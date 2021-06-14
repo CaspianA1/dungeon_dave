@@ -1,0 +1,197 @@
+Navigator nav = {
+	// .animation = &current_level.animations[animation_ind], .v = v, .path_ind = -1
+	.pos = pos_ref, .path_ind = -1, .v = v
+};
+
+/////
+
+static double foo;
+byte flying = 0;
+if (keys[SDL_SCANCODE_T]) foo += 0.02, flying = 1;
+if (keys[SDL_SCANCODE_Y]) foo -= 0.02, flying = 1;
+player.jump.height = foo;
+
+/////
+
+typedef struct {
+	SDL_AudioSpec audio_spec;
+} SoundPlayer;
+
+/////
+
+inlinable SoundPlayer init_sound_player(void) {
+	SoundPlayer s = {};
+	return s;
+}
+
+/////
+
+/*
+Mix_Music* sound = Mix_LoadMUS("../assets/audio/jump_land.wav");
+if (sound == NULL) {
+	printf("Sound load failed: %s\n", Mix_GetError());
+	return 2;
+}
+
+Mix_PlayMusic(sound, -1);
+SDL_Delay(10000);
+Mix_FreeMusic(sound);
+*/
+
+/////
+
+/*
+SDL_RenderCopyExF(screen.renderer, screen.pixel_buffer,
+	NULL, &dest_crop, tilt.val, NULL, SDL_FLIP_NONE);
+SDL_RenderCopyExF(screen.renderer, screen.shape_buffer,
+	NULL, &dest_crop, tilt.val, NULL, SDL_FLIP_NONE);
+*/
+
+/////
+
+deinit_dungeon_dave:
+	// deinit_floorcast_thread(&floorcast_thread);
+	/*
+	deinit_sound(player.jump.sound_at_jump);
+	deinit_sound(player.jump.sound_at_land);
+	deinit_weapon(weapon);
+	deinit_level(current_level);
+	deinit_audio_subsystem();
+	deinit_screen();
+	#ifdef TRACK_MEMORY
+	dynamic_memory_report();
+	#endif
+	return 0;
+	*/
+
+/////
+
+/* These fields are used for initializing Navigators,
+so they must be preset before all of the level data is copied over to `current_level`.
+*/
+
+/*
+current_level.map_width = map_width;
+current_level.map_height = map_height;
+*/
+
+/////
+
+/*
+DEBUG(enemy.state, d);
+DEBUG(enemy.dist_thresholds.begin_attacking, lf);
+DEBUG(enemy.dist_thresholds.begin_chasing, lf);
+DEBUG(enemy.dist_thresholds.min_idle_sound, lf);
+DEBUG(enemy.dist_thresholds.max_idle_sound, lf);
+DEBUG(enemy.hp_to_retreat, lf);
+DEBUG(enemy.hp, lf);
+DEBUG(enemy.animation_seg_lengths[0], u);
+DEBUG(enemy.animation_seg_lengths[1], u);
+DEBUG(enemy.animation_seg_lengths[2], u);
+DEBUG(enemy.animation_seg_lengths[3], u);
+DEBUG(enemy.animation_seg_lengths[4], u);
+DEBUG(enemy.animations.billboard.sprite, s);
+
+DEBUG((void*) enemy.sounds, p);
+DEBUG_VECF(enemy.animations.billboard.pos);
+*/
+
+/////
+
+Enemy init_test_enemy(void) {
+	const Sound stack_sounds[5] = {
+		init_sound("../assets/audio/enemy_sound_test/idle.wav", 1),
+		init_sound("../assets/audio/enemy_sound_test/chase_and_retreat.wav", 1),
+		init_sound("../assets/audio/enemy_sound_test/attack.wav", 1),
+		init_sound("../assets/audio/enemy_sound_test/attacked.wav", 1),
+		init_sound("../assets/audio/enemy_sound_test/death.wav", 1)
+	};
+
+	Enemy test_enemy = {
+		.state = Idle,
+
+		.dist_thresholds = {
+			.begin_attacking = 1.5,
+			.begin_chasing = 3.0,
+			.min_idle_sound = 6.0,
+			.max_idle_sound = 10.0
+		},
+
+		.hp_to_retreat = 5.0,
+		.hp = 20.0,
+
+		.animation_seg_lengths = {4, 8, 10, 11, 4},
+		.animations = init_animation(
+			"../assets/spritesheets/enemy_spritesheet_test.bmp", 6, 7, 37, 12)
+	};
+
+	Billboard* billboard = &test_enemy.animations.billboard;
+	billboard -> pos = (VectorF) {2.5, 7.5};
+	billboard -> height = 0.0;
+
+	const size_t sound_alloc_size = 5 * sizeof(Sound);
+	test_enemy.sounds = wmalloc(sound_alloc_size);
+	memcpy(test_enemy.sounds, &stack_sounds, sound_alloc_size);
+
+	const Navigator nav = init_navigator(current_level.init_pos,
+		&test_enemy.animations.billboard.pos, 0.02);
+
+	DEBUG_VECF(current_level.init_pos);
+	DEBUG_VECF(test_enemy.animations.billboard.pos);	
+
+	memcpy(&test_enemy.navigator, &nav, sizeof(Navigator));
+
+	return test_enemy;
+}
+
+/////
+
+/*
+const double current_time = SDL_GetTicks() / 1000.0;
+const double time_delta = current_time - animation -> last_frame_time;
+
+if (time_delta >= animation -> secs_per_frame) {
+	if (++animation -> frame_ind == animation -> frame_count)
+		animation -> frame_ind = 0;
+
+	animation -> last_frame_time = current_time;
+}
+*/
+
+/////
+
+if (i >= start_of_enemies)
+	printf("Enemy\n");
+else if (i < current_level.billboard_count)
+	printf("Billboard\n");
+else
+	printf("Animation\n");
+
+	/*
+	Billboard* billboard = is_animated // factor in an enemy here, based on the index
+		? &current_level.animations[possible_animation_index].billboard
+		: &current_level.billboards[i];
+	*/
+	/*
+	Billboard* billboard = is_animated // factor in an enemy here, based on the index
+		? &current_level.animations[possible_animation_index].billboard
+		: &current_level.billboards[i];
+	*/
+
+/////
+
+int seg_lengths_sum = 0;
+
+for (byte i = 0; i < enemy -> state; i++)
+	seg_lengths_sum += enemy -> animation_seg_lengths[i];
+
+DEBUG(seg_lengths_sum, d);
+
+/////
+
+/*
+if (hit_wall) play_sound(body -> sound_at_wall_hit);
+else pause_unpause_sound(body -> sound_at_wall_hit, 1);
+*/
+
+/////

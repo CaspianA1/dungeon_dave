@@ -1,0 +1,79 @@
+#define check_weights(node) printf(#node ":\n");\
+	for (int i = 0; i < node -> edge_count; i++)\
+		printf("%d\n", node -> weights[i]);
+
+check_weights(a);
+check_weights(b);
+check_weights(c);
+check_weights(d);
+check_weights(e);
+check_weights(f);
+check_weights(g);
+check_weights(h);
+
+/////
+
+if (visited_count == 8) {
+	printf("Shortest path: %d\n", current -> distance);
+	return;
+}
+
+printf("---\n");
+
+printf("%c's neighbors are ", current -> value);
+
+for (int i = 0; i < current -> edge_count - 1; i++)
+	printf("%c, ", current -> edges[i] -> value);
+
+printf("%c.\n", current -> edges[current -> edge_count - 1] -> value);
+
+/////
+
+/*
+const int tentative_distance = current -> distance + current -> weights[i];
+
+printf("\tWeight between %c and %c: %d.\n",
+	current -> value, neighbor -> value, current -> weights[i]);
+printf("\tCurrent distance plus the weight: %d.\n", tentative_distance);
+
+if (neighbor -> distance > tentative_distance) {
+	printf("Setting a smaller tentative distance for %c.\n", neighbor -> value);
+	neighbor -> distance = tentative_distance;
+}
+
+printf("neighbor -> distance = %d\n", neighbor -> distance);
+*/
+
+/*
+neighbor -> distance = current -> distance + current -> weights[i];
+const int tent = current -> distance + current -> weights[i];
+printf("%c's tent: %d\n", neighbor -> value, tent);
+
+if (tent < closest -> distance) {
+	printf("The closest neighbor is now %c.\n", neighbor -> value);
+	closest = neighbor;
+	// neighbor -> distance = tent;
+}
+*/
+
+/////
+
+print_node("---\nCurrent node: ", current, ".\nNeighbors: [");
+for (int i = 0; i < current -> edge_count - 1; i++)
+	print_node("", current -> edges[i], ", ");
+print_node("", current -> edges[current -> edge_count - 1], "].\n");
+
+/////
+
+/*
+what about when the closest had an infinite dist,
+and when each neighbor has been visited?
+*/
+
+/////
+
+void print_node(const char* before, Node* node, const char* after) {
+	printf("%s{%c: %d}%s", before, node -> value, node -> distance, after);
+}
+
+/////

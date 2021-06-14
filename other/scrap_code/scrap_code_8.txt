@@ -1,0 +1,131 @@
+int tex_coord = 0;
+// try not using the hit_begin and hit_end
+for (float screen_x = sprite.hit_begin; screen_x < sprite.hit_end; screen_x += step_x) {
+	if (z_buffer[(int) screen_x] > sprite.distance) {
+		int height = screen_height / sprite.distance;
+
+		SDL_Rect screen_pos = {
+			screen_x,
+			(screen_height / 2 - height / 2) + player.pace.height,
+			step_x + 1,
+			height
+		};
+
+		render_scanline(sprite, tex_coord, &screen_pos);
+	}
+	tex_coord++;
+}
+
+/////
+
+float distance, hit_begin, hit_end;
+
+/////
+
+Sprite* sprite = &sprites[point - wall_count - 1];
+if (sprite -> hit_begin == -1) sprite -> hit_begin = screen_x;
+else sprite -> hit_end = screen_x;
+
+/////
+
+if (sprite -> hit_begin == -1) sprite -> hit_begin = screen_x;
+else sprite -> hit_end = screen_x;
+
+/////
+
+Coord sprite_pos(int sprite_abs_ind) {
+	Coord c = {-1};
+
+	for (int x = 0; x < map_width; x++) {
+		for (int y = 0; y < map_height; y++) {
+			if (map[y][x] == sprite_abs_ind) {
+				c.x	= x, c.y = y;
+				goto sprite_pos_end;
+			}
+		}
+	}
+	sprite_pos_end:
+	return c;
+}
+
+/////
+
+Sprite* sprite = &sprites[point - wall_count - 1];
+sprite -> hit.x = new_x;
+sprite -> hit.y = new_y;
+
+/////
+
+// don't iterate over where the sprite was hit, do another way.
+// this will check even coordinates where there is a wall in the way.
+int size = screen_height / sprite.dist;
+DEBUG(size, d);
+// get x position
+
+/*
+float screen_x = tan(to_radians(sprite.angle)) * sprite.dist;
+DEBUG(screen_x, f);
+*/
+
+float screen_x = tan(sprite.angle);
+DEBUG(screen_x, f);
+
+/////
+
+/*
+float dx = fabs(pos.x - player.pos.x), dy = fabs(pos.y - player.pos.y);
+sprite -> dist = sqrt(dx * dx + dy * dy);
+sprite -> angle = atan2(dy, dx) - to_radians(player.angle);
+printf("Angle from %s is %f\n", sprite -> path, sprite -> angle);
+*/
+
+/////
+
+const int size = screen_height / sprite.dist;
+int x = (sprite.angle / to_radians(fov)) * screen_width;
+
+for (float scanline = x; scanline < x + size; scanline += step_x) {
+	DEBUG(scanline, f);
+	if (z_buffer[(int) scanline] > sprite.dist) {
+
+		SDL_Rect screen_pos = {
+			scanline,
+			(screen_height / 2 - size / 2) + player.pace.height,
+			step_x + 1,
+			size
+		};
+
+		render_scanline(sprite, 2, &screen_pos);
+
+	}
+	else printf("Cannot\n");
+}
+
+/*
+SDL_Rect pos = {
+	x,
+	(screen_height / 2 - size / 2) + player.pace.height,
+	size,
+	size
+};
+
+printf("pos = {%d, %d, %d, %d}\n", pos.x, pos.y, pos.w, pos.h);
+
+SDL_RenderCopy(renderer_3D, sprite.texture, NULL, &pos);
+*/
+
+/////
+
+Coord pos;
+float dist, dx, dy;
+
+/////
+
+/*
+planeX = camera x, planeY = camera y,
+dirX = delta x, dirY = delta y
+*/
+
+//  double invDet = 1.0 / (planeX * dirY - dirX * planeY)
+
+/////

@@ -1,0 +1,347 @@
+// to glide on wall sides, define a function `is_a_wall(x, y, z)` for the player position.
+const byte point = wall_point(new_pos[0], new_pos[1]);
+const byte wall_point_height = current_level.get_point_height(point, new_pos);
+
+// if the player height is higher than the wall point height
+if (p_height /* + 1 */ >= wall_point_height) {
+	// printf("Allow\n");
+	*pos = new_pos;
+	return;
+}
+
+// int y_hit = 0, x_hit = 0;
+if (wall_point(prev_pos[0], new_pos[1]))
+	new_pos[1] = prev_pos[1]; // y_hit = 1, body -> v = 0;
+
+if (wall_point(new_pos[0], prev_pos[1]))
+	new_pos[0] = prev_pos[0]; // x_hit = 1, body -> v = 0;
+
+/*
+if (y_hit && x_hit) {
+	printf("Corner\n");
+	new_pos[0] -= movement[0];
+}
+*/
+
+*pos = new_pos;
+
+///// Numbers:
+
+// "../assets/spritesheets/numbers.bmp", 3, 3, 7, 12, 3.5, 7.0, 0.0);
+
+/////
+
+static double foo = 0;
+if (keys[SDL_SCANCODE_T]) foo += 0.1;
+if (keys[SDL_SCANCODE_Y]) foo -= 0.1;
+if (foo < 0.0) foo = 0.0;
+player.jump.height = foo;
+
+/////
+
+if (keys[SDL_SCANCODE_C]) {if (side == 0 && point == 2) continue;}
+
+/////
+
+// if (cast_data.point == 2 && cast_data.side == 1) return;
+/*
+if (cast_data.point == 2 && cast_data.side == 1) {
+	correct_dist = (cast_data.dist + 0.5) * cos_beta;
+	// wall_h /= 2;
+}
+*/
+
+/*
+static double foo = 0.0;
+if (keys[SDL_SCANCODE_T]) foo += 0.00001;
+if (keys[SDL_SCANCODE_Y]) foo -= 0.00001;
+if (cast_data.point == 2) correct_dist += foo;
+*/
+
+/////
+
+static double foo = 0.0;
+static const double change = 0.0001;
+if (keys[SDL_SCANCODE_T]) foo += change;
+if (keys[SDL_SCANCODE_Y]) foo -= change;
+// correct_dist += foo;
+// correct_dist -= 0.5;
+
+/////
+
+// DEBUG(cast_data.dist, lf);
+const double foo = 
+correct_dist = (cast_data.dist - 1.5) * cos_beta;
+
+/*
+const double
+	dx = cast_data.dist * cos(theta),
+	dy = cast_data.dist * sin(theta);
+
+printf("dx = %lf, dy = %lf\n", dx, dy);
+*/
+
+/*
+static double foo = 0.0;
+static const double change = 0.0001;
+if (keys[SDL_SCANCODE_T]) foo += change;
+if (keys[SDL_SCANCODE_Y]) foo -= change;
+*/
+
+/////
+
+if (cast_data.point == 2 && cast_data.side == 1) {
+	DEBUG(cast_data.dist + 0.5, lf);
+	correct_dist = (cast_data.dist + 0.5) * cos_beta;
+}
+
+/////
+
+static double foo = 0;
+if (keys[SDL_SCANCODE_T]) foo += 0.0001;
+if (keys[SDL_SCANCODE_Y]) foo -= 0.0001;
+if (cast_data.point == 2) {
+	/*
+	wall.y += foo;
+	wall.h -= foo;
+	*/
+	wall.y -= foo;
+}
+
+/////
+
+/*
+inlinable Uint32 get_surface_pixel(void* pixels,
+	const int surface_pitch, const int x, const int y) { // for surface
+
+	// return *(Uint32*) ((Uint8*) pixels + y * surface_pitch + x * PIXEL_FORMAT_BPP);
+	// return *((Uint32) pixels + y * surface_pitch + x * PIXEL_FORMAT_BPP);
+	Uint32* foo = (Uint32*) pixels + y * surface_pitch + x * PIXEL_FORMAT_BPP;
+	return *foo;
+}
+*/
+
+/////
+
+// viney_bricks_2 and the carpet don't work, viney_bricks does
+// aha - some are octet streams	
+if (keys[SDL_SCANCODE_T]) {
+	/*
+	DEBUG(offset[0], lf);
+	int offset_x = (int) offset[0] & (int) tex_w[0];
+	DEBUG(offset_x, d);
+	*/
+}
+const Uint32 src = get_surface_pixel(
+	surface -> pixels, surface -> pitch,
+	(int) offset[0] & max_offset,
+	(int) offset[1] & max_offset);
+
+/*
+const Uint32 src = get_surface_pixel_2(surface,
+	(int) offset[0] & max_offset, (int) offset[1] & max_offset);
+*/
+
+if (screen_y < 0 || screen_y >= settings.screen_height - 1) continue;
+Uint32* dest = get_pixbuf_pixel(x, screen_y);
+*dest = src;
+/*
+dest[0] = 255;
+dest[1] = 0;
+dest[2] = 0;
+dest[3] = 0;
+*/
+
+// safe_set_pixbuf_pixel(x, screen_y, src);
+ray_pos = VectorFF_add(ray_pos, step);
+
+/////
+
+/*
+int incr = 1;
+if (keys[SDL_SCANCODE_T]) incr = 2;
+if (keys[SDL_SCANCODE_Y]) incr = 4;
+if (keys[SDL_SCANCODE_U]) incr = 8;
+*/
+
+/////
+
+// Uint32* dest = get_pixbuf_pixel(x, y);
+// if (keys[SDL_SCANCODE_C]) *dest = src; // this assignment is super slow
+// memcpy(dest, &src, sizeof(Uint32));
+
+/*
+if (keys[SDL_SCANCODE_T]) memcpy(dest, &src, sizeof(src));
+else if (keys[SDL_SCANCODE_Y]) *dest = src;
+*/
+
+/////
+
+// shade the dest - and not the src?
+
+/////
+
+DEBUG(y, d);
+if (y == settings.half_screen_height) {
+	/*
+	printf("Middle\n");
+	if (is_floor) break;
+	// else continue;
+	else break;
+	*/
+	break;
+}
+
+/////
+
+/*
+double pos_z = 0.5;
+
+if (is_floor) {
+	pos_z += player.jump.height * screen_height_over_proj_dist;
+}
+else {
+	double foo = current_level.max_point_height - player.jump.height - 2.0;
+	pos_z += foo * screen_height_over_proj_dist;
+}
+*/
+
+/////
+
+double height = is_floor
+		? player.jump.height
+		// : current_level.max_point_height - player.jump.height;
+		: current_level.max_point_height;
+
+if (!is_floor) {
+	static double foo;
+	if (keys[SDL_SCANCODE_1]) foo += 0.05;
+	if (keys[SDL_SCANCODE_2]) foo -= 0.05;
+	height += foo;
+	DEBUG(height, lf);
+}
+
+/*
+at the top: should be zero
+*/
+
+/////
+
+const double
+	theta = to_radians(player.angle),
+	screen_height_over_proj_dist = settings.screen_height / settings.proj_dist,
+	y_shift = player.pace.screen_offset + player.z_pitch; // in screen space
+
+const double abs_y_shift = fabs(y_shift);
+
+const double h = player.jump.height;
+double height = current_level.max_point_height - h - 2;
+
+if (!is_floor) {
+	static double foo;
+	if (keys[SDL_SCANCODE_1]) foo += 0.05;
+	if (keys[SDL_SCANCODE_2]) foo -= 0.05;
+	height += floor(foo);
+	printf("player height = %lf | ceiling height = %lf\n", player.jump.height, height);
+}
+/*
+left: player height, right: correct ceiling height
+_________
+|_0_|___|
+|_1_|___|
+|_2_|___|
+|_3_|___|
+|_4_|_0_|
+|_5_|___|
+|_6_|___|
+|_7_|___|
+*/
+
+const double pos_z = (0.5 + height) * screen_height_over_proj_dist;
+
+const double screen_pos_z = pos_z * settings.screen_height;
+
+/////
+
+// draw_plane(player, 0, settings.screen_width, 0, settings.half_screen_height, 0);
+
+/////
+
+const double abs_y_shift = fabs(y_shift);
+const double pos_z = 0.5 + player.jump.height * screen_height_over_proj_dist;
+// const double screen_z = pos_z * settings.screen_height;
+// const double screen_z = pos_z * settings.screen_height;
+// const double screen_z = settings.half_screen_height + player.jump.height * settings.proj_dist;
+
+//////////
+/*
+const double s = settings.screen_height;
+const double p = settings.proj_dist;
+const double r = s / p;
+const double j = player.jump.height;
+
+const double q = 0.5 + j / r;
+const double w = q * s;
+
+const double screen_z = w;
+*/
+//////////
+const double s = settings.screen_height;
+const double p = settings.proj_dist;
+const double r = s / p;
+const double j = player.jump.height;
+
+const double a = j * r;
+const double b = 0.5 + a;
+const double c = b * settings.screen_height;
+const double screen_z = c;r
+
+/*
+const double m = 0.5 + j * r;
+const double z = m * p;
+const double screen_z = z;
+*/
+//////////
+
+/////
+
+const double pos_z = 0.5 + player.jump.height * screen_height_over_proj_dist;
+// const double screen_z = pos_z * settings.screen_height;
+// const double screen_z = pos_z * settings.screen_height;
+// const double screen_z = settings.half_screen_height + player.jump.height * settings.proj_dist;
+
+//////////
+const double s = settings.screen_height;
+const double p = settings.proj_dist;
+const double r = s / p;
+const double j = player.jump.height;
+
+const double a = j * r;
+// const double screen_z = (0.5 + a) * settings.screen_height;
+
+/*
+const double screen_z = (
+	0.5 + player.jump.height * settings.screen_height / settings.proj_dist)
+	* settings.screen_height;
+*/
+
+const double screen_z = settings.half_screen_height +
+	(j * settings.screen_height * settings.screen_height / settings.proj_dist);
+//////////
+
+/////
+
+const double p_height_ratio = p_height * screen_height_over_proj_dist;
+const double opp_h = 0.5 + p_height_ratio;
+const double screen_z = opp_h * settings.screen_height;
+
+/////
+
+/*
+const double p_height = current_level.max_point_height - player.jump.height - 2.0;
+const double p_height_ratio = p_height / screen_height_over_proj_dist;
+const double opp_h = 0.5 + p_height_ratio;
+const double screen_z = opp_h * settings.screen_height;
+*/
+
+/////

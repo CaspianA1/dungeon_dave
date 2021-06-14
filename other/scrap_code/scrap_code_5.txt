@@ -1,0 +1,432 @@
+// break;
+
+/*
+if (point > wall_count) {}
+
+else {
+	draw_wall(dist, screen_x, new_x, new_y, point, player, sprites, textured_walls);
+	break;
+}
+*/
+
+/*
+if (is_a_wall(point)) {
+	draw_wall(dist, screen_x, new_x, new_y, point, player, sprites, textured_walls);
+	break;
+}
+else
+	continue;
+*/
+
+/*
+if (point > wall_count)
+	hit -> sprite_index = point - wall_count - 1;
+
+else {
+	dist = adjusted_dist;
+	draw_wall(dist, screen_x, new_x, new_y, point, player, sprites, textured_walls);
+	break;
+}
+*/
+
+// draw_sprites(player, sprites, z_buffer, cast_ind + 1);
+
+Collision z_buffer[cast_hits];
+
+/////
+
+
+typedef struct {
+	float distance;
+} Collision;
+
+/*
+int cmp_collisions(const void* a, const void* b) {
+	Collision* first = (Collision*) a, *second = (Collision*) b;
+	return first -> distance - second -> distance;
+}
+
+int contains(Collision* unique_sprites, int len, Collision cmp) {
+	for (int i = 0; i < len; i++) {
+		if (unique_sprites[i].sprite_index == cmp.sprite_index) return 1;
+	}
+	return 0;
+}
+*/
+
+// http://rachelnertia.github.io/programming/2016/04/27/box2d-raycasting-progress/
+void draw_sprites(Player player, Sprite* sprites, Collision* z_buffer, int actual_hits) {
+	/*
+	int num_unique = 0;
+	Collision* unique_sprites = malloc(0);
+
+	for (int i = 0; i < actual_hits; i++) {
+		Collision hit = z_buffer[i];
+
+		if (hit.sprite_index != -1 && !contains(unique_sprites, num_unique, hit)) {
+			unique_sprites = realloc(unique_sprites, ++num_unique * sizeof(Collision));
+			unique_sprites[num_unique - 1] = hit;
+		}
+	}
+
+	qsort(unique_sprites, num_unique, sizeof(Collision), cmp_collisions);
+
+	for (int i = 0; i < num_unique; i++) {
+		Collision collision = unique_sprites[i];
+		Sprite sprite = sprites[collision.sprite_index];
+		// draw the sprite
+	}
+
+	free(unique_sprites);
+	*/
+}
+
+/////
+
+float distance(float x0, float y0, float x1, float y1) {
+	return sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)));
+}
+
+/////
+
+
+	float sprite_distances[sprite_count];
+	for (int i = 0; i < sprite_count; i++) sprite_distances[i] = -1;
+
+	for (int x = 0; x < map_width; x++) {
+		for (int y = 0; y < map_height; y++) {
+			unsigned char point = map[y][x];
+			if (is_a_sprite(point)) {
+				Sprite sprite = sprites[point - wall_count - 1];
+				// sprite_distances[point - wall_count - 1] = distance(x, y, player.x, player.y);
+				float dx = x + 0.5 - player.x, dy = x + 0.5 - player.y;
+				float dist = sqrt(dx * dx + dy * dy);
+				float angle = atan2(dy, dx) - to_radians(player.angle);
+				float view_dist = 64;
+				float size = view_dist / (cos(angle) * dist);
+				float x = tan(angle) * view_dist;
+
+				SDL_Rect screen_pos = {x, 0, sprite.surface -> w, sprite.surface -> h};
+				SDL_RenderCopy(renderer_3D, sprite.texture, NULL, &screen_pos);
+			}
+		}
+	}
+
+	// qsort(sprite_distances, sprite_count, sizeof(float), comparator);
+
+	// decide if they are visible or not
+
+	/*
+	for (int i = 0; i < sprite_count; i++) {
+		Sprite sprite = sprites[i];
+		float dist = sprite_distances[i];
+		if (dist != -1) {
+			float dx = 
+		}
+	}
+	*/
+
+	// for (int i = 0; i < sprite_count; i++) printf("%f\n", sprite_distances[i]);
+
+}
+
+/////
+
+for (int i = 0; i < sprite_count; i++)
+	printf("%f\n", collisions[i].dist);
+printf("---\n");
+
+/////
+
+/*
+if (first -> begin_scr_x == -1 || second -> begin_scr_x == -1) {
+	return -1;
+}
+*/
+
+///////////////////////
+
+for (int i = 0; i < sprite_count; i++) {
+	Collision* c = &collisions[i];
+	if (c -> begin_scr_x == -1) c -> dist = -1;
+	else c -> dist = distance(c -> map_x, c -> map_y, player.x, player.y) + 1;
+	c -> height = screen_height / c -> dist;
+}
+
+qsort(collisions, sprite_count, sizeof(Collision), comparator);
+
+for (int i = 0; i < sprite_count; i++) {
+	Collision hit = collisions[i];
+	if (hit.begin_scr_x != -1) {
+		Sprite sprite = sprites[hit.sprite_ind];
+		int range = hit.end_scr_x - hit.begin_scr_x;
+
+		float scaler = ((float) range / screen_width) * sprite.surface -> w;
+		printf("scaler = %f\n", scaler);
+
+		/*
+		SDL_Rect vline = {0, 0, 1, sprite.surface -> h};
+		SDL_Rect position = {hit.begin_scr_x, screen_height / 2, step_x + 1, sprite.surface -> h};
+		*/
+
+		SDL_Rect pos = {0, 0, 64 * scaler, 64 * scaler};
+		SDL_RenderCopy(renderer_3D, sprite.texture, NULL, &pos);
+
+		/*
+		for (float x = hit.begin_scr_x; x < hit.end_scr_x; x += step_x) {
+			if (z_buffer[(int) x] < hit.dist) { // if a wall is closer than the hit distance
+
+				SDL_Rect column = {
+					x,
+					(screen_height / 2 - hit.height / 2) + player.pace.height,
+					step_x + 1,
+					hit.height
+				}, slice = {x, 0, 1, hit.height};
+
+				SDL_RenderCopy(renderer_3D, sprite.texture, &slice, &column);
+
+			}
+		}
+		*/
+	}
+}
+
+///////////////////////
+
+/*
+for (int i = 0; i < sprite_count; i++)
+	printf("%f, %d\n", collisions[i].dist, collisions[i].sprite_ind);
+printf("---\n");
+*/
+
+/////
+
+// flickers: https://www.youtube.com/watch?v=pkAao7OtqSk
+
+/////
+
+Collision sprite_collisions[sprite_count];
+for (int i = 0; i < sprite_count; i ++)
+	sprite_collisions[i].begin_scr_x = -1;
+
+
+
+	////////////////////
+
+	typedef struct {
+		float map_x, map_y, dist, height;
+		int begin_scr_x, end_scr_x, sprite_ind;
+	} Collision;
+
+	int comparator(const void* a, const void* b) {
+		return ((Collision*) a) -> dist - ((Collision*) b) -> dist;
+	}
+
+	// https://lodev.org/cgtutor/raycasting3.html
+	void draw_sprites(float* z_buffer, Sprite* sprites, Collision* collisions, Player player) {
+
+	}
+
+	int sprite_ind = point - wall_count - 1;
+	Collision* c = &sprite_collisions[sprite_ind];
+	if (c -> begin_scr_x == -1) {
+		c -> begin_scr_x = screen_x;
+		c -> map_x = new_x;
+		c -> map_y = new_y;
+		c -> sprite_ind = sprite_ind;
+	}
+	else c -> end_scr_x = screen_x;
+
+
+/////
+
+draw_sprites(z_buffer, sprites, sprite_collisions, player);
+
+/////
+
+float z_buffer[screen_width], screen_x = 0;
+
+z_buffer[(int) screen_x] = dist;
+
+/////
+
+/*
+Sprite sprite = sprites[point - wall_count - 1];
+int wall_w = sprite.surface -> w, wall_h = sprite.surface -> h;
+float x_diff = new_x - (int) new_x, y_diff = new_y - (int) new_y;
+int x_coord = (int) (wall_w * x_diff) & (wall_w - 1),
+	y_coord = (int) (wall_h * y_diff) & (wall_h - 1);
+
+// int tex_coord = (x_coord + y_coord) / 2;
+int tex_coord = x_coord;
+
+// printf("Coord: %d\n", tex_coord);
+
+SDL_Rect column = {
+	screen_x,
+	(screen_height / 2 - wall_h / 2) + player.pace.height,
+	step_x + 1,
+	wall_h
+}, slice = {tex_coord, 0, 1, wall_h};
+
+SDL_RenderCopy(renderer_3D, sprite.texture, &slice, &column);
+break;
+*/
+
+/////
+
+const int cast_hits = fov / theta_step + 10;
+
+/////
+
+/*
+int x_coord = (int) (wall_w * x_diff) & (wall_w - 1),
+	y_coord = (int) (wall_h * y_diff) & (wall_h - 1);
+
+int tex_coord = (x_coord + y_coord) / 2;
+if (!sprite -> drawn_yet) {
+	sprite -> drawn_yet = 1;
+	sprite -> first_scan_ind = tex_coord;
+}
+*/
+
+// debug(tex_coord, d);
+
+/*
+if (sprite -> first_scan_ind == 31)
+	tex_coord -= 31;
+else if (sprite -> first_scan_ind == 0)
+{
+	// tex_coord += 31;
+}
+*/
+
+/*
+if (tex_coord < 31)
+	tex_coord += 32;
+else
+	tex_coord -= 31;
+*/
+
+/*
+if (tex_coord == 31)
+	printf("First\n");
+else printf("Second\n");
+
+tex_coord = 64 - tex_coord;
+*/
+
+/////
+
+/*
+int sprite_height = screen_height / adjusted_dist;
+int sprite_ind = point - wall_count - 1;
+
+Sprite* sprite = &sprites[sprite_ind];
+int wall_w = sprite -> surface -> w, wall_h = sprite -> surface -> h;
+
+float x_diff = new_x - (int) new_x, y_diff = new_y - (int) new_y;
+int x_state = close_to_whole(x_diff),
+	y_state = close_to_whole(y_diff);
+
+int y_tex = (int) (wall_w * x_diff) & (wall_w - 1),
+	x_tex = (int) (wall_h * y_diff) & (wall_h - 1);
+
+int tex_coord;
+if (x_state ^ y_state) {
+	if (y_state)
+		tex_coord = y_tex;
+	else
+		// tex_coord = x_tex;
+		tex_coord = 0;
+}
+
+else
+	tex_coord = wall_w - 1;
+
+// tex_coord *= 2;
+
+// on each side, the sprite is facing the other direction. fix that and then double.
+
+SDL_Rect sprite_slice = {tex_coord, 0, 1, wall_h},
+
+screen_pos = {
+	screen_x,
+	(screen_height / 2 - wall_h / 2) + player.pace.height,
+	step_x + 1,
+	sprite_height
+};
+
+Scanline* scanline = &sprite_layer[(int) screen_x];
+scanline -> sprite_slice = sprite_slice;
+scanline -> screen_pos = screen_pos;
+scanline -> sprite_ind = sprite_ind;
+*/
+
+/////
+
+// I only need the first and last valid coordinates.
+
+int sprite_ind = point - wall_count - 1;
+Sprite* sprite = &sprites[sprite_ind];
+
+if (!sprite -> hit_yet)
+	sprite -> hit_yet = 1;
+
+int sprite_height = screen_height / adjusted_dist;
+int wall_w = sprite -> surface -> w, wall_h = sprite -> surface -> h;
+float x_diff = new_x - (int) new_x, y_diff = new_y - (int) new_y;
+int x_state = close_to_whole(x_diff),
+	y_state = close_to_whole(y_diff),
+	x_tex = (int) (wall_h * y_diff) & (wall_h - 1),
+	y_tex = (int) (wall_w * x_diff) & (wall_w - 1);
+
+int tex_coord;
+if (x_state ^ y_state) {
+	if (y_state) {
+		tex_coord = 64 - y_tex;
+	}
+	else {
+		tex_coord = x_tex;
+	}
+	// tex_coord /= 2;
+}
+else
+	tex_coord = wall_w - 1;
+
+SDL_Rect sprite_slice = {tex_coord, 0, 1, wall_h},
+
+screen_pos = {
+	screen_x,
+	(screen_height / 2 - wall_h / 2) + player.pace.height,
+	step_x + 1,
+	sprite_height
+};
+
+Scanline* scanline = &sprite_layer[(int) screen_x];
+scanline -> sprite_slice = sprite_slice;
+scanline -> screen_pos = screen_pos;
+scanline -> sprite_ind = sprite_ind;
+
+typedef struct {
+	SDL_Rect sprite_slice, screen_pos;
+	int sprite_ind;
+} Scanline;
+
+void draw_sprite_layer(Scanline* sprite_layer, Sprite* sprites) {
+	for (int i = 0; i < screen_width; i++) {
+		Scanline scanl = sprite_layer[i];
+		if (scanl.sprite_ind != -1)
+			SDL_RenderCopy(
+				renderer_3D, sprites[scanl.sprite_ind].texture,
+				&scanl.sprite_slice, &scanl.screen_pos);
+	}
+}
+
+Scanline sprite_layer[screen_width + 1];
+
+draw_sprite_layer(sprite_layer, sprites);
+
+for (int i = 0; i < screen_width; i++) sprite_layer[i].sprite_ind = -1;
+
+/////

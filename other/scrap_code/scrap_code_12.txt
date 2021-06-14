@@ -1,0 +1,131 @@
+/*
+const int sprite_w = sprite.surface -> w, sprite_h = sprite.surface -> h;
+const int bytes_per_pix = sprite.surface -> format -> BytesPerPixel;
+const void* pixels = sprite.surface -> pixels;
+const Uint8 pitch = sprite.surface -> pitch;
+*/
+
+/*
+int tex_x = (int) ((floor_hit_x - (int) floor_hit_x) * sprite_w) % 64,
+	tex_y = (int) ((floor_hit_y - (int) floor_hit_y) * sprite_h) % 64;
+*/
+
+/*
+int tex_x = fabs((floor_hit_x - (int) floor_hit_x) * sprite_w),
+	tex_y = fabs((floor_hit_y - (int) floor_hit_y) * sprite_h);
+
+*screen_pixel = 0xd2b48c;
+*/
+
+/*
+Uint32 *sprite_pixel = (Uint32*) ((Uint8*) pixels + tex_y * sprite_w * sprite_pitch + tex_x),
+		*screen_pixel = ((Uint32*) ((Uint8*) screen.pixels + y * screen.pitch + (int) screen_x));
+
+*screen_pixel = *sprite_pixel;
+*screen_pixel = 0xd2b48c;
+*/
+
+/////
+
+/*
+Uint32 *sprite_pixel = (Uint32*) ((Uint8*) pixels + tex_y * sprite_w * pitch + tex_x),
+		*screen_pixel = ((Uint32*) ((Uint8*) screen.pixels + y * screen.pitch + (int) screen_x));
+*/
+
+/////
+
+/*
+SDL_Rect crop = {tex_x, tex_y, 1, 1}, screen_pos = {screen_x, y, 1, 1};
+SDL_RenderCopy(screen.renderer_3D, sprite.texture, &crop, &screen_pos);
+*/
+
+// draw_pixel(screen_x, y, 255, 0, 0);
+
+// bpp = 3
+
+/*
+Uint8 *sprite_pixel = (Uint8*) pixels + tex_y * pitch + tex_x * bytes_per_pix,
+	*screen_pixel = (Uint8*) screen.pixels + y * screen.pitch + (int) round(screen_x) * 4;
+*/
+
+// multiplying by different numbers for the end of screen_pixel stretches it & changes the color
+// check if the generated texture is warped in any way
+
+// are pixels 32 or 8 bytes?
+
+/*
+needed:
+bytes_per_pix for the screen
+non-gray colors from the sprite
+*/
+
+*screen_pixel = *sprite_pixel;
+
+/////
+
+// step_x = ((double) screen_width / (double) fov) * theta_step,
+
+/////
+
+if (floor_row == wall_pos.y + wall_pos.h - half_screen_height) {
+	// printf("First. Tex x, y: %d, %d\n", tex_x, tex_y);
+}
+
+// printf("tex_x, tex_y: %d, %d\n", tex_x, tex_y);
+
+// Uint32* floor_pixel = ((Uint32*) ((Uint8*) screen.pixels + y * screen.pitch)) + screen_x;
+// *floor_pixel = get_surface_pixel(pixels, pitch, bytes_per_pixel, tex_x, tex_y);
+
+/////
+
+/*
+return SDL_BYTEORDER == SDL_BIG_ENDIAN
+	? pixel[0] << 16 | pixel[1] << 8 | pixel[2]
+	: pixel[0] | pixel[1] << 8 | pixel[2] << 16;
+*/
+
+/////
+
+printf("%.*e\n", DECIMAL_DIG, screen.projection_distance);
+
+/////
+
+const double foo = height_ratio / width_ratio;
+
+/////
+
+for (int y = wall_pos.y + wall_pos.h; y < screen_height; y++) {
+	const int floor_row = y - half_screen_height;
+
+	// would projection distance change for the floor?
+	const double floor_straight_distance = player_height / floor_row * screen.projection_distance;
+	const double floor_actual_distance = floor_straight_distance / cos_beta;
+
+	const double
+		hit_x = cos_theta * floor_actual_distance + player_x,
+		hit_y = sin_theta * floor_actual_distance + player_y;
+
+	double tex_x = fabs((hit_x - (int) hit_x) * sprite_w),
+		tex_y = fabs((hit_y - (int) hit_y) * sprite_h);
+
+	const Uint32 surface_pixel = get_surface_pixel(pixels, pitch, bytes_per_pixel, tex_x, tex_y);
+	*get_pixbuf_pixel(screen_x, y) = surface_pixel;
+	*get_pixbuf_pixel(screen_x, screen_height - y) = surface_pixel;
+}
+
+/////
+
+for (int y = half_screen_height; y < screen_height; y++) {
+	// const int floor_row = y - half_screen_height;
+	const int floor_row = y - half_screen_height + 1;
+
+/////
+
+const double x_mantissa = fabs(player_x - (int) round(player_x)),
+	y_mantissa = fabs(player_y - (int) round(player_y));
+
+const double 
+	hit_x = cos_theta * floor_actual_distance + x_mantissa,
+	hit_y = sin_theta * floor_actual_distance + y_mantissa;
+
+/////

@@ -1,0 +1,266 @@
+/*
+if (doubles_eq(pos -> x, 17.95) && doubles_eq(pos -> y, 9.05)) {
+	printf("Yes\n");
+	pos -> x += 0.5;
+}
+else {
+	printf("No, because {%lf, %lf}\n", pos -> x, pos -> y);
+}
+
+return;
+*/
+
+/////
+
+void account_for_wall_clipping(VectorF* pos, const VectorI dir, const double v) {
+	/*
+	if (doubles_eq(pos -> x, 17.95) && doubles_eq(pos -> y, 9.05)) {
+		printf("Yes\n");
+		pos -> x += 0.5;
+	}
+	else {
+		printf("No, because {%lf, %lf}\n", pos -> x, pos -> y);
+	}
+
+	return;
+	*/
+
+	printf("---\npos = {%lf, %lf}\n", pos -> x, pos -> y);
+
+	const VectorI floored_pos = VectorF_floor(*pos);
+
+	const int
+		walk_axis_y = doubles_almost_eq(pos -> x, floored_pos.x),
+		walk_axis_x = doubles_almost_eq(pos -> y, floored_pos.y);
+
+	if (walk_axis_y && !walk_axis_x) {
+		printf("Case 1\n");
+		// pos -> y += v * dir.y;
+		// pos -> y += 0.5;
+	}
+
+	else if (walk_axis_x && !walk_axis_y) {
+		printf("Case 2\n");
+		// pos -> x += v * dir.x;
+		pos -> x += 0.5;
+	}
+}
+
+account_for_wall_clipping(pos, dir, nav -> v);
+
+/////
+
+typedef struct {
+	byte point;
+	double dist;
+	VectorF hit, next_cast_start;
+} CastData;
+
+/////
+
+/*
+TTF_Font* font = TTF_OpenFont("../assets/fonts/dnd.ttf", avg_dimensions / 10.0);
+if (font == NULL) FAIL("Could not open the main font: %s\n", SDL_GetError());
+
+const SDL_Color font_color = {255, 165, 0, SDL_ALPHA_OPAQUE}; // tan
+
+SDL_Surface* text_surface = TTF_RenderText_Solid(font, "DUNGEON DAVE", font_color);
+SDL_Texture* text_texture = SDL_CreateTextureFromSurface(screen.renderer_3D, text_surface);
+*/
+
+/////
+
+Message settings_button = init_message("settings", 0, 0, 255, 0);
+const SDL_Rect settings_button_pos = {
+	title_pos.x + half_title_pos_w, title_pos.y + title_pos.h,
+	half_title_pos_w, title_pos.h
+};
+settings_button.pos = settings_button_pos;
+
+/////
+
+/*
+const int line_thickness = screen_height / 100;
+SDL_Rect border_line = message.pos;
+
+border_line.y -= line_thickness * 2;
+border_line.h = line_thickness;
+SDL_RenderFillRect(screen.renderer_3D, &border_line);
+
+border_line.y = message.pos.y + message.pos.h + line_thickness * 2;
+SDL_RenderFillRect(screen.renderer_3D, &border_line);
+
+border_line.w = line_thickness;
+*/
+
+/////
+
+if (message.bordered) { // not working
+	const SDL_Color color = message.color;
+	SDL_SetRenderDrawColor(screen.renderer_3D, 5, 5, 5, SDL_ALPHA_OPAQUE);
+
+	const int line_thickness = screen_height / 100;
+
+	for (int i = -line_thickness; i < 0; i++) {
+		SDL_Rect top_border = message.pos, side_border = message.pos;
+
+		top_border.y = message.pos.y + i;
+		SDL_RenderFillRect(screen.renderer_3D, &top_border);
+
+		/*
+		side_border.x = message.pos.x + i;
+		SDL_RenderDrawRect(screen.renderer_3D, &side_border);
+		*/
+	}
+}
+
+/////
+
+Message start_button = init_message("press any key to begin", 255, 69, 0, 1);
+const SDL_Rect start_button_pos = {
+	title_pos.x, title_pos.y + title_pos.h,
+	half_title_pos_w, title_pos.h
+};
+start_button.pos = start_button_pos;
+
+///// The screen center:
+
+/*
+const SDL_Rect title_pos = {
+	half_screen_width - title.sprite.surface -> w / 2,
+	half_screen_height - title.sprite.surface -> h / 2,
+	title.sprite.surface -> w, title.sprite.surface -> h
+};
+*/
+
+/////
+
+Sprite background = init_sprite("../assets/walls/sand_2.bmp");
+
+/////
+
+/*
+int half_screen_width, half_screen_height;
+double max_delay;
+*/
+
+/*
+const double
+	max_delay = 1000.0 / max_fps,
+
+	two_pi = M_PI * 2.0,
+	half_pi = M_PI / 2.0,
+	three_pi_over_two = 3.0 * M_PI / 2.0,
+	five_pi_over_two = 5.0 * M_PI / 2.0,
+
+	half_screen_width = screen_width / 2.0,
+	half_screen_height = screen_height / 2.0;
+*/
+
+/////
+
+/*
+enum {
+	screen_width = 1200, screen_height = 700,
+	fov = 90, max_fps = 60, ray_column_width = 2
+};
+*/
+
+/////
+
+/*
+settings.half_screen_width = settings.screen_width / 2;
+settings.half_screen_height = settings.screen_height / 2;
+
+settings.projection_distance = settings.half_screen_width / tan(to_radians(settings.fov / 2.0));
+*/
+
+/////
+
+what is needed for an engine interface:
+	- screen width, height
+	- map width, height
+
+	- fov
+	- fps
+
+	- pace step
+	- pace offset converter
+
+	- pitch step
+	- pitch max
+
+	- keybindings for up, down, left, right, turn left, turn right, look up, look down
+
+	- 2D mode enabled or not
+
+	- application name
+
+/////
+
+// .a = 0.03, .limit_v = 0.06
+
+/////
+
+/*
+Message title = init_message("Dungeon Dave", 255, 140, 0, 0);
+const SDL_Rect title_pos = {
+	settings.half_screen_width - title.sprite.surface -> w / 2,
+	title.sprite.surface -> h, title.sprite.surface -> w, title.sprite.surface -> h
+}; title.pos = title_pos;
+*/
+
+///// Didn't work:
+
+Message start = init_message("Begin", 177, 255, 212, 0);
+set_message_pos(&start,
+	settings.half_screen_width - start.sprite.surface -> w / 2,
+	settings.half_screen_height - start.sprite.surface -> h / 2,
+	start.sprite.surface -> w,
+	start.sprite.surface -> h);
+
+/////
+
+/*
+const VectorI
+	curr_vertex = path -> data[nav -> path_ind],
+	next_vertex = path -> data[nav -> path_ind + 1];
+*/
+
+/////
+
+// const double height_progress = p_height / settings.half_screen_height;
+
+const double straight_distance = 0.5 / get_row(y, y_pitch) * settings.projection_distance;
+
+/*
+const double foo = p_height / straight_distance;
+straight_distance += foo;
+*/
+
+/////
+
+/*	
+const int row = get_row(y, y_pitch);
+const double eye_rel_height = 0.5 + height_shift;
+
+const double straight_dist = 0.5 / row * settings.projection_distance;
+const double actual_dist = straight_dist / cos_beta;
+*/
+
+/////
+
+// https://www.willusher.io/sdl2%20tutorials/2013/12/18/lesson-6-true-type-fonts-with-sdl_ttf
+// https://www.rapidtables.com/web/color/orange-color.html
+
+/////
+
+/*
+typedef struct {
+	double x, y;
+} VectorF;
+*/
+
+// typedef __m128 VectorF;
+
+/////

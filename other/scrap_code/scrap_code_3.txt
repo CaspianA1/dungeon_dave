@@ -1,0 +1,510 @@
+/*
+void render_3D(Player player, Animation* animations, Sprite* textured_walls) {
+	float wall_width = 64;
+	float angle_step = player.fov / screen_width;
+
+	const float
+		rel_x = player.x * width_ratio,
+		rel_y = player.y * height_ratio,
+		half_screen_w = screen_width / 2;
+
+	for (int screen_x = 0; screen_x < screen_width; screen_x++) {	
+	}
+}
+*/
+
+/////
+
+float dista = fabs((cos_theta * dist) * cos(beta) + (sin_theta * dist) * sin(beta));
+dista *= cos(to_radians(theta - player.angle));
+printf("%f\n", dista);
+
+/////
+
+#include <math.h>
+
+enum {
+	map_width = 12, map_height = 15,
+	screen_width = 800, screen_height = 500
+};
+
+const unsigned char map[map_height][map_width] = {
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
+	{1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1},
+	{1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1},
+	{1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+};
+
+typedef struct {
+	float a, b;
+} Vector;
+
+typedef struct {
+	Vector pos, direction;
+} Player;
+
+void loop() {
+	for (int column = 0; column < screen_width; column++) {
+		angle = atan2()
+	}	
+}
+
+int main() {
+
+}
+
+/////
+
+d render_3D(Player player, Animation* animations, Sprite* textured_walls) {
+	SET_COLOR(renderer_3D, 0, 0, 0);
+
+	const float
+		rel_x = player.x * width_ratio,
+		rel_y = player.y * height_ratio,
+		half_fov = player.fov / 2;
+
+	const float step_theta = 0.1;
+
+	float screen_x = 0, step_x = (screen_width / player.fov) * step_theta;
+
+	for (float theta = player.angle - half_fov; theta < player.angle + half_fov; theta += step_theta) {
+		const float rad_theta = to_radians(theta);
+		const float cos_theta = cos(rad_theta), sin_theta = sin(rad_theta);
+
+		float dist = 0, new_x, new_y;
+		while (dist += ray_dist_step) {
+			new_x = cos_theta * dist + rel_x;
+			new_y = sin_theta * dist + rel_y;
+			if (map[(int) (new_y / height_ratio)][(int) (new_x / width_ratio)]) {
+				dist *= cos(to_radians(theta - player.angle));
+				float double_dist = dist * 2;
+				if (double_dist >= screen_height) break;
+				SDL_Rect column = {screen_x, dist, step_x + 1, screen_height - double_dist};
+				SDL_RenderFillRect(renderer_3D, &column), SDL_RenderDrawRect(renderer_3D, &column);
+				break;
+			}
+		}
+		screen_x += step_x;
+	}
+}
+
+/////
+
+/*
+float
+	screen_x = new_x * width_ratio,
+	screen_y = new_y * height_ratio;
+
+int vert_state = close_to_whole(new_x - (int) new_x),
+	hori_state = close_to_whole(new_y - (int) new_y),
+	axis_coord;
+
+if (vert_state ^ hori_state)
+	vert_tex = vert_state,
+	axis_coord = hori_state ? new_y : new_x;
+else
+	coord = vert_tex ? new_x : new_y;
+*/
+
+/////
+
+exp:
+	$(CC) $(CFLAGS) `pkg-config --cflags --libs sdl2` -o bin/test other/q_6.c
+	./bin/test
+
+/////
+
+while (1) {
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		switch (event.type) {
+			case SDL_QUIT:
+				SDL_DestroyWindow(window_3D);
+				SDL_DestroyRenderer(renderer_3D);
+				for (int i = 0; i < animation_count; i++)
+					free_animation(animations[i]);
+				for (int i = 0; i < textured_wall_count; i++)
+					free_sprite(textured_walls[i]);
+				#ifdef WITH_2D
+				SDL_DestroyWindow(window_2D);
+				SDL_DestroyRenderer(renderer_2D);
+				#endif
+				return 0;
+			case SDL_KEYDOWN:
+				switch (event.key.keysym.sym) {
+					case SDLK_LEFT: printf("Left\n"); break;
+					case SDLK_RIGHT: printf("Right\n"); break;
+					case SDLK_UP: printf("Up\n"); break;
+					case SDLK_DOWN: printf("Down\n"); break;
+				}
+				break;
+		}
+
+/////
+
+
+/*
+SDL_Event event;
+while (SDL_PollEvent(&event)) {
+	if (event.type == SDL_QUIT) {
+		SDL_DestroyWindow(window_3D);
+		SDL_DestroyRenderer(renderer_3D);
+		for (int i = 0; i < animation_count; i++)
+			free_animation(animations[i]);
+		for (int i = 0; i < textured_wall_count; i++)
+			free_sprite(textured_walls[i]);
+		#ifdef WITH_2D
+		SDL_DestroyWindow(window_2D);
+		SDL_DestroyRenderer(renderer_2D);
+		#endif
+		return 0;
+	}
+	else if (event.type == SDL_KEYDOWN) {
+		float radian_angle = to_radians(player.angle);
+		float move_x = cos(radian_angle) * move_speed_decr,
+			move_y = sin(radian_angle) * move_speed_decr;
+
+		SDL_Event event;
+		while (SDL_PollEvent(&event)) {
+			switch (event.type) {
+				case SDL_QUIT:
+					SDL_DestroyWindow(window_3D);
+					SDL_DestroyRenderer(renderer_3D);
+					for (int i = 0; i < animation_count; i++)
+						free_animation(animations[i]);
+					for (int i = 0; i < textured_wall_count; i++)
+						free_sprite(textured_walls[i]);
+					#ifdef WITH_2D
+					SDL_DestroyWindow(window_2D);
+					SDL_DestroyRenderer(renderer_2D);
+					#endif
+					return 0;
+				case SDL_DOWN:
+			}
+		}
+
+		if (keys[SDL_SCANCODE_UP]) player.x += move_x, player.y += move_y;
+		if (keys[SDL_SCANCODE_DOWN]) player.x -= move_x, player.y -= move_y;
+		if (keys[SDL_SCANCODE_LEFT]) player.x += move_y, player.y -= move_x;
+		if (keys[SDL_SCANCODE_RIGHT]) player.x -= move_y, player.y += move_x;
+		if (keys[SDL_SCANCODE_A]) player.angle -= angle_turn;
+		if (keys[SDL_SCANCODE_S]) player.angle += angle_turn;
+
+		if (player.x < 0) player.x = 0;
+		else if (player.x > screen_width) player.x = screen_width;
+
+		if (player.y < 0) player.y = 0;
+		else if (player.y > screen_height) player.y = screen_height;
+
+		if (is_a_wall(map[(int) player.y][(int) player.x]))
+			player.y = player.prev_y, player.x = player.prev_x;
+
+		if (player.angle > 360) player.angle = 0;
+		else if (player.angle < 0) player.angle = 360;
+
+		player.prev_y = player.y, player.prev_x = player.x;
+		*/
+
+/////
+
+/*
+int skybox_x = (player.angle / 360.0) * skybox.scale.w - screen_width;
+SDL_Rect crop = {skybox_x, 0, screen_width, skybox.scale.h};
+SDL_Rect scale = {0, 0, screen_width, screen_height / 2 - player.pace.height};
+SDL_RenderCopy(renderer_3D, skybox.texture, &crop, &scale);
+*/
+
+/////
+
+/*
+test a small window of the spinning skybox before scaling it up (w/ a clear too)
+something with skybox.scale.width / 360
+
+int skybox_x = (player.angle / 360) * skybox.scale.w;
+
+// calculate needed width based on the screen width
+int width = 40;
+
+if (width + skybox_x > skybox.scale.w)
+	printf("Too wide\n");
+else
+	printf("It's fine\n");
+
+SDL_Rect crop = {skybox_x, 0, width, skybox.scale.h};
+SDL_Rect scale = {0, 0, screen_width, screen_height / 2};
+
+SDL_RenderCopy(renderer_3D, skybox.texture, &crop, &scale);
+*/
+
+/////
+
+	SET_COLOR(renderer_3D, 0, 0, 0);
+	SDL_RenderClear(renderer_3D);
+
+	const int full_width = skybox.scale.w / 4;
+	const SDL_Rect scale = {0, 0, screen_width, screen_height / 2};
+
+	int x1 = (player.angle / 360) * skybox.scale.w;
+	int width_1 = full_width;
+
+	if (x1 + width_1 > skybox.scale.w) {
+
+		int remainder = skybox.scale.w - x1;
+
+		printf("Overblown\n");
+		SDL_Rect neu = {0, 0, remainder, skybox.scale.h};
+		SDL_RenderCopy(renderer_3D, skybox.texture, &neu, &scale);
+
+		/*
+		printf("Overblown\n");
+		width_1 = skybox.scale.w - x_1;
+		printf("width_1 = %d\n", width_1);
+
+		int width_2 = full_width - width_1;
+		SDL_Rect the_rest = {50, 0, width_2, skybox.scale.h};
+		SDL_RenderCopy(renderer_3D, skybox.texture, &the_rest, NULL);
+		*/
+	}
+	else {
+		printf("Not\n");
+		SDL_Rect first = {x1, 0, width_1, skybox.scale.h};
+		SDL_RenderCopy(renderer_3D, skybox.texture, &first, &scale);
+	}
+
+/////
+
+void render_skybox(Player player, Sprite skybox) {
+	// if it is overblown, fix the width AND the x
+}
+
+/////
+
+if (wall_height > screen_height)
+	wall_height = screen_height;
+
+/////
+
+int tex_vert = close_to_whole(new_x - (int) new_x);
+int tex_hori = close_to_whole(new_y - (int) new_y);
+
+int tex_ind;
+if (tex_vert ^ tex_hori)
+	tex_ind = tex_vert
+		? (int) (new_y * height_ratio) % 64
+		: (int) (new_x * width_ratio) % 64;
+else
+	tex_ind = 500;
+
+/*
+int tex_ind = tex_vert
+	? (int) (new_y * height_ratio) % 64
+	: (int) (new_x * width_ratio) % 64;
+*/
+
+/////
+
+float step_offset = dist - floor(dist);
+printf("%f\n", step_offset);
+float tex_ind = wall.scale.w * step_offset;
+
+/////
+
+Animation animations[animation_count] = {
+	load_animation("assets/spritesheets/carrot.bmp", std_fps, 12, 5, 3),
+	load_animation("assets/spritesheets/bogo.bmp", std_fps, 6, 2, 3),
+	load_animation("assets/spritesheets/robot.bmp", std_fps, 3, 2, 2)
+};
+
+/////
+
+/*
+DepthInfo cast_data = {dist * cos(to_radians(theta - player.angle)), theta, -1};
+
+if (point > wall_count) {
+	cast_data.sprite_ind = point - wall_count - 1;
+	printf("At iteration %d, sprite ind is %d\n", cast_iteration, point - wall_count - 1);
+	z_buffer[cast_iteration] = cast_data;
+}
+
+else {
+	z_buffer[cast_iteration] = cast_data;
+	dist = cast_data.dist;
+	draw_wall(dist, screen_x, new_x, new_y, point, player, sprites, textured_walls);
+	break;
+}
+*/
+
+/*
+for (int i = 0; i < cast_iteration; i++) {
+	DepthInfo d = z_buffer[i];
+	// printf("%d\n", d.sprite_ind);
+	if (d.sprite_ind != -1) {
+		printf("Hit a sprite\n");
+		// printf("%f\n", d.dist);
+	}
+}
+*/
+
+for (int i = 0; i < cast_iteration; i++) {
+
+}
+
+/////
+
+// DepthInfo z_buffer[(int) cast_iters + 10];
+
+/////
+
+/*
+DepthInfo cast_data = {dist * cos(to_radians(theta - player.angle)), theta, -1};
+
+if (point > wall_count) {
+	cast_data.sprite_ind = point - wall_count - 1;
+	printf("At iteration %d, sprite ind is %d\n", cast_iteration, point - wall_count - 1);
+	z_buffer[cast_iteration] = cast_data;
+}
+
+else {
+	z_buffer[cast_iteration] = cast_data;
+	dist = cast_data.dist;
+	draw_wall(dist, screen_x, new_x, new_y, point, player, sprites, textured_walls);
+	break;
+}
+*/
+
+/////
+
+// cast_iters = fov / theta_step + 10,
+
+/////
+
+width_ratio = (float) screen_width / map_width,
+height_ratio = (float) screen_height / map_height;
+
+/////
+
+/*
+for (int i = 0; i < sprite_count; i++) {
+	SpriteHit hit = z_buffer[i];
+	if (hit.dist_sum != -1) {
+		float avg_dist = hit.dist_sum / hit.hit_count;
+		printf("avg_dist = %f\n", avg_dist);
+	}
+}
+*/
+
+/////
+
+/* std_fps = 20,*/ 
+
+/////
+
+/*
+SpriteHit* a = (SpriteHit*) first;
+SpriteHit* b = (SpriteHit*) second;
+
+if (a -> dist_sum == -1 || b -> dist_sum == -1)
+	return 0;
+
+return a -> avg_dist - b -> avg_dist;
+*/
+
+/////
+
+/*
+for (int i = 0; i < sprite_count; i++) {
+	SpriteHit* hit = &hits[i];
+	if (hit -> dist_sum != -1)
+		hit -> avg_dist = hit -> dist_sum / hit -> hit_count;
+}
+*/
+
+/*
+qsort(hits, sprite_count, sizeof(SpriteHit), hit_comparator);
+
+for (int i = 0; i < sprite_count; i++) {
+	Sprite sprite = sprites[i];
+	SpriteHit hit = hits[i];
+}
+*/
+
+/////
+
+/*
+SDL_AudioSpec wavSpec;
+Uint32 wavLength;
+Uint8 *wavBuffer;
+ 
+SDL_LoadWAV("assets/audio/storm.wav", &wavSpec, &wavBuffer, &wavLength);
+SDL_AudioDeviceID deviceId = SDL_OpenAudioDevice(NULL, 0, &wavSpec, NULL, 0);
+int success = SDL_QueueAudio(deviceId, wavBuffer, wavLength);
+if (success == -1) printf("Fail\n");
+SDL_PauseAudioDevice(deviceId, 0);
+SDL_Delay(3000);
+SDL_CloseAudioDevice(deviceId);
+SDL_FreeWAV(wavBuffer);
+SDL_Quit();
+*/
+
+/////
+
+/*
+1 = yellow
+2 = blue
+3 = orange
+4 = red
+
+5 = dials
+6 = cobblestone
+7 = dirt
+
+8 = carrot
+9 = bogo
+*/
+
+/////
+
+/*
+typedef struct {
+	Uint8* pos;
+	Uint8* buffer;
+	Uint32 audio_len, wav_len;
+	SDL_AudioSpec data;
+} Sound;
+
+void _play_sound(void* user_data, Uint8* buffer, int length) {
+	if (length == 0)
+		return;
+}
+
+void play_sound(Sound sound) {
+
+}
+
+Sound load_sound(const char* path) {
+	Sound sound;
+
+	if (SDL_LoadWAV(path, &sound.data, &sound.buffer, &sound.wav_len) == NULL)
+		fail("Could not load a sound: %s\n", path);
+
+	sound.data.callback = _play_sound;
+	sound.data.userdata = NULL;
+	sound.pos = sound.buffer;
+	sound.audio_len = sound.wav_len;
+
+	return sound;
+}
+*/
+
+/////

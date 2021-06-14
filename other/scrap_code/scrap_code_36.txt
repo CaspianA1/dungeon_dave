@@ -1,0 +1,108 @@
+// maybe should draw only from the final smallest_wall_y instead
+void draw_skybox_scanline(SDL_FRect wall, const double player_angle) {
+	const Skybox skybox = current_level.skybox;
+
+	if (wall.y >= settings.screen_height) wall.y = settings.screen_height - 1;
+
+	const double
+		turn_percent = player_angle / two_pi,
+		scan_percent = wall.x / settings.screen_width,
+		y_shown_percent = wall.y / settings.screen_height;
+
+	const double src_col_index = fmod(
+		scan_percent * (skybox.max_width / 4.0) + turn_percent * skybox.max_width,
+		skybox.max_width);
+
+	const SDL_Rect src = {
+		src_col_index, 0, 1, y_shown_percent * skybox.max_height
+	};
+
+	const SDL_FRect dest = {
+		wall.x, 0, settings.ray_column_width, wall.y
+	};
+
+	SDL_RenderCopyF(screen.renderer_3D, skybox.sprite.texture, &src, &dest);
+}
+
+/////
+
+/*
+// for each column, only draw one skybox vertical line
+if (current_level.skybox_enabled && !(*drawn_skybox)) {
+	draw_skybox_scanline(raised_wall, player_angle);
+	*drawn_skybox = 0;
+}
+*/
+
+/////
+
+/*
+Uint64 foo;
+Uint32 bar = SDL_DequeueAudio(sound.device_id, sound.buffer, sound.length);
+DEBUG(bar, d);
+*/
+
+/////
+
+/*
+if (SDL_GetAudioDeviceStatus(sound.device_id) == SDL_AUDIO_STOPPED)
+	play_sound(sound);
+*/
+
+/*
+// not reporting correctly
+switch (SDL_GetAudioDeviceStatus(sound.device_id))
+{
+    case SDL_AUDIO_STOPPED: printf("stopped\n"); break;
+    case SDL_AUDIO_PLAYING: printf("playing\n"); break;
+    case SDL_AUDIO_PAUSED: printf("paused\n"); break;
+    default: printf("???"); break;
+}
+*/
+
+// printf("Status: %d\n", SDL_GetAudioStatus());
+
+/////
+
+/*
+printf("%d\n", sound.data.size);
+printf("%d\n", sound.data.size / sound.data.freq);
+*/
+
+/////
+
+/*
+if (!(*drawn_first_top)) {
+	// wall.y -= wall.h;
+
+	*drawn_first_top = 1;
+
+	const int y_diff = *last_wall_y - wall.y;
+	// if (y_diff <= 0) return;
+
+	const SDL_Rect wall_top = {
+		screen_x, wall.y, settings.ray_column_width, y_diff
+	};
+
+	draw_colored_rect(32, 178, 70, &wall_top);
+	/////
+
+	
+}
+*last_wall_y = wall.y;
+*/
+
+/////
+
+const byte
+	curr_point_height = (byte) wall.y / settings.screen_height,
+	last_point_height = (byte) *last_wall_y / settings.screen_height;
+
+printf("curr = %d, last = %d\n", curr_point_height, last_point_height);
+
+/////
+
+// if (screen_x != 600 && ((int) wall.y / settings.screen_height) == 0 /* && !*first_wall_hit */) {
+// if (wall.y < *last_wall_y && *last_wall_y != settings.screen_height) {
+
+/////

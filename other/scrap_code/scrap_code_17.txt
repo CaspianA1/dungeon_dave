@@ -1,0 +1,270 @@
+void draw_textured_wall(const int wall_height, const byte point,
+	const SDL_Rect pace_wall_pos, const double new_x, const double new_y) {
+
+	// const Sprite wall_sprite = textured_walls[point - (wall_count - textured_wall_count + 1)];
+	Sprite wall_sprite = sprites[5];
+
+	const int tex_w = wall_sprite.surface -> w, tex_h = wall_sprite.surface -> h;
+
+	const double
+		diff_x = new_x - floor(new_x),
+		diff_y = new_y - floor(new_y);
+
+	const int on_x = close_to_whole(diff_y), on_y = close_to_whole(diff_x);
+
+	int offset;
+	if (on_x ^ on_y)
+		offset = on_x
+			? (int) (diff_x * tex_w) & tex_w - 1
+			: (int) (diff_y * tex_h) & tex_h - 1;
+	else
+		offset = tex_w - 1;
+
+	render_scanline(wall_height, wall_sprite, offset, &pace_wall_pos);
+}
+
+/////
+
+// SDL_RenderSetLogicalSize(screen.renderer_3D, screen_width, screen_height);
+// SDL_RenderSetScale(screen.renderer_3D, screen_width, screen_height);
+
+/////
+
+/*
+if (orig_x < 0) result = -result;
+return result;
+*/
+
+/*
+if (orig_x < 0) result = -result;
+return result;
+*/
+
+/////
+
+const double lookup_cos(double x) {
+	if (x < 0) x = -x;
+	if (x > two_pi) x = fmod(x, two_pi);
+	return _lookup(cos_table, x);
+}
+
+/////
+
+cos_table = init_trig_table(1, trig_precision),
+tan_table = init_trig_table(2, trig_precision);
+
+deinit_trig_table(cos_table);
+deinit_trig_table(tan_table);
+
+/////
+
+double
+	maybe_new_x = lookup_cos(rad_angle) * move_speed_decr + *x,
+	maybe_new_y = lookup_sin(rad_angle) * move_speed_decr + *y;
+
+if (is_a_wall(map[(int) *y][(int) maybe_new_x]))
+	maybe_new_x = *x;
+
+if (is_a_wall(map[(int) *y][(int) maybe_new_x]))
+	maybe_new_y = *y;
+
+if (up) *x = maybe_new_x, *y = maybe_new_y;
+if (down) *x = maybe_new_x, *y = maybe_new_y;
+if (left) *x = maybe_new_y, *y = maybe_new_x;
+if (right) *x = maybe_new_y, *y = maybe_new_x;
+
+return 1;
+
+//////////////////////////////////////////////////
+
+/*
+const double
+	move_x = lookup_cos(rad_angle) * move_speed_decr,
+	move_y = lookup_sin(rad_angle) * move_speed_decr;
+
+////////////////////
+
+if (look_up && *y_pitch <= y_pitch_max) *y_pitch += y_pitch_step;
+if (look_down && -*y_pitch <= y_pitch_max) *y_pitch -= y_pitch_step;
+
+if (turn_left) *angle -= angle_turn;
+if (turn_right) *angle += angle_turn;
+
+if (up) *x += move_x, *y += move_y;
+if (down) *x -= move_x, *y -= move_y;
+if (left) *x += move_y, *y -= move_x;
+if (right) *x -= move_y, *y += move_x;
+
+if (*angle < 0) *angle = 360;
+else if (*angle > 360) *angle = 0;
+
+if (is_a_wall(map[(int) *y][(int) *x]))
+	*x = *prev_x, *y = *prev_y;
+
+////////////////////
+if (*prev_x != *x || *prev_y != *y) {
+	Pace* pace = &player -> pace;
+
+	if ((pace -> x += pace -> step_x) > two_pi)
+		pace -> x = 0;
+
+	pace -> sin_x = lookup_sin(pace -> x);
+	pace -> screen_offset = (pace -> sin_x) * (screen_height / pace -> offset_converter);
+}
+
+*prev_x = *x, *prev_y = *y;
+return 1;
+*/
+
+//////////////////////////////////////////////////
+
+/*
+if (player.recently_turned) {
+	int angle = 2;
+	if (player.turned_left) angle = -angle;
+
+	SDL_RenderCopyEx(screen.renderer_3D, screen.pixel_buffer, NULL, NULL, angle, NULL, SDL_FLIP_NONE);
+	SDL_RenderCopyEx(screen.renderer_3D, screen.shape_buffer, NULL, NULL, angle, NULL, SDL_FLIP_NONE);
+}
+
+else {
+	SDL_RenderCopy(screen.renderer_3D, screen.pixel_buffer, NULL, NULL);
+	SDL_RenderCopy(screen.renderer_3D, screen.shape_buffer, NULL, NULL);
+}
+
+SDL_RenderPresent(screen.renderer_3D);
+
+#ifdef MODE_2D
+SDL_RenderPresent(screen.renderer_2D);
+#endif
+*/
+
+/////
+
+printf("Tilted at angle %lf\n", tilt_angle);
+double crop_top = fabs(tan(tilt_angle)) / 1.0;
+crop_top *= screen_width;
+DEBUG(crop_top, lf);
+
+/////
+
+void refresh(const double tilt_angle) {
+	SDL_UnlockTexture(screen.pixel_buffer);
+	SDL_SetRenderTarget(screen.renderer_3D, NULL);
+
+	/*
+	const double y_crop = tan(fabs(to_radians(tilt_angle))) * screen_width;
+	SDL_Rect crop = {0, y_crop, screen_width, screen_height - y_crop};
+	*/
+
+	/*
+	RENDER_W_ROTATION(screen.pixel_buffer, crop, tilt_angle);
+	RENDER_W_ROTATION(screen.shape_buffer, crop, tilt_angle);
+	*/
+
+	// 
+
+	SDL_Rect crop = {5, 5, 10, 10};
+	SDL_Point center = {1, 1};
+
+	/*
+	SDL_RenderCopyEx(screen.renderer_3D, screen.pixel_buffer, &crop, NULL, tilt_angle, NULL, SDL_FLIP_NONE);
+	SDL_RenderCopyEx(screen.renderer_3D, screen.shape_buffer, &crop, NULL, tilt_angle, NULL, SDL_FLIP_NONE);
+	*/
+	
+	SDL_RenderPresent(screen.renderer_3D);
+
+	#ifdef MODE_2D
+	SDL_RenderPresent(screen.renderer_2D);
+	#endif
+
+/////
+
+#define RENDER_TURNED(buf)\
+	SDL_RenderCopyEx(screen.renderer_3D, buf, NULL, NULL,\
+		tilt_angle, NULL, SDL_FLIP_NONE)
+
+/////
+
+/*
+const double y_crop = tan(fabs(to_radians(tilt_angle))) * screen_width;
+const SDL_Rect src_crop = {0, y_crop, screen_width, screen_height - y_crop};
+*/
+
+/////
+
+, trig_precision = 15000
+
+/////
+
+/*
+typedef struct {
+	double pitch;
+	const double pitch_step, pitch_max;
+} YPitch; // for y-shearing
+
+typedef struct {
+	double angle;
+	const double step, max;
+} Tilt;
+*/
+
+/////
+
+/*
+Player player = {{15.1, 1.1}, 150, {0, }, // {0, 16, 0, 0, 0.1},
+	{0, screen_height / 25, screen_height / 1.2}, {0, 0.1, 5}};
+*/
+
+/////
+
+/*
+typedef struct {
+	int screen_offset;
+	const int offset_converter;
+	double x, sin_x;
+	const double step_x;
+} Pace;
+*/
+
+/////
+
+/*
+printf("Steps for dx = %f and dy = %f: %d\n",
+	fabs(new_x - player.pos.x), fabs(new_y - player.pos.y), steps);
+*/
+
+/////
+
+// for (int y = wall_pos.y + wall_pos.h; y < screen_height - player.pace.screen_offset; y++) {
+
+for (int y = wall_pos.y + wall_pos.h; y < screen_height; y++) {
+
+	const double floor_row = y - half_screen_height - player.y_pitch.val;
+	const double floor_straight_distance = 0.5 / floor_row * screen.projection_distance;
+	const double floor_actual_distance = floor_straight_distance / cos_beta;
+
+	const double 
+		hit_x = cos_theta * floor_actual_distance + player.pos.x,
+		hit_y = sin_theta * floor_actual_distance + player.pos.y;
+
+	const int
+		tex_x = (int) ((hit_x - floor(hit_x)) * sprite_w) & sprite_w - 1,
+		tex_y = (int) ((hit_y - floor(hit_y)) * sprite_h) & sprite_h - 1;
+
+	// there's no wall here (of course), but this is used for the shading calculation
+	const double shade = calculate_shade(screen.projection_distance / floor_actual_distance);
+
+	Uint32 surface_pixel = get_surface_pixel(pixels, surface_pitch, bytes_per_pixel, tex_x, tex_y);
+	SDL_Color pixel;
+	SDL_GetRGB(surface_pixel, format, &pixel.r, &pixel.g, &pixel.b);
+
+	surface_pixel = SDL_MapRGB(format, pixel.r * shade, pixel.g * shade, pixel.b * shade);
+
+	/*
+	const int floor_y = y + player.pace.screen_offset;
+	if (floor_y > 0) *get_pixbuf_pixel(wall_pos.x, floor_y) = surface_pixel;
+	*/
+}
+
+/////

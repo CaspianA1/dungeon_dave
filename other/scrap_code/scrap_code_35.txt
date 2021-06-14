@@ -1,0 +1,328 @@
+/*
+Uint32 surface_pixel = get_surface_pixel(surfaces[0] -> pixels, surfaces[0] -> pitch,
+	surface_offsets[0].x, surface_offsets[0].y);
+
+const int pace_y = y + pace;
+for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
+	*get_pixbuf_pixel(x, pace_y) = surface_pixel;
+*/
+
+/*
+const byte point = tex_hit_data[(int) floor(hits[1])][(int) floor(hits[0])];
+const Sprite* sprite = &current_level.textured_walls[point - 1];
+const SDL_Surface* surface = sprite -> surface;
+const int max_offset = sprite -> surface -> w - 1;
+
+const VectorI surface_offset = {
+	(hits[0] - floor(hits[0])) * max_offset,
+	(hits[1] - floor(hits[1])) * max_offset
+};
+
+// bottleneck
+Uint32 surface_pixel = get_surface_pixel(surface -> pixels, surface -> pitch,
+	surface_offset.x, surface_offset.y);
+
+const int pace_y = y + pace;
+for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
+	*get_pixbuf_pixel(x, pace_y) = surface_pixel;
+*/
+
+/////
+
+// assert(y >= 0);
+// assert(y <= settings.screen_height - 1);
+
+/*
+int pace_y = y + pace;
+
+if (y < 0 || y >= settings.screen_height) {
+	printf("Skip\n");
+	continue;
+}
+*/
+
+// DEBUG(y, d);
+
+/////
+
+/*
+if (pace_y_vals[0] >= settings.screen_height
+	|| pace_y_vals[1] <= 0) {
+	printf("skip\n");
+	continue;
+}
+*/
+
+/////
+
+/*
+
+if (pace_y_vals[0] >= settings.screen_height) {
+	printf("Bad 1: %d\n", pace_y_vals[0]);
+}
+
+if (pace_y_vals[1] >= settings.screen_height) {
+	printf("Bad 2: %d\n", pace_y_vals[1]);
+}
+*/
+
+/////
+
+int rel_start = begin - pace, rel_end = end - pace;
+
+if (!is_ceiling) rel_end--;
+// else if (is_ceiling) 
+
+for (int y = rel_start; y < rel_end; y += 2) {
+	DEBUG(is_ceiling, d);
+	// assert(y >= 0);
+
+	/*
+	assert(y <= settings.screen_height - 1);
+
+	int pace_y_vals[2] = {y + pace, y + pace + 1};
+
+	assert(pace_y_vals[0] >= 0);
+	assert(pace_y_vals[0] <= settings.screen_height - 1);
+
+	assert(pace_y_vals[1] >= 0);
+	assert(pace_y_vals[1] <= settings.screen_height - 1);
+	*/
+
+/////
+
+if ((rel_end - rel_start) % 2 != 0) {
+	printf("Odd diff\n");
+}
+else {
+	printf("Even diff\n");
+}
+
+/////
+
+
+// printf("%s\n", rel_end % 2 == 0 ? "Even" : "Odd");
+
+int y;
+for (y = rel_start; y < rel_end; y += 2) {
+	if (y >= rel_end - 1) {
+		printf("End at %d\n", y);
+	}
+
+	const int next_y = y + 1;
+
+/////
+
+for (int y = rel_start; y < rel_end; y += 2) {
+	if (y >= rel_end - 1) {
+		printf("End at %d\n", y);
+	}
+
+	const int next_y = y + 1;
+
+	int pace_y_vals[2] = {
+		y + pace,
+		next_y + pace
+	};
+
+	/*
+	assert(pace_y_vals[0] >= 0);
+	assert(pace_y_vals[0] <= settings.screen_height - 1);
+
+	assert(pace_y_vals[1] >= 0);
+	assert(pace_y_vals[1] <= settings.screen_height - 1);
+	*/
+
+/////
+
+/*
+int rel_start = begin - pace, rel_end = end - pace;
+DEBUG(rel_start, lf);
+*/
+
+/*
+if (rel_start % 2 != 0) rel_end++;
+// if (rel_end % 2 != 0) rel_end++;
+DEBUG(pace, lf);
+*/
+
+/////
+
+if (pace_y_vals[1] >= settings.screen_height) {
+	// pace_y_vals[1] = settings.screen_height - 1;
+	/*
+	printf("Stop at upper y = %ld\n", pace_y_vals[1]);
+	break;
+	*/
+}
+
+///// This may be needed later:
+
+// Animation weapon = init_animation("../assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 10);
+// animate_full_screen(&weapon, -animating_weapon, player.y_pitch, 0);
+
+// Animation weapon = init_animation("../assets/spritesheets/weapons/shotgun.bmp", 4, 7, 28, 20);
+
+/////
+
+/*
+surface_pixels[0] = shade_ARGB_pixel(surfaces[0] -> pixels, surfaces[0] -> pitch,
+	surface_offsets[0].x, surface_offsets[0].y);
+
+surface_pixels[1] = shade_ARGB_pixel(surfaces[1] -> pixels, surfaces[1] -> pitch,
+	surface_offsets[1].x, surface_offsets[1].y);
+*/
+
+/////
+
+// draw_skybox_scanline(current_level.skybox, raised_wall, player_angle);
+
+const int
+	wall_point_height = wall.y / settings.screen_height,
+	player_point_height = player.jump.height / settings.screen_height;
+
+DEBUG(wall_point_height, d);
+
+if (wall_point_height >= player_point_height)
+	draw_skybox_scanline(current_level.skybox, raised_wall, player_angle);
+
+/////
+
+// for each column, only draw one skybox vertical line
+if (current_level.skybox_enabled && i == 0) {
+	// draw_skybox_scanline(current_level.skybox, raised_wall, player_angle);
+
+	// if (wall.y + wall.h <= settings.half_screen_height)
+}
+
+/////
+
+const int src_overshoot = index_plus_width - skybox.max_width;
+
+const SDL_Rect src_1 = {
+	src_col_index, 0, width, skybox.max_height
+};
+
+const int first_width = 5;
+
+const SDL_Rect dest_1 = {
+	0, 0, first_width, settings.screen_height
+};
+
+SDL_RenderCopy(screen.renderer_3D, skybox.sprite.texture, &src_1, &dest_1);
+
+/////
+
+const SDL_Rect src_1 = {
+	
+},
+
+src_2 = {
+
+},
+
+dest_1 = {
+	
+},
+
+dest_2 = {
+
+};
+
+
+/*
+const int src_overshoot = index_plus_width - skybox.max_width;
+const double src_overshoot_ratio = (double) src_overshoot / skybox.max_width;
+
+const SDL_Rect src = {
+	src_col_index - src_overshoot, 0, width - src_overshoot, skybox.max_height
+};
+
+const SDL_Rect dest = {
+	0, 0, settings.screen_width, settings.screen_height
+};
+
+SDL_RenderCopy(screen.renderer_3D, skybox.sprite.texture, &src, NULL);
+*/
+
+/////
+
+const double dest_w_to_src_w = (double) skybox.max_width / settings.screen_width;
+
+/////
+
+if (index_plus_width > skybox.max_width) {
+	const int error = index_plus_width - skybox.max_width;
+	const double error_percent = (double) error / skybox.max_width;
+	DEBUG(error_percent, lf);
+
+	const SDL_Rect src = {src_col_index, 0, src_width, skybox.max_height};
+	SDL_RenderCopy(screen.renderer_3D, skybox.sprite.texture, &src, NULL);
+
+	/*
+	for (int i = 0; i < skybox.max_width; i++) {
+		const double i_percent = (double) i / skybox.max_width;
+		const double dest_x = i_percent * settings.screen_width;
+
+		const double src_index = fmod(
+			i_percent * src_width + turn_percent * skybox.max_width,
+			skybox.max_width);
+
+		const SDL_Rect src = {src_index, 0, 1, skybox.max_height};
+
+		const SDL_FRect dest = {
+			dest_x, 0, settings.ray_column_width, settings.screen_height
+		};
+
+		SDL_RenderCopyF(screen.renderer_3D, skybox.sprite.texture, &src, &dest);
+	}
+	*/
+
+}
+
+/////
+
+const int index_plus_width = src_col_index + src_width;
+
+/////
+
+const Sprite wall = current_level.textured_walls[0];
+
+const SDL_FRect dest = {0, begin, wall.surface -> w, end - begin};
+
+SDL_RenderCopyExF(
+	screen.renderer_3D,
+	wall.texture,
+	NULL,
+	&dest,
+	a,
+	NULL,
+	SDL_FLIP_NONE);
+
+return;
+
+/////
+
+/*
+SDL_Rect src_2 = src_1;
+src_2.x = skybox.max_width - src_2.x;
+
+const SDL_Rect dest_2 = {
+	dest_error,
+	0, dest_error, settings.screen_height
+};
+
+SDL_RenderCopy(screen.renderer_3D, skybox.sprite.texture, &src_2, &dest_2);
+*/
+
+/////
+
+static int x = 0;
+if (keys[SDL_SCANCODE_T]) x++;
+if (keys[SDL_SCANCODE_Y]) x--;
+
+DEBUG(x, d);
+
+if (keys[SDL_SCANCODE_C]) dest_2.x += x;
+
+/////

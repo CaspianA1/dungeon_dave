@@ -1,0 +1,404 @@
+/*
+int floor_y = y + pace;
+if (floor_y > screen_height) floor_y = screen_height - 1;
+*/
+
+/*
+int floor_y = y;
+if (floor_y >= screen_height) floor_y = screen_height;
+int ceil_y = screen_height - y;
+if (ceil_y < 0) ceil_y = 0;
+*/
+
+/*
+*get_pixbuf_pixel(screen_x, floor_y) = surface_pixel;
+*get_pixbuf_pixel(screen_x, ceil_y) = surface_pixel;
+*/
+
+/////
+
+// for (int y = half_screen_height - 1; y < screen_height - pace; y++) {
+
+/////
+
+const SDL_Rect wall_pos = {
+	screen_x,
+	half_screen_height - wall_height / 2 + pace,
+	1,
+	wall_height
+};
+
+const int
+	init_y = wall_pos.y + wall_pos.h - pace,
+	end_y = screen_height - pace;
+
+const int range_y = end_y - init_y;
+
+const int floor_y = y + pace;
+*get_pixbuf_pixel(screen_x, floor_y) = surface_pixel;
+
+int ceiling_y = end_y - floor_y;
+
+if (ceiling_y < 0) {
+	printf("Less: %d\n", ceiling_y);
+}
+
+/////
+
+// if (roof_y < 0) printf("Warning: %d\n", roof_y);
+// *get_pixbuf_pixel(screen_x, roof_y + pace) = surface_pixel;
+
+/*
+int roof_y = screen_height - ground_y;
+roof_y += fabs(pace);
+
+if (roof_y < 0) {
+	printf("Bad\n");
+}
+
+*get_pixbuf_pixel(screen_x, roof_y) = surface_pixel;
+*/
+
+
+/*
+int the_floor = y + pace;
+if (the_floor >= screen_height) the_floor = screen_height - 1;
+
+int top = screen_height - 1 - y;
+
+*get_pixbuf_pixel(screen_x, bottom) = surface_pixel;
+*get_pixbuf_pixel(screen_x, top) = surface_pixel;
+*/
+
+/////
+
+// for (int y = wall_pos.y + wall_pos.h; y < screen_height; y++) {
+
+/////
+
+/*
+DEBUG(shifted_up, d);
+int top_space = wall_pos.y;
+DEBUG(top_space, d);
+int flipped = top_space - shifted_up + 1;
+DEBUG(flipped, d);
+*/
+
+/////
+
+/*
+int shifted_up = floor_y - wall_height;
+assert(shifted_up > 0);
+int flipped = screen_height - shifted_up;
+if (flipped < 0) flipped = 0;
+
+*get_pixbuf_pixel(screen_x, flipped) = surface_pixel;
+*/
+
+/////
+
+void refresh(const int pace_offset)
+
+// const SDL_Rect pace_crop = {0, 0, screen_width, screen_height - pace_offset};
+SDL_Rect pace_crop;
+pace_crop.x = 0;
+pace_crop.w = screen_width;
+
+if (pace_offset <= 0) pace_crop.y = 0, pace_crop.h = screen_height - pace_offset;
+else pace_crop.y = pace_offset, pace_crop.h = screen_height;
+
+printf("pace_crop = {%d, %d, %d, %d}\n", pace_crop.x, pace_crop.y, pace_crop.w, pace_crop.h);
+
+clear(screen.renderer_3D, NULL);
+
+/////
+
+/*
+// do not change this snippet, no matter what!
+const int floor_y = y + pace;
+*get_pixbuf_pixel(screen_x, floor_y) = surface_pixel;
+
+const int flipped = screen_height - y + pace; // works, except for the top, need another range
+if (flipped < 0) continue;
+*get_pixbuf_pixel(screen_x, flipped) = surface_pixel;
+*/
+
+/////
+
+/*
+*get_pixbuf_pixel(screen_x, y + pace) = surface_pixel;
+
+// const int roof_pixel = half_screen_height - floor_row - pace - 1;
+// const int roof_pixel = half_screen_height - floor_row;
+// const int roof_pixel = half_screen_height - floor_row + pace;
+// const int roof_pixel = wall_pos.y - floor_row;
+int roof_pixel = half_screen_height + pace - floor_row;
+
+if (roof_pixel < 0) {
+	roof_pixel = 0;
+}
+else if (roof_pixel >= fabs(pace)) {
+	printf("Bad bad\n");
+}
+
+*get_pixbuf_pixel(screen_x, roof_pixel) = surface_pixel;
+*/
+
+/////
+
+// for (int y = half_screen_height; y < screen_height - pace; y++) {
+// for (int y = init_y; y < end_y; y++) {
+// for (int y = wall_pos.y + wall_pos.h; y < screen_height; y++) {
+// for (int y = init_y; y < end_y; y++) {
+
+
+/*
+const int bottom = y + pace;
+*get_pixbuf_pixel(screen_x, bottom) = surface_pixel;
+
+int top = screen_height - bottom;
+if (top < 0) printf("Less\n");
+
+*get_pixbuf_pixel(screen_x, top) = surface_pixel;
+*/
+
+/////
+
+typedef struct {
+	int screen_x, point;
+} RayData;
+
+/////
+
+printf("Val is %lf\n", x);
+
+/*
+if (x >= table.period) {
+	printf("Doing fmod\n");
+	x = fmod(x, table.period);
+}
+else if (x <= 0) {
+	printf("Smaller\n");
+}
+
+printf("---\n");
+*/
+
+if (x <= 0) {
+	printf("Smaller\n");
+}
+
+/////
+
+/*
+inlinable const double trig_val(TrigTable table, double x) {
+	double (*fn) (double);
+	switch (table.fn_type) {
+		case 0: fn = sin; break;
+		case 1: fn = cos; break;
+		case 2: fn = tan; break;
+	}
+
+	double official = fn(x), mine;
+
+	if (table.fn_type == 0) {
+		mine = x < 0 // sin(-x) = -sin(x)
+			? -table.vals[(int) (fabs(x) / table.step)]
+			: table.vals[(int) (x / table.step)];
+	}
+
+	if (fabs(official - mine) > 0.05) {
+		printf("Imprecise for x = %lf with fn #%d\n", x, table.fn_type);
+		printf("Mine was %lf, theirs was %lf\n---\n", mine, official);
+	}
+
+	return official;
+}
+*/
+
+/////
+
+/*
+if (x < 0)
+	return -sin_table.vals[(int) (-x / sin_table.step)];
+*/
+
+/*
+if (x < 0) {
+	? -sin_table.vals[(int) (-x / sin_table.step)]
+	: sin_table.vals[(int) (x / sin_table.step)];
+}
+*/
+
+/*
+double result;
+
+if (x >= sin_table.period) {printf("Caught em 1 w \n");}
+
+return sin(x);
+
+return x < 0
+	? -sin_table.vals[(int) (-x / sin_table.step)]
+	: sin_table.vals[(int) (x / sin_table.step)];
+*/
+
+/////
+
+// if (x >= sin_table.period) {printf("Caught em 2\n");}
+
+// double result;
+return cos(x);
+
+// return cos_table.vals[(int) (fabs(x) / cos_table.step)];
+
+/////
+
+/*
+double mine = _lookup(cos_table, x), official = cos(x);
+if (fabs(mine - official) > 0.01) {
+	printf("---\nFor x = %lf, mine = %lf, and official = %lf\n", x, mine, official);
+}
+*/
+
+/////
+
+/*
+printf("---\n");
+
+double orig_x = x, official = cos(x);
+printf("Orig x is %lf\n", x);
+
+if (x < 0) {
+	printf("Invert %lf\n", x);
+	x = -x;
+}
+if (x > two_pi) {
+	printf("Decrease %lf\n", x);
+	x -= two_pi;
+}
+
+double mine = _lookup(cos_table, x);
+if (fabs(mine - official) > 0.01) {
+	printf("---\nFor x = %lf, mine was %lf, and official was %lf\n",
+		orig_x, mine, official);
+	printf("X mutated into %lf\n", x);
+}
+
+return official;
+*/
+
+/////
+
+/*
+printf("---\n");
+// double val = 1.226966;
+double val = 1.226966;
+// printf("Lookup table at 1: %lf\n", _lookup(cos_table, 1));
+printf("Lookup table at 1.226966: %lf\n", _lookup(cos_table, val));
+return 0;
+*/
+
+/////
+
+
+
+/*
+x = fabs(x);
+if (x > M_PI)
+	x -= M_PI;
+*/
+
+/*
+if (x < 0) return -_lookup(tan_table, -x);
+if (x > M_PI)
+	x -= M_PI;
+
+double mine = _lookup(tan_table, x);
+if (fabs(mine - official) > 0.01) {
+	printf("Error. Mine is %lf, official is %lf\n", mine, official);
+}
+
+return mine;
+*/
+
+/*
+result = _lookup(tan_table, x);
+printf("Mine vs theirs: %lf, %lf\n", result, tan(x));
+return result;
+*/
+
+/*
+int was_negative =
+x = abs(x);
+
+double orig_x = x;
+
+if (x < 0) return -_lookup(tan_table, -x);
+if ()
+*/
+
+/////
+
+/*
+double mine = _lookup(tan_table, x), official = tan(orig_x);
+if (orig_x < 0) mine = -mine;
+if (fabs(mine - official) > 0.01) {
+	printf("First x: %lf\n", x);
+	printf("Error. Mine vs official for x = %lf: %lf, %lf\n",
+		x, mine, official);
+}
+
+return mine;
+*/
+
+/////
+
+/*
+viewport.y -= foo;
+viewport.h -= foo;
+
+
+printf("viewport: {%d, %d, %d, %d}\n", viewport.x, viewport.y, viewport.w, viewport.h);
+*/
+
+SDL_RenderCopy(screen.renderer_3D, screen.pixel_buffer, &viewport, NULL);
+SDL_RenderCopy(screen.renderer_3D, screen.shape_buffer, &viewport, NULL);
+
+/////
+
+up = keys[SDL_SCANCODE_W],
+down = keys[SDL_SCANCODE_S],
+left = keys[SDL_SCANCODE_A],
+right = keys[SDL_SCANCODE_D],
+turn_left = keys[SDL_SCANCODE_LEFT],
+turn_right = keys[SDL_SCANCODE_RIGHT],
+look_up = keys[SDL_SCANCODE_UP],
+look_down = keys[SDL_SCANCODE_DOWN];
+
+/////
+
+/*
+https://zdoom.org/wiki/Y-shearing
+https://permadi.com/1996/05/ray-casting-tutorial-16/#LOOKING%20UP%20AND%20DOWN
+https://github.com/andrew-lim/sdl2-raycast
+https://zdoom.org/wiki/Free_look
+https://altimit.systems/articles/Doom%20Engine%20Review/page3.php
+https://fabiensanglard.net/doomIphone/doomClassicRenderer.php
+https://maroon-roundworm-f4li9vp9.ws-us03.gitpod.io/
+
+study this code: /Users/caspianahlberg/Desktop/Programming/C++ Files/sdl2-raycast
+
+https://www.youtube.com/watch?v=IPExaiAYDIo
+https://www.youtube.com/watch?v=RSt2ycuV8JA
+*/
+
+/////
+
+/*
+plan:
+1. no pace
+2. good floor and ceiling
+3. pace, keep both good (start with bottom good, and no pace involved in loop)
+*/
+
+/////

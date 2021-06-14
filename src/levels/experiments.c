@@ -1,0 +1,164 @@
+byte get_experiments_point_height(const byte point, const VectorF pos) {
+	if (point == 1) {
+		if (pos[0] <= 8.9999 && pos[1] <= 5.9999) return 3;
+		else return 5;
+	}
+
+	else if (point == 2) {
+		if (pos[1] <= 9.99999) return 1;
+		else if (pos[0] >= 21.99999 || pos[1] <= 10.99999) return 2;
+		return 3;
+	}
+
+	else if (point == 6) {
+		if (pos[0] <= 13.0001) return 3;
+		return 2;
+	}
+
+	else if (point == 7) {
+		if (pos[1] >= 30.9999) return 2;
+		return 1;
+	}
+
+	switch (point) {
+		case 3: return 6;
+		case 4: return 3;
+		case 5: return 6; // 8 before
+		default: return point;
+	}
+}
+
+double experiments_shader(const VectorF pos) {
+	static const Circle
+		first_health_kit = {5.0, 2.0, 1.0},
+		first_downward_stairs = {22.0, 24.0, 5.0},
+		torch = {7.5, 12.5, 1.0};
+
+	return
+		diffuse_circle(pos, first_health_kit) * 5.0
+		+ diffuse_circle(pos, first_downward_stairs) * 0.2
+		+ diffuse_circle(pos, torch) * 5.0
+		+ 2.0;
+}
+
+void load_experiments(void) {
+	enum {
+		map_width = 40, map_height = 40,
+		wall_count = 7, billboard_count = 2,
+		animation_count = 2, enemy_count = 1
+	};
+
+	static const byte wall_data[map_height][map_width] = {
+		{1, 1, 1, 1, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 1, 0, 0, 1, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 1, 0, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 1, 1, 1, 0, 0, 1, 0, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 1, 0, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 1, 0, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 1, 0, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 2, 2, 2, 2, 1, 1, 0, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{3, 2, 2, 2, 2, 1, 1, 0, 3, 5, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{3, 2, 2, 2, 2, 1, 1, 0, 3, 5, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{3, 2, 2, 2, 2, 0, 0, 0, 3, 5, 5, 2, 2, 2, 2, 5, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{3, 2, 2, 2, 2, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 6, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 7, 7, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 7, 7, 6, 0, 0, 0, 0, 6, 0, 0, 6, 0, 6, 0, 6, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 7, 7, 6, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 7, 7, 6, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 7, 7, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 7, 7, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+	};
+
+	// previous: {1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}
+	Level experiments = init_level(map_width, map_height, (VectorF) {2.0, 2.0}, 2.0);
+	experiments.max_point_height = 6;
+	experiments.background_sound = init_sound("../assets/audio/sultan.wav", 0);
+	experiments.get_point_height = get_experiments_point_height;
+	experiments.shader = experiments_shader;
+
+	for (int y = 0; y < map_height; y++) {
+		memcpy(experiments.wall_data[y], &wall_data[y], map_width);
+		memset(experiments.ceiling_data[y], 1, map_width);
+		memset(experiments.floor_data[y], 1, map_width);
+	}
+
+	for (int x = 4; x < 7; x++) {
+		for (int y = 0; y < 3; y++)
+			experiments.floor_data[y][x] = 5;
+	}
+
+	for (int x = 11; x < 13; x++) {
+		for (int y = 27; y < 29; y++)
+			experiments.floor_data[y][x] = 7;
+	}
+
+	for (int x = 16; x < 22; x++) {
+		for (int y = 24; y < 30; y++)
+			experiments.floor_data[y][x] = 6;
+	}
+
+	set_level_skybox(&experiments, "../assets/skyboxes/desert.bmp");
+
+	set_level_walls(&experiments, wall_count,
+		"../assets/walls/pyramid_bricks_3.bmp",
+		"../assets/walls/marble.bmp",
+		"../assets/walls/hieroglyphics.bmp",
+		"../assets/walls/window.bmp",
+		"../assets/walls/rug_1.bmp",
+		"../assets/walls/sandstone.bmp",
+		"../assets/walls/cobblestone_3.bmp");
+
+	set_level_billboards(&experiments, billboard_count,
+		"../assets/objects/health_kit.bmp", 11.5, 28.0, 0.0,
+		"../assets/objects/palm_tree.bmp", 16.5, 29.5, 0.0);
+
+	set_level_animations(&experiments, animation_count,
+		// "../assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,
+		"../assets/spritesheets/flying_carpet.bmp", 5, 10, 46, 25, 5.0, 2.0, 0.0,
+		"../assets/spritesheets/torch_2.bmp", 2, 3, 5, 12, 7.5, 12.5, 0.0);
+
+
+	memcpy(&current_level, &experiments, sizeof(Level));
+
+	// this is set after b/c this depends on fns that read from current_level
+	set_level_enemies(&current_level, enemy_count,
+		Dead, // state
+		1.5, 3.0, 6.0, 10.0, // dist_thresholds
+		5.0, 20.0, // hp_to_retreat, hp
+		4, 8, 10, 11, 4, // animation_seg_lengths
+
+		"../assets/spritesheets/enemy_spritesheet_test.bmp", 6, 7, 37, 12, // animation data
+		2.5, 3.5, 0.0, // billboard data
+
+		"../assets/audio/enemy_sound_test/idle.wav", // sound data
+		"../assets/audio/enemy_sound_test/chase_and_retreat.wav",
+		"../assets/audio/enemy_sound_test/attack.wav",
+		"../assets/audio/enemy_sound_test/attacked.wav",
+		"../assets/audio/enemy_sound_test/death.wav",
+
+		0.02 /* navigator speed */ );
+
+	set_level_generic_billboard_container(&current_level);
+}

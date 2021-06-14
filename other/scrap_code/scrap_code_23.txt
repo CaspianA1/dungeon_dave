@@ -1,0 +1,249 @@
+// Animation weapon = init_animation("assets/spritesheets/whip.bmp", 4, 6, 22, 25);
+// Animation weapon = init_animation("assets/spritesheets/other/shotgun.bmp", 4, 7, 28, 10);
+// Animation weapon = init_animation("assets/spritesheets/other/reload_pistol.bmp", 4, 7, 28, 12);
+// Animation weapon = init_animation("assets/spritesheets/other/tommy_gun.bmp", 4, 7, 25, 12);
+// Animation weapon = init_animation("assets/spritesheets/other/wolfenstein_pistol.bmp", 2, 3, 5, 5);
+
+/////
+
+for (int i = 0; i < renderable_count; i++) {
+	Renderable r;
+
+	// if (i < sprite_count)
+}
+
+/*
+for (int i = 0; i < renderable_count; i++) {
+	static Renderable r;
+
+	if (i < scount)
+		r.data.sprite = spr[i], r.is_sprite = 1;
+	else
+		r.data.animation = animations[i - scount], r.is_sprite = 0;
+}
+*/
+
+for (int i = 0; i < renderable_count; i++) {
+
+	/*
+	Renderable r = renderable[i];
+	if (r.is_sprite) printf("A sprite: %s\n", r.sprite.path);
+	else printf("An animation: %s\n", r.animation.spritesheet.path);
+	*/
+}
+
+/////
+
+for (int i = 0; i < renderable_count; i++) {
+	// Renderable r = {.is_sprite = i < sprite_count};
+	Renderable* r = renderable[i];
+	r -> is_sprite = i < sprite_count;
+
+	if (r -> is_sprite) {
+		printf("Is a sprite\n");
+		// memcpy(r -> sprite, &sprites[i], sizeof(Sprite));
+	}
+	else {
+		printf("Is an animation\n");
+		// memcpy(r -> animation, &animations[i - sprite_count], sizeof(Animation));
+	}
+
+	// renderable[i] = r;
+}
+
+/*
+for (int i = 0; i < renderable_count; i++) {
+	Renderable* r = renderable[i];
+	if (r -> is_sprite) printf("This is a sprite: %s\n", r -> sprite.path);
+	else printf("This is an animation: %s\n", r -> animation.spritesheet.path);
+}
+*/
+
+/////
+
+/*
+if (i < sprite_count) {
+	Sprite sprite = sprites[i];
+	DEBUG(sprite.path, s);
+	renderable[i].sprite = &sprite;
+}
+else {
+	Animation animation = animations[i - sprite_count];
+	DEBUG(animation.spritesheet.path, s);
+	renderable[i].animation = &animation;
+}
+*/
+
+/////
+
+# offset_pattern = r"\[.+ [+-] .+\]"
+# offset_pattern = r"\[([0-9]|.)+\]"
+
+/////
+
+# offset_pattern = r"\[([0-9]+|.+)\]"
+
+/////
+
+# r"\[(rbp|rsp)(.+)\]$" # r"\[(rbp|rsp).+\]$" # r"\[(rbp)|(rsp)\]"
+
+///// Working:
+
+offset_pattern = r"(.*)\[(rbp|rsp).*\].*"
+
+/////
+
+"""
+	if re.search(offset_pattern, row):
+		row = row.strip()
+
+		print("Row:", row)
+		numbers = re.findall(number_pattern, row)
+		print("Numbers: ", numbers)
+
+		# stack_offset_rows.append(row.strip())
+"""
+
+/////
+
+/*
+typedef struct {
+	SDL_Surface* surface;
+	SDL_Texture* texture;
+	const char* path;
+} Sprite;
+*/
+
+/*
+typedef struct {
+	SDL_Surface* surface;
+	SDL_Texture* texture;
+	VectorF pos;
+	double beta, dist_squared;
+	const char* path;
+} Sprite;
+
+typedef struct {
+	Sprite spritesheet;
+
+	const int
+		frames_per_row, frames_per_col,
+		sheet_w, sheet_h, frame_w, frame_h, frame_count;
+
+	const double secs_per_frame;
+	Uint32 last_frame_time;
+	int frame_ind;
+} Animation;
+*/
+
+// static Sprite *textured_walls, *sprites;
+
+/////
+
+/*
+const Sprite spritesheet = init_sprite(path);
+
+const int
+	sheet_w = spritesheet.surface -> w,
+	sheet_h = spritesheet.surface -> h;
+
+const Animation animation = {
+	spritesheet, frames_per_row, frames_per_col,
+	sheet_w, sheet_h,
+	sheet_w / frames_per_row, sheet_h / frames_per_col,
+	frame_count, 1.0 / fps, 0, 0
+};
+*/
+
+/*
+const Sprite spritesheet = init_sprite(path);
+
+const int
+	sheet_w = spritesheet.surface -> w,
+	sheet_h = spritesheet.surface -> h;
+*/
+
+/////
+
+for (int i = 0; i < billboard_count; i++) {
+	VectorI pos = sprite_pos(i);
+	printf("{%d, %d},\n", pos.x, pos.y);
+}
+
+/*
+const VectorI pos = sprite_pos(i);
+const VectorF delta = {pos.x - player.pos.x, pos.y - player.pos.y};
+*/
+
+const VectorI sprite_pos(const int sprite_abs_ind) {
+	const int sprite_rel_ind = sprite_abs_ind + wall_count + 1;
+	VectorI c = {-1};
+
+	for (int x = 0; x < map_width; x++) {
+		for (int y = 0; y < map_height; y++) {
+			if (map[y][x] == sprite_rel_ind) {
+				c.x	= x, c.y = y;
+				goto sprite_pos_end;
+			}
+		}
+	}
+	sprite_pos_end:
+	return c;
+}
+
+/*
+static const byte map[map_height][map_width] = {
+	{4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{4, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 10,0, 5, 0, 0, 0, 0, 2},
+	{4, 0, 5, 5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{4, 0, 5, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{4, 0, 5, 0, 18,5, 0, 5, 0, 0, 15,0, 16,0, 0, 0, 0, 0, 0, 2},
+	{4, 0, 5, 0, 0, 5, 0 ,5, 0, 0, 0, 0, 0, 0, 17,0, 0, 0, 0, 2},
+	{4, 0, 5, 5, 5, 5, 0, 5, 0, 0, 13,0, 14,0, 0, 0, 0, 0, 0, 2},
+	{4, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{4, 0, 19,5, 5, 5, 5, 5, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 2},
+	{4, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 2},
+	{4, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 2},
+	{4, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 0, 2},
+	{4, 0, 6, 0, 0, 0, 0, 0, 0, 0, 7, 7, 0, 0, 0, 0, 0, 0, 0, 2},
+	{4, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 3, 0, 0, 11,0, 2},
+	{4, 0, 6, 0, 0, 0, 0, 0, 0, 0, 7, 7, 0, 0, 0, 3, 0, 0, 0, 2},
+	{4, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,0, 2},
+	{4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2}
+};
+*/
+
+/////
+
+// #include "../audio_visual/overlay/dual_rendering.c"
+
+/////
+
+inlinable const int is_a_wall(const byte point) {
+	return point >= 1 && point <= wall_count;
+}
+
+/////
+
+
+	// kinematic_body -> v = kinematic_body -> max_v - (kinematic_body -> a * t * 4);
+	kinematic_body -> v = kinematic_body -> max_v - kinematic_body -> a * t;
+	if (kinematic_body -> v < 0) kinematic_body -> v = 0;
+}
+
+/*
+if (kinematic_body -> v > kinematic_body -> limit_v)
+	kinematic_body -> v = kinematic_body -> limit_v;
+
+else if (kinematic_body -> v < 0)
+	kinematic_body -> v = 0;
+*/
+
+DEBUG(kinematic_body -> v, lf);
+DEBUG(kinematic_body -> max_v, lf);
+DEBUG(kinematic_body -> limit_v, lf);
+
+/////

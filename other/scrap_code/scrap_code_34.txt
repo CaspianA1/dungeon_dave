@@ -1,0 +1,332 @@
+/*
+Uint32* beginning = get_pixbuf_pixel(screen_x, pace_y);
+for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
+	*(beginning) = surface_pixel;
+*/
+
+/*
+Uint32* beginning = get_pixbuf_pixel(screen_x, pace_y);
+memset(beginning, surface_pixel, settings.ray_column_width * sizeof(Uint32));
+*/
+
+/*
+for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
+	*get_pixbuf_pixel(x, pace_y) = surface_pixel;
+*/
+
+/////
+
+/*
+const double to_radians(const double degrees);
+const int close_to_whole(const double num);
+const int doubles_eq(const double a, const double b);
+void tick_delay(const Uint32 before);
+*/
+
+/////
+
+// return (mouse_state & SDL_BUTTON(SDL_BUTTON_LEFT)) ? AnimateWeapon : ProceedAsNormal;
+
+/////
+
+/*
+return (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+	? AnimateWeapon : ProceedAsNormal;
+*/
+
+/////
+
+// const Uint32 mouse_state = SDL_GetMouseState(&mouse_pos -> x, &mouse_pos -> y);
+
+/////
+
+/*
+if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)
+	return Exit;
+*/
+
+/////
+
+// SDL_FlushEvent(SDL_MOUSEBUTTONDOWN);
+
+/////
+
+
+	/*
+	draw_floor_or_ceil(player.pos, dir, wall.x, 0, ceil(wall.y), cos_beta,
+		player.pace.screen_offset, player.y_pitch, player.jump.height,
+		get_ceil_row, 1);
+	*/
+
+	/*
+	draw_floor_or_ceil(player.pos, dir, wall.x, wall.y + wall.h, settings.screen_height,
+		cos_beta, pace, player.y_pitch, p_height, get_floor_row, 0);
+	*/
+
+	draw_floor_or_ceil(player.pos, dir, wall.x, wall.y + wall.h, settings.screen_height,
+		cos_beta, player.pace.screen_offset, player.y_pitch,
+		player.jump.height, get_floor_row, 0);
+}
+
+inlinable void draw_floor_and_ceil(const Player player, const VectorF dir,
+	const SDL_FRect wall, const double cos_beta) {
+
+	draw_ceiling(player, dir, wall, cos_beta);
+	draw_floor(player, dir, wall, cos_beta);
+
+
+	/*
+	const double
+		pace = player.pace.screen_offset,
+		p_height = player.jump.height;
+
+	draw_floor_or_ceil(player.pos, dir, wall.x, 0, ceil(wall.y),
+		cos_beta, pace, player.y_pitch, p_height, get_ceil_row, 1);
+	*/
+
+	/*
+	draw_floor_or_ceil(player.pos, dir, wall.x, wall.y + wall.h, settings.screen_height,
+		cos_beta, pace, player.y_pitch, p_height, get_floor_row, 0);
+	*/
+
+/////
+
+inlinable void draw_floor_and_ceil(const Player player, const VectorF dir,
+	const SDL_FRect wall, const double cos_beta) {
+
+	draw_ceiling(player, dir, wall, cos_beta);
+	draw_floor(player, dir, wall, cos_beta);
+}
+
+/////
+
+/*
+const SDL_FRect top_side = {
+	screen_x, raised_wall.y,
+	settings.ray_column_width,last_raised_wall_bottom
+};
+
+SDL_SetRenderDrawColor(screen.renderer_3D, 0, 128, 0, SDL_ALPHA_OPAQUE);
+SDL_RenderFillRectF(screen.renderer_3D, &top_side);
+last_raised_wall_bottom = raised_wall.y;
+*/
+
+/////
+
+// if (*first_wall_hit && i - 1 == player.jump.height / settings.screen_height) {
+
+/////
+
+// make a second path of doubles for the middle of the hallway
+
+/////
+
+/*
+printf("{%lf, %lf}\n", nav.animation -> billboard.pos[0],
+	nav.animation -> billboard.pos[1]);
+*/
+
+/*
+printf("-\nfull height = %lf\npoint height = %lf\n",
+	player.jump.height, player.jump.height / settings.screen_height);
+*/
+
+/////
+
+/*
+int offset;
+
+if (doubles_eq(dir[0], 0)) printf("A\n");
+else if (doubles_eq(dir[1], 0)) printf("B\n");
+else printf("C\n");
+*/
+
+/////
+
+-msse2
+
+/////
+
+for (byte i = 1; i <= point_height; i++) {
+// for (byte i = 0; i < point_height; i++) {
+	SDL_FRect raised_wall = wall;
+	raised_wall.y -= wall_height * (i - 1);
+	// raised_wall.y -= wall_height * i;
+
+///// Some wall top code:
+
+/*
+const double
+	top_of_floor = (wall.y - wall_height * (i + 1)) + wall.h, // top of floor top
+	bottom_of_floor = wall.y; // bottom of wall top
+
+const double y_difference = bottom_of_floor - top_of_floor;
+DEBUG(y_difference, lf);
+if (y_difference <= 0.0) continue;
+
+const SDL_FRect top_side = {
+	screen_x, top_of_floor,
+	settings.ray_column_width, y_difference
+};
+
+SDL_SetRenderDrawColor(screen.renderer_3D, 0, 128, 0, SDL_ALPHA_OPAQUE);
+SDL_RenderFillRectF(screen.renderer_3D, &top_side);
+*/
+
+/////
+
+/*
+const double
+	scan_percentage = (double) screen_x / settings.screen_width,
+	turn_percentage = player_angle / two_pi,
+	wall_y_percentage = (raised_wall.y < 0 ? 0 : raised_wall.y)
+		/ settings.screen_height;
+
+DEBUG(wall_y_percentage, lf);
+
+const double skybox_column = scan_percentage * skybox.max_width;
+const double src_height_percentage = wall_y_percentage * skybox.max_height;
+
+const SDL_Rect src = {
+	skybox_column * turn_percentage, 0, 1, src_height_percentage
+};
+
+const SDL_FRect dest = {
+	screen_x, 0, settings.ray_column_width, settings.screen_height
+
+	// raised_wall.y
+};
+
+SDL_RenderCopyF(screen.renderer_3D, skybox.sprite.texture, &src, &dest);
+*/
+
+/////
+
+const double skybox_turn_offset = (player_angle / two_pi) * (skybox.max_width - 1);
+const double skybox_scan_percentage = (double) screen_x / settings.screen_width;
+const double combined_src_offset = skybox_turn_offset * skybox_scan_percentage;
+
+double dest_y_percentage = (wall.y + wall.h) / settings.screen_height;
+if (dest_y_percentage > 1) dest_y_percentage = 1;
+// const double src_height = skybox.max_height;
+DEBUG(dest_y_percentage, lf);
+
+const double src_height = skybox.max_height * dest_y_percentage;
+
+/////
+
+const double
+	turn_percent = (player_angle / two_pi),
+	scan_percent = (double) screen_x / settings.screen_width,
+	percent_of_y_shown = wall.y
+
+
+/*
+int col_ind = scan_percent * skybox
+
+assert()
+*/
+
+const SDL_Rect src = {
+	0, 0, 1, wall.y
+};
+
+const SDL_FRect dest = {
+	screen_x, 0, settings.ray_column_width,
+	wall.y
+};
+
+SDL_RenderCopyF(screen.renderer_3D, skybox.sprite.texture, &src, &dest);
+}
+
+///// This is a good template:
+
+void draw_skybox_scanline(Skybox skybox, const SDL_FRect wall, const double player_angle) {
+	const double
+		turn_percent = (player_angle / two_pi),
+		scan_percent = wall.x / settings.screen_width,
+		y_shown_percent = wall.y / settings.screen_height;
+
+	const double src_height_shown = y_shown_percent * skybox.max_height;
+	const double src_col_index = scan_percent * skybox.max_width;
+
+	const SDL_Rect src = {
+		src_col_index, 0, 1, src_height_shown
+	};
+
+	const SDL_FRect dest = {
+		wall.x, 0, settings.ray_column_width, wall.y
+	};
+
+	SDL_RenderCopyF(screen.renderer_3D, skybox.sprite.texture, &src, &dest);
+}
+
+/////
+
+/*
+SDL_Color pixel;
+SDL_GetRGB(surface_pixel, screen.pixel_format, &pixel.r, &pixel.g, &pixel.b);
+const double shade = calculate_shading_factor(settings.projection_distance / actual_dist);
+surface_pixel = SDL_MapRGB(screen.pixel_format, pixel.r * shade, pixel.g * shade, pixel.b * shade);
+*get_pixbuf_pixel(screen_x, pace_y) = surface_pixel;
+*/
+
+/////
+
+if (pace_y < 0 || pace_y >= settings.screen_height) {
+	printf("Skip\n");
+	continue;
+}
+
+/////
+
+typedef __m256d two_VectorF;
+
+/////
+
+// _mm_fmset1_pd
+// const VectorF2 slope_as_vec2 = VectorF2_memset(slopes);
+// VectorF2_memset;
+// _mm_set1_epi64;
+// _mm_set1_epi256;
+// _mm256_set1_pd;
+
+/////
+
+#include <xmmintrin.h>
+#include <immintrin.h>
+#include <x86intrin.h>
+
+/////
+
+#include <x86intrin.h>
+
+/////
+
+/*
+VectorF_twice hits;
+_mm256_fmadd_pd;
+*/
+
+/*
+const VectorF hit = VectorF_line_pos(pos, dir, actual_dist);
+-----
+inlinable const VectorF VectorF_line_pos(const VectorF p, const VectorF dir, const double m) {
+	const VectorF m_as_vector = VectorF_memset(m);
+	return VectorFF_add(VectorFF_mul(dir, m_as_vector), p);
+}
+*/	
+
+/////
+
+/*
+if (hit[0] <= 1 || hit[0] >= current_level.map_width - 1
+	|| hit[1] <= 1 || hit[1] >= current_level.map_height - 1)
+	continue;
+*/
+
+/////
+
+__m64 foo;
+
+/////

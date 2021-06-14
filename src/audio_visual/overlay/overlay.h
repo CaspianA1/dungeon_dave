@@ -1,0 +1,38 @@
+typedef struct {
+	SDL_Surface* surface;
+	SDL_Texture* texture;
+} Sprite;
+
+/////
+
+typedef struct {
+	Sprite sprite;
+	VectorF pos; // `height` here is a point height
+	double beta, dist, height;
+} Billboard;
+
+/////
+
+typedef struct {
+	Billboard billboard;
+
+	const int frames_per_row, frames_per_col, frame_w, frame_h, frame_count;
+
+	int frame_ind;
+	const double secs_per_frame;
+	double last_frame_time;
+} Animation;
+
+typedef struct {
+	Billboard billboard;
+	byte is_animated, is_enemy;
+	int animation_index;
+} GenericBillboard;
+
+/////
+
+typedef struct {
+	byte enabled;
+	Sprite sprite;
+	int max_width, max_height;
+} Skybox;

@@ -1,0 +1,235 @@
+/*
+SDL_CreateWindowAndRenderer(screen_width, screen_height,
+	SDL_RENDERER_ACCELERATED, &window_3D, &renderer_3D);
+SDL_SetWindowTitle(window_3D, "Dungeon Dave 3D");
+
+#ifdef MODE_2D
+SDL_CreateWindowAndRenderer(screen_width, screen_height,
+	SDL_RENDERER_ACCELERATED, &window_2D, &renderer_2D);
+SDL_SetWindowTitle(window_2D, "Dungeon Dave 2D");
+#endif
+*/
+
+SDL_DestroyWindow(window_3D);
+SDL_DestroyRenderer(renderer_3D);
+
+
+#ifdef MODE_2D
+SDL_DestroyWindow(window_2D);
+SDL_DestroyRenderer(renderer_2D);
+#endif
+
+free(z_buffer);
+
+SDL_Quit();
+
+/////
+
+void render_scanline(const double dist, const Sprite sprite, const int tex_coord, const SDL_Rect* pos) {
+	int shade = 1020 / dist; // (255 * 4) / dist
+	if (shade > 255) shade = 255;
+	SDL_SetTextureColorMod(sprite.texture, shade, shade, shade);
+
+	const SDL_Rect slice = {tex_coord, 0, 1, sprite.surface -> h};
+	SDL_RenderCopy(renderer_3D, sprite.texture, &slice, pos);
+}
+
+/////
+
+
+void draw_sprites(const Player player) {
+	Sprite sorted_sprites[sprite_count];
+	memcpy(sorted_sprites, sprites, sizeof(sorted_sprites));
+
+	const double rad_player_angle = to_radians(player.angle);
+
+	for (int i = 0; i < sprite_count; i++) {
+		Sprite* sprite = &sorted_sprites[i];
+
+		const Coord pos = sprite_pos(i);
+		const double dx = pos.x - player.pos.x, dy = pos.y - player.pos.y;
+		const double theta = wrap_angle(atan2f(dy, dx));
+
+		sprite -> theta = theta;
+		sprite -> gamma = wrap_angle(theta - rad_player_angle);
+
+		sprite -> dist = sqrt(dx * dx + dy * dy) * cos(wrap_angle(rad_player_angle - theta));
+	}
+
+	qsort(sorted_sprites, sprite_count, sizeof(Sprite), compare_distances);
+
+	for (int i = 0; i < sprite_count; i++) {
+		const Sprite sprite = sorted_sprites[i];
+
+		if (sprite.dist <= 0 ||
+			doubles_eq(sprite.gamma, half_pi) || doubles_eq(sprite.gamma, three_pi_over_two))
+			continue;
+
+		const double center_offset = tan(sprite.gamma) * projection_distance;
+		const int screen_center_x = half_screen_width + center_offset;
+		const int size = fabs(projection_distance / sprite.dist);
+		const int half_size = size / 2;
+		const int screen_start_x = screen_center_x - half_size, screen_end_x = screen_center_x + half_size;
+
+		for (double screen_row = screen_start_x; screen_row < screen_end_x; screen_row += step_x) {
+			if (screen_row < 0 || screen_row > screen_width || z_buffer[(int) screen_row] < sprite.dist)
+				continue;
+
+			const int tex_ind = ((screen_row - screen_start_x) / size) * sprite.surface -> w;
+
+			const SDL_Rect pos = {
+				round(screen_row),
+				half_screen_height - half_size + player.pace.height,
+				step_x + 1,
+				size
+			};
+
+			render_scanline(sprite.dist, sprite, tex_ind, &pos);
+		}
+	}
+}
+
+/////
+
+// #define SET_COLOR(rend, r, g, b) SDL_SetRenderDrawColor(rend, r, g, b, SDL_ALPHA_OPAQUE)
+
+/////
+
+/*
+SET_COLOR(renderer_3D, 0, 0, 0);
+SDL_RenderClear(renderer_3D);
+*/
+
+/*
+raycast(player);
+SDL_RenderPresent(renderer_3D);
+SDL_UpdateWindowSurface(window_3D);
+
+#ifdef MODE_2D
+render_2D_map(player);
+#endif
+
+SET_COLOR(renderer_3D, 0, 0, 0);
+*/
+
+/////
+
+/*
+// a small, contained test for the shape buffer
+SDL_Rect rect = {20, 20, 100, 100}; // first, try direct draw, then through tex
+SDL_SetRenderDrawColor(screen.renderer_3D, 255, 0, 0, SDL_ALPHA_OPAQUE);
+SDL_RenderFillRect(screen.renderer_3D, &rect);
+SDL_RenderDrawRect(screen.renderer_3D, &rect);
+SDL_RenderPresent(screen.renderer_3D);
+SDL_UpdateWindowSurface(screen.window_3D);
+*/
+
+SDL_Renderer* renderer = screen.renderer_3D;
+
+SDL_SetRenderTarget(renderer, screen.shape_buffer);
+SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+
+SDL_Rect rect = {20, 20, 100, 100};
+SDL_RenderFillRect(renderer, &rect);
+SDL_RenderDrawRect(renderer, &rect);
+
+SDL_SetRenderTarget(renderer, NULL);
+SDL_RenderCopy(renderer, screen.shape_buffer, NULL, NULL);
+
+SDL_RenderPresent(renderer);
+SDL_UpdateWindowSurface(screen.window_3D);
+
+/*
+prepare_for_drawing();
+#ifdef MODE_2D
+render_2D_map(player);
+#endif
+raycast(player);
+refresh();
+*/
+
+/////
+
+void draw_rectangle(int r, int g, int b) {
+	/*
+	SDL_SetRenderStream;
+	SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+	SDL_Rect rect = {20, 20, 40, 40};
+	SDL_RenderDrawRect(renderer, &rect);	
+	SDL_RenderFillRect(renderer, &rect);
+	*/
+}
+
+/*
+don't need to clear texture for raycaster; all good
+
+needed texture operations:
+- plot a pixel
+- draw a fixed-color rectangle
+- draw a scanline of a texture
+*/
+
+/////
+
+
+/*
+SDL_Rect pixel, floor_pos;
+pixel.w = 1;
+pixel.h = 1;
+floor_pos.x = screen_x;
+floor_pos.w = 1;
+floor_pos.h = 1;
+*/
+
+
+/*
+pixel.x = texture_x;
+pixel.y = texture_y;
+floor_pos.y = screen_height - y;
+*/
+
+// draw_pixel(texture_x, texture_y)
+
+// this is the slowest point
+/*
+SDL_RenderCopy(renderer_3D, sprite.texture, &pixel, &floor_pos);
+floor_pos.y = y;
+SDL_RenderCopy(renderer_3D, sprite.texture, &pixel, &floor_pos);
+*/
+// SDL_RenderDrawPoint(renderer_3D, screen_x, y);
+
+/////
+
+/*
+SDL_SetRenderTarget(screen.renderer_3D, screen.shape_buffer);
+SDL_RenderCopy(screen.renderer_3D, screen.pixel_buffer, NULL, NULL); // damn, this overwrites it
+
+SDL_SetRenderTarget(screen.renderer_3D, NULL);
+SDL_RenderCopy(screen.renderer_3D, screen.shape_buffer, NULL, NULL);
+*/
+
+/////
+
+
+if (tex_x > 64) tex_x = 64;
+if (tex_y > 64) tex_y = 64;
+*/
+
+int tex_x = 20, tex_y = 10;
+// Uint32 pixel = getpixel(sprite.surface, tex_y, tex_x);
+
+/*
+Uint8* pixel = (Uint8*) pixels + tex_y * pitch + tex_x * bytes_per_pix;
+Uint32* row = ((Uint32*) ((Uint8*) screen.pixels + tex_y * screen.pitch)) + tex_x;
+int color = 0xFF000000 | (row[1] << 16) | (row[2] << 8) | row[3];
+*row = color;
+*/
+
+// SDL_PIXELFORMAT_ARGB8888
+
+/*
+draw_pixel(screen_x, y, r, g, b);
+draw_pixel(screen_x, screen_height - y, r, g, b);
+*/
+
+/////

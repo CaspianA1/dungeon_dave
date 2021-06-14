@@ -1,0 +1,404 @@
+// if (turned) {
+if (1) {
+	VectorF copy_dir = *dir, copy_plane = *plane;
+
+	const double
+		old_dir_x = copy_dir[0],
+		old_plane_x = copy_plane[0];
+		// rad_theta = to_radians(*theta);
+
+	// const double delta_theta = rad_theta - to_radians(prev_theta);
+	// const double cos_delta_theta = cos(delta_theta), sin_delta_theta = sin(delta_theta);
+	const double cos_delta_theta = cos(0.05), sin_delta_theta = sin(0.05);
+
+	// if (*theta < prev_theta) { // left
+	if (keys[SDL_SCANCODE_LEFT]) {
+		copy_dir[0] = copy_dir[0] * cos_delta_theta - copy_dir[1] * sin_delta_theta;
+		copy_dir[1] = old_dir_x * sin_delta_theta + copy_dir[1] * cos_delta_theta;
+		copy_plane[0] = copy_plane[0] * cos_delta_theta - copy_plane[1] * sin_delta_theta;
+		copy_plane[1] = old_plane_x * sin_delta_theta + copy_plane[1] * cos_delta_theta;
+	}
+
+	// else {
+	if (keys[SDL_SCANCODE_RIGHT]) {
+		copy_dir[0] = copy_dir[0] * cos_delta_theta + copy_dir[1] * sin_delta_theta;
+		copy_dir[1] = old_dir_x * -sin_delta_theta + copy_dir[1] * cos_delta_theta;
+		copy_plane[0] = copy_plane[0] * cos_delta_theta + copy_plane[1] * sin_delta_theta;
+		copy_plane[1] = old_plane_x * -sin_delta_theta + copy_plane[1] * cos_delta_theta;
+	}
+
+	printf("dir = {%lf, %lf}\n", (*dir)[0], (*dir)[1]);
+
+	*dir = copy_dir;
+	*plane = copy_plane;
+
+	// printf("For dir = {%lf, %lf}, plane = {%lf, %lf}")
+
+	/*
+	(*dir)[0] = cos(rad_theta);
+	(*dir)[1] = sin(rad_theta);
+	*/
+
+/////
+
+// const byte turned = !doubles_eq(*theta, prev_theta);
+
+/////
+
+DEBUG(*theta, lf);
+DEBUG_VECF(dir);
+
+VectorF foo = {cos(to_radians(*theta)), sin(to_radians(*theta))};
+DEBUG_VECF(foo);
+
+/////
+
+/*
+pos = {22.0, 11.5},
+dir = {-1.0, 0.0},
+plane = {0.0, 0.66};
+*/
+
+/////
+
+// DEBUG(num, lf);
+// return num < 0.01 || num > 0.99;
+// return num < 0.02 || (num > 0.98 && num < 1.02);
+// return num == 0 || num == 1;
+
+return num < 0.01 || (num < 1.0 && num > 0.99);
+
+/////
+
+void draw_textured_wall(const CastData cast_data, const VectorF dir,
+	const SDL_FRect wall, const int slice_h, const double shade_h) {
+
+	// printf("hit: {%f, %f}\n", cast_data.hit[0], cast_data.hit[1]);
+
+	const Sprite wall_sprite = current_level.textured_walls[cast_data.point - 1];
+	const int max_offset = wall_sprite.surface -> w - 1;
+
+	const VectorF diff = {
+		cast_data.hit[0] - floor(cast_data.hit[0]),
+		cast_data.hit[1] - floor(cast_data.hit[1])
+	};
+
+	if (cast_data.side) {
+
+	}
+
+	/*
+	const VectorF diff = {
+		cast_data.hit[0] - floor(cast_data.hit[0]),
+		cast_data.hit[1] - floor(cast_data.hit[1])
+	};
+
+	int offset;
+
+	if (close_to_whole(diff[0])) {
+		const int y_offset = (int) (diff[1] * (max_offset + 2));
+		offset = (dir[0] < 0.0) ? max_offset - y_offset : y_offset;
+	}
+	else {
+		const int x_offset = (int) (diff[0] * (max_offset + 2)
+		offset = (dir[1] > 0.0) ? max_offset - x_offset : x_offset;
+	}
+	*/
+
+	// draw_scanline(wall_sprite, offset, slice_h, shade_h, &wall);
+
+/////
+
+/*
+const VectorF diff = {
+	cast_data.hit[0] - floor(cast_data.hit[0]),
+	cast_data.hit[1] - floor(cast_data.hit[1])
+};
+
+
+
+if (close_to_whole(diff[0])) {
+	const int y_offset = (int) (diff[1] * (max_offset + 2));
+	offset = (dir[0] < 0.0) ? max_offset - y_offset : y_offset;
+}
+else {
+	const int x_offset = (int) (diff[0] * (max_offset + 2)
+	offset = (dir[1] > 0.0) ? max_offset - x_offset : x_offset;
+}
+*/
+
+/////
+
+/* new:
+_VectorF2_line_pos:
+	push	rbp
+	mov	rbp, rsp
+	vpermpd	ymm2, ymm2, 80
+	vinsertf128	ymm1, ymm1, xmm1, 1
+	vinsertf128	ymm0, ymm0, xmm0, 1
+	vfmadd231pd	ymm0, ymm2, ymm1
+	pop	rbp
+	ret
+*/
+
+/* old:
+
+_VectorF2_line_pos:
+	push	rbp
+	mov	rbp, rsp
+	vmovddup	xmm3, xmm2
+	vfmadd213pd	xmm3, xmm1, xmm0
+	vpermilpd	xmm2, xmm2, 3
+	vfmadd213pd	xmm2, xmm1, xmm0
+	vinsertf128	ymm0, ymm3, xmm2, 1
+	pop	rbp
+	ret
+*/
+
+/* way old:
+_VectorF2_line_pos:
+	push	rbp
+	mov	rbp, rsp
+	vpermpd	ymm2, ymm2, 80
+	vinsertf128	ymm1, ymm1, xmm1, 1
+	vinsertf128	ymm0, ymm0, xmm0, 1
+	vfmadd231pd	ymm0, ymm2, ymm1
+	pop	rbp
+	ret
+*/
+
+// should give many line positions back
+VectorF2 VectorF2_line_pos(const VectorF pos,
+	const VectorF dir, const VectorF slopes) {
+
+	/*
+	const VectorF2
+		slopes_as_vec2 = {slopes[0], slopes[0], slopes[1], slopes[1]},
+		dir_as_vec2 = {dir[0], dir[1], dir[0], dir[1]},
+		pos_as_vec2 = {pos[0], pos[1], pos[0], pos[1]};
+
+	return VectorFF2_add(VectorFF2_mul(dir_as_vec2, slopes_as_vec2), pos_as_vec2);
+	*/
+
+	/*
+	if (keys[SDL_SCANCODE_C]) {
+		const VectorF2
+			slopes_as_vec2 = {slopes[0], slopes[0], slopes[1], slopes[1]},
+			dir_as_vec2 = {dir[0], dir[1], dir[0], dir[1]},
+			pos_as_vec2 = {pos[0], pos[1], pos[0], pos[1]};
+
+		return VectorFF2_add(VectorFF2_mul(dir_as_vec2, slopes_as_vec2), pos_as_vec2);
+	}
+	else {
+		const VectorF
+			first = VectorF_line_pos(pos, dir, slopes[0]),
+			second = VectorF_line_pos(pos, dir, slopes[1]);
+
+		const VectorF2 result = {
+			first[0], first[1], second[0], second[1]
+		};
+
+		return result;
+	}
+	*/
+
+	/*
+	const VectorF
+		first = VectorF_line_pos(pos, dir, slopes[0]),
+		second = VectorF_line_pos(pos, dir, slopes[1]);
+
+	const VectorF2 result = {
+		first[0], first[1], second[0], second[1]
+	};
+
+	return result;
+	*/
+
+	// for slopes {1.2, 2.2}, create {1.2, 2.2, 1.2, 2.2}
+
+	VectorF2 slope_as_vec2;
+	slope_as_vec2[0] = slopes[0];
+	slope_as_vec2[1] = slopes[0];
+	slope_as_vec2[2] = slopes[1];
+	slope_as_vec2[3] = slopes[1];
+
+	VectorF2 dir_as_vec2;
+	dir_as_vec2[0] = dir[0];
+	dir_as_vec2[1] = dir[1];
+	dir_as_vec2[2] = dir[0];
+	dir_as_vec2[3] = dir[1];
+
+	VectorF2 pos_as_vec2;
+	pos_as_vec2[0] = pos[0];
+	pos_as_vec2[1] = pos[1];
+	pos_as_vec2[2] = pos[0];
+	pos_as_vec2[3] = pos[1];
+
+	return VectorFF2_add(VectorFF2_mul(dir_as_vec2, slope_as_vec2), pos_as_vec2);
+}
+
+/////
+
+	/*
+	surface_pixels[0] = shade_ARGB_pixel(surface_pixels[0], actual_dists[0]);
+	surface_pixels[1] = shade_ARGB_pixel(surface_pixels[1], actual_dists[1]);
+	*/
+
+	int pace_y_vals[2] = {y + pace, next_y + pace};
+	if (pace_y_vals[1] >= settings.screen_height)
+		pace_y_vals[1] = settings.screen_height - 1;
+
+	Uint32
+		*dest_1 = get_pixbuf_pixel(screen_x, pace_y_vals[0]),
+		*dest_2 = get_pixbuf_pixel(screen_x, pace_y_vals[1]);
+
+	// for (int x = screen_x; x < screen_x + settings.ray_column_width; x++) {
+	for (int offset_x = 0; offset_x < settings.ray_column_width; offset_x++) {
+		*(dest_1 + offset_x) = surface_pixels[0];
+		*(dest_2 + offset_x) = surface_pixels[1];
+
+		/*
+		*get_pixbuf_pixel(x, pace_y_vals[0]) = surface_pixels[0];
+		*get_pixbuf_pixel(x, pace_y_vals[1]) = surface_pixels[1];
+		*/
+	}
+}
+
+/////
+
+// bottleneck
+Uint32 surface_pixels[2] = {
+	get_surface_pixel(surfaces[0] -> pixels, surfaces[0] -> pitch,
+		surface_offsets[0].x, surface_offsets[0].y),
+
+	get_surface_pixel(surfaces[1] -> pixels, surfaces[1] -> pitch,
+		surface_offsets[1].x, surface_offsets[1].y)
+};
+
+int pace_y_vals[2] = {y + pace, next_y + pace};
+if (pace_y_vals[1] >= settings.screen_height)
+	pace_y_vals[1] = settings.screen_height - 1;
+
+Uint32* dest = get_pixbuf_pixel(screen_x, pace_y_vals[0]);
+
+
+*get_pixbuf_pixel(screen_x, y + pace) =
+	shade_ARGB_pixel(surface_pixels[0], actual_dists[0]);
+*(dest + 1) = shade_ARGB_pixel(surface_pixels[1], actual_dists[1]);
+
+/*
+#ifdef FULL_QUALITY
+
+get_pixbuf_pixel(screen_x, pace_y_vals[0])
+#else
+
+#endif
+*/
+
+/*
+surface_pixels[0] = shade_ARGB_pixel(surface_pixels[0], actual_dists[0]);
+surface_pixels[1] = shade_ARGB_pixel(surface_pixels[1], actual_dists[1]);
+
+Uint32
+	*dest_1 = get_pixbuf_pixel(screen_x, pace_y_vals[0]),
+	*dest_2 = get_pixbuf_pixel(screen_x, pace_y_vals[1]);
+
+for (int offset_x = 0; offset_x < settings.ray_column_width; offset_x++) {
+	*(dest_1 + offset_x) = surface_pixels[0];
+	*(dest_2 + offset_x) = surface_pixels[1];
+}
+*/
+
+/////
+
+/*
+#ifdef FULL_QUALITY
+
+get_pixbuf_pixel(screen_x, pace_y_vals[0])
+#else
+
+#endif
+*/
+
+/*
+surface_pixels[0] = shade_ARGB_pixel(surface_pixels[0], actual_dists[0]);
+surface_pixels[1] = shade_ARGB_pixel(surface_pixels[1], actual_dists[1]);
+
+Uint32
+	*dest_1 = get_pixbuf_pixel(screen_x, pace_y_vals[0]),
+	*dest_2 = get_pixbuf_pixel(screen_x, pace_y_vals[1]);
+
+for (int offset_x = 0; offset_x < settings.ray_column_width; offset_x++) {
+	*(dest_1 + offset_x) = surface_pixels[0];
+	*(dest_2 + offset_x) = surface_pixels[1];
+}
+*/
+
+/////
+
+
+void *__wrap_malloc(size_t size)
+{
+    void *ptr = malloc(size);
+    printf("malloc(%d) = %p\n", size, ptr);
+    return ptr;
+}
+
+/////
+
+unsigned
+	path_queue_mallocs = 0,
+
+	init_path_mallocs = 0,
+	copy_path_mallocs = 0,
+
+	init_path_queue_mallocs = 0,
+
+	navigator_frees = 0,
+	bfs_frees = 0;
+
+/////
+
+printf("%s\n---\n", leak_status);
+
+printf("Navigator status:\n");
+DEBUG(path_queue_mallocs, u);
+DEBUG(init_path_mallocs, u);
+DEBUG(copy_path_mallocs, u);
+DEBUG(init_path_queue_mallocs, u);
+DEBUG(navigator_frees, u);
+DEBUG(bfs_frees, u);
+printf("total_bfs_mallocs = %u\n",
+	 path_queue_mallocs + init_path_mallocs + copy_path_mallocs
+	+ init_path_queue_mallocs);
+printf("---\n");
+
+/////
+
+void** free_pool;
+int pool_len = 0;
+
+void add_to_pool(void* ptr) {
+	free_pool = realloc(free_pool, ++pool_len * sizeof(void*));
+	free_pool[pool_len - 1] = ptr;
+}
+
+byte already_in_pool(void* ptr) {
+	int count = 0;
+	for (int i = 0; i < pool_len; i++) {
+		if (free_pool[i] == ptr) count++;
+
+		if (count == 2) {
+			printf("Error time: %p was freed twice\n", ptr);
+		}
+	}
+	return count != 1;
+}
+
+/////
+
+add_to_pool(ptr);
+assert(!already_in_pool(ptr));
+if (already_in_pool(ptr)) printf("Twice\n");
+
+/////

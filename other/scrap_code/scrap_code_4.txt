@@ -1,0 +1,333 @@
+if (hit.start != -1) {
+	// printf("hit start, hit stop: %d, %d\n", hit.start, hit.stop);
+
+	int y = screen_height / 2 + scale / 2 - sprite.scale.h;
+	SDL_Rect crop = {0, 0, sprite.scale.w, sprite.scale.h};
+	// SDL_Rect pos = {hit.start, y, scale, scale};
+	SDL_Rect pos = {hit.start, screen_height / 2, hit.stop / scale, scale};
+
+	// printf("y - scale: %f\n", y - scale);
+
+	/*
+	printf("start, stop, diff: %d, %d, %d\n", hit.start, hit.stop, hit.stop - hit.start);
+	printf("crop: %d, %d, %d, %d\n", crop.x, crop.y, crop.w, crop.h);
+	*/
+
+	if (hit.start == 0) {
+		/*
+		float a = (float) scale / (hit.stop - hit.start);
+		crop.x += a; // what does `a` need to be?
+		*/
+	}
+
+	SDL_RenderCopy(renderer_3D, sprite.texture, &crop, &pos);
+}
+
+/////
+
+// float scale = screen_height / avg_dists[i];
+
+/////
+
+void draw_sprites(Player player, Sprite* sprites, SpriteHit* hits) {
+	float avg_dists[sprite_count];
+
+	for (int i = 0; i < sprite_count; i++) {
+		SpriteHit hit = hits[i];
+		if (hit.dist_sum != -1)
+			avg_dists[i] = hit.dist_sum / hit.hit_count;
+	}
+
+	qsort(avg_dists, sprite_count, sizeof(float), comparator);
+
+	for (int i = 0; i < sprite_count; i++) {
+		Sprite sprite = sprites[i];
+		SpriteHit hit = hits[i];
+		int wall_height = screen_height / avg_dists[i];
+
+		/*
+		SDL_Rect column = {
+			hit.start,
+			(screen_height / 2 - wall_height / 2) + player.pace.height,
+			hit.stop,
+			wall_height
+		};
+		*/
+
+		printf("hit started at %d and ended at %d\n", hit.start, hit.end);
+
+		/*
+		if (hit.start != -1)
+			SDL_RenderCopy(renderer_3D, sprite.texture, NULL, NULL);
+		*/
+	}
+
+}
+
+/////
+
+/*
+https://twobithistory.org/2019/11/06/doom-bsp.html
+only checking the grid lines?
+*/
+
+/////
+
+	// the width must equal the height.
+
+	float range = hit.stop - hit.start;
+	float step_a = range / across_and_down;
+	printf("step_a = %f\n", step_a);
+
+	float a = 0;
+	for (int x = hit.start; x < hit.stop; x++) {
+
+		SDL_Rect column = {
+			x,
+			(screen_height / 2 - across_and_down / 2) + player.pace.height,
+			step_x + 1,
+			across_and_down
+		},
+
+		slice = {a, 0, 1, sprite.scale.h};
+
+		SDL_RenderCopy(renderer_3D, sprite.texture, &slice, &column);
+
+		a++;
+
+		/*
+		if (a < 64)
+			a += step_a;
+		*/
+	}
+	printf("final a: %f\n", a);
+}
+
+/////
+
+/*
+for (int x = 0; x < sprite.scale.w; x++) {
+
+	SDL_Rect column =
+		{x + hit.start, (screen_height / 2 - across_and_down / 2) + player.pace.height,
+		step_x + 1, across_and_down};
+
+	SDL_Rect slice = {x, 0, 1, sprite.scale.h};
+
+	SDL_RenderCopy(renderer_3D, sprite.texture, &slice, &column);
+}
+*/
+
+/////
+
+for (int i = 0; i < sprite_count; i++) {
+	SpriteHit hit = hits[i];
+	if (hit.start != -1) {
+		Sprite sprite = sprites[i];
+		int across_and_down = screen_height / avg_dists[i],
+			range = (hit.stop - hit.start) * across_and_down;
+
+		printf("range = %d\n", range);
+		float steps = (float) sprite.scale.w / range;
+		printf("steps = %f\n", steps);
+		// steps * range is 64
+
+		float index = 0;
+		for (int screen_x = hit.start; screen_x < hit.stop; screen_x++) {
+			printf("index = %d\n", (int) index);
+
+			SDL_Rect column = {
+				screen_x,
+				(screen_height / 2 - across_and_down / 2) + player.pace.height,
+				step_x + 1,
+				across_and_down
+			}, slice = {index, 0, 1, sprite.scale.h};
+
+			SDL_RenderCopy(renderer_3D, sprite.texture, &slice, &column);
+			index += steps;
+		}
+	}
+}
+
+/////
+
+/*
+for (int screen_x = hit.start; screen_x < hit.stop; screen_x++) {
+	SDL_Rect column = {
+		screen_x,
+		(screen_height / 2 - across_and_down / 2) + player.pace.height,
+		step_x + 1,
+		across_and_down
+	}, slice = {range % x, 0, 1, sprite.scale.h};
+
+	SDL_RenderCopy(renderer_3D, sprite.texture, &slice, &column);
+	x++;
+}
+*/
+
+	for (int i = 0; i < sprite_count; i++) {
+		SpriteHit hit = hits[i];
+		if (hit.start != -1) {
+			Sprite sprite = sprites[i];
+			int across_and_down = screen_height / avg_dists[i],
+				sprite_width = (hit.stop - hit.start);
+
+			printf("the width is %d\n", sprite_width);
+
+			SDL_Rect crop = {0, 0, 64, 64};
+			int y = (screen_height / 2 - across_and_down / 2) + player.pace.height;
+			SDL_Rect move_to = {hit.start, y, across_and_down, across_and_down};
+
+			SDL_RenderCopy(renderer_3D, sprite.texture, &crop, &move_to);
+		}
+	}
+}
+
+/////
+
+// do fancy numbering for sprite column index
+
+/////
+
+void draw_sprites(Player player, Sprite* sprites, SpriteHit* hits) {
+	float avg_dists[sprite_count];
+
+	for (int i = 0; i < sprite_count; i++) {
+		SpriteHit hit = hits[i];
+		if (hit.dist_sum != -1)
+			avg_dists[i] = hit.dist_sum / hit.hit_count;
+	}
+
+	qsort(avg_dists, sprite_count, sizeof(float), comparator);
+
+
+
+	for (int i = 0; i < sprite_count; i++) {
+		SpriteHit hit = hits[i];
+		if (hit.start != -1) {
+			printf("i started hitting at %d and ended at %d.\n", hit.start, hit.stop);
+
+			Sprite sprite = sprites[i];
+			int across_and_down = screen_height / avg_dists[i],
+				hit_range = (hit.stop - hit.start);
+
+			SDL_Rect crop = {0, 0, 64, 64}; // some parts need to be obscured
+			int y = (screen_height / 2 - across_and_down / 2) + player.pace.height;
+			SDL_Rect move_to = {hit.start, y, across_and_down, across_and_down};
+
+			SDL_RenderCopy(renderer_3D, sprite.texture, &crop, &move_to);
+		}
+	}
+}
+
+typedef struct {
+	double dist_sum;
+	int hit_count, start, stop;
+} SpriteHit;
+
+SpriteHit* hit = &hits[point - wall_count - 1];
+hit -> hit_count++;
+hit -> dist_sum += adjusted_dist;
+
+if (hit -> start == -1) hit -> start = screen_x;
+else hit -> stop = screen_x;
+
+/////
+
+
+/*
+SpriteHit hits[sprite_count];
+for (int i = 0; i < sprite_count; i++) {
+	SpriteHit hit = {-1, 0, -1, 0};
+	hits[i] = hit;
+}
+*/
+
+// Collision z_buffer[]
+
+/////
+
+void render_char_sprite(Sprite* sprite, SDL_Rect* cropped,
+		float dist_wall, float vline_x, float width_to_fov) {
+
+	float scaler = sprite_scale_factor / dist_wall;
+
+	float new_width = (float) sprite -> scale.w * scaler,
+		 new_height = (float) sprite -> scale.h * scaler;
+
+	float sprite_x = vline_x - new_width;
+
+	if (sprite_x < 0 && vline_x < width_to_fov)
+		return;
+
+	SDL_Rect scaled =
+		{sprite_x, sprite -> scale.y,
+		new_width, new_height};
+
+	SDL_RenderCopy(renderer_3D, sprite -> texture, cropped, &scaled);
+}
+
+/////
+
+/*
+int sprite_hits[sprite_count] = {0};
+double sprite_distances[sprite_count] = {0};
+
+for (int i = 0; i < actual_hits; i++) {
+	Collision c = z_buffer[i];
+	int i = c.sprite_index;
+	if (i != -1) sprite_distances[i] += c.distance, sprite_hits[i]++;
+}
+
+for (int i = 0; i < sprite_count; i++) {
+	if (sprite_distances[i] != 0)
+		sprite_distances[i] /= sprite_hits[i];
+}
+
+qsort(sprite_distances, sprite_count, sizeof(double), comparator);
+//////////
+
+for (int i = 0; i < sprite_count; i++) {
+	float dist = sprite_distances[i];
+	if (dist != 0) {
+		printf("Operating on sprite #%d\n", i + 1);
+		Sprite sprite = sprites[i];
+		SDL_RenderCopy(renderer_3D, sprite.texture, NULL, NULL);
+	}
+}
+*/
+
+/////
+
+/*
+int sprite_ind = c.sprite_index;
+if (sprite_ind != -1) {
+	Sprite sprite = sprites[sprite_ind];
+	if (!contains(*unique_sprites, num_unique, sprite)) {
+		unique_sprites = realloc(unique_sprites, ++num_unique * sizeof(Sprite));
+		unique_sprites[num_unique - 1] = &sprites[sprite_ind];
+	}
+}
+*/
+
+/////
+
+// const SDL_Rect scale;
+
+// {surface, texture, {0, screen_height / 2, surface -> w, surface -> h}, path};
+
+/////
+
+int pos = new_x * width_ratio;
+if (hit -> begin_x == -1) hit -> begin_x = pos;
+else hit -> end_x = pos;
+
+/////
+
+for (int i = 0; i < cast_hits; i++) {
+	Collision* collision = &z_buffer[i];
+	collision -> sprite_index = -1;
+	collision -> begin_x = -1;
+}
+
+/////

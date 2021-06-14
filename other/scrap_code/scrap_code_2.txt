@@ -1,0 +1,228 @@
+/*
+Sprite sprites[sprite_count] = {
+	load_sprite("assets/carrot.bmp"),
+	load_sprite("assets/bogo.bmp"),
+	load_sprite("assets/robot.bmp")
+};
+*/
+
+/////
+
+/*
+int height = (0.5 * screen_height) / dist_wall;
+printf("The height is %d\n", height);
+// int upper_spacing = log(dist_wall * 15) * 20;
+*/
+
+// int upper_spacing = dist_wall * 1.2;
+// int upper_spacing = log(dist_wall * 15) * 20;
+int upper_spacing = dist_wall;
+
+int a = screen_height - 2 * upper_spacing;
+if (a < 0)
+	break;
+/*
+	upper_spacing = screen_height / 2,
+	a = 2;
+*/
+
+/////
+
+int wall_height = (screen_height / 2) / dist_wall;
+int spacing = (screen_height - wall_height) / 2;
+/*
+SET_COLOR(renderer_3D, 1, 1, 1);
+SDL_RenderDrawLine(renderer_3D,
+	vline_x, spacing, vline_x, screen_height - spacing);
+break;
+// SDL_Rect vscale = {vline_x, spacing, width_fov_ratio + 1, screen_height - spacing * 2};
+*/
+
+/*
+int center_y = screen_height / 2;
+SDL_Rect vscale = {
+	vline_x,
+	center_y - dist_wall,
+	width_fov_ratio + 1,
+	dist_wall * 2
+};
+*/
+
+/////
+
+/*
+float part_1 = screen_height / dist_wall;
+printf("part_1 = %f\n", part_1);
+// float upper_spacing = part_1 + WALL_HEIGHT;
+float upper_spacing = (dist_wall + WALL_HEIGHT) / 2;
+printf("upper_spacing = %f\n", upper_spacing);
+
+SDL_Rect vscale = {
+	vline_x, upper_spacing, width_fov_ratio + 1, screen_height - 2 * upper_spacing
+};
+*/
+
+/////
+
+// #define FOV 90
+// #define DARKENING 1.8
+// #define SPRITE_SCALE_FACTOR 100.0
+// #define MOVE_SPEED_DEC 0.08
+// #define ANGLE_TURN 2
+// #define MAX_RAY_LEN 400 // not used
+// #define RAY_THETA_STEP 0.4
+// #define RAY_DIST_STEP 0.8
+// #define STD_FPS 20
+
+/////
+
+/*
+int wall_height = screen_height * 64 / dist_wall;
+printf("dist_wall = %d, wall_height = %d\n", (int) dist_wall, wall_height);
+int a = screen_height - wall_height / 2;
+SDL_Rect vslice = {coord % wall.scale.w, 0, 1, wall.scale.h},
+vscale = {vline_x, a, width_to_fov + 1, screen_height - 2 * a};
+SDL_RenderCopy(renderer_3D, wall.texture, &vslice, &vscale);
+*/
+
+/////
+void draw_rectangle(SDL_Rect rectangle, int r, int g, int b) {
+	SET_COLOR(renderer_3D, r, g, b);
+	SDL_RenderFillRect(renderer_3D, &rectangle);
+	SDL_RenderDrawRect(renderer_3D, &rectangle);
+}
+
+void draw_colored_wall(int map_point, int width_fov_ratio,
+						float dist_wall, float vline_x) {
+	int r, g, b;
+	switch (map_point) {
+		case 1: r = 255, g = 255, b = 0; break;
+		case 2: r = 0, g = 128, b = 128; break;
+		case 3: r = 255, g = 165, b = 0; break;
+		case 4: r = 255, g = 0, b = 0; break;
+	}
+
+	float color_decr = dist_wall / darkening;
+	shade(&r, color_decr);
+	shade(&g, color_decr);
+	shade(&b, color_decr);
+
+	SDL_Rect vline = {
+		vline_x, dist_wall,
+		width_fov_ratio + 1,
+		screen_height - 2 * dist_wall
+	};
+
+	draw_rectangle(vline, r, g, b);
+}
+
+void render_3D(Player player, Animation* animations, Sprite* textured_walls) {
+	float rel_x = player.x * width_ratio;
+	float rel_y = player.y * height_ratio;
+	float half_fov = player.fov / 2;
+	float width_to_fov = (screen_width / player.fov) / 2;
+
+	int vertical_texture;
+	for (float theta = player.angle - half_fov, vline_x = 0;
+		theta < player.angle + half_fov;
+		theta += ray_theta_step, vline_x += width_to_fov) {
+
+		float radian_theta = to_radians(theta);
+		float cos_theta = cos(radian_theta), sin_theta = sin(radian_theta);
+		float distort_adjust = cos(to_radians(theta - player.angle));
+
+		float d = 0, new_x, new_y;
+		while (d += ray_dist_step) {
+			new_y = sin_theta * d + rel_y,
+			new_x = cos_theta * d + rel_x;
+
+			float map_y = new_y / height_ratio, map_x = new_x / width_ratio;
+			int i_map_y = map_y, i_map_x = map_x;
+			int map_point = map[i_map_y][i_map_x];
+
+			if (map_point) {
+				float dist_wall = distance(rel_x, rel_y, new_x, new_y) * distort_adjust;
+				float twice_dist_wall = 2 * dist_wall;
+
+				if (twice_dist_wall >= screen_height) break; // add fog?
+
+				else if (is_a_wall(map_point)) {
+					if (map_point <= 4)
+						draw_colored_wall(map_point, width_to_fov, dist_wall, vline_x);
+					else {
+						int wall_ind = map_point - (wall_count - textured_wall_count + 1);
+						Sprite wall = textured_walls[wall_ind];
+
+						float diff_x = map_x - i_map_x, diff_y = map_y - i_map_y;
+						int x_state = diff_x <= 0.04 || diff_x >= 0.96,
+							y_state = diff_y <= 0.04 || diff_y >= 0.96,
+							coord;
+
+						if (x_state ^ y_state) // not a corner
+							vertical_texture = y_state,
+							coord = x_state ? new_y : new_x;
+						else
+							coord = vertical_texture ? new_x : new_y;
+
+						SDL_Rect vslice = {coord % wall.scale.w, 0, 1, wall.scale.h},
+						vscale = {vline_x, dist_wall, width_to_fov + 1, screen_height - twice_dist_wall};
+						SDL_RenderCopy(renderer_3D, wall.texture, &vslice, &vscale);
+					}
+					break;
+				}
+
+				Animation* animation = &animations[map_point - (wall_count + 1)];
+				if (!animation -> frame_drawn) { // same drawing routine as walls?
+					animation -> frame_drawn = 1;
+					render_next_frame(animation, dist_wall, vline_x, width_to_fov);
+				}
+			}
+		}
+	}
+	for (int i = 0; i < animation_count; i++)
+		animations[i].frame_drawn = 0;
+}
+
+/////
+
+void render_3D(Player player, Animation* animations, Sprite* textured_walls) {
+	SET_COLOR(renderer_3D, 0, 0, 0);
+
+	const float
+		rel_x = player.x * width_ratio,
+		rel_y = player.y * height_ratio,
+		half_fov = player.fov / 2;
+
+	const float step_theta = 0.1;
+
+	float screen_x = 0, step_x = (screen_width / player.fov) * step_theta;
+
+	for (float theta = player.angle - half_fov; theta < player.angle + half_fov; theta += step_theta) {
+		const float rad_theta = to_radians(theta);
+		const float cos_theta = cos(rad_theta), sin_theta = sin(rad_theta);
+
+		float d = 0, new_x, new_y;
+		while (d += 0.1) {
+			new_x = cos_theta * d + rel_x;
+			new_y = sin_theta * d + rel_y;
+			if (map[(int) (new_y / height_ratio)][(int) (new_x / width_ratio)]) {
+				float adjust = cos(to_radians(theta - player.angle));
+				float dist = distance(rel_x, rel_y, new_x, new_y) * adjust;
+				float double_dist = 2 * dist;
+				if (double_dist >= screen_height) break;
+				SDL_Rect column = {screen_x, dist, step_x + 1, screen_height - double_dist};
+				SDL_RenderFillRect(renderer_3D, &column), SDL_RenderDrawRect(renderer_3D, &column);
+				break;
+			}
+		}
+		screen_x += step_x;
+	}
+}
+
+/////
+
+float distance(float x0, float y0, float x1, float y1) {
+	return sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)));
+}
+
+/////

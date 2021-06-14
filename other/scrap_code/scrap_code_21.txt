@@ -1,0 +1,326 @@
+
+/*
+button map:
+
+mouse up, turn up
+mouse down, turn down
+mouse left, turn left
+mouse right, turn right
+
+up, forward
+down, backward
+left, left strafe
+right, right strafe
+*/
+
+const int handle_input(Player* player, const Uint8* keys) {
+	/*
+	mouse up - turn up
+	mouse down - turn down
+	etc
+	*/
+
+	const int forward = keys[SDL_SCANCODE_W], backward = keys[SDL_SCANCODE_S];
+	const int turned = SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT);
+
+	if (!(forward || turned)) return 0;
+	return 1;
+
+		/*
+		up = keys[SDL_SCANCODE_UP],
+		down = keys[SDL_SCANCODE_DOWN],
+		left = keys[SDL_SCANCODE_LEFT],
+		right = keys[SDL_SCANCODE_RIGHT],
+		turn_left = keys[SDL_SCANCODE_A],
+		turn_right = keys[SDL_SCANCODE_D],
+		look_up = keys[SDL_SCANCODE_W],
+		look_down = keys[SDL_SCANCODE_S];
+		*/
+
+	/*
+	const int strafed = left || right;
+	const int moved = up || down || strafed || turn_left || turn_right || look_up || look_down;
+	player -> physics_properties.moving = moved;
+	*/
+
+	// if (!moved) return 0;
+
+	/*
+	const int moved_mouse = SDL_GetMouseState(NULL, NULL);
+	DEBUG(moved_mouse, d);
+	*/
+
+	/*
+	double
+		*angle = &player -> angle,
+		*y_pitch = &player -> y_pitch.val;
+
+	const double
+		rad_angle = to_radians(*angle),
+		y_pitch_step = player -> y_pitch.step,
+		y_pitch_max = player -> y_pitch.max;
+
+	VectorF* pos = &player -> pos;
+	const VectorF
+		old_pos = {pos -> x, pos -> y},
+		move = {cos(rad_angle) * move_speed_decr, sin(rad_angle) * move_speed_decr};
+
+	//////////
+
+	if (up) pos -> x += move.x, pos -> y += move.y;
+	if (down) pos -> x -= move.x, pos -> y -= move.y;
+	if (left) pos -> x += move.y, pos -> y -= move.x;
+	if (right) pos -> x -= move.y, pos -> y += move.x;
+
+	if (is_a_wall(map[(int) old_pos.y][(int) pos -> x])) pos -> x = old_pos.x;
+	if (is_a_wall(map[(int) pos -> y][(int) old_pos.x])) pos -> y = old_pos.y;
+
+	//////////
+
+	if (turn_left) *angle -= angle_turn;
+	if (turn_right) *angle += angle_turn;
+
+	if (*angle < 0) *angle = 360;
+	else if (*angle > 360) *angle = 0;
+
+	//////////
+
+	if (look_up && *y_pitch <= y_pitch_max) *y_pitch += y_pitch_step;
+	if (look_down && -*y_pitch <= y_pitch_max) *y_pitch -= y_pitch_step;
+
+	//////////
+
+	Domain* tilt = &player -> tilt;
+	
+	if (strafed) {
+		tilt -> val += left ? -tilt -> step : tilt -> step;
+
+		if (tilt -> val > tilt -> max)
+			tilt -> val = tilt -> max;
+		else if (tilt -> val < -tilt -> max)
+			tilt -> val = -tilt -> max;
+	}
+
+	else if (tilt -> val + tilt -> step < 0) tilt -> val += tilt -> step;
+	else if (tilt -> val - tilt -> step > 0) tilt -> val -= tilt -> step;
+
+	//////////
+
+	if (pos -> x != old_pos.x || pos -> y != old_pos.y) {
+		Pace* pace = &player -> pace;
+
+		if ((pace -> domain.val += pace -> domain.step) > two_pi) pace -> domain.val = 0;
+		pace -> screen_offset = sin(pace -> domain.val) * (screen_height / pace -> offset_scaler);
+	}
+
+	//////////
+
+	return 1;
+	*/
+}
+
+/////
+
+typedef struct {
+	int clicked;
+	VectorI initial_click, prev_pos;
+} Mouse;
+
+{0, {0, 0}, {0, 0}}
+
+
+*y_pitch = -(mouse_y - mouse -> initial_click.y);
+mouse -> prev_pos.x = mouse_x;
+mouse -> prev_pos.y = mouse_y;
+
+//////////
+
+const int x_delta = mouse_x - mouse -> initial_click.x;
+
+if (first_click_since_move) {
+	printf("First\n");
+}
+
+/*
+else {
+	if (x_delta == 0) {}
+	else {
+		*angle = x_delta;
+		printf("\nNot your first rodeo; angle was %d, now is %d because of x-delta %d.\n"
+			"Mouse X is %d, but initial click is %d.\n",
+			(int) *prev_angle, (int) *angle, x_delta, mouse_x, mouse -> initial_click.x);
+		*prev_angle = *angle;
+	}
+}
+*/
+
+Mouse* mouse = &player -> mouse;
+
+const int first_click_since_move = !mouse -> clicked && mouse_state;
+if (first_click_since_move) {
+	printf("Set first\n");
+	mouse -> initial_click.x = mouse_x,
+	mouse -> initial_click.y = mouse_y;
+}
+
+mouse -> clicked = mouse_state;
+
+/////
+
+/*
+const int strafed = left || right;
+const int moved = up || down || strafed || turn_left || turn_right || look_up || look_down;
+player -> physics_properties.moving = moved;
+*/
+
+// if (!moved) return 0;
+
+/*
+const int moved_mouse = SDL_GetMouseState(NULL, NULL);
+DEBUG(moved_mouse, d);
+*/
+
+/*
+double
+	*angle = &player -> angle,
+	*y_pitch = &player -> y_pitch.val;
+
+const double
+	rad_angle = to_radians(*angle),
+	y_pitch_step = player -> y_pitch.step,
+	y_pitch_max = player -> y_pitch.max;
+
+VectorF* pos = &player -> pos;
+const VectorF
+	old_pos = {pos -> x, pos -> y},
+	move = {cos(rad_angle) * move_speed_decr, sin(rad_angle) * move_speed_decr};
+
+//////////
+
+if (up) pos -> x += move.x, pos -> y += move.y;
+if (down) pos -> x -= move.x, pos -> y -= move.y;
+if (left) pos -> x += move.y, pos -> y -= move.x;
+if (right) pos -> x -= move.y, pos -> y += move.x;
+
+if (is_a_wall(map[(int) old_pos.y][(int) pos -> x])) pos -> x = old_pos.x;
+if (is_a_wall(map[(int) pos -> y][(int) old_pos.x])) pos -> y = old_pos.y;
+
+//////////
+
+if (turn_left) *angle -= angle_turn;
+if (turn_right) *angle += angle_turn;
+
+if (*angle < 0) *angle = 360;
+else if (*angle > 360) *angle = 0;
+
+//////////
+
+if (look_up && *y_pitch <= y_pitch_max) *y_pitch += y_pitch_step;
+if (look_down && -*y_pitch <= y_pitch_max) *y_pitch -= y_pitch_step;
+
+//////////
+
+Domain* tilt = &player -> tilt;
+
+if (strafed) {
+	tilt -> val += left ? -tilt -> step : tilt -> step;
+
+	if (tilt -> val > tilt -> max)
+		tilt -> val = tilt -> max;
+	else if (tilt -> val < -tilt -> max)
+		tilt -> val = -tilt -> max;
+}
+
+else if (tilt -> val + tilt -> step < 0) tilt -> val += tilt -> step;
+else if (tilt -> val - tilt -> step > 0) tilt -> val -= tilt -> step;
+
+//////////
+
+if (pos -> x != old_pos.x || pos -> y != old_pos.y) {
+	Pace* pace = &player -> pace;
+
+	if ((pace -> domain.val += pace -> domain.step) > two_pi) pace -> domain.val = 0;
+	pace -> screen_offset = sin(pace -> domain.val) * (screen_height / pace -> offset_scaler);
+}
+
+//////////
+
+return 1;
+*/
+
+/////
+
+y_pitch_step = player -> y_pitch.step,
+y_pitch_max = player -> y_pitch.max;
+
+/////
+
+y_pitch;
+
+/////
+
+else if (event.type == SDL_MOUSEMOTION) {
+	player.mouse_pos.x = event.motion.x;
+	player.mouse_pos.y = event.motion.y;
+}
+
+/////
+
+// SDL_ShowCursor(0);
+// SDL_SetRelativeMouseMode(SDL_TRUE);
+SDL_SetWindowGrab(screen.window_3D, SDL_TRUE);
+
+
+// SDL_SetRelativeMouseMode(SDL_TRUE);
+// SDL_WarpMouseInWindow(screen.window_3D, half_screen_width, half_screen_height);
+// SDL_SetWindowGrab(screen.window_3D, SDL_TRUE);
+// need to move cursor to center of screen constantly
+// SDL_ShowCursor(0);
+
+/////
+
+/*
+button map:
+
+mouse up, turn up
+mouse down, turn down
+mouse left, turn left
+mouse right, turn right
+
+up, forward
+down, backward
+left, left strafe
+right, right strafe
+*/
+
+/////
+
+if (*angle > 360) *angle = 0;
+else if (*angle < 0) *angle = 360;
+
+/////
+
+/*
+if (mouse_pos -> y == screen_height - 1)
+	SDL_WarpMouseInWindow(screen.window_3D, mouse_pos -> x, screen_height - 1);
+else if (mouse_pos -> y < 0)
+	SDL_WarpMouseInWindow(screen.window_3D, mouse_pos -> x, 0);
+*/
+
+//////////
+
+/*
+if (mouse_pos -> x >= screen_width)
+	SDL_WarpMouseInWindow(screen.window_3D, 0, mouse_pos -> y);
+else if (mouse_pos -> x <= 0)
+	SDL_WarpMouseInWindow(screen.window_3D, screen_width - 1, mouse_pos -> y);
+*/
+
+/////
+
+// SDL_SetWindowGrab(screen.window_3D, SDL_TRUE);
+// SDL_ShowCursor(SDL_FALSE);
+
+// SDL_SetRelativeMouseMode(SDL_TRUE);
+
+/////

@@ -1,0 +1,123 @@
+// if (floor_actual_distance < 0.0) printf("Small dist\n");
+
+/*
+if (cos_theta < 0 || sin_theta < 0) {
+	printf("Sin and cos were less than zero, while dist was %lf\n", floor_actual_distance);
+	printf("Part 1 of calculation: %lf, %lf\n", floor_actual_distance * cos_theta,
+		floor_actual_distance * sin_theta);
+	printf("Player pos: %lf, %lf\n---\n", player_x, player_y);
+
+	if (floor_actual_distance < 0.0)
+		printf("Case of less than: %lf\n", floor_actual_distance);
+}
+*/
+
+
+/*
+if (hit_x < 0) hit_x = 64 - hit_x;
+if (hit_y < 0) hit_y = 64 - hit_y;
+*/
+
+/*
+const int tex_x = fabs((hit_x - (int) hit_x) * sprite_w);
+	tex_y = fabs((hit_y - (int) hit_y) * sprite_h);
+*/
+
+/////
+
+/*
+https://stackoverflow.com/questions/62393477/what-is-the-math-behind-billboard-sprite-drawing-inverse-matrix
+https://dev.opera.com/articles/3d-games-with-canvas-and-raycasting-part-2/
+https://github.com/Dooskington/Rustcaster
+https://comp.graphics.algorithms.narkive.com/fehjrAQm/raycasting-floor-ceiling
+*/
+
+/////
+
+// const double floor_actual_distance = floor_row / (2 * y - floor_row);
+
+/////
+
+const int tex_x = (int) (hit_x * 64) % 64,
+	tex_y = (int) (hit_y * 64) % 64;
+
+/////
+
+/*
+- in the rust code, check that the floor row is reasonable, and find out what line_screen_end means
+- also, check the texture values for a ray that hits near a wall
+- but first, find out why hit x and y are negative at times
+- it is because cos theta and sin theta are, which they shouldn't be
+- the other hit distances are never negative, but why are these?
+
+- look more at others' code and look for those who asked questions like mine online
+*/
+
+/////
+
+int init_y = wall_pos.y + wall_pos.h;
+
+double floor_straight_distance = dist;
+double floor_step = 1.0 / (screen_height - init_y);
+DEBUG(floor_step, f);
+
+for (int y = init_y; y < screen_height; y++) {
+	if (floor_straight_distance < 0) printf("Alert\n");
+	const double floor_row = y - half_screen_height;
+
+	const double floor_actual_distance = floor_straight_distance / cos_beta;
+
+	const double 
+		hit_x = cos_theta * floor_actual_distance + player_x,
+		hit_y = sin_theta * floor_actual_distance + player_y;
+
+	// if (hit_x < 0 || hit_y < 0) printf("Hit x or y are less than zero\n");
+
+	const int tex_x = (hit_x - (int) hit_x) * sprite_w,
+		tex_y = (hit_y - (int) hit_y) * sprite_h;
+
+	const Uint32 surface_pixel = get_surface_pixel(pixels, pitch, bytes_per_pixel, tex_x, tex_y);
+	*get_pixbuf_pixel(screen_x, y) = surface_pixel;
+	*get_pixbuf_pixel(screen_x, screen_height - y) = surface_pixel;
+
+	floor_straight_distance -= floor_step;
+}
+
+/////
+
+int first = 1, diff;
+for (int y = wall_pos.y + wall_pos.h; y < screen_height; y++) {
+	const double floor_row = y - half_screen_height;
+
+	double floor_straight_distance = player_height / floor_row * screen.projection_distance;
+	if (first) {
+		diff = floor_straight_distance - dist;
+	}
+
+	floor_straight_distance += diff;
+
+/////
+
+/*
+const double wall_height = screen_height / dist;
+DEBUG(wall_height, lf);
+*/
+
+/////
+
+// check out the js code and see if its straight distance is right or wrong
+// noticed: the negative null pixel effect is only bad in the beginning
+// if i can get the same wall heights as for rust, this will work
+// or, draw a triangle to find an alternative method
+
+// if (hit_x < 0 || hit_y < 0) printf("Hit x or y are less than zero\n");
+
+/////
+
+A = 4
+
+_all:
+	clang -lSDL2 -o bin/pixel_buffering_$A other/pixel_buffering_$A.c
+	./bin/pixel_buffering_$A
+
+/////

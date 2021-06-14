@@ -1,0 +1,318 @@
+int tex_offset(Sprite* sprite, float new_x, float new_y) {
+	float x_diff = new_x - (int) new_x, y_diff = new_y - (int) new_y;
+	
+
+	int x_state = close_to_whole(x_diff),
+		y_state = close_to_whole(y_diff),
+		wall_w = sprite -> surface -> w,
+		wall_h = sprite -> surface -> h,
+		tex_coord;
+
+	printf("diffs: %f, %f. states: %d, %d \n", x_diff, y_diff, x_state, y_state);
+
+	// printf("x, y: %d, %d\n", x_state, y_state);
+
+	if (x_state ^ y_state)
+		tex_coord = y_state
+			? (int) (wall_w * x_diff) & (wall_w - 1)
+			: (int) (wall_h * y_diff) & (wall_h - 1);
+	else
+		tex_coord = wall_w - 1;
+
+	return tex_coord;
+
+	/*
+	int tex_w = sprite -> surface -> w, tex_h = sprite -> surface -> h;
+	float x_diff = new_x - (int) new_x, y_diff = new_y - (int) new_y;
+
+	int x_state = close_to_whole(x_diff),
+		y_state = close_to_whole(y_diff),
+		tex_x = (int) (tex_h * y_diff) & (tex_h - 1),
+		tex_y = (int) (tex_w * x_diff) & (tex_w - 1);
+
+	printf("new_x, new_y: x_state, y_state: %f, %f, %d, %d\n", new_x, new_y, x_state, y_state);
+
+	if (x_state ^ y_state) // this condition should be met more
+		return y_state ? tex_y : tex_x;
+	else
+		return tex_w - 1;
+	*/
+}
+
+void draw_sprites(Sprite* sprites, Player player) {
+	for (int i = 0; i < sprite_count; i++) {
+		Sprite sprite = sprites[i];
+		if (sprite.first_tex_x != -1) {
+
+			/*
+			if (sprite.first_tex_x > sprite.last_tex_x) {
+				int temp = sprite.first_tex_x;
+				sprite.first_tex_x = sprite.last_tex_x;
+				sprite.last_tex_x = temp;
+			}
+
+			else if (sprite.first_tex_x == sprite.last_tex_x)
+				sprite.first_tex_x = 0;
+			*/
+
+			// printf("tex range: %d, %d\n", sprite.first_tex_x, sprite.last_tex_x);
+
+			SDL_Rect crop = {
+				sprite.first_tex_x, 0,
+				sprite.last_tex_x - sprite.first_tex_x, sprite.surface -> w
+			};
+
+			int wall_height = screen_height / (sprite.dist_sum / sprite.hit_count);
+
+			SDL_Rect pos = {
+				sprite.first_screen_x,
+				(screen_height / 2 - wall_height / 2) + player.pace.height,
+				sprite.last_screen_x - sprite.first_screen_x,
+				wall_height
+			};
+
+			SDL_RenderCopy(renderer_3D, sprite.texture, &crop, &pos);
+		}
+	}
+}
+
+/////
+
+	Sprite* sprite = &sprites[point - wall_count - 1];
+
+	int tex_coord = tex_offset(sprite, new_x, new_y); // this is wrong
+	printf("%d\n", tex_coord);
+
+	if (sprite -> first_tex_x == -1) {
+		// printf("---\nFirst: %d\n", tex_coord);
+		sprite -> first_tex_x = tex_coord;
+		sprite -> first_screen_x = screen_x;
+	}
+	else {
+		// printf("Second: %d\n", tex_coord);
+		sprite -> last_tex_x = tex_coord;
+		sprite -> last_screen_x = screen_x;
+	}
+
+	sprite -> dist_sum += adjusted_dist;
+	sprite -> hit_count++;
+}
+
+/////
+
+else {
+	Sprite* sprite = &sprites[point - wall_count - 1];
+
+	float x_diff = new_x - (int) new_x, y_diff = new_y - (int) new_y;
+	int sprite_w = sprite -> surface -> w, sprite_h = sprite -> surface -> h;
+
+	// this is a horrible mess
+	int tex_x = abs(((int) (sprite_h * y_diff) & (sprite_h - 1)) - (sprite_h - 1)),
+		tex_y = abs(((int) (sprite_w * x_diff) & (sprite_w - 1)) - (sprite_w - 1));
+
+	int tex_offset = (tex_x + tex_y) / 2;
+
+	if (sprite -> first_tex_x == INT_MAX) {
+		sprite -> first_tex_x = tex_offset;
+		sprite -> first_screen_x = screen_x;
+	}
+	else {
+		sprite -> last_tex_x = tex_offset;
+		sprite -> last_screen_x = screen_x;
+	}
+
+	sprite -> hit_count++;
+	sprite -> dist_sum += adjusted_dist;
+}
+
+/////
+
+
+for (int i = 0; i < sprite_count; i++) {
+	Sprite* s = &sprites[i];
+	s -> first_tex_x = INT_MAX;
+	s -> hit_count = 0;
+	s -> dist_sum = 0;
+}
+
+/////
+
+// draw_sprites(sprites, player);
+
+/////
+
+sprite_scale_factor = 100.0,
+
+/////
+
+
+void draw_sprites(Sprite* sprites, Player player) {
+	for (int i = 0; i < sprite_count; i++) {
+		Sprite sprite = sprites[i];
+		if (sprite.first_tex_x != INT_MAX) {
+			int wall_height = screen_height / (sprite.dist_sum / sprite.hit_count);
+
+			// printf("range: %d, %d\n", sprite.first_tex_x, sprite.last_tex_x);
+
+			SDL_Rect crop = {
+				sprite.first_tex_x, 0,
+				sprite.last_tex_x - sprite.first_tex_x, sprite.surface -> h
+			}, pos = {
+				sprite.first_screen_x,
+				(screen_height / 2 - wall_height / 2) + player.pace.height,
+				sprite.last_screen_x - sprite.first_screen_x,
+				wall_height
+			};
+
+			printf("First vs last: %d, %d\n", sprite.first_tex_x, sprite.last_tex_x);
+
+			/*
+			if (crop.x < 0) {
+				crop.x = -crop.x * 2;
+				pos.w += crop.x / 2;
+			}
+			*/
+
+			SDL_RenderCopy(renderer_3D, sprite.texture, &crop, &pos);
+		}
+	}
+}
+
+/////
+
+int first_tex_x, first_screen_x, last_tex_x, last_screen_x, hit_count;
+float dist_sum;
+
+/////
+
+float distance(float x0, float y0, float x1, float y1) {
+	return sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)));
+}
+
+/////
+
+
+const unsigned char map[map_height][map_width] = {
+	{5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+	{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+	{6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 5},
+	{6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 7},
+	{6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7},
+	{6, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 7},
+	{6, 5, 5, 0, 8, 0, 0, 0, 0, 0, 0, 7},
+	{6, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 7},
+	{6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 7},
+	{6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 7},
+	{6, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 7},
+	{6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7},
+	{6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7},
+	{6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7},
+	{6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7}
+};
+
+/////
+
+// float sprite_x = player.x - sprite -> x, sprite_y = player.y - sprite -> y;
+// need planeX, planeY, dirX, and dirY
+// dirX is the X direction vector, and vice versa for Y
+// I don't know what planeX and planeY are
+
+/////
+
+SDL_Rect crop = {spriteScreenX, 0, spriteWidth, spriteHeight},
+		pos = {drawStartX, drawStartY, drawEndX, drawEndY};
+
+printf("crop: {%d, %d, %d, %d}\n", crop.x, crop.y, crop.w, crop.h);
+
+SDL_RenderCopy(renderer_3D, sprite -> texture, &crop, &pos)
+
+/////
+double dirX = -1.0, dirY = 0.0; //initial direction vector
+double posX = 22.0, posY = 11.5; //x and y start position
+double planeX = 0.0, planeY = 0.66; //the 2d raycaster version of camera plane
+
+double spriteX = sprite.x - posX;
+double spriteY = sprite.y - posY;
+double invDet = 1.0 / (planeX * dirY - dirX * planeY);
+double transformX = invDet * (dirY * spriteX - dirX * spriteY);
+double transformY = invDet * (-planeY * spriteX + planeX * spriteY); //this is actually the depth inside the screen, that what Z is in 3D
+
+int spriteScreenX = (int) ((screen_width / 2) * (1 + transformX / transformY));
+int spriteHeight = abs((int) (screen_height / (transformY))); //using 'transformY' instead of the real distance prevents fisheye
+
+int drawStartY = -spriteHeight / 2 + screen_height / 2;
+if(drawStartY < 0) drawStartY = 0;
+int drawEndY = spriteHeight / 2 + screen_height / 2;
+if(drawEndY >= screen_height) drawEndY = screen_height - 1;
+
+int spriteWidth = abs( (int) (screen_height / (transformY)));
+int drawStartX = -spriteWidth / 2 + spriteScreenX;
+if(drawStartX < 0) drawStartX = 0;
+int drawEndX = spriteWidth / 2 + spriteScreenX;
+if(drawEndX >= screen_width) drawEndX = screen_width - 1;
+
+for(int stripe = drawStartX; stripe < drawEndX; stripe++)
+     {
+       int texX = (int)(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * sprite.surface -> w / spriteWidth) / 256;
+       //the conditions in the if are:
+       //1) it's in front of camera plane so you don't see things behind you
+       //2) it's on the screen (left)
+       //3) it's on the screen (right)
+       //4) ZBuffer, with perpendicular distance
+       if(transformY > 0 && stripe > 0 && stripe < screen_width && transformY < z_buffer[stripe])
+       for(int y = drawStartY; y < drawEndY; y++) //for every pixel of the current stripe
+       {
+         int d = (y) * 256 - screen_height * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
+         int texY = ((d * sprite.surface -> h) / spriteHeight) / 256;
+         Uint32 color = texture[sprite[spriteOrder[i]].texture][texWidth * texY + texX]; //get current color from the texture
+         if((color & 0x00FFFFFF) != 0) buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
+       }
+     }
+   }
+
+/////
+
+float distance(float x0, float y0, float x1, float y1) {
+	return sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)));
+}
+
+/////
+
+Sprite load_positional_sprite(const char* path, float x, float y) {
+	Sprite sprite = load_sprite(path);
+	sprite.x = x;
+	sprite.y = y;
+	return sprite;
+}
+
+/////
+
+/*
+Sprite* sort_sprites(Sprite* sprites, Player player) {
+	Sprite* sorted_sprites = calloc(sprite_count, sizeof(Sprite));
+	memcpy(sorted_sprites, sprites, sizeof(Sprite) * sprite_count);
+
+	for (int i = 0; i < sprite_count; i++) {
+		Sprite* sprite = &sprites[i];
+		Coord pos = sprite_pos(i + wall_count + 1);
+		if (pos.x != -1) {
+			float dx = pos.x - player.pos.x, dy = pos.y - player.pos.y;
+			sprite -> distance_squared = dx * dx + dy * dy;
+		}
+	}
+
+	qsort(sorted_sprites, sprite_count, sizeof(Sprite), compare_distances);
+
+	return sprites;
+}
+*/
+
+/////
+
+/*
+https://www.playfuljs.com/a-first-person-engine-in-265-lines/
+https://stackoverflow.com/questions/24173966/raycasting-engine-rendering-creating-slight-distortion-increasing-towards-edges
+https://en.wikipedia.org/wiki/Atan2
+*/
+
+/////

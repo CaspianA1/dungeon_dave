@@ -1,0 +1,99 @@
+void draw_floor(const SDL_Rect wall_pos, const Player player,
+	const VectorF dir, const double cos_beta) { // GOOD
+
+	const Sprite sprite = textured_walls[0];
+	const SDL_Surface* surface = sprite.surface;
+	const SDL_PixelFormat* format = surface -> format;
+	const void* pixels = surface -> pixels;
+	const int
+		surface_pitch = surface -> pitch,
+		sprite_w = sprite.surface -> w;
+
+	for (int y = wall_pos.y + wall_pos.h; y < screen_height - player.pace.screen_offset; y++) {
+		const int floor_y = y + player.pace.screen_offset;
+		if (floor_y < 0) continue;
+		const int floor_row = y - half_screen_height - player.y_pitch.val;
+
+		const double floor_straight_distance = 0.5 / floor_row * screen.projection_distance;
+		const double floor_actual_distance = floor_straight_distance / cos_beta;
+
+		const VectorF hit = {
+			dir.x * floor_actual_distance + player.pos.x,
+			dir.y * floor_actual_distance + player.pos.y
+		};
+
+		const VectorI pixel_coord = {
+			(int) ((hit.x - floor(hit.x)) * sprite_w) & sprite_w - 1,
+			(int) ((hit.y - floor(hit.y)) * sprite_w) & sprite_w - 1
+		};
+
+		Uint32 surface_pixel = get_surface_pixel(pixels, surface_pitch, pixel_coord.x, pixel_coord.y);
+		SDL_Color pixel;
+		SDL_GetRGB(surface_pixel, format, &pixel.r, &pixel.g, &pixel.b);
+
+		// there's no wall here (of course), but this is used for the shading calculation
+		const double shade = calculate_shade(screen.projection_distance / floor_actual_distance);
+		surface_pixel = SDL_MapRGB(format, pixel.r * shade, pixel.g * shade, pixel.b * shade);
+		*get_pixbuf_pixel(wall_pos.x, floor_y) = surface_pixel;
+	}
+}
+
+/////
+
+/*
+void draw_floor_ceiling(const SDL_Rect wall_pos, const Player player,
+	const VectorF dir, const double cos_beta) { // BAD
+
+	const Sprite sprite = textured_walls[0];
+	const SDL_Surface* surface = sprite.surface;
+	const SDL_PixelFormat* format = surface -> format;
+	const void* pixels = surface -> pixels;
+	const int
+		surface_pitch = surface -> pitch,
+		sprite_w = sprite.surface -> w;
+
+	// printf("Wall y = %d, wall height = %d\n---\n", wall_pos.y, wall_pos.h);
+	for (int y = 0; y < screen_height; y++) {
+		const double straight_distance = 0.5 / (y - half_screen_height) * screen.projection_distance;
+		const double actual_distance = straight_distance / cos_beta;
+
+		const VectorF hit = {
+			dir.x * actual_distance + player.pos.x,
+			dir.y * actual_distance + player.pos.y
+		};
+
+		const VectorI pixel_coord = {
+			(int) ((hit.x - floor(hit.x)) * sprite_w) & sprite_w - 1,
+			(int) ((hit.y - floor(hit.y)) * sprite_w) & sprite_w - 1
+		};
+
+		Uint32 surface_pixel = get_surface_pixel(pixels, surface_pitch, pixel_coord.x, pixel_coord.y);
+		SDL_Color pixel;
+		SDL_GetRGB(surface_pixel, format, &pixel.r, &pixel.g, &pixel.b);
+
+		// there's no wall here (of course), but this is used for the shading calculation
+		const double shade = calculate_shade(screen.projection_distance / actual_distance);
+		surface_pixel = SDL_MapRGB(format, pixel.r * shade, pixel.g * shade, pixel.b * shade);
+
+		*get_pixbuf_pixel(wall_pos.x, y) = surface_pixel;
+	}
+}
+*/
+
+/////
+
+// draw_floor_ceiling(pace_wall, player, ray_direction, cos_beta);
+
+/////
+
+draw_floor_or_ceiling(
+	player,
+	dir,
+	sprite,
+	wall.x,
+	wall.y + wall.h,
+	screen_height - player.pace.screen_offset,
+	-half_screen_height,
+	cos_beta);
+
+/////

@@ -1,0 +1,153 @@
+----- THE FIRST ONE
+
+clang -march=native -Wall -Wdouble-promotion -Wformat -Wpedantic -Wextra -Ofast `sdl2-config --cflags --libs` -lSDL2_ttf -lm -lpthread -o bin/dungeon_dave.app src/main/dungeon_dave.c
+./bin/dungeon_dave.app
+make: *** [run] Bus error: 10
+Caspians-MacBook-Air:dungeon_dave caspianahlberg$ WWWWWWWWWWWW
+Caspians-MacBook-Air:dungeon_dave caspianahlberg$ make find_leaks
+clang -march=native -Wall -Wdouble-promotion -Wformat -Wpedantic -Wextra -ggdb3 -fsanitize=address `sdl2-config --cflags --libs` -lSDL2_ttf -lm -lpthread -o bin/dungeon_dave.app src/main/dungeon_dave.c
+make run
+./bin/dungeon_dave.app
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==21071==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x00010660a7e8 bp 0x7ffee980d000 sp 0x7ffee980cf90 T0)
+==21071==The signal is caused by a READ memory access.
+==21071==Hint: this fault was caused by a dereference of a high value address (see register values below).  Dissassemble the provided pc to learn which register was used.
+    #0 0x10660a7e8 in __sanitizer::StackDepotBase<__sanitizer::StackDepotNode, 1, 20>::Put(__sanitizer::StackTrace, bool*)+0x168 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a7e8)
+    #1 0x10660a66b in __sanitizer::StackDepotPut(__sanitizer::StackTrace)+0x1b (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a66b)
+    #2 0x1065abb2a in __asan::Allocator::QuarantineChunk(__asan::AsanChunk*, void*, __sanitizer::BufferedStackTrace*)+0x8a (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0xbb2a)
+    #3 0x1065f5cd5 in wrap__ZdlPv+0xe5 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x55cd5)
+    #4 0x7fff2881b3cf in ForEachCGQEntryEventDo(unsigned int (CGQEntry*) block_pointer)+0x1e0 (HIToolbox:x86_64+0x4b3cf)
+    #5 0x7fff2881b7a8 in _RemoveCGEventFromQueue+0x9f (HIToolbox:x86_64+0x4b7a8)
+    #6 0x7fff2881b696 in Convert1CGEvent(unsigned char)+0xb9 (HIToolbox:x86_64+0x4b696)
+    #7 0x7fff2881b581 in MainLoopObserver(unsigned int, OpaqueEventRef*, void*)+0x28 (HIToolbox:x86_64+0x4b581)
+    #8 0x7fff287d9afb in _NotifyEventLoopObservers+0x98 (HIToolbox:x86_64+0x9afb)
+    #9 0x7fff288015ef in RunCurrentEventLoopInMode+0xe3 (HIToolbox:x86_64+0x315ef)
+    #10 0x7fff28801281 in ReceiveNextEventCommon+0x11a (HIToolbox:x86_64+0x31281)
+    #11 0x7fff2880114e in _BlockUntilNextEventMatchingListInModeWithFilter+0x3f (HIToolbox:x86_64+0x3114e)
+    #12 0x7fff22d999b0 in _DPSNextEvent+0x372 (AppKit:x86_64+0x3e9b0)
+    #13 0x7fff22d98176 in -[NSApplication(NSEvent) _nextEventMatchingEventMask:untilDate:inMode:dequeue:]+0x555 (AppKit:x86_64+0x3d176)
+    #14 0x1064f2906 in Cocoa_PumpEvents+0x73 (libSDL2-2.0.0.dylib:x86_64+0xb3906)
+    #15 0x106460387 in SDL_PumpEvents_REAL+0x20 (libSDL2-2.0.0.dylib:x86_64+0x21387)
+    #16 0x1064603e6 in SDL_WaitEventTimeout_REAL+0x2b (libSDL2-2.0.0.dylib:x86_64+0x213e6)
+    #17 0x106408ed5 in handle_input input.c:179
+    #18 0x1064240ad in main dungeon_dave.c:54
+    #19 0x7fff2049e620 in start+0x0 (libdyld.dylib:x86_64+0x15620)
+
+==21071==Register values:
+rax = 0x00000000619e0b98  rbx = 0x0000000000000011  rcx = 0x00000000490ad880  rdx = 0x0000000000000011  
+rdi = 0x0000000000042f84  rsi = 0x00007ffee980d0a0  rbp = 0x00007ffee980d000  rsp = 0x00007ffee980cf90  
+ r8 = 0x0000000106928090   r9 = 0x000000009e85128e  r10 = 0x00007ffee980d120  r11 = 0x0000000000000000  
+r12 = 0x00007ffee980d8e0  r13 = 0x000000012596d968  r14 = 0xff1e1b18ff1d1b17  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a7e8) in __sanitizer::StackDepotBase<__sanitizer::StackDepotNode, 1, 20>::Put(__sanitizer::StackTrace, bool*)+0x168
+==21071==ABORTING
+make[1]: *** [run] Abort
+
+----- THE SECOND ONE
+
+Before event reading. Event address = 0x10a239010. An SDL error: 
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==22276==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x00010a4187e8 bp 0x7ffee5a03660 sp 0x7ffee5a035f0 T0)
+==22276==The signal is caused by a READ memory access.
+==22276==Hint: this fault was caused by a dereference of a high value address (see register values below).  Dissassemble the provided pc to learn which register was used.
+    #0 0x10a4187e8 in __sanitizer::StackDepotBase<__sanitizer::StackDepotNode, 1, 20>::Put(__sanitizer::StackTrace, bool*)+0x168 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a7e8)
+    #1 0x10a41866b in __sanitizer::StackDepotPut(__sanitizer::StackTrace)+0x1b (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a66b)
+    #2 0x10a3b53b1 in __asan::Allocator::Allocate(unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType, bool)+0x5f1 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x73b1)
+    #3 0x10a3b5c2b in __asan::asan_memalign(unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType)+0x3b (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x7c2b)
+    #4 0x10a4038b2 in wrap__Znwm+0xe2 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x558b2)
+    #5 0x7fff5ec33745 in -[MTLIGAccelCommandBuffer initContextStateDescriptorForEngine:]+0xdf (AppleIntelKBLGraphicsMTLDriver:x86_64+0x85745)
+    #6 0x7fff5ec33a46 in -[MTLIGAccelCommandBuffer blitCommandEncoder]+0x36 (AppleIntelKBLGraphicsMTLDriver:x86_64+0x85a46)
+    #7 0x10a305b79 in METAL_UnlockTexture+0x1cf (libSDL2-2.0.0.dylib:x86_64+0xbeb79)
+    #8 0x10a278c1e in SDL_UnlockTexture_REAL+0x12b (libSDL2-2.0.0.dylib:x86_64+0x31c1e)
+    #9 0x10a2024b4 in refresh screen.c:34
+    #10 0x10a22e3a9 in main dungeon_dave.c:86
+    #11 0x7fff2049e620 in start+0x0 (libdyld.dylib:x86_64+0x15620)
+
+==22276==Register values:
+rax = 0x00000000a5b5aeb2  rbx = 0x0000000000000008  rcx = 0x00000000a8183ac2  rdx = 0x0000000000000008  
+rdi = 0x0000000000070bf0  rsi = 0x00007ffee5a03760  rbp = 0x00007ffee5a03660  rsp = 0x00007ffee5a035f0  
+ r8 = 0x000000010a736090   r9 = 0x000000005aa7bebf  r10 = 0x0000000000000008  r11 = 0x0000000000000000  
+r12 = 0x00006210005668f0  r13 = 0x0000000113bce2e0  r14 = 0xff13110dff0e0c08  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a7e8) in __sanitizer::StackDepotBase<__sanitizer::StackDepotNode, 1, 20>::Put(__sanitizer::StackTrace, bool*)+0x168
+==22276==ABORTING
+make[1]: *** [run] Abort trap: 6
+
+----- THE THIRD ONE
+
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==22450==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x00010173a7e8 bp 0x7ffeee6e9020 sp 0x7ffeee6e8fb0 T0)
+==22450==The signal is caused by a READ memory access.
+==22450==Hint: this fault was caused by a dereference of a high value address (see register values below).  Dissassemble the provided pc to learn which register was used.
+    #0 0x10173a7e8 in __sanitizer::StackDepotBase<__sanitizer::StackDepotNode, 1, 20>::Put(__sanitizer::StackTrace, bool*)+0x168 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a7e8)
+    #1 0x10173a66b in __sanitizer::StackDepotPut(__sanitizer::StackTrace)+0x1b (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a66b)
+    #2 0x1016d73b1 in __asan::Allocator::Allocate(unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType, bool)+0x5f1 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x73b1)
+    #3 0x1016d77be in __asan::asan_calloc(unsigned long, unsigned long, __sanitizer::BufferedStackTrace*)+0x3e (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x77be)
+    #4 0x101719613 in wrap_calloc+0x103 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x49613)
+    #5 0x7fff205439a4 in __NSSetM_new+0xd1 (CoreFoundation:x86_64h+0x499a4)
+    #6 0x7fff2059330f in +[NSMutableSet setWithCapacity:]+0x20 (CoreFoundation:x86_64h+0x9930f)
+    #7 0x7fff230fab65 in +[NSEvent _touchesFromSet:matchingPhase:inView:includeResting:]+0x7d (AppKit:x86_64+0x39fb65)
+    #8 0x7fff230faa47 in -[NSEvent _touchesMatchingPhase:inView:includeResting:]+0x6a (AppKit:x86_64+0x39fa47)
+    #9 0x7fff23125fca in -[NSEvent touchesMatchingPhase:inView:]+0x108 (AppKit:x86_64+0x3cafca)
+    #10 0x7fff22f2340d in -[NSWindow(NSEventRouting) _reallySendEvent:isDelayedEvent:]+0x257 (AppKit:x86_64+0x1c840d)
+    #11 0x7fff22f22f99 in -[NSWindow(NSEventRouting) sendEvent:]+0x15a (AppKit:x86_64+0x1c7f99)
+    #12 0x10162052c in -[SDLWindow sendEvent:]+0x2e (libSDL2-2.0.0.dylib:x86_64+0xb852c)
+    #13 0x7fff2350f03f in routeGestureEvent+0x184 (AppKit:x86_64+0x7b403f)
+    #14 0x7fff22f21e70 in -[NSApplication(NSEvent) sendEvent:]+0xc4c (AppKit:x86_64+0x1c6e70)
+    #15 0x10161aa72 in -[SDLApplication sendEvent:]+0x42 (libSDL2-2.0.0.dylib:x86_64+0xb2a72)
+    #16 0x10161b933 in Cocoa_PumpEvents+0xa0 (libSDL2-2.0.0.dylib:x86_64+0xb3933)
+    #17 0x101589387 in SDL_PumpEvents_REAL+0x20 (libSDL2-2.0.0.dylib:x86_64+0x21387)
+    #18 0x1015893e6 in SDL_WaitEventTimeout_REAL+0x2b (libSDL2-2.0.0.dylib:x86_64+0x213e6)
+    #19 0x10152ccf5 in handle_input input.c:180
+    #20 0x101547f4d in main dungeon_dave.c:54
+    #21 0x7fff2049e620 in start+0x0 (libdyld.dylib:x86_64+0x15620)
+
+==22450==Register values:
+rax = 0x0000000066977cd2  rbx = 0x0000000000000012  rcx = 0x00000000112ea657  rdx = 0x0000000000000012  
+rdi = 0x00000000000853d8  rsi = 0x00007ffeee6e9128  rbp = 0x00007ffeee6e9020  rsp = 0x00007ffeee6e8fb0  
+ r8 = 0x0000000101a58090   r9 = 0x00000000998960ca  r10 = 0x00007ffeee6e91a8  r11 = 0x0000000000000000  
+r12 = 0x000060300016e6c0  r13 = 0x0000000120cb3458  r14 = 0xff1f1e1bff1f1d19  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a7e8) in __sanitizer::StackDepotBase<__sanitizer::StackDepotNode, 1, 20>::Put(__sanitizer::StackTrace, bool*)+0x168
+==22450==ABORTING
+make[1]: *** [run] Abort trap: 6
+
+----- THE FOURTH ONE
+
+==22549==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x000100e927e8 bp 0x7ffeeef86160 sp 0x7ffeeef860f0 T0)
+==22549==The signal is caused by a READ memory access.
+==22549==Hint: this fault was caused by a dereference of a high value address (see register values below).  Dissassemble the provided pc to learn which register was used.
+    #0 0x100e927e8 in __sanitizer::StackDepotBase<__sanitizer::StackDepotNode, 1, 20>::Put(__sanitizer::StackTrace, bool*)+0x168 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a7e8)
+    #1 0x100e9266b in __sanitizer::StackDepotPut(__sanitizer::StackTrace)+0x1b (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a66b)
+    #2 0x100e2f3b1 in __asan::Allocator::Allocate(unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType, bool)+0x5f1 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x73b1)
+    #3 0x100e2f7be in __asan::asan_calloc(unsigned long, unsigned long, __sanitizer::BufferedStackTrace*)+0x3e (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x77be)
+    #4 0x100e71613 in wrap_calloc+0x103 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x49613)
+    #5 0x7fff2031fb0a in class_createInstance+0x47 (libobjc.A.dylib:x86_64h+0x5b0a)
+    #6 0x7fff204fe640 in __CFAllocateObject+0xe (CoreFoundation:x86_64h+0x4640)
+    #7 0x7fff20543941 in __NSSetM_new+0x6e (CoreFoundation:x86_64h+0x49941)
+    #8 0x7fff2059330f in +[NSMutableSet setWithCapacity:]+0x20 (CoreFoundation:x86_64h+0x9930f)
+    #9 0x7fff230fab65 in +[NSEvent _touchesFromSet:matchingPhase:inView:includeResting:]+0x7d (AppKit:x86_64+0x39fb65)
+    #10 0x7fff230faa47 in -[NSEvent _touchesMatchingPhase:inView:includeResting:]+0x6a (AppKit:x86_64+0x39fa47)
+    #11 0x7fff23353aef in -[NSEvent _initMTTouchesFromIOHidEvent:]+0x9dc (AppKit:x86_64+0x5f8aef)
+    #12 0x7fff22f20b7f in -[NSEvent _initWithCGEvent:eventRef:]+0xd74 (AppKit:x86_64+0x1c5b7f)
+    #13 0x7fff22d9849e in -[NSApplication(NSEvent) _nextEventMatchingEventMask:untilDate:inMode:dequeue:]+0x87d (AppKit:x86_64+0x3d49e)
+    #14 0x100d79906 in Cocoa_PumpEvents+0x73 (libSDL2-2.0.0.dylib:x86_64+0xb3906)
+    #15 0x100ce7387 in SDL_PumpEvents_REAL+0x20 (libSDL2-2.0.0.dylib:x86_64+0x21387)
+    #16 0x100ce73e6 in SDL_WaitEventTimeout_REAL+0x2b (libSDL2-2.0.0.dylib:x86_64+0x213e6)
+    #17 0x100c8fcf5 in handle_input input.c:180
+    #18 0x100caaf4d in main dungeon_dave.c:54
+    #19 0x7fff2049e620 in start+0x0 (libdyld.dylib:x86_64+0x15620)
+
+==22549==Register values:
+rax = 0x00000000efd70aaa  rbx = 0x0000000000000010  rcx = 0x00000000c39ee9d0  rdx = 0x0000000000000010  
+rdi = 0x00000000000e0f4f  rsi = 0x00007ffeeef86268  rbp = 0x00007ffeeef86160  rsp = 0x00007ffeeef860f0  
+ r8 = 0x00000001011b0090   r9 = 0x0000000010fe2eb3  r10 = 0x0000000000000010  r11 = 0x0000000000000000  
+r12 = 0x0000603000194160  r13 = 0x0000000120456580  r14 = 0xff17130bff282217  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6a7e8) in __sanitizer::StackDepotBase<__sanitizer::StackDepotNode, 1, 20>::Put(__sanitizer::StackTrace, bool*)+0x168
+==22549==ABORTING
+
+----- THE FIFTH ONE

@@ -1,0 +1,341 @@
+/*
+Animation
+	bogo = init_animation("assets/spritesheets/bogo.bmp", 2, 3, 5, 3),
+	carrot = init_animation("assets/spritesheets/carrot.bmp", 5, 3, 12, 12),
+	gold_key = init_animation("assets/spritesheets/gold_key.bmp", 3, 4, 12, 5),
+	ditto = init_animation("assets/spritesheets/ditto.bmp", 6, 5, 28, 15),
+	mega_man = init_animation("assets/spritesheets/mega_man.bmp", 8, 6, 48, 24),
+	sonic = init_animation("assets/spritesheets/sonic.bmp", 6, 5, 30, 20),
+	metroid = init_animation("assets/spritesheets/metroid.bmp", 2, 2, 4, 4),
+	tut = init_animation("assets/spritesheets/tut.bmp", 6, 5, 29, 10);
+	
+
+memcpy(&animations[0], &bogo, sizeof(Animation));
+memcpy(&animations[1], &carrot, sizeof(Animation));
+memcpy(&animations[2], &gold_key, sizeof(Animation));
+memcpy(&animations[3], &ditto, sizeof(Animation));
+memcpy(&animations[4], &mega_man, sizeof(Animation));
+memcpy(&animations[5], &sonic, sizeof(Animation));
+memcpy(&animations[6], &metroid, sizeof(Animation));
+memcpy(&animations[7], &tut, sizeof(Animation));
+
+const static VectorF animation_positions[animation_count] = {
+	{11, 5}, {10, 3}, {18, 5}, {13, 15}, {2, 2}, {5, 15}, {4.5, 11.5}, {4.2, 7}
+};
+
+for (int i = 0; i < animation_count; i++)
+	animations[i].billboard.pos = animation_positions[i];
+*/
+
+/////
+
+// is ray to player not seen, don't approach
+
+void move_towards_player(Enemy enemy, const Player player) {
+	Billboard billboard = enemy.animation -> billboard;
+
+	DEBUG(billboard.beta, lf);
+
+	const VectorF ray_to_player = {cos(billboard.beta), sin(billboard.beta)};
+	const CastData enemy_sight = dda(billboard.pos, ray_to_player);
+	printf("Enemy sight: {%lf, %lf}\n", enemy_sight.hit.x, enemy_sight.hit.y);
+	printf("Player pos: {%lf, %lf}\n", player.pos.x, player.pos.y);
+
+	if (doubles_eq(enemy_sight.hit.x, player.pos.x) || doubles_eq(enemy_sight.hit.y, player.pos.y)) {
+		printf("Sight!\n");
+	}
+}
+
+/////
+
+// draw_floor_and_ceil(player, ray_direction, wall, cos_beta);
+
+
+
+draw_floor_or_ceil(player, ray_direction, wall.x, wall.y + wall.h,
+	screen_height, cos_beta, get_floor_row, textured_walls[2]);
+
+for (int i = 1; i <= 2; i++) {
+	wall_height = orig * i;
+	wall.y = half_screen_height - wall_height / 2 + player.y_pitch + player.pace.screen_offset;
+
+	if (cast_data.point <= plain_wall_count)
+		draw_untextured_wall(cast_data.point, wall);
+	else
+		draw_textured_wall(cast_data, wall);
+}
+draw_floor_or_ceil(player, ray_direction, wall.x, 0, wall.y,
+	cos_beta, get_ceil_row, textured_walls[3]);
+
+/////
+
+/*
+if (strcmp(wall_sprite.path, "assets/walls/sphinx.bmp") == 0) {
+	printf("%lf, %lf\n", diff.x, diff.y);
+}
+
+int
+	x_side = (int) (diff.x * (max_offset + 1)) % max_offset,
+	y_side = (int) (diff.y * (max_offset + 1)) % max_offset,
+	offset;
+
+if (diff.x == 0.0 || diff.y == 1.0) offset = y_side;
+else offset = x_side;
+
+draw_scanline(wall_sprite, offset, &wall);
+*/
+
+/////
+
+
+	/*
+	printf("This one\n");
+	if (diff.y > 0.5) {
+		printf("Right 1\n");
+	}
+	else {
+		printf("Left 1\n");
+		// offset = max_offset - offset;
+	}
+	*/
+
+}
+else {
+	offset = std_x_offset;
+	offset = max_offset - offset;
+
+	/*
+	if (diff.x > 0.5 || diff.y > 0.5) {
+		printf("Right 2\n");
+	}
+	else {
+		printf("Left 2\n");
+	}
+	*/
+
+/////
+
+if (close_to_whole(diff.x)) {
+	offset = std_y_offset;
+
+
+	// if ((int) cast_data.hit.x % 2 == 0 && (int) cast_data.hit.y % 2 != 0)
+		// offset = max_offset - offset;
+
+	/*
+	if ((int) cast_data.hit.x % 2 == 0)
+		offset = max_offset - offset;
+	*/
+}
+else {
+	offset = std_x_offset;
+
+	/*
+	if ((int) cast_data.hit.y % 2 == 0)
+		offset = max_offset - offset;
+	*/
+}
+
+/////
+
+/*
+const VectorI surface_offset = {
+	(int) ((hit.x - floor(hit.x)) * wall_sprite_w) & (wall_sprite_w - 1),
+	(int) ((hit.y - floor(hit.y)) * wall_sprite_w) & (wall_sprite_w - 1)
+};
+*/
+
+/////
+
+/*
+draw_floor_or_ceil(player.pos, ray_direction, wall.x, wall.y + wall.h, screen_height,
+	cos_beta, player.pace.screen_offset, player.y_pitch, get_floor_row, textured_walls[5]);
+*/
+
+draw_floor_and_ceil(player, ray_direction, wall, cos_beta);
+
+draw_wall(cast_data, ray_direction, wall);
+
+/*
+if (cast_data.point == 5 || cast_data.point == 8) {
+	for (int i = 1; i <= cast_data.point / 2.0; i++) {
+		wall.y -= wall_height;
+		draw_wall(cast_data, wall);
+	}
+}
+*/
+
+/////
+
+const VectorI adjusted_offsets = {
+	dir.x < 0 ? max_offset - unadjusted_offsets.y : unadjusted_offsets.y,
+	dir.y > 0 ? max_offset - unadjusted_offsets.x : unadjusted_offsets.x
+};
+
+printf("%d, %d\n", adjusted_offsets.x, adjusted_offsets.y);
+
+int offset;
+
+if (doubles_eq(diff.x, 0) || doubles_eq(diff.x, 1)) {
+	offset = adjusted_offsets.x;
+}
+else {
+	offset = adjusted_offsets.y;
+}
+
+/*
+const VectorI has_offset = {
+	close_to_whole(diff.x),
+	close_to_whole(diff.y),
+};
+
+if (has_offset.x && !has_offset.y) offset = adjusted_offsets.x;
+else if (has_offset.y && !has_offset.x) offset = adjusted_offsets.y;
+else {
+	printf("Case 3. Has x, with diff %lf, and has y, with diff %lf.\n", diff.x, diff.y);
+	offset = 0;
+}
+*/
+
+/*
+if (close_to_whole(diff.x) && close_to_whole(diff.y)) {
+	printf("Both\n");
+}
+
+//////////
+
+int offset = 0;
+
+if (close_to_whole(diff.x)) {
+	printf("X\n");
+	const int y_offset = diff.y * max_offset;
+	offset = dir.x < 0 ? max_offset - y_offset : y_offset;
+}
+else {
+	printf("Y\n");
+	const int x_offset = diff.x * max_offset;
+	offset = dir.y > 0 ? max_offset - x_offset : x_offset;
+}
+*/
+
+//////////
+
+
+const VectorI adjusted_offsets = {
+	dir.x < 0 ? max_offset - unadjusted_offsets.y : unadjusted_offsets.y,
+	dir.y > 0 ? max_offset - unadjusted_offsets.x : unadjusted_offsets.x
+};
+
+/////
+
+int offset;
+
+if (close_to_whole(diff.x) && close_to_whole(diff.y)) {
+	offset = 0;
+}
+
+else if (close_to_whole(diff.x)) {
+	// printf("1\n");
+	offset = diff.y * max_offset;
+	// if (offset == 0) printf("Edge 1\n");
+	if (dir.x < 0) {
+		offset = max_offset - offset;
+	}
+}
+else {
+	offset = diff.x * max_offset;
+	if (dir.y > 0) {
+		// if (offset == 0) printf("Edge 2\n");
+		offset = max_offset - offset;
+	}
+}
+
+/*
+int offset = 0;
+
+/////
+
+int offset;
+
+if (close_to_whole(diff.x) && close_to_whole(diff.y)) {
+	// offset = dir.x < 0 ? max_offset : 0;
+	offset = ((diff.y * max_offset) + (diff.x * max_offset)) / 2.0;
+	if (dir.x < 0) offset = max_offset - offset;
+}
+
+else if (close_to_whole(diff.x)) {
+	printf("Hori side\n");
+	const int y_offset = diff.y * max_offset;
+	offset = dir.x < 0 ? max_offset - y_offset : y_offset;
+}
+else {
+	printf("Vert side\n");
+	const int x_offset = diff.x * max_offset;
+	offset = dir.y > 0 ? max_offset - x_offset : x_offset;
+}
+
+/////
+
+/*
+if (cast_data.point == 5) {
+	wall.y -= wall_height;
+	printf("wall = {%d, %d, %d, %d}\n", wall.x, wall.y, wall.w, wall.h);
+	draw_wall(cast_data, ray_direction, wall);
+}
+
+else if (!first_iteration) {
+	draw_wall(cast_data, ray_direction, wall);
+}
+
+if (!first_iteration) {
+	screen.z_buffer[screen_x] = correct_dist;
+	first_iteration = 1;
+}
+*/
+
+/////
+
+/*
+if (cast_data.point == 5)
+	current_raised = 1;
+
+printf("Wall height of point %d is %d\n", cast_data.point, get_wall_height(cast_data.point));
+
+if (get_wall_height(cast_data.point) != current_raised) {
+	printf("Skip drawing\n");
+}
+else {
+	printf("Draw\n");
+	draw_wall(cast_data, ray_direction, wall);
+}
+*/
+
+/*
+int raise_amt;
+
+if (cast_data.point == 5) {
+	raise_amt = wall_height;
+}
+else {
+	raise_amt = 0;
+}
+*/
+
+// draw_wall(cast_data, ray_direction, wall);
+
+/////
+
+/*
+if (cast_data.point == 5) {
+	drawing_raised_walls = 1;
+	wall.y -= wall_height;
+}
+
+if (drawing_raised_walls && cast_data.point != 5)
+	goto step_ray_pos;
+
+// printf("About to draw with point %d\n", cast_data.point);
+draw_wall(cast_data, ray_direction, wall);
+*/
+
+/////

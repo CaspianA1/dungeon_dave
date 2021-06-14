@@ -1,0 +1,46 @@
+super-priorities:
+	- bug fixes (floor/ceiling, then jumping)
+	- variable wall height extensions
+	- sound design
+	- dedicated vector operations
+
+features:
+	- covered tops of walls
+	- floor and ceiling with variable wall heights: if ceilings should work, the wall height should change depending on the point height
+	- stairs
+	- enemy AI
+	- jolt back when using weapon (a 'shaky' thing)
+	- reuse Sprites in many places
+	- doors
+	- status bar while playing w/ a settings option in the title screen and on the status bar
+	- animated skyboxes
+	- look up with skybox
+	- escape mouse if pressing escape
+	- floorcast multithreading, if horizontal method doesn't work
+	- a level opener, with a cool spinning effect (only for the first level)
+	- fast floor/ceiling
+	- fly mode
+	- faster strafe speed + increase strafe speed and fov when pressing shift
+	- an app: https://gist.github.com/mathiasbynens/674099
+problems:
+	- high CPU usage
+	- slowing down -> a keypress, resets speed
+	- flickering at the top of the small shotgun animation at some point
+	- clipping into corners for player
+	- small screen -> bigger screen or very small screen, edge triangles
+	- z-buffering issues for higher point heights - one per point height segment
+	- player height needs to be readjusted when screen height changes (it also changes based on screen width)
+	- optimize floor shading (with `raycast_2`, there is some unnecessary floor shading)
+	- make some sound effects quieter
+	- weird lines for the hieroglyphics wall
+	- final floors are not working
+	- use intrinsics for VectorF2_line_pos
+	- weird jump clipping needs to be fixed
+	- need min and max proj dist
+	- pthreads are glitching out
+	- empty z-buffer slots for ray_column_widths above 1
+	- SDL_PollEvent errors (that occur more with lower optimization)
+	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
+	- draw_floor_plane doesn't draw some textures right
+	- falling through floors: corner clip -> jump, fall
+	- too many Mix_Chunks on the available channels -> out of channels

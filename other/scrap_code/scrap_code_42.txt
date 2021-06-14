@@ -1,0 +1,471 @@
+DEBUG(sizeof(Enemy), d);
+DEBUG(sizeof(Level), d);
+DEBUG(sizeof(Player), d);
+DEBUG(sizeof(VectorF2), d);
+DEBUG(sizeof(Screen), d);
+DEBUG(sizeof(Settings), d);
+
+/////
+
+inlinable byte changed_state_per_threshold(const double dist,
+	const double threshold, EnemyState* curr_state,
+	const EnemyState new_state) {
+
+	if (dist <= threshold && *curr_state != new_state) {
+		*curr_state = new_state;
+		return 1;
+	}
+	return 0;
+}
+
+/////
+
+/*
+byte state_changed = 0;
+
+if (dist <= dist_thresholds.begin_attacking && enemy -> state != Attacking)
+	enemy -> state = Attacking, state_changed = 1;
+else if (dist <= dist_thresholds.begin_chasing)
+	enemy -> state = Chasing, state_changed = 1;
+else if (dist >= dist_thresholds.min_idle_sound && dist <= dist_thresholds.max_idle_sound)
+	enemy -> state = Idle, state_changed = 1;
+*/
+
+// if (state_changed) play_sound(*enemy -> sounds[enemy -> state]);
+
+///// A level opener:
+player.pos[0] = current_level.map_width / 2;
+player.pos[1] = current_level.map_height / 2;
+settings.proj_dist = 20.0;
+player.angle = 90.0;
+player.jump.height = current_level.max_point_height;
+while (1) {
+	const Uint32 before = SDL_GetTicks();
+
+	const InputStatus input_status = handle_input(&player, 1);
+	if (input_status == Exit) goto deinit_dungeon_dave;
+
+	player.jump.height -= 0.01;
+	if (player.jump.height < 0.0) {
+		player.jump.height = 0.0;
+		break;
+	}
+
+	settings.proj_dist++;
+	player.angle++;
+	if (player.angle > 360.0) player.angle = 0.0;
+
+	draw_skybox(player.angle);
+	prepare_for_drawing();
+	raycast_2(player);
+	draw_generic_billboards(player);
+	refresh(player.tilt, player.pos);
+	tick_delay(before);
+}
+
+/////
+
+// (x−h)2+(y−k)2=r2.
+
+/*
+const VectorF center_diffs = VectorFF_sub(pos, circle.center);
+return center_diffs[0] * center_diffs[0] + center_diffs[1] * center_diffs[1]
+	== circle.radius * circle.radius;
+*/
+
+/*
+const double
+	x_minus_h = pos[0] - circle.center[0],
+	y_minus_k = pos[1] - 
+*/
+
+/////
+
+inlinable VectorF VectorF_texture_offset(const VectorF hit, const double max_offset);
+
+/////
+
+// const double cos_beta; // cos_beta = cos(to_radians(player.angle) - theta);
+
+/////
+
+// get the texture coordinate from the fractional part
+static double foo = 1.0, change_foo = 0.00000001;
+if (keys[SDL_SCANCODE_T]) foo += change_foo;
+if (keys[SDL_SCANCODE_Y]) foo -= change_foo;
+if (foo < 0.0) foo = 0.0; // div foo by magic ratio?
+
+/////
+
+/*
+1: #3 is faster than #1 and #2. SIMD makes a big difference, but not a monumental one.
+2: Find out my assumption that's making #3 only work with a 66 degree FOV.
+3: Once #3 is fixed, #4 can utilize SIMD too to maximize performance.
+
+https://lodev.org/cgtutor/raycasting2.html
+For 90 degrees, the floor doesn't turn when turning
+For 60 degrees, there's no texture misalignment problem
+Find other horizontal floor code on Github
+*/
+
+void lodev_expanded_fc(const Player player) {
+	const int screenWidth = settings.screen_width, screenHeight = settings.screen_height;
+	const double angle = to_radians(player.angle);
+	const double height_over_proj_dist = settings.screen_height / settings.proj_dist;
+	// multiply by a magic ratio for the two angles
+	const double dirX = cos(angle) / height_over_proj_dist, dirY = sin(angle) / height_over_proj_dist;
+	const double planeX = -dirY, planeY = dirX;
+	const double posX = player.pos[0], posY = player.pos[1];
+	const Sprite sprite = current_level.walls[2];
+	const SDL_Surface* surface = sprite.surface;
+	const int texWidth = surface -> w, texHeight = surface -> h;
+
+	//FLOOR CASTING
+	for(int y = 0; y < screenHeight; y++) {
+	  // rayDir for leftmost ray (x = 0) and rightmost ray (x = w)
+	  double rayDirX0 = dirX - planeX;
+	  double rayDirY0 = dirY - planeY;
+	  double rayDirX1 = dirX + planeX;
+	  double rayDirY1 = dirY + planeY;
+
+	  // Current y position compared to the center of the screen (the horizon)
+	  int p = y - screenHeight / 2;
+
+	  // Vertical position of the camera.
+	  double posZ = 0.5 * screenHeight;
+
+	  // Horizontal distance from the camera to the floor for the current row.
+	  // 0.5 is the z position exactly in the middle between floor and ceiling.
+	  double rowDistance = posZ / p;
+
+	  // calculate the real world step vector we have to add for each x (parallel to camera plane)
+	  // adding step by step avoids multiplications with a weight in the inner loop
+	  double floorStepX = rowDistance * (rayDirX1 - rayDirX0) / screenWidth;
+	  double floorStepY = rowDistance * (rayDirY1 - rayDirY0) / screenWidth;
+
+	  // real world coordinates of the leftmost column. This will be updated as we step to the right.
+	  double floorX = posX + rowDistance * rayDirX0;
+	  double floorY = posY + rowDistance * rayDirY0;
+
+	  for(int x = 0; x < screenWidth; x++) {
+	    // the cell coord is simply got from the integer parts of floorX and floorY
+	    int cellX = (int) (floorX);
+	    int cellY = (int) (floorY);
+
+	    int tx = (int)(texWidth * (floorX - cellX)) & (texWidth - 1);
+	    int ty = (int)(texHeight * (floorY - cellY)) & (texHeight - 1);
+
+	    floorX += floorStepX;
+	    floorY += floorStepY;
+
+	    const Uint32 pixel = get_surface_pixel(surface -> pixels, surface -> pitch, tx, ty);
+	    *get_pixbuf_pixel(x, y) = pixel;
+		}
+	}
+}
+
+/////
+
+if (keys[SDL_SCANCODE_ESCAPE]) {
+	if (SDL_SetWindowFullscreen(screen.window, 0) < 0)
+		DEBUG(SDL_GetError(), s);
+	else printf("Success\n");
+}
+
+/////
+
+/*
+player.z_pitch = 0;
+player.jump.height = 0;
+player.pace.screen_offset = 0;
+update_fov(INIT_FOV);
+*/
+if (keys[SDL_SCANCODE_C]) player.jump.height += 0.1;
+
+/////
+
+	abs_y_shift = fabs(y_shift),
+	// height = is_floor ? player.jump.height : 2 - (1 - player.jump.height);
+	// height = is_floor ? player.jump.height : current_level.max_point_height - (1 - player.jump.height);
+	height = is_floor ? player.jump.height : (current_level.max_point_height - (3.0 + player.jump.height));
+
+if (!is_floor)
+	DEBUG(height, lf);
+
+if (keys[SDL_SCANCODE_1]) height = 1;
+if (keys[SDL_SCANCODE_2]) height = 2;
+if (keys[SDL_SCANCODE_3]) height = 3;
+if (keys[SDL_SCANCODE_4]) height = 4;
+if (keys[SDL_SCANCODE_5]) height = 5;
+
+if (height < 0) height = 0;
+
+	/*
+	is_floor
+		? player.jump.height
+		: current_level.max_point_height - 1.0 - player.jump.height;
+	*/
+
+/////
+
+const double magic_number = settings.fov / 66.849622365373434718;
+DEBUG(magic_number, lf);
+
+/////
+
+// screen_height_over_proj_dist = settings.screen_width / settings.proj_dist,
+// screen_height_over_proj_dist = 1.5,
+
+/////
+
+/*
+a____b
+\c_d/
+
+dp = dot product
+p = point
+if dot(bp, ba), dot(bp, bc), dot(ap, ab), dot(ap, ad), dot(dp, dc)
+*/
+
+/////
+
+inlinable double diffuse_quad(const VectorF pos, const Quad quad) {
+	const double
+		x1 = quad[0], y1 = quad[1],
+		x2 = quad[3], y2 = quad[4],
+		x3 = quad[5], y3 = quad[6],
+		x4 = quad[7], y4 = quad[8];
+
+	(void) pos;
+	(void) x1;
+	(void) y1;
+	(void) x2;
+	(void) y2;
+	(void) x3;
+	(void) y3;
+	(void) x4;
+	(void) y4;
+
+	return 0.0;
+}
+
+/////
+
+const double
+	x1 = quad[0], y1 = quad[1],
+	x2 = quad[3], y2 = quad[4],
+	x3 = quad[5], y3 = quad[6],
+	x4 = quad[7], y4 = quad[8];
+
+(void) pos; (void) x1; (void) y1; (void) x2; (void) y2;
+(void) x3; (void) y3; (void) x4; (void) y4;
+
+/////
+
+typedef __m512d Quad; // eight coordinates
+
+/////
+
+fns: intersects with polygon, rectangle, or circle
+
+/////
+
+// https://www.tutorialspoint.com/Check-if-a-given-point-lies-inside-a-Polygon
+
+/////
+
+for (int i = 0; i <= 4; i++) {
+	const double point_1 = quad[i % 4], 
+}
+
+/////
+
+// https://en.wikipedia.org/wiki/Winding_number
+// http://paulbourke.net/geometry/polygonmesh/#insidepoly
+
+/////
+
+/*
+const double
+	d1 = sign(pt, v1, v2),
+	d2 = sign(pt, v2, v3),
+	d3 = sign(pt, v3, v1);
+*/
+
+/////
+
+/*
+return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+p1 = [triangle[0], triangle[1]]
+p2 = [triangle[2], triangle[3]]
+p3 = [triangle[4], triangle[5]]
+return
+	(triangle[0] - triangle[4]) * (triangle[3] - triangle[5]) -
+	(triangle[2] - triangle[4]) * (triangle[1] - triangle[5]);
+*/
+
+/////
+
+/*
+const VectorF
+	v1 = {triangle[0], triangle[1]},
+	v2 = {triangle[2], triangle[3]},
+	v3 = {triangle[4], triangle[5]};
+*/
+
+// first: 73 - 14 lines = 59 lines. second: 70 - 14 lines = 56 lines, third: 
+
+/*
+const double
+	slope_1 = sign(pos, v1, v2),
+	slope_2 = sign(pos, v2, v3),
+	slope_3 = sign(pos, v3, v1);
+*/
+
+/////
+
+/*
+	p1
+   / \
+  /   \
+ /     \
+p2______p3
+
+((p1.x - p3.x) * (p2.y - p3.y)) - ((p2.x - p3.x) * (p1.y - p3.y))
+Is there a SIMD instruction for this? What is it called?
+*/
+
+/////
+
+// asm("nop"); // btwn nops, 281 lines optimized
+
+/*
+if (y + pace >= settings.screen_height) {
+	printf("Error: %f\n", y + pace);
+}
+*/
+
+/*
+assert(shift_y >= 0);
+assert(shift_y <= settings.screen_height - 1);
+assert(screen_x >= 0);
+assert(screen_x <= settings.screen_width - 1);
+*/
+
+/////
+
+// https://stackoverflow.com/questions/63983054/sdl-geterror-returning-an-undocumented-error-on-macos
+
+/////
+
+// printf("Before event reading. Event address = %p. An SDL error: %s\n", (void*) &event, SDL_GetError());
+
+/////
+
+// else if (floor(pos[1]) == 10.0 && point == 2) return 8;
+// else if (pos[1] <= 9.0001 && point == 2) return 2;
+// else if (pos[1] >= 10.0001 && point == 2) return 2;
+
+else if (point == 2) {
+	/*
+	if (pos[1] >= 13.0) return 4;
+	else if (pos[1] >= 12.0) return 3;
+	else if (pos[1] >= 11.0) return 2;
+	else if (pos[1] >= 10.0) return 1;
+	else return point;
+	*/
+}
+
+/////
+
+/*
+// DEBUG(pos[1], lf); // fix the flickering
+if (point == 2 && pos[1] >= 6) {
+	int foo = pos[1];
+	// DEBUG(foo, d);
+	// const int foo = round(pos[1]) - 7;
+	// DEBUG(foo, d);
+	// return pos[1] - 7;
+	// return ceil(pos[1]);
+	// assert(foo > 0);
+}
+*/
+
+/////
+
+return current_level.wall_data[(int) (pos[1] + 0.0001)][(int) (pos[0] - 0.0001)];
+
+/////
+
+SDL_SetRenderDrawBlendMode(screen.renderer, SDL_BLENDMODE_ADD);
+
+/////
+
+set_level_animations(&experiments, animation_count,
+	"../assets/spritesheets/numbers.bmp", 3, 3, 7, 12, 3.5, 7.0);
+
+/////
+
+VectorF* pos = &nav -> animation -> billboard.pos;
+(*pos)[0] += nav -> v * dir.x;
+(*pos)[1] += nav -> v * dir.y;
+
+// if past the current vertex
+if ((dir.x == 1 && (*pos)[0] >= next_vertex[0]) ||
+	(dir.x == -1 && (*pos)[0] <= next_vertex[0]) ||
+	(dir.y == 1 && (*pos)[1] >= next_vertex[1]) ||
+	(dir.y == -1 && (*pos)[1] <= next_vertex[1])) {
+
+	(*pos)[0] = next_vertex[0];
+	(*pos)[1] = next_vertex[1];
+	nav -> path_ind++;
+}
+
+/////
+
+// SDL_SetTextureBlendMode(*buffer, SDL_BLENDMODE_ADD);
+// SDL_SetTextureBlendMode(*buffer, SDL_BLENDMODE_ADD);
+// if (i == 1) SDL_SetTextureBlendMode(*buffer, SDL_BLENDMODE_ADD);
+// SDL_SetTextureBlendMode(*buffer, SDL_BLENDMODE_BLEND);
+
+// if (i == 0) SDL_SetTextureBlendMode(*buffer, SDL_BLENDMODE_BLEND);
+// else SDL_SetTextureBlendMode(*buffer, SDL_BLENDMODE_BLEND);
+
+// if (i == 0) SDL_SetTextureBlendMode(*buffer, SDL_BLENDMODE_BLEND);
+
+/////
+
+/*
+if (keys[SDL_SCANCODE_C])
+	SDL_SetTextureBlendMode(generic.billboard.sprite.texture, SDL_BLENDMODE_ADD);
+else
+	SDL_SetTextureBlendMode(generic.billboard.sprite.texture, SDL_BLENDMODE_BLEND);
+*/
+
+/////
+
+/*
+SDL_SetRenderTarget(screen.renderer, screen.pixel_buffer);
+SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+SDL_RenderClear(screen.renderer);
+*/
+//
+// SDL_SetRenderTarget(screen.renderer, screen.pixel_buffer);
+
+/////
+
+// switch-case
+else if (point == 3) return 6;
+else if (point == 4) return 3;
+else if (point == 5) return 8;
+else if (point == 6) return 2;
+
+/////
+
+/*
+possible_spritesheet_crop.y = frame_origin.y,
+possible_spritesheet_crop.w = 1,
+possible_spritesheet_crop.h = possible_animation -> frame_h;
+*/
+
+/////

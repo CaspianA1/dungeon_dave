@@ -1,0 +1,165 @@
+SDL_Rect the_ceiling = {0, 0, screen_width, screen_height / 2},
+		 the_floor = {0, screen_height / 2, screen_width, screen_height};
+
+draw_rectangle(renderer_3D, &the_ceiling, 210, 180, 140);
+draw_rectangle(renderer_3D, &the_floor, 0, 128, 8);
+
+/////
+
+/*
+for (int y = 0; y < map_height / 2; y++) {
+	for (int x = 0; x < map_width / 2; x++) {
+		const unsigned char map_point = map[y][x];
+		printf("%d\n", map_point);
+	}
+}
+*/
+
+// SDL_RenderCopyEx;
+
+/////
+
+float player_h = 0.5;
+for (int y = half_screen_height; y < screen_height; y++) {
+	int floor_row = y - half_screen_height;
+	float straight_dist = (player_h / floor_row) * projection_distance;
+	// float actual_dist = straight_dist * cos(_ - to_radians(player.angle));
+
+	
+
+	/*
+	let angle_beta_radians = rotation - ray_angle;
+	let floor_actual_distance = floor_straight_distance / f64::cos(angle_beta_radians);
+	*/
+}
+
+/////
+
+/*
+Sprite sprite = textured_walls[1];
+
+SDL_Rect screen_bottom = {
+	0, half_screen_height,
+	screen_width, screen_height
+};
+
+for (float x = 0; x < screen_width; x += step_x) {
+	int tex_ind = (int) x % 64;
+	SDL_Rect slice = {0, 0, tex_ind, sprite.surface -> h};
+	SDL_RenderCopyEx(renderer_3D, sprite.texture,
+	&slice, &screen_bottom, player.angle, NULL, SDL_FLIP_NONE);
+
+}
+*/
+
+/////
+
+/*
+SET_COLOR(renderer_3D, 210, 180, 140);
+SDL_RenderDrawPoint(renderer_3D, screen_pos.x, screen_pos.y + screen_pos.h);
+*/
+
+
+
+/*
+for (int y = screen_pos.y + screen_pos.h; y < screen_height; y++) {
+	// double ground_dist = height / (2 * y - height)
+	while ()
+}
+*/
+
+/////
+
+
+double ground_dist = dist;
+int y = wall_pos.y + wall_pos.h;
+
+/*
+while ((ground_dist -= dist_step) > 0) {
+	double weight = ground_dist / dist;
+	int floor_x = weight * new_x + (1 - weight) * player.pos.x,
+		floor_y = weight * new_y + (1 - weight) * player.pos.y;
+
+	int tex_x = (floor_x * tex.surface -> w) % tex.surface -> w,
+		tex_y = (floor_y * tex.surface -> h) % tex.surface -> h;
+
+	SDL_Rect pixel = {tex_x, tex_y, 1, 1};
+	SDL_Rect ground_pos = {screen_x, y, 1, 1};
+
+	SDL_RenderCopy(renderer_3D, tex.texture, &pixel, &ground_pos);
+
+	y++;
+}
+*/
+
+/////
+
+// double ground_dist = wall_height / (2 * y - wall_height);
+
+/////
+
+// double ground_dist = dist;
+// double ground_dist = rand() % 8;
+// double ground_dist = wall_height / (2 * y - wall_height);
+// double progress = y - wall_bottom / screen_height - wall_bottom;
+// DEBUG(progress, f);
+// double ground_dist = dist - progress;
+
+//////////
+
+Sprite tex = textured_walls[0];
+
+int wall_bottom = wall_pos.y + wall_pos.h;
+double ground_dist = dist;
+for (int y = wall_bottom; y < screen_height; y++, ground_dist -= dist_step) {
+	double weight = ground_dist / dist;
+
+	double floor_x = weight * new_x + (1 - weight) * player.pos.x,
+		floor_y = weight * new_y + (1 - weight) * player.pos.y;
+
+	int tex_x = (int) (64 * floor_x) & 63,
+		tex_y = (int) (64 * floor_y) & 63;
+
+	SDL_Rect pixel = {tex_x, tex_y, 1, 1};
+	SDL_Rect ground_pos = {screen_x, y, 1, 1};
+
+	SDL_RenderCopy(renderer_3D, tex.texture, &pixel, &ground_pos);
+}
+
+//////////
+
+/*
+get floor row
+get straight distance
+get actual distance
+get x and y of hit, and then its decimal component
+get texture x and y
+get pixel
+draw it at the right position
+*/
+
+/*
+let floor_straight_distance = (player_height / floor_row as f64) * self.projection_distance;
+let angle_beta_radians = rotation - ray_angle;
+
+let floor_actual_distance = floor_straight_distance / f64::cos(angle_beta_radians);
+
+let mut floor_hit_x: f64 = origin_x + (floor_actual_distance * f64::cos(ray_angle));
+let mut floor_hit_y: f64 = origin_y + (floor_actual_distance * f64::sin(ray_angle));
+
+floor_hit_x -= floor_hit_x.floor();
+floor_hit_y -= floor_hit_y.floor();
+
+let texture_x: u32 = f64::floor(floor_hit_x * (floor_texture.width - 1) as f64) as u32;
+let texture_y: u32 = f64::floor(floor_hit_y * (floor_texture.height - 1) as f64) as u32;
+*/
+
+/////
+
+/*
+double posX = 22.0, posY = 11.5;  //x and y start position
+double dirX = -1.0, dirY = 0.0; //initial direction vector
+double planeX = 0.0, planeY = 0.66; //the 2d raycaster version of camera plane
+*/
+
+/////

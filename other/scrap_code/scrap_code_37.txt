@@ -1,0 +1,279 @@
+const byte player_point_height = player.jump.height / settings.screen_height;
+
+if (player_point_height >= point_height) {
+	const double y_diff = *last_wall_y - wall.y;
+	if (y_diff <= 0.0) return;
+
+	const SDL_FRect wall_top = {
+		screen_x, wall.y, settings.ray_column_width, y_diff - 1
+	};
+
+	SDL_SetRenderDrawColor(screen.renderer_3D,
+		255, (int) wall.y % 255, 0, SDL_ALPHA_OPAQUE);
+
+	SDL_RenderFillRectF(screen.renderer_3D, &wall_top);
+}
+
+/*
+if (*first_wall_hit) {
+	screen.z_buffer[screen_x] = correct_dist;
+	*first_wall_hit = 0;
+	*last_wall_y = wall.y;
+	*last_point_height = point_height;
+}
+
+// do for one screen_x
+
+const byte player_point_height = player.jump.height / settings.screen_height;
+
+if (point_height >= *last_point_height
+	&& player_point_height >= point_height
+	&& screen_x >= 500 && screen_x <= 700) {
+
+	const double y_diff = *last_wall_y - wall.y;
+	if (y_diff <= 0.0) return;
+
+	const SDL_FRect wall_top = {
+		screen_x, wall.y, settings.ray_column_width, y_diff - 1
+	};
+
+	SDL_SetRenderDrawColor(screen.renderer_3D,
+		255, (int) wall.y % 255, 0, SDL_ALPHA_OPAQUE);
+
+	SDL_RenderFillRectF(screen.renderer_3D, &wall_top);
+}
+
+*last_wall_y = wall.y;
+*last_point_height = point_height;
+*/
+
+/////
+
+const byte player_point_height = player.jump.height / settings.screen_height;
+
+if (point_height >= *last_point_height && player_point_height >= point_height) {
+	simd_draw_floor_or_ceil(player.pos, dir, 0, screen_x,
+		*last_wall_y, wall.y, cos_beta,
+		player.pace.screen_offset, player.y_pitch, player.jump.height);
+}
+*last_wall_y = wall.y;
+*last_point_height = point_height;
+
+/////
+
+-mavx2
+
+/////
+
+const byte player_point_height = player.jump.height / settings.screen_height;
+
+/////
+
+if (point_height >= *last_point_height
+	&& player_point_height == point_height
+	&& point_height > *largest_point_height) {
+	// not working yet ):
+
+/////
+
+SDL_SetRenderDrawColor;
+SDL_RenderDrawLine(screen.renderer_3D,
+	round(curr_vertex[0] * width_ratio_over_scale),
+	round(curr_vertex[1] * height_ratio_over_scale),
+	round(next_vertex[0] * width_ratio_over_scale),
+	round(next_vertex[1] * height_ratio_over_scale));
+
+/////
+
+const double
+	width_ratio_over_scale = current_level.width_ratio / settings.minimap_scale,
+	height_ratio_over_scale = current_level.height_ratio / settings.minimap_scale;
+
+/////
+
+SDL_RenderDrawLine(screen.renderer_3D,
+	round(player.pos[0] * width_ratio_over_scale),
+	round(player.pos[1] * height_ratio_over_scale),
+	round(cast_data.hit[0] * width_ratio_over_scale),
+	round(cast_data.hit[1] * height_ratio_over_scale));
+
+/////
+
+const VectorF curr_vertex = {curr_vertexI.x + 0.5, curr_vertexI.y + 0.5};
+
+/////
+
+/*
+ceil(current_level.width_ratio / settings.minimap_scale),
+ceil(current_level.height_ratio / settings.minimap_scale)
+*/
+
+/////
+
+void draw_minimap(const VectorF player_pos) {
+	static int minimap_enabled = 0;
+	if (keys[SDL_SCANCODE_1]) minimap_enabled = 0;
+	if (keys[SDL_SCANCODE_2]) minimap_enabled = 1;
+
+	if (!minimap_enabled) return;
+
+	/*
+	const double
+		width_ratio_over_scale = current_level.width_ratio / settings.minimap_scale,
+		height_ratio_over_scale = current_level.height_ratio / settings.minimap_scale;
+	*/
+
+	const double
+		screen_width_fraction = settings.screen_width / settings.minimap_scale,
+		screen_height_fraction = settings.screen_height / settings.minimap_scale;
+
+	/*
+	const SDL_FRect background = {0, 0, screen_width_fraction, screen_height_fraction};
+	SDL_SetRenderDrawColor(screen.renderer_3D, 0, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRectF(screen.renderer_3D, &background);
+	*/
+
+	SDL_SetRenderDrawColor(screen.renderer_3D, 210, 180, 140, SDL_ALPHA_OPAQUE);
+
+	SDL_FRect wall = {
+		0, 0,
+		screen_width_fraction / current_level.map_width,
+		screen_height_fraction / current_level.map_height
+	};
+
+	for (int map_x = 0; map_x < current_level.map_width; map_x++) {
+		for (int map_y = 0; map_y < current_level.map_height; map_y++) {
+			if (current_level.wall_data[map_y][map_x]) {
+				/*
+				wall.x = map_x;
+				wall.y = map_y;
+				*/
+				wall.x = map_x * current_level.width_ratio;
+				wall.y = map_y * current_level.height_ratio;
+				SDL_RenderFillRectF(screen.renderer_3D, &wall);
+			}
+		}
+	}
+
+	const SDL_FRect player_dot = {
+		player_pos[0] * screen_width_fraction,
+		player_pos[1] * screen_height_fraction,
+		/*
+		player_pos[0] * width_ratio_over_scale,
+		player_pos[1] * height_ratio_over_scale,
+		*/
+		5, 5
+	};
+
+	SDL_SetRenderDrawColor(screen.renderer_3D, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRectF(screen.renderer_3D, &player_dot);
+
+/////
+
+/*
+if (animating_weapon && weapon.frame_ind == 0) animating_weapon = 0;
+else if (input_status == BeginAnimatingWeapon) animating_weapon = 1;
+// -1 -> cycle frame, 0 -> first frame
+animate_weapon(&weapon, -animating_weapon,
+	player.y_pitch, player.pace.screen_offset);
+*/
+
+/////
+
+/*
+Animation weapon = init_animation("../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30);
+int animating_weapon = 0;
+*/
+
+/////
+
+/*
+inlinable void update_theta(double* theta, const VectorI* mouse_pos) {
+	*theta = ((double) mouse_pos -> x / settings.screen_width) * 360.0;
+
+	if (mouse_pos -> x == settings.screen_width - 1)
+		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos -> y);
+	else if (mouse_pos -> x == 0)
+		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
+}
+*/
+
+/////
+
+/*
+player -> dir[0] = cos(rad_theta);
+player -> dir[1] = sin(rad_theta);
+*/
+
+/*
+const double
+	cos_theta = cos(rad_theta),
+	sin_theta = sin(rad_theta);
+
+const VectorF forward_back_movement = {
+	cos_theta * body -> v,
+	sin_theta * body -> v
+},
+
+sideways_movement = {
+	cos_theta * body -> strafe_v,
+	sin_theta * body -> strafe_v
+};
+*/
+
+/////
+
+void update_theta_and_dir_and_plane(double* theta,
+	VectorI* mouse_pos, VectorF* dir, VectorF* plane) {
+
+	/////
+	SDL_GetMouseState(&mouse_pos -> x, &mouse_pos -> y);
+
+	const double prev_theta = *theta;
+	*theta = ((double) mouse_pos -> x / settings.screen_width) * 360.0;
+
+	const byte turned = !doubles_eq(*theta, prev_theta);
+
+	if (mouse_pos -> x == settings.screen_width - 1)
+		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos -> y);
+	else if (mouse_pos -> x == 0)
+		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
+	/////
+
+	if (turned) {
+		const double
+			old_dir_x = (*dir)[0],
+			old_plane_x = (*plane)[0],
+			rad_theta = to_radians(*theta);
+
+		const double delta_theta = rad_theta - to_radians(prev_theta);
+		const double cos_delta_theta = cos(delta_theta), sin_delta_theta = sin(delta_theta);
+		VectorF copy_dir = *dir, copy_plane = *plane;
+
+		/*
+		(*dir)[0] = cos(rad_theta);
+		(*dir)[1] = sin(rad_theta);
+		*/
+
+		if (*theta > prev_theta) { // right
+			dir[0] = dir[0] * cos_delta_theta + dir[1] * sin_delta_theta;
+			dir[1] = old_dir_x * -sin_delta_theta + dir[1] * cos_delta_theta;
+			plane[0] = plane[0] * cos_delta_theta + plane[1] * sin_delta_theta;
+			plane[1] = old_plane_x * -sin_delta_theta + plane[1] * cos_delta_theta;
+		}
+		else { // left
+		}
+
+		/*
+		(*plane)[0] = (*plane)[0] * cos_delta_theta + (*plane)[1] * sin_delta_theta;
+		(*plane)[1] = old_plane_x * sin_delta_theta + (*plane)[1] * cos_delta_theta;
+		*/
+
+/////
+
+/*
+(*plane)[0] = (*plane)[0] * cos_delta_theta + (*plane)[1] * sin_delta_theta;
+(*plane)[1] = old_plane_x * sin_delta_theta + (*plane)[1] * cos_delta_theta;
+*/
+
+/////
