@@ -43,6 +43,8 @@ visplane floors
 non-clipping enemies
 */
 
+// this is the first commit from the new computer!
+
 int main(void) {
 	Player player;
 	Weapon weapon;
