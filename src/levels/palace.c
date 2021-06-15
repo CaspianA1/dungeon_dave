@@ -94,8 +94,8 @@ void load_palace(void) {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
-	// previous: {1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}, {12.0, 37.0, 0.0}
-	Level palace = init_level(map_width, map_height, (VectorF) {15.5, 24.5}, 2.0);
+	// previous: {1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}, {12.0, 37.0, 0.0}, {15.5, 24.5, 2.0}
+	Level palace = init_level(map_width, map_height, (VectorF) {2.0, 2.0}, 2.0);
 	palace.max_point_height = 6;
 	palace.background_sound = init_sound("../assets/audio/sultan.wav", 0);
 	palace.get_point_height = get_palace_point_height;

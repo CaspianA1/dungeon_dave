@@ -1,8 +1,7 @@
 super-priorities:
-	- bug fixes (floor/ceiling, then jumping)
+	- bug fixes
+	- enemy AI
 	- variable wall height extensions
-	- sound design
-	- dedicated vector operations
 
 features:
 	- covered tops of walls
