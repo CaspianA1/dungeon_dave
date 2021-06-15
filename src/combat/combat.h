@@ -32,11 +32,12 @@ inlinable Navigator init_navigator(const VectorF, VectorF*, const double);
 
 typedef struct {
 	byte in_use;
+	const double screen_y_shift_percent_down;
 	Sound sound;
 	Animation animation;
 } Weapon;
 
-inlinable Weapon init_weapon(const char*, const char*, const int, const int, const int, const int);
+inlinable Weapon init_weapon(const char*, const char*, const double, const int, const int, const int, const int);
 
 /////
 

@@ -122,13 +122,13 @@ void load_all_defaults(void (*load_first_level) (void), Player* player, Weapon* 
 
 	const Player first_player = load_player(4.8, 0.3, 8.0, 0.1, 15.0, 0.08, 0.09, 0.06, 1.9);
 
-	const Weapon first_weapon = init_weapon("../assets/audio/shotgun.wav",
-		"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30);
-
 	/*
-	const Navigator first_navigator = init_navigator(first_player.pos,
-		&current_level.animations[0].billboard.pos, 0.05);
+	const Weapon first_weapon = init_weapon("../assets/audio/shotgun.wav",
+		"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 0.0, 6, 10, 59, 30);
 	*/
+
+	const Weapon first_weapon = init_weapon("../assets/audio/enemy_sound_test/attack.wav",
+		"../assets/spritesheets/weapons/golden_dagger.bmp", 0.09, 2, 5, 9, 30);
 
 	memcpy(player, &first_player, sizeof(Player));
 	memcpy(weapon, &first_weapon, sizeof(Weapon));

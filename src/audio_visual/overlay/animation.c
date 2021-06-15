@@ -50,7 +50,7 @@ inlinable VectorI get_spritesheet_frame_origin(const Animation animation) {
 }
 
 void animate_weapon(Animation* animation, const VectorF pos,
-	const int frame_num, const int z_pitch, const double pace) {
+	const int frame_num, const int z_pitch, const double pace, const double screen_y_shift_percent_down) {
 	// frame_num == -1 -> auto_progress frame
 
 	#ifndef SHADING_ENABLED
@@ -66,7 +66,7 @@ void animate_weapon(Animation* animation, const VectorF pos,
 
 	const SDL_FRect screen_pos = {
 		pace,
-		fabs(pace) + (z_pitch < 0 ? 0 : z_pitch),
+		fabs(pace) + (z_pitch < 0 ? 0 : z_pitch) + settings.screen_height * screen_y_shift_percent_down,
 		settings.screen_width,
 		settings.screen_height
 	};

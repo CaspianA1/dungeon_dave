@@ -40,7 +40,7 @@ double palace_shader(const VectorF pos) {
 		diffuse_circle(pos, first_health_kit) * 5.0
 		+ diffuse_circle(pos, first_downward_stairs) * 0.2
 		+ diffuse_circle(pos, torch) * 5.0
-		+ flat_triangle(pos, ravine_jump_entrance) * 1.5
+		+ flat_triangle(pos, ravine_jump_entrance) * 1.8
 		+ 2.0;
 }
 

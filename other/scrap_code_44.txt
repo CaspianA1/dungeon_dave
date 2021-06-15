@@ -264,3 +264,10 @@ settings.half_screen_height - (wall_h / 2.0) +
 */
 
 /////
+
+/*
+const Navigator first_navigator = init_navigator(first_player.pos,
+	&current_level.animations[0].billboard.pos, 0.05);
+*/
+
+/////
