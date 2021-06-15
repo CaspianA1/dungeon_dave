@@ -195,3 +195,23 @@ else pause_unpause_sound(body -> sound_at_wall_hit, 1);
 */
 
 /////
+
+void retreat_enemy(Enemy* enemy) {
+	while (1) {
+		const VectorI new_spot = {rand() % current_level.map_width, rand() % current_level.map_height};
+		const byte point = wall_point(new_spot.x, new_spot.y);
+		if (point) continue; // any point indicates a point height above 1
+		else if (current_level.get_point_height(point, (VectorF) {new_spot.x, new_spot.y}) != 0) continue;
+		else break;
+	}
+}
+
+/////
+
+/*
+Navigator nav = enemy -> navigator;
+nav.pos = wmalloc(sizeof(VectorF));
+memcpy(&nav.pos, &new_spot, sizeof(VectorF));
+*/
+
+/////

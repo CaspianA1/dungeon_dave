@@ -132,7 +132,7 @@ void load_experiments(void) {
 
 	set_level_billboards(&experiments, billboard_count,
 		"../assets/objects/health_kit.bmp", 11.5, 28.0, 0.0,
-		"../assets/objects/palm_tree.bmp", 16.5, 29.5, 0.0);
+		"../assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0);
 
 	set_level_animations(&experiments, animation_count,
 		// "../assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,
@@ -144,7 +144,7 @@ void load_experiments(void) {
 
 	// this is set after b/c this depends on fns that read from current_level
 	set_level_enemies(&current_level, enemy_count,
-		Dead, // state
+		Chasing, // state
 		1.5, 3.0, 6.0, 10.0, // dist_thresholds
 		5.0, 20.0, // hp_to_retreat, hp
 		4, 8, 10, 11, 4, // animation_seg_lengths

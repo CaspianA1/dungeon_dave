@@ -1,28 +1,52 @@
 /*
-The enemy AI:
-
 Five enemy states: Idle, Chasing, Attacking, Retreating, Dead
-
-spritesheet layout:
-idle, then chasing, then attacking, then retreating, then dead.
-for sounds: idle, chasing, attacking, attacked, dead
+The spritesheet layout is in the order of the enemy states.
+The sounds are in the same order, but with Retreating substituted for Attacked.
 */
 
+void set_enemy_state(Enemy* enemy, EnemyState new_state) {
+	enemy -> state = new_state;
+
+	int new_frame_ind = 0;
+	for (byte i = 0; i < enemy -> state; i++)
+		new_frame_ind += enemy -> animation_seg_lengths[i];
+
+	enemy -> animations.frame_ind = new_frame_ind;
+}
+
+void retreat_enemy(Enemy* enemy) {
+	if (enemy -> state == Retreating) {
+		// keep chasing
+	}
+
+	else {
+		while (1) {
+			const VectorF new_spot = {rand() % current_level.map_width, rand() % current_level.map_height};
+			if (wall_point(new_spot[0], new_spot[1])) continue;
+			enemy -> animations.billboard.pos = new_spot;
+			// if the new dest isn't navigatable to, find a new spot
+
+			set_enemy_state(enemy, Retreating);
+			break;
+		}
+	}
+}
+
 void update_enemy(Enemy* enemy, const Player player) {
-	enemy -> state = Dead;
-
 	static byte i = 1;
-
 	if (i) play_sound(enemy -> sounds[enemy -> state], 0);
+	i = 0;
 
 	switch (enemy -> state) {
 		case Idle: // stay there, idle animation
-			printf("Idle\n");
 			break;
-		case Chasing: // bfs stuff
-			update_path_if_needed(&enemy -> navigator, player.pos, player.jump);
+		case Chasing: { // bfs stuff
+			const byte reached_dest = update_path_if_needed(&enemy -> navigator, player.pos, player.jump);
+			if (reached_dest) set_enemy_state(enemy, Attacking);
 			break;
+		}
 		case Attacking: // attack animation + fighting
+			// attack if the player is close enough, otherwise transition to Chasing
 			break;
 		case Retreating: // run away to some random vantage point
 			break;

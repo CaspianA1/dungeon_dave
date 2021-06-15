@@ -103,7 +103,6 @@ void set_level_animations(Level* level, const unsigned animation_count, ...) {
 animation_seg_lengths, animations, sounds, navigator */
 
 void set_level_enemies(Level* level, const unsigned enemy_count, ...) {
-	// the memory leak is here
 	level -> enemy_count = enemy_count;
 	level -> enemies = wmalloc(enemy_count * sizeof(Enemy));
 
@@ -111,9 +110,8 @@ void set_level_enemies(Level* level, const unsigned enemy_count, ...) {
 	va_start(enemy_data, enemy_count);
 
 	for (byte i = 0; i < enemy_count; i++) {
+		const EnemyState enemy_state = va_arg(enemy_data, EnemyState);
 		Enemy enemy = {
-			.state = va_arg(enemy_data, EnemyState),
-
 			.dist_thresholds = {
 				.begin_attacking = va_arg(enemy_data, double),
 				.begin_chasing = va_arg(enemy_data, double),
@@ -140,8 +138,8 @@ void set_level_enemies(Level* level, const unsigned enemy_count, ...) {
 			.sounds = wmalloc(5 * sizeof(Sound))
 		};
 
-		for (byte i = 0; i < enemy.state; i++)
-			enemy.animations.frame_ind += enemy.animation_seg_lengths[i];
+		void set_enemy_state(Enemy*, EnemyState);
+		set_enemy_state(&enemy, enemy_state);
 
 		Billboard* billboard = &enemy.animations.billboard;
 		billboard -> pos = (VectorF) {va_arg(enemy_data, double), va_arg(enemy_data, double)};

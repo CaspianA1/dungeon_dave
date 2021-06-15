@@ -21,11 +21,12 @@ inlinable Navigator init_navigator(const VectorF player_pos, VectorF* pos_ref, c
 	return nav;
 }
 
-void update_path_if_needed(Navigator* nav, const VectorF player_pos, const Jump jump) {
-	if (jump.height > 0.0 && !jump.jumping) return;
+// returns if the destination was reached
+byte update_path_if_needed(Navigator* nav, const VectorF player_pos, const Jump jump) {
+	if (jump.height > 0.0 && !jump.jumping) return 0;
 	else if (nav -> path_ind == -1) {
 		update_path(nav, player_pos, 0);
-		return;
+		return 0;
 	}
 
 	const Path* path = &nav -> path_to_player;
@@ -65,5 +66,7 @@ void update_path_if_needed(Navigator* nav, const VectorF player_pos, const Jump 
 			nav -> path_ind++;
 		}
 		*pos_ref = pos;
+		return 0;
 	}
+	return 1;
 }
