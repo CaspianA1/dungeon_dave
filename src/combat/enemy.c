@@ -53,7 +53,6 @@ void update_enemy(Enemy* enemy, const Player player) {
 		case Dead: // do not move, dead single-sprite animation
 			break;
 	}
-	i = 0;
 }
 
 inlinable void update_all_enemies(const Player player) {
