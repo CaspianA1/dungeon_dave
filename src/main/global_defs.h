@@ -8,8 +8,8 @@
 #define FULL_QUALITY
 // #define TRACK_MEMORY
 
-#define INIT_W 1000
-#define INIT_H 700
+#define INIT_W 800
+#define INIT_H 600
 #define INIT_MAX_FPS 60
 #define INIT_RAY_COLUMN_W 1
 

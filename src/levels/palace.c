@@ -1,4 +1,4 @@
-byte get_experiments_point_height(const byte point, const VectorF pos) {
+byte get_palace_point_height(const byte point, const VectorF pos) {
 	if (point == 1) {
 		if (pos[0] <= 8.9999 && pos[1] <= 5.9999) return 3;
 		else return 5;
@@ -28,7 +28,7 @@ byte get_experiments_point_height(const byte point, const VectorF pos) {
 	}
 }
 
-double experiments_shader(const VectorF pos) {
+double palace_shader(const VectorF pos) {
 	static const Circle
 		first_health_kit = {5.0, 2.0, 1.0},
 		first_downward_stairs = {22.0, 24.0, 5.0},
@@ -41,7 +41,7 @@ double experiments_shader(const VectorF pos) {
 		+ 2.0;
 }
 
-void load_experiments(void) {
+void load_palace(void) {
 	enum {
 		map_width = 40, map_height = 40,
 		wall_count = 7, billboard_count = 2,
@@ -91,37 +91,37 @@ void load_experiments(void) {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
-	// previous: {1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}
-	Level experiments = init_level(map_width, map_height, (VectorF) {2.0, 2.0}, 2.0);
-	experiments.max_point_height = 6;
-	experiments.background_sound = init_sound("../assets/audio/sultan.wav", 0);
-	experiments.get_point_height = get_experiments_point_height;
-	experiments.shader = experiments_shader;
+	// previous: {1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}
+	Level palace = init_level(map_width, map_height, (VectorF) {12.0, 37.0}, 0.0);
+	palace.max_point_height = 6;
+	palace.background_sound = init_sound("../assets/audio/sultan.wav", 0);
+	palace.get_point_height = get_palace_point_height;
+	palace.shader = palace_shader;
 
 	for (int y = 0; y < map_height; y++) {
-		memcpy(experiments.wall_data[y], &wall_data[y], map_width);
-		memset(experiments.ceiling_data[y], 1, map_width);
-		memset(experiments.floor_data[y], 1, map_width);
+		memcpy(palace.wall_data[y], &wall_data[y], map_width);
+		memset(palace.ceiling_data[y], 1, map_width);
+		memset(palace.floor_data[y], 1, map_width);
 	}
 
 	for (int x = 4; x < 7; x++) {
 		for (int y = 0; y < 3; y++)
-			experiments.floor_data[y][x] = 5;
+			palace.floor_data[y][x] = 5;
 	}
 
 	for (int x = 11; x < 13; x++) {
 		for (int y = 27; y < 29; y++)
-			experiments.floor_data[y][x] = 7;
+			palace.floor_data[y][x] = 7;
 	}
 
 	for (int x = 16; x < 22; x++) {
 		for (int y = 24; y < 30; y++)
-			experiments.floor_data[y][x] = 6;
+			palace.floor_data[y][x] = 6;
 	}
 
-	set_level_skybox(&experiments, "../assets/skyboxes/desert.bmp");
+	set_level_skybox(&palace, "../assets/skyboxes/desert.bmp");
 
-	set_level_walls(&experiments, wall_count,
+	set_level_walls(&palace, wall_count,
 		"../assets/walls/pyramid_bricks_3.bmp",
 		"../assets/walls/marble.bmp",
 		"../assets/walls/hieroglyphics.bmp",
@@ -130,17 +130,16 @@ void load_experiments(void) {
 		"../assets/walls/sandstone.bmp",
 		"../assets/walls/cobblestone_3.bmp");
 
-	set_level_billboards(&experiments, billboard_count,
+	set_level_billboards(&palace, billboard_count,
 		"../assets/objects/health_kit.bmp", 11.5, 28.0, 0.0,
 		"../assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0);
 
-	set_level_animations(&experiments, animation_count,
+	set_level_animations(&palace, animation_count,
 		// "../assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,
 		"../assets/spritesheets/flying_carpet.bmp", 5, 10, 46, 25, 5.0, 2.0, 0.0,
 		"../assets/spritesheets/torch_2.bmp", 2, 3, 5, 12, 7.5, 12.5, 0.0);
 
-
-	memcpy(&current_level, &experiments, sizeof(Level));
+	memcpy(&current_level, &palace, sizeof(Level));
 
 	// this is set after b/c this depends on fns that read from current_level
 	set_level_enemies(&current_level, enemy_count,

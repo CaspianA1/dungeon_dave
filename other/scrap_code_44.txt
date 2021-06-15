@@ -215,3 +215,42 @@ memcpy(&nav.pos, &new_spot, sizeof(VectorF));
 */
 
 /////
+
+/*
+const byte player_point_height = player.jump.height / settings.screen_height;
+if (point_height >= *last_point_height
+	&& player_point_height == point_height
+	&& point_height >= *largest_point_height) {
+
+		SDL_SetRenderDrawColor(screen.renderer_3D, 255, (int) wall.y % 255, 0, SDL_ALPHA_OPAQUE);
+		SDL_RenderDrawLineF(screen.renderer_3D, screen_x, *last_wall_y, screen_x, wall.y);
+}
+//
+*last_wall_y = wall.y;
+*last_point_height = point_height;
+if (point_height > *largest_point_height) *largest_point_height = point_height;
+//
+*/
+
+/////
+
+/*
+if (first)
+	printf("Beginning\n---\n");
+*/
+
+// first = 0;
+
+/////
+
+/*
+static double off = 0.0;
+if (keys[SDL_SCANCODE_3]) off += 0.0001;
+if (keys[SDL_SCANCODE_4]) off -= 0.0001;
+wall.y += off;
+*/
+
+// wall.y += 2;
+// wall.y = ceil((double) wall.y);
+
+/////

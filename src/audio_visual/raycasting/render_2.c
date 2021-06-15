@@ -1,6 +1,6 @@
 void handle_ray(const Player player, const CastData cast_data, const int screen_x,
-	byte* first_wall_hit, double* smallest_wall_y, double* last_wall_y, // make some params static
-	byte* last_point_height, const double player_angle, /* in radians */
+	byte* first_wall_hit, double* smallest_wall_y, // make some params static
+	const double player_angle, /* in radians */
 	const double theta, const VectorF dir) {
 
 	const double cos_beta = cos(player_angle - theta);
@@ -9,20 +9,20 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 
 	const byte point_height = current_level.get_point_height(cast_data.point, cast_data.hit);
 
-	const SDL_FRect wall = {
+	SDL_FRect wall = {
 		screen_x,
 		settings.half_screen_height - (wall_h / 2.0) +
 			player.z_pitch + player.pace.screen_offset +
-			(player.jump.height * settings.screen_height / correct_dist) - 2.0,
+			(player.jump.height * settings.screen_height / correct_dist),
 		settings.ray_column_width,
-		(float) (wall_h + 2.0) // without the `2.0`, a stitch appears
+		wall_h
 	};
+
+	// printf("Wall bottom is %f\n", (double) (wall.y + wall.h));
 
 	if (*first_wall_hit) {
 		screen.z_buffer[screen_x] = correct_dist;
 		*first_wall_hit = 0;
-		*last_wall_y = (double) wall.y;
-		*last_point_height = point_height;
 	}
 
 	for (byte i = 0; i < point_height; i++) {
@@ -33,7 +33,7 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 		if ((double) raised_wall.y >= *smallest_wall_y) continue;
 
 		const int max_sprite_height =
-			current_level.walls[cast_data.point - 1].surface -> h;
+			current_level.walls[cast_data.point - 1].surface -> h - 1;
 
 		const double
 			raised_wall_bottom = (double) (raised_wall.y + raised_wall.h),
@@ -63,23 +63,6 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 		}
 		draw_wall(cast_data, dir, raised_wall, sprite_height, max_raised_wall_h);
 	}
-
-	/////
-	/*
-	const byte player_point_height = player.jump.height / settings.screen_height;
-	if (point_height >= *last_point_height
-		&& player_point_height == point_height
-		&& point_height >= *largest_point_height) {
-
-			SDL_SetRenderDrawColor(screen.renderer_3D, 255, (int) wall.y % 255, 0, SDL_ALPHA_OPAQUE);
-			SDL_RenderDrawLineF(screen.renderer_3D, screen_x, *last_wall_y, screen_x, wall.y);
-	}
-	/////
-	*last_wall_y = wall.y;
-	*last_point_height = point_height;
-	if (point_height > *largest_point_height) *largest_point_height = point_height;
-	/////
-	*/
 }
 
 void raycast_2(const Player player) {
@@ -92,8 +75,8 @@ void raycast_2(const Player player) {
 		const VectorF dir = {cos(theta), sin(theta)};
 
 		// begin DDA
-		byte first_wall_hit = 1, last_point_height, side;
-		double smallest_wall_y = DBL_MAX, last_wall_y;
+		byte first_wall_hit = 1, side;
+		double smallest_wall_y = DBL_MAX;
 
 		const VectorF unit_step_size = {fabs(1.0 / dir[0]), fabs(1.0 / dir[1])};
 		VectorF ray_length;
@@ -137,10 +120,9 @@ void raycast_2(const Player player) {
 				};
 
 				handle_ray(player, cast_data, screen_x,
-					&first_wall_hit, &smallest_wall_y, &last_wall_y,
-					&last_point_height, player_angle, theta, dir);
+					&first_wall_hit, &smallest_wall_y,
+					player_angle, theta, dir);
 			}
-			else last_point_height = 0;
 		}
 		// end DDA
 	}

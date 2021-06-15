@@ -114,10 +114,9 @@ void raycast(const Player player) {
 			screen_x,
 			settings.half_screen_height - (wall_h / 2.0) +
 				player.z_pitch + player.pace.screen_offset
-				+ (player.jump.height * settings.screen_height / correct_dist) - 2.0,
+				+ (player.jump.height * settings.screen_height / correct_dist),
 
-			settings.ray_column_width,
-			wall_h + 2.0 // without the `2.0`, a stitch appears
+			settings.ray_column_width, wall_h
 		};
 
 		std_draw_floor(player, ray_direction, wall, cos_beta);
