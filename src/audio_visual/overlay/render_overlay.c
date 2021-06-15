@@ -24,7 +24,7 @@ int cmp_generic_billboards(const void* a, const void* b) {
 	else return 0;
 }
 
-void draw_generic_billboards(const Player player) {
+void draw_generic_billboards(const Player player, const double billboard_y_shift) {
 	const double player_angle = to_radians(player.angle);
 
 	const byte generic_billboard_count = current_level.generic_billboard_count;
@@ -43,12 +43,10 @@ void draw_generic_billboards(const Player player) {
 
 		Billboard* billboard;
 
-		if (is_animated) {
-			if (is_enemy)
-				billboard = &current_level.enemies[possible_enemy_index].animations.billboard;
-			else
-				billboard = &current_level.animations[possible_animation_index].billboard;
-		}
+		if (is_animated)
+			billboard = is_enemy
+				? &current_level.enemies[possible_enemy_index].animations.billboard
+				: &current_level.animations[possible_animation_index].billboard;
 		else
 			billboard = &current_level.billboards[i];
 
@@ -86,14 +84,8 @@ void draw_generic_billboards(const Player player) {
 			center_offset = tan(billboard.beta) * settings.proj_dist,
 			size = settings.proj_dist / billboard.dist;
 
-		/*
-		if (generic.is_enemy) {
-			// printf("Bad guy\n");
-			continue;
-		}
-		*/
-
 		/////
+
 		Animation* possible_animation;
 		SDL_Rect possible_spritesheet_crop;
 		double possible_spritesheet_begin_x, width;
@@ -123,6 +115,7 @@ void draw_generic_billboards(const Player player) {
 			width = possible_animation -> frame_w;
 		}
 		else width = billboard.sprite.surface -> w;
+
 		/////
 
 		const double
@@ -137,10 +130,8 @@ void draw_generic_billboards(const Player player) {
 		else if (end_x >= settings.screen_width) end_x = settings.screen_width - 1.0;
 
 		SDL_FRect screen_pos = {
-			0.0, settings.half_screen_height - half_size
-			+ player.pace.screen_offset + player.z_pitch
-			+ ((player.jump.height - billboard.height) * settings.screen_height)
-				/ billboard.dist,
+			0.0, billboard_y_shift - half_size
+			+ (player.jump.height - billboard.height) * settings.screen_height / billboard.dist,
 			settings.ray_column_width, size
 		};
 

@@ -15,6 +15,10 @@ typedef struct {
 
 /////
 
+typedef enum {
+	Navigating, ReachedDest, CouldNotNavigate
+} NavigatorState;
+
 typedef struct {
 	Path path_to_player; // whole-number path
 	VectorF* pos;

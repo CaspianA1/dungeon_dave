@@ -5,8 +5,8 @@ byte get_palace_point_height(const byte point, const VectorF pos) {
 	}
 
 	else if (point == 2) {
-		if (pos[1] <= 9.99999) return 1;
-		else if (pos[0] >= 21.99999 || pos[1] <= 10.99999) return 2;
+		if (pos[1] <= 9.9999) return 1;
+		else if (pos[0] >= 21.0001 || pos[1] <= 10.9999) return 2;
 		return 3;
 	}
 
@@ -34,17 +34,20 @@ double palace_shader(const VectorF pos) {
 		first_downward_stairs = {22.0, 24.0, 5.0},
 		torch = {7.5, 12.5, 1.0};
 
+	static const Triangle ravine_jump_entrance = {{15.0001, 24.0}, {15.5, 31.5}, {5.0, 28.0}};
+
 	return
 		diffuse_circle(pos, first_health_kit) * 5.0
 		+ diffuse_circle(pos, first_downward_stairs) * 0.2
 		+ diffuse_circle(pos, torch) * 5.0
+		+ flat_triangle(pos, ravine_jump_entrance) * 1.5
 		+ 2.0;
 }
 
 void load_palace(void) {
 	enum {
 		map_width = 40, map_height = 40,
-		wall_count = 7, billboard_count = 2,
+		wall_count = 7, billboard_count = 3,
 		animation_count = 2, enemy_count = 1
 	};
 
@@ -91,8 +94,8 @@ void load_palace(void) {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
-	// previous: {1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}
-	Level palace = init_level(map_width, map_height, (VectorF) {12.0, 37.0}, 0.0);
+	// previous: {1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}, {12.0, 37.0, 0.0}
+	Level palace = init_level(map_width, map_height, (VectorF) {15.5, 24.5}, 2.0);
 	palace.max_point_height = 6;
 	palace.background_sound = init_sound("../assets/audio/sultan.wav", 0);
 	palace.get_point_height = get_palace_point_height;
@@ -132,7 +135,8 @@ void load_palace(void) {
 
 	set_level_billboards(&palace, billboard_count,
 		"../assets/objects/health_kit.bmp", 11.5, 28.0, 0.0,
-		"../assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0);
+		"../assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0,
+		"../assets/objects/golden_dome.bmp", 13.0, 28.0, 1.0);
 
 	set_level_animations(&palace, animation_count,
 		// "../assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,

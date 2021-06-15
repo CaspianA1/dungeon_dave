@@ -14,9 +14,9 @@ void set_enemy_state(Enemy* enemy, EnemyState new_state) {
 	enemy -> animations.frame_ind = new_frame_ind;
 }
 
-void retreat_enemy(Enemy* enemy) {
+void retreat_enemy(Enemy* enemy, const Player player) {
 	if (enemy -> state == Retreating) {
-		// keep chasing
+		update_path_if_needed(&enemy -> navigator, player.pos, player.jump);
 	}
 
 	else {
@@ -25,6 +25,8 @@ void retreat_enemy(Enemy* enemy) {
 			if (wall_point(new_spot[0], new_spot[1])) continue;
 			enemy -> animations.billboard.pos = new_spot;
 			// if the new dest isn't navigatable to, find a new spot
+			if (update_path_if_needed(&enemy -> navigator, player.pos, player.jump) == CouldNotNavigate)
+				continue;
 
 			set_enemy_state(enemy, Retreating);
 			break;
@@ -41,8 +43,8 @@ void update_enemy(Enemy* enemy, const Player player) {
 		case Idle: // stay there, idle animation
 			break;
 		case Chasing: { // bfs stuff
-			const byte reached_dest = update_path_if_needed(&enemy -> navigator, player.pos, player.jump);
-			if (reached_dest) set_enemy_state(enemy, Attacking);
+			if (update_path_if_needed(&enemy -> navigator, player.pos, player.jump) == ReachedDest)
+				set_enemy_state(enemy, Attacking);
 			break;
 		}
 		case Attacking: // attack animation + fighting

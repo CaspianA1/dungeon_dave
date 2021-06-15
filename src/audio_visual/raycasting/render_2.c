@@ -1,7 +1,6 @@
 void handle_ray(const Player player, const CastData cast_data, const int screen_x,
-	byte* first_wall_hit, double* smallest_wall_y, // make some params static
-	const double player_angle, /* in radians */
-	const double theta, const VectorF dir) {
+	byte* first_wall_hit, double* smallest_wall_y, const double player_angle,
+	const double theta, const double wall_y_shift, const double full_jump_height, const VectorF dir) {
 
 	const double cos_beta = cos(player_angle - theta);
 	const double correct_dist = cast_data.dist * cos_beta;
@@ -9,16 +8,12 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 
 	const byte point_height = current_level.get_point_height(cast_data.point, cast_data.hit);
 
-	SDL_FRect wall = {
+	const SDL_FRect wall = {
 		screen_x,
-		settings.half_screen_height - (wall_h / 2.0) +
-			player.z_pitch + player.pace.screen_offset +
-			(player.jump.height * settings.screen_height / correct_dist),
+		wall_y_shift - wall_h / 2.0 + full_jump_height / correct_dist,
 		settings.ray_column_width,
 		wall_h
 	};
-
-	// printf("Wall bottom is %f\n", (double) (wall.y + wall.h));
 
 	if (*first_wall_hit) {
 		screen.z_buffer[screen_x] = correct_dist;
@@ -65,7 +60,7 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 	}
 }
 
-void raycast_2(const Player player) {
+void raycast_2(const Player player, const double wall_y_shift, const double full_jump_height) {
 	const double player_angle = to_radians(player.angle);
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
@@ -121,7 +116,7 @@ void raycast_2(const Player player) {
 
 				handle_ray(player, cast_data, screen_x,
 					&first_wall_hit, &smallest_wall_y,
-					player_angle, theta, dir);
+					player_angle, theta, wall_y_shift, full_jump_height, dir);
 			}
 		}
 		// end DDA

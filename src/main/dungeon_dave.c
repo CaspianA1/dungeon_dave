@@ -43,8 +43,6 @@ visplane floors
 non-clipping enemies
 */
 
-// this is the first commit from the new computer!
-
 int main(void) {
 	Player player;
 	Weapon weapon;
@@ -66,9 +64,13 @@ int main(void) {
 		update_screen_dimensions(&player.pace.domain.max);
 		prepare_for_drawing();
 
+		const double
+			wall_y_shift = settings.half_screen_height + player.z_pitch + player.pace.screen_offset,
+			full_jump_height = player.jump.height * settings.screen_height;
+
 		// start_floorcast_tick(&floorcast_thread);
-		raycast_2(player);
-		draw_generic_billboards(player);
+		raycast_2(player, wall_y_shift, full_jump_height);
+		draw_generic_billboards(player, wall_y_shift);
 
 		/*
 		draw_ceiling_plane(player);

@@ -94,7 +94,7 @@ CastData dda(const VectorF pos, const VectorF dir) {
 	}
 }
 
-void raycast(const Player player) {
+void raycast(const Player player, const double wall_y_shift, const double full_jump_height) {
 	const double player_angle = to_radians(player.angle);
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
@@ -112,10 +112,7 @@ void raycast(const Player player) {
 
 		const SDL_FRect wall = {
 			screen_x,
-			settings.half_screen_height - (wall_h / 2.0) +
-				player.z_pitch + player.pace.screen_offset
-				+ (player.jump.height * settings.screen_height / correct_dist),
-
+			wall_y_shift - wall_h / 2.0 + full_jump_height / correct_dist,
 			settings.ray_column_width, wall_h
 		};
 

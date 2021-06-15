@@ -19,7 +19,7 @@ inlinable double line_side(const VectorF p1, const VectorF p2, const VectorF p3)
 	return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1]);
 }
 
-inlinable double flat_triangle(const VectorF pos, const Triangle triangle, const double flat) {
+inlinable byte flat_triangle(const VectorF pos, const Triangle triangle) {
 	const double
 		slope_1 = line_side(pos, triangle[0], triangle[1]),
 		slope_2 = line_side(pos, triangle[1], triangle[2]),
@@ -29,7 +29,7 @@ inlinable double flat_triangle(const VectorF pos, const Triangle triangle, const
 		has_neg = (slope_1 < 0) || (slope_2 < 0) || (slope_3 < 0),
 		has_pos = (slope_1 > 0) || (slope_2 > 0) || (slope_3 > 0);
 
-	return (!(has_neg && has_pos)) ? flat : 0.0;
+	return !(has_neg && has_pos);
 }
 
 /*

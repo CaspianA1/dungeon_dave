@@ -254,3 +254,13 @@ wall.y += off;
 // wall.y = ceil((double) wall.y);
 
 /////
+
+// (wall_y_base_val - (wall_h / 2.0)) / correct_dist,
+
+/*
+settings.half_screen_height - (wall_h / 2.0) +
+	player.z_pitch + player.pace.screen_offset +
+	(player.jump.height * settings.screen_height / correct_dist),
+*/
+
+/////
