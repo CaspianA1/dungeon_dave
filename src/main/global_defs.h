@@ -4,10 +4,10 @@
 #include <pthread.h>
 
 #define SHADING_ENABLED
-// #define SOUND_ENABLED
+#define SOUND_ENABLED
 #define FULL_QUALITY
 // #define TRACK_MEMORY
-#define NOCLIP_MODE
+// #define NOCLIP_MODE
 
 #define INIT_W 800
 #define INIT_H 600
