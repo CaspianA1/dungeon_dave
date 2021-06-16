@@ -71,10 +71,7 @@ void load_level_1(void) {
 		memset(level_1.floor_data[y], 4, map_width);
 	}
 
-	for (byte y = 8; y <= 9; y++) {
-		for (byte x = 18; x <= 19; x++)
-			level_1.floor_data[y][x] = 9; // dirt
-	}
+	fill_level_data(level_1.floor_data, 9, 18, 20, 8, 10); // dirt
 
 	for (byte y = 2; y <= 4; y++) {
 		level_1.floor_data[y][16] = 10; // grass

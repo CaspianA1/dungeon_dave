@@ -26,8 +26,10 @@ void update_pos(VectorF* pos, const VectorF prev_pos,
 		if (keys[KEY_SPEEDUP_1] || keys[KEY_SPEEDUP_2]) {
 			increasing_fov = 1;
 			body -> v *= body -> v_incr_multiplier;
+			#ifndef NOCLIP_MODE
 			if (settings.fov < settings.max_fov)
 				update_fov(settings.fov + settings.fov_step);
+			#endif
 		}
 
 		if (body -> v > body -> limit_v)
@@ -69,6 +71,13 @@ void update_pos(VectorF* pos, const VectorF prev_pos,
 
 	VectorF new_pos = VectorFF_add(*pos, movement);
 
+	#ifdef NOCLIP_MODE
+
+	(void) prev_pos;
+	(void) p_height;
+
+	#else
+
 	const double stop_dist = settings.stop_dist_from_wall;
 
 	if (point_exists_at(prev_pos[0], new_pos[1] + stop_dist, p_height) ||
@@ -78,6 +87,8 @@ void update_pos(VectorF* pos, const VectorF prev_pos,
 	if (point_exists_at(new_pos[0] + stop_dist, prev_pos[1], p_height) ||
 		point_exists_at(new_pos[0] - stop_dist, prev_pos[1], p_height))
 		new_pos[0] = prev_pos[0];
+
+	#endif
 
 	*pos = new_pos;
 }
@@ -102,11 +113,21 @@ inlinable void update_tilt(Domain* tilt, const byte strafe, const byte lstrafe) 
 }
 
 inlinable void update_pace(Pace* pace, const VectorF* pos, const VectorF prev_pos) {
+	#ifndef NOCLIP_MODE
+
 	if ((*pos)[0] != prev_pos[0] || (*pos)[1] != prev_pos[1]) {
 		if ((pace -> domain.val += pace -> domain.step) > two_pi) pace -> domain.val = 0;
 		pace -> screen_offset = sin(pace -> domain.val) *
 			(settings.screen_height / pace -> offset_scaler);
 	}
+
+	#else
+
+	(void) pace;
+	(void) pos;
+	(void) prev_pos;
+
+	#endif
 }
 
 inlinable void init_a_jump(Jump* jump, const byte falling) {
@@ -118,6 +139,23 @@ inlinable void init_a_jump(Jump* jump, const byte falling) {
 }
 
 void update_jump(Jump* jump, const VectorF pos) {
+	#ifdef NOCLIP_MODE
+
+	(void) pos;
+
+	double*
+		last_tick_time = &jump -> time_at_jump,
+		curr_tick_time = SDL_GetTicks() / 1000.0;
+
+	const double pos_change = jump -> up_v0 * (curr_tick_time - *last_tick_time);
+
+	if (keys[KEY_FLY_UP]) jump -> height += pos_change;
+	if (keys[KEY_FLY_DOWN]) jump -> height -= pos_change;
+
+	*last_tick_time = curr_tick_time;
+
+	#else
+
 	if (keys[KEY_JUMP] && !jump -> jumping) {
 		init_a_jump(jump, 0);
 		play_sound(jump -> sound_at_jump, 0);
@@ -130,8 +168,7 @@ void update_jump(Jump* jump, const VectorF pos) {
 		const double t = SDL_GetTicks() / 1000.0 - jump -> time_at_jump;
 
 		// y = y0 + v0t + 0.5at^2
-		jump -> height = jump -> start_height + ((jump -> v0 * t)
-						+ (0.5 * g * (t * t)));
+		jump -> height = jump -> start_height + ((jump -> v0 * t) + (0.5 * g * (t * t)));
 
 		if (jump -> height > jump -> highest_height)
 			jump -> highest_height = jump -> height;
@@ -153,6 +190,8 @@ void update_jump(Jump* jump, const VectorF pos) {
 
 	else if (wall_point_height < jump -> height) // falling
 		init_a_jump(jump, 1);
+
+	#endif
 }
 
 InputStatus handle_input(Player* player, const byte restrict_movement) {

@@ -11,6 +11,7 @@ void init_screen(void) {
 	screen.pixel_format = SDL_AllocFormat(PIXEL_FORMAT);
 	screen.z_buffer = wcalloc(settings.screen_width, sizeof(double));
 	init_buffers(settings.screen_width, settings.screen_height, 0);
+
 }
 
 void deinit_screen(void) {

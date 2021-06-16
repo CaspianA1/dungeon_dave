@@ -22,10 +22,19 @@ inlinable Level init_level(const int map_width, const int map_height,
 	return level;
 }
 
-void randomize_map(const Level level, byte** map_datum, const byte* points, const byte len_points) {
+void randomize_map(const Level level, byte** map_data, const byte* points, const byte len_points) {
 	for (int y = 0; y < level.map_height; y++) {
 		for (int x = 0; x < level.map_width; x++)
-			map_datum[y][x] = points[rand() % len_points];
+			map_data[y][x] = points[rand() % len_points];
+	}
+}
+
+inlinable void fill_level_data(byte** map_data, const byte point,
+	const int x0, const int x1, const int y0, const int y1) {
+
+	for (int x = x0; x < x1; x++) {
+		for (int y = y0; y < y1; y++)
+			map_data[y][x] = point;
 	}
 }
 

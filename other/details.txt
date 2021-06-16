@@ -18,7 +18,7 @@ features:
 	- floorcast multithreading, if horizontal method doesn't work
 	- a level opener, with a cool spinning effect (only for the first level)
 	- fast floor/ceiling
-	- faster strafe speed + increase strafe speed and fov when pressing shift
+	- increase strafe speed and fov when pressing shift
 	- a sprite pool
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:

@@ -271,3 +271,46 @@ const Navigator first_navigator = init_navigator(first_player.pos,
 */
 
 /////
+
+/*
+for (byte x = 4; x < 7; x++) {
+	for (byte y = 0; y < 3; y++)
+		palace.floor_data[y][x] = 5;
+}
+
+for (byte x = 11; x < 13; x++) {
+	for (byte y = 27; y < 29; y++)
+		palace.floor_data[y][x] = 7;
+}
+
+for (byte x = 16; x < 22; x++) {
+	for (byte y = 24; y < 30; y++)
+		palace.floor_data[y][x] = 6;
+}
+
+for (byte x = 1; x < 12; x++) {
+	for (byte y = 24; y < 26; y++)
+		palace.floor_data[y][x] = 2;
+}
+
+for (byte x = 1; x < 9; x++) {
+	for (byte y = 19; y < 26; y++)
+		palace.floor_data[y][x] = 2;
+}
+
+for (byte x = 1; x < 4; x++) {
+	for (byte y = 25; y < 39; y++)
+		palace.floor_data[y][x] = 2;
+}
+*/
+
+/////
+
+/*
+for (byte y = 8; y <= 9; y++) {
+	for (byte x = 18; x <= 19; x++)
+		level_1.floor_data[y][x] = 9; // dirt
+}
+*/
+
+/////

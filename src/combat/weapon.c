@@ -13,6 +13,7 @@ void deinit_weapon(const Weapon weapon) {
 }
 
 void use_weapon_if_needed(Weapon* weapon, const Player player, const InputStatus input_status) {
+	#ifndef NOCLIP_MODE
 	if (weapon -> in_use && weapon -> animation.frame_ind == 0) weapon -> in_use = 0;
 	else if (input_status == BeginAnimatingWeapon) {
 		if (!weapon -> in_use) play_sound(weapon -> sound, 0);
@@ -22,4 +23,12 @@ void use_weapon_if_needed(Weapon* weapon, const Player player, const InputStatus
 	// -1 -> cycle frame, 0 -> first frame
 	animate_weapon(&weapon -> animation, player.pos, -weapon -> in_use,
 		player.z_pitch, player.pace.screen_offset, weapon -> screen_y_shift_percent_down);
+
+	#else
+
+	(void) weapon;
+	(void) player;
+	(void) input_status;
+
+	#endif
 }
