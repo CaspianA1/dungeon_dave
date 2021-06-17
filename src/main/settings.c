@@ -53,7 +53,7 @@ void load_default_settings(void) {
 	keys = SDL_GetKeyboardState(NULL);
 }
 
-void update_screen_dimensions(double* pace_max) {
+void update_screen_dimensions(double* const restrict pace_max) {
 	int new_width, new_height;
 	SDL_GetWindowSize(screen.window, &new_width, &new_height);
 
@@ -111,7 +111,9 @@ Player load_player(const double jump_up_v0,
 	return player;
 }
 
-void load_all_defaults(void (*load_first_level) (void), Player* player, Weapon* weapon) {
+void load_all_defaults(void (*load_first_level) (void),
+	Player* const restrict player, Weapon* const restrict weapon) {
+
 	load_default_settings();
 
 	void init_screen(void);

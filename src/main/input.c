@@ -1,4 +1,4 @@
-inlinable void update_mouse_and_theta(double* theta, VectorI* mouse_pos) {
+inlinable void update_mouse_and_theta(double* const restrict theta, VectorI* const restrict mouse_pos) {
 	const int prev_mouse_x = mouse_pos -> x;
 	SDL_GetMouseState(&mouse_pos -> x, &mouse_pos -> y);
 	if (prev_mouse_x == mouse_pos -> x) return;
@@ -11,8 +11,8 @@ inlinable void update_mouse_and_theta(double* theta, VectorI* mouse_pos) {
 		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
-void update_pos(VectorF* pos, const VectorF prev_pos,
-	KinematicBody* body, const double rad_theta, const double p_height,
+void update_pos(VectorF* const restrict pos, const VectorF prev_pos,
+	KinematicBody* const restrict body, const double rad_theta, const double p_height,
 	const byte forward, const byte backward, const byte lstrafe, const byte rstrafe) {
 
 	const double curr_time = SDL_GetTicks() / 1000.0; // in seconds
@@ -93,11 +93,11 @@ void update_pos(VectorF* pos, const VectorF prev_pos,
 	*pos = new_pos;
 }
 
-inlinable void update_z_pitch(int* z_pitch, const int* mouse_y) {
+inlinable void update_z_pitch(int* const restrict z_pitch, const int* const restrict mouse_y) {
 	*z_pitch = -*mouse_y + settings.half_screen_height;
 }
 
-inlinable void update_tilt(Domain* tilt, const byte strafe, const byte lstrafe) {
+inlinable void update_tilt(Domain* const restrict tilt, const byte strafe, const byte lstrafe) {
 	if (strafe) {
 
 		tilt -> val += lstrafe ? -tilt -> step : tilt -> step;
@@ -112,10 +112,10 @@ inlinable void update_tilt(Domain* tilt, const byte strafe, const byte lstrafe) 
 	else if (tilt -> val - tilt -> step > 0) tilt -> val -= tilt -> step;
 }
 
-inlinable void update_pace(Pace* pace, const VectorF* pos, const VectorF prev_pos) {
+inlinable void update_pace(Pace* const restrict pace, const VectorF pos, const VectorF prev_pos) {
 	#ifndef NOCLIP_MODE
 
-	if ((*pos)[0] != prev_pos[0] || (*pos)[1] != prev_pos[1]) {
+	if (pos[0] != prev_pos[0] || pos[1] != prev_pos[1]) {
 		if ((pace -> domain.val += pace -> domain.step) > two_pi) pace -> domain.val = 0;
 		pace -> screen_offset = sin(pace -> domain.val) *
 			(settings.screen_height / pace -> offset_scaler);
@@ -130,7 +130,7 @@ inlinable void update_pace(Pace* pace, const VectorF* pos, const VectorF prev_po
 	#endif
 }
 
-inlinable void init_a_jump(Jump* jump, const byte falling) {
+inlinable void init_a_jump(Jump* const restrict jump, const byte falling) {
 	jump -> jumping = 1;
 	jump -> time_at_jump = SDL_GetTicks() / 1000.0;
 	jump -> start_height = jump -> height;
@@ -138,7 +138,7 @@ inlinable void init_a_jump(Jump* jump, const byte falling) {
 	jump -> v0 = falling ? 0 : jump -> up_v0;
 }
 
-void update_jump(Jump* jump, const VectorF pos) {
+void update_jump(Jump* const restrict jump, const VectorF pos) {
 	#ifdef NOCLIP_MODE
 
 	(void) pos;
@@ -194,7 +194,7 @@ void update_jump(Jump* jump, const VectorF pos) {
 	#endif
 }
 
-InputStatus handle_input(Player* player, const byte restrict_movement) {
+InputStatus handle_input(Player* const restrict player, const byte restrict_movement) {
 	InputStatus input_status = ProceedAsNormal;
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
@@ -221,7 +221,7 @@ InputStatus handle_input(Player* player, const byte restrict_movement) {
 		const byte moved_any_direction = strafe || moved_forward_or_backward;
 		/////
 
-		KinematicBody* body = &player -> body;
+		KinematicBody* const restrict body = &player -> body;
 		const double curr_secs = SDL_GetTicks() / 1000.0;
 		if (moved_any_direction && !body -> moving_forward_or_backward)
 			body -> time_of_move = curr_secs;
@@ -231,10 +231,10 @@ InputStatus handle_input(Player* player, const byte restrict_movement) {
 
 		body -> moving_forward_or_backward = moved_forward_or_backward;
 
-		double* theta = &player -> angle;
-		VectorF* pos = &player -> pos;
+		double* const restrict theta = &player -> angle;
+		VectorF* const restrict pos = &player -> pos;
 		const VectorF prev_pos = *pos;
-		VectorI* mouse_pos = &player -> mouse_pos;
+		VectorI* const restrict mouse_pos = &player -> mouse_pos;
 
 		update_mouse_and_theta(theta, mouse_pos);
 		update_pos(pos, prev_pos, body, to_radians(*theta),
@@ -243,7 +243,7 @@ InputStatus handle_input(Player* player, const byte restrict_movement) {
 		update_jump(&player -> jump, player -> pos);
 		update_z_pitch(&player -> z_pitch, &mouse_pos -> y);
 		update_tilt(&player -> tilt, strafe, lstrafe);
-		update_pace(&player -> pace, pos, prev_pos);
+		update_pace(&player -> pace, *pos, prev_pos);
 	}
 
 	return input_status;

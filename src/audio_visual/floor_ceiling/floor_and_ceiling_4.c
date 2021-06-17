@@ -18,7 +18,7 @@ void lodev_expanded_fc(const Player player) {
 	const double planeX = -dirY, planeY = dirX;
 	const double posX = player.pos[0], posY = player.pos[1];
 	const Sprite sprite = current_level.walls[2];
-	const SDL_Surface* surface = sprite.surface;
+	const SDL_Surface* restrict surface = sprite.surface;
 	const int texWidth = surface -> w, texHeight = surface -> h;
 
 	//FLOOR CASTING

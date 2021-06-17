@@ -1,8 +1,8 @@
-Sprite init_sprite(const char* path) {
-	SDL_Surface* unconverted_surface = SDL_LoadBMP(path);
-	if (unconverted_surface == NULL) FAIL("Could not load a sprite: %s\n", path);
+Sprite init_sprite(const char* const restrict path) {
+	SDL_Surface* restrict unconverted_surface = SDL_LoadBMP(path);
+	if (unconverted_surface == NULL) FAIL("Could not load a sprite of path %s\n", path);
 
-	SDL_Surface* converted_surface = SDL_ConvertSurface(unconverted_surface, screen.pixel_format, 0);
+	SDL_Surface* restrict converted_surface = SDL_ConvertSurface(unconverted_surface, screen.pixel_format, 0);
 	if (converted_surface == NULL) FAIL("Could not convert a sprite's surface type: %s\n", path);
 	SDL_FreeSurface(unconverted_surface);
 	SDL_LockSurface(converted_surface);
@@ -21,7 +21,7 @@ inlinable void deinit_sprite(const Sprite sprite) {
 
 // offset is vertical
 inlinable void draw_column(const Sprite sprite, const VectorF hit,
-	const int offset, const int slice_h, const double shade_h, const SDL_FRect* dest) {
+	const int offset, const int slice_h, const double shade_h, const SDL_FRect* restrict dest) {
 	/* slice_h pertains to src crop. shade_h pertains to shading.
 	for partially obscured walls, need shade h. */
 

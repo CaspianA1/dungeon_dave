@@ -57,7 +57,7 @@ void floorcast(const Player player) {
 			const VectorF cell = get_cell_from_ray_pos(ray_pos);
 
 			const byte point = current_level.floor_data[(int) cell[1]][(int) cell[0]];
-			const SDL_Surface* surface = current_level.walls[point - 1].surface;
+			const SDL_Surface* restrict surface = current_level.walls[point - 1].surface;
 
 			const VectorF tex_w = VectorF_memset(surface -> w);
 			const int max_offset = tex_w[0] - 1;
@@ -89,7 +89,7 @@ typedef struct {
 	void* player;
 } FloorCastThread;
 
-void* threaded_floorcast(void* untyped_floorcast_thread) {
+void* threaded_floorcast(void* const untyped_floorcast_thread) {
 	FloorCastThread* thread = (FloorCastThread*) untyped_floorcast_thread;
 	Player* player = thread -> player;
 
@@ -116,16 +116,16 @@ inlinable FloorCastThread init_floorcast_thread(Player* player) {
 	return thread;
 }
 
-inlinable void deinit_floorcast_thread(FloorCastThread* thread) {
+inlinable void deinit_floorcast_thread(FloorCastThread* const thread) {
 	thread -> state = EndFloorCast;
 	pthread_join(thread -> thread, NULL);
 }
 
-inlinable void start_floorcast_tick(FloorCastThread* thread) {
+inlinable void start_floorcast_tick(FloorCastThread* const thread) {
 	thread -> state = BeginFloorCast;
 }
 
-inlinable void wait_for_floorcast_tick(FloorCastThread* thread) {
+inlinable void wait_for_floorcast_tick(FloorCastThread* const thread) {
 	printf("thread 1, state = %d\n", thread -> state);
 	while (thread -> state == CurrentlyFloorCasting) {
 		printf("Waiting because state = %d\n", CurrentlyFloorCasting);

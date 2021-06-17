@@ -121,6 +121,8 @@ void load_palace(void) {
 	fill_level_data(palace.floor_data, 2, 1, 9, 19, 26); // part 2 of the aforementioned
 	fill_level_data(palace.floor_data, 2, 1, 4, 25, 39); // part 3 of the aforementioned
 
+	// "../assets/skyboxes/desert.bmp"
+	// ../../Aseprite/Palace City Skybox.bmp"
 	set_level_skybox(&palace, "../assets/skyboxes/desert.bmp");
 
 	set_level_walls(&palace, wall_count,

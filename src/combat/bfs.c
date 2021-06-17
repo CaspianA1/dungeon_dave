@@ -6,7 +6,7 @@ byte vertex_is_valid(const VectorI vertex) {
 }
 
 void update_queue_with_neighbors(
-	PathQueue* paths, Path path, const VectorI vertex, byte** all_visited) {
+	PathQueue* const paths, Path path, const VectorI vertex, map_data all_visited) {
 
 	const VectorI
 		top = {vertex.x, vertex.y - 1},
@@ -27,7 +27,7 @@ void update_queue_with_neighbors(
 	for (byte i = 0; i < 8; i++) {
 		const VectorI neighbor = neighbors[i];
 		if (vertex_is_valid(neighbor)) {
-			byte** walls = current_level.wall_data;
+			map_data walls = current_level.wall_data;
 
 			if ((VectorII_eq(neighbor, top_left) && walls[left.y][left.x]) ||
 				(VectorII_eq(neighbor, top_right) && walls[right.y][right.x]) ||
@@ -52,7 +52,7 @@ ResultBFS bfs(const VectorF begin, const VectorF end) {
 		int_end = VectorF_floor(end);
 
 	/////
-	byte** all_visited = wmalloc(current_level.map_height * sizeof(byte*));
+	mut_map_data all_visited = wmalloc(current_level.map_height * sizeof(byte*));
 	for (int y = 0; y < current_level.map_height; y++)
 		all_visited[y] = wcalloc(current_level.map_width, sizeof(byte));
 	all_visited[int_begin.y][int_begin.x] = 1;

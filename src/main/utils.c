@@ -21,12 +21,12 @@ inlinable void* wcalloc(size_t nitems, size_t size) {
 	return calloc(nitems, size);
 }
 
-inlinable void* wrealloc(void* ptr, size_t new_size) {
+inlinable void* wrealloc(const void* const restrict ptr, size_t new_size) {
 	realloc_count++;
 	return realloc(ptr, new_size);
 }
 
-inlinable void wfree(void* ptr) {
+inlinable void wfree(const void* const restrict ptr) {
 	if (ptr == NULL) {
 		printf("Error: attempt to free a null pointer\n");
 		abort();

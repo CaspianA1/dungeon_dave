@@ -4,7 +4,7 @@ void simd_draw_floor_or_ceil(const VectorF pos, const VectorF dir,
 
 	if (end <= begin) return;
 
-	byte** tex_hit_data;
+	map_data tex_hit_data;
 	int (*get_row) (const double, const int);
 
 	if (is_ceiling) {
@@ -59,7 +59,7 @@ void simd_draw_floor_or_ceil(const VectorF pos, const VectorF dir,
 			tex_hit_data[floored_hits[1].y][floored_hits[1].x]
 		};
 
-		const SDL_Surface* surfaces[2] = {
+		const SDL_Surface* restrict surfaces[2] = {
 			current_level.walls[points[0] - 1].surface,
 			current_level.walls[points[1] - 1].surface
 		};

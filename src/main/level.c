@@ -22,23 +22,23 @@ inlinable Level init_level(const int map_width, const int map_height,
 	return level;
 }
 
-void randomize_map(const Level level, byte** map_data, const byte* points, const byte len_points) {
+void randomize_map(const Level level, map_data md, const byte* const restrict points, const byte len_points) {
 	for (int y = 0; y < level.map_height; y++) {
 		for (int x = 0; x < level.map_width; x++)
-			map_data[y][x] = points[rand() % len_points];
+			md[y][x] = points[rand() % len_points];
 	}
 }
 
-inlinable void fill_level_data(byte** map_data, const byte point,
+inlinable void fill_level_data(map_data md, const byte point,
 	const int x0, const int x1, const int y0, const int y1) {
 
 	for (int x = x0; x < x1; x++) {
 		for (int y = y0; y < y1; y++)
-			map_data[y][x] = point;
+			md[y][x] = point;
 	}
 }
 
-inlinable void set_level_skybox(Level* level, const char* path) {
+inlinable void set_level_skybox(Level* const restrict level, const char* const restrict path) {
 	level -> skybox.enabled = 1;
 	const Sprite sprite = init_sprite(path);
 	level -> skybox.sprite = sprite;
@@ -47,7 +47,7 @@ inlinable void set_level_skybox(Level* level, const char* path) {
 }
 
 // path
-void set_level_walls(Level* level, const unsigned wall_count, ...) {
+void set_level_walls(Level* const restrict level, const unsigned wall_count, ...) {
 	level -> wall_count = wall_count; // unsigned b/c of type promotion semantics
 	level -> walls = wmalloc(wall_count * sizeof(Sprite));
 
@@ -61,7 +61,7 @@ void set_level_walls(Level* level, const unsigned wall_count, ...) {
 }
 
 // path, x, y, height
-void set_level_billboards(Level* level, const unsigned billboard_count, ...) {
+void set_level_billboards(Level* const restrict level, const unsigned billboard_count, ...) {
 	level -> billboard_count = billboard_count;
 	level -> billboards = wmalloc(billboard_count * sizeof(Billboard));
 
@@ -69,17 +69,20 @@ void set_level_billboards(Level* level, const unsigned billboard_count, ...) {
 	va_start(billboard_data, billboard_count);
 
 	for (byte i = 0; i < billboard_count; i++) {
-		Billboard* billboard = &level -> billboards[i];
+		Billboard* const restrict billboard = &level -> billboards[i];
 		billboard -> sprite = init_sprite(va_arg(billboard_data, const char*));
-		billboard -> pos[0] = va_arg(billboard_data, double);
-		billboard -> pos[1] = va_arg(billboard_data, double);
+		billboard -> pos = (VectorF) {
+			va_arg(billboard_data, double),
+			va_arg(billboard_data, double)
+		};
+		billboard -> player_delta = (VectorF) {0, 0};
 		billboard -> height = va_arg(billboard_data, double);
 	}
 	va_end(billboard_data);
 }
 
 // path, frames/row, frames/col, frame_count, fps, x, y, height
-void set_level_animations(Level* level, const unsigned animation_count, ...) {
+void set_level_animations(Level* const restrict level, const unsigned animation_count, ...) {
 	level -> animation_count = animation_count;
 	level -> animations = wmalloc(animation_count * sizeof(Animation));
 
@@ -87,7 +90,7 @@ void set_level_animations(Level* level, const unsigned animation_count, ...) {
 	va_start(animation_data, animation_count);
 
 	for (byte i = 0; i < animation_count; i++) {
-		const char* path = va_arg(animation_data, const char*);
+		const char* const restrict path = va_arg(animation_data, const char*);
 		const int
 			frames_per_row = va_arg(animation_data, int),
 			frames_per_col = va_arg(animation_data, int),
@@ -97,12 +100,13 @@ void set_level_animations(Level* level, const unsigned animation_count, ...) {
 		const Animation new_animation = init_animation(
 			path, frames_per_row, frames_per_col, frame_count, fps);
 
-		Animation* dest = &level -> animations[i];
+		Animation* const restrict dest = &level -> animations[i];
 		memcpy(dest, &new_animation, sizeof(Animation));
 		dest -> billboard.pos = (VectorF) {
 			va_arg(animation_data, double),
 			va_arg(animation_data, double)
 		};
+		dest -> billboard.player_delta = (VectorF) {0, 0};
 		dest -> billboard.height = va_arg(animation_data, double);
 	}
 	va_end(animation_data);
@@ -111,7 +115,7 @@ void set_level_animations(Level* level, const unsigned animation_count, ...) {
 /* state, dist_thresholds, hp_to_retreat, hp,
 animation_seg_lengths, animations, sounds, navigator */
 
-void set_level_enemies(Level* level, const unsigned enemy_count, ...) {
+void set_level_enemies(Level* const restrict level, const unsigned enemy_count, ...) {
 	level -> enemy_count = enemy_count;
 	level -> enemies = wmalloc(enemy_count * sizeof(Enemy));
 
@@ -150,20 +154,22 @@ void set_level_enemies(Level* level, const unsigned enemy_count, ...) {
 		void set_enemy_state(Enemy*, EnemyState);
 		set_enemy_state(&enemy, enemy_state);
 
-		Billboard* billboard = &enemy.animations.billboard;
+		Billboard* const restrict billboard = &enemy.animations.billboard;
 		billboard -> pos = (VectorF) {va_arg(enemy_data, double), va_arg(enemy_data, double)};
 		billboard -> height = va_arg(enemy_data, double);
 
 		for (byte i = 0; i < 5; i++)
 			enemy.sounds[i] = init_sound(va_arg(enemy_data, const char*), 1);
 
-		Enemy* dest = &level -> enemies[i];
+		Enemy* const restrict dest = &level -> enemies[i];
 		memcpy(dest, &enemy, sizeof(Enemy));
 
-		const Navigator nav = init_navigator(level -> init_pos,
-			&dest -> animations.billboard.pos, va_arg(enemy_data, double));
+		Billboard* const restrict dest_billboard = &dest -> animations.billboard;
 
-		memcpy(&dest -> navigator, &nav, sizeof(Navigator));
+		const Navigator nav = init_navigator(level -> init_pos,
+			&dest_billboard -> pos, &dest_billboard -> player_delta, va_arg(enemy_data, double));
+
+		memcpy(&dest -> nav, &nav, sizeof(Navigator));
 
 	}
 	va_end(enemy_data);

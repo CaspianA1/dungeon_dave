@@ -45,7 +45,7 @@ typedef struct {
 typedef struct {
 	SDL_Window* window;
 	SDL_Renderer* renderer;
-	SDL_PixelFormat* pixel_format;
+	SDL_PixelFormat* restrict pixel_format;
 	SDL_Texture *pixel_buffer, *shape_buffer;
 	void* pixels;
 	int pixel_pitch; // `pixels` and `pixel_pitch` pertain to the pixel buffer
@@ -80,11 +80,11 @@ typedef struct {
 	double (*shader) (const VectorF);
 	// for cache optimization; `shader` and `walls` are typically used together
 
-	Sprite* walls;
-	Billboard* billboards;
-	Animation* animations;
-	Enemy* enemies;
-	GenericBillboard* generic_billboards;
+	Sprite* restrict walls;
+	Billboard* restrict billboards;
+	Animation* restrict animations;
+	Enemy* restrict enemies;
+	GenericBillboard* restrict generic_billboards;
 } Level;
 
 /////
@@ -95,4 +95,4 @@ Level current_level;
 Settings settings;
 
 SDL_Event event;
-const Uint8* keys;
+const Uint8* restrict keys;

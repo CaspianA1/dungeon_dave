@@ -4,7 +4,7 @@ The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Retreating substituted for Attacked.
 */
 
-void set_enemy_state(Enemy* enemy, EnemyState new_state) {
+void set_enemy_state(Enemy* const restrict enemy, EnemyState new_state) {
 	enemy -> state = new_state;
 
 	int new_frame_ind = 0;
@@ -14,9 +14,11 @@ void set_enemy_state(Enemy* enemy, EnemyState new_state) {
 	enemy -> animations.frame_ind = new_frame_ind;
 }
 
-void retreat_enemy(Enemy* enemy, const Player player) {
+void retreat_enemy(Enemy* const restrict enemy, const Player player) {
+	Navigator* const restrict nav = &enemy -> nav;
+
 	if (enemy -> state == Retreating) {
-		update_path_if_needed(&enemy -> navigator, player.pos, player.jump);
+		update_path_if_needed(nav, player.pos, player.jump);
 	}
 
 	else {
@@ -25,7 +27,7 @@ void retreat_enemy(Enemy* enemy, const Player player) {
 			if (wall_point(new_spot[0], new_spot[1])) continue;
 			enemy -> animations.billboard.pos = new_spot;
 			// if the new dest isn't navigatable to, find a new spot
-			if (update_path_if_needed(&enemy -> navigator, player.pos, player.jump) == CouldNotNavigate)
+			if (update_path_if_needed(nav, player.pos, player.jump) == CouldNotNavigate)
 				continue;
 
 			set_enemy_state(enemy, Retreating);
@@ -34,21 +36,26 @@ void retreat_enemy(Enemy* enemy, const Player player) {
 	}
 }
 
-void update_enemy(Enemy* enemy, const Player player) {
+void update_enemy(Enemy* const restrict enemy, const Player player) {
 	static byte i = 1;
 	if (i) play_sound(enemy -> sounds[enemy -> state], 0);
 	i = 0;
+
+	Navigator* const restrict nav = &enemy -> nav;
+
+	// DEBUG_VECF(*nav -> player_dest_delta);
 
 	switch (enemy -> state) {
 		case Idle: // stay there, idle animation
 			break;
 		case Chasing: { // bfs stuff
-			if (update_path_if_needed(&enemy -> navigator, player.pos, player.jump) == ReachedDest)
+			if (update_path_if_needed(nav, player.pos, player.jump) == ReachedDest)
 				set_enemy_state(enemy, Attacking);
 			break;
 		}
 		case Attacking: // attack animation + fighting
 			// attack if the player is close enough, otherwise transition to Chasing
+			// DEBUG(player.pos[0] - enemy.nav -> pos[0], lf);
 			break;
 		case Retreating: // run away to some random vantage point
 			break;
@@ -67,5 +74,5 @@ void deinit_enemy(const Enemy enemy) {
 	for (byte i = 0; i < 5; i++)
 		deinit_sound(enemy.sounds[i]);
 	wfree(enemy.sounds);
-	deinit_navigator(enemy.navigator);	
+	deinit_navigator(enemy.nav);	
 }

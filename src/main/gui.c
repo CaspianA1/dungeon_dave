@@ -1,33 +1,26 @@
 typedef struct {
-	TTF_Font* font;
+	TTF_Font* restrict font;
 	Sprite sprite;
 	byte r, g, b, has_background;
 	SDL_Rect pos;
 } Message;
 
-Message init_message(const char* text,
+Message init_message(const char* const restrict text,
 	const byte r, const byte g, const byte b, const byte has_background) {
 
 	const double avg_dimensions = (settings.screen_width + settings.screen_height) / 2.0;
 
 	Message message = {
 		TTF_OpenFont("../assets/fonts/dnd.ttf", avg_dimensions / 10.0),
-		.r = r, .g = g, .b = b,
-		.has_background = has_background
+		.r = r, .g = g, .b = b, .has_background = has_background
 	};
 
 	if (message.font == NULL) FAIL("Could not open a font: %s\n", SDL_GetError());
 
-	const SDL_Color color = {r, g, b, SDL_ALPHA_OPAQUE};
-	message.sprite.surface = TTF_RenderText_Solid(message.font, text, color);
+	message.sprite.surface = TTF_RenderText_Solid(message.font, text, (SDL_Color) {r, g, b, SDL_ALPHA_OPAQUE});
 	message.sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, message.sprite.surface);
 
 	return message;
-}
-
-inlinable void set_message_pos(Message* message, const int x, const int y, const int w, const int h) {
-
-	message -> pos = (SDL_Rect) {x, y, w, h};
 }
 
 inlinable void draw_colored_rect(const byte r, const byte g,
@@ -53,7 +46,7 @@ inlinable byte mouse_over_message(const Message message) {
 	const SDL_Rect box = message.pos;
 
 	return mouse_x >= box.x && mouse_x <= box.x + box.w
-			&& mouse_y >= box.y && mouse_y <= box.y + box.h;
+		&& mouse_y >= box.y && mouse_y <= box.y + box.h;
 }
 
 inlinable void deinit_message(Message message) {
@@ -61,13 +54,13 @@ inlinable void deinit_message(Message message) {
 	deinit_sprite(message.sprite);
 }
 
-inlinable void after_gui_event(double* pace_max, const Uint32 before) {
+inlinable void after_gui_event(double* const restrict pace_max, const Uint32 before) {
 	SDL_RenderPresent(screen.renderer);
 	update_screen_dimensions(pace_max);
 	tick_delay(before);
 }
 
-InputStatus display_logo(double* pace_max) {
+InputStatus display_logo(double* const restrict pace_max) {
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 
@@ -88,7 +81,7 @@ InputStatus display_logo(double* pace_max) {
 	}
 }
 
-InputStatus display_title_screen(double* pace_max) {
+InputStatus display_title_screen(double* const restrict pace_max) {
 	const Sound title_track = init_sound("../assets/audio/title.wav", 0);
 	play_sound(title_track, 1);
 	if (display_logo(pace_max) == Exit) return Exit;
@@ -103,11 +96,12 @@ InputStatus display_title_screen(double* pace_max) {
 		const Uint32 before = SDL_GetTicks();
 
 		start = init_message("Start!", 255, 99, 71, 0);
-		set_message_pos(&start,
-			settings.half_screen_width - start.sprite.surface -> w / 2,
-			settings.half_screen_height - start.sprite.surface -> h / 2,
-			start.sprite.surface -> w,
-			start.sprite.surface -> h);
+		start.pos = (SDL_Rect) {
+				settings.half_screen_width - start.sprite.surface -> w / 2,
+				settings.half_screen_height - start.sprite.surface -> h / 2,
+				start.sprite.surface -> w,
+				start.sprite.surface -> h
+			};
 
 		start.has_background = mouse_over_message(start);
 

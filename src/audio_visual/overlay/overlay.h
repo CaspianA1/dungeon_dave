@@ -1,14 +1,14 @@
 typedef struct {
-	SDL_Surface* surface;
-	SDL_Texture* texture;
+	SDL_Surface* restrict surface;
+	SDL_Texture* restrict texture;
 } Sprite;
 
 /////
 
 typedef struct {
 	Sprite sprite;
-	VectorF pos; // `height` here is a point height
-	double beta, dist, height;
+	VectorF pos, player_delta;
+	double beta, dist, height; // `height` here is a point height
 } Billboard;
 
 /////

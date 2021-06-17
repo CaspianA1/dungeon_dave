@@ -32,11 +32,15 @@ inlinable void prepare_for_drawing(void) {
 	SDL_RenderClear(screen.renderer);
 }
 
-inlinable void draw_tilted(SDL_Texture* buffer, const SDL_Rect* dest_crop, const double tilt) {
+inlinable void draw_tilted(SDL_Texture* const restrict buffer,
+	const SDL_Rect* const restrict dest_crop, const double tilt) {
+
 	SDL_RenderCopyEx(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
-inlinable void draw_tilted_f(SDL_Texture* buffer, const SDL_FRect* dest_crop, const double tilt) {
+inlinable void draw_tilted_f(SDL_Texture* const restrict buffer,
+	const SDL_FRect* const restrict dest_crop, const double tilt) {
+
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
@@ -89,7 +93,7 @@ inlinable Uint32* get_pixbuf_pixel(const int x, const int y) { // for texture
 	return ((Uint32*) ((Uint8*) screen.pixels + y * screen.pixel_pitch)) + x;
 }
 
-inlinable Uint32 get_surface_pixel(const void* pixels,
+inlinable Uint32 get_surface_pixel(const void* const restrict pixels,
 	const int surface_pitch, const int x, const int y) { // for surface
 
 	return *(Uint32*) ((Uint8*) pixels + y * surface_pitch + x * PIXEL_FORMAT_BPP);

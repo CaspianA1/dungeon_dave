@@ -1,5 +1,5 @@
 void handle_ray(const Player player, const CastData cast_data, const int screen_x,
-	byte* first_wall_hit, double* smallest_wall_y, const double player_angle,
+	byte* restrict first_wall_hit, double* restrict smallest_wall_y, const double player_angle,
 	const double theta, const double wall_y_shift, const double full_jump_height, const VectorF dir) {
 
 	const double cos_beta = cos(player_angle - theta);

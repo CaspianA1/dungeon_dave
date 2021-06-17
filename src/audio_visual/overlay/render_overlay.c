@@ -13,7 +13,7 @@ Here is the naming system:
 I refer to a 'generic billboard' as a Billboard or Animation.
 */
 
-int cmp_generic_billboards(const void* a, const void* b) {
+int cmp_generic_billboards(const void* const restrict a, const void* const restrict b) {
 	const VectorF distances = {
 		((GenericBillboard*) a) -> billboard.dist,
 		((GenericBillboard*) b) -> billboard.dist
@@ -28,7 +28,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 	const double player_angle = to_radians(player.angle);
 
 	const byte generic_billboard_count = current_level.generic_billboard_count;
-	GenericBillboard* generic_billboards = current_level.generic_billboards;
+	GenericBillboard* restrict generic_billboards = current_level.generic_billboards;
 
 	const byte start_of_enemies = current_level.billboard_count + current_level.animation_count;
 
@@ -51,12 +51,13 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 			billboard = &current_level.billboards[i];
 
 		const VectorF delta = VectorFF_sub(billboard -> pos, player.pos);
+		billboard -> player_delta = (VectorF) {fabs(delta[0]), fabs(delta[1])};
 
 		billboard -> beta = atan2(delta[1], delta[0]) - player_angle;
 		billboard -> dist =
 			sqrt(delta[0] * delta[0] + delta[1] * delta[1]) * cos(billboard -> beta);
 
-		GenericBillboard* generic_billboard = &generic_billboards[i];
+		GenericBillboard* const restrict generic_billboard = &generic_billboards[i];
 		generic_billboard -> billboard = *billboard;
 		generic_billboard -> is_animated = is_animated;
 		generic_billboard -> is_enemy = is_enemy;
@@ -86,13 +87,13 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 
 		/////
 
-		Animation* possible_animation;
+		Animation* restrict possible_animation;
 		SDL_Rect possible_spritesheet_crop;
 		double possible_spritesheet_begin_x, width;
 
 		if (generic.is_animated) {
 			// if the index is over the billboard + animation count, read it from the enemies
-			Enemy* possible_enemy;
+			Enemy* restrict possible_enemy;
 
 			if (generic.is_enemy) {
 				possible_enemy = &current_level.enemies[generic.animation_index];

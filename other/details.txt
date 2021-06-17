@@ -20,6 +20,7 @@ features:
 	- fast floor/ceiling
 	- increase strafe speed and fov when pressing shift
 	- a sprite pool
+	- a skybox of a great city
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- high CPU usage

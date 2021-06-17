@@ -1,8 +1,8 @@
-inlinable Animation init_animation(const char* path,
+inlinable Animation init_animation(const char* const restrict path,
 	const int frames_per_row, const int frames_per_col,
 	const int frame_count, const int fps) {
 
-	const Billboard billboard = {init_sprite(path), {0, 0}, 0, 0, 0};
+	const Billboard billboard = {init_sprite(path), {0, 0}, {0, 0}, 0, 0, 0};
 
 	return (Animation) {
 		billboard, frames_per_row, frames_per_col,
@@ -12,7 +12,7 @@ inlinable Animation init_animation(const char* path,
 	};
 }
 
-inlinable void progress_frame_ind(Animation* animation, const int begin, const int end) {
+inlinable void progress_frame_ind(Animation* const restrict animation, const int begin, const int end) {
 	const double current_time = SDL_GetTicks() / 1000.0;
 	const double time_delta = current_time - animation -> last_frame_time;
 
@@ -24,11 +24,11 @@ inlinable void progress_frame_ind(Animation* animation, const int begin, const i
 	}
 }
 
-inlinable void progress_animation_frame_ind(Animation* animation) {
+inlinable void progress_animation_frame_ind(Animation* const restrict animation) {
 	progress_frame_ind(animation, 0, animation -> frame_count);
 }
 
-inlinable void progress_enemy_frame_ind(Enemy* enemy) {
+inlinable void progress_enemy_frame_ind(Enemy* const restrict enemy) {
 	int begin = 0;
 	for (byte i = 0; i < enemy -> state; i++)
 		begin += enemy -> animation_seg_lengths[i];
@@ -41,7 +41,7 @@ inlinable void progress_enemy_frame_ind(Enemy* enemy) {
 inlinable VectorI get_spritesheet_frame_origin(const Animation animation) {
 	const int y_ind = animation.frame_ind / animation.frames_per_row;
 	const int x_ind = animation.frame_ind - y_ind * animation.frames_per_row;
-	const SDL_Surface* surface = animation.billboard.sprite.surface;
+	const SDL_Surface* const restrict surface = animation.billboard.sprite.surface;
 
 	return (VectorI) {
 		((double) x_ind / animation.frames_per_row) * surface -> w,
@@ -49,7 +49,7 @@ inlinable VectorI get_spritesheet_frame_origin(const Animation animation) {
 	};
 }
 
-void animate_weapon(Animation* animation, const VectorF pos,
+void animate_weapon(Animation* const restrict animation, const VectorF pos,
 	const int frame_num, const int z_pitch, const double pace, const double screen_y_shift_percent_down) {
 	// frame_num == -1 -> auto_progress frame
 
@@ -71,7 +71,7 @@ void animate_weapon(Animation* animation, const VectorF pos,
 		settings.screen_height
 	};
 
-	SDL_Texture* texture = animation -> billboard.sprite.texture;
+	SDL_Texture* const restrict texture = animation -> billboard.sprite.texture;
 
 	byte shade = 255 * calculate_shade(settings.screen_height, pos);
 	if (shade < 70) shade = 70;

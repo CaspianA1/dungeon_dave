@@ -1,5 +1,6 @@
-inlinable Weapon init_weapon(const char* sound_path,
-	const char* spritesheet_path, const double screen_y_shift_percent_down, const int frames_per_row,
+inlinable Weapon init_weapon(const char* const restrict sound_path,
+	const char* const restrict spritesheet_path,
+	const double screen_y_shift_percent_down, const int frames_per_row,
 	const int frames_per_col, const int frame_count, const int fps) {
 
 	return (Weapon) {0, screen_y_shift_percent_down,
@@ -12,7 +13,7 @@ void deinit_weapon(const Weapon weapon) {
 	deinit_sprite(weapon.animation.billboard.sprite);
 }
 
-void use_weapon_if_needed(Weapon* weapon, const Player player, const InputStatus input_status) {
+void use_weapon_if_needed(Weapon* const restrict weapon, const Player player, const InputStatus input_status) {
 	#ifndef NOCLIP_MODE
 	if (weapon -> in_use && weapon -> animation.frame_ind == 0) weapon -> in_use = 0;
 	else if (input_status == BeginAnimatingWeapon) {
