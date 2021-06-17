@@ -26,14 +26,9 @@ void simd_draw_floor_or_ceil(const VectorF pos, const VectorF dir,
 		cos_beta_vec = VectorF_memset(cos_beta);
 
 	double
-		hit_w_limit = current_level.map_width, //  - 0.0 - 0.05,
-		hit_h_limit = current_level.map_height; //  - 1.0;
+		hit_w_limit = current_level.map_width,
+		hit_h_limit = current_level.map_height;
 
-	static double edge = 0.0;
-	if (keys[SDL_SCANCODE_T]) edge += 0.000001;
-	if (keys[SDL_SCANCODE_Y]) edge -= 0.000001;
-
-	// byte first = 1;
 	for (int y = begin - pace; y < (int) end - pace; y += 2) {
 		const int next_y = y + 1;
 
@@ -44,7 +39,7 @@ void simd_draw_floor_or_ceil(const VectorF pos, const VectorF dir,
 		const VectorF2 hits = VectorF2_line_pos(pos, dir, actual_dists);
 		// {hit.x1, hit.y1, hit.x1, hit.y1}
 
-		if (hits[0] < edge || hits[1] < edge || hits[2] < 0.0 || hits[3] < 0.0
+		if (hits[0] < 0.0 || hits[1] < 0.0 || hits[2] < 0.0 || hits[3] < 0.0
 			|| hits[0] > hit_w_limit || hits[1] > hit_h_limit
 			|| hits[2] > hit_w_limit || hits[3] > hit_h_limit)
 			continue;
@@ -97,13 +92,6 @@ void simd_draw_floor_or_ceil(const VectorF pos, const VectorF dir,
 			dest_y = settings.screen_height - 1;
 		else if (dest_y < 0)
 			dest_y = 0;
-
-		/*
-		if (first)
-			printf("First Y is %d\n---\n", dest_y);
-
-		first = 0;
-		*/
 
 		*get_pixbuf_pixel(screen_x, dest_y) =
 			shade_ARGB_pixel(surface_pixels[0], actual_dists[0], first_hit);

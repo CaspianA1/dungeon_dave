@@ -52,7 +52,7 @@ ResultBFS bfs(const VectorF begin, const VectorF end) {
 		int_end = VectorF_floor(end);
 
 	/////
-	mut_map_data all_visited = wmalloc(current_level.map_height * sizeof(byte*));
+	byte** restrict all_visited = wmalloc(current_level.map_height * sizeof(byte*));
 	for (int y = 0; y < current_level.map_height; y++)
 		all_visited[y] = wcalloc(current_level.map_width, sizeof(byte));
 	all_visited[int_begin.y][int_begin.x] = 1;

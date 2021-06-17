@@ -1,6 +1,6 @@
 static Uint32 temp_buf[INIT_H][INIT_W]; // max: 1440 by 900
 
-// adapt this to new FOVs
+// Why doesn't this work on more FOVs?
 void draw_floor_plane(const Player player) {
 	// store pixels in a local buffer, and write them afterwards? vram is far away
 	// https://stackoverflow.com/questions/2963898/faster-alternative-to-memcpy
