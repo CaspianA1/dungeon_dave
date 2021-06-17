@@ -43,23 +43,25 @@ void update_enemy(Enemy* const restrict enemy, const Player player) {
 
 	Navigator* const restrict nav = &enemy -> nav;
 
-	// DEBUG_VECF(*nav -> player_dest_delta);
-
 	switch (enemy -> state) {
-		case Idle: // stay there, idle animation
+		case Idle:
+			/* do not move (while periodically making idle noises),
+			unless the player is close enough. In that case, switch to state Chasing */
 			break;
-		case Chasing: { // bfs stuff
+		case Chasing:
 			if (update_path_if_needed(nav, player.pos, player.jump) == ReachedDest)
 				set_enemy_state(enemy, Attacking);
 			break;
-		}
-		case Attacking: // attack animation + fighting
-			// attack if the player is close enough, otherwise transition to Chasing
-			// DEBUG(player.pos[0] - enemy.nav -> pos[0], lf);
+		case Attacking:
+			/* if dist delta < 0.99 for x and y, attack,
+			otherwise transition to state Chasing */
 			break;
-		case Retreating: // run away to some random vantage point
+		case Retreating:
+			/* if vantage point reached, wait for some amount of time,
+			and then find a new vantage point */
 			break;
-		case Dead: // do not move, dead single-sprite animation
+		case Dead:
+			// do not move, just display a dead single-sprite animation
 			break;
 	}
 }

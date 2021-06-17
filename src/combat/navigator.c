@@ -16,9 +16,9 @@ inlinable void update_path(Navigator* const nav, const VectorF player_pos, const
 }
 
 inlinable Navigator init_navigator(const VectorF player_pos, VectorF* const pos_ref,
-	const VectorF* const player_delta_ref, const double v) {
+	double* const dist_to_player_ref, const double v) {
 
-	Navigator nav = {.pos = pos_ref, .player_dest_delta = player_delta_ref, .path_ind = -1, .v = v};
+	Navigator nav = {.pos = pos_ref, .dist_to_player = dist_to_player_ref, .path_ind = -1, .v = v};
 	update_path(&nav, player_pos, 1);
 	return nav;
 }
@@ -31,11 +31,7 @@ NavigatorState update_path_if_needed(Navigator* const nav, const VectorF player_
 	}
 
 	const Path* const path = &nav -> path_to_player;
-	VectorF player_dest_delta = *nav -> player_dest_delta;
-
-	// if (nav -> player_dest_delta[0] >= 0.99 || nav -> player_dest_delta[1] >= 0.99)
-	if (player_dest_delta[0] >= 0.99 || player_dest_delta[1] >= 0.99)
-		update_path(nav, player_pos, 0);
+	if (*nav -> dist_to_player >= 0.99) update_path(nav, player_pos, 0);
 
 	if (nav -> path_ind < path -> length - 1) {
 		const VectorI

@@ -75,7 +75,6 @@ void set_level_billboards(Level* const restrict level, const unsigned billboard_
 			va_arg(billboard_data, double),
 			va_arg(billboard_data, double)
 		};
-		billboard -> player_delta = (VectorF) {0, 0};
 		billboard -> height = va_arg(billboard_data, double);
 	}
 	va_end(billboard_data);
@@ -106,7 +105,6 @@ void set_level_animations(Level* const restrict level, const unsigned animation_
 			va_arg(animation_data, double),
 			va_arg(animation_data, double)
 		};
-		dest -> billboard.player_delta = (VectorF) {0, 0};
 		dest -> billboard.height = va_arg(animation_data, double);
 	}
 	va_end(animation_data);
@@ -167,7 +165,7 @@ void set_level_enemies(Level* const restrict level, const unsigned enemy_count, 
 		Billboard* const restrict dest_billboard = &dest -> animations.billboard;
 
 		const Navigator nav = init_navigator(level -> init_pos,
-			&dest_billboard -> pos, &dest_billboard -> player_delta, va_arg(enemy_data, double));
+			&dest_billboard -> pos, &dest_billboard -> dist, va_arg(enemy_data, double));
 
 		memcpy(&dest -> nav, &nav, sizeof(Navigator));
 

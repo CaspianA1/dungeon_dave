@@ -51,7 +51,6 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 			billboard = &current_level.billboards[i];
 
 		const VectorF delta = VectorFF_sub(billboard -> pos, player.pos);
-		billboard -> player_delta = (VectorF) {fabs(delta[0]), fabs(delta[1])};
 
 		billboard -> beta = atan2(delta[1], delta[0]) - player_angle;
 		billboard -> dist =

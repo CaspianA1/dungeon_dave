@@ -154,7 +154,7 @@ void load_palace(void) {
 		4, 8, 10, 11, 4, // animation_seg_lengths
 
 		"../assets/spritesheets/enemy_spritesheet_test.bmp", 6, 7, 37, 12, // animation data
-		2.5, 3.5, 0.0, // billboard data
+		5.5, 4.5, 0.0, // billboard data
 
 		"../assets/audio/enemy_sound_test/idle.wav", // sound data
 		"../assets/audio/enemy_sound_test/chase_and_retreat.wav",

@@ -7,7 +7,7 @@ typedef struct {
 
 typedef struct {
 	Sprite sprite;
-	VectorF pos, player_delta;
+	VectorF pos;
 	double beta, dist, height; // `height` here is a point height
 } Billboard;
 

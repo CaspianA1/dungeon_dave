@@ -22,12 +22,12 @@ typedef enum {
 typedef struct {
 	Path path_to_player; // whole-number path
 	VectorF* const pos;
-	const VectorF* const player_dest_delta;
+	double* const dist_to_player;
 	int path_ind;
 	const double v;
 } Navigator;
 
-inlinable Navigator init_navigator(const VectorF, VectorF*, const VectorF*, const double);
+inlinable Navigator init_navigator(const VectorF, VectorF* const, double* const, const double);
 
 /////
 

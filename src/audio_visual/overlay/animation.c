@@ -2,7 +2,7 @@ inlinable Animation init_animation(const char* const restrict path,
 	const int frames_per_row, const int frames_per_col,
 	const int frame_count, const int fps) {
 
-	const Billboard billboard = {init_sprite(path), {0, 0}, {0, 0}, 0, 0, 0};
+	const Billboard billboard = {init_sprite(path), {0, 0}, 0, 0, 0};
 
 	return (Animation) {
 		billboard, frames_per_row, frames_per_col,

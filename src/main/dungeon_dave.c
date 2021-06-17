@@ -38,6 +38,7 @@
 
 /*
 itinerary:
+a beautiful skybox
 enemy ai
 visplane floors
 non-clipping enemies
