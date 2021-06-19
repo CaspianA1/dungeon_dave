@@ -148,19 +148,19 @@ void load_palace(void) {
 
 	// this is set after b/c this depends on fns that read from current_level
 	set_level_enemies(&current_level, enemy_count,
-		Chasing, // state
-		1.5, 3.0, 6.0, 10.0, // dist_thresholds
+		Idle, // state
+		2.0, 8.0, // dist_thresholds
 		5.0, 20.0, // hp_to_retreat, hp
-		4, 8, 10, 11, 4, // animation_seg_lengths
+		4, 8, 10, 4, // animation_seg_lengths
 
-		"../assets/spritesheets/enemy_spritesheet_test.bmp", 6, 7, 37, 12, // animation data
-		5.5, 4.5, 0.0, // billboard data
+		"../assets/spritesheets/enemy_spritesheet_test.bmp", 5, 6, 26, 12, // animation data
+		3.0, 7.5, 0.0, // billboard data
 
 		"../assets/audio/enemy_sound_test/idle.wav", // sound data
-		"../assets/audio/enemy_sound_test/chase_and_retreat.wav",
+		"../assets/audio/enemy_sound_test/chase.wav",
 		"../assets/audio/enemy_sound_test/attack.wav",
-		"../assets/audio/enemy_sound_test/attacked.wav",
 		"../assets/audio/enemy_sound_test/death.wav",
+		"../assets/audio/enemy_sound_test/attacked.wav",
 
 		0.02 /* navigator speed */ );
 

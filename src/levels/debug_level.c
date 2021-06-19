@@ -51,11 +51,9 @@ void load_debug_level(void) {
 
 	set_level_billboards(&debug_level, billboard_count);
 	set_level_animations(&debug_level, animation_count,
-		"../assets/spritesheets/sonic.bmp", 6, 5, 30, 30, 4.5, 4.5, 0.0);
+		"../assets/spritesheets/sonic.bmp", 6, 5, 30, 30, 2.5, 2.5, 0.0);
 
 	memcpy(&current_level, &debug_level, sizeof(Level));
-
 	set_level_enemies(&current_level, enemy_count);
-
-	set_level_generic_billboard_container(&debug_level);
+	set_level_generic_billboard_container(&current_level);
 }

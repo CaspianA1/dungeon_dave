@@ -9,8 +9,8 @@
 // #define TRACK_MEMORY
 // #define NOCLIP_MODE
 
-#define INIT_W 800
-#define INIT_H 600
+#define INIT_W 640
+#define INIT_H 480
 #define INIT_MAX_FPS 60
 #define INIT_RAY_COLUMN_W 1
 

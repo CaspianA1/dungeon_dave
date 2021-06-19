@@ -53,8 +53,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 		const VectorF delta = VectorFF_sub(billboard -> pos, player.pos);
 
 		billboard -> beta = atan2(delta[1], delta[0]) - player_angle;
-		billboard -> dist =
-			sqrt(delta[0] * delta[0] + delta[1] * delta[1]) * cos(billboard -> beta);
+		billboard -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 
 		GenericBillboard* const restrict generic_billboard = &generic_billboards[i];
 		generic_billboard -> billboard = *billboard;
@@ -69,20 +68,23 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 
 	for (byte i = 0; i < generic_billboard_count; i++) {
 		const GenericBillboard generic = generic_billboards[i];
-
 		const Billboard billboard = generic.billboard;
 
-		const double abs_billboard_beta = fabs(billboard.beta);
+		const double
+			abs_billboard_beta = fabs(billboard.beta),
+			cos_billboard_beta = cos(billboard.beta);
 
-		if (billboard.dist <= 0.0
+		if (cos_billboard_beta <= 0.0
 			|| doubles_eq(abs_billboard_beta, half_pi, std_double_epsilon)
 			|| doubles_eq(abs_billboard_beta, three_pi_over_two, std_double_epsilon)
 			|| doubles_eq(abs_billboard_beta, five_pi_over_two, std_double_epsilon))
 			continue;
 
+		const double corrected_dist = billboard.dist * cos_billboard_beta;
+
 		const double
 			center_offset = tan(billboard.beta) * settings.proj_dist,
-			size = settings.proj_dist / billboard.dist;
+			size = settings.proj_dist / corrected_dist;
 
 		/////
 
@@ -131,12 +133,12 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 
 		SDL_FRect screen_pos = {
 			0.0, billboard_y_shift - half_size
-			+ (player.jump.height - billboard.height) * settings.screen_height / billboard.dist,
+			+ (player.jump.height - billboard.height) * settings.screen_height / corrected_dist,
 			settings.ray_column_width, size
 		};
 
 		for (int screen_row = start_x; screen_row < end_x; screen_row++) {
-			if (screen_row < 0 || screen.z_buffer[screen_row] < billboard.dist) continue;
+			if (screen_row < 0 || screen.z_buffer[screen_row] < corrected_dist) continue;
 
 			const double offset = ((double) (screen_row - start_x) / size) * width;
 			screen_pos.x = screen_row;

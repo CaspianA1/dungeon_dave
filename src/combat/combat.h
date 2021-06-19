@@ -32,13 +32,11 @@ inlinable Navigator init_navigator(const VectorF, VectorF* const, double* const,
 /////
 
 typedef struct {
-	const double
-		min_idle_sound, max_idle_sound,
-		begin_chasing, begin_attacking;
+	const double wake_from_idle, max_idle_sound;
 } EnemyDistThresholds;
 
 typedef enum {
-	Idle, Chasing, Attacking, Retreating, Dead
+	Idle, Chasing, Attacking, Dead
 } EnemyState;
 
 typedef struct {
@@ -47,13 +45,10 @@ typedef struct {
 	const double hp_to_retreat;
 	double hp;
 
-	// the pos is stored in the Animation, and the Navigator stores a pointer to that
-
-	/* A sound for each state. Each sound plays
-	when the state begins. Retreating sound = chasing sound. */
-	const byte animation_seg_lengths[5];
+	const byte animation_seg_lengths[4];
 	Animation animations; // from one large spritesheet
 
+	// A sound for each state. Each sound plays when the state begins.
 	Sound* const restrict sounds; // 5 sounds (ptrs b/c struct doubles in size otherwise)
 	Navigator nav;
 } Enemy;

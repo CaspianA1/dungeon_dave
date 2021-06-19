@@ -116,10 +116,7 @@ void load_level_1(void) {
 		"../assets/spritesheets/gold_key.bmp", 3, 4, 12, 6, 1.5, 1.4, 0.0,
 		"../assets/spritesheets/torch.bmp", 3, 3, 9, 9, 19.0, 9.5, 0.0);
 
-
 	memcpy(&current_level, &level_1, sizeof(Level));
-
 	set_level_enemies(&current_level, enemy_count);
-
-	set_level_generic_billboard_container(&level_1);
+	set_level_generic_billboard_container(&current_level);
 }

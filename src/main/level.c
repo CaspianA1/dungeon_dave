@@ -124,17 +124,14 @@ void set_level_enemies(Level* const restrict level, const unsigned enemy_count, 
 		const EnemyState enemy_state = va_arg(enemy_data, EnemyState);
 		Enemy enemy = {
 			.dist_thresholds = {
-				.begin_attacking = va_arg(enemy_data, double),
-				.begin_chasing = va_arg(enemy_data, double),
-				.min_idle_sound = va_arg(enemy_data, double),
-				.max_idle_sound = va_arg(enemy_data, double),
+				.wake_from_idle = va_arg(enemy_data, double),
+				.max_idle_sound = va_arg(enemy_data, double)
 			},
 
 			.hp_to_retreat = va_arg(enemy_data, double),
 			.hp = va_arg(enemy_data, double),
 
 			.animation_seg_lengths = {
-				va_arg(enemy_data, unsigned),
 				va_arg(enemy_data, unsigned),
 				va_arg(enemy_data, unsigned),
 				va_arg(enemy_data, unsigned),
@@ -149,15 +146,15 @@ void set_level_enemies(Level* const restrict level, const unsigned enemy_count, 
 			.sounds = wmalloc(5 * sizeof(Sound))
 		};
 
-		void set_enemy_state(Enemy*, EnemyState);
-		set_enemy_state(&enemy, enemy_state);
-
 		Billboard* const restrict billboard = &enemy.animations.billboard;
 		billboard -> pos = (VectorF) {va_arg(enemy_data, double), va_arg(enemy_data, double)};
 		billboard -> height = va_arg(enemy_data, double);
 
 		for (byte i = 0; i < 5; i++)
 			enemy.sounds[i] = init_sound(va_arg(enemy_data, const char*), 1);
+
+		void set_enemy_state(Enemy*, EnemyState, byte);
+		set_enemy_state(&enemy, enemy_state, 1);
 
 		Enemy* const restrict dest = &level -> enemies[i];
 		memcpy(dest, &enemy, sizeof(Enemy));

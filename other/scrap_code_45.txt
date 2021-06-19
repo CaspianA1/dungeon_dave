@@ -1,0 +1,57 @@
+void retreat_enemy(Enemy* const restrict enemy, const Player player) {
+	Navigator* const restrict nav = &enemy -> nav;
+
+	if (enemy -> state == Retreating) {
+		update_path_if_needed(nav, player.pos, player.jump);
+	}
+
+	else {
+		while (1) {
+			const VectorF new_spot = {rand() % current_level.map_width, rand() % current_level.map_height};
+			if (wall_point(new_spot[0], new_spot[1])) continue;
+			enemy -> animations.billboard.pos = new_spot;
+			// if the new dest isn't navigatable to, find a new spot
+			if (update_path_if_needed(nav, player.pos, player.jump) == CouldNotNavigate)
+				continue;
+
+			set_enemy_state(enemy, Retreating);
+			break;
+		}
+	}
+}
+
+case Retreating:
+	/* if vantage point reached, wait for some amount of time,
+	and then find a new vantage point */
+	break;
+
+// the pos is stored in the Animation, and the Navigator stores a pointer to that
+
+/////
+
+case Chasing: case Attacking: {
+	const NavigatorState navigator_state = update_path_if_needed(nav, player.pos, player.jump);
+	if (enemy -> state == Chasing) {
+		if (navigator_state == ReachedDest) set_enemy_state(enemy, Attacking, 0);
+	}
+
+	else {
+		printf("Attacking\n");
+		// printf("Attacking, dist = %lf\n", dist);
+		// if (dist >= thresholds.begin_chasing) set_enemy_state(enemy, Chasing, 0);
+		// else, attack
+	}
+	break;
+}
+
+/////
+
+/*
+printf("In attack\n");
+if (dist >= thresholds.begin_chasing) {
+	printf("Switch to chase b/c dist is %lf\n", dist);
+	set_enemy_state(enemy, Chasing, 0);
+}
+*/
+
+/////

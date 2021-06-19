@@ -1,11 +1,12 @@
 /*
-Five enemy states: Idle, Chasing, Attacking, Retreating, Dead
+Four enemy states: Idle, Chasing, Attacking, Dead
 The spritesheet layout is in the order of the enemy states.
-The sounds are in the same order, but with Retreating substituted for Attacked.
+The sounds are in the same order, but with Attacked added after Attacking.
 */
 
-void set_enemy_state(Enemy* const restrict enemy, EnemyState new_state) {
+void set_enemy_state(Enemy* const restrict enemy, EnemyState new_state, byte silent) {
 	enemy -> state = new_state;
+	if (!silent) play_sound(enemy -> sounds[enemy -> state], 0); // stop the previous sound as well
 
 	int new_frame_ind = 0;
 	for (byte i = 0; i < enemy -> state; i++)
@@ -14,55 +15,29 @@ void set_enemy_state(Enemy* const restrict enemy, EnemyState new_state) {
 	enemy -> animations.frame_ind = new_frame_ind;
 }
 
-void retreat_enemy(Enemy* const restrict enemy, const Player player) {
-	Navigator* const restrict nav = &enemy -> nav;
-
-	if (enemy -> state == Retreating) {
-		update_path_if_needed(nav, player.pos, player.jump);
-	}
-
-	else {
-		while (1) {
-			const VectorF new_spot = {rand() % current_level.map_width, rand() % current_level.map_height};
-			if (wall_point(new_spot[0], new_spot[1])) continue;
-			enemy -> animations.billboard.pos = new_spot;
-			// if the new dest isn't navigatable to, find a new spot
-			if (update_path_if_needed(nav, player.pos, player.jump) == CouldNotNavigate)
-				continue;
-
-			set_enemy_state(enemy, Retreating);
-			break;
-		}
-	}
-}
-
 void update_enemy(Enemy* const restrict enemy, const Player player) {
-	static byte i = 1;
-	if (i) play_sound(enemy -> sounds[enemy -> state], 0);
-	i = 0;
-
 	Navigator* const restrict nav = &enemy -> nav;
+	const double dist = fabs(*nav -> dist_to_player);
+	const EnemyDistThresholds thresholds = enemy -> dist_thresholds;
 
 	switch (enemy -> state) {
 		case Idle:
-			/* do not move (while periodically making idle noises),
+			/* do not move (while peridically making idle noises),
 			unless the player is close enough. In that case, switch to state Chasing */
+			if (dist <= thresholds.wake_from_idle) set_enemy_state(enemy, Chasing, 0);
 			break;
+		
 		case Chasing:
 			if (update_path_if_needed(nav, player.pos, player.jump) == ReachedDest)
-				set_enemy_state(enemy, Attacking);
+				set_enemy_state(enemy, Attacking, 0);
 			break;
+
 		case Attacking:
-			/* if dist delta < 0.99 for x and y, attack,
-			otherwise transition to state Chasing */
+			if (update_path_if_needed(nav, player.pos, player.jump) == Navigating)
+				set_enemy_state(enemy, Chasing, 0);
 			break;
-		case Retreating:
-			/* if vantage point reached, wait for some amount of time,
-			and then find a new vantage point */
-			break;
-		case Dead:
-			// do not move, just display a dead single-sprite animation
-			break;
+
+		case Dead: break; // this state is also done
 	}
 }
 

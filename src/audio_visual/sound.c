@@ -54,8 +54,6 @@ inlinable void play_sound(const Sound sound, const byte should_loop) {
 		if (Mix_PlayChannel(-1, sound.type.short_sound, loop_status) == -1)
 			fail_sound(sound, "play");
 	}
-	else {
-		if (Mix_PlayMusic(sound.type.long_sound, loop_status) == -1)
+	else if (Mix_PlayMusic(sound.type.long_sound, loop_status) == -1)
 			fail_sound(sound, "play");
-	}
 }
