@@ -27,17 +27,17 @@ void update_enemy(Enemy* const restrict enemy, const Player player) {
 			if (dist <= thresholds.wake_from_idle) set_enemy_state(enemy, Chasing, 0);
 			break;
 		
-		case Chasing:
+		case Chasing: // done
 			if (update_path_if_needed(nav, player.pos, player.jump) == ReachedDest)
 				set_enemy_state(enemy, Attacking, 0);
 			break;
 
-		case Attacking:
+		case Attacking: // done
 			if (update_path_if_needed(nav, player.pos, player.jump) == Navigating)
 				set_enemy_state(enemy, Chasing, 0);
 			break;
 
-		case Dead: break; // this state is also done
+		case Dead: break; // done
 	}
 }
 
