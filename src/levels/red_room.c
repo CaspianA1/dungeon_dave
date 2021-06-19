@@ -1,0 +1,54 @@
+byte get_red_room_point_height(const byte point, const VectorF pos) {
+	(void) pos;
+	return point;
+}
+
+double red_room_shader(const VectorF pos) {
+	(void) pos;
+	return 0.5;
+}
+
+void load_red_room(void) {
+	enum {
+		map_width = 10, map_height = 10,
+		wall_count = 2, billboard_count = 0,
+		animation_count = 0, enemy_count = 0
+	};
+
+	static const byte wall_data[map_height][map_width] = {
+		{2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+		{2, 0, 2, 0, 0, 0, 0, 0, 0, 2},
+		{2, 0, 2, 0, 0, 0, 0, 0, 0, 2},
+		{2, 0, 2, 0, 0, 0, 0, 0, 0, 2},
+		{2, 0, 2, 0, 0, 0, 0, 0, 0, 2},
+		{2, 0, 2, 0, 0, 0, 0, 0, 0, 2},
+		{2, 0, 2, 2, 2, 0, 0, 0, 0, 2},
+		{2, 0, 2, 2, 2, 0, 0, 0, 0, 2},
+		{2, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+		{2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
+	};
+
+	Level red_room = init_level(map_width, map_height, (VectorF) {1.5, 1.5}, 0.0);
+	red_room.max_point_height = 1;
+	red_room.background_sound = init_sound("../assets/audio/red_room_track.wav", 0);
+	red_room.get_point_height = get_red_room_point_height;
+	red_room.shader = red_room_shader;
+
+	for (int y = 0; y < map_height; y++) {
+		memcpy(red_room.wall_data[y], &wall_data[y], map_width);
+		memset(red_room.ceiling_data[y], 1, map_width);
+		memset(red_room.floor_data[y], 1, map_width);
+	}
+
+	set_level_walls(&red_room, wall_count,
+		"../assets/walls/red_room_floor.bmp",
+		"../assets/walls/red_curtains.bmp");	
+
+	set_level_billboards(&red_room, billboard_count);	
+	set_level_animations(&red_room, animation_count);	
+
+	memcpy(&current_level, &red_room, sizeof(Level));
+
+	set_level_enemies(&current_level, enemy_count);
+	set_level_generic_billboard_container(&current_level);
+}

@@ -35,6 +35,7 @@
 #include "../levels/level_1.c"
 #include "../levels/debug_level.c"
 #include "../levels/palace.c"
+#include "../levels/red_room.c"
 
 /*
 itinerary:
@@ -47,7 +48,7 @@ non-clipping enemies
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_red_room, &player, &weapon);
 	// FloorCastThread floorcast_thread = init_floorcast_thread(&player);
 
 	if (display_title_screen(&player.pace.domain.max) == Exit)
