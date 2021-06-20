@@ -95,8 +95,8 @@ Player load_player(const double jump_up_v0,
 		.jump = {.jumping = 0, .up_v0 = jump_up_v0, .v0 = 0.0,
 			.height = init_height, .start_height = init_height,
 			.highest_height = init_height, .time_at_jump = 0.0,
-			.sound_at_jump = init_sound("../assets/audio/jump_up.wav", 1),
-			.sound_at_land = init_sound("../assets/audio/jump_land.wav", 1)},
+			.sound_at_jump = init_sound("../assets/audio/sound_effects/jump_up.wav", 1),
+			.sound_at_land = init_sound("../assets/audio/sound_effects/jump_land.wav", 1)},
 
 		.tilt = {.val = 0.0, .step = tilt_step, .max = tilt_max},
 
@@ -125,7 +125,7 @@ void load_all_defaults(void (*load_first_level) (void),
 
 	const Player first_player = load_player(4.8, 0.3, 8.0, 0.1, 15.0, 0.08, 0.09, 0.06, 1.9);
 
-	const Weapon first_weapon = init_weapon("../assets/audio/shotgun.wav",
+	const Weapon first_weapon = init_weapon("../assets/audio/sound_effects/shotgun.wav",
 		"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 0.0, 6, 10, 59, 30);
 
 	/*

@@ -61,7 +61,7 @@ void load_level_1(void) {
 	Level level_1 = init_level(map_width, map_height, (VectorF) {17.5, 11.5}, 0.0);
 
 	level_1.max_point_height = 3;
-	level_1.background_sound = init_sound("../assets/audio/ambient_wind.wav", 0);
+	level_1.background_sound = init_sound("../assets/audio/themes/ambient_wind.wav", 0);
 	level_1.get_point_height = get_level_1_point_height;
 	level_1.shader = level_1_shader;
 

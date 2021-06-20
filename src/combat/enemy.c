@@ -20,10 +20,9 @@ void update_enemy(Enemy* const restrict enemy, const Player player) {
 	const double dist = fabs(*nav -> dist_to_player);
 	const EnemyDistThresholds thresholds = enemy -> dist_thresholds;
 
+	// for each state (excluding Dead), periodically play the sound from that state
 	switch (enemy -> state) {
 		case Idle:
-			/* do not move (while peridically making idle noises),
-			unless the player is close enough. In that case, switch to state Chasing */
 			if (dist <= thresholds.wake_from_idle) set_enemy_state(enemy, Chasing, 0);
 			break;
 		

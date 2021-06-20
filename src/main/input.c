@@ -26,9 +26,12 @@ void update_pos(VectorF* const restrict pos, const VectorF prev_pos,
 		if (keys[KEY_SPEEDUP_1] || keys[KEY_SPEEDUP_2]) {
 			increasing_fov = 1;
 			body -> v *= body -> v_incr_multiplier;
+
 			#ifndef NOCLIP_MODE
+
 			if (settings.fov < settings.max_fov)
 				update_fov(settings.fov + settings.fov_step);
+
 			#endif
 		}
 

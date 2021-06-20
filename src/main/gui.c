@@ -82,7 +82,7 @@ InputStatus display_logo(double* const restrict pace_max) {
 }
 
 InputStatus display_title_screen(double* const restrict pace_max) {
-	const Sound title_track = init_sound("../assets/audio/title.wav", 0);
+	const Sound title_track = init_sound("../assets/audio/themes/title.wav", 0);
 	play_sound(title_track, 1);
 	if (display_logo(pace_max) == Exit) return Exit;
 

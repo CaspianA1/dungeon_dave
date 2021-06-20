@@ -55,5 +55,5 @@ inlinable void play_sound(const Sound sound, const byte should_loop) {
 			fail_sound(sound, "play");
 	}
 	else if (Mix_PlayMusic(sound.type.long_sound, loop_status) == -1)
-			fail_sound(sound, "play");
+		fail_sound(sound, "play");
 }
