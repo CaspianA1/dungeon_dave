@@ -159,7 +159,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 	}
 }
 
-void draw_skybox(const double angle) {
+void draw_skybox(const double angle, const double p_height, const int z_pitch) {
 	const Skybox skybox = current_level.skybox;
 
 	const double turn_percent = angle / 360.0;
@@ -167,25 +167,36 @@ void draw_skybox(const double angle) {
 		src_col_index = turn_percent * skybox.max_width,
 		src_width = skybox.max_width / 4.0;
 
+	(void) p_height;
+	(void) z_pitch;
+	// show a select third at z-pitch and height 0
+
+	double
+		src_y = 0, dest_y = 0, src_height = skybox.max_height,
+		dest_height = settings.half_screen_height;
+
 	if (turn_percent > 0.75) {
 		const double err_amt = (turn_percent - 0.75) * 4.0;
 		const int src_error = skybox.max_width * err_amt;
 		const double dest_error = settings.screen_width * err_amt;
 
 		const SDL_Rect
-			src_1 = {src_col_index, 0, src_width, skybox.max_height},
-			dest_1 = {0, 0, settings.screen_width - dest_error, settings.screen_height};
+			src_1 = {src_col_index, src_y, src_width, src_height},
+			dest_1 = {0, dest_y, settings.screen_width - dest_error, dest_height};
 
 		SDL_RenderCopy(screen.renderer, skybox.sprite.texture, &src_1, &dest_1);
 
 		const SDL_Rect
-			src_2 = {0, 0, src_error / 4, skybox.max_height},
-			dest_2 = {dest_1.w, 0, settings.screen_width - dest_1.w, settings.screen_height};
+			src_2 = {0, src_y, src_error / 4, src_height},
+			dest_2 = {dest_1.w, dest_y, settings.screen_width - dest_1.w, dest_height};
 		SDL_RenderCopy(screen.renderer, skybox.sprite.texture, &src_2, &dest_2);
 	}
 
 	else {
-		const SDL_Rect src = {src_col_index, 0, src_width, skybox.max_height};
-		SDL_RenderCopy(screen.renderer, skybox.sprite.texture, &src, NULL);
+		const SDL_Rect
+			src = {src_col_index, src_y, src_width, src_height},
+			dest = {0, dest_y, settings.screen_width, dest_height};
+
+		SDL_RenderCopy(screen.renderer, skybox.sprite.texture, &src, &dest);
 	}
 }

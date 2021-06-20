@@ -2,6 +2,10 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 	byte* restrict first_wall_hit, double* restrict smallest_wall_y, const double player_angle,
 	const double theta, const double wall_y_shift, const double full_jump_height, const VectorF dir) {
 
+	#ifdef PLANAR_MODE
+	(void) player;
+	#endif
+
 	const double cos_beta = cos(player_angle - theta);
 	const double correct_dist = cast_data.dist * cos_beta;
 	const double wall_h = settings.proj_dist / correct_dist;
@@ -41,7 +45,12 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 			sprite_height = max_sprite_height;
 			if ((double) raised_wall.y < *smallest_wall_y)
 				*smallest_wall_y = (double) raised_wall.y;
+
+			#ifndef PLANAR_MODE
+
 			if (i == 0) std_draw_floor(player, dir, raised_wall, cos_beta);
+
+			#endif
 		}
 
 		else { // partially obscured: bottom of wall somewhere in middle of tallest

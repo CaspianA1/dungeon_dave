@@ -55,3 +55,42 @@ if (dist >= thresholds.begin_chasing) {
 */
 
 /////
+
+// store pixels in a local buffer, and write them afterwards? vram is far away
+// https://stackoverflow.com/questions/2963898/faster-alternative-to-memcpy
+
+/////
+
+static double foo = 0;
+if (keys[SDL_SCANCODE_T]) foo += 0.01;
+if (keys[SDL_SCANCODE_Y]) foo -= 0.01;
+DEBUG(foo, lf);
+
+(void) z_pitch;
+// double y_shift = z_pitch;
+double y_shift = foo * settings.screen_height;
+DEBUG(y_shift, lf);
+
+/*
+if the height increases, less should be shown at the bottom, and more should be shown at the top
+*/
+
+double y_portion_available = settings.half_screen_height;
+// y_portion_available -= p_height * settings.screen_height;
+double y_src_available = skybox.max_height;
+
+// const double y_portion_available = settings.screen_height;
+// const double available_ratio = y_portion_available / settings.screen_height;
+// const double y_src_available = available_ratio * skybox.max_height;
+
+/////
+
+const double third_dest_height = settings.screen_height / 3.0;
+
+/*
+double y_shift = 20;
+double y_portion_available = settings.half_screen_height;
+double y_src_available = skybox.max_height;
+*/
+
+/////

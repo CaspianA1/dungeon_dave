@@ -44,12 +44,13 @@ inlinable void draw_tilted_f(SDL_Texture* const restrict buffer,
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
-void refresh(const Domain tilt, const VectorF pos, const double angle) {
+// void refresh(const Domain tilt, const VectorF pos, const double angle, const int z_pitch) {
+void refresh(const Player player) {
 	SDL_UnlockTexture(screen.pixel_buffer);
 	SDL_SetRenderTarget(screen.renderer, NULL);
 
-	void draw_skybox(const double);
-	draw_skybox(angle);
+	void draw_skybox(const double, const double, const int);
+	draw_skybox(player.angle, player.jump.height, player.z_pitch);
 
 	/*
 	When rotating the image according to the tilt angle, there's some dead space on the edges,
@@ -62,6 +63,8 @@ void refresh(const Domain tilt, const VectorF pos, const double angle) {
 	ϴ_____| B
 	   A
 	*/
+
+	const Domain tilt = player.tilt;
 
 	if (tilt.val >= -tilt.step - 0.01 && tilt.val <= tilt.step + 0.01) {
 		SDL_RenderCopy(screen.renderer, screen.pixel_buffer, NULL, NULL);
@@ -85,7 +88,7 @@ void refresh(const Domain tilt, const VectorF pos, const double angle) {
 	}
 
 	void draw_minimap(const VectorF);
-	draw_minimap(pos);
+	draw_minimap(player.pos);
 	SDL_RenderPresent(screen.renderer);
 }
 

@@ -66,6 +66,8 @@ int main(void) {
 		update_screen_dimensions(&player.pace.domain.max);
 		prepare_for_drawing();
 
+		#ifndef PLANAR_MODE
+
 		const double
 			wall_y_shift = settings.half_screen_height + player.z_pitch + player.pace.screen_offset,
 			full_jump_height = player.jump.height * settings.screen_height;
@@ -74,17 +76,21 @@ int main(void) {
 		raycast_2(player, wall_y_shift, full_jump_height);
 		draw_generic_billboards(player, wall_y_shift);
 
-		/*
-		draw_ceiling_plane(player);
-		draw_floor_plane(player);
-		refresh_and_clear_temp_buf();
-		*/
-
 		update_all_enemies(player);
 		use_weapon_if_needed(&weapon, player, input_status);
 		// wait_for_floorcast_tick(&floorcast_thread);
 
-		refresh(player.tilt, player.pos, player.angle);
+		#else
+
+		// draw_ceiling_plane(player);
+		/*
+		draw_floor_plane(player);
+		refresh_and_clear_temp_buf();
+		*/
+
+		#endif
+
+		refresh(player);
 		tick_delay(before);
 	}
 }

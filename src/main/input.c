@@ -115,8 +115,14 @@ inlinable void update_tilt(Domain* const restrict tilt, const byte strafe, const
 	else if (tilt -> val - tilt -> step > 0) tilt -> val -= tilt -> step;
 }
 
-inlinable void update_pace(Pace* const restrict pace, const VectorF pos, const VectorF prev_pos) {
+inlinable void update_pace(Pace* const restrict pace, const VectorF pos, const VectorF prev_pos, const double v) {
+	(void) v;
+
 	#ifndef NOCLIP_MODE
+
+	// if (v < 0.008) return;
+	// or slow down pace by 2?
+
 
 	if (pos[0] != prev_pos[0] || pos[1] != prev_pos[1]) {
 		if ((pace -> domain.val += pace -> domain.step) > two_pi) pace -> domain.val = 0;
@@ -246,7 +252,7 @@ InputStatus handle_input(Player* const restrict player, const byte restrict_move
 		update_jump(&player -> jump, player -> pos);
 		update_z_pitch(&player -> z_pitch, &mouse_pos -> y);
 		update_tilt(&player -> tilt, strafe, lstrafe);
-		update_pace(&player -> pace, *pos, prev_pos);
+		update_pace(&player -> pace, *pos, prev_pos, player -> body.v);
 	}
 
 	return input_status;
