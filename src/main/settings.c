@@ -2,6 +2,7 @@ inlinable void update_proj_dist(void) {
 	settings.proj_dist = settings.half_screen_width / tan(to_radians(settings.fov / 2.0));
 }
 
+// see how other raycasters use the fov to determine things
 inlinable void update_fov(const double new_fov) {
 	if (new_fov <= 0.0 || new_fov >= 180.0) return;
 	settings.fov = new_fov;

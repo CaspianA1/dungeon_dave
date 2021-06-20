@@ -48,7 +48,7 @@ non-clipping enemies
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_red_room, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 	// FloorCastThread floorcast_thread = init_floorcast_thread(&player);
 
 	if (display_title_screen(&player.pace.domain.max) == Exit)
