@@ -172,8 +172,7 @@ void draw_skybox(const double angle, const double y_shift) {
 		src_col_index = turn_percent * skybox.max_width,
 		src_width = skybox.max_width / 4.0;
 
-	const double dest_y = 0.0, dest_height = y_shift;
-
+	const int dest_y = 0.0, dest_height = y_shift;
 	double look_up_percent = y_shift / settings.screen_height;
 
 	const int // src_height can be divided to determine what fraction is shown at once
