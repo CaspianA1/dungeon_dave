@@ -19,7 +19,7 @@ void draw_floor_plane(const Player player) {
 		screen_z = settings.half_screen_height +
 			player.jump.height * settings.screen_height * screen_height_over_proj_dist;
 
-	const byte* point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
+	const byte* const point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
 
 	const VectorF dir = {
 		cos(theta) / screen_height_over_proj_dist,
@@ -51,16 +51,13 @@ void draw_floor_plane(const Player player) {
 
 		for (int x = begin_x; x < end_x; x++) {
 			const VectorF cell = get_cell_from_ray_pos(ray_pos);
-			// const byte point = point_data[(int) cell[1]][(int) cell[0]];
-			// const byte point = point_data[(int) (floor(cell[1]) * current_level.map_height + floor(cell[0]))];
 			const byte point = map_point(point_data, cell[0], cell[1]);
-			const SDL_Surface* restrict surface = current_level.walls[point - 1].surface;
+			const SDL_Surface* const surface = current_level.walls[point - 1].surface;
 
 			const VectorF tex_w = VectorF_memset(surface -> w);
 			const int max_offset = tex_w[0] - 1;
 			const VectorF offset = VectorFF_mul(tex_w, VectorFF_sub(ray_pos, cell));
 
-			/////
 			const Uint32 src = get_surface_pixel(
 				surface -> pixels, surface -> pitch,
 				(int) offset[0] & max_offset,
@@ -94,7 +91,7 @@ inlinable void draw_ceiling_plane(const Player player) {
 		reverse_p_height * settings.screen_height / screen_height_over_proj_dist;
 	//////////
 
-	const byte* point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
+	const byte* const point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
 
 	const VectorF dir = {
 		cos(theta) * screen_height_over_proj_dist,
@@ -126,23 +123,19 @@ inlinable void draw_ceiling_plane(const Player player) {
 
 		for (int x = begin_x; x < end_x; x++) {
 			const VectorF cell = get_cell_from_ray_pos(ray_pos);
-			// const byte point = point_data[(int) cell[1]][(int) cell[0]];
-			// const byte point = point_data[(int) (floor(cell[1]) * current_level.map_height + floor(cell[0]))];
 			const byte point = map_point(point_data, cell[0], cell[1]);
-			const SDL_Surface* restrict surface = current_level.walls[point - 1].surface;
+			const SDL_Surface* const surface = current_level.walls[point - 1].surface;
 
 			const VectorF tex_w = VectorF_memset(surface -> w);
 			const int max_offset = tex_w[0] - 1;
 			const VectorF offset = VectorFF_mul(tex_w, VectorFF_sub(ray_pos, cell));
 
-			/////
 			const Uint32 src = get_surface_pixel(
 				surface -> pixels, surface -> pitch,
 				(int) offset[0] & max_offset,
 				(int) offset[1] & max_offset);
 
-			temp_buf[screen_y][x] = src; // also aligned now (?)
-			// *get_pixbuf_pixel(x, screen_y) = src; // aligned
+			temp_buf[screen_y][x] = src;
 			ray_pos = VectorFF_add(ray_pos, step);
 		}
 	}

@@ -1,6 +1,6 @@
 typedef struct {
-	SDL_Surface* restrict surface;
-	SDL_Texture* restrict texture;
+	SDL_Surface* surface;
+	SDL_Texture* texture;
 } Sprite;
 
 /////

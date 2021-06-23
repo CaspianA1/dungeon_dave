@@ -4,7 +4,7 @@ The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Attacked added after Attacking.
 */
 
-void set_enemy_state(Enemy* const restrict enemy, EnemyState new_state, byte silent) {
+void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	enemy -> state = new_state;
 	if (!silent) play_sound(enemy -> sounds[enemy -> state], 0); // stop the previous sound as well
 
@@ -15,8 +15,8 @@ void set_enemy_state(Enemy* const restrict enemy, EnemyState new_state, byte sil
 	enemy -> animations.frame_ind = new_frame_ind;
 }
 
-void update_enemy(Enemy* const restrict enemy, const Player player) {
-	Navigator* const restrict nav = &enemy -> nav;
+void update_enemy(Enemy* const enemy, const Player player) {
+	Navigator* const nav = &enemy -> nav;
 	const double dist = fabs(*nav -> dist_to_player);
 	const EnemyDistThresholds thresholds = enemy -> dist_thresholds;
 

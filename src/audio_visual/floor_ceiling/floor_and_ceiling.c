@@ -11,9 +11,8 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const double dist, const V
 	(void) pos;
 	#endif
 
-	// why isn't (a | b | c) * d equal to ((a * d) | (b * d) | (c * d))?
-
-	// settings.proj_dist / dist is the shading of an imaginary wall
+	/* why isn't (a | b | c) * d equal to ((a * d) | (b * d) | (c * d))?
+	settings.proj_dist / dist is the shading of an imaginary wall */
 	const double shade = calculate_shade(settings.proj_dist / dist, pos);
 
 	const Uint8 // this could perhaps use some SIMD
@@ -76,11 +75,8 @@ void draw_floor_or_ceil(
 			continue;
 
 		const VectorI floored_hit = VectorF_floor(hit);
-		// const byte point = tex_hit_data[floored_hit.y][floored_hit.x];
-		// const byte point = tex_hit_data[floored_hit.y * current_level.map_height + floored_hit.x];
 		const byte point = map_point(tex_hit_data, floored_hit.x, floored_hit.y);
-
-		const SDL_Surface* restrict surface = current_level.walls[point - 1].surface;
+		const SDL_Surface* const surface = current_level.walls[point - 1].surface;
 		const int max_offset = surface -> w - 1;
 
 		const VectorI surface_offset = {

@@ -1,11 +1,11 @@
 typedef struct {
-	TTF_Font* restrict font;
+	TTF_Font* font;
 	Sprite sprite;
 	byte r, g, b, has_background;
 	SDL_Rect pos;
 } Message;
 
-Message init_message(const char* const restrict text,
+Message init_message(const char* const text,
 	const byte r, const byte g, const byte b, const byte has_background) {
 
 	const double avg_dimensions = (settings.screen_width + settings.screen_height) / 2.0;
@@ -24,7 +24,7 @@ Message init_message(const char* const restrict text,
 }
 
 inlinable void draw_colored_rect(const byte r, const byte g,
-	const byte b, const SDL_Rect* rect) {
+	const byte b, const SDL_Rect* const rect) {
 
 	SDL_SetRenderDrawColor(screen.renderer, r, g, b, SDL_ALPHA_OPAQUE);
 	SDL_RenderFillRect(screen.renderer, rect);
@@ -54,15 +54,15 @@ inlinable void deinit_message(Message message) {
 	deinit_sprite(message.sprite);
 }
 
-inlinable void after_gui_event(double* const restrict pace_max,
-	int* const restrict z_pitch, const int mouse_y, const Uint32 before) {
+inlinable void after_gui_event(double* const pace_max,
+	int* const z_pitch, const int mouse_y, const Uint32 before) {
 
 	SDL_RenderPresent(screen.renderer);
 	update_screen_dimensions(pace_max, z_pitch, mouse_y);
 	tick_delay(before);
 }
 
-InputStatus display_logo(double* const restrict pace_max, int* const restrict z_pitch, const int mouse_y) {
+InputStatus display_logo(double* const pace_max, int* const z_pitch, const int mouse_y) {
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 
@@ -83,8 +83,8 @@ InputStatus display_logo(double* const restrict pace_max, int* const restrict z_
 	}
 }
 
-InputStatus display_title_screen(double* const restrict pace_max,
-	int* const restrict z_pitch, const int mouse_y) {
+InputStatus display_title_screen(double* const pace_max,
+	int* const z_pitch, const int mouse_y) {
 
 	const Sound title_track = init_sound("../assets/audio/themes/title.wav", 0);
 	play_sound(title_track, 1);

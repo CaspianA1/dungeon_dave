@@ -49,7 +49,7 @@ typedef struct {
 	Animation animations; // from one large spritesheet
 
 	// A sound for each state. Each sound plays when the state begins.
-	Sound* const restrict sounds; // 5 sounds (ptrs b/c struct doubles in size otherwise)
+	Sound* const sounds; // 5 sounds (ptrs b/c struct doubles in size otherwise)
 	Navigator nav;
 } Enemy;
 
@@ -62,6 +62,6 @@ typedef struct {
 	Animation animation;
 } Weapon;
 
-inlinable Weapon init_weapon(const char*, const char*, const double, const int, const int, const int, const int);
+inlinable Weapon init_weapon(const char* const, const char* const, const double, const int, const int, const int, const int);
 
 /////

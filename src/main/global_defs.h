@@ -66,8 +66,6 @@ const double
 	small_double_epsilon = 0.000001;
 
 typedef uint_fast8_t byte;
-// typedef byte* restrict const* restrict map_data;
-// typedef byte* map_data;
 typedef __m128d VectorF; // two doubles
 typedef __m256d VectorF2; // four doubles
 

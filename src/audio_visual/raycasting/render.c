@@ -16,8 +16,7 @@ void draw_minimap(const VectorF pos) {
 		height_scale = (double) settings.screen_height
 			/ current_level.map_height / settings.minimap_scale;
 
-	const byte r = 30, g = 144, b = 255;
-
+	const SDL_Color baby_blue = {30, 144, 255, SDL_ALPHA_OPAQUE};
 	SDL_FRect wall = {0.0, 0.0, width_scale, height_scale};
 
 	for (int map_x = 0; map_x < current_level.map_width; map_x++) {
@@ -27,7 +26,9 @@ void draw_minimap(const VectorF pos) {
 				((double) current_level.get_point_height(point, (VectorF) {map_x, map_y})
 				/ current_level.max_point_height);
 
-			SDL_SetRenderDrawColor(screen.renderer, r * shade, g * shade, b * shade, SDL_ALPHA_OPAQUE);
+			SDL_SetRenderDrawColor(screen.renderer,
+				baby_blue.r * shade, baby_blue.g * shade,
+				baby_blue.b * shade, SDL_ALPHA_OPAQUE);
 
 			wall.x = map_x * width_scale;
 			wall.y = map_y * height_scale;

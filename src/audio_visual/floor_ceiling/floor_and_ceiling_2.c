@@ -50,19 +50,11 @@ void simd_draw_floor_or_ceil(const VectorF pos, const VectorF dir,
 		};
 
 		const byte points[2] = {
-			/*
-			tex_hit_data[floored_hits[0].y][floored_hits[0].x],
-			tex_hit_data[floored_hits[1].y][floored_hits[1].x]
-			*/
-			/*
-			tex_hit_data[floored_hits[0].y * current_level.map_height + floored_hits[0].x],
-			tex_hit_data[floored_hits[1].y * current_level.map_height + floored_hits[1].x]
-			*/
 			map_point(tex_hit_data, floored_hits[0].x, floored_hits[0].y),
 			map_point(tex_hit_data, floored_hits[1].x, floored_hits[1].y)
 		};
 
-		const SDL_Surface* restrict surfaces[2] = {
+		const SDL_Surface* surfaces[2] = {
 			current_level.walls[points[0] - 1].surface,
 			current_level.walls[points[1] - 1].surface
 		};

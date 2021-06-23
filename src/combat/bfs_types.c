@@ -15,7 +15,7 @@ inlinable Path copy_path(const Path path) {
 	return copy;
 }
 
-inlinable void add_to_path(Path* const restrict path, const VectorI new) {
+inlinable void add_to_path(Path* const path, const VectorI new) {
 	if (path -> length++ == path -> max_alloc)
 		path -> data = wrealloc(path -> data, ++path -> max_alloc * sizeof(VectorI));
 
@@ -35,7 +35,7 @@ PathQueue init_path_queue(const int init_length, ...) {
 	return path_queue;
 }
 
-inlinable void enqueue_a_path(PathQueue* const restrict path_queue, const Path new) {
+inlinable void enqueue_a_path(PathQueue* const path_queue, const Path new) {
 	if (path_queue -> length++ == path_queue -> max_alloc)
 		path_queue -> data = wrealloc(path_queue -> data,
 			++path_queue -> max_alloc * sizeof(Path));
@@ -46,7 +46,7 @@ inlinable void enqueue_a_path(PathQueue* const restrict path_queue, const Path n
 	path_queue -> data[0] = new;
 }
 
-inlinable Path dequeue_a_path(PathQueue* const restrict path_queue) {
+inlinable Path dequeue_a_path(PathQueue* const path_queue) {
 	if (path_queue -> length == 0) FAIL("Cannot dequeue from an empty queue!\n");
 	return path_queue -> data[--path_queue -> length];
 }

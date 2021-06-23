@@ -13,7 +13,7 @@ Here is the naming system:
 I refer to a 'generic billboard' as a Billboard or Animation.
 */
 
-int cmp_generic_billboards(const void* const restrict a, const void* const restrict b) {
+int cmp_generic_billboards(const void* const a, const void* const b) {
 	const VectorF distances = {
 		((GenericBillboard*) a) -> billboard.dist,
 		((GenericBillboard*) b) -> billboard.dist
@@ -28,7 +28,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 	const double player_angle = to_radians(player.angle);
 
 	const byte generic_billboard_count = current_level.generic_billboard_count;
-	GenericBillboard* restrict generic_billboards = current_level.generic_billboards;
+	GenericBillboard* const generic_billboards = current_level.generic_billboards;
 
 	const byte start_of_enemies = current_level.billboard_count + current_level.animation_count;
 
@@ -55,7 +55,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 		billboard -> beta = atan2(delta[1], delta[0]) - player_angle;
 		billboard -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 
-		GenericBillboard* const restrict generic_billboard = &generic_billboards[i];
+		GenericBillboard* const generic_billboard = &generic_billboards[i];
 		generic_billboard -> billboard = *billboard;
 		generic_billboard -> is_animated = is_animated;
 		generic_billboard -> is_enemy = is_enemy;
@@ -88,13 +88,12 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 
 		/////
 
-		Animation* restrict possible_animation;
+		Animation* possible_animation;
 		SDL_Rect possible_spritesheet_crop;
 		double possible_spritesheet_begin_x, width;
 
 		if (generic.is_animated) {
-			// if the index is over the billboard + animation count, read it from the enemies
-			Enemy* restrict possible_enemy;
+			Enemy* possible_enemy;
 
 			if (generic.is_enemy) {
 				possible_enemy = &current_level.enemies[generic.animation_index];
@@ -168,6 +167,7 @@ void draw_skybox(const double angle, const double y_shift) {
 		src_width = skybox.max_width / 4.0;
 
 	//////////
+
 	/*
 	I need to adjust src_height and dest_height
 	find out what percentage of the skybox I need to show when looking completely up

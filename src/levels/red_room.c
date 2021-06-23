@@ -34,14 +34,6 @@ void load_red_room(void) {
 	red_room.get_point_height = get_red_room_point_height;
 	red_room.shader = red_room_shader;
 
-	/*
-	for (int y = 0; y < map_height; y++) {
-		memcpy(red_room.wall_data[y], &wall_data[y], map_width);
-		memset(red_room.ceiling_data[y], 1, map_width);
-		memset(red_room.floor_data[y], 1, map_width);
-	}
-	*/
-
 	const int bytes = map_width * map_height;
 	memcpy(red_room.wall_data, wall_data, bytes);
 	memset(red_room.ceiling_data, 1, bytes);

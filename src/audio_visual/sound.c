@@ -1,10 +1,10 @@
 typedef struct {
 	byte is_short;
 	union {
-			Mix_Chunk* restrict short_sound;
-			Mix_Music* restrict long_sound;
+			Mix_Chunk* short_sound;
+			Mix_Music* long_sound;
 	} type;
-	const char* restrict path;
+	const char* path;
 } Sound;
 
 inlinable void init_audio_subsystem(void) {
@@ -17,12 +17,12 @@ inlinable void deinit_audio_subsystem(void) {
 	Mix_Quit();
 }
 
-inlinable void fail_sound(const Sound sound, const char* const restrict error_type) {
+inlinable void fail_sound(const Sound sound, const char* const error_type) {
 	FAIL("Could not %s a %s sound of path %s: %s\n",
 		error_type, sound.is_short ? "short" : "long", sound.path, Mix_GetError());
 }
 
-inlinable Sound init_sound(const char* const restrict path, const byte is_short) {
+inlinable Sound init_sound(const char* const path, const byte is_short) {
 	Sound sound = {.is_short = is_short, .path = path};
 	if (is_short) {
 		if ((sound.type.short_sound = Mix_LoadWAV(path)) == NULL)

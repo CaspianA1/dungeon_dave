@@ -303,3 +303,140 @@ static const byte wall_data[map_height * map_width] = {
 */
 
 /////
+
+/*
+for (int y = 0; y < map_height; y++) {
+	memcpy(debug_level.wall_data[y], &wall_data[y], map_width);
+	memset(debug_level.ceiling_data[y], 2, map_width);
+	memset(debug_level.floor_data[y], 2, map_width);
+}
+*/
+
+/*
+const int bytes = map_width * map_height;
+// DEBUG(bytes, d);
+// memcpy(debug_level.wall_data, wall_data, bytes);
+m_memcpy(debug_level.wall_data, wall_data, bytes);
+*/
+
+/*
+const int bytes = map_width * map_height;
+m_memcpy(debug_level.wall_data, wall_data, bytes);
+*/
+
+/////
+
+/*
+const int bytes = map_width * map_height;
+memset(debug_level.wall_data, 1, bytes);
+
+memset(debug_level.wall_data, 2, map_width);
+*/
+
+/////
+
+const int bytes = map_width * map_height;
+
+for (int y = 0; y < map_height; y++) {
+	for (int x = 0; x < map_width; x++) {
+		debug_level.wall_data[y * map_width + x] = y;
+	}
+}
+
+memset(debug_level.ceiling_data, 2, bytes);
+memset(debug_level.floor_data, 2, bytes);
+
+/*
+for (int x = 0; x < map_width; x++) {
+	printf("{");
+	for (int y = 0; y < map_height; y++) {
+		printf("%d, ", wall_data[y][x]);
+	}
+	printf("},\n");
+}
+*/
+
+for (int y = 0; y < map_height; y++) {
+	printf("{");
+	for (int x = 0; x < map_width; x++) {
+		printf("%d, ", wall_data[y][x]);
+	}
+	printf("},\n");
+}
+
+printf("Incorrect:\n");
+for (int y = 0; y < map_height; y++) {
+	printf("{");
+	for (int x = 0; x < map_width; x++) {
+		// printf("%d, ", debug_level.wall_data[x * map_width + y]);
+		printf("%d, ", debug_level.wall_data[y * map_height + x]);
+	}
+	printf("},\n");
+}
+
+/////
+
+void m_memcpy(void* dest, const void* src, size_t n) {
+	char* csrc = (char*) src;
+	char* cdest = (char*) dest;
+	
+	/*
+	for (size_t i = 0; i < n; i++) {
+		printf("i = %zu, csrc[i] = %d\n", i, csrc[i]);
+		printf("---\n");
+
+		cdest[i] = csrc[i];
+	}
+
+	for (size_t i = 0; i < n; i++) {
+		if (cdest[i] != csrc[i]) printf("Bad\n");
+	}
+	*/
+
+	int w = 12, h = 10;
+
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++)
+			cdest[y * w + x] = csrc[y * w + x];
+	}
+}
+
+/////
+
+/*
+byte** restrict all_visited = wmalloc(current_level.map_height * sizeof(byte*));
+for (int y = 0; y < current_level.map_height; y++)
+	all_visited[y] = wcalloc(current_level.map_width, sizeof(byte));
+all_visited[int_begin.y][int_begin.x] = 1;
+*/
+
+/////
+
+/*
+for (int y = 0; y < map_height; y++) {
+	for (int x = 0; x < map_width; x++) {
+		debug_level.wall_data[y * map_width + x] = wall_data[y][x];
+	}
+}
+*/
+
+/////
+
+for (int y = 0; y < map_height; y++) {
+	printf("{");
+	for (int x = 0; x < map_width; x++) {
+		printf("%d, ", wall_data[y][x]);
+	}
+	printf("},\n");
+}
+
+printf("Incorrect:\n");
+for (int y = 0; y < map_height; y++) {
+	printf("{");
+	for (int x = 0; x < map_width; x++) {
+		printf("%d, ", debug_level.wall_data[y * map_width + x]);
+	}
+	printf("},\n");
+}
+
+/////

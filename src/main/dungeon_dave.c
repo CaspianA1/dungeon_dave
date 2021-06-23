@@ -45,8 +45,6 @@ visplane floors
 non-clipping enemies
 */
 
-// wrong levels: level 1, debug level
-
 int main(void) {
 	Player player;
 	Weapon weapon;

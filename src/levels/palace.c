@@ -108,14 +108,6 @@ void load_palace(void) {
 	palace.get_point_height = get_palace_point_height;
 	palace.shader = palace_shader;
 
-	/*
-	for (int y = 0; y < map_height; y++) {
-		memcpy(palace.wall_data[y], &wall_data[y], map_width);
-		memset(palace.ceiling_data[y], 1, map_width);
-		memset(palace.floor_data[y], 1, map_width);
-	}
-	*/
-
 	const int bytes = map_width * map_height;
 	memcpy(palace.wall_data, wall_data, bytes);
 	memset(palace.ceiling_data, 1, bytes);

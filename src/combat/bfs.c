@@ -6,7 +6,7 @@ byte vertex_is_valid(const VectorI vertex) {
 }
 
 void update_queue_with_neighbors(
-	PathQueue* const paths, Path path, const VectorI vertex, byte* all_visited) {
+	PathQueue* const paths, Path path, const VectorI vertex, byte* const all_visited) {
 
 	const VectorI
 		top = {vertex.x, vertex.y - 1},
@@ -33,9 +33,8 @@ void update_queue_with_neighbors(
 				(VectorII_eq(neighbor, bottom_left) && map_point(current_level.wall_data, bottom.x, bottom.y)))
 				continue;
 
-			// byte* was_visited = &all_visited[neighbor.y][neighbor.x];
-			byte* was_visited = &all_visited[neighbor.y * current_level.map_height + neighbor.x];
-			if (!(*was_visited)) {
+			byte* const was_visited = &all_visited[neighbor.y * current_level.map_width + neighbor.x];
+			if (!*was_visited) {
 				*was_visited = 1;
 				Path path_copy = copy_path(path);
 				add_to_path(&path_copy, neighbor);
@@ -50,16 +49,8 @@ ResultBFS bfs(const VectorF begin, const VectorF end) {
 		int_begin = VectorF_floor(begin),
 		int_end = VectorF_floor(end);
 
-	/////
-	/*
-	byte** restrict all_visited = wmalloc(current_level.map_height * sizeof(byte*));
-	for (int y = 0; y < current_level.map_height; y++)
-		all_visited[y] = wcalloc(current_level.map_width, sizeof(byte));
-	all_visited[int_begin.y][int_begin.x] = 1;
-	*/
-
-	byte* all_visited = wmalloc(current_level.map_width * current_level.map_height);
-	/////
+	byte* const all_visited = wcalloc(current_level.map_width * current_level.map_height, sizeof(byte));
+	set_map_point(all_visited, 1, int_begin.x, int_begin.y, current_level.map_width);
 
 	PathQueue paths = init_path_queue(1, init_path(1, int_begin));
 	ResultBFS result = {.succeeded = 0};
@@ -79,12 +70,7 @@ ResultBFS bfs(const VectorF begin, const VectorF end) {
 		wfree(path.data);
 	}
 
-	/*
-	for (int y = 0; y < current_level.map_height; y++) wfree(all_visited[y]);
 	wfree(all_visited);
-	*/
-	wfree(all_visited);
-
 	for (int i = 0; i < paths.length; i++) wfree(paths.data[i].data);
 	wfree(paths.data);
 
