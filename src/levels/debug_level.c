@@ -11,7 +11,6 @@ double debug_level_shader(const VectorF pos) {
 void load_debug_level(void) {
 	enum {
 		map_width = 12, map_height = 10,
-		// map_width = 40, map_height = 40,
 		wall_count = 5, billboard_count = 0,
 		animation_count = 1, enemy_count = 0
 	};

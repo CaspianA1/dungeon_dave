@@ -27,12 +27,8 @@ void update_pos(VectorF* const pos, const VectorF prev_pos,
 			increasing_fov = 1;
 			body -> v *= body -> v_incr_multiplier;
 
-			#ifndef NOCLIP_MODE
-
 			if (settings.fov < settings.max_fov)
 				update_fov(settings.fov + settings.fov_step);
-
-			#endif
 		}
 
 		if (body -> v > body -> limit_v)
@@ -151,7 +147,7 @@ void update_jump(Jump* const jump, const VectorF pos) {
 
 	(void) pos;
 
-	double*
+	double* const
 		last_tick_time = &jump -> time_at_jump,
 		curr_tick_time = SDL_GetTicks() / 1000.0;
 
@@ -200,6 +196,8 @@ void update_jump(Jump* const jump, const VectorF pos) {
 		init_a_jump(jump, 1);
 
 	#endif
+
+	if (jump -> height < 0.0) jump -> height = 0.0;
 }
 
 InputStatus handle_input(Player* const player, const byte restrict_movement) {

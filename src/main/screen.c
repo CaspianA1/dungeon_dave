@@ -30,7 +30,6 @@ inlinable void prepare_for_drawing(void) {
 
 	SDL_LockTexture(screen.pixel_buffer, NULL, &screen.pixels, &screen.pixel_pitch);
 	SDL_SetRenderTarget(screen.renderer, screen.shape_buffer);
-	SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, 0);
 	SDL_RenderClear(screen.renderer);
 }
 
