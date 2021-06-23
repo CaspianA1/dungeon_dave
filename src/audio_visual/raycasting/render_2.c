@@ -7,20 +7,20 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 	#endif
 
 	const double cos_beta = cos(player_angle - theta);
-	const double correct_dist = cast_data.dist * cos_beta;
-	const double wall_h = settings.proj_dist / correct_dist;
+	const double corrected_dist = cast_data.dist * cos_beta;
+	const double wall_h = settings.proj_dist / corrected_dist;
 
 	const byte point_height = current_level.get_point_height(cast_data.point, cast_data.hit);
 
 	const SDL_FRect wall = {
 		screen_x,
-		wall_y_shift - wall_h / 2.0 + full_jump_height / correct_dist,
+		wall_y_shift - wall_h / 2.0 + full_jump_height / corrected_dist,
 		settings.ray_column_width,
 		wall_h
 	};
 
 	if (*first_wall_hit) {
-		screen.z_buffer[screen_x] = correct_dist;
+		screen.z_buffer[screen_x] = corrected_dist;
 		*first_wall_hit = 0;
 	}
 
@@ -117,7 +117,7 @@ void raycast_2(const Player player, const double wall_y_shift, const double full
 				curr_tile.y < 0 || curr_tile.y >= current_level.map_height)
 				break;
 
-			const byte point = wall_point(curr_tile.x, curr_tile.y);
+			const byte point = map_point(current_level.wall_data, curr_tile.x, curr_tile.y);
 			if (point) {
 				const CastData cast_data = {
 					point, side, distance, VectorF_line_pos(player.pos, dir, distance)

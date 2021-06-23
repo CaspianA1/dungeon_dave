@@ -16,17 +16,22 @@ void draw_minimap(const VectorF pos) {
 		height_scale = (double) settings.screen_height
 			/ current_level.map_height / settings.minimap_scale;
 
-	SDL_SetRenderDrawColor(screen.renderer, 30, 144, 255, SDL_ALPHA_OPAQUE);
+	const byte r = 30, g = 144, b = 255;
 
 	SDL_FRect wall = {0.0, 0.0, width_scale, height_scale};
 
 	for (int map_x = 0; map_x < current_level.map_width; map_x++) {
 		for (int map_y = 0; map_y < current_level.map_height; map_y++) {
-			if (wall_point(map_x, map_y)) {
-				wall.x = map_x * width_scale;
-				wall.y = map_y * height_scale;
-				SDL_RenderFillRectF(screen.renderer, &wall);
-			}
+			const byte point = map_point(current_level.wall_data, map_x, map_y);
+			const double shade = 1.0 -
+				((double) current_level.get_point_height(point, (VectorF) {map_x, map_y})
+				/ current_level.max_point_height);
+
+			SDL_SetRenderDrawColor(screen.renderer, r * shade, g * shade, b * shade, SDL_ALPHA_OPAQUE);
+
+			wall.x = map_x * width_scale;
+			wall.y = map_y * height_scale;
+			SDL_RenderFillRectF(screen.renderer, &wall);
 		}
 	}
 
@@ -88,7 +93,7 @@ CastData dda(const VectorF pos, const VectorF dir) {
 			ray_length[1] += unit_step_size[1],
 			side = 1;
 
-		const byte point = wall_point(curr_tile.x, curr_tile.y);
+		const byte point = map_point(current_level.wall_data, curr_tile.x, curr_tile.y);
 		if (point)
 			return (CastData) {point, side, distance, VectorF_line_pos(pos, dir, distance)};
 	}
@@ -105,14 +110,14 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 		const CastData cast_data = dda(player.pos, ray_direction);
 
 		const double cos_beta = cos(player_angle - theta);
-		const double correct_dist = cast_data.dist * cos_beta;
-		screen.z_buffer[screen_x] = correct_dist;
+		const double corrected_dist = cast_data.dist * cos_beta;
+		screen.z_buffer[screen_x] = corrected_dist;
 
-		const double wall_h = settings.proj_dist / correct_dist;
+		const double wall_h = settings.proj_dist / corrected_dist;
 
 		const SDL_FRect wall = {
 			screen_x,
-			wall_y_shift - wall_h / 2.0 + full_jump_height / correct_dist,
+			wall_y_shift - wall_h / 2.0 + full_jump_height / corrected_dist,
 			settings.ray_column_width, wall_h
 		};
 

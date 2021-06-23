@@ -1,6 +1,7 @@
 static Uint32 temp_buf[INIT_H][INIT_W];
 
-// Why doesn't this work for more FOVs?
+/* Why doesn't this work for more FOVs? Part of the problem:
+the floor moves closer when the FOV increases, which is incorrect */
 void draw_floor_plane(const Player player) {
 	const int
 		begin_x = 0, end_x = settings.screen_width,
@@ -18,7 +19,7 @@ void draw_floor_plane(const Player player) {
 		screen_z = settings.half_screen_height +
 			player.jump.height * settings.screen_height * screen_height_over_proj_dist;
 
-	const map_data point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
+	const byte* point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
 
 	const VectorF dir = {
 		cos(theta) / screen_height_over_proj_dist,
@@ -50,7 +51,9 @@ void draw_floor_plane(const Player player) {
 
 		for (int x = begin_x; x < end_x; x++) {
 			const VectorF cell = get_cell_from_ray_pos(ray_pos);
-			const byte point = point_data[(int) cell[1]][(int) cell[0]];
+			// const byte point = point_data[(int) cell[1]][(int) cell[0]];
+			// const byte point = point_data[(int) (floor(cell[1]) * current_level.map_height + floor(cell[0]))];
+			const byte point = map_point(point_data, cell[0], cell[1]);
 			const SDL_Surface* restrict surface = current_level.walls[point - 1].surface;
 
 			const VectorF tex_w = VectorF_memset(surface -> w);
@@ -91,7 +94,7 @@ inlinable void draw_ceiling_plane(const Player player) {
 		reverse_p_height * settings.screen_height / screen_height_over_proj_dist;
 	//////////
 
-	const map_data point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
+	const byte* point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
 
 	const VectorF dir = {
 		cos(theta) * screen_height_over_proj_dist,
@@ -123,7 +126,9 @@ inlinable void draw_ceiling_plane(const Player player) {
 
 		for (int x = begin_x; x < end_x; x++) {
 			const VectorF cell = get_cell_from_ray_pos(ray_pos);
-			const byte point = point_data[(int) cell[1]][(int) cell[0]];
+			// const byte point = point_data[(int) cell[1]][(int) cell[0]];
+			// const byte point = point_data[(int) (floor(cell[1]) * current_level.map_height + floor(cell[0]))];
+			const byte point = map_point(point_data, cell[0], cell[1]);
 			const SDL_Surface* restrict surface = current_level.walls[point - 1].surface;
 
 			const VectorF tex_w = VectorF_memset(surface -> w);

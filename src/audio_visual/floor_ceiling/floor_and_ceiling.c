@@ -45,7 +45,7 @@ void draw_floor_or_ceil(
 
 	if (end <= begin) return;
 
-	map_data tex_hit_data;
+	byte* tex_hit_data;
 	int (*get_row) (const double, const int);
 
 	if (is_ceiling) {
@@ -76,7 +76,9 @@ void draw_floor_or_ceil(
 			continue;
 
 		const VectorI floored_hit = VectorF_floor(hit);
-		const byte point = tex_hit_data[floored_hit.y][floored_hit.x];
+		// const byte point = tex_hit_data[floored_hit.y][floored_hit.x];
+		// const byte point = tex_hit_data[floored_hit.y * current_level.map_height + floored_hit.x];
+		const byte point = map_point(tex_hit_data, floored_hit.x, floored_hit.y);
 
 		const SDL_Surface* restrict surface = current_level.walls[point - 1].surface;
 		const int max_offset = surface -> w - 1;

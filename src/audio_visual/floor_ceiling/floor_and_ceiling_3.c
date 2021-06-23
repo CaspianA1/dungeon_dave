@@ -56,7 +56,13 @@ void floorcast(const Player player) {
 		for (int x = 0; x < settings.screen_width; x++) {
 			const VectorF cell = get_cell_from_ray_pos(ray_pos);
 
-			const byte point = current_level.floor_data[(int) cell[1]][(int) cell[0]];
+			// const byte point = current_level.floor_data[(int) cell[1]][(int) cell[0]];
+			/*
+			const byte point = current_level.floor_data[
+				(int) (floor(cell[1]) * current_level.map_height + floor(cell[0]))];
+			*/
+			const byte point = map_point(current_level.floor_data, cell[0], cell[1]);
+
 			const SDL_Surface* restrict surface = current_level.walls[point - 1].surface;
 
 			const VectorF tex_w = VectorF_memset(surface -> w);

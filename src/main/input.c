@@ -96,8 +96,8 @@ void update_pos(VectorF* const restrict pos, const VectorF prev_pos,
 	*pos = new_pos;
 }
 
-inlinable void update_z_pitch(int* const restrict z_pitch, const int* const restrict mouse_y) {
-	*z_pitch = -*mouse_y + settings.half_screen_height;
+void update_z_pitch(int* const restrict z_pitch, const int mouse_y) {
+	*z_pitch = -mouse_y + settings.half_screen_height;
 }
 
 inlinable void update_tilt(Domain* const restrict tilt, const byte strafe, const byte lstrafe) {
@@ -122,7 +122,6 @@ inlinable void update_pace(Pace* const restrict pace, const VectorF pos, const V
 
 	// if (v < 0.008) return;
 	// or slow down pace by 2?
-
 
 	if (pos[0] != prev_pos[0] || pos[1] != prev_pos[1]) {
 		if ((pace -> domain.val += pace -> domain.step) > two_pi) pace -> domain.val = 0;
@@ -170,7 +169,7 @@ void update_jump(Jump* const restrict jump, const VectorF pos) {
 		play_sound(jump -> sound_at_jump, 0);
 	}
 
-	const byte point = wall_point(pos[0], pos[1]);
+	const byte point = map_point(current_level.wall_data, pos[0], pos[1]);
 	const byte wall_point_height = current_level.get_point_height(point, pos);
 
 	if (jump -> jumping) {
@@ -250,7 +249,7 @@ InputStatus handle_input(Player* const restrict player, const byte restrict_move
 			player -> jump.height, forward, backward, lstrafe, rstrafe);
 
 		update_jump(&player -> jump, player -> pos);
-		update_z_pitch(&player -> z_pitch, &mouse_pos -> y);
+		update_z_pitch(&player -> z_pitch, mouse_pos -> y);
 		update_tilt(&player -> tilt, strafe, lstrafe);
 		update_pace(&player -> pace, *pos, prev_pos, player -> body.v);
 	}

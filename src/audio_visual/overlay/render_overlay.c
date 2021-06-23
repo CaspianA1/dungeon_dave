@@ -159,7 +159,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 	}
 }
 
-void draw_skybox(const double angle, const double p_height, const int z_pitch) {
+void draw_skybox(const double angle, const double y_shift) {
 	const Skybox skybox = current_level.skybox;
 
 	const double turn_percent = angle / 360.0;
@@ -167,13 +167,41 @@ void draw_skybox(const double angle, const double p_height, const int z_pitch) {
 		src_col_index = turn_percent * skybox.max_width,
 		src_width = skybox.max_width / 4.0;
 
-	(void) p_height;
-	(void) z_pitch;
-	// show a select third at z-pitch and height 0
+	//////////
+	/*
+	I need to adjust src_height and dest_height
+	find out what percentage of the skybox I need to show when looking completely up
+	also, the texture box shouldn't move down when looking up and down
 
-	double
-		src_y = 0, dest_y = 0, src_height = skybox.max_height,
-		dest_height = settings.half_screen_height;
+	All of the dest math is correct
+
+	some warping when looking up
+	make the scroll rate even when looking up and down
+	https://www.dcode.fr/function-equation-finder
+	make sure that there is an equal amount of skybox to show when looking up and down
+	*/
+
+	const double two_thirds = 2.0 / 3.0;
+	const double dest_y = 0, dest_height = y_shift; // maybe dest_y shouldn't always be 0
+	const double y_shift_percentage = y_shift / settings.screen_height;
+	const double show_percentage = y_shift_percentage * two_thirds;
+	// DEBUG(dest_height, lf);
+
+	int src_height = show_percentage * skybox.max_height;
+
+	double test = two_thirds * y_shift_percentage * y_shift_percentage
+				- 5.0 / 3.0 * y_shift_percentage + 1.0;
+
+	int src_y = test * skybox.max_height;
+
+	// printf("src_y = %d, src_height = %d\n", src_y, src_height);
+	// DEBUG(src_y + src_height, d);
+
+	// at the top: y = 0/3, height = 2/3
+	// in the middle: y = 1/3, height = 1/3
+	// at the bottom: y = 3/3, height = 0/3
+
+	//////////
 
 	if (turn_percent > 0.75) {
 		const double err_amt = (turn_percent - 0.75) * 4.0;

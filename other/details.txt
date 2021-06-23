@@ -23,6 +23,7 @@ features:
 	- look up and down in the skybox
 	- an airship level
 	- no pace if slow enough
+	- store data like textures and maps in column-major order
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- high CPU usage

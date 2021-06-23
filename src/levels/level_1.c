@@ -65,28 +65,78 @@ void load_level_1(void) {
 	level_1.get_point_height = get_level_1_point_height;
 	level_1.shader = level_1_shader;
 
+	/*
 	for (int y = 0; y < map_height; y++) {
 		memcpy(level_1.wall_data[y], &wall_data[y], map_width);
 		memset(level_1.ceiling_data[y], 4, map_width); // sand
 		memset(level_1.floor_data[y], 4, map_width);
 	}
+	*/
 
-	fill_level_data(level_1.floor_data, 9, 18, 20, 8, 10); // dirt
+	// DEBUG(sizeof(wall_data), lu);
+
+	const int bytes = map_width * map_height;
+
+	memcpy(level_1.wall_data, wall_data, bytes);
+	memset(level_1.ceiling_data, 4, bytes); // sand
+	memset(level_1.floor_data, 4, bytes);
+
+	/*
+	//////////
+	printf("Dest:\n");
+	for (int x = 0; x < map_width; x++) {
+		printf("{");
+		for (int y = 0; y < map_height; y++) {
+			printf("%d, ", level_1.wall_data[y * map_height + x]);
+		}
+		printf("},\n");
+	}
+
+	// 375
+	printf("%zu\n", sizeof(level_1.wall_data));
+	printf("Src:\n");
+	for (int x = 0; x < map_width; x++) {
+		printf("{");
+		for (int y = 0; y < map_height; y++) {
+			printf("%d, ", wall_data[y][x]);
+		}
+		printf("},\n");
+	}
+
+	//////////
+	*/
+
+	fill_level_data(level_1.floor_data, 9, 18, 20, 8, 10, map_height); // dirt
 
 	for (byte y = 2; y <= 4; y++) {
+		/*
 		level_1.floor_data[y][16] = 10; // grass
 		level_1.floor_data[y][20] = 10;
 		level_1.floor_data[5][y + 15] = 10;
 		level_1.floor_data[1][y + 15] = 10;
+		*/
+		set_map_point(level_1.floor_data, 10, 16, y, map_height); // grass
+		set_map_point(level_1.floor_data, 10, 20, y, map_height);
+		set_map_point(level_1.floor_data, 10, y + 15, 5, map_height);
+		set_map_point(level_1.floor_data, 10, y + 15, 1, map_height);
 
 		for (byte x = 17; x <= 19; x++)
-			level_1.floor_data[y][x] = 8; // water
+			// level_1.floor_data[y][x] = 8; // water
+			// level_1.floor_data[y * current_level.map_height + x] = 8;
+			set_map_point(level_1.floor_data, 8, x, y, map_height); // water
 	}
 
+	/*
 	level_1.floor_data[5][16] = 10; // grass on corners around idol
 	level_1.floor_data[1][16] = 10;
 	level_1.floor_data[1][20] = 10;
 	level_1.floor_data[5][20] = 10;
+	*/
+
+	set_map_point(level_1.floor_data, 10, 16, 5, map_height);
+	set_map_point(level_1.floor_data, 10, 16, 1, map_height);
+	set_map_point(level_1.floor_data, 10, 20, 1, map_height);
+	set_map_point(level_1.floor_data, 10, 20, 5, map_height);
 
 	set_level_skybox(&level_1, "../assets/skyboxes/mossy_mountains_2.bmp");
 

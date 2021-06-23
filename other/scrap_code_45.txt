@@ -94,3 +94,212 @@ double y_src_available = skybox.max_height;
 */
 
 /////
+
+(void) z_pitch;
+// show a select third at z-pitch and height 0
+
+/////
+
+//
+double dest_height = settings.half_screen_height;
+const double z_pitch_ratio = (double) z_pitch / dest_height;
+//
+double src_y = 0, dest_y = 0, src_height = skybox.max_height;
+//
+double third_src = skybox.max_height / 3.0;
+double src_z_pitch = z_pitch_ratio * third_src;
+//
+src_y = third_src - src_z_pitch;
+src_height = third_src;
+//
+if (z_pitch > 0) { // show more if looking up
+	printf("Adjust\n");
+	/*
+	double src_z_pitch = z_pitch_ratio * src_height;
+	src_height -= src_z_pitch;
+	*/
+}
+//
+
+/////
+
+//////////
+static double center = 0.5;
+if (keys[SDL_SCANCODE_T] && center < 1.0) center += 0.01;
+if (keys[SDL_SCANCODE_Y] && center > 0.0) center -= 0.01;
+if (keys[SDL_SCANCODE_U]) center = 0.5;
+DEBUG(center, lf);
+center = 0.5;
+//////////
+
+/*
+When lowering the center, the content is being stretched, instead of more being shown.
+An example is when the center is 0.5 and 't' is pressed.
+*/
+
+const double dest_height = settings.screen_height * center;
+const double third_src_height = skybox.max_height / 3.0;
+double src_height = third_src_height;
+
+// src_height += (skybox.max_height * (center - 0.75));
+
+DEBUG(src_height, lf);
+printf("---\n");
+
+const double z_pitch_ratio = (double) z_pitch / dest_height;
+const double src_z_pitch = z_pitch_ratio * src_height;
+const double src_y = src_height - src_z_pitch;
+//////////
+
+/////
+
+/*
+When lowering the center, the content is being stretched, instead of more being shown.
+An example is when the center is 0.5 and 't' is pressed.
+*/
+
+///// This part works without the floor plane:
+
+//////////
+const double dest_height = settings.half_screen_height;
+const double src_height = skybox.max_height / 3.0;
+
+const double z_pitch_ratio = (double) z_pitch / dest_height;
+const double src_z_pitch = z_pitch_ratio * src_height;
+const double src_y = src_height - src_z_pitch;
+//////////
+
+///// This does things a little bit differently:
+
+//////////
+const double dest_y = z_pitch;
+const double dest_height = settings.half_screen_height;
+const double src_height = skybox.max_height / 3.0;
+
+const double z_pitch_ratio = (double) z_pitch / dest_height;
+const double src_z_pitch = z_pitch_ratio * src_height;
+const double src_y = src_height - src_z_pitch;
+
+DEBUG(skybox.max_height, d);
+DEBUG(src_y + src_height, lf);
+//////////
+
+///// Works for when looking down:
+
+//////////
+double dest_y;
+
+if (z_pitch < 0)
+	dest_y = z_pitch;
+else
+	dest_y = 0;
+
+const double dest_height = settings.half_screen_height;
+const double src_height = skybox.max_height / 3.0;
+
+const double z_pitch_ratio = (double) z_pitch / dest_height;
+const double src_z_pitch = z_pitch_ratio * src_height;
+const double src_y = src_height - src_z_pitch;
+
+DEBUG(skybox.max_height, d);
+DEBUG(src_y + src_height, lf);
+//////////
+
+/////
+
+DEBUG(z_pitch, d);
+double dest_y, dest_height;
+
+if (z_pitch < 0) {
+	dest_y = z_pitch;
+	dest_height = settings.half_screen_height;
+}
+else { // when looking up
+	dest_y = z_pitch;
+	dest_height = settings.half_screen_height ; // + z_pitch;
+}
+
+/////
+
+const double f = ((double) z_pitch + settings.half_screen_height) / settings.screen_height;
+double z_pitch_ratio = f; // (double) (z_pitch - 1.0) / dest_height;
+if (keys[SDL_SCANCODE_C]) z_pitch_ratio = (double) (z_pitch - 1.0) / dest_height;
+
+///// This almost works:
+
+//////////
+
+const double dest_y = z_pitch, dest_height = settings.half_screen_height;
+// I need to adjust src_height and dest_height
+// find out what percentage of the skybox I need to show when looking completely up
+// also, the texture box shouldn't move down when looking up and down
+const double src_height = skybox.max_height / 3.0;
+
+const double z_pitch_ratio = (double) z_pitch / dest_height;
+const double src_z_pitch = z_pitch_ratio * src_height;
+const double src_y = src_height - src_z_pitch;
+
+//////////
+
+/////
+
+const double z_pitch_ratio = (double) z_pitch / settings.screen_height + 0.5;
+
+/////
+
+//////////
+
+const double dest_y = z_pitch, dest_height = settings.half_screen_height;
+// I need to adjust src_height and dest_height
+// find out what percentage of the skybox I need to show when looking completely up
+// also, the texture box shouldn't move down when looking up and down
+
+const double magic_num = 1.0 / 3.0;
+const double src_height = skybox.max_height * magic_num;
+
+const double z_pitch_ratio = z_pitch / dest_height;
+const double src_z_pitch = z_pitch_ratio * src_height;
+// DEBUG(src_z_pitch, lf);
+const double src_y = src_height - src_z_pitch;
+
+//////////
+
+/////
+
+/*
+if (y_shift < 0) y_shift = 0;
+else if (y_shift >= settings.screen_height) y_shift = settings.screen_height - 1;
+*/
+
+/////
+
+/*
+const double z_pitch_ratio = (y_shift - settings.half_screen_height) / dest_height;
+const double src_height = skybox.max_height / 3.0;
+
+const double src_z_pitch = z_pitch_ratio * src_height;
+const double src_y = src_height - src_z_pitch * 2.0;
+*/
+
+/////
+
+// all down = 0/3, middle = 1/3, all up = 2/3
+
+/////
+
+/*
+static const byte wall_data[map_height * map_width] = {
+	5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+	5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
+	5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
+	5, 0, 0, 0, 4, 4, 3, 3, 0, 1, 1, 5,
+	5, 0, 0, 0, 4, 4, 3, 3, 2, 2, 0, 5,
+	5, 0, 0, 0, 4, 0, 3, 3, 0, 0, 0, 5,
+	5, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 5,
+	5, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 5,
+	5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5,
+	5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
+};
+*/
+
+/////

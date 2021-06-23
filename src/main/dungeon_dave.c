@@ -45,13 +45,15 @@ visplane floors
 non-clipping enemies
 */
 
+// wrong levels: level 1, debug level
+
 int main(void) {
 	Player player;
 	Weapon weapon;
 	load_all_defaults(load_palace, &player, &weapon);
 	// FloorCastThread floorcast_thread = init_floorcast_thread(&player);
 
-	if (display_title_screen(&player.pace.domain.max) == Exit)
+	if (display_title_screen(&player.pace.domain.max, &player.z_pitch, player.mouse_pos.y) == Exit)
 		deinit_all(player, weapon);
 
 	play_sound(current_level.background_sound, 1);
@@ -63,14 +65,14 @@ int main(void) {
 		const InputStatus input_status = handle_input(&player, 0);
 		if (input_status == Exit) deinit_all(player, weapon);
 
-		update_screen_dimensions(&player.pace.domain.max);
+		update_screen_dimensions(&player.pace.domain.max, &player.z_pitch, player.mouse_pos.y);
 		prepare_for_drawing();
+
+		const double wall_y_shift = settings.half_screen_height + player.z_pitch + player.pace.screen_offset;
 
 		#ifndef PLANAR_MODE
 
-		const double
-			wall_y_shift = settings.half_screen_height + player.z_pitch + player.pace.screen_offset,
-			full_jump_height = player.jump.height * settings.screen_height;
+		const double full_jump_height = player.jump.height * settings.screen_height;
 
 		// start_floorcast_tick(&floorcast_thread);
 		raycast_2(player, wall_y_shift, full_jump_height);
@@ -82,15 +84,15 @@ int main(void) {
 
 		#else
 
-		// draw_ceiling_plane(player);
-		/*
-		draw_floor_plane(player);
-		refresh_and_clear_temp_buf();
-		*/
+		if (!keys[SDL_SCANCODE_T]) {
+			// draw_ceiling_plane(player);
+			draw_floor_plane(player);
+			refresh_and_clear_temp_buf();
+		}
 
 		#endif
 
-		refresh(player);
+		refresh(player.tilt, player.pos, player.angle, wall_y_shift);
 		tick_delay(before);
 	}
 }

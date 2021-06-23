@@ -30,15 +30,22 @@ void load_red_room(void) {
 
 	Level red_room = init_level(map_width, map_height, (VectorF) {1.5, 1.5}, 0.0);
 	red_room.max_point_height = 1;
-	red_room.background_sound = init_sound("../assets/audio/red_room_track.wav", 0);
+	red_room.background_sound = init_sound("../assets/audio/themes/red_room_track.wav", 0);
 	red_room.get_point_height = get_red_room_point_height;
 	red_room.shader = red_room_shader;
 
+	/*
 	for (int y = 0; y < map_height; y++) {
 		memcpy(red_room.wall_data[y], &wall_data[y], map_width);
 		memset(red_room.ceiling_data[y], 1, map_width);
 		memset(red_room.floor_data[y], 1, map_width);
 	}
+	*/
+
+	const int bytes = map_width * map_height;
+	memcpy(red_room.wall_data, wall_data, bytes);
+	memset(red_room.ceiling_data, 1, bytes);
+	memset(red_room.floor_data, 1, bytes);
 
 	set_level_walls(&red_room, wall_count,
 		"../assets/walls/red_room_floor.bmp",

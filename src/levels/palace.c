@@ -24,7 +24,7 @@ byte get_palace_point_height(const byte point, const VectorF pos) {
 	switch (point) {
 		case 3: return 6;
 		case 4: return 3;
-		case 5: return 6; // 8 before
+		case 5: return 8; // 6 before
 		default: return point;
 	}
 }
@@ -103,27 +103,34 @@ void load_palace(void) {
 
 	// previous: {1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}, {12.0, 37.0, 0.0}, {15.5, 24.5, 2.0}
 	Level palace = init_level(map_width, map_height, (VectorF) {2.0, 2.0}, 2.0);
-	palace.max_point_height = 6;
+	palace.max_point_height = 8;
 	palace.background_sound = init_sound("../assets/audio/themes/sultan.wav", 0);
 	palace.get_point_height = get_palace_point_height;
 	palace.shader = palace_shader;
 
+	/*
 	for (int y = 0; y < map_height; y++) {
 		memcpy(palace.wall_data[y], &wall_data[y], map_width);
 		memset(palace.ceiling_data[y], 1, map_width);
 		memset(palace.floor_data[y], 1, map_width);
 	}
+	*/
 
-	fill_level_data(palace.floor_data, 5, 4, 7, 1, 3); // the flying carpet area
-	fill_level_data(palace.floor_data, 7, 11, 13, 27, 29); // the entrance near the obstacle course
-	fill_level_data(palace.floor_data, 6, 16, 22, 24, 30); // the sandstone around the pillars
-	fill_level_data(palace.floor_data, 2, 1, 12, 24, 26); // part 1 of the hidden area's marble
-	fill_level_data(palace.floor_data, 2, 1, 9, 19, 26); // part 2 of the aforementioned
-	fill_level_data(palace.floor_data, 2, 1, 4, 25, 39); // part 3 of the aforementioned
+	const int bytes = map_width * map_height;
+	memcpy(palace.wall_data, wall_data, bytes);
+	memset(palace.ceiling_data, 1, bytes);
+	memset(palace.floor_data, 1, bytes);
+
+	fill_level_data(palace.floor_data, 5, 4, 7, 1, 3, map_height); // the flying carpet area
+	fill_level_data(palace.floor_data, 7, 11, 13, 27, 29, map_height); // the entrance near the obstacle course
+	fill_level_data(palace.floor_data, 6, 16, 22, 24, 30, map_height); // the sandstone around the pillars
+	fill_level_data(palace.floor_data, 2, 1, 12, 24, 26, map_height); // part 1 of the hidden area's marble
+	fill_level_data(palace.floor_data, 2, 1, 9, 19, 26, map_height); // part 2 of the aforementioned
+	fill_level_data(palace.floor_data, 2, 1, 4, 25, 39, map_height); // part 3 of the aforementioned
 
 	// "../assets/skyboxes/desert.bmp"
-	// ../../Aseprite/Palace City Skybox.bmp"
-	set_level_skybox(&palace, "../../Aseprite/Palace City Skybox.bmp");
+	// "../../Aseprite/Palace City Skybox.bmp"
+	set_level_skybox(&palace, "../assets/skyboxes/desert.bmp");
 
 	set_level_walls(&palace, wall_count,
 		"../assets/walls/pyramid_bricks_3.bmp",

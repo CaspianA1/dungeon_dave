@@ -54,7 +54,9 @@ void load_default_settings(void) {
 	keys = SDL_GetKeyboardState(NULL);
 }
 
-void update_screen_dimensions(double* const restrict pace_max) {
+void update_screen_dimensions(double* const restrict pace_max,
+	int* const restrict z_pitch, const int mouse_y) {
+
 	int new_width, new_height;
 	SDL_GetWindowSize(screen.window, &new_width, &new_height);
 
@@ -74,6 +76,8 @@ void update_screen_dimensions(double* const restrict pace_max) {
 			settings.screen_height = new_height;
 			settings.half_screen_height = new_height / 2;
 			*pace_max = new_height / settings.pace_max_divisor;
+			void update_z_pitch(int* const restrict, const int);
+			update_z_pitch(z_pitch, mouse_y);
 		}
 	}
 }

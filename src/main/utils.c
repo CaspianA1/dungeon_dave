@@ -21,12 +21,12 @@ inlinable void* wcalloc(size_t nitems, size_t size) {
 	return calloc(nitems, size);
 }
 
-inlinable void* wrealloc(const void* const restrict ptr, size_t new_size) {
+inlinable void* wrealloc(void* ptr, size_t new_size) {
 	realloc_count++;
 	return realloc(ptr, new_size);
 }
 
-inlinable void wfree(const void* const restrict ptr) {
+inlinable void wfree(void* ptr) {
 	if (ptr == NULL) {
 		printf("Error: attempt to free a null pointer\n");
 		abort();
@@ -77,12 +77,14 @@ inlinable void tick_delay(const Uint32 before) {
 	if (wait > 0) SDL_Delay(wait);
 }
 
-inlinable byte wall_point(const double x, const double y) {
-	return current_level.wall_data[(int) floor(y)][(int) floor(x)];	
+inlinable byte map_point(const byte* map, const double x, const double y) {
+	// return current_level.wall_data[(int) floor(y)][(int) floor(x)];	
+	// return current_level.wall_data[(int) (floor(y) * current_level.map_height + floor(x))];
+	return map[(int) (floor(y) * current_level.map_height + floor(x))];
 }
 
 inlinable byte point_exists_at(const double x, const double y, const double z) {
-	const byte point_val = wall_point(x, y);
+	const byte point_val = map_point(current_level.wall_data, x, y);
 	return point_val && z < current_level.get_point_height(point_val, (VectorF) {x, y});
 }
 

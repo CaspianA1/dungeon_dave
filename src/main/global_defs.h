@@ -3,11 +3,13 @@
 #include <SDL2/SDL_mixer.h>
 #include <pthread.h>
 
+/*
 #define PLANAR_MODE
 #define NOCLIP_MODE
+*/
 
 // #define SHADING_ENABLED
-#define SOUND_ENABLED
+// #define SOUND_ENABLED
 #define FULL_QUALITY
 // #define TRACK_MEMORY
 
@@ -64,7 +66,8 @@ const double
 	small_double_epsilon = 0.000001;
 
 typedef uint_fast8_t byte;
-typedef byte* restrict const* restrict map_data;
+// typedef byte* restrict const* restrict map_data;
+// typedef byte* map_data;
 typedef __m128d VectorF; // two doubles
 typedef __m256d VectorF2; // four doubles
 

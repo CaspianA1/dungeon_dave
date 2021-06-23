@@ -11,30 +11,44 @@ inlinable Level init_level(const int map_width, const int map_height,
 		.init_pos = init_pos, .init_height = init_height, .skybox.enabled = 0
 	};
 
-	byte*** map_data[3] = {&level.wall_data, &level.ceiling_data, &level.floor_data};
+	// byte*** map_data[3] = {&level.wall_data, &level.ceiling_data, &level.floor_data};
+	byte** map_data[3] = {&level.wall_data, &level.ceiling_data, &level.floor_data};
 	for (byte i = 0; i < 3; i++) {
-		byte*** map_datum = map_data[i];
+		// byte*** map_datum = map_data[i];
+		byte** map_datum = map_data[i];
+
+		*map_datum = wmalloc(map_width * map_height);
+
+		/*
 		*map_datum = wmalloc(map_height * sizeof(byte*));
 
 		for (int y = 0; y < map_height; y++)
 			(*map_datum)[y] = wmalloc(map_width); // sizeof(byte) = always 1
+		*/
 	}
 	return level;
 }
 
-void randomize_map(const Level level, map_data md, const byte* const restrict points, const byte len_points) {
+inlinable void set_map_point(byte* map, const byte val, const int x, const int y, const int height) {
+	map[y * height + x] = val;
+}
+
+void randomize_map(const Level level, byte* md, const byte* const restrict points, const byte len_points) {
+
 	for (int y = 0; y < level.map_height; y++) {
 		for (int x = 0; x < level.map_width; x++)
-			md[y][x] = points[rand() % len_points];
+			// md[y][x] = points[rand() % len_points];
+			md[y * level.map_height + x] = points[rand() % len_points];
 	}
 }
 
-inlinable void fill_level_data(map_data md, const byte point,
-	const int x0, const int x1, const int y0, const int y1) {
+inlinable void fill_level_data(byte* md, const byte point,
+	const int x0, const int x1, const int y0, const int y1, const int height) {
 
 	for (int x = x0; x < x1; x++) {
 		for (int y = y0; y < y1; y++)
-			md[y][x] = point;
+			// md[y][x] = point;
+			md[y * height + x] = point;
 	}
 }
 
@@ -178,6 +192,7 @@ inlinable void set_level_generic_billboard_container(Level* level) {
 }
 
 void deinit_level(const Level level) {
+	/*
 	byte** map_data[3] = {level.wall_data, level.ceiling_data, level.floor_data};
 	for (byte i = 0; i < 3; i++) {
 		byte** map_datum = map_data[i];
@@ -185,6 +200,10 @@ void deinit_level(const Level level) {
 			wfree(map_datum[y]);
 		wfree(map_datum);
 	}
+	*/
+	byte* map_data[3] = {level.wall_data, level.ceiling_data, level.floor_data};
+	for (byte i = 0; i < 3; i++)
+		wfree(map_data[i]);
 
 	if (level.skybox.enabled) deinit_sprite(level.skybox.sprite);
 	deinit_sound(level.background_sound);

@@ -25,7 +25,9 @@ void deinit_screen(void) {
 }
 
 inlinable void prepare_for_drawing(void) {
-	if (!current_level.skybox.enabled) SDL_RenderClear(screen.renderer);
+	SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, 0);
+	SDL_RenderClear(screen.renderer);
+
 	SDL_LockTexture(screen.pixel_buffer, NULL, &screen.pixels, &screen.pixel_pitch);
 	SDL_SetRenderTarget(screen.renderer, screen.shape_buffer);
 	SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, 0);
@@ -33,24 +35,17 @@ inlinable void prepare_for_drawing(void) {
 }
 
 inlinable void draw_tilted(SDL_Texture* const restrict buffer,
-	const SDL_Rect* const restrict dest_crop, const double tilt) {
-
-	SDL_RenderCopyEx(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
-}
-
-inlinable void draw_tilted_f(SDL_Texture* const restrict buffer,
 	const SDL_FRect* const restrict dest_crop, const double tilt) {
 
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
-// void refresh(const Domain tilt, const VectorF pos, const double angle, const int z_pitch) {
-void refresh(const Player player) {
+void refresh(const Domain tilt, const VectorF pos, const double angle, const double y_shift) {
 	SDL_UnlockTexture(screen.pixel_buffer);
 	SDL_SetRenderTarget(screen.renderer, NULL);
 
-	void draw_skybox(const double, const double, const int);
-	draw_skybox(player.angle, player.jump.height, player.z_pitch);
+	void draw_skybox(const double, const double);
+	draw_skybox(angle, y_shift);
 
 	/*
 	When rotating the image according to the tilt angle, there's some dead space on the edges,
@@ -63,8 +58,6 @@ void refresh(const Player player) {
 	ϴ_____| B
 	   A
 	*/
-
-	const Domain tilt = player.tilt;
 
 	if (tilt.val >= -tilt.step - 0.01 && tilt.val <= tilt.step + 0.01) {
 		SDL_RenderCopy(screen.renderer, screen.pixel_buffer, NULL, NULL);
@@ -83,12 +76,12 @@ void refresh(const Player player) {
 			settings.screen_height + y_crop_adjust * 2.0
 		};
 
-		draw_tilted_f(screen.pixel_buffer, &dest_crop, tilt.val);
-		draw_tilted_f(screen.shape_buffer, &dest_crop, tilt.val);
+		draw_tilted(screen.pixel_buffer, &dest_crop, tilt.val);
+		draw_tilted(screen.shape_buffer, &dest_crop, tilt.val);
 	}
 
 	void draw_minimap(const VectorF);
-	draw_minimap(player.pos);
+	draw_minimap(pos);
 	SDL_RenderPresent(screen.renderer);
 }
 

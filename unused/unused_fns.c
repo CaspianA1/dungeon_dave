@@ -418,3 +418,10 @@ inlinable void set_message_pos(Message* const restrict message, const int x, con
 
 	message -> pos = (SDL_Rect) {x, y, w, h};
 }
+
+inlinable void draw_tilted(SDL_Texture* const restrict buffer,
+	const SDL_Rect* const restrict dest_crop, const double tilt) {
+
+	SDL_RenderCopyEx(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
+}
+
