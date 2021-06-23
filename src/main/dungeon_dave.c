@@ -67,6 +67,7 @@ int main(void) {
 		prepare_for_drawing();
 
 		const double wall_y_shift = settings.half_screen_height + player.z_pitch + player.pace.screen_offset;
+		draw_skybox(player.angle, wall_y_shift);
 
 		#ifndef PLANAR_MODE
 
@@ -90,7 +91,7 @@ int main(void) {
 
 		#endif
 
-		refresh(player.tilt, player.pos, player.angle, wall_y_shift);
+		refresh(player.tilt, player.pos);
 		tick_delay(before);
 	}
 }

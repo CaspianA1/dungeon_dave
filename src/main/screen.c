@@ -37,14 +37,9 @@ inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const des
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
-void refresh(const Domain tilt, const VectorF pos, const double angle,
-	const double y_shift) {
-
+void refresh(const Domain tilt, const VectorF pos) {
 	SDL_UnlockTexture(screen.pixel_buffer);
 	SDL_SetRenderTarget(screen.renderer, NULL);
-
-	void draw_skybox(const double, const double);
-	draw_skybox(angle, y_shift);
 
 	/*
 	When rotating the image according to the tilt angle, there's some dead space on the edges,
