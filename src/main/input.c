@@ -120,9 +120,10 @@ inlinable void update_pace(Pace* const pace, const VectorF pos, const VectorF pr
 	// or slow down pace by 2?
 
 	if (pos[0] != prev_pos[0] || pos[1] != prev_pos[1]) {
-		if ((pace -> domain.val += pace -> domain.step) > two_pi) pace -> domain.val = 0;
-		pace -> screen_offset = sin(pace -> domain.val) *
-			(settings.screen_height / pace -> offset_scaler);
+		Domain* domain = &pace -> domain;
+		if ((domain -> val += domain -> step) > two_pi) domain -> val = 0;
+		pace -> screen_offset = sin(domain -> val) *
+			settings.screen_height / pace -> offset_scaler;
 	}
 
 	#else

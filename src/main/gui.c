@@ -54,15 +54,14 @@ inlinable void deinit_message(Message message) {
 	deinit_sprite(message.sprite);
 }
 
-inlinable void after_gui_event(double* const pace_max,
-	int* const z_pitch, const int mouse_y, const Uint32 before) {
+inlinable void after_gui_event(int* const z_pitch, const int mouse_y, const Uint32 before) {
 
 	SDL_RenderPresent(screen.renderer);
-	update_screen_dimensions(pace_max, z_pitch, mouse_y);
+	update_screen_dimensions(z_pitch, mouse_y);
 	tick_delay(before);
 }
 
-InputStatus display_logo(double* const pace_max, int* const z_pitch, const int mouse_y) {
+InputStatus display_logo(int* const z_pitch, const int mouse_y) {
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 
@@ -79,16 +78,15 @@ InputStatus display_logo(double* const pace_max, int* const z_pitch, const int m
 		Sprite logo = init_sprite("../assets/logo.bmp");
 		SDL_RenderCopy(screen.renderer, logo.texture, NULL, NULL);
 		deinit_sprite(logo);
-		after_gui_event(pace_max, z_pitch, mouse_y, before);
+		after_gui_event(z_pitch, mouse_y, before);
 	}
 }
 
-InputStatus display_title_screen(double* const pace_max,
-	int* const z_pitch, const int mouse_y) {
+InputStatus display_title_screen(int* const z_pitch, const int mouse_y) {
 
 	const Sound title_track = init_sound("../assets/audio/themes/title.wav", 0);
 	play_sound(title_track, 1);
-	if (display_logo(pace_max, z_pitch, mouse_y) == Exit) return Exit;
+	if (display_logo(z_pitch, mouse_y) == Exit) return Exit;
 
 	if (TTF_Init() == -1)
 		FAIL("Unable to initialize the font library: %s", SDL_GetError());
@@ -143,7 +141,7 @@ InputStatus display_title_screen(double* const pace_max,
 		draw_colored_rect(139, 0, 0, &darker_center_rect);
 		draw_message(start);
 		deinit_message(start);
-		after_gui_event(pace_max, z_pitch, mouse_y, before);
+		after_gui_event(z_pitch, mouse_y, before);
 	}
 	exit_title_screen:
 		deinit_message(start);

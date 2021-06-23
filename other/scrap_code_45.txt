@@ -440,3 +440,108 @@ for (int y = 0; y < map_height; y++) {
 }
 
 /////
+
+//////////
+
+/*
+I need to adjust src_height and dest_height
+find out what percentage of the skybox I need to show when looking completely up
+also, the texture box shouldn't move down when looking up and down
+
+All of the dest math is correct
+
+some warping when looking up
+make the scroll rate even when looking up and down
+https://www.dcode.fr/function-equation-finder
+make sure that there is an equal amount of skybox to show when looking up and down
+
+old:
+	at the top: y = 0/3, height = 2/3
+	in the middle: y = 1/3, height = 1/3
+	at the bottom: y = 3/3, height = 0/3
+*/
+
+/*
+const double two_thirds = 2.0 / 3.0;
+const double dest_y = 0, dest_height = y_shift; // maybe dest_y shouldn't always be 0
+const double y_shift_percentage = y_shift / settings.screen_height;
+
+const double dest_height_show_percentage = y_shift_percentage * two_thirds;
+const int src_height = dest_height_show_percentage * skybox.max_height;
+
+const double src_y_show_percentage =
+	two_thirds * y_shift_percentage * y_shift_percentage - 5.0 / 3.0 * y_shift_percentage + 1.0;
+const int src_y = src_y_show_percentage * skybox.max_height;
+*/
+
+/*
+const double dest_y = 0, dest_height = y_shift;
+const double src_y = 0, src_height = skybox.max_height;
+*/
+
+/*
+const double dest_y = 0, dest_height = y_shift;
+const double third_src_height = skybox.max_height / 3.0;
+const double src_y = third_src_height, src_height = third_src_height;
+*/
+
+//////////
+
+///// squished, but even:
+
+/*
+const double dest_y = 0, dest_height = y_shift;
+const double third_src_height = skybox.max_height / 3.0;
+const double look_up_percent = y_shift / settings.screen_height;
+const double src_y = skybox.max_height * (1.0 - look_up_percent);
+const double src_height = skybox.max_height * look_up_percent;
+*/
+
+///// The final sky code:
+
+//////////
+
+/*
+I need to adjust src_height and dest_height
+find out what percentage of the skybox I need to show when looking completely up
+also, the texture box shouldn't move down when looking up and down
+
+All of the dest math is correct
+
+some warping when looking up
+make the scroll rate even when looking up and down
+https://www.dcode.fr/function-equation-finder
+make sure that there is an equal amount of skybox to show when looking up and down
+*/
+
+const double
+	dest_y = 0.0, dest_height = y_shift,
+	look_up_percent = y_shift / settings.screen_height;
+
+// src_height can be divided to determine what fraction is shown at once
+const double
+	src_y = skybox.max_height * (1.0 - look_up_percent),
+	src_height = skybox.max_height * look_up_percent;
+
+//////////
+
+/////
+
+typedef struct {
+	double val;
+	const double step;
+	double max;
+} Domain;
+
+/////
+
+const double new_num = y_shift - 51.0;
+
+double look_up_percent = y_shift / settings.screen_height;
+// if (look_up_percent <= 0.0) return;
+
+if (look_up_percent > 0.0) {
+	look_up_percent = new_num / settings.screen_height;
+}
+
+/////

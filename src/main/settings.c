@@ -54,8 +54,7 @@ void load_default_settings(void) {
 	keys = SDL_GetKeyboardState(NULL);
 }
 
-void update_screen_dimensions(double* const pace_max,
-	int* const z_pitch, const int mouse_y) {
+void update_screen_dimensions(int* const z_pitch, const int mouse_y) {
 
 	int new_width, new_height;
 	SDL_GetWindowSize(screen.window, &new_width, &new_height);
@@ -75,7 +74,6 @@ void update_screen_dimensions(double* const pace_max,
 		if (height_not_eq) {
 			settings.screen_height = new_height;
 			settings.half_screen_height = new_height / 2;
-			*pace_max = new_height / settings.pace_max_divisor;
 			void update_z_pitch(int* const, const int);
 			update_z_pitch(z_pitch, mouse_y);
 		}
@@ -89,7 +87,7 @@ Player load_player(const double jump_up_v0,
 
 	const double init_height = current_level.init_height;
 
-	const Player player = {
+	return (Player) {
 		.pos = current_level.init_pos,
 
 		.mouse_pos = {0, 0},
@@ -104,16 +102,13 @@ Player load_player(const double jump_up_v0,
 
 		.tilt = {.val = 0.0, .step = tilt_step, .max = tilt_max},
 
-		.pace = {.domain = {.val = 0.0, .step = pace_step,
-			.max = settings.screen_height / settings.pace_max_divisor},
+		.pace = {.domain = {.val = 0.0, .step = pace_step},
 			.offset_scaler = pace_offset_scaler, .screen_offset = 0},
 
 		.body = {.moving_forward_or_backward = 0, .was_forward = 0, .was_backward = 0,
 			.v = 0.0, .max_v_reached = 0.0, .a = body_a, .limit_v = body_limit_v,
 			.strafe_v = body_strafe_v, .v_incr_multiplier = body_v_incr_multiplier}
 	};
-
-	return player;
 }
 
 void load_all_defaults(void (*load_first_level) (void),

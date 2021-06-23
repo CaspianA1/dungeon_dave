@@ -3,8 +3,10 @@
 #include <SDL2/SDL_mixer.h>
 #include <pthread.h>
 
+/*
 #define PLANAR_MODE
 #define NOCLIP_MODE
+*/
 
 #define SHADING_ENABLED
 #define SOUND_ENABLED
@@ -12,8 +14,8 @@
 // #define TRACK_MEMORY
 
 // max: 1440 by 900
-#define INIT_W 1440
-#define INIT_H 900
+#define INIT_W 800
+#define INIT_H 800
 #define INIT_MAX_FPS 60
 #define INIT_RAY_COLUMN_W 1
 
@@ -23,7 +25,6 @@
 #define INIT_MAX_FOV 100.0
 
 #define INIT_MINIMAP_SCALE 3.0
-#define INIT_PACE_MAX_DIVISOR 1.2
 #define INIT_STOP_DIST_FROM_WALL 0.1
 
 #define AUDIO_CHUNK_SIZE 1024

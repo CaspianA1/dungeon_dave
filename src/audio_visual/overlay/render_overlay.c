@@ -158,6 +158,12 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 	}
 }
 
+/*
+https://zdoom.org/wiki/Free_look
+https://zdoom.org/wiki/Sky
+https://zdoom.org/wiki/Sky_stretching
+*/
+
 void draw_skybox(const double angle, const double y_shift) {
 	const Skybox skybox = current_level.skybox;
 
@@ -166,42 +172,13 @@ void draw_skybox(const double angle, const double y_shift) {
 		src_col_index = turn_percent * skybox.max_width,
 		src_width = skybox.max_width / 4.0;
 
-	//////////
+	const double dest_y = 0.0, dest_height = y_shift;
 
-	/*
-	I need to adjust src_height and dest_height
-	find out what percentage of the skybox I need to show when looking completely up
-	also, the texture box shouldn't move down when looking up and down
+	double look_up_percent = y_shift / settings.screen_height;
 
-	All of the dest math is correct
-
-	some warping when looking up
-	make the scroll rate even when looking up and down
-	https://www.dcode.fr/function-equation-finder
-	make sure that there is an equal amount of skybox to show when looking up and down
-	*/
-
-	const double two_thirds = 2.0 / 3.0;
-	const double dest_y = 0, dest_height = y_shift; // maybe dest_y shouldn't always be 0
-	const double y_shift_percentage = y_shift / settings.screen_height;
-	const double show_percentage = y_shift_percentage * two_thirds;
-	// DEBUG(dest_height, lf);
-
-	int src_height = show_percentage * skybox.max_height;
-
-	double test = two_thirds * y_shift_percentage * y_shift_percentage
-				- 5.0 / 3.0 * y_shift_percentage + 1.0;
-
-	int src_y = test * skybox.max_height;
-
-	// printf("src_y = %d, src_height = %d\n", src_y, src_height);
-	// DEBUG(src_y + src_height, d);
-
-	// at the top: y = 0/3, height = 2/3
-	// in the middle: y = 1/3, height = 1/3
-	// at the bottom: y = 3/3, height = 0/3
-
-	//////////
+	const int // src_height can be divided to determine what fraction is shown at once
+		src_y = skybox.max_height * (1.0 - look_up_percent),
+		src_height = skybox.max_height * look_up_percent;
 
 	if (turn_percent > 0.75) {
 		const double err_amt = (turn_percent - 0.75) * 4.0;

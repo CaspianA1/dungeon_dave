@@ -20,10 +20,10 @@ features:
 	- increase strafe speed and fov when pressing shift
 	- a sprite pool
 	- a skybox of a great city
-	- look up and down in the skybox
 	- an airship level
 	- no pace if slow enough
 	- store data like textures and maps in column-major order
+	- rotate skyboxes
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- high CPU usage
@@ -47,3 +47,4 @@ problems:
 	- draw_floor_plane doesn't draw some textures right
 	- falling through floors: corner clip -> jump, fall
 	- too many Mix_Chunks on the available channels -> out of channels
+	- skybox stretching
