@@ -34,9 +34,7 @@ inlinable void prepare_for_drawing(void) {
 	SDL_RenderClear(screen.renderer);
 }
 
-inlinable void draw_tilted(SDL_Texture* const buffer,
-	const SDL_FRect* const dest_crop, const double tilt) {
-
+inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const dest_crop, const double tilt) {
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
