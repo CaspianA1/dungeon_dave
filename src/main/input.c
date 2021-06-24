@@ -99,7 +99,7 @@ void update_z_pitch(int* const z_pitch, const int mouse_y) {
 inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lstrafe) {
 	if (strafe) {
 
-		tilt -> val += lstrafe ? -tilt -> step : tilt -> step;
+		tilt -> val += lstrafe ? tilt -> step : -tilt -> step;
 
 		if (tilt -> val > tilt -> max)
 			tilt -> val = tilt -> max;
@@ -107,8 +107,8 @@ inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lst
 			tilt -> val = -tilt -> max;
 	}
 
-	else if (tilt -> val + tilt -> step < 0) tilt -> val += tilt -> step;
-	else if (tilt -> val - tilt -> step > 0) tilt -> val -= tilt -> step;
+	else if (tilt -> val + tilt -> step < 0.0) tilt -> val += tilt -> step;
+	else if (tilt -> val - tilt -> step > 0.0) tilt -> val -= tilt -> step;
 }
 
 inlinable void update_pace(Pace* const pace, const VectorF pos, const VectorF prev_pos, const double v) {

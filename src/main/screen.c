@@ -11,7 +11,6 @@ void init_screen(void) {
 	screen.pixel_format = SDL_AllocFormat(PIXEL_FORMAT);
 	screen.z_buffer = wcalloc(settings.screen_width, sizeof(double));
 	init_buffers(settings.screen_width, settings.screen_height, 0);
-
 }
 
 void deinit_screen(void) {
@@ -63,6 +62,11 @@ void refresh(const Domain tilt, const VectorF pos) {
 		const double
 			x_crop_adjust = tan_tilt * settings.screen_width,
 			y_crop_adjust = tan_tilt * settings.screen_height;
+
+		/*
+		const double new_virtual_scr_w = settings.screen_width - x_crop_adjust * 2.0;;
+		settings.proj_dist = new_virtual_scr_w / 2.0 / tan(to_radians(settings.fov / 2.0));
+		*/
 
 		const SDL_FRect dest_crop = {
 			-x_crop_adjust, -y_crop_adjust,

@@ -82,6 +82,18 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 
 		const double corrected_dist = billboard.dist * cos_billboard_beta;
 
+		/* an experiment with not causing sprites to fly up
+		when the projection distance increases
+
+		static byte foo = 1;
+		static double val;
+
+		if (foo) {
+			val = settings.proj_dist;
+			foo = 0;
+		}
+		*/
+
 		const double
 			center_offset = tan(billboard.beta) * settings.proj_dist,
 			size = settings.proj_dist / corrected_dist;

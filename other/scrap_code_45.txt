@@ -545,3 +545,11 @@ if (look_up_percent > 0.0) {
 }
 
 /////
+
+/*
+proj_dist = half_scr_w / tan(fov / 2)
+proj_dist * tan(fov / 2) = half_scr_w
+screen_w = 2 * proj_dist * tan(fov / 2)
+*/
+
+/////
