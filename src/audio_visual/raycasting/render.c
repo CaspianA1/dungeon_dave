@@ -47,7 +47,6 @@ void draw_wall(const CastData cast_data, const VectorF dir,
 	const Sprite wall_sprite = current_level.walls[cast_data.point - 1];
 	const int max_offset = wall_sprite.surface -> w - 1;
 
-
 	int offset;
 	if (cast_data.side) { // before, I used `round` (why did I do that?)
 		const int x_offset = (cast_data.hit[0] - floor(cast_data.hit[0])) * max_offset;
@@ -112,7 +111,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 
 		const double cos_beta = cos(player_angle - theta);
 		const double corrected_dist = cast_data.dist * cos_beta;
-		screen.z_buffer[screen_x] = corrected_dist;
+		update_z_buffer(screen_x, corrected_dist);
 
 		const double wall_h = settings.proj_dist / corrected_dist;
 

@@ -113,7 +113,7 @@ void load_palace(void) {
 	memset(palace.ceiling_data, 1, bytes);
 	memset(palace.floor_data, 1, bytes);
 
-	fill_level_data(palace.floor_data, 5, 4, 7, 1, 3, map_height); // the flying carpet area
+	fill_level_data(palace.floor_data, 5, 4, 6, 1, 3, map_height); // the flying carpet area
 	fill_level_data(palace.floor_data, 7, 11, 13, 27, 29, map_height); // the entrance near the obstacle course
 	fill_level_data(palace.floor_data, 6, 16, 22, 24, 30, map_height); // the sandstone around the pillars
 	fill_level_data(palace.floor_data, 2, 1, 12, 24, 26, map_height); // part 1 of the hidden area's marble

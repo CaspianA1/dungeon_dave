@@ -92,6 +92,13 @@ inlinable void set_map_point(byte* const map, const byte val, const int x, const
 
 /////
 
+inlinable void update_z_buffer(const int screen_x, const double dist) {
+	for (int i = screen_x; i < screen_x + settings.ray_column_width; i++)
+		screen.z_buffer[i] = dist;
+}
+
+/////
+
 inlinable byte VectorII_eq(const VectorI v1, const VectorI v2) {
 	return v1.x == v2.x && v1.y == v2.y;
 }

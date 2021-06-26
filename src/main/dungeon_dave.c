@@ -59,6 +59,7 @@ int main(void) {
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VECF(player.pos);
+		// player.pos = (VectorF) {3.0, 3.0};
 
 		const InputStatus input_status = handle_input(&player, 0);
 		if (input_status == Exit) deinit_all(player, weapon);
@@ -74,8 +75,11 @@ int main(void) {
 		const double full_jump_height = player.jump.height * settings.screen_height;
 
 		// start_floorcast_tick(&floorcast_thread);
-		raycast_2(player, wall_y_shift, full_jump_height);
+		if (!keys[SDL_SCANCODE_T]) raycast_2(player, wall_y_shift, full_jump_height);
 		draw_generic_billboards(player, wall_y_shift);
+
+		draw_floor_plane(player);
+		refresh_and_clear_temp_buf();
 
 		update_all_enemies(player);
 		use_weapon_if_needed(&weapon, player, input_status);
@@ -83,11 +87,9 @@ int main(void) {
 
 		#else
 
-		if (!keys[SDL_SCANCODE_T]) {
-			// draw_ceiling_plane(player);
-			draw_floor_plane(player);
-			refresh_and_clear_temp_buf();
-		}
+		// draw_ceiling_plane(player);
+		draw_floor_plane(player);
+		refresh_and_clear_temp_buf();
 
 		#endif
 

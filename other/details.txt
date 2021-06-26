@@ -6,6 +6,7 @@ super-priorities:
 features:
 	- covered tops of walls
 	- floor and ceiling with variable wall heights: if ceilings should work, the wall height should change depending on the point height
+	- sets of enemy animations
 	- enemy AI
 	- doors
 	- status bar while playing w/ a settings option in the title screen and on the status bar
@@ -25,8 +26,7 @@ problems:
 	- small screen -> bigger screen or very small screen, edge triangles
 	- z-buffering issues for higher point heights - one per point height segment
 	- player height needs to be readjusted when screen height changes (it also changes based on screen width)
-	- optimize floor shading (with `raycast_2`, there is some unnecessary floor shading)
-	- weird lines for the hieroglyphics wall
+	- weird vertical lines when close to raised walls
 	- final floors are not working
 	- min and max proj dist
 	- empty z-buffer slots for ray_column_widths above 1

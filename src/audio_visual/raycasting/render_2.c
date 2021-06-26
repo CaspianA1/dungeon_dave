@@ -20,7 +20,7 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 	};
 
 	if (*first_wall_hit) {
-		screen.z_buffer[screen_x] = corrected_dist;
+		update_z_buffer(screen_x, corrected_dist);
 		*first_wall_hit = 0;
 	}
 
@@ -48,7 +48,7 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 
 			#ifndef PLANAR_MODE
 
-			if (i == 0) std_draw_floor(player, dir, raised_wall, cos_beta);
+			// if (i == 0) std_draw_floor(player, dir, raised_wall, cos_beta);
 
 			#endif
 		}
