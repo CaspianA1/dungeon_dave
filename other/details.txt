@@ -35,3 +35,4 @@ problems:
 	- draw_floor_plane doesn't draw some textures right
 	- too many Mix_Chunks on the available channels -> out of channels
 	- skybox stretching
+	- some sides of textures get more drawn on them near the end than others

@@ -4,6 +4,8 @@ typedef struct {
 	const VectorF hit;
 } CastData;
 
+#include <assert.h>
+
 inlinable int calculate_wall_tex_offset(const CastData cast_data, const VectorF dir, const int width) {
 	const int max_offset = width - 1;
 
@@ -52,7 +54,7 @@ void old_handle_ray(const Player player, const CastData cast_data, const int scr
 		if ((double) raised_wall.y >= *smallest_wall_y) continue;
 
 		const double raised_wall_bottom = (double) (raised_wall.y + raised_wall.h);
-		double sprite_height;
+		int sprite_height;
 
 		// fully visible: bottom smaller than smallest top
 		if (raised_wall_bottom <= *smallest_wall_y) {
@@ -73,7 +75,10 @@ void old_handle_ray(const Player player, const CastData cast_data, const int scr
 			raised_wall.h -= (float) y_obscured;
 			if (doubles_eq((double) raised_wall.h, 0.0, std_double_epsilon)) continue;
 
-			sprite_height = max_sprite_h * (double) raised_wall.h / init_raised_h;
+			sprite_height = max_sprite_h;
+
+			// if (player.jump.height >= i)
+			sprite_height *= (double) raised_wall.h / init_raised_h;
 		}
 
 		if ((double) raised_wall.y < *smallest_wall_y) *smallest_wall_y = (double) raised_wall.y;
@@ -191,7 +196,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 
 		// begin DDA
 		byte first_wall_hit = 1, side;
-		double smallest_wall_y = DBL_MAX;
+		double smallest_wall_y = DBL_MAX / 2;
 
 		const VectorF unit_step_size = {fabs(1.0 / dir[0]), fabs(1.0 / dir[1])};
 		VectorF ray_length, origin = player.pos;
@@ -225,8 +230,10 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 
 			const byte point = map_point(current_level.wall_data, curr_tile.x, curr_tile.y);
 			if (point) {
+				void (*fn) () = keys[SDL_SCANCODE_C] ? handle_ray : old_handle_ray;
+
 				const CastData cast_data = {point, side, distance, VectorF_line_pos(player.pos, dir, distance)};
-				old_handle_ray(player, cast_data, screen_x, &first_wall_hit, &smallest_wall_y,
+				fn(player, cast_data, screen_x, &first_wall_hit, &smallest_wall_y,
 					player_angle, theta, wall_y_shift, full_jump_height, dir);
 			}
 		}
