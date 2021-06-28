@@ -19,3 +19,32 @@ else
 */
 
 /////
+
+double sprite_h;
+
+// fully visible: bottom smaller than smallest top
+if (raised_wall_bottom <= *smallest_wall_y) {
+	sprite_h = max_sprite_h;
+
+	#ifndef PLANAR_MODE
+
+	if (i == 0) std_draw_floor(player, dir, raised_wall, cos_beta);
+
+	#endif
+}
+
+else { // partially obscured: bottom of wall somewhere in middle of tallest
+	const double
+		y_obscured = raised_wall_bottom - *smallest_wall_y,
+		init_raised_h = (double) raised_wall.h;
+
+	raised_wall.h -= (float) y_obscured;
+	if (doubles_eq((double) raised_wall.h, 0.0, std_double_epsilon)) continue;
+
+	// sprite_h = max_sprite_h * (double) raised_wall.h / init_raised_h;
+	sprite_h = max_sprite_h;
+}
+
+if ((double) raised_wall.y < *smallest_wall_y) *smallest_wall_y = (double) raised_wall.y;
+
+/////
