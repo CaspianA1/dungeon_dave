@@ -95,13 +95,31 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 	}
 }
 
-/*
-void dda_iter(double* const distance) {
+inlinable void dda_step(double* const distance, VectorI* const curr_tile_ref,
+	VectorF* const ray_length_ref, byte* const side,
+	const VectorF unit_step_size, const VectorI ray_step) {
 
+	VectorI curr_tile = *curr_tile_ref;
+	VectorF ray_length = *ray_length_ref;
+
+	if (ray_length[0] < ray_length[1]) {
+		*distance = ray_length[0];
+		curr_tile.x += ray_step.x;
+		ray_length[0] += unit_step_size[0];
+		*side = 0;
+	}
+	else {
+		*distance = ray_length[1];
+		curr_tile.y += ray_step.y;
+		ray_length[1] += unit_step_size[1];
+		*side = 1;
+	}
+
+	*curr_tile_ref = curr_tile;
+	*ray_length_ref = ray_length;
 }
-*/
 
-void raycast_2(const Player player, const double wall_y_shift, const double full_jump_height) {
+void raycast(const Player player, const double wall_y_shift, const double full_jump_height) {
 	const double player_angle = to_radians(player.angle);
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
@@ -114,35 +132,30 @@ void raycast_2(const Player player, const double wall_y_shift, const double full
 		double smallest_wall_y = DBL_MAX;
 
 		const VectorF unit_step_size = {fabs(1.0 / dir[0]), fabs(1.0 / dir[1])};
-		VectorF ray_length;
-		VectorI curr_tile = VectorF_floor(player.pos), ray_step;
+		VectorF ray_length, origin = player.pos;
+		VectorI curr_tile = VectorF_floor(origin), ray_step;
 
-		if (dir[0] < 0.0)
-			ray_step.x = -1,
-			ray_length[0] = (player.pos[0] - curr_tile.x) * unit_step_size[0];
-		else
-			ray_step.x = 1,
-			ray_length[0] = (curr_tile.x + 1.0 - player.pos[0]) * unit_step_size[0];
+		if (dir[0] < 0.0) {
+			ray_step.x = -1;
+			ray_length[0] = (origin[0] - curr_tile.x) * unit_step_size[0];
+		}
+		else {
+			ray_step.x = 1;
+			ray_length[0] = (curr_tile.x + 1.0 - origin[0]) * unit_step_size[0];
+		}
 
-		if (dir[1] < 0.0)
-			ray_step.y = -1,
-			ray_length[1] = (player.pos[1] - curr_tile.y) * unit_step_size[1];
-		else
-			ray_step.y = 1,
-			ray_length[1] = (curr_tile.y + 1.0 - player.pos[1]) * unit_step_size[1];
+		if (dir[1] < 0.0) {
+			ray_step.y = -1;
+			ray_length[1] = (origin[1] - curr_tile.y) * unit_step_size[1];
+		}
+		else {
+			ray_step.y = 1;
+			ray_length[1] = (curr_tile.y + 1.0 - origin[1]) * unit_step_size[1];
+		}
 
 		double distance = 0;
 		while (1) {
-			if (ray_length[0] < ray_length[1])
-				distance = ray_length[0],
-				curr_tile.x += ray_step.x,
-				ray_length[0] += unit_step_size[0],
-				side = 0;
-			else
-				distance = ray_length[1],
-				curr_tile.y += ray_step.y,
-				ray_length[1] += unit_step_size[1],
-				side = 1;
+			dda_step(&distance, &curr_tile, &ray_length, &side, unit_step_size, ray_step);
 
 			if (curr_tile.x < 0 || curr_tile.x >= current_level.map_width ||
 				curr_tile.y < 0 || curr_tile.y >= current_level.map_height)
@@ -150,12 +163,8 @@ void raycast_2(const Player player, const double wall_y_shift, const double full
 
 			const byte point = map_point(current_level.wall_data, curr_tile.x, curr_tile.y);
 			if (point) {
-				const CastData cast_data = {
-					point, side, distance, VectorF_line_pos(player.pos, dir, distance)
-				};
-
-				handle_ray(player, cast_data, screen_x,
-					&first_wall_hit, &smallest_wall_y,
+				const CastData cast_data = {point, side, distance, VectorF_line_pos(player.pos, dir, distance)};
+				handle_ray(player, cast_data, screen_x, &first_wall_hit, &smallest_wall_y,
 					player_angle, theta, wall_y_shift, full_jump_height, dir);
 			}
 		}

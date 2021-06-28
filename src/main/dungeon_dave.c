@@ -71,14 +71,8 @@ int main(void) {
 
 		const double full_jump_height = player.jump.height * settings.screen_height;
 
-		if (!keys[SDL_SCANCODE_T]) raycast_2(player, wall_y_shift, full_jump_height);
+		raycast(player, wall_y_shift, full_jump_height);
 		draw_generic_billboards(player, wall_y_shift);
-
-		/*
-		draw_floor_plane(player);
-		refresh_and_clear_temp_buf();
-		*/
-
 		update_all_enemies(player);
 		use_weapon_if_needed(&weapon, player, input_status);
 
