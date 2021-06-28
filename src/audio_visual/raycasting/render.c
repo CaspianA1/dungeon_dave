@@ -41,21 +41,24 @@ void draw_minimap(const VectorF pos) {
 	SDL_RenderFillRectF(screen.renderer, &player_dot);
 }
 
+int calculate_wall_tex_offset(const CastData cast_data, const VectorF dir, const int width) {
+	const int max_offset = width - 1;
+
+	if (cast_data.side) {
+		const int x_offset = (cast_data.hit[0] - floor(cast_data.hit[0])) * max_offset;
+		return (dir[1] > 0.0) ? max_offset - x_offset : x_offset;
+	}
+	else {
+		const int y_offset = (cast_data.hit[1] - floor(cast_data.hit[1])) * max_offset;
+		return (dir[0] < 0.0) ? max_offset - y_offset : y_offset;
+	}
+}
+
 void draw_wall(const CastData cast_data, const VectorF dir,
 	const SDL_FRect wall, const int slice_h, const double shade_h) {
 
 	const Sprite wall_sprite = current_level.walls[cast_data.point - 1];
-	const int max_offset = wall_sprite.surface -> w - 1;
-
-	int offset;
-	if (cast_data.side) { // before, I used `round` (why did I do that?)
-		const int x_offset = (cast_data.hit[0] - floor(cast_data.hit[0])) * max_offset;
-		offset = (dir[1] > 0.0) ? max_offset - x_offset : x_offset;
-	}
-	else {
-		const int y_offset = (cast_data.hit[1] - floor(cast_data.hit[1])) * max_offset;
-		offset = (dir[0] < 0.0) ? max_offset - y_offset : y_offset;
-	}
+	const int offset = calculate_wall_tex_offset(cast_data, dir, wall_sprite.surface -> w);
 
 	draw_column(wall_sprite, cast_data.hit, offset, slice_h, shade_h, &wall);
 }

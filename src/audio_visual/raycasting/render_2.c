@@ -1,3 +1,5 @@
+// to precalculate: the sprite used, the offset, the shade, and call SDL_SetTextureColorMod just once
+
 void handle_ray(const Player player, const CastData cast_data, const int screen_x,
 	byte* const first_wall_hit, double* const smallest_wall_y, const double player_angle,
 	const double theta, const double wall_y_shift, const double full_jump_height, const VectorF dir) {
@@ -24,48 +26,55 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 		*first_wall_hit = 0;
 	}
 
-	for (byte i = 0; i < point_height; i++) {
+	const int max_sprite_h = current_level.walls[cast_data.point - 1].surface -> h; // - 1;
+
+	int offset;
+	Sprite wall_sprite;
+
+	for (byte i = 0, first_draw_event = 1; i < point_height; i++) {
 		SDL_FRect raised_wall = wall;
 		raised_wall.y -= wall.h * i;
 
 		// completely obscured: starts under the tallest so far
 		if ((double) raised_wall.y >= *smallest_wall_y) continue;
 
-		const int max_sprite_height =
-			current_level.walls[cast_data.point - 1].surface -> h - 1;
-
-		const double
-			raised_wall_bottom = (double) (raised_wall.y + raised_wall.h),
-			max_raised_wall_h = (double) raised_wall.h;
-
+		const double raised_wall_bottom = (double) (raised_wall.y + raised_wall.h);
 		double sprite_height;
 
 		// fully visible: bottom smaller than smallest top
 		if (raised_wall_bottom <= *smallest_wall_y) {
-			sprite_height = max_sprite_height;
-			if ((double) raised_wall.y < *smallest_wall_y)
-				*smallest_wall_y = (double) raised_wall.y;
+			sprite_height = max_sprite_h;
 
 			#ifndef PLANAR_MODE
 
-			// if (i == 0) std_draw_floor(player, dir, raised_wall, cos_beta);
+			if (i == 0) std_draw_floor(player, dir, raised_wall, cos_beta);
 
 			#endif
 		}
 
 		else { // partially obscured: bottom of wall somewhere in middle of tallest
-			const double y_obscured = raised_wall_bottom - *smallest_wall_y;
-			const double init_raised_h = (double) raised_wall.h;
+			const double
+				y_obscured = raised_wall_bottom - *smallest_wall_y,
+				init_raised_h = (double) raised_wall.h;
 
 			raised_wall.h -= (float) y_obscured;
 			if (doubles_eq((double) raised_wall.h, 0.0, std_double_epsilon)) continue;
 
-			sprite_height = max_sprite_height * (double) raised_wall.h / init_raised_h;
-
-			if ((double) raised_wall.y < *smallest_wall_y)
-				*smallest_wall_y = (double) raised_wall.y;
+			sprite_height = max_sprite_h * (double) raised_wall.h / init_raised_h;
 		}
-		draw_wall(cast_data, dir, raised_wall, sprite_height, max_raised_wall_h);
+
+		if ((double) raised_wall.y < *smallest_wall_y) *smallest_wall_y = (double) raised_wall.y;
+
+		if (first_draw_event) {
+			wall_sprite = current_level.walls[cast_data.point - 1];	
+			offset = calculate_wall_tex_offset(cast_data, dir, wall_sprite.surface -> w);
+			const byte shade = 255 * calculate_shade((double) wall.h, cast_data.hit);
+			SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
+			first_draw_event = 0;
+		}
+
+		const SDL_Rect slice = {offset, 0, 1, sprite_height};
+		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
 	}
 }
 

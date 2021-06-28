@@ -553,3 +553,16 @@ screen_w = 2 * proj_dist * tan(fov / 2)
 */
 
 /////
+
+void draw_precalculated_wall(const Sprite wall_sprite, const SDL_FRect* dest,
+	const int offset, const double src_height) {
+
+	const SDL_Rect slice = {offset, 0, 1, src_height};
+	SDL_RenderCopyF(screen.renderer, sprite.texture, &slice, dest);
+}
+
+/////
+
+// draw_wall(cast_data, dir, raised_wall, sprite_height, max_raised_wall_h);
+
+/////

@@ -9,7 +9,7 @@
 */
 
 #define SHADING_ENABLED
-#define SOUND_ENABLED
+// #define SOUND_ENABLED
 #define FULL_QUALITY
 // #define TRACK_MEMORY
 
@@ -53,9 +53,12 @@
 
 #define LOOP(max) for (int i = 0; i < max; i++)
 #define FAIL(...) {fprintf(stderr, __VA_ARGS__); exit(1);}
+
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define DEBUG_VECF(vec) printf(#vec " = {%lf, %lf}\n", vec[0], vec[1])
 #define DEBUG_VECI(vec) printf(#vec " = {%d, %d}\n", vec.x, vec.y)
+#define DEBUG_FRECT(frect) printf(#frect = " = {.x = %lf, .y = %lf, .w = %lf, .h = %lf}\n",\
+						frect.x, frect.y, frect.w, frect.h)
 
 /////
 
