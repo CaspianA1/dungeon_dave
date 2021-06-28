@@ -1,22 +1,3 @@
-typedef struct {
-	const byte point, side;
-	const double dist;
-	const VectorF hit;
-} CastData;
-
-inlinable int calculate_wall_tex_offset(const CastData cast_data, const VectorF dir, const int width) {
-	const int max_offset = width - 1;
-
-	if (cast_data.side) {
-		const int x_offset = (cast_data.hit[0] - floor(cast_data.hit[0])) * max_offset;
-		return (dir[1] > 0.0) ? max_offset - x_offset : x_offset;
-	}
-	else {
-		const int y_offset = (cast_data.hit[1] - floor(cast_data.hit[1])) * max_offset;
-		return (dir[0] < 0.0) ? max_offset - y_offset : y_offset;
-	}
-}
-
 void draw_wall(const CastData cast_data, const VectorF dir,
 	const SDL_FRect wall, const int slice_h, const double shade_h) {
 
@@ -69,8 +50,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 	const double player_angle = to_radians(player.angle);
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
-		const double theta = atan((screen_x - settings.half_screen_width)
-							/ settings.proj_dist) + player_angle;
+		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
 
 		const VectorF ray_direction = {cos(theta), sin(theta)};
 		const CastData cast_data = dda(player.pos, ray_direction);

@@ -1,4 +1,21 @@
-// to precalculate: the sprite used, the offset, the shade, and call SDL_SetTextureColorMod just once
+typedef struct {
+	const byte point, side;
+	const double dist;
+	const VectorF hit;
+} CastData;
+
+inlinable int calculate_wall_tex_offset(const CastData cast_data, const VectorF dir, const int width) {
+	const int max_offset = width - 1;
+
+	if (cast_data.side) {
+		const int x_offset = (cast_data.hit[0] - floor(cast_data.hit[0])) * max_offset;
+		return (dir[1] > 0.0) ? max_offset - x_offset : x_offset;
+	}
+	else {
+		const int y_offset = (cast_data.hit[1] - floor(cast_data.hit[1])) * max_offset;
+		return (dir[0] < 0.0) ? max_offset - y_offset : y_offset;
+	}
+}
 
 void handle_ray(const Player player, const CastData cast_data, const int screen_x,
 	byte* const first_wall_hit, double* const smallest_wall_y, const double player_angle,
@@ -26,7 +43,7 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 		*first_wall_hit = 0;
 	}
 
-	const int max_sprite_h = current_level.walls[cast_data.point - 1].surface -> h; // - 1;
+	const int max_sprite_h = current_level.walls[cast_data.point - 1].surface -> h;
 
 	int offset;
 	Sprite wall_sprite;
@@ -78,12 +95,17 @@ void handle_ray(const Player player, const CastData cast_data, const int screen_
 	}
 }
 
+/*
+void dda_iter(double* const distance) {
+
+}
+*/
+
 void raycast_2(const Player player, const double wall_y_shift, const double full_jump_height) {
 	const double player_angle = to_radians(player.angle);
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
-		const double theta = atan((screen_x - settings.half_screen_width)
-			/ settings.proj_dist) + player_angle;
+		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
 
 		const VectorF dir = {cos(theta), sin(theta)};
 

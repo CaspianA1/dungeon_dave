@@ -29,8 +29,7 @@
 #include "../audio_visual/floor_ceiling/floor_and_ceiling_3.c"
 #include "../audio_visual/floor_ceiling/floor_and_ceiling_4.c"
 #include "../audio_visual/floor_ceiling/draw_plane.c"
-#include "../audio_visual/raycasting/render.c"
-#include "../audio_visual/raycasting/render_2.c"
+#include "../audio_visual/raycast.c"
 
 #include "../levels/level_1.c"
 #include "../levels/debug_level.c"
@@ -49,7 +48,6 @@ int main(void) {
 	Player player;
 	Weapon weapon;
 	load_all_defaults(load_palace, &player, &weapon);
-	// FloorCastThread floorcast_thread = init_floorcast_thread(&player);
 
 	if (display_title_screen(&player.z_pitch, player.mouse_pos.y) == Exit)
 		deinit_all(player, weapon);
@@ -59,7 +57,6 @@ int main(void) {
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VECF(player.pos);
-		// player.pos = (VectorF) {3.0, 3.0};
 
 		const InputStatus input_status = handle_input(&player, 0);
 		if (input_status == Exit) deinit_all(player, weapon);
@@ -74,7 +71,6 @@ int main(void) {
 
 		const double full_jump_height = player.jump.height * settings.screen_height;
 
-		// start_floorcast_tick(&floorcast_thread);
 		if (!keys[SDL_SCANCODE_T]) raycast_2(player, wall_y_shift, full_jump_height);
 		draw_generic_billboards(player, wall_y_shift);
 
@@ -85,7 +81,6 @@ int main(void) {
 
 		update_all_enemies(player);
 		use_weapon_if_needed(&weapon, player, input_status);
-		// wait_for_floorcast_tick(&floorcast_thread);
 
 		#else
 

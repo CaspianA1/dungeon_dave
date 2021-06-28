@@ -1,0 +1,6 @@
+// FloorCastThread floorcast_thread = init_floorcast_thread(&player);
+// player.pos = (VectorF) {3.0, 3.0};
+// start_floorcast_tick(&floorcast_thread);
+// wait_for_floorcast_tick(&floorcast_thread);
+
+/////
