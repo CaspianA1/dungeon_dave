@@ -149,3 +149,40 @@ InputStatus display_title_screen(int* const z_pitch, const int mouse_y) {
 		deinit_sound(title_track);
 		return title_screen_input;
 }
+
+void draw_minimap(const VectorF pos) {
+	static byte minimap_enabled = 0;
+	if (keys[KEY_DISABLE_MINIMAP]) minimap_enabled = 0;
+	if (keys[KEY_ENABLE_MINIMAP]) minimap_enabled = 1;
+	if (!minimap_enabled) return;
+
+	const double
+		width_scale = (double) settings.screen_width
+			/ current_level.map_width / settings.minimap_scale,
+		height_scale = (double) settings.screen_height
+			/ current_level.map_height / settings.minimap_scale;
+
+	const SDL_Color baby_blue = {30, 144, 255, SDL_ALPHA_OPAQUE};
+	SDL_FRect wall = {0.0, 0.0, width_scale, height_scale};
+
+	for (int map_x = 0; map_x < current_level.map_width; map_x++) {
+		for (int map_y = 0; map_y < current_level.map_height; map_y++) {
+			const byte point = map_point(current_level.wall_data, map_x, map_y);
+			const double shade = 1.0 -
+				((double) current_level.get_point_height(point, (VectorF) {map_x, map_y})
+				/ current_level.max_point_height);
+
+			SDL_SetRenderDrawColor(screen.renderer,
+				baby_blue.r * shade, baby_blue.g * shade,
+				baby_blue.b * shade, SDL_ALPHA_OPAQUE);
+
+			wall.x = map_x * width_scale;
+			wall.y = map_y * height_scale;
+			SDL_RenderFillRectF(screen.renderer, &wall);
+		}
+	}
+
+	const SDL_FRect player_dot = {pos[0] * width_scale, pos[1] * height_scale, 5, 5};
+	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRectF(screen.renderer, &player_dot);
+}
