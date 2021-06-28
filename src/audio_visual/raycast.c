@@ -196,7 +196,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 
 		// begin DDA
 		byte first_wall_hit = 1, side;
-		double smallest_wall_y = DBL_MAX / 2;
+		double smallest_wall_y = DBL_MAX;
 
 		const VectorF unit_step_size = {fabs(1.0 / dir[0]), fabs(1.0 / dir[1])};
 		VectorF ray_length, origin = player.pos;
