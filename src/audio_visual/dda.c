@@ -1,6 +1,6 @@
 typedef struct {
-	double distance;
-	byte hit_count, side;
+	double dist;
+	byte first_hit, step_count, side;
 	const VectorF origin, dir, unit_step_size;
 	VectorF ray_length, recent_hit;
 	const VectorI ray_step;
@@ -32,25 +32,29 @@ DataDDA init_dda(const VectorF origin, const VectorF dir) {
 	}
 
 	return (DataDDA) {
-		0.0, 0, 0, origin, dir, unit_step_size, ray_length, {-1.0, -1.0}, ray_step, curr_tile
+		0.0, 1, 0, 0, origin, dir, unit_step_size, ray_length, {-1.0, -1.0}, ray_step, curr_tile
 	};
 }
 
-inlinable void iter_dda(DataDDA* const d_ref) {
+inlinable byte iter_dda(DataDDA* const d_ref) {
 	DataDDA d = *d_ref;
 
 	if (d.ray_length[0] < d.ray_length[1]) {
-		d.distance = d.ray_length[0];
+		d.dist = d.ray_length[0];
 		d.curr_tile.x += d.ray_step.x;
 		d.ray_length[0] += d.unit_step_size[0];
 		d.side = 0;
 	}
 	else {
-		d.distance = d.ray_length[1];
+		d.dist = d.ray_length[1];
 		d.curr_tile.y += d.ray_step.y;
 		d.ray_length[1] += d.unit_step_size[1];
 		d.side = 1;
 	}
 
+	if (VectorI_out_of_bounds(d.curr_tile)) return 0;
+
+	d.step_count++;
 	memcpy(d_ref, &d, sizeof(DataDDA));
+	return 1;
 }

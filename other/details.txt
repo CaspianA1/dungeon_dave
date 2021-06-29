@@ -23,17 +23,15 @@ features:
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
-	- clipping into corners for player
+	- clipping into corners
 	- small screen -> bigger screen or very small screen, edge triangles
-	- z-buffering issues for higher point heights - one per point height segment
+	- z-buffering issues for higher point heights
 	- player height needs to be readjusted when screen height changes (it also changes based on screen width)
-	- weird vertical lines when close to raised walls
-	- final floors are not working
 	- min and max proj dist
 	- empty z-buffer slots for ray_column_widths above 1
-	- SDL_PollEvent errors (that occur more with lower optimization)
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
 	- draw_floor_plane doesn't draw some textures right
 	- too many Mix_Chunks on the available channels -> out of channels
 	- skybox stretching
 	- some sides of textures get more drawn on them near the end than others
+	- navigators use too much heap memory
