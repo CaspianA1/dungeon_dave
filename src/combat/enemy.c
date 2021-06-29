@@ -4,6 +4,21 @@ The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Attacked added after Attacking.
 */
 
+void shoot_enemy(Player player, Enemy* const enemy) {
+	(void) player;
+	(void) enemy;
+	// const Billboard billboard = enemy -> animations.billboard;
+
+	/* do DDA, if goes close enough to an enemy, shoot them. If a wall, stop, no hit.
+	Checking beta doesn't help with walls. */
+
+	/*
+	if (fabs(billboard.beta) <= 0.3) {
+		printf("Can shoot\n");
+	}
+	*/
+}
+
 void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	enemy -> state = new_state;
 	if (!silent) play_sound(enemy -> sounds[enemy -> state], 0); // stop the previous sound as well

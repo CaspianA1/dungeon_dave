@@ -99,6 +99,10 @@ inlinable void update_z_buffer(const int screen_x, const double dist) {
 
 /////
 
+inlinable byte VectorI_out_of_bounds(const VectorI vi) {
+	return vi.x < 0 || vi.x >= current_level.map_width || vi.y < 0 || vi.y >= current_level.map_height;
+}
+
 inlinable byte VectorII_eq(const VectorI v1, const VectorI v2) {
 	return v1.x == v2.x && v1.y == v2.y;
 }

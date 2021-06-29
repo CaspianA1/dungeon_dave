@@ -18,7 +18,8 @@ features:
 	- a skybox of a great city
 	- an airship level
 	- no pace if slow enough
-	- store data like textures and maps in column-major order, if possible
+	- abstracted dda
+	- combat
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
