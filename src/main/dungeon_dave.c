@@ -40,10 +40,9 @@
 
 /*
 itinerary:
-a beautiful skybox
-enemy ai
 visplane floors
-non-clipping enemies
+non-clipping pathfinding
+close-range shooting
 */
 
 int main(void) {

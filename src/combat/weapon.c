@@ -29,6 +29,8 @@ void shoot_weapon(const Weapon* const weapon, const VectorF pos, const VectorF d
 			const VectorF delta = {fabs(bullet_pos.x - billboard.pos[0]), fabs(bullet_pos.y - billboard.pos[1])};
 			const double bullet_dist_squared = delta[0] * delta[0] + delta[1] * delta[1];
 
+			// DEBUG(bullet_dist_squared, lf);
+
 			if (bullet_dist_squared <= dist_squared_for_hit) {
 				enemy -> recently_attacked = 1;
 				enemy -> hp -= weapon -> power;

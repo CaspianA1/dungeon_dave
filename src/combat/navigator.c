@@ -23,11 +23,29 @@ inlinable Navigator init_navigator(const VectorF player_pos, VectorF* const pos_
 	return nav;
 }
 
-inlinable byte navigator_in_wall(const VectorF pos) {
-	(void) pos;
-	return 0;
+inlinable byte navigator_in_wall(const VectorF pos) { // 8 directions
+	return map_point(current_level.wall_data, pos[0] + 0.5, pos[1])
+		|| map_point(current_level.wall_data, pos[0] - 0.5, pos[1])
+		|| map_point(current_level.wall_data, pos[0], pos[1] + 0.5)
+		|| map_point(current_level.wall_data, pos[0], pos[1] - 0.5)
+		|| map_point(current_level.wall_data, pos[0] + 0.5, pos[1] + 0.5)
+		|| map_point(current_level.wall_data, pos[0] + 0.5, pos[1] - 0.5)
+		|| map_point(current_level.wall_data, pos[0] - 0.5, pos[1] + 0.5)
+		|| map_point(current_level.wall_data, pos[0] - 0.5, pos[1] - 0.5);
 }
 
+/*
+void construct_non_clipping_path(Path path) {
+	const VectorI* orig_path = path.data;
+	VectorF* const better_path = malloc(path.length * sizeof(VectorF));
+	for (int i = 0; i < path.length; i++) {
+		const VectorI orig_path_entry = orig_path[i];
+		better_path[i] = (VectorF) {orig_path_entry.x + 0.5, orig_path_entry.y + 0.5};
+	}
+}
+*/
+
+// construct a new path that has been guaranteed to not have any walls to clip into on its way
 NavigatorState update_path_if_needed(Navigator* const nav, const VectorF player_pos, const Jump jump) {
 	if (jump.height > 0.0 && !jump.jumping) return CouldNotNavigate;
 	else if (nav -> path_ind == -1) {
@@ -44,26 +62,17 @@ NavigatorState update_path_if_needed(Navigator* const nav, const VectorF player_
 			next_vertexI = path -> data[nav -> path_ind + 1];
 
 		const VectorI dir = {next_vertexI.x - curr_vertexI.x, next_vertexI.y - curr_vertexI.y};
-		const VectorF next_vertex = {next_vertexI.x + 0.5, next_vertexI.y + 0.5};
 
 		VectorF* const pos_ref = nav -> pos;
 		VectorF pos = *pos_ref;
+		const VectorF movement = {nav -> v * dir.x, nav -> v * dir.y};
 
-		pos[0] += nav -> v * dir.x;
-		pos[1] += nav -> v * dir.y;
+		pos = VectorFF_add(pos, movement);
 
 		// if past the current vertex
-		if ((dir.x == 1 && pos[0] >= next_vertex[0]) ||
-			(dir.x == -1 && pos[0] <= next_vertex[0]) ||
-			(dir.y == 1 && pos[1] >= next_vertex[1]) ||
-			(dir.y == -1 && pos[1] <= next_vertex[1])) {
+		if ((dir.x == 1 && pos[0] >= next_vertexI.x) || (dir.x == -1 && pos[0] <= next_vertexI.x)
+			|| (dir.y == 1 && pos[1] >= next_vertexI.y) || (dir.y == -1 && pos[1] <= next_vertexI.y)) nav -> path_ind++;
 
-			pos[0] = floor(pos[0]);
-			pos[1] = floor(pos[1]);
-			pos = VectorFF_add(pos, VectorF_memset(0.5));
-
-			nav -> path_ind++;
-		}
 		*pos_ref = pos;
 		return Navigating;
 	}

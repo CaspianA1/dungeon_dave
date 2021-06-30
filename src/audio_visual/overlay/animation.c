@@ -35,6 +35,8 @@ inlinable void progress_enemy_frame_ind(Enemy* const enemy) {
 
 	const int end = begin + enemy -> animation_seg_lengths[enemy -> state];
 
+	if (enemy -> state == Dead && enemy -> animations.frame_ind == end - 1) return;
+
 	progress_frame_ind(&enemy -> animations, begin, end);
 }
 
