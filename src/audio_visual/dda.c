@@ -1,8 +1,8 @@
 typedef struct {
 	double dist;
-	byte first_hit, step_count, side;
+	byte at_first_hit, step_count, side;
 	const VectorF origin, dir, unit_step_size;
-	VectorF ray_length, recent_hit;
+	VectorF ray_length;
 	const VectorI ray_step;
 	VectorI curr_tile;
 } DataDDA;
@@ -32,7 +32,7 @@ DataDDA init_dda(const VectorF origin, const VectorF dir) {
 	}
 
 	return (DataDDA) {
-		0.0, 1, 0, 0, origin, dir, unit_step_size, ray_length, {-1.0, -1.0}, ray_step, curr_tile
+		0.0, 1, 0, 0, origin, dir, unit_step_size, ray_length, ray_step, curr_tile
 	};
 }
 

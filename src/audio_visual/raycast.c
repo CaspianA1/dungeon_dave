@@ -106,10 +106,10 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 			const byte point = map_point(current_level.wall_data, ray.curr_tile.x, ray.curr_tile.y);
 			if (point) {
 				const CastData cast_data = {point, ray.side, ray.dist, VectorF_line_pos(player.pos, dir, ray.dist)};
-				handle_ray(player, cast_data, screen_x, ray.first_hit, &smallest_wall_y,
+				handle_ray(player, cast_data, screen_x, ray.at_first_hit, &smallest_wall_y,
 					player_angle, theta, wall_y_shift, full_jump_height, dir);
 
-				ray.first_hit = 0;
+				ray.at_first_hit = 0;
 			}
 		}
 	}

@@ -162,7 +162,7 @@ void load_palace(void) {
 		"../assets/audio/enemy_sound_test/death.wav",
 		"../assets/audio/enemy_sound_test/attacked.wav",
 
-		0.02 /* navigator speed */ );
+		0.03 /* navigator speed */ );
 
 	set_level_generic_billboard_container(&current_level);
 }

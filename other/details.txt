@@ -1,7 +1,7 @@
 super-priorities:
 	- bug fixes
 	- enemy AI
-	- variable wall height extensions
+	- fast floors
 
 features:
 	- covered tops of walls
@@ -22,7 +22,8 @@ features:
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
-	- clipping into corners
+	- player clipping into corners
+	- enemy clipping into walls
 	- small screen -> bigger screen or very small screen, edge triangles
 	- z-buffering issues for higher point heights
 	- player height needs to be readjusted when screen height changes (it also changes based on screen width)
