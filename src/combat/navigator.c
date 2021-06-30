@@ -23,6 +23,11 @@ inlinable Navigator init_navigator(const VectorF player_pos, VectorF* const pos_
 	return nav;
 }
 
+inlinable byte navigator_in_wall(const VectorF pos) {
+	(void) pos;
+	return 0;
+}
+
 NavigatorState update_path_if_needed(Navigator* const nav, const VectorF player_pos, const Jump jump) {
 	if (jump.height > 0.0 && !jump.jumping) return CouldNotNavigate;
 	else if (nav -> path_ind == -1) {

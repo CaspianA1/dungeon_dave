@@ -182,7 +182,8 @@ void draw_minimap(const VectorF pos) {
 		}
 	}
 
-	const SDL_FRect player_dot = {pos[0] * width_scale, pos[1] * height_scale, 5, 5};
+	const byte dot_size = (settings.screen_width + settings.screen_height) / 300;
+	const SDL_FRect player_dot = {pos[0] * width_scale, pos[1] * height_scale, dot_size, dot_size};
 	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderFillRectF(screen.renderer, &player_dot);
 }

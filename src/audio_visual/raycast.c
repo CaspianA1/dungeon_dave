@@ -1,29 +1,4 @@
 typedef struct {
-	const byte point, side;
-	const double dist;
-	const VectorF hit;
-} CastData;
-
-/*
-extended cast data:
-- player angle and angle of ray in radians - check
-- distance of raycast - check
-- the point that the raycast hit, and the position that the raycast hit - check
-- the screen x - check
-- wall y shift - check
-- full jump height - check
-- if the first wall y hit - check
-- direction - check
-
-typedef struct {
-	const double player_angle, theta, cos_beta, dist, wall_y_shift, full_jump_height;
-	const VectorF hit, dir;
-	const byte point, first_wall_hit;
-	const int screen_x;
-} DataRaycast;
-*/
-
-typedef struct {
 	double* const smallest_wall_y;
 	const double player_angle, theta, dist, wall_y_shift, full_jump_height;
 	const VectorF begin, hit, dir;

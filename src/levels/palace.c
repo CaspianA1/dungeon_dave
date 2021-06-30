@@ -147,13 +147,14 @@ void load_palace(void) {
 	memcpy(&current_level, &palace, sizeof(Level));
 
 	// this is set after b/c this depends on fns that read from current_level
+
 	set_level_enemies(&current_level, enemy_count,
 		Idle, // state
 		2.0, 8.0, // dist_thresholds
 		20.0, // hp
-		4, 8, 10, 4, // animation_seg_lengths
+		5, 2, 3, 13, // animation_seg_lengths
 
-		"../assets/spritesheets/enemy_spritesheet_test.bmp", 5, 6, 26, 12, // animation data
+		"../assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
 		3.0, 7.5, 0.0, // billboard data
 
 		"../assets/audio/enemy_sound_test/idle.wav", // sound data

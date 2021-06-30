@@ -217,3 +217,49 @@ ray.at_first_hit = 0;
 */
 
 /////
+
+typedef struct {
+	const byte point, side;
+	const double dist;
+	const VectorF hit;
+} CastData;
+
+/*
+extended cast data:
+- player angle and angle of ray in radians - check
+- distance of raycast - check
+- the point that the raycast hit, and the position that the raycast hit - check
+- the screen x - check
+- wall y shift - check
+- full jump height - check
+- if the first wall y hit - check
+- direction - check
+
+typedef struct {
+	const double player_angle, theta, cos_beta, dist, wall_y_shift, full_jump_height;
+	const VectorF hit, dir;
+	const byte point, first_wall_hit;
+	const int screen_x;
+} DataRaycast;
+*/
+
+///// The test enemy:
+
+set_level_enemies(&current_level, enemy_count,
+	Idle, // state
+	2.0, 8.0, // dist_thresholds
+	20.0, // hp
+	4, 8, 10, 4, // animation_seg_lengths
+
+	"../assets/spritesheets/enemy_spritesheet_test.bmp", 5, 6, 26, 12, // animation data
+	3.0, 7.5, 0.0, // billboard data
+
+	"../assets/audio/enemy_sound_test/idle.wav", // sound data
+	"../assets/audio/enemy_sound_test/chase.wav",
+	"../assets/audio/enemy_sound_test/attack.wav",
+	"../assets/audio/enemy_sound_test/death.wav",
+	"../assets/audio/enemy_sound_test/attacked.wav",
+
+	0.03 /* navigator speed */ );
+
+/////

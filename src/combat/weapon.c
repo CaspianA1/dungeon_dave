@@ -14,7 +14,7 @@ void deinit_weapon(const Weapon weapon) {
 
 void shoot_weapon(const Weapon* const weapon, const VectorF pos, const VectorF dir) {
 	DataDDA bullet = init_dda(pos, dir);
-	const double dist_squared_for_hit = 1.2;
+	const double dist_squared_for_hit = 1.3;
 
 	while (iter_dda(&bullet)) {
 		const VectorI bullet_pos = bullet.curr_tile;
@@ -22,6 +22,7 @@ void shoot_weapon(const Weapon* const weapon, const VectorF pos, const VectorF d
 
 		for (byte i = 0; i < current_level.enemy_count; i++) {
 			Enemy* const enemy = &current_level.enemies[i];
+
 			if (enemy -> state == Dead) continue;
 
 			const Billboard billboard = enemy -> animations.billboard;
