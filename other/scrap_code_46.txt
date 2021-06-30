@@ -206,5 +206,14 @@ if ((double) (raised_wall.y + raised_wall.h) > *smallest_wall_y) {
 
 else if (i == 0) std_draw_floor(player, dir, raised_wall, cos_beta);
 
+/////
+
+/*
+const CastData cast_data = {point, ray.side, ray.dist, VectorF_line_pos(player.pos, dir, ray.dist)};
+handle_ray(player, cast_data, screen_x, ray.at_first_hit, &smallest_wall_y,
+	player_angle, theta, wall_y_shift, full_jump_height, dir);
+
+ray.at_first_hit = 0;
+*/
 
 /////

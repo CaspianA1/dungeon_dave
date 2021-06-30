@@ -100,18 +100,19 @@ void simd_draw_floor_or_ceil(const VectorF, const VectorF,
 	const byte, const int, const double, const double,
 	const double, const double, const int, const double);
 
-inlinable void std_draw_ceiling(const Player player, const VectorF dir,
-	const SDL_FRect wall, const double cos_beta) {
+inlinable void std_draw_ceiling(const VectorF pos, const VectorF dir,
+	const double pace, const int z_pitch, const double p_height,
+	const double cos_beta, const SDL_FRect wall)  {
 
-	simd_draw_floor_or_ceil(player.pos, dir, 1, wall.x, 0.0,
-		(double) wall.y + 1.0, cos_beta,
-		player.pace.screen_offset, player.z_pitch, player.jump.height);
+	simd_draw_floor_or_ceil(pos, dir, 1, wall.x, 0.0, (double) wall.y + 1.0,
+		cos_beta, pace, z_pitch, p_height);
 }
 
-inlinable void std_draw_floor(const Player player, const VectorF dir,
-	const SDL_FRect wall, const double cos_beta) {
+// inlinable void std_draw_floor(const Player player, const VectorF dir,
+inlinable void std_draw_floor(const VectorF pos, const VectorF dir,
+	const double pace, const int z_pitch, const double p_height,
+	const double cos_beta, const SDL_FRect wall)  {
 
-	simd_draw_floor_or_ceil(player.pos, dir, 0, wall.x, (double) (wall.y + wall.h),
-		settings.screen_height, cos_beta, player.pace.screen_offset, player.z_pitch,
-		player.jump.height);
+	simd_draw_floor_or_ceil(pos, dir, 0, wall.x, (double) (wall.y + wall.h),
+		settings.screen_height, cos_beta, pace, z_pitch, p_height);
 }

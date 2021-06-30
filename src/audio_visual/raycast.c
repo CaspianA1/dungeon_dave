@@ -8,7 +8,6 @@ typedef struct {
 extended cast data:
 - player angle and angle of ray in radians - check
 - distance of raycast - check
-- cos beta - check
 - the point that the raycast hit, and the position that the raycast hit - check
 - the screen x - check
 - wall y shift - check
@@ -24,6 +23,14 @@ typedef struct {
 } DataRaycast;
 */
 
+typedef struct {
+	double* const smallest_wall_y;
+	const double player_angle, theta, dist, wall_y_shift, full_jump_height;
+	const VectorF begin, hit, dir;
+	const byte point, side, first_wall_hit;
+	const int screen_x;
+} DataRaycast;
+
 inlinable int calculate_wall_tex_offset(const byte side, const VectorF hit, const VectorF dir, const int width) {
 	const int max_offset = width - 1;
 
@@ -37,51 +44,50 @@ inlinable int calculate_wall_tex_offset(const byte side, const VectorF hit, cons
 	}
 }
 
-void handle_ray(const Player player, const CastData cast_data, const int screen_x,
-	const byte first_wall_hit, double* const smallest_wall_y, const double player_angle,
-	const double theta, const double wall_y_shift, const double full_jump_height, const VectorF dir) {
-
-	const double cos_beta = cos(player_angle - theta);
-	const double corrected_dist = cast_data.dist * cos_beta;
+// passing the player is temporary
+void handle_ray(const DataRaycast d, const Player player) {
+	const double cos_beta = cos(d.player_angle - d.theta);
+	const double corrected_dist = d.dist * cos_beta;
 	const double wall_h = settings.proj_dist / corrected_dist;
-	const byte point_height = current_level.get_point_height(cast_data.point, cast_data.hit);
+	const byte point_height = current_level.get_point_height(d.point, d.hit);
 
 	const SDL_FRect wall = {
-		screen_x,
-		wall_y_shift - wall_h / 2.0 + full_jump_height / corrected_dist,
+		d.screen_x,
+		d.wall_y_shift - wall_h / 2.0 + d.full_jump_height / corrected_dist,
 		settings.ray_column_width,
 		wall_h
 	};
 
-	const Sprite wall_sprite = current_level.walls[cast_data.point - 1];
+	const Sprite wall_sprite = current_level.walls[d.point - 1];
 	const int
 		max_sprite_h = wall_sprite.surface -> h,
-		offset = calculate_wall_tex_offset(cast_data.side, cast_data.hit, dir, wall_sprite.surface -> w);
+		offset = calculate_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.surface -> w);
 
-	if (first_wall_hit) update_z_buffer(screen_x, corrected_dist);
+	if (d.first_wall_hit) update_z_buffer(d.screen_x, corrected_dist);
 
 	for (byte i = 0, first_draw_event = 1; i < point_height; i++) {
 		SDL_FRect raised_wall = wall;
 		raised_wall.y -= wall.h * i;
 
 		/* completely obscured: starts under the tallest wall so far. wouldn't be seen, but this is for additional speed. */
-		if ((double) raised_wall.y >= *smallest_wall_y || raised_wall.y >= settings.screen_height)
+		if ((double) raised_wall.y >= *d.smallest_wall_y || raised_wall.y >= settings.screen_height)
 			continue;
 
 		int sprite_h = max_sprite_h;
 
 		// partially obscured: bottom of wall somewhere in middle of tallest
-		if ((double) (raised_wall.y + raised_wall.h) > *smallest_wall_y) {
-			raised_wall.h = *smallest_wall_y - (double) raised_wall.y;
+		if ((double) (raised_wall.y + raised_wall.h) > *d.smallest_wall_y) {
+			raised_wall.h = *d.smallest_wall_y - (double) raised_wall.y;
 			sprite_h = ceil(max_sprite_h * (double) raised_wall.h / wall_h);
 		}
 
-		else if (i == 0) std_draw_floor(player, dir, raised_wall, cos_beta);
+		else if (i == 0) std_draw_floor(d.begin, d.dir, player.pace.screen_offset, player.z_pitch,
+			player.jump.height, cos_beta, raised_wall);
 
-		if ((double) raised_wall.y < *smallest_wall_y) *smallest_wall_y = (double) raised_wall.y;
+		if ((double) raised_wall.y < *d.smallest_wall_y) *d.smallest_wall_y = (double) raised_wall.y;
 
 		if (first_draw_event) {
-			const byte shade = 255 * calculate_shade((double) wall.h, cast_data.hit);
+			const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
 			SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 			first_draw_event = 0;
 		}
@@ -105,9 +111,10 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 		while (iter_dda(&ray)) {
 			const byte point = map_point(current_level.wall_data, ray.curr_tile.x, ray.curr_tile.y);
 			if (point) {
-				const CastData cast_data = {point, ray.side, ray.dist, VectorF_line_pos(player.pos, dir, ray.dist)};
-				handle_ray(player, cast_data, screen_x, ray.at_first_hit, &smallest_wall_y,
-					player_angle, theta, wall_y_shift, full_jump_height, dir);
+				handle_ray((DataRaycast) {
+					&smallest_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height, player.pos,
+					VectorF_line_pos(player.pos, dir, ray.dist), dir, point, ray.side, ray.at_first_hit, screen_x
+				}, player);
 
 				ray.at_first_hit = 0;
 			}
