@@ -16,11 +16,9 @@ inlinable void safe_set_pixbuf_pixel(const int x, const int y, const Uint32 src)
 
 // handle changes to the FOV
 void floorcast(const Player player) {
-	const double
-		theta = to_radians(player.angle),
-		height_over_proj_dist = settings.screen_height / settings.proj_dist;
+	const double height_over_proj_dist = settings.screen_height / settings.proj_dist;
 
-	const VectorF dir = {cos(theta) / height_over_proj_dist, sin(theta) / height_over_proj_dist};
+	const VectorF dir = VectorFF_div(player.dir, VectorF_memset(height_over_proj_dist));
 
 	const VectorF
 		pos = player.pos,

@@ -18,8 +18,7 @@ features:
 	- a skybox of a great city
 	- an airship level
 	- no pace if slow enough
-	- abstracted dda
-	- combat
+	- close-range combat
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

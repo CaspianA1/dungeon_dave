@@ -11,7 +11,7 @@ inlinable void update_mouse_and_theta(double* const theta, VectorI* const mouse_
 		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
-void update_pos(VectorF* const pos, const VectorF prev_pos,
+void update_pos(VectorF* const pos, const VectorF prev_pos, VectorF* const dir,
 	KinematicBody* const body, const double rad_theta, const double p_height,
 	const byte forward, const byte backward, const byte lstrafe, const byte rstrafe) {
 
@@ -48,11 +48,12 @@ void update_pos(VectorF* const pos, const VectorF prev_pos,
 	if (!increasing_fov && settings.fov > INIT_FOV)
 		update_fov(settings.fov - settings.fov_step);
 
-	const VectorF dir = {cos(rad_theta), sin(rad_theta)};
+	const VectorF new_dir = {cos(rad_theta), sin(rad_theta)};
+	*dir = new_dir;
 
 	const VectorF
-		forward_back_movement = VectorFF_mul(dir, VectorF_memset(body -> v)),
-		sideways_movement = VectorFF_mul(dir, VectorF_memset(body -> strafe_v));
+		forward_back_movement = VectorFF_mul(new_dir, VectorF_memset(body -> v)),
+		sideways_movement = VectorFF_mul(new_dir, VectorF_memset(body -> strafe_v));
 
 	VectorF movement = {0.0, 0.0};
 
@@ -239,12 +240,12 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 		body -> moving_forward_or_backward = moved_forward_or_backward;
 
 		double* const theta = &player -> angle;
-		VectorF* const pos = &player -> pos;
+		VectorF* const pos = &player -> pos, *const dir = &player -> dir;
 		const VectorF prev_pos = *pos;
 		VectorI* const mouse_pos = &player -> mouse_pos;
 
 		update_mouse_and_theta(theta, mouse_pos);
-		update_pos(pos, prev_pos, body, to_radians(*theta),
+		update_pos(pos, prev_pos, dir, body, to_radians(*theta),
 			player -> jump.height, forward, backward, lstrafe, rstrafe);
 
 		update_jump(&player -> jump, player -> pos);

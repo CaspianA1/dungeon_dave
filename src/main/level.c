@@ -123,7 +123,6 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 				.max_idle_sound = va_arg(enemy_data, double)
 			},
 
-			.hp_to_retreat = va_arg(enemy_data, double),
 			.hp = va_arg(enemy_data, double),
 
 			.animation_seg_lengths = {

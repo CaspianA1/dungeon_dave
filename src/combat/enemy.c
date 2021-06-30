@@ -1,23 +1,8 @@
 /*
 Four enemy states: Idle, Chasing, Attacking, Dead
 The spritesheet layout is in the order of the enemy states.
-The sounds are in the same order, but with Attacked added after Attacking.
+The sounds are in the same order, but with Attacked added after Dead.
 */
-
-void shoot_enemy(Player player, Enemy* const enemy) {
-	(void) player;
-	(void) enemy;
-	// const Billboard billboard = enemy -> animations.billboard;
-
-	/* do DDA, if goes close enough to an enemy, shoot them. If a wall, stop, no hit.
-	Checking beta doesn't help with walls. */
-
-	/*
-	if (fabs(billboard.beta) <= 0.3) {
-		printf("Can shoot\n");
-	}
-	*/
-}
 
 void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	enemy -> state = new_state;
@@ -35,10 +20,11 @@ void update_enemy(Enemy* const enemy, const Player player) {
 	const double dist = fabs(*nav -> dist_to_player);
 	const EnemyDistThresholds thresholds = enemy -> dist_thresholds;
 
-	// for each state (excluding Dead), periodically play the sound from that state
+	/* for each state (excluding Dead), periodically play the sound from that state,
+	and only play the Dead animation once, stopping on the last frame */
 	switch (enemy -> state) {
 		case Idle:
-			if (dist <= thresholds.wake_from_idle) set_enemy_state(enemy, Chasing, 0);
+			if (dist <= thresholds.wake_from_idle || enemy -> recently_attacked) set_enemy_state(enemy, Chasing, 0);
 			break;
 		
 		case Chasing: // done
@@ -53,6 +39,7 @@ void update_enemy(Enemy* const enemy, const Player player) {
 
 		case Dead: break; // done
 	}
+	enemy -> recently_attacked = 0;
 }
 
 inlinable void update_all_enemies(const Player player) {

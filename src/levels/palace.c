@@ -125,8 +125,8 @@ void load_palace(void) {
 	set_level_skybox(&palace, "../../Aseprite/Palace City Skybox.bmp");
 
 	set_level_walls(&palace, wall_count,
-		// "../assets/walls/pyramid_bricks_3.bmp",
-		"../assets/walls/desert_snake.bmp",
+		"../assets/walls/pyramid_bricks_3.bmp",
+		// "../assets/walls/desert_snake.bmp",
 		"../assets/walls/marble.bmp",
 		"../assets/walls/hieroglyphics.bmp",
 		"../assets/walls/window.bmp",
@@ -150,7 +150,7 @@ void load_palace(void) {
 	set_level_enemies(&current_level, enemy_count,
 		Idle, // state
 		2.0, 8.0, // dist_thresholds
-		5.0, 20.0, // hp_to_retreat, hp
+		20.0, // hp
 		4, 8, 10, 4, // animation_seg_lengths
 
 		"../assets/spritesheets/enemy_spritesheet_test.bmp", 5, 6, 26, 12, // animation data

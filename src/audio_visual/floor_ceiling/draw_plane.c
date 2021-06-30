@@ -10,7 +10,6 @@ void draw_floor_plane(const Player player) {
 	const byte is_floor = 1;
 
 	const double
-		theta = to_radians(player.angle),
 		screen_height_over_proj_dist = settings.screen_height / settings.proj_dist,
 		y_shift = player.pace.screen_offset + player.z_pitch; // in screen space
 
@@ -21,10 +20,7 @@ void draw_floor_plane(const Player player) {
 
 	const byte* const point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
 
-	const VectorF dir = {
-		cos(theta) / screen_height_over_proj_dist,
-		sin(theta) / screen_height_over_proj_dist
-	};
+	const VectorF dir = VectorFF_div(player.dir, VectorF_memset(screen_height_over_proj_dist));
 
 	const VectorF
 		/* for 90 degrees, this works, b/c the camera plane and direction vector are parallel.

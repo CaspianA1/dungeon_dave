@@ -100,18 +100,16 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 		const VectorF dir = {cos(theta), sin(theta)};
 
 		double smallest_wall_y = DBL_MAX;
-		DataDDA dda_data = init_dda(player.pos, dir);
+		DataDDA ray = init_dda(player.pos, dir);
 
-		while (1) {
-			if (!iter_dda(&dda_data)) break;
-
-			const byte point = map_point(current_level.wall_data, dda_data.curr_tile.x, dda_data.curr_tile.y);
+		while (iter_dda(&ray)) {
+			const byte point = map_point(current_level.wall_data, ray.curr_tile.x, ray.curr_tile.y);
 			if (point) {
-				const CastData cast_data = {point, dda_data.side, dda_data.dist, VectorF_line_pos(player.pos, dir, dda_data.dist)};
-				handle_ray(player, cast_data, screen_x, dda_data.first_hit, &smallest_wall_y,
+				const CastData cast_data = {point, ray.side, ray.dist, VectorF_line_pos(player.pos, dir, ray.dist)};
+				handle_ray(player, cast_data, screen_x, ray.first_hit, &smallest_wall_y,
 					player_angle, theta, wall_y_shift, full_jump_height, dir);
 
-				dda_data.first_hit = 0;
+				ray.first_hit = 0;
 			}
 		}
 	}

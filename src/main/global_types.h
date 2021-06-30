@@ -30,7 +30,7 @@ typedef struct {
 } Jump;
 
 typedef struct {
-	VectorF pos;
+	VectorF pos, dir;
 	VectorI mouse_pos;
 	double angle;
 	int z_pitch;

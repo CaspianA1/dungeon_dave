@@ -18,18 +18,19 @@
 #include "input.c"
 #include "gui.c"
 
+#include "../audio_visual/dda.c"
+
 #include "../combat/bfs_types.c"
 #include "../combat/bfs.c"
 #include "../combat/navigator.c"
-#include "../combat/weapon.c"
 #include "../combat/enemy.c"
+#include "../combat/weapon.c"
 
 #include "../audio_visual/floor_ceiling/floor_and_ceiling.c"
 #include "../audio_visual/floor_ceiling/floor_and_ceiling_2.c"
 #include "../audio_visual/floor_ceiling/floor_and_ceiling_3.c"
 #include "../audio_visual/floor_ceiling/floor_and_ceiling_4.c"
 #include "../audio_visual/floor_ceiling/draw_plane.c"
-#include "../audio_visual/dda.c"
 #include "../audio_visual/raycast.c"
 
 #include "../levels/level_1.c"

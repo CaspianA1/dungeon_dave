@@ -90,6 +90,8 @@ Player load_player(const double jump_up_v0,
 	return (Player) {
 		.pos = current_level.init_pos,
 
+		.dir = {1.0, 0.0},
+
 		.mouse_pos = {0, 0},
 
 		.angle = 0.0, .z_pitch = 0,
@@ -125,11 +127,11 @@ void load_all_defaults(void (*load_first_level) (void),
 	const Player first_player = load_player(4.8, 0.3, 8.0, 0.1, 15.0, 0.08, 0.09, 0.06, 1.9);
 
 	const Weapon first_weapon = init_weapon("../assets/audio/sound_effects/shotgun.wav",
-		"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 0.0, 6, 10, 59, 30);
+		"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 0.0, 4.0, 6, 10, 59, 30);
 
 	/*
 	const Weapon first_weapon = init_weapon("../assets/audio/enemy_sound_test/attack.wav",
-		"../assets/spritesheets/weapons/golden_dagger.bmp", 0.09, 2, 5, 9, 30);
+		"../assets/spritesheets/weapons/golden_dagger.bmp", 0.09, 4.0, 2, 5, 9, 30);
 	*/
 
 	memcpy(player, &first_player, sizeof(Player));

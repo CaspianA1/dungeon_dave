@@ -42,9 +42,9 @@ typedef enum {
 typedef struct {
 	EnemyState state;
 	const EnemyDistThresholds dist_thresholds;
-	const double hp_to_retreat;
 	double hp;
 
+	byte recently_attacked;
 	const byte animation_seg_lengths[4];
 	Animation animations; // from one large spritesheet
 
@@ -57,11 +57,12 @@ typedef struct {
 
 typedef struct {
 	byte in_use;
-	const double screen_y_shift_percent_down;
+	const double screen_y_shift_percent_down, power;
 	Sound sound;
 	Animation animation;
 } Weapon;
 
-inlinable Weapon init_weapon(const char* const, const char* const, const double, const int, const int, const int, const int);
+inlinable Weapon init_weapon(const char* const, const char* const,
+	const double, const double, const int, const int, const int, const int);
 
 /////
