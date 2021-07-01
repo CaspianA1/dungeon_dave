@@ -146,8 +146,7 @@ void load_palace(void) {
 
 	memcpy(&current_level, &palace, sizeof(Level));
 
-	// this is set after b/c this depends on fns that read from current_level
-
+	// this is set after b/c it depends on fns that read from current_level
 	set_level_enemies(&current_level, enemy_count,
 		Idle, // state
 		2.0, 8.0, // dist_thresholds
@@ -163,7 +162,7 @@ void load_palace(void) {
 		"../assets/audio/enemy_sound_test/death.wav",
 		"../assets/audio/enemy_sound_test/attacked.wav",
 
-		0.03 /* navigator speed */ );
+		0.025 /* navigator speed */ );
 
 	set_level_generic_billboard_container(&current_level);
 }

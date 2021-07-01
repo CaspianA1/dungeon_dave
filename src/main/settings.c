@@ -1,5 +1,14 @@
 inlinable void update_proj_dist(void) {
 	settings.proj_dist = settings.half_screen_width / tan(to_radians(settings.fov / 2.0));
+
+	/*
+	fov = 2 * atan(x / 2f), where x = some number (usually diagonal of film), and f = focal length	
+	fov / 2 = atan(x / 2f)
+	tan(fov / 2) = x / 2f
+	2f * tan(fov / 2) = x
+	2f = x / tan(fov / 2)
+	f = 0.5x / tan(fov / 2)
+	*/
 }
 
 // see how other raycasters use the fov to determine things

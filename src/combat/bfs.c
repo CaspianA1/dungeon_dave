@@ -8,6 +8,7 @@ byte vertex_is_valid(const VectorI vertex) {
 void update_queue_with_neighbors(
 	PathQueue* const paths, Path path, const VectorI vertex, byte* const all_visited) {
 
+	/*
 	const VectorI
 		top = {vertex.x, vertex.y - 1},
 		bottom = {vertex.x, vertex.y + 1},
@@ -19,19 +20,37 @@ void update_queue_with_neighbors(
 		top_right = {vertex.x + 1, vertex.y - 1},
 		bottom_right = {vertex.x + 1, vertex.y + 1};
 
+	// use an enum
 	const VectorI neighbors[8] = {
 		top, bottom, left, right, top_left, bottom_left, top_right, bottom_right
 	};
+	*/
+
+	const VectorI neighbors[8] = {
+		{vertex.x, vertex.y - 1}, {vertex.x, vertex.y + 1},
+		{vertex.x - 1, vertex.y}, {vertex.x + 1, vertex.y},
+		{vertex.x - 1, vertex.y - 1}, {vertex.x - 1, vertex.y + 1},
+		{vertex.x + 1, vertex.y - 1}, {vertex.x + 1, vertex.y + 1}
+	};
+
+	typedef enum {Top, Bottom, Left, Right, TopLeft, BottomLeft, TopRight, BottomRight} NeighborID;
 
 	// for no wall collisions, rule out movement with a corner wall and diagonal movement
-	for (byte i = 0; i < 8; i++) {
+	for (NeighborID i = 0; i < 8; i++) {
 		const VectorI neighbor = neighbors[i];
 		if (vertex_is_valid(neighbor)) {
+			if ((i == TopLeft) ||
+				(i == TopRight) ||
+				(i == BottomRight) ||
+				(i == BottomLeft)) {}
+
+			/*
 			if ((VectorII_eq(neighbor, top_left) && map_point(current_level.wall_data, left.x, left.y)) ||
 				(VectorII_eq(neighbor, top_right) && map_point(current_level.wall_data, right.x, right.y)) ||
 				(VectorII_eq(neighbor, bottom_right) && map_point(current_level.wall_data, bottom.x, bottom.y)) ||
 				(VectorII_eq(neighbor, bottom_left) && map_point(current_level.wall_data, bottom.x, bottom.y)))
 				continue;
+			*/
 
 			byte* const was_visited = &all_visited[neighbor.y * current_level.map_width + neighbor.x];
 			if (!*was_visited) {
@@ -45,9 +64,7 @@ void update_queue_with_neighbors(
 }
 
 ResultBFS bfs(const VectorF begin, const VectorF end) {
-	const VectorI
-		int_begin = VectorF_floor(begin),
-		int_end = VectorF_floor(end);
+	const VectorI int_begin = VectorF_floor(begin), int_end = VectorF_floor(end);
 
 	byte* const all_visited = wcalloc(current_level.map_width * current_level.map_height, sizeof(byte));
 	set_map_point(all_visited, 1, int_begin.x, int_begin.y, current_level.map_width);

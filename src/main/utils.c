@@ -112,6 +112,10 @@ inlinable VectorI VectorF_floor(const VectorF vf) {
 	return (VectorI) {(int) floor(vf[0]), (int) floor(vf[1])};
 }
 
+inlinable VectorI VectorF_round(const VectorF vf) {
+	return (VectorI) {(int) round(vf[0]), (int) round(vf[1])};
+}
+
 #define VectorF_memset _mm_set1_pd
 #define VectorFF_add _mm_add_pd
 #define VectorFF_sub _mm_sub_pd
@@ -121,6 +125,12 @@ inlinable VectorI VectorF_floor(const VectorF vf) {
 #define VectorF2_memset _mm256_set1_pd
 #define VectorFF2_add _mm256_add_pd
 #define VectorFF2_mul _mm256_mul_pd
+
+inlinable byte VectorFF_exceed_dist(const VectorF a, const VectorF b, const double dist) {
+	const VectorF delta = VectorFF_sub(a, b);
+	const double dist_squared = delta[0] * delta[0] + delta[1] * delta[1];
+	return dist_squared > dist * dist;
+}
 
 inlinable VectorF VectorFF_diff(const VectorF a, const VectorF b) {
 	return (VectorF) {fabs(a[0] - b[0]), fabs(a[1] - b[1])};

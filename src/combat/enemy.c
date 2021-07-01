@@ -18,26 +18,28 @@ void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 void update_enemy(Enemy* const enemy, const Player player) {
 	Navigator* const nav = &enemy -> nav;
 	const double dist = fabs(*nav -> dist_to_player);
-	const EnemyDistThresholds thresholds = enemy -> dist_thresholds;
 
 	/* for each state (excluding Dead), periodically play the sound from that state,
 	and only play the Dead animation once, stopping on the last frame */
 	switch (enemy -> state) {
 		case Idle:
-			if (dist <= thresholds.wake_from_idle || enemy -> recently_attacked) set_enemy_state(enemy, Chasing, 0);
+			if (dist <= enemy -> dist_wake_from_idle || enemy -> recently_attacked)
+				set_enemy_state(enemy, Chasing, 0);
 			break;
 		
-		case Chasing: // done
-			if (update_path_if_needed(nav, player.pos, player.jump) == ReachedDest)
+		case Chasing:
+			if (dist >= enemy -> dist_return_to_idle)
+				set_enemy_state(enemy, Idle, 0);
+			else if (update_path_if_needed(nav, player.pos, player.jump) == ReachedDest)
 				set_enemy_state(enemy, Attacking, 0);
 			break;
 
-		case Attacking: // done
+		case Attacking:
 			if (update_path_if_needed(nav, player.pos, player.jump) == Navigating)
 				set_enemy_state(enemy, Chasing, 0);
 			break;
 
-		case Dead: break; // done
+		case Dead: break;
 	}
 	enemy -> recently_attacked = 0;
 }
@@ -52,5 +54,5 @@ void deinit_enemy(const Enemy enemy) {
 	for (byte i = 0; i < 5; i++)
 		deinit_sound(enemy.sounds[i]);
 	wfree(enemy.sounds);
-	deinit_navigator(enemy.nav);	
+	deinit_navigator(&enemy.nav);	
 }

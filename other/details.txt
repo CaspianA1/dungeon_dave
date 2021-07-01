@@ -18,7 +18,6 @@ features:
 	- a skybox of a great city
 	- an airship level
 	- no pace if slow enough
-	- close-range combat
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -35,3 +34,5 @@ problems:
 	- skybox stretching
 	- some sides of textures get more drawn on them near the end than others
 	- navigators use too much heap memory
+	- change the VectorF name to something less clunky
+	- less doubles in render_overlay.c

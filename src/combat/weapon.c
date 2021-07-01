@@ -14,33 +14,28 @@ void deinit_weapon(const Weapon weapon) {
 
 void shoot_weapon(const Weapon* const weapon, const VectorF pos, const VectorF dir) {
 	DataDDA bullet = init_dda(pos, dir);
-	const double dist_squared_for_hit = 1.3;
 
 	while (iter_dda(&bullet)) {
-		const VectorI bullet_pos = bullet.curr_tile;
-		if (map_point(current_level.wall_data, bullet_pos.x, bullet_pos.y)) break;
+		const VectorI bullet_tile = bullet.curr_tile;
+		if (map_point(current_level.wall_data, bullet_tile.x, bullet_tile.y)) break;
 
 		for (byte i = 0; i < current_level.enemy_count; i++) {
 			Enemy* const enemy = &current_level.enemies[i];
-
 			if (enemy -> state == Dead) continue;
 
-			const Billboard billboard = enemy -> animations.billboard;
-			const VectorF delta = {fabs(bullet_pos.x - billboard.pos[0]), fabs(bullet_pos.y - billboard.pos[1])};
-			const double bullet_dist_squared = delta[0] * delta[0] + delta[1] * delta[1];
+			const VectorF
+				enemy_pos = enemy -> animations.billboard.pos,
+				bullet_pos = VectorF_line_pos(pos, dir, bullet.dist);
 
-			// DEBUG(bullet_dist_squared, lf);
-
-			if (bullet_dist_squared <= dist_squared_for_hit) {
+			if (!VectorFF_exceed_dist(enemy_pos, bullet_pos, 0.51)) {
 				enemy -> recently_attacked = 1;
 				enemy -> hp -= weapon -> power;
 				if (enemy -> hp <= 0.0) set_enemy_state(enemy, Dead, 0);
-				else play_sound(enemy -> sounds[4], 0);
-				goto finished_shooting;
+				else play_sound(enemy -> sounds[4], 0); // attacked
+				return;
 			}
 		}
 	}
-	finished_shooting:;
 }
 
 void use_weapon_if_needed(Weapon* const weapon, const Player player, const InputStatus input_status) {

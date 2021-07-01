@@ -51,7 +51,6 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 			billboard = &current_level.billboards[i];
 
 		const VectorF delta = VectorFF_sub(billboard -> pos, player.pos);
-
 		billboard -> beta = atan2(delta[1], delta[0]) - player_angle;
 		billboard -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 
@@ -74,7 +73,8 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 			abs_billboard_beta = fabs(billboard.beta),
 			cos_billboard_beta = cos(billboard.beta);
 
-		if (cos_billboard_beta <= 0.0
+		if (billboard.dist <= 0.01
+			|| cos_billboard_beta <= 0.0
 			|| doubles_eq(abs_billboard_beta, half_pi, std_double_epsilon)
 			|| doubles_eq(abs_billboard_beta, three_pi_over_two, std_double_epsilon)
 			|| doubles_eq(abs_billboard_beta, five_pi_over_two, std_double_epsilon))
@@ -98,39 +98,6 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 			center_offset = tan(billboard.beta) * settings.proj_dist,
 			size = settings.proj_dist / corrected_dist;
 
-		/////
-
-		Animation* possible_animation;
-		SDL_Rect possible_spritesheet_crop;
-		double possible_spritesheet_begin_x, width;
-
-		if (generic.is_animated) {
-			Enemy* possible_enemy;
-
-			if (generic.is_enemy) {
-				possible_enemy = &current_level.enemies[generic.animation_index];
-				possible_animation = &possible_enemy -> animations;
-			}
-			else
-				possible_animation = &current_level.animations[generic.animation_index];
-
-			const VectorI frame_origin = get_spritesheet_frame_origin(*possible_animation);
-
-			possible_spritesheet_begin_x = frame_origin.x;
-			possible_spritesheet_crop = (SDL_Rect) {
-				.y = frame_origin.y,
-				.w = 1, .h = possible_animation -> frame_h
-			};
-
-			if (generic.is_enemy) progress_enemy_frame_ind(possible_enemy);
-			else progress_animation_frame_ind(possible_animation);
-
-			width = possible_animation -> frame_w;
-		}
-		else width = billboard.sprite.surface -> w;
-
-		/////
-
 		const double
 			center_x = settings.half_screen_width + center_offset,
 			half_size = size / 2.0;
@@ -140,7 +107,44 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 
 		double end_x = center_x + half_size;
 		if (end_x < 0.0) continue;
-		else if (end_x >= settings.screen_width) end_x = settings.screen_width - 1.0;
+		else if (end_x > settings.screen_width) end_x = settings.screen_width;
+
+		/////
+
+		Animation* possible_animation;
+		SDL_Rect src_crop;
+		int src_begin_x, width;
+
+		if (generic.is_animated) {
+			Enemy* possible_enemy;
+
+			if (generic.is_enemy) {
+				possible_enemy = &current_level.enemies[generic.animation_index];
+				possible_animation = &possible_enemy -> animations;
+			}
+			else possible_animation = &current_level.animations[generic.animation_index];
+
+			const VectorI frame_origin = get_spritesheet_frame_origin(*possible_animation);
+
+			src_begin_x = frame_origin.x;
+			src_crop = (SDL_Rect) {
+				.y = frame_origin.y,
+				.w = 1, .h = possible_animation -> frame_h
+			};
+
+			if (generic.is_enemy) progress_enemy_frame_ind(possible_enemy);
+			else progress_animation_frame_ind(possible_animation);
+
+			width = possible_animation -> frame_w;
+		}
+		else {
+			const SDL_Surface* surface = billboard.sprite.surface;
+			width = surface -> w;
+			src_crop = (SDL_Rect) {.y = 0, .w = 1, .h = surface -> h};
+			src_begin_x = 0;
+		}
+
+		/////
 
 		SDL_FRect screen_pos = {
 			0.0, billboard_y_shift - half_size
@@ -148,24 +152,17 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 			settings.ray_column_width, size
 		};
 
-		for (int screen_row = start_x; screen_row < end_x; screen_row++) {
+		const byte shade = 255 * calculate_shade(size, billboard.pos);
+		SDL_SetTextureColorMod(billboard.sprite.texture, shade, shade, shade);
+
+		for (int screen_row = start_x; screen_row < end_x; screen_row += settings.ray_column_width) {
 			if (screen_row < 0 || screen.z_buffer[screen_row] < corrected_dist) continue;
 
-			const double offset = ((double) (screen_row - start_x) / size) * width;
 			screen_pos.x = screen_row;
+			const int src_offset = ((double) (screen_row - (int) start_x) / size) * width;
+			src_crop.x = src_offset + src_begin_x;
 
-			if (generic.is_animated) {
-				const byte shade = 255 * calculate_shade((double) screen_pos.h, billboard.pos);
-
-				SDL_SetTextureColorMod(billboard.sprite.texture, shade, shade, shade);
-
-				possible_spritesheet_crop.x = possible_spritesheet_begin_x + offset;
-
-				SDL_RenderCopyF(screen.renderer, billboard.sprite.texture,
-					&possible_spritesheet_crop, &screen_pos);
-			}
-
-			else draw_column(billboard.sprite, billboard.pos, offset, -1, -1, &screen_pos);
+			SDL_RenderCopyF(screen.renderer, billboard.sprite.texture, &src_crop, &screen_pos);
 		}
 	}
 }
@@ -184,7 +181,7 @@ void draw_skybox(const double angle, const double y_shift) {
 		src_col_index = turn_percent * skybox.max_width,
 		src_width = skybox.max_width / 4.0;
 
-	const int dest_y = 0.0, dest_height = y_shift;
+	const int dest_y = 0, dest_height = y_shift;
 	double look_up_percent = y_shift / settings.screen_height;
 
 	const int // src_height can be divided to determine what fraction is shown at once

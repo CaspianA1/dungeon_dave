@@ -1,0 +1,209 @@
+///// The old navigation snippet:
+
+/*
+// if past the current vertex
+
+if ((dir[0] > 0.0 && pos[0] > next_vertex[0]) || (dir[0] < 0.0 && pos[0] < next_vertex[0])
+	|| (dir[1] > 0.0 && pos[1] > next_vertex[1]) || (dir[1] < 1.0 && pos[1] < next_vertex[1]))
+	nav -> path_ind++;
+*/
+
+///// An attempt at making it better:
+
+/*
+DEBUG_VECF(curr_vertex);
+DEBUG_VECF(next_vertex);
+
+const VectorF dir = VectorFF_sub(next_vertex, curr_vertex);
+const VectorF movement = VectorFF_mul(dir, VectorF_memset(nav -> v));
+*nav -> pos = VectorFF_add(*nav -> pos, movement);
+if (*nav -> dist_to_player < 0.5) nav -> path_ind++;
+
+return Navigating;
+*/
+
+///// The old make_corrected_path code:
+
+CorrectedPath make_corrected_path(const Path path, const VectorF player_pos) {
+	const VectorI* orig_path = path.data;
+	// const int extended_length = path.length + 1;
+	const CorrectedPath corrected_path = {wmalloc(path.length * sizeof(VectorF)), path.length};
+
+	for (int i = 0; i < path.length; i++) {
+		const VectorI orig_entry = orig_path[i];
+		corrected_path.data[i] = (VectorF) {orig_entry.x, orig_entry.y};
+	}
+
+	// corrected_path.data[path.length - 1] = player_pos;
+
+	/*
+	int temp_path_ind = 0;
+	for (int i = 0; i < path.length - 1; i++) {
+		VectorF
+			* const pos_ref = &corrected_path.data[i],
+			* const next_ref = &corrected_path.data[i + 1];
+
+		VectorF pos = *pos_ref, next = *next_ref;
+		const VectorF dir = VectorFF_sub(next, pos);
+
+		while (1) {
+			pos = VectorFF_add(pos, dir);
+
+			if (navigator_in_wall(pos)) {
+				// printf("In wall! Bad, adjust.\n");
+			}
+
+			if ((dir[0] == 1 && pos[0] >= next[0]) || (dir[0] == -1 && pos[0] <= next[0])
+				|| (dir[1] == 1 && pos[1] >= next[1]) || (dir[1] == -1 && pos[1] <= next[1])) {
+				temp_path_ind++;
+				break;
+			}
+		}
+		// here, assign a new curr and next pos, if needed
+	}
+	*/
+
+	return corrected_path;
+}
+
+/////
+
+inlinable VectorI VectorF_round(const VectorF vf) {
+	return (VectorI) {(int) round(vf[0]), (int) round(vf[1])};
+}
+
+/////
+
+/*
+const VectorF
+	enemy_pos = enemy -> animations.billboard.pos,
+	bullet_pos = VectorF_line_pos(pos, dir, bullet.dist);
+
+const VectorF delta = VectorFF_sub(enemy_pos, bullet_pos);
+const double dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
+
+if (dist <= 0.51) {
+*/
+
+/////
+
+/*
+const VectorF dest = path -> data[path -> length - 1];
+const VectorF delta = VectorFF_sub(player_pos, dest);
+const double dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
+
+DEBUG_VECF(dest);
+DEBUG_VECF(player_pos);
+DEBUG(dist, lf);
+printf("---\n");
+*/
+
+/////
+
+// if (!VectorFF_exceed_dist(player_pos, pos, 0.4)) nav -> path_ind++;
+
+/////
+
+/*
+const VectorI
+	top = {vertex.x, vertex.y - 1},
+	bottom = {vertex.x, vertex.y + 1},
+	left = {vertex.x - 1, vertex.y},
+	right = {vertex.x + 1, vertex.y},
+
+	top_left = {vertex.x - 1, vertex.y - 1},
+	bottom_left = {vertex.x - 1, vertex.y + 1},
+	top_right = {vertex.x + 1, vertex.y - 1},
+	bottom_right = {vertex.x + 1, vertex.y + 1};
+
+// use an enum
+const VectorI neighbors[8] = {
+	top, bottom, left, right, top_left, bottom_left, top_right, bottom_right
+};
+*/
+
+/////
+
+if ((VectorII_eq(neighbor, top_left) && map_point(current_level.wall_data, left.x, left.y)) ||
+	(VectorII_eq(neighbor, top_right) && map_point(current_level.wall_data, right.x, right.y)) ||
+	(VectorII_eq(neighbor, bottom_right) && map_point(current_level.wall_data, bottom.x, bottom.y)) ||
+	(VectorII_eq(neighbor, bottom_left) && map_point(current_level.wall_data, bottom.x, bottom.y)))
+	continue;
+
+/////
+
+// offset is vertical
+inlinable void draw_column(const Sprite sprite, const VectorF hit,
+	const int offset, const int slice_h, const double shade_h, const SDL_FRect* const dest) {
+	/* slice_h pertains to src crop. shade_h pertains to shading.
+	for partially obscured walls, need shade h. */
+
+	#ifndef SHADING_ENABLED
+	(void) shade_h;
+	(void) hit;
+	#endif
+
+	const byte shade = 255 * calculate_shade(
+		(shade_h == -1) ? (double) dest -> h : shade_h, hit);
+
+	SDL_SetTextureColorMod(sprite.texture, shade, shade, shade);
+
+	const SDL_Rect slice = {
+		offset, 0, 1,
+		(slice_h == -1) ? sprite.surface -> h : slice_h
+	};	
+
+	SDL_RenderCopyF(screen.renderer, sprite.texture, &slice, dest);
+}
+
+/////
+
+/*
+for map center {18.5, 3.5}, drawing ranges from {18.0, 3.0} to {19.0, 4.0}
+*/
+
+printf("---\n\n\n\n\n");
+
+// if in wall, override wall
+for (int screen_row = start_x; screen_row < end_x; screen_row++) {
+	// if (screen_row < 0 || screen.z_buffer[screen_row] < corrected_dist) continue;
+	if (screen_row < 0) continue;
+
+	const double percent_scanned = ((double) (screen_row - (int) start_x) / size);
+	// const double map_pos = (percent_scanned - 0.5) + billboard.pos;
+	const VectorF map_pos = VectorFF_add(billboard.pos, VectorF_memset(percent_scanned - 0.5));
+
+	// if wall is closer to player than sprite column
+	if (screen.z_buffer[screen_row] < corrected_dist) {
+		if (!keys[SDL_SCANCODE_R])
+		continue;
+		// if (!map_point(current_level.wall_data, map_pos[0], map_pos[1]))
+	}
+
+	screen_pos.x = screen_row;
+	src_crop.x = percent_scanned * width + src_begin_x;
+
+	SDL_RenderCopyF(screen.renderer, billboard.sprite.texture, &src_crop, &screen_pos);
+}
+
+/////
+
+const double scan_percent_step = (double) (end_x - start_x) / size;
+double percent_scanned = 0.0;
+
+for (int screen_row = start_x; screen_row < end_x; screen_row++) {
+	percent_scanned += scan_percent_step;
+
+	DEBUG(percent_scanned, lf);
+
+	if (screen_row < 0 || screen.z_buffer[screen_row] < corrected_dist) continue;
+
+	// const double percent_scanned = ((double) (screen_row - (int) start_x) / size);
+
+	screen_pos.x = screen_row;
+	src_crop.x = percent_scanned * width + src_begin_x;
+
+	SDL_RenderCopyF(screen.renderer, billboard.sprite.texture, &src_crop, &screen_pos);
+}
+
+/////

@@ -42,7 +42,6 @@
 itinerary:
 visplane floors
 non-clipping pathfinding
-close-range shooting
 */
 
 int main(void) {

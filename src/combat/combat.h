@@ -19,8 +19,14 @@ typedef enum {
 	Navigating, ReachedDest, CouldNotNavigate
 } NavigatorState;
 
+// this path eliminates wall clipping and jerky movement
 typedef struct {
-	Path path_to_player; // whole-number path
+	VectorF* data;
+	int length;
+} CorrectedPath;
+
+typedef struct {
+	CorrectedPath path;
 	VectorF* const pos;
 	double* const dist_to_player;
 	int path_ind;
@@ -31,25 +37,20 @@ inlinable Navigator init_navigator(const VectorF, VectorF* const, double* const,
 
 /////
 
-typedef struct {
-	const double wake_from_idle, max_idle_sound;
-} EnemyDistThresholds;
-
 typedef enum {
 	Idle, Chasing, Attacking, Dead
 } EnemyState;
 
 typedef struct {
 	EnemyState state;
-	const EnemyDistThresholds dist_thresholds;
+	const double dist_wake_from_idle, dist_return_to_idle;
 	double hp;
 
 	byte recently_attacked;
 	const byte animation_seg_lengths[4];
 	Animation animations; // from one large spritesheet
 
-	// A sound for each state. Each sound plays when the state begins.
-	Sound* const sounds; // 5 sounds (ptrs b/c struct doubles in size otherwise)
+	Sound* const sounds; // a sound for each state + Attacked (ptrs b/c the struct doubles in size otherwise)
 	Navigator nav;
 } Enemy;
 
