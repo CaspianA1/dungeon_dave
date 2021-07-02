@@ -34,7 +34,7 @@ inlinable Sound init_sound(const char* const path, const byte is_short) {
 	return sound;
 }
 
-inlinable void deinit_sound(Sound sound) {
+inlinable void deinit_sound(const Sound sound) {
 	if (sound.is_short) Mix_FreeChunk(sound.type.short_sound);
 	else Mix_FreeMusic(sound.type.long_sound);	
 }
