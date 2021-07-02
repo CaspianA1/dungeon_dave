@@ -34,7 +34,8 @@ problems:
 	- skybox stretching
 	- some sides of textures get more drawn on them near the end than others
 	- navigators use too much heap memory
-	- change the VectorF name to something less clunky, and z_pitch to y_pitch
+	- change the VectorF name to something less clunky
 	- less doubles in render_overlay.c
 	- don't pass the player in handle_ray
 	- add back the BFS wall checking
+	- don't intersect the player dot with walls in the minimap	

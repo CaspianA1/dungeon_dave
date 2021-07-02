@@ -84,7 +84,7 @@ int main(void) {
 
 		#endif
 
-		refresh(player.tilt, player.pos, player.y_pitch);
+		refresh(player.tilt, player.pos, wall_y_shift);
 		tick_delay(before);
 	}
 }

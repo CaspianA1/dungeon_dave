@@ -201,7 +201,7 @@ void draw_crosshair(const int y_pitch) {
 	if (!update_toggle(&toggle)) return;
 
 	const byte half_dimensions = settings.screen_width / 40, thickness = settings.screen_width / 200;
-	const VectorI center = {settings.half_screen_width, settings.half_screen_height + (y_pitch < 0 ? 0 : y_pitch)};
+	const VectorI center = {settings.half_screen_width, y_pitch};
 
 	SDL_SetRenderDrawColor(screen.renderer, toggle.r, toggle.g, toggle.b, SDL_ALPHA_OPAQUE);
 
