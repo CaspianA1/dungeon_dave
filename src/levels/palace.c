@@ -138,7 +138,7 @@ void load_palace(void) {
 		"../assets/walls/horses.bmp");
 
 	set_level_billboards(&palace, billboard_count,
-		"../assets/objects/health_kit.bmp", 3.5, 24.5, 0.0, // 11.5, 28.0
+		"../assets/objects/health_kit.bmp", 4.5, 22.5, 0.0, // 11.5, 28.0
 		"../assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0,
 		"../assets/objects/golden_dome.bmp", 13.0, 28.0, 1.0);
 
