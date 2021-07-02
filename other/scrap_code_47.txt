@@ -207,3 +207,48 @@ for (int screen_row = start_x; screen_row < end_x; screen_row++) {
 }
 
 /////
+
+/*
+const double max_log10_v = log(limit_v);
+const double rev_log_incr = max_log10_v - log(v);
+DEBUG(rev_log_incr, lf);
+*/
+
+/*
+const double rev_log_incr = 1.0 - (log(v + 1.0) / log(limit_v + 1.0));
+DEBUG(rev_log_incr, lf);
+*/
+
+// const double domain_incr = domain -> step * rev_log_incr;
+// const double domain_incr = domain -> step * v / limit_v;
+// const double domain_incr = domain -> step * log(limit_v) / log(v);
+/*
+const double num = log(limit_v) / log(v);
+DEBUG(num, lf);
+*/
+const d
+
+/////
+
+// pace -> screen_offset = log10(v + 1.0) * settings.screen_height / pace -> offset_scaler * 20.0 * sin(domain -> val);
+// pace -> screen_offset = 20;
+
+// pace -> screen_offset++;
+
+/////
+
+KinematicBody* const body = &player -> body;
+const double curr_secs = SDL_GetTicks() / 1000.0;
+if (moved_any_direction && !body -> moving_forward_or_backward) {
+	if (body -> v > 0.0) {
+		printf("Should keep some\n");
+		// body -> time_of_move = (double) (curr_secs + body -> time_of_stop) / 2.0;
+		body -> time_of_move = body -> time_of_stop;
+	}
+	else {
+		printf("Else\n");
+		body -> time_of_move = curr_secs;
+	}
+}
+
+/////

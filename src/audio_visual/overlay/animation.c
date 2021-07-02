@@ -69,10 +69,8 @@ void animate_weapon(Animation* const animation, const VectorF pos,
 
 	const SDL_FRect screen_pos = {
 		pace,
-
 		fabs(pace) + (z_pitch < 0 ? 0 : z_pitch) +
 		settings.screen_height * screen_y_shift_percent_down,
-
 		settings.screen_width,
 		settings.screen_height
 	};

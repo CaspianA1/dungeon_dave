@@ -16,7 +16,6 @@ void update_pos(VectorF* const pos, const VectorF prev_pos, VectorF* const dir,
 	const byte forward, const byte backward, const byte lstrafe, const byte rstrafe) {
 
 	const double curr_time = SDL_GetTicks() / 1000.0; // in seconds
-
 	byte increasing_fov = 0;
 
 	if (body -> moving_forward_or_backward) {
@@ -72,10 +71,8 @@ void update_pos(VectorF* const pos, const VectorF prev_pos, VectorF* const dir,
 	VectorF new_pos = VectorFF_add(*pos, movement);
 
 	#ifdef NOCLIP_MODE
-
 	(void) prev_pos;
 	(void) p_height;
-
 	#else
 
 	const double stop_dist = settings.stop_dist_from_wall;
@@ -99,7 +96,6 @@ void update_z_pitch(int* const z_pitch, const int mouse_y) {
 
 inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lstrafe) {
 	if (strafe) {
-
 		tilt -> val += lstrafe ? tilt -> step : -tilt -> step;
 
 		if (tilt -> val > tilt -> max)
@@ -112,29 +108,21 @@ inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lst
 	else if (tilt -> val - tilt -> step > 0.0) tilt -> val -= tilt -> step;
 }
 
-inlinable void update_pace(Pace* const pace, const VectorF pos, const VectorF prev_pos, const double v) {
-	(void) v;
+#ifdef NOCLIP_MODE
 
-	#ifndef NOCLIP_MODE
+#define update_pace(a, b, c, d, e)
 
-	// if (v < 0.008) return;
-	// or slow down pace by 2?
+#else
 
+inlinable void update_pace(Pace* const pace, const VectorF pos, const VectorF prev_pos, const double v, const double lim_v) {
 	if (pos[0] != prev_pos[0] || pos[1] != prev_pos[1]) {
-		Domain* domain = &pace -> domain;
-		if ((domain -> val += domain -> step) > two_pi) domain -> val = 0;
-		pace -> screen_offset = sin(domain -> val) *
-			settings.screen_height / pace -> offset_scaler;
+		Domain* const domain = &pace -> domain;
+		double domain_incr = domain -> step * log(lim_v) / log(v);
+		if ((domain -> val += domain_incr) > two_pi) domain -> val = 0.0;
+		pace -> screen_offset = sin(domain -> val) * settings.screen_height / pace -> offset_scaler;
 	}
-
-	#else
-
-	(void) pace;
-	(void) pos;
-	(void) prev_pos;
-
-	#endif
 }
+#endif
 
 inlinable void init_a_jump(Jump* const jump, const byte falling) {
 	jump -> jumping = 1;
@@ -240,18 +228,18 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 		body -> moving_forward_or_backward = moved_forward_or_backward;
 
 		double* const theta = &player -> angle;
-		VectorF* const pos = &player -> pos, *const dir = &player -> dir;
+		VectorF* const pos = &player -> pos;
 		const VectorF prev_pos = *pos;
 		VectorI* const mouse_pos = &player -> mouse_pos;
 
 		update_mouse_and_theta(theta, mouse_pos);
-		update_pos(pos, prev_pos, dir, body, to_radians(*theta),
+		update_pos(pos, prev_pos, &player -> dir, body, to_radians(*theta),
 			player -> jump.height, forward, backward, lstrafe, rstrafe);
 
 		update_jump(&player -> jump, player -> pos);
 		update_z_pitch(&player -> z_pitch, mouse_pos -> y);
 		update_tilt(&player -> tilt, strafe, lstrafe);
-		update_pace(&player -> pace, *pos, prev_pos, player -> body.v);
+		update_pace(&player -> pace, *pos, prev_pos, player -> body.v, player -> body.limit_v);
 	}
 
 	return input_status;
