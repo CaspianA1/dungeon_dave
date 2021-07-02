@@ -28,7 +28,7 @@ void load_red_room(void) {
 		{2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
 	};
 
-	Level red_room = init_level(map_width, map_height, (VectorF) {1.5, 1.5}, 0.0);
+	Level red_room = init_level(map_width, map_height, 1.5, 1.5, 0.0);
 	red_room.max_point_height = 1;
 	red_room.background_sound = init_sound("../assets/audio/themes/red_room_track.wav", 0);
 	red_room.get_point_height = get_red_room_point_height;

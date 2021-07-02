@@ -1,5 +1,5 @@
 inlinable Level init_level(const int map_width, const int map_height,
-	const VectorF init_pos, const double init_height) {
+	const double init_x, const double init_y, const double init_height) {
 
 	/* The wall, billboard, and animation count are not
 	initialized here as constant because for them to be set variadically,
@@ -8,7 +8,7 @@ inlinable Level init_level(const int map_width, const int map_height,
 
 	Level level = {
 		.map_width = map_width, .map_height = map_height,
-		.init_pos = init_pos, .init_height = init_height, .skybox.enabled = 0
+		.init_pos = {init_x, init_y}, .init_height = init_height, .skybox.enabled = 0
 	};
 
 	byte** const map_data[3] = {&level.wall_data, &level.ceiling_data, &level.floor_data};

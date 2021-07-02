@@ -25,6 +25,7 @@ byte get_palace_point_height(const byte point, const VectorF pos) {
 		case 3: return 6;
 		case 4: return 3;
 		case 5: return 8; // 6 before
+		case 8: return 1;
 		default: return point;
 	}
 }
@@ -54,10 +55,11 @@ double palace_shader(const VectorF pos) {
 void load_palace(void) {
 	enum {
 		map_width = 40, map_height = 40,
-		wall_count = 7, billboard_count = 3,
+		wall_count = 8, billboard_count = 3,
 		animation_count = 2, enemy_count = 1
 	};
 
+	// in the horse area: a health kit, and the enemy
 	static const byte wall_data[map_height][map_width] = {
 		{1, 1, 1, 1, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		{1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -79,11 +81,11 @@ void load_palace(void) {
 		{3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-		{1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-		{1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-		{1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-		{1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 8, 8, 8, 8, 8, 8, 0, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 8, 0, 0, 0, 0, 8, 0, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 8, 0, 0, 0, 0, 8, 0, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 8, 0, 0, 0, 0, 8, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 8, 0, 8, 8, 8, 8, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{1, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 6, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{1, 0, 0, 0, 6, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -102,7 +104,7 @@ void load_palace(void) {
 	};
 
 	// previous: {1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}, {12.0, 37.0, 0.0}, {15.5, 24.5, 2.0}
-	Level palace = init_level(map_width, map_height, (VectorF) {2.0, 2.0}, 2.0);
+	Level palace = init_level(map_width, map_height, 2.0, 2.0, 2.0);
 	palace.max_point_height = 8;
 	palace.background_sound = init_sound("../assets/audio/themes/sultan.wav", 0);
 	palace.get_point_height = get_palace_point_height;
@@ -132,10 +134,11 @@ void load_palace(void) {
 		"../assets/walls/window.bmp",
 		"../assets/walls/rug_1.bmp",
 		"../assets/walls/sandstone.bmp",
-		"../assets/walls/cobblestone_3.bmp");
+		"../assets/walls/cobblestone_3.bmp",
+		"../assets/walls/horses.bmp");
 
 	set_level_billboards(&palace, billboard_count,
-		"../assets/objects/health_kit.bmp", 11.5, 28.0, 0.0,
+		"../assets/objects/health_kit.bmp", 3.5, 24.5, 0.0, // 11.5, 28.0
 		"../assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0,
 		"../assets/objects/golden_dome.bmp", 13.0, 28.0, 1.0);
 
@@ -154,7 +157,7 @@ void load_palace(void) {
 		5, 2, 3, 13, // animation_seg_lengths
 
 		"../assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
-		3.0, 7.5, 0.0, // billboard data
+		6.5, 21.5, 0.0, // billboard data (3.0, 7.5 before)
 
 		"../assets/audio/enemy_sound_test/idle.wav", // sound data
 		"../assets/audio/enemy_sound_test/chase.wav",

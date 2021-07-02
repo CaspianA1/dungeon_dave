@@ -70,6 +70,9 @@ void update_pos(VectorF* const pos, const VectorF prev_pos, VectorF* const dir,
 
 	VectorF new_pos = VectorFF_add(*pos, movement);
 
+	if (new_pos[1] < 0 || new_pos[1] > current_level.map_height) new_pos[1] = prev_pos[1];
+	if (new_pos[0] < 0 || new_pos[0] > current_level.map_width) new_pos[0] = prev_pos[0];
+
 	#ifdef NOCLIP_MODE
 	(void) prev_pos;
 	(void) p_height;
