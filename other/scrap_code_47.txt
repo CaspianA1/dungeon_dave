@@ -252,3 +252,26 @@ if (moved_any_direction && !body -> moving_forward_or_backward) {
 }
 
 /////
+
+void keep_gui_state(const int key) {
+	static byte enabled, toggled_previously = 0;
+	const byte pressed_key = keys[key];
+	if (pressed_key && !toggled_)
+}
+
+/////
+
+/*
+static byte minimap_enabled = 0, toggled_minimap_previously = 0;
+const byte pressed_minimap_key = keys[KEY_TOGGLE_MINIMAP];
+*/
+
+/*
+if (pressed_minimap_key && !toggled_minimap_previously)
+	minimap_enabled = !minimap_enabled;
+toggled_minimap_previously = toggle_minimap_key;
+
+if (!minimap_enabled) return;
+*/
+
+/////

@@ -54,14 +54,13 @@ inlinable void deinit_message(Message message) {
 	deinit_sprite(message.sprite);
 }
 
-inlinable void after_gui_event(int* const z_pitch, const int mouse_y, const Uint32 before) {
-
+inlinable void after_gui_event(int* const y_pitch, const int mouse_y, const Uint32 before) {
 	SDL_RenderPresent(screen.renderer);
-	update_screen_dimensions(z_pitch, mouse_y);
+	update_screen_dimensions(y_pitch, mouse_y);
 	tick_delay(before);
 }
 
-InputStatus display_logo(int* const z_pitch, const int mouse_y) {
+InputStatus display_logo(int* const y_pitch, const int mouse_y) {
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 
@@ -78,15 +77,15 @@ InputStatus display_logo(int* const z_pitch, const int mouse_y) {
 		Sprite logo = init_sprite("../assets/logo.bmp");
 		SDL_RenderCopy(screen.renderer, logo.texture, NULL, NULL);
 		deinit_sprite(logo);
-		after_gui_event(z_pitch, mouse_y, before);
+		after_gui_event(y_pitch, mouse_y, before);
 	}
 }
 
-InputStatus display_title_screen(int* const z_pitch, const int mouse_y) {
+InputStatus display_title_screen(int* const y_pitch, const int mouse_y) {
 
 	const Sound title_track = init_sound("../assets/audio/themes/title.wav", 0);
 	play_sound(title_track, 1);
-	if (display_logo(z_pitch, mouse_y) == Exit) return Exit;
+	if (display_logo(y_pitch, mouse_y) == Exit) return Exit;
 
 	if (TTF_Init() == -1)
 		FAIL("Unable to initialize the font library: %s", SDL_GetError());
@@ -141,7 +140,7 @@ InputStatus display_title_screen(int* const z_pitch, const int mouse_y) {
 		draw_colored_rect(139, 0, 0, &darker_center_rect);
 		draw_message(start);
 		deinit_message(start);
-		after_gui_event(z_pitch, mouse_y, before);
+		after_gui_event(y_pitch, mouse_y, before);
 	}
 	exit_title_screen:
 		deinit_message(start);
@@ -150,11 +149,25 @@ InputStatus display_title_screen(int* const z_pitch, const int mouse_y) {
 		return title_screen_input;
 }
 
+/////
+
+typedef struct {
+	byte r, g, b, enabled, enabled_previously;
+	const int key;
+} Toggle;
+
+byte update_toggle(Toggle* const toggle) {
+	const byte pressed_key = keys[toggle -> key];
+	if (pressed_key && !toggle -> enabled_previously)
+		toggle -> enabled = !toggle -> enabled;
+
+	toggle -> enabled_previously = pressed_key;
+	return toggle -> enabled;
+}
+
 void draw_minimap(const VectorF pos) {
-	static byte minimap_enabled = 0;
-	if (keys[KEY_DISABLE_MINIMAP]) minimap_enabled = 0;
-	if (keys[KEY_ENABLE_MINIMAP]) minimap_enabled = 1;
-	if (!minimap_enabled) return;
+	static Toggle toggle = {30, 144, 255, 0, 0, KEY_TOGGLE_MINIMAP};
+	if (!update_toggle(&toggle)) return;
 
 	const double
 		width_scale = (double) settings.screen_width
@@ -162,28 +175,40 @@ void draw_minimap(const VectorF pos) {
 		height_scale = (double) settings.screen_height
 			/ current_level.map_height / settings.minimap_scale;
 
-	const SDL_Color baby_blue = {30, 144, 255, SDL_ALPHA_OPAQUE};
 	SDL_FRect wall = {0.0, 0.0, width_scale, height_scale};
 
 	for (int map_x = 0; map_x < current_level.map_width; map_x++) {
 		for (int map_y = 0; map_y < current_level.map_height; map_y++) {
 			const byte point = map_point(current_level.wall_data, map_x, map_y);
 			const double shade = 1.0 -
-				((double) current_level.get_point_height(point, (VectorF) {map_x, map_y})
-				/ current_level.max_point_height);
+				((double) current_level.get_point_height(point, (VectorF) {map_x, map_y}) / current_level.max_point_height);
 
-			SDL_SetRenderDrawColor(screen.renderer,
-				baby_blue.r * shade, baby_blue.g * shade,
-				baby_blue.b * shade, SDL_ALPHA_OPAQUE);
-
+			SDL_SetRenderDrawColor(screen.renderer, toggle.r * shade, toggle.g * shade, toggle.b * shade, SDL_ALPHA_OPAQUE);
 			wall.x = map_x * width_scale;
 			wall.y = map_y * height_scale;
 			SDL_RenderFillRectF(screen.renderer, &wall);
 		}
 	}
 
-	const byte dot_size = (settings.screen_width + settings.screen_height) / 300;
-	const SDL_FRect player_dot = {pos[0] * width_scale, pos[1] * height_scale, dot_size, dot_size};
+	const byte dot_size = (settings.screen_width + settings.screen_height) / 300.0;
+	const SDL_Rect player_dot = {pos[0] * width_scale, pos[1] * height_scale, dot_size, dot_size};
 	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderFillRectF(screen.renderer, &player_dot);
+	SDL_RenderFillRect(screen.renderer, &player_dot);
+}
+
+void draw_crosshair(const int y_pitch) {
+	static Toggle toggle = {255, 215, 0, 0, 0, KEY_TOGGLE_CROSSHAIR};
+	if (!update_toggle(&toggle)) return;
+
+	const byte half_dimensions = settings.screen_width / 40, thickness = settings.screen_width / 200;
+	const VectorI center = {settings.half_screen_width, settings.half_screen_height + (y_pitch < 0 ? 0 : y_pitch)};
+
+	SDL_SetRenderDrawColor(screen.renderer, toggle.r, toggle.g, toggle.b, SDL_ALPHA_OPAQUE);
+
+	const SDL_Rect
+		across = {center.x - half_dimensions, center.y, half_dimensions * 2 + thickness, thickness},
+		down = {center.x, center.y - half_dimensions, thickness, half_dimensions * 2 + thickness};
+	
+	SDL_RenderFillRect(screen.renderer, &across);
+	SDL_RenderFillRect(screen.renderer, &down);
 }

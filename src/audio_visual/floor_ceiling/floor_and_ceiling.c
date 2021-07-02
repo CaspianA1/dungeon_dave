@@ -29,18 +29,18 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const double dist, const V
 
 #endif
 
-inlinable int get_ceil_row(const double y, const int z_pitch) {
-	return settings.half_screen_height + z_pitch - y;
+inlinable int get_ceil_row(const double y, const int y_pitch) {
+	return settings.half_screen_height + y_pitch - y;
 }
 
-inlinable int get_floor_row(const double y, const int z_pitch) {
-	return y - settings.half_screen_height - z_pitch + 1;
+inlinable int get_floor_row(const double y, const int y_pitch) {
+	return y - settings.half_screen_height - y_pitch + 1;
 }
 
 void draw_floor_or_ceil(
 	const VectorF pos, const VectorF dir, 
 	const byte is_ceiling, const int screen_x, const double begin, const double end,
-	const double cos_beta, const double pace, const int z_pitch, const double p_height) {
+	const double cos_beta, const double pace, const int y_pitch, const double p_height) {
 
 	if (end <= begin) return;
 
@@ -65,7 +65,7 @@ void draw_floor_or_ceil(
 		const int pace_y = y + pace;
 		if (pace_y < 0 || pace_y >= settings.screen_height) continue;
 
-		const double straight_dist = opp_h / get_row(y, z_pitch) * settings.proj_dist;
+		const double straight_dist = opp_h / get_row(y, y_pitch) * settings.proj_dist;
 		const double actual_dist = straight_dist / cos_beta;
 
 		const VectorF hit = VectorF_line_pos(pos, dir, actual_dist);
@@ -101,18 +101,18 @@ void simd_draw_floor_or_ceil(const VectorF, const VectorF,
 	const double, const double, const int, const double);
 
 inlinable void std_draw_ceiling(const VectorF pos, const VectorF dir,
-	const double pace, const int z_pitch, const double p_height,
+	const double pace, const int y_pitch, const double p_height,
 	const double cos_beta, const SDL_FRect wall)  {
 
 	simd_draw_floor_or_ceil(pos, dir, 1, wall.x, 0.0, (double) wall.y + 1.0,
-		cos_beta, pace, z_pitch, p_height);
+		cos_beta, pace, y_pitch, p_height);
 }
 
 // inlinable void std_draw_floor(const Player player, const VectorF dir,
 inlinable void std_draw_floor(const VectorF pos, const VectorF dir,
-	const double pace, const int z_pitch, const double p_height,
+	const double pace, const int y_pitch, const double p_height,
 	const double cos_beta, const SDL_FRect wall)  {
 
 	simd_draw_floor_or_ceil(pos, dir, 0, wall.x, (double) (wall.y + wall.h),
-		settings.screen_height, cos_beta, pace, z_pitch, p_height);
+		settings.screen_height, cos_beta, pace, y_pitch, p_height);
 }

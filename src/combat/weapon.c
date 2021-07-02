@@ -50,7 +50,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player player, const Input
 
 	// -1 -> cycle frame, 0 -> first frame
 	animate_weapon(&weapon -> animation, player.pos, -weapon -> in_use,
-		player.z_pitch, player.pace.screen_offset, weapon -> screen_y_shift_percent_down);
+		player.y_pitch, player.pace.screen_offset, weapon -> screen_y_shift_percent_down);
 
 	#else
 

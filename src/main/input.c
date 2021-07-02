@@ -90,8 +90,8 @@ void update_pos(VectorF* const pos, const VectorF prev_pos, VectorF* const dir,
 	*pos = new_pos;
 }
 
-void update_z_pitch(int* const z_pitch, const int mouse_y) {
-	*z_pitch = -mouse_y + settings.half_screen_height;
+void update_y_pitch(int* const y_pitch, const int mouse_y) {
+	*y_pitch = -mouse_y + settings.half_screen_height;
 }
 
 inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lstrafe) {
@@ -237,7 +237,7 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 			player -> jump.height, forward, backward, lstrafe, rstrafe);
 
 		update_jump(&player -> jump, player -> pos);
-		update_z_pitch(&player -> z_pitch, mouse_pos -> y);
+		update_y_pitch(&player -> y_pitch, mouse_pos -> y);
 		update_tilt(&player -> tilt, strafe, lstrafe);
 		update_pace(&player -> pace, *pos, prev_pos, player -> body.v, player -> body.limit_v);
 	}

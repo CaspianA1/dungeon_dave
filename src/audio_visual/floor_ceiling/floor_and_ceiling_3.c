@@ -30,20 +30,20 @@ void floorcast(const Player player) {
 		ray_dir_diff = VectorFF_mul(plane, VectorF_memset(2.0));
 
 	// y change is in screen space
-	const double y_change = player.pace.screen_offset + player.z_pitch;
+	const double y_change = player.pace.screen_offset + player.y_pitch;
 	const double
 		abs_y_change = fabs(y_change),
 		height = player.jump.height;
 		// height = current_level.max_point_height - 1.0 - player.jump.height;
 
-	const double pos_z = 0.5 + height * settings.screen_height / settings.proj_dist;
-	const double screen_pos_z = pos_z * settings.screen_height;
+	const double pos_y = 0.5 + height * settings.screen_height / settings.proj_dist;
+	const double screen_pos_y = pos_y * settings.screen_height;
 
 	for (int y = -abs_y_change; y < settings.half_screen_height + abs_y_change - 1; y++) {
 		if (y == settings.half_screen_height) break;
 
 		const int row = abs(y - settings.half_screen_height);
-		const VectorF row_dist = VectorF_memset(screen_pos_z / row);
+		const VectorF row_dist = VectorF_memset(screen_pos_y / row);
 		const VectorF step = VectorFF_div(VectorFF_mul(row_dist, ray_dir_diff), width_vec);
 		VectorF ray_pos = VectorFF_add(VectorFF_mul(ray_dir_begin, row_dist), pos);
 

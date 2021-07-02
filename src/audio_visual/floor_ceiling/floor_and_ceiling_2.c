@@ -1,6 +1,6 @@
 void simd_draw_floor_or_ceil(const VectorF pos, const VectorF dir, 
 	const byte is_ceiling, const int screen_x, const double begin, const double end,
-	const double cos_beta, double pace, const int z_pitch, const double p_height) {
+	const double cos_beta, double pace, const int y_pitch, const double p_height) {
 
 	if (end <= begin) return;
 
@@ -32,7 +32,7 @@ void simd_draw_floor_or_ceil(const VectorF pos, const VectorF dir,
 	for (int y = begin - pace; y < (int) end - pace; y += 2) {
 		const int next_y = y + 1;
 
-		const VectorF rows = {get_row(y, z_pitch), get_row(next_y, z_pitch)};
+		const VectorF rows = {get_row(y, y_pitch), get_row(next_y, y_pitch)};
 		const VectorF straight_dists = VectorFF_mul(VectorFF_div(opp_h_vec, rows), proj_dist_vec);
 		const VectorF actual_dists = VectorFF_div(straight_dists, cos_beta_vec);
 

@@ -56,7 +56,7 @@ void handle_ray(const DataRaycast d, const Player player) {
 			sprite_h = ceil(max_sprite_h * (double) raised_wall.h / wall_h);
 		}
 
-		else if (i == 0) std_draw_floor(d.begin, d.dir, player.pace.screen_offset, player.z_pitch,
+		else if (i == 0) std_draw_floor(d.begin, d.dir, player.pace.screen_offset, player.y_pitch,
 			player.jump.height, cos_beta, raised_wall);
 
 		if ((double) raised_wall.y < *d.smallest_wall_y) *d.smallest_wall_y = (double) raised_wall.y;

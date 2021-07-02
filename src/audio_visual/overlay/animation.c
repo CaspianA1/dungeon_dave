@@ -1,6 +1,5 @@
-inlinable Animation init_animation(const char* const path,
-	const int frames_per_row, const int frames_per_col,
-	const int frame_count, const int fps) {
+inlinable Animation init_animation(const char* const path, const int frames_per_row,
+	const int frames_per_col, const int frame_count, const int fps) {
 
 	const Billboard billboard = {init_sprite(path), {0, 0}, 0, 0, 0};
 
@@ -52,7 +51,7 @@ inlinable VectorI get_spritesheet_frame_origin(const Animation animation) {
 }
 
 void animate_weapon(Animation* const animation, const VectorF pos,
-	const int frame_num, const int z_pitch, const double pace, const double screen_y_shift_percent_down) {
+	const int frame_num, const int y_pitch, const double pace, const double screen_y_shift_percent_down) {
  
 	// frame_num == -1 -> auto_progress frame
 
@@ -69,7 +68,7 @@ void animate_weapon(Animation* const animation, const VectorF pos,
 
 	const SDL_FRect screen_pos = {
 		pace,
-		fabs(pace) + (z_pitch < 0 ? 0 : z_pitch) +
+		fabs(pace) + (y_pitch < 0 ? 0 : y_pitch) +
 		settings.screen_height * screen_y_shift_percent_down,
 		settings.screen_width,
 		settings.screen_height

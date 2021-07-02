@@ -36,7 +36,7 @@ inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const des
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
-void refresh(const Domain tilt, const VectorF pos) {
+void refresh(const Domain tilt, const VectorF pos, const int y_pitch) {
 	SDL_UnlockTexture(screen.pixel_buffer);
 	SDL_SetRenderTarget(screen.renderer, NULL);
 
@@ -80,6 +80,9 @@ void refresh(const Domain tilt, const VectorF pos) {
 
 	void draw_minimap(const VectorF);
 	draw_minimap(pos);
+	void draw_crosshair(const int);
+	draw_crosshair(y_pitch);
+
 	SDL_RenderPresent(screen.renderer);
 }
 

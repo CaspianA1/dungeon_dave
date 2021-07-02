@@ -33,7 +33,7 @@ typedef struct {
 	VectorF pos, dir;
 	VectorI mouse_pos;
 	double angle;
-	int z_pitch;
+	int y_pitch;
 	Jump jump;
 	Domain tilt;
 	Pace pace;

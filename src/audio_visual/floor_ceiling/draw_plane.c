@@ -11,11 +11,11 @@ void draw_floor_plane(const Player player) {
 
 	const double
 		screen_height_over_proj_dist = settings.screen_height / settings.proj_dist,
-		y_shift = player.pace.screen_offset + player.z_pitch; // in screen space
+		y_shift = player.pace.screen_offset + player.y_pitch; // in screen space
 
 	const double
 		abs_y_shift = fabs(y_shift),
-		screen_z = settings.half_screen_height +
+		height_shift = settings.half_screen_height +
 			player.jump.height * settings.screen_height * screen_height_over_proj_dist;
 
 	const byte* const point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
@@ -24,7 +24,8 @@ void draw_floor_plane(const Player player) {
 
 	const VectorF
 		/* for 90 degrees, this works, b/c the camera plane and direction vector are parallel.
-		visualize the vectors and see how non-90 degree angles need to be adjusted. */
+		visualize the vectors and see how non-90 degree angles need to be adjusted. 
+		find out how the old plane code worked differently for this. */
 		plane = {-dir[1], dir[0]},
 		screen_width_vec = VectorF_memset(settings.screen_width);
 
@@ -41,7 +42,7 @@ void draw_floor_plane(const Player player) {
 
 		const int row = abs(y - settings.half_screen_height);
 
-		const VectorF row_dist = VectorF_memset(screen_z / row);
+		const VectorF row_dist = VectorF_memset(height_shift / row);
 		const VectorF step = VectorFF_div(VectorFF_mul(row_dist, ray_dir_diff), screen_width_vec);
 		VectorF ray_pos = VectorFF_add(VectorFF_mul(ray_dir_begin, row_dist), player.pos);
 
@@ -76,20 +77,20 @@ inlinable void draw_ceiling_plane(const Player player) {
 	const double
 		theta = to_radians(player.angle),
 		screen_height_over_proj_dist = settings.screen_height / settings.proj_dist,
-		y_shift = player.pace.screen_offset + player.z_pitch; // in screen space
+		y_shift = player.pace.screen_offset + player.y_pitch; // in screen space
 
 	//////////
 	const double
 		abs_y_shift = fabs(y_shift), // I need another constant than 2.0
 		reverse_p_height = current_level.max_point_height - player.jump.height - 2.0;
 
-	const double screen_z = settings.half_screen_height +
+	const double height_shift = settings.half_screen_height +
 		reverse_p_height * settings.screen_height / screen_height_over_proj_dist;
 	//////////
 
 	const byte* const point_data = is_floor ? current_level.floor_data : current_level.ceiling_data;
 
-	const VectorF dir = {
+	const VectorF dir = { // the way of determining the dir differs in draw_floor_plane and draw_ceiling_plane
 		cos(theta) * screen_height_over_proj_dist,
 		sin(theta) * screen_height_over_proj_dist
 	};
@@ -113,7 +114,7 @@ inlinable void draw_ceiling_plane(const Player player) {
 
 		const int row = abs(y - settings.half_screen_height);
 
-		const VectorF row_dist = VectorF_memset(screen_z / row);
+		const VectorF row_dist = VectorF_memset(height_shift / row);
 		const VectorF step = VectorFF_div(VectorFF_mul(row_dist, ray_dir_diff), screen_width_vec);
 		VectorF ray_pos = VectorFF_add(VectorFF_mul(ray_dir_begin, row_dist), player.pos);
 

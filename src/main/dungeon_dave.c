@@ -49,7 +49,7 @@ int main(void) {
 	Weapon weapon;
 	load_all_defaults(load_palace, &player, &weapon);
 
-	if (display_title_screen(&player.z_pitch, player.mouse_pos.y) == Exit)
+	if (display_title_screen(&player.y_pitch, player.mouse_pos.y) == Exit)
 		deinit_all(player, weapon);
 
 	play_sound(current_level.background_sound, 1);
@@ -61,10 +61,10 @@ int main(void) {
 		const InputStatus input_status = handle_input(&player, 0);
 		if (input_status == Exit) deinit_all(player, weapon);
 
-		update_screen_dimensions(&player.z_pitch, player.mouse_pos.y);
+		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
 		prepare_for_drawing();
 
-		const double wall_y_shift = settings.half_screen_height + player.z_pitch + player.pace.screen_offset;
+		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 		draw_skybox(player.angle, wall_y_shift);
 
 		#ifndef PLANAR_MODE
@@ -84,7 +84,7 @@ int main(void) {
 
 		#endif
 
-		refresh(player.tilt, player.pos);
+		refresh(player.tilt, player.pos, player.y_pitch);
 		tick_delay(before);
 	}
 }

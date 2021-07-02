@@ -24,7 +24,7 @@ problems:
 	- player clipping into corners
 	- enemy clipping into walls
 	- small screen -> bigger screen or very small screen, edge triangles
-	- z-buffering issues for higher point heights
+	- z-buffering issues with sprites for higher point heights
 	- player height needs to be readjusted when screen height changes (it also changes based on screen width)
 	- min and max proj dist
 	- empty z-buffer slots for ray_column_widths above 1
@@ -34,5 +34,7 @@ problems:
 	- skybox stretching
 	- some sides of textures get more drawn on them near the end than others
 	- navigators use too much heap memory
-	- change the VectorF name to something less clunky
+	- change the VectorF name to something less clunky, and z_pitch to y_pitch
 	- less doubles in render_overlay.c
+	- don't pass the player in handle_ray
+	- add back the BFS wall checking

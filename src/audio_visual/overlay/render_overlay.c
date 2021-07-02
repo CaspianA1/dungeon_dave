@@ -155,6 +155,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 		const byte shade = 255 * calculate_shade(size, billboard.pos);
 		SDL_SetTextureColorMod(billboard.sprite.texture, shade, shade, shade);
 
+		// change z-buffer stuff with filled-in zeros
 		for (int screen_row = start_x; screen_row < end_x; screen_row += settings.ray_column_width) {
 			if (screen_row < 0 || screen.z_buffer[screen_row] < corrected_dist) continue;
 
