@@ -4,6 +4,7 @@ byte get_level_1_point_height(const byte point, const VectorF pos) {
 		case 0: return 0;
 		case 1: return 3; // cobblestone edges
 		case 3: case 5: return 2; // stone, hieroglyphics
+		case 4: return (pos[0] < 5.0001) ? 5 : 1;
 		default: return 1;
 	}
 }
@@ -60,7 +61,7 @@ void load_level_1(void) {
 	// old init positions: {18.5, 9.0}, {3.0, 3.0}, {7.0, 12.0}
 	Level level_1 = init_level(map_width, map_height, 17.5, 11.5, 0.0);
 
-	level_1.max_point_height = 3;
+	level_1.max_point_height = 5;
 	level_1.background_sound = init_sound("../assets/audio/themes/ambient_wind.wav", 0);
 	level_1.get_point_height = get_level_1_point_height;
 	level_1.shader = level_1_shader;

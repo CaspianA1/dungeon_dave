@@ -32,10 +32,10 @@ problems:
 	- draw_floor_plane doesn't draw some textures right
 	- too many Mix_Chunks on the available channels -> out of channels
 	- skybox stretching
-	- some sides of textures get more drawn on them near the end than others
 	- navigators use too much heap memory
 	- change the VectorF name to something less clunky
 	- less doubles in render_overlay.c
 	- don't pass the player in handle_ray
 	- add back the BFS wall checking
-	- don't intersect the player dot with walls in the minimap	
+	- don't intersect the player dot with walls in the minimap
+	- many VectorF's to double[2]'s

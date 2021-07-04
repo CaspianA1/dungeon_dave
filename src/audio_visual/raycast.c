@@ -2,6 +2,7 @@ typedef struct {
 	double* const smallest_wall_y;
 	const double player_angle, theta, dist, wall_y_shift, full_jump_height;
 	const VectorF begin, hit, dir;
+	// const double begin[2], hit[2], dir[2];
 	const byte point, side, first_wall_hit;
 	const int screen_x;
 } DataRaycast;
@@ -89,17 +90,23 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 		const VectorF dir = {cos(theta), sin(theta)};
 
 		double smallest_wall_y = DBL_MAX;
+		byte at_first_hit = 1, curr_point_height = player.jump.height;
 		DataDDA ray = init_dda(player.pos, dir);
 
 		while (iter_dda(&ray)) {
 			const byte point = map_point(current_level.wall_data, ray.curr_tile.x, ray.curr_tile.y);
-			if (point) {
-				handle_ray((DataRaycast) {
-					&smallest_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height, player.pos,
-					VectorF_line_pos(player.pos, dir, ray.dist), dir, point, ray.side, ray.at_first_hit, screen_x
-				}, player);
+			const VectorF hit = VectorF_line_pos(player.pos, dir, ray.dist);
+			const byte point_height = current_level.get_point_height(point, hit);
 
-				ray.at_first_hit = 0;
+			if (point_height != curr_point_height) {
+				if (point) {
+					handle_ray((DataRaycast) {
+						&smallest_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height, player.pos,
+						hit, dir, point, ray.side, at_first_hit, screen_x
+					}, player);
+					at_first_hit = 0;
+				}
+				curr_point_height = point_height;
 			}
 		}
 	}

@@ -132,7 +132,7 @@ void load_all_defaults(void (*load_first_level) (void),
 	init_audio_subsystem();
 	load_first_level();
 
-	const Player first_player = load_player(4.8, 0.3, 8.0, 0.12, 15.0, 0.08, 0.09, 0.06, 1.9);
+	const Player first_player = load_player(4.8, 0.3, 8.0, 0.12, 15.0, 0.08, 0.09, 0.05, 1.9);
 
 	const Weapon first_weapon = init_weapon("../assets/audio/sound_effects/shotgun.wav",
 		"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 0.0, 4.0, 6, 10, 59, 30);

@@ -1,8 +1,10 @@
 typedef struct {
 	double dist;
-	byte at_first_hit, step_count, side;
+	byte step_count, side;
 	const VectorF origin, dir, unit_step_size;
+	// const double origin[2], dir[2], unit_step_size[2];
 	VectorF ray_length;
+	// double ray_length[2];
 	const VectorI ray_step;
 	VectorI curr_tile;
 } DataDDA;
@@ -10,6 +12,10 @@ typedef struct {
 DataDDA init_dda(const VectorF origin, const VectorF dir) {
 	const VectorF unit_step_size = {fabs(1.0 / dir[0]), fabs(1.0 / dir[1])};
 	VectorF ray_length;
+	/*
+	const double unit_step_size[2] = {fabs(1.0 / dir[0]), fabs(1.0 / dir[1])};
+	double ray_length[2];
+	*/
 	const VectorI curr_tile = VectorF_floor(origin);
 	VectorI ray_step;
 
@@ -32,7 +38,7 @@ DataDDA init_dda(const VectorF origin, const VectorF dir) {
 	}
 
 	return (DataDDA) {
-		0.0, 1, 0, 0, origin, dir, unit_step_size, ray_length, ray_step, curr_tile
+		0.0, 0, 0, origin, dir, unit_step_size, ray_length, ray_step, curr_tile
 	};
 }
 
