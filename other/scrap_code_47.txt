@@ -275,3 +275,15 @@ if (!minimap_enabled) return;
 */
 
 /////
+
+/*
+if (obscured_diff == 0.0f) printf("Zero\n");
+else if (obscured_diff < 0.0f) printf("Less\n");
+else printf("More\n");
+*/
+
+/////
+
+// subtract from src_crop a certain amount; the difference is in screen space, translate to sprite space
+
+/////

@@ -35,9 +35,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 	for (byte i = 0; i < generic_billboard_count; i++) {
 		const byte
 			is_animated = i >= current_level.billboard_count,
-			is_enemy = i >= start_of_enemies;
-
-		const int
+			is_enemy = i >= start_of_enemies,
 			possible_animation_index = i - current_level.billboard_count,
 			possible_enemy_index = i - start_of_enemies;
 
@@ -111,12 +109,12 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 
 		/////
 
-		Animation* possible_animation;
+		Animation* possible_animation = NULL;
 		SDL_Rect src_crop;
 		int src_begin_x, width;
 
 		if (generic.is_animated) {
-			Enemy* possible_enemy;
+			Enemy* possible_enemy = NULL;
 
 			if (generic.is_enemy) {
 				possible_enemy = &current_level.enemies[generic.animation_index];
@@ -157,6 +155,19 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 
 		for (int screen_row = start_x; screen_row < end_x; screen_row += settings.ray_column_width) {
 			if (screen_row < 0 || screen.z_buffer[screen_row] < corrected_dist) continue;
+
+			/*
+			if (screen_row < 0) continue;
+
+			if (screen.z_buffer[screen_row] < corrected_dist) { // if wall obscures sprite
+				extern float* wall_y_buffer;
+				const float dest_diff = screen_pos.y - wall_y_buffer[screen_row];
+				if (dest_diff <= 0.0f) continue;
+				const float dest_diff_ratio = dest_diff / screen_pos.h;
+				const float src_diff = dest_diff_ratio * src_crop.h;
+				if (billboard.pos[0] == 18.5 && billboard.pos[1] == 3.5) DEBUG((double) src_diff, lf);
+			}
+			*/
 
 			screen_pos.x = screen_row;
 			const int src_offset = ((double) (screen_row - (int) start_x) / size) * width;

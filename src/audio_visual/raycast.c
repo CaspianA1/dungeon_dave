@@ -19,6 +19,8 @@ inlinable int calculate_wall_tex_offset(const byte side, const VectorF hit, cons
 	}
 }
 
+// float* wall_y_buffer;
+
 // passing the player is temporary
 void handle_ray(const DataRaycast d, const Player player) {
 	const double cos_beta = cos(d.player_angle - d.theta);
@@ -38,11 +40,21 @@ void handle_ray(const DataRaycast d, const Player player) {
 		max_sprite_h = wall_sprite.surface -> h,
 		offset = calculate_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.surface -> w);
 
+	/*
+	static byte first = 1;
+	if (first) {
+		wall_y_buffer = calloc(settings.screen_width, sizeof(float));
+		first = 0;
+	}
+	*/
+
 	if (d.first_wall_hit) update_z_buffer(d.screen_x, corrected_dist);
 
 	for (byte i = 0, first_draw_event = 1; i < point_height; i++) {
 		SDL_FRect raised_wall = wall;
 		raised_wall.y -= wall.h * i;
+
+		// if (i == point_height - 1) wall_y_buffer[d.screen_x] = raised_wall.y;
 
 		/* completely obscured: starts under the tallest wall so far. wouldn't be seen, but this is for additional speed. */
 		if ((double) raised_wall.y >= *d.smallest_wall_y || raised_wall.y >= settings.screen_height)
