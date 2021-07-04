@@ -3,6 +3,10 @@ inlinable Weapon init_weapon(const char* const sound_path,
 	const double screen_y_shift_percent_down, const double power, const int frames_per_row,
 	const int frames_per_col, const int frame_count, const int fps) {
 
+	#ifndef SOUND_ENABLED
+	(void) sound_path;
+	#endif
+
 	return (Weapon) {0, screen_y_shift_percent_down, power,
 		init_sound(sound_path, 1), init_animation(spritesheet_path, frames_per_row, frames_per_col, frame_count, fps)};
 }

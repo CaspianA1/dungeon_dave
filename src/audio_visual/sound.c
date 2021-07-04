@@ -1,3 +1,5 @@
+#ifdef SOUND_ENABLED
+
 typedef struct {
 	byte is_short;
 	union {
@@ -57,3 +59,15 @@ inlinable void play_sound(const Sound sound, const byte should_loop) {
 	else if (Mix_PlayMusic(sound.type.long_sound, loop_status) == -1)
 		fail_sound(sound, "play");
 }
+
+#else
+
+typedef byte Sound;
+#define init_audio_subsystem()
+#define deinit_audio_subsystem()
+#define fail_sound(a, b)
+#define init_sound(a, b) 0
+#define deinit_sound(a) (void) a
+#define play_sound(a, b)
+
+#endif

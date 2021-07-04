@@ -49,8 +49,10 @@ void handle_ray(const DataRaycast d, const Player player) {
 	*/
 
 	if (d.first_wall_hit) update_z_buffer(d.screen_x, corrected_dist);
+	const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
+	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 
-	for (byte i = 0, first_draw_event = 1; i < point_height; i++) {
+	for (byte i = 0; i < point_height; i++) {
 		SDL_FRect raised_wall = wall;
 		raised_wall.y -= wall.h * i;
 
@@ -72,12 +74,6 @@ void handle_ray(const DataRaycast d, const Player player) {
 			player.jump.height, cos_beta, raised_wall);
 
 		if ((double) raised_wall.y < *d.smallest_wall_y) *d.smallest_wall_y = (double) raised_wall.y;
-
-		if (first_draw_event) {
-			const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
-			SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
-			first_draw_event = 0;
-		}
 
 		const SDL_Rect slice = {offset, 0, 1, sprite_h};
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
