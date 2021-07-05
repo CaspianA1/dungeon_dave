@@ -1,4 +1,4 @@
-inlinable Uint8 get_bits(const Uint32 value, const Uint8 offset, const Uint8 n) {
+inlinable byte get_bits(const Uint32 value, const byte offset, const byte n) {
 	return (value >> offset) & ((1 << n) - 1);
 }
 
@@ -6,7 +6,6 @@ inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const 
 	const VectorI floored_hit = VectorF_floor(hit);
 
 	const byte point = map_point(current_level.floor_data, floored_hit.x, floored_hit.y);
-
 	const SDL_Surface* const surface = current_level.walls[point - 1].surface;
 	const int max_offset = surface -> w - 1;
 
@@ -18,9 +17,11 @@ inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const 
 	Uint32 src = get_surface_pixel(surface -> pixels, surface -> pitch, surface_offset.x, surface_offset.y);
 
 	#ifdef SHADING_ENABLED
-	const int shade = calculate_shade(settings.proj_dist / actual_dist, hit);
-	const Uint8 r = get_bits(src, 16, 23) << shade, g = get_bits(src, 8, 15) << shade, b = get_bits(src, 0, 8) << shade;
+	const double shade = calculate_shade(settings.proj_dist / actual_dist, hit);
+	const byte r = get_bits(src, 16, 23) * shade, g = get_bits(src, 8, 15) * shade, b = get_bits(src, 0, 8) * shade;
 	src = 0xFF000000 | (r << 16) | (g << 8) | b;
+	#else
+	(void) actual_dist;
 	#endif
 
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
@@ -31,6 +32,7 @@ void fast_affine_floor(const VectorF pos, const double p_height, const double pa
 	const double p_height_ratio = p_height * settings.screen_height / settings.proj_dist;
 	const double opp_h = 0.5 + p_height_ratio;
 
+	// y_shift - pace may go outside map boundaries; limit this domain
 	for (int y = y_shift - pace; y < settings.screen_height - pace; y++) {
 		const int pace_y = y + pace;
 		if (pace_y < 0) continue;

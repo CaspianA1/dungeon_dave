@@ -121,7 +121,7 @@ inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lst
 inlinable void update_pace(Pace* const pace, const VectorF pos, const VectorF prev_pos, const double v, const double lim_v) {
 	if (pos[0] != prev_pos[0] || pos[1] != prev_pos[1]) {
 		Domain* const domain = &pace -> domain;
-		double domain_incr = domain -> step * log(lim_v) / log(v);
+		const double domain_incr = domain -> step * log(lim_v) / log(v);
 		if ((domain -> val += domain_incr) > two_pi) domain -> val = 0.0;
 		pace -> screen_offset = sin(domain -> val) * settings.screen_height / pace -> offset_scaler;
 	}
