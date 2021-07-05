@@ -2,7 +2,8 @@ inlinable byte get_bits(const Uint32 value, const byte offset, const byte n) {
 	return (value >> offset) & ((1 << n) - 1);
 }
 
-inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const int screen_x, const int pace_y) {
+inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
+
 	const VectorI floored_hit = VectorF_floor(hit);
 
 	const byte point = map_point(current_level.floor_data, floored_hit.x, floored_hit.y);
@@ -25,7 +26,7 @@ inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const 
 	#endif
 
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
-		*get_pixbuf_pixel(x, pace_y) = src;
+		*(pixbuf_row + x) = src;
 }
 
 void fast_affine_floor(const VectorF pos, const double p_height, const double pace, const int y_pitch, const double y_shift) {
@@ -41,13 +42,15 @@ void fast_affine_floor(const VectorF pos, const double p_height, const double pa
 		if (row == 0) continue;
 		const double straight_dist = opp_h / row * settings.proj_dist;
 
+		Uint32* const pixbuf_row = get_pixbuf_row(pace_y);
+
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			const double actual_dist = straight_dist / screen.cos_beta_buffer[screen_x];
 			const VectorF hit = VectorFF_add(VectorFF_mul(screen.dir_buffer[screen_x], VectorF_memset(actual_dist)), pos);
 
 			if (hit[0] < 0.0 || hit[1] < 0.0 || hit[0] > current_level.map_width - 1.0
 				|| hit[1] > current_level.map_height - 1.0) continue;
-			draw_from_hit(hit, actual_dist, screen_x, pace_y);
+			draw_from_hit(hit, actual_dist, screen_x, pixbuf_row);
 		}
 	}
 }

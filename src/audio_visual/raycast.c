@@ -97,7 +97,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 			const VectorF hit = VectorF_line_pos(player.pos, dir, ray.dist);
 			const byte point_height = current_level.get_point_height(point, hit);
 
-			if (point_height != curr_point_height) {
+			if (point_height != curr_point_height || point) {
 				double height_change_y, height_change_h;
 				if (point) {
 					const VectorF wall_y_components = handle_ray((DataRaycast) {

@@ -90,8 +90,8 @@ void refresh(const Domain tilt, const VectorF pos, const int y_pitch) {
 	SDL_RenderPresent(screen.renderer);
 }
 
-inlinable Uint32* get_pixbuf_pixel(const int x, const int y) { // for texture
-	return ((Uint32*) ((Uint8*) screen.pixels + y * screen.pixel_pitch)) + x;
+inlinable Uint32* get_pixbuf_row(const int y) { // for texture
+	return ((Uint32*) ((Uint8*) screen.pixels + y * screen.pixel_pitch));
 }
 
 inlinable Uint32 get_surface_pixel(const void* const pixels,
