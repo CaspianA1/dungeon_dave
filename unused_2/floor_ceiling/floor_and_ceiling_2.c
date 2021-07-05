@@ -32,6 +32,8 @@ void simd_draw_floor_or_ceil(const VectorF pos, const VectorF dir,
 	for (int y = begin - pace; y < (int) end - pace; y += 2) {
 		const int next_y = y + 1;
 
+		// DEBUG(get_row(y, y_pitch), d);
+
 		const VectorF rows = {get_row(y, y_pitch), get_row(next_y, y_pitch)};
 		const VectorF straight_dists = VectorFF_mul(VectorFF_div(opp_h_vec, rows), proj_dist_vec);
 		const VectorF actual_dists = VectorFF_div(straight_dists, cos_beta_vec);

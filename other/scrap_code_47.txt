@@ -397,3 +397,10 @@ if (point_exists_at(new_pos[0] + stop_dist, new_pos[1], p_height) ||
 // last_height_change_y = height_change_y;
 
 /////
+
+/*
+else if (i == 0) std_draw_floor(d.begin, d.dir, player.pace.screen_offset, player.y_pitch,
+	player.jump.height, cos_beta, raised_wall);
+*/
+
+/////

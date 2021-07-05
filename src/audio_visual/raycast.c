@@ -49,7 +49,13 @@ VectorF handle_ray(const DataRaycast d, const Player player) {
 	}
 	*/
 
-	if (d.first_wall_hit) update_z_buffer(d.screen_x, corrected_dist);
+	// update z-buffer later even when handle_ray is skipped
+	if (d.first_wall_hit) {
+		update_z_buffer(d.screen_x, corrected_dist);
+		screen.cos_beta_buffer[d.screen_x] = cos_beta;
+		screen.dir_buffer[d.screen_x] = d.dir;
+	}
+
 	const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 
@@ -64,16 +70,19 @@ VectorF handle_ray(const DataRaycast d, const Player player) {
 		if ((double) raised_wall.y >= *d.curr_smallest_wall_y || raised_wall.y >= settings.screen_height)
 			continue;
 
-		int sprite_h = max_sprite_h;
+		int sprite_h;
 
 		// partially obscured: bottom of wall somewhere in middle of tallest
 		if ((double) (raised_wall.y + raised_wall.h) > *d.curr_smallest_wall_y) {
 			raised_wall.h = *d.curr_smallest_wall_y - (double) raised_wall.y;
 			sprite_h = ceil(max_sprite_h * (double) raised_wall.h / wall_h);
 		}
+		else sprite_h = max_sprite_h;
 
+		/*
 		else if (i == 0) std_draw_floor(d.begin, d.dir, player.pace.screen_offset, player.y_pitch,
 			player.jump.height, cos_beta, raised_wall);
+		*/
 
 		*d.curr_smallest_wall_y = (double) raised_wall.y;
 
@@ -88,7 +97,6 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
-
 		const VectorF dir = {cos(theta), sin(theta)};
 
 		double curr_smallest_wall_y = DBL_MAX, last_height_change_y = settings.screen_height;
@@ -113,11 +121,14 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 				}
 				else height_change_y = settings.screen_height, height_change_h = 0.0; // correct?
 
-				/*
-				if (screen_x > 395 && screen_x < 405)
+				if (screen_x > 395 && screen_x < 405) {
+					/*
+					SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 					SDL_RenderDrawLine(screen.renderer, screen_x, height_change_y + height_change_h,
 					screen_x, last_height_change_y);
-				*/
+					*/
+				}
+
 				// draw from last wall y to current wall bottom (y + h)
 				curr_point_height = point_height;
 				last_height_change_y = height_change_y;

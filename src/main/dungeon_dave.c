@@ -26,11 +26,7 @@
 #include "../combat/enemy.c"
 #include "../combat/weapon.c"
 
-#include "../audio_visual/floor_ceiling/floor_and_ceiling.c"
-#include "../audio_visual/floor_ceiling/floor_and_ceiling_2.c"
-#include "../audio_visual/floor_ceiling/floor_and_ceiling_3.c"
-#include "../audio_visual/floor_ceiling/floor_and_ceiling_4.c"
-#include "../audio_visual/floor_ceiling/draw_plane.c"
+#include "../audio_visual/floorcast.c"
 #include "../audio_visual/raycast.c"
 
 #include "../levels/level_1.c"
@@ -54,6 +50,9 @@ int main(void) {
 
 	play_sound(current_level.background_sound, 1);
 
+	screen.cos_beta_buffer = calloc(settings.screen_width, sizeof(double));
+	screen.dir_buffer = calloc(settings.screen_width, sizeof(VectorF));
+
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VECF(player.pos);
@@ -72,6 +71,8 @@ int main(void) {
 		const double full_jump_height = player.jump.height * settings.screen_height;
 
 		raycast(player, wall_y_shift, full_jump_height);
+		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, player.y_pitch, wall_y_shift);
+
 		draw_generic_billboards(player, wall_y_shift);
 		update_all_enemies(player);
 		use_weapon_if_needed(&weapon, player, input_status);
