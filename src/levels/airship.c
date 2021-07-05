@@ -5,7 +5,7 @@ byte get_airship_point_height(const byte point, const VectorF pos) {
 
 double airship_shader(const VectorF pos) {
 	(void) pos;
-	return current_level.base_shade;
+	return 4.5;
 }
 
 void load_airship(void) {
@@ -37,6 +37,4 @@ void load_airship(void) {
 		{1, 0, 0, 0, 0, 0, 0, 0, 1, 0},
 		{1, 1, 1, 1, 1, 1, 1, 1, 0, 0}
 	};
-
-	// base shade = 4.5
 }
