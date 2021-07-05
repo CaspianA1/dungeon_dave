@@ -1,5 +1,5 @@
 typedef struct {
-	double* const smallest_wall_y;
+	double* const curr_smallest_wall_y;
 	const double player_angle, theta, dist, wall_y_shift, full_jump_height;
 	const VectorF begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
@@ -23,7 +23,7 @@ inlinable int calculate_wall_tex_offset(const byte side, const VectorF hit, cons
 // float* wall_y_buffer;
 
 // passing the player is temporary
-void handle_ray(const DataRaycast d, const Player player) {
+VectorF handle_ray(const DataRaycast d, const Player player) {
 	const double cos_beta = cos(d.player_angle - d.theta);
 	const double corrected_dist = d.dist * cos_beta;
 	const double wall_h = settings.proj_dist / corrected_dist;
@@ -53,32 +53,34 @@ void handle_ray(const DataRaycast d, const Player player) {
 	const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 
+	const double smallest_wall_y = (double) (wall.y - (wall.h * (point_height - 1)));
+	// wall_y_buffer[d.screen_x] = smallest_wall_y;
+
 	for (byte i = 0; i < point_height; i++) {
 		SDL_FRect raised_wall = wall;
 		raised_wall.y -= wall.h * i;
 
-		// if (i == point_height - 1) wall_y_buffer[d.screen_x] = raised_wall.y;
-
-		/* completely obscured: starts under the tallest wall so far. wouldn't be seen, but this is for additional speed. */
-		if ((double) raised_wall.y >= *d.smallest_wall_y || raised_wall.y >= settings.screen_height)
+		/* completely obscured: starts under the tallest wall so far; wouldn't be seen, but this is for additional speed */
+		if ((double) raised_wall.y >= *d.curr_smallest_wall_y || raised_wall.y >= settings.screen_height)
 			continue;
 
 		int sprite_h = max_sprite_h;
 
 		// partially obscured: bottom of wall somewhere in middle of tallest
-		if ((double) (raised_wall.y + raised_wall.h) > *d.smallest_wall_y) {
-			raised_wall.h = *d.smallest_wall_y - (double) raised_wall.y;
+		if ((double) (raised_wall.y + raised_wall.h) > *d.curr_smallest_wall_y) {
+			raised_wall.h = *d.curr_smallest_wall_y - (double) raised_wall.y;
 			sprite_h = ceil(max_sprite_h * (double) raised_wall.h / wall_h);
 		}
 
 		else if (i == 0) std_draw_floor(d.begin, d.dir, player.pace.screen_offset, player.y_pitch,
 			player.jump.height, cos_beta, raised_wall);
 
-		if ((double) raised_wall.y < *d.smallest_wall_y) *d.smallest_wall_y = (double) raised_wall.y;
+		*d.curr_smallest_wall_y = (double) raised_wall.y;
 
 		const SDL_Rect slice = {offset, 0, 1, sprite_h};
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
 	}
+	return (VectorF) {(double) smallest_wall_y, (double) wall.h};
 }
 
 void raycast(const Player player, const double wall_y_shift, const double full_jump_height) {
@@ -89,7 +91,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 
 		const VectorF dir = {cos(theta), sin(theta)};
 
-		double smallest_wall_y = DBL_MAX;
+		double curr_smallest_wall_y = DBL_MAX, last_height_change_y = settings.screen_height;
 		byte at_first_hit = 1, curr_point_height = player.jump.height;
 		DataDDA ray = init_dda(player.pos, dir);
 
@@ -99,14 +101,26 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 			const byte point_height = current_level.get_point_height(point, hit);
 
 			if (point_height != curr_point_height) {
+				double height_change_y, height_change_h;
 				if (point) {
-					handle_ray((DataRaycast) {
-						&smallest_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height, player.pos,
-						hit, dir, point, ray.side, at_first_hit, screen_x
-					}, player);
+					const VectorF wall_y_components = handle_ray((DataRaycast) {
+						&curr_smallest_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height,
+						player.pos,hit, dir, point, ray.side, at_first_hit, screen_x}, player);
+
+					height_change_y = wall_y_components[0], height_change_h = wall_y_components[1];
+
 					at_first_hit = 0;
 				}
+				else height_change_y = settings.screen_height, height_change_h = 0.0; // correct?
+
+				/*
+				if (screen_x > 395 && screen_x < 405)
+					SDL_RenderDrawLine(screen.renderer, screen_x, height_change_y + height_change_h,
+					screen_x, last_height_change_y);
+				*/
+				// draw from last wall y to current wall bottom (y + h)
 				curr_point_height = point_height;
+				last_height_change_y = height_change_y;
 			}
 		}
 	}

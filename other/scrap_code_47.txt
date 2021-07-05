@@ -287,3 +287,113 @@ else printf("More\n");
 // subtract from src_crop a certain amount; the difference is in screen space, translate to sprite space
 
 /////
+
+/*
+DataDDA d = *d_ref;
+
+if (d.ray_length[0] < d.ray_length[1]) {
+	d.dist = d.ray_length[0];
+	d.curr_tile.x += d.ray_step.x;
+	d.ray_length[0] += d.unit_step_size[0];
+	d.side = 0;
+}
+else {
+	d.dist = d.ray_length[1];
+	d.curr_tile.y += d.ray_step.y;
+	d.ray_length[1] += d.unit_step_size[1];
+	d.side = 1;
+}
+*/
+
+/////
+
+// if (i == point_height - 1) wall_y_buffer[d.screen_x] = raised_wall.y;
+
+/////
+
+if ((double) raised_wall.y < *d.smallest_wall_y) {
+	printf("Yes, set\n");
+	*d.smallest_wall_y = (double) raised_wall.y;
+}
+else {
+	printf("No, do not set\n");
+}
+
+/////
+
+/*
+byte in_wall = 0;
+if (point_exists_at(new_pos[0], new_pos[1] + stop_dist, p_height) ||
+	point_exists_at(new_pos[0], new_pos[1] - stop_dist, p_height)) {
+	// const double adjusted = ceil(new_pos[1]);
+	const double adjusted = floor(new_pos[1]) + 0.2;
+	printf("Stop at pos y = %lf\nReset pos to %lf\n", new_pos[1], adjusted);
+	new_pos[1] = adjusted;
+	in_wall = 1;
+}
+
+else printf("No point exists at y = %lf\n", new_pos[1]);
+*/
+
+/*
+if (point_exists_at(new_pos[0], new_pos[1] + stop_dist, p_height) ||
+	point_exists_at(new_pos[0], new_pos[1] - stop_dist, p_height))
+	new_pos[1] = prev_pos[1];
+
+if (point_exists_at(new_pos[0] + stop_dist, new_pos[1], p_height) ||
+	point_exists_at(new_pos[0] - stop_dist, new_pos[1], p_height))
+	new_pos[0] = prev_pos[0];
+*/
+
+/////
+
+if (!point_exists_at((*pos)[0], new_pos[1], p_height)) {
+	(*pos)[1] = new_pos[1];
+}
+
+/////
+
+
+/*
+DEBUG(new_pos[1], lf);
+if (new_pos[1] < 11.0 + 0.05) new_pos[1] = 11.0 + 0.05;
+*/
+
+if (current_level.map_data[])
+
+/*
+if (point_exists_at((*pos)[0], new_pos[1] + stop_dist, p_height))
+	new_pos[1] = ceil(new_pos[1]) + stop_dist;
+*/
+
+/*
+byte in_wall = 0;
+if (point_exists_at(new_pos[0], new_pos[1] + stop_dist, p_height) ||
+	point_exists_at(new_pos[0], new_pos[1] - stop_dist, p_height)) {
+	// const double adjusted = ceil(new_pos[1]);
+	const double adjusted = floor(new_pos[1]) + 0.2;
+	printf("Stop at pos y = %lf\nReset pos to %lf\n", new_pos[1], adjusted);
+	new_pos[1] = adjusted;
+	in_wall = 1;
+}
+
+else printf("No point exists at y = %lf\n", new_pos[1]);
+*/
+
+/*
+if (point_exists_at(new_pos[0], new_pos[1] + stop_dist, p_height) ||
+	point_exists_at(new_pos[0], new_pos[1] - stop_dist, p_height))
+	new_pos[1] = prev_pos[1];
+
+if (point_exists_at(new_pos[0] + stop_dist, new_pos[1], p_height) ||
+	point_exists_at(new_pos[0] - stop_dist, new_pos[1], p_height))
+	new_pos[0] = prev_pos[0];
+*/
+
+/////
+
+// x0, y0, x1, y1
+// SDL_RenderDrawLine(screen.renderer, screen_x, last_height_change_y, screen_x, height_change_y);
+// last_height_change_y = height_change_y;
+
+/////

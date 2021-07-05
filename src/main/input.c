@@ -47,12 +47,11 @@ void update_pos(VectorF* const pos, const VectorF prev_pos, VectorF* const dir,
 	if (!increasing_fov && settings.fov > INIT_FOV)
 		update_fov(settings.fov - settings.fov_step);
 
-	const VectorF new_dir = {cos(rad_theta), sin(rad_theta)};
-	*dir = new_dir;
+	*dir = (VectorF) {cos(rad_theta), sin(rad_theta)};
 
 	const VectorF
-		forward_back_movement = VectorFF_mul(new_dir, VectorF_memset(body -> v)),
-		sideways_movement = VectorFF_mul(new_dir, VectorF_memset(body -> strafe_v));
+		forward_back_movement = VectorFF_mul(*dir, VectorF_memset(body -> v)),
+		sideways_movement = VectorFF_mul(*dir, VectorF_memset(body -> strafe_v));
 
 	VectorF movement = {0.0, 0.0};
 
@@ -74,18 +73,20 @@ void update_pos(VectorF* const pos, const VectorF prev_pos, VectorF* const dir,
 	if (new_pos[0] < 0 || new_pos[0] > current_level.map_width) new_pos[0] = prev_pos[0];
 
 	#ifdef NOCLIP_MODE
+
 	(void) prev_pos;
 	(void) p_height;
+
 	#else
 
 	const double stop_dist = settings.stop_dist_from_wall;
 
-	if (point_exists_at(prev_pos[0], new_pos[1] + stop_dist, p_height) ||
-		point_exists_at(prev_pos[0], new_pos[1] - stop_dist, p_height))
+	if (point_exists_at(new_pos[0], new_pos[1] + stop_dist, p_height) ||
+		point_exists_at(new_pos[0], new_pos[1] - stop_dist, p_height))
 		new_pos[1] = prev_pos[1];
 
-	if (point_exists_at(new_pos[0] + stop_dist, prev_pos[1], p_height) ||
-		point_exists_at(new_pos[0] - stop_dist, prev_pos[1], p_height))
+	if (point_exists_at(new_pos[0] + stop_dist, new_pos[1], p_height) ||
+		point_exists_at(new_pos[0] - stop_dist, new_pos[1], p_height))
 		new_pos[0] = prev_pos[0];
 
 	#endif
@@ -125,6 +126,7 @@ inlinable void update_pace(Pace* const pace, const VectorF pos, const VectorF pr
 		pace -> screen_offset = sin(domain -> val) * settings.screen_height / pace -> offset_scaler;
 	}
 }
+
 #endif
 
 inlinable void init_a_jump(Jump* const jump, const byte falling) {

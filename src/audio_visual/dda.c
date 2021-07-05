@@ -42,9 +42,7 @@ DataDDA init_dda(const VectorF origin, const VectorF dir) {
 	};
 }
 
-inlinable byte iter_dda(DataDDA* const d_ref) {
-	DataDDA d = *d_ref;
-
+inlinable DataDDA peek_dda(DataDDA d) {
 	if (d.ray_length[0] < d.ray_length[1]) {
 		d.dist = d.ray_length[0];
 		d.curr_tile.x += d.ray_step.x;
@@ -58,8 +56,12 @@ inlinable byte iter_dda(DataDDA* const d_ref) {
 		d.side = 1;
 	}
 
-	if (VectorI_out_of_bounds(d.curr_tile)) return 0;
+	return d;
+}
 
+inlinable byte iter_dda(DataDDA* const d_ref) {
+	DataDDA d = peek_dda(*d_ref);
+	if (VectorI_out_of_bounds(d.curr_tile)) return 0;
 	d.step_count++;
 	memcpy(d_ref, &d, sizeof(DataDDA));
 	return 1;
