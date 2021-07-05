@@ -1,0 +1,7 @@
+/*
+const byte point =
+	(hit[0] < 0.0 || hit[1] < 0.0 || hit[0] > current_level.map_width - 1.0 || hit[1] > current_level.map_height - 1.0)
+	? current_level.out_of_bounds_point : map_point(current_level.floor_data, floored_hit.x, floored_hit.y);
+*/
+
+/////

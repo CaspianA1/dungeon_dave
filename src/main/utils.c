@@ -92,9 +92,12 @@ inlinable void set_map_point(byte* const map, const byte val, const int x, const
 
 /////
 
-inlinable void update_z_buffer(const int screen_x, const double dist) {
-	for (int i = screen_x; i < screen_x + settings.ray_column_width; i++)
-		screen.z_buffer[i] = dist;
+inlinable void update_val_buffers(const int screen_x, const double dist, const double cos_beta, const VectorF dir) {
+	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++) {
+		screen.z_buffer[x] = dist;
+		screen.cos_beta_buffer[x] = cos_beta;
+		screen.dir_buffer[x] = dir;
+	}
 }
 
 /////

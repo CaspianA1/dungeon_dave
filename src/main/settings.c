@@ -24,7 +24,7 @@ inlinable void update_max_fps(const int new_max_fps) {
 	settings.max_delay = 1000.0 / new_max_fps;
 }
 
-void init_buffers(const int new_width, const int new_height, const byte should_free) {
+void init_SDL_buffers(const int new_width, const int new_height, const byte should_free) {
 	SDL_Texture** const buffers[2] = {
 		&screen.pixel_buffer, &screen.shape_buffer
 	};
@@ -72,12 +72,14 @@ void update_screen_dimensions(int* const y_pitch, const int mouse_y) {
 		height_not_eq = new_height != settings.screen_height;
 
 	if (width_not_eq || height_not_eq) {
-		init_buffers(new_width, new_height, 1);
+		init_SDL_buffers(new_width, new_height, 1);
 		if (width_not_eq) {
 			settings.screen_width = new_width;
 			settings.half_screen_width = new_width / 2;
 			update_proj_dist();
 			screen.z_buffer = wrealloc(screen.z_buffer, new_width * sizeof(double));
+			screen.cos_beta_buffer = wrealloc(screen.cos_beta_buffer, new_width * sizeof(double));
+			screen.dir_buffer = wrealloc(screen.dir_buffer, new_width * sizeof(VectorF));
 		}
 		if (height_not_eq) {
 			settings.screen_height = new_height;

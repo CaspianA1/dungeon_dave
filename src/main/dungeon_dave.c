@@ -43,15 +43,12 @@ non-clipping pathfinding
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen(&player.y_pitch, player.mouse_pos.y) == Exit)
 		deinit_all(player, weapon);
 
 	play_sound(current_level.background_sound, 1);
-
-	screen.cos_beta_buffer = calloc(settings.screen_width, sizeof(double));
-	screen.dir_buffer = calloc(settings.screen_width, sizeof(VectorF));
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();

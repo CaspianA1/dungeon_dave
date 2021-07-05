@@ -13,7 +13,6 @@ features:
 	- animated skyboxes
 	- escape mouse if pressing escape
 	- a level opener, with a cool spinning effect (only for the first level)
-	- fast floor/ceiling
 	- a sprite pool
 	- a skybox of a great city
 	- an airship level
@@ -27,16 +26,14 @@ problems:
 	- z-buffering issues with sprites for higher point heights
 	- player height needs to be readjusted when screen height changes (it also changes based on screen width)
 	- min and max proj dist
-	- empty z-buffer slots for ray_column_widths above 1
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
-	- draw_floor_plane doesn't draw some textures right
 	- too many Mix_Chunks on the available channels -> out of channels
 	- skybox stretching
 	- navigators use too much heap memory
 	- change the VectorF name to something less clunky
-	- less doubles in render_overlay.c
-	- don't pass the player in handle_ray
+	- less doubles and more ints in render_overlay.c
 	- add back the BFS wall checking
 	- don't intersect the player dot with walls in the minimap
 	- many VectorF's to double[2]'s
-	- stop when hitting a sprite
+	- collide with sprites
+	- error when decreasing screen size for val buffers
