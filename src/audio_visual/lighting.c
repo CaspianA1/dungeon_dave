@@ -5,7 +5,7 @@ typedef struct {
 	double radius;
 } Circle;
 
-typedef VectorF Triangle[3];
+typedef double Triangle[3][2];
 
 inlinable double diffuse_circle(const VectorF pos, const Circle circle) {
 	const VectorF center_diff = VectorFF_sub(pos, circle.center);
@@ -15,7 +15,7 @@ inlinable double diffuse_circle(const VectorF pos, const Circle circle) {
 }
 
 // https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
-inlinable double line_side(const VectorF p1, const VectorF p2, const VectorF p3) {
+inlinable double line_side(const VectorF p1, const double p2[2], const double p3[2]) {
 	return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1]);
 }
 

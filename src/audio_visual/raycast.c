@@ -48,7 +48,6 @@ VectorF handle_ray(const DataRaycast d) {
 	}
 	*/
 
-	// update z-buffer later even when handle_ray is skipped
 	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, d.dir);
 
 	const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
