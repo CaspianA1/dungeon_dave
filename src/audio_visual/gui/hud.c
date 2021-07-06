@@ -1,3 +1,5 @@
+
+
 byte update_toggle(Toggle* const toggle) {
 	const byte pressed_key = keys[toggle -> key];
 	if (pressed_key && !toggle -> enabled_previously)
@@ -23,19 +25,20 @@ void draw_minimap(const VectorF pos) {
 		for (int map_y = 0; map_y < current_level.map_height; map_y++) {
 			const byte point = map_point(current_level.wall_data, map_x, map_y);
 			const double shade = 1.0 -
-				((double) current_level.get_point_height(point, (VectorF) {map_x, map_y}) / current_level.max_point_height);
+				((double) current_level.get_point_height(point, (VectorF) {map_x, map_y})
+				/ current_level.max_point_height);
 
-			SDL_SetRenderDrawColor(screen.renderer, toggle.r * shade, toggle.g * shade, toggle.b * shade, SDL_ALPHA_OPAQUE);
+			SDL_SetRenderDrawColor(screen.renderer, toggle.r * shade, toggle.g * shade,
+				toggle.b * shade, SDL_ALPHA_OPAQUE);
 			wall.x = map_x * width_scale;
 			wall.y = map_y * height_scale;
 			SDL_RenderFillRectF(screen.renderer, &wall);
 		}
 	}
 
-	const byte dot_size = (settings.screen_width + settings.screen_height) / 300.0;
-	const SDL_Rect player_dot = {pos[0] * width_scale, pos[1] * height_scale, dot_size, dot_size};
+	const SDL_FRect player_dot = {pos[0] * width_scale, pos[1] * height_scale, width_scale, height_scale};
 	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderFillRect(screen.renderer, &player_dot);
+	SDL_RenderFillRectF(screen.renderer, &player_dot);
 }
 
 void draw_crosshair(const int y_pitch) {

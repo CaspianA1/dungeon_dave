@@ -39,5 +39,3 @@ problems:
 	- don't intersect the player dot with walls in the minimap
 	- many VectorF's to double[2]'s
 	- shading is slow
-	- can't shoot Eddie when he's idle
-	- add VectorF_apply
