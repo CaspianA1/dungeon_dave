@@ -68,19 +68,20 @@ int main(void) {
 		const double full_jump_height = player.jump.height * settings.screen_height;
 
 		raycast(player, wall_y_shift, full_jump_height);
-		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, player.y_pitch, wall_y_shift);
 
 		draw_generic_billboards(player, wall_y_shift);
 		update_all_enemies(player);
 		use_weapon_if_needed(&weapon, player, input_status);
 
-		#else
+		#endif
 
+		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, player.y_pitch, wall_y_shift);
+
+		/*
 		// draw_ceiling_plane(player);
 		draw_floor_plane(player); // fix
 		refresh_and_clear_temp_buf();
-
-		#endif
+		*/
 
 		refresh(player.tilt, player.pos, wall_y_shift);
 		tick_delay(before);
