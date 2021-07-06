@@ -19,7 +19,6 @@ features:
 	- no pace if slow enough
 	- collide with sprites
 	- accelerate sideways
-	- add back planar mode
 	- add back Adam's whip for close-range combat
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:

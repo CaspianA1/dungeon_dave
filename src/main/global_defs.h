@@ -3,8 +3,8 @@
 #include <SDL2/SDL_mixer.h>
 #include <pthread.h>
 
-// #define PLANAR_MODE
-// #define NOCLIP_MODE
+#define PLANAR_MODE
+#define NOCLIP_MODE
 
 #define SHADING_ENABLED
 // #define SOUND_ENABLED

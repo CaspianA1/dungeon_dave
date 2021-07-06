@@ -28,8 +28,10 @@ inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const 
 		*(pixbuf_row + x) = src;
 }
 
-void fast_affine_floor(const VectorF pos, const double p_height, const double pace, const int y_pitch, const double y_shift) {
-	const double p_height_ratio = p_height * settings.screen_height / settings.proj_dist;
+void fast_affine_floor(const VectorF pos, const double full_jump_height,
+	const double pace, const int y_pitch, const double y_shift) {
+
+	const double p_height_ratio = full_jump_height / settings.proj_dist;
 	const double opp_h = 0.5 + p_height_ratio;
 
 	// y_shift - pace may go outside map boundaries; limit this domain
@@ -53,3 +55,16 @@ void fast_affine_floor(const VectorF pos, const double p_height, const double pa
 		}
 	}
 }
+
+#ifdef PLANAR_MODE
+
+void fill_val_buffers_for_planar_mode(const double angle_degrees) {
+	const double player_angle = to_radians(angle_degrees);
+
+	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
+		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
+		update_val_buffers(screen_x, 0, cos(player_angle - theta), (VectorF) {cos(theta), sin(theta)});
+	}
+}
+
+#endif

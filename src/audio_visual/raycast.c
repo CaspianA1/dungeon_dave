@@ -60,7 +60,7 @@ VectorF handle_ray(const DataRaycast d) {
 		SDL_FRect raised_wall = wall;
 		raised_wall.y -= wall.h * i;
 
-		/* completely obscured: starts under the tallest wall so far; wouldn't be seen, but this is for additional speed */
+		/* completely obscured: starts under the tallest wall so far; wouldn't be seen, but for more speed */
 		if ((double) raised_wall.y >= *d.curr_smallest_wall_y || raised_wall.y >= settings.screen_height)
 			continue;
 
