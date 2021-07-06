@@ -80,3 +80,42 @@ inlinable VectorI VectorF_round(const VectorF vf) {
 */
 
 /////
+
+/*
+// draw_ceiling_plane(player);
+draw_floor_plane(player); // fix
+refresh_and_clear_temp_buf();
+*/
+
+/////
+
+// https://developer.nvidia.com/gpugems/gpugems/part-v-performance-and-practicalities/chapter-28-graphics-pipeline-performance
+
+/////
+
+/*
+DEBUG(y_shift, lf);
+const SDL_FRect to_draw = {0, y_shift - pace, settings.screen_width, settings.screen_height - pace};
+DEBUG_FRECT(to_draw);
+
+y = y_shift - pace
+e = scr_height - pace
+
+h = e - y
+h = (scr_height - pace) - (y_shift - pace)
+h = scr_height - pace - y_shift + pace
+h = scr_height - y_shift
+*/
+
+/////
+
+// const SDL_Rect pixbuf_draw_region = {0, y_shift - pace, settings.screen_width, settings.screen_height - y_shift};
+// const SDL_Rect pixbuf_draw_region = {0, settings.half_screen_width, settings.screen_width, settings.screen_height};
+// const SDL_Rect pixbuf_draw_region = {0, y_shift - pace, settings.screen_width, settings.screen_height};
+
+/////
+
+printf("pixbuf_draw_region = {%d, %d, %d, %d}\n",
+	pixbuf_draw_region.x, pixbuf_draw_region.y, pixbuf_draw_region.w, pixbuf_draw_region.h);
+
+/////

@@ -29,12 +29,12 @@ inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const 
 }
 
 void fast_affine_floor(const VectorF pos, const double full_jump_height,
-	const double pace, const int y_pitch, const double y_shift) {
+	const double pace, const double y_shift, const int y_pitch, const byte pixbuf_crop_out_of_bounds) {
 
 	const double p_height_ratio = full_jump_height / settings.proj_dist;
 	const double opp_h = 0.5 + p_height_ratio;
 
-	// y_shift - pace may go outside map boundaries; limit this domain
+	// `y_shift - pace` may go outside map boundaries; limit this domain
 	for (int y = y_shift - pace; y < settings.screen_height - pace; y++) {
 		const int pace_y = y + pace;
 		if (pace_y < 0) continue;
@@ -43,7 +43,8 @@ void fast_affine_floor(const VectorF pos, const double full_jump_height,
 		if (row == 0) continue;
 		const double straight_dist = opp_h / row * settings.proj_dist;
 
-		Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch);
+		const int pixbuf_row_offset = pace_y - (pixbuf_crop_out_of_bounds ? 0 : y_shift);
+		Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pixbuf_row_offset * screen.pixel_pitch);
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			const double actual_dist = straight_dist / screen.cos_beta_buffer[screen_x];

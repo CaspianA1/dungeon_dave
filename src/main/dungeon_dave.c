@@ -60,12 +60,12 @@ int main(void) {
 		if (input_status == Exit) deinit_all(player, weapon);
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
-		prepare_for_drawing();
 
 		const double
 			wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset,
 			full_jump_height = player.jump.height * settings.screen_height;
 
+		const byte pixbuf_region_out_of_bounds = prepare_for_drawing(wall_y_shift);
 		draw_skybox(player.angle, wall_y_shift);
 
 		#ifndef PLANAR_MODE
@@ -77,13 +77,8 @@ int main(void) {
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		fast_affine_floor(player.pos, full_jump_height, player.pace.screen_offset, player.y_pitch, wall_y_shift);
-
-		/*
-		// draw_ceiling_plane(player);
-		draw_floor_plane(player); // fix
-		refresh_and_clear_temp_buf();
-		*/
+		fast_affine_floor(player.pos, full_jump_height, player.pace.screen_offset,
+			wall_y_shift, player.y_pitch, pixbuf_region_out_of_bounds);
 
 		refresh(player.tilt, player.pos, wall_y_shift);
 		tick_delay(before);

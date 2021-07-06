@@ -27,13 +27,20 @@ void deinit_screen(void) {
 	SDL_Quit();
 }
 
-inlinable void prepare_for_drawing(void) {
+// returns if the pixel buffer crop went out of bounds
+inlinable byte prepare_for_drawing(const double y_shift) {
 	SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, 0);
 	SDL_RenderClear(screen.renderer);
 
-	SDL_LockTexture(screen.pixel_buffer, NULL, &screen.pixels, &screen.pixel_pitch);
+	// this doesn't behave like a normal SDL_Rect; it only crops the region as {x1, y1, x2, y2}; no heights
+	const SDL_Rect pixbuf_draw_region = {0, ceil(y_shift), settings.screen_width, settings.screen_height};
+	const SDL_Rect* const pixbuf_draw_region_ptr = (pixbuf_draw_region.y < 0) ? NULL : &pixbuf_draw_region;
+
+	SDL_LockTexture(screen.pixel_buffer, pixbuf_draw_region_ptr, &screen.pixels, &screen.pixel_pitch);
 	SDL_SetRenderTarget(screen.renderer, screen.shape_buffer);
 	SDL_RenderClear(screen.renderer);
+
+	return pixbuf_draw_region_ptr == NULL;
 }
 
 inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const dest_crop, const double tilt) {
@@ -91,7 +98,7 @@ void refresh(const Domain tilt, const VectorF pos, const int y_pitch) {
 }
 
 inlinable Uint32 get_surface_pixel(const void* const pixels,
-	const int surface_pitch, const int x, const int y) { // for surface
+	const int surface_pitch, const int x, const int y) {
 
 	return *(Uint32*) ((Uint8*) pixels + y * surface_pitch + x * PIXEL_FORMAT_BPP);
 }

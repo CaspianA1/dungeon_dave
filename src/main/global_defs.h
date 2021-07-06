@@ -3,8 +3,10 @@
 #include <SDL2/SDL_mixer.h>
 #include <pthread.h>
 
+/*
 #define PLANAR_MODE
 #define NOCLIP_MODE
+*/
 
 #define SHADING_ENABLED
 // #define SOUND_ENABLED
@@ -55,8 +57,8 @@
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define DEBUG_VECF(vec) printf(#vec " = {%lf, %lf}\n", vec[0], vec[1])
 #define DEBUG_VECI(vec) printf(#vec " = {%d, %d}\n", vec.x, vec.y)
-#define DEBUG_FRECT(frect) printf(#frect = " = {.x = %lf, .y = %lf, .w = %lf, .h = %lf}\n",\
-						frect.x, frect.y, frect.w, frect.h)
+#define DEBUG_FRECT(frect) printf(#frect " = {.x = %lf, .y = %lf, .w = %lf, .h = %lf}\n",\
+	(double) frect.x, (double) frect.y, (double) frect.w, (double) frect.h)
 
 /////
 
