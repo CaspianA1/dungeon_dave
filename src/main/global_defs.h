@@ -9,7 +9,7 @@
 */
 
 #define SHADING_ENABLED
-#define SOUND_ENABLED
+// #define SOUND_ENABLED
 #define FULL_QUALITY
 // #define TRACK_MEMORY
 

@@ -18,6 +18,7 @@ features:
 	- an airship level
 	- no pace if slow enough
 	- collide with sprites
+	- accelerate sideways
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

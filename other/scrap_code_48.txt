@@ -56,3 +56,9 @@ inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const 
 	#endif
 
 /////
+
+inlinable Uint32* get_pixbuf_row(const int y) { // for texture
+	return ((Uint32*) ((Uint8*) screen.pixels + y * screen.pixel_pitch));
+}
+
+/////

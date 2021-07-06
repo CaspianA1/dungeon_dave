@@ -77,7 +77,7 @@ int main(void) {
 		#else
 
 		// draw_ceiling_plane(player);
-		draw_floor_plane(player);
+		draw_floor_plane(player); // fix
 		refresh_and_clear_temp_buf();
 
 		#endif
