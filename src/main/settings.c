@@ -34,7 +34,7 @@ void init_SDL_buffers(const int new_width, const int new_height, const byte shou
 	};
 
 	for (byte i = 0; i < 2; i++) {
-		SDL_Texture** buffer = buffers[i];
+		SDL_Texture** const buffer = buffers[i];
 
 		if (should_free) SDL_DestroyTexture(*buffer);
 
@@ -137,11 +137,11 @@ void load_all_defaults(void (*load_first_level) (void),
 	const Player first_player = load_player(4.8, 0.3, 8.0, 0.12, 15.0, 0.08, 0.09, 0.05, 1.9);
 
 	const Weapon first_weapon = init_weapon("../assets/audio/sound_effects/shotgun.wav",
-		"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 0.0, 4.0, 6, 10, 59, 30);
+		"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 4.0, 0.6, 6, 10, 59, 30);
 
 	/*
 	const Weapon first_weapon = init_weapon("../assets/audio/enemy_sound_test/attack.wav",
-		"../assets/spritesheets/weapons/golden_dagger.bmp", 0.09, 4.0, 2, 5, 9, 30);
+		"../assets/spritesheets/weapons/golden_dagger.bmp", 4.0, 0.2, 2, 5, 9, 30);
 	*/
 
 	memcpy(player, &first_player, sizeof(Player));

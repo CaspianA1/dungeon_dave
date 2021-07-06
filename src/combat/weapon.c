@@ -1,14 +1,15 @@
-inlinable Weapon init_weapon(const char* const sound_path,
-	const char* const spritesheet_path,
-	const double screen_y_shift_percent_down, const double power, const int frames_per_row,
+inlinable Weapon init_weapon(const char* const sound_path, const char* const spritesheet_path,
+	const double power, const double dist_for_hit, const int frames_per_row,
 	const int frames_per_col, const int frame_count, const int fps) {
 
 	#ifndef SOUND_ENABLED
 	(void) sound_path;
 	#endif
 
-	return (Weapon) {0, screen_y_shift_percent_down, power,
-		init_sound(sound_path, 1), init_animation(spritesheet_path, frames_per_row, frames_per_col, frame_count, fps)};
+	return (Weapon) {
+		0, power, dist_for_hit, init_sound(sound_path, 1),
+		init_animation(spritesheet_path, frames_per_row, frames_per_col, frame_count, fps)
+	};
 }
 
 void deinit_weapon(const Weapon weapon) {
@@ -31,7 +32,7 @@ void shoot_weapon(const Weapon* const weapon, const VectorF pos, const VectorF d
 				enemy_pos = enemy -> animations.billboard.pos,
 				bullet_pos = VectorF_line_pos(pos, dir, bullet.dist);
 
-			if (!VectorFF_exceed_dist(enemy_pos, bullet_pos, 0.51)) {
+			if (!VectorFF_exceed_dist(enemy_pos, bullet_pos, weapon -> dist_for_hit)) {
 				enemy -> recently_attacked = 1;
 				enemy -> hp -= weapon -> power;
 				if (enemy -> hp <= 0.0) set_enemy_state(enemy, Dead, 0);
@@ -54,7 +55,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player player, const Input
 
 	// -1 -> cycle frame, 0 -> first frame
 	animate_weapon(&weapon -> animation, player.pos, -weapon -> in_use,
-		player.y_pitch, player.pace.screen_offset, weapon -> screen_y_shift_percent_down);
+		player.y_pitch, player.pace.screen_offset);
 
 	#else
 

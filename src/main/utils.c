@@ -111,12 +111,9 @@ inlinable byte VectorII_eq(const VectorI v1, const VectorI v2) {
 }
 
 ///// https://docs.microsoft.com/en-us/cpp/intrinsics/x86-intrinsics-list?view=msvc-160
+
 inlinable VectorI VectorF_floor(const VectorF vf) {
 	return (VectorI) {(int) floor(vf[0]), (int) floor(vf[1])};
-}
-
-inlinable VectorI VectorF_round(const VectorF vf) {
-	return (VectorI) {(int) round(vf[0]), (int) round(vf[1])};
 }
 
 #define VectorF_memset _mm_set1_pd
@@ -136,15 +133,14 @@ inlinable byte VectorFF_exceed_dist(const VectorF a, const VectorF b, const doub
 }
 
 inlinable VectorF VectorFF_diff(const VectorF a, const VectorF b) {
-	return (VectorF) {fabs(a[0] - b[0]), fabs(a[1] - b[1])};
+	const VectorF signed_diff = VectorFF_sub(a, b);
+	return (VectorF) {fabs(signed_diff[0]), fabs(signed_diff[1])};
 }
 
 inlinable byte VectorF_in_range(const double p, const VectorF range) {
 	return p >= range[0] - small_double_epsilon && p <= range[1] + small_double_epsilon;
 }
-
-inlinable VectorF VectorF_line_pos(const VectorF pos,
-	const VectorF dir, const double slope) {
+inlinable VectorF VectorF_line_pos(const VectorF pos, const VectorF dir, const double slope) {
 
 	const VectorF slope_as_vec = VectorF_memset(slope);
 	return VectorFF_add(VectorFF_mul(dir, slope_as_vec), pos);

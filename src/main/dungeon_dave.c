@@ -13,12 +13,14 @@
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
 #include "../audio_visual/overlay/render_overlay.c"
+#include "../audio_visual/dda.c"
 
 #include "level.c"
 #include "input.c"
-#include "gui.c"
 
-#include "../audio_visual/dda.c"
+#include "../audio_visual/gui/gui.h"
+#include "../audio_visual/gui/hud.c"
+#include "../audio_visual/gui/title_screen.c"
 
 #include "../combat/bfs_types.c"
 #include "../combat/bfs.c"
@@ -36,7 +38,7 @@
 
 /*
 itinerary:
-visplane floors
+fast floor shading
 non-clipping pathfinding
 */
 

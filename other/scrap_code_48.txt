@@ -62,3 +62,21 @@ inlinable Uint32* get_pixbuf_row(const int y) { // for texture
 }
 
 /////
+
+const SDL_FRect screen_pos = {
+	pace,
+	fabs(pace) + (y_pitch < 0 ? 0 : y_pitch) +
+	settings.screen_height * screen_y_shift_percent_down,
+	settings.screen_width,
+	settings.screen_height
+};
+
+/////
+
+/*
+inlinable VectorI VectorF_round(const VectorF vf) {
+	return (VectorI) {(int) round(vf[0]), (int) round(vf[1])};
+}
+*/
+
+/////

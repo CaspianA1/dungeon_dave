@@ -58,7 +58,7 @@ typedef struct {
 
 typedef struct {
 	byte in_use;
-	const double screen_y_shift_percent_down, power;
+	const double power, dist_for_hit;
 	Sound sound;
 	Animation animation;
 } Weapon;
