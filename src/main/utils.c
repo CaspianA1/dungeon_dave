@@ -141,15 +141,12 @@ inlinable byte VectorF_in_range(const double p, const VectorF range) {
 	return p >= range[0] - small_double_epsilon && p <= range[1] + small_double_epsilon;
 }
 inlinable VectorF VectorF_line_pos(const VectorF pos, const VectorF dir, const double slope) {
-
 	const VectorF slope_as_vec = VectorF_memset(slope);
 	return VectorFF_add(VectorFF_mul(dir, slope_as_vec), pos);
 }
 
 // http://ftp.neutrino.es/x86InstructionSet/VINSERTF128.html
-inlinable VectorF2 VectorF2_line_pos(const VectorF pos,
-	const VectorF dir, const VectorF slopes) {
-
+inlinable VectorF2 VectorF2_line_pos(const VectorF pos, const VectorF dir, const VectorF slopes) {
 	const VectorF2
 		slopes_as_vec2 = {slopes[0], slopes[0], slopes[1], slopes[1]},
 		dir_as_vec2 = {dir[0], dir[1], dir[0], dir[1]},

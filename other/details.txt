@@ -20,6 +20,7 @@ features:
 	- collide with sprites
 	- accelerate sideways
 	- add back planar mode
+	- add back Adam's whip for close-range combat
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -39,3 +40,4 @@ problems:
 	- don't intersect the player dot with walls in the minimap
 	- many VectorF's to double[2]'s
 	- shading is slow
+	- hit detection for weapons is still sometimes spotty
