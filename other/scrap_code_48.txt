@@ -165,3 +165,16 @@ gui.background.whole_colors = {
 */
 
 /////
+
+/*
+int SDL_QueryTexture(SDL_Texture * texture,
+                     Uint32 * format, int *access,
+                     int *w, int *h);
+*/
+
+SDL_TextureAccess access;
+int a = SDL_QueryTexture(s.texture, screen.pixel_format, &access, NULL, NULL);
+DEBUG(a, d);
+DEBUG(access, d);
+
+/////

@@ -5,7 +5,7 @@ void init_screen(void) {
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1", SDL_HINT_OVERRIDE);
 
 	SDL_CreateWindowAndRenderer(settings.screen_width, settings.screen_height,
-		SDL_WINDOW_RESIZABLE | SDL_RENDERER_ACCELERATED, &screen.window, &screen.renderer);
+		SDL_RENDERER_ACCELERATED | SDL_WINDOW_RESIZABLE, &screen.window, &screen.renderer);
 	SDL_SetWindowTitle(screen.window, "Dungeon Dave");
 
 	screen.pixel_format = SDL_AllocFormat(PIXEL_FORMAT);
