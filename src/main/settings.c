@@ -63,7 +63,7 @@ void load_default_settings(void) {
 	keys = SDL_GetKeyboardState(NULL);
 }
 
-void update_screen_dimensions(int* const y_pitch, const int mouse_y) {
+byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
 	int new_width, new_height;
 	SDL_GetWindowSize(screen.window, &new_width, &new_height);
 
@@ -87,7 +87,9 @@ void update_screen_dimensions(int* const y_pitch, const int mouse_y) {
 			void update_y_pitch(int* const, const int);
 			update_y_pitch(y_pitch, mouse_y);
 		}
+		return 1;
 	}
+	return 0;
 }
 
 Player load_player(const double jump_up_v0,
@@ -159,6 +161,8 @@ void deinit_all(const Player player, const Weapon weapon) {
 	deinit_level(current_level);
 	deinit_audio_subsystem();
 	deinit_screen();
+
+	TTF_Quit();
 
 	#ifdef TRACK_MEMORY
 	dynamic_memory_report();

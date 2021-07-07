@@ -9,7 +9,7 @@
 */
 
 #define SHADING_ENABLED
-// #define SOUND_ENABLED
+#define SOUND_ENABLED
 #define FULL_QUALITY
 // #define TRACK_MEMORY
 
@@ -17,7 +17,7 @@
 #define INIT_W 800
 #define INIT_H 600
 #define INIT_MAX_FPS 60
-#define INIT_RAY_COLUMN_W 1
+#define INIT_RAY_COLUMN_W 10
 
 // #define INIT_FOV 66.849622365373434718
 #define INIT_FOV 90.0

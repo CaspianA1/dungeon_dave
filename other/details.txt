@@ -20,6 +20,7 @@ features:
 	- collide with sprites
 	- accelerate sideways
 	- add back Adam's whip for close-range combat
+	- a gui system
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

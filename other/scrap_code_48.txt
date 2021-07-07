@@ -128,3 +128,40 @@ wall.y = map_y * height_scale;
 // SDL_RenderFillRect(screen.renderer, &wall);
 
 /////
+
+/*
+GUI gui = {
+	.num_messages = num_messages,
+	has_sprite_background,
+	msg_color,
+	
+	messages,
+	wmalloc(num_messages * sizeof(Message)),
+	font, {
+		.msg_color = msg_color,
+		.background = {background_r, background_g, background_b, SDL_ALPHA_OPAQUE},
+		.border = {border_r, border_g, border_b, SDL_ALPHA_OPAQUE}
+	}
+};
+*/
+
+/////
+
+/*
+gui.background.whole_colors = {
+	.center = {
+		va_arg(gui_data, unsigned),
+		va_arg(gui_data, unsigned),
+		va_arg(gui_data, unsigned),
+		SDL_ALPHA_OPAQUE
+	},
+	.border = {
+		va_arg(gui_data, unsigned),
+		va_arg(gui_data, unsigned),
+		va_arg(gui_data, unsigned),
+		SDL_ALPHA_OPAQUE
+	}
+};
+*/
+
+/////

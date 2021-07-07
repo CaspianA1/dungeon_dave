@@ -1,10 +1,10 @@
 Message init_message(const char* const text,
 	const byte r, const byte g, const byte b, const byte has_background) {
 
-	const double avg_dimensions = (settings.screen_width + settings.screen_height) / 2.0;
+	const int avg_dimensions = (settings.screen_width + settings.screen_height) / 2;
 
 	Message message = {
-		TTF_OpenFont("../assets/fonts/dnd.ttf", avg_dimensions / 10.0),
+		TTF_OpenFont("../assets/dnd.ttf", avg_dimensions / 10.0),
 		.r = r, .g = g, .b = b, .has_background = has_background
 	};
 
@@ -16,8 +16,8 @@ Message init_message(const char* const text,
 	return message;
 }
 
-inlinable void draw_colored_rect(const byte r, const byte g,
-	const byte b, const double shade, const SDL_Rect* const rect) {
+inlinable void draw_colored_rect(const byte r, const byte g, const byte b,
+	const double shade, const SDL_Rect* const rect) {
 
 	SDL_SetRenderDrawColor(screen.renderer, r * shade, g * shade, b * shade, SDL_ALPHA_OPAQUE);
 	SDL_RenderFillRect(screen.renderer, rect);
@@ -47,54 +47,66 @@ inlinable void deinit_message(Message message) {
 	deinit_sprite(message.sprite);
 }
 
-inlinable void after_gui_event(int* const y_pitch, const int mouse_y, const Uint32 before) {
-	SDL_RenderPresent(screen.renderer);
-	update_screen_dimensions(y_pitch, mouse_y);
-	tick_delay(before);
-}
-
-InputStatus display_logo(int* const y_pitch, const int mouse_y) {
-	while (1) {
+InputStatus display_logo(void) {
+	Sprite logo;
+	InputStatus logo_input;
+	byte displaying_logo = 1, dimensions_changed = 1;
+	while (displaying_logo) {
 		const Uint32 before = SDL_GetTicks();
 
-		while (SDL_PollEvent(&event)) {
+		if (dimensions_changed) logo = init_sprite("../assets/logo.bmp");
+
+		// SDL_PollEvent may loop more even after pressing exit, so this stops that
+		byte checking_for_input = 1;
+		while (SDL_PollEvent(&event) && checking_for_input) {
 			switch (event.type) {
 				case SDL_WINDOWEVENT:
-					if (event.window.event == SDL_WINDOWEVENT_CLOSE) return Exit;
+					if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+						logo_input = Exit;
+						displaying_logo = 0;
+						checking_for_input = 0;
+					}
 					break;
-				case SDL_KEYUP: case SDL_MOUSEBUTTONDOWN:
-					return ProceedAsNormal;
+				case SDL_KEYUP: case SDL_MOUSEBUTTONDOWN: {
+					logo_input = ProceedAsNormal;
+					displaying_logo = 0;
+					checking_for_input = 0;
+				}
 			}
 		}
 
-		Sprite logo = init_sprite("../assets/logo.bmp");
 		SDL_RenderCopy(screen.renderer, logo.texture, NULL, NULL);
-		deinit_sprite(logo);
-		after_gui_event(y_pitch, mouse_y, before);
+		dimensions_changed = after_gui_event(before);
+
+		if (dimensions_changed || !displaying_logo) deinit_sprite(logo);
 	}
+	return logo_input;
 }
 
-InputStatus display_title_screen(int* const y_pitch, const int mouse_y) {
+InputStatus display_title_screen(void) {
 	const Sound title_track = init_sound("../assets/audio/themes/title.wav", 0);
 	play_sound(title_track, 1);
-	if (display_logo(y_pitch, mouse_y) == Exit) return Exit;
+	if (display_logo() == Exit) return Exit;
 
 	if (TTF_Init() == -1)
 		FAIL("Unable to initialize the font library: %s", SDL_GetError());
 
 	Message start;
 	InputStatus title_screen_input;
+	byte displaying_title_screen = 1, dimensions_changed = 1;
 
-	while (1) {
+	while (displaying_title_screen) {
 		const Uint32 before = SDL_GetTicks();
 
-		start = init_message("Start!", 255, 99, 71, 0);
-		start.pos = (SDL_Rect) {
-				settings.half_screen_width - start.sprite.surface -> w / 2,
-				settings.half_screen_height - start.sprite.surface -> h / 2,
-				start.sprite.surface -> w,
-				start.sprite.surface -> h
+		if (dimensions_changed) {
+			start = init_message("Start!", 255, 99, 71, 0);
+			start.pos = (SDL_Rect) {
+					settings.half_screen_width - start.sprite.surface -> w / 2,
+					settings.half_screen_height - start.sprite.surface -> h / 2,
+					start.sprite.surface -> w,
+					start.sprite.surface -> h
 			};
+		}
 
 		start.has_background = mouse_over_message(start);
 
@@ -105,7 +117,7 @@ InputStatus display_title_screen(int* const y_pitch, const int mouse_y) {
 				case SDL_WINDOWEVENT:
 					if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
 						title_screen_input = Exit;
-						goto exit_title_screen;
+						displaying_title_screen = 0;
 					}
 					break;
 
@@ -113,7 +125,7 @@ InputStatus display_title_screen(int* const y_pitch, const int mouse_y) {
 					if (start.has_background) {
 						SDL_ShowCursor(SDL_FALSE);
 						title_screen_input = ProceedAsNormal;
-						goto exit_title_screen;
+						displaying_title_screen = 0;
 					}
 				}
 			}
@@ -131,12 +143,10 @@ InputStatus display_title_screen(int* const y_pitch, const int mouse_y) {
 		draw_colored_rect(228, 29, 29, 1.0, NULL);
 		draw_colored_rect(139, 0, 0, 1.0, &darker_center_rect);
 		draw_message(start);
-		deinit_message(start);
-		after_gui_event(y_pitch, mouse_y, before);
+		dimensions_changed = after_gui_event(before);
+		if (dimensions_changed || !displaying_title_screen) deinit_message(start);
 	}
-	exit_title_screen:
-		deinit_message(start);
-		TTF_Quit();
-		deinit_sound(title_track);
-		return title_screen_input;
+
+	deinit_sound(title_track);
+	return title_screen_input;
 }
