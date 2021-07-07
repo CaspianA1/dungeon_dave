@@ -119,3 +119,12 @@ printf("pixbuf_draw_region = {%d, %d, %d, %d}\n",
 	pixbuf_draw_region.x, pixbuf_draw_region.y, pixbuf_draw_region.w, pixbuf_draw_region.h);
 
 /////
+
+// SDL_SetRenderDrawColor(screen.renderer, toggle.r * shade, toggle.g * shade, toggle.b * shade, SDL_ALPHA_OPAQUE);
+/*
+wall.x = map_x * width_scale;
+wall.y = map_y * height_scale;
+*/
+// SDL_RenderFillRect(screen.renderer, &wall);
+
+/////

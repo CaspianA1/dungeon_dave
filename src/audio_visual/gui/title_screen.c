@@ -17,9 +17,9 @@ Message init_message(const char* const text,
 }
 
 inlinable void draw_colored_rect(const byte r, const byte g,
-	const byte b, const SDL_Rect* const rect) {
+	const byte b, const double shade, const SDL_Rect* const rect) {
 
-	SDL_SetRenderDrawColor(screen.renderer, r, g, b, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderDrawColor(screen.renderer, r * shade, g * shade, b * shade, SDL_ALPHA_OPAQUE);
 	SDL_RenderFillRect(screen.renderer, rect);
 }
 
@@ -128,8 +128,8 @@ InputStatus display_title_screen(int* const y_pitch, const int mouse_y) {
 			settings.screen_height - twice_border_thickness
 		};
 
-		draw_colored_rect(228, 29, 29, NULL);
-		draw_colored_rect(139, 0, 0, &darker_center_rect);
+		draw_colored_rect(228, 29, 29, 1.0, NULL);
+		draw_colored_rect(139, 0, 0, 1.0, &darker_center_rect);
 		draw_message(start);
 		deinit_message(start);
 		after_gui_event(y_pitch, mouse_y, before);

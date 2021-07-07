@@ -11,13 +11,13 @@ void draw_minimap(const VectorF pos) {
 	static Toggle toggle = {30, 144, 255, 0, 0, KEY_TOGGLE_MINIMAP};
 	if (!update_toggle(&toggle)) return;
 
-	const double
+	const int
 		width_scale = (double) settings.screen_width
 			/ current_level.map_width / settings.minimap_scale,
 		height_scale = (double) settings.screen_height
 			/ current_level.map_height / settings.minimap_scale;
 
-	SDL_FRect wall = {0.0, 0.0, width_scale, height_scale};
+	SDL_Rect wall_tile = {0, 0, width_scale, height_scale};
 
 	for (int map_x = 0; map_x < current_level.map_width; map_x++) {
 		for (int map_y = 0; map_y < current_level.map_height; map_y++) {
@@ -25,17 +25,14 @@ void draw_minimap(const VectorF pos) {
 			const byte point_height = current_level.get_point_height(point, (VectorF) {map_x, map_y});
 			const double shade = 1.0 - (double) point_height / current_level.max_point_height;
 
-			SDL_SetRenderDrawColor(screen.renderer, toggle.r * shade, toggle.g * shade,
-				toggle.b * shade, SDL_ALPHA_OPAQUE);
-			wall.x = map_x * width_scale;
-			wall.y = map_y * height_scale;
-			SDL_RenderFillRectF(screen.renderer, &wall);
+			wall_tile.x = map_x * width_scale;
+			wall_tile.y = map_y * height_scale;
+			draw_colored_rect(toggle.r, toggle.g, toggle.b, shade, &wall_tile);
 		}
 	}
 
-	const SDL_FRect player_dot = {pos[0] * width_scale, pos[1] * height_scale, width_scale, height_scale};
-	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderFillRectF(screen.renderer, &player_dot);
+	const SDL_Rect player_dot = {pos[0] * width_scale, pos[1] * height_scale, width_scale, height_scale};
+	draw_colored_rect(255, 0, 0, 1.0, &player_dot);
 }
 
 void draw_crosshair(const int y_pitch) {

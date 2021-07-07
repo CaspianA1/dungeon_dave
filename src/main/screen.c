@@ -64,7 +64,7 @@ void refresh(const Domain tilt, const VectorF pos, const int y_pitch) {
 	*/
 
 	if (tilt.val >= -tilt.step - 0.01 && tilt.val <= tilt.step + 0.01) {
-		SDL_RenderCopy(screen.renderer, screen.pixel_buffer, NULL, NULL);
+		SDL_RenderCopy(screen.renderer, screen.pixel_buffer, NULL, NULL); // copy everything?
 		SDL_RenderCopy(screen.renderer, screen.shape_buffer, NULL, NULL);
 	}
 

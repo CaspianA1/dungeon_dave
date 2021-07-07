@@ -19,8 +19,9 @@
 #include "input.c"
 
 #include "../audio_visual/gui/gui.h"
-#include "../audio_visual/gui/hud.c"
 #include "../audio_visual/gui/title_screen.c"
+#include "../audio_visual/gui/hud.c"
+#include "../audio_visual/gui/option_screen.c"
 
 #include "../combat/bfs_types.c"
 #include "../combat/bfs.c"
