@@ -1,27 +1,19 @@
 inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
-	const VectorI floored_hit = VectorF_floor(hit);
-	const byte point = map_point(current_level.floor_data, floored_hit.x, floored_hit.y);
-
-	// why is the point height never zero?
-	// if (current_level.get_point_height(point, hit) != 0) return;
-
-	const Sprite sprite = current_level.walls[point - 1];
-	const SDL_Surface* const surface = sprite.surface;
+	const byte floor_point = map_point(current_level.floor_data, hit[0], hit[1]);
+	// https://wiki.libsdl.org/SDL_RenderReadPixels
+	const SDL_Surface* const surface = current_level.walls[floor_point - 1].surface;
 	const int max_offset = surface -> w - 1;
 
+	const VectorI floored_hit = VectorF_floor(hit);
 	const VectorI surface_offset = {
 		(hit[0] - floored_hit.x) * max_offset,
 		(hit[1] - floored_hit.y) * max_offset
 	};
 
-	/*
-	Uint32* const src_row = (Uint32*) ((Uint8*) texture -> pixels + surface_offset.y * screen.pixel_pitch);
-	Uint32 src = *(src_row + surface_offset.x);
-	*/
-
 	Uint32 src = get_surface_pixel(surface -> pixels, surface -> pitch, surface_offset.x, surface_offset.y);
 
 	#ifdef SHADING_ENABLED
+
 	const double shade = calculate_shade(settings.proj_dist / actual_dist, hit);
 	const byte r = (byte) (src >> 16) * shade, g = (byte) (src >> 8) * shade, b = (byte) src * shade;
 	src = 0xFF000000 | (r << 16) | (g << 8) | b;
@@ -52,10 +44,12 @@ void fast_affine_floor(const VectorF pos, const double full_jump_height,
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			if (screen.wall_bottom_buffer[screen_x] >= pace_y + 1) continue;
-			// factor in point heights for the area after the stairs to skip more rendering
 
 			const double actual_dist = straight_dist / screen.cos_beta_buffer[screen_x];
 			const VectorF hit = VectorFF_add(VectorFF_mul(screen.dir_buffer[screen_x], VectorF_memset(actual_dist)), pos);
+
+			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
+			if (current_level.get_point_height(wall_point, hit)) continue;
 
 			draw_from_hit(hit, actual_dist, screen_x, pixbuf_row);
 		}

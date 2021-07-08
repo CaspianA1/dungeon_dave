@@ -50,6 +50,7 @@
 
 #define inlinable static inline
 
+#define ASM_I_AM_HERE __asm__ volatile ("nop");
 #define LOOP(max) for (int i = 0; i < max; i++)
 #define FAIL(...) {fprintf(stderr, __VA_ARGS__); exit(1);}
 

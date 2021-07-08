@@ -5,3 +5,10 @@ if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_width - 1.0
 }
 
 /////
+
+/*
+Uint32* const src_row = (Uint32*) ((Uint8*) texture -> pixels + surface_offset.y * screen.pixel_pitch);
+Uint32 src = *(src_row + surface_offset.x);
+*/
+
+/////
