@@ -7,7 +7,7 @@ typedef struct {
 	const int screen_x;
 } DataRaycast;
 
-inlinable int calculate_wall_tex_offset(const byte side, const VectorF hit, const VectorF dir, const int width) {
+inlinable int get_wall_tex_offset(const byte side, const VectorF hit, const VectorF dir, const int width) {
 	const int max_offset = width - 1;
 
 	if (side) {
@@ -35,10 +35,15 @@ VectorF handle_ray(const DataRaycast d) {
 		wall_h
 	};
 
+	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, wall.y + wall.h, d.dir);
+
 	const Sprite wall_sprite = current_level.walls[d.point - 1];
-	const int
-		max_sprite_h = wall_sprite.surface -> h,
-		offset = calculate_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.surface -> w);
+	const int max_sprite_h = wall_sprite.surface -> h;
+
+	const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
+	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
+
+	SDL_Rect slice = {get_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.surface -> w), 0, .w = 1};
 
 	/*
 	static byte first = 1;
@@ -48,11 +53,6 @@ VectorF handle_ray(const DataRaycast d) {
 	}
 	*/
 
-	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, wall.y + wall.h, d.dir);
-
-	const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
-	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
-
 	const double smallest_wall_y = (double) (wall.y - (wall.h * (point_height - 1)));
 	// wall_y_buffer[d.screen_x] = smallest_wall_y;
 
@@ -60,23 +60,20 @@ VectorF handle_ray(const DataRaycast d) {
 		SDL_FRect raised_wall = wall;
 		raised_wall.y -= wall.h * i;
 
-		/* completely obscured: starts under the tallest wall so far; wouldn't be seen, but for more speed */
+		// completely obscured: starts under the tallest wall so far; wouldn't be seen, but for more speed
 		if ((double) raised_wall.y >= *d.curr_smallest_wall_y || raised_wall.y >= settings.screen_height)
 			continue;
 
-		int sprite_h;
-
 		// partially obscured: bottom of wall somewhere in middle of tallest
-		if ((double) (raised_wall.y + raised_wall.h) > *d.curr_smallest_wall_y) {
+		else if ((double) (raised_wall.y + raised_wall.h) > *d.curr_smallest_wall_y) {
 			raised_wall.h = *d.curr_smallest_wall_y - (double) raised_wall.y;
-			sprite_h = ceil(max_sprite_h * (double) raised_wall.h / wall_h);
+			slice.h = ceil(max_sprite_h * (double) raised_wall.h / wall_h);
 		}
-		else sprite_h = max_sprite_h;
+		else slice.h = max_sprite_h;
 
 		*d.curr_smallest_wall_y = (double) raised_wall.y;
 
-		const SDL_Rect slice = {offset, 0, 1, sprite_h};
-		if (keys[SDL_SCANCODE_T]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
+		if (!keys[SDL_SCANCODE_T]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
 	}
 	return (VectorF) {(double) smallest_wall_y, (double) wall.h};
 }
@@ -97,7 +94,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 			const VectorF hit = VectorF_line_pos(player.pos, dir, ray.dist);
 			const byte point_height = current_level.get_point_height(point, hit);
 
-			if (point_height != curr_point_height || point) {
+			if (point_height != curr_point_height) {
 				double height_change_y, height_change_h;
 				if (point) {
 					const VectorF wall_y_components = handle_ray((DataRaycast) {

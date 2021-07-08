@@ -21,6 +21,9 @@ features:
 	- accelerate sideways
 	- add back Adam's whip for close-range combat
 	- a gui system
+	- anti-aliasing
+	- a file format
+	- switch over to floats, if 2 floats can be in a vector
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

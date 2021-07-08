@@ -212,4 +212,25 @@ done:
 	ray equation: {a[0] * d + p[0], a[1] * d + p[1]}
 */
 
+///// 36,000 bytes for all buffers
+
+size_t a = sizeof(float) + sizeof(double) + sizeof(double) + sizeof(VectorF);
+size_t b = a * settings.screen_width;
+DEBUG(b, zu);
+
+/////
+
+byte r, g, b;
+
+if (keys[SDL_SCANCODE_F])
+	r = (byte) (src >> 16) * shade,
+	g = (byte) (src >> 8) * shade,
+	b = (byte) src * shade;
+else
+	r = get_bits(src, 16, 23) * shade,
+	g = get_bits(src, 8, 15) * shade,
+	b = get_bits(src, 0, 8) * shade;
+
+// const byte r = get_bits(src, 16, 23) * shade, g = get_bits(src, 8, 15) * shade, b = get_bits(src, 0, 8) * shade;
+
 /////

@@ -425,3 +425,6 @@ inlinable void draw_tilted(SDL_Texture* const restrict buffer,
 	SDL_RenderCopyEx(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
+inlinable byte get_bits(const Uint32 value, const byte offset, const byte n) {
+	return (value >> offset) & ((1 << n) - 1);
+}

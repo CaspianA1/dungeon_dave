@@ -20,29 +20,25 @@ void deinit_screen(void) {
 	SDL_FreeFormat(screen.pixel_format);
 	SDL_DestroyWindow(screen.window);
 	SDL_DestroyRenderer(screen.renderer);
+
 	SDL_DestroyTexture(screen.pixel_buffer);
 	SDL_DestroyTexture(screen.shape_buffer);
+
 	wfree(screen.z_buffer);
 	wfree(screen.cos_beta_buffer);
 	wfree(screen.wall_bottom_buffer);
 	wfree(screen.dir_buffer);
+
 	SDL_Quit();
 }
 
-// returns if the pixel buffer crop went out of bounds
-inlinable byte prepare_for_drawing(const double y_shift) {
+inlinable void prepare_for_drawing(void) {
 	SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, 0);
 	SDL_RenderClear(screen.renderer);
 
-	// this doesn't behave like a normal SDL_Rect; it only crops the region as {x1, y1, x2, y2}; no heights
-	const SDL_Rect pixbuf_draw_region = {0, ceil(y_shift), settings.screen_width, settings.screen_height};
-	const SDL_Rect* const pixbuf_draw_region_ptr = (pixbuf_draw_region.y < 0) ? NULL : &pixbuf_draw_region;
-
-	SDL_LockTexture(screen.pixel_buffer, pixbuf_draw_region_ptr, &screen.pixels, &screen.pixel_pitch);
+	SDL_LockTexture(screen.pixel_buffer, NULL, &screen.pixels, &screen.pixel_pitch);
 	SDL_SetRenderTarget(screen.renderer, screen.shape_buffer);
 	SDL_RenderClear(screen.renderer);
-
-	return pixbuf_draw_region_ptr == NULL;
 }
 
 inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const dest_crop, const double tilt) {

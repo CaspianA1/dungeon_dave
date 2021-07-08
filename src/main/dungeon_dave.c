@@ -67,7 +67,7 @@ int main(void) {
 			wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset,
 			full_jump_height = player.jump.height * settings.screen_height;
 
-		const byte pixbuf_region_out_of_bounds = prepare_for_drawing(wall_y_shift);
+		prepare_for_drawing();
 		draw_skybox(player.angle, wall_y_shift);
 
 		#ifndef PLANAR_MODE
@@ -79,8 +79,7 @@ int main(void) {
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		fast_affine_floor(player.pos, full_jump_height, player.pace.screen_offset,
-			wall_y_shift, player.y_pitch, pixbuf_region_out_of_bounds);
+		fast_affine_floor(player.pos, full_jump_height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
 		refresh(player.tilt, player.pos, wall_y_shift);
 		tick_delay(before);
