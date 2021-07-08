@@ -57,11 +57,6 @@ void fast_affine_floor(const VectorF pos, const double full_jump_height,
 			const double actual_dist = straight_dist / screen.cos_beta_buffer[screen_x];
 			const VectorF hit = VectorFF_add(VectorFF_mul(screen.dir_buffer[screen_x], VectorF_memset(actual_dist)), pos);
 
-			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_width - 1.0
-				|| hit[1] > current_level.map_height - 1.0) {
-				printf("Escape\n");
-				break;
-			}
 			draw_from_hit(hit, actual_dist, screen_x, pixbuf_row);
 		}
 	}
