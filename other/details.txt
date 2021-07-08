@@ -23,6 +23,7 @@ features:
 	- a gui system
 	- anti-aliasing
 	- a file format
+	- a map editor
 	- switch over to floats, if 2 floats can be in a vector
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
