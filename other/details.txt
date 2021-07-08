@@ -46,4 +46,3 @@ problems:
 	- hit detection for weapons is still sometimes spotty
 	- abandon text surfaces and only keep the texture? will that work with floors?
 	- skyboxes become wonky when the screen size increases
-	- floors aren't drawn higher up

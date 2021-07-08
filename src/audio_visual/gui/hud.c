@@ -21,7 +21,7 @@ void draw_minimap(const VectorF pos) {
 
 	for (int map_x = 0; map_x < current_level.map_width; map_x++) {
 		for (int map_y = 0; map_y < current_level.map_height; map_y++) {
-			const byte point = map_point(current_level.floor_data, map_x, map_y);
+			const byte point = map_point(current_level.wall_data, map_x, map_y);
 			const byte point_height = current_level.get_point_height(point, (VectorF) {map_x, map_y});
 			const double shade = 1.0 - (double) point_height / current_level.max_point_height;
 
