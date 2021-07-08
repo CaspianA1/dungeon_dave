@@ -50,6 +50,7 @@ typedef struct {
 	void* pixels;
 	int pixel_pitch; // `pixels` and `pixel_pitch` pertain to the pixel buffer
 	double *z_buffer, *cos_beta_buffer;
+	float* wall_bottom_buffer;
 	VectorF* dir_buffer;
 } Screen;
 

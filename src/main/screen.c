@@ -12,6 +12,7 @@ void init_screen(void) {
 	init_SDL_buffers(settings.screen_width, settings.screen_height, 0);
 	screen.z_buffer = wcalloc(settings.screen_width, sizeof(double));
 	screen.cos_beta_buffer = wcalloc(settings.screen_width, sizeof(double));
+	screen.wall_bottom_buffer = wcalloc(settings.screen_width, sizeof(float));
 	screen.dir_buffer = wcalloc(settings.screen_width, sizeof(VectorF));
 }
 
@@ -23,6 +24,7 @@ void deinit_screen(void) {
 	SDL_DestroyTexture(screen.shape_buffer);
 	wfree(screen.z_buffer);
 	wfree(screen.cos_beta_buffer);
+	wfree(screen.wall_bottom_buffer);
 	wfree(screen.dir_buffer);
 	SDL_Quit();
 }

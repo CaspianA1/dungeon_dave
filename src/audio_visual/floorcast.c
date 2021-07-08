@@ -47,6 +47,8 @@ void fast_affine_floor(const VectorF pos, const double full_jump_height,
 		Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pixbuf_row_offset * screen.pixel_pitch);
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
+			if (screen.wall_bottom_buffer[screen_x] >= pace_y + 1) continue;
+
 			const double actual_dist = straight_dist / screen.cos_beta_buffer[screen_x];
 			const VectorF hit = VectorFF_add(VectorFF_mul(screen.dir_buffer[screen_x], VectorF_memset(actual_dist)), pos);
 

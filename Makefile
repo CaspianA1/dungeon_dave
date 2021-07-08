@@ -8,7 +8,7 @@ OPTIMIZE = -Ofast
 DEBUG = -ggdb3
 
 CFLAGS = -std=c99 -march=native -Wall -Wdouble-promotion -Wformat -Wpedantic -Wextra
-LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm -lpthread
+LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm
 LDFLAGS = $(LIBS) -o bin/$(OUT) src/main/$(MAIN).c
 
 all: build_optimized run

@@ -92,10 +92,13 @@ inlinable void set_map_point(byte* const map, const byte val, const int x, const
 
 /////
 
-inlinable void update_val_buffers(const int screen_x, const double dist, const double cos_beta, const VectorF dir) {
+inlinable void update_val_buffers(const int screen_x, const double dist, const double cos_beta,
+	const float wall_bottom, const VectorF dir) {
+
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++) {
 		screen.z_buffer[x] = dist;
 		screen.cos_beta_buffer[x] = cos_beta;
+		screen.wall_bottom_buffer[x] = wall_bottom;
 		screen.dir_buffer[x] = dir;
 	}
 }
@@ -122,9 +125,6 @@ inlinable VectorI VectorF_floor(const VectorF vf) {
 #define VectorFF_mul _mm_mul_pd
 #define VectorFF_div _mm_div_pd
 
-#define VectorF2_memset _mm256_set1_pd
-#define VectorFF2_add _mm256_add_pd
-#define VectorFF2_mul _mm256_mul_pd
 
 inlinable byte VectorFF_exceed_dist(const VectorF a, const VectorF b, const double dist) {
 	const VectorF delta = VectorFF_sub(a, b);
@@ -144,32 +144,3 @@ inlinable VectorF VectorF_line_pos(const VectorF pos, const VectorF dir, const d
 	const VectorF slope_as_vec = VectorF_memset(slope);
 	return VectorFF_add(VectorFF_mul(dir, slope_as_vec), pos);
 }
-
-// http://ftp.neutrino.es/x86InstructionSet/VINSERTF128.html
-inlinable VectorF2 VectorF2_line_pos(const VectorF pos, const VectorF dir, const VectorF slopes) {
-	const VectorF2
-		slopes_as_vec2 = {slopes[0], slopes[0], slopes[1], slopes[1]},
-		dir_as_vec2 = {dir[0], dir[1], dir[0], dir[1]},
-		pos_as_vec2 = {pos[0], pos[1], pos[0], pos[1]};
-
-	return VectorFF2_add(VectorFF2_mul(dir_as_vec2, slopes_as_vec2), pos_as_vec2);
-}
-
-/*
-vector operations needed:
-	subtraction of int-based vectors (not together): {a[0] - b[0], a[1] - b[1]}
-	distance: sqrt(a[0] * a[0] + b[1] * b[1])
-	
-	texture offset: {a[0] - floor(a[0]) * m, a[1] - floor(a[1]) * m}
-	unit step size: {fabs(1.0 / a[0]), fabs(1.0 / a[1])}
-	truncation: {(int) floor(a[0]), (int) floor(a[1])}
-	delta between floating-point and int-based vectors: {fabs(v[0] - i[0]), fabs(v[1] - i[1])}
-
-	handy functions: https://chryswoods.com/vector_c++/emmintrin.html
-
-	also, make VectorI to an intrinsic at some point (need the right type first)
-
-done:
-	subtraction of floating-point vectors
-	ray equation: {a[0] * d + p[0], a[1] * d + p[1]}
-*/

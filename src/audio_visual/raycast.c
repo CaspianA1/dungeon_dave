@@ -48,7 +48,7 @@ VectorF handle_ray(const DataRaycast d) {
 	}
 	*/
 
-	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, d.dir);
+	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, wall.y + wall.h, d.dir);
 
 	const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
@@ -76,7 +76,7 @@ VectorF handle_ray(const DataRaycast d) {
 		*d.curr_smallest_wall_y = (double) raised_wall.y;
 
 		const SDL_Rect slice = {offset, 0, 1, sprite_h};
-		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
+		if (keys[SDL_SCANCODE_T]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
 	}
 	return (VectorF) {(double) smallest_wall_y, (double) wall.h};
 }
