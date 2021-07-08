@@ -24,8 +24,8 @@ inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const 
 	#ifdef SHADING_ENABLED
 	const double shade = calculate_shade(settings.proj_dist / actual_dist, hit);
 	const byte r = (byte) (src >> 16) * shade, g = (byte) (src >> 8) * shade, b = (byte) src * shade;
-
 	src = 0xFF000000 | (r << 16) | (g << 8) | b;
+
 	#else
 	(void) actual_dist;
 	#endif
