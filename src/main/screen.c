@@ -13,7 +13,7 @@ void init_screen(void) {
 	screen.z_buffer = wcalloc(settings.screen_width, sizeof(double));
 	screen.cos_beta_buffer = wcalloc(settings.screen_width, sizeof(double));
 	screen.wall_bottom_buffer = wcalloc(settings.screen_width, sizeof(float));
-	screen.dir_buffer = wcalloc(settings.screen_width, sizeof(vec)); // maybe try making these doubles
+	screen.dir_buffer = wcalloc(settings.screen_width, sizeof(vec)); // try making these doubles
 }
 
 void deinit_screen(void) {

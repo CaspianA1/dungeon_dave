@@ -24,3 +24,9 @@ Uint32 src = *(src_row + surface_offset.x);
 typedef __m256d VectorF2; // four doubles
 
 /////
+
+return (DataDDA) {
+	0.0, 0, 0, origin, dir, unit_step_size, ray_length, ray_step, curr_tile
+};
+
+/////

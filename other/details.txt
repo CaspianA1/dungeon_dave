@@ -39,7 +39,6 @@ problems:
 	- too many Mix_Chunks on the available channels -> out of channels
 	- skybox stretching
 	- navigators use too much heap memory
-	- change the VectorF name to something less clunky
 	- less doubles and more ints in render_overlay.c
 	- add back the BFS wall checking
 	- don't intersect the player dot with walls in the minimap
@@ -51,3 +50,4 @@ problems:
 	- planar + noclip mode crash
 	- don't reallocate the `all_visited` var each time in bfs.c
 	- disabling vsync makes everything choppy
+	- vecs to double[2]'s in screen.dir_buffer

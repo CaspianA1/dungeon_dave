@@ -91,7 +91,6 @@ typedef struct {
 
 /////
 
-
 Screen screen;
 Level current_level;
 Settings settings;
