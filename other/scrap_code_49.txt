@@ -12,3 +12,15 @@ Uint32 src = *(src_row + surface_offset.x);
 */
 
 /////
+
+// #define VectorF_memset _mm_set1_pd
+// #define VectorFF_add _mm_add_pd
+// #define VectorFF_sub _mm_sub_pd
+// #define VectorFF_mul _mm_mul_pd
+// #define VectorFF_div _mm_div_pd
+
+/////
+
+typedef __m256d VectorF2; // four doubles
+
+/////

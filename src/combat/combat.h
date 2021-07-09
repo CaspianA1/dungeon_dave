@@ -1,5 +1,5 @@
 typedef struct {
-	VectorI* data;
+	ivec* data;
 	int length, max_alloc;
 } Path;
 
@@ -21,19 +21,19 @@ typedef enum {
 
 // this path eliminates wall clipping and jerky movement
 typedef struct {
-	VectorF* data;
+	vec* data;
 	int length;
 } CorrectedPath;
 
 typedef struct {
 	CorrectedPath path;
-	VectorF* const pos;
+	vec* const pos;
 	double* const dist_to_player;
 	int path_ind;
 	const double v;
 } Navigator;
 
-inlinable Navigator init_navigator(const VectorF, VectorF* const, double* const, const double);
+inlinable Navigator init_navigator(const vec, vec* const, double* const, const double);
 
 /////
 

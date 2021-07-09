@@ -7,7 +7,7 @@ byte update_toggle(Toggle* const toggle) {
 	return toggle -> enabled;
 }
 
-void draw_minimap(const VectorF pos) {
+void draw_minimap(const vec pos) {
 	static Toggle toggle = {30, 144, 255, 0, 0, KEY_TOGGLE_MINIMAP};
 	if (!update_toggle(&toggle)) return;
 
@@ -22,7 +22,7 @@ void draw_minimap(const VectorF pos) {
 	for (int map_x = 0; map_x < current_level.map_width; map_x++) {
 		for (int map_y = 0; map_y < current_level.map_height; map_y++) {
 			const byte point = map_point(current_level.wall_data, map_x, map_y);
-			const byte point_height = current_level.get_point_height(point, (VectorF) {map_x, map_y});
+			const byte point_height = current_level.get_point_height(point, (vec) {map_x, map_y});
 			const double shade = 1.0 - (double) point_height / current_level.max_point_height;
 
 			wall_tile.x = map_x * width_scale;
@@ -40,7 +40,7 @@ void draw_crosshair(const int y_pitch) {
 	if (!update_toggle(&toggle)) return;
 
 	const byte half_dimensions = settings.screen_width / 40, thickness = settings.screen_width / 200;
-	const VectorI center = {settings.half_screen_width, y_pitch};
+	const ivec center = {settings.half_screen_width, y_pitch};
 
 	SDL_SetRenderDrawColor(screen.renderer, toggle.r, toggle.g, toggle.b, SDL_ALPHA_OPAQUE);
 

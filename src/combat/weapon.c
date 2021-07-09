@@ -17,22 +17,22 @@ void deinit_weapon(const Weapon weapon) {
 	deinit_sprite(weapon.animation.billboard.sprite);
 }
 
-void shoot_weapon(const Weapon* const weapon, const VectorF pos, const VectorF dir) {
+void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 	DataDDA bullet = init_dda(pos, dir);
 
 	while (iter_dda(&bullet)) {
-		const VectorI bullet_tile = bullet.curr_tile;
+		const ivec bullet_tile = bullet.curr_tile;
 		if (map_point(current_level.wall_data, bullet_tile.x, bullet_tile.y)) break;
 
 		for (byte i = 0; i < current_level.enemy_count; i++) {
 			Enemy* const enemy = &current_level.enemies[i];
 			if (enemy -> state == Dead) continue;
 
-			const VectorF
+			const vec
 				enemy_pos = enemy -> animations.billboard.pos,
-				bullet_pos = VectorF_line_pos(pos, dir, bullet.dist);
+				bullet_pos = vec_line_pos(pos, dir, bullet.dist);
 
-			if (!VectorFF_exceed_dist(enemy_pos, bullet_pos, weapon -> dist_for_hit)) {
+			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon -> dist_for_hit)) {
 				enemy -> recently_attacked = 1;
 				enemy -> hp -= weapon -> power;
 				if (enemy -> hp <= 0.0) set_enemy_state(enemy, Dead, 0);

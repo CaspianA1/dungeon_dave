@@ -13,7 +13,7 @@ void init_screen(void) {
 	screen.z_buffer = wcalloc(settings.screen_width, sizeof(double));
 	screen.cos_beta_buffer = wcalloc(settings.screen_width, sizeof(double));
 	screen.wall_bottom_buffer = wcalloc(settings.screen_width, sizeof(float));
-	screen.dir_buffer = wcalloc(settings.screen_width, sizeof(VectorF));
+	screen.dir_buffer = wcalloc(settings.screen_width, sizeof(vec)); // maybe try making these doubles
 }
 
 void deinit_screen(void) {
@@ -45,7 +45,7 @@ inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const des
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
-void refresh(const Domain tilt, const VectorF pos, const int y_pitch) {
+void refresh(const Domain tilt, const vec pos, const int y_pitch) {
 	SDL_UnlockTexture(screen.pixel_buffer);
 	SDL_SetRenderTarget(screen.renderer, NULL);
 
@@ -87,7 +87,7 @@ void refresh(const Domain tilt, const VectorF pos, const int y_pitch) {
 		draw_tilted(screen.shape_buffer, &dest_crop, tilt.val);
 	}
 
-	void draw_minimap(const VectorF);
+	void draw_minimap(const vec);
 	draw_minimap(pos);
 	void draw_crosshair(const int);
 	draw_crosshair(y_pitch);
@@ -95,8 +95,6 @@ void refresh(const Domain tilt, const VectorF pos, const int y_pitch) {
 	SDL_RenderPresent(screen.renderer);
 }
 
-inlinable Uint32 get_surface_pixel(const void* const pixels,
-	const int surface_pitch, const int x, const int y) {
-
+inlinable Uint32 get_surface_pixel(const void* const pixels, const int surface_pitch, const int x, const int y) {
 	return *(Uint32*) ((Uint8*) pixels + y * surface_pitch + x * PIXEL_FORMAT_BPP);
 }

@@ -83,17 +83,15 @@ inlinable byte map_point(const byte* const map, const double x, const double y) 
 
 inlinable byte point_exists_at(const double x, const double y, const double z) {
 	const byte point_val = map_point(current_level.wall_data, x, y);
-	return point_val && z < current_level.get_point_height(point_val, (VectorF) {x, y});
+	return point_val && z < current_level.get_point_height(point_val, (vec) {x, y});
 }
 
 inlinable void set_map_point(byte* const map, const byte val, const int x, const int y, const int map_width) {
 	map[y * map_width + x] = val;
 }
 
-/////
-
 inlinable void update_val_buffers(const int screen_x, const double dist, const double cos_beta,
-	const float wall_bottom, const VectorF dir) {
+	const float wall_bottom, const vec dir) {
 
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++) {
 		screen.z_buffer[x] = dist;
@@ -103,44 +101,33 @@ inlinable void update_val_buffers(const int screen_x, const double dist, const d
 	}
 }
 
-/////
-
-inlinable byte VectorI_out_of_bounds(const VectorI vi) {
-	return vi.x < 0 || vi.x > current_level.map_width - 1 || vi.y < 0 || vi.y > current_level.map_height - 1;
-}
-
-inlinable byte VectorII_eq(const VectorI v1, const VectorI v2) {
-	return v1.x == v2.x && v1.y == v2.y;
-}
-
 ///// https://docs.microsoft.com/en-us/cpp/intrinsics/x86-intrinsics-list?view=msvc-160
 
-inlinable VectorI VectorF_floor(const VectorF vf) {
-	return (VectorI) {(int) floor(vf[0]), (int) floor(vf[1])};
-}
+#define vec_fill _mm_set1_pd
 
-#define VectorF_memset _mm_set1_pd
-#define VectorFF_add _mm_add_pd
-#define VectorFF_sub _mm_sub_pd
-#define VectorFF_mul _mm_mul_pd
-#define VectorFF_div _mm_div_pd
-
-
-inlinable byte VectorFF_exceed_dist(const VectorF a, const VectorF b, const double dist) {
-	const VectorF delta = VectorFF_sub(a, b);
+inlinable byte vec_delta_exceeds(const vec a, const vec b, const double dist) {
+	const vec delta = a - b;
 	const double dist_squared = delta[0] * delta[0] + delta[1] * delta[1];
 	return dist_squared > dist * dist;
 }
 
-inlinable VectorF VectorFF_diff(const VectorF a, const VectorF b) {
-	const VectorF signed_diff = VectorFF_sub(a, b);
-	return (VectorF) {fabs(signed_diff[0]), fabs(signed_diff[1])};
+inlinable vec vec_diff(const vec a, const vec b) {
+	const vec delta = a - b;
+	return (vec) {fabs(delta[0]), fabs(delta[1])};
 }
 
-inlinable byte VectorF_in_range(const double p, const VectorF range) {
+inlinable byte vec_in_range(const double p, const vec range) {
 	return p >= range[0] - small_double_epsilon && p <= range[1] + small_double_epsilon;
 }
-inlinable VectorF VectorF_line_pos(const VectorF pos, const VectorF dir, const double slope) {
-	const VectorF slope_as_vec = VectorF_memset(slope);
-	return VectorFF_add(VectorFF_mul(dir, slope_as_vec), pos);
+
+inlinable vec vec_line_pos(const vec pos, const vec dir, const double slope) {
+	return dir * vec_fill(slope) + pos;
+}
+
+inlinable byte ivec_out_of_bounds(const ivec v) {
+	return v.x < 0 || v.x > current_level.map_width - 1 || v.y < 0 || v.y > current_level.map_height - 1;
+}
+
+inlinable ivec vec_to_ivec(const vec v) {
+	return (ivec) {(int) floor(v[0]), (int) floor(v[1])};
 }

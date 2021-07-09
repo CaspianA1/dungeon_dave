@@ -30,8 +30,8 @@ typedef struct {
 } Jump;
 
 typedef struct {
-	VectorF pos, dir;
-	VectorI mouse_pos;
+	vec pos, dir;
+	ivec mouse_pos;
 	double angle;
 	int y_pitch;
 	Jump jump;
@@ -51,7 +51,7 @@ typedef struct {
 	int pixel_pitch; // `pixels` and `pixel_pitch` pertain to the pixel buffer
 	double *z_buffer, *cos_beta_buffer;
 	float* wall_bottom_buffer;
-	VectorF* dir_buffer;
+	vec* dir_buffer;
 } Screen;
 
 /////
@@ -67,7 +67,7 @@ typedef struct {
 
 typedef struct {
 	const int map_width, map_height;
-	const VectorF init_pos;
+	const vec init_pos;
 	const double init_height;
 
 	byte
@@ -78,8 +78,8 @@ typedef struct {
 	Skybox skybox;
 	Sound background_sound;
 
-	byte (*get_point_height) (const byte, const VectorF);
-	double (*shader) (const VectorF);
+	byte (*get_point_height) (const byte, const vec);
+	double (*shader) (const vec);
 	// for cache optimization; `shader` and `walls` are typically used together
 
 	Sprite* walls;

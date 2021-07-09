@@ -39,18 +39,18 @@ inlinable void progress_enemy_frame_ind(Enemy* const enemy) {
 	progress_frame_ind(&enemy -> animations, begin, end);
 }
 
-inlinable VectorI get_spritesheet_frame_origin(const Animation animation) {
+inlinable ivec get_spritesheet_frame_origin(const Animation animation) {
 	const int y_ind = animation.frame_ind / animation.frames_per_row;
 	const int x_ind = animation.frame_ind - y_ind * animation.frames_per_row;
 	const SDL_Surface* const surface = animation.billboard.sprite.surface;
 
-	return (VectorI) {
+	return (ivec) {
 		((double) x_ind / animation.frames_per_row) * surface -> w,
 		((double) y_ind / animation.frames_per_col) * surface -> h
 	};
 }
 
-void animate_weapon(Animation* const animation, const VectorF pos,
+void animate_weapon(Animation* const animation, const vec pos,
 	const int frame_num, const int y_pitch, const double pace) {
  
 	// frame_num == -1 -> auto_progress frame
@@ -59,7 +59,7 @@ void animate_weapon(Animation* const animation, const VectorF pos,
 	(void) pos;
 	#endif
 
-	const VectorI frame_origin = get_spritesheet_frame_origin(*animation);
+	const ivec frame_origin = get_spritesheet_frame_origin(*animation);
 
 	const SDL_Rect sheet_crop = {
 		frame_origin.x, frame_origin.y,

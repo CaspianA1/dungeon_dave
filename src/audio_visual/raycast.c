@@ -1,13 +1,13 @@
 typedef struct {
 	double* const curr_smallest_wall_y;
 	const double player_angle, theta, dist, wall_y_shift, full_jump_height;
-	const VectorF begin, hit, dir;
+	const vec begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
 	const byte point, side, first_wall_hit;
 	const int screen_x;
 } DataRaycast;
 
-inlinable int get_wall_tex_offset(const byte side, const VectorF hit, const VectorF dir, const int width) {
+inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir, const int width) {
 	const int max_offset = width - 1;
 
 	if (side) {
@@ -22,7 +22,7 @@ inlinable int get_wall_tex_offset(const byte side, const VectorF hit, const Vect
 
 // float* wall_y_buffer;
 
-VectorF handle_ray(const DataRaycast d) {
+vec handle_ray(const DataRaycast d) {
 	const double cos_beta = cos(d.player_angle - d.theta);
 	const double corrected_dist = d.dist * cos_beta;
 	const double wall_h = settings.proj_dist / corrected_dist;
@@ -75,7 +75,7 @@ VectorF handle_ray(const DataRaycast d) {
 
 		if (!keys[SDL_SCANCODE_T]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
 	}
-	return (VectorF) {(double) smallest_wall_y, (double) wall.h};
+	return (vec) {(double) smallest_wall_y, (double) wall.h};
 }
 
 void raycast(const Player player, const double wall_y_shift, const double full_jump_height) {
@@ -83,7 +83,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
-		const VectorF dir = {cos(theta), sin(theta)};
+		const vec dir = {cos(theta), sin(theta)};
 
 		double curr_smallest_wall_y = DBL_MAX, last_height_change_y = settings.screen_height;
 		byte at_first_hit = 1, curr_point_height = player.jump.height;
@@ -91,13 +91,13 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 
 		while (iter_dda(&ray)) {
 			const byte point = map_point(current_level.wall_data, ray.curr_tile.x, ray.curr_tile.y);
-			const VectorF hit = VectorF_line_pos(player.pos, dir, ray.dist);
+			const vec hit = vec_line_pos(player.pos, dir, ray.dist);
 			const byte point_height = current_level.get_point_height(point, hit);
 
 			if (point_height != curr_point_height) {
 				double height_change_y, height_change_h;
 				if (point) {
-					const VectorF wall_y_components = handle_ray((DataRaycast) {
+					const vec wall_y_components = handle_ray((DataRaycast) {
 						&curr_smallest_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height,
 						player.pos, hit, dir, point, ray.side, at_first_hit, screen_x});
 

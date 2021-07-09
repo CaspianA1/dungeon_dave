@@ -1,25 +1,25 @@
 // structs: triangle, circle
 
 typedef struct {
-	VectorF center;
+	vec center;
 	double radius;
 } Circle;
 
 typedef double Triangle[3][2];
 
-inlinable double diffuse_circle(const VectorF pos, const Circle circle) {
-	const VectorF center_diff = VectorFF_sub(pos, circle.center);
+inlinable double diffuse_circle(const vec pos, const Circle circle) {
+	const vec center_diff = pos - circle.center;
 	const double radius_squared = circle.radius * circle.radius;
 	const double d_squared = center_diff[0] * center_diff[0] + center_diff[1] * center_diff[1];
 	return (d_squared <= radius_squared) ? radius_squared - d_squared : 0.0;
 }
 
 // https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
-inlinable double line_side(const VectorF p1, const double p2[2], const double p3[2]) {
+inlinable double line_side(const vec p1, const double p2[2], const double p3[2]) {
 	return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1]);
 }
 
-inlinable byte flat_triangle(const VectorF pos, const Triangle triangle) {
+inlinable byte flat_triangle(const vec pos, const Triangle triangle) {
 	const double
 		slope_1 = line_side(pos, triangle[0], triangle[1]),
 		slope_2 = line_side(pos, triangle[1], triangle[2]),
@@ -46,7 +46,7 @@ functions like `diffuse_circle` above.
 
 #ifdef SHADING_ENABLED
 
-inlinable double calculate_shade(const double wall_h, const VectorF pos) {
+inlinable double calculate_shade(const double wall_h, const vec pos) {
 	const double shade = wall_h / settings.screen_height * current_level.shader(pos);
 	return shade > 1.0 ? 1.0 : shade;
 }

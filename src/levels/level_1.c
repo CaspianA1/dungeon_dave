@@ -1,5 +1,4 @@
-byte get_level_1_point_height(const byte point, const VectorF pos) {
-	(void) pos;
+byte get_level_1_point_height(const byte point, const vec pos) {
 	switch (point) {
 		case 0: return 0;
 		case 1: return 3; // cobblestone edges
@@ -9,23 +8,22 @@ byte get_level_1_point_height(const byte point, const VectorF pos) {
 	}
 }
 
-double level_1_shader(const VectorF pos) {
-	static const VectorF
+double level_1_shader(const vec pos) {
+	static const vec
 		pillar_center = {4.5, 11.5},
 		tunnel_center = {18.0, 7.0},
 		plaza_x_range = {16.0, 21.0},
 		plaza_y_range = {1.0, 6.0};
 
-	if (VectorF_in_range(pos[0], plaza_x_range)
-		&& VectorF_in_range(pos[1], plaza_y_range))
+	if (vec_in_range(pos[0], plaza_x_range) && vec_in_range(pos[1], plaza_y_range))
 		return pos[1] / 2.5; // tan was too expensive for this
 		// return fabs(tan(pos[0] - pos[1]));
 
-	const VectorF pillar_center_diff = VectorFF_diff(pos, pillar_center);
+	const vec pillar_center_diff = vec_diff(pos, pillar_center);
 	if (pillar_center_diff[0] < 0.75 && pillar_center_diff[1] < 0.75)
 		return pillar_center_diff[0] / pillar_center_diff[1];
 
-	const VectorF tunnel_center_diff = VectorFF_diff(pos, tunnel_center);
+	const vec tunnel_center_diff = vec_diff(pos, tunnel_center);
 	if (tunnel_center_diff[0] < 3.99 && tunnel_center_diff[1] < 1.99)
 		return tunnel_center_diff[0] + tunnel_center_diff[1];
 

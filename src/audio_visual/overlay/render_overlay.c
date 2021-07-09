@@ -14,7 +14,7 @@ I refer to a 'generic billboard' as a Billboard or Animation.
 */
 
 int cmp_generic_billboards(const void* const a, const void* const b) {
-	const VectorF distances = {
+	const double distances[2] = {
 		((GenericBillboard*) a) -> billboard.dist,
 		((GenericBillboard*) b) -> billboard.dist
 	};
@@ -48,7 +48,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 		else
 			billboard = &current_level.billboards[i];
 
-		const VectorF delta = VectorFF_sub(billboard -> pos, player.pos);
+		const vec delta = billboard -> pos - player.pos;
 		billboard -> beta = atan2(delta[1], delta[0]) - player_angle;
 		billboard -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 
@@ -122,7 +122,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 			}
 			else possible_animation = &current_level.animations[generic.animation_index];
 
-			const VectorI frame_origin = get_spritesheet_frame_origin(*possible_animation);
+			const ivec frame_origin = get_spritesheet_frame_origin(*possible_animation);
 
 			src_begin_x = frame_origin.x;
 			src_crop = (SDL_Rect) {
@@ -199,28 +199,20 @@ void draw_skybox(const double angle, const double y_shift) {
 		src_y = skybox.max_height * (1.0 - look_up_percent),
 		src_height = skybox.max_height * look_up_percent;
 
+	const SDL_Rect src_1 = {src_col_index, src_y, src_width, src_height};
+	SDL_Rect dest_1 =  {0, dest_y, settings.screen_width, dest_height};
+
 	if (turn_percent > 0.75) {
 		const double err_amt = (turn_percent - 0.75) * 4.0;
-		const int src_error = skybox.max_width * err_amt;
-		const double dest_error = settings.screen_width * err_amt;
+		const int src_error = skybox.max_width * err_amt, dest_error = settings.screen_width * err_amt;
 
-		const SDL_Rect
-			src_1 = {src_col_index, src_y, src_width, src_height},
-			dest_1 = {0, dest_y, settings.screen_width - dest_error, dest_height};
-
-		SDL_RenderCopy(screen.renderer, skybox.sprite.texture, &src_1, &dest_1);
+		dest_1.w -= dest_error;
 
 		const SDL_Rect
 			src_2 = {0, src_y, src_error / 4, src_height},
 			dest_2 = {dest_1.w, dest_y, settings.screen_width - dest_1.w, dest_height};
+
 		SDL_RenderCopy(screen.renderer, skybox.sprite.texture, &src_2, &dest_2);
 	}
-
-	else {
-		const SDL_Rect
-			src = {src_col_index, src_y, src_width, src_height},
-			dest = {0, dest_y, settings.screen_width, dest_height};
-
-		SDL_RenderCopy(screen.renderer, skybox.sprite.texture, &src, &dest);
-	}
+	SDL_RenderCopy(screen.renderer, skybox.sprite.texture, &src_1, &dest_1);
 }

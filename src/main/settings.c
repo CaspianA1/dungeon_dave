@@ -80,7 +80,7 @@ byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
 			screen.z_buffer = wrealloc(screen.z_buffer, new_width * sizeof(double));
 			screen.cos_beta_buffer = wrealloc(screen.cos_beta_buffer, new_width * sizeof(double));
 			screen.wall_bottom_buffer = wrealloc(screen.wall_bottom_buffer, new_width * sizeof(float));
-			screen.dir_buffer = wrealloc(screen.dir_buffer, new_width * sizeof(VectorF));
+			screen.dir_buffer = wrealloc(screen.dir_buffer, new_width * sizeof(vec));
 		}
 		if (height_not_eq) {
 			settings.screen_height = new_height;

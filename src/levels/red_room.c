@@ -1,9 +1,9 @@
-byte get_red_room_point_height(const byte point, const VectorF pos) {
+byte get_red_room_point_height(const byte point, const vec pos) {
 	(void) pos;
 	return point;
 }
 
-double red_room_shader(const VectorF pos) {
+double red_room_shader(const vec pos) {
 	(void) pos;
 	return 0.5;
 }

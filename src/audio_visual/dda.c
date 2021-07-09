@@ -1,23 +1,23 @@
 typedef struct {
 	double dist;
 	byte step_count, side;
-	const VectorF origin, dir, unit_step_size;
+	const vec origin, dir, unit_step_size;
 	// const double origin[2], dir[2], unit_step_size[2];
-	VectorF ray_length;
+	vec ray_length;
 	// double ray_length[2];
-	const VectorI ray_step;
-	VectorI curr_tile;
+	const ivec ray_step;
+	ivec curr_tile;
 } DataDDA;
 
-DataDDA init_dda(const VectorF origin, const VectorF dir) {
-	const VectorF unit_step_size = {fabs(1.0 / dir[0]), fabs(1.0 / dir[1])};
-	VectorF ray_length;
+DataDDA init_dda(const vec origin, const vec dir) {
+	const vec unit_step_size = {fabs(1.0 / dir[0]), fabs(1.0 / dir[1])};
+	vec ray_length;
 	/*
 	const double unit_step_size[2] = {fabs(1.0 / dir[0]), fabs(1.0 / dir[1])};
 	double ray_length[2];
 	*/
-	const VectorI curr_tile = VectorF_floor(origin);
-	VectorI ray_step;
+	const ivec curr_tile = vec_to_ivec(origin);
+	ivec ray_step;
 
 	if (dir[0] < 0.0) {
 		ray_step.x = -1;
@@ -61,7 +61,7 @@ inlinable DataDDA peek_dda(DataDDA d) {
 
 inlinable byte iter_dda(DataDDA* const d_ref) {
 	DataDDA d = peek_dda(*d_ref);
-	if (VectorI_out_of_bounds(d.curr_tile)) return 0;
+	if (ivec_out_of_bounds(d.curr_tile)) return 0;
 	d.step_count++;
 	memcpy(d_ref, &d, sizeof(DataDDA));
 	return 1;

@@ -7,7 +7,7 @@ OUT = $(MAIN).app
 OPTIMIZE = -Ofast
 DEBUG = -ggdb3
 
-CFLAGS = -std=c99 -march=native -Wall -Wdouble-promotion -Wformat -Wpedantic -Wextra
+CFLAGS = -std=c99 -march=native -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
 LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm
 LDFLAGS = $(LIBS) -o bin/$(OUT) src/main/$(MAIN).c
 

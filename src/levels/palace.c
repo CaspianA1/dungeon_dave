@@ -1,4 +1,4 @@
-byte get_palace_point_height(const byte point, const VectorF pos) {
+byte get_palace_point_height(const byte point, const vec pos) {
 	if (point == 1) {
 		if (pos[0] <= 8.9999 && pos[1] <= 5.9999) return 3;
 		else return 5;
@@ -31,7 +31,7 @@ byte get_palace_point_height(const byte point, const VectorF pos) {
 	}
 }
 
-double palace_shader(const VectorF pos) {
+double palace_shader(const vec pos) {
 	static const Circle
 		first_health_kit = {5.0, 2.0, 1.0},
 		first_downward_stairs = {22.0, 24.0, 5.0},
@@ -126,7 +126,7 @@ void load_palace(void) {
 
 	// "../assets/skyboxes/desert.bmp"
 	// "../../Aseprite/Palace City Skybox.bmp"
-	set_level_skybox(&palace, "../../Aseprite/Palace City Skybox.bmp");
+	set_level_skybox(&palace, "../assets/skyboxes/desert.bmp");
 
 	set_level_walls(&palace, wall_count,
 		"../assets/walls/pyramid_bricks_3.bmp",

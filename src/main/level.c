@@ -66,7 +66,7 @@ void set_level_billboards(Level* const level, const unsigned billboard_count, ..
 	for (byte i = 0; i < billboard_count; i++) {
 		Billboard* const billboard = &level -> billboards[i];
 		billboard -> sprite = init_sprite(va_arg(billboard_data, const char*));
-		billboard -> pos = (VectorF) {
+		billboard -> pos = (vec) {
 			va_arg(billboard_data, double),
 			va_arg(billboard_data, double)
 		};
@@ -96,7 +96,7 @@ void set_level_animations(Level* const level, const unsigned animation_count, ..
 
 		Animation* const dest = &level -> animations[i];
 		memcpy(dest, &new_animation, sizeof(Animation));
-		dest -> billboard.pos = (VectorF) {
+		dest -> billboard.pos = (vec) {
 			va_arg(animation_data, double),
 			va_arg(animation_data, double)
 		};
@@ -138,7 +138,7 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 		};
 
 		Billboard* const billboard = &enemy.animations.billboard;
-		billboard -> pos = (VectorF) {va_arg(enemy_data, double), va_arg(enemy_data, double)};
+		billboard -> pos = (vec) {va_arg(enemy_data, double), va_arg(enemy_data, double)};
 		billboard -> height = va_arg(enemy_data, double);
 
 		for (byte i = 0; i < 5; i++)

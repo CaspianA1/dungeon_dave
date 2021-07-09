@@ -1,9 +1,9 @@
-byte get_airship_point_height(const byte point, const VectorF pos) {
+byte get_airship_point_height(const byte point, const vec pos) {
 	(void) pos;
 	return point;
 }
 
-double airship_shader(const VectorF pos) {
+double airship_shader(const vec pos) {
 	(void) pos;
 	return 4.5;
 }

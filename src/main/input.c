@@ -1,4 +1,4 @@
-inlinable void update_mouse_and_theta(double* const theta, VectorI* const mouse_pos) {
+inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos) {
 	const int prev_mouse_x = mouse_pos -> x;
 	SDL_GetMouseState(&mouse_pos -> x, &mouse_pos -> y);
 	if (prev_mouse_x == mouse_pos -> x) return;
@@ -11,7 +11,7 @@ inlinable void update_mouse_and_theta(double* const theta, VectorI* const mouse_
 		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
-void update_pos(VectorF* const pos, const VectorF prev_pos, VectorF* const dir,
+void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
 	KinematicBody* const body, const double rad_theta, const double p_height,
 	const byte forward, const byte backward, const byte lstrafe, const byte rstrafe) {
 
@@ -47,27 +47,21 @@ void update_pos(VectorF* const pos, const VectorF prev_pos, VectorF* const dir,
 	if (!increasing_fov && settings.fov > INIT_FOV)
 		update_fov(settings.fov - settings.fov_step);
 
-	*dir = (VectorF) {cos(rad_theta), sin(rad_theta)};
+	*dir = (vec) {cos(rad_theta), sin(rad_theta)};
 
-	const VectorF
-		forward_back_movement = VectorFF_mul(*dir, VectorF_memset(body -> v)),
-		sideways_movement = VectorFF_mul(*dir, VectorF_memset(body -> strafe_v));
+	const vec
+		forward_back_movement = *dir * vec_fill(body -> v),
+		sideways_movement = *dir * vec_fill(body -> strafe_v);
 
-	VectorF movement = {0.0, 0.0};
+	vec movement = {0.0, 0.0};
 
-	if (body -> was_forward)
-		movement = VectorFF_add(movement, forward_back_movement);
+	if (body -> was_forward) movement += forward_back_movement;
+	if (body -> was_backward) movement -= forward_back_movement;
 
-	if (body -> was_backward)
-		movement = VectorFF_sub(movement, forward_back_movement);
+	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
+	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
 
-	if (lstrafe)
-		movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
-
-	if (rstrafe)
-		movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
-
-	VectorF new_pos = VectorFF_add(*pos, movement);
+	vec new_pos = *pos + movement;
 
 	if (new_pos[1] < 0 || new_pos[1] > current_level.map_height) new_pos[1] = prev_pos[1];
 	if (new_pos[0] < 0 || new_pos[0] > current_level.map_width) new_pos[0] = prev_pos[0];
@@ -118,7 +112,7 @@ inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lst
 
 #else
 
-inlinable void update_pace(Pace* const pace, const VectorF pos, const VectorF prev_pos, const double v, const double lim_v) {
+inlinable void update_pace(Pace* const pace, const vec pos, const vec prev_pos, const double v, const double lim_v) {
 	if (pos[0] != prev_pos[0] || pos[1] != prev_pos[1]) {
 		Domain* const domain = &pace -> domain;
 		const double domain_incr = domain -> step * log(lim_v) / log(v);
@@ -137,7 +131,7 @@ inlinable void init_a_jump(Jump* const jump, const byte falling) {
 	jump -> v0 = falling ? 0 : jump -> up_v0;
 }
 
-void update_jump(Jump* const jump, const VectorF pos) {
+void update_jump(Jump* const jump, const vec pos) {
 	#ifdef NOCLIP_MODE
 
 	(void) pos;
@@ -233,9 +227,9 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 		body -> moving_forward_or_backward = moved_forward_or_backward;
 
 		double* const theta = &player -> angle;
-		VectorF* const pos = &player -> pos;
-		const VectorF prev_pos = *pos;
-		VectorI* const mouse_pos = &player -> mouse_pos;
+		vec* const pos = &player -> pos;
+		const vec prev_pos = *pos;
+		ivec* const mouse_pos = &player -> mouse_pos;
 
 		update_mouse_and_theta(theta, mouse_pos);
 		update_pos(pos, prev_pos, &player -> dir, body, to_radians(*theta),

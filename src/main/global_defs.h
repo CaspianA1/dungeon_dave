@@ -55,8 +55,8 @@
 #define FAIL(...) {fprintf(stderr, __VA_ARGS__); exit(1);}
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
-#define DEBUG_VECF(vec) printf(#vec " = {%lf, %lf}\n", vec[0], vec[1])
-#define DEBUG_VECI(vec) printf(#vec " = {%d, %d}\n", vec.x, vec.y)
+#define DEBUG_VEC(vec) printf(#vec " = {%lf, %lf}\n", vec[0], vec[1])
+#define DEBUG_IVEC(vec) printf(#vec " = {%d, %d}\n", vec.x, vec.y)
 #define DEBUG_FRECT(frect) printf(#frect " = {.x = %lf, .y = %lf, .w = %lf, .h = %lf}\n",\
 	(double) frect.x, (double) frect.y, (double) frect.w, (double) frect.h)
 
@@ -72,12 +72,8 @@ const double
 	small_double_epsilon = 0.000001;
 
 typedef uint_fast8_t byte;
-typedef __m128d VectorF; // two doubles
-typedef __m256d VectorF2; // four doubles
-
-typedef struct {
-	int x, y;
-} VectorI;
+typedef __m128d vec;
+typedef struct {int x, y;} ivec;
 
 // https://www.spriters-resource.com/pc_computer/doomdoomii/
 // https://lodev.org/cgtutor/raycasting4.html

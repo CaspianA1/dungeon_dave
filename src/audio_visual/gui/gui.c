@@ -88,7 +88,7 @@ void resize_gui(GUI* const gui) {
 	gui -> font = TTF_OpenFont(gui -> font_name, avg_dimensions / gui -> message_scale);
 
 	for (byte i = 0; i < gui -> message_count; i++) {
-		NewMessage* message = &gui -> messages[i];
+		NewMessage* const message = &gui -> messages[i];
 		deinit_sprite(message -> text_sprite);
 
 		Sprite* text_sprite = &message -> text_sprite;

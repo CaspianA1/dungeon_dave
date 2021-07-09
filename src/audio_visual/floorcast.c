@@ -1,11 +1,11 @@
-inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
+inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
 	const byte floor_point = map_point(current_level.floor_data, hit[0], hit[1]);
 	// https://wiki.libsdl.org/SDL_RenderReadPixels
 	const SDL_Surface* const surface = current_level.walls[floor_point - 1].surface;
 	const int max_offset = surface -> w - 1;
 
-	const VectorI floored_hit = VectorF_floor(hit);
-	const VectorI surface_offset = {
+	const ivec floored_hit = vec_to_ivec(hit);
+	const ivec surface_offset = {
 		(hit[0] - floored_hit.x) * max_offset,
 		(hit[1] - floored_hit.y) * max_offset
 	};
@@ -26,15 +26,22 @@ inlinable void draw_from_hit(const VectorF hit, const double actual_dist, const 
 		*(pixbuf_row + x) = src;
 }
 
-void fast_affine_floor(const VectorF pos, const double full_jump_height,
+void fast_affine_floor(const vec pos, const double full_jump_height,
 	const double pace, double y_shift, const int y_pitch) {
 
 	const double opp_h = 0.5 + full_jump_height / settings.proj_dist;
 	if (y_shift < 0.0) y_shift = 0.0;
 
+	/*
+	printf("---\n");
+	DEBUG(y_shift, lf);
+	*/
+
 	// `y_shift - pace` may go outside the map boundaries; limit this domain
 	for (int y = y_shift - pace; y < settings.screen_height - pace; y++) {
 		const int pace_y = y + pace;
+
+		// DEBUG(pace_y, d);
 
 		const int row = y - settings.half_screen_height - y_pitch + 1;
 		if (row == 0) continue;
@@ -46,8 +53,7 @@ void fast_affine_floor(const VectorF pos, const double full_jump_height,
 			if (screen.wall_bottom_buffer[screen_x] >= pace_y + 1) continue;
 
 			const double actual_dist = straight_dist / screen.cos_beta_buffer[screen_x];
-			const VectorF hit = VectorFF_add(VectorFF_mul(screen.dir_buffer[screen_x], VectorF_memset(actual_dist)), pos);
-
+			const vec hit = vec_line_pos(pos, screen.dir_buffer[screen_x], actual_dist);
 			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
 			if (current_level.get_point_height(wall_point, hit)) continue;
 

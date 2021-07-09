@@ -2,22 +2,22 @@ Path init_path(const int init_length, ...) {
 	va_list args;
 	va_start(args, init_length);
 
-	Path path = {wmalloc(init_length * sizeof(VectorI)), init_length, init_length};
-	for (int i = 0; i < init_length; i++) path.data[i] = va_arg(args, VectorI);
+	Path path = {wmalloc(init_length * sizeof(ivec)), init_length, init_length};
+	for (int i = 0; i < init_length; i++) path.data[i] = va_arg(args, ivec);
 
 	va_end(args);
 	return path;
 }
 
 inlinable Path copy_path(const Path path) {
-	Path copy = {wmalloc(path.length * sizeof(VectorI)), path.length, path.length};
-	memcpy(copy.data, path.data, path.length * sizeof(VectorI));
+	Path copy = {wmalloc(path.length * sizeof(ivec)), path.length, path.length};
+	memcpy(copy.data, path.data, path.length * sizeof(ivec));
 	return copy;
 }
 
-inlinable void add_to_path(Path* const path, const VectorI new) {
+inlinable void add_to_path(Path* const path, const ivec new) {
 	if (path -> length++ == path -> max_alloc)
-		path -> data = wrealloc(path -> data, ++path -> max_alloc * sizeof(VectorI));
+		path -> data = wrealloc(path -> data, ++path -> max_alloc * sizeof(ivec));
 
 	path -> data[path -> length - 1] = new;
 }
@@ -37,8 +37,7 @@ PathQueue init_path_queue(const int init_length, ...) {
 
 inlinable void enqueue_a_path(PathQueue* const path_queue, const Path new) {
 	if (path_queue -> length++ == path_queue -> max_alloc)
-		path_queue -> data = wrealloc(path_queue -> data,
-			++path_queue -> max_alloc * sizeof(Path));
+		path_queue -> data = wrealloc(path_queue -> data, ++path_queue -> max_alloc * sizeof(Path));
 
 	for (int i = path_queue -> length - 1; i > 0; i--)
 		path_queue -> data[i] = path_queue -> data[i - 1];

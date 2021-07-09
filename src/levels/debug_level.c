@@ -1,10 +1,10 @@
-byte get_debug_level_point_height(const byte point, const VectorF pos) {
+byte get_debug_level_point_height(const byte point, const vec pos) {
 	(void) pos;
 	if (point == 5) return 1;
 	return point;
 }
 
-double debug_level_shader(const VectorF pos) {
+double debug_level_shader(const vec pos) {
 	return pos[0] / 2.0;
 }
 
