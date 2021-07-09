@@ -49,8 +49,8 @@
 #define PIXEL_FORMAT_BPP 4
 
 #define inlinable static inline
-
 #define ASM_I_AM_HERE __asm__ volatile ("nop");
+
 #define LOOP(max) for (int i = 0; i < max; i++)
 #define FAIL(...) {fprintf(stderr, __VA_ARGS__); exit(1);}
 
@@ -75,6 +75,9 @@ typedef uint_fast8_t byte;
 typedef __m128d vec;
 typedef struct {int x, y;} ivec;
 
-// https://www.spriters-resource.com/pc_computer/doomdoomii/
-// https://lodev.org/cgtutor/raycasting4.html
-// https://medium.com/@Powersaurus/pico-8-raycaster-doors-cd8de9d943b
+/*
+https://www.spriters-resource.com/pc_computer/doomdoomii/
+https://lodev.org/cgtutor/raycasting4.html
+https://medium.com/@Powersaurus/pico-8-raycaster-doors-cd8de9d943b
+https://docs.microsoft.com/en-us/cpp/intrinsics/x86-intrinsics-list?view=msvc-160
+*/

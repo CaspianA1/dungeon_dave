@@ -32,22 +32,15 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 	const double opp_h = 0.5 + full_jump_height / settings.proj_dist;
 	if (y_shift < 0.0) y_shift = 0.0;
 
-	/*
-	printf("---\n");
-	DEBUG(y_shift, lf);
-	*/
-
 	// `y_shift - pace` may go outside the map boundaries; limit this domain
 	for (int y = y_shift - pace; y < settings.screen_height - pace; y++) {
 		const int pace_y = y + pace;
-
-		// DEBUG(pace_y, d);
 
 		const int row = y - settings.half_screen_height - y_pitch + 1;
 		if (row == 0) continue;
 		const double straight_dist = opp_h / row * settings.proj_dist;
 
-		Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch);
+		Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch); // move this out
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			if (screen.wall_bottom_buffer[screen_x] >= pace_y + 1) continue;
@@ -69,7 +62,7 @@ void fill_val_buffers_for_planar_mode(const double angle_degrees) {
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
-		update_val_buffers(screen_x, 0.0, cos(player_angle - theta), 0.0f, (VectorF) {cos(theta), sin(theta)});
+		update_val_buffers(screen_x, 0.0, cos(player_angle - theta), 0.0f, (vec) {cos(theta), sin(theta)});
 	}
 }
 

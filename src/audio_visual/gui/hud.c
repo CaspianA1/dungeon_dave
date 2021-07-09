@@ -35,12 +35,12 @@ void draw_minimap(const vec pos) {
 	draw_colored_rect(255, 0, 0, 1.0, &player_dot);
 }
 
-void draw_crosshair(const int y_pitch) {
+void draw_crosshair(const int y_shift) {
 	static Toggle toggle = {255, 215, 0, 0, 0, KEY_TOGGLE_CROSSHAIR};
 	if (!update_toggle(&toggle)) return;
 
 	const byte half_dimensions = settings.screen_width / 40, thickness = settings.screen_width / 200;
-	const ivec center = {settings.half_screen_width, y_pitch};
+	const ivec center = {settings.half_screen_width, y_shift};
 
 	SDL_SetRenderDrawColor(screen.renderer, toggle.r, toggle.g, toggle.b, SDL_ALPHA_OPAQUE);
 

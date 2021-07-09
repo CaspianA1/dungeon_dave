@@ -101,7 +101,7 @@ inlinable void update_val_buffers(const int screen_x, const double dist, const d
 	}
 }
 
-///// https://docs.microsoft.com/en-us/cpp/intrinsics/x86-intrinsics-list?view=msvc-160
+/////
 
 #define vec_fill _mm_set1_pd
 

@@ -43,9 +43,9 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 	}
 }
 
-void use_weapon_if_needed(Weapon* const weapon, const Player player, const InputStatus input_status) {
-	#ifndef NOCLIP_MODE
+#ifndef NOCLIP_MODE
 
+void use_weapon_if_needed(Weapon* const weapon, const Player player, const InputStatus input_status) {
 	if (weapon -> in_use && weapon -> animation.frame_ind == 0) weapon -> in_use = 0;
 	else if (input_status == BeginAnimatingWeapon && !weapon -> in_use) {
 		weapon -> in_use = 1;
@@ -56,12 +56,10 @@ void use_weapon_if_needed(Weapon* const weapon, const Player player, const Input
 	// -1 -> cycle frame, 0 -> first frame
 	animate_weapon(&weapon -> animation, player.pos, -weapon -> in_use,
 		player.y_pitch, player.pace.screen_offset);
-
-	#else
-
-	(void) weapon;
-	(void) player;
-	(void) input_status;
-
-	#endif
 }
+
+#else
+
+#define use_weapon_if_needed(a, b, c)
+
+#endif

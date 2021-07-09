@@ -18,3 +18,7 @@ inlinable void deinit_sprite(const Sprite sprite) {
 	SDL_FreeSurface(sprite.surface);
 	SDL_DestroyTexture(sprite.texture);
 }
+
+inlinable Uint32 get_surface_pixel(const void* const pixels, const int surface_pitch, const int x, const int y) {
+	return *(Uint32*) ((Uint8*) pixels + y * surface_pitch + x * PIXEL_FORMAT_BPP);
+}

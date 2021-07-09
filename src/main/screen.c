@@ -34,18 +34,18 @@ void deinit_screen(void) {
 
 inlinable void prepare_for_drawing(void) {
 	SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, 0);
-	SDL_RenderClear(screen.renderer);
+	SDL_RenderClear(screen.renderer); // clearing the window
 
 	SDL_LockTexture(screen.pixel_buffer, NULL, &screen.pixels, &screen.pixel_pitch);
 	SDL_SetRenderTarget(screen.renderer, screen.shape_buffer);
-	SDL_RenderClear(screen.renderer);
+	SDL_RenderClear(screen.renderer); // cleaning the shape buffer
 }
 
 inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const dest_crop, const double tilt) {
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
-void refresh(const Domain tilt, const vec pos, const int y_pitch) {
+void refresh(const Domain tilt, const vec pos, const double y_shift) {
 	SDL_UnlockTexture(screen.pixel_buffer);
 	SDL_SetRenderTarget(screen.renderer, NULL);
 
@@ -87,14 +87,11 @@ void refresh(const Domain tilt, const vec pos, const int y_pitch) {
 		draw_tilted(screen.shape_buffer, &dest_crop, tilt.val);
 	}
 
+	// these are drawn to the window because if it were to the shape buffer, they would be rotated
 	void draw_minimap(const vec);
 	draw_minimap(pos);
 	void draw_crosshair(const int);
-	draw_crosshair(y_pitch);
+	draw_crosshair(y_shift);
 
 	SDL_RenderPresent(screen.renderer);
-}
-
-inlinable Uint32 get_surface_pixel(const void* const pixels, const int surface_pitch, const int x, const int y) {
-	return *(Uint32*) ((Uint8*) pixels + y * surface_pitch + x * PIXEL_FORMAT_BPP);
 }

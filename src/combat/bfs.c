@@ -68,7 +68,7 @@ ResultBFS bfs(const vec begin, const vec end) {
 	set_map_point(all_visited, 1, int_begin.x, int_begin.y, current_level.map_width);
 
 	PathQueue paths = init_path_queue(1, init_path(1, int_begin));
-	ResultBFS result = {.succeeded = 0};
+	ResultBFS result = {0};
 
 	while (paths.length > 0) {
 		Path path = dequeue_a_path(&paths);

@@ -1,5 +1,5 @@
 /*
-the user can change this:
+the user should be able to change this:
 - minimap size
 - ray column width (range from 1 to 10)
 - fov (range from 60 to 120)
