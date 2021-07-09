@@ -30,3 +30,45 @@ return (DataDDA) {
 };
 
 /////
+
+void fast_affine_floor(const vec pos, const double full_jump_height,
+	const double pace, double y_shift, const int y_pitch) {
+
+	const double opp_h = 0.5 + full_jump_height / settings.proj_dist;
+	if (y_shift < 0.0) y_shift = 0.0;
+
+	printf("---\n");
+	// const long begin = y_shift;
+	// const long other = (Uint8*) begin;
+
+	// Uint32* row = (Uint32*) ((Uint8*) screen.pixels +  * screen.pixel_pitch);
+	// const int row_step = y_shift * screen.pixel_pitch;
+
+	const int pixbuf_row_step = (int) screen.pixel_pitch;
+	Uint32* pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + (int) (y_shift + 20) * screen.pixel_pitch);
+
+	// `y_shift - pace` may go outside the map boundaries; limit this domain
+	for (int y = y_shift - pace; y < settings.screen_height - pace; y++) {//, pixbuf_row += pixbuf_row_step) {
+		const int pace_y = y + pace;
+
+		const int row = y - settings.half_screen_height - y_pitch + 1;
+		if (row == 0) continue;
+		const double straight_dist = opp_h / row * settings.proj_dist;
+
+		// Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch); // move this out
+		// DEBUG((void*) pixbuf_row, p);
+
+		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
+			if (screen.wall_bottom_buffer[screen_x] >= pace_y + 1) continue;
+
+			const double actual_dist = straight_dist / screen.cos_beta_buffer[screen_x];
+			const vec hit = vec_line_pos(pos, screen.dir_buffer[screen_x], actual_dist);
+			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
+			if (current_level.get_point_height(wall_point, hit)) continue;
+
+			draw_from_hit(hit, actual_dist, screen_x, pixbuf_row);
+		}
+	}
+}
+
+/////

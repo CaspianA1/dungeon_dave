@@ -47,7 +47,7 @@ problems:
 	- hit detection for weapons is still sometimes spotty
 	- abandon text surfaces and only keep the texture? will that work with floors?
 	- skyboxes become wonky when the screen size increases
-	- planar + noclip mode crash
 	- don't reallocate the `all_visited` var each time in bfs.c
 	- disabling vsync makes everything choppy
 	- vecs to double[2]'s in screen.dir_buffer
+	- move row offset out of loop in floorcast

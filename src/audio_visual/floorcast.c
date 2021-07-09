@@ -40,15 +40,26 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 		if (row == 0) continue;
 		const double straight_dist = opp_h / row * settings.proj_dist;
 
-		Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch); // move this out
+		// move this out of the loop
+		Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch); 
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			if (screen.wall_bottom_buffer[screen_x] >= pace_y + 1) continue;
 
 			const double actual_dist = straight_dist / screen.cos_beta_buffer[screen_x];
 			const vec hit = vec_line_pos(pos, screen.dir_buffer[screen_x], actual_dist);
+			
+			#ifndef PLANAR_MODE
+
 			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
 			if (current_level.get_point_height(wall_point, hit)) continue;
+
+			#else
+
+			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_width - 1.0
+				|| hit[1] > current_level.map_height - 1.0) continue;
+
+			#endif
 
 			draw_from_hit(hit, actual_dist, screen_x, pixbuf_row);
 		}
