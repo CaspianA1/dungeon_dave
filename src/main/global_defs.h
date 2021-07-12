@@ -2,7 +2,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 
-#define PLANAR_MODE
+// #define PLANAR_MODE
 #define NOCLIP_MODE
 
 // #define SHADING_ENABLED

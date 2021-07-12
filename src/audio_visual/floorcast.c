@@ -1,4 +1,4 @@
-inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
+inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* pixbuf_row) {
 	const byte floor_point = map_point(current_level.floor_data, hit[0], hit[1]);
 	// https://wiki.libsdl.org/SDL_RenderReadPixels
 	const SDL_Surface* const surface = current_level.walls[floor_point - 1].surface;
@@ -32,16 +32,16 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 	const double opp_h = 0.5 + full_jump_height / settings.proj_dist;
 	if (y_shift < 0.0) y_shift = 0.0;
 
+	Uint32* pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + (int) y_shift * screen.pixel_pitch); 
+	const Uint32 pixbuf_row_step = screen.pixel_pitch / sizeof(Uint32);
+
 	// `y_shift - pace` may go outside the map boundaries; limit this domain
-	for (int y = y_shift - pace; y < settings.screen_height - pace; y++) {
+	for (int y = y_shift - pace; y < settings.screen_height - pace; y++, pixbuf_row += pixbuf_row_step) {
 		const int pace_y = y + pace;
 
 		const int row = y - settings.half_screen_height - y_pitch + 1;
 		if (row == 0) continue;
 		const double straight_dist = opp_h / row * settings.proj_dist;
-
-		// move this out of the loop
-		Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch); 
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			const BufferVal buffer_val = val_buffer[screen_x];
@@ -50,15 +50,15 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 			const double actual_dist = straight_dist / (double) buffer_val.cos_beta;
 			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
 
-			#ifndef PLANAR_MODE
-
-			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
-			if (current_level.get_point_height(wall_point, hit)) continue;
-
-			#else
+			#ifdef PLANAR_MODE
 
 			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_width - 1.0
 				|| hit[1] > current_level.map_height - 1.0) continue;
+
+			#else
+
+			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
+			if (current_level.get_point_height(wall_point, hit)) continue;
 
 			#endif
 

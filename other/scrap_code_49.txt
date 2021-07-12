@@ -165,3 +165,22 @@ else {
 // "../../Aseprite/Palace City Skybox.bmp"
 
 /////
+
+/*
+// move this out of the loop
+// Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch); 
+const unsigned long readable_pixbuf_row = (unsigned long) pixbuf_row;
+DEBUG(readable_pixbuf_row, lu);
+*/
+
+/*
+Uint32* const reference_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch); 
+DEBUG((unsigned long) reference_row, lu);
+DEBUG((unsigned long) pixbuf_row, lu);
+
+unsigned long row_difference = (unsigned long) pixbuf_row - (unsigned long) reference_row;
+DEBUG(row_difference, lu);
+printf("-\n");
+*/
+
+/////

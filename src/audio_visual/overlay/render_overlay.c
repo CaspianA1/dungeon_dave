@@ -24,7 +24,7 @@ int cmp_generic_billboards(const void* const a, const void* const b) {
 	else return 0;
 }
 
-void draw_generic_billboards(const Player player, const double billboard_y_shift) {
+void draw_generic_billboards(const Player player, const double y_shift) {
 	const double player_angle = to_radians(player.angle);
 
 	const byte generic_billboard_count = current_level.generic_billboard_count;
@@ -145,7 +145,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 		/////
 
 		SDL_FRect screen_pos = {
-			0.0, billboard_y_shift - half_size
+			0.0, y_shift - half_size
 			+ (player.jump.height - billboard.height) * settings.screen_height / corrected_dist,
 			settings.ray_column_width, size
 		};
