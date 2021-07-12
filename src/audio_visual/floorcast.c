@@ -1,18 +1,3 @@
-inlinable void basic_draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* pixbuf_row) {
-	(void) hit;
-	(void) actual_dist;
-
-	Uint32 src = 4291998860; // tan
-
-	const double shade = calculate_shade(settings.proj_dist / actual_dist, hit);
-	const byte r = (byte) (src >> 16) * shade, g = (byte) (src >> 8) * shade, b = (byte) src * shade;
-	src = 0xFF000000 | (r << 16) | (g << 8) | b;
-
-	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
-		*(pixbuf_row + x) = src;
-}
-
-
 PSprite p;
 inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
 	const int max_offset = p.size - 1;
@@ -23,8 +8,7 @@ inlinable void draw_from_hit(const vec hit, const double actual_dist, const int 
 		(hit[1] - floored_hit.y) * max_offset
 	};
 
-	Uint32* row = read_texture_row(p.pixels, p.pitch, offset.y);
-	Uint32 src = *(row + offset.x);
+	Uint32 src = *(read_texture_row(p.pixels, p.pitch, offset.y) + offset.x);
 
 	#ifdef SHADING_ENABLED
 	const double shade = calculate_shade(settings.proj_dist / actual_dist, hit);

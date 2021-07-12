@@ -55,7 +55,7 @@ int main(void) {
 
 	play_sound(current_level.background_sound, 1);
 
-	p = init_psprite("../assets/walls/mesa.bmp");
+	p = init_psprite("../assets/walls/pyramid_bricks_3.bmp");
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();

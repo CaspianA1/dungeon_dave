@@ -48,4 +48,4 @@ problems:
 	- disabling vsync makes everything choppy
 	- vecs to double[2]'s in screen.dir_buffer
 	- fix the offset problem for fast_affine_floor
-	- fix psprites
+	- sometimes, psprites disappear mid-game
