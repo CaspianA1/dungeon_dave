@@ -10,6 +10,7 @@
 #include "settings.c"
 #include "screen.c"
 
+#include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
 #include "../audio_visual/overlay/render_overlay.c"
 #include "../audio_visual/dda.c"
