@@ -2,12 +2,10 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 
-/*
 #define PLANAR_MODE
 #define NOCLIP_MODE
-*/
 
-#define SHADING_ENABLED
+// #define SHADING_ENABLED
 // #define SOUND_ENABLED
 #define FULL_QUALITY
 // #define TRACK_MEMORY

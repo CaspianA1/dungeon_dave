@@ -52,9 +52,9 @@ typedef struct {
 } Screen;
 
 typedef struct {
-	float *depth, *cos_beta, *wall_bottom;
-	vec* dir;
-} ValBuffers;
+	float depth, cos_beta, wall_bottom;
+	vec dir;
+} BufferVal;
 
 /////
 
@@ -94,7 +94,7 @@ typedef struct {
 /////
 
 Screen screen;
-ValBuffers val_buffers;
+BufferVal* val_buffer;
 Settings settings;
 Level current_level;
 

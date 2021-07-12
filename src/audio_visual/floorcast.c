@@ -44,10 +44,11 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 		Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch); 
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
-			if (val_buffers.wall_bottom[screen_x] >= pace_y + 1) continue;
+			const BufferVal buffer_val = val_buffer[screen_x];
+			if (buffer_val.wall_bottom >= pace_y + 1) continue;
 
-			const double actual_dist = straight_dist / (double) val_buffers.cos_beta[screen_x];
-			const vec hit = vec_line_pos(pos, val_buffers.dir[screen_x], actual_dist);
+			const double actual_dist = straight_dist / (double) buffer_val.cos_beta;
+			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
 
 			#ifndef PLANAR_MODE
 

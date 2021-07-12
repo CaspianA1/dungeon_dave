@@ -123,3 +123,45 @@ inlinable void fn_over_val_buffers(void* (*fn) (void*)) {
 }
 
 /////
+
+/*
+typedef struct {
+	float *depth, *cos_beta, *wall_bottom;
+	vec* dir;
+} ValBuffers;
+*/
+
+/////
+
+/*
+val_buffers.depth = wrealloc(val_buffers.depth, new_width * sizeof(float));
+val_buffers.cos_beta = wrealloc(val_buffers.cos_beta, new_width * sizeof(float));
+val_buffers.wall_bottom = wrealloc(val_buffers.wall_bottom, new_width * sizeof(float));
+val_buffers.dir = wrealloc(val_buffers.dir, new_width * sizeof(vec));
+*/
+
+/////
+
+/*
+const int // src_height can be divided to determine what fraction is shown at once
+	src_y = skybox.max_height * (1.0 - look_up_percent),
+	src_height = skybox.max_height * look_up_percent; // make more elegant
+*/
+
+int src_y, src_height;
+
+if (keys[SDL_SCANCODE_T]) {
+	src_height = skybox.max_height * look_up_percent;
+	src_y = skybox.max_height - src_height;
+}
+
+else {
+	src_y = skybox.max_height * (1.0 - look_up_percent);
+	src_height = skybox.max_height * look_up_percent; // make more elegant
+}
+
+/////
+
+// "../../Aseprite/Palace City Skybox.bmp"
+
+/////

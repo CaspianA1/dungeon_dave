@@ -90,14 +90,15 @@ inlinable void set_map_point(byte* const map, const byte val, const int x, const
 	map[y * map_width + x] = val;
 }
 
-inlinable void update_val_buffers(const int screen_x, const double dist, const double cos_beta,
+void update_val_buffers(const int screen_x, const float dist, const float cos_beta,
 	const float wall_bottom, const vec dir) {
 
-	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++) {
-		val_buffers.depth[x] = dist;
-		val_buffers.cos_beta[x] = cos_beta;
-		val_buffers.wall_bottom[x] = wall_bottom;
-		val_buffers.dir[x] = dir;
+	BufferVal* buffer_val = &val_buffer[screen_x];
+	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++, buffer_val++) {
+		buffer_val -> depth = dist;
+		buffer_val -> cos_beta = cos_beta;
+		buffer_val -> wall_bottom = wall_bottom;
+		buffer_val -> dir = dir;
 	}
 }
 
