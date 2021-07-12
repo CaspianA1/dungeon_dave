@@ -72,3 +72,24 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 }
 
 /////
+
+/*
+__m64 foo = {1};
+__m64i bar;
+__m128i baz;
+__v1di a;
+__v2si b;
+__v4hi c;
+__v8qi d;
+*/
+
+__v2si john = {1, 2, 3};
+DEBUG(sizeof(john), zu);
+DEBUG(sizeof(int), zu);
+
+/////
+
+typedef int ivec[2];
+// typedef __v2si ivec;
+
+/////

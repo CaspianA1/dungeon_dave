@@ -72,8 +72,7 @@ vec handle_ray(const DataRaycast d) {
 		else slice.h = max_sprite_h;
 
 		*d.curr_smallest_wall_y = (double) raised_wall.y;
-
-		if (!keys[SDL_SCANCODE_T]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
+		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
 	}
 	return (vec) {(double) smallest_wall_y, (double) wall.h};
 }
@@ -107,12 +106,13 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 				}
 				else height_change_y = settings.screen_height, height_change_h = 0.0; // correct?
 
-				if (screen_x > 395 && screen_x < 405) {
-					/*
-					SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-					SDL_RenderDrawLine(screen.renderer, screen_x, height_change_y + height_change_h,
-					screen_x, last_height_change_y);
-					*/
+				// goal: draw from last height_change_y to current height_change_y + height_change+h
+				if (screen_x > 400 && screen_x < 405 && !at_first_hit && point_height > curr_point_height) {
+					const byte r = 210, g = 180, b = 140;
+					const double shade = 1.0 - (double) point_height / current_level.max_point_height;
+					SDL_SetRenderDrawColor(screen.renderer, r * shade, g * shade, b * shade, SDL_ALPHA_OPAQUE);
+					SDL_RenderDrawLine(screen.renderer, screen_x, last_height_change_y, 
+						screen_x, height_change_y + height_change_h);
 				}
 
 				// draw from last wall y to current wall bottom (y + h)
