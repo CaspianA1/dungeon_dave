@@ -3,6 +3,12 @@ typedef struct {
 	ivec size;
 } Sprite;
 
+typedef struct {
+	void* pixels;
+	int pitch;
+	Sprite sprite;
+} PSprite; // pixelwise access
+
 /////
 
 typedef struct {

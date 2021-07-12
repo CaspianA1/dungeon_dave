@@ -1,14 +1,36 @@
-// 4291998860 = tan color
+inlinable void basic_draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* pixbuf_row) {
+	(void) hit;
+	(void) actual_dist;
 
-inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* pixbuf_row) {
-	Uint32 src = 4291998860;
-
-	#ifdef SHADING_ENABLED
+	Uint32 src = 4291998860; // tan
 
 	const double shade = calculate_shade(settings.proj_dist / actual_dist, hit);
 	const byte r = (byte) (src >> 16) * shade, g = (byte) (src >> 8) * shade, b = (byte) src * shade;
 	src = 0xFF000000 | (r << 16) | (g << 8) | b;
 
+	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
+		*(pixbuf_row + x) = src;
+}
+
+
+PSprite p;
+inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
+	const Sprite sprite = p.sprite;
+	const int max_offset = sprite.size.x - 1;
+
+	const ivec floored_hit = vec_to_ivec(hit);
+	const ivec offset = {
+		(hit[0] - floored_hit.x) * max_offset,
+		(hit[1] - floored_hit.y) * max_offset
+	};
+
+	Uint32* row = read_texture_row(p.pixels, p.pitch, offset.y);
+	Uint32 src = *(row + offset.x);
+
+	#ifdef SHADING_ENABLED
+	const double shade = calculate_shade(settings.proj_dist / actual_dist, hit);
+	const byte r = (byte) (src >> 16) * shade, g = (byte) (src >> 8) * shade, b = (byte) src * shade;
+	src = 0xFF000000 | (r << 16) | (g << 8) | b;
 	#else
 	(void) actual_dist;
 	#endif
@@ -37,7 +59,7 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 		const int pace_y = y + pace;
 		const double straight_dist = opp_h / row * settings.proj_dist;
 
-		Uint32* const pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch);
+		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 		/*
 		if (cmp_pixbuf_row == pixbuf_row) {
 			printf("Equal\n");
