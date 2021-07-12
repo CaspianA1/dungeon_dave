@@ -154,7 +154,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 		SDL_SetTextureColorMod(billboard.sprite.texture, shade, shade, shade);
 
 		for (int screen_row = start_x; screen_row < end_x; screen_row += settings.ray_column_width) {
-			if (screen_row < 0 || screen.z_buffer[screen_row] < corrected_dist) continue;
+			if (screen_row < 0 || (double) screen.z_buffer[screen_row] < corrected_dist) continue;
 
 			/*
 			if (screen_row < 0) continue;

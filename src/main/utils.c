@@ -124,10 +124,8 @@ inlinable vec vec_line_pos(const vec pos, const vec dir, const double slope) {
 	return dir * vec_fill(slope) + pos;
 }
 
-inlinable byte ivec_out_of_bounds(const ivec v) {
-	return v.x < 0 || v.x > current_level.map_width - 1 || v.y < 0 || v.y > current_level.map_height - 1;
-}
-
 inlinable ivec vec_to_ivec(const vec v) {
 	return (ivec) {(int) floor(v[0]), (int) floor(v[1])};
 }
+
+// inlinable int ivec_by_int

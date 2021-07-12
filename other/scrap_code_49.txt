@@ -93,3 +93,23 @@ typedef int ivec[2];
 // typedef __v2si ivec;
 
 /////
+
+inlinable byte ivec_out_of_bounds(const ivec v) {
+	return v.x < 0 || v.x > current_level.map_width - 1 || v.y < 0 || v.y > current_level.map_height - 1;
+}
+
+/////
+
+/*
+DEBUG(sizeof(DataDDA), zu);
+DEBUG(sizeof(short), zu);
+DEBUG(sizeof(int), zu);
+DEBUG(sizeof(ivec), zu);
+DEBUG(sizeof(int_fast16_t), zu);
+*/
+
+/////
+
+// typedef int_fast16_t smallint;
+
+/////

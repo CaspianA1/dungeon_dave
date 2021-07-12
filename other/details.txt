@@ -24,7 +24,6 @@ features:
 	- anti-aliasing
 	- a file format
 	- a map editor
-	- switch over to floats, if 2 floats can be in a vector
 	- seethrough sprites
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
@@ -42,7 +41,6 @@ problems:
 	- less doubles and more ints in render_overlay.c
 	- add back the BFS wall checking
 	- don't intersect the player dot with walls in the minimap
-	- many VectorF's to double[2]'s
 	- shading is slow
 	- hit detection for weapons is still sometimes spotty
 	- abandon text surfaces and only keep the texture? will that work with floors?

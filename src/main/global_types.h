@@ -49,7 +49,7 @@ typedef struct {
 	SDL_Texture *pixel_buffer, *shape_buffer;
 	void* pixels;
 	int pixel_pitch; // `pixels` and `pixel_pitch` pertain to the pixel buffer
-	double *z_buffer, *cos_beta_buffer;
+	float *z_buffer, *cos_beta_buffer;
 	float* wall_bottom_buffer;
 	vec* dir_buffer;
 } Screen;

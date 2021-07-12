@@ -13,8 +13,8 @@ void init_screen(void) {
 
 	screen.pixel_format = SDL_AllocFormat(PIXEL_FORMAT);
 	init_SDL_buffers(settings.screen_width, settings.screen_height, 0);
-	screen.z_buffer = wcalloc(settings.screen_width, sizeof(double));
-	screen.cos_beta_buffer = wcalloc(settings.screen_width, sizeof(double));
+	screen.z_buffer = wcalloc(settings.screen_width, sizeof(float));
+	screen.cos_beta_buffer = wcalloc(settings.screen_width, sizeof(float));
 	screen.wall_bottom_buffer = wcalloc(settings.screen_width, sizeof(float));
 	screen.dir_buffer = wcalloc(settings.screen_width, sizeof(vec)); // try making these doubles
 }
