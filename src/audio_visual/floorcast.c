@@ -15,8 +15,7 @@ inlinable void basic_draw_from_hit(const vec hit, const double actual_dist, cons
 
 PSprite p;
 inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
-	const Sprite sprite = p.sprite;
-	const int max_offset = sprite.size.x - 1;
+	const int max_offset = p.size - 1;
 
 	const ivec floored_hit = vec_to_ivec(hit);
 	const ivec offset = {

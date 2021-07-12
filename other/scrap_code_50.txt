@@ -48,3 +48,13 @@ PixelwiseSprite init_pixelwise_sprite(const char* const path) {
 // PixelwiseSprite pws = init_pixelwise_sprite("../assets/walls/mesa.bmp");
 
 /////
+
+/*
+for (int y = 0; y < size.y; y++) {
+	Uint32* row = read_texture_row(p.pixels, p.pitch, y);
+	for (int x = 0; x < size.x; x++)
+		row[x] = 4291998860 / (x + 1);
+}
+*/
+
+/////

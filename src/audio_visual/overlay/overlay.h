@@ -5,8 +5,8 @@ typedef struct {
 
 typedef struct {
 	void* pixels;
-	int pitch;
-	Sprite sprite;
+	int pitch, size; // for pixelwise access, equal dimensions are needed
+	SDL_Texture* texture;
 } PSprite; // pixelwise access
 
 /////
