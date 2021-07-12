@@ -62,7 +62,7 @@ inlinable byte iter_dda(DataDDA* const d_ref) {
 	DataDDA d = peek_dda(*d_ref);
 
 	const ivec v = d.curr_tile;
-	if (v.x < 0 || v.x > current_level.map_width - 1 || v.y < 0 || v.y > current_level.map_height - 1)
+	if (v.x < 0 || v.x > current_level.map_size.x - 1 || v.y < 0 || v.y > current_level.map_size.y - 1)
 		return 0;
 
 	d.step_count++;

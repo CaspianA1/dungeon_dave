@@ -1,7 +1,7 @@
 byte vertex_is_valid(const ivec vertex) {
 	return
-		vertex.x >= 0 && vertex.x < current_level.map_width
-		&& vertex.y >= 0 && vertex.y < current_level.map_height
+		vertex.x >= 0 && vertex.x < current_level.map_size.x
+		&& vertex.y >= 0 && vertex.y < current_level.map_size.y
 		&& !map_point(current_level.wall_data, vertex.x, vertex.y); // use the other fn
 }
 
@@ -50,7 +50,7 @@ void update_queue_with_neighbors(PathQueue* const paths, Path path, const ivec v
 				continue;
 			*/
 
-			byte* const was_visited = &all_visited[neighbor.y * current_level.map_width + neighbor.x];
+			byte* const was_visited = &all_visited[neighbor.y * current_level.map_size.x + neighbor.x];
 			if (!*was_visited) {
 				*was_visited = 1;
 				Path path_copy = copy_path(path);
@@ -64,8 +64,8 @@ void update_queue_with_neighbors(PathQueue* const paths, Path path, const ivec v
 ResultBFS bfs(const vec begin, const vec end) {
 	const ivec int_begin = vec_to_ivec(begin), int_end = vec_to_ivec(end);
 
-	byte* const all_visited = wcalloc(current_level.map_width * current_level.map_height, sizeof(byte));
-	set_map_point(all_visited, 1, int_begin.x, int_begin.y, current_level.map_width);
+	byte* const all_visited = wcalloc(current_level.map_size.x * current_level.map_size.y, sizeof(byte));
+	set_map_point(all_visited, 1, int_begin.x, int_begin.y, current_level.map_size.x);
 
 	PathQueue paths = init_path_queue(1, init_path(1, int_begin));
 	ResultBFS result = {0};

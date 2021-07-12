@@ -63,8 +63,8 @@ void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
 
 	vec new_pos = *pos + movement;
 
-	if (new_pos[1] < 0 || new_pos[1] > current_level.map_height) new_pos[1] = prev_pos[1];
-	if (new_pos[0] < 0 || new_pos[0] > current_level.map_width) new_pos[0] = prev_pos[0];
+	if (new_pos[1] < 0 || new_pos[1] > current_level.map_size.y) new_pos[1] = prev_pos[1];
+	if (new_pos[0] < 0 || new_pos[0] > current_level.map_size.x) new_pos[0] = prev_pos[0];
 
 	#ifdef NOCLIP_MODE
 

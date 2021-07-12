@@ -78,7 +78,7 @@ inlinable void tick_delay(const Uint32 before) {
 }
 
 inlinable byte map_point(const byte* const map, const double x, const double y) {
-	return map[(int) (floor(y) * current_level.map_width + floor(x))];
+	return map[(int) (floor(y) * current_level.map_size.x + floor(x))];
 }
 
 inlinable byte point_exists_at(const double x, const double y, const double z) {

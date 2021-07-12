@@ -7,7 +7,7 @@ inlinable Level init_level(const int map_width, const int map_height,
 	twice would be redundant. */
 
 	Level level = {
-		.map_width = map_width, .map_height = map_height,
+		.map_size = {map_width, map_height},
 		.init_pos = {init_x, init_y}, .init_height = init_height, .skybox.enabled = 0
 	};
 
@@ -18,9 +18,10 @@ inlinable Level init_level(const int map_width, const int map_height,
 }
 
 void randomize_map(const Level level, byte* const md, const byte* const points, const byte len_points) {
-	for (int y = 0; y < level.map_height; y++) {
-		for (int x = 0; x < level.map_width; x++)
-			md[y * level.map_width + x] = points[rand() % len_points];
+	for (int x = 0; x < current_level.map_size.x; x++) {
+		for (int y = 0; y < current_level.map_size.y; y++) {
+			md[y * level.map_size.x + x] = points[rand() % len_points];
+		}
 	}
 }
 

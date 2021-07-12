@@ -68,7 +68,7 @@ typedef struct {
 /////
 
 typedef struct {
-	const int map_width, map_height;
+	const ivec map_size;
 	const vec init_pos;
 	const double init_height;
 
