@@ -1,10 +1,3 @@
-byte vertex_is_valid(const ivec vertex) {
-	return
-		vertex.x >= 0 && vertex.x < current_level.map_size.x
-		&& vertex.y >= 0 && vertex.y < current_level.map_size.y
-		&& !map_point(current_level.wall_data, vertex.x, vertex.y); // use the other fn
-}
-
 void update_queue_with_neighbors(PathQueue* const paths, Path path, const ivec vertex, byte* const all_visited) {
 	/*
 	const VectorI
@@ -36,27 +29,28 @@ void update_queue_with_neighbors(PathQueue* const paths, Path path, const ivec v
 	// for no wall collisions, rule out movement with a corner wall and diagonal movement
 	for (NeighborID i = 0; i < 8; i++) {
 		const ivec neighbor = neighbors[i];
-		if (vertex_is_valid(neighbor)) {
-			if ((i == TopLeft) ||
-				(i == TopRight) ||
-				(i == BottomRight) ||
-				(i == BottomLeft)) {}
+		if (ivec_out_of_bounds(neighbor) || map_point(current_level.wall_data, neighbor.x, neighbor.y))
+			continue;
 
-			/*
-			if ((VectorII_eq(neighbor, top_left) && map_point(current_level.wall_data, left.x, left.y)) ||
-				(VectorII_eq(neighbor, top_right) && map_point(current_level.wall_data, right.x, right.y)) ||
-				(VectorII_eq(neighbor, bottom_right) && map_point(current_level.wall_data, bottom.x, bottom.y)) ||
-				(VectorII_eq(neighbor, bottom_left) && map_point(current_level.wall_data, bottom.x, bottom.y)))
-				continue;
-			*/
+		if ((i == TopLeft) ||
+			(i == TopRight) ||
+			(i == BottomRight) ||
+			(i == BottomLeft)) {}
 
-			byte* const was_visited = &all_visited[neighbor.y * current_level.map_size.x + neighbor.x];
-			if (!*was_visited) {
-				*was_visited = 1;
-				Path path_copy = copy_path(path);
-				add_to_path(&path_copy, neighbor);
-				enqueue_a_path(paths, path_copy);
-			}
+		/*
+		if ((VectorII_eq(neighbor, top_left) && map_point(current_level.wall_data, left.x, left.y)) ||
+			(VectorII_eq(neighbor, top_right) && map_point(current_level.wall_data, right.x, right.y)) ||
+			(VectorII_eq(neighbor, bottom_right) && map_point(current_level.wall_data, bottom.x, bottom.y)) ||
+			(VectorII_eq(neighbor, bottom_left) && map_point(current_level.wall_data, bottom.x, bottom.y)))
+			continue;
+		*/
+
+		byte* const was_visited = &all_visited[neighbor.y * current_level.map_size.x + neighbor.x];
+		if (!*was_visited) {
+			*was_visited = 1;
+			Path path_copy = copy_path(path);
+			add_to_path(&path_copy, neighbor);
+			enqueue_a_path(paths, path_copy);
 		}
 	}
 }

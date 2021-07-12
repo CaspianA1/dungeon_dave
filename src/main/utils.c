@@ -130,3 +130,7 @@ inlinable ivec vec_to_ivec(const vec v) {
 }
 
 // inlinable int ivec_by_int
+
+inlinable byte ivec_out_of_bounds(const ivec v) {
+	return v.x < 0 || v.x > current_level.map_size.x - 1 || v.y < 0 || v.y > current_level.map_size.y - 1;
+}

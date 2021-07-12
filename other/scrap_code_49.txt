@@ -201,3 +201,14 @@ return (Sprite) {
 */
 
 /////
+
+/*
+byte vertex_is_valid(const ivec vertex) {
+	return
+		vertex.x >= 0 && vertex.x < current_level.map_size.x
+		&& vertex.y >= 0 && vertex.y < current_level.map_size.y
+		&& !map_point(current_level.wall_data, vertex.x, vertex.y); // use the other fn
+}
+*/
+
+/////
