@@ -136,9 +136,9 @@ void draw_generic_billboards(const Player player, const double y_shift) {
 			width = possible_animation -> frame_w;
 		}
 		else {
-			const SDL_Surface* surface = billboard.sprite.surface;
-			width = surface -> w;
-			src_crop = (SDL_Rect) {.y = 0, .w = 1, .h = surface -> h};
+			const ivec src_size = billboard.sprite.size;
+			width = src_size.x;
+			src_crop = (SDL_Rect) {.y = 0, .w = 1, .h = src_size.y};
 			src_begin_x = 0;
 		}
 
@@ -186,24 +186,25 @@ https://zdoom.org/wiki/Sky_stretching
 
 void draw_skybox(const double angle, const double y_shift) {
 	const Skybox skybox = current_level.skybox;
+	const ivec max_size = skybox.sprite.size;
 
 	const double turn_percent = angle / 360.0;
 	const int
-		src_col_index = turn_percent * skybox.max_width,
-		src_width = skybox.max_width / 4.0;
+		src_col_index = turn_percent * max_size.x,
+		src_width = max_size.x / 4.0;
 
 	const int dest_y = 0, dest_height = y_shift;
 	const double look_up_percent = y_shift / settings.screen_height;
 
-	const int src_height = skybox.max_height * look_up_percent;
-	const int src_y = skybox.max_height - src_height;
+	const int src_height = max_size.y * look_up_percent;
+	const int src_y = max_size.y - src_height;
 
 	const SDL_Rect src_1 = {src_col_index, src_y, src_width, src_height};
 	SDL_Rect dest_1 =  {0, dest_y, settings.screen_width, dest_height};
 
 	if (turn_percent > 0.75) {
 		const double err_amt = (turn_percent - 0.75) * 4.0;
-		const int src_error = skybox.max_width * err_amt, dest_error = settings.screen_width * err_amt;
+		const int src_error = max_size.x * err_amt, dest_error = settings.screen_width * err_amt;
 
 		dest_1.w -= dest_error;
 

@@ -58,8 +58,10 @@ GUI init_gui(const byte msg_r, const byte msg_g, const byte msg_b, const char* c
 	for (byte i = 0; i < message_count; i++) {
 		const char* text = va_arg(gui_data, const char*); // or a msg?
 		SDL_Surface* const surface = TTF_RenderText_Solid(gui.font, text, msg_color);
+		const ivec size = {surface -> w, surface -> h};
 		SDL_Texture* const texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
-		gui.messages[i] = (NewMessage) {text, {surface, texture}, 0, va_arg(gui_data, SDL_Rect (*) (const Sprite))};
+		SDL_FreeSurface(surface);
+		gui.messages[i] = (NewMessage) {text, {texture, size}, 0, va_arg(gui_data, SDL_Rect (*) (const Sprite))};
 	}
 
 	va_end(gui_data);
@@ -91,9 +93,11 @@ void resize_gui(GUI* const gui) {
 		NewMessage* const message = &gui -> messages[i];
 		deinit_sprite(message -> text_sprite);
 
-		Sprite* text_sprite = &message -> text_sprite;
-		text_sprite -> surface = TTF_RenderText_Solid(gui -> font, message -> text, gui -> msg_color);
-		text_sprite -> texture = SDL_CreateTextureFromSurface(screen.renderer, text_sprite -> surface);
+		Sprite* const text_sprite = &message -> text_sprite;
+		SDL_Surface* const surface = TTF_RenderText_Solid(gui -> font, message -> text, gui -> msg_color);
+		text_sprite -> texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
+		text_sprite -> size = (ivec) {surface -> w, surface -> h};
+		SDL_FreeSurface(surface);
 	}
 }
 

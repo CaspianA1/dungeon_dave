@@ -428,3 +428,7 @@ inlinable void draw_tilted(SDL_Texture* const restrict buffer,
 inlinable byte get_bits(const Uint32 value, const byte offset, const byte n) {
 	return (value >> offset) & ((1 << n) - 1);
 }
+
+inlinable Uint32 get_surface_pixel(const void* const pixels, const int surface_pitch, const int x, const int y) {
+	return *(Uint32*) ((Uint8*) pixels + y * surface_pitch + x * PIXEL_FORMAT_BPP);
+}

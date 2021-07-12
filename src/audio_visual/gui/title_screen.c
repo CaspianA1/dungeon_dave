@@ -1,5 +1,4 @@
-Message init_message(const char* const text,
-	const byte r, const byte g, const byte b, const byte has_background) {
+Message init_message(const char* const text, const byte r, const byte g, const byte b, const byte has_background) {
 
 	const int avg_dimensions = (settings.screen_width + settings.screen_height) / 2;
 
@@ -10,8 +9,10 @@ Message init_message(const char* const text,
 
 	if (message.font == NULL) FAIL("Could not open a font: %s\n", SDL_GetError());
 
-	message.sprite.surface = TTF_RenderText_Solid(message.font, text, (SDL_Color) {r, g, b, SDL_ALPHA_OPAQUE});
-	message.sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, message.sprite.surface);
+	SDL_Surface* const surface = TTF_RenderText_Solid(message.font, text, (SDL_Color) {r, g, b, SDL_ALPHA_OPAQUE});
+	message.sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
+	message.sprite.size = (ivec) {surface -> w, surface -> h};
+	SDL_FreeSurface(surface);
 
 	return message;
 }
@@ -101,10 +102,10 @@ InputStatus display_title_screen(void) {
 		if (dimensions_changed) {
 			start = init_message("Start!", 255, 99, 71, 0);
 			start.pos = (SDL_Rect) {
-					settings.half_screen_width - start.sprite.surface -> w / 2,
-					settings.half_screen_height - start.sprite.surface -> h / 2,
-					start.sprite.surface -> w,
-					start.sprite.surface -> h
+					settings.half_screen_width - start.sprite.size.x / 2,
+					settings.half_screen_height - start.sprite.size.y / 2,
+					start.sprite.size.x,
+					start.sprite.size.y
 			};
 		}
 

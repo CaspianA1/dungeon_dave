@@ -1,12 +1,26 @@
+Sprite init_sprite(const char* const path) { // put in other file
+	SDL_Surface* const surface = SDL_LoadBMP(path);
+	SDL_Texture* const texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
+
+	const Sprite sprite = {texture, {surface -> w, surface -> h}};
+	SDL_FreeSurface(surface);
+	return sprite;
+}
+
+inlinable void deinit_sprite(const Sprite sprite) {
+	SDL_DestroyTexture(sprite.texture);
+}
+
 inlinable Animation init_animation(const char* const path, const int frames_per_row,
 	const int frames_per_col, const int frame_count, const int fps) {
 
 	const Billboard billboard = {init_sprite(path), {0, 0}, 0, 0, 0};
+	const ivec size = billboard.sprite.size;
 
 	return (Animation) {
 		billboard, frames_per_row, frames_per_col,
-		billboard.sprite.surface -> w / frames_per_row,
-		billboard.sprite.surface -> h / frames_per_col,
+		size.x / frames_per_row,
+		size.y / frames_per_col,
 		frame_count, 0, 1.0 / fps, 0
 	};
 }
@@ -42,11 +56,11 @@ inlinable void progress_enemy_frame_ind(Enemy* const enemy) {
 inlinable ivec get_spritesheet_frame_origin(const Animation animation) {
 	const int y_ind = animation.frame_ind / animation.frames_per_row;
 	const int x_ind = animation.frame_ind - y_ind * animation.frames_per_row;
-	const SDL_Surface* const surface = animation.billboard.sprite.surface;
+	const ivec size = animation.billboard.sprite.size;
 
 	return (ivec) {
-		((double) x_ind / animation.frames_per_row) * surface -> w,
-		((double) y_ind / animation.frames_per_col) * surface -> h
+		(double) x_ind / animation.frames_per_row * size.x,
+		(double) y_ind / animation.frames_per_col * size.y
 	};
 }
 

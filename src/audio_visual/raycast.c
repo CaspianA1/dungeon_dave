@@ -38,12 +38,12 @@ vec handle_ray(const DataRaycast d) {
 	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, wall.y + wall.h, d.dir);
 
 	const Sprite wall_sprite = current_level.walls[d.point - 1];
-	const int max_sprite_h = wall_sprite.surface -> h;
+	const int max_sprite_h = wall_sprite.size.y;
 
 	const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 
-	SDL_Rect slice = {get_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.surface -> w), 0, .w = 1};
+	SDL_Rect slice = {get_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.size.x), 0, .w = 1};
 
 	/*
 	static byte first = 1;
@@ -72,7 +72,7 @@ vec handle_ray(const DataRaycast d) {
 		else slice.h = max_sprite_h;
 
 		*d.curr_smallest_wall_y = (double) raised_wall.y;
-		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
+		if (!keys[SDL_SCANCODE_T]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
 	}
 	return (vec) {(double) smallest_wall_y, (double) wall.h};
 }

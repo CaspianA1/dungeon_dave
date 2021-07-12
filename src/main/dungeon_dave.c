@@ -10,7 +10,6 @@
 #include "settings.c"
 #include "screen.c"
 
-#include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
 #include "../audio_visual/overlay/render_overlay.c"
 #include "../audio_visual/dda.c"
@@ -80,7 +79,7 @@ int main(void) {
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		fast_affine_floor(player.pos, full_jump_height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
+		// fast_affine_floor(player.pos, full_jump_height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
 		refresh(player.tilt, player.pos, wall_y_shift);
 		tick_delay(before);

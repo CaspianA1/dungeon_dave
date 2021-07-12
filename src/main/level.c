@@ -37,8 +37,6 @@ inlinable void set_level_skybox(Level* const level, const char* const path) {
 	level -> skybox.enabled = 1;
 	const Sprite sprite = init_sprite(path);
 	level -> skybox.sprite = sprite;
-	level -> skybox.max_width = sprite.surface -> w;
-	level -> skybox.max_height = sprite.surface -> h;
 }
 
 // path

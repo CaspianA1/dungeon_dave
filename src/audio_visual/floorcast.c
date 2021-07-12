@@ -1,16 +1,18 @@
 inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* pixbuf_row) {
 	const byte floor_point = map_point(current_level.floor_data, hit[0], hit[1]);
 	// https://wiki.libsdl.org/SDL_RenderReadPixels
-	const SDL_Surface* const surface = current_level.walls[floor_point - 1].surface;
-	const int max_offset = surface -> w - 1;
+	// const SDL_Surface* const surface = current_level.walls[floor_point - 1].surface;
+	// const int max_offset = surface -> w - 1;
 
+	/*
 	const ivec floored_hit = vec_to_ivec(hit);
 	const ivec surface_offset = {
 		(hit[0] - floored_hit.x) * max_offset,
 		(hit[1] - floored_hit.y) * max_offset
 	};
+	*/
 
-	Uint32 src = get_surface_pixel(surface -> pixels, surface -> pitch, surface_offset.x, surface_offset.y);
+	Uint32 src = 12345; // get_surface_pixel(surface -> pixels, surface -> pitch, surface_offset.x, surface_offset.y);
 
 	#ifdef SHADING_ENABLED
 
@@ -33,15 +35,26 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 	if (y_shift < 0.0) y_shift = 0.0;
 
 	Uint32* pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + (int) y_shift * screen.pixel_pitch); 
-	const Uint32 pixbuf_row_step = screen.pixel_pitch / sizeof(Uint32);
+	const Uint32 pixbuf_row_step = screen.pixel_pitch / sizeof(Uint32); // 1000
 
 	// `y_shift - pace` may go outside the map boundaries; limit this domain
+	// for (int y = y_shift - pace; y < settings.screen_height - pace; y++) { // , pixbuf_row += pixbuf_row_step) {
 	for (int y = y_shift - pace; y < settings.screen_height - pace; y++, pixbuf_row += pixbuf_row_step) {
-		const int pace_y = y + pace;
-
 		const int row = y - settings.half_screen_height - y_pitch + 1;
 		if (row == 0) continue;
+
+		const int pace_y = y + pace;
 		const double straight_dist = opp_h / row * settings.proj_dist;
+
+		/*
+		Uint32* const cmp_pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + pace_y * screen.pixel_pitch);
+		if (cmp_pixbuf_row == pixbuf_row) {
+			printf("Equal\n");
+		}
+		else {
+			printf("Not equal\n");
+		}
+		*/
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			const BufferVal buffer_val = val_buffer[screen_x];

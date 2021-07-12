@@ -1,6 +1,6 @@
 typedef struct {
-	SDL_Surface* surface;
 	SDL_Texture* texture;
+	ivec size;
 } Sprite;
 
 /////
@@ -34,5 +34,4 @@ typedef struct {
 typedef struct {
 	byte enabled;
 	Sprite sprite;
-	int max_width, max_height;
 } Skybox;
