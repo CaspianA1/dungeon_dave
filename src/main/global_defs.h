@@ -7,7 +7,7 @@
 #define NOCLIP_MODE
 */
 
-// #define SHADING_ENABLED
+#define SHADING_ENABLED
 // #define SOUND_ENABLED
 #define FULL_QUALITY
 // #define TRACK_MEMORY
@@ -46,7 +46,7 @@
 #define KEY_RSTRAFE SDL_SCANCODE_D
 
 #define PIXEL_FORMAT SDL_PIXELFORMAT_ARGB8888
-#define PIXEL_FORMAT_BPP 4
+#define PIXEL_FORMAT_BYTES_PER_PIXEL 4
 
 #define inlinable static inline
 #define ASM_I_AM_HERE __asm__ volatile ("nop");

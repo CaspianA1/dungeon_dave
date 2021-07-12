@@ -1,0 +1,50 @@
+#define PIXEL_FORMAT_BYTES_PER_PIXEL 4
+
+/////
+
+inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* pixbuf_row) {
+	const byte floor_point = map_point(current_level.floor_data, hit[0], hit[1]);
+	const SDL_Surface* const surface = current_level.walls[floor_point - 1].surface;
+	const int max_offset = sprite.size.x - 1;
+
+	const ivec floored_hit = vec_to_ivec(hit);
+	const ivec surface_offset = {
+		(hit[0] - floored_hit.x) * max_offset,
+		(hit[1] - floored_hit.y) * max_offset
+	};
+
+	#ifdef SHADING_ENABLED
+	const double shade = calculate_shade(settings.proj_dist / actual_dist, hit);
+	const byte r = (byte) (src >> 16) * shade, g = (byte) (src >> 8) * shade, b = (byte) src * shade;
+	src = 0xFF000000 | (r << 16) | (g << 8) | b;
+	#else
+	(void) dist;
+	#endif
+
+	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
+		*(pixbuf_row + x) = src;
+}
+
+/////
+
+typedef struct {
+	void* pixels;
+	ivec size;
+} PixelwiseSprite;
+
+PixelwiseSprite init_pixelwise_sprite(const char* const path) {
+	const Sprite base_sprite = init_sprite(path);
+	PixelwiseSprite pixelwise_sprite = {.size = base_sprite.size};
+	SDL_Texture* const prev_render_target = SDL_GetRenderTarget(screen.renderer);
+	SDL_SetRenderTarget(screen.renderer, base_sprite.texture);
+	const int pixel_pitch = PIXEL_FORMAT_BYTES_PER_PIXEL * base_sprite.size.x;
+	SDL_RenderReadPixels(screen.renderer, NULL, PIXEL_FORMAT, &pixelwise_sprite.pixels, pixel_pitch);
+	SDL_SetRenderTarget(screen.renderer, prev_render_target);
+	return pixelwise_sprite;
+}
+
+/////
+
+// PixelwiseSprite pws = init_pixelwise_sprite("../assets/walls/mesa.bmp");
+
+/////

@@ -415,7 +415,6 @@ void update_enemy(Enemy* enemy, const Player player) {
 }
 
 inlinable void set_message_pos(Message* const restrict message, const int x, const int y, const int w, const int h) {
-
 	message -> pos = (SDL_Rect) {x, y, w, h};
 }
 

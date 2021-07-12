@@ -1,20 +1,7 @@
+// 4291998860 = tan color
+
 inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* pixbuf_row) {
-	const byte floor_point = map_point(current_level.floor_data, hit[0], hit[1]);
-	// https://wiki.libsdl.org/SDL_RenderReadPixels
-	// const SDL_Surface* const surface = current_level.walls[floor_point - 1].surface;
-	// const int max_offset = surface -> w - 1;
-
-	/*
-	const ivec floored_hit = vec_to_ivec(hit);
-	const ivec surface_offset = {
-		(hit[0] - floored_hit.x) * max_offset,
-		(hit[1] - floored_hit.y) * max_offset
-	};
-	*/
-
-	// pixelwise copy from texture to texture
-
-	Uint32 src = 4291998860; // get_surface_pixel(surface -> pixels, surface -> pitch, surface_offset.x, surface_offset.y);
+	Uint32 src = 4291998860;
 
 	#ifdef SHADING_ENABLED
 
