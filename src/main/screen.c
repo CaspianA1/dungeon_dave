@@ -13,10 +13,10 @@ void init_screen(void) {
 
 	screen.pixel_format = SDL_AllocFormat(PIXEL_FORMAT);
 	init_SDL_buffers(settings.screen_width, settings.screen_height, 0);
-	screen.z_buffer = wcalloc(settings.screen_width, sizeof(float));
-	screen.cos_beta_buffer = wcalloc(settings.screen_width, sizeof(float));
-	screen.wall_bottom_buffer = wcalloc(settings.screen_width, sizeof(float));
-	screen.dir_buffer = wcalloc(settings.screen_width, sizeof(vec)); // try making these doubles
+	val_buffers.depth = wcalloc(settings.screen_width, sizeof(float)); // malloc
+	val_buffers.cos_beta = wcalloc(settings.screen_width, sizeof(float));
+	val_buffers.wall_bottom = wcalloc(settings.screen_width, sizeof(float));
+	val_buffers.dir = wcalloc(settings.screen_width, sizeof(vec)); // try making these doubles
 }
 
 void deinit_screen(void) {
@@ -27,10 +27,10 @@ void deinit_screen(void) {
 	SDL_DestroyTexture(screen.pixel_buffer);
 	SDL_DestroyTexture(screen.shape_buffer);
 
-	wfree(screen.z_buffer);
-	wfree(screen.cos_beta_buffer);
-	wfree(screen.wall_bottom_buffer);
-	wfree(screen.dir_buffer);
+	wfree(val_buffers.depth);
+	wfree(val_buffers.cos_beta);
+	wfree(val_buffers.wall_bottom);
+	wfree(val_buffers.dir);
 
 	SDL_Quit();
 }

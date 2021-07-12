@@ -1,18 +1,14 @@
-inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos_ref) {
-	ivec mouse_pos = *mouse_pos_ref;
+inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos) {
+	const int prev_mouse_x = mouse_pos -> x;
+	SDL_GetMouseState(&mouse_pos -> x, &mouse_pos -> y);
+	if (prev_mouse_x == mouse_pos -> x) return;
 
-	const int prev_mouse_x = mouse_pos.x;
-	SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
-	if (prev_mouse_x == mouse_pos.x) return;
+	*theta += (double) (mouse_pos -> x - prev_mouse_x) / settings.screen_width * 360.0;
 
-	*theta += (double) (mouse_pos.x - prev_mouse_x) / settings.screen_width * 360.0;
-
-	if (mouse_pos.x == settings.screen_width - 1)
-		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos.y);
-	else if (mouse_pos.x == 0)
-		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos.y);
-
-	*mouse_pos_ref = mouse_pos;
+	if (mouse_pos -> x == settings.screen_width - 1)
+		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos -> y);
+	else if (mouse_pos -> x == 0)
+		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
 void update_pos(vec* const pos, const vec prev_pos, vec* const dir,

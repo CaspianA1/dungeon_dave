@@ -37,7 +37,7 @@ profile:
 	mv *.gcov bin/profiling
 	@echo Profiling data is in any .gcov file in bin/profiling.
 
-find_leaks:
+auto_debug: # finds writes to uninitialized memory and such
 	$(CC) $(CFLAGS) $(DEBUG) -fsanitize=address $(LDFLAGS)
 	make run
 

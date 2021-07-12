@@ -154,7 +154,7 @@ void draw_generic_billboards(const Player player, const double billboard_y_shift
 		SDL_SetTextureColorMod(billboard.sprite.texture, shade, shade, shade);
 
 		for (int screen_row = start_x; screen_row < end_x; screen_row += settings.ray_column_width) {
-			if (screen_row < 0 || (double) screen.z_buffer[screen_row] < corrected_dist) continue;
+			if (screen_row < 0 || (double) val_buffers.depth[screen_row] < corrected_dist) continue;
 
 			/*
 			if (screen_row < 0) continue;
@@ -197,7 +197,7 @@ void draw_skybox(const double angle, const double y_shift) {
 
 	const int // src_height can be divided to determine what fraction is shown at once
 		src_y = skybox.max_height * (1.0 - look_up_percent),
-		src_height = skybox.max_height * look_up_percent;
+		src_height = skybox.max_height * look_up_percent; // more elegant
 
 	const SDL_Rect src_1 = {src_col_index, src_y, src_width, src_height};
 	SDL_Rect dest_1 =  {0, dest_y, settings.screen_width, dest_height};

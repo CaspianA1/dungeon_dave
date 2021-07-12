@@ -49,10 +49,12 @@ typedef struct {
 	SDL_Texture *pixel_buffer, *shape_buffer;
 	void* pixels;
 	int pixel_pitch; // `pixels` and `pixel_pitch` pertain to the pixel buffer
-	float *z_buffer, *cos_beta_buffer;
-	float* wall_bottom_buffer;
-	vec* dir_buffer;
 } Screen;
+
+typedef struct {
+	float *depth, *cos_beta, *wall_bottom;
+	vec* dir;
+} ValBuffers;
 
 /////
 
@@ -92,8 +94,9 @@ typedef struct {
 /////
 
 Screen screen;
-Level current_level;
+ValBuffers val_buffers;
 Settings settings;
+Level current_level;
 
 SDL_Event event;
 const Uint8* keys;

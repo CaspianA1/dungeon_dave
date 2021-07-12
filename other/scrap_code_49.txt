@@ -113,3 +113,13 @@ DEBUG(sizeof(int_fast16_t), zu);
 // typedef int_fast16_t smallint;
 
 /////
+
+inlinable void fn_over_val_buffers(void* (*fn) (void*)) {
+	const size_t sizes[4] = {sizeof(float), sizeof(float), sizeof(float), sizeof(vec)};
+	const void* buffers[4] = {&val_buffers.depth, &val_buffers.cos_beta, &val_buffers.wall_bottom, &val_buffers.dir};
+	for (byte i = 0; i < 4; i++) {
+		buffers[i] = fn(buffers[i]);
+	}
+}
+
+/////

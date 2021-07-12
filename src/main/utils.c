@@ -94,10 +94,10 @@ inlinable void update_val_buffers(const int screen_x, const double dist, const d
 	const float wall_bottom, const vec dir) {
 
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++) {
-		screen.z_buffer[x] = dist;
-		screen.cos_beta_buffer[x] = cos_beta;
-		screen.wall_bottom_buffer[x] = wall_bottom;
-		screen.dir_buffer[x] = dir;
+		val_buffers.depth[x] = dist;
+		val_buffers.cos_beta[x] = cos_beta;
+		val_buffers.wall_bottom[x] = wall_bottom;
+		val_buffers.dir[x] = dir;
 	}
 }
 
