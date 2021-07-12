@@ -42,18 +42,12 @@ DataDDA init_dda(const vec origin, const vec dir) {
 }
 
 inlinable DataDDA peek_dda(DataDDA d) {
-	if (d.ray_length[0] < d.ray_length[1]) {
-		d.dist = d.ray_length[0];
-		d.curr_tile.x += d.ray_step.x;
-		d.ray_length[0] += d.unit_step_size[0];
-		d.side = 0;
-	}
-	else {
-		d.dist = d.ray_length[1];
-		d.curr_tile.y += d.ray_step.y;
-		d.ray_length[1] += d.unit_step_size[1];
-		d.side = 1;
-	}
+	const byte axis = d.ray_length[0] >= d.ray_length[1];
+
+	d.dist = d.ray_length[axis];
+	*ptr_ivec_ind(&d.curr_tile, axis) += ivec_ind(d.ray_step, axis);
+	d.ray_length[axis] += d.unit_step_size[axis];
+	d.side = axis;
 
 	return d;
 }

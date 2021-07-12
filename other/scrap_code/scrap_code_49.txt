@@ -212,3 +212,20 @@ byte vertex_is_valid(const ivec vertex) {
 */
 
 /////
+
+/*
+if (d.ray_length[0] < d.ray_length[1]) {
+	d.dist = d.ray_length[0];
+	d.curr_tile.x += d.ray_step.x;
+	d.ray_length[0] += d.unit_step_size[0];
+	d.side = 0;
+}
+else {
+	d.dist = d.ray_length[1];
+	d.curr_tile.y += d.ray_step.y;
+	d.ray_length[1] += d.unit_step_size[1];
+	d.side = 1;
+}
+*/
+
+/////
