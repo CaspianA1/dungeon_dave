@@ -15,6 +15,7 @@ features:
 	- a file format
 	- a map editor
 	- seethrough sprites
+	- momentary sounds for enemies
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -25,7 +26,7 @@ problems:
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
 	- too many Mix_Chunks on the available channels -> out of channels
 	- skybox stretching
-	- use less heap memory for navigators
+	- use less heap memory for navigators via efficient queues
 	- less doubles and more ints in render_overlay.c
 	- don't intersect the player dot with walls in the minimap
 	- shading is slow
