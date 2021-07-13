@@ -80,8 +80,10 @@ NavigatorState update_path_if_needed(Navigator* const nav, const vec player_pos,
 		if (!update_path(nav, player_pos, 0)) return CouldNotNavigate;
 	}
 
+	/*
 	print_navigator(nav -> path, *nav -> pos);
 	DEBUG_VEC((*nav -> pos));
+	*/
 
 	if (nav -> path_ind < end_ind) {
 		const vec

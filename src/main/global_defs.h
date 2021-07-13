@@ -9,7 +9,7 @@
 
 // #define SHADING_ENABLED
 // #define SOUND_ENABLED
-#define TRACK_MEMORY
+// #define TRACK_MEMORY
 
 // max: 1440 by 900
 #define INIT_W 640
@@ -48,7 +48,7 @@
 #define PIXEL_FORMAT_BYTES_PER_PIXEL 4
 
 #define inlinable static inline
-#define ASM_I_AM_HERE __asm__ volatile ("nop");
+#define ASM_I_AM_HERE __asm__ volatile ("nop # I AM HERE")
 
 #define LOOP(max) for (int i = 0; i < max; i++)
 #define FAIL(...) {fprintf(stderr, __VA_ARGS__); exit(1);}

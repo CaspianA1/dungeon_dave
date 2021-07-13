@@ -51,8 +51,7 @@ inlinable void update_all_enemies(const Player player) {
 
 void deinit_enemy(const Enemy enemy) {
 	deinit_sprite(enemy.animations.billboard.sprite);
-	for (byte i = 0; i < 5; i++)
-		deinit_sound(enemy.sounds[i]);
+	for (byte i = 0; i < 5; i++) deinit_sound(enemy.sounds[i]);
 	wfree(enemy.sounds);
 	deinit_navigator(&enemy.nav);	
 }

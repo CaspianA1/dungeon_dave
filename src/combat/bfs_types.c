@@ -22,7 +22,7 @@ inlinable void add_to_path(Path* const path, const ivec new) {
 	path -> data[path -> length - 1] = new;
 }
 
-/////
+//////////
 
 PathQueue init_path_queue(const int init_length, ...) {
 	va_list args;
@@ -35,7 +35,7 @@ PathQueue init_path_queue(const int init_length, ...) {
 	return path_queue;
 }
 
-inlinable void enqueue_a_path(PathQueue* const path_queue, const Path new) {
+inlinable void enqueue_to_paths(PathQueue* const path_queue, const Path new) {
 	if (path_queue -> length++ == path_queue -> max_alloc)
 		path_queue -> data = wrealloc(path_queue -> data, ++path_queue -> max_alloc * sizeof(Path));
 
