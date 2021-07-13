@@ -1,22 +1,11 @@
+typedef enum {Top, Bottom, Left, Right, TopLeft, BottomLeft, TopRight, BottomRight} NeighborID;
+
+inlinable byte neighbor_map_point(const ivec neighbors[8], const NeighborID neighbor_id) {
+	const ivec neighbor = neighbors[neighbor_id];
+	return map_point(current_level.wall_data, neighbor.x, neighbor.y);
+}
+
 void update_queue_with_neighbors(PathQueue* const paths, Path path, const ivec vertex, byte* const all_visited) {
-	/*
-	const VectorI
-		top = {vertex.x, vertex.y - 1},
-		bottom = {vertex.x, vertex.y + 1},
-		left = {vertex.x - 1, vertex.y},
-		right = {vertex.x + 1, vertex.y},
-
-		top_left = {vertex.x - 1, vertex.y - 1},
-		bottom_left = {vertex.x - 1, vertex.y + 1},
-		top_right = {vertex.x + 1, vertex.y - 1},
-		bottom_right = {vertex.x + 1, vertex.y + 1};
-
-	// use an enum
-	const VectorI neighbors[8] = {
-		top, bottom, left, right, top_left, bottom_left, top_right, bottom_right
-	};
-	*/
-
 	const ivec neighbors[8] = {
 		{vertex.x, vertex.y - 1}, {vertex.x, vertex.y + 1},
 		{vertex.x - 1, vertex.y}, {vertex.x + 1, vertex.y},
@@ -24,26 +13,34 @@ void update_queue_with_neighbors(PathQueue* const paths, Path path, const ivec v
 		{vertex.x + 1, vertex.y - 1}, {vertex.x + 1, vertex.y + 1}
 	};
 
-	typedef enum {Top, Bottom, Left, Right, TopLeft, BottomLeft, TopRight, BottomRight} NeighborID;
-
-	// for no wall collisions, rule out movement with a corner wall and diagonal movement
 	for (NeighborID i = 0; i < 8; i++) {
+		byte skip_this_neighbor = 0;
+
 		const ivec neighbor = neighbors[i];
 		if (ivec_out_of_bounds(neighbor) || map_point(current_level.wall_data, neighbor.x, neighbor.y))
-			continue;
+			skip_this_neighbor = 1;
 
-		if ((i == TopLeft) ||
-			(i == TopRight) ||
-			(i == BottomRight) ||
-			(i == BottomLeft)) {}
+		else if (i == BottomLeft) {
+			if (neighbor_map_point(neighbors, Left) || neighbor_map_point(neighbors, Bottom))
+				skip_this_neighbor = 1;
+		}
 
-		/*
-		if ((VectorII_eq(neighbor, top_left) && map_point(current_level.wall_data, left.x, left.y)) ||
-			(VectorII_eq(neighbor, top_right) && map_point(current_level.wall_data, right.x, right.y)) ||
-			(VectorII_eq(neighbor, bottom_right) && map_point(current_level.wall_data, bottom.x, bottom.y)) ||
-			(VectorII_eq(neighbor, bottom_left) && map_point(current_level.wall_data, bottom.x, bottom.y)))
-			continue;
-		*/
+		else if (i == BottomRight) {
+			if (neighbor_map_point(neighbors, Bottom) || neighbor_map_point(neighbors, Right))
+				skip_this_neighbor = 1;
+		}
+
+		else if (i == TopLeft) {
+			if (neighbor_map_point(neighbors, Left) || neighbor_map_point(neighbors, Top))
+				skip_this_neighbor = 1;
+		}
+
+		else if (i == TopRight) {
+			if (neighbor_map_point(neighbors, Top) || neighbor_map_point(neighbors, Right))
+				skip_this_neighbor = 1;
+		}
+
+		if (skip_this_neighbor) continue;
 
 		byte* const was_visited = &all_visited[neighbor.y * current_level.map_size.x + neighbor.x];
 		if (!*was_visited) {
@@ -56,7 +53,7 @@ void update_queue_with_neighbors(PathQueue* const paths, Path path, const ivec v
 }
 
 ResultBFS bfs(const vec begin, const vec end) {
-	const ivec int_begin = vec_to_ivec(begin), int_end = vec_to_ivec(end);
+	const ivec int_begin = ivec_from_vec(begin), int_end = ivec_from_vec(end);
 
 	byte* const all_visited = wcalloc(current_level.map_size.x * current_level.map_size.y, sizeof(byte));
 	set_map_point(all_visited, 1, int_begin.x, int_begin.y, current_level.map_size.x);

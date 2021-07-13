@@ -125,7 +125,7 @@ inlinable vec vec_line_pos(const vec pos, const vec dir, const double slope) {
 	return dir * vec_fill(slope) + pos;
 }
 
-inlinable ivec vec_to_ivec(const vec v) {
+inlinable ivec ivec_from_vec(const vec v) {
 	return (ivec) {(int) floor(v[0]), (int) floor(v[1])};
 }
 

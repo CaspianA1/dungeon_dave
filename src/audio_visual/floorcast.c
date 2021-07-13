@@ -2,7 +2,7 @@ PSprite p;
 inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
 	const int max_offset = p.size - 1;
 
-	const ivec floored_hit = vec_to_ivec(hit);
+	const ivec floored_hit = ivec_from_vec(hit);
 	const ivec offset = {
 		(hit[0] - floored_hit.x) * max_offset,
 		(hit[1] - floored_hit.y) * max_offset

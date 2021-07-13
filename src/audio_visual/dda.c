@@ -10,7 +10,7 @@ typedef struct {
 DataDDA init_dda(const vec origin, const vec dir) {
 	const double unit_step_size[2] = {fabs(1.0 / dir[0]), fabs(1.0 / dir[1])};
 	double ray_length[2];
-	const ivec curr_tile = vec_to_ivec(origin);
+	const ivec curr_tile = ivec_from_vec(origin);
 	ivec ray_step;
 
 	if (dir[0] < 0.0) {

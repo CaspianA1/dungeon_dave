@@ -34,7 +34,7 @@ void load_level_1(void) {
 	enum {
 		map_width = 25, map_height = 15,
 		wall_count = 10, billboard_count = 7,
-		animation_count = 3, enemy_count = 0
+		animation_count = 3, enemy_count = 1
 	};
 
 	// static b/c may be too big for stack
@@ -116,6 +116,23 @@ void load_level_1(void) {
 		"../assets/spritesheets/torch.bmp", 3, 3, 9, 9, 19.0, 9.5, 0.0);
 
 	memcpy(&current_level, &level_1, sizeof(Level));
-	set_level_enemies(&current_level, enemy_count);
+
+	set_level_enemies(&current_level, enemy_count,
+		Idle, // state
+		2.0, 12.0, // dist_thresholds
+		20.0, // hp
+		5, 2, 3, 13, // animation_seg_lengths
+
+		"../assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
+		8.5, 7.5, 0.0, // billboard data
+
+		"../assets/audio/enemy_sound_test/idle.wav", // sound data
+		"../assets/audio/enemy_sound_test/chase.wav",
+		"../assets/audio/enemy_sound_test/attack.wav",
+		"../assets/audio/enemy_sound_test/death.wav",
+		"../assets/audio/enemy_sound_test/attacked.wav",
+
+		0.025 /* navigator speed */ );
+
 	set_level_generic_billboard_container(&current_level);
 }
