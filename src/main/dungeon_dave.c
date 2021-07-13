@@ -24,7 +24,7 @@
 #include "../audio_visual/gui/hud.c"
 #include "../audio_visual/gui/option_screen.c"
 
-#include "../combat/efficient_bfs.c"
+#include "../combat/efficient_bfs_types.c"
 #include "../combat/bfs_types.c"
 #include "../combat/bfs.c"
 #include "../combat/navigator.c"

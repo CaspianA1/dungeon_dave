@@ -26,7 +26,6 @@ problems:
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
 	- too many Mix_Chunks on the available channels -> out of channels
 	- skybox stretching
-	- use less heap memory for navigators via efficient queues
 	- less doubles and more ints in render_overlay.c
 	- don't intersect the player dot with walls in the minimap
 	- shading is slow
@@ -37,3 +36,5 @@ problems:
 	- vecs to double[2]'s in screen.dir_buffer
 	- fix the offset problem for fast_affine_floor
 	- sometimes, psprites disappear mid-game
+	- less heap memory use for navigators via efficient queues
+	- floors are a tiny bit misaligned near some edges

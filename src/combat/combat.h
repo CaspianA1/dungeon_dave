@@ -13,7 +13,7 @@ typedef struct {
 	Path path;
 } ResultBFS;
 
-/////
+//////////
 
 typedef enum {
 	Navigating, ReachedDest, CouldNotNavigate
@@ -35,7 +35,7 @@ typedef struct {
 
 inlinable Navigator init_navigator(const vec, vec* const, const double);
 
-/////
+//////////
 
 typedef enum {
 	Idle, Chasing, Attacking, Dead
@@ -54,7 +54,7 @@ typedef struct {
 	Navigator nav;
 } Enemy;
 
-/////
+//////////
 
 typedef struct {
 	byte in_use;
@@ -66,4 +66,4 @@ typedef struct {
 inlinable Weapon init_weapon(const char* const, const char* const,
 	const double, const double, const int, const int, const int, const int);
 
-/////
+//////////
