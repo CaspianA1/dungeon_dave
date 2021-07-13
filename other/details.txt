@@ -25,7 +25,7 @@ problems:
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
 	- too many Mix_Chunks on the available channels -> out of channels
 	- skybox stretching
-	- navigators use too much heap memory
+	- use less heap memory for navigators
 	- less doubles and more ints in render_overlay.c
 	- don't intersect the player dot with walls in the minimap
 	- shading is slow

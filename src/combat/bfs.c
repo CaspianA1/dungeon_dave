@@ -46,7 +46,11 @@ ResultBFS bfs(const vec begin, const vec end) {
 	PathQueue paths = init_path_queue(1, init_path(1, int_begin));
 	ResultBFS result = {0};
 
+	// unsigned bfs_allocs_for_iter = bfs_allocs;
+
 	while (paths.length > 0) {
+		// DEBUG(paths.length, d);
+
 		Path path = dequeue_a_path(&paths);
 
 		const ivec vertex = path.data[path.length - 1];
@@ -64,6 +68,11 @@ ResultBFS bfs(const vec begin, const vec end) {
 	wfree(all_visited);
 	for (int i = 0; i < paths.length; i++) wfree(paths.data[i].data);
 	wfree(paths.data);
+
+	/*
+	const unsigned curr_bfs_allocs = bfs_allocs - bfs_allocs_for_iter;
+	DEBUG(curr_bfs_allocs, u);
+	*/
 
 	return result;
 }
