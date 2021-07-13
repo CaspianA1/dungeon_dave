@@ -41,3 +41,12 @@ inlinable Weapon init_weapon(const char* const sound_path, const char* const spr
 */
 
 /////
+
+inlinable Weapon init_weapon(const char* const, const char* const,
+	const double, const double, const int, const int, const int, const int);
+
+/////
+
+// frame_num == -1 -> auto_progress frame
+
+/////

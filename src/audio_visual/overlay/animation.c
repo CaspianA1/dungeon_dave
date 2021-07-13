@@ -52,9 +52,7 @@ inlinable ivec get_spritesheet_frame_origin(const Animation animation) {
 }
 
 void animate_weapon(Animation* const animation, const vec pos,
-	const int frame_num, const int y_pitch, const double pace) {
- 
-	// frame_num == -1 -> auto_progress frame
+	const byte paces_sideways, const byte in_use, const int y_pitch, const double pace) {
 
 	#ifndef SHADING_ENABLED
 	(void) pos;
@@ -67,8 +65,11 @@ void animate_weapon(Animation* const animation, const vec pos,
 		animation -> frame_w, animation -> frame_h
 	};
 
-	const SDL_FRect screen_pos = {
-		pace,
+	/* the reason the `paces_sideways` flag exists is because the whip animation has half-drawn parts that are shown
+	when the animation is scrolled on the x-axis, so to avoid revealing that, the flags stops the undrawn part
+	from being shown (by stopping x-axis scrolling) when it cycles its animation. */
+	const SDL_Rect screen_pos = {
+		(paces_sideways || (!paces_sideways && !in_use)) ? pace : 0,
 		fabs(pace) + (y_pitch < 0 ? 0 : y_pitch),
 		settings.screen_width,
 		settings.screen_height
@@ -81,6 +82,6 @@ void animate_weapon(Animation* const animation, const vec pos,
 	SDL_SetTextureColorMod(texture, shade, shade, shade);
 
 	// renders to shape buffer
-	SDL_RenderCopyF(screen.renderer, texture, &sheet_crop, &screen_pos);
-	if (frame_num == -1) progress_animation_frame_ind(animation);
+	SDL_RenderCopy(screen.renderer, texture, &sheet_crop, &screen_pos);
+	if (in_use) progress_animation_frame_ind(animation);
 }

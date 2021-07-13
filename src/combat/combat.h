@@ -61,13 +61,10 @@ typedef struct {
 //////////
 
 typedef struct {
-	byte in_use, short_range;
+	byte in_use, short_range, paces_sideways;
 	const double power, dist_for_hit;
 	Sound sound;
 	Animation animation;
 } Weapon;
-
-inlinable Weapon init_weapon(const char* const, const char* const,
-	const double, const double, const int, const int, const int, const int);
 
 //////////
