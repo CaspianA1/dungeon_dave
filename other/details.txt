@@ -1,22 +1,12 @@
-super-priorities:
-	- bug fixes
-	- enemy AI
-	- fast floors
-
 features:
 	- covered tops of walls
 	- floor and ceiling with variable wall heights: if ceilings should work, the wall height should change depending on the point height
-	- sets of enemy animations
-	- enemy AI
 	- doors
-	- status bar while playing w/ a settings option in the title screen and on the status bar
-	- animated skyboxes
-	- escape mouse if pressing escape
-	- a level opener, with a cool spinning effect (only for the first level)
+	- status bar while playing w/ a settings option in the title screen and status bar
+	- move mouse out of window if pressing escape
+	- a level opener, with a cool spinning effect
 	- a sprite pool
-	- a skybox of a great city
 	- an airship level
-	- no pace if slow enough
 	- collide with sprites
 	- accelerate sideways
 	- add back Adam's whip for close-range combat
@@ -29,17 +19,14 @@ features:
 problems:
 	- slowing down -> a keypress, resets speed
 	- player clipping into corners
-	- enemy clipping into walls
 	- small screen -> bigger screen or very small screen, edge triangles
 	- z-buffering issues with sprites for higher point heights
-	- player height needs to be readjusted when screen height changes (it also changes based on screen width)
 	- min and max proj dist
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
 	- too many Mix_Chunks on the available channels -> out of channels
 	- skybox stretching
 	- navigators use too much heap memory
 	- less doubles and more ints in render_overlay.c
-	- add back the BFS wall checking
 	- don't intersect the player dot with walls in the minimap
 	- shading is slow
 	- hit detection for weapons is still sometimes spotty
