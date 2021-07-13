@@ -74,3 +74,12 @@ inlinable void basic_draw_from_hit(const vec hit, const double actual_dist, cons
 }
 
 /////
+
+/*
+SDL_UpdateTexture(p.texture, NULL, converted_surface -> pixels, converted_surface -> pitch);
+SDL_FreeSurface(converted_surface);
+printf("Here\n");
+DEBUG(SDL_GetError(), s);
+*/
+
+/////

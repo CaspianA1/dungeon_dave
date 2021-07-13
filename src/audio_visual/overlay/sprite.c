@@ -16,7 +16,9 @@ PSprite init_psprite(const char* const path) {
 	if (unconverted_surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
 	SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(unconverted_surface, PIXEL_FORMAT, 0);
 	if (converted_surface == NULL) FAIL("Could not convert a surface type for path %s\n", path);
+
 	SDL_FreeSurface(unconverted_surface);
+	SDL_LockSurface(converted_surface);
 
 	const ivec size = {converted_surface -> w, converted_surface -> h};
 
@@ -26,9 +28,12 @@ PSprite init_psprite(const char* const path) {
 		.size = size.x
 	};
 
+
 	SDL_LockTexture(p.texture, NULL, &p.pixels, &p.pitch);
 	memcpy(p.pixels, converted_surface -> pixels, size.x * size.y * sizeof(Uint32));
 	SDL_UnlockTexture(p.texture);
+
+	SDL_UnlockSurface(converted_surface);
 	SDL_FreeSurface(converted_surface);
 
 	return p;
