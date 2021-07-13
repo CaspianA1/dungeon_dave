@@ -1,17 +1,3 @@
-inlinable Weapon init_weapon(const char* const sound_path, const char* const spritesheet_path,
-	const double power, const double dist_for_hit, const int frames_per_row,
-	const int frames_per_col, const int frame_count, const int fps) {
-
-	#ifndef SOUND_ENABLED
-	(void) sound_path;
-	#endif
-
-	return (Weapon) {
-		0, power, dist_for_hit, init_sound(sound_path, 1),
-		init_animation(spritesheet_path, frames_per_row, frames_per_col, frame_count, fps)
-	};
-}
-
 void deinit_weapon(const Weapon weapon) {
 	deinit_sound(weapon.sound);
 	deinit_sprite(weapon.animation.billboard.sprite);
@@ -40,6 +26,7 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 				return;
 			}
 		}
+		if (weapon -> short_range) break;
 	}
 }
 

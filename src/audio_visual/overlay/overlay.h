@@ -29,6 +29,8 @@ typedef struct {
 	double last_frame_time;
 } Animation;
 
+Animation init_animation(const char* const, const int, const int, const int, const int);
+
 typedef struct {
 	Billboard billboard;
 	byte is_animated, is_enemy;

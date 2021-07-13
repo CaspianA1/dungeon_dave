@@ -124,9 +124,7 @@ Player load_player(const double jump_up_v0,
 	};
 }
 
-void load_all_defaults(void (*load_first_level) (void),
-	Player* const player, Weapon* const weapon) {
-
+void load_all_defaults(void (*load_first_level) (void), Player* const player, Weapon* const weapon) {
 	load_default_settings();
 
 	void init_screen(void);
@@ -137,12 +135,26 @@ void load_all_defaults(void (*load_first_level) (void),
 
 	const Player first_player = load_player(4.8, 0.3, 8.0, 0.12, 15.0, 0.08, 0.09, 0.05, 1.9);
 
-	const Weapon first_weapon = init_weapon("../assets/audio/sound_effects/shotgun.wav",
-		"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 4.0, 0.7, 6, 10, 59, 30);
+	const Weapon first_weapon = {
+		.in_use = 0, .short_range = 1, .power = 2.0, .dist_for_hit = 0.6,
+		.sound = init_sound("../assets/audio/sound_effects/whip_crack.wav", 1),
+		.animation = init_animation("../assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60)
+	};
 
 	/*
-	const Weapon first_weapon = init_weapon("../assets/audio/enemy_sound_test/attack.wav",
-		"../assets/spritesheets/weapons/golden_dagger.bmp", 4.0, 0.2, 2, 5, 9, 30);
+	const Weapon first_weapon = {
+		.in_use = 0, .short_range = 0, .power = 4.0, .dist_for_hit = 0.7, 
+		.sound = init_sound("../assets/audio/sound_effects/shotgun.wav", 1),
+		.animation = init_animation("../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30)
+	};
+	*/
+
+	/*
+	const Weapon first_weapon = {
+		.in_use = 0, .short_range = 0, .power = 4.0, .dist_for_hit = 0.2, 
+		.sound = init_sound("../assets/audio/enemy_sound_test/attack.wav", 1),
+		.animation = init_animation("../assets/spritesheets/weapons/golden_dagger.bmp", 2, 5, 9, 30)
+	};
 	*/
 
 	memcpy(player, &first_player, sizeof(Player));

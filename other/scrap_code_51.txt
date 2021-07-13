@@ -6,3 +6,38 @@ printf("---\n");
 */
 
 /////
+
+/*
+const Weapon first_weapon = init_weapon("../assets/audio/sound_effects/whip_crack.wav",
+	"../assets/spritesheets/weapons/whip.bmp", 4.5, 0.4, 4, 6, 22, 60);
+*/
+
+/*
+const Weapon first_weapon = init_weapon("../assets/audio/sound_effects/shotgun.wav",
+	"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 4.0, 0.7, 6, 10, 59, 30);
+*/
+
+/*
+const Weapon first_weapon = init_weapon("../assets/audio/enemy_sound_test/attack.wav",
+	"../assets/spritesheets/weapons/golden_dagger.bmp", 4.0, 0.2, 2, 5, 9, 30);
+*/
+
+/////
+
+/*
+inlinable Weapon init_weapon(const char* const sound_path, const char* const spritesheet_path,
+	const double power, const double dist_for_hit, const int frames_per_row,
+	const int frames_per_col, const int frame_count, const int fps) {
+
+	#ifndef SOUND_ENABLED
+	(void) sound_path;
+	#endif
+
+	return (Weapon) {
+		0, power, dist_for_hit, init_sound(sound_path, 1),
+		init_animation(spritesheet_path, frames_per_row, frames_per_col, frame_count, fps)
+	};
+}
+*/
+
+/////

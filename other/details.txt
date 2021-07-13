@@ -9,7 +9,6 @@ features:
 	- an airship level
 	- collide with sprites
 	- accelerate sideways
-	- add back Adam's whip for close-range combat
 	- a gui system
 	- anti-aliasing
 	- a file format

@@ -61,7 +61,7 @@ typedef struct {
 //////////
 
 typedef struct {
-	byte in_use;
+	byte in_use, short_range;
 	const double power, dist_for_hit;
 	Sound sound;
 	Animation animation;
