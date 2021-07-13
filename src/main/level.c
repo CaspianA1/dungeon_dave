@@ -150,10 +150,7 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 		memcpy(dest, &enemy, sizeof(Enemy));
 
 		Billboard* const dest_billboard = &dest -> animations.billboard;
-
-		const Navigator nav = init_navigator(level -> init_pos,
-			&dest_billboard -> pos, &dest_billboard -> dist, va_arg(enemy_data, double));
-
+		const Navigator nav = init_navigator(level -> init_pos, &dest_billboard -> pos, va_arg(enemy_data, double));
 		memcpy(&dest -> nav, &nav, sizeof(Navigator));
 
 	}

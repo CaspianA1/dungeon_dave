@@ -17,8 +17,9 @@ void update_queue_with_neighbors(PathQueue* const paths, Path path, const ivec v
 		byte skip_this_neighbor = 0;
 
 		const ivec neighbor = neighbors[i];
-		if (ivec_out_of_bounds(neighbor) || map_point(current_level.wall_data, neighbor.x, neighbor.y))
+		if (ivec_out_of_bounds(neighbor) || map_point(current_level.wall_data, neighbor.x, neighbor.y)) {
 			skip_this_neighbor = 1;
+		}
 
 		else if (i == BottomLeft) {
 			if (neighbor_map_point(neighbors, Left) || neighbor_map_point(neighbors, Bottom))

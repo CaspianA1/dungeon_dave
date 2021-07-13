@@ -17,7 +17,7 @@ void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 
 void update_enemy(Enemy* const enemy, const Player player) {
 	Navigator* const nav = &enemy -> nav;
-	const double dist = fabs(*nav -> dist_to_player);
+	const double dist = enemy -> animations.billboard.dist;
 
 	/* for each state (excluding Dead), periodically play the sound from that state,
 	and only play the Dead animation once, stopping on the last frame */
@@ -30,12 +30,12 @@ void update_enemy(Enemy* const enemy, const Player player) {
 		case Chasing:
 			if (dist >= enemy -> dist_return_to_idle)
 				set_enemy_state(enemy, Idle, 0);
-			else if (update_path_if_needed(nav, player.pos, player.jump) == ReachedDest)
+			else if (update_path_if_needed(nav, player.pos, player.jump.height) == ReachedDest)
 				set_enemy_state(enemy, Attacking, 0);
 			break;
 
 		case Attacking:
-			if (update_path_if_needed(nav, player.pos, player.jump) == Navigating)
+			if (update_path_if_needed(nav, player.pos, player.jump.height) == Navigating)
 				set_enemy_state(enemy, Chasing, 0);
 			break;
 

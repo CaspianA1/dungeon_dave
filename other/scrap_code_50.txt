@@ -155,3 +155,57 @@ else if (i == TopLeft && neighbor_map_point(neighbors, Left))
 	skip_this_neighbor = 1;
 
 /////
+
+inlinable byte navigator_in_wall(const vec pos) { // 8 directions
+	return map_point(current_level.wall_data, pos[0] + 0.5, pos[1])
+		|| map_point(current_level.wall_data, pos[0] - 0.5, pos[1])
+		|| map_point(current_level.wall_data, pos[0], pos[1] + 0.5)
+		|| map_point(current_level.wall_data, pos[0], pos[1] - 0.5)
+		|| map_point(current_level.wall_data, pos[0] + 0.5, pos[1] + 0.5)
+		|| map_point(current_level.wall_data, pos[0] + 0.5, pos[1] - 0.5)
+		|| map_point(current_level.wall_data, pos[0] - 0.5, pos[1] + 0.5)
+		|| map_point(current_level.wall_data, pos[0] - 0.5, pos[1] - 0.5);
+}
+
+/////
+
+/* construct a new path that has been guaranteed to not have any walls to clip into on its way;
+for a given node on the path, if the enemy is in a wall during navigating, find a suitable replacement
+node nearby - just keep trying to make that possible. but before that, don't allow the enemy BFS corner
+movement, because that will remove many possible bugs later.
+*/
+
+/////
+
+EnemyState prev_state = current_level.enemies[0].state;
+while (1) {
+	const Uint32 before = SDL_GetTicks();
+	if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
+
+	Enemy* const enemy = &current_level.enemies[0];
+	if (keys[SDL_SCANCODE_F] && enemy -> state != Dead) {
+		prev_state = enemy -> state;
+		set_enemy_state(enemy, Dead, 1);
+	}
+	else if (keys[SDL_SCANCODE_G] && enemy -> state != Dead) {
+		set_enemy_state(enemy, prev_state, 1);
+	}
+
+///// note: an enemy can never be caught in a wall while dead because the enemy never goes in a wall
+
+int in_dead = 0;
+while (1) {
+	const Uint32 before = SDL_GetTicks();
+	if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
+
+	Enemy* const enemy = &current_level.enemies[0];
+	if (keys[SDL_SCANCODE_F]) {
+		if (in_dead) set_enemy_state(enemy, Chasing, 1);
+		else set_enemy_state(enemy, Dead, 1);
+
+		in_dead = !in_dead;
+	}
+
+	DEBUG(enemy -> state, d);
+
+/////

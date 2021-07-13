@@ -19,7 +19,8 @@ typedef enum {
 	Navigating, ReachedDest, CouldNotNavigate
 } NavigatorState;
 
-// this path eliminates wall clipping and jerky movement
+/* this path accomodates for the previous pos of the Navigator
+and aligns the navigator to the middle of the tile it's on */
 typedef struct {
 	vec* data;
 	int length;
@@ -28,12 +29,11 @@ typedef struct {
 typedef struct {
 	CorrectedPath path;
 	vec* const pos;
-	double* const dist_to_player;
 	int path_ind;
 	const double v;
 } Navigator;
 
-inlinable Navigator init_navigator(const vec, vec* const, double* const, const double);
+inlinable Navigator init_navigator(const vec, vec* const, const double);
 
 /////
 
