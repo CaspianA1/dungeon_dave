@@ -1,64 +1,36 @@
-// unsigned bfs_allocs = 0;
+Route extend_route(Route route, const ivec node) {
+	if (++route.length == max_route_length)
+		route.creation_error = 1;
+	else
+		route.data[route.length - 1] = node;
 
-Path init_path(const int init_length, ...) {
-	va_list args;
-	va_start(args, init_length);
-
-	Path path = {wmalloc(init_length * sizeof(ivec)), init_length, init_length};
-	for (int i = 0; i < init_length; i++) path.data[i] = va_arg(args, ivec);
-
-	// bfs_allocs++;
-
-	va_end(args);
-	return path;
+	return route;
 }
 
-inlinable Path copy_path(const Path path) {
-	Path copy = {wmalloc(path.length * sizeof(ivec)), path.length, path.length};
-	memcpy(copy.data, path.data, path.length * sizeof(ivec));
-
-	// bfs_allocs++;
-
-	return copy;
+RouteQueue init_routes(const ivec starting_node) {
+	RouteQueue routes = {wmalloc(route_queue_init_alloc * sizeof(Route)), 1, route_queue_init_alloc};
+	routes.data[0] = (Route) {0, 1, {starting_node}};
+	return routes;
 }
 
-inlinable void add_to_path(Path* const path, const ivec new) {
-	if (path -> length++ == path -> max_alloc)
-		path -> data = wrealloc(path -> data, ++path -> max_alloc * sizeof(ivec));
+#define deinit_routes(routes) wfree(routes.data)
 
-	path -> data[path -> length - 1] = new;
+void enqueue_to_routes(RouteQueue* const routes_ref, const Route route) {
+	RouteQueue routes = *routes_ref;
 
-	// bfs_allocs++;
+	if (routes.length++ == routes.max_alloc) {
+		routes.max_alloc *= 2;
+		routes.data = wrealloc(routes.data, routes.max_alloc * sizeof(Route));
+	}
+
+	for (int i = routes.length - 1; i > 0; i--)
+		routes.data[i] = routes.data[i - 1];
+	routes.data[0] = route;
+
+	*routes_ref = routes;
 }
 
-//////////
-
-PathQueue init_path_queue(const int init_length, ...) {
-	va_list args;
-	va_start(args, init_length);
-
-	PathQueue path_queue = {wmalloc(init_length * sizeof(Path)), init_length, init_length};
-	for (int i = 0; i < init_length; i++) path_queue.data[i] = va_arg(args, Path);
-
-	// bfs_allocs++;
-
-	va_end(args);
-	return path_queue;
-}
-
-inlinable void enqueue_to_paths(PathQueue* const path_queue, const Path new) {
-	if (path_queue -> length++ == path_queue -> max_alloc)
-		path_queue -> data = wrealloc(path_queue -> data, ++path_queue -> max_alloc * sizeof(Path));
-
-	for (int i = path_queue -> length - 1; i > 0; i--)
-		path_queue -> data[i] = path_queue -> data[i - 1];
-
-	path_queue -> data[0] = new;
-
-	// bfs_allocs++;
-}
-
-inlinable Path dequeue_a_path(PathQueue* const path_queue) {
-	if (path_queue -> length == 0) FAIL("Cannot dequeue from an empty queue!\n");
-	return path_queue -> data[--path_queue -> length];
+Route dequeue_from_routes(RouteQueue* const routes_ref) {
+	if (routes_ref -> length == 0) FAIL("Cannot dequeue from an empty route queue\n");
+	return routes_ref -> data[--routes_ref -> length];
 }

@@ -1,35 +1,39 @@
-typedef struct {
-	ivec* data;
-	int length, max_alloc;
-} Path;
+enum {max_route_length = 10, route_queue_init_alloc = 5};
 
 typedef struct {
-	Path* data;
-	int length, max_alloc;
-} PathQueue;
+	byte creation_error;
+	int length;
+	ivec data[max_route_length];
+} Route;
 
 typedef struct {
-	byte succeeded;
-	Path path;
+	Route* data;
+	int length, max_alloc;
+} RouteQueue;
+
+typedef enum {
+	FailedBFS, SucceededBFS, PathTooLongBFS,
+	Navigating, ReachedDest
+} NavigationState;
+
+typedef struct {
+	NavigationState state;
+	Route route;
 } ResultBFS;
 
 //////////
 
-typedef enum {
-	Navigating, ReachedDest, CouldNotNavigate
-} NavigatorState;
-
 /* this path accomodates for the previous pos of the Navigator
 and aligns the navigator to the middle of the tile it's on */
 typedef struct {
-	vec* data;
 	int length;
-} CorrectedPath;
+	vec data[max_route_length];
+} CorrectedRoute;
 
 typedef struct {
-	CorrectedPath path;
+	CorrectedRoute route;
 	vec* const pos;
-	int path_ind;
+	int route_ind;
 	const double v;
 } Navigator;
 
@@ -43,7 +47,7 @@ typedef enum {
 
 typedef struct {
 	EnemyState state;
-	const double dist_wake_from_idle, dist_return_to_idle;
+	const double dist_wake_from_idle;
 	double hp;
 
 	byte recently_attacked;

@@ -362,3 +362,12 @@ and a dequeue becomes {f a b c d}
 */
 
 /////
+
+/*
+if (dist >= enemy -> dist_return_to_idle)
+	set_enemy_state(enemy, Idle, 0);
+else if (update_path_if_needed(nav, player.pos, player.jump.height) == ReachedDest)
+	set_enemy_state(enemy, Attacking, 0);
+*/
+
+/////

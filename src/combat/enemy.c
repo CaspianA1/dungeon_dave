@@ -27,11 +27,14 @@ void update_enemy(Enemy* const enemy, const Player player) {
 				set_enemy_state(enemy, Chasing, 0);
 			break;
 		
-		case Chasing:
-			if (dist >= enemy -> dist_return_to_idle)
-				set_enemy_state(enemy, Idle, 0);
-			else if (update_path_if_needed(nav, player.pos, player.jump.height) == ReachedDest)
+		case Chasing: {
+			const NavigationState nav_state = update_path_if_needed(nav, player.pos, player.jump.height);
+			if (nav_state == ReachedDest)
 				set_enemy_state(enemy, Attacking, 0);
+			else if (nav_state == PathTooLongBFS)
+				set_enemy_state(enemy, Idle, 0);
+			}
+
 			break;
 
 		case Attacking:
@@ -53,5 +56,4 @@ void deinit_enemy(const Enemy enemy) {
 	deinit_sprite(enemy.animations.billboard.sprite);
 	for (byte i = 0; i < 5; i++) deinit_sound(enemy.sounds[i]);
 	wfree(enemy.sounds);
-	deinit_navigator(&enemy.nav);	
 }

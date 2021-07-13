@@ -153,7 +153,7 @@ void load_palace(void) {
 	// this is set after b/c it depends on fns that read from current_level
 	set_level_enemies(&current_level, enemy_count,
 		Idle, // state
-		2.0, 12.0, // dist_thresholds
+		2.0, // dist_wake_from_idle
 		20.0, // hp
 		5, 2, 3, 13, // animation_seg_lengths
 

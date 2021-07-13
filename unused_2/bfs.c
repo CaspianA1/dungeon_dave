@@ -1,3 +1,13 @@
+typedef struct {
+	ivec* data;
+	int length, max_alloc;
+} Path;
+
+typedef struct {
+	Path* data;
+	int length, max_alloc;
+} PathQueue;
+
 typedef enum {
 	TopLeft, Top, TopRight,
 	Left, Right,
@@ -9,8 +19,7 @@ inlinable byte neighbor_map_point(const ivec neighbors[8], const NeighborID neig
 	return map_point(current_level.wall_data, neighbor.x, neighbor.y);
 }
 
-// returns if updating the queue succeeded
-byte update_queue_with_neighbors(RouteQueue* const routes, Route route, const ivec vertex, byte* const all_visited) {
+void update_queue_with_neighbors(PathQueue* const paths, Path path, const ivec vertex, byte* const all_visited) {
 	const int dec_x = vertex.x - 1, dec_y = vertex.y - 1, inc_x = vertex.x + 1, inc_y = vertex.y + 1;
 	const ivec neighbors[8] = {
 		{dec_x, dec_y}, {vertex.x, dec_y}, {inc_x, dec_y},
@@ -31,12 +40,11 @@ byte update_queue_with_neighbors(RouteQueue* const routes, Route route, const iv
 		byte* const was_visited = &all_visited[neighbor.y * current_level.map_size.x + neighbor.x];
 		if (!*was_visited) {
 			*was_visited = 1;
-			const Route next_route = extend_route(route, neighbor);
-			if (next_route.creation_error) return 0;
-			enqueue_to_routes(routes, next_route);
+			Path path_copy = copy_path(path);
+			add_to_path(&path_copy, neighbor);
+			enqueue_to_paths(paths, path_copy);
 		}
 	}
-	return 1;
 }
 
 ResultBFS bfs(const vec begin, const vec end) {
@@ -45,28 +53,36 @@ ResultBFS bfs(const vec begin, const vec end) {
 	byte* const all_visited = wcalloc(current_level.map_size.x * current_level.map_size.y, sizeof(byte));
 	set_map_point(all_visited, 1, int_begin.x, int_begin.y, current_level.map_size.x);
 
-	RouteQueue routes = init_routes(int_begin);
-	ResultBFS result = {.state = FailedBFS};
+	PathQueue paths = init_path_queue(1, init_path(1, int_begin));
+	ResultBFS result = {0};
 
-	while (routes.length > 0) {
-		Route route = dequeue_from_routes(&routes);
+	// unsigned bfs_allocs_for_iter = bfs_allocs;
 
-		const ivec vertex = route.data[route.length - 1];
+	while (paths.length > 0) {
+		// DEBUG(paths.length, d);
+
+		Path path = dequeue_a_path(&paths);
+
+		const ivec vertex = path.data[path.length - 1];
 
 		if (vertex.x == int_end.x && vertex.y == int_end.y) {
-			result.state = SucceededBFS;
-			result.route = route;
+			result.succeeded = 1;
+			result.path = path;
 			break;
 		}
 
-		if (!update_queue_with_neighbors(&routes, route, vertex, all_visited)) {
-			result.state = PathTooLongBFS;
-			break;
-		}
+		update_queue_with_neighbors(&paths, path, vertex, all_visited);
+		wfree(path.data);
 	}
 
 	wfree(all_visited);
-	deinit_routes(routes);
+	for (int i = 0; i < paths.length; i++) wfree(paths.data[i].data);
+	wfree(paths.data);
+
+	/*
+	const unsigned curr_bfs_allocs = bfs_allocs - bfs_allocs_for_iter;
+	DEBUG(curr_bfs_allocs, u);
+	*/
 
 	return result;
 }

@@ -1,0 +1,8 @@
+/*
+print_navigator(nav -> route, *nav -> pos);
+DEBUG_VEC((*nav -> pos));
+DEBUG_VEC(player_pos);
+printf("---\n");
+*/
+
+/////

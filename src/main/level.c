@@ -118,7 +118,6 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 		const EnemyState enemy_state = va_arg(enemy_data, EnemyState);
 		Enemy enemy = {
 			.dist_wake_from_idle = va_arg(enemy_data, double),
-			.dist_return_to_idle = va_arg(enemy_data, double),
 			.hp = va_arg(enemy_data, double),
 
 			.animation_seg_lengths = {
