@@ -209,3 +209,37 @@ while (1) {
 	DEBUG(enemy -> state, d);
 
 /////
+
+// typedef enum {Top, Bottom, Left, Right, TopLeft, BottomLeft, TopRight, BottomRight} NeighborID;
+
+/*
+a b c
+d e f
+g h i
+*/
+
+///// The old neighbor ID scheme:
+
+// typedef enum {Top, Bottom, Left, Right, TopLeft, BottomLeft, TopRight, BottomRight} NeighborID;
+
+/*
+const ivec neighbors[8] = {
+	{vertex.x, vertex.y - 1}, {vertex.x, vertex.y + 1},
+	{vertex.x - 1, vertex.y}, {vertex.x + 1, vertex.y},
+	{vertex.x - 1, vertex.y - 1}, {vertex.x - 1, vertex.y + 1},
+	{vertex.x + 1, vertex.y - 1}, {vertex.x + 1, vertex.y + 1}
+};
+*/
+
+/////
+
+/*
+a b c
+d e f
+g h i
+
+left to right is positive, right to left is negative
+down is postive, up is negative
+*/
+
+/////

@@ -1,4 +1,8 @@
-typedef enum {Top, Bottom, Left, Right, TopLeft, BottomLeft, TopRight, BottomRight} NeighborID;
+typedef enum {
+	TopLeft, Top, TopRight,
+	Left, Right,
+	BottomLeft, Bottom, BottomRight
+} NeighborID;
 
 inlinable byte neighbor_map_point(const ivec neighbors[8], const NeighborID neighbor_id) {
 	const ivec neighbor = neighbors[neighbor_id];
@@ -6,11 +10,11 @@ inlinable byte neighbor_map_point(const ivec neighbors[8], const NeighborID neig
 }
 
 void update_queue_with_neighbors(PathQueue* const paths, Path path, const ivec vertex, byte* const all_visited) {
+	const int dec_x = vertex.x - 1, dec_y = vertex.y - 1, inc_x = vertex.x + 1, inc_y = vertex.y + 1;
 	const ivec neighbors[8] = {
-		{vertex.x, vertex.y - 1}, {vertex.x, vertex.y + 1},
-		{vertex.x - 1, vertex.y}, {vertex.x + 1, vertex.y},
-		{vertex.x - 1, vertex.y - 1}, {vertex.x - 1, vertex.y + 1},
-		{vertex.x + 1, vertex.y - 1}, {vertex.x + 1, vertex.y + 1}
+		{dec_x, dec_y}, {vertex.x, dec_y}, {inc_x, dec_y},
+		{dec_x, vertex.y}, {inc_x, vertex.y},
+		{dec_x, inc_y}, {vertex.x, inc_y}, {inc_x, inc_y}
 	};
 
 	for (NeighborID i = 0; i < 8; i++) {
