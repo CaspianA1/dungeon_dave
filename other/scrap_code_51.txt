@@ -50,3 +50,42 @@ inlinable Weapon init_weapon(const char* const, const char* const,
 // frame_num == -1 -> auto_progress frame
 
 /////
+
+DEBUG(d2 - actual_dist, lf);
+DEBUG(d3 - d2, lf);
+printf("---\n");
+
+/////
+
+const double actual_dist = straight_dist / (double) buffer_val.cos_beta;
+
+const double d2 = straight_dist / (double) val_buffer[screen_x + 1].cos_beta;
+const double d3 = straight_dist / (double) val_buffer[screen_x + 2].cos_beta;
+
+/////
+
+/*
+const vec test = {2.5, 3.5}, other = {0.2, 0.3};
+const vec foo = _mm_floor_sd(test, other);
+DEBUG_VEC(foo);
+*/
+
+const vec value = {3.2, 4.4};
+__m128d integer = _mm_round_pd(value,_MM_FROUND_TRUNC);
+__m128d fraction = _mm_sub_pd(value,integer);
+DEBUG_VEC(fraction);
+
+///// so cool!
+
+inlinable vec vec_tex_offset(const vec pos, const int max_offset) {
+	return vec_fill(max_offset) * (pos - _mm_round_pd(pos, _MM_FROUND_TRUNC));
+}
+
+/////
+
+/*
+const vec offset = vec_tex_offset(hit, p.size - 1);
+Uint32 src = *(read_texture_row(p.pixels, p.pitch, offset[1]) + (int) offset[0]);
+*/
+
+/////

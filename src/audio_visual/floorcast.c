@@ -1,5 +1,9 @@
+vec vec_tex_offset(const vec pos, const int max_offset) {
+	return vec_fill(max_offset) * (pos - _mm_round_pd(pos, _MM_FROUND_TRUNC));
+}
+
 PSprite p;
-inlinable void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
+void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
 	const int max_offset = p.size - 1;
 
 	const ivec floored_hit = ivec_from_vec(hit);
@@ -13,7 +17,7 @@ inlinable void draw_from_hit(const vec hit, const double actual_dist, const int 
 	#ifdef SHADING_ENABLED
 	const double shade = calculate_shade(settings.proj_dist / actual_dist, hit);
 	const byte r = (byte) (src >> 16) * shade, g = (byte) (src >> 8) * shade, b = (byte) src * shade;
-	src = 0xFF000000 | (r << 16) | (g << 8) | b;
+	src = 0xFF000000 | (r << 16) | (g << 8) | b; // this line + calculate_shade are big slowdowns
 	#else
 	(void) actual_dist;
 	#endif

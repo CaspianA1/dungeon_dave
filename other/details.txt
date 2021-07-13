@@ -15,6 +15,7 @@ features:
 	- a map editor
 	- seethrough sprites
 	- momentary sounds for enemies
+	- linearly interpolate for actual_dist for more speed
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -27,7 +28,7 @@ problems:
 	- skybox stretching
 	- less doubles and more ints in render_overlay.c
 	- don't intersect the player dot with walls in the minimap
-	- shading is slow
+	- shading is slow (it isn't the shading logic, it's the divisions)
 	- hit detection for weapons is still sometimes spotty
 	- skyboxes become wonky when the screen size increases
 	- don't reallocate the `all_visited` var each time in bfs.c
