@@ -16,6 +16,7 @@ features:
 	- seethrough sprites
 	- momentary sounds for enemies
 	- linearly interpolate for actual_dist for more speed
+	- floors at different height levels (not necessarily within just one block)
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

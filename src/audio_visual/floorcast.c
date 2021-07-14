@@ -29,10 +29,10 @@ void draw_from_hit(const vec hit, const double dist, const int screen_x, Uint32*
 		*(pixbuf_row + x) = pixel;
 }
 
-void fast_affine_floor(const vec pos, const double full_jump_height,
-	const double pace, double y_shift, const int y_pitch) {
+void fast_affine_floor(const vec pos, const double p_height, const double pace, double y_shift, const int y_pitch) {
+	const double height_ratio = p_height * settings.screen_height / settings.proj_dist;
+	const double opp_h = 0.5 + height_ratio;
 
-	const double opp_h = 0.5 + full_jump_height / settings.proj_dist;
 	if (y_shift < 0.0) y_shift = 0.0;
 
 	/*
@@ -62,7 +62,7 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			const BufferVal buffer_val = val_buffer[screen_x];
-			if (buffer_val.wall_bottom >= pace_y + 1) continue;
+			// if (buffer_val.wall_bottom >= pace_y + 1) continue;
 
 			const double actual_dist = straight_dist / (double) buffer_val.cos_beta;
 			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
@@ -74,8 +74,10 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 
 			#else
 
+			/*
 			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
 			if (current_level.get_point_height(wall_point, hit)) continue;
+			*/
 
 			#endif
 

@@ -14,13 +14,13 @@ inlinable Uint32* read_texture_row(const void* const pixels, const int pixel_pit
 PSprite init_psprite(const char* const path) {
 	SDL_Surface* const unconverted_surface = SDL_LoadBMP(path);
 	if (unconverted_surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
-	SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(unconverted_surface, PIXEL_FORMAT, 0);
-	if (converted_surface == NULL) FAIL("Could not convert a surface type for path %s\n", path);
+	SDL_Surface* const surface = SDL_ConvertSurfaceFormat(unconverted_surface, PIXEL_FORMAT, 0);
+	if (surface == NULL) FAIL("Could not convert a surface type for path %s\n", path);
 
 	SDL_FreeSurface(unconverted_surface);
-	SDL_LockSurface(converted_surface);
+	SDL_LockSurface(surface);
 
-	const ivec size = {converted_surface -> w, converted_surface -> h};
+	const ivec size = {surface -> w, surface -> h};
 
 	PSprite p = {
 		.texture = SDL_CreateTexture(screen.renderer, PIXEL_FORMAT,
@@ -28,13 +28,18 @@ PSprite init_psprite(const char* const path) {
 		.size = size.x
 	};
 
+	/*
+	SDL_LockTexture(p.texture, NULL, &p.pixels, &p.pitch);
+	SDL_UpdateTexture(p.texture, NULL, surface -> pixels, surface -> pitch);
+	SDL_UnlockTexture(p.texture);
+	*/
 
 	SDL_LockTexture(p.texture, NULL, &p.pixels, &p.pitch);
-	memcpy(p.pixels, converted_surface -> pixels, size.x * size.y * sizeof(Uint32));
+	memcpy(p.pixels, surface -> pixels, size.x * size.y * sizeof(Uint32));
 	SDL_UnlockTexture(p.texture);
 
-	SDL_UnlockSurface(converted_surface);
-	SDL_FreeSurface(converted_surface);
+	SDL_UnlockSurface(surface);
+	SDL_FreeSurface(surface);
 
 	return p;
 }
