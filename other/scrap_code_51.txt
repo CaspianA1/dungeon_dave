@@ -262,3 +262,102 @@ _shade_ARGB_pixel:                      ## @shade_ARGB_pixel
 */
 
 /////
+
+void print_bits(const Uint32 val, const char* const msg) {
+	printf("%s | ", msg);
+	for (int i = 0; i < 31; i++) {
+		printf("%c", (val & (1 << i)) ? '1' : '0');
+	}
+
+	/*
+	for (int i = 31; 0 <= i; i--)
+		printf("%c", (val & (1 << i)) ? '1' : '0');
+	*/
+	putchar('\n');
+}
+
+/////
+
+/*
+void print_bits(long n, const char* const msg) {
+	long i;
+	printf("%s | 0", msg);
+	for (i = 1 << 30; i > 0; i = i / 2) {
+		const byte cond = ((n & i) != 0);
+		putchar(cond ? '1' : '0');
+	}
+	putchar('\n');
+}
+*/
+
+/*
+#include <stdlib.h>
+void print_bits(int a, const char* msg) {
+	const int buf_size = 32;
+
+	char* buffer = malloc(buf_size);
+	buffer += (buf_size - 1);
+
+	for (int i = 31; i >= 0; i--) {
+		*buffer-- = (a & 1) + '0';
+		a >>= 1;
+	}
+	printf("%s | %s\n", msg, buffer);
+}
+*/
+
+/////
+
+Uint32 get_bits(const Uint32 pixel, const byte offset, const byte amt) {
+	return (pixel >> offset) & ((1 << amt) - 1);
+}
+
+/////
+
+// const Uint32 rgb = second_test_pixel << 8;
+// const Uint32 rgb = 0xFF000000 & pixel;
+
+/////
+
+// const Uint32 rgb = 0b00000000000000000000000000000000;
+// const Uint32 rgb = pixel << 8;
+
+/*
+const Uint32 rgb = 0b00000000111111111111111111111111;
+const Uint32 v = 0b01111111000000000000000000000000 | rgb;
+*/
+
+print_bits(v, "rgb              ");
+
+// print_bits(get_bits(second_test_pixel, 0, 2), "extract          ");
+return pixel;
+
+/////
+
+// print_bits(get_bits(second_test_pixel, 0, 2), "extract          ");
+return pixel;
+
+/////
+
+unsigned createMask(unsigned a, unsigned b)
+{
+   unsigned r = 0;
+   for (unsigned i=a; i<=b; i++)
+       r |= 1 << i;
+
+   return r;
+}
+
+/////
+
+// const Uint32 mask = createMask(8, 31);
+// const Uint32 mask = 0b11111111111111111111111100000000;
+
+/////
+
+/*
+const Uint32 rgb = 0b00000000111111111111111111111111;
+const Uint32 v = 0b01111111000000000000000000000000 | rgb;
+*/
+
+/////
