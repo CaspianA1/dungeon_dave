@@ -36,4 +36,3 @@ problems:
 	- vecs to double[2]'s in screen.dir_buffer
 	- fix the offset problem for fast_affine_floor
 	- sometimes, psprites disappear mid-game
-	- floors are a tiny bit misaligned near some edges
