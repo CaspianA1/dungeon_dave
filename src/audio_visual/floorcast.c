@@ -4,11 +4,12 @@ inlinable vec vec_tex_offset(const vec pos, const int tex_size) {
 
 #ifdef SHADING_ENABLED
 
+// this = 10270, orig = 10319 (difference of 49 lines)
+// return 0b11111111000000000000000000000000 | (Uint32) ((pixel & 0b00000000111111111111111111111111) * shade);
 Uint32 shade_ARGB_pixel(const Uint32 pixel, const double dist, const vec hit) {
 	const double shade = calculate_shade(settings.proj_dist / dist, hit);
 	const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
-	Uint32 rgb = (r << 16) | (g << 8) | b; // this line + calculate_shade are big slowdowns
-	return 0xFF000000 | rgb; // 0xFF000000 = 0b11111111000000000000000000000000
+	return 0xFF000000 | (r << 16) | (g << 8) | b; // this line + calculate_shade are big slowdowns
 }
 
 #endif

@@ -66,3 +66,7 @@ Uint32 shader_2(const Uint32 pixel, const double dist, const vec hit) {
 if (keys[SDL_SCANCODE_F]) rgb = ~rgb;
 
 /////
+
+// 0xFF000000 = 0b11111111000000000000000000000000
+
+/////
