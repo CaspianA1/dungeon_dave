@@ -2,76 +2,13 @@ inlinable vec vec_tex_offset(const vec pos, const int tex_size) {
 	return vec_fill(tex_size) * (pos - _mm_round_pd(pos, _MM_FROUND_TRUNC));
 }
 
-
-/*
-idea:
-1. turn the 32-bit int into 4 8-bit ints,
-2. simd multiply the first three by the shade
-3. make that vector one number
-
-xmm registers store 4 32-bit floating-point numbers
-need a way to take each byte out of a 32-bit number and put each part in a section of an xmm register
-*/
-
-void print_bits(Uint32 val) {
-	for (int i = 31; 0 <= i; i--)
-		printf("%c", (val & (1 << i)) ? '1' : '0');
-	putchar('\n');
-}
-
 #ifdef SHADING_ENABLED
 
 Uint32 shade_ARGB_pixel(const Uint32 pixel, const double dist, const vec hit) {
 	const double shade = calculate_shade(settings.proj_dist / dist, hit);
 	const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
-	return 0xFF000000 | (r << 16) | (g << 8) | b; // this line + calculate_shade are big slowdowns
-}
-
-// https://stackoverflow.com/questions/58895781/extracting-bytes-from-a-32-bits-number
-Uint32 shader_2(const Uint32 pixel, const double dist, const vec hit) {
-	(void) dist;
-	(void) hit;
-	return pixel;
-
-	/*
-	print_bits(pixel);
-	const double shade = 0.8;
-	DEBUG(shade, lf);
-	const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
-	const Uint32 result = 0xFF000000 | (r << 16) | (g << 8) | b;
-	print_bits(result);
-	printf("---\n");
-	return result;
-	*/
-
-	/*
-	11111111 11011001 10100000 01100110
-	shade = 0.800000
-	11111111 10101101 10000000 01010001
-
-	the shaded part = 101011011000000001010001
-
-	01100110 * 0.8 = 1010001 (didn't equal 01010001?)
-	*/
-
-
-	/*
-	printf("Pixel: ");
-	print_bits(pixel);
-
-	const Uint32 rgb = (pixel >> 8);
-	printf("RGB: ");	
-	print_bits(rgb);
-
-	const Uint32 shaded = rgb * 0.8;	
-
-	printf("Result: ");
-	const Uint32 result = 0xFF000000 | shaded;
-	print_bits(result);
-	printf("---\n");
-
-	return result;
-	*/
+	Uint32 rgb = (r << 16) | (g << 8) | b; // this line + calculate_shade are big slowdowns
+	return 0xFF000000 | rgb; // 0xFF000000 = 0b11111111000000000000000000000000
 }
 
 #endif
@@ -83,7 +20,6 @@ void draw_from_hit(const vec hit, const double dist, const int screen_x, Uint32*
 
 	#ifdef SHADING_ENABLED
 	pixel = shade_ARGB_pixel(pixel, dist, hit);
-	// pixel = shader_2(pixel, dist, hit);
 	#else
 	(void) dist;
 	#endif
