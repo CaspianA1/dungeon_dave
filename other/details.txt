@@ -7,7 +7,7 @@ features:
 	- a level opener, with a cool spinning effect
 	- a sprite pool
 	- an airship level
-	- collide with sprites
+	- collide with billboards
 	- accelerate sideways
 	- a gui system
 	- anti-aliasing
