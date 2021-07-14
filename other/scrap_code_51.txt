@@ -89,3 +89,30 @@ Uint32 src = *(read_texture_row(p.pixels, p.pitch, offset[1]) + (int) offset[0])
 */
 
 /////
+
+double actual_dist_step = d6 - d5;
+const double actual_dist_step_step = actual_dist_step - (d5 - d4);
+DEBUG(actual_dist_step_step, lf);
+
+double actual_dist = d1;
+
+DEBUG(d6 - d5, lf);
+DEBUG(d5 - d4, lf);
+DEBUG(d4 - d3, lf);
+DEBUG(d3 - d2, lf);
+DEBUG(d2 - d1, lf);
+printf("---\n");
+
+for (int screen_x = 0; screen_x < settings.screen_width;
+	screen_x++, actual_dist += actual_dist_step, actual_dist_step += actual_dist_step_step) {
+
+/////
+
+const double d1 = straight_dist / (double) val_buffer[0].cos_beta;
+const double d2 = straight_dist / (double) val_buffer[1].cos_beta;
+const double d3 = straight_dist / (double) val_buffer[2].cos_beta;
+const double d4 = straight_dist / (double) val_buffer[3].cos_beta;
+const double d5 = straight_dist / (double) val_buffer[4].cos_beta;
+const double d6 = straight_dist / (double) val_buffer[5].cos_beta;
+
+/////

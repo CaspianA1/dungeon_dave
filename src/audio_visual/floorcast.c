@@ -43,10 +43,11 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 		const int row = y - settings.half_screen_height - y_pitch + 1;
 		if (row == 0) continue;
 
-		const int pace_y = y + pace;
 		const double straight_dist = opp_h / row * settings.proj_dist;
 
+		const int pace_y = y + pace;
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
+
 		/*
 		if (cmp_pixbuf_row == pixbuf_row) {
 			printf("Equal\n");
