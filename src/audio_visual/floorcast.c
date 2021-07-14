@@ -37,10 +37,8 @@ Uint32 shader_2(const Uint32 pixel, const double dist, const vec hit) {
 	print_bits(pixel);
 	const double shade = 0.8;
 	DEBUG(shade, lf);
-
 	const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
 	const Uint32 result = 0xFF000000 | (r << 16) | (g << 8) | b;
-
 	print_bits(result);
 	printf("---\n");
 	return result;
