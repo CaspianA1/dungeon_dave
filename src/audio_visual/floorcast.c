@@ -1,29 +1,36 @@
-vec vec_tex_offset(const vec pos, const int max_offset) {
-	return vec_fill(max_offset) * (pos - _mm_round_pd(pos, _MM_FROUND_TRUNC));
+inlinable vec vec_tex_offset(const vec pos, const int tex_size) {
+	return vec_fill(tex_size - 1) * (pos - _mm_round_pd(pos, _MM_FROUND_TRUNC));
 }
 
+
+/*
+idea:
+1. turn the 32-bit int into 4 8-bit ints,
+2. simd multiply the first three by the shade
+3. make that vector one number
+*/
+
+#ifdef SHADING_ENABLED
+Uint32 shade_ARGB_pixel(const Uint32 pixel, const double dist, const vec hit) {
+	const double shade = calculate_shade(settings.proj_dist / dist, hit);
+	const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
+	return 0xFF000000 | (r << 16) | (g << 8) | b; // this line + calculate_shade are big slowdowns
+}
+#endif
+
 PSprite p;
-void draw_from_hit(const vec hit, const double actual_dist, const int screen_x, Uint32* const pixbuf_row) {
-	const int max_offset = p.size - 1;
-
-	const ivec floored_hit = ivec_from_vec(hit);
-	const ivec offset = {
-		(hit[0] - floored_hit.x) * max_offset,
-		(hit[1] - floored_hit.y) * max_offset
-	};
-
-	Uint32 src = *(read_texture_row(p.pixels, p.pitch, offset.y) + offset.x);
+void draw_from_hit(const vec hit, const double dist, const int screen_x, Uint32* const pixbuf_row) {
+	const vec offset = vec_tex_offset(hit, p.size);
+	Uint32 pixel = *(read_texture_row(p.pixels, p.pitch, offset[1]) + (long) offset[0]);
 
 	#ifdef SHADING_ENABLED
-	const double shade = calculate_shade(settings.proj_dist / actual_dist, hit);
-	const byte r = (byte) (src >> 16) * shade, g = (byte) (src >> 8) * shade, b = (byte) src * shade;
-	src = 0xFF000000 | (r << 16) | (g << 8) | b; // this line + calculate_shade are big slowdowns
+	pixel = shade_ARGB_pixel(pixel, dist, hit);
 	#else
-	(void) actual_dist;
+	(void) dist;
 	#endif
 
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
-		*(pixbuf_row + x) = src;
+		*(pixbuf_row + x) = pixel;
 }
 
 void fast_affine_floor(const vec pos, const double full_jump_height,

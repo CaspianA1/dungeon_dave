@@ -116,3 +116,149 @@ const double d5 = straight_dist / (double) val_buffer[4].cos_beta;
 const double d6 = straight_dist / (double) val_buffer[5].cos_beta;
 
 /////
+
+// #include <immintrin.h>
+// #include <xmmintrin.h>
+#include <x86intrin.h>
+
+/////
+
+_mm256_frcz_pd;
+_mm256_frcz_ps;
+
+/////
+
+/*
+const int max_offset = p.size - 1;
+const ivec floored_hit = ivec_from_vec(hit);
+const ivec offset = {
+	(hit[0] - floored_hit.x) * max_offset,
+	(hit[1] - floored_hit.y) * max_offset
+};
+*/
+
+/////
+
+ivec ivec_tex_offset(const vec pos, const int tex_size) {
+	const int max_offset = tex_size - 1;
+	const ivec floored_hit = ivec_from_vec(pos);
+	return (ivec) {
+		(pos[0] - floored_hit.x) * max_offset,
+		(pos[1] - floored_hit.y) * max_offset
+	};
+}
+
+/////
+
+/*
+const vec offset = vec_tex_offset(hit, p.size);	// 10306
+Uint32 src = *(read_texture_row(p.pixels, p.pitch, offset[1]) + (long) offset[0]);
+*/
+
+
+/*
+Uint32 src;
+
+if (keys[SDL_SCANCODE_R]) {
+	const ivec offset = ivec_tex_offset(hit, p.size);
+	src = *(read_texture_row(p.pixels, p.pitch, offset.y) + offset.x);
+}
+else {
+	const vec offset = vec_tex_offset(hit, p.size);	
+	src = *(read_texture_row(p.pixels, p.pitch, offset[1]) + (long) offset[0] + 1);
+}
+*/
+
+/////
+
+/* const shade factor:
+_shade_ARGB_pixel:                      ## @shade_ARGB_pixel
+	.cfi_startproc
+## %bb.0:
+	push	rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset rbp, -16
+	mov	rbp, rsp
+	.cfi_def_cfa_register rbp
+	mov	eax, edi
+	mov	ecx, edi
+	shr	ecx, 16
+	movzx	ecx, cl
+	vcvtsi2sd	xmm0, xmm0, ecx
+	movzx	ecx, ah
+	vmovsd	xmm1, qword ptr [rip + LCPI54_0] ## xmm1 = mem[0],zero
+	vmulsd	xmm0, xmm0, xmm1
+	vcvttsd2si	edx, xmm0
+	movzx	eax, al
+	vcvtsi2sd	xmm0, xmm2, ecx
+	vmulsd	xmm0, xmm0, xmm1
+	vcvttsd2si	ecx, xmm0
+	vcvtsi2sd	xmm0, xmm2, eax
+	vmulsd	xmm0, xmm0, xmm1
+	vcvttsd2si	eax, xmm0
+	shl	edx, 16
+	movzx	ecx, cl
+	shl	ecx, 8
+	movzx	eax, al
+	or	eax, ecx
+	or	eax, edx
+	or	eax, -16777216
+	pop	rbp
+	ret
+
+non-const shade factor:
+_shade_ARGB_pixel:                      ## @shade_ARGB_pixel
+	.cfi_startproc
+## %bb.0:
+	push	rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset rbp, -16
+	mov	rbp, rsp
+	.cfi_def_cfa_register rbp
+	push	rbx
+	sub	rsp, 24
+	.cfi_offset rbx, -24
+	vmovsd	qword ptr [rbp - 32], xmm0      ## 8-byte Spill
+	mov	ebx, edi
+	mov	rax, qword ptr [rip + _settings@GOTPCREL]
+	vmovsd	xmm0, qword ptr [rax + 56]      ## xmm0 = mem[0],zero
+	vmovsd	qword ptr [rbp - 24], xmm0      ## 8-byte Spill
+	vcvtsi2sd	xmm0, xmm2, dword ptr [rax + 4]
+	vmovsd	qword ptr [rbp - 16], xmm0      ## 8-byte Spill
+	mov	rax, qword ptr [rip + _current_level@GOTPCREL]
+	vmovapd	xmm0, xmm1
+	call	qword ptr [rax + 112]
+	vmulsd	xmm0, xmm0, qword ptr [rbp - 24] ## 8-byte Folded Reload
+	vmovsd	xmm1, qword ptr [rbp - 16]      ## 8-byte Reload
+                                        ## xmm1 = mem[0],zero
+	vmulsd	xmm1, xmm1, qword ptr [rbp - 32] ## 8-byte Folded Reload
+	vdivsd	xmm0, xmm0, xmm1
+	vminsd	xmm0, xmm0, qword ptr [rip + LCPI54_0]
+	mov	eax, ebx
+	shr	eax, 16
+	movzx	eax, al
+	vcvtsi2sd	xmm1, xmm2, eax
+	vmulsd	xmm1, xmm0, xmm1
+	vcvttsd2si	ecx, xmm1
+	movzx	eax, bh
+	vcvtsi2sd	xmm1, xmm2, eax
+	vmulsd	xmm1, xmm0, xmm1
+	vcvttsd2si	eax, xmm1
+	movzx	edx, bl
+	vcvtsi2sd	xmm1, xmm2, edx
+	vmulsd	xmm0, xmm0, xmm1
+	vcvttsd2si	edx, xmm0
+	shl	ecx, 16
+	movzx	esi, al
+	shl	esi, 8
+	movzx	eax, dl
+	or	eax, esi
+	or	eax, ecx
+	or	eax, -16777216
+	add	rsp, 24
+	pop	rbx
+	pop	rbp
+	ret
+*/
+
+/////
