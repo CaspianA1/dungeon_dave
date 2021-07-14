@@ -11,6 +11,56 @@ inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos
 		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
+void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement, const double p_height) {
+	vec pos = *pos_ref + movement;
+
+	/*
+	__m64 foo = {1.0f, 2.0f};
+	DEBUG(sizeof(__m64), zu);
+	DEBUG(sizeof(float), zu);
+	*/
+
+	#ifdef NOCLIP_MODE
+
+	(void) prev_pos;
+	(void) p_height;
+
+	/* out-of-bounds hit detection is only needed for noclip mode,
+	as it will be impossible to go out of bounds otherwise in normal mode */
+	if (pos[1] < 1 || pos[1] > current_level.map_size.y - 1) pos[1] = prev_pos[1];
+	if (pos[0] < 1 || pos[0] > current_level.map_size.x - 1) pos[0] = prev_pos[0];
+
+	#else
+
+	if (point_exists_at(pos[0], pos[1] + settings.stop_dist, p_height) ||
+		point_exists_at(pos[0], pos[1] - settings.stop_dist, p_height))
+		pos[1] = prev_pos[1];
+
+	if (point_exists_at(pos[0] + settings.stop_dist, pos[1], p_height) ||
+		point_exists_at(pos[0] - settings.stop_dist, pos[1], p_height))
+		pos[0] = prev_pos[0];
+
+	for (byte i = 0; i < current_level.generic_billboard_count; i++) {
+		const Billboard b = current_level.generic_billboards[i].billboard;
+
+		if (b.dist < settings.stop_dist && i == 10) {
+
+			/*
+			if (b.beta < -two_pi && b.beta > -two_pi + settings.stop_dist)
+				printf("Hit case 1\n");
+			*/
+
+			// DEBUG(b.beta, lf);
+			// pos = prev_pos;
+			break;
+		}
+	}
+
+	#endif
+
+	*pos_ref = pos;
+}
+
 void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
 	KinematicBody* const body, const double rad_theta, const double p_height,
 	const byte forward, const byte backward, const byte lstrafe, const byte rstrafe) {
@@ -61,31 +111,7 @@ void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
 	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
 
-	vec new_pos = *pos + movement;
-
-	if (new_pos[1] < 0 || new_pos[1] > current_level.map_size.y) new_pos[1] = prev_pos[1];
-	if (new_pos[0] < 0 || new_pos[0] > current_level.map_size.x) new_pos[0] = prev_pos[0];
-
-	#ifdef NOCLIP_MODE
-
-	(void) prev_pos;
-	(void) p_height;
-
-	#else
-
-	const double stop_dist = settings.stop_dist_from_wall;
-
-	if (point_exists_at(new_pos[0], new_pos[1] + stop_dist, p_height) ||
-		point_exists_at(new_pos[0], new_pos[1] - stop_dist, p_height))
-		new_pos[1] = prev_pos[1];
-
-	if (point_exists_at(new_pos[0] + stop_dist, new_pos[1], p_height) ||
-		point_exists_at(new_pos[0] - stop_dist, new_pos[1], p_height))
-		new_pos[0] = prev_pos[0];
-
-	#endif
-
-	*pos = new_pos;
+	hit_detection(pos, prev_pos, movement, p_height);
 }
 
 void update_y_pitch(int* const y_pitch, const int mouse_y) {

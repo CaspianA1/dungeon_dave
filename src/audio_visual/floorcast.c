@@ -66,8 +66,8 @@ void fast_affine_floor(const vec pos, const double full_jump_height,
 
 			#ifdef PLANAR_MODE
 
-			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_width - 1.0
-				|| hit[1] > current_level.map_height - 1.0) continue;
+			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_size.x - 1.0
+				|| hit[1] > current_level.map_size.y - 1.0) continue;
 
 			#else
 

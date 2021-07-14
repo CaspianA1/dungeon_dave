@@ -49,7 +49,10 @@ void draw_generic_billboards(const Player player, const double y_shift) {
 			billboard = &current_level.billboards[i];
 
 		const vec delta = billboard -> pos - player.pos;
+
 		billboard -> beta = atan2(delta[1], delta[0]) - player_angle;
+		if (billboard -> beta < -two_pi) billboard -> beta += two_pi;
+
 		billboard -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 
 		GenericBillboard* const generic_billboard = &generic_billboards[i];

@@ -57,7 +57,7 @@ void load_default_settings(void) {
 	settings.fov_step = INIT_FOV_STEP;
 	settings.max_fov = INIT_MAX_FOV;
 	settings.minimap_scale = INIT_MINIMAP_SCALE;
-	settings.stop_dist_from_wall = INIT_STOP_DIST_FROM_WALL;
+	settings.stop_dist = INIT_STOP_DIST;
 
 	srand(time(NULL));
 	keys = SDL_GetKeyboardState(NULL);
