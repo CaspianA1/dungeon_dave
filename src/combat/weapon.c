@@ -22,7 +22,7 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 				enemy -> recently_attacked = 1;
 				enemy -> hp -= weapon -> power;
 				if (enemy -> hp <= 0.0) set_enemy_state(enemy, Dead, 0);
-				else play_sound(enemy -> sounds[4], 0); // attacked
+				else {play_sound(enemy -> sounds[4], 0);} // attacked
 				return;
 			}
 		}

@@ -56,7 +56,7 @@ GUI init_gui(const byte msg_r, const byte msg_g, const byte msg_b, const char* c
 	}
 
 	for (byte i = 0; i < message_count; i++) {
-		const char* text = va_arg(gui_data, const char*); // or a msg?
+		const char* const text = va_arg(gui_data, const char*); // or a msg?
 		SDL_Surface* const surface = TTF_RenderText_Solid(gui.font, text, msg_color);
 		const ivec size = {surface -> w, surface -> h};
 		SDL_Texture* const texture = SDL_CreateTextureFromSurface(screen.renderer, surface);

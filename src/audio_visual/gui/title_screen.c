@@ -93,7 +93,7 @@ InputStatus display_title_screen(void) {
 		FAIL("Unable to initialize the font library: %s", SDL_GetError());
 
 	Message start;
-	InputStatus title_screen_input;
+	InputStatus title_screen_input = Exit;
 	byte displaying_title_screen = 1, dimensions_changed = 1;
 
 	while (displaying_title_screen) {
@@ -117,7 +117,6 @@ InputStatus display_title_screen(void) {
 			switch (event.type) {
 				case SDL_WINDOWEVENT:
 					if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
-						title_screen_input = Exit;
 						displaying_title_screen = 0;
 					}
 					break;

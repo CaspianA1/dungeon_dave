@@ -33,12 +33,12 @@ byte get_palace_point_height(const byte point, const vec pos) {
 
 double palace_shader(const vec pos) {
 	static const Circle
-		first_health_kit = {5.0, 2.0, 1.0},
-		first_downward_stairs = {22.0, 24.0, 5.0},
-		torch = {7.5, 12.5, 1.0},
-		hidden_area_circle_1 = {2.5, 30.5, 1.5},
-		hidden_area_circle_2 = {2.5, 26.5, 1.5},
-		hidden_area_circle_3 = {5.0, 22.5, 3.5};
+		first_health_kit = {{5.0, 2.0}, 1.0},
+		first_downward_stairs = {{22.0, 24.0}, 5.0},
+		torch = {{7.5, 12.5}, 1.0},
+		hidden_area_circle_1 = {{2.5, 30.5}, 1.5},
+		hidden_area_circle_2 = {{2.5, 26.5}, 1.5},
+		hidden_area_circle_3 = {{5.0, 22.5}, 3.5};
 
 	static const Triangle ravine_jump_entrance = {{15.0001, 24.0}, {15.5, 31.5}, {5.0, 28.0}};
 

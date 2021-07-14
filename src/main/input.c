@@ -199,8 +199,9 @@ void update_jump(Jump* const jump, const vec pos) {
 				jump -> height = wall_point_height;
 
 				// for big jumps only
-				if (jump -> highest_height - wall_point_height >= 2.0)
+				if (jump -> highest_height - wall_point_height >= 2.0) {
 					play_sound(jump -> sound_at_land, 0);
+				}
 
 				jump -> highest_height = jump -> height + 0.001;
 			}

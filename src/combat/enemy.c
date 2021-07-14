@@ -6,7 +6,7 @@ The sounds are in the same order, but with Attacked added after Dead.
 
 void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	enemy -> state = new_state;
-	if (!silent) play_sound(enemy -> sounds[enemy -> state], 0); // stop the previous sound as well
+	if (!silent) {play_sound(enemy -> sounds[enemy -> state], 0);} // stop the previous sound as well
 
 	int new_frame_ind = 0;
 	for (byte i = 0; i < enemy -> state; i++)

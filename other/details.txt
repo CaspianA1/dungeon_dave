@@ -36,4 +36,6 @@ problems:
 	- disabling vsync makes everything choppy
 	- vecs to double[2]'s in screen.dir_buffer
 	- fix the offset problem for fast_affine_floor
-	- sometimes, psprites disappear mid-game
+	- sometimes, psprites disappear mid-game (use memory sanitizer to resolve the problem: https://github.com/google/sanitizers/wiki/MemorySanitizer) (also, each time that the minimap is enabled, the psprite becomes corrupted)
+	- bogo is completely dark with the make rule `debug_2` (he is only light with -Ofast)
+	- fix all of the memory leaks

@@ -1,4 +1,5 @@
 CC = clang
+# export LIBRARY_PATH="$LIBRARY_PATH:/usr/local/lib"
 
 MAIN = dungeon_dave
 # OUT = Dungeon\ Dave.app
@@ -6,6 +7,11 @@ OUT = $(MAIN).app
 
 OPTIMIZE = -Ofast
 DEBUG = -ggdb3
+DEBUG_2_FLAGS = -fsanitize=address
+
+ifeq ($(CC),gcc-10)
+	DEBUG_2_FLAGS += -fsanitize=leak # -fsanitize=memory
+endif
 
 CFLAGS = -std=c99 -march=native -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
 LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm
@@ -38,7 +44,7 @@ profile:
 	@echo Profiling data is in any .gcov file in bin/profiling.
 
 debug_2: # finds writes to uninitialized memory and such
-	$(CC) $(CFLAGS) $(DEBUG) -fsanitize=address -fsanitize=memory $(LDFLAGS)
+	$(CC) $(CFLAGS) $(DEBUG) $(DEBUG_2_FLAGS) $(LDFLAGS)
 	make run
 
 clean:

@@ -21,7 +21,7 @@ void print_navigator(const CorrectedRoute corrected_route, const vec floating_po
 				}
 
 				if (visited_point) color = 118;
-				else if (x == end.x == y == end.y) color = 208;
+				else if (x == end.x && y == end.y) color = 208;
 				else color = 99;
 			}
 			printf("\033[48;5;%dm \033[0m", color);

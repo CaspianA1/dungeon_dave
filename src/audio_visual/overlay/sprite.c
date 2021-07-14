@@ -1,4 +1,4 @@
-Sprite init_sprite(const char* const path) { // put in other file
+Sprite init_sprite(const char* const path) {
 	SDL_Surface* const surface = SDL_LoadBMP(path);
 	if (surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
 
@@ -30,12 +30,12 @@ PSprite init_psprite(const char* const path) {
 
 	/*
 	SDL_LockTexture(p.texture, NULL, &p.pixels, &p.pitch);
-	SDL_UpdateTexture(p.texture, NULL, surface -> pixels, surface -> pitch);
+	SDL_UpdateTexture(p.texture, NULL, surface -> pixels, p.pitch);
 	SDL_UnlockTexture(p.texture);
 	*/
 
 	SDL_LockTexture(p.texture, NULL, &p.pixels, &p.pitch);
-	memcpy(p.pixels, surface -> pixels, size.x * size.y * sizeof(Uint32));
+	memcpy(p.pixels, surface -> pixels, p.pitch * size.y);
 	SDL_UnlockTexture(p.texture);
 
 	SDL_UnlockSurface(surface);
