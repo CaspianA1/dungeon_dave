@@ -37,3 +37,72 @@ glGenerateMipmap(GL_TEXTURE_2D);
 LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm -framework OpenGL -lGL -lglew
 
 /////
+
+/*
+surface -> h / 2
+surface -> h / 2 + surface -> h / 4
+surface -> h / 2 + surface -> h / 4 + surface -> h / 8
+*/
+
+// const int y_div_change = 1 << (i - 1);
+// dest.y += surface.h / y_div_change;
+const int n = surface -> h >> (i - 1);
+DEBUG(n, d);
+dest.y += n;
+
+/*
+for (int j = 1, n = 2; j < i; j++, n *= 2) {
+	DEBUG(n, d);
+}
+*/
+printf("-\n");
+
+///// Data related to mipmapping scale:
+
+// surface -> h / 2
+// surface -> h / 2 + surface -> h / 4
+// surface -> h / 2 + surface -> h / 4 + surface -> h / 8
+
+/*
+const SDL_Rect
+	dest_1 = {0, 0, surface -> w, surface -> h}, // 512
+	dest_2 = {surface -> w, 0, surface -> w / 2, surface -> h / 2}, // 256
+	dest_3 = {surface -> w, surface -> h / 2, surface -> w / 4, surface -> h / 4}; // 128
+
+const SDL_Rect dest_4 = {surface -> w, surface -> h / 2 + surface -> h / 4, surface -> w / 8, surface -> h / 8}; // 64
+const SDL_Rect dest_5 = {surface -> w, surface -> h / 2 + surface -> h / 4 + surface -> h / 8, surface -> w / 16, surface -> h / 16}; // 32
+
+SDL_Rect parts[] = {dest_1, dest_2, dest_3, dest_4, dest_5};
+for (byte i = 0; i < 5; i++)
+	SDL_BlitScaled(surface, NULL, mipmap, parts + i);
+*/
+
+/////
+
+/*
+the incorrect version:
+dest = {.x = 0, .y = 0, .w = 512, .h = 512}
+dest = {.x = 512, .y = 0, .w = 256, .h = 256}
+dest = {.x = 512, .y = 0, .w = 128, .h = 128}
+dest = {.x = 512, .y = 256, .w = 64, .h = 64}
+dest = {.x = 512, .y = 384, .w = 32, .h = 32}
+dest = {.x = 512, .y = 448, .w = 16, .h = 16}
+dest = {.x = 512, .y = 480, .w = 8, .h = 8}
+dest = {.x = 512, .y = 496, .w = 4, .h = 4}
+dest = {.x = 512, .y = 504, .w = 2, .h = 2}
+dest = {.x = 512, .y = 508, .w = 1, .h = 1}
+
+the correct version:
+dest = {.x = 0, .y = 0, .w = 512, .h = 512}
+dest = {.x = 512, .y = 0, .w = 256, .h = 256}
+dest = {.x = 512, .y = 256, .w = 128, .h = 128}
+dest = {.x = 512, .y = 384, .w = 64, .h = 64}
+dest = {.x = 512, .y = 448, .w = 32, .h = 32}
+dest = {.x = 512, .y = 480, .w = 16, .h = 16}
+dest = {.x = 512, .y = 496, .w = 8, .h = 8}
+dest = {.x = 512, .y = 504, .w = 4, .h = 4}
+dest = {.x = 512, .y = 508, .w = 2, .h = 2}
+dest = {.x = 512, .y = 510, .w = 1, .h = 1}
+*/
+
+/////

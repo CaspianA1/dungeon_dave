@@ -131,6 +131,7 @@ void load_palace(void) {
 		"../assets/walls/pyramid_bricks_3.bmp",
 		"../assets/walls/marble.bmp",
 		"../assets/walls/hieroglyphics.bmp",
+		// "../../../Downloads/rsz_hieroglyphics.bmp",
 		"../assets/walls/window.bmp",
 		"../assets/walls/rug_1.bmp",
 		"../assets/walls/sandstone.bmp",

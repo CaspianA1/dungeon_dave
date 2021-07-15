@@ -22,8 +22,8 @@
 // #define TRACK_MEMORY
 
 // max: 1440 by 900
-#define INIT_W 1440
-#define INIT_H 900
+#define INIT_W 800
+#define INIT_H 600
 #define INIT_MAX_FPS 60
 #define INIT_RAY_COLUMN_W 1
 
@@ -64,8 +64,11 @@
 #define FAIL(...) {fprintf(stderr, __VA_ARGS__); exit(1);}
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
+
 #define DEBUG_VEC(vec) printf(#vec " = {%lf, %lf}\n", vec[0], vec[1])
 #define DEBUG_IVEC(vec) printf(#vec " = {%d, %d}\n", vec.x, vec.y)
+
+#define DEBUG_RECT(rect) printf(#rect " = {.x = %d, .y = %d, .w = %d, .h = %d}\n", rect.x, rect.y, rect.w, rect.h)
 #define DEBUG_FRECT(frect) printf(#frect " = {.x = %lf, .y = %lf, .w = %lf, .h = %lf}\n",\
 	(double) frect.x, (double) frect.y, (double) frect.w, (double) frect.h)
 

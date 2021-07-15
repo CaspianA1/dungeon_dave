@@ -10,6 +10,7 @@
 #include "settings.c"
 #include "screen.c"
 
+#include "../audio_visual/overlay/mipmap.c"
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
 #include "../audio_visual/overlay/render_overlay.c"
@@ -49,6 +50,8 @@ int main(void) {
 	Player player;
 	Weapon weapon;
 	load_all_defaults(load_palace, &player, &weapon);
+
+	// mipmap_test();
 
 	if (display_title_screen() == Exit)
 		deinit_all(player, weapon);
