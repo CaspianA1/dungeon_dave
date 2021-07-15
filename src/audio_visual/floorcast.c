@@ -62,7 +62,7 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			const BufferVal buffer_val = val_buffer[screen_x];
-			// if (buffer_val.wall_bottom >= pace_y + 1) continue;
+			if (buffer_val.wall_bottom >= pace_y + 1) continue;
 
 			const double actual_dist = straight_dist / (double) buffer_val.cos_beta;
 			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
@@ -74,10 +74,8 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 
 			#else
 
-			/*
 			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
 			if (current_level.get_point_height(wall_point, hit)) continue;
-			*/
 
 			#endif
 

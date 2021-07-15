@@ -70,3 +70,34 @@ if (keys[SDL_SCANCODE_F]) rgb = ~rgb;
 // 0xFF000000 = 0b11111111000000000000000000000000
 
 /////
+
+// SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+// SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+// SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
+
+/////
+
+const Uint32 flags = SDL_RENDERER_ACCELERATED | SDL_WINDOW_RESIZABLE; // | SDL_WINDOW_OPENGL | SDL_VIDEO_RENDER_OGL;
+SDL_CreateWindowAndRenderer(settings.screen_width, settings.screen_height,
+	flags, &screen.window, &screen.renderer);
+SDL_SetWindowTitle(screen.window, "Dungeon Dave");
+
+SDL_GLContext context = SDL_GL_CreateContext(screen.window);
+DEBUG(SDL_GetError(), s);
+
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
+SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+// glEnable(GL_MULTISAMPLE);
+
+/////

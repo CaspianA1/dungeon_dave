@@ -8,9 +8,6 @@ void init_screen(void) {
 		SDL_RENDERER_ACCELERATED | SDL_WINDOW_RESIZABLE, &screen.window, &screen.renderer);
 	SDL_SetWindowTitle(screen.window, "Dungeon Dave");
 
-	// printf("%d\n", SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH));
-	// SDL_RENDERER_PRESENTVSYNC
-
 	screen.pixel_format = SDL_AllocFormat(PIXEL_FORMAT);
 	init_SDL_buffers(settings.screen_width, settings.screen_height, 0);
 

@@ -1,0 +1,39 @@
+int a, b, c, d;
+a = SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1", SDL_HINT_OVERRIDE);
+b = SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "opengl", SDL_HINT_OVERRIDE);
+c = SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+d = SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+DEBUG(a, d);
+DEBUG(b, d);
+DEBUG(c, d);
+DEBUG(d, d);
+
+SDL_CreateWindowAndRenderer(settings.screen_width, settings.screen_height,
+	SDL_RENDERER_ACCELERATED | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL, &screen.window, &screen.renderer);
+
+/////
+
+// /*
+SDL_GLContext context = SDL_GL_CreateContext(screen.window);
+glEnable(GL_MULTISAMPLE);
+// */
+
+/////
+
+printf("Before generating mipmap\n");
+glEnable( GL_POLYGON_SMOOTH );
+/*
+SDL_GL_BindTexture(sprite.texture, NULL, NULL); 
+glGenerateMipmap(GL_TEXTURE_2D);
+*/
+
+/////
+
+#include <GL/glew.h>
+#include <SDL2/SDL_opengl.h>
+
+/////
+
+LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm -framework OpenGL -lGL -lglew
+
+/////

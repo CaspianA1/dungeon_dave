@@ -3,6 +3,7 @@ Sprite init_sprite(const char* const path) {
 	if (surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
 
 	const Sprite sprite = {SDL_CreateTextureFromSurface(screen.renderer, surface), {surface -> w, surface -> h}};
+
 	SDL_FreeSurface(surface);
 	return sprite;
 }
