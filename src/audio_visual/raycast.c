@@ -1,5 +1,5 @@
 typedef struct {
-	double* const curr_smallest_wall_y;
+	double* const last_wall_y;
 	const double player_angle, theta, dist, wall_y_shift, full_jump_height;
 	const vec begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
@@ -56,17 +56,17 @@ vec handle_ray(const DataRaycast d) {
 		raised_wall_dest.y -= wall_dest.h * i;
 
 		// completely obscured: starts under the tallest wall so far; wouldn't be seen, but for more speed
-		if ((double) raised_wall_dest.y >= *d.curr_smallest_wall_y || raised_wall_dest.y >= settings.screen_height)
+		if ((double) raised_wall_dest.y >= *d.last_wall_y || raised_wall_dest.y >= settings.screen_height)
 			continue;
 
 		// partially obscured: bottom of wall somewhere in middle of tallest
-		else if ((double) (raised_wall_dest.y + raised_wall_dest.h) > *d.curr_smallest_wall_y) {
-			raised_wall_dest.h = *d.curr_smallest_wall_y - (double) raised_wall_dest.y;
+		else if ((double) (raised_wall_dest.y + raised_wall_dest.h) > *d.last_wall_y) {
+			raised_wall_dest.h = *d.last_wall_y - (double) raised_wall_dest.y;
 			slice.h = ceil(max_sprite_h * (double) raised_wall_dest.h / wall_h);
 		}
 		else slice.h = max_sprite_h;
 
-		*d.curr_smallest_wall_y = (double) raised_wall_dest.y;
+		*d.last_wall_y = (double) raised_wall_dest.y;
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall_dest);
 	}
 	return (vec) {(double) smallest_wall_y, wall_h};
