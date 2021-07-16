@@ -17,7 +17,7 @@ features:
 	- momentary sounds for enemies
 	- linearly interpolate for actual_dist for more speed
 	- floors at different height levels (not necessarily within just one block)
-	- smooth mipmap depth switching
+	- smooth mipmap depth switching, and mipmap a texture until its width or height reaches 1
 	- mipmapping for sprites
 	- blur larger mipmap depths a bit more for each
 	- a shotgun more in the art style of Adam's whip
