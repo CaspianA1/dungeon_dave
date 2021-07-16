@@ -4,12 +4,9 @@ inlinable vec vec_tex_offset(const vec pos, const int tex_size) {
 
 #ifdef SHADING_ENABLED
 
-// this = 10270, orig = 10319 (difference of 49 lines)
-// return 0b11111111000000000000000000000000 | (Uint32) ((pixel & 0b00000000111111111111111111111111) * shade);
-Uint32 shade_ARGB_pixel(const Uint32 pixel, const double dist, const vec hit) {
-	const double shade = calculate_shade(settings.proj_dist / dist, hit);
+inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const double shade) {
 	const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
-	return 0xFF000000 | (r << 16) | (g << 8) | b; // this line + calculate_shade are big slowdowns
+	return 0xFF000000 | (r << 16) | (g << 8) | b;
 }
 
 #endif
@@ -20,7 +17,7 @@ void draw_from_hit(const vec hit, const double dist, const int screen_x, Uint32*
 	Uint32 pixel = *(read_texture_row(p.pixels, p.pitch, offset[1]) + (long) offset[0]);
 
 	#ifdef SHADING_ENABLED
-	pixel = shade_ARGB_pixel(pixel, dist, hit);
+	pixel = shade_ARGB_pixel(pixel, calculate_shade(settings.proj_dist / dist, hit));
 	#else
 	(void) dist;
 	#endif
@@ -51,14 +48,7 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 		const int pace_y = y + pace;
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 
-		/*
-		if (cmp_pixbuf_row == pixbuf_row) {
-			printf("Equal\n");
-		}
-		else {
-			printf("Not equal\n");
-		}
-		*/
+		// printf((cmp_pixbuf_row == pixbuf_row) ? "Equal" : "Not equal");
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			const BufferVal buffer_val = val_buffer[screen_x];

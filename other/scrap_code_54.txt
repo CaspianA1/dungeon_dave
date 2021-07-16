@@ -49,3 +49,112 @@ https://zdoom.org/wiki/Sky_stretching
 */
 
 /////
+
+// Uint32* const pixel = read_surface_pixel(mipmap, x, y, bpp);
+// *pixel = ~(*pixel);
+// *pixel = 13808780;
+
+// Uint32* p = (Uint32*) ((Uint8*) mipmap -> pixels + y * mipmap -> pitch + x * bpp);
+// *p = 13808780;
+
+/////
+
+const Uint32 color_masks[4] = { // extraction masks for red, green, blue, and alpha
+	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF
+	#else
+	0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000
+	#endif
+};
+
+/*
+SDL_Surface* const mipmap = SDL_CreateRGBSurface(0, surface -> w + (surface -> w >> 1),
+	surface -> h, 32, color_masks[0], color_masks[1], color_masks[2], color_masks[3]);
+*/
+
+/*
+SDL_CreateRGBSurfaceWithFormat
+    (Uint32 flags, int width, int height, int depth, Uint32 format);
+*/
+
+///// Some old optimized pixel things:
+
+// this = 10270, orig = 10319 (difference of 49 lines)
+// return 0b11111111000000000000000000000000 | (Uint32) ((pixel & 0b00000000111111111111111111111111) * shade);
+
+/*
+Uint32 shade_ARGB_pixel(const Uint32 pixel, const double dist, const vec hit) {
+	const double shade = calculate_shade(settings.proj_dist / dist, hit);
+	const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
+	return 0xFF000000 | (r << 16) | (g << 8) | b; // this line + calculate_shade are big slowdowns
+}
+*/
+
+#endif
+
+/////
+
+// const Uint32 tan = 0xFF000000 | (210 << 16) | (180 << 8) | 140;
+
+/////
+
+/*
+for (int kernel_y_offset = -2; kernel_y_offset <= 2; kernel_y_offset++) {
+	const int mipmap_y = y + kernel_y_offset;
+	if (mipmap_y < 0) continue;
+	else if (mipmap_y >= mipmap -> h) break;
+
+	const byte debug = x == 10 && y == 10 && first;
+	if (first) first = 0;
+
+	Uint32* const mipmap_row = (Uint32*) ((Uint8*) mipmap -> pixels + mipmap_y * mipmap -> pitch);
+
+	for (int kernel_x_offset = -2; kernel_x_offset <= 2; kernel_x_offset++) {
+		const int mipmap_x = x + kernel_x_offset;
+		if (mipmap_x < 0) continue;
+		else if (mipmap_x >= mipmap -> w) break;
+
+		const double kernel_val = kernel[kernel_y_offset + 2][kernel_x_offset + 2] * sigma;
+		// Uint32* const mipmap_pixel = mipmap_row + mipmap_x;
+
+		// printf("%u", *mipmap_pixel);
+		*mipmap_row = 0;
+
+		// *mipmap_pixel = shade_ARGB_pixel(*mipmap_pixel, 0.8);	
+		// sum += *mipmap_pixel;
+	}
+}
+// *center_pixel = sum;
+*/
+
+/////
+
+// *mipmap_row = 0;
+// *mipmap_row = shade_ARGB_pixel(*mipmap_row, 0.9);
+
+/*
+const double shade = 0.9999;
+Uint32* const p = mipmap_row + kernel_x_offset;
+const Uint32 shaded = (byte) (p[0] * shade) | (byte) (p[1] * shade) << 8 | (byte) (p[2] * shade) << 16;
+*p = shaded;
+*/
+
+/////
+
+/*
+static byte first = 1;
+if (first) {
+	DEBUG(kernel[0][0] * sigma, lf);
+	first = 0;
+}
+*/
+
+/////
+
+static byte first;
+if (first) {
+	DEBUG(color_sum[0], lf);
+	first = 0;
+}
+
+/////
