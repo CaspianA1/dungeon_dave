@@ -106,3 +106,12 @@ dest = {.x = 512, .y = 510, .w = 1, .h = 1}
 */
 
 /////
+
+	/*
+	if (SDL_SaveBMP(mipmap.surface, "test_mipmap.bmp") < 0)
+		printf("Error saving a bitmap: %s\n", SDL_GetError());
+	else printf("Succeeded in saving a bitmap\n");
+	*/
+}
+
+/////
