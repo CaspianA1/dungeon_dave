@@ -1,4 +1,4 @@
-const byte max_mipmap_depth = 5;
+const byte max_mipmap_depth = 4;
 const double max_mipmap_dist = 30.0;
 
 SDL_Rect get_mipmap_crop(const ivec size, const byte depth_offset) {
@@ -73,7 +73,7 @@ kernel:
 */
 
 // why does each row look the same?
-void apply_gaussian_to_pixel(const SDL_Surface* const mipmap, const int x, const int y) {
+Uint32 get_gaussian_for_pixel(const SDL_Surface* const mipmap, const int x, const int y) {
 	const double sigma = 1.0 / 273.0; // std dev of this gaussian distribution
 
 	const int kernel[5][5] = {
@@ -98,7 +98,6 @@ void apply_gaussian_to_pixel(const SDL_Surface* const mipmap, const int x, const
 	double sum[3] = {0.0, 0.0, 0.0};
 
 	const SDL_PixelFormat* const format = mipmap -> format;
-	const int bpp = format -> BytesPerPixel;
 
 	for (int kernel_y_offset = -2; kernel_y_offset <= 2; kernel_y_offset++) {
 		const int mipmap_y_offset = y + kernel_y_offset;
@@ -110,7 +109,7 @@ void apply_gaussian_to_pixel(const SDL_Surface* const mipmap, const int x, const
 			const int mipmap_x_offset = x + kernel_x_offset;
 			if (mipmap_x_offset < 0 || mipmap_x_offset >= mipmap -> w) continue;
 
-			const Uint32* const pixel = mipmap_row + kernel_x_offset * bpp;
+			const Uint32* const pixel = mipmap_row + kernel_x_offset * format -> BytesPerPixel;
 			const double kernel_val = kernel[kernel_y_offset + 2][kernel_x_offset + 2] * sigma;
 
 			byte r, g, b;
@@ -125,19 +124,24 @@ void apply_gaussian_to_pixel(const SDL_Surface* const mipmap, const int x, const
 		first = 0; // write to a new image?
 	}
 
-	*read_surface_pixel(mipmap, x, y, bpp) = SDL_MapRGB(format, sum[0], sum[1], sum[2]);
-	// *read_surface_pixel(copy, x, y, bpp) = 0xFF000000 | (210 << 16) | (180 << 8) | 140;
+	return SDL_MapRGB(format, sum[0], sum[1], sum[2]);
+	// return 0xFF000000 | (210 << 16) | (180 << 8) | 140;
 }
 
 /* https://aryamansharda.medium.com/image-filters-gaussian-blur-eb36db6781b1
 https://computergraphics.stackexchange.com/questions/39/how-is-gaussian-blur-implemented */
 void apply_gaussian_blur(SDL_Surface* mipmap, const SDL_Rect depth_crop) {
-	// SDL_Surface* copy = SDL_CreateRGBSurfaceWithFormat(0, mipmap -> w, mipmap -> h, 32, PIXEL_FORMAT);
+	SDL_Surface* const blurred_dest = SDL_CreateRGBSurfaceWithFormat(0, depth_crop.w, depth_crop.h, 32, PIXEL_FORMAT);
 
-	for (int y = depth_crop.y; y < depth_crop.y + depth_crop.h; y++) {
-		for (int x = depth_crop.x; x < depth_crop.x + depth_crop.w; x++)
-			apply_gaussian_to_pixel(mipmap, x, y);
+	const int bpp = mipmap -> format -> BytesPerPixel;
+	for (int y = depth_crop.y, dest_y = 0; y < depth_crop.y + depth_crop.h; y++, dest_y++) {
+		for (int x = depth_crop.x, dest_x = 0; x < depth_crop.x + depth_crop.w; x++, dest_x++)
+			*read_surface_pixel(blurred_dest, dest_x, dest_y, bpp) = get_gaussian_for_pixel(mipmap, x, y);
 	}
-	// *mipmap = *copy;
-	// mipmap = copy;
+
+	static byte first = 1;
+	if (first) {
+		SDL_SaveBMP(blurred_dest, "out.bmp");
+		first = 0;
+	}
 }
