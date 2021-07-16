@@ -1,5 +1,5 @@
 Sprite init_sprite(const char* const path, const byte enable_mipmap) {
-	SDL_Surface* surface = SDL_LoadBMP(enable_mipmap ? "assets/walls/house.bmp" : path);
+	SDL_Surface* surface = SDL_LoadBMP(enable_mipmap ? "assets/walls/desert_snake.bmp" : path);
 	if (surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
 
 	if (enable_mipmap) {

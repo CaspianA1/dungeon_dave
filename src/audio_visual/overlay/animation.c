@@ -77,9 +77,11 @@ void animate_weapon(Animation* const animation, const vec pos,
 
 	SDL_Texture* const texture = animation -> billboard.sprite.texture;
 
+	#ifdef SHADING_ENABLED
 	byte shade = 255 * calculate_shade(settings.screen_height, pos);
 	if (shade < 70) shade = 70;
 	SDL_SetTextureColorMod(texture, shade, shade, shade);
+	#endif
 
 	// renders to shape buffer
 	SDL_RenderCopy(screen.renderer, texture, &sheet_crop, &screen_pos);

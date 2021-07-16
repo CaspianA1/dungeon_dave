@@ -60,7 +60,7 @@ int main(void) {
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
-		if (keys[KEY_DEBUG_DISABLE_WALL]) DEBUG_VEC(player.pos);
+		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
 		const InputStatus input_status = handle_input(&player, 0);
 		if (input_status == Exit) deinit_all(player, weapon);

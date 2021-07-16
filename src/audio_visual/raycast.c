@@ -39,27 +39,9 @@ vec handle_ray(const DataRaycast d) {
 
 	const Sprite wall_sprite = current_level.walls[d.point - 1];
 
-	//////////
-	const SDL_Rect mipmap_crop = get_mipmap_crop(wall_sprite.size, 0);
+	const SDL_Rect mipmap_crop = get_mipmap_crop(wall_sprite.size, 1);
 	const int max_sprite_h = mipmap_crop.h;
-	SDL_Rect slice;
-	slice.x = get_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.size.x * 2 / 3);
-	slice.y = mipmap_crop.y;
-	slice.w = 1;
-
-	if (keys[SDL_SCANCODE_R]) {
-		DEBUG_RECT(slice);
-		/* example for depth 0: {.x = 74, .y = 0, .w = 1, .h = -2140310760}
-		{.x = 99, .y = 0, .w = 1, .h = -2140310760}
-		houses = 256x256
-		*/
-	}
-
-	// const int max_sprite_h = wall_sprite.size.y;
-	// SDL_Rect slice = {get_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.size.x), 0, .w = 1};
-	// SDL_Rect slice = {5, 5, 2, 2};
-	// DEBUG_RECT(slice);
-	//////////
+	SDL_Rect slice = {get_wall_tex_offset(d.side, d.hit, d.dir, mipmap_crop.w), 0, .w = 1};
 
 	#ifdef SHADING_ENABLED
 	const byte shade = 255 * calculate_shade((double) wall_dest.h, d.hit);
@@ -93,7 +75,7 @@ vec handle_ray(const DataRaycast d) {
 		else slice.h = max_sprite_h;
 
 		*d.curr_smallest_wall_y = (double) raised_wall.y;
-		if (!keys[SDL_SCANCODE_T]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
+		if (!keys[KEY_DEBUG_DISABLE_WALL]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
 	}
 	return (vec) {(double) smallest_wall_y, (double) wall_dest.h};
 }
