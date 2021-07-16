@@ -36,7 +36,7 @@ inlinable void fill_level_data(byte* const md, const byte point,
 
 inlinable void set_level_skybox(Level* const level, const char* const path) {
 	level -> skybox.enabled = 1;
-	const Sprite sprite = init_sprite(path);
+	const Sprite sprite = init_sprite(path, 0);
 	level -> skybox.sprite = sprite;
 }
 
@@ -49,7 +49,7 @@ void set_level_walls(Level* const level, const unsigned wall_count, ...) {
 	va_start(wall_data, wall_count);
 
 	for (byte i = 0; i < wall_count; i++)
-		level -> walls[i] = init_sprite(va_arg(wall_data, const char*));
+		level -> walls[i] = init_sprite(va_arg(wall_data, const char*), 1);
 
 	va_end(wall_data);
 }
@@ -64,7 +64,7 @@ void set_level_billboards(Level* const level, const unsigned billboard_count, ..
 
 	for (byte i = 0; i < billboard_count; i++) {
 		Billboard* const billboard = &level -> billboards[i];
-		billboard -> sprite = init_sprite(va_arg(billboard_data, const char*));
+		billboard -> sprite = init_sprite(va_arg(billboard_data, const char*), 1);
 		billboard -> pos = (vec) {
 			va_arg(billboard_data, double),
 			va_arg(billboard_data, double)
@@ -92,7 +92,7 @@ void set_level_animations(Level* const level, const unsigned animation_count, ..
 			fps = va_arg(animation_data, int);
 
 		const Animation new_animation = init_animation(
-			path, frames_per_row, frames_per_col, frame_count, fps);
+			path, frames_per_row, frames_per_col, frame_count, fps, 1);
 
 		Animation* const dest = &level -> animations[i];
 		memcpy(dest, &new_animation, sizeof(Animation));
@@ -135,8 +135,8 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 		const int
 			frames_per_row = va_arg(enemy_data, int), frames_per_col = va_arg(enemy_data, int),
 			frame_count = va_arg(enemy_data, int), fps = va_arg(enemy_data, int);
-		Animation animations = init_animation(animation_path,
-			frames_per_row, frames_per_col, frame_count, fps);
+
+		Animation animations = init_animation(animation_path, frames_per_row, frames_per_col, frame_count, fps, 1);
 		memcpy(&enemy.animations, &animations, sizeof(Animation));
 
 		Billboard* const billboard = &enemy.animations.billboard;

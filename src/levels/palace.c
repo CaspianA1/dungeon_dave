@@ -108,7 +108,7 @@ void load_palace(void) {
 	Level palace = init_level(map_width, map_height, 2.5, 28.5, 2.0);
 	palace.max_point_height = 8;
 	palace.out_of_bounds_point = 1;
-	palace.background_sound = init_sound("../assets/audio/themes/sultan.wav", 0);
+	palace.background_sound = init_sound("assets/audio/themes/sultan.wav", 0);
 	palace.get_point_height = get_palace_point_height;
 	palace.shader = palace_shader;
 
@@ -124,30 +124,30 @@ void load_palace(void) {
 	fill_level_data(palace.floor_data, 2, 1, 9, 19, 26, map_height); // part 2 of the aforementioned
 	fill_level_data(palace.floor_data, 2, 1, 4, 25, 39, map_height); // part 3 of the aforementioned
 
-	// "../assets/skyboxes/desert.bmp"
-	set_level_skybox(&palace, "../assets/skyboxes/palace_city_skybox.bmp");
+	// "assets/skyboxes/desert.bmp"
+	set_level_skybox(&palace, "assets/skyboxes/palace_city_skybox.bmp");
 
 	set_level_walls(&palace, wall_count,
-		"../assets/walls/pyramid_bricks_3.bmp",
-		"../assets/walls/marble.bmp",
-		"../assets/walls/hieroglyphics.bmp",
+		"assets/walls/pyramid_bricks_3.bmp",
+		"assets/walls/marble.bmp",
+		"assets/walls/hieroglyphics.bmp",
 		// "../../../Downloads/rsz_hieroglyphics.bmp",
-		"../assets/walls/window.bmp",
-		"../assets/walls/rug_1.bmp",
-		"../assets/walls/sandstone.bmp",
-		"../assets/walls/cobblestone_3.bmp",
-		"../assets/walls/horses.bmp",
-		"../assets/walls/mesa.bmp");
+		"assets/walls/window.bmp",
+		"assets/walls/rug_1.bmp",
+		"assets/walls/sandstone.bmp",
+		"assets/walls/cobblestone_3.bmp",
+		"assets/walls/horses.bmp",
+		"assets/walls/mesa.bmp");
 
 	set_level_billboards(&palace, billboard_count,
-		"../assets/objects/health_kit.bmp", 4.5, 22.5, 0.0, // 11.5, 28.0
-		"../assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0,
-		"../assets/objects/golden_dome.bmp", 13.0, 28.0, 1.0);
+		"assets/objects/health_kit.bmp", 4.5, 22.5, 0.0, // 11.5, 28.0
+		"assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0,
+		"assets/objects/golden_dome.bmp", 13.0, 28.0, 1.0);
 
 	set_level_animations(&palace, animation_count,
-		// "../assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,
-		"../assets/spritesheets/flying_carpet.bmp", 5, 10, 46, 25, 5.0, 2.0, 0.0,
-		"../assets/spritesheets/torch_2.bmp", 2, 3, 5, 12, 7.5, 12.5, 0.0);
+		// "assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,
+		"assets/spritesheets/flying_carpet.bmp", 5, 10, 46, 25, 5.0, 2.0, 0.0,
+		"assets/spritesheets/torch_2.bmp", 2, 3, 5, 12, 7.5, 12.5, 0.0);
 
 	memcpy(&current_level, &palace, sizeof(Level));
 
@@ -158,14 +158,14 @@ void load_palace(void) {
 		20.0, // hp
 		5, 2, 3, 13, // animation_seg_lengths
 
-		"../assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
+		"assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
 		6.5, 21.5, 0.0, // billboard data (3.0, 7.5 before)
 
-		"../assets/audio/enemy_sound_test/idle.wav", // sound data
-		"../assets/audio/enemy_sound_test/chase.wav",
-		"../assets/audio/enemy_sound_test/attack.wav",
-		"../assets/audio/enemy_sound_test/death.wav",
-		"../assets/audio/enemy_sound_test/attacked.wav",
+		"assets/audio/enemy_sound_test/idle.wav", // sound data
+		"assets/audio/enemy_sound_test/chase.wav",
+		"assets/audio/enemy_sound_test/attack.wav",
+		"assets/audio/enemy_sound_test/death.wav",
+		"assets/audio/enemy_sound_test/attacked.wav",
 
 		0.025 /* navigator speed */ );
 

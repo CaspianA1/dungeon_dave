@@ -61,7 +61,7 @@ void load_level_1(void) {
 
 	level_1.max_point_height = 5;
 	level_1.out_of_bounds_point = 7;
-	level_1.background_sound = init_sound("../assets/audio/themes/ambient_wind.wav", 0);
+	level_1.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);
 	level_1.get_point_height = get_level_1_point_height;
 	level_1.shader = level_1_shader;
 
@@ -87,33 +87,33 @@ void load_level_1(void) {
 	set_map_point(level_1.floor_data, 10, 20, 1, map_width);
 	set_map_point(level_1.floor_data, 10, 20, 5, map_width);
 
-	set_level_skybox(&level_1, "../assets/skyboxes/mossy_mountains_2.bmp");
+	set_level_skybox(&level_1, "assets/skyboxes/mossy_mountains_2.bmp");
 
 	set_level_walls(&level_1, wall_count,
-		"../assets/walls/cobblestone_2.bmp",
-		"../assets/walls/cobblestone_3.bmp",
-		"../assets/walls/stone_2.bmp",
-		"../assets/walls/pyramid_bricks_3.bmp",
-		"../assets/walls/hieroglyphics.bmp",
-		"../assets/walls/desert_snake.bmp",
-		"../assets/wolf/colorstone.bmp",
-		"../assets/walls/water.bmp",
-		"../assets/walls/dirt.bmp",
-		"../assets/walls/grass.bmp");
+		"assets/walls/cobblestone_2.bmp",
+		"assets/walls/cobblestone_3.bmp",
+		"assets/walls/stone_2.bmp",
+		"assets/walls/pyramid_bricks_3.bmp",
+		"assets/walls/hieroglyphics.bmp",
+		"assets/walls/desert_snake.bmp",
+		"assets/wolf/colorstone.bmp",
+		"assets/walls/water.bmp",
+		"assets/walls/dirt.bmp",
+		"assets/walls/grass.bmp");
 
 	set_level_billboards(&level_1, billboard_count,
-		"../assets/objects/tomato.bmp", 6.0, 2.0, 1.0,
-		"../assets/objects/demon_head.bmp", 23.5, 1.5, 0.0,
-		"../assets/objects/jungle.bmp", 11.5, 11.5, 0.0,
-		"../assets/objects/health_kit.bmp", 12.0, 7.5, 0.0,
-		"../assets/objects/idol.bmp", 18.5, 3.5, 0.0,
-		"../assets/objects/axe.bmp", 11.0, 7.5, 0.0,
-		"../assets/wolf/lamp.bmp", 18.5, 11.5, 0.0);
+		"assets/objects/tomato.bmp", 6.0, 2.0, 1.0,
+		"assets/objects/demon_head.bmp", 23.5, 1.5, 0.0,
+		"assets/objects/jungle.bmp", 11.5, 11.5, 0.0,
+		"assets/objects/health_kit.bmp", 12.0, 7.5, 0.0,
+		"assets/objects/idol.bmp", 18.5, 3.5, 0.0,
+		"assets/objects/axe.bmp", 11.0, 7.5, 0.0,
+		"assets/wolf/lamp.bmp", 18.5, 11.5, 0.0);
 
 	set_level_animations(&level_1, animation_count,
-		"../assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 4.5, 11.5, 0.0,
-		"../assets/spritesheets/gold_key.bmp", 3, 4, 12, 6, 1.5, 1.4, 0.0,
-		"../assets/spritesheets/torch.bmp", 3, 3, 9, 9, 19.0, 9.5, 0.0);
+		"assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 4.5, 11.5, 0.0,
+		"assets/spritesheets/gold_key.bmp", 3, 4, 12, 6, 1.5, 1.4, 0.0,
+		"assets/spritesheets/torch.bmp", 3, 3, 9, 9, 19.0, 9.5, 0.0);
 
 	memcpy(&current_level, &level_1, sizeof(Level));
 
@@ -123,14 +123,14 @@ void load_level_1(void) {
 		20.0, // hp
 		5, 2, 3, 13, // animation_seg_lengths
 
-		"../assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
+		"assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
 		8.5, 7.5, 0.0, // billboard data
 
-		"../assets/audio/enemy_sound_test/idle.wav", // sound data
-		"../assets/audio/enemy_sound_test/chase.wav",
-		"../assets/audio/enemy_sound_test/attack.wav",
-		"../assets/audio/enemy_sound_test/death.wav",
-		"../assets/audio/enemy_sound_test/attacked.wav",
+		"assets/audio/enemy_sound_test/idle.wav", // sound data
+		"assets/audio/enemy_sound_test/chase.wav",
+		"assets/audio/enemy_sound_test/attack.wav",
+		"assets/audio/enemy_sound_test/death.wav",
+		"assets/audio/enemy_sound_test/attacked.wav",
 
 		0.025 /* navigator speed */ );
 

@@ -1,7 +1,7 @@
 Animation init_animation(const char* const path, const int frames_per_row,
-	const int frames_per_col, const int frame_count, const int fps) {
+	const int frames_per_col, const int frame_count, const int fps, const byte enable_mipmap) {
 
-	const Billboard billboard = {init_sprite(path), {0, 0}, 0, 0, 0};
+	const Billboard billboard = {init_sprite(path, enable_mipmap), {0, 0}, 0, 0, 0};
 	const ivec size = billboard.sprite.size;
 
 	return (Animation) {

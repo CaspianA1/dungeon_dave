@@ -1,6 +1,8 @@
-Sprite init_sprite(const char* const path) {
+Sprite init_sprite(const char* const path, const byte enable_mipmap) {
 	SDL_Surface* const surface = SDL_LoadBMP(path);
 	if (surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
+
+	// printf("For path = %s, enable_mipmap = %d\n", path, enable_mipmap);
 
 	const Sprite sprite = {SDL_CreateTextureFromSurface(screen.renderer, surface), {surface -> w, surface -> h}};
 

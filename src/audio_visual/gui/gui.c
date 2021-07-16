@@ -1,4 +1,4 @@
-const char* STD_GUI_FONT_PATH = "../assets/dnd.ttf";
+const char* STD_GUI_FONT_PATH = "assets/dnd.ttf";
 
 typedef struct {
 	const char* text;
@@ -38,7 +38,7 @@ GUI init_gui(const byte msg_r, const byte msg_g, const byte msg_b, const char* c
 	};
 
 	if (has_sprite_background)
-		gui.background.sprite = init_sprite(va_arg(gui_data, const char*));
+		gui.background.sprite = init_sprite(va_arg(gui_data, const char*), 0);
 	else {
 		gui.background.whole_colors.center = (SDL_Color) {
 			va_arg(gui_data, unsigned),

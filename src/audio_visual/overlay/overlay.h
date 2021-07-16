@@ -29,7 +29,7 @@ typedef struct {
 	double last_frame_time;
 } Animation;
 
-Animation init_animation(const char* const, const int, const int, const int, const int);
+Animation init_animation(const char* const, const int, const int, const int, const int, const byte);
 
 typedef struct {
 	Billboard billboard;

@@ -67,6 +67,6 @@ void make_mipmap(SDL_Surface* const surface) {
 }
 
 void mipmap_test(void) {
-	SDL_Surface* const surface = SDL_LoadBMP("../assets/walls/dune.bmp");
+	SDL_Surface* const surface = SDL_LoadBMP("assets/walls/dune.bmp");
 	make_mipmap(surface);
 }

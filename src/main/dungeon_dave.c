@@ -49,7 +49,7 @@ non-clipping pathfinding
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_red_room, &player, &weapon);
 
 	// mipmap_test();
 
@@ -58,7 +58,7 @@ int main(void) {
 
 	play_sound(current_level.background_sound, 1);
 
-	p = init_psprite("../assets/walls/dune.bmp");
+	p = init_psprite("assets/walls/dune.bmp");
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();

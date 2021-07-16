@@ -3,7 +3,7 @@ Message init_message(const char* const text, const byte r, const byte g, const b
 	const int avg_dimensions = (settings.screen_width + settings.screen_height) / 2;
 
 	Message message = {
-		TTF_OpenFont("../assets/dnd.ttf", avg_dimensions / 10.0),
+		TTF_OpenFont("assets/dnd.ttf", avg_dimensions / 10.0),
 		.r = r, .g = g, .b = b, .has_background = has_background
 	};
 
@@ -55,7 +55,7 @@ InputStatus display_logo(void) {
 	while (displaying_logo) {
 		const Uint32 before = SDL_GetTicks();
 
-		if (dimensions_changed) logo = init_sprite("../assets/logo.bmp");
+		if (dimensions_changed) logo = init_sprite("assets/logo.bmp", 0);
 
 		// SDL_PollEvent may loop more even after pressing exit, so this stops that
 		byte checking_for_input = 1;
@@ -85,7 +85,7 @@ InputStatus display_logo(void) {
 }
 
 InputStatus display_title_screen(void) {
-	const Sound title_track = init_sound("../assets/audio/themes/title.wav", 0);
+	const Sound title_track = init_sound("assets/audio/themes/title.wav", 0);
 	play_sound(title_track, 1);
 	if (display_logo() == Exit) return Exit;
 

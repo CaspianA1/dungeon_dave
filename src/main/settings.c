@@ -110,8 +110,8 @@ Player load_player(const double jump_up_v0,
 		.jump = {.jumping = 0, .up_v0 = jump_up_v0, .v0 = 0.0,
 			.height = init_height, .start_height = init_height,
 			.highest_height = init_height, .time_at_jump = 0.0,
-			.sound_at_jump = init_sound("../assets/audio/sound_effects/jump_up.wav", 1),
-			.sound_at_land = init_sound("../assets/audio/sound_effects/jump_land.wav", 1)},
+			.sound_at_jump = init_sound("assets/audio/sound_effects/jump_up.wav", 1),
+			.sound_at_land = init_sound("assets/audio/sound_effects/jump_land.wav", 1)},
 
 		.tilt = {.val = 0.0, .step = tilt_step, .max = tilt_max},
 
@@ -137,23 +137,23 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 	const Weapon first_weapon = {
 		.in_use = 0, .short_range = 1, .paces_sideways = 0, .power = 2.0, .dist_for_hit = 0.6,
-		.sound = init_sound("../assets/audio/sound_effects/whip_crack.wav", 1),
-		.animation = init_animation("../assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60)
+		.sound = init_sound("assets/audio/sound_effects/whip_crack.wav", 1),
+		.animation = init_animation("assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60, 0)
 	};
 
 	/*
 	const Weapon first_weapon = {
 		.in_use = 0, .short_range = 0, .paces_sideways = 1, .power = 4.0, .dist_for_hit = 0.7, 
-		.sound = init_sound("../assets/audio/sound_effects/shotgun.wav", 1),
-		.animation = init_animation("../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30)
+		.sound = init_sound("assets/audio/sound_effects/shotgun.wav", 1),
+		.animation = init_animation("assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30, 0)
 	};
 	*/
 
 	/*
 	const Weapon first_weapon = {
 		.in_use = 0, .short_range = 1, .paces_sideways = 1, .power = 4.0, .dist_for_hit = 0.6, 
-		.sound = init_sound("../assets/audio/enemy_sound_test/attack.wav", 1),
-		.animation = init_animation("../assets/spritesheets/weapons/golden_dagger.bmp", 2, 5, 9, 22)
+		.sound = init_sound("assets/audio/enemy_sound_test/attack.wav", 1),
+		.animation = init_animation("assets/spritesheets/weapons/golden_dagger.bmp", 2, 5, 9, 22, 0)
 	};
 	*/
 
