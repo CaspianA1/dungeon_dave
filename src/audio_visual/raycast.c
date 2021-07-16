@@ -20,13 +20,10 @@ inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir,
 	}
 }
 
-// float* wall_y_buffer;
-
 vec handle_ray(const DataRaycast d) {
 	const double cos_beta = cos(d.player_angle - d.theta);
 	const double corrected_dist = d.dist * cos_beta;
 	const double wall_h = settings.proj_dist / corrected_dist;
-	const byte point_height = current_level.get_point_height(d.point, d.hit);
 
 	const SDL_FRect wall_dest = {
 		d.screen_x,
@@ -35,7 +32,7 @@ vec handle_ray(const DataRaycast d) {
 		wall_h
 	};
 
-	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, wall_dest.y + wall_dest.h, d.dir);
+	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, (double) wall_dest.y + wall_h, d.dir);
 
 	const Sprite wall_sprite = current_level.walls[d.point - 1];
 	const SDL_Rect mipmap_crop = get_mipmap_crop_from_dist(wall_sprite.size, corrected_dist);
@@ -46,21 +43,13 @@ vec handle_ray(const DataRaycast d) {
 		.y = mipmap_crop.y, .w = 1
 	};
 
+	const byte point_height = current_level.get_point_height(d.point, d.hit);
+	const double smallest_wall_y = (double) wall_dest.y - (wall_h * (point_height - 1));
+
 	#ifdef SHADING_ENABLED
-	const byte shade = 255 * calculate_shade((double) wall_dest.h, d.hit);
+	const byte shade = 255 * calculate_shade(wall_h, d.hit);
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 	#endif
-
-	/*
-	static byte first = 1;
-	if (first) {
-		wall_y_buffer = calloc(settings.screen_width, sizeof(float));
-		first = 0;
-	}
-	*/
-
-	const double smallest_wall_y = (double) (wall_dest.y - (wall_dest.h * (point_height - 1)));
-	// wall_y_buffer[d.screen_x] = smallest_wall_y;
 
 	for (byte i = 0; i < point_height; i++) {
 		SDL_FRect raised_wall_dest = wall_dest;
@@ -80,7 +69,7 @@ vec handle_ray(const DataRaycast d) {
 		*d.curr_smallest_wall_y = (double) raised_wall_dest.y;
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall_dest);
 	}
-	return (vec) {(double) smallest_wall_y, (double) wall_dest.h};
+	return (vec) {(double) smallest_wall_y, wall_h};
 }
 
 void raycast(const Player player, const double wall_y_shift, const double full_jump_height) {
@@ -90,7 +79,8 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
 		const vec dir = {cos(theta), sin(theta)};
 
-		double curr_smallest_wall_y = DBL_MAX, last_height_change_y = settings.screen_height;
+		// curr_smallest_wall_y
+		double last_wall_y = DBL_MAX, last_height_change_y = settings.screen_height;
 		byte at_first_hit = 1, curr_point_height = player.jump.height;
 		DataDDA ray = init_dda(player.pos, dir);
 
@@ -103,7 +93,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 				double height_change_y, height_change_h;
 				if (point) {
 					const vec wall_y_components = handle_ray((DataRaycast) {
-						&curr_smallest_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height,
+						&last_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height,
 						player.pos, hit, dir, point, ray.side, at_first_hit, screen_x});
 
 					height_change_y = wall_y_components[0], height_change_h = wall_y_components[1];

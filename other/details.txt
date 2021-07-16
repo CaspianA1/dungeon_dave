@@ -21,6 +21,7 @@ features:
 	- a shotgun more in the art style of Adam's whip
 	- Attacked state for enemy
 	- a metro level
+	- draw sprite sections in chunks
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

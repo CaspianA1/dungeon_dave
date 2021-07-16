@@ -83,18 +83,6 @@ void draw_generic_billboards(const Player player, const double y_shift) {
 
 		const double corrected_dist = billboard.dist * cos_billboard_beta;
 
-		/* an experiment with not causing sprites to fly up
-		when the projection distance increases
-
-		static byte foo = 1;
-		static double val;
-
-		if (foo) {
-			val = settings.proj_dist;
-			foo = 0;
-		}
-		*/
-
 		const double
 			center_offset = tan(billboard.beta) * settings.proj_dist,
 			size = settings.proj_dist / corrected_dist;
@@ -110,8 +98,7 @@ void draw_generic_billboards(const Player player, const double y_shift) {
 		if (end_x < 0.0) continue;
 		else if (end_x > settings.screen_width) end_x = settings.screen_width;
 
-		/////
-
+		//////////
 		Animation* possible_animation = NULL;
 		SDL_Rect src_crop;
 		int src_begin_x, width;
@@ -144,8 +131,7 @@ void draw_generic_billboards(const Player player, const double y_shift) {
 			src_crop = (SDL_Rect) {.y = 0, .w = 1, .h = src_size.y};
 			src_begin_x = 0;
 		}
-
-		/////
+		//////////
 
 		SDL_FRect screen_pos = {
 			0.0, y_shift - half_size
@@ -161,19 +147,6 @@ void draw_generic_billboards(const Player player, const double y_shift) {
 		for (int screen_row = start_x; screen_row < end_x; screen_row += settings.ray_column_width) {
 			if (screen_row < 0 || (double) val_buffer[screen_row].depth < corrected_dist) continue;
 
-			/*
-			if (screen_row < 0) continue;
-
-			if (screen.z_buffer[screen_row] < corrected_dist) { // if wall obscures sprite
-				extern float* wall_y_buffer;
-				const float dest_diff = screen_pos.y - wall_y_buffer[screen_row];
-				if (dest_diff <= 0.0f) continue;
-				const float dest_diff_ratio = dest_diff / screen_pos.h;
-				const float src_diff = dest_diff_ratio * src_crop.h;
-				if (billboard.pos[0] == 18.5 && billboard.pos[1] == 3.5) DEBUG((double) src_diff, lf);
-			}
-			*/
-
 			screen_pos.x = screen_row;
 			const int src_offset = ((double) (screen_row - (int) start_x) / size) * width;
 			src_crop.x = src_offset + src_begin_x;
@@ -182,12 +155,6 @@ void draw_generic_billboards(const Player player, const double y_shift) {
 		}
 	}
 }
-
-/*
-https://zdoom.org/wiki/Free_look
-https://zdoom.org/wiki/Sky
-https://zdoom.org/wiki/Sky_stretching
-*/
 
 void draw_skybox(const double angle, const double y_shift) {
 	const Skybox skybox = current_level.skybox;
