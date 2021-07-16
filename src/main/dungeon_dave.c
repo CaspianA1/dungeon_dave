@@ -49,9 +49,7 @@ non-clipping pathfinding
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
-
-	mipmap_test();
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit)
 		deinit_all(player, weapon);
@@ -62,7 +60,7 @@ int main(void) {
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
-		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
+		if (keys[KEY_DEBUG_DISABLE_WALL]) DEBUG_VEC(player.pos);
 
 		const InputStatus input_status = handle_input(&player, 0);
 		if (input_status == Exit) deinit_all(player, weapon);

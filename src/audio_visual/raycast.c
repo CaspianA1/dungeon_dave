@@ -28,22 +28,43 @@ vec handle_ray(const DataRaycast d) {
 	const double wall_h = settings.proj_dist / corrected_dist;
 	const byte point_height = current_level.get_point_height(d.point, d.hit);
 
-	const SDL_FRect wall = {
+	const SDL_FRect wall_dest = {
 		d.screen_x,
 		d.wall_y_shift - wall_h / 2.0 + d.full_jump_height / corrected_dist,
 		settings.ray_column_width,
 		wall_h
 	};
 
-	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, wall.y + wall.h, d.dir);
+	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, wall_dest.y + wall_dest.h, d.dir);
 
 	const Sprite wall_sprite = current_level.walls[d.point - 1];
-	const int max_sprite_h = wall_sprite.size.y;
 
-	const byte shade = 255 * calculate_shade((double) wall.h, d.hit);
+	//////////
+	const SDL_Rect mipmap_crop = get_mipmap_crop(wall_sprite.size, 0);
+	const int max_sprite_h = mipmap_crop.h;
+	SDL_Rect slice;
+	slice.x = get_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.size.x * 2 / 3);
+	slice.y = mipmap_crop.y;
+	slice.w = 1;
+
+	if (keys[SDL_SCANCODE_R]) {
+		DEBUG_RECT(slice);
+		/* example for depth 0: {.x = 74, .y = 0, .w = 1, .h = -2140310760}
+		{.x = 99, .y = 0, .w = 1, .h = -2140310760}
+		houses = 256x256
+		*/
+	}
+
+	// const int max_sprite_h = wall_sprite.size.y;
+	// SDL_Rect slice = {get_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.size.x), 0, .w = 1};
+	// SDL_Rect slice = {5, 5, 2, 2};
+	// DEBUG_RECT(slice);
+	//////////
+
+	#ifdef SHADING_ENABLED
+	const byte shade = 255 * calculate_shade((double) wall_dest.h, d.hit);
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
-
-	SDL_Rect slice = {get_wall_tex_offset(d.side, d.hit, d.dir, wall_sprite.size.x), 0, .w = 1};
+	#endif
 
 	/*
 	static byte first = 1;
@@ -53,12 +74,12 @@ vec handle_ray(const DataRaycast d) {
 	}
 	*/
 
-	const double smallest_wall_y = (double) (wall.y - (wall.h * (point_height - 1)));
+	const double smallest_wall_y = (double) (wall_dest.y - (wall_dest.h * (point_height - 1)));
 	// wall_y_buffer[d.screen_x] = smallest_wall_y;
 
 	for (byte i = 0; i < point_height; i++) {
-		SDL_FRect raised_wall = wall;
-		raised_wall.y -= wall.h * i;
+		SDL_FRect raised_wall = wall_dest;
+		raised_wall.y -= wall_dest.h * i;
 
 		// completely obscured: starts under the tallest wall so far; wouldn't be seen, but for more speed
 		if ((double) raised_wall.y >= *d.curr_smallest_wall_y || raised_wall.y >= settings.screen_height)
@@ -74,7 +95,7 @@ vec handle_ray(const DataRaycast d) {
 		*d.curr_smallest_wall_y = (double) raised_wall.y;
 		if (!keys[SDL_SCANCODE_T]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
 	}
-	return (vec) {(double) smallest_wall_y, (double) wall.h};
+	return (vec) {(double) smallest_wall_y, (double) wall_dest.h};
 }
 
 void raycast(const Player player, const double wall_y_shift, const double full_jump_height) {

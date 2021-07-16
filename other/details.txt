@@ -20,6 +20,7 @@ features:
 	- mipmapping
 	- a shotgun more in the art style of Adam's whip
 	- Attacked state for enemy
+	- a metro level
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
