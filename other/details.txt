@@ -17,7 +17,7 @@ features:
 	- momentary sounds for enemies
 	- linearly interpolate for actual_dist for more speed
 	- floors at different height levels (not necessarily within just one block)
-	- mipmapping
+	- smooth mipmap depth switching
 	- a shotgun more in the art style of Adam's whip
 	- Attacked state for enemy
 	- a metro level

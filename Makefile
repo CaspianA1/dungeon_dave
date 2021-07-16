@@ -17,12 +17,12 @@ CFLAGS = -std=c99 -march=native -Wall -Wextra -Wdouble-promotion -Wpedantic -Wfo
 LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm
 LDFLAGS = $(LIBS) -o bin/$(OUT) src/main/$(MAIN).c
 
-all: build_optimized run
+all: build run
 
 run:
 	./bin/$(OUT)
 
-build_optimized:
+build:
 	$(CC) $(CFLAGS) $(OPTIMIZE) $(LDFLAGS)
 
 build_debug:

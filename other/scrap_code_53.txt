@@ -133,4 +133,37 @@ for 1, w becomes chopped in half (one scale too many), and h does the same thing
 // DEBUG_RECT(slice);
 //////////
 
+///// The chunky possible substitute for the mipmap creator:
+
+/*
+for (byte i = 0; i < mipmap_depth; i++) {
+	SDL_Rect dest = get_mipmap_crop((ivec) {mipmap -> w, mipmap -> h}, i);
+	SDL_BlitScaled(surface, NULL, mipmap, &dest);
+}
+*/
+
+///// The mipmap saver:
+
+/*
+if (SDL_SaveBMP(mipmap, "test_mipmap.bmp") < 0)
+	printf("Error saving a bitmap: %s\n", SDL_GetError());
+else printf("Succeeded in saving a bitmap\n");
+*/
+
+/////
+
+/*
+DEBUG(mipmap_crop.y, d);
+const byte this_depth = corrected_dist / max_mipmap_dist * mipmap_depth;
+DEBUG(this_depth, d);
+printf("-\n");
+*/
+
+/////
+
+void mipmap_test(void) {
+	SDL_Surface* const surface = SDL_LoadBMP("assets/walls/cross_blue.bmp");
+	load_mipmap(surface);
+}
+
 /////

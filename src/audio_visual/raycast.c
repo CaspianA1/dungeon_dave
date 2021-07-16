@@ -38,10 +38,13 @@ vec handle_ray(const DataRaycast d) {
 	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, wall_dest.y + wall_dest.h, d.dir);
 
 	const Sprite wall_sprite = current_level.walls[d.point - 1];
-
-	const SDL_Rect mipmap_crop = get_mipmap_crop(wall_sprite.size, 1);
+	const SDL_Rect mipmap_crop = get_mipmap_crop_from_dist(wall_sprite.size, corrected_dist);
 	const int max_sprite_h = mipmap_crop.h;
-	SDL_Rect slice = {get_wall_tex_offset(d.side, d.hit, d.dir, mipmap_crop.w), 0, .w = 1};
+
+	SDL_Rect slice = {
+		.x = get_wall_tex_offset(d.side, d.hit, d.dir, mipmap_crop.w) + mipmap_crop.x,
+		.y = mipmap_crop.y, .w = 1
+	};
 
 	#ifdef SHADING_ENABLED
 	const byte shade = 255 * calculate_shade((double) wall_dest.h, d.hit);
@@ -60,22 +63,22 @@ vec handle_ray(const DataRaycast d) {
 	// wall_y_buffer[d.screen_x] = smallest_wall_y;
 
 	for (byte i = 0; i < point_height; i++) {
-		SDL_FRect raised_wall = wall_dest;
-		raised_wall.y -= wall_dest.h * i;
+		SDL_FRect raised_wall_dest = wall_dest;
+		raised_wall_dest.y -= wall_dest.h * i;
 
 		// completely obscured: starts under the tallest wall so far; wouldn't be seen, but for more speed
-		if ((double) raised_wall.y >= *d.curr_smallest_wall_y || raised_wall.y >= settings.screen_height)
+		if ((double) raised_wall_dest.y >= *d.curr_smallest_wall_y || raised_wall_dest.y >= settings.screen_height)
 			continue;
 
 		// partially obscured: bottom of wall somewhere in middle of tallest
-		else if ((double) (raised_wall.y + raised_wall.h) > *d.curr_smallest_wall_y) {
-			raised_wall.h = *d.curr_smallest_wall_y - (double) raised_wall.y;
-			slice.h = ceil(max_sprite_h * (double) raised_wall.h / wall_h);
+		else if ((double) (raised_wall_dest.y + raised_wall_dest.h) > *d.curr_smallest_wall_y) {
+			raised_wall_dest.h = *d.curr_smallest_wall_y - (double) raised_wall_dest.y;
+			slice.h = ceil(max_sprite_h * (double) raised_wall_dest.h / wall_h);
 		}
 		else slice.h = max_sprite_h;
 
-		*d.curr_smallest_wall_y = (double) raised_wall.y;
-		if (!keys[KEY_DEBUG_DISABLE_WALL]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall);
+		*d.curr_smallest_wall_y = (double) raised_wall_dest.y;
+		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall_dest);
 	}
 	return (vec) {(double) smallest_wall_y, (double) wall_dest.h};
 }
