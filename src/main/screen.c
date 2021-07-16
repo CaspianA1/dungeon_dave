@@ -3,6 +3,7 @@ void init_screen(void) {
 		FAIL("Unable to launch Dungeon Dave: %s\n", SDL_GetError());
 
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1", SDL_HINT_OVERRIDE);
+	// SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);
 
 	SDL_CreateWindowAndRenderer(settings.screen_width, settings.screen_height,
 		SDL_RENDERER_ACCELERATED | SDL_WINDOW_RESIZABLE, &screen.window, &screen.renderer);

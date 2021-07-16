@@ -46,3 +46,4 @@ problems:
 	- sometimes, psprites disappear mid-game (use memory sanitizer to resolve the problem: https://github.com/google/sanitizers/wiki/MemorySanitizer) (also, each time that the minimap is enabled, the psprite becomes corrupted)
 	- bogo is completely dark with the make rule `debug_2` (he is only light with -Ofast)
 	- fix all of the memory leaks
+	- flickers between raised wall transitions
