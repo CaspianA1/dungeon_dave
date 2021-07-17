@@ -86,3 +86,9 @@ void fill_val_buffers_for_planar_mode(const double angle_degrees) {
 }
 
 #endif
+
+void full_colored_floor(const int y_shift) {
+	const SDL_Rect floor = {0, y_shift, settings.screen_width, settings.screen_height - y_shift};
+	SDL_SetRenderDrawColor(screen.renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRect(screen.renderer, &floor);
+}

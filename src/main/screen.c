@@ -45,6 +45,9 @@ void refresh(const Domain tilt, const vec pos, const double y_shift) {
 	SDL_UnlockTexture(screen.pixel_buffer);
 	SDL_SetRenderTarget(screen.renderer, NULL);
 
+	void full_colored_floor(const int);
+	if (!keys[SDL_SCANCODE_C]) full_colored_floor(y_shift);
+
 	/*
 	When rotating the image according to the tilt angle, there's some dead space on the edges,
 	resulting in some triangles on each side.

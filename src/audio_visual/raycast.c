@@ -4,6 +4,7 @@ typedef struct {
 	const vec begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
 	const byte point, side, first_wall_hit;
+	byte* last_point_height;
 	const int screen_x;
 } DataRaycast;
 
@@ -51,7 +52,7 @@ vec handle_ray(const DataRaycast d) {
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 	#endif
 
-	for (byte i = 0; i < point_height; i++) {
+	for (byte i = *d.last_point_height; i < point_height; i++) {
 		SDL_FRect raised_wall_dest = wall_dest;
 		raised_wall_dest.y -= wall_dest.h * i;
 
@@ -69,6 +70,8 @@ vec handle_ray(const DataRaycast d) {
 		*d.last_wall_y = (double) raised_wall_dest.y;
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall_dest);
 	}
+	*d.last_point_height = point_height;
+
 	return (vec) {(double) smallest_wall_y, wall_h};
 }
 
@@ -80,7 +83,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 		const vec dir = {cos(theta), sin(theta)};
 
 		double last_wall_y = DBL_MAX, last_height_change_y = settings.screen_height;
-		byte at_first_hit = 1, curr_point_height = player.jump.height;
+		byte at_first_hit = 1, curr_point_height = player.jump.height, last_point_height = player.jump.height;
 		DataDDA ray = init_dda(player.pos, dir);
 
 		while (iter_dda(&ray)) {
@@ -88,18 +91,21 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 			const vec hit = vec_line_pos(player.pos, dir, ray.dist);
 			const byte point_height = current_level.get_point_height(point, hit);
 
-			if (point_height != curr_point_height) {
+			if (point_height != curr_point_height || point) {
 				double height_change_y, height_change_h;
 				if (point) {
 					const vec wall_y_components = handle_ray((DataRaycast) {
 						&last_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height,
-						player.pos, hit, dir, point, ray.side, at_first_hit, screen_x});
+						player.pos, hit, dir, point, ray.side, at_first_hit, &last_point_height, screen_x});
 
 					height_change_y = wall_y_components[0], height_change_h = wall_y_components[1];
 
 					at_first_hit = 0;
 				}
-				else height_change_y = settings.screen_height, height_change_h = 0.0; // correct?
+				else {
+					height_change_y = settings.screen_height, height_change_h = 0.0; // correct?
+					last_point_height = 0;
+				}
 
 				// draw from last wall y (last height_change_h) to current wall bottom (y + h)
 				curr_point_height = point_height;
