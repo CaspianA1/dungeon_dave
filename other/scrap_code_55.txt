@@ -1,0 +1,116 @@
+// const double sigma = 1.0 / 273.0; // std dev of this gaussian distribution
+
+/*
+const int kernel[5][5] = {
+	{1, 4, 7, 4, 1},
+	{4, 16, 26, 16, 4},
+	{7, 26, 41, 26, 7},
+	{4, 16, 26, 16, 4},
+	{1, 4, 7, 4, 1}
+};
+*/
+
+/////
+
+// const double kernel_val = kernel[kernel_y_offset + 2][kernel_x_offset + 2];
+
+/*
+sum[0] += r * kernel_val;
+sum[1] += g * kernel_val;
+sum[2] += b * kernel_val;
+*/
+
+/////
+
+/*
+sum[0] *= sigma;
+sum[1] *= sigma;
+sum[2] *= sigma;
+*/
+
+/*
+sum[0] /= 25;
+sum[1] /= 25;
+sum[2] /= 25;
+*/
+
+/////
+
+inlinable Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
+	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
+}
+
+Uint32 getpixel(SDL_Surface *surface, const int x, const int y) {
+   const int bpp = surface->format->BytesPerPixel;
+   return (Uint32*) ((Uint8 *)surface->pixels + y * surface->pitch + x * bpp);
+
+            return *(Uint32 *)p;
+            break;
+
+        default:
+            return 0;       /* shouldn't happen, but avoids warnings */
+      }
+}
+
+Uint32 get_gaussian_for_pixel(SDL_Surface* const mipmap, const int x, const int y) {
+	// double sum[4] = {0.0, 0.0, 0.0};
+
+	/*
+	const SDL_PixelFormat* const format = mipmap -> format;
+	const int bpp = format -> BytesPerPixel;
+	*/
+
+	return getpixel(mipmap, x, y);
+	// return *read_surface_pixel(mipmap, x, y, bpp);
+
+	/*
+	for (int kernel_y_offset = -2; kernel_y_offset <= 2; kernel_y_offset++) {
+		const int mipmap_y_offset = y + kernel_y_offset;
+		if (mipmap_y_offset < 0 || mipmap_y_offset >= mipmap -> h) continue;
+
+		for (int kernel_x_offset = -2; kernel_x_offset <= 2; kernel_x_offset++) {
+			const int mipmap_x_offset = x + kernel_x_offset;
+			if (mipmap_x_offset < 0 || mipmap_x_offset >= mipmap -> w) continue;
+
+			Uint32* const pixel = read_surface_pixel(mipmap, x + kernel_x_offset, y + kernel_y_offset, bpp);
+
+			byte r, g, b, a;
+			SDL_GetRGBA(*pixel, mipmap -> format, &r, &g, &b, &a);
+
+			sum[0] = r;
+			sum[1] = g;
+			sum[2] = b;
+			sum[2] = a;
+		}
+	}
+
+	sum[0] /= 8;
+	sum[1] /= 8;
+	sum[2] /= 8;
+
+	return SDL_MapRGBA(format, sum[0], sum[1], sum[2], sum[3]);
+	*/
+}
+
+/* https://aryamansharda.medium.com/image-filters-gaussian-blur-eb36db6781b1
+https://computergraphics.stackexchange.com/questions/39/how-is-gaussian-blur-implemented */
+void apply_gaussian_blur(SDL_Surface* mipmap, const SDL_Rect depth_crop, const byte save) {
+	SDL_Surface* const blurred_dest = SDL_CreateRGBSurfaceWithFormat(0, depth_crop.w, depth_crop.h, 32, PIXEL_FORMAT);
+
+	const int bpp = mipmap -> format -> BytesPerPixel;
+	for (int y = depth_crop.y, dest_y = 0; y < depth_crop.y + depth_crop.h; y++, dest_y++) {
+		for (int x = depth_crop.x, dest_x = 0; x < depth_crop.x + depth_crop.w; x++, dest_x++)
+			*read_surface_pixel(blurred_dest, dest_x, dest_y, bpp) = get_gaussian_for_pixel(mipmap, x, y);
+			// *getpixel(blurred_dest, x, y) = *getpixel(mipmap, x, y);
+	}
+
+	if (save) SDL_SaveBMP(blurred_dest, "out.bmp");
+}
+
+void gauss_test(void) {
+	SDL_Surface* const image = SDL_LoadBMP("assets/walls/dirt.bmp");
+	apply_gaussian_blur(image, (SDL_Rect) {0, 0, image -> w, image -> h}, 1);
+	SDL_FreeSurface(image);
+}
+
+/////

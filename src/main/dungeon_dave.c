@@ -51,6 +51,11 @@ int main(void) {
 	Weapon weapon;
 	load_all_defaults(load_palace, &player, &weapon);
 
+	/*
+	gauss_test();
+	return 0;
+	*/
+
 	if (display_title_screen() == Exit)
 		deinit_all(player, weapon);
 
