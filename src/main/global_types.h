@@ -75,7 +75,7 @@ typedef struct {
 	byte
 		wall_count, billboard_count, animation_count, enemy_count,
 		generic_billboard_count, max_point_height, out_of_bounds_point,
- 		*wall_data, *ceiling_data, *floor_data;
+ 		*wall_data, *ceiling_data, *floor_data, *bfs_visited;
 
 	Skybox skybox;
 	Sound background_sound;

@@ -10,7 +10,7 @@ inlinable byte neighbor_map_point(const ivec neighbors[8], const NeighborID neig
 }
 
 // returns if updating the queue succeeded
-byte update_queue_with_neighbors(RouteQueue* const routes, Route route, const ivec vertex, byte* const all_visited) {
+byte update_queue_with_neighbors(RouteQueue* const routes, Route route, const ivec vertex) {
 	const int dec_x = vertex.x - 1, dec_y = vertex.y - 1, inc_x = vertex.x + 1, inc_y = vertex.y + 1;
 	const ivec neighbors[8] = {
 		{dec_x, dec_y}, {vertex.x, dec_y}, {inc_x, dec_y},
@@ -28,7 +28,7 @@ byte update_queue_with_neighbors(RouteQueue* const routes, Route route, const iv
 			(i == TopRight && (neighbor_map_point(neighbors, Top) || neighbor_map_point(neighbors, Right))))
 		continue;
 
-		byte* const was_visited = &all_visited[neighbor.y * current_level.map_size.x + neighbor.x];
+		byte* const was_visited = &current_level.bfs_visited[neighbor.y * current_level.map_size.x + neighbor.x];
 		if (!*was_visited) {
 			*was_visited = 1;
 			const Route next_route = extend_route(route, neighbor);
@@ -42,8 +42,8 @@ byte update_queue_with_neighbors(RouteQueue* const routes, Route route, const iv
 ResultBFS bfs(const vec begin, const vec end) {
 	const ivec int_begin = ivec_from_vec(begin), int_end = ivec_from_vec(end);
 
-	byte* const all_visited = wcalloc(current_level.map_size.x * current_level.map_size.y, sizeof(byte));
-	set_map_point(all_visited, 1, int_begin.x, int_begin.y, current_level.map_size.x);
+	memset(current_level.bfs_visited, 0, current_level.map_size.x * current_level.map_size.y);
+	set_map_point(current_level.bfs_visited, 1, int_begin.x, int_begin.y, current_level.map_size.x);
 
 	RouteQueue routes = init_routes(int_begin);
 	ResultBFS result = {.state = FailedBFS};
@@ -59,13 +59,12 @@ ResultBFS bfs(const vec begin, const vec end) {
 			break;
 		}
 
-		if (!update_queue_with_neighbors(&routes, route, vertex, all_visited)) {
+		if (!update_queue_with_neighbors(&routes, route, vertex)) {
 			result.state = PathTooLongBFS;
 			break;
 		}
 	}
 
-	wfree(all_visited);
 	deinit_routes(routes);
 
 	return result;

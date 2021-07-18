@@ -11,8 +11,8 @@ inlinable Level init_level(const int map_width, const int map_height,
 		.init_pos = {init_x, init_y}, .init_height = init_height, .skybox.enabled = 0
 	};
 
-	byte** const map_data[3] = {&level.wall_data, &level.ceiling_data, &level.floor_data};
-	for (byte i = 0; i < 3; i++)
+	byte** const map_data[4] = {&level.wall_data, &level.ceiling_data, &level.floor_data, &level.bfs_visited};
+	for (byte i = 0; i < 4; i++)
 		*map_data[i] = wmalloc(map_width * map_height);
 	return level;
 }
@@ -168,8 +168,8 @@ inlinable void set_level_generic_billboard_container(Level* const level) {
 }
 
 void deinit_level(const Level level) {
-	byte* const map_data[3] = {level.wall_data, level.ceiling_data, level.floor_data};
-	for (byte i = 0; i < 3; i++) wfree(map_data[i]);
+	byte* const map_data[4] = {level.wall_data, level.ceiling_data, level.floor_data, level.bfs_visited};
+	for (byte i = 0; i < 4; i++) wfree(map_data[i]);
 
 	if (level.skybox.enabled) deinit_sprite(level.skybox.sprite);
 	deinit_sound(level.background_sound);
