@@ -30,7 +30,7 @@ void blurrer(const char* path, const int blur_size) {
 
  	for (int y = 0; y < img_h; y++) {
 		for (int x = 0; x < img_w; x++) {
-			color sum = {0, 0, 0, 0}; // needed fn: add __v4si to __v2si
+			color sum = {0, 0, 0, 0};
 			int blur_sum_factor = 0;
 			for (int py = -blur_size; py <= blur_size; py++) {
 				for (int px = -blur_size; px <= blur_size; px++) {
@@ -48,10 +48,19 @@ void blurrer(const char* path, const int blur_size) {
 					sum += (color) {r, g, b, 0xFF000000};
 					*/
 
+					/*
+					const byte
+						r = get_bits(pixel, 16, 23),
+						g = get_bits(pixel, 8, 15),
+						b = get_bits(pixel, 0, 8);
+					
+					sum += (color) {r, g, b, 0xFF000000};
+					*/
+
 					byte r, g, b, a;
 					SDL_GetRGBA(pixel, sfc_blur -> format, &r, &g, &b, &a);
 					sum += (color) {r, g, b, a};
-
+	
 					blur_sum_factor++;
                 }
 			}

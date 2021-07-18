@@ -114,3 +114,15 @@ void gauss_test(void) {
 }
 
 /////
+
+// const Uint32 center = get_pixel(sfc_blur, x, y);
+// const Uint32 alpha = (get_pixel(sfc_blur, x, y) & 0xFF000000) >> 31;
+// const Uint32 alpha = 0xFF000000;
+// how to extract the alpha channel?
+
+// const Uint32 alpha = 0xFF000000;
+// const Uint32 alpha = get_bits(get_pixel(sfc_blur, x, y), 0, 8);
+
+// const Uint32 blurred_pixel = out[3] | (out[0] << 16) | (out [1] << 8) | out[2];
+
+/////

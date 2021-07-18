@@ -78,6 +78,7 @@ int main(void) {
 
 		prepare_for_drawing();
 		draw_skybox(player.angle, wall_y_shift);
+		draw_colored_floor(wall_y_shift);
 
 		#ifndef PLANAR_MODE
 		raycast(player, wall_y_shift, full_jump_height);
