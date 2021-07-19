@@ -78,7 +78,7 @@ int main(void) {
 
 		prepare_for_drawing();
 		draw_skybox(player.angle, wall_y_shift);
-		draw_colored_floor(wall_y_shift);
+		// draw_colored_floor(wall_y_shift);
 
 		#ifndef PLANAR_MODE
 		raycast(player, wall_y_shift, full_jump_height);
@@ -89,7 +89,7 @@ int main(void) {
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		// fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
+		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
 		refresh(player.tilt, player.pos, wall_y_shift);
 		tick_delay(before);
