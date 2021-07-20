@@ -15,11 +15,10 @@ features:
 	- a map editor
 	- seethrough sprites
 	- momentary sounds for enemies
-	- linearly interpolate for actual_dist for more speed
+	- linearly interpolate actual_dist for more speed
 	- floors at different height levels (not necessarily within just one block)
 	- smooth mipmap depth switching, and mipmap a texture until its width or height reaches 1
 	- mipmapping for sprites
-	- blur larger mipmap depths a bit more for each
 	- a shotgun more in the art style of Adam's whip
 	- Attacked state for enemy
 	- a metro level
@@ -48,4 +47,4 @@ problems:
 	- sometimes, psprites disappear mid-game (use memory sanitizer to resolve the problem: https://github.com/google/sanitizers/wiki/MemorySanitizer) (also, each time that the minimap is enabled, the psprite becomes corrupted)
 	- bogo is completely dark with the make rule `debug_2` (he is only light with -Ofast)
 	- fix all of the memory leaks
-	- flickers between raised wall transitions
+	- a gray line appears for blur fixing

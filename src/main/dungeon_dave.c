@@ -51,8 +51,12 @@ int main(void) {
 	Weapon weapon;
 	load_all_defaults(load_palace, &player, &weapon);
 
+	/*
 	blur_test();
 	return 0;
+	*/
+
+	blur_test();
 
 	if (display_title_screen() == Exit)
 		deinit_all(player, weapon);
