@@ -8,14 +8,6 @@ typedef __v4si color;
 #define PIXEL_FORMAT SDL_PIXELFORMAT_ARGB8888
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
-Uint32 get_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
-	return *(Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
-}
-
-void put_pixel(SDL_Surface* const surface, const int x, const int y, const int bpp, const Uint32 pixel) {
- 	*(Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp) = pixel;
-}
-
 void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_size) {
 	const int src_w = image -> w, src_h = image -> h;
 	SDL_Surface* const blurred_crop = SDL_CreateRGBSurfaceWithFormat(0, crop.w, crop.h, 32, PIXEL_FORMAT);
@@ -34,7 +26,7 @@ void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_
 					if (x1 < 0 || y1 < 0) continue;
 					else if (x1 >= src_w || y1 >= src_h) break;
 
-					const Uint32 pixel = get_pixel(image, x1, y1, bpp);
+					const Uint32 pixel = *get_pixel(image, x1, y1, bpp);
 
 					byte r, g, b, a;
 					SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
@@ -52,7 +44,7 @@ void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_
 			};
 
 			const Uint32 blurred_pixel = SDL_MapRGBA(format, out[0], out[1], out[2], out[3]);
-			put_pixel(blurred_crop, x - crop.x, y - crop.y, bpp, blurred_pixel);
+			*get_pixel(blurred_crop, x - crop.x, y - crop.y, bpp) = blurred_pixel;
 		}
 	}
 

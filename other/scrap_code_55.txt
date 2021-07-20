@@ -156,3 +156,12 @@ setprogname;
 */
 
 /////
+
+/*
+DEBUG_RECT(dest);
+DEBUG(surface -> w, d);
+DEBUG(surface -> h, d);
+printf("-\n");
+*/
+
+/////

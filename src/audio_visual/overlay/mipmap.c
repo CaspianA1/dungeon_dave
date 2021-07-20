@@ -35,16 +35,73 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface) {
 		if (i <= 1) dest.y = 0;
 		else dest.y += surface -> h >> (i - 1);
 
-		SDL_BlitScaled(surface, NULL, mipmap, &dest);
+		void blur_image_portion(SDL_Surface* const, SDL_Rect, const int);
+		blur_image_portion(mipmap, dest, i + 10);
 
 		/*
-		void apply_gaussian_blur(SDL_Surface* const, const SDL_Rect, const byte);
-		apply_gaussian_blur(mipmap, dest, 0);
+		static byte first = 1;
+		if (first) SDL_SaveBMP()
 		*/
+
+		SDL_BlitScaled(surface, NULL, mipmap, &dest);
 
 		dest.w >>= 1;
 		dest.h >>= 1;
 	}
 
 	return mipmap;
+}
+
+//////////
+
+Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
+	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
+}
+
+void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_size) { // box blur
+	typedef __v4si color;
+
+	const int src_w = image -> w, src_h = image -> h;
+	SDL_Surface* const blurred_crop = SDL_CreateRGBSurfaceWithFormat(0, crop.w, crop.h, 32, PIXEL_FORMAT);
+	SDL_LockSurface(blurred_crop);
+	SDL_LockSurface(image);
+
+	const SDL_PixelFormat* const format = image -> format;
+	const int bpp = format -> BytesPerPixel;
+ 	for (int y = crop.y; y < crop.y + crop.h; y++) {
+		for (int x = crop.x; x < crop.x + crop.w; x++) {
+			color sum = {0, 0, 0, 0};
+			int blur_sum_factor = 0;
+			for (int py = -blur_size; py <= blur_size; py++) {
+				for (int px = -blur_size; px <= blur_size; px++) {
+					const int x1 = x + px, y1 = y + py;
+					if (x1 < 0 || y1 < 0) continue;
+					else if (x1 >= src_w || y1 >= src_h) break;
+
+					const Uint32 pixel = *read_surface_pixel(image, x1, y1, bpp);
+
+					byte r, g, b, a;
+					SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
+					sum += (color) {r, g, b, a};
+	
+					blur_sum_factor++;
+                }
+			}
+
+			const byte out[4] = {
+				sum[0] / blur_sum_factor,
+				sum[1] / blur_sum_factor,
+				sum[2] / blur_sum_factor,
+				sum[3] / blur_sum_factor
+			};
+
+			const Uint32 blurred_pixel = SDL_MapRGBA(format, out[0], out[1], out[2], out[3]);
+			*read_surface_pixel(blurred_crop, x - crop.x, y - crop.y, bpp) = blurred_pixel;
+		}
+	}
+
+	SDL_UnlockSurface(blurred_crop);
+	SDL_UnlockSurface(image);
+	SDL_BlitScaled(blurred_crop, NULL, image, &crop);
+	SDL_FreeSurface(blurred_crop);
 }
