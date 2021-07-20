@@ -33,7 +33,7 @@
 #define INIT_MAX_FOV 100.0
 
 #define INIT_MINIMAP_SCALE 3.0
-#define INIT_STOP_DIST 0.1
+#define INIT_STOP_DIST 0.2
 
 #define AUDIO_CHUNK_SIZE 1024
 

@@ -48,3 +48,5 @@ problems:
 	- bogo is completely dark with the make rule `debug_2` (he is only light with -Ofast)
 	- fix all of the memory leaks
 	- a gray line appears for blur fixing
+	- little blinking dots in the distance for the hieroglyphics bitmap
+	- running head-on towards a navigator can make them temporarily clip into a wall

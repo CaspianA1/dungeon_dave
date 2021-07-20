@@ -135,12 +135,12 @@ void load_palace(void) {
 		"assets/walls/hieroglyphics.bmp",
 
 		"assets/walls/window.bmp",
-		"assets/walls/rug_1.bmp",
+		"assets/walls/smooth_rug_1.bmp",
 		"assets/walls/sandstone.bmp",
 		"assets/walls/cobblestone_3.bmp",
 		"assets/walls/horses.bmp",
 		"assets/walls/mesa.bmp",
-		"assets/walls/viney_bricks.bmp");
+		"assets/walls/smooth_viney_bricks.bmp");
 
 	set_level_billboards(&palace, billboard_count,
 		"assets/objects/health_kit.bmp", 4.5, 22.5, 0.0, // 11.5, 28.0

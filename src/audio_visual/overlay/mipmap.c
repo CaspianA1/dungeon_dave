@@ -44,12 +44,6 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface) {
 		dest.h >>= 1;
 	}
 
-	static byte first = 1;
-	if (first) {
-		SDL_SaveBMP(mipmap, "out.bmp");
-		first = 0;
-	}
-
 	return mipmap;
 }
 
@@ -110,11 +104,11 @@ void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_
 }
 
 void blur_test(void) {
-	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/viney_bricks.bmp");
+	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/smooth_viney_bricks.bmp");
 	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);
 	SDL_FreeSurface(unconverted_image);
 
-	blur_image_portion(image, (SDL_Rect) {80, 80, image -> w / 2, image -> h / 2}, 5);
+	blur_image_portion(image, (SDL_Rect) {0, 0, image -> w, image -> h}, 2);
 	SDL_SaveBMP(image, "out.bmp");
 	SDL_FreeSurface(image);
 }
