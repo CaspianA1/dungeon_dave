@@ -1,6 +1,6 @@
 // https://stackoverflow.com/questions/29521891/how-to-blur-sdl-surface-without-shaders
 #include <SDL2/SDL.h>
-#include <x86intrin.h>
+#include <xmmintrin.h>
 
 typedef uint_fast8_t byte;
 typedef __v4si color;
@@ -8,26 +8,22 @@ typedef __v4si color;
 #define PIXEL_FORMAT SDL_PIXELFORMAT_ARGB8888
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
-Uint32 get_pixel(const SDL_Surface* const surface, const int x, const int y) {
-	const int bpp = surface ->format -> BytesPerPixel;
-	return *(Uint32*) ((Uint8*) surface->pixels + y * surface -> pitch + x * bpp);
+Uint32 get_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
+	return *(Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
 }
 
-void put_pixel(SDL_Surface* const surface, const int x, const int y, const Uint32 pixel) {
- 	const int bpp = surface -> format-> BytesPerPixel;
- 	*(Uint32*) ((Uint8*) surface->pixels + y * surface -> pitch + x * bpp) = pixel;
+void put_pixel(SDL_Surface* const surface, const int x, const int y, const int bpp, const Uint32 pixel) {
+ 	*(Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp) = pixel;
 }
 
-byte get_bits(const Uint32 value, const byte offset, const byte n) {
-	return (value >> offset) & ((1 << n) - 1);
-}
+void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_size) {
+	const int src_w = image -> w, src_h = image -> h;
+	SDL_Surface* const blurred_crop = SDL_CreateRGBSurfaceWithFormat(0, crop.w, crop.h, 32, PIXEL_FORMAT);
+	SDL_LockSurface(blurred_crop);
+	SDL_LockSurface(image);
 
-SDL_Surface* blur_image_portion(const SDL_Surface* const src, const SDL_Rect crop, const int blur_size) {
-	const int src_w = src -> w, src_h = src -> h;
-	SDL_Surface* const dest = SDL_CreateRGBSurfaceWithFormat(0, src_w, src_h, 32, PIXEL_FORMAT);
-
-	const SDL_PixelFormat* const format = src -> format;
-	const int bpp = src -> format -> BytesPerPixel;
+	const SDL_PixelFormat* const format = image -> format;
+	const int bpp = format -> BytesPerPixel;
  	for (int y = crop.y; y < crop.y + crop.h; y++) {
 		for (int x = crop.x; x < crop.x + crop.w; x++) {
 			color sum = {0, 0, 0, 0};
@@ -38,7 +34,7 @@ SDL_Surface* blur_image_portion(const SDL_Surface* const src, const SDL_Rect cro
 					if (x1 < 0 || y1 < 0) continue;
 					else if (x1 >= src_w || y1 >= src_h) break;
 
-					const Uint32 pixel = get_pixel(src, x1, y1);
+					const Uint32 pixel = get_pixel(image, x1, y1, bpp);
 
 					byte r, g, b, a;
 					SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
@@ -56,22 +52,30 @@ SDL_Surface* blur_image_portion(const SDL_Surface* const src, const SDL_Rect cro
 			};
 
 			const Uint32 blurred_pixel = SDL_MapRGBA(format, out[0], out[1], out[2], out[3]);
-			put_pixel(dest, x, y, blurred_pixel);
+			put_pixel(blurred_crop, x - crop.x, y - crop.y, bpp, blurred_pixel);
 		}
 	}
-	return dest;
+
+	SDL_UnlockSurface(blurred_crop);
+	SDL_UnlockSurface(image);
+	SDL_BlitScaled(blurred_crop, NULL, image, &crop);
+	SDL_FreeSurface(blurred_crop);
 }
 
-int main(void) {
+int main(int argc, char** argv) {
+	if (argc != 2) {
+		printf("Supply one argument, please\n");
+		return 1;
+	}
+
 	// ../assets/walls/mesa.bmp
 	// ../../assets/objects/doomguy.bmp
 	// ../../assets/objects/bogo.bmp
-	SDL_Surface* const unconverted_src = SDL_LoadBMP("../../assets/walls/sand.bmp");
-	SDL_Surface* const src = SDL_ConvertSurfaceFormat(unconverted_src, PIXEL_FORMAT, 0);
-	SDL_Surface* const blurred = blur_image_portion(src, (SDL_Rect) {0, 0, src -> w, src -> h / 2}, 4);
-	SDL_SaveBMP(blurred, "out.bmp");
+	SDL_Surface* const unconverted_image = SDL_LoadBMP("../../assets/walls/rug_3.bmp");
+	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);
+	SDL_FreeSurface(unconverted_image);
 
-	SDL_FreeSurface(unconverted_src);
-	SDL_FreeSurface(src);
-	SDL_FreeSurface(blurred);
+	blur_image_portion(image, (SDL_Rect) {0, 0, image -> w, image -> h / 2}, atoi(argv[1]));
+	SDL_SaveBMP(image, "out.bmp");
+	SDL_FreeSurface(image);
 }

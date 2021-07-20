@@ -145,3 +145,14 @@ sum += (color) {r, g, b, 0xFF000000};
 */
 
 /////
+
+/*
+qsort;
+heapsort;
+radixsort;
+psort;
+mergesort;
+setprogname;
+*/
+
+/////
