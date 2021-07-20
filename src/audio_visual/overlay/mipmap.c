@@ -27,6 +27,8 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface) {
 	SDL_Surface* const mipmap = SDL_CreateRGBSurfaceWithFormat(0,
 		surface -> w + (surface -> w >> 1), surface -> h, 32, PIXEL_FORMAT);
 
+	void blur_image_portion(SDL_Surface* const, SDL_Rect, const int);
+
 	SDL_Rect dest = {.w = surface -> w, .h = surface -> h};
 	for (byte i = 0; i < max_mipmap_depth; i++) {
 		if (i == 0) dest.x = 0;
@@ -35,14 +37,7 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface) {
 		if (i <= 1) dest.y = 0;
 		else dest.y += surface -> h >> (i - 1);
 
-		void blur_image_portion(SDL_Surface* const, SDL_Rect, const int);
-		blur_image_portion(mipmap, dest, i + 10);
-
-		/*
-		static byte first = 1;
-		if (first) SDL_SaveBMP()
-		*/
-
+		blur_image_portion(mipmap, dest, i * 4);
 		SDL_BlitScaled(surface, NULL, mipmap, &dest);
 
 		dest.w >>= 1;
@@ -54,7 +49,7 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface) {
 
 //////////
 
-Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
+inlinable Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
 	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
 }
 
@@ -102,6 +97,17 @@ void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_
 
 	SDL_UnlockSurface(blurred_crop);
 	SDL_UnlockSurface(image);
+
 	SDL_BlitScaled(blurred_crop, NULL, image, &crop);
 	SDL_FreeSurface(blurred_crop);
+}
+
+void blur_test(void) {
+	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/rug_3.bmp");
+	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);
+	SDL_FreeSurface(unconverted_image);
+
+	blur_image_portion(image, (SDL_Rect) {80, 80, image -> w / 2, image -> h / 2}, 5);
+	SDL_SaveBMP(image, "out.bmp");
+	SDL_FreeSurface(image);
 }
