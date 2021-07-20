@@ -126,3 +126,22 @@ void gauss_test(void) {
 // const Uint32 blurred_pixel = out[3] | (out[0] << 16) | (out [1] << 8) | out[2];
 
 /////
+
+/*
+const byte
+	r = (byte) (pixel >> 16),
+	g = (byte) (pixel >> 8),
+	b = (byte) pixel;
+sum += (color) {r, g, b, 0xFF000000};
+*/
+
+/*
+const byte
+	r = get_bits(pixel, 16, 23),
+	g = get_bits(pixel, 8, 15),
+	b = get_bits(pixel, 0, 8);
+
+sum += (color) {r, g, b, 0xFF000000};
+*/
+
+/////

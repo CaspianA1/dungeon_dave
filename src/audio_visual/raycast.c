@@ -70,7 +70,7 @@ vec handle_ray(const DataRaycast d) {
 		else slice.h = max_sprite_h;
 
 		*d.last_wall_y = (double) raised_wall_dest.y;
-		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall_dest);
+		if (!keys[SDL_SCANCODE_G]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall_dest);
 	}
 	*d.last_point_height = point_height;
 
