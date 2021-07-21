@@ -8,7 +8,7 @@ byte update_toggle(Toggle* const toggle) {
 }
 
 void draw_minimap(const vec pos) {
-	static Toggle toggle = {30, 144, 255, 0, 0, KEY_TOGGLE_MINIMAP};
+	static Toggle toggle = {0, 0, 255, 0, 0, KEY_TOGGLE_MINIMAP};
 	if (!update_toggle(&toggle)) return;
 
 	const int
