@@ -273,3 +273,17 @@ return statemap;
 */
 
 /////
+
+void statemap_test(void) {
+	const StateMap statemap = init_statemap(32, 34); // 32 * 32 bits = 1024 bits = 256 bytes
+	// *statemap_byte(statemap, 1, 1) = 0b11111111;
+	// *statemap_byte(statemap, 2, 1) = 0b11111111;
+	// set_statemap_bit(statemap, 17, 1);
+	set_statemap_bit(statemap, 9, 31);
+
+	print_statemap(statemap);
+
+	exit(0);
+}
+
+/////
