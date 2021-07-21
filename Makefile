@@ -34,7 +34,7 @@ asm:
 debug: build_debug
 	lldb -d bin/$(OUT)
 
-profile:
+profile_gcov:
 	$(CC) $(CFLAGS) $(DEBUG) --coverage $(LDFLAGS)
 	make run
 	gcov -f -a $(OUT) > /dev/null

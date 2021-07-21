@@ -25,6 +25,7 @@ features:
 	- draw sprite sections in chunks
 	- a sol enemy
 	- bitplanes for floors and the bfs visited
+	- figure out lcov
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
