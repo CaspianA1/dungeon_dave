@@ -177,3 +177,79 @@ inlinable int* ivec_val(ivec* const v, const byte i) {
 }
 
 /////
+
+/* a statemap is just a matrix of bits. I didn't call it
+a bitmat because that sounds too much like bitmap.
+
+also, a chunk is a 32-bit number. each chunk can hold 32 states. */
+
+typedef uint32_t chunk_t;
+
+typedef struct {
+	ivec size;
+	chunk_t* const data;
+} StateMap;
+
+/////
+
+/*
+const int num_bits_unpadded = width * height;
+DEBUG(num_bits_unpadded, d);
+const int num_bytes_unpadded = num_bits_unpadded / sizeof(chunk_t);
+DEBUG(num_bytes_unpadded, d);
+return (StateMap) {0};
+*/
+
+/*
+const ivec dimensions_in_bytes = {
+	width / sizeof(chunk_t),
+	height / sizeof(chunk_t)
+};
+
+DEBUG(width * height, d);
+DEBUG(width * height / sizeof(chunk_t), d);
+
+DEBUG_IVEC(dimensions_in_bytes);
+
+const size_t data_size = dimensions_in_bytes.x * dimensions_in_bytes.y / sizeof(chunk_t);
+const StateMap statemap = {dimensions_in_bytes, calloc(data_size, sizeof(chunk_t))};
+return statemap;
+*/
+
+/////
+
+/*
+// 00000000000000000000000000000000 = 32 zeros
+print_bits(0b00000000000000000000000000000000);
+putchar('\n');
+*/
+
+/*
+for (size_t y = 0; y < statemap.size.y / sizeof(chunk_t); y++) {
+	for (size_t x = 0; x < statemap.size.x / sizeof(chunk_t); x++) {
+		const chunk_t chunk = statemap.data[y * statemap.size.x + x];
+		print_bits(chunk);
+		putchar('|');
+	}
+	putchar('\n');
+}
+*/
+
+/////
+
+/*
+void statemap_test(void) {
+	const StateMap statemap = init_statemap(20, 20); 
+	print_statemap(statemap);
+
+	exit(0);
+}
+
+bytes_across = 2
+bytes_down = 2
+total_bytes = 4
+000000000|000000000|
+000000000|000000000|
+*/
+
+/////
