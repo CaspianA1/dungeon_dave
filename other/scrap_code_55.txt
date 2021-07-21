@@ -253,3 +253,23 @@ total_bytes = 4
 */
 
 /////
+
+/*
+const int total_bits = bits_across * bits_down;
+DEBUG(total_bits, d);
+const int total_bytes = ceil(total_bits / 8);
+DEBUG(total_bytes, d);
+
+StateMap statemap = {
+	.byte_dimensions = {ceil(bits_across / 8.0), ceil(bits_down / 8.0)}
+};
+
+DEBUG_IVEC(statemap.byte_dimensions);
+
+statemap.data = malloc(total_bytes);
+memset(statemap.data, 0, total_bytes);
+
+return statemap;
+*/
+
+/////
