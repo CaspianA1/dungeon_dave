@@ -4,11 +4,11 @@ void deinit_weapon(const Weapon weapon) {
 }
 
 void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
-	DataDDA bullet = init_dda(pos, dir);
+	DataDDA bullet = init_dda(pos, dir, 0.5);
 
 	while (iter_dda(&bullet)) {
-		const ivec bullet_tile = bullet.curr_tile;
-		if (map_point(current_level.wall_data, bullet_tile.x, bullet_tile.y)) break;
+		const vec bullet_tile = {bullet.curr_tile[0], bullet.curr_tile[1]};
+		if (map_point(current_level.wall_data, bullet_tile[0], bullet_tile[1])) break;
 
 		for (byte i = 0; i < current_level.enemy_count; i++) {
 			Enemy* const enemy = &current_level.enemies[i];

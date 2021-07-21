@@ -129,14 +129,6 @@ inlinable ivec ivec_from_vec(const vec v) {
 	return (ivec) {(int) floor(v[0]), (int) floor(v[1])};
 }
 
-inlinable int ivec_ind(const ivec v, const byte i) {
-	return i ? v.y : v.x;
-}
-
-inlinable int* ptr_ivec_ind(ivec* const v, const byte i) {
-	return i ? &v -> y : &v -> x;
-}
-
 inlinable byte ivec_out_of_bounds(const ivec v) {
 	return v.x < 0 || v.x > current_level.map_size.x - 1 || v.y < 0 || v.y > current_level.map_size.y - 1;
 }

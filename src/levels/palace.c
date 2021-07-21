@@ -105,8 +105,10 @@ void load_palace(void) {
 		{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 	};
 
-	// previous: {1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}, {12.0, 37.0, 0.0}, {15.5, 24.5, 2.0}, {2.5. 28.5, 2.0}
-	Level palace = init_level(map_width, map_height, 2.0, 2.0, 2.0);
+	/* previous:
+		{1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}, {12.0, 37.0, 0.0},
+		{15.5, 24.5, 2.0}, {2.5. 28.5, 2.0}, {37.5, 9.5, 5.0} */
+	Level palace = init_level(map_width, map_height, 3.5, 24.5, 5.0);
 	palace.max_point_height = 8;
 	palace.out_of_bounds_point = 1;
 	palace.background_sound = init_sound("assets/audio/themes/sultan.wav", 0);
@@ -162,7 +164,7 @@ void load_palace(void) {
 		5, 2, 3, 13, // animation_seg_lengths
 
 		"assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
-		37.5, 5.5, 0.0, // billboard data (3.0, 7.5 before, then 6.5, 21.5, then 32.5, 23.5)
+		6.5, 21.5, 0.0, // billboard data (3.0, 7.5 before, then 6.5, 21.5, then 32.5, 23.5, then 75.5, 5.5)
 
 		"assets/audio/enemy_sound_test/idle.wav", // sound data
 		"assets/audio/enemy_sound_test/chase.wav",

@@ -165,3 +165,15 @@ printf("-\n");
 */
 
 /////
+
+inlinable int ivec_ind(const ivec v, const byte i) {
+	return i ? v.y : v.x;
+}
+
+/////
+
+inlinable int* ivec_val(ivec* const v, const byte i) {
+	return i ? &v -> y : &v -> x;
+}
+
+/////

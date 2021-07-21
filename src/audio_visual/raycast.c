@@ -86,10 +86,10 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 
 		double last_wall_y = DBL_MAX, last_height_change_y = settings.screen_height;
 		byte at_first_hit = 1, curr_point_height = player.jump.height, last_point_height = player.jump.height;
-		DataDDA ray = init_dda(player.pos, dir);
+		DataDDA ray = init_dda(player.pos, dir, 1.0);
 
 		while (iter_dda(&ray)) {
-			const byte point = map_point(current_level.wall_data, ray.curr_tile.x, ray.curr_tile.y);
+			const byte point = map_point(current_level.wall_data, ray.curr_tile[0], ray.curr_tile[1]);
 			const vec hit = vec_line_pos(player.pos, dir, ray.dist);
 			const byte point_height = current_level.get_point_height(point, hit);
 
