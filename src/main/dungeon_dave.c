@@ -9,12 +9,13 @@
 #include "../audio_visual/lighting.c"
 #include "settings.c"
 #include "screen.c"
+#include "dda.c"
+#include "statemap.c"
 
 #include "../audio_visual/overlay/mipmap.c"
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
 #include "../audio_visual/overlay/render_overlay.c"
-#include "../audio_visual/dda.c"
 
 #include "level.c"
 #include "input.c"
