@@ -111,4 +111,6 @@ void blur_test(void) {
 	blur_image_portion(image, (SDL_Rect) {0, 0, image -> w, image -> h}, 2);
 	SDL_SaveBMP(image, "out.bmp");
 	SDL_FreeSurface(image);
+
+	exit(0);
 }
