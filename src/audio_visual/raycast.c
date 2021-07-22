@@ -33,7 +33,11 @@ vec handle_ray(const DataRaycast d) {
 		wall_h
 	};
 
-	if (d.first_wall_hit) update_val_buffers(d.screen_x, corrected_dist, cos_beta, d.dir);
+	const byte point_height = current_level.get_point_height(d.point, d.hit);
+	const double smallest_wall_y = (double) wall_dest.y - (wall_h * (point_height - 1)); // = wall_top
+
+	if (d.first_wall_hit) update_val_buffers(d.screen_x, smallest_wall_y,
+		wall_dest.y + wall_dest.h, corrected_dist, cos_beta, d.dir);
 
 	const Sprite wall_sprite = current_level.walls[d.point - 1];
 	const SDL_Rect mipmap_crop = get_mipmap_crop_from_dist(wall_sprite.size, corrected_dist);
@@ -43,9 +47,6 @@ vec handle_ray(const DataRaycast d) {
 		.x = get_wall_tex_offset(d.side, d.hit, d.dir, mipmap_crop.w) + mipmap_crop.x,
 		.y = mipmap_crop.y, .w = 1
 	};
-
-	const byte point_height = current_level.get_point_height(d.point, d.hit);
-	const double smallest_wall_y = (double) wall_dest.y - (wall_h * (point_height - 1));
 
 	#ifdef SHADING_ENABLED
 	const byte shade = 255 * calculate_shade(wall_h, d.hit);
