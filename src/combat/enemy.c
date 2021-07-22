@@ -4,9 +4,13 @@ The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Attacked added after Dead.
 */
 
+enum {dist_wake_up_from_weapon = 5};
+
 void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
+	if (enemy -> state == new_state) return;
+
 	enemy -> state = new_state;
-	if (!silent) {play_sound(enemy -> sounds[enemy -> state], 0);} // stop the previous sound as well
+	if (!silent) {play_sound(enemy -> sounds[enemy -> state], 0);}
 
 	int new_frame_ind = 0;
 	for (byte i = 0; i < enemy -> state; i++)
@@ -33,7 +37,7 @@ void update_enemy(Enemy* const enemy, const Player player) {
 				set_enemy_state(enemy, Attacking, 0);
 			else if (nav_state == PathTooLongBFS)
 				set_enemy_state(enemy, Idle, 0);
-			}
+		}
 
 			break;
 

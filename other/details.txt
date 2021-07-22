@@ -10,7 +10,6 @@ features:
 	- collide with billboards
 	- accelerate sideways
 	- a gui system
-	- anti-aliasing
 	- a file format
 	- a map editor
 	- momentary sounds for enemies
@@ -27,6 +26,7 @@ features:
 	- figure out lcov (?)
 	- make each file an .o file, and then link them all together
 	- faster enemy movement when nearer player (logarithmic scale)
+	- only one sound effect at once - otherwise, out of channels
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
