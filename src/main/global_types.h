@@ -52,7 +52,7 @@ typedef struct {
 } Screen;
 
 typedef struct {
-	float depth, cos_beta, wall_bottom;
+	float depth, cos_beta;
 	vec dir;
 } BufferVal;
 
@@ -85,7 +85,7 @@ typedef struct {
 		generic_billboard_count, max_point_height, out_of_bounds_point,
  		*wall_data, *ceiling_data, *floor_data;
 
- 	StateMap bfs_visited;	
+ 	StateMap bfs_visited;
 
 	Skybox skybox;
 	Sound background_sound;
@@ -105,6 +105,7 @@ typedef struct {
 
 Screen screen;
 BufferVal* val_buffer;
+StateMap occluded_pixels;
 Settings settings;
 Level current_level;
 
