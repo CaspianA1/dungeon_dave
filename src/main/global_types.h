@@ -18,8 +18,7 @@ typedef struct {
 
 typedef struct {
 	byte moving_forward_or_backward, was_forward, was_backward;
-	double v, max_v_reached, a, limit_v, strafe_v,
-		time_of_move, time_of_stop, v_incr_multiplier;
+	double v, max_v_reached, a, limit_v, strafe_v, time_of_move, time_of_stop, v_incr_multiplier;
 } KinematicBody;
 
 typedef struct {

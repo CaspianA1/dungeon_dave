@@ -51,3 +51,23 @@ problems:
 	- a gray line appears for blur fixing
 	- little blinking dots in the distance for the hieroglyphics bitmap
 	- running head-on towards a navigator can make them temporarily clip into a wall
+
+completed:
+	- minimap that conveys height data
+	- crosshair that stays aligned to the horizon
+	- enemy AI with idle, chasing, attacking, and dead states, with BFS pathfinding; enemies have different sounds and animations depending on their state as well
+	- weapons use DDA to detect collisions; option to allow weapon to have close and far range as well
+	- rudimentary level creation interface
+	- shading of diffuse circles and flat triangles, as well as environments that get darker when farther away
+	- static and animated billboards (with only 1D z-buffering for now)
+	- texture mapping, with mipmapping that incorporates box blur for cache coherency and fuzzy effects at a distance
+	- audio system that allows for sound effects and background music
+	- skyboxes that also change the portion shown based on the y-pitch
+	- raycasting with multiple floor heights (no multi-dimensional floors though, yet)
+	- use of vector intrinsics and optimized bitmatrix data structure to ease performance on older devices
+	- free look, with y-shearing and turning controlled by the mouse
+	- accurate movement physics, both in terms of 2D acceleration + deceleration, and Y-axis jumping
+	- increase in FOV while accelerating, screen tilt when strafing, and additional y-shearing when moving, giving a 'pacing' effect
+	- remappable keybindings for movement
+	- memory leak tracking system
+	- planar mode + noclip mode
