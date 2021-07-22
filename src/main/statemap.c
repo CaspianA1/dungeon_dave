@@ -1,12 +1,6 @@
 /* A statemap is just a matrix of bits. I didn't call it
 a bitmat because that sounds too much like bitmap. */
 
-typedef struct {
-	const ivec chunk_dimensions;
-	const int alloc_bytes;
-	byte* data;
-} StateMap;
-
 #define clear_statemap(s) memset(s.data, 0, s.alloc_bytes)
 #define deinit_statemap(s) wfree(s.data);
 
@@ -26,17 +20,17 @@ StateMap init_statemap(const int bits_across, const int bits_down) {
 
 //////////
 
-byte* statemap_byte(const StateMap statemap, const int x, const int y) {
+inlinable byte* statemap_byte(const StateMap statemap, const int x, const int y) {
 	return statemap.data + (y * statemap.chunk_dimensions.x + x);
 }
 
-void set_nth_bit(byte* const bits, const byte n) {
-	*bits |= 1 << (7 - n);
-}
-
-void set_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
+// returns if bit was previously set
+byte set_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
 	byte* const bits = statemap_byte(statemap, bits_x / 8, bits_y);
-	set_nth_bit(bits, bits_x % 8);
+	const byte n = 7 - (bits_x & 7); // bits_x & 7 == bits_x % 8
+	const byte was_set = (*bits >> n) & 1; // if bit was set
+	*bits |= 1 << n; // sets nth bit
+	return was_set;
 }
 
 void print_statemap(const StateMap statemap) {
@@ -50,4 +44,3 @@ void print_statemap(const StateMap statemap) {
 		putchar('\n');
 	}
 }
-

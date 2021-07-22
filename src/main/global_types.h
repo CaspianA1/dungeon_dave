@@ -68,6 +68,14 @@ typedef struct {
 /////
 
 typedef struct {
+	const ivec chunk_dimensions;
+	const int alloc_bytes;
+	byte* data;
+} StateMap;
+
+/////
+
+typedef struct {
 	const ivec map_size;
 	const vec init_pos;
 	const double init_height;
@@ -75,7 +83,9 @@ typedef struct {
 	byte
 		wall_count, billboard_count, animation_count, enemy_count,
 		generic_billboard_count, max_point_height, out_of_bounds_point,
- 		*wall_data, *ceiling_data, *floor_data, *bfs_visited;
+ 		*wall_data, *ceiling_data, *floor_data;
+
+ 	StateMap bfs_visited;	
 
 	Skybox skybox;
 	Sound background_sound;

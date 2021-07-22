@@ -287,3 +287,29 @@ void statemap_test(void) {
 }
 
 /////
+
+byte set_nth_bit_with_status(byte* const bits, const int bits_x, const int bits_y) {
+	byte* const bits = statemap_byte(statemap, bits_x / 8, bits_y);
+	const byte nth_bit = bits_x % 8;
+	
+
+	set_nth_bit(bits, nth_bit);
+
+	/*
+	// const byte status = nth_bit_is_set(*bits, n);
+	set_nth_bit(bits, n);
+	return status;
+	*/
+}
+
+/////
+
+void statemap_test(void) {
+	StateMap statemap = init_statemap(32, 32);
+	set_statemap_bit(statemap, 20, 0);
+	printf("%d\n", statemap_bit_set(statemap, 20, 0));
+	print_statemap(statemap);
+	exit(0);
+}
+
+/////

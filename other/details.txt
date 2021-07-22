@@ -13,7 +13,6 @@ features:
 	- anti-aliasing
 	- a file format
 	- a map editor
-	- seethrough sprites
 	- momentary sounds for enemies
 	- linearly interpolate actual_dist for more speed
 	- floors at different height levels (not necessarily within just one block)
@@ -24,9 +23,10 @@ features:
 	- a metro level
 	- draw sprite sections in chunks
 	- a sol enemy
-	- bitplanes for floors and the bfs visited
+	- bitplanes for floors
 	- figure out lcov (?)
 	- make each file an .o file, and then link them all together
+	- faster enemy movement when nearer player (logarithmic scale)
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
