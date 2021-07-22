@@ -109,7 +109,7 @@ void load_palace(void) {
 		{1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}, {12.0, 37.0, 0.0},
 		{15.5, 24.5, 2.0}, {2.5. 28.5, 2.0}, {37.5, 9.5, 5.0} */
 	Level palace = init_level(map_width, map_height, 3.5, 24.5, 5.0);
-	palace.max_point_height = 8;
+	palace.max_point_height = 15;
 	palace.out_of_bounds_point = 1;
 	palace.background_sound = init_sound("assets/audio/themes/sultan.wav", 0);
 	palace.get_point_height = get_palace_point_height;
