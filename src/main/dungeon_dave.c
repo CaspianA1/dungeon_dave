@@ -69,15 +69,14 @@ int main(void) {
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
 		clear_statemap(occluded_pixels);
 
-		const double
-			wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset,
-			full_jump_height = player.jump.height * settings.screen_height;
+		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
 		prepare_for_drawing();
 		draw_skybox(player.angle, wall_y_shift);
 		// draw_colored_floor(wall_y_shift);
 
 		#ifndef PLANAR_MODE
+		const double full_jump_height = player.jump.height * settings.screen_height;
 		raycast(player, wall_y_shift, full_jump_height);
 		draw_generic_billboards(player, wall_y_shift);
 		update_all_enemies(player);
