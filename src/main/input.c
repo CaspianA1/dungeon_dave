@@ -232,7 +232,7 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 	}
 
 	if (!restrict_movement) {
-		/////
+		//////////
 		const byte forward = keys[KEY_FORWARD], backward = keys[KEY_BACKWARD],
 			lstrafe = keys[KEY_LSTRAFE], rstrafe = keys[KEY_RSTRAFE];
 
@@ -241,7 +241,7 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 			moved_forward_or_backward = forward ^ backward;
 
 		const byte moved_any_direction = strafe || moved_forward_or_backward;
-		/////
+		//////////
 
 		KinematicBody* const body = &player -> body;
 		const double curr_secs = SDL_GetTicks() / 1000.0;

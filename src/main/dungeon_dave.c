@@ -14,6 +14,7 @@
 #include "screen.c"
 
 #include "../audio_visual/lighting.c"
+#include "../audio_visual/effects.c"
 #include "../audio_visual/overlay/mipmap.c"
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
@@ -58,11 +59,12 @@ int main(void) {
 	play_sound(current_level.background_sound, 1);
 	p = init_psprite("assets/walls/dune.bmp");
 
+	byte dying = 0;
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
-		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
+		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos), dying = 1;
 
-		const InputStatus input_status = handle_input(&player, 0);
+		const InputStatus input_status = handle_input(&player, dying);
 		if (input_status == Exit) deinit_all(player, weapon);
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
@@ -83,6 +85,8 @@ int main(void) {
 		#else
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
+
+		if (dying) death_effect(&player.jump.height, &player.angle);
 
 		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
