@@ -13,7 +13,7 @@ features:
 	- a file format
 	- a map editor
 	- linearly interpolate actual_dist for more speed
-	- floors at different height levels (not necessarily within just one block)
+	- floors at different height levels
 	- smooth mipmap depth switching, and mipmap a texture until its width or height reaches 1
 	- mipmapping for sprites
 	- a shotgun more in the art style of Adam's whip
@@ -39,11 +39,10 @@ problems:
 	- skybox stretching
 	- less doubles and more ints in render_overlay.c
 	- don't intersect the player dot with walls in the minimap
-	- shading is slow (it isn't the shading logic, it's the divisions)
+	- shading is slow (it isn't the shading logic, it's the bitwise ops)
 	- skyboxes become wonky when the screen size increases
-	- don't reallocate the `all_visited` var each time in bfs.c
 	- disabling vsync makes everything choppy
-	- vecs to double[2]'s in screen.dir_buffer
+	- vecs to float[2]'s in screen.dir_buffer
 	- fix the offset problem for fast_affine_floor
 	- sometimes, psprites disappear mid-game (use memory sanitizer to resolve the problem: https://github.com/google/sanitizers/wiki/MemorySanitizer) (also, each time that the minimap is enabled, the psprite becomes corrupted)
 	- bogo is completely dark with the make rule `debug_2` (he is only light with -Ofast)
