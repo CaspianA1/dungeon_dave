@@ -86,7 +86,7 @@ int main(void) {
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		if (dying) death_effect(&player.jump.height, &player.angle);
+		if (dying) death_effect(player.pos, &player.jump.height, &player.angle);
 
 		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
