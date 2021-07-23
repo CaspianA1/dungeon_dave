@@ -57,10 +57,10 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 			const double actual_dist = straight_dist / (double) buffer_val.cos_beta;
 			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
 
-			#ifdef PLANAR_MODE
-
 			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_size.x - 1.0
 				|| hit[1] > current_level.map_size.y - 1.0) continue;
+
+			#ifdef PLANAR_MODE
 
 			#else
 

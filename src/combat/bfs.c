@@ -28,7 +28,7 @@ byte update_queue_with_neighbors(RouteQueue* const routes, Route route, const iv
 			(i == TopRight && (neighbor_map_point(neighbors, Top) || neighbor_map_point(neighbors, Right))))
 		continue;
 
-		if (!set_statemap_bit(current_level.bfs_visited, neighbor.x, neighbor.y)) { // if not visited before
+		if (!set_statemap_bit_with_status(current_level.bfs_visited, neighbor.x, neighbor.y)) { // if not visited before
 			const Route next_route = extend_route(route, neighbor);
 			if (next_route.creation_error) return 0;
 			enqueue_to_routes(routes, next_route);
@@ -41,7 +41,7 @@ ResultBFS bfs(const vec begin, const vec end) {
 	const ivec int_begin = ivec_from_vec(begin), int_end = ivec_from_vec(end);
 
 	clear_statemap(current_level.bfs_visited);
-	set_statemap_bit(current_level.bfs_visited, int_begin.x, int_begin.y); // not fully working yet?
+	set_statemap_bit(current_level.bfs_visited, int_begin.x, int_begin.y);
 
 	RouteQueue routes = init_routes(int_begin);
 	ResultBFS result = {.state = FailedBFS};

@@ -24,13 +24,25 @@ inlinable byte* statemap_byte(const StateMap statemap, const int x, const int y)
 	return statemap.data + (y * statemap.chunk_dimensions.x + x);
 }
 
+inlinable byte get_n_for_bits_x(const int bits_x) {
+	return 7 - (bits_x & 7); // bits_x & 7 == bits_x % 8
+}
+
 // returns if bit was previously set
-byte set_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
+inlinable byte set_statemap_bit_with_status(const StateMap statemap, const int bits_x, const int bits_y) {
 	byte* const bits = statemap_byte(statemap, bits_x / 8, bits_y);
-	const byte n = 7 - (bits_x & 7); // bits_x & 7 == bits_x % 8
+	const byte n = get_n_for_bits_x(bits_x);
 	const byte was_set = (*bits >> n) & 1; // if bit was set
 	*bits |= 1 << n; // sets nth bit
 	return was_set;
+}
+
+inlinable void set_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
+	*statemap_byte(statemap, bits_x / 8, bits_y) |= 1 << get_n_for_bits_x(bits_x);
+}
+
+byte get_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
+	return (*statemap_byte(statemap, bits_x / 8, bits_y) >> get_n_for_bits_x(bits_x)) & 1;
 }
 
 void print_statemap(const StateMap statemap) {
