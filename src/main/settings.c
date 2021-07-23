@@ -58,9 +58,6 @@ void load_default_settings(void) {
 	settings.max_fov = INIT_MAX_FOV;
 	settings.minimap_scale = INIT_MINIMAP_SCALE;
 	settings.stop_dist = INIT_STOP_DIST;
-
-	srand(time(NULL));
-	keys = SDL_GetKeyboardState(NULL);
 }
 
 byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
@@ -127,9 +124,12 @@ Player load_player(const double jump_up_v0,
 void load_all_defaults(void (*load_first_level) (void), Player* const player, Weapon* const weapon) {
 	load_default_settings();
 
+	srand(time(NULL));
+
 	void init_screen(void);
 	init_screen();
 
+	keys = SDL_GetKeyboardState(NULL);
 	val_buffer = wmalloc(settings.screen_width * sizeof(BufferVal));
 
 	StateMap init_statemap(const int, const int);
