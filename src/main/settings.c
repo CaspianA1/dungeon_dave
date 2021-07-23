@@ -179,7 +179,6 @@ void deinit_all(const Player player, const Weapon weapon) {
 	deinit_screen();
 
 	wfree(val_buffer);
-
 	deinit_statemap(occluded_by_walls);
 
 	TTF_Quit();
