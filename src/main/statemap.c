@@ -37,7 +37,7 @@ inlinable byte set_statemap_bit_with_status(const StateMap statemap, const int b
 	return was_set;
 }
 
-inlinable void set_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
+void set_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
 	*statemap_byte(statemap, bits_x / 8, bits_y) |= 1 << get_n_for_bits_x(bits_x);
 }
 

@@ -90,7 +90,12 @@ inlinable void set_map_point(byte* const map, const byte val, const int x, const
 	map[y * map_width + x] = val;
 }
 
-void update_val_buffers(const int screen_x, const int wall_top, const int wall_bottom, const float dist,
+inlinable void align_from_out_of_vert_bounds(int* const val) {
+	if (*val < 0) *val = 0;
+	else if (*val >= settings.screen_height) *val = settings.screen_height - 1;
+}
+
+void update_val_buffers(const int screen_x, int wall_top, int wall_bottom, const float dist,
 	const float cos_beta, const vec dir) {
 
 	BufferVal* buffer_val = &val_buffer[screen_x];
@@ -100,10 +105,12 @@ void update_val_buffers(const int screen_x, const int wall_top, const int wall_b
 		buffer_val -> dir = dir;
 	}
 
-	for (int y = wall_top; y < wall_bottom; y++) {
-		// set vals in occluded pixels here
-	}
-	// also, initialize and rescale occluded pixels as needed in a function in settings.c
+	align_from_out_of_vert_bounds(&wall_top);
+	align_from_out_of_vert_bounds(&wall_bottom);
+
+	void set_statemap_bit(const StateMap, const int, const int);
+	for (int y = wall_top; y < wall_bottom; y++)
+		set_statemap_bit(occluded_by_walls, screen_x, y);
 }
 
 /////

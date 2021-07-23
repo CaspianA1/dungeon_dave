@@ -51,6 +51,8 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 		// printf((cmp_pixbuf_row == pixbuf_row) ? "Equal" : "Not equal");
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
+			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
+
 			const BufferVal buffer_val = val_buffer[screen_x];
 			// if (buffer_val.wall_bottom >= pace_y + 1) continue;
 
