@@ -130,6 +130,11 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	void init_screen(void);
 	init_screen();
 
+	val_buffer = wmalloc(settings.screen_width * sizeof(BufferVal));
+
+	StateMap init_statemap(const int, const int);
+	occluded_by_walls = init_statemap(settings.screen_width, settings.screen_height);
+
 	init_audio_subsystem();
 	load_first_level();
 
@@ -172,6 +177,10 @@ void deinit_all(const Player player, const Weapon weapon) {
 	deinit_level(current_level);
 	deinit_audio_subsystem();
 	deinit_screen();
+
+	wfree(val_buffer);
+
+	deinit_statemap(occluded_by_walls);
 
 	TTF_Quit();
 

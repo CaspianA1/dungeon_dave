@@ -6,12 +6,14 @@
 
 #include "utils.c"
 
-#include "../audio_visual/lighting.c"
-#include "settings.c"
-#include "screen.c"
 #include "dda.c"
 #include "statemap.c"
 
+
+#include "settings.c"
+#include "screen.c"
+
+#include "../audio_visual/lighting.c"
 #include "../audio_visual/overlay/mipmap.c"
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
@@ -67,7 +69,7 @@ int main(void) {
 		if (input_status == Exit) deinit_all(player, weapon);
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
-		clear_statemap(occluded_pixels);
+		clear_statemap(occluded_by_walls);
 
 		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 

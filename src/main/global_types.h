@@ -67,8 +67,8 @@ typedef struct {
 /////
 
 typedef struct {
-	const ivec chunk_dimensions;
-	const int alloc_bytes;
+	ivec chunk_dimensions;
+	int alloc_bytes;
 	byte* data;
 } StateMap;
 
@@ -104,7 +104,7 @@ typedef struct {
 
 Screen screen;
 BufferVal* val_buffer;
-StateMap occluded_pixels;
+StateMap occluded_by_walls;
 Settings settings;
 Level current_level;
 

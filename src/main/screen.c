@@ -11,8 +11,6 @@ void init_screen(void) {
 
 	screen.pixel_format = SDL_AllocFormat(PIXEL_FORMAT);
 	init_SDL_buffers(settings.screen_width, settings.screen_height, 0);
-
-	val_buffer = wmalloc(settings.screen_width * sizeof(BufferVal));
 }
 
 void deinit_screen(void) {
@@ -22,8 +20,6 @@ void deinit_screen(void) {
 
 	SDL_DestroyTexture(screen.pixel_buffer);
 	SDL_DestroyTexture(screen.shape_buffer);
-
-	wfree(val_buffer);
 
 	SDL_Quit();
 }
