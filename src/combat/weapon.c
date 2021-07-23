@@ -41,7 +41,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player player, const Input
 
 		for (byte i = 0; i < current_level.enemy_count; i++) {
 			Enemy* const enemy = &current_level.enemies[i];
-			if (enemy -> animations.billboard.dist <= dist_wake_up_from_weapon && enemy -> state != Dead)
+			if (enemy -> animations.billboard.dist <= dist_wake_up_from_weapon && enemy -> state == Idle)
 				set_enemy_state(enemy, Chasing, 0);
 		}
 	}

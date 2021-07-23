@@ -51,6 +51,7 @@ problems:
 	- a gray line appears for blur fixing
 	- little blinking dots in the distance for the hieroglyphics bitmap
 	- running head-on towards a navigator can make them temporarily clip into a wall
+	- some weapon uses at a distance result in the walking sound
 
 completed:
 	- minimap that conveys height data
