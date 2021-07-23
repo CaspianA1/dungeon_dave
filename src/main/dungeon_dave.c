@@ -54,11 +54,8 @@ int main(void) {
 	Weapon weapon;
 	load_all_defaults(load_palace, &player, &weapon);
 
-	if (display_title_screen() == Exit)
-		deinit_all(player, weapon);
-
+	if (display_title_screen() == Exit) deinit_all(player, weapon);
 	play_sound(current_level.background_sound, 1);
-
 	p = init_psprite("assets/walls/dune.bmp");
 
 	while (1) {

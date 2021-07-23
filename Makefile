@@ -43,7 +43,7 @@ profile_gcov:
 	mv *.gcov bin/profiling
 	@echo Profiling data is in any .gcov file in bin/profiling.
 
-debug_2: # finds writes to uninitialized memory and such
+debug_2: # finds writes to unallocated memory and such
 	$(CC) $(CFLAGS) $(DEBUG) $(DEBUG_2_FLAGS) $(LDFLAGS)
 	make run
 

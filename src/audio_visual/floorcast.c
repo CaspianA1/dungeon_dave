@@ -54,7 +54,6 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
 
 			const BufferVal buffer_val = val_buffer[screen_x];
-			// if (buffer_val.wall_bottom >= pace_y + 1) continue;
 
 			const double actual_dist = straight_dist / (double) buffer_val.cos_beta;
 			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
@@ -62,13 +61,9 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_size.x - 1.0
 				|| hit[1] > current_level.map_size.y - 1.0) continue;
 
-			#ifdef PLANAR_MODE
-
-			#else
-
+			#ifndef PLANAR_MODE
 			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
 			if (current_level.get_point_height(wall_point, hit)) continue;
-
 			#endif
 
 			draw_from_hit(hit, actual_dist, screen_x, pixbuf_row);

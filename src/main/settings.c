@@ -76,6 +76,10 @@ byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
 			update_proj_dist();
 
 			val_buffer = wrealloc(val_buffer, new_width * sizeof(BufferVal));
+
+			deinit_statemap(occluded_by_walls);
+			occluded_by_walls = init_statemap(new_width, new_height);
+
 		}
 		if (height_not_eq) {
 			settings.screen_height = new_height;
