@@ -77,8 +77,8 @@ inlinable void tick_delay(const Uint32 before) {
 	if (wait > 0) SDL_Delay(wait);
 }
 
-inlinable byte map_point(const byte* const map, const double x, const double y) {
-	return map[(int) (floor(y) * current_level.map_size.x + floor(x))];
+inlinable byte map_point(const byte* const map, const int x, const int y) {
+	return map[y * current_level.map_size.x + x];
 }
 
 inlinable byte point_exists_at(const double x, const double y, const double z) {

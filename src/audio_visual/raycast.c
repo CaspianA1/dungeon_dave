@@ -12,11 +12,11 @@ inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir,
 	const int max_offset = width - 1;
 
 	if (side) {
-		const int x_offset = (hit[0] - floor(hit[0])) * max_offset;
+		const int x_offset = (hit[0] - (int) hit[0]) * max_offset;
 		return (dir[1] > 0.0) ? max_offset - x_offset : x_offset;
 	}
 	else {
-		const int y_offset = (hit[1] - floor(hit[1])) * max_offset;
+		const int y_offset = (hit[1] - (int) hit[1]) * max_offset;
 		return (dir[0] < 0.0) ? max_offset - y_offset : y_offset;
 	}
 }
