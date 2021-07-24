@@ -84,8 +84,6 @@ int main(void) {
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		if (keys[SDL_SCANCODE_V]) player.is_dead = 1;
-
 		if (player.is_dead && death_effect(player.pos, &player.jump.height, &player.angle, &player.tilt.val))
 			deinit_all(&player, weapon);
 

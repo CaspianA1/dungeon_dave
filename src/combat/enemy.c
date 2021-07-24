@@ -45,7 +45,11 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 			if (update_path_if_needed(nav, player -> pos, player -> jump.height) == Navigating)
 				set_enemy_state(enemy, Chasing, 0);
 			else if ((SDL_GetTicks() / 1000.0 - enemy -> time_at_attack > time_no_attacking_after_player_hit)) {
-				if ((player -> hp -= enemy -> power) <= 0.0) player -> is_dead = 1;
+				if ((player -> hp -= enemy -> power) <= 0.0) {
+					player -> is_dead = 1;
+					player -> hp = 0.0;
+					for (byte i = 0; i < current_level.enemy_count; i++) set_enemy_state(enemy, Idle, 1);
+				}
 			}
 
 			break;
