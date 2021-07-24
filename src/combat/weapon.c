@@ -49,8 +49,8 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	}
 
 	// -1 -> cycle frame, 0 -> first frame
-	animate_weapon(&weapon -> animation, player -> pos, weapon -> paces_sideways, weapon -> in_use,
-		player -> y_pitch, player -> pace.screen_offset);
+	animate_weapon(&weapon -> animation, player -> pos, weapon -> paces_sideways,
+		weapon -> in_use, player -> y_pitch, player -> pace.screen_offset);
 }
 
 #else
