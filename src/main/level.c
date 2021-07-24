@@ -107,8 +107,8 @@ void set_level_animations(Level* const level, const unsigned animation_count, ..
 	va_end(animation_data);
 }
 
-/* state, dist_thresholds, hp_to_retreat, hp,
-animation_seg_lengths, animations, sounds, navigator */
+/* state, dist wake from idle, hp, power,
+animation data, sounds, navigator speed */
 
 void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 	level -> enemy_count = enemy_count;
@@ -122,6 +122,7 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 		Enemy enemy = {
 			.dist_wake_from_idle = va_arg(enemy_data, double),
 			.hp = va_arg(enemy_data, double),
+			.power = va_arg(enemy_data, double),
 
 			.animation_seg_lengths = {
 				va_arg(enemy_data, unsigned),

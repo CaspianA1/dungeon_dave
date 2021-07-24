@@ -17,7 +17,7 @@ void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	enemy -> animations.frame_ind = new_frame_ind;
 }
 
-void update_enemy(Enemy* const enemy, const Player* const player) {
+void update_enemy(Enemy* const enemy, Player* const player) {
 	Navigator* const nav = &enemy -> nav;
 	const double dist = enemy -> animations.billboard.dist;
 
@@ -42,6 +42,10 @@ void update_enemy(Enemy* const enemy, const Player* const player) {
 		case Attacking:
 			if (update_path_if_needed(nav, player -> pos, player -> jump.height) == Navigating)
 				set_enemy_state(enemy, Chasing, 0);
+			else {
+				if ((player -> hp -= enemy -> power) <= 0.0) player -> is_dead = 1;
+			}
+
 			break;
 
 		case Dead: break;
@@ -49,7 +53,7 @@ void update_enemy(Enemy* const enemy, const Player* const player) {
 	enemy -> recently_attacked = 0;
 }
 
-inlinable void update_all_enemies(const Player* const player) {
+inlinable void update_all_enemies(Player* const player) {
 	for (byte i = 0; i < current_level.enemy_count; i++)
 		update_enemy(&current_level.enemies[i], player);
 }

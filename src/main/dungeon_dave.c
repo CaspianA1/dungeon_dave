@@ -50,7 +50,7 @@ non-clipping pathfinding
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, weapon);
 	play_sound(current_level.background_sound, 1);
@@ -59,14 +59,14 @@ int main(void) {
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
-		if (keys[SDL_SCANCODE_V]) player.is_dead = 1;
-		if (keys[SDL_SCANCODE_B]) player.is_dead = 0;
 
 		const InputStatus input_status = handle_input(&player, player.is_dead);
 		if (input_status == Exit) deinit_all(&player, weapon);
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
 		clear_statemap(occluded_by_walls);
+
+		DEBUG(player.hp, lf);
 
 		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
