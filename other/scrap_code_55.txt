@@ -313,3 +313,10 @@ void statemap_test(void) {
 }
 
 /////
+
+DEBUG(red_fade, d);
+DEBUG(black_fade_1, d);
+DEBUG(black_fade_2, d);
+printf("r = %d, g = %d, b = %d\n---\n", r, g, b);
+
+/////
