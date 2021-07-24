@@ -50,6 +50,3 @@ PSprite init_psprite(const char* const path) {
 
 	return p;
 }
-
-#define deinit_sprite(sprite) SDL_DestroyTexture(sprite.texture);
-#define deinit_psprite(p) SDL_DestroyTexture(p.texture);

@@ -3,6 +3,10 @@ typedef struct {
 	ivec size;
 } Sprite;
 
+Sprite init_sprite(const char* const, const byte);
+#define deinit_sprite(sprite) SDL_DestroyTexture(sprite.texture);
+#define deinit_psprite(p) SDL_DestroyTexture(p.texture);
+
 typedef struct {
 	void* pixels;
 	int pitch, size; // for pixelwise access, equal dimensions are needed
