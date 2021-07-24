@@ -48,7 +48,7 @@ typedef enum {
 typedef struct {
 	EnemyState state;
 	const double dist_wake_from_idle;
-	double hp, power;
+	double hp, power, time_at_attack;
 
 	byte recently_attacked;
 	const byte animation_seg_lengths[4];

@@ -2,7 +2,8 @@
 The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Attacked added after Dead. */
 
-enum {dist_wake_up_from_weapon = 5};
+const int dist_wake_up_from_weapon = 5;
+const double time_no_attacking_after_player_hit = 0.4;
 
 void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	if (enemy -> state == new_state) return;
@@ -21,6 +22,8 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 	Navigator* const nav = &enemy -> nav;
 	const double dist = enemy -> animations.billboard.dist;
 
+	if (enemy -> recently_attacked) enemy -> time_at_attack = SDL_GetTicks() / 1000.0;
+
 	/* for each state (excluding Dead), periodically play the sound from that state,
 	and only play the Dead animation once, stopping on the last frame */
 	switch (enemy -> state) {
@@ -36,13 +39,12 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 			else if (nav_state == PathTooLongBFS)
 				set_enemy_state(enemy, Idle, 0);
 		}
-
 			break;
 
 		case Attacking:
 			if (update_path_if_needed(nav, player -> pos, player -> jump.height) == Navigating)
 				set_enemy_state(enemy, Chasing, 0);
-			else {
+			else if ((SDL_GetTicks() / 1000.0 - enemy -> time_at_attack > time_no_attacking_after_player_hit)) {
 				if ((player -> hp -= enemy -> power) <= 0.0) player -> is_dead = 1;
 			}
 

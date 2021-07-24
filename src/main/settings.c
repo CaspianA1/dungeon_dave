@@ -145,7 +145,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	const Player first_player = load_player(4.8, 0.3, 8.0, 0.12, 15.0, 0.08, 0.09, 0.05, 1.9);
 
 	const Weapon first_weapon = {
-		.in_use = 0, .short_range = 1, .paces_sideways = 0, .power = 3.5, .dist_for_hit = 0.5,
+		.in_use = 0, .short_range = 1, .paces_sideways = 0, .power = 4.0, .dist_for_hit = 0.5,
 		.sound = init_sound("assets/audio/sound_effects/whip_crack.wav", 1),
 		.animation = init_animation("assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60, 0)
 	};
