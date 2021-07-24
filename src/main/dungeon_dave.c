@@ -56,14 +56,13 @@ int main(void) {
 	play_sound(current_level.background_sound, 1);
 	p = init_psprite("assets/walls/dune.bmp");
 
-	byte dying = 0;
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
-		if (keys[SDL_SCANCODE_V]) dying = 1;
-		if (keys[SDL_SCANCODE_B]) dying = 0;
+		if (keys[SDL_SCANCODE_V]) player.is_dead = 1;
+		if (keys[SDL_SCANCODE_B]) player.is_dead = 0;
 
-		const InputStatus input_status = handle_input(&player, dying);
+		const InputStatus input_status = handle_input(&player, player.is_dead);
 		if (input_status == Exit) deinit_all(player, weapon);
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
@@ -85,7 +84,7 @@ int main(void) {
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		if (dying) death_effect(player.pos, &player.jump.height, &player.angle, &player.tilt.val);
+		if (player.is_dead) death_effect(player.pos, &player.jump.height, &player.angle, &player.tilt.val);
 
 		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 

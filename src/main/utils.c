@@ -109,7 +109,7 @@ void update_val_buffers(const int screen_x, double wall_top, double wall_bottom,
 	align_from_out_of_vert_bounds(&wall_bottom);
 
 	void set_statemap_bit(const StateMap, const int, const int);
-	for (double y = wall_top; y < wall_bottom - 1.0; y++)
+	for (double y = ceil(wall_top); y < wall_bottom - 1.0; y++)
 		set_statemap_bit(occluded_by_walls, screen_x, y);
 }
 

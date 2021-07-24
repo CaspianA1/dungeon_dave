@@ -106,7 +106,7 @@ Player load_player(const double jump_up_v0,
 
 		.mouse_pos = {0, 0},
 
-		.angle = 0.0, .y_pitch = 0,
+		.angle = 0.0, .hp = 30.0, .is_dead = 0, .y_pitch = 0,
 
 		.jump = {.jumping = 0, .up_v0 = jump_up_v0, .v0 = 0.0,
 			.height = init_height, .start_height = init_height,
