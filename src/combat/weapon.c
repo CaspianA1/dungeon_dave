@@ -32,14 +32,14 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 
 #ifndef NOCLIP_MODE
 
-void use_weapon_if_needed(Weapon* const weapon, const Player player, const InputStatus input_status) {
-	if (player.is_dead) weapon -> animation.frame_ind = 0;
+void use_weapon_if_needed(Weapon* const weapon, const Player* const player, const InputStatus input_status) {
+	if (player -> is_dead) weapon -> animation.frame_ind = 0;
 
 	if (weapon -> in_use && weapon -> animation.frame_ind == 0) weapon -> in_use = 0;
-	else if (input_status == BeginAnimatingWeapon && !weapon -> in_use && !player.is_dead) {
+	else if (input_status == BeginAnimatingWeapon && !weapon -> in_use && !player -> is_dead) {
 		weapon -> in_use = 1;
 		play_sound(weapon -> sound, 0);
-		shoot_weapon(weapon, player.pos, player.dir);
+		shoot_weapon(weapon, player -> pos, player -> dir);
 
 		for (byte i = 0; i < current_level.enemy_count; i++) {
 			Enemy* const enemy = &current_level.enemies[i];
@@ -49,8 +49,8 @@ void use_weapon_if_needed(Weapon* const weapon, const Player player, const Input
 	}
 
 	// -1 -> cycle frame, 0 -> first frame
-	animate_weapon(&weapon -> animation, player.pos, weapon -> paces_sideways, weapon -> in_use,
-		player.y_pitch, player.pace.screen_offset);
+	animate_weapon(&weapon -> animation, player -> pos, weapon -> paces_sideways, weapon -> in_use,
+		player -> y_pitch, player -> pace.screen_offset);
 }
 
 #else

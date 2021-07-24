@@ -1,8 +1,6 @@
-/*
-Four enemy states: Idle, Chasing, Attacking, Dead
+/* Four enemy states: Idle, Chasing, Attacking, Dead
 The spritesheet layout is in the order of the enemy states.
-The sounds are in the same order, but with Attacked added after Dead.
-*/
+The sounds are in the same order, but with Attacked added after Dead. */
 
 enum {dist_wake_up_from_weapon = 5};
 
@@ -19,7 +17,7 @@ void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	enemy -> animations.frame_ind = new_frame_ind;
 }
 
-void update_enemy(Enemy* const enemy, const Player player) {
+void update_enemy(Enemy* const enemy, const Player* const player) {
 	Navigator* const nav = &enemy -> nav;
 	const double dist = enemy -> animations.billboard.dist;
 
@@ -32,7 +30,7 @@ void update_enemy(Enemy* const enemy, const Player player) {
 			break;
 		
 		case Chasing: {
-			const NavigationState nav_state = update_path_if_needed(nav, player.pos, player.jump.height);
+			const NavigationState nav_state = update_path_if_needed(nav, player -> pos, player -> jump.height);
 			if (nav_state == ReachedDest)
 				set_enemy_state(enemy, Attacking, 0);
 			else if (nav_state == PathTooLongBFS)
@@ -42,7 +40,7 @@ void update_enemy(Enemy* const enemy, const Player player) {
 			break;
 
 		case Attacking:
-			if (update_path_if_needed(nav, player.pos, player.jump.height) == Navigating)
+			if (update_path_if_needed(nav, player -> pos, player -> jump.height) == Navigating)
 				set_enemy_state(enemy, Chasing, 0);
 			break;
 
@@ -51,7 +49,7 @@ void update_enemy(Enemy* const enemy, const Player player) {
 	enemy -> recently_attacked = 0;
 }
 
-inlinable void update_all_enemies(const Player player) {
+inlinable void update_all_enemies(const Player* const player) {
 	for (byte i = 0; i < current_level.enemy_count; i++)
 		update_enemy(&current_level.enemies[i], player);
 }

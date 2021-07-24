@@ -170,13 +170,13 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	memcpy(weapon, &first_weapon, sizeof(Weapon));
 }
 
-void deinit_all(const Player player, const Weapon weapon) {
+void deinit_all(const Player* const player, const Weapon weapon) {
 	void deinit_weapon(const Weapon);
 	void deinit_level(const Level);
 	void deinit_screen(void);
 
-	deinit_sound(player.jump.sound_at_jump);
-	deinit_sound(player.jump.sound_at_land);
+	deinit_sound(player -> jump.sound_at_jump);
+	deinit_sound(player -> jump.sound_at_land);
 	deinit_weapon(weapon);
 	deinit_level(current_level);
 	deinit_audio_subsystem();

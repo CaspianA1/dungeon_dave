@@ -52,7 +52,7 @@ int main(void) {
 	Weapon weapon;
 	load_all_defaults(load_palace, &player, &weapon);
 
-	if (display_title_screen() == Exit) deinit_all(player, weapon);
+	if (display_title_screen() == Exit) deinit_all(&player, weapon);
 	play_sound(current_level.background_sound, 1);
 	p = init_psprite("assets/walls/dune.bmp");
 
@@ -63,7 +63,7 @@ int main(void) {
 		if (keys[SDL_SCANCODE_B]) player.is_dead = 0;
 
 		const InputStatus input_status = handle_input(&player, player.is_dead);
-		if (input_status == Exit) deinit_all(player, weapon);
+		if (input_status == Exit) deinit_all(&player, weapon);
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
 		clear_statemap(occluded_by_walls);
@@ -76,10 +76,10 @@ int main(void) {
 
 		#ifndef PLANAR_MODE
 		const double full_jump_height = player.jump.height * settings.screen_height;
-		raycast(player, wall_y_shift, full_jump_height);
-		draw_generic_billboards(player, wall_y_shift);
-		update_all_enemies(player);
-		use_weapon_if_needed(&weapon, player, input_status);
+		raycast(&player, wall_y_shift, full_jump_height);
+		draw_generic_billboards(&player, wall_y_shift);
+		update_all_enemies(&player);
+		use_weapon_if_needed(&weapon, &player, input_status);
 		#else
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif

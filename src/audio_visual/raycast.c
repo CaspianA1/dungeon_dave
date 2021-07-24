@@ -78,20 +78,20 @@ vec handle_ray(const DataRaycast d) {
 	return (vec) {(double) smallest_wall_y, wall_h};
 }
 
-void raycast(const Player player, const double wall_y_shift, const double full_jump_height) {
-	const double player_angle = to_radians(player.angle);
+void raycast(const Player* const player, const double wall_y_shift, const double full_jump_height) {
+	const double player_angle = to_radians(player -> angle);
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
 		const vec dir = {cos(theta), sin(theta)};
 
 		double last_wall_y = DBL_MAX, last_height_change_y = settings.screen_height;
-		byte at_first_hit = 1, curr_point_height = player.jump.height, last_point_height = player.jump.height;
-		DataDDA ray = init_dda(player.pos, dir, 1.0);
+		byte at_first_hit = 1, curr_point_height = player -> jump.height, last_point_height = player -> jump.height;
+		DataDDA ray = init_dda(player -> pos, dir, 1.0);
 
 		while (iter_dda(&ray)) {
 			const byte point = map_point(current_level.wall_data, ray.curr_tile[0], ray.curr_tile[1]);
-			const vec hit = vec_line_pos(player.pos, dir, ray.dist);
+			const vec hit = vec_line_pos(player -> pos, dir, ray.dist);
 			const byte point_height = current_level.get_point_height(point, hit);
 
 			if (point_height != curr_point_height) {
@@ -99,7 +99,7 @@ void raycast(const Player player, const double wall_y_shift, const double full_j
 				if (point) {
 					const vec wall_y_components = handle_ray((DataRaycast) {
 						&last_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height,
-						player.pos, hit, dir, point, ray.side, at_first_hit, &last_point_height, screen_x});
+						player -> pos, hit, dir, point, ray.side, at_first_hit, &last_point_height, screen_x});
 
 					height_change_y = wall_y_components[0], height_change_h = wall_y_components[1];
 
