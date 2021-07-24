@@ -52,6 +52,7 @@ problems:
 	- little blinking dots in the distance for the hieroglyphics bitmap
 	- running head-on towards a navigator can make them temporarily clip into a wall
 	- some weapon uses at a distance result in the walking sound
+	- readjust mouse pos after scaling down the screen - b/c that is messing with the skybox
 
 completed:
 	- minimap that conveys height data

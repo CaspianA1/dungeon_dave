@@ -60,13 +60,13 @@ int main(void) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
+		DEBUG(player.hp, lf);
+
 		const InputStatus input_status = handle_input(&player, player.is_dead);
 		if (input_status == Exit) deinit_all(&player, weapon);
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
 		clear_statemap(occluded_by_walls);
-
-		DEBUG(player.hp, lf);
 
 		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
@@ -78,13 +78,16 @@ int main(void) {
 		const double full_jump_height = player.jump.height * settings.screen_height;
 		raycast(&player, wall_y_shift, full_jump_height);
 		draw_generic_billboards(&player, wall_y_shift);
-		update_all_enemies(&player);
+		if (!player.is_dead) update_all_enemies(&player);
 		use_weapon_if_needed(&weapon, &player, input_status);
 		#else
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		if (player.is_dead) death_effect(player.pos, &player.jump.height, &player.angle, &player.tilt.val);
+		if (keys[SDL_SCANCODE_V]) player.is_dead = 1;
+
+		if (player.is_dead && death_effect(player.pos, &player.jump.height, &player.angle, &player.tilt.val))
+			deinit_all(&player, weapon);
 
 		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
