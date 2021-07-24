@@ -33,8 +33,10 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 #ifndef NOCLIP_MODE
 
 void use_weapon_if_needed(Weapon* const weapon, const Player player, const InputStatus input_status) {
+	if (player.is_dead) weapon -> animation.frame_ind = 0;
+
 	if (weapon -> in_use && weapon -> animation.frame_ind == 0) weapon -> in_use = 0;
-	else if (input_status == BeginAnimatingWeapon && !weapon -> in_use) {
+	else if (input_status == BeginAnimatingWeapon && !weapon -> in_use && !player.is_dead) {
 		weapon -> in_use = 1;
 		play_sound(weapon -> sound, 0);
 		shoot_weapon(weapon, player.pos, player.dir);
