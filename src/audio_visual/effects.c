@@ -1,6 +1,6 @@
-void death_effect(const vec pos, double* const p_height, double* const angle) {
+void death_effect(const vec pos, double* const p_height, double* const angle, double* const tilt_val) {
 	static byte red_fade = 1, black_fade_1 = 0, black_fade_2 = 0, r = 255, g = 255, b = 255;
-	const byte color_step = 2, lowest_color = 43;
+	const byte color_step = 4, lowest_color = 43;
 
 	if (red_fade) {
 		g -= color_step;
@@ -12,25 +12,21 @@ void death_effect(const vec pos, double* const p_height, double* const angle) {
 	else if (black_fade_2) {
 		r -= color_step;
 		g -= color_step;
-		if ((b -= color_step) == 1) black_fade_2 = 0;
+		if ((b -= color_step) <= 3) black_fade_2 = 0;
 	}
 
-	else return;
-
-	SDL_SetTextureColorMod(screen.pixel_buffer, r, g, b);
-	SDL_SetTextureColorMod(screen.shape_buffer, r, g, b);
+	if (red_fade || black_fade_1 || black_fade_2) {
+		SDL_SetTextureColorMod(screen.pixel_buffer, r, g, b);
+		SDL_SetTextureColorMod(screen.shape_buffer, r, g, b);
+	}
 
 	const byte base_height = current_level.get_point_height(map_point(current_level.wall_data, pos[0], pos[1]), pos);
-	const double min_base_height_offset = -0.28;
-	if (*p_height > base_height + min_base_height_offset) {
-		// const double 
+	const double bottom = base_height - 0.2 * (base_height + 1);
+	const double dist_from_bottom = *p_height - bottom;
 
-		/*
-		const double sink_speed = ((*p_height - min_base_height_offset) - base_height) / 10.0;
-		*p_height -= sink_speed;
-		*angle += sink_speed * 360.0;
-		*/
-	}
+	if (*p_height > bottom) *p_height -= dist_from_bottom / 10.0;
+	else *p_height = bottom;
 
-	DEBUG(*p_height, lf);
+	*angle += dist_from_bottom * 30.0;
+	*tilt_val += 0.1;
 }

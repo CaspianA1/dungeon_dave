@@ -137,7 +137,7 @@ inlinable vec vec_line_pos(const vec pos, const vec dir, const double slope) {
 }
 
 inlinable ivec ivec_from_vec(const vec v) {
-	return (ivec) {(int) floor(v[0]), (int) floor(v[1])};
+	return (ivec) {(int) v[0], (int) v[1]};
 }
 
 inlinable byte ivec_out_of_bounds(const ivec v) {

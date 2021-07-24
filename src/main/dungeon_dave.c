@@ -62,7 +62,9 @@ int main(void) {
 	byte dying = 0;
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
-		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos), dying = 1;
+		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
+		if (keys[SDL_SCANCODE_V]) dying = 1;
+		if (keys[SDL_SCANCODE_B]) dying = 0;
 
 		const InputStatus input_status = handle_input(&player, dying);
 		if (input_status == Exit) deinit_all(player, weapon);
@@ -86,7 +88,7 @@ int main(void) {
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		if (dying) death_effect(player.pos, &player.jump.height, &player.angle);
+		if (dying) death_effect(player.pos, &player.jump.height, &player.angle, &player.tilt.val);
 
 		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 

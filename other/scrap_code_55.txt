@@ -320,3 +320,30 @@ DEBUG(black_fade_2, d);
 printf("r = %d, g = %d, b = %d\n---\n", r, g, b);
 
 /////
+
+/*
+const double sink_speed = 1.0 / log((*p_height - min_base_height_offset) - base_height);
+*p_height += sink_speed;
+*/
+
+/*
+const double sink_speed = ((*p_height - min_base_height_offset) - base_height) / 10.0;
+*p_height -= sink_speed;
+*angle += sink_speed * 360.0;
+*/
+
+/////
+
+/*
+const byte base_height = current_level.get_point_height(map_point(current_level.wall_data, pos[0], pos[1]), pos);
+const double min_base_height_offset = -0.25 * (base_height + 1);
+if (*p_height > base_height + min_base_height_offset) {
+	const double sink_speed = (*p_height - min_base_height_offset - base_height) / 20.0;
+	*p_height -= sink_speed;
+	*angle += sink_speed * 360.0;
+}
+
+DEBUG(*p_height, lf);
+*/
+
+/////
