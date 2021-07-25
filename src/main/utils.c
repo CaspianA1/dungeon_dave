@@ -140,6 +140,10 @@ inlinable ivec ivec_from_vec(const vec v) {
 	return (ivec) {(int) v[0], (int) v[1]};
 }
 
+inlinable vec vec_from_ivec(const ivec v) {
+	return (vec) {v.x, v.y};
+}
+
 inlinable byte ivec_out_of_bounds(const ivec v) {
 	return v.x < 0 || v.x > current_level.map_size.x - 1 || v.y < 0 || v.y > current_level.map_size.y - 1;
 }

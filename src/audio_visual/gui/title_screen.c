@@ -22,6 +22,13 @@ inlinable void draw_colored_rect(const byte r, const byte g, const byte b,
 	SDL_RenderFillRect(screen.renderer, rect);
 }
 
+inlinable void draw_colored_frect(const byte r, const byte g, const byte b,
+	const double shade, const SDL_FRect* const frect) {
+
+	SDL_SetRenderDrawColor(screen.renderer, r * shade, g * shade, b * shade, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRectF(screen.renderer, frect);
+}
+
 inlinable void draw_message(const Message message) {
 	if (message.has_background) {
 		SDL_SetRenderDrawColor(screen.renderer, 255 - message.r,

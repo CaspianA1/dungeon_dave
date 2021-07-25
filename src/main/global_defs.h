@@ -22,7 +22,7 @@
 // #define TRACK_MEMORY
 
 // max: 1440 by 900
-#define INIT_W 900
+#define INIT_W 1000
 #define INIT_H 700
 #define INIT_MAX_FPS 60
 #define INIT_RAY_COLUMN_W 1
@@ -32,7 +32,7 @@
 #define INIT_FOV_STEP 0.5
 #define INIT_MAX_FOV 100.0
 
-#define INIT_MINIMAP_SCALE 2
+#define INIT_MINIMAP_SCALE 3
 #define INIT_STOP_DIST 0.2
 
 #define INIT_HP 30
