@@ -131,7 +131,7 @@ void load_palace(void) {
 	assets/skyboxes/palace_city_skybox.bmp
 	assets/skyboxes/desert_eyes.bmp */
 
-	set_level_skybox(&palace, "assets/skyboxes/desert_eyes.bmp");
+	set_level_skybox(&palace, "assets/skyboxes/desert.bmp");
 
 	set_level_walls(&palace, wall_count,
 		"assets/walls/pyramid_bricks_3.bmp",
