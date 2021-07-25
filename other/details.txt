@@ -27,10 +27,9 @@ features:
 	- only one sound effect at once - otherwise, out of channels
 	- player sound for damage taken
 	- EnemyInstance struct + enemy data file
-	- show HP on-screen
 	- long-range attacking enemies
-	- hud on the bottom of the screen
 	- slow enemies down by hitting them - or stop them in some way
+	- text under the hud elements
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
