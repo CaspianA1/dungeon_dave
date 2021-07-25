@@ -29,6 +29,7 @@ features:
 	- EnemyInstance struct + enemy data file
 	- show HP on-screen
 	- long-range attacking enemies
+	- hud on the bottom of the screen
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -38,7 +39,7 @@ problems:
 	- min and max proj dist
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
 	- too many Mix_Chunks on the available channels -> out of channels
-	- skybox stretching
+	- skybox stretching - fix it by limiting the y-pitch + pace combination
 	- less doubles and more ints in render_overlay.c
 	- don't intersect the player dot with walls in the minimap
 	- shading is slow (it isn't the shading logic, it's the bitwise ops)

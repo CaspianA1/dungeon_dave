@@ -32,7 +32,7 @@
 #define INIT_FOV_STEP 0.5
 #define INIT_MAX_FOV 100.0
 
-#define INIT_MINIMAP_SCALE 4.0
+#define INIT_MINIMAP_SCALE 2
 #define INIT_STOP_DIST 0.2
 
 #define INIT_HP 30

@@ -390,3 +390,25 @@ SDL_RenderCopy(screen.renderer, texture, NULL, NULL);
 // when to free texture? thru fns init_hud_vals, reinit_hud_vals, and deinit_hud_vals?
 
 /////
+
+/*
+SDL_Rect full_wall = {
+	settings.screen_width - width_scale * cur, settings.screen_height - height_scale * 2,
+	width_scale, height_scale
+};
+
+DEBUG_RECT(full_wall);
+
+SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+SDL_RenderFillRect(screen.renderer, &full_wall);
+*/
+
+/*
+const int x_add = settings.screen_width - minimap_width;
+DEBUG(x_add, d);
+
+DEBUG(minimap_width, d);
+DEBUG(map_x * current_level.map_size.x);
+*/
+
+/////

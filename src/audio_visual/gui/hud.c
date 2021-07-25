@@ -24,21 +24,18 @@ byte update_toggle(Toggle* const toggle) {
 inlinable void draw_minimap(const vec pos) {
 	toggledef(0, 0, 255, KEY_TOGGLE_MINIMAP);
 
-	const int
-		width_scale = (double) settings.screen_width
-			/ current_level.map_size.x / settings.minimap_scale,
-		height_scale = (double) settings.screen_height
-			/ current_level.map_size.y / settings.minimap_scale;
+	const ivec tile_amts = current_level.map_size;
+	const int minimap_w = settings.screen_width / tile_amts.x, minimap_h = settings.screen_height / tile_amts.y;
+	const int width_scale = minimap_w / settings.minimap_scale, height_scale = minimap_h / settings.minimap_scale;
 
 	SDL_Rect wall_tile = {0, 0, width_scale, height_scale};
-
-	for (int map_x = 0; map_x < current_level.map_size.x; map_x++) {
-		for (int map_y = 0; map_y < current_level.map_size.y; map_y++) {
+	for (int map_x = 0; map_x < tile_amts.x; map_x++) {
+		for (int map_y = 0; map_y < tile_amts.y; map_y++) {
 			const byte point = map_point(current_level.wall_data, map_x, map_y);
 			const byte point_height = current_level.get_point_height(point, (vec) {map_x, map_y});
 			const double shade = 1.0 - (double) point_height / current_level.max_point_height;
 
-			wall_tile.x = map_x * width_scale;
+			wall_tile.x = map_x * width_scale; // (settings.screen_width - minimap_width);
 			wall_tile.y = map_y * height_scale;
 			draw_colored_rect(toggle.r, toggle.g, toggle.b, shade, &wall_tile);
 		}
