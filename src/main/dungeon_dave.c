@@ -54,8 +54,6 @@ int main(void) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
-		// DEBUG(player.hp, lf);
-
 		const InputStatus input_status = handle_input(&player, player.is_dead);
 		if (input_status == Exit) deinit_all(&player, weapon);
 
