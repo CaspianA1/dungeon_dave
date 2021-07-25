@@ -54,7 +54,7 @@ int main(void) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
-		DEBUG(player.hp, lf);
+		// DEBUG(player.hp, lf);
 
 		const InputStatus input_status = handle_input(&player, player.is_dead);
 		if (input_status == Exit) deinit_all(&player, weapon);
@@ -83,7 +83,7 @@ int main(void) {
 
 		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
-		refresh(player.tilt, player.pos, wall_y_shift);
+		refresh(&player, wall_y_shift);
 		tick_delay(before);
 	}
 }

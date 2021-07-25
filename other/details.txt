@@ -26,8 +26,9 @@ features:
 	- faster enemy movement when nearer player (logarithmic scale)
 	- only one sound effect at once - otherwise, out of channels
 	- player sound for damage taken
-	- EnemyInstance struct
+	- EnemyInstance struct + enemy data file
 	- show HP on-screen
+	- long-range attacking enemies
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

@@ -11,7 +11,7 @@ byte update_toggle(Toggle* const toggle) {
 	return toggle -> enabled;
 }
 
-void draw_minimap(const vec pos) {
+inlinable void draw_minimap(const vec pos) {
 	toggledef(0, 0, 255, KEY_TOGGLE_MINIMAP);
 
 	const int
@@ -38,7 +38,7 @@ void draw_minimap(const vec pos) {
 	draw_colored_rect(255, 0, 0, 1.0, &player_dot);
 }
 
-void draw_crosshair(const int y_shift) {
+inlinable void draw_crosshair(const int y_shift) {
 	toggledef(255, 215, 0, KEY_TOGGLE_CROSSHAIR);
 
 	const byte half_dimensions = settings.screen_width / 40, thickness = settings.screen_width / 200;
@@ -54,15 +54,25 @@ void draw_crosshair(const int y_shift) {
 	SDL_RenderFillRect(screen.renderer, &down);
 }
 
-void draw_hp(const double hp, const double init_hp) {
+inlinable void draw_hp(const double hp, const double init_hp) {
 	toggledef(0, 0, 0, KEY_TOGGLE_HP_PERCENT);
 	// w/ % sign at the end
 
-	const double percent = hp / init_hp * 100.0;
+	char percent_str[5]; // max 4 characters = 100% + null terminator
+	sprintf(percent_str, "%d%%", (byte) (hp / init_hp * 100));
+	const SDL_Color color = {toggle.r, toggle.g, toggle.b, SDL_ALPHA_OPAQUE};
 
-	/*
 	const int avg_dimensions = (settings.screen_width + settings.screen_height) / 2;
-	TTF_Font* font = TTF_OpenFont(font_name, avg_dimensions / message_scale);
-	SDL_Surface* const surface = TTF_RenderText_Solid(gui -> font, message -> text, gui -> msg_color);
-	*/
+	TTF_Font* font = TTF_OpenFont(STD_GUI_FONT_PATH, avg_dimensions / 20);
+	SDL_Surface* const surface = TTF_RenderText_Solid(font, percent_str, color);
+	SDL_Texture* const texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
+
+	SDL_RenderCopy(screen.renderer, texture, NULL, NULL);
+}
+
+// these are drawn to the window because if it were to the shape buffer, they would be rotated
+void draw_hud_elements(const Player* const player, const double y_shift) {
+	draw_minimap(player -> pos);
+	draw_crosshair(y_shift);
+	draw_hp(player -> hp, player -> init_hp);
 }

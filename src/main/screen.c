@@ -37,7 +37,8 @@ inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const des
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
-void refresh(const Domain tilt, const vec pos, const double y_shift) {
+// void refresh(const Domain tilt, const vec pos, const double y_shift) {
+void refresh(const Player* const player, const double y_shift) {
 	SDL_UnlockTexture(screen.pixel_buffer);
 	SDL_SetRenderTarget(screen.renderer, NULL);
 
@@ -53,6 +54,7 @@ void refresh(const Domain tilt, const vec pos, const double y_shift) {
 	   A
 	*/
 
+	const Domain tilt = player -> tilt;
 	if (tilt.val >= -tilt.step - 0.01 && tilt.val <= tilt.step + 0.01) {
 		SDL_RenderCopy(screen.renderer, screen.pixel_buffer, NULL, NULL); // copy everything?
 		SDL_RenderCopy(screen.renderer, screen.shape_buffer, NULL, NULL);
@@ -79,11 +81,8 @@ void refresh(const Domain tilt, const vec pos, const double y_shift) {
 		draw_tilted(screen.shape_buffer, &dest_crop, tilt.val);
 	}
 
-	// these are drawn to the window because if it were to the shape buffer, they would be rotated
-	void draw_minimap(const vec);
-	draw_minimap(pos);
-	void draw_crosshair(const int);
-	draw_crosshair(y_shift);
-
+	void draw_hud_elements(const Player* const, const double);
+	draw_hud_elements(player, y_shift);
+	
 	SDL_RenderPresent(screen.renderer);
 }
