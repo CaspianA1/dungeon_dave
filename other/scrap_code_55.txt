@@ -412,3 +412,18 @@ DEBUG(map_x * current_level.map_size.x);
 */
 
 /////
+
+/*
+const int minimap_height = settings.screen_height / settings.minimap_scale;
+const int minimap_top = settings.screen_height - minimap_height;
+
+SDL_FRect test_rect = {300, minimap_top, 20, minimap_height};
+SDL_RenderFillRectF(screen.renderer, &test_rect);
+*/
+
+/*
+const SDL_Rect hp_box = {300, minimap_size[0], minimap_size, minimap_size[1]};
+SDL_RenderCopy(screen.renderer, hud_resources.hp_texture, NULL, &hp_box);
+o*/
+
+/////

@@ -32,7 +32,7 @@
 #define INIT_FOV_STEP 0.5
 #define INIT_MAX_FOV 100.0
 
-#define INIT_MINIMAP_SCALE 4.2
+#define INIT_MINIMAP_SCALE 4.8
 #define INIT_STOP_DIST 0.2
 
 #define INIT_HP 30
@@ -40,8 +40,8 @@
 #define AUDIO_CHUNK_SIZE 1024
 
 #define KEY_TOGGLE_MINIMAP SDL_SCANCODE_1
-#define KEY_TOGGLE_CROSSHAIR SDL_SCANCODE_2
-#define KEY_TOGGLE_HP_PERCENT SDL_SCANCODE_3
+#define KEY_TOGGLE_HP_PERCENT SDL_SCANCODE_2
+#define KEY_TOGGLE_CROSSHAIR SDL_SCANCODE_3
 
 #define KEY_SPEEDUP_1 SDL_SCANCODE_LSHIFT
 #define KEY_SPEEDUP_2 SDL_SCANCODE_RSHIFT
@@ -87,6 +87,7 @@ const double
 	small_double_epsilon = 0.000001;
 
 typedef uint_fast8_t byte;
+
 typedef __m128d vec;
 typedef struct {int x, y;} ivec;
 

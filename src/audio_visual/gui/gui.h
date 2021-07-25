@@ -8,6 +8,6 @@ typedef struct {
 /////
 
 typedef struct {
-	byte r, g, b, enabled, enabled_previously;
+	byte enabled, enabled_previously;
 	const int key;
 } Toggle;
