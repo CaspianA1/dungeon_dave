@@ -29,11 +29,10 @@ GUI init_gui(const byte msg_r, const byte msg_g, const byte msg_b, const char* c
 	va_start(gui_data, message_count);
 
 	const SDL_Color msg_color = {msg_r, msg_g, msg_b, SDL_ALPHA_OPAQUE};
-	const int avg_dimensions = (settings.screen_width + settings.screen_height) / 2;
 
 	GUI gui = {
 		message_count, has_sprite_background, message_scale, msg_color,
-		wmalloc(message_count * sizeof(Message)), TTF_OpenFont(font_name, avg_dimensions / message_scale),
+		wmalloc(message_count * sizeof(Message)), TTF_OpenFont(font_name, settings.avg_dimensions / message_scale),
 		.font_name = font_name
 	};
 
@@ -86,8 +85,7 @@ inlinable byte after_gui_event(const Uint32 before) {
 
 void resize_gui(GUI* const gui) {
 	TTF_CloseFont(gui -> font);
-	const int avg_dimensions = (settings.screen_width + settings.screen_height) / 2;
-	gui -> font = TTF_OpenFont(gui -> font_name, avg_dimensions / gui -> message_scale);
+	gui -> font = TTF_OpenFont(gui -> font_name, settings.avg_dimensions / gui -> message_scale);
 
 	for (byte i = 0; i < gui -> message_count; i++) {
 		NewMessage* const message = &gui -> messages[i];

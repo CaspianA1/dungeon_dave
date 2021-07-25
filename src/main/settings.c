@@ -50,6 +50,7 @@ void load_default_settings(void) {
 	settings.screen_height = INIT_H;
 	settings.half_screen_width = settings.screen_width / 2;
 	settings.half_screen_height = settings.screen_height / 2;
+	settings.avg_dimensions = (INIT_W + INIT_H) / 2;
 	update_max_fps(INIT_MAX_FPS);
 	settings.ray_column_width = INIT_RAY_COLUMN_W;
 
@@ -70,6 +71,8 @@ byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
 
 	if (width_not_eq || height_not_eq) {
 		init_SDL_buffers(new_width, new_height, 1);
+		settings.avg_dimensions = (new_width + new_height) / 2;
+
 		if (width_not_eq) {
 			settings.screen_width = new_width;
 			settings.half_screen_width = new_width / 2;
@@ -106,7 +109,7 @@ Player load_player(const double jump_up_v0,
 
 		.mouse_pos = {0, 0},
 
-		.angle = 0.0, .hp = 30.0, .init_hp = 30.0, .is_dead = 0, .y_pitch = 0,
+		.angle = 0.0, .hp = INIT_HP, .is_dead = 0, .y_pitch = 0,
 
 		.jump = {.jumping = 0, .up_v0 = jump_up_v0, .v0 = 0.0,
 			.height = init_height, .start_height = init_height,
@@ -173,6 +176,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 void deinit_all(const Player* const player, const Weapon weapon) {
 	void deinit_weapon(const Weapon);
 	void deinit_level(const Level);
+	void deinit_hud_resources(void);
 	void deinit_screen(void);
 
 	deinit_sound(player -> jump.sound_at_jump);
@@ -180,6 +184,7 @@ void deinit_all(const Player* const player, const Weapon weapon) {
 	deinit_weapon(weapon);
 	deinit_level(current_level);
 	deinit_audio_subsystem();
+	deinit_hud_resources();
 	deinit_screen();
 
 	wfree(val_buffer);

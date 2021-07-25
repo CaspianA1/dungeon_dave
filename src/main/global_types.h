@@ -32,7 +32,6 @@ typedef struct {
 	vec pos, dir;
 	ivec mouse_pos;
 	double angle, hp;
-	const double init_hp;
 	byte is_dead;
 	int y_pitch;
 	Jump jump;
@@ -61,7 +60,7 @@ typedef struct {
 
 typedef struct {
 	int screen_width, screen_height, half_screen_width, half_screen_height,
-		max_fps, max_delay, ray_column_width;
+		avg_dimensions, max_fps, max_delay, ray_column_width;
 
 	double fov, fov_step, max_fov, proj_dist, minimap_scale, stop_dist;
 } Settings;

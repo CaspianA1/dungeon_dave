@@ -1,9 +1,7 @@
 Message init_message(const char* const text, const byte r, const byte g, const byte b, const byte has_background) {
 
-	const int avg_dimensions = (settings.screen_width + settings.screen_height) / 2;
-
 	Message message = {
-		TTF_OpenFont("assets/dnd.ttf", avg_dimensions / 10.0),
+		TTF_OpenFont("assets/dnd.ttf", settings.avg_dimensions / 10.0),
 		.r = r, .g = g, .b = b, .has_background = has_background
 	};
 
