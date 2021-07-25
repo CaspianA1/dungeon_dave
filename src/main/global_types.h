@@ -32,6 +32,7 @@ typedef struct {
 	vec pos, dir;
 	ivec mouse_pos;
 	double angle, hp;
+	const double init_hp;
 	byte is_dead;
 	int y_pitch;
 	Jump jump;

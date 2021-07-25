@@ -1,3 +1,7 @@
+#define toggledef(r, g, b, key)\
+	static Toggle toggle = {r, g, b, 0, 0, key};\
+	if (!update_toggle(&toggle)) return;
+
 byte update_toggle(Toggle* const toggle) {
 	const byte pressed_key = keys[toggle -> key];
 	if (pressed_key && !toggle -> enabled_previously)
@@ -8,8 +12,7 @@ byte update_toggle(Toggle* const toggle) {
 }
 
 void draw_minimap(const vec pos) {
-	static Toggle toggle = {0, 0, 255, 0, 0, KEY_TOGGLE_MINIMAP};
-	if (!update_toggle(&toggle)) return;
+	toggledef(0, 0, 255, KEY_TOGGLE_MINIMAP);
 
 	const int
 		width_scale = (double) settings.screen_width
@@ -36,8 +39,7 @@ void draw_minimap(const vec pos) {
 }
 
 void draw_crosshair(const int y_shift) {
-	static Toggle toggle = {255, 215, 0, 0, 0, KEY_TOGGLE_CROSSHAIR};
-	if (!update_toggle(&toggle)) return;
+	toggledef(255, 215, 0, KEY_TOGGLE_CROSSHAIR);
 
 	const byte half_dimensions = settings.screen_width / 40, thickness = settings.screen_width / 200;
 	const ivec center = {settings.half_screen_width, y_shift};
@@ -50,4 +52,17 @@ void draw_crosshair(const int y_shift) {
 	
 	SDL_RenderFillRect(screen.renderer, &across);
 	SDL_RenderFillRect(screen.renderer, &down);
+}
+
+void draw_hp(const double hp, const double init_hp) {
+	toggledef(0, 0, 0, KEY_TOGGLE_HP_PERCENT);
+	// w/ % sign at the end
+
+	const double percent = hp / init_hp * 100.0;
+
+	/*
+	const int avg_dimensions = (settings.screen_width + settings.screen_height) / 2;
+	TTF_Font* font = TTF_OpenFont(font_name, avg_dimensions / message_scale);
+	SDL_Surface* const surface = TTF_RenderText_Solid(gui -> font, message -> text, gui -> msg_color);
+	*/
 }

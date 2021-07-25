@@ -27,6 +27,7 @@ features:
 	- only one sound effect at once - otherwise, out of channels
 	- player sound for damage taken
 	- EnemyInstance struct
+	- show HP on-screen
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
