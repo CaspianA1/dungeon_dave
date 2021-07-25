@@ -56,7 +56,17 @@ inlinable void draw_crosshair(const int y_shift) {
 
 inlinable void draw_hp(const double hp, const double init_hp) {
 	toggledef(0, 0, 0, KEY_TOGGLE_HP_PERCENT);
-	// w/ % sign at the end
+
+	(void) hp;
+	(void) init_hp;
+
+	/*
+	static int prev_screen_width = INIT_W, prev_screen_height = INIT_H;
+
+	static byte first_invocation = 1;
+	if (first_invocation) {
+		first_invocation = 0;
+	}
 
 	char percent_str[5]; // max 4 characters = 100% + null terminator
 	sprintf(percent_str, "%d%%", (byte) (hp / init_hp * 100));
@@ -68,6 +78,9 @@ inlinable void draw_hp(const double hp, const double init_hp) {
 	SDL_Texture* const texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
 
 	SDL_RenderCopy(screen.renderer, texture, NULL, NULL);
+
+	// when to free texture? thru fns init_hud_vals, reinit_hud_vals, and deinit_hud_vals?
+	*/
 }
 
 // these are drawn to the window because if it were to the shape buffer, they would be rotated

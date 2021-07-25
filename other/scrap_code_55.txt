@@ -358,4 +358,19 @@ fast floor shading
 non-clipping pathfinding
 */
 
+///// the old get_wall_tex_offset:
+
+const int max_offset = width - 1;
+
+if (side) {
+	const int x_offset = (hit[0] - (int) hit[0]) * max_offset;
+	return (dir[1] > 0.0) ? max_offset - x_offset : x_offset;
+}
+else {
+	const byte cond = keys[SDL_SCANCODE_C] ? (dir[0] < 0.0) : (dir[1] > 0.0);
+
+	const int y_offset = (hit[1] - (int) hit[1]) * max_offset;
+	return cond ? max_offset - y_offset : y_offset;
+}
+
 /////

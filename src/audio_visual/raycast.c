@@ -10,15 +10,10 @@ typedef struct {
 
 inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir, const int width) {
 	const int max_offset = width - 1;
-
-	if (side) {
-		const int x_offset = (hit[0] - (int) hit[0]) * max_offset;
-		return (dir[1] > 0.0) ? max_offset - x_offset : x_offset;
-	}
-	else {
-		const int y_offset = (hit[1] - (int) hit[1]) * max_offset;
-		return (dir[0] < 0.0) ? max_offset - y_offset : y_offset;
-	}
+	const double component = hit[!side];
+	const int offset = (component - (int) component) * max_offset;
+	const byte cond = side ? (dir[1] > 0.0) : (dir[0] < 0.0);
+	return cond ? max_offset - offset : offset;
 }
 
 vec handle_ray(const DataRaycast d) {
@@ -75,7 +70,7 @@ vec handle_ray(const DataRaycast d) {
 	}
 	*d.last_point_height = point_height;
 
-	return (vec) {(double) smallest_wall_y, wall_h};
+	return (vec) {smallest_wall_y, wall_h};
 }
 
 void raycast(const Player* const player, const double wall_y_shift, const double full_jump_height) {
