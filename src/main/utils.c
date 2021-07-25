@@ -92,7 +92,7 @@ inlinable void set_map_point(byte* const map, const byte val, const int x, const
 
 inlinable void align_from_out_of_vert_bounds(double* const val) {
 	if (*val < 0.0) *val = 0.0;
-	else if (*val >= settings.screen_height) *val = settings.screen_height - 1.0;
+	else if (*val > settings.screen_height) *val = settings.screen_height;
 }
 
 void update_val_buffers(const int screen_x, double wall_top, double wall_bottom, const float dist,
@@ -109,7 +109,7 @@ void update_val_buffers(const int screen_x, double wall_top, double wall_bottom,
 	align_from_out_of_vert_bounds(&wall_bottom);
 
 	void set_statemap_bit(const StateMap, const int, const int);
-	for (double y = ceil(wall_top); y < wall_bottom - 1.0; y++)
+	for (double y = round(wall_top); y < round(wall_bottom); y++)
 		set_statemap_bit(occluded_by_walls, screen_x, y);
 }
 

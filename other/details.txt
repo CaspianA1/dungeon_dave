@@ -26,7 +26,7 @@ features:
 	- make each file an .o file, and then link them all together
 	- faster enemy movement when nearer player (logarithmic scale)
 	- only one sound effect at once - otherwise, out of channels
-	- player sound for damage taken
+	- player sound for damage taken + discrete decrease for health from enemy
 	- EnemyInstance struct
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
