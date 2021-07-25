@@ -28,8 +28,6 @@ inlinable void draw_minimap(const vec pos) {
 	const vec screen_size = {settings.screen_width, settings.screen_height};
 	const vec minimap_size = screen_size / vec_fill(settings.minimap_scale);
 	const vec scale = minimap_size / vec_from_ivec(tile_amts);
-	const vec dest_minimap_offset = screen_size - minimap_size;
-	(void) dest_minimap_offset;
 
 	const vec origin = screen_size - minimap_size;
 	SDL_FRect wall_tile = {origin[0], origin[1], scale[0], scale[1]};
