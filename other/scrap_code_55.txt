@@ -351,3 +351,11 @@ DEBUG(*p_height, lf);
 // as val b4 = 12449 -> 12440 -> 12440 -> 12425 -> 12421 -> 12404
 
 /////
+
+/*
+itinerary:
+fast floor shading
+non-clipping pathfinding
+*/
+
+/////

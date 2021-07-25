@@ -49,7 +49,7 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 					enemy -> time_at_attack = curr_time;
 
 					double dist = enemy -> animations.billboard.dist;
-					if (dist > 1.0) dist = 1.0;
+					if (dist > 1.0) dist = 1.0; // when the decr hp is less than zero, the enemy clips into walls - why?
 					const double decr_hp = enemy -> power * (1.0 - dist * dist); // more damage closer
 
 					if ((player -> hp -= decr_hp) <= 0.0) {

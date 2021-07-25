@@ -25,7 +25,7 @@ features:
 	- make each file an .o file, and then link them all together
 	- faster enemy movement when nearer player (logarithmic scale)
 	- only one sound effect at once - otherwise, out of channels
-	- player sound for damage taken + discrete decrease for health from enemy
+	- player sound for damage taken
 	- EnemyInstance struct
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
@@ -46,10 +46,10 @@ problems:
 	- fix the offset problem for fast_affine_floor
 	- sometimes, psprites disappear mid-game (use memory sanitizer to resolve the problem: https://github.com/google/sanitizers/wiki/MemorySanitizer) (also, each time that the minimap is enabled, the psprite becomes corrupted)
 	- bogo is completely dark with the make rule `debug_2` (he is only light with -Ofast)
-	- fix all of the memory leaks
+	- many memory leaks
 	- a gray line appears for blur fixing
 	- little blinking dots in the distance for the hieroglyphics bitmap
-	- running head-on towards a navigator can make them temporarily clip into a wall
+	- running head-on towards a Navigator can make them temporarily clip into a wall
 	- some weapon uses at a distance result in the walking sound
 	- readjust mouse pos after scaling down the screen - b/c that is messing with the skybox
 
@@ -71,4 +71,4 @@ completed:
 	- increase in FOV while accelerating, screen tilt when strafing, and additional y-shearing when moving, giving a 'pacing' effect
 	- remappable keybindings for movement
 	- memory leak tracking system
-	- planar mode + noclip mode
+	- planar + noclip mode

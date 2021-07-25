@@ -40,12 +40,6 @@
 #include "../levels/palace.c"
 #include "../levels/red_room.c"
 
-/*
-itinerary:
-fast floor shading
-non-clipping pathfinding
-*/
-
 // drawing order: skybox, walls, generic billboards, weapon, floor, minimap, crosshair
 int main(void) {
 	Player player;
