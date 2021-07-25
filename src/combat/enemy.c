@@ -2,8 +2,7 @@
 The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Attacked added after Dead. */
 
-const int dist_wake_up_from_weapon = 5;
-const double time_no_attacking_after_player_hit = 0.4;
+const int dist_wake_up_from_weapon = 5, attack_time_spacing = 1;
 
 void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	if (enemy -> state == new_state) return;
@@ -22,7 +21,7 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 	Navigator* const nav = &enemy -> nav;
 	const double dist = enemy -> animations.billboard.dist;
 
-	if (enemy -> recently_attacked) enemy -> time_at_attack = SDL_GetTicks() / 1000.0;
+	// if (enemy -> recently_attacked) enemy -> time_at_attack = SDL_GetTicks() / 1000.0;
 
 	/* for each state (excluding Dead), periodically play the sound from that state,
 	and only play the Dead animation once, stopping on the last frame */
@@ -44,11 +43,20 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 		case Attacking:
 			if (update_path_if_needed(nav, player -> pos, player -> jump.height) == Navigating)
 				set_enemy_state(enemy, Chasing, 0);
-			else if ((SDL_GetTicks() / 1000.0 - enemy -> time_at_attack > time_no_attacking_after_player_hit)) {
-				if ((player -> hp -= enemy -> power) <= 0.0) {
-					player -> is_dead = 1;
-					player -> hp = 0.0;
-					for (byte i = 0; i < current_level.enemy_count; i++) set_enemy_state(enemy, Idle, 1);
+			else {
+				const double curr_time = SDL_GetTicks() / 1000.0;
+				if (curr_time - enemy -> time_at_attack > attack_time_spacing) {
+					enemy -> time_at_attack = curr_time;
+
+					double dist = enemy -> animations.billboard.dist;
+					if (dist > 1.0) dist = 1.0;
+					const double decr_hp = enemy -> power * (1.0 - dist * dist); // more damage closer
+
+					if ((player -> hp -= decr_hp) <= 0.0) {
+						player -> is_dead = 1;
+						player -> hp = 0.0;
+						for (byte i = 0; i < current_level.enemy_count; i++) set_enemy_state(enemy, Idle, 1);
+					}
 				}
 			}
 

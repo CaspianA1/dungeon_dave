@@ -21,7 +21,6 @@ features:
 	- a metro level
 	- draw sprite sections in chunks
 	- a sol enemy
-	- bitplanes for floors
 	- figure out lcov (?)
 	- make each file an .o file, and then link them all together
 	- faster enemy movement when nearer player (logarithmic scale)

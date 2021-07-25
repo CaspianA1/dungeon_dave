@@ -162,7 +162,7 @@ void load_palace(void) {
 	set_level_enemies(&current_level, enemy_count,
 		Idle, // state
 		2.0, // dist_wake_from_idle
-		20.0, 0.07, // hp, power
+		20.0, 3.0, // hp, power
 		5, 2, 3, 13, // animation_seg_lengths
 
 		"assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
