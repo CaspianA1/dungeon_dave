@@ -30,6 +30,7 @@ features:
 	- show HP on-screen
 	- long-range attacking enemies
 	- hud on the bottom of the screen
+	- slow enemies down by hitting them - or stop them in some way
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

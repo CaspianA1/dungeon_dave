@@ -25,23 +25,27 @@ inlinable void draw_minimap(const vec pos) {
 	toggledef(0, 0, 255, KEY_TOGGLE_MINIMAP);
 
 	const ivec tile_amts = current_level.map_size;
-	const int minimap_w = settings.screen_width / tile_amts.x, minimap_h = settings.screen_height / tile_amts.y;
-	const int width_scale = minimap_w / settings.minimap_scale, height_scale = minimap_h / settings.minimap_scale;
+	const ivec minimap_size = {
+		settings.screen_width / settings.minimap_scale, settings.screen_height / settings.minimap_scale
+	};
 
-	SDL_Rect wall_tile = {0, 0, width_scale, height_scale};
-	for (int map_x = 0; map_x < tile_amts.x; map_x++) {
-		for (int map_y = 0; map_y < tile_amts.y; map_y++) {
+	const ivec scale = {minimap_size.x / tile_amts.x, minimap_size.y / tile_amts.y};
+	const ivec dest_minimap_offset = {
+		settings.screen_width - minimap_size.x + scale.x,
+		settings.screen_height - minimap_size.y + scale.y
+	};
+
+	SDL_Rect wall_tile = {0, 0, scale.x, scale.y};
+	for (int map_y = 0; map_y < tile_amts.y; map_y++, wall_tile.y += scale.y, wall_tile.x = 0) {
+		for (int map_x = 0; map_x < tile_amts.x; map_x++, wall_tile.x += scale.x) {
 			const byte point = map_point(current_level.wall_data, map_x, map_y);
 			const byte point_height = current_level.get_point_height(point, (vec) {map_x, map_y});
 			const double shade = 1.0 - (double) point_height / current_level.max_point_height;
-
-			wall_tile.x = map_x * width_scale; // (settings.screen_width - minimap_width);
-			wall_tile.y = map_y * height_scale;
 			draw_colored_rect(toggle.r, toggle.g, toggle.b, shade, &wall_tile);
 		}
 	}
 
-	const SDL_Rect player_dot = {pos[0] * width_scale, pos[1] * height_scale, width_scale, height_scale};
+	const SDL_Rect player_dot = {pos[0] * scale.x, pos[1] * scale.y, scale.x, scale.y};
 	draw_colored_rect(255, 0, 0, 1.0, &player_dot);
 }
 
