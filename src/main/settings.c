@@ -153,7 +153,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	*/
 
 	const Weapon first_weapon = {
-		.in_use = 0, .short_range = 0, .paces_sideways = 1, .power = 4.0, .dist_for_hit = 0.5,
+		.in_use = 0, .short_range = 0, .paces_sideways = 1, .power = 6.0, .dist_for_hit = 0.5,
 		.sound = init_sound("assets/audio/sound_effects/shotgun.wav", 1),
 		.animation = init_animation("assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30, 0)
 	};

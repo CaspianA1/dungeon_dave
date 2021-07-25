@@ -2,6 +2,15 @@
 	static Toggle toggle = {r, g, b, 0, 0, key};\
 	if (!update_toggle(&toggle)) return;
 
+static struct {
+	TTF_Font* font;
+	SDL_Texture* hp_texture;
+} hud_resources;
+
+void init_hud_resources(void) {
+	
+}
+
 byte update_toggle(Toggle* const toggle) {
 	const byte pressed_key = keys[toggle -> key];
 	if (pressed_key && !toggle -> enabled_previously)
