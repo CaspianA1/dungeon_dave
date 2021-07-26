@@ -8,6 +8,10 @@ typedef struct {
 	const int screen_x;
 } DataRaycast;
 
+typedef struct {
+	double x, y, w, h;
+} DRect;
+
 inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir, const int width) {
 	const int max_offset = width - 1;
 	const double component = hit[!side];
@@ -21,7 +25,7 @@ vec handle_ray(const DataRaycast d) {
 	const double corrected_dist = d.dist * cos_beta;
 	const double wall_h = settings.proj_dist / corrected_dist;
 
-	const SDL_FRect wall_dest = {
+	const DRect wall_dest = {
 		d.screen_x,
 		d.wall_y_shift - wall_h / 2.0 + d.full_jump_height / corrected_dist,
 		settings.ray_column_width,
@@ -29,10 +33,10 @@ vec handle_ray(const DataRaycast d) {
 	};
 
 	const byte point_height = current_level.get_point_height(d.point, d.hit);
-	const double smallest_wall_y = (double) wall_dest.y - (wall_h * (point_height - 1)); // = wall_top
+	const double smallest_wall_y = wall_dest.y - (wall_h * (point_height - 1)); // = wall_top
 
 	if (d.first_wall_hit) update_val_buffers(d.screen_x, smallest_wall_y,
-		(double) (wall_dest.y + wall_dest.h), corrected_dist, cos_beta, d.dir);
+		wall_dest.y + wall_dest.h, corrected_dist, cos_beta, d.dir);
 
 	const Sprite wall_sprite = current_level.walls[d.point - 1];
 	const SDL_Rect mipmap_crop = get_mipmap_crop_from_dist(wall_sprite.size, corrected_dist);
@@ -48,25 +52,26 @@ vec handle_ray(const DataRaycast d) {
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 	#endif
 
-	// byte i = *d.last_point_height;
-	// byte i = 0;
 	for (byte i = *d.last_point_height; i < point_height; i++) {
-		SDL_FRect raised_wall_dest = wall_dest;
+		DRect raised_wall_dest = wall_dest;
 		raised_wall_dest.y -= wall_dest.h * i;
 
 		// completely obscured: starts under the tallest wall so far; wouldn't be seen, but for more speed
-		if ((double) raised_wall_dest.y >= *d.last_wall_y || raised_wall_dest.y >= settings.screen_height)
+		if (raised_wall_dest.y >= *d.last_wall_y || raised_wall_dest.y >= settings.screen_height)
 			continue;
 
 		// partially obscured: bottom of wall somewhere in middle of tallest
-		else if ((double) (raised_wall_dest.y + raised_wall_dest.h) > *d.last_wall_y) {
-			raised_wall_dest.h = *d.last_wall_y - (double) raised_wall_dest.y;
-			slice.h = ceil(max_sprite_h * (double) raised_wall_dest.h / wall_h);
+		else if (raised_wall_dest.y + raised_wall_dest.h > *d.last_wall_y) {
+			raised_wall_dest.h = *d.last_wall_y - raised_wall_dest.y;
+			slice.h = ceil(max_sprite_h * raised_wall_dest.h / wall_h);
 		}
 		else slice.h = max_sprite_h;
 
-		*d.last_wall_y = (double) raised_wall_dest.y;
-		if (!keys[SDL_SCANCODE_G]) SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &raised_wall_dest);
+		*d.last_wall_y = raised_wall_dest.y;
+		if (!keys[SDL_SCANCODE_G]) {
+			SDL_FRect frect = {raised_wall_dest.x, raised_wall_dest.y, raised_wall_dest.w, raised_wall_dest.h};
+			SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &frect);
+		}
 	}
 	*d.last_point_height = point_height;
 

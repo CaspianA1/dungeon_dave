@@ -427,3 +427,13 @@ SDL_RenderCopy(screen.renderer, hud_resources.hp_texture, NULL, &hp_box);
 o*/
 
 /////
+
+typedef struct {
+	double x, y, w, h;
+} DRect;
+
+SDL_FRect get_frect(const DRect d) {
+	return (SDL_FRect) {d.x, d.y, d.w, d.h};
+}
+
+/////

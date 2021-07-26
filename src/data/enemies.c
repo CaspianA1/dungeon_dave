@@ -1,0 +1,3 @@
+eddie = (Enemy) {
+
+};

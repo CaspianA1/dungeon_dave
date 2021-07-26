@@ -1,0 +1,16 @@
+/*
+const double s = 0.00001;
+static double a, b;
+if (keys[SDL_SCANCODE_4]) a += s;
+if (keys[SDL_SCANCODE_5]) a -= s;
+if (keys[SDL_SCANCODE_6]) a = 0.0;
+
+if (keys[SDL_SCANCODE_7]) b += s;
+if (keys[SDL_SCANCODE_8]) b -= s;
+if (keys[SDL_SCANCODE_9]) b = 0.0;
+
+// wall_dest.y -= a, wall_dest.h += a;
+// wall_dest.y += a, wall_dest.h += b;
+*/
+
+/////
