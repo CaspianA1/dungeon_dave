@@ -30,7 +30,7 @@ features:
 	- long-range attacking enemies
 	- slow enemies down by hitting them - or stop them in some way
 	- text under the hud elements
-	- add back rendering overlay
+	- objects with base Billboard are super jerky
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

@@ -39,50 +39,39 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 			possible_animation_index = i - current_level.billboard_count,
 			possible_enemy_index = i - start_of_enemies;
 
-		Billboard* billboard;
-		Billboard possible_constructed_billboard;
+		Billboard billboard;
+		DataBillboard* billboard_data = NULL;
 
 		if (is_animated) {
 			if (is_enemy) {
-				const AnimatedBillboard* const animated_billboard =
+				AnimatedBillboard* const animated_billboard =
 					&current_level.enemies[possible_enemy_index].animated_billboard;
-				possible_constructed_billboard = (Billboard) {
+				billboard = (Billboard) {
 					animated_billboard -> animation_data.sprite, animated_billboard -> billboard_data
 				};
-				billboard = &possible_constructed_billboard;
+				billboard_data = &animated_billboard -> billboard_data;
 			}
 			else {
-				// billboard = &current_level.animated_billboards[possible_animation_index];
-				const AnimatedBillboard* const animated_billboard =
+				AnimatedBillboard* const animated_billboard =
 					&current_level.animated_billboards[possible_animation_index];
-				possible_constructed_billboard = (Billboard) {
+				billboard = (Billboard) {
 					animated_billboard -> animation_data.sprite, animated_billboard -> billboard_data
 				};
-				billboard = &possible_constructed_billboard;
+				billboard_data = &animated_billboard -> billboard_data;
 			}
 		}
-		else billboard = &current_level.billboards[i];
-
-		/*
-		if (is_animated)
-			billboard_data = is_enemy
-				? &current_level.enemies[possible_enemy_index].animated_billboard.billboard_data
-				: &current_level.animated_billboards[possible_animation_index];
-		else
+		else {
+			billboard = current_level.billboards[i];
 			billboard_data = &current_level.billboards[i].billboard_data;
-		*/
-
-		DataBillboard* const billboard_data = &billboard -> billboard_data;
+		}
 
 		const vec delta = billboard_data -> pos - player -> pos;
-
 		billboard_data -> beta = atan2(delta[1], delta[0]) - player_angle;
 		if (billboard_data -> beta < -two_pi) billboard_data -> beta += two_pi;
-
 		billboard_data -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 
 		GenericBillboard* const generic_billboard = &generic_billboards[i];
-		generic_billboard -> billboard = *billboard;
+		generic_billboard -> billboard = billboard;
 		generic_billboard -> is_animated = is_animated;
 		generic_billboard -> is_enemy = is_enemy;
 		generic_billboard -> animation_index = is_enemy
@@ -96,8 +85,6 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		const GenericBillboard generic = generic_billboards[i];
 		const Billboard billboard = generic.billboard;
 		const DataBillboard billboard_data = billboard.billboard_data;
-
-		DEBUG(generic.is_enemy, d);
 
 		const double
 			abs_billboard_beta = fabs(billboard_data.beta),
@@ -163,7 +150,7 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		//////////
 
 		SDL_FRect screen_pos = {
-			0.0, y_shift - half_size // where is eddie with -O2 and beyond?
+			0.0, y_shift - half_size
 			+ (player -> jump.height - billboard_data.height) * settings.screen_height / corrected_dist,
 			settings.ray_column_width, size
 		};
