@@ -163,28 +163,6 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 		const Navigator nav = init_navigator(level -> init_pos, &dest_billboard_data -> pos, va_arg(enemy_data, double));
 		memcpy(&dest -> nav, &nav, sizeof(Navigator));
 
-		/*
-		Animation animations = init_animation(animation_path, frames_per_row, frames_per_col, frame_count, fps, 0);
-		memcpy(&enemy.animations, &animations, sizeof(Animation));
-
-		Billboard* const billboard = &enemy.animations.billboard;
-		billboard -> pos = (vec) {va_arg(enemy_data, double), va_arg(enemy_data, double)};
-		billboard -> height = va_arg(enemy_data, double);
-
-		for (byte i = 0; i < 5; i++)
-			enemy.sounds[i] = init_sound(va_arg(enemy_data, const char*), 1);
-
-		void set_enemy_state(Enemy*, EnemyState, byte);
-		set_enemy_state(&enemy, enemy_state, 1);
-
-		Enemy* const dest = &level -> enemies[i];
-		memcpy(dest, &enemy, sizeof(Enemy));
-
-		Billboard* const dest_billboard = &dest -> animations.billboard;
-		const Navigator nav = init_navigator(level -> init_pos, &dest_billboard -> pos, va_arg(enemy_data, double));
-		memcpy(&dest -> nav, &nav, sizeof(Navigator));
-		*/
-
 	}
 	va_end(enemy_data);
 }
