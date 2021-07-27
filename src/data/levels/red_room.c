@@ -12,7 +12,7 @@ void load_red_room(void) {
 	enum {
 		map_width = 10, map_height = 10,
 		wall_count = 2, billboard_count = 0,
-		animation_count = 0, enemy_count = 0
+		animated_billboard_count = 0, enemy_count = 0
 	};
 
 	static const byte wall_data[map_height][map_width] = {
@@ -45,7 +45,7 @@ void load_red_room(void) {
 		"assets/walls/red_curtains.bmp");	
 
 	set_level_billboards(&red_room, billboard_count);	
-	set_level_animations(&red_room, animation_count);	
+	set_level_animated_billboards(&red_room, animated_billboard_count);	
 
 	memcpy(&current_level, &red_room, sizeof(Level));
 

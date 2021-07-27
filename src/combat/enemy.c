@@ -14,12 +14,12 @@ void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	for (byte i = 0; i < enemy -> state; i++)
 		new_frame_ind += enemy -> animation_seg_lengths[i];
 
-	enemy -> animations.frame_ind = new_frame_ind;
+	enemy -> animated_billboard.animation_data.frame_ind = new_frame_ind;
 }
 
 void update_enemy(Enemy* const enemy, Player* const player) {
 	Navigator* const nav = &enemy -> nav;
-	const double dist = enemy -> animations.billboard.dist;
+	const double dist = enemy -> animated_billboard.billboard_data.dist;
 
 	// if (enemy -> recently_attacked) enemy -> time_at_attack = SDL_GetTicks() / 1000.0;
 
@@ -48,7 +48,7 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 				if (curr_time - enemy -> time_at_attack > attack_time_spacing) {
 					enemy -> time_at_attack = curr_time;
 
-					double dist = enemy -> animations.billboard.dist;
+					double dist = enemy -> animated_billboard.billboard_data.dist; // don't reuse dist
 					if (dist > 1.0) dist = 1.0; // when the decr hp is less than zero, the enemy clips into walls - why?
 					const double decr_hp = enemy -> power * (1.0 - dist * dist); // more damage closer
 
@@ -72,8 +72,8 @@ inlinable void update_all_enemies(Player* const player) {
 		update_enemy(&current_level.enemies[i], player);
 }
 
-void deinit_enemy(const Enemy enemy) {
-	deinit_sprite(enemy.animations.billboard.sprite);
-	for (byte i = 0; i < 5; i++) deinit_sound(enemy.sounds[i]);
-	wfree(enemy.sounds);
+void deinit_enemy(const Enemy* const enemy) {
+	deinit_sprite(enemy -> animated_billboard.animation_data.sprite);
+	for (byte i = 0; i < 5; i++) deinit_sound(enemy -> sounds[i]);
+	wfree(enemy -> sounds);
 }

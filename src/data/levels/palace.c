@@ -58,7 +58,7 @@ void load_palace(void) {
 	enum {
 		map_width = 40, map_height = 40,
 		wall_count = 10, billboard_count = 3,
-		animation_count = 2, enemy_count = 1
+		animated_billboard_count = 2, enemy_count = 1
 	};
 
 	// in the horse area: a health kit, and the enemy
@@ -151,7 +151,7 @@ void load_palace(void) {
 		"assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0,
 		"assets/objects/golden_dome.bmp", 13.0, 28.0, 1.0);
 
-	set_level_animations(&palace, animation_count,
+	set_level_animated_billboards(&palace, animated_billboard_count,
 		// "assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,
 		"assets/spritesheets/flying_carpet.bmp", 5, 10, 46, 25, 5.0, 2.0, 0.0,
 		"assets/spritesheets/torch_2.bmp", 2, 3, 5, 12, 7.5, 12.5, 0.0);

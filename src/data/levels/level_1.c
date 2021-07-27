@@ -34,7 +34,7 @@ void load_level_1(void) {
 	enum {
 		map_width = 25, map_height = 15,
 		wall_count = 10, billboard_count = 7,
-		animation_count = 3, enemy_count = 1
+		animated_billboard_count = 3, enemy_count = 1
 	};
 
 	// static b/c may be too big for stack
@@ -110,7 +110,7 @@ void load_level_1(void) {
 		"assets/objects/axe.bmp", 11.0, 7.5, 0.0,
 		"assets/wolf/lamp.bmp", 18.5, 11.5, 0.0);
 
-	set_level_animations(&level_1, animation_count,
+	set_level_animated_billboards(&level_1, animated_billboard_count,
 		"assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 4.5, 11.5, 0.0,
 		"assets/spritesheets/gold_key.bmp", 3, 4, 12, 6, 1.5, 1.4, 0.0,
 		"assets/spritesheets/torch.bmp", 3, 3, 9, 9, 19.0, 9.5, 0.0);

@@ -1,6 +1,6 @@
 void deinit_weapon(const Weapon weapon) {
 	deinit_sound(weapon.sound);
-	deinit_sprite(weapon.animation.billboard.sprite);
+	deinit_sprite(weapon.animation_data.sprite);
 }
 
 void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
@@ -15,7 +15,7 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 			if (enemy -> state == Dead) continue;
 
 			const vec
-				enemy_pos = enemy -> animations.billboard.pos,
+				enemy_pos = enemy -> animated_billboard.billboard_data.pos,
 				bullet_pos = vec_line_pos(pos, dir, bullet.dist);
 
 			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon -> dist_for_hit)) {
@@ -33,9 +33,9 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 #ifndef NOCLIP_MODE
 
 void use_weapon_if_needed(Weapon* const weapon, const Player* const player, const InputStatus input_status) {
-	if (player -> is_dead) weapon -> animation.frame_ind = 0;
+	if (player -> is_dead) weapon -> animation_data.frame_ind = 0;
 
-	if (weapon -> in_use && weapon -> animation.frame_ind == 0) weapon -> in_use = 0;
+	if (weapon -> in_use && weapon -> animation_data.frame_ind == 0) weapon -> in_use = 0;
 	else if (input_status == BeginAnimatingWeapon && !weapon -> in_use && !player -> is_dead) {
 		weapon -> in_use = 1;
 		play_sound(weapon -> sound, 0);
@@ -43,13 +43,13 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 
 		for (byte i = 0; i < current_level.enemy_count; i++) {
 			Enemy* const enemy = &current_level.enemies[i];
-			if (enemy -> animations.billboard.dist <= dist_wake_up_from_weapon && enemy -> state == Idle)
+			if (enemy -> animated_billboard.billboard_data.dist <= dist_wake_up_from_weapon && enemy -> state == Idle)
 				set_enemy_state(enemy, Chasing, 0);
 		}
 	}
 
 	// -1 -> cycle frame, 0 -> first frame
-	animate_weapon(&weapon -> animation, player -> pos, weapon -> paces_sideways,
+	animate_weapon(&weapon -> animation_data, player -> pos, weapon -> paces_sideways,
 		weapon -> in_use, player -> y_pitch, player -> pace.screen_offset);
 }
 

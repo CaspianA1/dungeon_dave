@@ -16,24 +16,31 @@ typedef struct {
 /////
 
 typedef struct {
-	Sprite sprite;
 	vec pos;
 	double beta, dist, height; // `height` here is a point height
-} Billboard;
-
-/////
+} DataBillboard;
 
 typedef struct {
-	Billboard billboard;
+	Sprite sprite;
+	DataBillboard billboard_data;
+} Billboard;
+
+typedef struct {
+	Sprite sprite;
 
 	const int frames_per_row, frames_per_col, frame_w, frame_h, frame_count;
 
 	int frame_ind;
 	const double secs_per_frame;
 	double last_frame_time;
-} Animation;
+} DataAnimation;
 
-Animation init_animation(const char* const, const int, const int, const int, const int, const byte);
+typedef struct {
+	DataAnimation animation_data;
+	DataBillboard billboard_data;
+} AnimatedBillboard;
+
+DataAnimation init_animation_data(const char* const, const int, const int, const int, const int, const byte);
 
 typedef struct {
 	Billboard billboard;

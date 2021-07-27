@@ -12,7 +12,7 @@ void load_debug_level(void) {
 	enum {
 		map_width = 12, map_height = 10,
 		wall_count = 5, billboard_count = 0,
-		animation_count = 1, enemy_count = 0
+		animated_billboard_count = 1, enemy_count = 0
 	};
 
 	static const byte wall_data[map_height][map_width] = {
@@ -50,7 +50,7 @@ void load_debug_level(void) {
 		"assets/wolf/bluestone.bmp");
 
 	set_level_billboards(&debug_level, billboard_count);
-	set_level_animations(&debug_level, animation_count,
+	set_level_animated_billboards(&debug_level, animated_billboard_count,
 		"assets/spritesheets/sonic.bmp", 6, 5, 30, 30, 2.5, 2.5, 0.0);
 
 	memcpy(&current_level, &debug_level, sizeof(Level));

@@ -1,31 +1,31 @@
-Animation init_animation(const char* const path, const int frames_per_row,
+DataAnimation init_animation_data(const char* const path, const int frames_per_row,
 	const int frames_per_col, const int frame_count, const int fps, const byte enable_mipmap) {
 
-	const Billboard billboard = {init_sprite(path, enable_mipmap), {0, 0}, 0, 0, 0};
-	const ivec size = billboard.sprite.size;
+	// const Billboard billboard = {init_sprite(path, enable_mipmap), {0, 0}, 0, 0, 0};
+	const Sprite sprite = init_sprite(path, enable_mipmap);
 
-	return (Animation) {
-		billboard, frames_per_row, frames_per_col,
-		size.x / frames_per_row,
-		size.y / frames_per_col,
+	return (DataAnimation) {
+		sprite, frames_per_row, frames_per_col,
+		sprite.size.x / frames_per_row,
+		sprite.size.y / frames_per_col,
 		frame_count, 0, 1.0 / fps, 0
 	};
 }
 
-inlinable void progress_frame_ind(Animation* const animation, const int begin, const int end) {
+inlinable void progress_frame_ind(DataAnimation* const animation_data, const int begin, const int end) {
 	const double current_time = SDL_GetTicks() / 1000.0;
-	const double time_delta = current_time - animation -> last_frame_time;
+	const double time_delta = current_time - animation_data -> last_frame_time;
 
-	if (time_delta >= animation -> secs_per_frame) {
-		if (++animation -> frame_ind == end)
-			animation -> frame_ind = begin;
+	if (time_delta >= animation_data -> secs_per_frame) {
+		if (++animation_data -> frame_ind == end)
+			animation_data -> frame_ind = begin;
 
-		animation -> last_frame_time = current_time;
+		animation_data -> last_frame_time = current_time;
 	}
 }
 
-inlinable void progress_animation_frame_ind(Animation* const animation) {
-	progress_frame_ind(animation, 0, animation -> frame_count);
+inlinable void progress_animation_data_frame_ind(DataAnimation* const animation_data) {
+	progress_frame_ind(animation_data, 0, animation_data -> frame_count);
 }
 
 inlinable void progress_enemy_frame_ind(Enemy* const enemy) {
@@ -35,34 +35,35 @@ inlinable void progress_enemy_frame_ind(Enemy* const enemy) {
 
 	const int end = begin + enemy -> animation_seg_lengths[enemy -> state];
 
-	if (enemy -> state == Dead && enemy -> animations.frame_ind == end - 1) return;
+	AnimatedBillboard* const animated_billboard = &enemy -> animated_billboard;
+	if (enemy -> state == Dead && animated_billboard -> animation_data.frame_ind == end - 1) return;
 
-	progress_frame_ind(&enemy -> animations, begin, end);
+	progress_frame_ind(&animated_billboard -> animation_data, begin, end);
 }
 
-inlinable ivec get_spritesheet_frame_origin(const Animation animation) {
-	const int y_ind = animation.frame_ind / animation.frames_per_row;
-	const int x_ind = animation.frame_ind - y_ind * animation.frames_per_row;
-	const ivec size = animation.billboard.sprite.size;
+inlinable ivec get_spritesheet_frame_origin(const DataAnimation* const animation_data) {
+	const int y_ind = animation_data -> frame_ind / animation_data -> frames_per_row;
+	const int x_ind = animation_data -> frame_ind - y_ind * animation_data -> frames_per_row;
+	const ivec size = animation_data -> sprite.size;
 
 	return (ivec) {
-		(double) x_ind / animation.frames_per_row * size.x,
-		(double) y_ind / animation.frames_per_col * size.y
+		(double) x_ind / animation_data -> frames_per_row * size.x,
+		(double) y_ind / animation_data -> frames_per_col * size.y
 	};
 }
 
-void animate_weapon(Animation* const animation, const vec pos,
+void animate_weapon(DataAnimation* const animation_data, const vec pos,
 	const byte paces_sideways, const byte in_use, const int y_pitch, const double pace) {
 
 	#ifndef SHADING_ENABLED
 	(void) pos;
 	#endif
 
-	const ivec frame_origin = get_spritesheet_frame_origin(*animation);
+	const ivec frame_origin = get_spritesheet_frame_origin(animation_data);
 
 	const SDL_Rect sheet_crop = {
 		frame_origin.x, frame_origin.y,
-		animation -> frame_w, animation -> frame_h
+		animation_data -> frame_w, animation_data -> frame_h
 	};
 
 	/* the reason the `paces_sideways` flag exists is because the whip animation has half-drawn parts that are shown
@@ -75,7 +76,7 @@ void animate_weapon(Animation* const animation, const vec pos,
 		settings.screen_height
 	};
 
-	SDL_Texture* const texture = animation -> billboard.sprite.texture;
+	SDL_Texture* const texture = animation_data -> sprite.texture;
 
 	#ifdef SHADING_ENABLED
 	byte shade = 255 * calculate_shade(settings.screen_height, pos);
@@ -85,5 +86,5 @@ void animate_weapon(Animation* const animation, const vec pos,
 
 	// renders to shape buffer
 	SDL_RenderCopy(screen.renderer, texture, &sheet_crop, &screen_pos);
-	if (in_use) progress_animation_frame_ind(animation);
+	if (in_use) progress_animation_data_frame_ind(animation_data);
 }

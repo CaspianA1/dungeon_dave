@@ -52,7 +52,7 @@ typedef struct {
 
 	byte recently_attacked;
 	const byte animation_seg_lengths[4];
-	Animation animations; // from one large spritesheet
+	AnimatedBillboard animated_billboard; // from one large spritesheet
 
 	Sound* const sounds; // a sound for each state + Attacked (ptrs b/c the struct doubles in size otherwise)
 	Navigator nav;
@@ -64,7 +64,7 @@ typedef struct {
 	byte in_use, short_range, paces_sideways;
 	const double power, dist_for_hit;
 	Sound sound;
-	Animation animation;
+	DataAnimation animation_data;
 } Weapon;
 
 //////////

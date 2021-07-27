@@ -40,22 +40,6 @@ void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement, c
 		point_exists_at(pos[0] - settings.stop_dist, pos[1], p_height))
 		pos[0] = prev_pos[0];
 
-	for (byte i = 0; i < current_level.generic_billboard_count; i++) {
-		const Billboard b = current_level.generic_billboards[i].billboard;
-
-		if (b.dist < settings.stop_dist && i == 10) {
-
-			/*
-			if (b.beta < -two_pi && b.beta > -two_pi + settings.stop_dist)
-				printf("Hit case 1\n");
-			*/
-
-			// DEBUG(b.beta, lf);
-			// pos = prev_pos;
-			break;
-		}
-	}
-
 	#endif
 
 	*pos_ref = pos;

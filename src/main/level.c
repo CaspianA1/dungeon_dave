@@ -67,24 +67,24 @@ void set_level_billboards(Level* const level, const unsigned billboard_count, ..
 	for (byte i = 0; i < billboard_count; i++) {
 		Billboard* const billboard = &level -> billboards[i];
 		billboard -> sprite = init_sprite(va_arg(billboard_data, const char*), 0);
-		billboard -> pos = (vec) {
+		billboard -> billboard_data.pos = (vec) {
 			va_arg(billboard_data, double),
 			va_arg(billboard_data, double)
 		};
-		billboard -> height = va_arg(billboard_data, double);
+		billboard -> billboard_data.height = va_arg(billboard_data, double);
 	}
 	va_end(billboard_data);
 }
 
 // path, frames/row, frames/col, frame_count, fps, x, y, height
-void set_level_animations(Level* const level, const unsigned animation_count, ...) {
-	level -> animation_count = animation_count;
-	level -> animations = wmalloc(animation_count * sizeof(Animation));
+void set_level_animated_billboards(Level* const level, const unsigned animated_billboard_count, ...) {
+	level -> animated_billboard_count = animated_billboard_count;
+	level -> animated_billboards = wmalloc(animated_billboard_count * sizeof(AnimatedBillboard));
 
 	va_list animation_data;
-	va_start(animation_data, animation_count);
+	va_start(animation_data, animated_billboard_count);
 
-	for (byte i = 0; i < animation_count; i++) {
+	for (byte i = 0; i < animated_billboard_count; i++) {
 		const char* const path = va_arg(animation_data, const char*);
 
 		const int
@@ -93,16 +93,16 @@ void set_level_animations(Level* const level, const unsigned animation_count, ..
 			frame_count = va_arg(animation_data, int),
 			fps = va_arg(animation_data, int);
 
-		const Animation new_animation = init_animation(
+		const DataAnimation _animation_data = init_animation_data(
 			path, frames_per_row, frames_per_col, frame_count, fps, 0);
 
-		Animation* const dest = &level -> animations[i];
-		memcpy(dest, &new_animation, sizeof(Animation));
-		dest -> billboard.pos = (vec) {
-			va_arg(animation_data, double),
-			va_arg(animation_data, double)
+		const DataBillboard billboard_data = {
+			{va_arg(animation_data, double), va_arg(animation_data, double)},
+			.height = va_arg(animation_data, double)
 		};
-		dest -> billboard.height = va_arg(animation_data, double);
+
+		const AnimatedBillboard animated_billboard = {_animation_data, billboard_data};
+		memcpy(&level -> animated_billboards[i], &animated_billboard, sizeof(AnimatedBillboard));
 	}
 	va_end(animation_data);
 }
@@ -134,11 +134,36 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 			.sounds = wmalloc(5 * sizeof(Sound))
 		};
 
-		const char* animation_path = va_arg(enemy_data, const char*);
+		const char* const animation_path = va_arg(enemy_data, const char*);
 		const int
 			frames_per_row = va_arg(enemy_data, int), frames_per_col = va_arg(enemy_data, int),
 			frame_count = va_arg(enemy_data, int), fps = va_arg(enemy_data, int);
 
+		const DataAnimation animation_data = init_animation_data(
+			animation_path, frames_per_row, frames_per_col, frame_count, fps, 0);
+
+		const DataBillboard billboard_data = {
+			{va_arg(enemy_data, double), va_arg(enemy_data, double)},
+			.height = va_arg(enemy_data, double)
+		};
+
+		for (byte i = 0; i < 5; i++)
+			enemy.sounds[i] = init_sound(va_arg(enemy_data, const char*), 1);
+
+		const AnimatedBillboard animated_billboard = {animation_data, billboard_data};
+		memcpy(&enemy.animated_billboard, &animated_billboard, sizeof(AnimatedBillboard));
+
+		void set_enemy_state(Enemy*, EnemyState, byte);
+		set_enemy_state(&enemy, enemy_state, 1);
+
+		Enemy* const dest = &level -> enemies[i];
+		memcpy(dest, &enemy, sizeof(Enemy));
+
+		DataBillboard* const dest_billboard_data = &dest -> animated_billboard.billboard_data;
+		const Navigator nav = init_navigator(level -> init_pos, &dest_billboard_data -> pos, va_arg(enemy_data, double));
+		memcpy(&dest -> nav, &nav, sizeof(Navigator));
+
+		/*
 		Animation animations = init_animation(animation_path, frames_per_row, frames_per_col, frame_count, fps, 0);
 		memcpy(&enemy.animations, &animations, sizeof(Animation));
 
@@ -158,6 +183,7 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 		Billboard* const dest_billboard = &dest -> animations.billboard;
 		const Navigator nav = init_navigator(level -> init_pos, &dest_billboard -> pos, va_arg(enemy_data, double));
 		memcpy(&dest -> nav, &nav, sizeof(Navigator));
+		*/
 
 	}
 	va_end(enemy_data);
@@ -165,7 +191,7 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 
 inlinable void set_level_generic_billboard_container(Level* const level) {
 	level -> generic_billboard_count = level -> billboard_count
-		+ level -> animation_count + level -> enemy_count;
+		+ level -> animated_billboard_count + level -> enemy_count;
 
 	level -> generic_billboards = wmalloc(level -> generic_billboard_count * sizeof(GenericBillboard));
 }
@@ -187,13 +213,13 @@ void deinit_level(const Level level) {
 		deinit_sprite(level.billboards[i].sprite);
 	wfree(level.billboards);
 
-	for (byte i = 0; i < level.animation_count; i++)
-		deinit_sprite(level.animations[i].billboard.sprite);
-	wfree(level.animations);
+	for (byte i = 0; i < level.animated_billboard_count; i++)
+		deinit_sprite(level.animated_billboards[i].animation_data.sprite);
+	wfree(level.animated_billboards);
 
-	void deinit_enemy(const Enemy);
+	void deinit_enemy(const Enemy* const);
 	for (byte i = 0; i < level.enemy_count; i++)
-		deinit_enemy(level.enemies[i]);
+		deinit_enemy(&level.enemies[i]);
 	wfree(level.enemies);
 
 	wfree(level.generic_billboards);

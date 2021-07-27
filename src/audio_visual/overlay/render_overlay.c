@@ -15,8 +15,8 @@ I refer to a 'generic billboard' as a Billboard or Animation.
 
 int cmp_generic_billboards(const void* const a, const void* const b) {
 	const double distances[2] = {
-		((GenericBillboard*) a) -> billboard.dist,
-		((GenericBillboard*) b) -> billboard.dist
+		((GenericBillboard*) a) -> billboard.billboard_data.dist,
+		((GenericBillboard*) b) -> billboard.billboard_data.dist
 	};
 
 	if (distances[0] > distances[1]) return -1;
@@ -25,12 +25,15 @@ int cmp_generic_billboards(const void* const a, const void* const b) {
 }
 
 void draw_generic_billboards(const Player* const player, const double y_shift) {
+	(void) player;
+	(void) y_shift;
+	/*
 	const double player_angle = to_radians(player -> angle);
 
 	const byte generic_billboard_count = current_level.generic_billboard_count;
 	GenericBillboard* const generic_billboards = current_level.generic_billboards;
 
-	const byte start_of_enemies = current_level.billboard_count + current_level.animation_count;
+	const byte start_of_enemies = current_level.billboard_count + current_level.animated_billboard_count;
 
 	for (byte i = 0; i < generic_billboard_count; i++) {
 		const byte
@@ -39,24 +42,24 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 			possible_animation_index = i - current_level.billboard_count,
 			possible_enemy_index = i - start_of_enemies;
 
-		Billboard* billboard;
+		DataBillboard* billboard_data;
 
 		if (is_animated)
-			billboard = is_enemy
-				? &current_level.enemies[possible_enemy_index].animations.billboard
-				: &current_level.animations[possible_animation_index].billboard;
+			billboard_data = is_enemy
+				? &current_level.enemies[possible_enemy_index].animated_billboard.billboard_data
+				: &current_level.animated_billboards[possible_animation_index].billboard_data;
 		else
-			billboard = &current_level.billboards[i];
+			billboard_data = &current_level.billboards[i].billboard_data;
 
-		const vec delta = billboard -> pos - player -> pos;
+		const vec delta = billboard_data -> pos - player -> pos;
 
-		billboard -> beta = atan2(delta[1], delta[0]) - player_angle;
-		if (billboard -> beta < -two_pi) billboard -> beta += two_pi;
+		billboard_data -> beta = atan2(delta[1], delta[0]) - player_angle;
+		if (billboard_data -> beta < -two_pi) billboard_data -> beta += two_pi;
 
-		billboard -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
+		billboard_data -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 
 		GenericBillboard* const generic_billboard = &generic_billboards[i];
-		generic_billboard -> billboard = *billboard;
+		generic_billboard -> billboard = *billboard_data;
 		generic_billboard -> is_animated = is_animated;
 		generic_billboard -> is_enemy = is_enemy;
 		generic_billboard -> animation_index = is_enemy
@@ -154,6 +157,7 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 			SDL_RenderCopyF(screen.renderer, billboard.sprite.texture, &src_crop, &screen_pos);
 		}
 	}
+	*/
 }
 
 void draw_skybox(const double angle, const double y_shift) {
