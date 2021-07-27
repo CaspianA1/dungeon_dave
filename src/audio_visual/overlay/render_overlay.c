@@ -156,7 +156,7 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		};
 
 		#ifdef SHADING_ENABLED
-		const byte shade = 255 * calculate_shade(size, billboard.pos);
+		const byte shade = 255 * calculate_shade(size, billboard_data.pos);
 		SDL_SetTextureColorMod(billboard.sprite.texture, shade, shade, shade);
 		#endif
 
@@ -171,6 +171,8 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		}
 	}
 }
+
+void draw_just_stuff();
 
 void draw_skybox(const double angle, const double y_shift) {
 	const Skybox skybox = current_level.skybox;

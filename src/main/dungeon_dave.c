@@ -13,12 +13,12 @@
 #include "input.c"
 #include "level.c"
 
+#include "../audio_visual/lighting.c"
 #include "../audio_visual/overlay/mipmap.c"
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
 #include "../audio_visual/overlay/render_overlay.c"
 
-#include "../audio_visual/lighting.c"
 #include "../audio_visual/effects.c"
 #include "../audio_visual/raycast.c"
 #include "../audio_visual/floorcast.c"
