@@ -25,9 +25,6 @@ int cmp_generic_billboards(const void* const a, const void* const b) {
 }
 
 void draw_generic_billboards(const Player* const player, const double y_shift) {
-	(void) player;
-	(void) y_shift;
-	/*
 	const double player_angle = to_radians(player -> angle);
 
 	const byte generic_billboard_count = current_level.generic_billboard_count;
@@ -42,14 +39,40 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 			possible_animation_index = i - current_level.billboard_count,
 			possible_enemy_index = i - start_of_enemies;
 
-		DataBillboard* billboard_data;
+		Billboard* billboard;
+		Billboard possible_constructed_billboard;
 
+		if (is_animated) {
+			if (is_enemy) {
+				const AnimatedBillboard* const animated_billboard =
+					&current_level.enemies[possible_enemy_index].animated_billboard;
+				possible_constructed_billboard = (Billboard) {
+					animated_billboard -> animation_data.sprite, animated_billboard -> billboard_data
+				};
+				billboard = &possible_constructed_billboard;
+			}
+			else {
+				// billboard = &current_level.animated_billboards[possible_animation_index];
+				const AnimatedBillboard* const animated_billboard =
+					&current_level.animated_billboards[possible_animation_index];
+				possible_constructed_billboard = (Billboard) {
+					animated_billboard -> animation_data.sprite, animated_billboard -> billboard_data
+				};
+				billboard = &possible_constructed_billboard;
+			}
+		}
+		else billboard = &current_level.billboards[i];
+
+		/*
 		if (is_animated)
 			billboard_data = is_enemy
 				? &current_level.enemies[possible_enemy_index].animated_billboard.billboard_data
-				: &current_level.animated_billboards[possible_animation_index].billboard_data;
+				: &current_level.animated_billboards[possible_animation_index];
 		else
 			billboard_data = &current_level.billboards[i].billboard_data;
+		*/
+
+		DataBillboard* const billboard_data = &billboard -> billboard_data;
 
 		const vec delta = billboard_data -> pos - player -> pos;
 
@@ -59,7 +82,7 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		billboard_data -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 
 		GenericBillboard* const generic_billboard = &generic_billboards[i];
-		generic_billboard -> billboard = *billboard_data;
+		generic_billboard -> billboard = *billboard;
 		generic_billboard -> is_animated = is_animated;
 		generic_billboard -> is_enemy = is_enemy;
 		generic_billboard -> animation_index = is_enemy
@@ -72,22 +95,25 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 	for (byte i = 0; i < generic_billboard_count; i++) {
 		const GenericBillboard generic = generic_billboards[i];
 		const Billboard billboard = generic.billboard;
+		const DataBillboard billboard_data = billboard.billboard_data;
+
+		DEBUG(generic.is_enemy, d);
 
 		const double
-			abs_billboard_beta = fabs(billboard.beta),
-			cos_billboard_beta = cos(billboard.beta);
+			abs_billboard_beta = fabs(billboard_data.beta),
+			cos_billboard_beta = cos(billboard_data.beta);
 
-		if (billboard.dist <= 0.01
+		if (billboard_data.dist <= 0.01
 			|| cos_billboard_beta <= 0.0
 			|| doubles_eq(abs_billboard_beta, half_pi, std_double_epsilon)
 			|| doubles_eq(abs_billboard_beta, three_pi_over_two, std_double_epsilon)
 			|| doubles_eq(abs_billboard_beta, five_pi_over_two, std_double_epsilon))
 			continue;
 
-		const double corrected_dist = billboard.dist * cos_billboard_beta;
+		const double corrected_dist = billboard_data.dist * cos_billboard_beta;
 
 		const double
-			center_offset = tan(billboard.beta) * settings.proj_dist,
+			center_offset = tan(billboard_data.beta) * settings.proj_dist,
 			size = settings.proj_dist / corrected_dist;
 
 		const double
@@ -102,7 +128,7 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		else if (end_x > settings.screen_width) end_x = settings.screen_width;
 
 		//////////
-		Animation* possible_animation = NULL;
+		DataAnimation* possible_animation_data = NULL;
 		SDL_Rect src_crop;
 		int src_begin_x, width;
 
@@ -111,22 +137,22 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 
 			if (generic.is_enemy) {
 				possible_enemy = &current_level.enemies[generic.animation_index];
-				possible_animation = &possible_enemy -> animations;
+				possible_animation_data = &possible_enemy -> animated_billboard.animation_data;
 			}
-			else possible_animation = &current_level.animations[generic.animation_index];
+			else possible_animation_data = &current_level.animated_billboards[generic.animation_index].animation_data;
 
-			const ivec frame_origin = get_spritesheet_frame_origin(*possible_animation);
+			const ivec frame_origin = get_spritesheet_frame_origin(possible_animation_data);
 
 			src_begin_x = frame_origin.x;
 			src_crop = (SDL_Rect) {
 				.y = frame_origin.y,
-				.w = 1, .h = possible_animation -> frame_h
+				.w = 1, .h = possible_animation_data -> frame_h
 			};
 
 			if (generic.is_enemy) progress_enemy_frame_ind(possible_enemy);
-			else progress_animation_frame_ind(possible_animation);
+			else progress_animation_data_frame_ind(possible_animation_data);
 
-			width = possible_animation -> frame_w;
+			width = possible_animation_data -> frame_w;
 		}
 		else {
 			const ivec src_size = billboard.sprite.size;
@@ -137,8 +163,8 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		//////////
 
 		SDL_FRect screen_pos = {
-			0.0, y_shift - half_size
-			+ (player -> jump.height - billboard.height) * settings.screen_height / corrected_dist,
+			0.0, y_shift - half_size // where is eddie with -O2 and beyond?
+			+ (player -> jump.height - billboard_data.height) * settings.screen_height / corrected_dist,
 			settings.ray_column_width, size
 		};
 
@@ -157,7 +183,6 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 			SDL_RenderCopyF(screen.renderer, billboard.sprite.texture, &src_crop, &screen_pos);
 		}
 	}
-	*/
 }
 
 void draw_skybox(const double angle, const double y_shift) {

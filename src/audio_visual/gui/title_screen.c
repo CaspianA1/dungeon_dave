@@ -55,7 +55,7 @@ inlinable void deinit_message(Message message) {
 
 InputStatus display_logo(void) {
 	Sprite logo;
-	InputStatus logo_input;
+	InputStatus logo_input = Exit;
 	byte displaying_logo = 1, dimensions_changed = 1;
 	while (displaying_logo) {
 		const Uint32 before = SDL_GetTicks();
