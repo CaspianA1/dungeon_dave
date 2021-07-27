@@ -158,8 +158,6 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 	}
 }
 
-void draw_just_stuff();
-
 void draw_skybox(const double angle, const double y_shift) {
 	const Skybox skybox = current_level.skybox;
 	const ivec max_size = skybox.sprite.size;

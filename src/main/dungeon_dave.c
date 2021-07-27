@@ -18,6 +18,7 @@
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
 #include "../audio_visual/overlay/render_overlay.c"
+#include "../audio_visual/overlay/render_things.c"
 
 #include "../audio_visual/effects.c"
 #include "../audio_visual/raycast.c"
@@ -44,7 +45,7 @@
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, weapon);
 	play_sound(current_level.background_sound, 1);
@@ -69,8 +70,11 @@ int main(void) {
 		#ifndef PLANAR_MODE
 		const double full_jump_height = player.jump.height * settings.screen_height;
 		raycast(&player, wall_y_shift, full_jump_height);
+		draw_still_things(&player, wall_y_shift);
+		/*
 		draw_generic_billboards(&player, wall_y_shift);
 		if (!player.is_dead) update_all_enemies(&player);
+		*/
 		use_weapon_if_needed(&weapon, &player, input_status);
 		#else
 		fill_val_buffers_for_planar_mode(player.angle);
