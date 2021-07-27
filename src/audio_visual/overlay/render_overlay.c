@@ -1,18 +1,4 @@
-/*
-Here is the naming system:
-	- A Sprite is just something that is drawable, which can apply
-		to Walls, Billboards, and Animations.
-
-	- A Billboard is a Sprite that always faces the player. Their
-		position can be changed theoretically as well.
-
-	- An Animation is a Billboard that has a spritesheet as its Sprite field.
-		It stores metadata about the animation, such as the frame index,
-		and info regarding how to crop the spritesheet per frame.
-
-I refer to a 'generic billboard' as a Billboard or Animation.
-*/
-
+// generic billboard = billboard || animation
 int cmp_generic_billboards(const void* const a, const void* const b) {
 	const double distances[2] = {
 		((GenericBillboard*) a) -> billboard.billboard_data.dist,
