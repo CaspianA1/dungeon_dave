@@ -73,16 +73,15 @@ byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
 		init_SDL_buffers(new_width, new_height, 1);
 		settings.avg_dimensions = (new_width + new_height) / 2;
 
+		deinit_statemap(occluded_by_walls);
+		occluded_by_walls = init_statemap(new_width, new_height);
+
 		if (width_not_eq) {
 			settings.screen_width = new_width;
 			settings.half_screen_width = new_width / 2;
 			update_proj_dist();
 
 			val_buffer = wrealloc(val_buffer, new_width * sizeof(BufferVal));
-
-			deinit_statemap(occluded_by_walls);
-			occluded_by_walls = init_statemap(new_width, new_height);
-
 		}
 		if (height_not_eq) {
 			settings.screen_height = new_height;
