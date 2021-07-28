@@ -18,7 +18,7 @@
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
 #include "../audio_visual/overlay/render_overlay.c"
-#include "../audio_visual/overlay/render_things.c"
+#include "../audio_visual/overlay/render_billboards.c"
 
 #include "../audio_visual/effects.c"
 #include "../audio_visual/raycast.c"
@@ -45,7 +45,7 @@
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, weapon);
 	play_sound(current_level.background_sound, 1);

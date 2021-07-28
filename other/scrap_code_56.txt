@@ -70,3 +70,22 @@ memcpy(&dest -> nav, &nav, sizeof(Navigator));
 I refer to a 'generic billboard' as a Billboard or Animation. */
 
 /////
+
+// if y shift > screen height, warping occurs - so stop that beforehand
+if (src_1.y < 0) { // for current config, max neg = -48
+	printf("Stretch: src_1.y = %d\n", src_1.y);
+	// src_1.y = 0;
+} // else printf("No stretch\n");
+
+/////
+
+// double sub = M_PI;
+// static double sub = M_PI;
+// static double sub = M_PI / 8;
+// sub = 0.982699
+static double sub = 0.98;
+if (keys[SDL_SCANCODE_K]) sub += 0.01;
+if (keys[SDL_SCANCODE_L]) sub -= 0.01;
+DEBUG(sub, lf);
+
+/////

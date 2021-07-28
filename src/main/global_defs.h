@@ -12,18 +12,16 @@
 
 #endif
 
-/*
 #define PLANAR_MODE
 #define NOCLIP_MODE
-*/
 
 #define SHADING_ENABLED
-#define SOUND_ENABLED
+// #define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 // max: 1440 by 900
-#define INIT_W 1000
-#define INIT_H 700
+#define INIT_W 800
+#define INIT_H 600
 #define INIT_MAX_FPS 60
 #define INIT_RAY_COLUMN_W 1
 

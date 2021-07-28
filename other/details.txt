@@ -30,7 +30,6 @@ features:
 	- long-range attacking enemies
 	- slow enemies down by hitting them - or stop them in some way
 	- text under the hud elements
-	- objects with base Billboard are super jerky
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -57,7 +56,9 @@ problems:
 	- some weapon uses at a distance result in the walking sound
 	- readjust mouse pos after scaling down the screen - b/c that is messing with the skybox
 	- another wall stitch
-	- un-neat render_overlay code
+	- un-neat render_overlay code + objects with base Billboard are super jerky
+	- can't stretch screen vertically without weird visual problems + segfault crashes (the statemap is the issue)
+	- jerky weapon movement in the first split second of gameplay
 
 completed:
 	- minimap that conveys height data

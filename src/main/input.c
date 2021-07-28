@@ -127,7 +127,8 @@ inlinable void update_pace(Pace* const pace, const vec pos, const vec prev_pos, 
 		Domain* const domain = &pace -> domain;
 		const double domain_incr = domain -> step * log(lim_v) / log(v);
 		if ((domain -> val += domain_incr) > two_pi) domain -> val = 0.0;
-		pace -> screen_offset = sin(domain -> val) * settings.screen_height / pace -> offset_scaler;
+		// the magical number 0.98 causes skybox warping problems to disappear
+		pace -> screen_offset = (sin(domain -> val) - 0.98) * settings.screen_height / pace -> offset_scaler;
 	}
 }
 
