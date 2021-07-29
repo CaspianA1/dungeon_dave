@@ -7,8 +7,8 @@ typedef struct {
 
 int cmp_things(const void* const a, const void* const b) {
 	const double distances[2] = {
-		((DataBillboard*) a) -> dist,
-		((DataBillboard*) b) -> dist
+		((Thing*) a) -> billboard_data -> dist,
+		((Thing*) b) -> billboard_data -> dist
 	};
 
 	if (distances[0] > distances[1]) return -1;

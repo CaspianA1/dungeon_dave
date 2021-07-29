@@ -77,7 +77,7 @@ int main(void) {
 		draw_generic_billboards(&player, wall_y_shift);
 		if (!player.is_dead) update_all_enemies(&player);
 		*/
-		// draw_still_things(&player, wall_y_shift);
+		draw_still_things(&player, wall_y_shift);
 		use_weapon_if_needed(&weapon, &player, input_status);
 		#else
 		fill_val_buffers_for_planar_mode(player.angle);

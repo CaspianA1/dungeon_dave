@@ -1,0 +1,50 @@
+///// An attempt at thing ranges:
+
+typedef struct {
+	int start, end;
+} RangeX;
+
+RangeX visible[5] = {0};
+byte range_ind = 0, in_visible_block = 1;
+
+#define obscured_x (double) val_buffer[screen_row].depth < corrected_dist
+#define print_range(r) printf("{%d, %d}, ", r.start, r.end);
+
+for (int screen_row = start_x; screen_row < end_x; screen_row += settings.ray_column_width) {
+	if (screen_row < 0) continue;
+
+	else if (obscured_x) {
+		if (in_visible_block) range_ind++;
+		in_visible_block = 0;
+	}
+	else {
+		RangeX* const visible_range = &visible[range_ind];
+
+		if (!in_visible_block) visible_range -> start = screen_row;
+		else visible_range -> end = screen_row;
+
+		in_visible_block = 1;
+	}
+}
+
+for (byte i = 0; i < range_ind + 1; i++) {
+	const RangeX visible_range = visible[i];
+
+	print_range(visible_range)
+
+	screen_pos.x = visible_range.start;
+	src_crop.x = ((double) (visible_range.start - (int) start_x) / size) * sprite.size.x;
+	src_crop.w = visible_range.end - visible_range.start;
+
+	SDL_RenderCopyF(screen.renderer, thing.sprite.texture, &src_crop, &screen_pos);
+}
+putchar('\n');
+
+/*
+for (byte i = 0; i < range_ind + 1; i++) {
+	printf("{%d, %d}, ", ranges[i].start, ranges[i].end);
+}
+putchar('\n');
+*/
+
+/////
