@@ -18,7 +18,6 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const double shade) {
 
 PSprite p;
 
-// b4 = 11463
 inlinable void draw_from_hit(const vec hit, const double dist, const int screen_x, Uint32* const pixbuf_row) {
 	const vec offset = vec_tex_offset(hit, p.size);
 	Uint32 pixel = read_texture_row(p.pixels, p.pitch, offset[1])[(long) offset[0]];

@@ -19,9 +19,10 @@ void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 
 void update_enemy(Enemy* const enemy, Player* const player) {
 	Navigator* const nav = &enemy -> nav;
-	const double dist = enemy -> animated_billboard.billboard_data.dist;
+	double dist = enemy -> animated_billboard.billboard_data.dist;
 
-	// if (enemy -> recently_attacked) enemy -> time_at_attack = SDL_GetTicks() / 1000.0;
+	for (byte i = 0; i < 5; i++)
+		set_sound_volume_from_dist(enemy -> sounds[i], enemy -> animated_billboard.billboard_data.dist);
 
 	/* for each state (excluding Dead), periodically play the sound from that state,
 	and only play the Dead animation once, stopping on the last frame */
@@ -48,7 +49,6 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 				if (curr_time - enemy -> time_at_attack > attack_time_spacing) {
 					enemy -> time_at_attack = curr_time;
 
-					double dist = enemy -> animated_billboard.billboard_data.dist; // don't reuse dist
 					if (dist > 1.0) dist = 1.0; // when the decr hp is less than zero, the enemy clips into walls - why?
 					const double decr_hp = enemy -> power * (1.0 - dist * dist); // more damage closer
 

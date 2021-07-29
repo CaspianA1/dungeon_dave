@@ -1,8 +1,10 @@
 #ifdef SOUND_ENABLED
 
+const double max_sound_dist = 10.0;
+
 typedef struct {
 	byte is_short;
-	union {
+	union { // `short` and `long` alone are datatypes, so wouldn't work
 			Mix_Chunk* short_sound;
 			Mix_Music* long_sound;
 	} type;
@@ -41,15 +43,14 @@ inlinable void deinit_sound(const Sound sound) {
 	else Mix_FreeMusic(sound.type.long_sound);	
 }
 
-inlinable void play_sound(const Sound sound, const byte should_loop) {
-	#ifndef SOUND_ENABLED
+// this expects a short sound
+inlinable void set_sound_volume_from_dist(const Sound sound, const double dist) {
+	double percent_audible = 1.0 - dist / max_sound_dist;
+	if (percent_audible < 0.0) percent_audible = 0.0;
+	Mix_VolumeChunk(sound.type.short_sound, percent_audible * MIX_MAX_VOLUME);
+}
 
-	(void) sound;
-	(void) should_loop;
-	return;
-
-	#endif
-
+void play_sound(const Sound sound, const byte should_loop) {
 	const int loop_status = should_loop ? -1 : 0;
 
 	if (sound.is_short) {

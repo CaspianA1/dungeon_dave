@@ -36,9 +36,11 @@
 #include "../combat/enemy.c"
 #include "../combat/weapon.c"
 
+/*
 #include "../data/levels/level_1.c"
 #include "../data/levels/debug_level.c"
 #include "../data/levels/red_room.c"
+*/
 #include "../data/levels/palace.c"
 
 

@@ -53,6 +53,7 @@ problems:
 	- readjust mouse pos after scaling down the screen - b/c that is messing with the skybox
 	- another wall stitch
 	- un-neat render_overlay code + objects with base Billboard are super jerky (next up)
+	- pass sounds by reference
 
 completed:
 	- minimap that conveys height data
