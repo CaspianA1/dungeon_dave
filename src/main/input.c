@@ -31,7 +31,7 @@ void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement,
 
 	if (point_exists_at(pos[0], pos[1] + settings.stop_dist, p_height) ||
 		point_exists_at(pos[0], pos[1] - settings.stop_dist, p_height))
-		pos[1] = prev_pos[1], hit_y = 1;
+		pos[1] = prev_pos[1], hit_y = 1; // set pos to block-aligned value?
 
 	if (point_exists_at(pos[0] + settings.stop_dist, pos[1], p_height) ||
 		point_exists_at(pos[0] - settings.stop_dist, pos[1], p_height))
