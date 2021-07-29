@@ -1,8 +1,8 @@
 // a rewrite of render_overlay.c; thing = billboard or animation or enemy
 
 typedef struct {
-	DataBillboard* billboard_data;
-	Sprite sprite;
+	const DataBillboard* const billboard_data;
+	const Sprite sprite;
 } Thing;
 
 int cmp_things(const void* const a, const void* const b) {
@@ -16,7 +16,7 @@ int cmp_things(const void* const a, const void* const b) {
 	else return 0;
 }
 
-void draw_processed_still_things(const Player* const player, Thing* thing_container,
+void draw_processed_still_things(const Player* const player, Thing* const thing_container,
 	const int thing_count, const double y_shift) {
 
 	for (byte i = 0; i < thing_count; i++) {
@@ -28,11 +28,10 @@ void draw_processed_still_things(const Player* const player, Thing* thing_contai
 			abs_billboard_beta = fabs(billboard_data.beta),
 			cos_billboard_beta = cos(billboard_data.beta);
 
-		if (billboard_data.dist <= 0.01
-			|| cos_billboard_beta <= 0.0
-			|| doubles_eq(abs_billboard_beta, half_pi)
-			|| doubles_eq(abs_billboard_beta, three_pi_over_two)
-			|| doubles_eq(abs_billboard_beta, five_pi_over_two))
+		if (billboard_data.dist <= 0.01 // if too close
+			|| cos_billboard_beta <= 0.0 // if out of view
+			|| doubles_eq(abs_billboard_beta, half_pi) // if tan of beta equals inf val for tan
+			|| doubles_eq(abs_billboard_beta, three_pi_over_two))
 			continue;
 
 		const double corrected_dist = billboard_data.dist * cos_billboard_beta;
@@ -92,7 +91,8 @@ void draw_still_things(const Player* const player, const double y_shift) {
 		if (billboard_data -> beta < -two_pi) billboard_data -> beta += two_pi;
 		billboard_data -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 
-		thing_container[i] = (Thing) {billboard_data, billboard -> sprite};
+		const Thing thing = {billboard_data, billboard -> sprite};
+		memcpy(&thing_container[i], &thing, sizeof(Thing));
 	}
 
 	qsort(thing_container, thing_count, sizeof(Thing), cmp_things);
