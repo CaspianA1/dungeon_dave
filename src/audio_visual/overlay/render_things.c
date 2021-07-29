@@ -63,7 +63,7 @@ void draw_processed_still_things(const Player* const player, Thing* const thing_
 
 		#ifdef SHADING_ENABLED
 		const byte shade = 255 * calculate_shade(size, billboard_data.pos);
-		SDL_SetTextureColorMod(billboard.sprite.texture, shade, shade, shade);
+		SDL_SetTextureColorMod(thing.sprite.texture, shade, shade, shade);
 		#endif
 
 		for (int screen_row = start_x; screen_row < end_x; screen_row += settings.ray_column_width) {
