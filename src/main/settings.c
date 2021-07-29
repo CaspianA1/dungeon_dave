@@ -147,19 +147,19 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	const double offset_scaler = 15.0;
 	const Player first_player = load_player(4.8, 0.3, 8.0, 0.12, offset_scaler, 0.08, 0.09, 0.05, 1.9);
 
-	/*
 	const Weapon first_weapon = {
 		.in_use = 0, .short_range = 1, .paces_sideways = 0, .power = 4.0, .dist_for_hit = 0.5,
 		.sound = init_sound("assets/audio/sound_effects/whip_crack.wav", 1),
 		.animation_data = init_animation_data("assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60, 0)
 	};
-	*/
 
+	/*
 	const Weapon first_weapon = {
 		.in_use = 0, .short_range = 0, .paces_sideways = 1, .power = 6.0, .dist_for_hit = 0.5,
 		.sound = init_sound("assets/audio/sound_effects/shotgun.wav", 1),
 		.animation_data = init_animation_data("assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30, 0)
 	};
+	*/
 
 	/*
 	const Weapon first_weapon = {

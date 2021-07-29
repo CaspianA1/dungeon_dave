@@ -1,8 +1,7 @@
 features:
 	- covered tops of walls
-	- floor and ceiling with variable wall heights: if ceilings should work, the wall height should change depending on the point height
 	- doors
-	- status bar while playing w/ a settings option in the title screen and status bar
+	- a settings option in the title screen and status bar
 	- move mouse out of window if pressing escape
 	- a level opener, with a cool spinning effect
 	- a sprite pool
@@ -24,31 +23,28 @@ features:
 	- figure out lcov (?)
 	- make each file an .o file, and then link them all together
 	- faster enemy movement when nearer player (logarithmic scale)
-	- only one sound effect at once - otherwise, out of channels
+	- only one sound effect at once - otherwise, out of channels (?)
 	- player sound for damage taken
 	- EnemyInstance struct + enemy data file
 	- long-range attacking enemies
 	- slow enemies down by hitting them - or stop them in some way
-	- make weapon movement look more natural
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
 	- player clipping into corners
 	- small screen -> bigger screen or very small screen, edge triangles
 	- z-buffering issues with sprites for higher point heights
-	- min and max proj dist
+	- min and max projection distance
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
 	- too many Mix_Chunks on the available channels -> out of channels
-	- skybox stretching - fix it by limiting the y-pitch + pace combination
-	- less doubles and more ints in render_overlay.c
 	- don't intersect the player dot with walls in the minimap
 	- shading is slow (it isn't the shading logic, it's the bitwise ops)
 	- skyboxes become wonky when the screen size increases
 	- disabling vsync makes everything choppy
 	- vecs to float[2]'s in screen.dir_buffer
 	- fix the offset problem for fast_affine_floor
-	- sometimes, psprites disappear mid-game (use memory sanitizer to resolve the problem: https://github.com/google/sanitizers/wiki/MemorySanitizer) (also, each time that the minimap is enabled, the psprite becomes corrupted)
-	- bogo is completely dark with the make rule `debug_2` (he is only light with -Ofast)
+	- sometimes, psprites disappear mid-game (use memory sanitizer to resolve the problem: https://github.com/google/sanitizers/wiki/MemorySanitizer)
+	- bogo is completely light with -Ofast when he shouldn't be
 	- many memory leaks
 	- a gray line appears for blur fixing
 	- little blinking dots in the distance for the hieroglyphics bitmap
@@ -57,8 +53,6 @@ problems:
 	- readjust mouse pos after scaling down the screen - b/c that is messing with the skybox
 	- another wall stitch
 	- un-neat render_overlay code + objects with base Billboard are super jerky
-	- can't stretch screen vertically without weird visual problems + segfault crashes (the statemap is the issue)
-	- jerky weapon movement in the first split second of gameplay
 
 completed:
 	- minimap that conveys height data

@@ -52,7 +52,7 @@ inlinable ivec get_spritesheet_frame_origin(const DataAnimation* const animation
 }
 
 void animate_weapon(DataAnimation* const animation_data, const vec pos,
-	const byte paces_sideways, const byte in_use, const int y_pitch, const double pace) {
+	const byte paces_sideways_on_use, const byte in_use, const int y_pitch, const double v) {
 
 	#ifndef SHADING_ENABLED
 	(void) pos;
@@ -65,14 +65,24 @@ void animate_weapon(DataAnimation* const animation_data, const vec pos,
 		animation_data -> frame_w, animation_data -> frame_h
 	};
 
-	/* the reason the `paces_sideways` flag exists is because the whip animation has half-drawn parts that are shown
-	when the animation is scrolled on the x-axis, so to avoid revealing that, the flags stops the undrawn part
-	from being shown (by stopping x-axis scrolling) when it cycles its animation. */
+	/* the reason the `paces_sideways_on_use` flag exists is because the whip animation has half-drawn parts
+	that are shown when the animation is scrolled on the x-axis, so to avoid revealing that, the flags stops
+	the undrawn part from being shown (by stopping x-axis scrolling) when it cycles its animation.
+	`weapon_arc` gives a constant back-and-forth movement that goes wider when the player speed is higher.
+	there's a fabs call for the y-component of screen_pos b/c otherwise, the underside - the undrawn bottom
+	of the weapon - would be shown.
+	*/
+
+	static double x = 0.0;
+	x += log(v + 1.0) * 1.2;
+	if (x > two_pi) x = 0.0;
+
+	const double weapon_arc = sin(x) * settings.screen_width / 15.0; // pulsating back-and-forth movement
+
 	const SDL_Rect screen_pos = {
-		(paces_sideways || (!paces_sideways && !in_use)) ? pace : 0,
-		fabs(pace) + (y_pitch < 0 ? 0 : y_pitch),
-		settings.screen_width,
-		settings.screen_height
+		(!paces_sideways_on_use && in_use) ? 0 : weapon_arc,
+		fabs(weapon_arc) + (y_pitch < 0 ? 0 : y_pitch),
+		settings.screen_width, settings.screen_height
 	};
 
 	SDL_Texture* const texture = animation_data -> sprite.texture;

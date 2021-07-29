@@ -89,3 +89,41 @@ if (keys[SDL_SCANCODE_L]) sub -= 0.01;
 DEBUG(sub, lf);
 
 /////
+
+
+static double x;
+x += 0.1;
+if (x > two_pi) x = 0.0;
+
+const double w = sin(x) * settings.screen_width / 2;
+SDL_Rect screen_pos = {
+	w, w, settings.screen_width, settings.screen_height
+};
+
+/*
+(void) v;
+const double width = v * settings.screen_width;
+DEBUG(width, lf);
+static double x;
+static double direction = 4.0;
+
+static vec prev_pos;
+if (prev_pos[0] != pos[0] || prev_pos[1] != pos[1]) {
+	prev_pos = pos;
+
+	x += direction;
+	if (x > width || x < -width) direction = -direction;
+}
+
+SDL_Rect screen_pos = {
+	// (paces_sideways || (!paces_sideways && !in_use)) ? pace : 0,
+	x,
+	fabs(pace) + (y_pitch < 0 ? 0 : y_pitch),
+	settings.screen_width,
+	settings.screen_height
+};
+
+DEBUG(screen_pos.x, d);
+*/
+
+/////
