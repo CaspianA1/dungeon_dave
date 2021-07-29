@@ -52,6 +52,8 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 					if (dist > 1.0) dist = 1.0; // when the decr hp is less than zero, the enemy clips into walls - why?
 					const double decr_hp = enemy -> power * (1.0 - dist * dist); // more damage closer
 
+					play_sound(player -> sound_when_attacked, 0);
+
 					if ((player -> hp -= decr_hp) <= 0.0) {
 						player -> is_dead = 1;
 						player -> hp = 0.0;

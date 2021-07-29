@@ -18,7 +18,7 @@
 */
 
 #define SHADING_ENABLED
-// #define SOUND_ENABLED
+#define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 // max: 1440 by 900
@@ -35,9 +35,9 @@
 #define INIT_MINIMAP_SCALE 4.8
 #define INIT_STOP_DIST 0.2
 
-#define INIT_HP 30
+#define INIT_HP 30.0
 
-#define AUDIO_CHUNK_SIZE 1024
+#define AUDIO_CHUNK_SIZE 512 // 1024 before
 
 #define KEY_TOGGLE_MINIMAP SDL_SCANCODE_1
 #define KEY_TOGGLE_HP_PERCENT SDL_SCANCODE_2

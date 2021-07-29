@@ -14,7 +14,7 @@ features:
 	- linearly interpolate actual_dist for more speed
 	- floors at different height levels
 	- smooth mipmap depth switching, and mipmap a texture until its width or height reaches 1
-	- mipmapping for sprites
+	- mipmapping for billboards
 	- a shotgun more in the art style of Adam's whip
 	- Attacked state for enemy
 	- a metro level

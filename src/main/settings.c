@@ -108,7 +108,11 @@ Player load_player(const double jump_up_v0,
 
 		.mouse_pos = {0, 0},
 
-		.angle = 0.0, .hp = INIT_HP, .is_dead = 0, .y_pitch = 0,
+		.angle = 0.0, .hp = INIT_HP, .is_dead = 0,
+
+		.sound_when_attacked = init_sound("assets/audio/sound_effects/attacked.wav", 1),
+
+		.y_pitch = 0,
 
 		.jump = {.jumping = 0, .up_v0 = jump_up_v0, .v0 = 0.0,
 			.height = init_height, .start_height = init_height,
@@ -179,6 +183,7 @@ void deinit_all(const Player* const player, const Weapon weapon) {
 	void deinit_hud_resources(void);
 	void deinit_screen(void);
 
+	deinit_sound(player -> sound_when_attacked);
 	deinit_sound(player -> jump.sound_at_jump);
 	deinit_sound(player -> jump.sound_at_land);
 	deinit_weapon(weapon);

@@ -11,34 +11,33 @@ inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos
 		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
-void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement, const double p_height) {
+void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement,
+	const double p_height, double* const v_ref) {
 	vec pos = *pos_ref + movement;
-
-	/*
-	__m64 foo = {1.0f, 2.0f};
-	DEBUG(sizeof(__m64), zu);
-	DEBUG(sizeof(float), zu);
-	*/
 
 	#ifdef NOCLIP_MODE
 
 	(void) prev_pos;
 	(void) p_height;
 
-	/* out-of-bounds hit detection is only needed for noclip mode,
-	as it will be impossible to go out of bounds otherwise in normal mode */
+	/* Out-of-bounds hit detection is only needed for noclip mode,
+	as it will be impossible to go out of bounds otherwise in normal mode. */
 	if (pos[1] < 1 || pos[1] > current_level.map_size.y - 1) pos[1] = prev_pos[1];
 	if (pos[0] < 1 || pos[0] > current_level.map_size.x - 1) pos[0] = prev_pos[0];
 
 	#else
 
+	byte hit_y = 0, hit_x = 0;
+
 	if (point_exists_at(pos[0], pos[1] + settings.stop_dist, p_height) ||
 		point_exists_at(pos[0], pos[1] - settings.stop_dist, p_height))
-		pos[1] = prev_pos[1];
+		pos[1] = prev_pos[1], hit_y = 1;
 
 	if (point_exists_at(pos[0] + settings.stop_dist, pos[1], p_height) ||
 		point_exists_at(pos[0] - settings.stop_dist, pos[1], p_height))
-		pos[0] = prev_pos[0];
+		pos[0] = prev_pos[0], hit_x = 1;
+
+	if (hit_y && hit_x) *v_ref = 0.0;
 
 	#endif
 
@@ -95,7 +94,7 @@ void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
 	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
 
-	hit_detection(pos, prev_pos, movement, p_height);
+	hit_detection(pos, prev_pos, movement, p_height, &body -> v);
 }
 
 void update_y_pitch(int* const y_pitch, const int mouse_y) {
