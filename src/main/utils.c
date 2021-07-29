@@ -68,8 +68,8 @@ inlinable double to_radians(const double degrees) {
 	return degrees * M_PI / 180.0;
 }
 
-inlinable byte doubles_eq(const double a, const double b, const double epsilon) {
-	return fabs(a - b) < epsilon;
+inlinable byte doubles_eq(const double a, const double b) {
+	return fabs(a - b) < small_double_epsilon;
 }
 
 inlinable void tick_delay(const Uint32 before) {

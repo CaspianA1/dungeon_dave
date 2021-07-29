@@ -18,7 +18,7 @@
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
 #include "../audio_visual/overlay/render_overlay.c"
-#include "../audio_visual/overlay/render_billboards.c"
+#include "../audio_visual/overlay/render_things.c"
 
 #include "../audio_visual/effects.c"
 #include "../audio_visual/raycast.c"
@@ -78,6 +78,7 @@ int main(void) {
 		draw_generic_billboards(&player, wall_y_shift);
 		if (!player.is_dead) update_all_enemies(&player);
 		*/
+		draw_still_things(&player, wall_y_shift);
 		use_weapon_if_needed(&weapon, &player, input_status);
 		#else
 		fill_val_buffers_for_planar_mode(player.angle);

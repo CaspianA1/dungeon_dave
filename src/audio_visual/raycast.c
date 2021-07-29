@@ -68,13 +68,10 @@ vec handle_ray(const DataRaycast d) {
 		else slice.h = max_sprite_h;
 
 		*d.last_wall_y = raised_wall_dest.y;
-		if (!keys[SDL_SCANCODE_G]) {
-			SDL_FRect frect = {raised_wall_dest.x, raised_wall_dest.y, raised_wall_dest.w, raised_wall_dest.h};
-			SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &frect);
-		}
+		SDL_FRect frect = {raised_wall_dest.x, raised_wall_dest.y, raised_wall_dest.w, raised_wall_dest.h};
+		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &frect);
 	}
 	*d.last_point_height = point_height;
-
 	return (vec) {smallest_wall_y, wall_h};
 }
 

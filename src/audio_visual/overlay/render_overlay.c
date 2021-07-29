@@ -78,9 +78,9 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 
 		if (billboard_data.dist <= 0.01
 			|| cos_billboard_beta <= 0.0
-			|| doubles_eq(abs_billboard_beta, half_pi, std_double_epsilon)
-			|| doubles_eq(abs_billboard_beta, three_pi_over_two, std_double_epsilon)
-			|| doubles_eq(abs_billboard_beta, five_pi_over_two, std_double_epsilon))
+			|| doubles_eq(abs_billboard_beta, half_pi)
+			|| doubles_eq(abs_billboard_beta, three_pi_over_two)
+			|| doubles_eq(abs_billboard_beta, five_pi_over_two))
 			continue;
 
 		const double corrected_dist = billboard_data.dist * cos_billboard_beta;
@@ -159,8 +159,6 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 }
 
 void draw_skybox(const double angle, const double y_shift) {
-	// DEBUG(y_shift, lf);
-
 	const Skybox skybox = current_level.skybox;
 	const ivec max_size = skybox.sprite.size;
 
