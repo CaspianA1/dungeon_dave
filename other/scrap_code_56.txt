@@ -127,3 +127,28 @@ DEBUG(screen_pos.x, d);
 */
 
 /////
+
+__m128 pixels = (__m128) {pixel >> 16, pixel >> 8, pixel} * _mm_set1_ps(shade);
+return 0xFF000000 | ((byte) pixels[0] << 16) | ((byte) pixels[1] << 8) | (byte) pixels[2];
+
+/////
+
+/*
+Uint32* pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + (int) y_shift * screen.pixel_pitch); 
+const Uint32 pixbuf_row_step = screen.pixel_pitch / sizeof(Uint32); // 1000
+*/
+
+// `y_shift - pace` may go outside the map boundaries; limit this domain
+for (int y = y_shift - pace; y < settings.screen_height - pace; y += 2) {
+// for (int y = y_shift - pace; y < settings.screen_height - pace; y++, pixbuf_row += pixbuf_row_step) {
+	const int row = y - settings.half_screen_height - y_pitch + 1;
+	if (row == 0) continue;
+
+	const double straight_dist = opp_h / row * settings.proj_dist;
+
+	const int pace_y = y + pace;
+	Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
+
+	// printf((cmp_pixbuf_row == pixbuf_row) ? "Equal" : "Not equal");
+
+/////

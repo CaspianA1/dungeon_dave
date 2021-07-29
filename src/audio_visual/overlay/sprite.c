@@ -14,10 +14,6 @@ Sprite init_sprite(const char* const path, const byte enable_mipmap) {
 	return sprite;
 }
 
-inlinable Uint32* read_texture_row(const void* const pixels, const int pixel_pitch, const int y) {
-	return (Uint32*) ((Uint8*) pixels + y * pixel_pitch);
-}
-
 PSprite init_psprite(const char* const path) {
 	SDL_Surface* const unconverted_surface = SDL_LoadBMP(path);
 	if (unconverted_surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);

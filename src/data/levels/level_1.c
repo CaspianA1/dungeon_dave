@@ -1,4 +1,4 @@
-byte get_level_1_point_height(const byte point, const vec pos) {
+inlinable byte get_level_1_point_height(const byte point, const vec pos) {
 	switch (point) {
 		case 0: return 0;
 		case 1: return 3; // cobblestone edges
@@ -8,7 +8,7 @@ byte get_level_1_point_height(const byte point, const vec pos) {
 	}
 }
 
-double level_1_shader(const vec pos) {
+inlinable double level_1_shader(const vec pos) {
 	static const vec
 		pillar_center = {4.5, 11.5},
 		tunnel_center = {18.0, 7.0},

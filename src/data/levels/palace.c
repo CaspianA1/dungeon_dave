@@ -1,4 +1,4 @@
-byte get_palace_point_height(const byte point, const vec pos) {
+inlinable byte get_palace_point_height(const byte point, const vec pos) {
 	if (point == 1) {
 		if (pos[0] <= 8.9999 && pos[1] <= 5.9999) return 3;
 		else return 5;
@@ -32,7 +32,7 @@ byte get_palace_point_height(const byte point, const vec pos) {
 	}
 }
 
-double palace_shader(const vec pos) {
+inlinable double palace_shader(const vec pos) {
 	static const Circle
 		first_health_kit = {{5.0, 2.0}, 1.0},
 		first_downward_stairs = {{22.0, 24.0}, 5.0},

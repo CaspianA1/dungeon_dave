@@ -54,7 +54,7 @@ inlinable Uint32* read_surface_pixel(const SDL_Surface* const surface, const int
 }
 
 void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_size) { // box blur
-	typedef __v4si color;
+	typedef __v4si color4;
 
 	const int src_w = image -> w, src_h = image -> h;
 	SDL_Surface* const blurred_crop = SDL_CreateRGBSurfaceWithFormat(0, crop.w, crop.h, 32, PIXEL_FORMAT);
@@ -65,7 +65,7 @@ void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_
 	const int bpp = format -> BytesPerPixel;
  	for (int y = crop.y; y < crop.y + crop.h; y++) {
 		for (int x = crop.x; x < crop.x + crop.w; x++) {
-			color sum = {0, 0, 0, 0};
+			color4 sum = {0, 0, 0, 0};
 			int blur_sum_factor = 0;
 			for (int py = -blur_size; py <= blur_size; py++) {
 				for (int px = -blur_size; px <= blur_size; px++) {
@@ -77,7 +77,7 @@ void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_
 
 					byte r, g, b, a;
 					SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
-					sum += (color) {r, g, b, a};
+					sum += (color4) {r, g, b, a};
 	
 					blur_sum_factor++;
                 }

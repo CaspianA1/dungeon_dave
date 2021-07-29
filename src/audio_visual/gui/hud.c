@@ -9,13 +9,13 @@ struct {
 
 typedef struct {
 	byte r, g, b;
-} Color;
+} Color3;
 
 enum {
 	HUD, PlayerMinimap, BackgroundHP
 } ColorID;
 
-const Color hud_colors[3] = {
+const Color3 hud_colors[3] = {
 	{255, 215, 0}, // yellow-orange (mostly yellow)
 	{255, 0, 0}, // red
 	{0, 0, 0} // black
@@ -47,7 +47,7 @@ inlinable void draw_minimap(const vec pos) {
 
 	const vec origin = screen_size - minimap_size;
 	SDL_FRect wall_tile = {0.0, origin[1], scale[0], scale[1]};
-	Color color = hud_colors[HUD];
+	Color3 color = hud_colors[HUD];
 
 	for (int map_y = 0; map_y < tile_amts.y; map_y++, wall_tile.y += (float) scale[1], wall_tile.x = 0.0) {
 		for (int map_x = 0; map_x < tile_amts.x; map_x++, wall_tile.x += (float) scale[0]) {
@@ -71,7 +71,7 @@ inlinable void draw_crosshair(const int y_shift) {
 	const byte half_dimensions = settings.screen_width / 40, thickness = settings.screen_width / 200;
 	const ivec center = {settings.half_screen_width, y_shift};
 
-	const Color color = hud_colors[HUD];
+	const Color3 color = hud_colors[HUD];
 	SDL_SetRenderDrawColor(screen.renderer, color.r, color.g, color.b, SDL_ALPHA_OPAQUE);
 
 	const SDL_Rect
@@ -89,7 +89,7 @@ inlinable void make_hp_text(const double hp, TTF_Font** const font, SDL_Texture*
 	if (font != NULL) TTF_CloseFont(*font);
 	*font = TTF_OpenFont(STD_GUI_FONT_PATH, settings.avg_dimensions / 10.0);
 
-	const Color color = hud_colors[HUD];
+	const Color3 color = hud_colors[HUD];
 	SDL_Surface* const surface = TTF_RenderText_Solid(*font, percent_str,
 		(SDL_Color) {color.r, color.g, color.b, SDL_ALPHA_OPAQUE});
 
@@ -114,7 +114,7 @@ inlinable void draw_hp(const double hp) {
 	const vec box_size = screen_size / vec_fill(settings.minimap_scale);
 	SDL_FRect hp_box = {box_size[0], screen_size[1] - box_size[1], box_size[0], box_size[1]};
 
-	const Color color = hud_colors[BackgroundHP];
+	const Color3 color = hud_colors[BackgroundHP];
 	SDL_SetRenderDrawColor(screen.renderer, color.r, color.g, color.b, SDL_ALPHA_OPAQUE); // black
 	SDL_RenderFillRectF(screen.renderer, &hp_box);
 	SDL_RenderCopyF(screen.renderer, hud_resources.hp_texture, NULL, &hp_box);

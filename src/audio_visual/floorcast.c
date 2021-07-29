@@ -2,6 +2,11 @@ inlinable vec vec_tex_offset(const vec pos, const int tex_size) {
 	return vec_fill(tex_size) * (pos - _mm_round_pd(pos, _MM_FROUND_TRUNC));
 }
 
+
+inlinable Uint32* read_texture_row(const void* const pixels, const int pixel_pitch, const int y) {
+	return (Uint32*) ((Uint8*) pixels + y * pixel_pitch);
+}
+
 #ifdef SHADING_ENABLED
 
 inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const double shade) {
@@ -12,9 +17,11 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const double shade) {
 #endif
 
 PSprite p;
-void draw_from_hit(const vec hit, const double dist, const int screen_x, Uint32* const pixbuf_row) {
+
+// b4 = 11463
+inlinable void draw_from_hit(const vec hit, const double dist, const int screen_x, Uint32* const pixbuf_row) {
 	const vec offset = vec_tex_offset(hit, p.size);
-	Uint32 pixel = *(read_texture_row(p.pixels, p.pitch, offset[1]) + (long) offset[0]);
+	Uint32 pixel = read_texture_row(p.pixels, p.pitch, offset[1])[(long) offset[0]];
 
 	#ifdef SHADING_ENABLED
 	pixel = shade_ARGB_pixel(pixel, calculate_shade(settings.proj_dist / dist, hit));
@@ -22,8 +29,7 @@ void draw_from_hit(const vec hit, const double dist, const int screen_x, Uint32*
 	(void) dist;
 	#endif
 
-	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++)
-		*(pixbuf_row + x) = pixel;
+	for (byte x = 0; x < settings.ray_column_width; x++) pixbuf_row[x + screen_x] = pixel;
 }
 
 void fast_affine_floor(const vec pos, const double p_height, const double pace, double y_shift, const int y_pitch) {
@@ -32,14 +38,7 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 
 	if (y_shift < 0.0) y_shift = 0.0;
 
-	/*
-	Uint32* pixbuf_row = (Uint32*) ((Uint8*) screen.pixels + (int) y_shift * screen.pixel_pitch); 
-	const Uint32 pixbuf_row_step = screen.pixel_pitch / sizeof(Uint32); // 1000
-	*/
-
-	// `y_shift - pace` may go outside the map boundaries; limit this domain
 	for (int y = y_shift - pace; y < settings.screen_height - pace; y++) {
-	// for (int y = y_shift - pace; y < settings.screen_height - pace; y++, pixbuf_row += pixbuf_row_step) {
 		const int row = y - settings.half_screen_height - y_pitch + 1;
 		if (row == 0) continue;
 
@@ -48,9 +47,7 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 		const int pace_y = y + pace;
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 
-		// printf((cmp_pixbuf_row == pixbuf_row) ? "Equal" : "Not equal");
-
-		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
+		for (int screen_x = 0; screen_x < settings.screen_width; screen_x++) {
 			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
 
 			const BufferVal buffer_val = val_buffer[screen_x];
