@@ -30,16 +30,9 @@ PSprite init_psprite(const char* const path) {
 	const ivec size = {surface -> w, surface -> h};
 
 	PSprite p = {
-		.texture = SDL_CreateTexture(screen.renderer, PIXEL_FORMAT,
-			SDL_TEXTUREACCESS_STREAMING, size.x, size.y),
+		.texture = SDL_CreateTexture(screen.renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_STREAMING, size.x, size.y),
 		.size = size.x
 	};
-
-	/*
-	SDL_LockTexture(p.texture, NULL, &p.pixels, &p.pitch);
-	SDL_UpdateTexture(p.texture, NULL, surface -> pixels, p.pitch);
-	SDL_UnlockTexture(p.texture);
-	*/
 
 	SDL_LockTexture(p.texture, NULL, &p.pixels, &p.pitch);
 	memcpy(p.pixels, surface -> pixels, p.pitch * size.y);

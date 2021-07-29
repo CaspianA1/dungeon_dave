@@ -52,7 +52,7 @@ problems:
 	- some weapon uses at a distance result in the walking sound
 	- readjust mouse pos after scaling down the screen - b/c that is messing with the skybox
 	- another wall stitch
-	- un-neat render_overlay code + objects with base Billboard are super jerky
+	- un-neat render_overlay code + objects with base Billboard are super jerky (next up)
 
 completed:
 	- minimap that conveys height data
