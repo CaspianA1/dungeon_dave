@@ -111,6 +111,7 @@ Player load_player(const double jump_up_v0,
 		.angle = 0.0, .hp = INIT_HP, .is_dead = 0,
 
 		.sound_when_attacked = init_sound("assets/audio/sound_effects/attacked.wav", 1),
+		.sound_when_dying = init_sound("assets/audio/sound_effects/dying.wav", 1),
 
 		.y_pitch = 0,
 
@@ -184,6 +185,7 @@ void deinit_all(const Player* const player, const Weapon weapon) {
 	void deinit_screen(void);
 
 	deinit_sound(player -> sound_when_attacked);
+	deinit_sound(player -> sound_when_dying);
 	deinit_sound(player -> jump.sound_at_jump);
 	deinit_sound(player -> jump.sound_at_land);
 	deinit_weapon(weapon);

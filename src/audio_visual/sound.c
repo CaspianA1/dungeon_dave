@@ -1,6 +1,6 @@
 #ifdef SOUND_ENABLED
 
-const double max_sound_dist = 10.0;
+const double max_sound_dist = 10.0, min_percent_audible = 0.3;
 
 typedef struct {
 	byte is_short;
@@ -46,7 +46,7 @@ inlinable void deinit_sound(const Sound sound) {
 // this expects a short sound
 inlinable void set_sound_volume_from_dist(const Sound sound, const double dist) {
 	double percent_audible = 1.0 - dist / max_sound_dist;
-	if (percent_audible < 0.0) percent_audible = 0.0;
+	if (percent_audible < min_percent_audible) percent_audible = min_percent_audible; // can't let stuff get too quiet
 	Mix_VolumeChunk(sound.type.short_sound, percent_audible * MIX_MAX_VOLUME);
 }
 

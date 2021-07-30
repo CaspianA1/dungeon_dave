@@ -36,11 +36,9 @@
 #include "../combat/enemy.c"
 #include "../combat/weapon.c"
 
-/*
 #include "../data/levels/level_1.c"
 #include "../data/levels/debug_level.c"
 #include "../data/levels/red_room.c"
-*/
 #include "../data/levels/palace.c"
 
 
@@ -48,7 +46,7 @@
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, weapon);
 	play_sound(current_level.background_sound, 1);
@@ -81,7 +79,7 @@ int main(void) {
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		if (player.is_dead && death_effect(player.pos, &player.jump.height, &player.angle, &player.tilt.val))
+		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, weapon);
 
 		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);

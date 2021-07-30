@@ -1,6 +1,11 @@
-byte death_effect(const vec pos, double* const p_height, double* const angle, double* const tilt_val) {
-	static byte red_fade = 1, black_fade_1 = 0, black_fade_2 = 0, r = 255, g = 255, b = 255;
+byte death_effect(Player* const player) {
+	static byte red_fade = 1, black_fade_1 = 0, black_fade_2 = 0, r = 255, g = 255, b = 255, first_call = 1;
 	const byte color_step = 4, lowest_color = 43;
+
+	if (first_call) {
+		play_sound(player -> sound_when_dying, 0);
+		first_call = 0;
+	}
 
 	if (red_fade) {
 		g -= color_step;
@@ -21,6 +26,9 @@ byte death_effect(const vec pos, double* const p_height, double* const angle, do
 	}
 	else return 1; // returns 1 when the effect has finished
 
+	const vec pos = player -> pos;
+	double* const p_height = &player -> jump.height;
+
 	const byte base_height = current_level.get_point_height(map_point(current_level.wall_data, pos[0], pos[1]), pos);
 	const double bottom = base_height - 0.2 * (base_height + 1);
 	const double dist_from_bottom = *p_height - bottom;
@@ -28,8 +36,8 @@ byte death_effect(const vec pos, double* const p_height, double* const angle, do
 	if (*p_height > bottom) *p_height -= dist_from_bottom / 10.0;
 	else *p_height = bottom;
 
-	*angle += dist_from_bottom * 30.0;
-	*tilt_val += 0.1;
+	player -> angle += dist_from_bottom * 30.0;
+	player -> tilt.val += 0.1;
 
 	return 0;
 }

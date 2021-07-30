@@ -33,7 +33,7 @@ typedef struct {
 	ivec mouse_pos;
 	double angle, hp;
 	byte is_dead;
-	Sound sound_when_attacked;
+	Sound sound_when_attacked, sound_when_dying;
 	int y_pitch;
 	Jump jump;
 	Domain tilt;
