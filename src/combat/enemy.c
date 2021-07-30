@@ -41,15 +41,21 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 		}
 			break;
 
-		case Attacking:
-			if (update_path_if_needed(nav, player -> pos, player -> jump.height) == Navigating)
+		case Attacking: {
+			const NavigationState nav_state = update_path_if_needed(nav, player -> pos, player -> jump.height);
+
+			if (nav_state == Navigating)
 				set_enemy_state(enemy, Chasing, 0);
+			else if (nav_state == FailedBFS)
+				set_enemy_state(enemy, Idle, 0);
+
 			else {
 				const double curr_time = SDL_GetTicks() / 1000.0;
-				if (curr_time - enemy -> time_at_attack > attack_time_spacing) {
+				if (curr_time - enemy -> time_at_attack > attack_time_spacing && dist <= 1.0) {
+
 					enemy -> time_at_attack = curr_time;
 
-					if (dist > 1.0) dist = 1.0; // when the decr hp is less than zero, the enemy clips into walls - why?
+					// when the decr hp is less than zero, the enemy clips into walls - why?
 					const double decr_hp = enemy -> power * (1.0 - dist * dist); // more damage closer
 
 					if ((player -> hp -= decr_hp) <= 0.0) {
@@ -57,9 +63,10 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 						player -> hp = 0.0;
 						for (byte i = 0; i < current_level.enemy_count; i++) set_enemy_state(enemy, Idle, 1);
 					}
-					else {play_sound(player -> sound_when_attacked, 0);}
+					else play_sound(player -> sound_when_attacked, 0);
 				}
 			}
+		}
 
 			break;
 

@@ -24,11 +24,9 @@ features:
 	- make each file an .o file, and then link them all together
 	- faster enemy movement when nearer player (logarithmic scale)
 	- only one sound effect at once - otherwise, out of channels (?)
-	- player sound for damage taken
 	- EnemyInstance struct + enemy data file
 	- long-range attacking enemies
 	- slow enemies down by hitting them - or stop them in some way
-	- player death sounds
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

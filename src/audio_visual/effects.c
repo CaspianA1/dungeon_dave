@@ -3,6 +3,7 @@ byte death_effect(Player* const player) {
 	const byte color_step = 4, lowest_color = 43;
 
 	if (first_call) {
+		player -> body.v = 0.0;
 		play_sound(player -> sound_when_dying, 0);
 		first_call = 0;
 	}

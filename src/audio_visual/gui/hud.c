@@ -84,7 +84,7 @@ inlinable void draw_crosshair(const int y_shift) {
 
 inlinable void make_hp_text(const double hp, TTF_Font** const font, SDL_Texture** const texture) {
 	char percent_str[5]; // max 4 characters = 100% + null terminator
-	sprintf(percent_str, "%d%%", (byte) (hp / INIT_HP * 100));
+	sprintf(percent_str, "%d%%", (byte) round(hp / INIT_HP * 100));
 
 	if (font != NULL) TTF_CloseFont(*font);
 	*font = TTF_OpenFont(STD_GUI_FONT_PATH, settings.avg_dimensions / 10.0);
@@ -122,6 +122,7 @@ inlinable void draw_hp(const double hp) {
 
 // these are drawn to the window because if it were to the shape buffer, they would be rotated
 void draw_hud_elements(const Player* const player, const double y_shift) {
+	if (player -> is_dead) return;
 	draw_minimap(player -> pos);
 	draw_crosshair(y_shift);
 	draw_hp(player -> hp);

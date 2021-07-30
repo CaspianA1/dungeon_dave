@@ -42,7 +42,7 @@
 #include "../data/levels/palace.c"
 
 
-// drawing order: skybox, walls, things, weapon, floor, minimap, crosshair
+// drawing order: skybox, walls, things, weapon, floor, minimap, crosshair, hp
 int main(void) {
 	Player player;
 	Weapon weapon;
