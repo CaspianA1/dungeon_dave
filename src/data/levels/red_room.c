@@ -1,6 +1,6 @@
 inlinable byte get_red_room_point_height(const byte point, const vec pos) {
 	(void) pos;
-	return point;
+	return (point == 2) ? 3 : 0;
 }
 
 inlinable double red_room_shader(const vec pos) {
