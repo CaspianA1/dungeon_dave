@@ -2,7 +2,9 @@
 The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Attacked added after Dead. */
 
-const int dist_wake_from_sound = 5, attack_time_spacing = 1;
+static const byte // sound chance at tick = numerator_sound_chancee / max_sand_sound_chance
+	max_rand_sound_chance = 200, numerator_sound_chance = 1,
+	dist_wake_from_sound = 5, attack_time_spacing = 1;
 
 void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	if (enemy -> state == new_state) return;
@@ -18,11 +20,15 @@ void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 }
 
 void update_enemy(Enemy* const enemy, Player* const player, const Weapon* const weapon) {
+	if (enemy -> state == Dead) return;
+
 	Navigator* const nav = &enemy -> nav;
 	double dist = enemy -> animated_billboard.billboard_data.dist;
 
 	for (byte i = 0; i < 5; i++)
 		set_sound_volume_from_dist(enemy -> sounds[i], enemy -> animated_billboard.billboard_data.dist);
+
+	const EnemyState last_state = enemy -> state;
 
 	/* for each state (excluding Dead), periodically play the sound from that state,
 	and only play the Dead animation once, stopping on the last frame */
@@ -71,11 +77,17 @@ void update_enemy(Enemy* const enemy, Player* const player, const Weapon* const 
 				}
 			}
 		}
-
 			break;
 
 		case Dead: break;
 	}
+
+	 // sound happens at state change, so only one sound at once
+	if (enemy -> state == last_state) {
+		const byte rand_num = (rand() % max_rand_sound_chance) + 1; // inclusive, 1 to max
+		if (rand_num <= numerator_sound_chance) play_sound(enemy -> sounds[enemy -> state], 0);
+	}
+
 	enemy -> recently_attacked = 0;
 }
 
@@ -87,5 +99,4 @@ inlinable void update_all_enemies(Player* const player, const Weapon* const weap
 void deinit_enemy(const Enemy* const enemy) {
 	deinit_sprite(enemy -> animated_billboard.animation_data.sprite);
 	for (byte i = 0; i < 5; i++) deinit_sound(enemy -> sounds[i]);
-	wfree(enemy -> sounds);
 }

@@ -25,7 +25,7 @@ features:
 	- faster enemy movement when nearer player (logarithmic scale)
 	- only one sound effect at once - otherwise, out of channels (?)
 	- EnemyInstance struct + enemy data file
-	- long-range attacking enemies
+	- long-range attacking enemies via guns
 	- slow enemies down by hitting them - or stop them in some way
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
@@ -35,7 +35,6 @@ problems:
 	- z-buffering issues with sprites for higher point heights
 	- min and max projection distance
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
-	- too many Mix_Chunks on the available channels -> out of channels
 	- don't intersect the player dot with walls in the minimap
 	- shading is slow (it isn't the shading logic, it's the bitwise ops)
 	- skyboxes become wonky when the screen size increases

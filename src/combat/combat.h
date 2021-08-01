@@ -47,14 +47,13 @@ typedef enum {
 
 typedef struct {
 	EnemyState state;
-	const double dist_wake_from_idle;
-	double hp, power, time_at_attack;
+	const double dist_wake_from_idle, power;
+	double hp, time_at_attack;
 
-	byte recently_attacked;
-	const byte animation_seg_lengths[4];
+	byte recently_attacked, animation_seg_lengths[4];
 	AnimatedBillboard animated_billboard; // from one large spritesheet
 
-	Sound* const sounds; // a sound for each state + Attacked (ptrs b/c the struct doubles in size otherwise)
+	Sound sounds[5]; // a sound for each state + Attacked
 	Navigator nav;
 } Enemy;
 

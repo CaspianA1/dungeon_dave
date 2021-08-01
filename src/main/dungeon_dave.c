@@ -41,16 +41,11 @@
 #include "../data/levels/red_room.c"
 #include "../data/levels/palace.c"
 
-/*
-- no enemy sound container
-- periodic enemy state sounds
-*/
-
 // drawing order: skybox, walls, things, weapon, floor, minimap, crosshair, hp
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, weapon);
 	play_sound(current_level.background_sound, 1);

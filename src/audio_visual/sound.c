@@ -1,6 +1,7 @@
 #ifdef SOUND_ENABLED
 
-const double max_sound_dist = 10.0, min_percent_audible = 0.3;
+static const double max_sound_dist = 10.0, min_percent_audible = 0.3;
+static const char* const out_of_channel_error = "No free channels available";
 
 typedef struct {
 	byte is_short;
@@ -54,8 +55,11 @@ void play_sound(const Sound sound, const byte should_loop) {
 	const int loop_status = should_loop ? -1 : 0;
 
 	if (sound.is_short) {
-		if (Mix_PlayChannel(-1, sound.type.short_sound, loop_status) == -1)
-			fail_sound(sound, "play");
+		if (Mix_PlayChannel(-1, sound.type.short_sound, loop_status) == -1) {
+			// out of channel error ignored b/c it is not fatal
+			if (strcmp(Mix_GetError(), out_of_channel_error) != 0)
+				fail_sound(sound, "play");
+		}
 	}
 	else if (Mix_PlayMusic(sound.type.long_sound, loop_status) == -1)
 		fail_sound(sound, "play");
