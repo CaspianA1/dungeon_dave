@@ -142,6 +142,8 @@ inlinable void init_a_jump(Jump* const jump, const byte falling) {
 }
 
 void update_jump(Jump* const jump, const vec pos) {
+	const double min_fall_height_for_sound = 2.0;
+
 	#ifdef NOCLIP_MODE
 
 	(void) pos;
@@ -162,7 +164,9 @@ void update_jump(Jump* const jump, const vec pos) {
 	if (keys[KEY_JUMP] && !jump -> jumping) {
 		init_a_jump(jump, 0);
 		play_sound(jump -> sound_at_jump, 0);
+		jump -> made_noise = 1;
 	}
+	else jump -> made_noise = 0;
 
 	const byte point = map_point(current_level.wall_data, pos[0], pos[1]);
 	const byte wall_point_height = current_level.get_point_height(point, pos);
@@ -183,9 +187,11 @@ void update_jump(Jump* const jump, const vec pos) {
 				jump -> height = wall_point_height;
 
 				// for big jumps only
-				if (jump -> highest_height - wall_point_height >= 2.0) {
+				if (jump -> highest_height - wall_point_height >= min_fall_height_for_sound) {
 					play_sound(jump -> sound_at_land, 0);
+					jump -> made_noise = 1;
 				}
+				else jump -> made_noise = 0;
 
 				jump -> highest_height = jump -> height + 0.001;
 			}

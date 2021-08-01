@@ -2,7 +2,7 @@
 The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Attacked added after Dead. */
 
-const int dist_wake_up_from_weapon = 5, attack_time_spacing = 1;
+const int dist_wake_from_sound = 5, attack_time_spacing = 1;
 
 void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	if (enemy -> state == new_state) return;
@@ -17,7 +17,7 @@ void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	enemy -> animated_billboard.animation_data.frame_ind = new_frame_ind;
 }
 
-void update_enemy(Enemy* const enemy, Player* const player) {
+void update_enemy(Enemy* const enemy, Player* const player, const Weapon* const weapon) {
 	Navigator* const nav = &enemy -> nav;
 	double dist = enemy -> animated_billboard.billboard_data.dist;
 
@@ -27,9 +27,13 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 	/* for each state (excluding Dead), periodically play the sound from that state,
 	and only play the Dead animation once, stopping on the last frame */
 	switch (enemy -> state) {
-		case Idle:
-			if (dist <= enemy -> dist_wake_from_idle || enemy -> recently_attacked)
+		case Idle: {
+			const byte awoke_from_sound = (dist <= dist_wake_from_sound) &&
+				(weapon -> recently_used || player -> jump.made_noise); // if a player made a sound and they are close
+
+			if (awoke_from_sound || (dist <= enemy -> dist_wake_from_idle) || enemy -> recently_attacked)
 				set_enemy_state(enemy, Chasing, 0);
+		}
 			break;
 		
 		case Chasing: {
@@ -75,9 +79,9 @@ void update_enemy(Enemy* const enemy, Player* const player) {
 	enemy -> recently_attacked = 0;
 }
 
-inlinable void update_all_enemies(Player* const player) {
+inlinable void update_all_enemies(Player* const player, const Weapon* const weapon) {
 	for (byte i = 0; i < current_level.enemy_count; i++)
-		update_enemy(&current_level.enemies[i], player);
+		update_enemy(&current_level.enemies[i], player, weapon);
 }
 
 void deinit_enemy(const Enemy* const enemy) {

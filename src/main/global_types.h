@@ -22,7 +22,7 @@ typedef struct {
 } KinematicBody;
 
 typedef struct {
-	byte jumping;
+	byte jumping, made_noise;
 	const double up_v0;
 	double v0, height, start_height, highest_height, time_at_jump;
 	const Sound sound_at_jump, sound_at_land;

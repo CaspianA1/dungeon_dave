@@ -38,15 +38,11 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	if (weapon -> in_use && weapon -> animation_data.frame_ind == 0) weapon -> in_use = 0;
 	else if (input_status == BeginAnimatingWeapon && !weapon -> in_use && !player -> is_dead) {
 		weapon -> in_use = 1;
+		weapon -> recently_used = 1;
 		play_sound(weapon -> sound, 0);
 		shoot_weapon(weapon, player -> pos, player -> dir);
-
-		for (byte i = 0; i < current_level.enemy_count; i++) {
-			Enemy* const enemy = &current_level.enemies[i];
-			if (enemy -> animated_billboard.billboard_data.dist <= dist_wake_up_from_weapon && enemy -> state == Idle)
-				set_enemy_state(enemy, Chasing, 0);
-		}
 	}
+	else weapon -> recently_used = 0;
 
 	// -1 -> cycle frame, 0 -> first frame
 	animate_weapon(&weapon -> animation_data, player -> pos, weapon -> paces_sideways,

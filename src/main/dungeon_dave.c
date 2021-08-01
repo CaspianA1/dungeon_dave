@@ -41,12 +41,16 @@
 #include "../data/levels/red_room.c"
 #include "../data/levels/palace.c"
 
+/*
+- no enemy sound container
+- periodic enemy state sounds
+*/
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, crosshair, hp
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, weapon);
 	play_sound(current_level.background_sound, 1);
@@ -72,7 +76,7 @@ int main(void) {
 		const double full_jump_height = player.jump.height * settings.screen_height;
 		raycast(&player, wall_y_shift, full_jump_height);
 		draw_generic_billboards(&player, wall_y_shift);
-		if (!player.is_dead) update_all_enemies(&player);
+		if (!player.is_dead) update_all_enemies(&player, &weapon);
 		// draw_still_things(&player, wall_y_shift);
 		use_weapon_if_needed(&weapon, &player, input_status);
 		#else
