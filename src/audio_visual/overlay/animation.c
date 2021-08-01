@@ -73,15 +73,19 @@ void animate_weapon(DataAnimation* const animation_data, const vec pos,
 	of the weapon - would be shown.
 	*/
 
+	static vec prev_pos = {-1.0, -1.0};
 	static double x = 0.0;
-	x += log(v + 1.0) * 1.2;
-	if (x > two_pi) x = 0.0;
+	if (prev_pos[0] != pos[0] || prev_pos[1] != pos[1]) {
+		x += log(v + 1.0) * 1.2; // if stuck in corner, you'll still have speed, so line above removes weapon movement
+		if (x > two_pi) x = 0.0;
+	}
+	prev_pos = pos;
 
 	const double weapon_arc = sin(x) * settings.screen_width / 15.0; // pulsating back-and-forth movement
 
 	const SDL_Rect screen_pos = {
 		(!paces_sideways_on_use && in_use) ? 0 : weapon_arc,
-		fabs(weapon_arc) + (y_pitch < 0 ? 0 : y_pitch),
+		fabs(weapon_arc) + ((y_pitch < 0) ? 0 : y_pitch),
 		settings.screen_width, settings.screen_height
 	};
 

@@ -1,6 +1,6 @@
 #ifdef SOUND_ENABLED
 
-static const double max_sound_dist = 10.0, min_percent_audible = 0.3;
+static const double max_sound_dist = 10.0, min_percent_audible = 0.05;
 static const char* const out_of_channel_error = "No free channels available";
 
 typedef struct {

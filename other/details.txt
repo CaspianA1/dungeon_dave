@@ -5,7 +5,7 @@ features:
 	- move mouse out of window if pressing escape
 	- a level opener, with a cool spinning effect
 	- a sprite pool
-	- an airship level
+	- an airship + maze level
 	- collide with billboards
 	- accelerate sideways
 	- a gui system

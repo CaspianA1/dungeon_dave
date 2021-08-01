@@ -50,7 +50,7 @@ int main(void) {
 
 	if (display_title_screen() == Exit) deinit_all(&player, weapon);
 	play_sound(current_level.background_sound, 1);
-	p = init_psprite("assets/walls/dune.bmp");
+	p = init_psprite("assets/walls/grass.bmp");
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();

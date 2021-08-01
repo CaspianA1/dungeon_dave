@@ -11,8 +11,7 @@ inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos
 		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
-void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement,
-	const double p_height, double* const v_ref) {
+void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement, const double p_height) {
 	vec pos = *pos_ref + movement;
 
 	#ifdef NOCLIP_MODE
@@ -27,17 +26,13 @@ void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement,
 
 	#else
 
-	byte hit_y = 0, hit_x = 0;
-
 	if (point_exists_at(pos[0], pos[1] + settings.stop_dist, p_height) ||
 		point_exists_at(pos[0], pos[1] - settings.stop_dist, p_height))
-		pos[1] = prev_pos[1], hit_y = 1; // set pos to block-aligned value?
+		pos[1] = prev_pos[1]; // set pos to block-aligned value?
 
 	if (point_exists_at(pos[0] + settings.stop_dist, pos[1], p_height) ||
 		point_exists_at(pos[0] - settings.stop_dist, pos[1], p_height))
-		pos[0] = prev_pos[0], hit_x = 1;
-
-	if (hit_y && hit_x) *v_ref = 0.0;
+		pos[0] = prev_pos[0];
 
 	#endif
 
@@ -94,7 +89,7 @@ void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
 	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
 
-	hit_detection(pos, prev_pos, movement, p_height, &body -> v);
+	hit_detection(pos, prev_pos, movement, p_height);
 }
 
 void update_y_pitch(int* const y_pitch, const int mouse_y) {
