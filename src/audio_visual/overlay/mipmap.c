@@ -1,5 +1,5 @@
-const byte max_mipmap_depth = 4;
-const double max_mipmap_dist = 30.0;
+static const byte max_mipmap_depth = 4;
+static const double max_mipmap_dist = 30.0;
 
 SDL_Rect get_mipmap_crop(const ivec size, const byte depth_offset) {
 	const int orig_w = size.x * 2 / 3;

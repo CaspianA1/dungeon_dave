@@ -124,6 +124,6 @@ inlinable void draw_hp(const double hp) {
 void draw_hud_elements(const Player* const player, const double y_shift) {
 	if (player -> is_dead) return;
 	draw_minimap(player -> pos);
-	draw_crosshair(y_shift);
 	draw_hp(player -> hp);
+	draw_crosshair(y_shift);
 }
