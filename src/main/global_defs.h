@@ -68,6 +68,10 @@
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
+#define DEBUG_BYTE(byte)\
+	for (int i = 7; i >= 0; i--) putchar((num & (1 << i )) ? '1' : '0');\
+	putchar('\n');
+
 #define DEBUG_VEC(vec) printf(#vec " = {%lf, %lf}\n", vec[0], vec[1])
 #define DEBUG_IVEC(vec) printf(#vec " = {%d, %d}\n", vec.x, vec.y)
 

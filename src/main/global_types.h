@@ -17,7 +17,7 @@ typedef struct {
 } Pace;
 
 typedef struct {
-	byte moving_forward_or_backward, was_forward, was_backward;
+	byte status; // moving forward or backward, was forward, was backward
 	double v, max_v_reached, a, limit_v, strafe_v, time_of_move, time_of_stop, v_incr_multiplier;
 } KinematicBody;
 

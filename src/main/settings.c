@@ -126,8 +126,7 @@ Player load_player(const double jump_up_v0,
 		.pace = {.domain = {.val = 0.0, .step = pace_step},
 			.offset_scaler = pace_offset_scaler, .screen_offset = 0},
 
-		.body = {.moving_forward_or_backward = 0, .was_forward = 0, .was_backward = 0,
-			.v = 0.0, .max_v_reached = 0.0, .a = body_a, .limit_v = body_limit_v,
+		.body = {.status = 0, .v = 0.0, .max_v_reached = 0.0, .a = body_a, .limit_v = body_limit_v,
 			.strafe_v = body_strafe_v, .v_incr_multiplier = body_v_incr_multiplier}
 	};
 }
