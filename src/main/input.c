@@ -1,3 +1,8 @@
+static const byte
+	mask_forward_or_backward = MASK_OF(0),
+	mask_forward = MASK_OF(1),
+	mask_backward = MASK_OF(2);
+
 inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos) {
 	const int prev_mouse_x = mouse_pos -> x;
 	SDL_GetMouseState(&mouse_pos -> x, &mouse_pos -> y);

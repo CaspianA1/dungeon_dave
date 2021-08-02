@@ -60,7 +60,8 @@ typedef struct {
 //////////
 
 typedef struct {
-	byte in_use, short_range, paces_sideways, recently_used; // in the last tick
+	// byte in_use, short_range, paces_sideways, recently_used; // in the last tick
+	byte status; // in_use, short_range, paces_sideways, recently_used
 	const double power, dist_for_hit;
 	Sound sound;
 	DataAnimation animation_data;

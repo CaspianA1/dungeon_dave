@@ -33,8 +33,8 @@
 #include "../combat/bfs_types.c"
 #include "../combat/bfs.c"
 #include "../combat/navigator.c"
-#include "../combat/enemy.c"
 #include "../combat/weapon.c"
+#include "../combat/enemy.c"
 
 /*
 #include "../data/levels/level_1.c"

@@ -35,7 +35,8 @@ void update_enemy(Enemy* const enemy, Player* const player, const Weapon* const 
 	switch (enemy -> state) {
 		case Idle: {
 			const byte awoke_from_sound = (dist <= dist_wake_from_sound) &&
-				(weapon -> recently_used || player -> jump.made_noise); // if a player made a sound and they are close
+				((weapon -> status & mask_recently_used) || player -> jump.made_noise);
+				// if a player made a sound and they are close
 
 			if (awoke_from_sound || (dist <= enemy -> dist_wake_from_idle) || enemy -> recently_attacked)
 				set_enemy_state(enemy, Chasing, 0);

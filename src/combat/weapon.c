@@ -1,3 +1,9 @@
+const byte
+	mask_in_use = MASK_OF(0),
+	mask_short_range = MASK_OF(1),
+	mask_paces_sideways = MASK_OF(2),
+	mask_recently_used = MASK_OF(3);
+
 void deinit_weapon(const Weapon weapon) {
 	deinit_sound(weapon.sound);
 	deinit_sprite(weapon.animation_data.sprite);
@@ -21,12 +27,14 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon -> dist_for_hit)) {
 				enemy -> recently_attacked = 1;
 				enemy -> hp -= weapon -> power;
+
+				void set_enemy_state(Enemy* const, const EnemyState, const byte);
 				if (enemy -> hp <= 0.0) set_enemy_state(enemy, Dead, 0);
 				else play_sound(enemy -> sounds[4], 0); // attacked
 				return;
 			}
 		}
-		if (weapon -> short_range) break;
+		if (weapon -> status & mask_short_range) break;
 	}
 }
 
@@ -35,18 +43,21 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 void use_weapon_if_needed(Weapon* const weapon, const Player* const player, const InputStatus input_status) {
 	if (player -> is_dead) weapon -> animation_data.frame_ind = 0;
 
-	if (weapon -> in_use && weapon -> animation_data.frame_ind == 0) weapon -> in_use = 0;
-	else if (input_status == BeginAnimatingWeapon && !weapon -> in_use && !player -> is_dead) {
-		weapon -> in_use = 1;
-		weapon -> recently_used = 1;
+	const byte first_in_use = weapon -> status & mask_in_use;
+
+	if (first_in_use && weapon -> animation_data.frame_ind == 0)
+		clear_nth_bit(&weapon -> status, 0); // not in use
+	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
+		set_nth_bit(&weapon -> status, 0); // in use
+		set_nth_bit(&weapon -> status, 3); // recently used
 		play_sound(weapon -> sound, 0);
 		shoot_weapon(weapon, player -> pos, player -> dir);
 	}
-	else weapon -> recently_used = 0;
+	else clear_nth_bit(&weapon -> status, 3);
 
 	// -1 -> cycle frame, 0 -> first frame
-	animate_weapon(&weapon -> animation_data, player -> pos, weapon -> paces_sideways,
-		weapon -> in_use, player -> y_pitch, player -> body.v);
+	animate_weapon(&weapon -> animation_data, player -> pos, weapon -> status & mask_paces_sideways,
+		weapon -> status & mask_in_use, player -> y_pitch, player -> body.v);
 }
 
 #else
