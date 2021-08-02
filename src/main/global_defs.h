@@ -81,6 +81,10 @@
 
 /////
 
+typedef uint_fast8_t byte;
+typedef __m128d vec;
+typedef struct {int x, y;} ivec;
+
 const double
 	two_pi = M_PI * 2.0,
 	half_pi = M_PI / 2.0,
@@ -90,10 +94,10 @@ const double
 	std_double_epsilon = 0.01,
 	small_double_epsilon = 0.000001;
 
-typedef uint_fast8_t byte;
-
-typedef __m128d vec;
-typedef struct {int x, y;} ivec;
+const byte // relates to enemy movement
+	mask_forward_or_backward = 0b00000001,
+	mask_forward = 0b00000010,
+	mask_backward = 0b00000100;
 
 /*
 https://www.spriters-resource.com/pc_computer/doomdoomii/

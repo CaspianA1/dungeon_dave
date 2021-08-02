@@ -72,6 +72,10 @@ inlinable byte doubles_eq(const double a, const double b) {
 	return fabs(a - b) < small_double_epsilon;
 }
 
+inlinable void nth_bit_to_x(byte* const num, const byte n, const byte x) {
+	*num ^= (-x ^ *num) & (1 << n);
+}
+
 inlinable void tick_delay(const Uint32 before) {
 	const int wait = settings.max_delay - (SDL_GetTicks() - before);
 	if (wait > 0) SDL_Delay(wait);

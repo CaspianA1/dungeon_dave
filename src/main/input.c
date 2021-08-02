@@ -1,9 +1,3 @@
-static const struct {
-	const byte backward, forward, forward_or_backward;
-} kinematic_body_masks = {0b00000100, 0b00000010, 0b00000001};
-
-#define nth_to_x(num, n, x) num ^= (-x ^ num) & (1 << n)
-
 inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos) {
 	const int prev_mouse_x = mouse_pos -> x;
 	SDL_GetMouseState(&mouse_pos -> x, &mouse_pos -> y);
@@ -52,7 +46,7 @@ void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
 	const double curr_time = SDL_GetTicks() / 1000.0; // in seconds
 	byte increasing_fov = 0;
 
-	if (body -> status & kinematic_body_masks.forward_or_backward) {
+	if (body -> status & mask_forward_or_backward) {
 		const double t = curr_time - body -> time_of_move;
 		body -> v = body -> a * t;
 
@@ -68,8 +62,8 @@ void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
 			body -> v = body -> limit_v;
 
 		body -> max_v_reached = body -> v,
-		nth_to_x(body -> status, 1, forward);
-		nth_to_x(body -> status, 2, backward);
+		nth_bit_to_x(&body -> status, 1, forward);
+		nth_bit_to_x(&body -> status, 2, backward);
 	}
 
 	else {
@@ -89,8 +83,8 @@ void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
 
 	vec movement = {0.0, 0.0};
 
-	if (body -> status & kinematic_body_masks.forward) movement += forward_back_movement;
-	if (body -> status & kinematic_body_masks.backward) movement -= forward_back_movement;
+	if (body -> status & mask_forward) movement += forward_back_movement;
+	if (body -> status & mask_backward) movement -= forward_back_movement;
 
 	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
@@ -237,12 +231,12 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 		KinematicBody* const body = &player -> body;
 		const double curr_secs = SDL_GetTicks() / 1000.0;
 
-		if (moved_any_direction && !(body -> status & kinematic_body_masks.forward_or_backward))
+		if (moved_any_direction && !(body -> status & mask_forward_or_backward))
 			body -> time_of_move = curr_secs;
-		else if (!moved_any_direction && (body -> status & kinematic_body_masks.forward_or_backward))
+		else if (!moved_any_direction && (body -> status & mask_forward_or_backward))
 			body -> time_of_stop = curr_secs;
 
-		nth_to_x(body -> status, 0, moved_forward_or_backward);
+		nth_bit_to_x(&body -> status, 0, moved_forward_or_backward);
 
 		double* const theta = &player -> angle;
 		vec* const pos = &player -> pos;
