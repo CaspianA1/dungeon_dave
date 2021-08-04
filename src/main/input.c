@@ -137,8 +137,6 @@ inlinable void init_a_jump(Jump* const jump, const byte falling) {
 }
 
 void update_jump(Jump* const jump, const vec pos) {
-	const double min_fall_height_for_sound = 2.0;
-
 	#ifdef NOCLIP_MODE
 
 	(void) pos;
@@ -155,6 +153,8 @@ void update_jump(Jump* const jump, const vec pos) {
 	*last_tick_time = curr_tick_time;
 
 	#else
+
+	const double min_fall_height_for_sound = 2.0;
 
 	if (keys[KEY_JUMP] && !jump -> jumping) {
 		init_a_jump(jump, 0);
