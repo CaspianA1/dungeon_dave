@@ -139,13 +139,24 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	void init_screen(void);
 	init_screen();
 
+	init_audio_subsystem();
+
 	keys = SDL_GetKeyboardState(NULL);
 	val_buffer = wmalloc(settings.screen_width * sizeof(BufferVal));
 
 	StateMap init_statemap(const int, const int);
 	occluded_by_walls = init_statemap(settings.screen_width, settings.screen_height);
 
-	init_audio_subsystem();
+	//////////
+	/*
+	extern Enemy enemies[1];
+	Enemy init_eddie(void);
+
+	const Enemy eddie = init_eddie();
+	memcpy(enemies, &eddie, sizeof(Enemy));
+	*/
+	//////////
+
 	load_first_level();
 
 	const double offset_scaler = 15.0;
@@ -189,6 +200,13 @@ void deinit_all(const Player* const player, const Weapon weapon) {
 	deinit_sound(player -> jump.sound_at_land);
 	deinit_weapon(weapon);
 	deinit_level(current_level);
+
+	/*
+	extern Enemy enemies[1];
+	void deinit_enemy(Enemy);
+	deinit_enemy(enemies[0]);
+	*/
+
 	deinit_audio_subsystem();
 	deinit_hud_resources();
 	deinit_screen();

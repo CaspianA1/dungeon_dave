@@ -6,7 +6,7 @@ static const byte // sound chance at tick = numerator_sound_chancee / max_rand_s
 	max_rand_sound_chance = 200, numerator_sound_chance = 1,
 	dist_wake_from_sound = 5, attack_time_spacing = 1;
 
-void set_enemy_state(EnemyInstance* const enemy, EnemyState new_state, byte silent) {
+void set_enemy_state(EnemyInstance* const enemy, const EnemyState new_state, const byte silent) {
 	if (enemy -> state == new_state) return;
 
 	enemy -> state = new_state;

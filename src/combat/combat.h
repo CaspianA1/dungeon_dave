@@ -55,7 +55,7 @@ typedef struct {
 
 /*
 typedef struct {
-	Enemy* const enemy;
+	const Enemy* const enemy;
 	EnemyState state;
 	byte recently_attacked;
 	double hp, time_at_attack;

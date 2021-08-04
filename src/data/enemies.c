@@ -12,3 +12,5 @@ Enemy init_eddie(void) {
 		}
 	};
 }
+
+Enemy enemies[1];
