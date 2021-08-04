@@ -129,8 +129,7 @@ void load_palace(void) {
 
 	/* assets/skyboxes/desert.bmp
 	assets/skyboxes/palace_city.bmp
-	assets/skyboxes/desert_eyes.bmp
-	assets/skyboxes/lofoten.bmp */
+	assets/skyboxes/desert_eyes.bmp */
 
 	set_level_skybox(&palace, "assets/skyboxes/palace_city.bmp");
 
