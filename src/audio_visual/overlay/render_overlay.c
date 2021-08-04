@@ -106,7 +106,7 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		int src_begin_x, width;
 
 		if (generic.is_animated) {
-			Enemy* possible_enemy = NULL;
+			EnemyInstance* possible_enemy = NULL;
 
 			if (generic.is_enemy) {
 				possible_enemy = &current_level.enemies[generic.animation_index];

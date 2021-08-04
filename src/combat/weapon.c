@@ -11,7 +11,7 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 		if (map_point(current_level.wall_data, bullet_tile[0], bullet_tile[1])) break;
 
 		for (byte i = 0; i < current_level.enemy_count; i++) {
-			Enemy* const enemy = &current_level.enemies[i];
+			EnemyInstance* const enemy = &current_level.enemies[i];
 			if (enemy -> state == Dead) continue;
 
 			const vec
@@ -22,7 +22,7 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 				enemy -> recently_attacked = 1;
 				enemy -> hp -= weapon -> power;
 
-				void set_enemy_state(Enemy* const, const EnemyState, const byte);
+				void set_enemy_state(EnemyInstance* const, const EnemyState, const byte);
 				if (enemy -> hp <= 0.0) set_enemy_state(enemy, Dead, 0);
 				else play_sound(enemy -> sounds[4], 0); // attacked
 				return;

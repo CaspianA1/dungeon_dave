@@ -111,14 +111,14 @@ void set_level_animated_billboards(Level* const level, const unsigned animated_b
 probabilities of sounds, animation data, sounds, navigator speed */
 void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 	level -> enemy_count = enemy_count;
-	level -> enemies = wmalloc(enemy_count * sizeof(Enemy));
+	level -> enemies = wmalloc(enemy_count * sizeof(EnemyInstance));
 
 	va_list enemy_data;
 	va_start(enemy_data, enemy_count);
 
 	for (byte i = 0; i < enemy_count; i++) {
 		const EnemyState enemy_state = va_arg(enemy_data, EnemyState);
-		Enemy enemy = {
+		EnemyInstance enemy = {
 			.dist_wake_from_idle = va_arg(enemy_data, double),
 			.power = va_arg(enemy_data, double),
 			.hp = va_arg(enemy_data, double),
@@ -146,11 +146,11 @@ void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
 		const AnimatedBillboard animated_billboard = {animation_data, billboard_data};
 		memcpy(&enemy.animated_billboard, &animated_billboard, sizeof(AnimatedBillboard));
 
-		void set_enemy_state(Enemy* const, EnemyState, byte);
+		void set_enemy_state(EnemyInstance* const, EnemyState, byte);
 		set_enemy_state(&enemy, enemy_state, 1);
 
-		Enemy* const dest = &level -> enemies[i];
-		memcpy(dest, &enemy, sizeof(Enemy));
+		EnemyInstance* const dest = &level -> enemies[i];
+		memcpy(dest, &enemy, sizeof(EnemyInstance));
 
 		DataBillboard* const dest_billboard_data = &dest -> animated_billboard.billboard_data;
 		const Navigator nav = init_navigator(level -> init_pos, &dest_billboard_data -> pos, va_arg(enemy_data, double));
@@ -188,7 +188,7 @@ void deinit_level(const Level level) {
 		deinit_sprite(level.animated_billboards[i].animation_data.sprite);
 	wfree(level.animated_billboards);
 
-	void deinit_enemy(const Enemy* const);
+	void deinit_enemy(const EnemyInstance* const);
 	for (byte i = 0; i < level.enemy_count; i++)
 		deinit_enemy(&level.enemies[i]);
 	wfree(level.enemies);

@@ -2,11 +2,11 @@
 The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Attacked added after Dead. */
 
-static const byte // sound chance at tick = numerator_sound_chancee / max_sand_sound_chance
+static const byte // sound chance at tick = numerator_sound_chancee / max_rand_sound_chance
 	max_rand_sound_chance = 200, numerator_sound_chance = 1,
 	dist_wake_from_sound = 5, attack_time_spacing = 1;
 
-void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
+void set_enemy_state(EnemyInstance* const enemy, EnemyState new_state, byte silent) {
 	if (enemy -> state == new_state) return;
 
 	enemy -> state = new_state;
@@ -19,7 +19,7 @@ void set_enemy_state(Enemy* const enemy, EnemyState new_state, byte silent) {
 	enemy -> animated_billboard.animation_data.frame_ind = new_frame_ind;
 }
 
-void update_enemy(Enemy* const enemy, Player* const player, const Weapon* const weapon) {
+void update_enemy(EnemyInstance* const enemy, Player* const player, const Weapon* const weapon) {
 	if (enemy -> state == Dead) return;
 
 	Navigator* const nav = &enemy -> nav;
@@ -97,7 +97,7 @@ inlinable void update_all_enemies(Player* const player, const Weapon* const weap
 		update_enemy(&current_level.enemies[i], player, weapon);
 }
 
-void deinit_enemy(const Enemy* const enemy) {
+void deinit_enemy(const EnemyInstance* const enemy) {
 	deinit_sprite(enemy -> animated_billboard.animation_data.sprite);
 	for (byte i = 0; i < 5; i++) deinit_sound(enemy -> sounds[i]);
 }

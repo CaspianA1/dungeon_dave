@@ -27,7 +27,7 @@ inlinable void progress_animation_data_frame_ind(DataAnimation* const animation_
 	progress_frame_ind(animation_data, 0, animation_data -> frame_count);
 }
 
-inlinable void progress_enemy_frame_ind(Enemy* const enemy) {
+inlinable void progress_enemy_frame_ind(EnemyInstance* const enemy) {
 	int begin = 0;
 	for (byte i = 0; i < enemy -> state; i++)
 		begin += enemy -> animation_seg_lengths[i];

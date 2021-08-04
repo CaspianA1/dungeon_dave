@@ -98,7 +98,7 @@ typedef struct {
 	Sprite* walls;
 	Billboard* billboards;
 	AnimatedBillboard* animated_billboards;
-	Enemy* enemies;
+	EnemyInstance* enemies;
 	GenericBillboard* generic_billboards; // just a temp container that other billboards are copied into
 } Level;
 

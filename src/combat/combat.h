@@ -46,6 +46,14 @@ typedef enum {
 } EnemyState;
 
 typedef struct {
+	const double dist_wake_from_idle, power, init_hp;
+	const byte animation_seg_lengths[4];
+
+	const char* const animation_spritesheet_path;
+	const DataAnimation animation_data;
+} Enemy;
+
+typedef struct {
 	EnemyState state;
 	const double dist_wake_from_idle, power;
 	double hp, time_at_attack;
@@ -55,7 +63,7 @@ typedef struct {
 
 	Sound sounds[5]; // a sound for each state + Attacked
 	Navigator nav;
-} Enemy;
+} EnemyInstance;
 
 //////////
 
