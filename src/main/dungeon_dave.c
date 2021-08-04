@@ -36,6 +36,8 @@
 #include "../combat/weapon.c"
 #include "../combat/enemy.c"
 
+#include "../data/enemies.c"
+
 /*
 #include "../data/levels/level_1.c"
 #include "../data/levels/debug_level.c"

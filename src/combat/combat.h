@@ -46,12 +46,23 @@ typedef enum {
 } EnemyState;
 
 typedef struct {
-	const double dist_wake_from_idle, power, init_hp;
+	const double dist_wake_from_idle, power, init_hp, nav_speed;
 	const byte animation_seg_lengths[4];
 
-	const char* const animation_spritesheet_path;
 	const DataAnimation animation_data;
+	const Sound sounds[5]; // a sound for each state + Attacked
 } Enemy;
+
+/*
+typedef struct {
+	Enemy* const enemy;
+	EnemyState state;
+	byte recently_attacked;
+	double hp, time_at_attack;
+	DataBillboard billboard_data;
+	Navigator nav;
+} EventualEnemy;
+*/
 
 typedef struct {
 	EnemyState state;
@@ -68,8 +79,7 @@ typedef struct {
 //////////
 
 typedef struct {
-	// byte in_use, short_range, paces_sideways, recently_used; // in the last tick
-	byte status; // in_use, short_range, paces_sideways, recently_used
+	byte status; // in_use, short_range, paces_sideways, recently_used (in the last tick)
 	const double power, dist_for_hit;
 	Sound sound;
 	DataAnimation animation_data;
