@@ -1,5 +1,5 @@
 features:
-	- covered tops of walls
+	- 'sectors' for wall height sections
 	- doors
 	- a settings option in the title screen and status bar
 	- move mouse out of window if pressing escape

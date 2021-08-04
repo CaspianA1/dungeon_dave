@@ -1,9 +1,3 @@
-const byte
-	mask_in_use = MASK_OF(0),
-	mask_short_range = MASK_OF(1),
-	mask_paces_sideways = MASK_OF(2),
-	mask_recently_used = MASK_OF(3);
-
 void deinit_weapon(const Weapon weapon) {
 	deinit_sound(weapon.sound);
 	deinit_sprite(weapon.animation_data.sprite);

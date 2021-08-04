@@ -48,3 +48,53 @@ putchar('\n');
 */
 
 /////
+
+/*
+double h = p_height;
+
+static double a;
+const byte up = keys[SDL_SCANCODE_T], down = keys[SDL_SCANCODE_Y], clamp = keys[SDL_SCANCODE_U];
+if (up) a += 0.01;
+if (down) a -= 0.01;
+if (clamp) a = round(a);
+if (up || down || clamp) DEBUG(a, lf);
+h += a;
+
+const double test = 1.0 / current_level.max_point_height;
+DEBUG(test, lf);
+
+DEBUG(1.0 / (settings.screen_height / settings.proj_dist), lf);
+
+const double height_ratio = h * settings.screen_height / settings.proj_dist;
+
+DEBUG(height_ratio, lf);
+
+const double opp_h = 0.5 + height_ratio;
+*/
+
+///// This snippet adjusts the height to the point height that the player is at:
+
+const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
+const double world_height = p_height - p_height / screen_height_proj_ratio;
+const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
+
+/////
+
+const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
+const double world_height = p_height - floor_height / screen_height_proj_ratio;
+const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
+
+/*
+const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
+const double world_height = p_height - p_height / screen_height_proj_ratio;
+const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
+*/
+
+/////
+
+/*
+for floor height 1: -0.66
+floor height 2: -1.32
+*/
+
+/////

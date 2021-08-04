@@ -66,8 +66,6 @@
 #define LOOP(max) for (int i = 0; i < max; i++)
 #define FAIL(...) {fprintf(stderr, __VA_ARGS__); exit(1);}
 
-#define MASK_OF(n) (1 << n)
-
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
 #define DEBUG_BYTE(byte)\
@@ -95,6 +93,17 @@ const double
 	g = -9.8,
 	std_double_epsilon = 0.01,
 	small_double_epsilon = 0.000001;
+
+const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
+
+#define mask_forward_or_backward bitmasks[0]
+#define mask_forward bitmasks[1]
+#define mask_backward bitmasks[2]
+
+#define mask_in_use bitmasks[0]
+#define mask_short_range bitmasks[1]
+#define mask_paces_sideways bitmasks[2]
+#define mask_recently_used bitmasks[3]
 
 /*
 https://www.spriters-resource.com/pc_computer/doomdoomii/

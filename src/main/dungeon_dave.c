@@ -52,7 +52,7 @@ int main(void) {
 
 	if (display_title_screen() == Exit) deinit_all(&player, weapon);
 	play_sound(current_level.background_sound, 1);
-	p = init_psprite("assets/walls/grass.bmp");
+	p = init_psprite("assets/walls/dune.bmp");
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
@@ -84,7 +84,7 @@ int main(void) {
 		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, weapon);
 
-		fast_affine_floor(player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
+		fast_affine_floor(0, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
 		refresh(&player, wall_y_shift);
 		tick_delay(before);

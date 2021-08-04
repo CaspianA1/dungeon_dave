@@ -2,7 +2,6 @@ inlinable vec vec_tex_offset(const vec pos, const int tex_size) {
 	return vec_fill(tex_size) * (pos - _mm_round_pd(pos, _MM_FROUND_TRUNC));
 }
 
-
 inlinable Uint32* read_texture_row(const void* const pixels, const int pixel_pitch, const int y) {
 	return (Uint32*) ((Uint8*) pixels + y * pixel_pitch);
 }
@@ -40,9 +39,12 @@ inlinable void draw_from_hit(const vec hit, const double dist, const int screen_
 	for (byte x = 0; x < settings.ray_column_width; x++) pixbuf_row[x + screen_x] = pixel;
 }
 
-void fast_affine_floor(const vec pos, const double p_height, const double pace, double y_shift, const int y_pitch) {
-	const double height_ratio = p_height * settings.screen_height / settings.proj_dist;
-	const double opp_h = 0.5 + height_ratio;
+void fast_affine_floor(const byte floor_height, const vec pos,
+	const double p_height, const double pace, double y_shift, const int y_pitch) {
+
+	const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
+	const double world_height = p_height - floor_height / screen_height_proj_ratio;
+	const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
 
 	if (y_shift < 0.0) y_shift = 0.0;
 
@@ -56,7 +58,7 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x++) {
-			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
+			// if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
 
 			const BufferVal buffer_val = val_buffer[screen_x];
 
@@ -68,7 +70,7 @@ void fast_affine_floor(const vec pos, const double p_height, const double pace, 
 
 			#ifndef PLANAR_MODE
 			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
-			if (current_level.get_point_height(wall_point, hit)) continue;
+			if (current_level.get_point_height(wall_point, hit) != floor_height) continue;
 			#endif
 
 			draw_from_hit(hit, actual_dist, screen_x, pixbuf_row);
