@@ -61,7 +61,7 @@ typedef struct {
 	double hp, time_at_attack;
 	DataBillboard billboard_data;
 	Navigator nav;
-} EventualEnemy;
+} EventualEnemyInstance;
 */
 
 typedef struct {
