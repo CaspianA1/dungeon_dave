@@ -34,7 +34,7 @@ void load_level_1(void) {
 	enum {
 		map_width = 25, map_height = 15,
 		wall_count = 10, billboard_count = 7,
-		animated_billboard_count = 3, enemy_count = 1
+		animated_billboard_count = 3, enemy_instance_count = 1
 	};
 
 	// static b/c may be too big for stack
@@ -117,7 +117,7 @@ void load_level_1(void) {
 
 	memcpy(&current_level, &level_1, sizeof(Level));
 
-	set_level_enemies(&current_level, enemy_count,
+	set_level_enemy_instances(&current_level, enemy_instance_count,
 		Idle, // state
 		0.9, 3.0, 20.0, // dist_wake_from_idle, power, hp
 

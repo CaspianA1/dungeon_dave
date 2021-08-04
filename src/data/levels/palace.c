@@ -58,7 +58,7 @@ void load_palace(void) {
 	enum {
 		map_width = 40, map_height = 40,
 		wall_count = 10, billboard_count = 3,
-		animated_billboard_count = 2, enemy_count = 1
+		animated_billboard_count = 2, enemy_instance_count = 1
 	};
 
 	// in the horse area: a health kit, and the enemy
@@ -159,22 +159,6 @@ void load_palace(void) {
 	memcpy(&current_level, &palace, sizeof(Level));
 
 	// this is set after b/c it depends on fns that read from current_level
-	set_level_enemies(&current_level, enemy_count,
-		Idle, // state
-		0.9, 3.0, 20.0, // dist_wake_from_idle, power, hp
-
-		5, 2, 3, 13, // animation_seg_lengths
-
-		"assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
-		6.5, 21.5, 0.0, // billboard data (3.0, 7.5 before, then 6.5, 21.5, then 32.5, 23.5, then 75.5, 5.5)
-
-		"assets/audio/enemy_sound_test/idle.wav", // sound data
-		"assets/audio/enemy_sound_test/chase.wav",
-		"assets/audio/enemy_sound_test/attack.wav",
-		"assets/audio/enemy_sound_test/death.wav",
-		"assets/audio/enemy_sound_test/attacked.wav",
-
-		0.035 /* navigator speed */ );
-
+	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 6.5, 21.5, 0.0);
 	set_level_generic_billboard_container(&current_level);
 }

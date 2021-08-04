@@ -107,62 +107,45 @@ void set_level_animated_billboards(Level* const level, const unsigned animated_b
 	va_end(animation_data);
 }
 
-/* state, dist wake from idle, hp, power,
-probabilities of sounds, animation data, sounds, navigator speed */
-void set_level_enemies(Level* const level, const unsigned enemy_count, ...) {
-	level -> enemy_count = enemy_count;
-	level -> enemies = wmalloc(enemy_count * sizeof(EnemyInstance));
+// enemy index, x, y, height
+void set_level_enemy_instances(Level* const level, const unsigned enemy_instance_count, ...) {
+	level -> enemy_instance_count = enemy_instance_count;
+	level -> enemy_instances = wmalloc(enemy_instance_count * sizeof(EnemyInstance));
 
-	va_list enemy_data;
-	va_start(enemy_data, enemy_count);
+	va_list enemy_instance_data;
+	va_start(enemy_instance_data, enemy_instance_count);
 
-	for (byte i = 0; i < enemy_count; i++) {
-		const EnemyState enemy_state = va_arg(enemy_data, EnemyState);
-		EnemyInstance enemy = {
-			.dist_wake_from_idle = va_arg(enemy_data, double),
-			.power = va_arg(enemy_data, double),
-			.hp = va_arg(enemy_data, double),
+	extern Enemy enemies[1];
+	for (byte i = 0; i < enemy_instance_count; i++) {
+		const byte enemy_ind = va_arg(enemy_instance_data, unsigned);
+		Enemy* const enemy = &enemies[enemy_ind];
+		EnemyInstance* const enemy_instance_dest = &level -> enemy_instances[i];
+
+		const EnemyInstance enemy_instance = {
+			.enemy = enemy,
+			.state = Idle,
+			.recently_attacked = 0,
+			.hp = enemy -> init_hp,
+			.time_at_attack = 0.0,
+			.billboard_data = {
+				.pos = {va_arg(enemy_instance_data, double), va_arg(enemy_instance_data, double)},
+				.beta = 0.0, .dist = 0.0, .height = va_arg(enemy_instance_data, double)
+			}
 		};
 
-		for (byte i = 0; i < 4; i++)
-			enemy.animation_seg_lengths[i] = va_arg(enemy_data, unsigned);
+		memcpy(enemy_instance_dest, &enemy_instance, sizeof(EnemyInstance));
 
-		const char* const animation_path = va_arg(enemy_data, const char*);
-		const int
-			frames_per_row = va_arg(enemy_data, int), frames_per_col = va_arg(enemy_data, int),
-			frame_count = va_arg(enemy_data, int), fps = va_arg(enemy_data, int);
+		const Navigator nav = init_navigator(level -> init_pos,
+			&enemy_instance_dest -> billboard_data.pos, enemy -> nav_speed);
 
-		const DataAnimation animation_data = init_animation_data(
-			animation_path, frames_per_row, frames_per_col, frame_count, fps, 0);
-
-		const DataBillboard billboard_data = {
-			{va_arg(enemy_data, double), va_arg(enemy_data, double)},
-			.height = va_arg(enemy_data, double)
-		};
-
-		for (byte i = 0; i < 5; i++)
-			enemy.sounds[i] = init_sound(va_arg(enemy_data, const char*), 1);
-
-		const AnimatedBillboard animated_billboard = {animation_data, billboard_data};
-		memcpy(&enemy.animated_billboard, &animated_billboard, sizeof(AnimatedBillboard));
-
-		void set_enemy_state(EnemyInstance* const, EnemyState, byte);
-		set_enemy_state(&enemy, enemy_state, 1);
-
-		EnemyInstance* const dest = &level -> enemies[i];
-		memcpy(dest, &enemy, sizeof(EnemyInstance));
-
-		DataBillboard* const dest_billboard_data = &dest -> animated_billboard.billboard_data;
-		const Navigator nav = init_navigator(level -> init_pos, &dest_billboard_data -> pos, va_arg(enemy_data, double));
-		memcpy(&dest -> nav, &nav, sizeof(Navigator));
-
+		memcpy(&enemy_instance_dest -> nav, &nav, sizeof(Navigator));
 	}
-	va_end(enemy_data);
+	va_end(enemy_instance_data);
 }
 
 inlinable void set_level_generic_billboard_container(Level* const level) {
 	level -> generic_billboard_count = level -> billboard_count
-		+ level -> animated_billboard_count + level -> enemy_count;
+		+ level -> animated_billboard_count + level -> enemy_instance_count;
 
 	level -> generic_billboards = wmalloc(level -> generic_billboard_count * sizeof(GenericBillboard));
 }
@@ -188,10 +171,6 @@ void deinit_level(const Level level) {
 		deinit_sprite(level.animated_billboards[i].animation_data.sprite);
 	wfree(level.animated_billboards);
 
-	void deinit_enemy(const EnemyInstance* const);
-	for (byte i = 0; i < level.enemy_count; i++)
-		deinit_enemy(&level.enemies[i]);
-	wfree(level.enemies);
-
+	wfree(level.enemy_instances);
 	wfree(level.generic_billboards);
 }

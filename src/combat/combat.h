@@ -49,30 +49,16 @@ typedef struct {
 	const double dist_wake_from_idle, power, init_hp, nav_speed;
 	const byte animation_seg_lengths[4];
 
-	const DataAnimation animation_data;
+	DataAnimation animation_data; // TODO: should be const
 	const Sound sounds[5]; // a sound for each state + Attacked
 } Enemy;
 
-/*
 typedef struct {
-	const Enemy* const enemy;
+	Enemy* const enemy; // TODO: should be const
 	EnemyState state;
 	byte recently_attacked;
 	double hp, time_at_attack;
 	DataBillboard billboard_data;
-	Navigator nav;
-} EventualEnemyInstance;
-*/
-
-typedef struct {
-	EnemyState state;
-	const double dist_wake_from_idle, power;
-	double hp, time_at_attack;
-
-	byte recently_attacked, animation_seg_lengths[4];
-	AnimatedBillboard animated_billboard; // from one large spritesheet
-
-	Sound sounds[5]; // a sound for each state + Attacked
 	Navigator nav;
 } EnemyInstance;
 

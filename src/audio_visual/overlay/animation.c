@@ -27,17 +27,20 @@ inlinable void progress_animation_data_frame_ind(DataAnimation* const animation_
 	progress_frame_ind(animation_data, 0, animation_data -> frame_count);
 }
 
-inlinable void progress_enemy_frame_ind(EnemyInstance* const enemy) {
+inlinable void progress_enemy_instance_frame_ind(EnemyInstance* const enemy_instance) {
+	Enemy* const enemy = enemy_instance -> enemy;
+	const byte* const seg_lengths = enemy -> animation_seg_lengths;
+
 	int begin = 0;
-	for (byte i = 0; i < enemy -> state; i++)
-		begin += enemy -> animation_seg_lengths[i];
+	for (byte i = 0; i < enemy_instance -> state; i++)
+		begin += seg_lengths[i];
 
-	const int end = begin + enemy -> animation_seg_lengths[enemy -> state];
+	const int end = begin + seg_lengths[enemy_instance -> state];
 
-	AnimatedBillboard* const animated_billboard = &enemy -> animated_billboard;
-	if (enemy -> state == Dead && animated_billboard -> animation_data.frame_ind == end - 1) return;
+	DataAnimation* const animation_data = &enemy -> animation_data;
+	if (enemy_instance -> state == Dead && animation_data -> frame_ind == end - 1) return;
 
-	progress_frame_ind(&animated_billboard -> animation_data, begin, end);
+	progress_frame_ind(animation_data, begin, end);
 }
 
 inlinable ivec get_spritesheet_frame_origin(const DataAnimation* const animation_data) {

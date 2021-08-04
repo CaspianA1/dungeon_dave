@@ -38,12 +38,10 @@
 
 #include "../data/enemies.c"
 
-/*
 #include "../data/levels/level_1.c"
 #include "../data/levels/debug_level.c"
 #include "../data/levels/red_room.c"
 #include "../data/levels/forever_maze.c"
-*/
 #include "../data/levels/palace.c"
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
@@ -76,7 +74,7 @@ int main(void) {
 		const double full_jump_height = player.jump.height * settings.screen_height;
 		raycast(&player, wall_y_shift, full_jump_height);
 		draw_generic_billboards(&player, wall_y_shift);
-		if (!player.is_dead) update_all_enemies(&player, &weapon);
+		if (!player.is_dead) update_all_enemy_instances(&player, &weapon);
 		// draw_still_things(&player, wall_y_shift);
 		use_weapon_if_needed(&weapon, &player, input_status);
 		#else

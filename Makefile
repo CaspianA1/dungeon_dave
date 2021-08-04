@@ -13,7 +13,7 @@ ifeq ($(CC),gcc-10)
 	DEBUG_2_FLAGS += -fsanitize=leak # -fsanitize=memory
 endif
 
-WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat -Wno-gnu-binary-literal
+WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
 CFLAGS = -std=c99 -march=native $(WARNINGS)
 LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm
 LDFLAGS = $(LIBS) -o bin/$(OUT) src/main/$(MAIN).c

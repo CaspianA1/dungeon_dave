@@ -16,26 +16,26 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 	const byte generic_billboard_count = current_level.generic_billboard_count;
 	GenericBillboard* const generic_billboards = current_level.generic_billboards;
 
-	const byte start_of_enemies = current_level.billboard_count + current_level.animated_billboard_count;
+	const byte start_of_enemy_instances = current_level.billboard_count + current_level.animated_billboard_count;
 
 	for (byte i = 0; i < generic_billboard_count; i++) {
 		const byte
 			is_animated = i >= current_level.billboard_count,
-			is_enemy = i >= start_of_enemies,
+			is_enemy_instance = i >= start_of_enemy_instances,
 			possible_animation_index = i - current_level.billboard_count,
-			possible_enemy_index = i - start_of_enemies;
+			possible_enemy_index = i - start_of_enemy_instances;
 
 		Billboard billboard;
 		DataBillboard* billboard_data = NULL;
 
 		if (is_animated) {
-			if (is_enemy) {
-				AnimatedBillboard* const animated_billboard =
-					&current_level.enemies[possible_enemy_index].animated_billboard;
-				billboard = (Billboard) {
-					animated_billboard -> animation_data.sprite, animated_billboard -> billboard_data
-				};
-				billboard_data = &animated_billboard -> billboard_data;
+			if (is_enemy_instance) {
+				EnemyInstance* const enemy_instance = &current_level.enemy_instances[possible_enemy_index];
+				Enemy* const enemy = enemy_instance -> enemy;
+
+				DataBillboard* const b = &enemy_instance -> billboard_data;
+				billboard = (Billboard) {enemy -> animation_data.sprite, *b};
+				billboard_data = b;
 			}
 			else {
 				AnimatedBillboard* const animated_billboard =
@@ -59,8 +59,8 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		GenericBillboard* const generic_billboard = &generic_billboards[i];
 		generic_billboard -> billboard = billboard;
 		generic_billboard -> is_animated = is_animated;
-		generic_billboard -> is_enemy = is_enemy;
-		generic_billboard -> animation_index = is_enemy
+		generic_billboard -> is_enemy_instance = is_enemy_instance;
+		generic_billboard -> animation_index = is_enemy_instance
 			? possible_enemy_index
 			: possible_animation_index;
 	}	
@@ -106,11 +106,11 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		int src_begin_x, width;
 
 		if (generic.is_animated) {
-			EnemyInstance* possible_enemy = NULL;
+			EnemyInstance* possible_enemy_instance = NULL;
 
-			if (generic.is_enemy) {
-				possible_enemy = &current_level.enemies[generic.animation_index];
-				possible_animation_data = &possible_enemy -> animated_billboard.animation_data;
+			if (generic.is_enemy_instance) {
+				possible_enemy_instance = &current_level.enemy_instances[generic.animation_index];
+				possible_animation_data = &possible_enemy_instance -> enemy -> animation_data;
 			}
 			else possible_animation_data = &current_level.animated_billboards[generic.animation_index].animation_data;
 
@@ -122,7 +122,7 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 				.w = 1, .h = possible_animation_data -> frame_h
 			};
 
-			if (generic.is_enemy) progress_enemy_frame_ind(possible_enemy);
+			if (generic.is_enemy_instance) progress_enemy_instance_frame_ind(possible_enemy_instance);
 			else progress_animation_data_frame_ind(possible_animation_data);
 
 			width = possible_animation_data -> frame_w;

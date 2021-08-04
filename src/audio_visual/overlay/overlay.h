@@ -44,7 +44,7 @@ DataAnimation init_animation_data(const char* const, const int, const int, const
 
 typedef struct {
 	Billboard billboard;
-	byte is_animated, is_enemy;
+	byte is_animated, is_enemy_instance;
 	int animation_index;
 } GenericBillboard;
 

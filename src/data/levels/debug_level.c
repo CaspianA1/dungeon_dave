@@ -12,7 +12,7 @@ void load_debug_level(void) {
 	enum {
 		map_width = 12, map_height = 10,
 		wall_count = 5, billboard_count = 0,
-		animated_billboard_count = 1, enemy_count = 0
+		animated_billboard_count = 1, enemy_instance_count = 0
 	};
 
 	static const byte wall_data[map_height][map_width] = {
@@ -54,6 +54,6 @@ void load_debug_level(void) {
 		"assets/spritesheets/sonic.bmp", 6, 5, 30, 30, 2.5, 2.5, 0.0);
 
 	memcpy(&current_level, &debug_level, sizeof(Level));
-	set_level_enemies(&current_level, enemy_count);
+	set_level_enemy_instances(&current_level, enemy_instance_count);
 	set_level_generic_billboard_container(&current_level);
 }

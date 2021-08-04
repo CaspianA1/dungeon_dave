@@ -15,7 +15,7 @@ void load_maze(void) {
 	enum {
 		map_width = 90, map_height = 61,
 		wall_count = 2, billboard_count = 0,
-		animated_billboard_count = 0, enemy_count = 1
+		animated_billboard_count = 0, enemy_instance_count = 1
 	};
 
 	static const byte wall_data[map_height][map_width] = { // https://www.dcode.fr/maze-generator
@@ -105,7 +105,7 @@ void load_maze(void) {
 
 	memcpy(&current_level, &maze, sizeof(Level));
 
-	set_level_enemies(&current_level, enemy_count,
+	set_level_enemy_instances(&current_level, enemy_instance_count,
 		Idle, // state
 		0.9, 3.0, 20.0, // dist_wake_from_idle, power, hp
 

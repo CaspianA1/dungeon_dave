@@ -12,7 +12,7 @@ void load_red_room(void) {
 	enum {
 		map_width = 10, map_height = 10,
 		wall_count = 2, billboard_count = 0,
-		animated_billboard_count = 0, enemy_count = 0
+		animated_billboard_count = 0, enemy_instance_count = 0
 	};
 
 	static const byte wall_data[map_height][map_width] = {
@@ -49,6 +49,6 @@ void load_red_room(void) {
 
 	memcpy(&current_level, &red_room, sizeof(Level));
 
-	set_level_enemies(&current_level, enemy_count);
+	set_level_enemy_instances(&current_level, enemy_instance_count);
 	set_level_generic_billboard_container(&current_level);
 }

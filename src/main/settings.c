@@ -148,13 +148,11 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	occluded_by_walls = init_statemap(settings.screen_width, settings.screen_height);
 
 	//////////
-	/*
 	extern Enemy enemies[1];
 	Enemy init_eddie(void);
 
 	const Enemy eddie = init_eddie();
-	memcpy(enemies, &eddie, sizeof(Enemy));
-	*/
+	memcpy(&enemies[0], &eddie, sizeof(Enemy));
 	//////////
 
 	load_first_level();
@@ -201,11 +199,9 @@ void deinit_all(const Player* const player, const Weapon weapon) {
 	deinit_weapon(weapon);
 	deinit_level(current_level);
 
-	/*
 	extern Enemy enemies[1];
-	void deinit_enemy(Enemy);
-	deinit_enemy(enemies[0]);
-	*/
+	void deinit_enemy(const Enemy* const);
+	deinit_enemy(&enemies[0]);
 
 	deinit_audio_subsystem();
 	deinit_hud_resources();

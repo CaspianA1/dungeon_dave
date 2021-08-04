@@ -82,7 +82,7 @@ typedef struct {
 	const double init_height;
 
 	byte
-		wall_count, billboard_count, animated_billboard_count, enemy_count,
+		wall_count, billboard_count, animated_billboard_count, enemy_instance_count,
 		generic_billboard_count, max_point_height, out_of_bounds_point,
  		*wall_data, *ceiling_data, *floor_data;
 
@@ -98,7 +98,7 @@ typedef struct {
 	Sprite* walls;
 	Billboard* billboards;
 	AnimatedBillboard* animated_billboards;
-	EnemyInstance* enemies;
+	EnemyInstance* enemy_instances;
 	GenericBillboard* generic_billboards; // just a temp container that other billboards are copied into
 } Level;
 

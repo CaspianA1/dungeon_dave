@@ -10,21 +10,21 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 		const vec bullet_tile = {bullet.curr_tile[0], bullet.curr_tile[1]};
 		if (map_point(current_level.wall_data, bullet_tile[0], bullet_tile[1])) break;
 
-		for (byte i = 0; i < current_level.enemy_count; i++) {
-			EnemyInstance* const enemy = &current_level.enemies[i];
-			if (enemy -> state == Dead) continue;
+		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
+			EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
+			if (enemy_instance -> state == Dead) continue;
 
 			const vec
-				enemy_pos = enemy -> animated_billboard.billboard_data.pos,
+				enemy_pos = enemy_instance -> billboard_data.pos,
 				bullet_pos = vec_line_pos(pos, dir, bullet.dist);
 
 			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon -> dist_for_hit)) {
-				enemy -> recently_attacked = 1;
-				enemy -> hp -= weapon -> power;
+				enemy_instance -> recently_attacked = 1;
+				enemy_instance -> hp -= weapon -> power;
 
-				void set_enemy_state(EnemyInstance* const, const EnemyState, const byte);
-				if (enemy -> hp <= 0.0) set_enemy_state(enemy, Dead, 0);
-				else play_sound(enemy -> sounds[4], 0); // attacked
+				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte);
+				if (enemy_instance -> hp <= 0.0) set_enemy_instance_state(enemy_instance, Dead, 0);
+				else play_sound(enemy_instance -> enemy -> sounds[4], 0); // attacked
 				return;
 			}
 		}
