@@ -38,10 +38,12 @@
 
 #include "../data/enemies.c"
 
+/*
 #include "../data/levels/level_1.c"
 #include "../data/levels/debug_level.c"
 #include "../data/levels/red_room.c"
 #include "../data/levels/forever_maze.c"
+*/
 #include "../data/levels/palace.c"
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
@@ -50,7 +52,7 @@ int main(void) {
 	Weapon weapon;
 	load_all_defaults(load_palace, &player, &weapon);
 
-	if (display_title_screen() == Exit) deinit_all(&player, weapon);
+	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(current_level.background_sound, 1);
 	p = init_psprite("assets/walls/dune.bmp");
 
@@ -59,7 +61,7 @@ int main(void) {
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
 		const InputStatus input_status = handle_input(&player, player.is_dead);
-		if (input_status == Exit) deinit_all(&player, weapon);
+		if (input_status == Exit) deinit_all(&player, &weapon);
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
 		clear_statemap(occluded_by_walls);
@@ -82,7 +84,7 @@ int main(void) {
 		#endif
 
 		if (player.is_dead && death_effect(&player))
-			deinit_all(&player, weapon);
+			deinit_all(&player, &weapon);
 
 		fast_affine_floor(0, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 

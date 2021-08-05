@@ -1,30 +1,31 @@
-DataAnimation init_animation_data(const char* const path, const int frames_per_row,
+DataAnimationImmut init_immut_animation_data(const char* const path, const int frames_per_row,
 	const int frames_per_col, const int frame_count, const int fps, const byte enable_mipmap) {
 
 	const Sprite sprite = init_sprite(path, enable_mipmap);
 
-	return (DataAnimation) {
+	return (DataAnimationImmut) {
 		sprite, frames_per_row, frames_per_col,
 		sprite.size.x / frames_per_row,
 		sprite.size.y / frames_per_col,
-		frame_count, 0, 1.0 / fps, 0
+		frame_count, 1.0 / fps
 	};
 }
 
 inlinable void progress_frame_ind(DataAnimation* const animation_data, const int begin, const int end) {
 	const double current_time = SDL_GetTicks() / 1000.0;
-	const double time_delta = current_time - animation_data -> last_frame_time;
+	DataAnimationMut* const mut_animation_data = &animation_data -> mut;
+	const double time_delta = current_time - mut_animation_data -> last_frame_time;
 
-	if (time_delta >= animation_data -> secs_per_frame) {
-		if (++animation_data -> frame_ind == end)
-			animation_data -> frame_ind = begin;
+	if (time_delta >= animation_data -> immut.secs_per_frame) {
+		if (++mut_animation_data -> frame_ind == end)
+			mut_animation_data -> frame_ind = begin;
 
-		animation_data -> last_frame_time = current_time;
+		mut_animation_data -> last_frame_time = current_time;
 	}
 }
 
 inlinable void progress_animation_data_frame_ind(DataAnimation* const animation_data) {
-	progress_frame_ind(animation_data, 0, animation_data -> frame_count);
+	progress_frame_ind(animation_data, 0, animation_data -> immut.frame_count);
 }
 
 inlinable void progress_enemy_instance_frame_ind(EnemyInstance* const enemy_instance) {
@@ -37,20 +38,27 @@ inlinable void progress_enemy_instance_frame_ind(EnemyInstance* const enemy_inst
 
 	const int end = begin + seg_lengths[enemy_instance -> state];
 
-	DataAnimation* const animation_data = &enemy -> animation_data;
-	if (enemy_instance -> state == Dead && animation_data -> frame_ind == end - 1) return;
+	DataAnimationMut* const mut_animation_data = &enemy_instance -> mut_animation_data;
+	if (enemy_instance -> state == Dead && mut_animation_data -> frame_ind == end - 1) return;
 
-	progress_frame_ind(animation_data, begin, end);
+	DataAnimation animation_data = {enemy -> animation_data, *mut_animation_data};
+	progress_frame_ind(&animation_data, begin, end);
+	*mut_animation_data = animation_data.mut; // reassignment not expensive b/c struct is small
 }
 
 inlinable ivec get_spritesheet_frame_origin(const DataAnimation* const animation_data) {
-	const int y_ind = animation_data -> frame_ind / animation_data -> frames_per_row;
-	const int x_ind = animation_data -> frame_ind - y_ind * animation_data -> frames_per_row;
-	const ivec size = animation_data -> sprite.size;
+	const DataAnimationImmut* const immut = &animation_data -> immut;
+	const int frame_ind = animation_data -> mut.frame_ind;
+
+	const int frames_per_row = immut -> frames_per_row;
+
+	const int y_ind = frame_ind / frames_per_row;
+	const int x_ind = frame_ind - y_ind * frames_per_row;
+	const ivec size = immut -> sprite.size;
 
 	return (ivec) {
-		(double) x_ind / animation_data -> frames_per_row * size.x,
-		(double) y_ind / animation_data -> frames_per_col * size.y
+		(double) x_ind / frames_per_row * size.x,
+		(double) y_ind / immut -> frames_per_col * size.y
 	};
 }
 
@@ -65,7 +73,7 @@ void animate_weapon(DataAnimation* const animation_data, const vec pos,
 
 	const SDL_Rect sheet_crop = {
 		frame_origin.x, frame_origin.y,
-		animation_data -> frame_w, animation_data -> frame_h
+		animation_data -> immut.frame_w, animation_data -> immut.frame_h
 	};
 
 	/* the reason the `paces_sideways_on_use` flag exists is because the whip animation has half-drawn parts
@@ -92,7 +100,7 @@ void animate_weapon(DataAnimation* const animation_data, const vec pos,
 		settings.screen_width, settings.screen_height
 	};
 
-	SDL_Texture* const texture = animation_data -> sprite.texture;
+	SDL_Texture* const texture = animation_data -> immut.sprite.texture;
 
 	#ifdef SHADING_ENABLED
 	byte shade = 255 * calculate_shade(settings.screen_height, pos);

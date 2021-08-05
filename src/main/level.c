@@ -93,8 +93,13 @@ void set_level_animated_billboards(Level* const level, const unsigned animated_b
 			frame_count = va_arg(animation_data, int),
 			fps = va_arg(animation_data, int);
 
-		const DataAnimation _animation_data = init_animation_data(
-			path, frames_per_row, frames_per_col, frame_count, fps, 0);
+
+		DataAnimationImmut init_immut_animation_data(const char* const, const int,
+			const int, const int, const int, const byte);
+
+		const DataAnimation _animation_data = {
+			init_immut_animation_data(path, frames_per_row, frames_per_col, frame_count, fps, 0), {0.0, 0}
+		};
 
 		const DataBillboard billboard_data = {
 			{va_arg(animation_data, double), va_arg(animation_data, double)},
@@ -168,7 +173,7 @@ void deinit_level(const Level level) {
 	wfree(level.billboards);
 
 	for (byte i = 0; i < level.animated_billboard_count; i++)
-		deinit_sprite(level.animated_billboards[i].animation_data.sprite);
+		deinit_sprite(level.animated_billboards[i].animation_data.immut.sprite);
 	wfree(level.animated_billboards);
 
 	wfree(level.enemy_instances);

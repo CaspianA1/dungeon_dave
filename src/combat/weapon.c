@@ -1,6 +1,6 @@
-void deinit_weapon(const Weapon weapon) {
-	deinit_sound(weapon.sound);
-	deinit_sprite(weapon.animation_data.sprite);
+void deinit_weapon(const Weapon* const weapon) {
+	deinit_sound(weapon -> sound);
+	deinit_sprite(weapon -> animation_data.immut.sprite);
 }
 
 void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
@@ -35,11 +35,13 @@ void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 #ifndef NOCLIP_MODE
 
 void use_weapon_if_needed(Weapon* const weapon, const Player* const player, const InputStatus input_status) {
-	if (player -> is_dead) weapon -> animation_data.frame_ind = 0;
+	int* const frame_ind = &weapon -> animation_data.mut.frame_ind;
+
+	if (player -> is_dead) *frame_ind = 0;
 
 	const byte first_in_use = weapon -> status & mask_in_use;
 
-	if (first_in_use && weapon -> animation_data.frame_ind == 0)
+	if (first_in_use && *frame_ind == 0)
 		clear_nth_bit(&weapon -> status, 0); // not in use
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
 		set_nth_bit(&weapon -> status, 0); // in use

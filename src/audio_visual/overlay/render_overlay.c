@@ -41,7 +41,7 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 				AnimatedBillboard* const animated_billboard =
 					&current_level.animated_billboards[possible_animation_index];
 				billboard = (Billboard) {
-					animated_billboard -> animation_data.sprite, animated_billboard -> billboard_data
+					animated_billboard -> animation_data.immut.sprite, animated_billboard -> billboard_data
 				};
 				billboard_data = &animated_billboard -> billboard_data;
 			}
@@ -119,13 +119,13 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 			src_begin_x = frame_origin.x;
 			src_crop = (SDL_Rect) {
 				.y = frame_origin.y,
-				.w = 1, .h = possible_animation_data -> frame_h
+				.w = 1, .h = possible_animation_data -> immut.frame_h
 			};
 
 			if (generic.is_enemy_instance) progress_enemy_instance_frame_ind(possible_enemy_instance);
 			else progress_animation_data_frame_ind(possible_animation_data);
 
-			width = possible_animation_data -> frame_w;
+			width = possible_animation_data -> immut.frame_w;
 		}
 		else {
 			const ivec src_size = billboard.sprite.size;

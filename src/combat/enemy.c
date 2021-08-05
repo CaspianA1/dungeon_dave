@@ -18,7 +18,7 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 	for (byte i = 0; i < enemy_instance -> state; i++)
 		new_frame_ind += enemy -> animation_seg_lengths[i];
 
-	enemy -> animation_data.frame_ind = new_frame_ind;
+	enemy_instance -> mut_animation_data.frame_ind = new_frame_ind;
 }
 
 void update_enemy_instance(EnemyInstance* const enemy_instance, Player* const player, const Weapon* const weapon) {

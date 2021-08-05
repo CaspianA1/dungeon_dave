@@ -27,12 +27,18 @@ typedef struct {
 
 typedef struct {
 	Sprite sprite;
-
 	const int frames_per_row, frames_per_col, frame_w, frame_h, frame_count;
-
-	int frame_ind;
 	const double secs_per_frame;
+} DataAnimationImmut;
+
+typedef struct {
 	double last_frame_time;
+	int frame_ind;
+} DataAnimationMut;
+
+typedef struct {
+	const DataAnimationImmut immut;
+	DataAnimationMut mut;
 } DataAnimation;
 
 typedef struct {

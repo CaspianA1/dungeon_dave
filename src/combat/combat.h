@@ -49,12 +49,14 @@ typedef struct {
 	const double dist_wake_from_idle, power, init_hp, nav_speed;
 	const byte animation_seg_lengths[4];
 
-	DataAnimation animation_data; // TODO: should be const
+	const DataAnimationImmut animation_data; // TODO: should be const
 	const Sound sounds[5]; // a sound for each state + Attacked
 } Enemy;
 
 typedef struct {
 	Enemy* const enemy; // TODO: should be const
+	DataAnimationMut mut_animation_data;
+	
 	EnemyState state;
 	byte recently_attacked;
 	double hp, time_at_attack;

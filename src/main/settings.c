@@ -160,10 +160,12 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	const double offset_scaler = 15.0;
 	const Player first_player = load_player(4.8, 0.3, 8.0, 0.12, offset_scaler, 0.08, 0.09, 0.05, 1.9);
 
+
+	DataAnimationImmut init_immut_animation_data(const char* const, const int, const int, const int, const int, const byte);
 	const Weapon first_weapon = {
 		.status = mask_short_range, .power = 4.0, .dist_for_hit = 0.5,
 		.sound = init_sound("assets/audio/sound_effects/whip_crack.wav", 1),
-		.animation_data = init_animation_data("assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60, 0)
+		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60, 0), {0.0, 0}}
 	};
 
 	/*
@@ -186,8 +188,8 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	memcpy(weapon, &first_weapon, sizeof(Weapon));
 }
 
-void deinit_all(const Player* const player, const Weapon weapon) {
-	void deinit_weapon(const Weapon);
+void deinit_all(const Player* const player, const Weapon* const weapon) {
+	void deinit_weapon(const Weapon* const);
 	void deinit_level(const Level);
 	void deinit_hud_resources(void);
 	void deinit_screen(void);
