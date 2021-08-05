@@ -42,14 +42,15 @@ inlinable void draw_from_hit(const vec hit, const double dist, const int screen_
 void fast_affine_floor(const byte floor_height, const vec pos,
 	const double p_height, const double pace, double y_shift, const int y_pitch) {
 
-	// if (p_height + 1.0 < floor_height) return;
-
 	const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
 	const double world_height = p_height - floor_height / screen_height_proj_ratio;
+
+	// if the player is under the floor plane
+	if (world_height < -1.0 / (screen_height_proj_ratio * 2.0)) return;
+
 	const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
 
 	if (y_shift < 0.0) y_shift = 0.0;
-
 	for (int y = y_shift - pace; y < settings.screen_height - pace; y++) {
 		const int row = y - settings.half_screen_height - y_pitch + 1;
 		if (row == 0) continue;

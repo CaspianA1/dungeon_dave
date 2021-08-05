@@ -90,8 +90,6 @@ int main(void) {
 
 		fast_affine_floor(0, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
-		// fast_affine_floor(1, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
-
 		refresh(&player, wall_y_shift);
 		tick_delay(before);
 	}
