@@ -1,5 +1,5 @@
 // generic billboard = billboard || animation
-int cmp_generic_billboards(const void* const a, const void* const b) {
+static int cmp_generic_billboards(const void* const a, const void* const b) {
 	const double distances[2] = {
 		((GenericBillboard*) a) -> billboard.billboard_data.dist,
 		((GenericBillboard*) b) -> billboard.billboard_data.dist

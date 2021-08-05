@@ -1,5 +1,5 @@
 inlinable vec vec_tex_offset(const vec pos, const int tex_size) {
-	return vec_fill(tex_size) * (pos - _mm_round_pd(pos, _MM_FROUND_TRUNC));
+	return vec_fill(tex_size) * (pos - vec_trunc(pos));
 }
 
 inlinable Uint32* read_texture_row(const void* const pixels, const int pixel_pitch, const int y) {

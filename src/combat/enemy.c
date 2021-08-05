@@ -21,7 +21,7 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 	enemy_instance -> mut_animation_data.frame_ind = new_frame_ind;
 }
 
-void update_enemy_instance(EnemyInstance* const enemy_instance, Player* const player, const Weapon* const weapon) {
+static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* const player, const Weapon* const weapon) {
 	if (enemy_instance -> state == Dead) return;
 
 	const Enemy* const enemy = enemy_instance -> enemy;

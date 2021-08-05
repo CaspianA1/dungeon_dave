@@ -41,11 +41,12 @@ void set_statemap_bit(const StateMap statemap, const int bits_x, const int bits_
 	*statemap_byte(statemap, bits_x / 8, bits_y) |= 1 << get_n_for_bits_x(bits_x);
 }
 
-byte get_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
+inlinable byte get_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
 	return (*statemap_byte(statemap, bits_x / 8, bits_y) >> get_n_for_bits_x(bits_x)) & 1;
 }
 
-void print_statemap(const StateMap statemap) {
+/*
+static void print_statemap(const StateMap statemap) {
 	for (int y = 0; y < statemap.chunk_dimensions.y; y++) {
 		putchar('|');
 		for (int x = 0; x < statemap.chunk_dimensions.x; x++) {
@@ -56,3 +57,4 @@ void print_statemap(const StateMap statemap) {
 		putchar('\n');
 	}
 }
+*/

@@ -74,9 +74,9 @@ int main(void) {
 		const double full_jump_height = player.jump.height * settings.screen_height;
 		raycast(&player, wall_y_shift, full_jump_height);
 
-		// draw_things(&player, wall_y_shift);
-		draw_generic_billboards(&player, wall_y_shift);
-		if (!player.is_dead) update_all_enemy_instances(&player, &weapon);
+		draw_things(&player, wall_y_shift);
+		// draw_generic_billboards(&player, wall_y_shift);
+		// if (!player.is_dead) update_all_enemy_instances(&player, &weapon);
 
 		use_weapon_if_needed(&weapon, &player, input_status);
 		#else

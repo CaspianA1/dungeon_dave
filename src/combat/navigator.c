@@ -1,4 +1,5 @@
-void print_navigator(const CorrectedRoute corrected_route, const vec floating_pos) {
+/*
+static void print_navigator(const CorrectedRoute corrected_route, const vec floating_pos) {
 	const ivec
 		pos = ivec_from_vec(floating_pos),
 		end = ivec_from_vec(corrected_route.data[corrected_route.length - 1]);
@@ -30,8 +31,9 @@ void print_navigator(const CorrectedRoute corrected_route, const vec floating_po
 	}
 	printf("---\n");
 }
+*/
 
-CorrectedRoute make_corrected_route(const Route route, const vec nav_pos) {
+static CorrectedRoute make_corrected_route(const Route route, const vec nav_pos) {
 	CorrectedRoute corrected_route = {.length = route.length};
 
 	corrected_route.data[0] = nav_pos;

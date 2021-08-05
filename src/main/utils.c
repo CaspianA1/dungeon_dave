@@ -128,6 +128,7 @@ void update_val_buffers(const int screen_x, double wall_top, double wall_bottom,
 /////
 
 #define vec_fill _mm_set1_pd
+#define vec_trunc(vec) _mm_round_pd(vec, _MM_FROUND_TRUNC)
 
 inlinable byte vec_delta_exceeds(const vec a, const vec b, const double dist) {
 	const vec delta = a - b;

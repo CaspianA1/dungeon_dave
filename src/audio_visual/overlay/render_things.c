@@ -5,7 +5,7 @@ typedef struct {
 	const Sprite sprite;
 } Thing;
 
-int cmp_things(const void* const a, const void* const b) {
+static int cmp_things(const void* const a, const void* const b) {
 	const double distances[2] = {
 		((Thing*) a) -> billboard_data -> dist,
 		((Thing*) b) -> billboard_data -> dist
@@ -16,7 +16,7 @@ int cmp_things(const void* const a, const void* const b) {
 	else return 0;
 }
 
-void draw_processed_still_things(const Player* const player, Thing* const thing_container,
+static void draw_processed_things(const Player* const player, Thing* const thing_container,
 	const int thing_count, const double y_shift) {
 
 	for (byte i = 0; i < thing_count; i++) {
@@ -76,27 +76,40 @@ void draw_processed_still_things(const Player* const player, Thing* const thing_
 	}
 }
 
+inlinable void update_thing_values(const vec thing_pos, const vec player_pos,
+	const double player_angle, double* const beta, double* const dist) {
+
+	const vec delta = thing_pos - player_pos;
+	*beta = atan2(delta[1], delta[0]) - player_angle;
+	if (*beta < -two_pi) *beta += two_pi;
+	*dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
+}
+
+static void add_still_things_to_thing_container(Thing* const thing_container, const vec player_pos,
+	const double player_angle) {
+
+	for (byte i = 0; i < current_level.billboard_count; i++) {
+		Billboard* const billboard = &current_level.billboards[i];
+		DataBillboard* const billboard_data = &billboard -> billboard_data;
+
+		update_thing_values(billboard_data -> pos, player_pos, player_angle,
+			&billboard_data -> beta, &billboard_data -> dist);
+
+		const Thing thing = {billboard_data, billboard -> sprite};
+		memcpy(&thing_container[i], &thing, sizeof(Thing));
+	}
+}
+
 void draw_things(const Player* const player, const double y_shift) {
 	const double player_angle = to_radians(player -> angle);
 
 	const int thing_count = current_level.billboard_count;
 	Thing* const thing_container = wmalloc(thing_count * sizeof(Thing));
 
-	for (byte i = 0; i < thing_count; i++) {
-		Billboard* const billboard = &current_level.billboards[i];
-		DataBillboard* const billboard_data = &billboard -> billboard_data;
-
-		const vec delta = billboard_data -> pos - player -> pos;
-		billboard_data -> beta = atan2(delta[1], delta[0]) - player_angle;
-		if (billboard_data -> beta < -two_pi) billboard_data -> beta += two_pi;
-		billboard_data -> dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
-
-		const Thing thing = {billboard_data, billboard -> sprite};
-		memcpy(&thing_container[i], &thing, sizeof(Thing));
-	}
+	add_still_things_to_thing_container(thing_container, player -> pos, player_angle);
 
 	qsort(thing_container, thing_count, sizeof(Thing), cmp_things);
-	draw_processed_still_things(player, thing_container, thing_count, y_shift);
+	draw_processed_things(player, thing_container, thing_count, y_shift);
 
 	wfree(thing_container);
 }

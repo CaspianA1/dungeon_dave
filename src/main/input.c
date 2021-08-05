@@ -11,7 +11,7 @@ inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos
 		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
-void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement, const double p_height) {
+static void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement, const double p_height) {
 	vec pos = *pos_ref + movement;
 
 	#ifdef NOCLIP_MODE

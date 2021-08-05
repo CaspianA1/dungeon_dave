@@ -3,7 +3,7 @@ void deinit_weapon(const Weapon* const weapon) {
 	deinit_sprite(weapon -> animation_data.immut.sprite);
 }
 
-void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
+static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir) {
 	DataDDA bullet = init_dda(pos, dir, 0.5);
 
 	while (iter_dda(&bullet)) {
