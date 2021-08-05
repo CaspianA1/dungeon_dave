@@ -42,6 +42,8 @@ inlinable void draw_from_hit(const vec hit, const double dist, const int screen_
 void fast_affine_floor(const byte floor_height, const vec pos,
 	const double p_height, const double pace, double y_shift, const int y_pitch) {
 
+	// if (p_height + 1.0 < floor_height) return;
+
 	const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
 	const double world_height = p_height - floor_height / screen_height_proj_ratio;
 	const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
