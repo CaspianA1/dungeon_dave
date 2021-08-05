@@ -102,6 +102,8 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 
 		//////////
 		DataAnimation* possible_animation_data = NULL;
+		DataAnimation enemy_constructed_animation_data;
+
 		SDL_Rect src_crop;
 		int src_begin_x, width;
 
@@ -110,7 +112,13 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 
 			if (generic.is_enemy_instance) {
 				possible_enemy_instance = &current_level.enemy_instances[generic.animation_index];
-				possible_animation_data = &possible_enemy_instance -> enemy -> animation_data;
+
+				const DataAnimation local_constructed_enemy_animation_data = {
+					possible_enemy_instance -> enemy -> animation_data,
+					possible_enemy_instance -> mut_animation_data
+				};
+				memcpy(&enemy_constructed_animation_data, &local_constructed_enemy_animation_data, sizeof(DataAnimation));
+				possible_animation_data = &enemy_constructed_animation_data;
 			}
 			else possible_animation_data = &current_level.animated_billboards[generic.animation_index].animation_data;
 
