@@ -76,7 +76,7 @@ void draw_processed_still_things(const Player* const player, Thing* const thing_
 	}
 }
 
-void draw_still_things(const Player* const player, const double y_shift) {
+void draw_things(const Player* const player, const double y_shift) {
 	const double player_angle = to_radians(player -> angle);
 
 	const int thing_count = current_level.billboard_count;

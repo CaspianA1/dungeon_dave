@@ -105,22 +105,6 @@ void load_maze(void) {
 
 	memcpy(&current_level, &maze, sizeof(Level));
 
-	set_level_enemy_instances(&current_level, enemy_instance_count,
-		Idle, // state
-		0.9, 3.0, 20.0, // dist_wake_from_idle, power, hp
-
-		5, 2, 3, 13, // animation_seg_lengths
-
-		"assets/spritesheets/eddie.bmp", 23, 1, 23, 12, // animation data
-		28.5, 21.5, 0.0, // billboard data
-
-		"assets/audio/enemy_sound_test/idle.wav", // sound data
-		"assets/audio/enemy_sound_test/chase.wav",
-		"assets/audio/enemy_sound_test/attack.wav",
-		"assets/audio/enemy_sound_test/death.wav",
-		"assets/audio/enemy_sound_test/attacked.wav",
-
-		0.035 /* navigator speed */ );
-
+	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 28.5, 21.5, 0.0);
 	set_level_generic_billboard_container(&current_level);
 }
