@@ -3,6 +3,7 @@
 typedef struct {
 	const DataBillboard* const billboard_data;
 	const Sprite sprite;
+	const SDL_Rect src_crop;
 } Thing;
 
 static int cmp_things(const void* const a, const void* const b) {
@@ -22,7 +23,6 @@ static void draw_processed_things(const Player* const player, Thing* const thing
 	for (byte i = 0; i < thing_count; i++) {
 		const Thing thing = thing_container[i];
 		const DataBillboard billboard_data = *thing.billboard_data;
-		const Sprite sprite = thing.sprite;
 
 		const double
 			abs_billboard_beta = fabs(billboard_data.beta),
@@ -51,9 +51,7 @@ static void draw_processed_things(const Player* const player, Thing* const thing
 		if (end_x < 0.0) continue;
 		else if (end_x > settings.screen_width) end_x = settings.screen_width;
 
-		SDL_Rect src_crop = {
-			.y = 0, .w = 1, .h = sprite.size.y
-		};
+		SDL_Rect src_column = {.y = thing.src_crop.y, .w = 1, .h = thing.src_crop.h};
 
 		SDL_FRect screen_pos = {
 			0.0, y_shift - half_size
@@ -69,9 +67,11 @@ static void draw_processed_things(const Player* const player, Thing* const thing
 		for (int screen_row = start_x; screen_row < end_x; screen_row += settings.ray_column_width) {
 			if (screen_row < 0 || (double) val_buffer[screen_row].depth < corrected_dist) continue;
 			screen_pos.x = screen_row;
-			src_crop.x = ((double) (screen_row - (int) start_x) / size) * sprite.size.x;
 
-			SDL_RenderCopyF(screen.renderer, thing.sprite.texture, &src_crop, &screen_pos);
+			const int src_offset = ((double) (screen_row - (int) start_x) / size) * thing.src_crop.w;
+			src_column.x = src_offset + thing.src_crop.x;
+
+			SDL_RenderCopyF(screen.renderer, thing.sprite.texture, &src_column, &screen_pos);
 		}
 	}
 }
@@ -85,9 +85,10 @@ inlinable void update_thing_values(const vec thing_pos, const vec player_pos,
 	*dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 }
 
-static void add_still_things_to_thing_container(Thing* const thing_container, const vec player_pos,
-	const double player_angle) {
+#define THING_ADDER_FN(type) inlinable void add_##type##_things_to_thing_container(\
+	Thing* const thing_container, const vec player_pos, const double player_angle)
 
+THING_ADDER_FN(still) {
 	for (byte i = 0; i < current_level.billboard_count; i++) {
 		Billboard* const billboard = &current_level.billboards[i];
 		DataBillboard* const billboard_data = &billboard -> billboard_data;
@@ -95,18 +96,45 @@ static void add_still_things_to_thing_container(Thing* const thing_container, co
 		update_thing_values(billboard_data -> pos, player_pos, player_angle,
 			&billboard_data -> beta, &billboard_data -> dist);
 
-		const Thing thing = {billboard_data, billboard -> sprite};
+		const Sprite sprite = billboard -> sprite;
+		const Thing thing = {billboard_data, sprite, {0, 0, sprite.size.x, sprite.size.y}};
 		memcpy(&thing_container[i], &thing, sizeof(Thing));
+	}
+}
+
+THING_ADDER_FN(animated) {
+	for (byte i = 0; i < current_level.animated_billboard_count; i++) {
+		AnimatedBillboard* const animated_billboard = &current_level.animated_billboards[i];
+		DataBillboard* const billboard_data = &animated_billboard -> billboard_data;
+		DataAnimation* const animation_data = &animated_billboard -> animation_data;
+		const DataAnimationImmut* const immut_animation_data = &animation_data -> immut;
+
+		update_thing_values(billboard_data -> pos, player_pos, player_angle,
+			&billboard_data -> beta, &billboard_data -> dist);
+
+		const ivec
+			frame_origin = get_spritesheet_frame_origin(&animated_billboard -> animation_data),
+			dimensions = {immut_animation_data -> frame_w, immut_animation_data -> frame_h};
+
+		progress_animation_data_frame_ind(animation_data);
+
+		const Thing thing = {
+			billboard_data, immut_animation_data -> sprite,
+			{frame_origin.x, frame_origin.y, dimensions.x, dimensions.y}
+		};
+
+		memcpy(&thing_container[i + current_level.billboard_count], &thing, sizeof(Thing));
 	}
 }
 
 void draw_things(const Player* const player, const double y_shift) {
 	const double player_angle = to_radians(player -> angle);
 
-	const int thing_count = current_level.billboard_count;
+	const int thing_count = current_level.billboard_count + current_level.animated_billboard_count;
 	Thing* const thing_container = wmalloc(thing_count * sizeof(Thing));
 
 	add_still_things_to_thing_container(thing_container, player -> pos, player_angle);
+	add_animated_things_to_thing_container(thing_container, player -> pos, player_angle);
 
 	qsort(thing_container, thing_count, sizeof(Thing), cmp_things);
 	draw_processed_things(player, thing_container, thing_count, y_shift);

@@ -26,7 +26,7 @@ typedef struct {
 } Billboard;
 
 typedef struct {
-	Sprite sprite;
+	const Sprite sprite;
 	const int frames_per_row, frames_per_col, frame_w, frame_h, frame_count;
 	const double secs_per_frame;
 } DataAnimationImmut;
