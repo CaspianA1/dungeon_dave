@@ -114,7 +114,7 @@ THING_ADDER_FN(animated) {
 
 		const ivec
 			frame_origin = get_spritesheet_frame_origin(&animated_billboard -> animation_data),
-			dimensions = {immut_animation_data -> frame_w, immut_animation_data -> frame_h};
+			dimensions = immut_animation_data -> frame_size;
 
 		progress_animation_data_frame_ind(animation_data);
 

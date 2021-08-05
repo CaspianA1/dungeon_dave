@@ -27,7 +27,9 @@ typedef struct {
 
 typedef struct {
 	const Sprite sprite;
-	const int frames_per_row, frames_per_col, frame_w, frame_h, frame_count;
+	// const int frames_per_row, frames_per_col, frame_w, frame_h, frame_count;
+	const ivec frames_per_axis, frame_size;
+	const int frame_count;
 	const double secs_per_frame;
 } DataAnimationImmut;
 

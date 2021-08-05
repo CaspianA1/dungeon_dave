@@ -4,9 +4,9 @@ DataAnimationImmut init_immut_animation_data(const char* const path, const int f
 	const Sprite sprite = init_sprite(path, enable_mipmap);
 
 	return (DataAnimationImmut) {
-		sprite, frames_per_row, frames_per_col,
-		sprite.size.x / frames_per_row,
-		sprite.size.y / frames_per_col,
+		sprite, {frames_per_row, frames_per_col},
+		{sprite.size.x / frames_per_row,
+		sprite.size.y / frames_per_col},
 		frame_count, 1.0 / fps
 	};
 }
@@ -50,15 +50,16 @@ inlinable ivec get_spritesheet_frame_origin(const DataAnimation* const animation
 	const DataAnimationImmut* const immut = &animation_data -> immut;
 	const int frame_ind = animation_data -> mut.frame_ind;
 
-	const int frames_per_row = immut -> frames_per_row;
+	const ivec
+		frames_per_axis = immut -> frames_per_axis,
+		size = immut -> sprite.size;
 
-	const int y_ind = frame_ind / frames_per_row;
-	const int x_ind = frame_ind - y_ind * frames_per_row;
-	const ivec size = immut -> sprite.size;
+	const int y_ind = frame_ind / frames_per_axis.x;
+	const int x_ind = frame_ind - y_ind * frames_per_axis.x;
 
 	return (ivec) {
-		(double) x_ind / frames_per_row * size.x,
-		(double) y_ind / immut -> frames_per_col * size.y
+		(double) x_ind / frames_per_axis.x * size.x,
+		(double) y_ind / frames_per_axis.y * size.y
 	};
 }
 
@@ -69,11 +70,13 @@ void animate_weapon(DataAnimation* const animation_data, const vec pos,
 	(void) pos;
 	#endif
 
-	const ivec frame_origin = get_spritesheet_frame_origin(animation_data);
+	const ivec
+		frame_origin = get_spritesheet_frame_origin(animation_data),
+		frame_size = animation_data -> immut.frame_size;
 
 	const SDL_Rect sheet_crop = {
 		frame_origin.x, frame_origin.y,
-		animation_data -> immut.frame_w, animation_data -> immut.frame_h
+		frame_size.x, frame_size.y
 	};
 
 	/* the reason the `paces_sideways_on_use` flag exists is because the whip animation has half-drawn parts
