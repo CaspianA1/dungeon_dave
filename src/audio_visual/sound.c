@@ -73,6 +73,7 @@ typedef byte Sound;
 #define fail_sound(a, b)
 #define init_sound(a, b) 0
 #define deinit_sound(a) (void) a
+#define set_sound_volume_from_dist(a, b)
 #define play_sound(a, b)
 
 #endif

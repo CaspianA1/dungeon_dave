@@ -34,15 +34,15 @@ static void draw_processed_things(const Player* const player, Thing* const thing
 			|| doubles_eq(abs_billboard_beta, three_pi_over_two))
 			continue;
 
-		const double corrected_dist = billboard_data.dist * cos_billboard_beta;
-
 		const double
-			center_offset = tan(billboard_data.beta) * settings.proj_dist,
-			size = settings.proj_dist / corrected_dist;
+			corrected_dist = billboard_data.dist * cos_billboard_beta,
+			center_offset = tan(billboard_data.beta) * settings.proj_dist;
 
 		const double
 			center_x = settings.half_screen_width + center_offset,
-			half_size = size / 2.0;
+			size = settings.proj_dist / corrected_dist;
+
+		const double half_size = size / 2.0;
 
 		const double start_x = center_x - half_size;
 		if (start_x >= settings.screen_width) continue;
@@ -54,7 +54,7 @@ static void draw_processed_things(const Player* const player, Thing* const thing
 		SDL_Rect src_column = {.y = thing.src_crop.y, .w = 1, .h = thing.src_crop.h};
 
 		SDL_FRect screen_pos = {
-			0.0, y_shift - half_size
+			start_x, y_shift - half_size
 			+ (player -> jump.height - billboard_data.height) * settings.screen_height / corrected_dist,
 			settings.ray_column_width, size
 		};
@@ -64,11 +64,9 @@ static void draw_processed_things(const Player* const player, Thing* const thing
 		SDL_SetTextureColorMod(thing.sprite.texture, shade, shade, shade);
 		#endif
 
-		for (int screen_row = start_x; screen_row < end_x; screen_row += settings.ray_column_width) {
-			if (screen_row < 0 || (double) val_buffer[screen_row].depth < corrected_dist) continue;
-			screen_pos.x = screen_row;
-
-			const int src_offset = ((double) (screen_row - (int) start_x) / size) * thing.src_crop.w;
+		for (; (double) screen_pos.x < end_x; screen_pos.x += settings.ray_column_width) {
+			if (screen_pos.x < 0.0f || (double) val_buffer[(int) screen_pos.x].depth < corrected_dist) continue;
+			const int src_offset = (((double) screen_pos.x - (int) start_x) / size) * thing.src_crop.w;
 			src_column.x = src_offset + thing.src_crop.x;
 
 			SDL_RenderCopyF(screen.renderer, thing.sprite.texture, &src_column, &screen_pos);
