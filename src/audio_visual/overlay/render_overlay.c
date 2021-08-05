@@ -31,7 +31,7 @@ void draw_generic_billboards(const Player* const player, const double y_shift) {
 		if (is_animated) {
 			if (is_enemy_instance) {
 				EnemyInstance* const enemy_instance = &current_level.enemy_instances[possible_enemy_index];
-				Enemy* const enemy = enemy_instance -> enemy;
+				const Enemy* const enemy = enemy_instance -> enemy;
 
 				DataBillboard* const b = &enemy_instance -> billboard_data;
 				billboard = (Billboard) {enemy -> animation_data.sprite, *b};

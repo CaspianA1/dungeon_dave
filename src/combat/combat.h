@@ -54,7 +54,7 @@ typedef struct {
 } Enemy;
 
 typedef struct {
-	Enemy* const enemy; // TODO: should be const
+	const Enemy* const enemy;
 	DataAnimationMut mut_animation_data;
 	
 	EnemyState state;
