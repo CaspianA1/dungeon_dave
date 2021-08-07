@@ -47,7 +47,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 			break;
 		
 		case Chasing: {
-			const NavigationState nav_state = update_path_if_needed(nav, player -> pos, player -> jump.height);
+			const NavigationState nav_state = update_path_if_needed(nav, player -> pos);
 			if (nav_state == ReachedDest)
 				set_enemy_instance_state(enemy_instance, Attacking, 0);
 			else if (nav_state == PathTooLongBFS)
@@ -56,7 +56,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 			break;
 
 		case Attacking: {
-			const NavigationState nav_state = update_path_if_needed(nav, player -> pos, player -> jump.height);
+			const NavigationState nav_state = update_path_if_needed(nav, player -> pos);
 
 			if (nav_state == Navigating)
 				set_enemy_instance_state(enemy_instance, Chasing, 0);
