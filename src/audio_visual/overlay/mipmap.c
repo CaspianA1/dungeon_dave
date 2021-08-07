@@ -1,5 +1,5 @@
-static const byte max_mipmap_depth = 4;
-static const double max_mipmap_dist = 30.0;
+static const byte max_mipmap_depth = 4, blur_passes = 3;
+static const double max_mipmap_dist = 40.0;
 
 static SDL_Rect get_mipmap_crop(const ivec size, const byte depth_offset) {
 	const int orig_w = size.x * 2 / 3;
@@ -38,7 +38,9 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface) {
 		else dest.y += surface -> h >> (i - 1);
 
 		SDL_BlitScaled(surface, NULL, mipmap, &dest);
-		blur_image_portion(mipmap, dest, i / 2);
+
+		for (byte i = 0; i < blur_passes; i++)
+			blur_image_portion(mipmap, dest, i);
 
 		dest.w >>= 1;
 		dest.h >>= 1;
