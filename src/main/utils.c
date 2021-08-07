@@ -121,8 +121,7 @@ void update_val_buffers(const int screen_x, double wall_top, double wall_bottom,
 	align_from_out_of_vert_bounds(&wall_bottom);
 
 	void set_statemap_bit(const StateMap, const int, const int);
-	for (double y = round(wall_top); y < round(wall_bottom); y++)
-		set_statemap_bit(occluded_by_walls, screen_x, y);
+	for (double y = round(wall_top); y < round(wall_bottom); y++) set_statemap_bit(occluded_by_walls, screen_x, y);
 }
 
 /////
@@ -155,6 +154,10 @@ inlinable ivec ivec_from_vec(const vec v) {
 
 inlinable vec vec_from_ivec(const ivec v) {
 	return (vec) {v.x, v.y};
+}
+
+inlinable SDL_Rect rect_from_ivecs(const ivec v1, const ivec v2) {
+	return (SDL_Rect) {v1.x, v1.y, v2.x, v2.y};
 }
 
 inlinable byte ivec_out_of_bounds(const ivec v) {

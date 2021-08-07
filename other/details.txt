@@ -26,6 +26,7 @@ features:
 	- only one sound effect at once - otherwise, out of channels (?)
 	- long-range attacking enemies via guns
 	- slow enemies down by hitting them - or stop them in some way
+	- make the minimap full-screen, meaning that it's rendered separately from the health percentage
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

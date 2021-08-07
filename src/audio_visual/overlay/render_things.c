@@ -83,10 +83,11 @@ inlinable void update_thing_values(const vec thing_pos, const vec player_pos,
 	*dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 }
 
-#define THING_ADDER_FN(type) inlinable void add_##type##_things_to_thing_container(\
-	Thing* const thing_container, const vec player_pos, const double player_angle)
+#define THING_ADDER(name) add_##name##_things_to_thing_container
+#define THING_ADDER_SIGNATURE Thing* const thing_container, const vec player_pos, const double player_angle
+#define DEF_THING_ADDER(type) inlinable void THING_ADDER(type)(THING_ADDER_SIGNATURE)
 
-THING_ADDER_FN(still) {
+DEF_THING_ADDER(still) {
 	for (byte i = 0; i < current_level.billboard_count; i++) {
 		Billboard* const billboard = &current_level.billboards[i];
 		DataBillboard* const billboard_data = &billboard -> billboard_data;
@@ -100,7 +101,7 @@ THING_ADDER_FN(still) {
 	}
 }
 
-THING_ADDER_FN(animated) {
+DEF_THING_ADDER(animated) {
 	for (byte i = 0; i < current_level.animated_billboard_count; i++) {
 		AnimatedBillboard* const animated_billboard = &current_level.animated_billboards[i];
 		DataBillboard* const billboard_data = &animated_billboard -> billboard_data;
@@ -110,29 +111,56 @@ THING_ADDER_FN(animated) {
 		update_thing_values(billboard_data -> pos, player_pos, player_angle,
 			&billboard_data -> beta, &billboard_data -> dist);
 
-		const ivec
-			frame_origin = get_spritesheet_frame_origin(&animated_billboard -> animation_data),
-			dimensions = immut_animation_data -> frame_size;
+		const Thing thing = {
+			billboard_data, immut_animation_data -> sprite,
+			rect_from_ivecs(get_spritesheet_frame_origin(&animated_billboard -> animation_data),
+				immut_animation_data -> frame_size)
+		};
 
 		progress_animation_data_frame_ind(animation_data);
 
+		memcpy(&thing_container[i + current_level.billboard_count], &thing, sizeof(Thing));
+	}
+}
+
+DEF_THING_ADDER(enemy_instance) {
+	for (byte i = 0; i < current_level.enemy_instance_count; i++) {
+		EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
+		DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
+		const DataAnimationImmut* const immut_animation_data = &enemy_instance -> enemy -> animation_data;
+
+		update_thing_values(billboard_data -> pos, player_pos, player_angle,
+			&billboard_data -> beta, &billboard_data -> dist);
+
+		DataAnimation animation_data = {*immut_animation_data, enemy_instance -> mut_animation_data};
+
+		const ivec frame_origin = get_spritesheet_frame_origin(&animation_data);
+		progress_enemy_instance_frame_ind(enemy_instance);
+
 		const Thing thing = {
 			billboard_data, immut_animation_data -> sprite,
-			{frame_origin.x, frame_origin.y, dimensions.x, dimensions.y}
+			rect_from_ivecs(frame_origin, animation_data.immut.frame_size)
 		};
 
-		memcpy(&thing_container[i + current_level.billboard_count], &thing, sizeof(Thing));
+		memcpy(&thing_container[i + current_level.billboard_count + current_level.animated_billboard_count],
+			&thing, sizeof(Thing));
 	}
 }
 
 void draw_things(const Player* const player, const double y_shift) {
 	const double player_angle = to_radians(player -> angle);
 
-	const int thing_count = current_level.billboard_count + current_level.animated_billboard_count;
+	const byte thing_count = current_level.billboard_count
+		+ current_level.animated_billboard_count + current_level.enemy_instance_count;
 	Thing* const thing_container = wmalloc(thing_count * sizeof(Thing));
 
-	add_still_things_to_thing_container(thing_container, player -> pos, player_angle);
-	add_animated_things_to_thing_container(thing_container, player -> pos, player_angle);
+	enum {num_thing_adders = 3};
+	void (*thing_adders[3])(THING_ADDER_SIGNATURE) = {
+		THING_ADDER(still), THING_ADDER(animated), THING_ADDER(enemy_instance)
+	};
+
+	for (byte i = 0; i < num_thing_adders; i++)
+		thing_adders[i](thing_container, player -> pos, player_angle);
 
 	qsort(thing_container, thing_count, sizeof(Thing), cmp_things);
 	draw_processed_things(player, thing_container, thing_count, y_shift);
