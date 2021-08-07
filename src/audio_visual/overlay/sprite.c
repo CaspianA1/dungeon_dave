@@ -2,13 +2,16 @@ Sprite init_sprite(const char* const path, const byte enable_mipmap) {
 	SDL_Surface* surface = SDL_LoadBMP(path);
 	if (surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
 
+	Sprite sprite = {.max_mipmap_depth = 0};
+
 	if (enable_mipmap) {
-		SDL_Surface* const mipmap = load_mipmap(surface);
+		SDL_Surface* const mipmap = load_mipmap(surface, &sprite.max_mipmap_depth);
 		SDL_FreeSurface(surface);
 		surface = mipmap;
 	}
 
-	const Sprite sprite = {SDL_CreateTextureFromSurface(screen.renderer, surface), {surface -> w, surface -> h}};
+	sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
+	sprite.size = (ivec) {surface -> w, surface -> h};
 
 	SDL_FreeSurface(surface);
 	return sprite;

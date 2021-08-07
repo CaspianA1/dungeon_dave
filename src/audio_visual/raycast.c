@@ -39,7 +39,7 @@ vec handle_ray(const DataRaycast d) {
 		wall_dest.y + wall_dest.h, corrected_dist, cos_beta, d.dir);
 
 	const Sprite wall_sprite = current_level.walls[d.point - 1];
-	const SDL_Rect mipmap_crop = get_mipmap_crop_from_dist(wall_sprite.size, corrected_dist);
+	const SDL_Rect mipmap_crop = get_mipmap_crop_from_wall(&wall_sprite, wall_h);
 	const int max_sprite_h = mipmap_crop.h;
 
 	SDL_Rect slice = {

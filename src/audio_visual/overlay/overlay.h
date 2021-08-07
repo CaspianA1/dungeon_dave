@@ -1,6 +1,7 @@
 typedef struct {
 	SDL_Texture* texture;
 	ivec size;
+	byte max_mipmap_depth;
 } Sprite;
 
 Sprite init_sprite(const char* const, const byte);

@@ -60,7 +60,7 @@ GUI init_gui(const byte msg_r, const byte msg_g, const byte msg_b, const char* c
 		const ivec size = {surface -> w, surface -> h};
 		SDL_Texture* const texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
 		SDL_FreeSurface(surface);
-		gui.messages[i] = (NewMessage) {text, {texture, size}, 0, va_arg(gui_data, SDL_Rect (*) (const Sprite))};
+		gui.messages[i] = (NewMessage) {text, {texture, size, 0}, 0, va_arg(gui_data, SDL_Rect (*) (const Sprite))};
 	}
 
 	va_end(gui_data);

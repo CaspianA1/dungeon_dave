@@ -27,7 +27,6 @@ features:
 	- long-range attacking enemies via guns
 	- slow enemies down by hitting them - or stop them in some way
 	- still chase the player if their ground level is 0
-	- pass sounds by reference
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -48,6 +47,8 @@ problems:
 	- little blinking dots in the distance for the hieroglyphics bitmap
 	- horizontal wall stitches at a distance + vertical gray lines due to the box blur at a distance (reproduce by standing at the demon in level 1, and looking at the pyramid texture without shading enabled)
 	- enemies have jerky movement sometimes that can make them temporarily clip into a wall (reproduce it by jumping around, wait till the enemy moves at a slant, and then go to their position)
+	- pass sounds by reference
+	- make the 0.33 ground level not a constant in effects.c
 
 completed:
 	- minimap that conveys height data
