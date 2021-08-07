@@ -1,6 +1,6 @@
 inlinable byte get_debug_level_point_height(const byte point, const vec pos) {
 	(void) pos;
-	if (point == 5) return 1;
+	if (point == 5 || point == 6) return 1;
 	return point;
 }
 
@@ -11,7 +11,7 @@ inlinable double debug_level_shader(const vec pos) {
 void load_debug_level(void) {
 	enum {
 		map_width = 12, map_height = 10,
-		wall_count = 5, billboard_count = 0,
+		wall_count = 6, billboard_count = 0,
 		animated_billboard_count = 1, enemy_instance_count = 0
 	};
 
@@ -23,7 +23,7 @@ void load_debug_level(void) {
 		{5, 0, 0, 0, 4, 4, 3, 3, 2, 2, 0, 5},
 		{5, 0, 0, 0, 4, 0, 3, 3, 0, 0, 0, 5},
 		{5, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 5},
-		{5, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 5},
+		{5, 0, 6, 0, 4, 4, 4, 4, 4, 4, 0, 5},
 		{5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5},
 		{5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
 	};
@@ -47,7 +47,8 @@ void load_debug_level(void) {
 		"assets/walls/cobblestone.bmp",
 		"assets/wolf/eagle.bmp",
 		"assets/wolf/redbrick.bmp",
-		"assets/wolf/bluestone.bmp");
+		"assets/wolf/bluestone.bmp",
+		"assets/walls/arthouse_bricks.bmp");
 
 	set_level_billboards(&debug_level, billboard_count);
 	set_level_animated_billboards(&debug_level, animated_billboard_count,

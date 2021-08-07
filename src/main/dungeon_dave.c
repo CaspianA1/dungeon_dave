@@ -48,7 +48,7 @@
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_debug_level, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(current_level.background_sound, 1);
@@ -76,9 +76,9 @@ int main(void) {
 
 		// (keys[SDL_SCANCODE_T] ? draw_generic_billboards : draw_things)(&player, wall_y_shift);
 
-		draw_things(&player, wall_y_shift);
-		// draw_generic_billboards(&player, wall_y_shift);
-		// if (!player.is_dead) update_all_enemy_instances(&player, &weapon);
+		// draw_things(&player, wall_y_shift);
+		draw_generic_billboards(&player, wall_y_shift);
+		if (!player.is_dead) update_all_enemy_instances(&player, &weapon);
 
 		use_weapon_if_needed(&weapon, &player, input_status);
 		#else

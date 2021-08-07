@@ -65,6 +65,8 @@ inlinable Navigator init_navigator(const vec player_pos, vec* const pos_ref, con
 }
 
 NavigationState update_path_if_needed(Navigator* const nav, const vec player_pos, const double p_height) {
+	// TODO: pursue if base height is 0
+
 	if (p_height > 0.0 || (nav -> route_ind == -1 && update_route(nav, player_pos) != SucceededBFS))
 		return FailedBFS;
 

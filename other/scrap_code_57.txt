@@ -106,3 +106,29 @@ a / b / c = a / b * 1/c = a * 1/b * 1/c = a / (b * c)
 */
 
 /////
+
+const int max_offset = width - 1;
+
+double (*fn)();
+if (keys[SDL_SCANCODE_T]) fn = round;
+else if (keys[SDL_SCANCODE_Y]) fn = ceil;
+else fn = floor;
+
+/*
+if side && dir[1] > 0.0, fn = floor
+if !side && dir[0] < 0.0, fn = ?
+if side && dir[1] > 0.0, fn = ceil
+*/
+
+if (side) {
+	if (h == 1) printf("Yes, and (dir[1] > 0.0) == %d\n", dir[1] > 0.0);
+	const int x_offset = fn((hit[0] - (int) hit[0]) * max_offset);
+	return (dir[1] > 0.0) ? max_offset - x_offset : x_offset;
+}
+else {
+	if (h == 1) printf("No, and (dir[0] < 0.0) == %d\n", dir[0] < 0.0);
+	const int y_offset = fn((hit[1] - (int) hit[1]) * max_offset);
+	return (dir[0] < 0.0) ? max_offset - y_offset : y_offset;
+}
+
+/////

@@ -4,7 +4,7 @@ typedef struct {
 	const vec begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
 	const byte point, side, first_wall_hit;
-	byte* last_point_height;
+	byte* const last_point_height;
 	const int screen_x;
 } DataRaycast;
 
@@ -13,11 +13,10 @@ typedef struct {
 } DRect;
 
 inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir, const int width) {
-	const int max_offset = width - 1;
 	const double component = hit[!side];
-	const int offset = (component - (int) component) * max_offset;
+	const int offset = (component - (int) component) * width;
 	const byte cond = side ? (dir[1] > 0.0) : (dir[0] < 0.0);
-	return cond ? max_offset - offset : offset;
+	return cond ? (width - 1) - offset : offset;
 }
 
 vec handle_ray(const DataRaycast d) {

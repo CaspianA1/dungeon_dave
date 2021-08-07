@@ -188,7 +188,7 @@ void update_jump(Jump* const jump, const vec pos) {
 				}
 				else jump -> made_noise = 0;
 
-				jump -> highest_height = jump -> height + 0.001;
+				jump -> highest_height = jump -> height; // + 0.001;
 			}
 		}
 	}
