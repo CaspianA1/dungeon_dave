@@ -80,11 +80,9 @@ NavigationState update_path_if_needed(Navigator* const nav, const vec player_pos
 	}
 
 	if (nav -> route_ind < end_ind) {
-		const vec
-			curr_vertex = route -> data[nav -> route_ind],
-			next_vertex = route -> data[nav -> route_ind + 1];
+		const vec next_vertex = route -> data[nav -> route_ind + 1];
 
-		const vec dir = next_vertex - curr_vertex;
+		const vec dir = next_vertex - route -> data[nav -> route_ind];
 		vec* const ref_pos = nav -> pos;
 		vec pos = *ref_pos + dir * vec_fill(nav -> v);
 

@@ -1,11 +1,5 @@
 // a rewrite of render_overlay.c; thing = billboard or animation or enemy
 
-typedef struct {
-	const DataBillboard* const billboard_data;
-	const Sprite sprite;
-	const SDL_Rect src_crop;
-} Thing;
-
 static int cmp_things(const void* const a, const void* const b) {
 	const double distances[2] = {
 		((Thing*) a) -> billboard_data -> dist,
@@ -17,11 +11,9 @@ static int cmp_things(const void* const a, const void* const b) {
 	else return 0;
 }
 
-static void draw_processed_things(const Player* const player, Thing* const thing_container,
-	const int thing_count, const double y_shift) {
-
-	for (byte i = 0; i < thing_count; i++) {
-		const Thing thing = thing_container[i];
+static void draw_processed_things(const Player* const player, const double y_shift) {
+	for (byte i = 0; i < current_level.thing_count; i++) {
+		const Thing thing = current_level.thing_container[i];
 		const DataBillboard billboard_data = *thing.billboard_data;
 
 		const double
@@ -84,7 +76,7 @@ inlinable void update_thing_values(const vec thing_pos, const vec player_pos,
 }
 
 #define THING_ADDER(name) add_##name##_things_to_thing_container
-#define THING_ADDER_SIGNATURE Thing* const thing_container, const vec player_pos, const double player_angle
+#define THING_ADDER_SIGNATURE const vec player_pos, const double player_angle
 #define DEF_THING_ADDER(type) inlinable void THING_ADDER(type)(THING_ADDER_SIGNATURE)
 
 DEF_THING_ADDER(still) {
@@ -97,7 +89,7 @@ DEF_THING_ADDER(still) {
 
 		const Sprite sprite = billboard -> sprite;
 		const Thing thing = {billboard_data, sprite, {0, 0, sprite.size.x, sprite.size.y}};
-		memcpy(&thing_container[i], &thing, sizeof(Thing));
+		memcpy(&current_level.thing_container[i], &thing, sizeof(Thing));
 	}
 }
 
@@ -119,7 +111,7 @@ DEF_THING_ADDER(animated) {
 
 		progress_animation_data_frame_ind(animation_data);
 
-		memcpy(&thing_container[i + current_level.billboard_count], &thing, sizeof(Thing));
+		memcpy(&current_level.thing_container[i + current_level.billboard_count], &thing, sizeof(Thing));
 	}
 }
 
@@ -142,17 +134,13 @@ DEF_THING_ADDER(enemy_instance) {
 			rect_from_ivecs(frame_origin, animation_data.immut.frame_size)
 		};
 
-		memcpy(&thing_container[i + current_level.billboard_count + current_level.animated_billboard_count],
-			&thing, sizeof(Thing));
+		memcpy(&current_level.thing_container
+			[i + current_level.billboard_count + current_level.animated_billboard_count], &thing, sizeof(Thing));
 	}
 }
 
 void draw_things(const Player* const player, const double y_shift) {
 	const double player_angle = to_radians(player -> angle);
-
-	const byte thing_count = current_level.billboard_count
-		+ current_level.animated_billboard_count + current_level.enemy_instance_count;
-	Thing* const thing_container = wmalloc(thing_count * sizeof(Thing));
 
 	enum {num_thing_adders = 3};
 	void (*thing_adders[3])(THING_ADDER_SIGNATURE) = {
@@ -160,10 +148,8 @@ void draw_things(const Player* const player, const double y_shift) {
 	};
 
 	for (byte i = 0; i < num_thing_adders; i++)
-		thing_adders[i](thing_container, player -> pos, player_angle);
+		thing_adders[i](player -> pos, player_angle);
 
-	qsort(thing_container, thing_count, sizeof(Thing), cmp_things);
-	draw_processed_things(player, thing_container, thing_count, y_shift);
-
-	wfree(thing_container);
+	qsort(current_level.thing_container, current_level.thing_count, sizeof(Thing), cmp_things);
+	draw_processed_things(player, y_shift);
 }

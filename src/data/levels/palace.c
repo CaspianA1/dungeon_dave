@@ -160,5 +160,5 @@ void load_palace(void) {
 
 	// this is set after b/c it depends on fns that read from current_level
 	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 6.5, 21.5, 0.0);
-	set_level_generic_billboard_container(&current_level);
+	set_level_thing_container(&current_level);
 }

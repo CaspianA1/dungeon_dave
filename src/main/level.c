@@ -148,11 +148,11 @@ void set_level_enemy_instances(Level* const level, const unsigned enemy_instance
 	va_end(enemy_instance_data);
 }
 
-inlinable void set_level_generic_billboard_container(Level* const level) {
-	level -> generic_billboard_count = level -> billboard_count
+inlinable void set_level_thing_container(Level* const level) {
+	level -> thing_count = level -> billboard_count
 		+ level -> animated_billboard_count + level -> enemy_instance_count;
 
-	level -> generic_billboards = wmalloc(level -> generic_billboard_count * sizeof(GenericBillboard));
+	level -> thing_container = wmalloc(level -> thing_count * sizeof(Thing));
 }
 
 void deinit_level(const Level level) {
@@ -177,5 +177,5 @@ void deinit_level(const Level level) {
 	wfree(level.animated_billboards);
 
 	wfree(level.enemy_instances);
-	wfree(level.generic_billboards);
+	wfree(level.thing_container);
 }

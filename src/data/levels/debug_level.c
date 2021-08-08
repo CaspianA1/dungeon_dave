@@ -56,5 +56,5 @@ void load_debug_level(void) {
 
 	memcpy(&current_level, &debug_level, sizeof(Level));
 	set_level_enemy_instances(&current_level, enemy_instance_count);
-	set_level_generic_billboard_container(&current_level);
+	set_level_thing_container(&current_level);
 }

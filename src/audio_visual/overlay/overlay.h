@@ -49,13 +49,13 @@ typedef struct {
 	DataBillboard billboard_data;
 } AnimatedBillboard;
 
-DataAnimation init_animation_data(const char* const, const int, const int, const int, const int, const byte);
-
 typedef struct {
-	Billboard billboard;
-	byte is_animated, is_enemy_instance;
-	int animation_index;
-} GenericBillboard;
+	const DataBillboard* const billboard_data;
+	const Sprite sprite;
+	const SDL_Rect src_crop;
+} Thing;
+
+DataAnimation init_animation_data(const char* const, const int, const int, const int, const int, const byte);
 
 /////
 

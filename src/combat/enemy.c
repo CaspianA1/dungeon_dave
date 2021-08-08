@@ -12,7 +12,7 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 	const Enemy* const enemy = enemy_instance -> enemy;
 
 	enemy_instance -> state = new_state;
-	if (!silent) {play_sound(enemy -> sounds[enemy_instance -> state], 0);}
+	if (!silent) play_sound(enemy -> sounds[enemy_instance -> state], 0);
 
 	int new_frame_ind = 0;
 	for (byte i = 0; i < enemy_instance -> state; i++)

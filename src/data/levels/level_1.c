@@ -118,5 +118,5 @@ void load_level_1(void) {
 	memcpy(&current_level, &level_1, sizeof(Level));
 
 	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 8.5, 7.5, 0.0);
-	set_level_generic_billboard_container(&current_level);
+	set_level_thing_container(&current_level);
 }

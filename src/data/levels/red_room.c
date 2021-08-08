@@ -50,5 +50,5 @@ void load_red_room(void) {
 	memcpy(&current_level, &red_room, sizeof(Level));
 
 	set_level_enemy_instances(&current_level, enemy_instance_count);
-	set_level_generic_billboard_container(&current_level);
+	set_level_thing_container(&current_level);
 }

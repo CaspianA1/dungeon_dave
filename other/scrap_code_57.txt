@@ -132,3 +132,11 @@ else {
 }
 
 /////
+
+typedef struct {
+	Billboard billboard;
+	byte is_animated, is_enemy_instance;
+	int animation_index;
+} GenericBillboard;
+
+/////

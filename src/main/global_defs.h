@@ -19,7 +19,7 @@
 
 #define SHADING_ENABLED
 #define SOUND_ENABLED
-// #define TRACK_MEMORY
+#define TRACK_MEMORY
 
 // max: 1440 by 900
 #define INIT_W 800

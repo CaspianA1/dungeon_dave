@@ -106,5 +106,5 @@ void load_maze(void) {
 	memcpy(&current_level, &maze, sizeof(Level));
 
 	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 28.5, 21.5, 0.0);
-	set_level_generic_billboard_container(&current_level);
+	set_level_thing_container(&current_level);
 }

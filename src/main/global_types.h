@@ -83,7 +83,7 @@ typedef struct {
 
 	byte
 		wall_count, billboard_count, animated_billboard_count, enemy_instance_count,
-		generic_billboard_count, max_point_height, out_of_bounds_point,
+		thing_count, max_point_height, out_of_bounds_point,
  		*wall_data, *ceiling_data, *floor_data;
 
  	StateMap bfs_visited;
@@ -99,7 +99,7 @@ typedef struct {
 	Billboard* billboards;
 	AnimatedBillboard* animated_billboards;
 	EnemyInstance* enemy_instances;
-	GenericBillboard* generic_billboards; // just a temp container that other billboards are copied into
+	Thing* thing_container;
 } Level;
 
 /////
