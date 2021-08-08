@@ -58,7 +58,7 @@ void load_palace(void) {
 	enum {
 		map_width = 40, map_height = 40,
 		wall_count = 10, billboard_count = 3,
-		animated_billboard_count = 2, enemy_instance_count = 1
+		animated_billboard_count = 2, enemy_instance_count = 2
 	};
 
 	// in the horse area: a health kit, and the enemy
@@ -160,6 +160,9 @@ void load_palace(void) {
 	memcpy(&current_level, &palace, sizeof(Level));
 
 	// this is set after b/c it depends on fns that read from current_level
-	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 6.5, 21.5, 0.0);
+	set_level_enemy_instances(&current_level, enemy_instance_count,
+		0, 6.5, 21.5, 0.0,
+		0, 3.5, 21.5, 0.0);
+
 	set_level_thing_container(&current_level);
 }

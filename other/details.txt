@@ -51,6 +51,7 @@ problems:
 	- enemies have jerky movement sometimes that can make them temporarily clip into a wall (reproduce it by jumping around, wait till the enemy moves at a slant, and then go to their position)
 	- pass sounds by reference
 	- make the 0.33 ground level not a constant in effects.c
+	- fix enemy merging by making enemies account for thing collisions
 
 completed:
 	- minimap that conveys height data
