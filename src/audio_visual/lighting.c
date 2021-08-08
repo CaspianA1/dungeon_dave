@@ -1,8 +1,8 @@
 // structs: triangle, circle
 
 typedef struct {
-	vec center;
-	double radius;
+	const vec center;
+	const double radius;
 } Circle;
 
 typedef double Triangle[3][2];
