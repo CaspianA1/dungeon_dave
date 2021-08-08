@@ -57,7 +57,7 @@ inlinable double palace_shader(const vec pos) {
 void load_palace(void) {
 	enum {
 		map_width = 40, map_height = 40,
-		wall_count = 10, billboard_count = 3,
+		wall_count = 10, billboard_count = 4,
 		animated_billboard_count = 2, enemy_instance_count = 2
 	};
 
@@ -150,7 +150,8 @@ void load_palace(void) {
 	set_level_billboards(&palace, billboard_count,
 		"assets/objects/health_kit.bmp", 4.5, 22.5, 0.0, // 11.5, 28.0
 		"assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0,
-		"assets/objects/golden_dome.bmp", 13.0, 28.0, 1.0);
+		"assets/objects/golden_dome.bmp", 13.0, 28.0, 1.0,
+		"assets/objects/cactus.bmp", 2.5, 26.5, 0.0);
 
 	set_level_animated_billboards(&palace, animated_billboard_count,
 		// "assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,
