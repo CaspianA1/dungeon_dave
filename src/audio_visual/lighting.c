@@ -32,8 +32,7 @@ inlinable byte flat_triangle(const vec pos, const Triangle triangle) {
 	return !(has_neg && has_pos);
 }
 
-/*
-Shading explained:
+/* Shading explained:
 The `SHADING_ENABLED` flag is mostly for debugging (full visibility).
 For a given wall, if it is far away, its height will be small.
 Therefore, if a wall's height is small, it should be rendererd darker.
@@ -41,13 +40,13 @@ Dividing the wall height by the screen height gives an accurate darkness ratio.
 Depending on the object's position (a floor pixel, or a wall/sprite column),
 it may be considered darker or lighter (a dark corridor vs. a light plaza),
 and that is what `current_level.shader` calculates. That shader may call sub-shading
-functions like `diffuse_circle` above.
-*/
+functions like `diffuse_circle` above. */
 
 #ifdef SHADING_ENABLED
 
 inlinable double calculate_shade(const double wall_h, const vec pos) {
-	const double shade = wall_h / settings.screen_height * current_level.shader(pos);
+	double shade = wall_h / settings.screen_height * current_level.shader(pos);
+	if (shade < current_level.darkest_shade) shade = current_level.darkest_shade;
 	return shade > 1.0 ? 1.0 : shade;
 }
 
