@@ -56,12 +56,13 @@ static void draw_processed_things(const Player* const player, const double y_shi
 		SDL_SetTextureColorMod(thing.sprite.texture, shade, shade, shade);
 		#endif
 
+		SDL_Texture* const texture = thing.sprite -> texture;
 		for (; (double) screen_pos.x < end_x; screen_pos.x += settings.ray_column_width) {
 			if (screen_pos.x < 0.0f || (double) val_buffer[(int) screen_pos.x].depth < corrected_dist) continue;
 			const int src_offset = (((double) screen_pos.x - (int) start_x) / size) * thing.src_crop.w;
 			src_column.x = src_offset + thing.src_crop.x;
 
-			SDL_RenderCopyF(screen.renderer, thing.sprite.texture, &src_column, &screen_pos);
+			SDL_RenderCopyF(screen.renderer, texture, &src_column, &screen_pos);
 		}
 	}
 }
@@ -87,8 +88,9 @@ DEF_THING_ADDER(still) {
 		update_thing_values(billboard_data -> pos, player_pos, player_angle,
 			&billboard_data -> beta, &billboard_data -> dist);
 
-		const Sprite sprite = billboard -> sprite;
-		const Thing thing = {billboard_data, sprite, {0, 0, sprite.size.x, sprite.size.y}};
+		const Sprite* const sprite = &billboard -> sprite;
+		const ivec size = sprite -> size;
+		const Thing thing = {billboard_data, sprite, {0, 0, size.x, size.y}};
 		memcpy(&current_level.thing_container[i], &thing, sizeof(Thing));
 	}
 }
@@ -104,7 +106,7 @@ DEF_THING_ADDER(animated) {
 			&billboard_data -> beta, &billboard_data -> dist);
 
 		const Thing thing = {
-			billboard_data, immut_animation_data -> sprite,
+			billboard_data, &immut_animation_data -> sprite,
 			rect_from_ivecs(get_spritesheet_frame_origin(&animated_billboard -> animation_data),
 				immut_animation_data -> frame_size)
 		};
@@ -130,7 +132,7 @@ DEF_THING_ADDER(enemy_instance) {
 		progress_enemy_instance_frame_ind(enemy_instance);
 
 		const Thing thing = {
-			billboard_data, immut_animation_data -> sprite,
+			billboard_data, &immut_animation_data -> sprite,
 			rect_from_ivecs(frame_origin, animation_data.immut.frame_size)
 		};
 

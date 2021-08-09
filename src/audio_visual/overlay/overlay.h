@@ -28,7 +28,6 @@ typedef struct {
 
 typedef struct {
 	const Sprite sprite;
-	// const int frames_per_row, frames_per_col, frame_w, frame_h, frame_count;
 	const ivec frames_per_axis, frame_size;
 	const int frame_count;
 	const double secs_per_frame;
@@ -51,7 +50,7 @@ typedef struct {
 
 typedef struct {
 	const DataBillboard* const billboard_data;
-	const Sprite sprite; // TODO: to a ptr
+	const Sprite* const sprite;
 	const SDL_Rect src_crop;
 } Thing;
 
