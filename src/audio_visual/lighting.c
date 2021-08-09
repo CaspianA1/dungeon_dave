@@ -40,7 +40,7 @@ void init_lightmap(void) {
 	const ivec map_size = current_level.map_size;
 	const ivec lightmap_size = {map_size.x * samples_per_tile, map_size.y * samples_per_tile};
 
-	byte* const lightmap = wmalloc(lightmap_size.x * lightmap_size.y * sizeof(double));
+	byte* const lightmap = wmalloc(lightmap_size.x * lightmap_size.y * sizeof(float));
 
 	vec pos;
 	for (int y = 0; y < lightmap_size.y; y++) {
