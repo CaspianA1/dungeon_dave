@@ -32,6 +32,11 @@ inlinable byte flat_triangle(const vec pos, const Triangle triangle) {
 	return !(has_neg && has_pos);
 }
 
+/* given a list of diffuse circles and flat triangles,
+sample points in the current map to precalculate lighting */
+void create_lightmap(void) {
+}
+
 /* Shading explained:
 The `SHADING_ENABLED` flag is mostly for debugging (full visibility).
 For a given wall, if it is far away, its height will be small.
