@@ -140,3 +140,92 @@ typedef struct {
 } GenericBillboard;
 
 /////
+
+/*
+const double thing_hit_distance = 0.5;
+
+if (first_call) { // @ the first call, thing data has not been initialized yet
+	first_call = 0;
+	return 0;
+}
+
+DEBUG(first_call, d);
+
+for (byte i = 0; i < current_level.thing_count; i++) {
+	if (current_level.thing_container[i].billboard_data -> dist <= thing_hit_distance)
+		return 1;
+}
+return 0;
+*/
+
+/////
+
+/*
+const double
+	forward_y[2] = {pos[0], pos[1] + settings.stop_dist},
+	backard_y[2] = {pos[0], pos[1] - settings.stop_dist},
+	forward_x[2] = {pos[0] + settings.stop_dist, pos[1]},
+	backward_x[2] = {pos[0] - settings.stop_dist, pos[1]};
+*/
+
+/*
+if (point_exists_at(pos[0], pos[1] + settings.stop_dist, p_height) ||
+	point_exists_at(pos[0], pos[1] - settings.stop_dist, p_height))
+	pos[1] = prev_pos[1]; // set pos to block-aligned value?
+
+if (point_exists_at(pos[0] + settings.stop_dist, pos[1], p_height) ||
+	point_exists_at(pos[0] - settings.stop_dist, pos[1], p_height))
+	pos[0] = prev_pos[0];
+*/
+
+/////
+
+static byte thing_hit_detected(const double new_x, const double new_y) {
+	static byte num_calls = 0;
+	if (num_calls < 2) {
+		num_calls++;
+		return 0;
+	}
+	num_calls++;
+
+	DEBUG(num_calls, d);
+
+	const double thing_hit_distance = 0.5;
+	const vec vec_pos = {new_x, new_y};
+
+	for (byte i = 0; i < current_level.thing_count; i++) {
+		const vec thing_pos = current_level.thing_container[i].billboard_data -> pos;
+		DEBUG_VEC(thing_pos);
+		if (!vec_delta_exceeds(thing_pos, vec_pos, thing_hit_distance))
+			return 1;
+	}
+
+	puts("-\n");
+
+	return 0;
+}
+
+/////
+
+void draw_things(const Player* const player, const double y_shift) {
+	const double player_angle = to_radians(player -> angle);
+
+	enum {num_thing_adders = 3};
+	void (*thing_adders[3])(THING_ADDER_SIGNATURE) = {
+		THING_ADDER(still), THING_ADDER(animated), THING_ADDER(enemy_instance)
+	};
+
+	for (byte i = 0; i < num_thing_adders; i++)
+		thing_adders[i](player -> pos, player_angle);
+
+	qsort(current_level.thing_container, current_level.thing_count, sizeof(Thing), cmp_things);
+	draw_processed_things(player, y_shift);
+}
+
+/////
+
+const char sign = ((i & 1) << 1) - 1; // (i & 1) indicates even-ness, left shift = mul by 2
+
+positions_to_check[i] += settings.stop_dist * sign;
+
+/////

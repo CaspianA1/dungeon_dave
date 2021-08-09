@@ -93,9 +93,9 @@ inlinable byte map_point(const byte* const map, const int x, const int y) {
 	return map[y * current_level.map_size.x + x];
 }
 
-inlinable byte point_exists_at(const double x, const double y, const double z) {
-	const byte point_val = map_point(current_level.wall_data, x, y);
-	return point_val && z < current_level.get_point_height(point_val, (vec) {x, y});
+inlinable byte point_exists_at(const vec pos, const double z) {
+	const byte point_val = map_point(current_level.wall_data, pos[0], pos[1]);
+	return point_val && z < current_level.get_point_height(point_val, pos);
 }
 
 inlinable void set_map_point(byte* const map, const byte val, const int x, const int y, const int map_width) {

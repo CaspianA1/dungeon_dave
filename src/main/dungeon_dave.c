@@ -74,6 +74,7 @@ int main(void) {
 		raycast(&player, wall_y_shift, full_jump_height);
 
 		draw_things(&player, wall_y_shift);
+
 		if (!player.is_dead) update_all_enemy_instances(&player, &weapon);
 		use_weapon_if_needed(&weapon, &player, input_status);
 		#else

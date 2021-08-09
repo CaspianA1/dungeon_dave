@@ -11,6 +11,46 @@ inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos
 		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
+inlinable void handle_thing_collision(vec* const ref_pos, const vec prev_pos) {
+	static byte first_call = 1;
+	if (first_call) { // first call skipped b/c thing data has not been initialized yet
+		first_call = 0;
+		return;
+	}
+
+	vec pos = *ref_pos, positions_to_check[4] = {pos, pos, pos, pos};
+	for (byte i = 0; i < 4; i++) {
+		const byte axis = i > 1;
+
+		if (i & 1) positions_to_check[i][axis] += settings.stop_dist;
+		else positions_to_check[i][axis] -= settings.stop_dist;
+	}
+
+	for (byte i = 0; i < current_level.thing_count; i++) {
+		const vec thing_pos = current_level.thing_container[i].billboard_data -> pos;
+
+		for (byte j = 0; j < 4; j++) {
+			if (!vec_delta_exceeds(thing_pos, positions_to_check[j], 0.25)) {
+				const byte axis = j > 1;
+				pos[axis] = prev_pos[axis];
+			}
+		}
+	}
+
+	*ref_pos = pos;
+}
+
+static void handle_axis_collision(const byte axis, vec* const ref_pos, const vec prev_pos, const double p_height) {
+	const vec pos = *ref_pos;
+
+	vec forward_pos = pos, backward_pos = pos;
+	forward_pos[axis] += settings.stop_dist;
+	backward_pos[axis] -= settings.stop_dist;
+
+	if (point_exists_at(forward_pos, p_height) || point_exists_at(backward_pos, p_height))
+		(*ref_pos)[axis] = prev_pos[axis];
+}
+
 static void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement, const double p_height) {
 	vec pos = *pos_ref + movement;
 
@@ -26,13 +66,9 @@ static void hit_detection(vec* const pos_ref, const vec prev_pos, const vec move
 
 	#else
 
-	if (point_exists_at(pos[0], pos[1] + settings.stop_dist, p_height) ||
-		point_exists_at(pos[0], pos[1] - settings.stop_dist, p_height))
-		pos[1] = prev_pos[1]; // set pos to block-aligned value?
-
-	if (point_exists_at(pos[0] + settings.stop_dist, pos[1], p_height) ||
-		point_exists_at(pos[0] - settings.stop_dist, pos[1], p_height))
-		pos[0] = prev_pos[0];
+	handle_axis_collision(0, &pos, prev_pos, p_height);
+	handle_axis_collision(1, &pos, prev_pos, p_height);
+	handle_thing_collision(&pos, prev_pos);
 
 	#endif
 
