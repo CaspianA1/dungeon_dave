@@ -11,6 +11,8 @@ inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos
 		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
+#ifndef NOCLIP_MODE
+
 inlinable void handle_thing_collisions(vec* const ref_pos, const vec prev_pos, const double p_height) {
 	const double thing_hit_dist = 0.25, thing_jump_above_dist = 0.5;
 
@@ -55,6 +57,8 @@ static void handle_axis_collision(const byte axis, vec* const ref_pos, const vec
 	if (point_exists_at(forward_pos, p_height) || point_exists_at(backward_pos, p_height))
 		(*ref_pos)[axis] = prev_pos[axis];
 }
+
+#endif
 
 static void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement, const double p_height) {
 	vec pos = *pos_ref + movement;

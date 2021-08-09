@@ -51,12 +51,13 @@ static void draw_processed_things(const Player* const player, const double y_shi
 			settings.ray_column_width, size
 		};
 
+		SDL_Texture* const texture = thing.sprite -> texture;
+
 		#ifdef SHADING_ENABLED
 		const byte shade = 255 * calculate_shade(size, billboard_data.pos);
-		SDL_SetTextureColorMod(thing.sprite.texture, shade, shade, shade);
+		SDL_SetTextureColorMod(texture, shade, shade, shade);
 		#endif
 
-		SDL_Texture* const texture = thing.sprite -> texture;
 		for (; (double) screen_pos.x < end_x; screen_pos.x += settings.ray_column_width) {
 			if (screen_pos.x < 0.0f || (double) val_buffer[(int) screen_pos.x].depth < corrected_dist) continue;
 			const int src_offset = (((double) screen_pos.x - (int) start_x) / size) * thing.src_crop.w;
