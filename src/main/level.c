@@ -162,7 +162,7 @@ void deinit_level(const Level level) {
 	deinit_statemap(level.bfs_visited);
 
 	if (level.skybox.enabled) deinit_sprite(level.skybox.sprite);
-	deinit_sound(level.background_sound);
+	deinit_sound(&level.background_sound);
 
 	for (byte i = 0; i < level.wall_count; i++)
 		deinit_sprite(level.walls[i]);

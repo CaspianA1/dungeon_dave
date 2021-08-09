@@ -91,7 +91,7 @@ InputStatus display_logo(void) {
 
 InputStatus display_title_screen(void) {
 	const Sound title_track = init_sound("assets/audio/themes/title.wav", 0);
-	play_sound(title_track, 1);
+	play_sound(&title_track, 1);
 	if (display_logo() == Exit) return Exit;
 
 	if (TTF_Init() == -1)
@@ -152,6 +152,6 @@ InputStatus display_title_screen(void) {
 		if (dimensions_changed || !displaying_title_screen) deinit_message(start);
 	}
 
-	deinit_sound(title_track);
+	deinit_sound(&title_track);
 	return title_screen_input;
 }

@@ -1,5 +1,5 @@
 void deinit_weapon(const Weapon* const weapon) {
-	deinit_sound(weapon -> sound);
+	deinit_sound(&weapon -> sound);
 	deinit_sprite(weapon -> animation_data.immut.sprite);
 }
 
@@ -26,7 +26,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec di
 
 				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte);
 				if (enemy_instance -> hp <= 0.0) set_enemy_instance_state(enemy_instance, Dead, 0);
-				else play_sound(enemy_instance -> enemy -> sounds[4], 0); // attacked
+				else play_sound(&enemy_instance -> enemy -> sounds[4], 0); // attacked
 				return;
 			}
 		}
@@ -46,7 +46,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
 		set_nth_bit(&weapon -> status, 0); // in use
 		set_nth_bit(&weapon -> status, 3); // recently used
-		play_sound(weapon -> sound, 0);
+		play_sound(&weapon -> sound, 0);
 		shoot_weapon(weapon, player -> pos, player -> dir);
 	}
 	else clear_nth_bit(&weapon -> status, 3);

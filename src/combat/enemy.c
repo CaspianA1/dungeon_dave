@@ -12,7 +12,7 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 	const Enemy* const enemy = enemy_instance -> enemy;
 
 	enemy_instance -> state = new_state;
-	if (!silent) play_sound(enemy -> sounds[enemy_instance -> state], 0);
+	if (!silent) play_sound(&enemy -> sounds[enemy_instance -> state], 0);
 
 	int new_frame_ind = 0;
 	for (byte i = 0; i < enemy_instance -> state; i++)
@@ -29,7 +29,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 	Navigator* const nav = &enemy_instance -> nav;
 	double dist = enemy_instance -> billboard_data.dist;
 
-	for (byte i = 0; i < 5; i++) set_sound_volume_from_dist(enemy -> sounds[i], dist);
+	for (byte i = 0; i < 5; i++) set_sound_volume_from_dist(&enemy -> sounds[i], dist);
 
 	const EnemyState last_state = enemy_instance -> state;
 
@@ -78,7 +78,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 						for (byte i = 0; i < current_level.enemy_instance_count; i++)
 							set_enemy_instance_state(enemy_instance, Idle, 1);
 					}
-					else play_sound(player -> sound_when_attacked, 0);
+					else play_sound(&player -> sound_when_attacked, 0);
 				}
 			}
 		}
@@ -90,7 +90,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 	 // sound happens at state change, so only one sound at once
 	if (enemy_instance -> state == last_state) {
 		const byte rand_num = (rand() % max_rand_sound_chance) + 1; // inclusive, 1 to max
-		if (rand_num <= numerator_sound_chance) play_sound(enemy -> sounds[enemy_instance -> state], 0);
+		if (rand_num <= numerator_sound_chance) play_sound(&enemy -> sounds[enemy_instance -> state], 0);
 	}
 
 	enemy_instance -> recently_attacked = 0;
@@ -103,5 +103,5 @@ inlinable void update_all_enemy_instances(Player* const player, const Weapon* co
 
 void deinit_enemy(const Enemy* const enemy) {
 	deinit_sprite(enemy -> animation_data.sprite);
-	for (byte i = 0; i < 5; i++) deinit_sound(enemy -> sounds[i]);
+	for (byte i = 0; i < 5; i++) deinit_sound(&enemy -> sounds[i]);
 }

@@ -194,10 +194,10 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	void deinit_hud_resources(void);
 	void deinit_screen(void);
 
-	deinit_sound(player -> sound_when_attacked);
-	deinit_sound(player -> sound_when_dying);
-	deinit_sound(player -> jump.sound_at_jump);
-	deinit_sound(player -> jump.sound_at_land);
+	deinit_sound(&player -> sound_when_attacked);
+	deinit_sound(&player -> sound_when_dying);
+	deinit_sound(&player -> jump.sound_at_jump);
+	deinit_sound(&player -> jump.sound_at_land);
 	deinit_weapon(weapon);
 	deinit_level(current_level);
 
