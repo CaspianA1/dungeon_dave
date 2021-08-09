@@ -57,6 +57,8 @@ problems:
 	- make the 0.33 ground level not a constant in effects.c
 	- fix enemy merging by making enemies account for thing collisions
 	- thing hit detection isn't very good yet (use circle intersection for better results)
+	- many times, enemies just won't go to sleep after you run away from them
+	- don't hit a player if the height difference is big enough
 
 completed:
 	- minimap that conveys height data

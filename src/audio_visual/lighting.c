@@ -35,6 +35,7 @@ inlinable byte flat_triangle(const vec pos, const Triangle triangle) {
 /* given a list of diffuse circles and flat triangles,
 sample points in the current map to precalculate lighting */
 void create_lightmap(void) {
+	// def a number of samples per tile
 }
 
 /* Shading explained:

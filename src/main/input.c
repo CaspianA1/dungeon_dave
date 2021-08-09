@@ -13,9 +13,9 @@ inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos
 
 #ifndef NOCLIP_MODE
 
-inlinable void handle_thing_collisions(vec* const ref_pos, const vec prev_pos, const double p_height) {
-	const double thing_hit_dist = 0.25, thing_jump_above_dist = 0.5;
+const double thing_hit_dist = 0.5, thing_jump_above_dist = 0.5;
 
+inlinable void handle_thing_collisions(vec* const ref_pos, const vec prev_pos, const double p_height) {
 	static byte first_call = 1;
 	if (first_call) { // first call skipped b/c thing data has not been initialized yet
 		first_call = 0;
@@ -207,9 +207,32 @@ void update_jump(Jump* const jump, const vec pos) {
 		jump -> made_noise = 1;
 	}
 	else jump -> made_noise = 0;
+	
+	//////////
+	double ground_height;
+	static byte first_call = 1;
+	byte landed_on_thing = 0;
 
-	const byte point = map_point(current_level.wall_data, pos[0], pos[1]);
-	const byte wall_point_height = current_level.get_point_height(point, pos);
+	if (!first_call) { // first_call avoided for the same reason as explained in handle_thing_collisions
+		for (byte i = 0; i < current_level.thing_count; i++) {
+			const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
+			const double thing_height = billboard_data -> height;
+
+			if (jump -> height > thing_height && !vec_delta_exceeds(billboard_data -> pos, pos, thing_hit_dist)) {
+				landed_on_thing = 1;
+				ground_height = thing_height + 1.0;
+				break;
+			}
+		}
+	}
+
+	if (!landed_on_thing) {
+		const byte point = map_point(current_level.wall_data, pos[0], pos[1]);
+		ground_height = current_level.get_point_height(point, pos);
+	}
+
+	first_call = 0;
+	//////////
 
 	if (jump -> jumping) {
 		const double t = SDL_GetTicks() / 1000.0 - jump -> time_at_jump;
@@ -220,14 +243,14 @@ void update_jump(Jump* const jump, const vec pos) {
 		if (jump -> height > jump -> highest_height)
 			jump -> highest_height = jump -> height;
 
-		if (jump -> height < wall_point_height) {
-			if (jump -> highest_height > wall_point_height && (jump -> v0 + g * t) < 0.0) {
+		if (jump -> height < ground_height) {
+			if (jump -> highest_height > ground_height && (jump -> v0 + g * t) < 0.0) {
 				jump -> jumping = 0;
-				jump -> start_height = wall_point_height;
-				jump -> height = wall_point_height;
+				jump -> start_height = ground_height;
+				jump -> height = ground_height;
 
 				// for big jumps only
-				if (jump -> highest_height - wall_point_height >= min_fall_height_for_sound) {
+				if (jump -> highest_height - ground_height >= min_fall_height_for_sound) {
 					play_sound(jump -> sound_at_land, 0);
 					jump -> made_noise = 1;
 				}
@@ -238,7 +261,7 @@ void update_jump(Jump* const jump, const vec pos) {
 		}
 	}
 
-	else if (wall_point_height < jump -> height) // falling
+	else if (ground_height < jump -> height) // falling
 		init_a_jump(jump, 1);
 
 	#endif

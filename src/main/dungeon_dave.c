@@ -17,7 +17,7 @@
 #include "../audio_visual/overlay/mipmap.c"
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
-#include "../audio_visual/overlay/render_things.c"
+#include "../audio_visual/overlay/things.c"
 
 #include "../audio_visual/misc.c"
 #include "../audio_visual/raycast.c"
