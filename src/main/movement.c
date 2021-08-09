@@ -1,0 +1,221 @@
+#ifndef NOCLIP_MODE
+
+const double thing_hit_dist = 0.5, thing_jump_above_dist = 0.5;
+
+inlinable void handle_thing_collisions(vec* const ref_pos, const vec prev_pos, const double p_height) {
+	static byte first_call = 1;
+	if (first_call) { // first call skipped b/c thing data has not been initialized yet
+		first_call = 0;
+		return;
+	}
+
+	vec pos = *ref_pos, positions_to_check[4] = {pos, pos, pos, pos};
+	for (byte i = 0; i < 4; i++) {
+		const byte axis = i > 1;
+
+		if (i & 1) positions_to_check[i][axis] += settings.stop_dist;
+		else positions_to_check[i][axis] -= settings.stop_dist;
+	}
+
+	for (byte i = 0; i < current_level.thing_count; i++) {
+		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
+
+		// if the player is over the thing, or the thing is over the player
+		if (fabs(p_height - billboard_data -> height) >= thing_jump_above_dist) continue;
+
+		for (byte j = 0; j < 4; j++) {
+			if (!vec_delta_exceeds(billboard_data -> pos, positions_to_check[j], thing_hit_dist)) {
+				const byte axis = j > 1;
+				pos[axis] = prev_pos[axis];
+			}
+		}
+	}
+
+	*ref_pos = pos;
+}
+
+static void handle_axis_collision(const byte axis, vec* const ref_pos, const vec prev_pos, const double p_height) {
+	const vec pos = *ref_pos;
+
+	vec forward_pos = pos, backward_pos = pos;
+	forward_pos[axis] += settings.stop_dist;
+	backward_pos[axis] -= settings.stop_dist;
+
+	if (point_exists_at(forward_pos, p_height) || point_exists_at(backward_pos, p_height))
+		(*ref_pos)[axis] = prev_pos[axis];
+}
+
+#endif
+
+static void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement, const double p_height) {
+	vec pos = *pos_ref + movement;
+
+	#ifdef NOCLIP_MODE
+
+	(void) prev_pos;
+	(void) p_height;
+
+	/* Out-of-bounds hit detection is only needed for noclip mode,
+	as it will be impossible to go out of bounds otherwise in normal mode. */
+	if (pos[1] < 1 || pos[1] > current_level.map_size.y - 1) pos[1] = prev_pos[1];
+	if (pos[0] < 1 || pos[0] > current_level.map_size.x - 1) pos[0] = prev_pos[0];
+
+	#else
+
+	handle_axis_collision(0, &pos, prev_pos, p_height);
+	handle_axis_collision(1, &pos, prev_pos, p_height);
+	handle_thing_collisions(&pos, prev_pos, p_height);
+
+	#endif
+
+	*pos_ref = pos;
+}
+
+void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
+	KinematicBody* const body, const double rad_theta, const double p_height,
+	const byte forward, const byte backward, const byte lstrafe, const byte rstrafe) {
+
+	const double curr_time = SDL_GetTicks() / 1000.0; // in seconds
+	byte increasing_fov = 0;
+
+	if (body -> status & mask_forward_or_backward) {
+		const double t = curr_time - body -> time_of_move;
+		body -> v = body -> a * t;
+
+		if (keys[KEY_SPEEDUP_1] || keys[KEY_SPEEDUP_2]) {
+			increasing_fov = 1;
+			body -> v *= body -> v_incr_multiplier;
+
+			if (settings.fov < settings.max_fov)
+				update_fov(settings.fov + settings.fov_step);
+		}
+
+		if (body -> v > body -> limit_v)
+			body -> v = body -> limit_v;
+
+		body -> max_v_reached = body -> v,
+		nth_bit_to_x(&body -> status, 1, forward);
+		nth_bit_to_x(&body -> status, 2, backward);
+	}
+
+	else {
+		const double t = curr_time - body -> time_of_stop;
+		body -> v = body -> max_v_reached - body -> a * t;
+		if (body -> v < 0.0) body -> v = 0.0;
+	}
+
+	if (!increasing_fov && settings.fov > INIT_FOV)
+		update_fov(settings.fov - settings.fov_step);
+
+	*dir = (vec) {cos(rad_theta), sin(rad_theta)};
+
+	const vec
+		forward_back_movement = *dir * vec_fill(body -> v),
+		sideways_movement = *dir * vec_fill(body -> strafe_v);
+
+	vec movement = {0.0, 0.0};
+
+	if (body -> status & mask_forward) movement += forward_back_movement;
+	if (body -> status & mask_backward) movement -= forward_back_movement;
+
+	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
+	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
+
+	hit_detection(pos, prev_pos, movement, p_height);
+}
+
+inlinable void init_a_jump(Jump* const jump, const byte falling) {
+	jump -> jumping = 1;
+	jump -> time_at_jump = SDL_GetTicks() / 1000.0;
+	jump -> start_height = jump -> height;
+	jump -> highest_height = jump -> height;
+	jump -> v0 = falling ? 0 : jump -> up_v0;
+}
+
+void update_jump(Jump* const jump, const vec pos) {
+	#ifdef NOCLIP_MODE
+
+	(void) pos;
+
+	double* const
+		last_tick_time = &jump -> time_at_jump,
+		curr_tick_time = SDL_GetTicks() / 1000.0;
+
+	const double pos_change = jump -> up_v0 * (curr_tick_time - *last_tick_time);
+
+	if (keys[KEY_FLY_UP]) jump -> height += pos_change;
+	if (keys[KEY_FLY_DOWN]) jump -> height -= pos_change;
+
+	*last_tick_time = curr_tick_time;
+
+	#else
+
+	const double min_fall_height_for_sound = 2.0;
+
+	if (keys[KEY_JUMP] && !jump -> jumping) {
+		init_a_jump(jump, 0);
+		play_sound(jump -> sound_at_jump, 0);
+		jump -> made_noise = 1;
+	}
+	else jump -> made_noise = 0;
+	
+	//////////
+	double ground_height;
+	static byte first_call = 1;
+	byte landed_on_thing = 0;
+
+	if (!first_call) { // first_call avoided for the same reason as explained in handle_thing_collisions
+		for (byte i = 0; i < current_level.thing_count; i++) {
+			const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
+			const double thing_height = billboard_data -> height;
+
+			if (jump -> height > thing_height && !vec_delta_exceeds(billboard_data -> pos, pos, thing_hit_dist)) {
+				landed_on_thing = 1;
+				ground_height = thing_height + 1.0;
+				break;
+			}
+		}
+	}
+
+	if (!landed_on_thing) {
+		const byte point = map_point(current_level.wall_data, pos[0], pos[1]);
+		ground_height = current_level.get_point_height(point, pos);
+	}
+
+	first_call = 0;
+	//////////
+
+	if (jump -> jumping) {
+		const double t = SDL_GetTicks() / 1000.0 - jump -> time_at_jump;
+
+		// y = y0 + v0t + 0.5at^2
+		jump -> height = jump -> start_height + ((jump -> v0 * t) + (0.5 * g * (t * t)));
+
+		if (jump -> height > jump -> highest_height)
+			jump -> highest_height = jump -> height;
+
+		if (jump -> height < ground_height) {
+			if (jump -> highest_height > ground_height && (jump -> v0 + g * t) < 0.0) {
+				jump -> jumping = 0;
+				jump -> start_height = ground_height;
+				jump -> height = ground_height;
+
+				// for big jumps only
+				if (jump -> highest_height - ground_height >= min_fall_height_for_sound) {
+					play_sound(jump -> sound_at_land, 0);
+					jump -> made_noise = 1;
+				}
+				else jump -> made_noise = 0;
+
+				jump -> highest_height = jump -> height; // + 0.001;
+			}
+		}
+	}
+
+	else if (ground_height < jump -> height) // falling
+		init_a_jump(jump, 1);
+
+	#endif
+
+	if (jump -> height < 0.0) jump -> height = 0.0;
+}

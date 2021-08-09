@@ -9,10 +9,11 @@
 #include "dda.c"
 #include "statemap.c"
 #include "settings.c"
-#include "screen.c"
+#include "movement.c" // previously a part of input.c
 #include "input.c"
 #include "level.c"
 
+#include "../audio_visual/screen.c"
 #include "../audio_visual/lighting.c"
 #include "../audio_visual/overlay/mipmap.c"
 #include "../audio_visual/overlay/sprite.c"
