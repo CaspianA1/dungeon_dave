@@ -61,7 +61,7 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x++) {
-			// if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
+			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
 
 			const BufferVal buffer_val = val_buffer[screen_x];
 

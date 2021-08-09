@@ -52,7 +52,7 @@ problems:
 	- pass sounds by reference
 	- make the 0.33 ground level not a constant in effects.c
 	- fix enemy merging by making enemies account for thing collisions
-	- thing hit detection isn't very good yet
+	- thing hit detection isn't very good yet (use circle intersection for better results)
 
 completed:
 	- minimap that conveys height data

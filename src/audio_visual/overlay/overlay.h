@@ -51,7 +51,7 @@ typedef struct {
 
 typedef struct {
 	const DataBillboard* const billboard_data;
-	const Sprite sprite;
+	const Sprite sprite; // TODO: to a ptr
 	const SDL_Rect src_crop;
 } Thing;
 

@@ -11,7 +11,9 @@ inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos
 		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
 }
 
-inlinable void handle_thing_collision(vec* const ref_pos, const vec prev_pos) {
+inlinable void handle_thing_collisions(vec* const ref_pos, const vec prev_pos, const double p_height) {
+	const double thing_hit_dist = 0.25, thing_jump_above_dist = 0.5;
+
 	static byte first_call = 1;
 	if (first_call) { // first call skipped b/c thing data has not been initialized yet
 		first_call = 0;
@@ -27,10 +29,13 @@ inlinable void handle_thing_collision(vec* const ref_pos, const vec prev_pos) {
 	}
 
 	for (byte i = 0; i < current_level.thing_count; i++) {
-		const vec thing_pos = current_level.thing_container[i].billboard_data -> pos;
+		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
+
+		// if the player is over the thing, or the thing is over the player
+		if (fabs(p_height - billboard_data -> height) >= thing_jump_above_dist) continue;
 
 		for (byte j = 0; j < 4; j++) {
-			if (!vec_delta_exceeds(thing_pos, positions_to_check[j], 0.25)) {
+			if (!vec_delta_exceeds(billboard_data -> pos, positions_to_check[j], thing_hit_dist)) {
 				const byte axis = j > 1;
 				pos[axis] = prev_pos[axis];
 			}
@@ -68,7 +73,7 @@ static void hit_detection(vec* const pos_ref, const vec prev_pos, const vec move
 
 	handle_axis_collision(0, &pos, prev_pos, p_height);
 	handle_axis_collision(1, &pos, prev_pos, p_height);
-	handle_thing_collision(&pos, prev_pos);
+	handle_thing_collisions(&pos, prev_pos, p_height);
 
 	#endif
 
