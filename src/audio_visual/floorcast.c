@@ -39,6 +39,30 @@ inlinable void draw_from_hit(const vec hit, const double dist, const int screen_
 	for (byte x = 0; x < settings.ray_column_width; x++) pixbuf_row[x + screen_x] = pixel;
 }
 
+vec lerp_floor(const vec pos, const double straight_dist, vec* const hit) {
+	const BufferVal
+		start_buf_val = val_buffer[0],
+		end_buf_val = val_buffer[settings.screen_width - 1];
+
+	const double
+		start_actual_dist = straight_dist / (double) start_buf_val.cos_beta,
+		end_actual_dist = straight_dist / (double) end_buf_val.cos_beta;
+
+	const vec
+		start_hit = vec_line_pos(pos, start_buf_val.dir, start_actual_dist),
+		end_hit = vec_line_pos(pos, end_buf_val.dir, end_actual_dist);
+
+	/*
+	DEBUG_VEC(start_hit);
+	DEBUG_VEC(end_hit);
+	*/
+
+	const vec step = (end_hit - start_hit) / vec_fill(settings.screen_width);
+	*hit = start_hit;
+
+	return step;
+}
+
 void fast_affine_floor(const byte floor_height, const vec pos,
 	const double p_height, const double pace, double y_shift, const int y_pitch) {
 
@@ -60,6 +84,8 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 		const int pace_y = y + pace;
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 
+		// vec hit;
+		// const vec step = lerp_floor(pos, straight_dist, &hit);
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x++) {
 			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
 
@@ -77,6 +103,7 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 			#endif
 
 			draw_from_hit(hit, actual_dist, screen_x, pixbuf_row);
+			// hit += step;
 		}
 	}
 }

@@ -229,3 +229,19 @@ const char sign = ((i & 1) << 1) - 1; // (i & 1) indicates even-ness, left shift
 positions_to_check[i] += settings.stop_dist * sign;
 
 /////
+
+/*
+step[0] = fmod(step[0], current_level.map_size.x);
+step[1] = fmod(step[1], current_level.map_size.y);
+*/
+
+/*
+step[0] = fabs(step[0]);
+step[1] = fabs(step[1]);
+*/
+
+*hit = start_hit;
+
+// DEBUG_VEC((start_hit + step));
+
+/////
