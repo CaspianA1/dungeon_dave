@@ -156,10 +156,11 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	//////////
 
 	load_first_level();
+	void init_lightmap(void);
+	init_lightmap();
 
 	const double offset_scaler = 15.0;
 	const Player first_player = load_player(4.8, 0.3, 8.0, 0.12, offset_scaler, 0.08, 0.09, 0.05, 1.9);
-
 
 	DataAnimationImmut init_immut_animation_data(const char* const, const int, const int, const int, const int, const byte);
 	const Weapon first_weapon = {
