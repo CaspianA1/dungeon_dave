@@ -38,27 +38,23 @@
 
 #include "../data/enemies.c"
 
-/*
 #include "../data/levels/level_1.c"
 #include "../data/levels/debug_level.c"
 #include "../data/levels/red_room.c"
 #include "../data/levels/forever_maze.c"
-*/
 #include "../data/levels/palace.c"
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(&current_level.background_sound, 1);
 	p = init_psprite("assets/walls/dune.bmp");
 
 	while (1) {
-		// DEBUG(current_level.enemy_instances[0].state, d);
-
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
