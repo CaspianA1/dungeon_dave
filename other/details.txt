@@ -33,6 +33,7 @@ features:
 	- make the minimap full-screen, meaning that it's rendered separately from the health percentage
 	- a fade-up effect that starts when a level begins
 	- a lightmap system (and load defaults on a different thread, if lightmap creation is slow enough)
+	- stop a jump if a thing is above
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -56,7 +57,6 @@ problems:
 	- make the 0.33 ground level not a constant in effects.c
 	- fix enemy merging by making enemies account for thing collisions
 	- thing hit detection isn't very good yet (use circle intersection for better results)
-	- many times, enemies just won't go to sleep after you run away from them
 	- don't hit a player if the height difference is big enough
 
 completed:

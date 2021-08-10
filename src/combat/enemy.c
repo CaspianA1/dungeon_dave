@@ -27,7 +27,8 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 	const Enemy* const enemy = enemy_instance -> enemy;
 
 	Navigator* const nav = &enemy_instance -> nav;
-	double dist = enemy_instance -> billboard_data.dist;
+	const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
+	double dist = billboard_data -> dist;
 
 	for (byte i = 0; i < 5; i++) set_sound_volume_from_dist(&enemy -> sounds[i], dist);
 
@@ -37,9 +38,10 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 	and only play the Dead animation once, stopping on the last frame */
 	switch (enemy_instance -> state) {
 		case Idle: {
+			if (player -> jump.height - billboard_data -> height >= 1.0) break;
+
 			const byte awoke_from_sound = (dist <= dist_wake_from_sound) &&
 				((weapon -> status & mask_recently_used) || player -> jump.made_noise);
-				// if a player made a sound and they are close
 
 			if (awoke_from_sound || (dist <= enemy -> dist_wake_from_idle) || enemy_instance -> recently_attacked)
 				set_enemy_instance_state(enemy_instance, Chasing, 0);
@@ -50,7 +52,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 			const NavigationState nav_state = update_path_if_needed(nav, player -> pos);
 			if (nav_state == ReachedDest)
 				set_enemy_instance_state(enemy_instance, Attacking, 0);
-			else if (nav_state == PathTooLongBFS)
+			else if (nav_state == PathTooLongBFS || nav_state == FailedBFS)
 				set_enemy_instance_state(enemy_instance, Idle, 0);
 		}
 			break;
