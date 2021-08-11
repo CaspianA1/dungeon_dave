@@ -192,9 +192,6 @@ void update_jump(Jump* const jump, const vec pos) {
 	first_call = 0;
 	//////////
 
-	// if (hit_head) jump -> v0 /= 2.0;
-	// if (hit_head) goto fall;
-
 	if (jump -> jumping) {
 		const double t = SDL_GetTicks() / 1000.0 - jump -> time_at_jump;
 
