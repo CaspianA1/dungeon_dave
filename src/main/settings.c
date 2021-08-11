@@ -58,7 +58,6 @@ void load_default_settings(void) {
 	settings.fov_step = INIT_FOV_STEP;
 	settings.max_fov = INIT_MAX_FOV;
 	settings.minimap_scale = INIT_MINIMAP_SCALE;
-	settings.stop_dist = INIT_STOP_DIST;
 }
 
 byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
