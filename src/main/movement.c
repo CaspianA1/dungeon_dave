@@ -1,5 +1,25 @@
 const double thing_hit_dist = 0.5;
 
+void report_thing_hits(const vec pos, const vec movement, byte* const hit_x, byte* const hit_y) {
+	static byte first_call = 1;
+	if (first_call) { // thing data not initialized yet @ first call
+		first_call = 0;
+		return;
+	}
+
+	*hit_x = 0;
+	*hit_y = 0;
+
+	for (byte i = 0; i < current_level.thing_count; i++) {
+		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
+
+		if (!vec_delta_exceeds(billboard_data -> pos, (vec) {pos[0] + movement[0], pos[1]}, thing_hit_dist))
+			*hit_x = 1;
+		if (!vec_delta_exceeds(billboard_data -> pos, (vec) {pos[0], pos[1] + movement[1]}, thing_hit_dist))
+			*hit_y = 1;
+	}
+}
+
 void update_pos(vec* const ref_pos, vec* const dir,
 	KinematicBody* const body, const double rad_theta, const double p_height,
 	const byte forward, const byte backward, const byte lstrafe, const byte rstrafe) {
@@ -50,12 +70,14 @@ void update_pos(vec* const ref_pos, vec* const dir,
 	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
 
-	//////////
+	////////// collision detection
+	byte thing_hit_x, thing_hit_y;
 	vec pos = *ref_pos;
+	report_thing_hits(pos, movement, &thing_hit_x, &thing_hit_y);
 
-	if (!point_exists_at(pos[0] + movement[0], pos[1], p_height))
+	if (!point_exists_at(pos[0] + movement[0], pos[1], p_height) && !thing_hit_x)
 		pos[0] += movement[0];
-	if (!point_exists_at(pos[0], pos[1] + movement[1], p_height))
+	if (!point_exists_at(pos[0], pos[1] + movement[1], p_height) && !thing_hit_y)
 		pos[1] += movement[1];
 
 	*ref_pos = pos;
