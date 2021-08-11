@@ -1,88 +1,6 @@
-#ifndef NOCLIP_MODE
+const double thing_hit_dist = 0.5;
 
-const double thing_hit_dist = 0.5, thing_jump_above_dist = 0.5;
-
-inlinable void handle_thing_collisions(vec* const ref_pos, const vec prev_pos, const double p_height) {
-	static byte first_call = 1;
-	if (first_call) { // first call skipped b/c thing data has not been initialized yet
-		first_call = 0;
-		return;
-	}
-
-	vec pos = *ref_pos, positions_to_check[4] = {pos, pos, pos, pos};
-	for (byte i = 0; i < 4; i++) {
-		const byte axis = i > 1;
-
-		if (i & 1) positions_to_check[i][axis] += settings.stop_dist;
-		else positions_to_check[i][axis] -= settings.stop_dist;
-	}
-
-	for (byte i = 0; i < current_level.thing_count; i++) {
-		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
-
-		// if the player is over the thing, or the thing is over the player
-		if (fabs(p_height - billboard_data -> height) >= thing_jump_above_dist) continue;
-
-		for (byte j = 0; j < 4; j++) {
-			if (!vec_delta_exceeds(billboard_data -> pos, positions_to_check[j], thing_hit_dist)) {
-				const byte axis = j > 1;
-				pos[axis] = prev_pos[axis];
-			}
-		}
-	}
-
-	*ref_pos = pos;
-}
-
-/*
-typedef struct {const vec corners[4];} Rect;
-static byte rects_are_colliding(const Rect r1, const Rect r2) {
-	(void) r1;
-	(void) r2;
-	return 1;
-}
-*/
-
-static void handle_axis_collision(const byte axis, vec* const ref_pos, const vec prev_pos, const double p_height) {
-	const vec pos = *ref_pos;
-
-	vec forward_pos = pos, backward_pos = pos;
-	forward_pos[axis] += settings.stop_dist;
-	backward_pos[axis] -= settings.stop_dist;
-
-	if (point_exists_at(forward_pos, p_height) || point_exists_at(backward_pos, p_height)) {
-		// printf("Eject from %lf to %lf\n", (*ref_pos)[axis], prev_pos[axis]);
-		(*ref_pos)[axis] = prev_pos[axis];
-	}
-}
-
-#endif
-
-static void hit_detection(vec* const pos_ref, const vec prev_pos, const vec movement, const double p_height) {
-	vec pos = *pos_ref + movement;
-
-	#ifdef NOCLIP_MODE
-
-	(void) prev_pos;
-	(void) p_height;
-
-	/* Out-of-bounds hit detection is only needed for noclip mode,
-	as it will be impossible to go out of bounds otherwise in normal mode. */
-	if (pos[1] < 1 || pos[1] > current_level.map_size.y - 1) pos[1] = prev_pos[1];
-	if (pos[0] < 1 || pos[0] > current_level.map_size.x - 1) pos[0] = prev_pos[0];
-
-	#else
-
-	handle_axis_collision(0, &pos, prev_pos, p_height);
-	handle_axis_collision(1, &pos, prev_pos, p_height);
-	handle_thing_collisions(&pos, prev_pos, p_height);
-
-	#endif
-
-	*pos_ref = pos;
-}
-
-void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
+void update_pos(vec* const ref_pos, vec* const dir,
 	KinematicBody* const body, const double rad_theta, const double p_height,
 	const byte forward, const byte backward, const byte lstrafe, const byte rstrafe) {
 
@@ -132,7 +50,16 @@ void update_pos(vec* const pos, const vec prev_pos, vec* const dir,
 	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
 
-	hit_detection(pos, prev_pos, movement, p_height);
+	//////////
+	vec pos = *ref_pos;
+
+	if (!point_exists_at(pos[0] + movement[0], pos[1], p_height))
+		pos[0] += movement[0];
+	if (!point_exists_at(pos[0], pos[1] + movement[1], p_height))
+		pos[1] += movement[1];
+
+	*ref_pos = pos;
+	//////////
 }
 
 inlinable void init_a_jump(Jump* const jump, const byte falling) {

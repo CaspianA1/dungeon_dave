@@ -90,7 +90,7 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 		ivec* const mouse_pos = &player -> mouse_pos;
 
 		update_mouse_and_theta(theta, mouse_pos);
-		update_pos(pos, prev_pos, &player -> dir, body, to_radians(*theta),
+		update_pos(pos, &player -> dir, body, to_radians(*theta),
 			player -> jump.height, forward, backward, lstrafe, rstrafe);
 
 		update_jump(&player -> jump, player -> pos);
