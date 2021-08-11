@@ -1,0 +1,70 @@
+inlinable void new_handle_thing_collisions(vec* const ref_pos,
+	const vec prev_pos, const vec movement, const double p_height) {
+
+	(void) ref_pos;
+	(void) prev_pos;
+	(void) p_height;
+
+	static byte first_call = 1;
+	if (first_call) {
+		first_call = 0;
+		return;
+	}
+
+	vec new_pos = *ref_pos;
+
+	vec new_x_pos = prev_pos, new_y_pos = prev_pos;
+	new_x_pos[0] += movement[0];
+	new_y_pos[1] += movement[1];
+
+	for (byte i = 0; i < current_level.thing_count; i++) {
+		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
+		const Circle thing_circle = {billboard_data -> pos, 0.5};
+
+		byte x_hit = 0, y_hit = 0;
+		if (intersects_with_circle(new_x_pos, thing_circle)) new_pos[0] = prev_pos[0], x_hit = 1;
+		if (intersects_with_circle(new_y_pos, thing_circle) && !x_hit) new_pos[1] = prev_pos[1], y_hit = 1;
+
+		printf("x_hit = %d, y_hit = %d\n", x_hit, y_hit);
+
+		if (x_hit || y_hit) break;
+	}
+
+	*ref_pos = new_pos;
+}
+
+/////
+
+inlinable byte intersects_with_circle(const vec pos, const Circle circle) {
+	const vec center_diff = pos - circle.center;
+	const double
+		radius_squared = circle.radius * circle.radius,
+		d_squared = center_diff[0] * center_diff[0] + center_diff[1] * center_diff[1];
+	return d_squared <= radius_squared;
+}
+
+/////
+
+new_handle_thing_collisions(&pos, prev_pos, movement, p_height);
+
+/////
+
+// #define dest (*ref_pos)[axis]
+
+// dest = pos_to + 0.2;
+
+/*
+// (*ref_pos)[axis] = prev_pos[axis];
+const double diff = (*ref_pos)[axis] - prev_pos[axis];
+const char sign = ((pos[axis] - prev_pos[axis]) > 0.0) ? 1.0 : -1.0;
+DEBUG(sign, d);
+
+(*ref_pos)[axis] = (int) prev_pos[axis] + 0.2 * -sign;
+*/
+
+/////
+
+const double pos_to = round(pos[axis]);
+(*ref_pos)[axis] = pos_to;
+
+/////

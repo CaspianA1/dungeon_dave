@@ -12,13 +12,13 @@ typedef struct {
 } Color3;
 
 enum {
-	HUD, PlayerMinimap, BackgroundHP
+	HUD, BackgroundHP, PlayerMinimap
 } ColorID;
 
-const Color3 hud_colors[3] = {
+static const Color3 hud_colors[3] = {
 	{255, 215, 0}, // yellow-orange (mostly yellow)
-	{255, 0, 0}, // red
-	{0, 0, 0} // black
+	{0, 0, 0}, // black
+	{255, 0, 0} // red
 };
 
 //////////

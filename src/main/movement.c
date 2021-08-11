@@ -34,6 +34,15 @@ inlinable void handle_thing_collisions(vec* const ref_pos, const vec prev_pos, c
 	*ref_pos = pos;
 }
 
+/*
+typedef struct {const vec corners[4];} Rect;
+static byte rects_are_colliding(const Rect r1, const Rect r2) {
+	(void) r1;
+	(void) r2;
+	return 1;
+}
+*/
+
 static void handle_axis_collision(const byte axis, vec* const ref_pos, const vec prev_pos, const double p_height) {
 	const vec pos = *ref_pos;
 
@@ -41,8 +50,10 @@ static void handle_axis_collision(const byte axis, vec* const ref_pos, const vec
 	forward_pos[axis] += settings.stop_dist;
 	backward_pos[axis] -= settings.stop_dist;
 
-	if (point_exists_at(forward_pos, p_height) || point_exists_at(backward_pos, p_height))
+	if (point_exists_at(forward_pos, p_height) || point_exists_at(backward_pos, p_height)) {
+		// printf("Eject from %lf to %lf\n", (*ref_pos)[axis], prev_pos[axis]);
 		(*ref_pos)[axis] = prev_pos[axis];
+	}
 }
 
 #endif

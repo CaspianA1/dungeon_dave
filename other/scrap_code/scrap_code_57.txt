@@ -245,3 +245,7 @@ step[1] = fabs(step[1]);
 // DEBUG_VEC((start_hit + step));
 
 /////
+
+// take the cross product of the current velocity vector
+
+/////

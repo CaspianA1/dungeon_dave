@@ -1,16 +1,15 @@
-// structs: triangle, circle
+typedef double Triangle[3][2];
 
 typedef struct {
 	const vec center;
 	const double radius;
 } Circle;
 
-typedef double Triangle[3][2];
-
 inlinable double diffuse_circle(const vec pos, const Circle circle) {
 	const vec center_diff = pos - circle.center;
-	const double radius_squared = circle.radius * circle.radius;
-	const double d_squared = center_diff[0] * center_diff[0] + center_diff[1] * center_diff[1];
+	const double
+		radius_squared = circle.radius * circle.radius,
+		d_squared = center_diff[0] * center_diff[0] + center_diff[1] * center_diff[1];
 	return (d_squared <= radius_squared) ? radius_squared - d_squared : 0.0;
 }
 
