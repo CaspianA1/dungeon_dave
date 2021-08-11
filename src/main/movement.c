@@ -1,6 +1,28 @@
 const double thing_hit_dist = 0.5;
 
-void report_thing_hits(const vec pos, const vec movement, byte* const hit_x, byte* const hit_y) {
+typedef struct {
+	const vec origin, size;
+} BoundingBox;
+
+byte bounding_box_axis_collision(const BoundingBox a, const BoundingBox b, const byte axis) {
+	return (a.origin[axis] < b.origin[axis] + b.size[axis]) && (a.origin[axis] + a.size[axis] > b.origin[axis]);
+}
+
+BoundingBox bounding_box_from_pos(const vec pos) {
+	const vec box_axis_side_len = vec_fill(0.3);
+	return (BoundingBox) {pos - box_axis_side_len / vec_fill(2.0), box_axis_side_len};
+}
+
+void aabb_thing_collisions(const vec pos, const vec movement) { // aabb = axis-aligned bounding box
+	const BoundingBox player_bounding_box = bounding_box_from_pos(pos);
+
+	printf("pos = {%lf, %lf}\nplayer_bounding_box = {{%lf, %lf}, {%lf, %lf}}\n---\n",
+		pos[0], pos[1], player_bounding_box.origin[0], player_bounding_box.origin[1],
+		player_bounding_box.size[0], player_bounding_box.size[1]);
+}
+
+// do convex wireframe collisions instead
+inlinable void report_thing_hits(const vec pos, const vec movement, byte* const hit_x, byte* const hit_y) {
 	static byte first_call = 1;
 	if (first_call) { // thing data not initialized yet @ first call
 		first_call = 0;
@@ -81,6 +103,8 @@ void update_pos(vec* const ref_pos, vec* const dir,
 		pos[1] += movement[1];
 
 	*ref_pos = pos;
+
+	aabb_thing_collisions(pos, movement);
 	//////////
 }
 

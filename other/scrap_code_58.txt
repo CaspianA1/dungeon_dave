@@ -219,3 +219,9 @@ if (!map_point(current_level.wall_data, pos[0], pos[1] + movement[1]))
 https://github.com/Mekire/pygame-raycasting-experiment
 
 /////
+
+vec new_x_pos = pos, new_y_pos = pos;
+new_x_pos[0] += movement[0];
+new_y_pos[1] += movement[1];
+
+/////
