@@ -129,7 +129,7 @@ inlinable void init_a_jump(Jump* const jump, const byte falling) {
 	jump -> time_at_jump = SDL_GetTicks() / 1000.0;
 	jump -> start_height = jump -> height;
 	jump -> highest_height = jump -> height;
-	jump -> v0 = falling ? 0 : jump -> up_v0;
+	jump -> v0 = falling ? 0.0 : jump -> up_v0;
 }
 
 void update_jump(Jump* const jump, const vec pos) {
@@ -162,17 +162,24 @@ void update_jump(Jump* const jump, const vec pos) {
 	//////////
 	double ground_height;
 	static byte first_call = 1;
-	byte landed_on_thing = 0;
+	byte landed_on_thing = 0, hit_head = 0;
 
 	if (!first_call) { // first_call avoided for the same reason as explained in handle_thing_collisions
 		for (byte i = 0; i < current_level.thing_count; i++) {
 			const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
 			const double thing_height = billboard_data -> height;
+			const double height_delta = jump -> height - thing_height;
 
-			if (jump -> height > thing_height && !vec_delta_exceeds(billboard_data -> pos, pos, thing_hit_dist)) {
-				landed_on_thing = 1;
-				ground_height = thing_height + 1.0;
-				break;
+			if (!vec_delta_exceeds(billboard_data -> pos, pos, thing_hit_dist)) {
+				if (height_delta > 0.0) {
+					landed_on_thing = 1;
+					ground_height = thing_height + 1.0;
+					break;
+				}
+				else if (height_delta > -0.05) {
+					hit_head = 1;
+					break;
+				}
 			}
 		}
 	}
@@ -185,6 +192,9 @@ void update_jump(Jump* const jump, const vec pos) {
 	first_call = 0;
 	//////////
 
+	// if (hit_head) jump -> v0 /= 2.0;
+	// if (hit_head) goto fall;
+
 	if (jump -> jumping) {
 		const double t = SDL_GetTicks() / 1000.0 - jump -> time_at_jump;
 
@@ -194,8 +204,8 @@ void update_jump(Jump* const jump, const vec pos) {
 		if (jump -> height > jump -> highest_height)
 			jump -> highest_height = jump -> height;
 
-		if (jump -> height < ground_height) {
-			if (jump -> highest_height > ground_height && (jump -> v0 + g * t) < 0.0) {
+		if (jump -> height < ground_height) { // v = v0 + at
+			if (jump -> highest_height > ground_height && (jump -> v0 + g * t) < 0.0) { // reset jump
 				jump -> jumping = 0;
 				jump -> start_height = ground_height;
 				jump -> height = ground_height;
