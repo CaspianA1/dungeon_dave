@@ -18,7 +18,7 @@ BoundingBox bounding_box_from_pos(const vec pos) {
 }
 
 // aabb = axis-aligned bounding box
-void report_aabb_thing_collisions(const vec pos, const vec movement,
+inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	byte* const hit_x, byte* const hit_y, const double p_height) { 
 
 	*hit_x = 0;
@@ -53,7 +53,6 @@ void report_aabb_thing_collisions(const vec pos, const vec movement,
 		if (*hit_x && *hit_y) break;
 	}
 }
-
 
 void update_pos(vec* const ref_pos, vec* const dir,
 	KinematicBody* const body, const double rad_theta, const double p_height,
