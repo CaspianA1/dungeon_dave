@@ -16,12 +16,28 @@ static SDL_Rect get_mipmap_crop(const ivec size, const byte depth_offset) {
 	return dest;
 }
 
-inlinable SDL_Rect get_mipmap_crop_from_wall(const Sprite* const sprite, const double wall_h) {
-	double wall_h_percent = wall_h / settings.screen_height * mipmap_depth_heuristic;
-	if (wall_h_percent > 1.0) wall_h_percent = 1.0;
+inlinable int closest_pow_2(const int x) {
+	return 1 << (sizeof(x) * 8 - num_leading_zeroes(x));
+}
 
-	byte depth_offset = (1.0 - wall_h_percent) * (sprite -> max_mipmap_depth - 1);
-	return get_mipmap_crop(sprite -> size, depth_offset);
+inlinable SDL_Rect get_mipmap_crop_from_wall(const Sprite* const sprite, const int wall_h) {
+	/* A texture is displayed best if each texture pixel corresponds to one on-screen pixel,
+	meaning that for a 64x64 texture, it looks best if there is a 1:1 mapping for 64x64 screen units.
+	This function finds the nearest exponent for a power of 2 of the texture and turns that into a depth offset.
+
+	Example: a 64x64 texture with a projected wall height of 27 will look best if its mipmap level's height is 32,
+	as that is the closest to a 1:1 mapping. Since the nearest power of 2 is 32, the exponent is 5 (2 ** 5 == 32),
+	meaning that the depth offset should be the max power of two for the full-size texture minus the current
+	nearest power of two. In this case, that is 6 - 1, which means it should have a depth offset of 1. */
+
+	const ivec size = sprite -> size;
+	const int max_size = size.x * 2 / 3; // max size = full size of the full-resolution texture
+
+	int closest_exp_2 = closest_pow_2(wall_h);
+	if (closest_exp_2 > max_size) closest_exp_2 = max_size; // assumes that max_size is a power of 2
+
+	const byte depth_offset = exp_for_pow_of_2(max_size) - exp_for_pow_of_2(closest_exp_2);
+	return get_mipmap_crop(size, depth_offset);
 }
 
 SDL_Surface* load_mipmap(SDL_Surface* const surface, byte* const depth) {

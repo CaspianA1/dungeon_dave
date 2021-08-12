@@ -79,6 +79,9 @@
 
 /////
 
+#define num_leading_zeroes __builtin_clz
+#define exp_for_pow_of_2 __builtin_ffs
+
 typedef uint_fast8_t byte;
 typedef __m128d vec;
 typedef struct {int x, y;} ivec;

@@ -10,7 +10,7 @@ inlinable double hallway_shader(const vec pos) {
 
 void load_hallway(void) {
 	enum {
-		map_width = 10, map_height = 20,
+		map_width = 10, map_height = 25,
 		wall_count = 2, billboard_count = 0,
 		animated_billboard_count = 0, enemy_instance_count = 0
 	};
@@ -35,10 +35,15 @@ void load_hallway(void) {
 		{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
-	Level hallway = init_level(map_width, map_height, 4.5, 18.5, 0.0);
+	Level hallway = init_level(map_width, map_height, 4.5, 23.5, 0.0);
 	hallway.darkest_shade = 0.4;
 	hallway.max_point_height = 2;
 	hallway.out_of_bounds_point = 1;

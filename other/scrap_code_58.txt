@@ -225,3 +225,60 @@ new_x_pos[0] += movement[0];
 new_y_pos[1] += movement[1];
 
 /////
+
+int closest_pow_2(int input) {
+    return 1 << (int) ceil(log2(input));
+}
+
+/////
+
+inlinable int closest_pow_2(const unsigned x) {
+	return 1 << (sizeof(x) * 8 - __builtin_clz(x));
+}
+
+inlinable int other_closest_pow_2(const unsigned x) {
+	return 1 << (int) ceil(log2(x));
+}
+
+inlinable SDL_Rect get_mipmap_crop_from_wall(const Sprite* const sprite, const int wall_h) {
+	/*
+	- for a wall h of 64, return the first level - for 32, return the second - and so on
+	- need to round it to the nearest power of two for the sprite height
+
+	64 -> 0
+	32 -> 1
+	16 -> 
+
+
+	64 >> 0 = 64
+	64 >> 1 = 32
+	64 >> 2 = 16
+	*/
+
+	// printf("wall_h = %d, log2(wall_h) = %d\n", wall_h, (int) log2(wall_h));
+	printf("wall_h = %d, closest_pow_2(wall_h) = %d\n", wall_h, closest_pow_2(wall_h));
+	printf("wall_h = %d, other_closest_pow_2(wall_h) = %d\n---\n", wall_h, other_closest_pow_2(wall_h));
+
+	byte depth = wall_h < 64;
+	return get_mipmap_crop(sprite -> size, depth);
+
+	/*
+	double wall_h_percent = wall_h / settings.screen_height * mipmap_depth_heuristic;
+	if (wall_h_percent > 1.0) wall_h_percent = 1.0;
+
+	byte depth_offset = (1.0 - wall_h_percent) * (sprite -> max_mipmap_depth - 1);
+	return get_mipmap_crop(sprite -> size, depth_offset);
+	*/
+}
+
+/////
+
+/*
+double wall_h_percent = wall_h / settings.screen_height * mipmap_depth_heuristic;
+if (wall_h_percent > 1.0) wall_h_percent = 1.0;
+
+byte depth_offset = (1.0 - wall_h_percent) * (sprite -> max_mipmap_depth - 1);
+return get_mipmap_crop(sprite -> size, depth_offset);
+*/
+
+/////
