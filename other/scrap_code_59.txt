@@ -1,0 +1,90 @@
+void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_size) { // box blur
+	typedef __v4si color4;
+
+	const int src_w = image -> w, src_h = image -> h;
+	SDL_Surface* const blurred_crop = SDL_CreateRGBSurfaceWithFormat(0, crop.w, crop.h, 32, PIXEL_FORMAT);
+	SDL_LockSurface(blurred_crop);
+	SDL_LockSurface(image);
+
+	static byte first = 1;
+
+	const SDL_PixelFormat* const format = image -> format;
+	const int bpp = format -> BytesPerPixel;
+ 	for (int y = crop.y; y < crop.y + crop.h; y++) {
+		for (int x = crop.x; x < crop.x + crop.w; x++) {
+			color4 sum = {0, 0, 0, 0};
+			int blur_sum_factor = 0;
+			for (int py = -blur_size; py <= blur_size; py++) {
+				for (int px = -blur_size; px <= blur_size; px++) {
+
+					/*
+					int x1 = x + px, y1 = y + py;
+					clamp_axis_val(&x1, src_w);
+					clamp_axis_val(&y1, src_h);
+					*/
+
+					/*
+					const int x1 = x + px, y1 = y + py;
+					if (x1 < 0 || y1 < 0) continue;
+					else if (x1 >= src_w || y1 >= src_h) break;
+					*/
+
+					int x1 = x + px, y1 = y + py;
+
+					const byte
+						x1_small = x1 < 0,
+						y1_small = y1 < 0,
+						x1_big = x1 >= src_w,
+						y1_big = y1 >= src_h;
+
+					clamp_axis_val(&x1, src_w);
+					clamp_axis_val(&y1, src_h);
+
+					const Uint32 pixel = *read_surface_pixel(image, x1, y1, bpp);
+
+					byte r, g, b, a;
+					SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
+
+					if (x1_small || y1_small || x1_big || y1_big) {
+						blur_sum_factor = 9;
+						sum = (color4) {r * 9, g * 9, b * 9, a * 9};
+					}
+					else {
+						sum += (color4) {r, g, b, a};
+						blur_sum_factor++;
+					}
+				}
+			}
+
+			// TODO: figure out why the edges are close to black
+
+			if (blur_sum_factor == 0) blur_sum_factor = 1;
+			const Uint16 out[4] = {
+				sum[0] / blur_sum_factor,
+				sum[1] / blur_sum_factor,
+				sum[2] / blur_sum_factor,
+				sum[3] / blur_sum_factor
+			};
+
+			const Uint32 blurred_pixel = SDL_MapRGBA(format, out[0], out[1], out[2], out[3]);
+			*read_surface_pixel(blurred_crop, x - crop.x, y - crop.y, bpp) = blurred_pixel;
+		}
+	}
+
+	first = 0;
+
+	SDL_UnlockSurface(blurred_crop);
+	SDL_UnlockSurface(image);
+
+	SDL_BlitSurface(blurred_crop, NULL, image, &crop);
+	SDL_FreeSurface(blurred_crop);
+}
+
+/////
+
+inlinable void clamp_axis_val(int* const val, const int axis_size) {
+	if (*val < 0) *val = 0;
+	else if (*val >= axis_size) *val = axis_size - 1;
+}
+
+/////

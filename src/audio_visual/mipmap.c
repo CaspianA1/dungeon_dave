@@ -61,6 +61,7 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface, byte* const depth) {
 	}
 
 	/*
+	system("mkdir imgs");
 	static byte id = 0;
 	char buf[15];
 	sprintf(buf, "imgs/out_%d.bmp", id);
@@ -93,6 +94,7 @@ void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_
 			int blur_sum_factor = 0;
 			for (int py = -blur_size; py <= blur_size; py++) {
 				for (int px = -blur_size; px <= blur_size; px++) {
+
 					const int x1 = x + px, y1 = y + py;
 					if (x1 < 0 || y1 < 0) continue;
 					else if (x1 >= src_w || y1 >= src_h) break;
@@ -102,12 +104,11 @@ void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_
 					byte r, g, b, a;
 					SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
 					sum += (color4) {r, g, b, a};
-	
 					blur_sum_factor++;
-                }
+				}
 			}
 
-			// TODO: figure out why the edges are close to black
+			// TODO: figure out why the edges are close to black only when this is called by load_mipmap
 
 			if (blur_sum_factor == 0) blur_sum_factor = 1;
 			const byte out[4] = {
@@ -130,11 +131,11 @@ void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_
 }
 
 void blur_test(void) {
-	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/smooth_viney_bricks.bmp");
+	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/marble.bmp");
 	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);
 	SDL_FreeSurface(unconverted_image);
 
-	blur_image_portion(image, (SDL_Rect) {0, 0, image -> w, image -> h}, 2);
+	blur_image_portion(image, (SDL_Rect) {0, 0, image -> w, image -> h}, 3);
 	SDL_SaveBMP(image, "out.bmp");
 	SDL_FreeSurface(image);
 
