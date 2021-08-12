@@ -282,3 +282,45 @@ return get_mipmap_crop(sprite -> size, depth_offset);
 */
 
 /////
+
+vec pos_change_with_x = pos, pos_change_with_y = pos;
+pos_change_with_x[0] += movement[0];
+pos_change_with_y[1] += movement[1];
+
+const BoundingBox player_boxes[2] = {
+	bounding_box_from_pos(pos_change_with_x),
+	bounding_box_from_pos(pos_change_with_y),
+};
+
+/////
+
+/*
+printf("pos = {%lf, %lf}\nplayer_bounding_box = {{%lf, %lf}, {%lf, %lf}}\n---\n",
+	pos[0], pos[1], player_bounding_box.origin[0], player_bounding_box.origin[1],
+	player_bounding_box.size[0], player_bounding_box.size[1]);
+*/
+
+/////
+
+// do convex wireframe collisions instead
+inlinable void report_thing_hits(const vec pos, const vec movement, byte* const hit_x, byte* const hit_y) {
+	static byte first_call = 1;
+	if (first_call) { // thing data not initialized yet @ first call
+		first_call = 0;
+		return;
+	}
+
+	*hit_x = 0;
+	*hit_y = 0;
+
+	for (byte i = 0; i < current_level.thing_count; i++) {
+		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
+
+		if (!vec_delta_exceeds(billboard_data -> pos, (vec) {pos[0] + movement[0], pos[1]}, thing_hit_dist))
+			*hit_x = 1;
+		if (!vec_delta_exceeds(billboard_data -> pos, (vec) {pos[0], pos[1] + movement[1]}, thing_hit_dist))
+			*hit_y = 1;
+	}
+}
+
+/////

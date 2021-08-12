@@ -1,52 +1,59 @@
-const double thing_hit_dist = 0.5;
+static const double thing_hit_dist = 0.5, thing_y_collision_delta = 0.5, thing_box_axis_len = 0.3;
 
 typedef struct {
 	const vec origin, size;
 } BoundingBox;
 
-byte bounding_box_axis_collision(const BoundingBox a, const BoundingBox b, const byte axis) {
+byte aabb_axis_collision(const BoundingBox a, const BoundingBox b, const byte axis) {
 	return (a.origin[axis] < b.origin[axis] + b.size[axis]) && (a.origin[axis] + a.size[axis] > b.origin[axis]);
 }
 
+inlinable byte aabb_collision(const BoundingBox a, const BoundingBox b) {
+	return aabb_axis_collision(a, b, 0) &&  aabb_axis_collision(a, b, 1);
+}
+
 BoundingBox bounding_box_from_pos(const vec pos) {
-	const vec box_axis_side_len = vec_fill(0.3);
+	const vec box_axis_side_len = vec_fill(thing_box_axis_len);
 	return (BoundingBox) {pos - box_axis_side_len / vec_fill(2.0), box_axis_side_len};
 }
 
-void aabb_thing_collisions(const vec pos, const vec movement) { // aabb = axis-aligned bounding box
-	(void) movement;
-
-	const BoundingBox player_bounding_box = bounding_box_from_pos(pos);
-
-	(void) player_bounding_box;
-
-	/*
-	printf("pos = {%lf, %lf}\nplayer_bounding_box = {{%lf, %lf}, {%lf, %lf}}\n---\n",
-		pos[0], pos[1], player_bounding_box.origin[0], player_bounding_box.origin[1],
-		player_bounding_box.size[0], player_bounding_box.size[1]);
-	*/
-}
-
-// do convex wireframe collisions instead
-inlinable void report_thing_hits(const vec pos, const vec movement, byte* const hit_x, byte* const hit_y) {
-	static byte first_call = 1;
-	if (first_call) { // thing data not initialized yet @ first call
-		first_call = 0;
-		return;
-	}
+// aabb = axis-aligned bounding box
+void report_aabb_thing_collisions(const vec pos, const vec movement,
+	byte* const hit_x, byte* const hit_y, const double p_height) { 
 
 	*hit_x = 0;
 	*hit_y = 0;
 
+	static byte first_call = 1; // first call ignored b/c thing data has not been initialized yet
+	if (first_call) {
+		first_call = 0;
+		return;
+	}
+
+	vec pos_change_with_x = pos, pos_change_with_y = pos;
+	pos_change_with_x[0] += movement[0];
+	pos_change_with_y[1] += movement[1];
+
+	const BoundingBox player_boxes[2] = {
+		bounding_box_from_pos(pos_change_with_x),
+		bounding_box_from_pos(pos_change_with_y)
+	};
+
 	for (byte i = 0; i < current_level.thing_count; i++) {
 		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
 
-		if (!vec_delta_exceeds(billboard_data -> pos, (vec) {pos[0] + movement[0], pos[1]}, thing_hit_dist))
-			*hit_x = 1;
-		if (!vec_delta_exceeds(billboard_data -> pos, (vec) {pos[0], pos[1] + movement[1]}, thing_hit_dist))
-			*hit_y = 1;
+		const double y_delta = billboard_data -> height - p_height;
+		if (fabs(y_delta) >= thing_y_collision_delta) continue;
+
+		const BoundingBox thing_box = bounding_box_from_pos(billboard_data -> pos);
+
+		if (aabb_collision(thing_box, player_boxes[0])) *hit_x = 1;
+		if (aabb_collision(thing_box, player_boxes[1])) *hit_y = 1;
+
+		if (*hit_x && *hit_y) break;
 	}
 }
+
 
 void update_pos(vec* const ref_pos, vec* const dir,
 	KinematicBody* const body, const double rad_theta, const double p_height,
@@ -101,7 +108,7 @@ void update_pos(vec* const ref_pos, vec* const dir,
 	////////// collision detection
 	byte thing_hit_x, thing_hit_y;
 	vec pos = *ref_pos;
-	report_thing_hits(pos, movement, &thing_hit_x, &thing_hit_y);
+	report_aabb_thing_collisions(pos, movement, &thing_hit_x, &thing_hit_y, p_height);
 
 	if (!point_exists_at(pos[0] + movement[0], pos[1], p_height) && !thing_hit_x)
 		pos[0] += movement[0];
@@ -109,8 +116,6 @@ void update_pos(vec* const ref_pos, vec* const dir,
 		pos[1] += movement[1];
 
 	*ref_pos = pos;
-
-	aabb_thing_collisions(pos, movement);
 	//////////
 }
 
