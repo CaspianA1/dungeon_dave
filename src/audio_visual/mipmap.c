@@ -18,11 +18,9 @@ static SDL_Rect get_mipmap_crop(const ivec size, const byte depth_offset) {
 
 inlinable SDL_Rect get_mipmap_crop_from_wall(const Sprite* const sprite, const double wall_h) {
 	double wall_h_percent = wall_h / settings.screen_height * mipmap_depth_heuristic;
-
 	if (wall_h_percent > 1.0) wall_h_percent = 1.0;
 
 	byte depth_offset = (1.0 - wall_h_percent) * (sprite -> max_mipmap_depth - 1);
-
 	return get_mipmap_crop(sprite -> size, depth_offset);
 }
 

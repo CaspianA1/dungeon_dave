@@ -14,11 +14,17 @@ BoundingBox bounding_box_from_pos(const vec pos) {
 }
 
 void aabb_thing_collisions(const vec pos, const vec movement) { // aabb = axis-aligned bounding box
+	(void) movement;
+
 	const BoundingBox player_bounding_box = bounding_box_from_pos(pos);
 
+	(void) player_bounding_box;
+
+	/*
 	printf("pos = {%lf, %lf}\nplayer_bounding_box = {{%lf, %lf}, {%lf, %lf}}\n---\n",
 		pos[0], pos[1], player_bounding_box.origin[0], player_bounding_box.origin[1],
 		player_bounding_box.size[0], player_bounding_box.size[1]);
+	*/
 }
 
 // do convex wireframe collisions instead
