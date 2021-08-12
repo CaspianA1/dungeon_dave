@@ -1,6 +1,6 @@
 const double mipmap_depth_heuristic = 18.0;
 
-static SDL_Rect get_mipmap_crop(const ivec size, const byte depth_offset) {
+inlinable SDL_Rect get_mipmap_crop(const ivec size, const byte depth_offset) {
 	const int orig_w = size.x * 2 / 3;
 
 	SDL_Rect dest = {
