@@ -42,7 +42,8 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface, byte* const depth) {
 	SDL_Surface* const mipmap = SDL_CreateRGBSurfaceWithFormat(0,
 		surface -> w + (surface -> w >> 1), surface -> h, 32, PIXEL_FORMAT);
 
-	void blur_image_portion(SDL_Surface* const, SDL_Rect, const int);
+	// void blur_image_portion(SDL_Surface* const, SDL_Rect, const int);
+	void blur_portion_2(SDL_Surface* const, SDL_Rect, const int);
 
 	SDL_Rect dest = {.w = surface -> w, .h = surface -> h};
 	while (dest.w != 0 || dest.h != 0) {
@@ -53,7 +54,8 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface, byte* const depth) {
 		else dest.y += surface -> h >> (*depth - 1);
 
 		SDL_BlitScaled(surface, NULL, mipmap, &dest);
-		blur_image_portion(mipmap, dest, *depth);
+		// blur_image_portion(mipmap, dest, *depth);
+		blur_portion_2(mipmap, dest, *depth);
 
 		dest.w >>= 1;
 		dest.h >>= 1;
@@ -125,6 +127,80 @@ void blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int blur_
 
 	SDL_UnlockSurface(blurred_crop);
 	SDL_UnlockSurface(image);
+
+	/*
+	system("mkdir imgs");
+	static byte id = 0;
+	char buf[16];
+	sprintf(buf, "imgs/out_%d.bmp", id);
+	SDL_SaveBMP(blurred_crop, buf);
+	id++;
+	*/
+
+	SDL_BlitSurface(blurred_crop, NULL, image, &crop);
+	SDL_FreeSurface(blurred_crop);
+}
+
+typedef __v4si color4;
+
+color4 rgba_from_pixel(const SDL_Surface* const image, int x, int y) {
+	if (x < 0) x = 0;
+	else if (x >= image -> w) x = image -> w - 1;
+
+	if (y < 0) y = 0;
+	else if (y >= image -> h) y = image -> h - 1;
+
+	const SDL_PixelFormat* const format = image -> format;
+	const Uint32 pixel = *read_surface_pixel(image, x, y, format -> BytesPerPixel);
+	byte r, g, b, a;
+	SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
+	return (color4) {r, g, b, a};
+}
+
+void blur_portion_2(SDL_Surface* const image, SDL_Rect crop, const int blur_size) {
+	SDL_Surface* const blurred_crop = SDL_CreateRGBSurfaceWithFormat(0, crop.w, crop.h, 32, PIXEL_FORMAT);
+	SDL_LockSurface(blurred_crop);
+	SDL_LockSurface(image);
+
+	const SDL_PixelFormat* const format = image -> format;
+	const int bpp = format -> BytesPerPixel;
+ 	for (int y = crop.y; y < crop.y + crop.h; y++) {
+		for (int x = crop.x; x < crop.x + crop.w; x++) {
+			const color4 sum =
+				rgba_from_pixel(image, x - 1, y + 1) +
+				rgba_from_pixel(image, x + 0, y + 1) +
+				rgba_from_pixel(image, x + 1, y + 1) +
+				rgba_from_pixel(image, x - 1, y + 0) +
+				rgba_from_pixel(image, x + 0, y + 0) +
+				rgba_from_pixel(image, x + 1, y + 0) +
+				rgba_from_pixel(image, x - 1, y - 1) +
+				rgba_from_pixel(image, x + 0, y - 1) +
+				rgba_from_pixel(image, x + 1, y - 1);
+
+			const byte out[4] = {
+				sum[0] / 9,
+				sum[1] / 9,
+				sum[2] / 9,
+				sum[3] / 9
+			};
+
+			const Uint32 blurred_pixel = SDL_MapRGBA(format, out[0], out[1], out[2], out[3]); 
+			*read_surface_pixel(blurred_crop, x - crop.x, y - crop.y, bpp) = blurred_pixel;
+
+		}
+	}
+
+	SDL_UnlockSurface(blurred_crop);
+	SDL_UnlockSurface(image);
+
+	/*
+	system("mkdir imgs");
+	static byte id = 0;
+	char buf[16];
+	sprintf(buf, "imgs/out_%d.bmp", id);
+	SDL_SaveBMP(blurred_crop, buf);
+	id++;
+	*/
 
 	SDL_BlitSurface(blurred_crop, NULL, image, &crop);
 	SDL_FreeSurface(blurred_crop);
