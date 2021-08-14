@@ -7,10 +7,6 @@ struct {
 	SDL_Texture* hp_texture;
 } hud_resources = {NULL, NULL};
 
-typedef struct {
-	byte r, g, b;
-} Color3;
-
 enum {
 	HUD, BackgroundHP, PlayerMinimap
 } ColorID;

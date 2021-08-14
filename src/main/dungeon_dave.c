@@ -66,7 +66,6 @@ int main(void) {
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
 
 		clear_statemap(occluded_by_walls);
-		teleport_if_needed(&player);
 
 		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
@@ -90,6 +89,8 @@ int main(void) {
 			deinit_all(&player, &weapon);
 
 		fast_affine_floor(0, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
+
+		teleport_if_needed(&player);
 
 		refresh(&player, wall_y_shift);
 		tick_delay(before);

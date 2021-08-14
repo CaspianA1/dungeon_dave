@@ -97,3 +97,41 @@ levels w/ bad mipmap sizes:
 */
 
 /////
+
+SDL_SetRenderDrawColor(screen.renderer, teleporter_color.r, teleporter_color.g, teleporter_color.b, SDL_ALPHA_OPAQUE);
+
+// DEBUG(fuzz_ticks, d);
+
+for (byte i = 0; i < num_fuzz_dots_on_screen; i++) {
+	// const byte dot_size = (rand() % (settings.avg_dimensions / 20)) / ((fuzz_ticks + 1) / 4);
+	byte dot_size = (rand() % (settings.avg_dimensions / 20)) * (fuzz_ticks / ticks_for_teleporter_fuzz);
+
+
+	// DEBUG(dot_size, d);
+
+	// DEBUG((double) fuzz_ticks / ticks_for_teleporter_fuzz, lf);
+
+	// DEBUG(log(num_fuzz_dots_on_screen), lf);
+	// DEBUG(log(fuzz_ticks), lf);
+
+	const SDL_Rect dot_pos = {
+		rand() % settings.screen_width, rand() % settings.half_screen_height,
+		dot_size, dot_size
+	};
+
+	SDL_RenderFillRect(screen.renderer, &dot_pos);
+}
+
+/*
+SDL_Rect rand_fuzz_pos = {
+	rand() % settings.screen_width, rand() % settings.screen_height,
+	settings.screen_width >> 1, settings.screen_height >> 1
+};
+*/
+
+/*
+printf("I am here\n");
+SDL_RenderCopy(screen.renderer, teleporter_fuzz.texture, NULL, NULL);
+*/
+
+/////
