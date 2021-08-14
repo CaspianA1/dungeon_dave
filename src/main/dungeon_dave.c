@@ -44,14 +44,13 @@
 #include "../data/levels/red_room.c"
 #include "../data/levels/forever_maze.c"
 #include "../data/levels/palace.c"
-
 #include "../data/levels/mipmap_hallway.c"
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(&current_level.background_sound, 1);
@@ -65,6 +64,8 @@ int main(void) {
 		if (input_status == Exit) deinit_all(&player, &weapon);
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
+		teleport_if_needed(&player);
+
 		clear_statemap(occluded_by_walls);
 
 		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;

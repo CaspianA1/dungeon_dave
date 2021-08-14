@@ -14,7 +14,7 @@ inlinable double maze_shader(const vec pos) {
 void load_maze(void) {
 	enum {
 		map_width = 90, map_height = 61,
-		wall_count = 2, billboard_count = 0,
+		wall_count = 2, billboard_count = 0, teleporter_count = 0,
 		animated_billboard_count = 0, enemy_instance_count = 1
 	};
 
@@ -102,6 +102,7 @@ void load_maze(void) {
 		"assets/walls/grass.bmp");
 
 	set_level_billboards(&maze, billboard_count);	
+	set_level_teleporters(&maze, teleporter_count);
 	set_level_animated_billboards(&maze, animated_billboard_count);	
 
 	memcpy(&current_level, &maze, sizeof(Level));

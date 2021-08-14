@@ -11,7 +11,7 @@ inlinable double red_room_shader(const vec pos) {
 void load_red_room(void) {
 	enum {
 		map_width = 10, map_height = 10,
-		wall_count = 2, billboard_count = 0,
+		wall_count = 2, billboard_count = 0, teleporter_count = 0,
 		animated_billboard_count = 0, enemy_instance_count = 0
 	};
 
@@ -46,6 +46,7 @@ void load_red_room(void) {
 		"assets/walls/red_curtains.bmp");	
 
 	set_level_billboards(&red_room, billboard_count);	
+	set_level_teleporters(&red_room, teleporter_count);
 	set_level_animated_billboards(&red_room, animated_billboard_count);	
 
 	memcpy(&current_level, &red_room, sizeof(Level));

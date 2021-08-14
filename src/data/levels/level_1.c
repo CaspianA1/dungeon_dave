@@ -33,7 +33,7 @@ inlinable double level_1_shader(const vec pos) {
 void load_level_1(void) {
 	enum {
 		map_width = 25, map_height = 15,
-		wall_count = 10, billboard_count = 7,
+		wall_count = 10, billboard_count = 7, teleporter_count = 0,
 		animated_billboard_count = 3, enemy_instance_count = 1
 	};
 
@@ -109,6 +109,8 @@ void load_level_1(void) {
 		"assets/objects/idol.bmp", 18.5, 3.5, 0.0,
 		"assets/objects/axe.bmp", 11.0, 7.5, 0.0,
 		"assets/wolf/lamp.bmp", 18.5, 11.5, 0.0);
+
+	set_level_teleporters(&level_1, teleporter_count);
 
 	set_level_animated_billboards(&level_1, animated_billboard_count,
 		"assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 4.5, 11.5, 0.0,

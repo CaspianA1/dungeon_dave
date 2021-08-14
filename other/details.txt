@@ -33,7 +33,7 @@ features:
 	- a fade-up effect that starts when a level begins
 	- a lightmap system (and load defaults on a different thread, if lightmap creation is slow enough)
 	- hit head on things above player 
-	- teleporters
+	- allow enemies to teleport
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -56,6 +56,7 @@ problems:
 	- make the 0.33 ground level not a constant in effects.c
 	- fix enemy merging by making enemies account for thing collisions
 	- box blur doesn't handle edges
+	- level 1 stalls
 
 completed:
 	- minimap that conveys height data

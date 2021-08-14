@@ -1,6 +1,8 @@
 static Sprite teleporter_sprite;
 static Sound teleporter_sound;
 
+static const double teleporter_y_activation_delta = 1.0;
+
 void init_teleporter_data(void) {
 	teleporter_sprite = init_sprite("assets/objects/teleporter.bmp", 0);
 	teleporter_sound = init_sound("assets/audio/sound_effects/teleporter_zap.wav", 1);
@@ -14,7 +16,10 @@ void deinit_teleporter_data(void) {
 void teleport_if_needed(Player* const player) {
 	for (byte i = 0; i < current_level.teleporter_count; i++) {
 		const Teleporter teleporter = current_level.teleporters[i];
-		if (!vec_delta_exceeds(player -> pos, teleporter.from, thing_hit_dist)) {
+
+		if (!vec_delta_exceeds(player -> pos, teleporter.from_billboard.pos, thing_hit_dist) &&
+			fabs(teleporter.from_billboard.height - player -> jump.height) <= teleporter_y_activation_delta) {
+
 			play_sound(&teleporter_sound, 0);
 
 			const vec dest = teleporter.to;

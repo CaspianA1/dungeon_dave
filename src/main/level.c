@@ -76,6 +76,31 @@ void set_level_billboards(Level* const level, const unsigned billboard_count, ..
 	va_end(billboard_data);
 }
 
+// from, height, to
+void set_level_teleporters(Level* const level, const unsigned teleporter_count, ...) {
+	level -> teleporter_count = teleporter_count;
+	level -> teleporters = wmalloc(teleporter_count * sizeof(Teleporter));
+
+	va_list teleporter_data;
+	va_start(teleporter_data, teleporter_count);
+
+	for (byte i = 0; i < teleporter_count; i++) {
+		Teleporter* const teleporter = &level -> teleporters[i];
+		DataBillboard* const billboard_data = &teleporter -> from_billboard;
+
+		billboard_data -> pos = (vec) {
+			va_arg(teleporter_data, double),
+			va_arg(teleporter_data, double)
+		};
+
+		billboard_data -> height = va_arg(teleporter_data, double);
+		teleporter -> to = (vec) {
+			va_arg(teleporter_data, double),
+			va_arg(teleporter_data, double)
+		};
+	}
+}
+
 // path, frames/row, frames/col, frame_count, fps, x, y, height
 void set_level_animated_billboards(Level* const level, const unsigned animated_billboard_count, ...) {
 	level -> animated_billboard_count = animated_billboard_count;
@@ -149,7 +174,7 @@ void set_level_enemy_instances(Level* const level, const unsigned enemy_instance
 }
 
 inlinable void set_level_thing_container(Level* const level) {
-	level -> thing_count = level -> billboard_count
+	level -> thing_count = level -> billboard_count + level -> teleporter_count
 		+ level -> animated_billboard_count + level -> enemy_instance_count;
 
 	level -> thing_container = wmalloc(level -> thing_count * sizeof(Thing));
@@ -170,7 +195,9 @@ void deinit_level(const Level* const level) {
 
 	for (byte i = 0; i < level -> billboard_count; i++)
 		deinit_sprite(level -> billboards[i].sprite);
-	wfree(level-> billboards);
+	wfree(level -> billboards);
+
+	wfree(level -> teleporters);
 
 	for (byte i = 0; i < level -> animated_billboard_count; i++)
 		deinit_sprite(level -> animated_billboards[i].animation_data.immut.sprite);

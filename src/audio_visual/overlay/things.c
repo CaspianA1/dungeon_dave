@@ -68,7 +68,9 @@ static void draw_processed_things(const Player* const player, const double y_shi
 	}
 }
 
-inlinable void update_thing_values(const vec thing_pos, const vec player_pos,
+//////////
+
+void update_thing_values(const vec thing_pos, const vec player_pos,
 	const double player_angle, double* const beta, double* const dist) {
 
 	const vec delta = thing_pos - player_pos;
@@ -96,6 +98,21 @@ DEF_THING_ADDER(still) {
 	}
 }
 
+DEF_THING_ADDER(teleporter) {
+	for (byte i = 0; i < current_level.teleporter_count; i++) {
+		Teleporter* const teleporter = &current_level.teleporters[i];
+		DataBillboard* const billboard_data = &teleporter -> from_billboard;
+
+		update_thing_values(billboard_data -> pos, player_pos, player_angle, &billboard_data -> beta, &billboard_data -> dist);
+
+		const Thing thing = {
+			billboard_data, &teleporter_sprite, {0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}
+		};
+
+		memcpy(&current_level.thing_container[i + current_level.billboard_count], &thing, sizeof(Thing));
+	}
+}
+
 DEF_THING_ADDER(animated) {
 	for (byte i = 0; i < current_level.animated_billboard_count; i++) {
 		AnimatedBillboard* const animated_billboard = &current_level.animated_billboards[i];
@@ -114,7 +131,7 @@ DEF_THING_ADDER(animated) {
 
 		progress_animation_data_frame_ind(animation_data);
 
-		memcpy(&current_level.thing_container[i + current_level.billboard_count], &thing, sizeof(Thing));
+		memcpy(&current_level.thing_container[i + current_level.billboard_count + current_level.teleporter_count], &thing, sizeof(Thing));
 	}
 }
 
@@ -138,16 +155,17 @@ DEF_THING_ADDER(enemy_instance) {
 		};
 
 		memcpy(&current_level.thing_container
-			[i + current_level.billboard_count + current_level.animated_billboard_count], &thing, sizeof(Thing));
+			[i + current_level.billboard_count + current_level.teleporter_count + current_level.animated_billboard_count],
+			&thing, sizeof(Thing));
 	}
 }
 
 void draw_things(const Player* const player, const double y_shift) {
 	const double player_angle = to_radians(player -> angle);
 
-	enum {num_thing_adders = 3};
-	void (*thing_adders[3])(THING_ADDER_SIGNATURE) = {
-		THING_ADDER(still), THING_ADDER(animated), THING_ADDER(enemy_instance)
+	enum {num_thing_adders = 4};
+	void (*thing_adders[num_thing_adders])(THING_ADDER_SIGNATURE) = {
+		THING_ADDER(still), THING_ADDER(teleporter), THING_ADDER(animated), THING_ADDER(enemy_instance)
 	};
 
 	for (byte i = 0; i < num_thing_adders; i++)

@@ -11,7 +11,7 @@ inlinable double hallway_shader(const vec pos) {
 void load_hallway(void) {
 	enum {
 		map_width = 10, map_height = 25,
-		wall_count = 2, billboard_count = 0,
+		wall_count = 2, billboard_count = 0, teleporter_count = 0,
 		animated_billboard_count = 0, enemy_instance_count = 0
 	};
 
@@ -59,6 +59,7 @@ void load_hallway(void) {
 	set_level_skybox(&hallway, "assets/skyboxes/desert.bmp");
 	set_level_walls(&hallway, wall_count, "assets/walls/arthouse_bricks.bmp", "assets/walls/dirt.bmp");
 	set_level_billboards(&hallway, billboard_count);
+	set_level_teleporters(&hallway, teleporter_count);
 	set_level_animated_billboards(&hallway, animated_billboard_count);
 
 	memcpy(&current_level, &hallway, sizeof(Level));

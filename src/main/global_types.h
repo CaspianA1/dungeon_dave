@@ -77,7 +77,8 @@ typedef struct {
 //////////
 
 typedef struct {
-	const vec from, to; // drop the player at the appropriate point height + a bit more
+	DataBillboard from_billboard;
+	vec to;
 } Teleporter;
 
 typedef struct {
