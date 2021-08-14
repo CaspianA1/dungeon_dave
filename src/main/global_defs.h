@@ -18,7 +18,7 @@
 */
 
 // #define SHADING_ENABLED
-#define SOUND_ENABLED
+// #define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 // max: 1440 by 900
@@ -78,9 +78,6 @@
 	(double) frect.x, (double) frect.y, (double) frect.w, (double) frect.h)
 
 /////
-
-#define num_leading_zeroes __builtin_clz
-#define exp_for_pow_of_2 __builtin_ffs
 
 typedef uint_fast8_t byte;
 typedef __m128d vec;

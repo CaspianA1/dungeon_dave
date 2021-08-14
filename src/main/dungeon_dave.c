@@ -64,9 +64,9 @@ int main(void) {
 		if (input_status == Exit) deinit_all(&player, &weapon);
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
-		teleport_if_needed(&player);
 
 		clear_statemap(occluded_by_walls);
+		teleport_if_needed(&player);
 
 		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 

@@ -88,3 +88,12 @@ inlinable void clamp_axis_val(int* const val, const int axis_size) {
 }
 
 /////
+
+/*
+levels w/ bad mipmap sizes:
+- forever_maze (ivy.bmp) (done)
+- level_1 (cobblestone_2.bmp, stone_2.bmp, hieroglyphics.bmp) (done)
+- red_room (red_room_floor.bmp, red_curtains.bmp) (done)
+*/
+
+/////

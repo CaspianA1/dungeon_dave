@@ -88,7 +88,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 		while (iter_dda(&ray)) {
 			const byte point = map_point(current_level.wall_data, ray.curr_tile[0], ray.curr_tile[1]);
 			const vec hit = vec_line_pos(player -> pos, dir, ray.dist);
-			const byte point_height = current_level.get_point_height(point, hit);
+			const byte point_height = current_level.get_point_height(point, hit); // TODO: don't recalculate the point height
 
 			if (point_height != curr_point_height) {
 				double height_change_y, height_change_h;

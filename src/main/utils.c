@@ -62,7 +62,10 @@ void dynamic_memory_report(void) {
 
 #endif
 
-/////
+//////////
+
+#define num_leading_zeroes __builtin_clz
+#define exp_for_pow_of_2(num) (__builtin_ffs(num) - 1)
 
 inlinable double to_radians(const double degrees) {
 	return degrees * M_PI / 180.0;

@@ -1,3 +1,7 @@
+inlinable byte is_pow_of_2(const int num) {
+	return (num & (num - 1)) == 0;
+}
+
 Sprite init_sprite(const char* const path, const byte enable_mipmap) {
 	SDL_Surface* surface = SDL_LoadBMP(path);
 	if (surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
@@ -10,8 +14,12 @@ Sprite init_sprite(const char* const path, const byte enable_mipmap) {
 		surface = mipmap;
 	}
 
-	sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
 	sprite.size = (ivec) {surface -> w, surface -> h};
+
+	if (enable_mipmap && (!is_pow_of_2(sprite.size.x * 2 / 3) || !is_pow_of_2(sprite.size.y))) // mipmaps need powers of 2 dimensions
+		FAIL("The sprite with the path %s must have dimensions that are powers of two!\n", path);
+
+	sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
 
 	SDL_FreeSurface(surface);
 	return sprite;
