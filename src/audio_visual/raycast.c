@@ -3,7 +3,7 @@ typedef struct {
 	const double player_angle, theta, dist, wall_y_shift, full_jump_height;
 	const vec begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
-	const byte point, side, first_wall_hit;
+	const byte point, point_height, side, first_wall_hit;
 	byte* const last_point_height;
 	const int screen_x;
 } DataRaycast;
@@ -31,8 +31,7 @@ vec handle_ray(const DataRaycast d) {
 		wall_h
 	};
 
-	const byte point_height = current_level.get_point_height(d.point, d.hit);
-	const double smallest_wall_y = wall_dest.y - (wall_h * (point_height - 1)); // = wall_top
+	const double smallest_wall_y = wall_dest.y - (wall_h * (d.point_height - 1)); // = wall_top
 
 	if (d.first_wall_hit) update_val_buffers(d.screen_x, smallest_wall_y,
 		wall_dest.y + wall_dest.h, corrected_dist, cos_beta, d.dir);
@@ -51,7 +50,7 @@ vec handle_ray(const DataRaycast d) {
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 	#endif
 
-	for (byte i = *d.last_point_height; i < point_height; i++) {
+	for (byte i = *d.last_point_height; i < d.point_height; i++) {
 		DRect raised_wall_dest = wall_dest;
 		raised_wall_dest.y -= wall_dest.h * i;
 
@@ -70,7 +69,7 @@ vec handle_ray(const DataRaycast d) {
 		SDL_FRect frect = {raised_wall_dest.x, raised_wall_dest.y, raised_wall_dest.w, raised_wall_dest.h};
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &frect);
 	}
-	*d.last_point_height = point_height;
+	*d.last_point_height = d.point_height;
 	return (vec) {smallest_wall_y, wall_h};
 }
 
@@ -88,14 +87,14 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 		while (iter_dda(&ray)) {
 			const byte point = map_point(current_level.wall_data, ray.curr_tile[0], ray.curr_tile[1]);
 			const vec hit = vec_line_pos(player -> pos, dir, ray.dist);
-			const byte point_height = current_level.get_point_height(point, hit); // TODO: don't recalculate the point height
+			const byte point_height = current_level.get_point_height(point, hit);
 
 			if (point_height != curr_point_height) {
 				double height_change_y, height_change_h;
 				if (point) {
 					const vec wall_y_components = handle_ray((DataRaycast) {
 						&last_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height,
-						player -> pos, hit, dir, point, ray.side, at_first_hit, &last_point_height, screen_x});
+						player -> pos, hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x});
 
 					height_change_y = wall_y_components[0], height_change_h = wall_y_components[1];
 
