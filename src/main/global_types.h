@@ -2,7 +2,7 @@ typedef enum {
 	Exit, ProceedAsNormal, BeginAnimatingWeapon
 } InputStatus;
 
-/////
+//////////
 
 typedef struct {
 	double val;
@@ -41,7 +41,7 @@ typedef struct {
 	KinematicBody body;
 } Player;
 
-/////
+//////////
 
 typedef struct {
 	SDL_Window* window;
@@ -57,7 +57,7 @@ typedef struct {
 	vec dir;
 } BufferVal;
 
-/////
+//////////
 
 typedef struct {
 	int screen_width, screen_height, half_screen_width, half_screen_height,
@@ -66,7 +66,7 @@ typedef struct {
 	double fov, fov_step, max_fov, proj_dist, minimap_scale;
 } Settings;
 
-/////
+//////////
 
 typedef struct {
 	ivec chunk_dimensions;
@@ -74,7 +74,11 @@ typedef struct {
 	byte* data;
 } StateMap;
 
-/////
+//////////
+
+typedef struct {
+	const vec from, to; // drop the player at the appropriate point height + a bit more
+} Teleporter;
 
 typedef struct {
 	const ivec map_size;
@@ -84,7 +88,7 @@ typedef struct {
 
 	byte
 		wall_count, billboard_count, animated_billboard_count, enemy_instance_count,
-		thing_count, max_point_height, out_of_bounds_point,
+		teleporter_count, thing_count, max_point_height, out_of_bounds_point,
  		*wall_data, *ceiling_data, *floor_data;
 
  	StateMap bfs_visited;
@@ -100,6 +104,7 @@ typedef struct {
 	Billboard* billboards;
 	AnimatedBillboard* animated_billboards;
 	EnemyInstance* enemy_instances;
+	Teleporter* teleporters;
 	Thing* thing_container;
 } Level;
 

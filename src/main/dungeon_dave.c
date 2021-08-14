@@ -11,6 +11,7 @@
 #include "settings.c"
 #include "movement.c" // previously a part of input.c
 #include "input.c"
+#include "teleporter.c"
 #include "level.c"
 
 #include "../audio_visual/screen.c"

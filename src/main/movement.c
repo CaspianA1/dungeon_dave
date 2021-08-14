@@ -1,4 +1,9 @@
-static const double thing_hit_dist = 0.5, thing_y_collision_delta = 0.5, thing_box_axis_len = 0.3;
+static const double
+	thing_hit_dist = 0.5,
+	thing_y_collision_delta = 0.5,
+	thing_box_axis_len = 0.3;
+
+const double min_fall_height_for_sound = 2.0;
 
 typedef struct {
 	const vec origin, size;
@@ -143,8 +148,6 @@ void update_jump(Jump* const jump, const vec pos) {
 	*last_tick_time = curr_tick_time;
 
 	#else
-
-	const double min_fall_height_for_sound = 2.0;
 
 	if (keys[KEY_JUMP] && !jump -> jumping) {
 		init_a_jump(jump, 0);

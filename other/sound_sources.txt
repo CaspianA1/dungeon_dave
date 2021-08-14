@@ -13,3 +13,5 @@ https://freesound.org/people/Saltbearer/sounds/476852/ (enemy audio test, attack
 https://freesound.org/people/ludist/sounds/204450/ (enemy audio test, death)
 
 https://freesound.org/people/LamaMakesMusic/sounds/403639/ (wall hit, not used at the moment)
+
+https://freesound.org/people/michael_grinnell/sounds/512471/ (teleporter sound)

@@ -190,8 +190,9 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 void deinit_all(const Player* const player, const Weapon* const weapon) {
 	void deinit_weapon(const Weapon* const);
-	void deinit_level(const Level);
+	void deinit_level(const Level* const);
 	void deinit_hud_resources(void);
+	void deinit_teleporter_data(void);
 	void deinit_screen(void);
 
 	deinit_sound(&player -> sound_when_attacked);
@@ -199,11 +200,13 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	deinit_sound(&player -> jump.sound_at_jump);
 	deinit_sound(&player -> jump.sound_at_land);
 	deinit_weapon(weapon);
-	deinit_level(current_level);
+	deinit_level(&current_level);
 
 	extern Enemy enemies[1];
 	void deinit_enemy(const Enemy* const);
 	deinit_enemy(&enemies[0]);
+
+	deinit_teleporter_data();
 
 	deinit_audio_subsystem();
 	deinit_hud_resources();

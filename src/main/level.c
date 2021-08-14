@@ -155,27 +155,27 @@ inlinable void set_level_thing_container(Level* const level) {
 	level -> thing_container = wmalloc(level -> thing_count * sizeof(Thing));
 }
 
-void deinit_level(const Level level) {
-	byte* const map_data[3] = {level.wall_data, level.ceiling_data, level.floor_data};
+void deinit_level(const Level* const level) {
+	byte* const map_data[3] = {level -> wall_data, level -> ceiling_data, level -> floor_data};
 	for (byte i = 0; i < 3; i++) wfree(map_data[i]);
 
-	deinit_statemap(level.bfs_visited);
+	deinit_statemap(level -> bfs_visited);
 
-	if (level.skybox.enabled) deinit_sprite(level.skybox.sprite);
-	deinit_sound(&level.background_sound);
+	if (level -> skybox.enabled) deinit_sprite(level -> skybox.sprite);
+	deinit_sound(&level -> background_sound);
 
-	for (byte i = 0; i < level.wall_count; i++)
-		deinit_sprite(level.walls[i]);
-	wfree(level.walls);
+	for (byte i = 0; i < level -> wall_count; i++)
+		deinit_sprite(level -> walls[i]);
+	wfree(level -> walls);
 
-	for (byte i = 0; i < level.billboard_count; i++)
-		deinit_sprite(level.billboards[i].sprite);
-	wfree(level.billboards);
+	for (byte i = 0; i < level -> billboard_count; i++)
+		deinit_sprite(level -> billboards[i].sprite);
+	wfree(level-> billboards);
 
-	for (byte i = 0; i < level.animated_billboard_count; i++)
-		deinit_sprite(level.animated_billboards[i].animation_data.immut.sprite);
-	wfree(level.animated_billboards);
+	for (byte i = 0; i < level -> animated_billboard_count; i++)
+		deinit_sprite(level -> animated_billboards[i].animation_data.immut.sprite);
+	wfree(level -> animated_billboards);
 
-	wfree(level.enemy_instances);
-	wfree(level.thing_container);
+	wfree(level -> enemy_instances);
+	wfree(level -> thing_container);
 }
