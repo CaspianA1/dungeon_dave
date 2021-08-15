@@ -1,7 +1,6 @@
 static Sprite teleporter_sprite;
 static Sound teleporter_sound;
 
-static const double teleporter_y_activation_delta = 1.0;
 static const byte ticks_for_teleporter_fuzz = 50, num_fuzz_dots_on_screen = 80, dot_dimension_divisor = 15;
 static const Color3 teleporter_color = {255, 204, 0};
 
@@ -15,7 +14,28 @@ void deinit_teleporter_data(void) {
 	deinit_sound(&teleporter_sound);
 }
 
-void teleport_if_needed(Player* const player) {
+byte teleport_if_needed(vec* const pos, double* const height, const byte drop_actor) {
+	for (byte i = 0; i < current_level.teleporter_count; i++) {
+		const Teleporter teleporter = current_level.teleporters[i];
+
+		if (!vec_delta_exceeds(*pos, teleporter.from_billboard.pos, thing_hit_dist) &&
+			fabs(teleporter.from_billboard.height - *height) <= 1.0) {
+
+			play_sound(&teleporter_sound, 0);
+
+			const vec dest = teleporter.to;
+			const byte dest_point = map_point(current_level.wall_data, dest[0], dest[1]);
+			*height = current_level.get_point_height(dest_point, dest);
+			if (drop_actor) *height += min_fall_height_for_sound;
+
+			*pos = dest;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+void teleport_player_if_needed(Player* const player) {
 	static byte fuzz_ticks = ticks_for_teleporter_fuzz;
 
 	if (fuzz_ticks < ticks_for_teleporter_fuzz) {
@@ -38,22 +58,6 @@ void teleport_if_needed(Player* const player) {
 		}
 	}
 
-	for (byte i = 0; i < current_level.teleporter_count; i++) {
-		const Teleporter teleporter = current_level.teleporters[i];
-
-		if (!vec_delta_exceeds(player -> pos, teleporter.from_billboard.pos, thing_hit_dist) &&
-			fabs(teleporter.from_billboard.height - player -> jump.height) <= teleporter_y_activation_delta) {
-
-			fuzz_ticks--;
-
-			play_sound(&teleporter_sound, 0);
-
-			const vec dest = teleporter.to;
-			const byte dest_point = map_point(current_level.wall_data, dest[0], dest[1]);
-			player -> jump.height = current_level.get_point_height(dest_point, dest) + min_fall_height_for_sound;
-
-			player -> pos = dest;
-			break;
-		}
-	}
+	if (teleport_if_needed(&player -> pos, &player -> jump.height, 1))
+		fuzz_ticks--;
 }

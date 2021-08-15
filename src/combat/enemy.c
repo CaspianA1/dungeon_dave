@@ -27,11 +27,15 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 	const Enemy* const enemy = enemy_instance -> enemy;
 
 	Navigator* const nav = &enemy_instance -> nav;
-	const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
+	DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
+
+	if (teleport_if_needed(&billboard_data -> pos, &billboard_data -> height, 0)) {
+		// set_enemy_instance_state(enemy_instance, Chasing, 0);
+		nav -> route_ind = 0;
+	}
+
 	double dist = billboard_data -> dist;
-
 	for (byte i = 0; i < 5; i++) set_sound_volume_from_dist(&enemy -> sounds[i], dist);
-
 	const EnemyState last_state = enemy_instance -> state;
 
 	/* for each state (excluding Dead), periodically play the sound from that state,
@@ -49,7 +53,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 			break;
 		
 		case Chasing: {
-			const NavigationState nav_state = update_path_if_needed(nav, player -> pos);
+			const NavigationState nav_state = update_route_if_needed(nav, player -> pos);
 			if (nav_state == ReachedDest)
 				set_enemy_instance_state(enemy_instance, Attacking, 0);
 			else if (nav_state == PathTooLongBFS || nav_state == FailedBFS)
@@ -58,7 +62,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 			break;
 
 		case Attacking: {
-			const NavigationState nav_state = update_path_if_needed(nav, player -> pos);
+			const NavigationState nav_state = update_route_if_needed(nav, player -> pos);
 
 			if (nav_state == Navigating)
 				set_enemy_instance_state(enemy_instance, Chasing, 0);

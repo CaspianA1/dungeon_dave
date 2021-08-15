@@ -37,10 +37,8 @@ static CorrectedRoute make_corrected_route(const Route route, const vec nav_pos)
 	CorrectedRoute corrected_route = {.length = route.length};
 
 	corrected_route.data[0] = nav_pos;
-	for (int i = 1; i < route.length; i++) {
-		const ivec orig_node = route.data[i];
-		corrected_route.data[i] = (vec) {orig_node.x, orig_node.y} + vec_fill(0.5);
-	}
+	for (int i = 1; i < route.length; i++)
+		corrected_route.data[i] = vec_from_ivec(route.data[i]) + vec_fill(0.5);
 
 	return corrected_route;
 }
@@ -64,7 +62,7 @@ inlinable Navigator init_navigator(const vec player_pos, vec* const pos_ref, con
 	return nav;
 }
 
-NavigationState update_path_if_needed(Navigator* const nav, const vec player_pos) {
+NavigationState update_route_if_needed(Navigator* const nav, const vec player_pos) {
 	const byte base_height = current_level.get_point_height(
 		map_point(current_level.wall_data, player_pos[0], player_pos[1]), player_pos);
 

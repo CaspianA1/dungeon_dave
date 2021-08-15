@@ -11,8 +11,8 @@ inlinable double hallway_shader(const vec pos) {
 void load_hallway(void) {
 	enum {
 		map_width = 10, map_height = 25,
-		wall_count = 2, billboard_count = 0, teleporter_count = 0,
-		animated_billboard_count = 0, enemy_instance_count = 0
+		wall_count = 2, billboard_count = 0, teleporter_count = 3,
+		animated_billboard_count = 0, enemy_instance_count = 1
 	};
 
 	static const byte wall_data[map_height][map_width] = {
@@ -43,7 +43,7 @@ void load_hallway(void) {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
-	Level hallway = init_level(map_width, map_height, 4.5, 23.5, 0.0);
+	Level hallway = init_level(map_width, map_height, 5.0, 3.4, 0.0);
 	hallway.darkest_shade = 0.4;
 	hallway.max_point_height = 2;
 	hallway.out_of_bounds_point = 1;
@@ -59,11 +59,18 @@ void load_hallway(void) {
 	set_level_skybox(&hallway, "assets/skyboxes/desert.bmp");
 	set_level_walls(&hallway, wall_count, "assets/walls/arthouse_bricks.bmp", "assets/walls/dirt.bmp");
 	set_level_billboards(&hallway, billboard_count);
-	set_level_teleporters(&hallway, teleporter_count);
+
+	set_level_teleporters(&hallway, teleporter_count,
+		5.0, 4.0, 0.0, // from pos + height
+		5.5, 10.5, /* to pos */
+
+		6.0, 4.0, 0.0, 5.5, 10.5,
+		4.0, 4.0, 0.0, 5.5, 10.5);
+
 	set_level_animated_billboards(&hallway, animated_billboard_count);
 
 	memcpy(&current_level, &hallway, sizeof(Level));
 
-	set_level_enemy_instances(&hallway, enemy_instance_count, 0, 8.5, 7.5, 0.0);
-	set_level_thing_container(&hallway);
+	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 5.0, 8.0, 0.0);
+	set_level_thing_container(&current_level);
 }

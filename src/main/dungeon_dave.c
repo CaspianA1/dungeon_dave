@@ -50,7 +50,7 @@
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_hallway, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(&current_level.background_sound, 1);
@@ -90,7 +90,7 @@ int main(void) {
 
 		fast_affine_floor(0, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
-		teleport_if_needed(&player);
+		teleport_player_if_needed(&player);
 
 		refresh(&player, wall_y_shift);
 		tick_delay(before);
