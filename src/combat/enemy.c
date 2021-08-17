@@ -29,10 +29,8 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 	Navigator* const nav = &enemy_instance -> nav;
 	DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
 
-	if (teleport_if_needed(&billboard_data -> pos, &billboard_data -> height, 0)) {
-		// set_enemy_instance_state(enemy_instance, Chasing, 0);
-		nav -> route_ind = 0;
-	}
+	if (teleport_if_needed(&billboard_data -> pos, &billboard_data -> height, 0))
+		nav -> route_ind = 0; // this is very much a hack
 
 	double dist = billboard_data -> dist;
 	for (byte i = 0; i < 5; i++) set_sound_volume_from_dist(&enemy -> sounds[i], dist);

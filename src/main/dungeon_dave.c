@@ -50,7 +50,7 @@
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_hallway, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(&current_level.background_sound, 1);

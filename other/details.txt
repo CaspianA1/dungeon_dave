@@ -55,6 +55,7 @@ problems:
 	- make the 0.33 ground level not a constant in effects.c
 	- fix enemy merging by making enemies account for thing collisions
 	- box blur doesn't handle edges
+	- jitters when jumping onto things
 
 completed:
 	- minimap that conveys height data
