@@ -46,7 +46,7 @@ vec handle_ray(const DataRaycast* const d) {
 	};
 
 	#ifdef SHADING_ENABLED
-	const byte shade = 255 * calculate_shade(wall_h, d.hit);
+	const byte shade = 255 * calculate_shade(wall_h, d -> hit);
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 	#endif
 

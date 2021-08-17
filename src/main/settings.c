@@ -58,6 +58,7 @@ void load_default_settings(void) {
 	settings.fov_step = INIT_FOV_STEP;
 	settings.max_fov = INIT_MAX_FOV;
 	settings.minimap_scale = INIT_MINIMAP_SCALE;
+	settings.plane_bottom = -1.0 / ((settings.screen_height / settings.proj_dist) * 2.0);
 }
 
 byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
@@ -85,6 +86,7 @@ byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
 		if (height_not_eq) {
 			settings.screen_height = new_height;
 			settings.half_screen_height = new_height / 2;
+			settings.plane_bottom = -1.0 / ((settings.screen_height / settings.proj_dist) * 2.0);
 			void update_y_pitch(int* const, const int);
 			update_y_pitch(y_pitch, mouse_y);
 		}
