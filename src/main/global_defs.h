@@ -29,8 +29,8 @@
 
 // #define INIT_FOV 66.849622365373434718
 #define INIT_FOV 90.0
-#define INIT_FOV_STEP 0.5
-#define INIT_MAX_FOV 151.0
+#define INIT_FOV_STEP 1.0
+#define INIT_MAX_FOV 105.0
 
 #define INIT_MINIMAP_SCALE 4.8
 #define INIT_HP 30.0

@@ -31,7 +31,9 @@ byte death_effect(Player* const player) {
 	double* const p_height = &player -> jump.height;
 
 	const byte base_height = current_level.get_point_height(map_point(current_level.wall_data, pos[0], pos[1]), pos);
-	const double bottom = base_height - 0.2 * (base_height + 1);
+
+	const double death_fall_bottom = settings.plane_bottom * 9.0 / 10.0;
+	const double bottom = base_height + death_fall_bottom * (base_height + 1);
 	const double dist_from_bottom = *p_height - bottom;
 
 	if (*p_height > bottom) *p_height -= dist_from_bottom / 10.0;
