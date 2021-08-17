@@ -128,7 +128,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 					last_point_height = 0;
 				}
 
-				draw_at_height_change(screen_x, last_wall_y, height_change_y + height_change_h, point_height);
+				// draw_at_height_change(screen_x, last_wall_y, height_change_y + height_change_h, point_height);
 
 				curr_point_height = point_height;
 				last_height_change_y = height_change_y;
