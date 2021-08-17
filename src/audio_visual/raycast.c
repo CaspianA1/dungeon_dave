@@ -73,7 +73,8 @@ vec handle_ray(const DataRaycast* const d) {
 	return (vec) {smallest_wall_y, wall_h};
 }
 
-void draw_at_height_change(const int screen_x, const double last_wall_top, const double curr_wall_bottom) {
+// figure out why there is no red when the player height is 0
+void draw_at_height_change(const int screen_x, const double last_wall_top, const double curr_wall_bottom, const byte point_height) {
 	// from curr wall bottom (farther away) to last wall top
 
 	if (last_wall_top < curr_wall_bottom) return;
@@ -81,8 +82,9 @@ void draw_at_height_change(const int screen_x, const double last_wall_top, const
 	void draw_colored_rect(const byte, const byte, const byte, const double, const SDL_Rect* const);
 
 
-	if (screen_x == 200) {
-		SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	// if (screen_x == 200) {
+	if (1) {
+		SDL_SetRenderDrawColor(screen.renderer, (point_height == 1) ? 120 : 255, 0, 0, SDL_ALPHA_OPAQUE);
 		SDL_RenderDrawLine(screen.renderer, screen_x, curr_wall_bottom, screen_x, last_wall_top);
 
 		const SDL_Rect curr_wall_bottom_dot = {screen_x, curr_wall_bottom, 5, 5};
@@ -126,7 +128,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 					last_point_height = 0;
 				}
 
-				draw_at_height_change(screen_x, last_wall_y, height_change_y + height_change_h);
+				draw_at_height_change(screen_x, last_wall_y, height_change_y + height_change_h, point_height);
 
 				curr_point_height = point_height;
 				last_height_change_y = height_change_y;
