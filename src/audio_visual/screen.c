@@ -25,6 +25,8 @@ void deinit_screen(void) {
 }
 
 inlinable void prepare_for_drawing(void) {
+	clear_statemap(occluded_by_walls);
+
 	SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, 0);
 	SDL_RenderClear(screen.renderer); // clearing the window
 

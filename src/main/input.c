@@ -31,7 +31,7 @@ inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lst
 
 #ifdef NOCLIP_MODE
 
-#define update_pace(a, b, c, d, e)
+#define update_pace(a, b, c, d, e) (void) c
 
 #else
 

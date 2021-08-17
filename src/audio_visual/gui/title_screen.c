@@ -15,7 +15,7 @@ Message init_message(const char* const text, const byte r, const byte g, const b
 	return message;
 }
 
-inlinable void draw_colored_rect(const byte r, const byte g, const byte b,
+void draw_colored_rect(const byte r, const byte g, const byte b,
 	const double shade, const SDL_Rect* const rect) {
 
 	SDL_SetRenderDrawColor(screen.renderer, r * shade, g * shade, b * shade, SDL_ALPHA_OPAQUE);

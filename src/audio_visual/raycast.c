@@ -73,6 +73,26 @@ vec handle_ray(const DataRaycast* const d) {
 	return (vec) {smallest_wall_y, wall_h};
 }
 
+void draw_at_height_change(const int screen_x, const double last_wall_top, const double curr_wall_bottom) {
+	// from curr wall bottom (farther away) to last wall top
+
+	if (last_wall_top < curr_wall_bottom) return;
+
+	void draw_colored_rect(const byte, const byte, const byte, const double, const SDL_Rect* const);
+
+
+	if (screen_x == 200) {
+		SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_RenderDrawLine(screen.renderer, screen_x, curr_wall_bottom, screen_x, last_wall_top);
+
+		const SDL_Rect curr_wall_bottom_dot = {screen_x, curr_wall_bottom, 5, 5};
+		draw_colored_rect(255, 165, 0, 1.0, &curr_wall_bottom_dot);
+
+		const SDL_Rect last_wall_top_dot = {screen_x, last_wall_top, 5, 5};
+		draw_colored_rect(0, 255, 0, 1.0, &last_wall_top_dot);
+	}
+}
+
 void raycast(const Player* const player, const double wall_y_shift, const double full_jump_height) {
 	const double player_angle = to_radians(player -> angle);
 
@@ -97,16 +117,8 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 						player -> pos, hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x
 					};
 
-					/*
-					const vec wall_y_components = handle_ray((DataRaycast) {
-						&last_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height,
-						player -> pos, hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x});
-					*/
-
 					const vec wall_y_components = handle_ray(&raycast_data);
-
 					height_change_y = wall_y_components[0], height_change_h = wall_y_components[1];
-
 					at_first_hit = 0;
 				}
 				else {
@@ -114,7 +126,8 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 					last_point_height = 0;
 				}
 
-				// draw from last wall y (last height_change_h) to current wall bottom (y + h)
+				draw_at_height_change(screen_x, last_wall_y, height_change_y + height_change_h);
+
 				curr_point_height = point_height;
 				last_height_change_y = height_change_y;
 			}

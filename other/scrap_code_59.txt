@@ -135,3 +135,11 @@ SDL_RenderCopy(screen.renderer, teleporter_fuzz.texture, NULL, NULL);
 */
 
 /////
+
+/*
+const vec wall_y_components = handle_ray((DataRaycast) {
+	&last_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height,
+	player -> pos, hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x});
+*/
+
+/////

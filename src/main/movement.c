@@ -29,6 +29,10 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	*hit_x = 0;
 	*hit_y = 0;
 
+	#ifdef PLANAR_MODE
+	return;
+	#endif
+
 	static byte first_call = 1; // first call ignored b/c thing data has not been initialized yet
 	if (first_call) {
 		first_call = 0;
@@ -110,6 +114,11 @@ void update_pos(vec* const ref_pos, vec* const dir,
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
 
 	////////// collision detection
+	#ifdef NOCLIP_MODE
+	(void) p_height;
+	*ref_pos += movement;
+
+	#else
 	byte thing_hit_x, thing_hit_y;
 	vec pos = *ref_pos;
 	report_aabb_thing_collisions(pos, movement, &thing_hit_x, &thing_hit_y, p_height);
@@ -120,6 +129,7 @@ void update_pos(vec* const ref_pos, vec* const dir,
 		pos[1] += movement[1];
 
 	*ref_pos = pos;
+	#endif
 	//////////
 }
 
@@ -159,7 +169,10 @@ void update_jump(Jump* const jump, const vec pos) {
 	//////////
 	double ground_height;
 	static byte first_call = 1;
-	byte landed_on_thing = 0, hit_head = 0;
+	byte landed_on_thing = 0;
+
+	#ifndef PLANAR_MODE
+	byte hit_head = 0;
 
 	if (!first_call) { // first_call avoided for the same reason as explained in handle_thing_collisions
 		for (byte i = 0; i < current_level.thing_count; i++) {
@@ -180,6 +193,7 @@ void update_jump(Jump* const jump, const vec pos) {
 			}
 		}
 	}
+	#endif
 
 	if (!landed_on_thing) {
 		const byte point = map_point(current_level.wall_data, pos[0], pos[1]);

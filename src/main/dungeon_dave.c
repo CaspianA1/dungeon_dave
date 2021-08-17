@@ -65,8 +65,6 @@ int main(void) {
 
 		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
 
-		clear_statemap(occluded_by_walls);
-
 		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
 		prepare_for_drawing();
