@@ -1,4 +1,4 @@
-// this is a french castle
+// this is a french castle: https://www.visit.alsace/wp-content/uploads/lei/pictures/219006223-fleckenstein-castle-6-1600x900.jpg
 
 inlinable byte get_fleckenstein_point_height(const byte point, const vec pos) {
 	(void) pos;
