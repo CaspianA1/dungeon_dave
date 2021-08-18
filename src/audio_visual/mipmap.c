@@ -54,7 +54,7 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface, byte* const depth) {
 		else dest.y += surface -> h >> (*depth - 1);
 
 		SDL_BlitScaled(surface, NULL, mipmap, &dest);
-		blur_image_portion(mipmap, dest, *depth >> 1);
+		blur_image_portion(mipmap, dest, *depth / 3);
 		// blur_portion_2(mipmap, dest, *depth);
 
 		dest.w >>= 1;

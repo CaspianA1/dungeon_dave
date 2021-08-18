@@ -45,16 +45,17 @@
 #include "../data/levels/forever_maze.c"
 #include "../data/levels/palace.c"
 #include "../data/levels/mipmap_hallway.c"
+#include "../data/levels/fleckenstein.c"
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_fleckenstein, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(&current_level.background_sound, 1);
-	p = init_psprite("assets/walls/dune.bmp");
+	p = init_psprite("assets/walls/grass.bmp");
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
