@@ -98,7 +98,7 @@ typedef struct {
 	byte
 		wall_count, billboard_count, animated_billboard_count, enemy_instance_count,
 		teleporter_count, thing_count, max_point_height, out_of_bounds_point,
- 		*wall_data, *ceiling_data, *floor_data;
+ 		*wall_data, *ceiling_data, *floor_data, *heightmap;
 
  	StateMap bfs_visited;
 

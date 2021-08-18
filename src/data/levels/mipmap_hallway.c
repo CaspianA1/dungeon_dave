@@ -65,7 +65,7 @@ void load_hallway(void) {
 		5.5, 10.5, /* to pos */
 
 		6.0, 4.0, 0.0, 5.5, 10.5,
-		4.0, 4.0, 0.0, 5.5, 10.5);
+		4.0, 4.0, 0.0, 5.5, 4.5);
 
 	set_level_animated_billboards(&hallway, animated_billboard_count);
 

@@ -1,3 +1,19 @@
+void print_heightmap(void) {
+	printf("static const byte heightmap[map_height][map_width] = {\n");
+	for (int y = 0; y < current_level.map_size.y; y++) {
+		printf("\t{");
+		for (int x = 0; x < current_level.map_size.x; x++) {
+			const byte point = map_point(current_level.wall_data, x, y);
+			const byte point_height = current_level.get_point_height(point, (vec) {x, y});
+			const char* const str = (x < current_level.map_size.x - 1) ? "%d, " : "%d},\n";
+
+			printf(str, point_height);
+			// set_map_point(current_level.heightmap, current_level.get_point_height(x, y), x, y, current_level.map_size.x);
+		}
+	}
+	puts("};");
+}
+
 inlinable Level init_level(const int map_width, const int map_height,
 	const double init_x, const double init_y, const double init_height) {
 
@@ -12,8 +28,8 @@ inlinable Level init_level(const int map_width, const int map_height,
 		.bfs_visited = init_statemap(map_width, map_height)
 	};
 
-	byte** const map_data[3] = {&level.wall_data, &level.ceiling_data, &level.floor_data};
-	for (byte i = 0; i < 3; i++)
+	byte** const map_data[4] = {&level.wall_data, &level.ceiling_data, &level.floor_data, &level.heightmap};
+	for (byte i = 0; i < 4; i++)
 		*map_data[i] = wmalloc(map_width * map_height);
 
 	return level;
@@ -21,9 +37,8 @@ inlinable Level init_level(const int map_width, const int map_height,
 
 void randomize_map(const Level level, byte* const md, const byte* const points, const byte len_points) {
 	for (int x = 0; x < current_level.map_size.x; x++) {
-		for (int y = 0; y < current_level.map_size.y; y++) {
+		for (int y = 0; y < current_level.map_size.y; y++)
 			md[y * level.map_size.x + x] = points[rand() % len_points];
-		}
 	}
 }
 
@@ -181,8 +196,8 @@ inlinable void set_level_thing_container(Level* const level) {
 }
 
 void deinit_level(const Level* const level) {
-	byte* const map_data[3] = {level -> wall_data, level -> ceiling_data, level -> floor_data};
-	for (byte i = 0; i < 3; i++) wfree(map_data[i]);
+	byte* const map_data[4] = {level -> wall_data, level -> ceiling_data, level -> floor_data, level -> heightmap};
+	for (byte i = 0; i < 4; i++) wfree(map_data[i]);
 
 	deinit_statemap(level -> bfs_visited);
 

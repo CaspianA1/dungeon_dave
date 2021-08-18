@@ -52,13 +52,14 @@ todo:
 - heightmaps
 - different enemy AIs
 - build chocolate doom
+- find out why enemies get teleported into walls
 */
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_hallway, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(&current_level.background_sound, 1);
