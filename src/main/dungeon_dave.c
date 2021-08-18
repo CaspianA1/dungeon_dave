@@ -49,7 +49,9 @@
 
 /*
 todo:
+- heightmaps
 - different enemy AIs
+- build chocolate doom
 */
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
