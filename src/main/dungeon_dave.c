@@ -47,11 +47,16 @@
 #include "../data/levels/mipmap_hallway.c"
 #include "../data/levels/fleckenstein.c"
 
+/*
+todo:
+- different enemy AIs
+*/
+
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_fleckenstein, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(&current_level.background_sound, 1);
