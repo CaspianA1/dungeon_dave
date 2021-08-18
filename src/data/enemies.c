@@ -1,6 +1,6 @@
 Enemy init_eddie(void) {
 	return (Enemy) {
-		.dist_wake_from_idle = 0.9, .power = 10.0, .init_hp = 20.0, .nav_speed = 0.035, // 3.0
+		.dist_wake_from_idle = 0.9, .power = 3.0, .init_hp = 20.0, .nav_speed = 0.035,
 		.animation_seg_lengths = {5, 2, 3, 13},
 		.animation_data = init_immut_animation_data("assets/spritesheets/eddie.bmp", 23, 1, 23, 12, 0),
 		.sounds = {

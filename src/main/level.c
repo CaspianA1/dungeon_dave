@@ -29,8 +29,7 @@ inlinable Level init_level(const int map_width, const int map_height,
 	};
 
 	byte** const map_data[4] = {&level.wall_data, &level.ceiling_data, &level.floor_data, &level.heightmap};
-	for (byte i = 0; i < 4; i++)
-		*map_data[i] = wmalloc(map_width * map_height);
+	for (byte i = 0; i < 4; i++) *map_data[i] = wmalloc(map_width * map_height);
 
 	return level;
 }
