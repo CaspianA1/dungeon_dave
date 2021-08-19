@@ -1,10 +1,19 @@
 inlinable byte get_palace_point_height(const byte point, const vec pos) {
+	(void) point;
+	const double p = 0.0000001;
+
+	return map_point(current_level.heightmap, pos[0] - p, pos[1] - p);
+	// return map_point(current_level.heightmap, pos[0] + p, pos[1] - p);
+	// return map_point(current_level.heightmap, pos[0] - p, pos[1] + p);
+	// return map_point(current_level.heightmap, pos[0] + p, pos[1] + p);
+
+	// return map_point(current_level.heightmap, pos[0], pos[1]);
+	// return map_point(current_level.heightmap, pos[0] - p, pos[1]);
+	// return map_point(current_level.heightmap, pos[0] + p, pos[1]);
+	// return map_point(current_level.heightmap, pos[0], pos[1] - p);
+	// return map_point(current_level.heightmap, pos[0], pos[1] + p);
 
 	/*
-	(void) point;
-	return map_point(current_level.heightmap, pos[0] - 0.00001, pos[1] - 0.00001);
-	*/
-
 	if (point == 1) {
 		if (pos[0] <= 8.9999 && pos[1] <= 5.9999) return 3;
 		else return 5;
@@ -36,6 +45,7 @@ inlinable byte get_palace_point_height(const byte point, const vec pos) {
 		case 10: return 10;
 		default: return point;
 	}
+	*/
 }
 
 inlinable double palace_shader(const vec pos) {

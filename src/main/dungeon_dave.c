@@ -56,7 +56,6 @@ todo:
 - heightmaps
 - different enemy AIs
 - build chocolate doom
-- find out why enemies get teleported into walls
 */
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
