@@ -55,7 +55,7 @@
 todo:
 - heightmaps
 - different enemy AIs
-- build chocolate doom
+- screen width and height to screen size via mass sublime text substitutions
 */
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair

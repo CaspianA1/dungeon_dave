@@ -55,7 +55,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 		}
 			break;
 		
-		case Chasing: {
+		case Chasing: { // only the case for short range enemies
 			const NavigationState nav_state = update_route_if_needed(nav, player -> pos);
 			if (nav_state == ReachedDest)
 				set_enemy_instance_state(enemy_instance, Attacking, 0);
@@ -72,7 +72,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 			else if (nav_state == FailedBFS)
 				set_enemy_instance_state(enemy_instance, Idle, 0);
 
-			else {
+			else { // only the case for short range enemies
 				const double curr_time = SDL_GetTicks() / 1000.0;
 				if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing && dist <= 1.0
 					&& height_diff <= height_diff_for_interaction) {

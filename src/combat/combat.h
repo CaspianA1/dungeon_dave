@@ -47,7 +47,7 @@ typedef enum {
 
 typedef struct {
 	const double dist_wake_from_idle, power, init_hp, nav_speed;
-	const byte animation_seg_lengths[4];
+	const byte short_range, animation_seg_lengths[4];
 
 	const DataAnimationImmut animation_data;
 	const Sound sounds[5]; // a sound for each state + Attacked
