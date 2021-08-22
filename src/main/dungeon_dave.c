@@ -56,6 +56,7 @@ todo:
 - heightmaps
 - different enemy AIs
 - screen width and height to screen size via mass sublime text substitutions
+- 3D DDA
 */
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
