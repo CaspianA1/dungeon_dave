@@ -147,3 +147,11 @@ const vec wall_y_components = handle_ray((DataRaycast) {
 // origin and dir are braced b/c vec -> double[2], and the arrays can't be copied directly
 
 /////
+
+//////////
+
+inlinable void double_array_apply(double (*fn) (double), double* const array, const byte length) {
+	for (byte i = 0; i < length; i++) array[i] = fn(array[i]);
+}
+
+/////

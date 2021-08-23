@@ -127,7 +127,7 @@ void update_val_buffers(const int screen_x, double wall_top, double wall_bottom,
 	for (double y = round(wall_top); y < round(wall_bottom); y++) set_statemap_bit(occluded_by_walls, screen_x, y);
 }
 
-/////
+//////////
 
 #define vec_fill _mm_set1_pd
 #define vec_trunc(vec) _mm_round_pd(vec, _MM_FROUND_TRUNC)
