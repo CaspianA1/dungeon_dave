@@ -6,7 +6,7 @@ void deinit_weapon(const Weapon* const weapon) {
 #ifndef NOCLIP_MODE
 
 static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir, const double p_height) {
-	DataDDA bullet = init_dda(pos, dir, 0.5);
+	DataDDA bullet = init_dda((double[2]) UNPACK_2(pos), (double[2]) UNPACK_2(dir), 0.4);
 
 	extern const double height_diff_for_interaction;
 	while (iter_dda(&bullet)) {
