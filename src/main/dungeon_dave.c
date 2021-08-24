@@ -50,6 +50,7 @@
 /*
 todo:
 - 3D DDA
+- arms on the trooper
 - different enemy AIs
 - screen width and height to screen size via mass sublime text substitutions
 - heightmaps
