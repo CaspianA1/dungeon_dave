@@ -38,11 +38,11 @@ inlinable byte set_statemap_bit_with_status(const StateMap statemap, const int b
 }
 
 void set_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
-	*statemap_byte(statemap, bits_x / 8, bits_y) |= 1 << get_n_for_bits_x(bits_x);
+	*statemap_byte(statemap, bits_x / 8, bits_y) |= (1 << get_n_for_bits_x(bits_x));
 }
 
 inlinable byte get_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
-	return *statemap_byte(statemap, bits_x / 8, bits_y) >> (get_n_for_bits_x(bits_x) & 1);
+	return (*statemap_byte(statemap, bits_x / 8, bits_y) >> get_n_for_bits_x(bits_x)) & 1;
 }
 
 /*
