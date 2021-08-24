@@ -26,7 +26,7 @@ vec handle_ray(const DataRaycast* const d) {
 
 	const DRect wall_dest = {
 		d -> screen_x,
-		d -> wall_y_shift - wall_h / 2.0 + d -> full_jump_height / corrected_dist,
+		d -> wall_y_shift - (wall_h / 2.0) + (d -> full_jump_height / corrected_dist),
 		settings.ray_column_width,
 		wall_h
 	};
@@ -54,7 +54,7 @@ vec handle_ray(const DataRaycast* const d) {
 		DRect raised_wall_dest = wall_dest;
 		raised_wall_dest.y -= wall_dest.h * i;
 
-		// completely obscured: starts under the tallest wall so far; wouldn't be seen, but for more speed
+		// completely obscured: starts under the tallest wall so far; shouldn't be seen
 		if (raised_wall_dest.y >= *d -> last_wall_y || raised_wall_dest.y >= settings.screen_height)
 			continue;
 

@@ -53,6 +53,7 @@ problems:
 	- fix enemy merging by making enemies account for thing collisions
 	- box blur doesn't handle edges
 	- jitters when jumping onto things
+	- the statemap isn't occluding floor sections as expected
 
 completed:
 	- minimap that conveys height data

@@ -18,8 +18,8 @@ inlinable byte biggest_ind_of_3(const double a[3]) {
 #define APPLY_3(v, f) {f(v[0]), f(v[1]), f(v[2])}
 
 inlinable byte double3_out_of_bounds(const double a[3]) {
-	(void) a;
-	return 1; // TODO: complete this fn
+	// x across, y up, and z backward
+	return ivec_out_of_bounds((ivec) {a[0], a[2]}) || (a[1] < 0.0) || (a[1] > current_level.max_point_height);
 }
 
 #define OUT_OF_BOUNDS_3(a) double3_out_of_bounds((double[3]) a)

@@ -60,7 +60,7 @@ todo:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_hallway, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(&current_level.background_sound, 1);
@@ -82,7 +82,7 @@ int main(void) {
 		// draw_colored_floor(wall_y_shift);
 
 		#ifndef PLANAR_MODE
-		const double full_jump_height = player.jump.height * settings.screen_height;
+		double full_jump_height = player.jump.height * settings.screen_height; // screen height b/c height is vertical
 		raycast(&player, wall_y_shift, full_jump_height);
 
 		draw_things(&player, wall_y_shift);
