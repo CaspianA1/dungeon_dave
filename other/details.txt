@@ -34,6 +34,7 @@ features:
 	- a lightmap system (and load defaults on a different thread, if lightmap creation is slow enough)
 	- hit head on things above player
 	- heightmap instead of get_point_height fn
+	- health pickups
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

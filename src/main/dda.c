@@ -1,6 +1,12 @@
-// this could really use templates
+// This could really use templates
 
 #define BIGGEST_IND_OF_2(a) a[0] >= a[1]
+
+#define UNPACK_2(v) {v[0], v[1]}
+#define APPLY_2(v, f) {f(v[0]), f(v[1])}
+#define OUT_OF_BOUNDS_2(v) ivec_out_of_bounds((ivec) v)
+
+//////////
 
 inlinable byte biggest_ind_of_3(const double a[3]) {
 	if (a[0] >= a[1] && a[0] >= a[2]) return 1;
@@ -8,13 +14,19 @@ inlinable byte biggest_ind_of_3(const double a[3]) {
 	else return 3;
 }
 
-#define UNPACK_2(v) {v[0], v[1]}
-#define APPLY_2(v, f) {f(v[0]), f(v[1])}
-
 #define UNPACK_3(v) {v[0], v[1], v[2]}
 #define APPLY_3(v, f) {f(v[0]), f(v[1]), f(v[2])}
 
-#define DDA_DEF(dimensions, typename, init_fn, peek_fn, iter_fn, applier, unpacker, component_cmp)\
+inlinable byte double3_out_of_bounds(const double a[3]) {
+	(void) a;
+	return 1; // TODO: complete this fn
+}
+
+#define OUT_OF_BOUNDS_3(a) double3_out_of_bounds((double[3]) a)
+
+//////////
+
+#define DDA_DEF(dimensions, typename, init_fn, peek_fn, iter_fn, applier, unpacker, component_cmp, out_of_bounds_checker)\
 \
 typedef struct {\
 	byte step_count, side;\
@@ -55,15 +67,14 @@ inlinable typename peek_fn(typename d) {\
 	return d;\
 }\
 \
-inlinable byte iter_fn(DataDDA* const d_ref) {\
-	typename d = peek_dda(*d_ref);\
-	if (ivec_out_of_bounds((ivec) unpacker(d.curr_tile))) return 0;\
+inlinable byte iter_fn(typename* const d_ref) {\
+	typename d = peek_fn(*d_ref);\
+	if (out_of_bounds_checker(unpacker(d.curr_tile))) return 0;\
 \
 	d.step_count++;\
 	memcpy(d_ref, &d, sizeof(DataDDA));\
 	return 1;\
 }
 
-DDA_DEF(2, DataDDA, init_dda, peek_dda, iter_dda, APPLY_2, UNPACK_2, BIGGEST_IND_OF_2)
-
-// line 50: out of bounds checker
+DDA_DEF(2, DataDDA,   init_dda,    peek_dda,    iter_dda,    APPLY_2, UNPACK_2, BIGGEST_IND_OF_2, OUT_OF_BOUNDS_2)
+DDA_DEF(3, DataDDA3D, init_dda_3D, peek_dda_3D, iter_dda_3D, APPLY_3, UNPACK_3, biggest_ind_of_3, OUT_OF_BOUNDS_3)
