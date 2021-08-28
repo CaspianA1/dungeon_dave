@@ -5,6 +5,10 @@ void deinit_weapon(const Weapon* const weapon) {
 
 #ifndef NOCLIP_MODE
 
+#ifdef DISABLE_ENEMIES
+#define shoot_weapon(a, b, c, d)
+#else
+
 static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir, const double p_height) {
 	DataDDA bullet = init_dda((double[2]) UNPACK_2(pos), (double[2]) UNPACK_2(dir), 0.4);
 
@@ -35,6 +39,8 @@ static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec di
 		if (weapon -> status & mask_short_range) break;
 	}
 }
+
+#endif
 
 void use_weapon_if_needed(Weapon* const weapon, const Player* const player, const InputStatus input_status) {
 	int* const frame_ind = &weapon -> animation_data.mut.frame_ind;

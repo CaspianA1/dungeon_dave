@@ -80,7 +80,7 @@ inlinable void nth_bit_to_x(byte* const bits, const byte n, const byte x) {
 }
 
 inlinable void set_nth_bit(byte* const bits, const byte n) {
-	*bits |= 1 << n;
+	*bits |= (1 << n);
 }
 
 inlinable void clear_nth_bit(byte* const bits, const byte n) {
@@ -110,21 +110,13 @@ inlinable void align_from_out_of_vert_bounds(double* const val) {
 	else if (*val > settings.screen_height) *val = settings.screen_height;
 }
 
-void update_val_buffers(const int screen_x, double wall_top, double wall_bottom, const float dist,
-	const float cos_beta, const vec dir) {
-
+void update_val_buffer(const int screen_x, const float dist, const float cos_beta, const vec dir) {
 	BufferVal* buffer_val = &val_buffer[screen_x];
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++, buffer_val++) {
 		buffer_val -> depth = dist;
 		buffer_val -> cos_beta = cos_beta;
 		buffer_val -> dir = dir;
 	}
-
-	align_from_out_of_vert_bounds(&wall_top);
-	align_from_out_of_vert_bounds(&wall_bottom);
-
-	void set_statemap_bit(const StateMap, const int, const int);
-	for (double y = round(wall_top); y < round(wall_bottom); y++) set_statemap_bit(occluded_by_walls, screen_x, y);
 }
 
 //////////

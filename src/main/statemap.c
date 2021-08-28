@@ -51,7 +51,7 @@ static void print_statemap(const StateMap statemap) {
 		putchar('|');
 		for (int x = 0; x < statemap.chunk_dimensions.x; x++) {
 			const byte bits = *statemap_byte(statemap, x, y);
-			for (int i = 7; i >= 0; i--) printf("%c", (bits & (1 << i)) ? '1' : '0');
+			for (int i = 7; i >= 0; i--) putchar((bits & (1 << i)) ? '1' : '0');
 			putchar('|');
 		}
 		putchar('\n');

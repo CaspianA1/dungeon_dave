@@ -155,3 +155,98 @@ inlinable void double_array_apply(double (*fn) (double), double* const array, co
 }
 
 /////
+
+if (d -> screen_x == 200) {
+	DEBUG(*d -> last_wall_y, lf);
+	// DEBUG(smallest_wall_y, lf);
+	puts("---");
+	// at this point, *d -> last_wall_y equals the top of the wall
+}
+
+double projected_wall_top = *d -> last_wall_y;
+double projected_wall_bottom = last_last_wall_y;
+
+align_from_out_of_vert_bounds(&projected_wall_top);
+align_from_out_of_vert_bounds(&projected_wall_bottom);
+for (double y = round(projected_wall_top); y < round(projected_wall_bottom); y++)
+	set_statemap_bit(occluded_by_walls, d -> screen_x, y);
+
+/*
+SDL_Rect test = {d -> screen_x, *d -> last_wall_y, 10, 10};
+SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+SDL_RenderFillRect(screen.renderer, &test);
+*/
+
+//////////
+
+/*
+align_from_out_of_vert_bounds(&wall_top);
+align_from_out_of_vert_bounds(&wall_bottom);
+*/
+
+// void set_statemap_bit(const StateMap, const int, const int);
+// for (double y = round(wall_top); y < round(wall_bottom); y++) set_statemap_bit(occluded_by_walls, screen_x, y);
+
+
+/////
+
+void statemap_test(void) {
+	StateMap statemap = init_statemap(20, 20);
+	set_statemap_bit(statemap, 0, 0);
+	set_statemap_bit(statemap, 15, 15);
+
+	// check get_statemap_bit by printing each bit - it is probably incorrect
+
+	print_statemap(statemap);
+	deinit_statemap(statemap);
+}
+
+/////
+
+/*
+SDL_SetRenderDrawColor(screen.renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+SDL_RenderDrawLine(screen.renderer, d -> screen_x, projected_wall_top, d -> screen_x, projected_wall_bottom);
+*/
+
+/////
+
+// DEBUG(wall_h_sum, lf);
+
+double projected_wall_top = *d -> last_wall_y;
+double projected_wall_bottom = projected_wall_top + wall_h_sum;
+
+align_from_out_of_vert_bounds(&projected_wall_top);
+align_from_out_of_vert_bounds(&projected_wall_bottom);
+for (double y = round(projected_wall_top); y < round(projected_wall_bottom); y++)
+	set_statemap_bit(occluded_by_walls, d -> screen_x, y);
+
+// the top is right, the bottom is wrong
+void draw_colored_rect(const byte, const byte, const byte, const double, const SDL_Rect* const);
+
+const SDL_Rect top = {d -> screen_x, projected_wall_top, 10, 10};
+// draw_colored_rect(255, 0, 0, 1.0, &top); // red
+
+const SDL_Rect bottom = {d -> screen_x, projected_wall_bottom, 10, 5};
+// draw_colored_rect(0, 0, 255, 1.0, &bottom); // blue
+//
+
+//////////
+
+
+/////
+
+if (tilt.val >= -tilt.step - 0.01 && tilt.val <= tilt.step + 0.01) {
+	// the occlusion problem only shows up in first two cases below
+	if (keys[SDL_SCANCODE_T]) SDL_RenderCopy(screen.renderer, screen.pixel_buffer, NULL, NULL);
+
+	else if (keys[SDL_SCANCODE_Y]) {
+		SDL_RenderCopy(screen.renderer, screen.shape_buffer, NULL, NULL);
+		SDL_RenderCopy(screen.renderer, screen.pixel_buffer, NULL, NULL);
+	}
+	else {
+		SDL_RenderCopy(screen.renderer, screen.pixel_buffer, NULL, NULL); // copy everything?
+		SDL_RenderCopy(screen.renderer, screen.shape_buffer, NULL, NULL);
+	}
+}
+
+/////

@@ -50,9 +50,10 @@
 /*
 todo:
 - 3D DDA
+- the polygon floor algorithm
 - arms on the trooper
 - different enemy AIs
-- screen width and height to screen size via mass sublime text substitutions
+- screen width and height to screen size via sublime text substitutions
 - heightmaps
 */
 
@@ -64,7 +65,7 @@ int main(void) {
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	play_sound(&current_level.background_sound, 1);
-	p = init_psprite("assets/walls/grass.bmp");
+	p = init_psprite("assets/walls/dune.bmp");
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
@@ -87,7 +88,10 @@ int main(void) {
 
 		draw_things(&player, wall_y_shift);
 
+		#ifndef DISABLE_ENEMIES
 		if (!player.is_dead) update_all_enemy_instances(&player, &weapon);
+		#endif
+
 		use_weapon_if_needed(&weapon, &player, input_status);
 		#else
 		fill_val_buffers_for_planar_mode(player.angle);

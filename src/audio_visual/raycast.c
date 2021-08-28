@@ -31,10 +31,7 @@ vec handle_ray(const DataRaycast* const d) {
 		wall_h
 	};
 
-	const double smallest_wall_y = wall_dest.y - (wall_h * (d -> point_height - 1)); // = wall_top
-
-	if (d -> first_wall_hit) update_val_buffers(d -> screen_x, smallest_wall_y,
-		wall_dest.y + wall_dest.h, corrected_dist, cos_beta, d -> dir);
+	if (d -> first_wall_hit) update_val_buffer(d -> screen_x, corrected_dist, cos_beta, d -> dir);
 
 	const Sprite wall_sprite = current_level.walls[d -> point - 1];
 	const SDL_Rect mipmap_crop = get_mipmap_crop_from_wall(&wall_sprite, wall_h);
@@ -49,6 +46,8 @@ vec handle_ray(const DataRaycast* const d) {
 	const byte shade = 255 * calculate_shade(wall_h, d -> hit);
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 	#endif
+
+	double wall_dest_h_sum = 0.0;
 
 	for (byte i = *d -> last_point_height; i < d -> point_height; i++) {
 		DRect raised_wall_dest = wall_dest;
@@ -65,12 +64,29 @@ vec handle_ray(const DataRaycast* const d) {
 		}
 		else slice.h = max_sprite_h;
 
+		wall_dest_h_sum += raised_wall_dest.h;
+
 		*d -> last_wall_y = raised_wall_dest.y;
 		SDL_FRect frect = {raised_wall_dest.x, raised_wall_dest.y, raised_wall_dest.w, raised_wall_dest.h};
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &frect);
 	}
+
+	//////////
+	double projected_wall_top = *d -> last_wall_y;
+	double projected_wall_bottom = projected_wall_top + wall_dest_h_sum;
+
+	align_from_out_of_vert_bounds(&projected_wall_top);
+	align_from_out_of_vert_bounds(&projected_wall_bottom);
+	for (double y = round(projected_wall_top); y < round(projected_wall_bottom); y++)
+		set_statemap_bit(occluded_by_walls, d -> screen_x, y);
+
+	/* void draw_colored_rect(const byte, const byte, const byte, const double, const SDL_Rect* const);
+	const SDL_Rect top = {d -> screen_x, projected_wall_top, 10, 10}, bottom = {d -> screen_x, projected_wall_bottom, 10, 5};
+	draw_colored_rect(255, 0, 0, 1.0, &top); draw_colored_rect(0, 0, 255, 1.0, &bottom); // red, blue */
+	//////////
+
 	*d -> last_point_height = d -> point_height;
-	return (vec) {smallest_wall_y, wall_h};
+	return (vec) {projected_wall_top, wall_h};
 }
 
 // figure out why there is no red when the player height is 0
