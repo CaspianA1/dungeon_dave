@@ -19,7 +19,7 @@ inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir,
 	return cond ? (width - 1) - offset : offset;
 }
 
-vec handle_ray(const DataRaycast* const d) {
+void handle_ray(const DataRaycast* const d) {
 	const double cos_beta = cos(d -> p_angle - d -> theta);
 	const double corrected_dist = d -> dist * cos_beta;
 	const double wall_h = settings.proj_dist / corrected_dist;
@@ -90,11 +90,9 @@ vec handle_ray(const DataRaycast* const d) {
 		(d -> full_jump_height / settings.screen_height) <= current_level.max_point_height - 1.0;
 
 	DEBUG(below_highest_point, d);
-
-	if (d -> point_height == current_level.max_point_height && below_highest_point) return (vec) {-1.0, -1.0}; */
+	if (d -> point_height == current_level.max_point_height && below_highest_point) set exit status; */
 
 	*d -> last_point_height = d -> point_height;
-	return (vec) {projected_wall_top, wall_h};
 }
 
 void raycast(const Player* const player, const double wall_y_shift, const double full_jump_height) {
@@ -104,7 +102,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + p_angle;
 		const vec dir = {cos(theta), sin(theta)};
 
-		double last_wall_top = DBL_MAX, last_height_change_y = settings.screen_height;
+		double last_wall_top = DBL_MAX;
 		byte at_first_hit = 1, curr_point_height = player -> jump.height, last_point_height = player -> jump.height;
 		DataDDA ray = init_dda((double[2]) UNPACK_2(player -> pos), (double[2]) UNPACK_2(dir), 1.0);
 
@@ -114,29 +112,19 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 			const byte point_height = current_level.get_point_height(point, hit);
 
 			if (point_height != curr_point_height) {
-				double height_change_y, height_change_h;
 				if (point) {
 					const DataRaycast raycast_data = {
 						&last_wall_top, p_angle, theta, ray.dist, wall_y_shift, full_jump_height, player -> pos,
 						hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x
 					};
 
-					const vec wall_y_components = handle_ray(&raycast_data);
-
-					// if (wall_y_components[0] == -1.0 && wall_y_components[1] == -1.0) break;
-
-					height_change_y = wall_y_components[0], height_change_h = wall_y_components[1];
+					handle_ray(&raycast_data);
 					at_first_hit = 0;
 				}
-				else {
-					height_change_y = settings.screen_height, height_change_h = 0.0; // correct?
+				else
 					last_point_height = 0;
-				}
-
-				// draw_at_height_change(screen_x, last_wall_top, height_change_y + height_change_h, point_height);
 
 				curr_point_height = point_height;
-				last_height_change_y = height_change_y;
 			}
 		}
 	}

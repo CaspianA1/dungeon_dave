@@ -23,3 +23,7 @@ void draw_at_height_change(const int screen_x, const double last_wall_top, const
 // draw_at_height_change(screen_x, last_wall_top, height_change_y + height_change_h, point_height);
 
 /////
+
+// draw_at_height_change(screen_x, last_wall_top, height_change_y + height_change_h, point_height);
+
+/////
