@@ -53,6 +53,7 @@
 
 /*
 todo:
+- stop rendering early if possible
 - 3D DDA
 - the polygon floor algorithm
 - arms on the trooper

@@ -12,10 +12,8 @@
 
 #endif
 
-/*
 #define PLANAR_MODE
 #define NOCLIP_MODE
-*/
 
 // #define DISABLE_ENEMIES
 #define SHADING_ENABLED
