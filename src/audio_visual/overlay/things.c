@@ -70,17 +70,17 @@ static void draw_processed_things(const Player* const player, const double y_shi
 
 //////////
 
-void update_thing_values(const vec thing_pos, const vec player_pos,
-	const double player_angle, double* const beta, double* const dist) {
+void update_thing_values(const vec thing_pos, const vec p_pos, // p_pos = player_pos
+	const double p_angle, double* const beta, double* const dist) {
 
-	const vec delta = thing_pos - player_pos;
-	*beta = atan2(delta[1], delta[0]) - player_angle;
+	const vec delta = thing_pos - p_pos;
+	*beta = atan2(delta[1], delta[0]) - p_angle;
 	if (*beta < -two_pi) *beta += two_pi;
 	*dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 }
 
 #define THING_ADDER(name) add_##name##_things_to_thing_container
-#define THING_ADDER_SIGNATURE const vec player_pos, const double player_angle
+#define THING_ADDER_SIGNATURE const vec p_pos, const double p_angle
 #define DEF_THING_ADDER(type) inlinable void THING_ADDER(type)(THING_ADDER_SIGNATURE)
 
 DEF_THING_ADDER(still) {
@@ -88,7 +88,7 @@ DEF_THING_ADDER(still) {
 		Billboard* const billboard = &current_level.billboards[i];
 		DataBillboard* const billboard_data = &billboard -> billboard_data;
 
-		update_thing_values(billboard_data -> pos, player_pos, player_angle,
+		update_thing_values(billboard_data -> pos, p_pos, p_angle,
 			&billboard_data -> beta, &billboard_data -> dist);
 
 		const Sprite* const sprite = &billboard -> sprite;
@@ -103,7 +103,7 @@ DEF_THING_ADDER(teleporter) {
 		Teleporter* const teleporter = &current_level.teleporters[i];
 		DataBillboard* const billboard_data = &teleporter -> from_billboard;
 
-		update_thing_values(billboard_data -> pos, player_pos, player_angle, &billboard_data -> beta, &billboard_data -> dist);
+		update_thing_values(billboard_data -> pos, p_pos, p_angle, &billboard_data -> beta, &billboard_data -> dist);
 
 		const Thing thing = {
 			billboard_data, &teleporter_sprite, {0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}
@@ -120,7 +120,7 @@ DEF_THING_ADDER(animated) {
 		DataAnimation* const animation_data = &animated_billboard -> animation_data;
 		const DataAnimationImmut* const immut_animation_data = &animation_data -> immut;
 
-		update_thing_values(billboard_data -> pos, player_pos, player_angle,
+		update_thing_values(billboard_data -> pos, p_pos, p_angle,
 			&billboard_data -> beta, &billboard_data -> dist);
 
 		const Thing thing = {
@@ -141,7 +141,7 @@ DEF_THING_ADDER(enemy_instance) {
 		DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
 		const DataAnimationImmut* const immut_animation_data = &enemy_instance -> enemy -> animation_data;
 
-		update_thing_values(billboard_data -> pos, player_pos, player_angle,
+		update_thing_values(billboard_data -> pos, p_pos, p_angle,
 			&billboard_data -> beta, &billboard_data -> dist);
 
 		DataAnimation animation_data = {*immut_animation_data, enemy_instance -> mut_animation_data};
@@ -161,7 +161,7 @@ DEF_THING_ADDER(enemy_instance) {
 }
 
 void draw_things(const Player* const player, const double y_shift) {
-	const double player_angle = to_radians(player -> angle);
+	const double p_angle = to_radians(player -> angle);
 
 	enum {num_thing_adders = 4};
 	void (*thing_adders[num_thing_adders])(THING_ADDER_SIGNATURE) = {
@@ -169,7 +169,7 @@ void draw_things(const Player* const player, const double y_shift) {
 	};
 
 	for (byte i = 0; i < num_thing_adders; i++)
-		thing_adders[i](player -> pos, player_angle);
+		thing_adders[i](player -> pos, p_angle);
 
 	qsort(current_level.thing_container, current_level.thing_count, sizeof(Thing), cmp_things);
 	draw_processed_things(player, y_shift);

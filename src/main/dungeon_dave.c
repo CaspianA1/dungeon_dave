@@ -39,13 +39,17 @@
 
 #include "../data/enemies.c"
 
+/*
 #include "../data/levels/level_1.c"
 #include "../data/levels/debug_level.c"
 #include "../data/levels/red_room.c"
 #include "../data/levels/forever_maze.c"
+*/
 #include "../data/levels/palace.c"
+/*
 #include "../data/levels/mipmap_hallway.c"
 #include "../data/levels/fleckenstein.c"
+*/
 
 /*
 todo:

@@ -1,6 +1,6 @@
 typedef struct {
 	double* const last_wall_top;
-	const double player_angle, theta, dist, wall_y_shift, full_jump_height;
+	const double p_angle, theta, dist, wall_y_shift, full_jump_height;
 	const vec begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
 	const byte point, point_height, side, first_wall_hit;
@@ -20,7 +20,7 @@ inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir,
 }
 
 vec handle_ray(const DataRaycast* const d) {
-	const double cos_beta = cos(d -> player_angle - d -> theta);
+	const double cos_beta = cos(d -> p_angle - d -> theta);
 	const double corrected_dist = d -> dist * cos_beta;
 	const double wall_h = settings.proj_dist / corrected_dist;
 
@@ -91,18 +91,17 @@ vec handle_ray(const DataRaycast* const d) {
 
 	DEBUG(below_highest_point, d);
 
-	if (d -> point_height == current_level.max_point_height && below_highest_point) return (vec) {-1.0, -1.0};
-	*/
+	if (d -> point_height == current_level.max_point_height && below_highest_point) return (vec) {-1.0, -1.0}; */
 
 	*d -> last_point_height = d -> point_height;
 	return (vec) {projected_wall_top, wall_h};
 }
 
 void raycast(const Player* const player, const double wall_y_shift, const double full_jump_height) {
-	const double player_angle = to_radians(player -> angle);
+	const double p_angle = to_radians(player -> angle);
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
-		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
+		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + p_angle;
 		const vec dir = {cos(theta), sin(theta)};
 
 		double last_wall_top = DBL_MAX, last_height_change_y = settings.screen_height;
@@ -118,7 +117,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 				double height_change_y, height_change_h;
 				if (point) {
 					const DataRaycast raycast_data = {
-						&last_wall_top, player_angle, theta, ray.dist, wall_y_shift, full_jump_height, player -> pos,
+						&last_wall_top, p_angle, theta, ray.dist, wall_y_shift, full_jump_height, player -> pos,
 						hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x
 					};
 

@@ -111,11 +111,11 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 #ifdef PLANAR_MODE
 
 void fill_val_buffers_for_planar_mode(const double angle_degrees) {
-	const double player_angle = to_radians(angle_degrees);
+	const double p_angle = to_radians(angle_degrees);
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
-		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
-		update_val_buffer(screen_x, 0.0f, cosf(player_angle - theta), (vec) {cos(theta), sin(theta)});
+		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + p_angle;
+		update_val_buffer(screen_x, 0.0f, cosf(p_angle - theta), (vec) {cos(theta), sin(theta)});
 	}
 }
 

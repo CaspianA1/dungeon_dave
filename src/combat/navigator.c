@@ -44,9 +44,9 @@ static CorrectedRoute make_corrected_route(const Route route, const vec nav_pos)
 }
 
 // navigator idle if path too long
-inlinable NavigationState update_route(Navigator* const nav, const vec player_pos) {
+inlinable NavigationState update_route(Navigator* const nav, const vec p_pos) {
 	const vec nav_pos = *nav -> pos;
-	const ResultBFS bfs_result = bfs(nav_pos, player_pos); // allocate integer BFS path
+	const ResultBFS bfs_result = bfs(nav_pos, p_pos); // allocate integer BFS path
 
 	if (bfs_result.state == SucceededBFS) {
 		const CorrectedRoute corrected_route = make_corrected_route(bfs_result.route, nav_pos);
@@ -56,24 +56,24 @@ inlinable NavigationState update_route(Navigator* const nav, const vec player_po
 	return bfs_result.state;
 }
 
-inlinable Navigator init_navigator(const vec player_pos, vec* const pos_ref, const double v) {
+inlinable Navigator init_navigator(const vec p_pos, vec* const pos_ref, const double v) {
 	Navigator nav = {.pos = pos_ref, .route_ind = -1, .v = v};
-	update_route(&nav, player_pos);
+	update_route(&nav, p_pos);
 	return nav;
 }
 
-NavigationState update_route_if_needed(Navigator* const nav, const vec player_pos) {
+NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos) {
 	const byte base_height = current_level.get_point_height(
-		map_point(current_level.wall_data, player_pos[0], player_pos[1]), player_pos);
+		map_point(current_level.wall_data, p_pos[0], p_pos[1]), p_pos);
 
-	if (base_height > 0.0 || (nav -> route_ind == -1 && update_route(nav, player_pos) != SucceededBFS))
+	if (base_height > 0.0 || (nav -> route_ind == -1 && update_route(nav, p_pos) != SucceededBFS))
 		return FailedBFS;
 
 	const CorrectedRoute* const route = &nav -> route;
 
 	const int end_ind = route -> length - 1;
-	if (vec_delta_exceeds(player_pos, route -> data[end_ind], 1.0)) {
-		const NavigationState nav_state = update_route(nav, player_pos);
+	if (vec_delta_exceeds(p_pos, route -> data[end_ind], 1.0)) {
+		const NavigationState nav_state = update_route(nav, p_pos);
 		if (nav_state != SucceededBFS) return nav_state;
 	}
 
