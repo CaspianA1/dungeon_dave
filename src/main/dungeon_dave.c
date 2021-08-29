@@ -49,7 +49,7 @@
 
 /*
 todo:
-- 3D DDA
+- 3D DDA pitch-angle translation
 - the polygon floor algorithm
 - arms on the trooper
 - different enemy AIs
