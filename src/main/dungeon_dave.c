@@ -39,25 +39,22 @@
 
 #include "../data/enemies.c"
 
-/*
 #include "../data/levels/level_1.c"
 #include "../data/levels/debug_level.c"
 #include "../data/levels/red_room.c"
 #include "../data/levels/forever_maze.c"
-*/
 #include "../data/levels/palace.c"
-/*
 #include "../data/levels/mipmap_hallway.c"
 #include "../data/levels/fleckenstein.c"
-*/
 
 /*
 todo:
-- stop rendering early if possible
 - 3D DDA
 - the polygon floor algorithm
 - arms on the trooper
 - different enemy AIs
+- a unique hitbox size for each billboard
+- correct height translation, and then stop rendering early if possible
 - screen width and height to screen size via sublime text substitutions
 - heightmaps
 */
@@ -75,8 +72,6 @@ int main(void) {
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
-
-		// DEBUG(player.jump.height, lf);
 
 		const InputStatus input_status = handle_input(&player, player.is_dead);
 		if (input_status == Exit) deinit_all(&player, &weapon);

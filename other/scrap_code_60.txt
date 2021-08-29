@@ -1,0 +1,25 @@
+// figure out why there is no red when the player height is 0
+void draw_at_height_change(const int screen_x, const double last_wall_top, const double curr_wall_bottom, const byte point_height) {
+	// from curr wall bottom (farther away) to last wall top
+
+	if (last_wall_top < curr_wall_bottom) return;
+
+	void draw_colored_rect(const byte, const byte, const byte, const double, const SDL_Rect* const);
+
+
+	// if (screen_x == 200) {
+	if (1) {
+		SDL_SetRenderDrawColor(screen.renderer, (point_height == 1) ? 120 : 255, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_RenderDrawLine(screen.renderer, screen_x, curr_wall_bottom, screen_x, last_wall_top);
+
+		const SDL_Rect curr_wall_bottom_dot = {screen_x, curr_wall_bottom, 5, 5};
+		draw_colored_rect(255, 165, 0, 1.0, &curr_wall_bottom_dot);
+
+		const SDL_Rect last_wall_top_dot = {screen_x, last_wall_top, 5, 5};
+		draw_colored_rect(0, 255, 0, 1.0, &last_wall_top_dot);
+	}
+}
+
+// draw_at_height_change(screen_x, last_wall_top, height_change_y + height_change_h, point_height);
+
+/////

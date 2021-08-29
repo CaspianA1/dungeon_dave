@@ -85,30 +85,17 @@ vec handle_ray(const DataRaycast* const d) {
 	draw_colored_rect(255, 0, 0, 1.0, &top); draw_colored_rect(0, 0, 255, 1.0, &bottom); // red, blue */
 	//////////
 
+	/* this will work once player heights are accurate to the world
+	const byte below_highest_point =
+		(d -> full_jump_height / settings.screen_height) <= current_level.max_point_height - 1.0;
+
+	DEBUG(below_highest_point, d);
+
+	if (d -> point_height == current_level.max_point_height && below_highest_point) return (vec) {-1.0, -1.0};
+	*/
+
 	*d -> last_point_height = d -> point_height;
 	return (vec) {projected_wall_top, wall_h};
-}
-
-// figure out why there is no red when the player height is 0
-void draw_at_height_change(const int screen_x, const double last_wall_top, const double curr_wall_bottom, const byte point_height) {
-	// from curr wall bottom (farther away) to last wall top
-
-	if (last_wall_top < curr_wall_bottom) return;
-
-	void draw_colored_rect(const byte, const byte, const byte, const double, const SDL_Rect* const);
-
-
-	// if (screen_x == 200) {
-	if (1) {
-		SDL_SetRenderDrawColor(screen.renderer, (point_height == 1) ? 120 : 255, 0, 0, SDL_ALPHA_OPAQUE);
-		SDL_RenderDrawLine(screen.renderer, screen_x, curr_wall_bottom, screen_x, last_wall_top);
-
-		const SDL_Rect curr_wall_bottom_dot = {screen_x, curr_wall_bottom, 5, 5};
-		draw_colored_rect(255, 165, 0, 1.0, &curr_wall_bottom_dot);
-
-		const SDL_Rect last_wall_top_dot = {screen_x, last_wall_top, 5, 5};
-		draw_colored_rect(0, 255, 0, 1.0, &last_wall_top_dot);
-	}
 }
 
 void raycast(const Player* const player, const double wall_y_shift, const double full_jump_height) {
@@ -136,6 +123,9 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 					};
 
 					const vec wall_y_components = handle_ray(&raycast_data);
+
+					// if (wall_y_components[0] == -1.0 && wall_y_components[1] == -1.0) break;
+
 					height_change_y = wall_y_components[0], height_change_h = wall_y_components[1];
 					at_first_hit = 0;
 				}
@@ -144,7 +134,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 					last_point_height = 0;
 				}
 
-				// draw_at_height_change(screen_x, last_wall_y, height_change_y + height_change_h, point_height);
+				// draw_at_height_change(screen_x, last_wall_top, height_change_y + height_change_h, point_height);
 
 				curr_point_height = point_height;
 				last_height_change_y = height_change_y;
