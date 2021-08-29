@@ -250,3 +250,36 @@ if (tilt.val >= -tilt.step - 0.01 && tilt.val <= tilt.step + 0.01) {
 }
 
 /////
+
+// #define PIXEL_FORMAT_BYTES_PER_PIXEL 4
+
+/////
+
+if (keys[SDL_SCANCODE_T]) SDL_SetWindowFullscreen(screen.window, 1);
+if (keys[SDL_SCANCODE_Y]) SDL_SetWindowFullscreen(screen.window, 0);
+
+if (keys[SDL_SCANCODE_U]) SDL_RestoreWindow(screen.window);
+
+if (keys[SDL_SCANCODE_G]) SDL_SetWindowSize(screen.window, INIT_W, INIT_H);
+
+/*
+if (keys[KEY_ESCAPE]) {
+	puts("Here");
+	int a = SDL_SetWindowFullscreen(screen.window, 0); // why not working?
+	DEBUG(a, d);
+}
+
+DEBUG(SDL_GetError(), s);
+*/
+
+/*
+SDL_DisplayMode mode;
+int err = SDL_GetWindowDisplayMode(screen.window, &mode);
+
+printf("mode = {.format = %d, .w = %d, .h = %d, .refresh_rate = %d}\n",
+	mode.format, mode.w, mode.h, mode.refresh_rate);
+
+DEBUG(SDL_GetPixelFormatName(mode.format), s);
+*/
+
+/////

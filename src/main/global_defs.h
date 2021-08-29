@@ -17,7 +17,7 @@
 #define NOCLIP_MODE
 */
 
-#define DISABLE_ENEMIES
+// #define DISABLE_ENEMIES
 #define SHADING_ENABLED
 #define SOUND_ENABLED
 // #define TRACK_MEMORY
@@ -57,7 +57,7 @@
 #define KEY_RSTRAFE SDL_SCANCODE_D
 
 #define PIXEL_FORMAT SDL_PIXELFORMAT_ARGB8888
-#define PIXEL_FORMAT_BYTES_PER_PIXEL 4
+#define WINDOW_RENDERER_FLAGS SDL_RENDERER_ACCELERATED | SDL_WINDOW_RESIZABLE
 
 #define inlinable static inline
 #define ASM_I_AM_HERE __asm__ volatile ("nop # I AM HERE")

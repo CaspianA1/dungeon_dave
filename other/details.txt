@@ -6,7 +6,7 @@ features:
 	- 'sectors' for wall height sections
 	- doors
 	- a settings option in the title screen and status bar
-	- move mouse out of window if pressing escape
+	- escape full-screen if pressing escape
 	- a level opener, with a cool spinning effect
 	- a sprite pool
 	- an airship + maze level

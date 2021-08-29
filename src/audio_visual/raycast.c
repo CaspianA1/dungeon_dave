@@ -1,5 +1,5 @@
 typedef struct {
-	double* const last_wall_y;
+	double* const last_wall_top;
 	const double player_angle, theta, dist, wall_y_shift, full_jump_height;
 	const vec begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
@@ -38,8 +38,8 @@ vec handle_ray(const DataRaycast* const d) {
 	const int max_sprite_h = mipmap_crop.h;
 
 	SDL_Rect slice = {
-		.x = get_wall_tex_offset(d -> side, d -> hit, d -> dir, mipmap_crop.w) + mipmap_crop.x,
-		.y = mipmap_crop.y, .w = 1
+		get_wall_tex_offset(d -> side, d -> hit, d -> dir, mipmap_crop.w) + mipmap_crop.x,
+		mipmap_crop.y, .w = 1
 	};
 
 	#ifdef SHADING_ENABLED
@@ -54,25 +54,25 @@ vec handle_ray(const DataRaycast* const d) {
 		raised_wall_dest.y -= wall_dest.h * i;
 
 		// completely obscured: starts under the tallest wall so far; shouldn't be seen
-		if (raised_wall_dest.y >= *d -> last_wall_y || raised_wall_dest.y >= settings.screen_height)
+		if (raised_wall_dest.y >= *d -> last_wall_top || raised_wall_dest.y >= settings.screen_height)
 			continue;
 
 		// partially obscured: bottom of wall somewhere in middle of tallest
-		else if (raised_wall_dest.y + raised_wall_dest.h > *d -> last_wall_y) {
-			raised_wall_dest.h = *d -> last_wall_y - raised_wall_dest.y;
+		else if (raised_wall_dest.y + raised_wall_dest.h > *d -> last_wall_top) {
+			raised_wall_dest.h = *d -> last_wall_top - raised_wall_dest.y;
 			slice.h = ceil(max_sprite_h * raised_wall_dest.h / wall_h);
 		}
 		else slice.h = max_sprite_h;
 
 		wall_dest_h_sum += raised_wall_dest.h;
 
-		*d -> last_wall_y = raised_wall_dest.y;
+		*d -> last_wall_top = raised_wall_dest.y;
 		SDL_FRect frect = {raised_wall_dest.x, raised_wall_dest.y, raised_wall_dest.w, raised_wall_dest.h};
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &frect);
 	}
 
 	//////////
-	double projected_wall_top = *d -> last_wall_y;
+	double projected_wall_top = *d -> last_wall_top;
 	double projected_wall_bottom = projected_wall_top + wall_dest_h_sum;
 
 	align_from_out_of_vert_bounds(&projected_wall_top);
@@ -118,7 +118,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + player_angle;
 		const vec dir = {cos(theta), sin(theta)};
 
-		double last_wall_y = DBL_MAX, last_height_change_y = settings.screen_height;
+		double last_wall_top = DBL_MAX, last_height_change_y = settings.screen_height;
 		byte at_first_hit = 1, curr_point_height = player -> jump.height, last_point_height = player -> jump.height;
 		DataDDA ray = init_dda((double[2]) UNPACK_2(player -> pos), (double[2]) UNPACK_2(dir), 1.0);
 
@@ -131,8 +131,8 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 				double height_change_y, height_change_h;
 				if (point) {
 					const DataRaycast raycast_data = {
-						&last_wall_y, player_angle, theta, ray.dist, wall_y_shift, full_jump_height,
-						player -> pos, hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x
+						&last_wall_top, player_angle, theta, ray.dist, wall_y_shift, full_jump_height, player -> pos,
+						hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x
 					};
 
 					const vec wall_y_components = handle_ray(&raycast_data);
