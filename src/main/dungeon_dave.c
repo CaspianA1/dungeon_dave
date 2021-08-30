@@ -16,7 +16,10 @@
 
 #include "../audio_visual/screen.c"
 #include "../audio_visual/lighting.c"
+
+#include "../audio_visual/blur_filter.c"
 #include "../audio_visual/mipmap.c"
+
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
 #include "../audio_visual/overlay/things.c"
@@ -48,9 +51,10 @@
 #include "../data/levels/fleckenstein.c"
 
 /*
-todo:
-- 3D DDA pitch-angle translation
+TODO:
+- proper mipmap blurring
 - the polygon floor algorithm
+- 3D DDA pitch-angle translation
 - arms on the trooper
 - different enemy AIs
 - a unique hitbox size for each billboard
