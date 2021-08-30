@@ -88,7 +88,7 @@ void box_blur_test(void) {
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 // https://aryamansharda.medium.com/image-filters-gaussian-blur-eb36db6781b1
-void gaussian_blur(SDL_Surface* const image, const int radius) {
+SDL_Surface* gaussian_blur(SDL_Surface* const image, const int radius) {
 	const double sigma = MAX((radius / 2.0), 1.0);
 	const int kernel_size = 2 * radius + 1;
 	double kernel[kernel_size][kernel_size], sum = 0.0;
@@ -140,10 +140,14 @@ void gaussian_blur(SDL_Surface* const image, const int radius) {
 					blurred_pixel += (color4) {r * kernel_value, g * kernel_value, b * kernel_value, a * kernel_value};
 				}
 			}
+			*read_surface_pixel(blurred, x, y, bpp) = SDL_MapRGBA(format,
+				blurred_pixel[0], blurred_pixel[1], blurred_pixel[2], blurred_pixel[3]);
 		}
 	}
 
 	SDL_UnlockSurface(image);
 	SDL_UnlockSurface(blurred);
-	SDL_FreeSurface(blurred);
+
+	return blurred;
 }
+

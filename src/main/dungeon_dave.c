@@ -79,7 +79,6 @@ int main(void) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
-		teleport_player_if_needed(&player);
 		const InputStatus input_status = handle_input(&player, player.is_dead);
 		if (input_status == Exit) deinit_all(&player, &weapon);
 
@@ -109,6 +108,7 @@ int main(void) {
 			deinit_all(&player, &weapon);
 
 		fast_affine_floor(0, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
+		teleport_player_if_needed(&player);
 
 		refresh(&player, wall_y_shift);
 		tick_delay(before);
