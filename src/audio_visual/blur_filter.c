@@ -72,7 +72,7 @@ void box_blur_image_portion(SDL_Surface* const image, SDL_Rect crop, const int b
 }
 
 void box_blur_test(void) {
-	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/dune.bmp");
+	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/mesa.bmp");
 	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);
 	SDL_FreeSurface(unconverted_image);
 
@@ -81,4 +81,19 @@ void box_blur_test(void) {
 	SDL_FreeSurface(image);
 
 	exit(0);
+}
+
+//////////
+
+void gaussian_blur(SDL_Surface* const image) {
+	const int kernel[3][3] = {
+		{1, 2, 1},
+		{2, 4, 2},
+		{1, 2, 1}
+	};
+
+	(void) kernel;
+
+	SDL_LockSurface(image);
+	SDL_UnlockSurface(image);
 }
