@@ -93,6 +93,7 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 
 			const double actual_dist = straight_dist / (double) buffer_val.cos_beta;
 			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
+			// hit = align_vec_from_out_of_bounds(hit);
 
 			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_size.x - 1.0
 				|| hit[1] > current_level.map_size.y - 1.0) continue;

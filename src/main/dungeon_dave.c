@@ -39,17 +39,13 @@
 
 #include "../data/enemies.c"
 
-/*
 #include "../data/levels/level_1.c"
 #include "../data/levels/debug_level.c"
 #include "../data/levels/red_room.c"
 #include "../data/levels/forever_maze.c"
-*/
 #include "../data/levels/palace.c"
-/*
 #include "../data/levels/mipmap_hallway.c"
 #include "../data/levels/fleckenstein.c"
-*/
 
 /*
 todo:
@@ -77,6 +73,7 @@ int main(void) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
+		teleport_player_if_needed(&player);
 		const InputStatus input_status = handle_input(&player, player.is_dead);
 		if (input_status == Exit) deinit_all(&player, &weapon);
 
@@ -89,8 +86,7 @@ int main(void) {
 		// draw_colored_floor(wall_y_shift);
 
 		#ifndef PLANAR_MODE
-		double full_jump_height = player.jump.height * settings.screen_height; // screen height b/c height is vertical
-		raycast(&player, wall_y_shift, full_jump_height);
+		raycast(&player, wall_y_shift, player.jump.height * settings.screen_height); // screen b/c height is vertical
 
 		draw_things(&player, wall_y_shift);
 
@@ -107,8 +103,6 @@ int main(void) {
 			deinit_all(&player, &weapon);
 
 		fast_affine_floor(0, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
-
-		teleport_player_if_needed(&player);
 
 		refresh(&player, wall_y_shift);
 		tick_delay(before);

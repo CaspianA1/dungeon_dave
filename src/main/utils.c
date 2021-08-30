@@ -158,3 +158,7 @@ inlinable SDL_Rect rect_from_ivecs(const ivec v1, const ivec v2) {
 inlinable byte ivec_out_of_bounds(const ivec v) {
 	return v.x < 0 || v.x > current_level.map_size.x - 1 || v.y < 0 || v.y > current_level.map_size.y - 1;
 }
+
+inlinable vec align_vec_from_out_of_bounds(const vec v) {
+	return (vec) {fmod(fabs(v[0]), current_level.map_size.x), fmod(fabs(v[1]), current_level.map_size.y)};
+}

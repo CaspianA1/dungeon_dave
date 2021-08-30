@@ -35,6 +35,7 @@ features:
 	- hit head on things above player
 	- heightmap instead of get_point_height fn
 	- health pickups
+	- clear walls and things
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -64,7 +65,7 @@ completed:
 	- rudimentary level creation interface
 	- shading of diffuse circles and flat triangles, as well as environments that get darker when farther away
 	- static and animated billboards (with only 1D Z-buffering for now)
-	- texture mapping, with mipmapping that incorporates box blur (for cache coherency)
+	- texture mapping, with mipmapping that incorporates box blur (for cache coherency and reduced moiré patterns)
 	- audio system that allows for sound effects, background music, and volume tweaking based on a sound-emitter's distance from the player
 	- skyboxes that also change the portion shown based on the y-pitch
 	- raycasting with multiple floor heights (no multi-dimensional floors though, yet)
