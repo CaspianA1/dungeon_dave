@@ -92,7 +92,7 @@ int main(void) {
 		// draw_colored_floor(wall_y_shift);
 
 		#ifndef PLANAR_MODE
-		raycast(&player, wall_y_shift, player.jump.height * settings.screen_height); // screen b/c height is vertical
+		raycast(&player, wall_y_shift, player.jump.height * settings.screen_height); // scr h b/c height is vertical
 
 		draw_things(&player, wall_y_shift);
 
