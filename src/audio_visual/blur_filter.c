@@ -85,15 +85,65 @@ void box_blur_test(void) {
 
 //////////
 
-void gaussian_blur(SDL_Surface* const image) {
-	const int kernel[3][3] = {
-		{1, 2, 1},
-		{2, 4, 2},
-		{1, 2, 1}
-	};
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-	(void) kernel;
+// https://aryamansharda.medium.com/image-filters-gaussian-blur-eb36db6781b1
+void gaussian_blur(SDL_Surface* const image, const int radius) {
+	const double sigma = MAX((radius / 2.0), 1.0);
+	const int kernel_size = 2 * radius + 1;
+	double kernel[kernel_size][kernel_size], sum = 0.0;
+
+	memset(kernel, 0, kernel_size * kernel_size * sizeof(double));
+
+	for (int y = -radius; y <= radius; y++) {
+		for (int x = -radius; x <= radius; x++) {
+			const double
+				exponent_numerator = -(x * x + y * y),
+				exponent_denominator = 2 * sigma * sigma;
+
+			const double e_expression = pow(M_E, exponent_numerator / exponent_denominator);
+			const double kernel_value = e_expression / (2 * M_PI * sigma * sigma);
+
+			kernel[y + radius][x + radius] = kernel_value;
+			sum += kernel_value;
+		}
+	}
+
+	for (int y = 0; y < kernel_size; y++) {
+		for (int x = 0; x < kernel_size; x++)
+			kernel[y][x] /= sum;
+	}
+
+	//////////
+
+	const ivec image_size = {image -> w, image -> h};
+
+	SDL_Surface* const blurred = SDL_CreateRGBSurfaceWithFormat(0, image_size.x, image_size.y, 32, PIXEL_FORMAT);
+	const SDL_PixelFormat* const format = blurred -> format;
+	const int bpp = format -> BytesPerPixel;
 
 	SDL_LockSurface(image);
+	SDL_LockSurface(blurred);
+
+	for (int y = radius; y < image_size.y - radius; y++) {
+		for (int x = radius; x < image_size.x - radius; x++) {
+			color4 blurred_pixel = {0, 0, 0, 0};
+
+			for (int kernel_y = -kernel_size; kernel_y < kernel_size; kernel_y++) {
+				for (int kernel_x = -kernel_size; kernel_x < kernel_size; kernel_x++) {
+					const double kernel_value = kernel[kernel_y + radius][kernel_x + radius];
+
+					const Uint32 orig_pixel = *read_surface_pixel(image, x - kernel_x, y - kernel_y, bpp);
+
+					byte r, g, b, a;
+					SDL_GetRGBA(orig_pixel, format, &r, &g, &b, &a);
+					blurred_pixel += (color4) {r * kernel_value, g * kernel_value, b * kernel_value, a * kernel_value};
+				}
+			}
+		}
+	}
+
 	SDL_UnlockSurface(image);
+	SDL_UnlockSurface(blurred);
+	SDL_FreeSurface(blurred);
 }
