@@ -52,7 +52,7 @@
 
 /*
 TODO:
-- proper mipmap blurring
+- gaussian blur edge handling
 - the polygon floor algorithm
 - 3D DDA pitch-angle translation
 - arms on the trooper
