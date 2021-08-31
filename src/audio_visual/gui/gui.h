@@ -19,4 +19,4 @@ typedef struct {
 	static Toggle toggle = {0, 0, key};\
 	if (!update_toggle(&toggle)) return;
 
-const char* const STD_GUI_FONT_PATH = "assets/dnd.ttf";
+const char* const gui_font_path = "assets/dnd.ttf";
