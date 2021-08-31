@@ -140,7 +140,7 @@ SDL_Surface* gaussian_blur(SDL_Surface* const image, const int radius) {
 				}
 			}
 			*read_surface_pixel(blurred, x, y, bpp) = SDL_MapRGBA(format,
-				(byte) blurred_pixel[0], (byte) blurred_pixel[1], blurred_pixel[2], blurred_pixel[3]);
+				blurred_pixel[0], blurred_pixel[1], blurred_pixel[2], blurred_pixel[3]);
 		}
 	}
 
