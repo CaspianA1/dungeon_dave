@@ -83,12 +83,6 @@ typedef struct {
 //////////
 
 typedef struct {
-	byte r, g, b;
-} Color3;
-
-//////////
-
-typedef struct {
 	const ivec map_size;
 	const vec init_pos;
 	const double init_height;

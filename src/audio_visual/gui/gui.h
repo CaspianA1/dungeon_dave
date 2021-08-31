@@ -1,7 +1,12 @@
 typedef struct {
+	byte r, g, b;
+} Color3;
+
+typedef struct {
 	TTF_Font* font;
 	Sprite sprite;
-	byte r, g, b, has_background;
+	Color3 color;
+	byte has_background;
 	SDL_Rect pos;
 } OldMessage;
 

@@ -1,8 +1,7 @@
 OldMessage init_message(const char* const text, const byte r, const byte g, const byte b, const byte has_background) {
-
 	OldMessage message = {
 		TTF_OpenFont("assets/dnd.ttf", settings.avg_dimensions / 10.0),
-		.r = r, .g = g, .b = b, .has_background = has_background
+		.color = {r, g, b}, .has_background = has_background
 	};
 
 	if (message.font == NULL) FAIL("Could not open a font: %s\n", SDL_GetError());
@@ -30,9 +29,10 @@ inlinable void draw_colored_frect(const byte r, const byte g, const byte b,
 }
 
 inlinable void draw_message(const OldMessage* const message) {
+	const Color3 color = message -> color;
 	if (message -> has_background) {
-		SDL_SetRenderDrawColor(screen.renderer, 255 - message -> r,
-			255 - message -> g, 255 - message -> b, SDL_ALPHA_OPAQUE);
+		SDL_SetRenderDrawColor(screen.renderer, 255 - color.r,
+			255 - color.g, 255 - color.b, SDL_ALPHA_OPAQUE);
 		SDL_RenderFillRect(screen.renderer, &message -> pos);
 	}
 
