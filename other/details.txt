@@ -3,7 +3,6 @@ priority:
 	- weapon projectiles
 
 features:
-	- 'sectors' for wall height sections
 	- doors
 	- a settings option in the title screen and status bar
 	- escape full-screen if pressing escape
@@ -45,7 +44,6 @@ problems:
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
 	- don't intersect the player dot with walls in the minimap
 	- shading is slow (it's all down to one line, the calculate_shade line)
-	- skyboxes become wonky when the screen size changes too much (readjust mouse pos after scaling down the screen - b/c that is messing with the skybox)
 	- disabling vsync makes everything choppy (not a big problem, just curious why)
 	- sometimes, psprites disappear mid-game (use memory sanitizer to resolve the problem: https://github.com/google/sanitizers/wiki/MemorySanitizer)
 	- bogo is completely light with -Ofast when he shouldn't be

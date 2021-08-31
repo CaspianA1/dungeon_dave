@@ -1,7 +1,3 @@
-#define toggledef(key)\
-	static Toggle toggle = {0, 0, key};\
-	if (!update_toggle(&toggle)) return;
-
 struct {
 	TTF_Font* font;
 	SDL_Texture* hp_texture;
@@ -24,7 +20,7 @@ void deinit_hud_resources(void) {
 	TTF_CloseFont(hud_resources.font);
 }
 
-byte update_toggle(Toggle* const toggle) {
+byte update_toggle(Toggle* const toggle) { // returns if the toggle is set
 	const byte pressed_key = keys[toggle -> key];
 	if (pressed_key && !toggle -> enabled_previously)
 		toggle -> enabled = !toggle -> enabled;

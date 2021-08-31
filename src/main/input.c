@@ -1,18 +1,19 @@
-inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos) {
-	const int prev_mouse_x = mouse_pos -> x;
-	SDL_GetMouseState(&mouse_pos -> x, &mouse_pos -> y);
-	if (prev_mouse_x == mouse_pos -> x) return;
+inlinable void update_theta_and_y_pitch(double* const theta, int* const y_pitch) {
+	ivec mouse_pos;
+	SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
 
-	*theta += (double) (mouse_pos -> x - prev_mouse_x) / settings.screen_width * 360.0;
+	if (mouse_pos.x == settings.screen_width - 1)
+		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos.y);
+	else if (mouse_pos.x == 0)
+		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos.y);
 
-	if (mouse_pos -> x == settings.screen_width - 1)
-		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos -> y);
-	else if (mouse_pos -> x == 0)
-		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
-}
+	if (mouse_pos.y == settings.screen_height - 1)
+		SDL_WarpMouseInWindow(screen.window, mouse_pos.x, settings.screen_height - 1);
+	else if (mouse_pos.y == 0)
+		SDL_WarpMouseInWindow(screen.window, mouse_pos.x, 0);
 
-void update_y_pitch(int* const y_pitch, const int mouse_y) {
-	*y_pitch = -mouse_y + settings.half_screen_height;
+	*theta = (double) mouse_pos.x / settings.screen_width * 360.0;
+	*y_pitch = -mouse_pos.y + settings.half_screen_height;
 }
 
 inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lstrafe) {
@@ -86,15 +87,14 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 
 		double* const theta = &player -> angle;
 		vec* const pos = &player -> pos;
-		const vec prev_pos = *pos;
-		ivec* const mouse_pos = &player -> mouse_pos;
 
-		update_mouse_and_theta(theta, mouse_pos);
+		const vec prev_pos = *pos;
+
+		update_theta_and_y_pitch(theta, &player -> y_pitch);
 		update_pos(pos, &player -> dir, body, to_radians(*theta),
 			player -> jump.height, forward, backward, lstrafe, rstrafe);
 
 		update_jump(&player -> jump, player -> pos);
-		update_y_pitch(&player -> y_pitch, mouse_pos -> y);
 		update_tilt(&player -> tilt, strafe, lstrafe);
 		update_pace(&player -> pace, *pos, prev_pos, player -> body.v, player -> body.limit_v);
 	}

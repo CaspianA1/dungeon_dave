@@ -128,7 +128,6 @@ InputStatus display_title_screen(void) {
 
 				case SDL_MOUSEBUTTONDOWN: {
 					if (start.has_background) {
-						SDL_ShowCursor(SDL_FALSE);
 						title_screen_input = ProceedAsNormal;
 						displaying_title_screen = 0;
 					}

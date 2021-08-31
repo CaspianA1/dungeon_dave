@@ -218,4 +218,256 @@ printf("kernel = {\n\t{%lf, %lf, %lf},\n\t{%lf, %lf, %lf},\n\t{%lf, %lf, %lf}\n}
 	kernel[2][0], kernel[2][1], kernel[2][2]);
 */
 
+///// Overengineered:
+
+typedef struct {
+	const byte axis;
+	const int boundary, out_of_bounds_move;
+} MouseBound;
+
+const MouseBound mouse_bounds[4] = {
+	{0, settings.screen_width - 1, 1}, // if mouse on right edge, move to left edge
+	{0, 0, settings.screen_width - 1}, // if mouse on left edge, move to right edge
+	{1, 0, 0}, // if mouse on top edge, stay there
+	{1, settings.screen_height - 1, settings.screen_height - 1} // if mouse on bottom edge, stay there
+};
+
+byte axes_checked[2] = {0, 0};
+
+for (byte i = 0; i < 4; i++) {
+	const MouseBound bound = mouse_bounds[i];
+	if (axes_checked[bound.axis]) continue;
+
+	const int pos_component_to_check = bound.axis ? mouse_pos -> y : mouse_pos -> x;
+
+	if (*pos_component_to_check == bound.boundary) {
+		printf("Met boundary for axis %d, for boundary %d, so moving to %d\n",
+			bound.axis, bound.boundary, bound.out_of_bounds_move);
+
+		// SDL_WarpMouseInWindow(screen.window, )
+		if (bound.axis) {
+			SDL_WarpMouseInWindow(screen.window, _, _);
+		}
+
+		// *pos_component_to_check = bound.out_of_bounds_move;
+
+		axes_checked[bound.axis] = 1;
+	}
+}
+
+/*
+if (mouse_pos -> x == settings.screen_width - 1)
+	SDL_WarpMouseInWindow(screen.window, 1, mouse_pos -> y);
+else if (mouse_pos -> x == 0)
+	SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
+*/
+
+//////////
+
+/////
+
+inlinable void update_mouse_and_theta(double* const theta, ivec* const mouse_pos) {
+
+	/*
+	const int prev_mouse_x = mouse_pos -> x;
+	SDL_GetMouseState(&mouse_pos -> x, &mouse_pos -> y);
+
+	if (prev_mouse_x == mouse_pos -> x) return;
+
+	*theta = (double) mouse_pos -> x / settings.screen_width * 360.0;
+
+	if (mouse_pos -> x == settings.screen_width - 1)
+		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos -> y);
+	else if (mouse_pos -> x == 0)
+		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
+	*/
+
+	// mouse y locking is not working
+	// SDL_SetRelativeMouseMode(SDL_TRUE);
+
+	/*
+	if (mouse_pos -> y == settings.screen_height - 1)
+		SDL_WarpMouseInWindow(screen.window, mouse_pos -> x, settings.screen_height - 2);
+	else if (mouse_pos -> y < 5) {
+		printf("Warping from 0 to 1\n");
+		SDL_WarpMouseInWindow(screen.window, mouse_pos -> x, 5);
+	}
+	*/
+}
+
+/////
+
+inlinable void update_mouse_and_theta_and_y_pitch(double* const theta, int* const y_pitch, ivec* const _mouse_pos) {
+	(void) theta;
+	(void) _mouse_pos;
+
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+
+	/*
+	ivec mouse_pos;
+	SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+
+	if (mouse_pos.x == 0)
+		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos.y);
+	else if (mouse_pos.x == settings.screen_width - 1)
+		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos.y);
+
+	if (mouse_pos.y == 0) {
+		SDL_SetRelativeMouseMode(SDL_TRUE);
+		// SDL_WarpMouseInWindow(screen.window, mouse_pos.x, 20);
+	}
+	else
+		SDL_SetRelativeMouseMode(SDL_FALSE);
+
+	DEBUG_IVEC(mouse_pos);
+
+	*y_pitch = -mouse_pos.y + settings.half_screen_height;
+	*/
+
+	/*
+	DEBUG_IVEC(mouse_pos);
+
+	if (keys[SDL_SCANCODE_G]) {
+		puts("Warping");
+		SDL_WarpMouseInWindow(screen.window, 0, 0);
+	}
+	*/
+
+	/*
+	const int prev_mouse_x = mouse_pos -> x;
+	SDL_GetMouseState(&mouse_pos -> x, &mouse_pos -> y);
+
+	if (prev_mouse_x == mouse_pos -> x) return;
+
+	*theta = (double) mouse_pos -> x / settings.screen_width * 360.0;
+
+	if (mouse_pos -> x == settings.screen_width - 1)
+		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos -> y);
+	else if (mouse_pos -> x == 0)
+		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos -> y);
+	*/
+
+	// mouse y locking is not working
+	// SDL_SetRelativeMouseMode(SDL_TRUE);
+
+	/*
+	if (mouse_pos -> y == settings.screen_height - 1)
+		SDL_WarpMouseInWindow(screen.window, mouse_pos -> x, settings.screen_height - 2);
+	else if (mouse_pos -> y < 5) {
+		printf("Warping from 0 to 1\n");
+		SDL_WarpMouseInWindow(screen.window, mouse_pos -> x, 5);
+	}
+	*/
+}
+
+/////
+
+inlinable void update_mouse_and_theta_and_y_pitch(double* const theta, int* const y_pitch, ivec* const _mouse_pos) {
+	(void) theta;
+	(void) y_pitch;
+	(void) _mouse_pos;
+
+	// SDL_SetWindowGrab(screen.window, !keys[KEY_ESCAPE_WINDOW]);
+
+	ivec mouse_pos;
+	SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+	DEBUG_IVEC(mouse_pos);
+
+	// SDL_SetRelativeMouseMode(SDL_TRUE);
+}
+
+/////
+
+inlinable void update_mouse_and_theta_and_y_pitch(double* const theta, int* const y_pitch, ivec* const _mouse_pos) {
+	printf("Checking\n");
+
+	/*
+	static Toggle toggle = {0, 0, KEY_ESCAPE_WINDOW};\
+	if (!update_toggle(&toggle)) {
+		printf("Should not escape window\n");
+		return;
+	}
+	*/
+
+	toggledef(KEY_ESCAPE_WINDOW, 0); // if can escape window, don't control anything
+
+	DEBUG(toggle.enabled, d);
+
+	printf("Should escape window\n");
+
+	(void) theta;
+	(void) y_pitch;
+	(void) _mouse_pos;
+
+	ivec mouse_pos;
+	SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+
+	// const byte can_escape_window = keys[KEY_ESCAPE_WINDOW];
+
+		/*
+		at_right_boundary = mouse_pos.x == settings.screen_width - 1,
+		at_left_boundary = mouse_pos.x == 0,
+		at_upper_boundary = mouse_pos.y == settings.screen_height - 1,
+		at_lower_boundary = mouse_pos.y == 0;
+		*/
+
+	// SDL_ShowCursor(can_escape_window);
+
+	/*
+	if (!can_escape_window) {
+		// if mouse outside of window, don't do this
+		if (mouse_pos.x == settings.screen_width - 1)
+			SDL_WarpMouseInWindow(screen.window, 1, mouse_pos.y);
+		else if (mouse_pos.x == 0)
+			SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos.y);
+
+		if (mouse_pos.y == settings.screen_height - 1)
+			SDL_WarpMouseInWindow(screen.window, mouse_pos.x, settings.screen_height - 1);
+		else if (mouse_pos.y == 0)
+			SDL_WarpMouseInWindow(screen.window, mouse_pos.x, 0);
+	}
+	*/
+}
+
+/////
+
+/*
+at_right_boundary = mouse_pos.x == settings.screen_width - 1,
+at_left_boundary = mouse_pos.x == 0,
+at_upper_boundary = mouse_pos.y == settings.screen_height - 1,
+at_lower_boundary = mouse_pos.y == 0;
+*/
+
+
+/////
+
+inlinable void update_theta_and_y_pitch(double* const theta, int* const y_pitch, ivec* const _mouse_pos) {
+	puts("Checking");
+	toggledef(KEY_ESCAPE_WINDOW, 0); // if can escape window, return
+
+	DEBUG(toggle.enabled, d);
+
+	puts("Should not escape window");
+
+	(void) theta;
+	(void) y_pitch;
+	(void) _mouse_pos;
+
+	ivec mouse_pos;
+	SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+
+	if (mouse_pos.x == settings.screen_width - 1)
+		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos.y);
+	else if (mouse_pos.x == 0)
+		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos.y);
+
+	if (mouse_pos.y == settings.screen_height - 1)
+		SDL_WarpMouseInWindow(screen.window, mouse_pos.x, settings.screen_height - 1);
+	else if (mouse_pos.y == 0)
+		SDL_WarpMouseInWindow(screen.window, mouse_pos.x, 0);
+
+	*theta = (double) mouse_pos.x / settings.screen_width * 360.0;
+	*y_pitch = -mouse_pos.y + settings.half_screen_height;
+}
+
 /////

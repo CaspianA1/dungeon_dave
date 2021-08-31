@@ -61,7 +61,7 @@ void load_default_settings(void) {
 	settings.plane_bottom = -1.0 / ((settings.screen_height / settings.proj_dist) * 2.0);
 }
 
-byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
+byte update_screen_dimensions(void) {
 	int new_width, new_height;
 	SDL_GetWindowSize(screen.window, &new_width, &new_height);
 
@@ -87,8 +87,6 @@ byte update_screen_dimensions(int* const y_pitch, const int mouse_y) {
 			settings.screen_height = new_height;
 			settings.half_screen_height = new_height / 2;
 			settings.plane_bottom = -1.0 / ((settings.screen_height / settings.proj_dist) * 2.0);
-			void update_y_pitch(int* const, const int);
-			update_y_pitch(y_pitch, mouse_y);
 		}
 		return 1;
 	}
@@ -106,8 +104,6 @@ Player load_player(const double jump_up_v0,
 		.pos = current_level.init_pos,
 
 		.dir = {1.0, 0.0},
-
-		.mouse_pos = {0, 0},
 
 		.angle = 0.0, .hp = INIT_HP, .is_dead = 0,
 
@@ -141,7 +137,6 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	void init_screen(void);
 	init_screen();
 
-
 	STARTUP_LOG("audio subsystem");
 	init_audio_subsystem();
 
@@ -173,7 +168,9 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	const Player first_player = load_player(4.8, 0.35, 3.0, 0.12, 15.0, 0.08, 0.09, 0.05, 1.9);
 
 	STARTUP_LOG("primary weapon");
+
 	DataAnimationImmut init_immut_animation_data(const char* const, const int, const int, const int, const int, const byte);
+
 	const Weapon first_weapon = {
 		.status = mask_short_range, .power = 4.0, .dist_for_hit = 0.5,
 		.sound = init_sound("assets/audio/sound_effects/whip_crack.wav", 1),

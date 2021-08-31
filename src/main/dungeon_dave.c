@@ -3,6 +3,7 @@
 #include "../audio_visual/overlay/overlay.h"
 #include "../combat/combat.h"
 #include "global_types.h"
+#include "../audio_visual/gui/gui.h"
 
 #include "utils.c"
 
@@ -28,7 +29,6 @@
 #include "../audio_visual/raycast.c"
 #include "../audio_visual/floorcast.c"
 
-#include "../audio_visual/gui/gui.h"
 #include "../audio_visual/gui/gui.c"
 #include "../audio_visual/gui/title_screen.c"
 #include "../audio_visual/gui/hud.c"
@@ -52,6 +52,7 @@
 
 /*
 TODO:
+- a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
 - gaussian blur edge handling
 - the polygon floor algorithm
 - 3D DDA pitch-angle translation
@@ -67,9 +68,11 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
+	// SDL_ShowCursor(SDL_FALSE);
+
 	play_sound(&current_level.background_sound, 1);
 	p = init_psprite("assets/walls/dune.bmp");
 
@@ -80,10 +83,9 @@ int main(void) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
+		update_screen_dimensions();
 		const InputStatus input_status = handle_input(&player, player.is_dead);
 		if (input_status == Exit) deinit_all(&player, &weapon);
-
-		update_screen_dimensions(&player.y_pitch, player.mouse_pos.y);
 
 		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 

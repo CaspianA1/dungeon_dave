@@ -21,6 +21,11 @@ typedef struct {
 	} background;
 } GUI;
 
+
+#define toggledef(key)\
+	static Toggle toggle = {0, 0, key};\
+	if (!update_toggle(&toggle)) return;
+
 // args: msg r, msg g, msg b, font name, sprite bg, num messages, scale (bg sprite | bg colors), (text, {x, y, w, h})...
 GUI init_gui(const byte msg_r, const byte msg_g, const byte msg_b, const char* const font_name,
 	const byte has_sprite_background, const byte message_scale, const unsigned message_count, ...) {
@@ -67,18 +72,17 @@ GUI init_gui(const byte msg_r, const byte msg_g, const byte msg_b, const char* c
 	return gui;
 }
 
-inlinable void deinit_gui(const GUI gui) {
-	for (byte i = 0; i < gui.message_count; i++)
-		deinit_sprite(gui.messages[i].text_sprite);
-	wfree(gui.messages);
-	TTF_CloseFont(gui.font);
+inlinable void deinit_gui(const GUI* const gui) {
+	for (byte i = 0; i < gui -> message_count; i++)
+		deinit_sprite(gui -> messages[i].text_sprite);
+	wfree(gui -> messages);
+	TTF_CloseFont(gui -> font);
 }
 
 // returns if the screen dimensions changed
 inlinable byte after_gui_event(const Uint32 before) {
 	SDL_RenderPresent(screen.renderer);
-	int fake_y_pitch;
-	const byte dimensions_changed = update_screen_dimensions(&fake_y_pitch, settings.half_screen_height);
+	const byte dimensions_changed = update_screen_dimensions();
 	tick_delay(before);
 	return dimensions_changed;
 }
