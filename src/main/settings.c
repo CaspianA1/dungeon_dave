@@ -137,9 +137,12 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 	srand(time(NULL));
 
+	STARTUP_LOG("screen");
 	void init_screen(void);
 	init_screen();
 
+
+	STARTUP_LOG("audio subsystem");
 	init_audio_subsystem();
 
 	keys = SDL_GetKeyboardState(NULL);
@@ -149,6 +152,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	occluded_by_walls = init_statemap(settings.screen_width, settings.screen_height);
 
 	//////////
+	STARTUP_LOG("enemies");
 	extern Enemy enemies[1];
 	Enemy init_eddie(void);
 
@@ -156,7 +160,10 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	memcpy(&enemies[0], &eddie, sizeof(Enemy));
 	//////////
 
+	STARTUP_LOG("first level");
 	load_first_level();
+
+	STARTUP_LOG("lightmap");
 	void init_lightmap(void);
 	init_lightmap();
 
@@ -165,6 +172,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 	const Player first_player = load_player(4.8, 0.35, 3.0, 0.12, 15.0, 0.08, 0.09, 0.05, 1.9);
 
+	STARTUP_LOG("primary weapon");
 	DataAnimationImmut init_immut_animation_data(const char* const, const int, const int, const int, const int, const byte);
 	const Weapon first_weapon = {
 		.status = mask_short_range, .power = 4.0, .dist_for_hit = 0.5,

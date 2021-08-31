@@ -93,6 +93,8 @@ SDL_Surface* gaussian_blur(SDL_Surface* const image, const int radius) {
 	const int kernel_size = 2 * radius + 1;
 	double kernel[kernel_size][kernel_size], sum = 0.0;
 
+	DEBUG(kernel_size, d);
+
 	memset(kernel, 0, kernel_size * kernel_size * sizeof(double));
 
 	for (int y = -radius; y <= radius; y++) {
@@ -114,6 +116,11 @@ SDL_Surface* gaussian_blur(SDL_Surface* const image, const int radius) {
 			kernel[y][x] /= sum;
 	}
 
+	printf("kernel = {\n\t{%lf, %lf, %lf},\n\t{%lf, %lf, %lf},\n\t{%lf, %lf, %lf}\n}\n",
+		kernel[0][0], kernel[0][1], kernel[0][2],
+		kernel[1][0], kernel[1][1], kernel[1][2],
+		kernel[2][0], kernel[2][1], kernel[2][2]);
+
 	//////////
 
 	const ivec image_size = {image -> w, image -> h};
@@ -127,21 +134,34 @@ SDL_Surface* gaussian_blur(SDL_Surface* const image, const int radius) {
 
 	for (int y = radius; y < image_size.y - radius; y++) {
 		for (int x = radius; x < image_size.x - radius; x++) {
-			color4 blurred_pixel = {0, 0, 0, 0};
+			double blurred_pixel[4] = {0.0, 0.0, 0.0, 0.0};
 
-			for (int kernel_y = -kernel_size; kernel_y < kernel_size; kernel_y++) {
-				for (int kernel_x = -kernel_size; kernel_x < kernel_size; kernel_x++) {
+			for (int kernel_y = -radius; kernel_y <= radius; kernel_y++) {
+				for (int kernel_x = -radius; kernel_x <= radius; kernel_x++) {
 					const double kernel_value = kernel[kernel_y + radius][kernel_x + radius];
 
 					const Uint32 orig_pixel = *read_surface_pixel(image, x - kernel_x, y - kernel_y, bpp);
 
 					byte r, g, b, a;
 					SDL_GetRGBA(orig_pixel, format, &r, &g, &b, &a);
-					blurred_pixel += (color4) {r * kernel_value, g * kernel_value, b * kernel_value, a * kernel_value};
+					blurred_pixel[0] += r * kernel_value;
+					blurred_pixel[1] += g * kernel_value;
+					blurred_pixel[2] += b * kernel_value;
+					blurred_pixel[3] += a * kernel_value;
+					/*
+					printf("blurred_pixel = {%lf, %lf, %lf, %lf}\n",
+						blurred_pixel[0], blurred_pixel[1], blurred_pixel[2], blurred_pixel[3]);
+					*/
 				}
 			}
-			*read_surface_pixel(blurred, x, y, bpp) = SDL_MapRGBA(format,
+
+			/*
+			printf("blurred_pixel = {%lf, %lf, %lf, %lf}\n",
 				blurred_pixel[0], blurred_pixel[1], blurred_pixel[2], blurred_pixel[3]);
+			*/
+
+			*read_surface_pixel(blurred, x, y, bpp) = SDL_MapRGBA(format,
+				(byte) blurred_pixel[0], (byte) blurred_pixel[1], blurred_pixel[2], blurred_pixel[3]);
 		}
 	}
 
@@ -151,3 +171,14 @@ SDL_Surface* gaussian_blur(SDL_Surface* const image, const int radius) {
 	return blurred;
 }
 
+void gauss_blur_test(void) {
+	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/rug_2.bmp");
+	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);
+	SDL_FreeSurface(unconverted_image);
+
+	SDL_Surface* const blurred = gaussian_blur(image, 50);
+	SDL_SaveBMP(blurred, "out.bmp");
+	SDL_FreeSurface(blurred);
+
+	exit(0);
+}
