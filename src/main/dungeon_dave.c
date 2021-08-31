@@ -71,7 +71,7 @@ int main(void) {
 	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
-	// SDL_ShowCursor(SDL_FALSE);
+	SDL_ShowCursor(SDL_FALSE);
 
 	play_sound(&current_level.background_sound, 1);
 	p = init_psprite("assets/walls/dune.bmp");
