@@ -4,8 +4,7 @@ priority:
 
 features:
 	- doors
-	- a settings option in the title screen and status bar
-	- escape full-screen if pressing escape
+	- a settings/menu option in the title screen and status bar
 	- a level opener, with a cool spinning effect
 	- a sprite pool
 	- an airship + maze level
@@ -50,7 +49,7 @@ problems:
 	- enemies have jerky movement sometimes that can make them temporarily clip into a wall (reproduce it by jumping around, wait till the enemy moves at a slant, and then go to their position)
 	- fix enemy merging by making enemies account for thing collisions
 	- blurring doesn't handle edges
-	- jitters when jumping onto things
+	- jitters when jumping on top of things
 	- a flickering gap on the left side (one column wide) of the screen for things (specifically the cactus in the palace)
 
 completed:
