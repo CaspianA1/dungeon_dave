@@ -29,10 +29,9 @@
 #include "../audio_visual/raycast.c"
 #include "../audio_visual/floorcast.c"
 
-#include "../audio_visual/gui/gui.c"
+#include "../audio_visual/gui/menu.c"
 #include "../audio_visual/gui/title_screen.c"
 #include "../audio_visual/gui/hud.c"
-#include "../audio_visual/gui/option_screen.c"
 
 #include "../combat/bfs_types.c"
 #include "../combat/bfs.c"

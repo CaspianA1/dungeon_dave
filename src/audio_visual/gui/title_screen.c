@@ -1,6 +1,6 @@
-Message init_message(const char* const text, const byte r, const byte g, const byte b, const byte has_background) {
+OldMessage init_message(const char* const text, const byte r, const byte g, const byte b, const byte has_background) {
 
-	Message message = {
+	OldMessage message = {
 		TTF_OpenFont("assets/dnd.ttf", settings.avg_dimensions / 10.0),
 		.r = r, .g = g, .b = b, .has_background = has_background
 	};
@@ -29,28 +29,36 @@ inlinable void draw_colored_frect(const byte r, const byte g, const byte b,
 	SDL_RenderFillRectF(screen.renderer, frect);
 }
 
-inlinable void draw_message(const Message message) {
-	if (message.has_background) {
-		SDL_SetRenderDrawColor(screen.renderer, 255 - message.r,
-			255 - message.g, 255 - message.b, SDL_ALPHA_OPAQUE);
-		SDL_RenderFillRect(screen.renderer, &message.pos);
+inlinable void draw_message(const OldMessage* const message) {
+	if (message -> has_background) {
+		SDL_SetRenderDrawColor(screen.renderer, 255 - message -> r,
+			255 - message -> g, 255 - message -> b, SDL_ALPHA_OPAQUE);
+		SDL_RenderFillRect(screen.renderer, &message -> pos);
 	}
 
-	SDL_RenderCopy(screen.renderer, message.sprite.texture, NULL, &message.pos);
+	SDL_RenderCopy(screen.renderer, message -> sprite.texture, NULL, &message -> pos);
 }
 
-inlinable byte mouse_over_message(const Message message) {
+// returns if the screen dimensions changed
+inlinable byte after_gui_event(const Uint32 before) {
+	SDL_RenderPresent(screen.renderer);
+	const byte dimensions_changed = update_screen_dimensions();
+	tick_delay(before);
+	return dimensions_changed;
+}
+
+inlinable byte mouse_over_message(const OldMessage* const message) {
 	int mouse_x, mouse_y;
 	SDL_GetMouseState(&mouse_x, &mouse_y);
-	const SDL_Rect box = message.pos;
+	const SDL_Rect box = message -> pos;
 
 	return mouse_x >= box.x && mouse_x <= box.x + box.w
 		&& mouse_y >= box.y && mouse_y <= box.y + box.h;
 }
 
-inlinable void deinit_message(Message message) {
-	TTF_CloseFont(message.font);
-	deinit_sprite(message.sprite);
+inlinable void deinit_message(const OldMessage* const message) {
+	TTF_CloseFont(message -> font);
+	deinit_sprite(message -> sprite);
 }
 
 InputStatus display_logo(void) {
@@ -97,7 +105,7 @@ InputStatus display_title_screen(void) {
 	if (TTF_Init() == -1)
 		FAIL("Unable to initialize the font library: %s", SDL_GetError());
 
-	Message start;
+	OldMessage start;
 	InputStatus title_screen_input = Exit;
 	byte displaying_title_screen = 1, dimensions_changed = 1;
 
@@ -114,7 +122,7 @@ InputStatus display_title_screen(void) {
 			};
 		}
 
-		start.has_background = mouse_over_message(start);
+		start.has_background = mouse_over_message(&start);
 
 		/////
 
@@ -146,9 +154,9 @@ InputStatus display_title_screen(void) {
 
 		draw_colored_rect(228, 29, 29, 1.0, NULL);
 		draw_colored_rect(139, 0, 0, 1.0, &darker_center_rect);
-		draw_message(start);
+		draw_message(&start);
 		dimensions_changed = after_gui_event(before);
-		if (dimensions_changed || !displaying_title_screen) deinit_message(start);
+		if (dimensions_changed || !displaying_title_screen) deinit_message(&start);
 	}
 
 	deinit_sound(&title_track);
