@@ -79,7 +79,7 @@ inlinable void make_hp_text(const double hp, TTF_Font** const font, SDL_Texture*
 	sprintf(percent_str, "%d%%", (byte) round(hp / INIT_HP * 100));
 
 	if (font != NULL) TTF_CloseFont(*font);
-	*font = TTF_OpenFont(gui_font_path, settings.avg_dimensions / 10.0);
+	*font = TTF_OpenFont(gui_font_path, settings.avg_dimensions / font_size_divisor);
 
 	const Color3 color = hud_colors[HUD];
 	SDL_Surface* const surface = TTF_RenderText_Solid(*font, percent_str,

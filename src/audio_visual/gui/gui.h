@@ -20,3 +20,4 @@ typedef struct {
 	if (!update_toggle(&toggle)) return;
 
 const char* const gui_font_path = "assets/dnd.ttf";
+const byte font_size_divisor = 10;

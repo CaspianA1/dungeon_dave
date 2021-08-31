@@ -34,6 +34,7 @@ features:
 	- heightmap instead of get_point_height fn
 	- health pickups
 	- clear walls and things
+	- bump and bounce back against walls when running at them
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

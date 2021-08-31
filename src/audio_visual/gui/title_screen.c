@@ -1,6 +1,6 @@
 OldMessage init_message(const char* const text, const byte r, const byte g, const byte b, const byte has_background) {
 	OldMessage message = {
-		TTF_OpenFont("assets/dnd.ttf", settings.avg_dimensions / 10.0),
+		TTF_OpenFont("assets/dnd.ttf", settings.avg_dimensions / font_size_divisor),
 		.color = {r, g, b}, .has_background = has_background
 	};
 
@@ -65,6 +65,7 @@ InputStatus display_logo(void) {
 	Sprite logo;
 	InputStatus logo_input = Exit;
 	byte displaying_logo = 1, dimensions_changed = 1;
+
 	while (displaying_logo) {
 		const Uint32 before = SDL_GetTicks();
 
@@ -90,8 +91,8 @@ InputStatus display_logo(void) {
 		}
 
 		SDL_RenderCopy(screen.renderer, logo.texture, NULL, NULL);
-		dimensions_changed = after_gui_event(before);
 
+		dimensions_changed = after_gui_event(before);
 		if (dimensions_changed || !displaying_logo) deinit_sprite(logo);
 	}
 	return logo_input;

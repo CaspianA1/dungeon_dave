@@ -1,5 +1,3 @@
-typedef __v4si color4;
-
 inlinable Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
 	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
 }
@@ -7,7 +5,9 @@ inlinable Uint32* read_surface_pixel(const SDL_Surface* const surface, const int
 inlinable Uint32 box_blur_pixel(const SDL_Surface* const image, const SDL_PixelFormat* const format,
 	const ivec image_size, const int bpp, const int x, const int y, const int blur_size) {
 
-	color4 sum = {0, 0, 0, 0};
+	typedef __v4si color4_t;
+
+	color4_t sum = {0, 0, 0, 0};
 	int blur_sum_factor = 0;
 
 	for (int py = -blur_size; py <= blur_size; py++) {
@@ -26,7 +26,7 @@ inlinable Uint32 box_blur_pixel(const SDL_Surface* const image, const SDL_PixelF
 
 			byte r, g, b, a;
 			SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
-			sum += (color4) {r, g, b, a};
+			sum += (color4_t) {r, g, b, a};
 			blur_sum_factor++;
 		}
 	}

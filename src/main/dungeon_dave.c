@@ -52,6 +52,7 @@
 /*
 TODO:
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
+- highlight menus when the mouse is over them, detect clicks, rescale stuff (maybe), and figure out the full-screen error
 - gaussian blur edge handling
 - the polygon floor algorithm
 - 3D DDA pitch-angle translation
@@ -77,6 +78,7 @@ int main(void) {
 
 	// box_blur_test();
 	// gauss_blur_test();
+	// menu_test();
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
