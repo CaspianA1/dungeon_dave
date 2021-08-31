@@ -92,6 +92,10 @@ inlinable void tick_delay(const Uint32 before) {
 	if (wait > 0) SDL_Delay(wait);
 }
 
+inlinable double double_max(const double a, const double b) {
+	return (a > b) ? a : b;
+}
+
 inlinable byte map_point(const byte* const map, const int x, const int y) {
 	return map[y * current_level.map_size.x + x];
 }

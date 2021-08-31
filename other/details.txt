@@ -49,10 +49,9 @@ problems:
 	- disabling vsync makes everything choppy (not a big problem, just curious why)
 	- sometimes, psprites disappear mid-game (use memory sanitizer to resolve the problem: https://github.com/google/sanitizers/wiki/MemorySanitizer)
 	- bogo is completely light with -Ofast when he shouldn't be
-	- many memory leaks
 	- enemies have jerky movement sometimes that can make them temporarily clip into a wall (reproduce it by jumping around, wait till the enemy moves at a slant, and then go to their position)
 	- fix enemy merging by making enemies account for thing collisions
-	- box blur doesn't handle edges
+	- blurring doesn't handle edges
 	- jitters when jumping onto things
 	- a flickering gap on the left side (one column wide) of the screen for things (specifically the cactus in the palace)
 

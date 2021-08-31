@@ -85,43 +85,32 @@ void box_blur_test(void) {
 
 //////////
 
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-
 // https://aryamansharda.medium.com/image-filters-gaussian-blur-eb36db6781b1
 SDL_Surface* gaussian_blur(SDL_Surface* const image, const int radius) {
-	const double sigma = MAX((radius / 2.0), 1.0);
+	const double sigma = double_max((radius / 2.0), 1.0);
 	const int kernel_size = 2 * radius + 1;
-	double kernel[kernel_size][kernel_size], sum = 0.0;
 
-	DEBUG(kernel_size, d);
-
-	memset(kernel, 0, kernel_size * kernel_size * sizeof(double));
+	double* const
+		kernel = wcalloc(kernel_size * kernel_size, sizeof(double)),
+		sum = 0.0, exponent_denominator = 2.0 * sigma * sigma;
 
 	for (int y = -radius; y <= radius; y++) {
 		for (int x = -radius; x <= radius; x++) {
-			const double
-				exponent_numerator = -(x * x + y * y),
-				exponent_denominator = 2 * sigma * sigma;
-
+			const double exponent_numerator = -(x * x + y * y);
 			const double e_expression = pow(M_E, exponent_numerator / exponent_denominator);
-			const double kernel_value = e_expression / (2 * M_PI * sigma * sigma);
+			const double kernel_value = e_expression / (exponent_denominator * M_PI);
 
-			kernel[y + radius][x + radius] = kernel_value;
+			kernel[(y + radius) * kernel_size + (x + radius)] = kernel_value; // kernel[y][x] == kernel[y * width + x]
 			sum += kernel_value;
 		}
 	}
 
 	for (int y = 0; y < kernel_size; y++) {
 		for (int x = 0; x < kernel_size; x++)
-			kernel[y][x] /= sum;
+			kernel[y * kernel_size + x] /= sum;
 	}
 
-	printf("kernel = {\n\t{%lf, %lf, %lf},\n\t{%lf, %lf, %lf},\n\t{%lf, %lf, %lf}\n}\n",
-		kernel[0][0], kernel[0][1], kernel[0][2],
-		kernel[1][0], kernel[1][1], kernel[1][2],
-		kernel[2][0], kernel[2][1], kernel[2][2]);
-
-	//////////
+	////////// for a given image, a bounding box with a thickness of the radius will be unfilled
 
 	const ivec image_size = {image -> w, image -> h};
 
@@ -138,7 +127,7 @@ SDL_Surface* gaussian_blur(SDL_Surface* const image, const int radius) {
 
 			for (int kernel_y = -radius; kernel_y <= radius; kernel_y++) {
 				for (int kernel_x = -radius; kernel_x <= radius; kernel_x++) {
-					const double kernel_value = kernel[kernel_y + radius][kernel_x + radius];
+					const double kernel_value = kernel[(kernel_y + radius) * kernel_size + (kernel_x + radius)];
 
 					const Uint32 orig_pixel = *read_surface_pixel(image, x - kernel_x, y - kernel_y, bpp);
 
@@ -148,18 +137,8 @@ SDL_Surface* gaussian_blur(SDL_Surface* const image, const int radius) {
 					blurred_pixel[1] += g * kernel_value;
 					blurred_pixel[2] += b * kernel_value;
 					blurred_pixel[3] += a * kernel_value;
-					/*
-					printf("blurred_pixel = {%lf, %lf, %lf, %lf}\n",
-						blurred_pixel[0], blurred_pixel[1], blurred_pixel[2], blurred_pixel[3]);
-					*/
 				}
 			}
-
-			/*
-			printf("blurred_pixel = {%lf, %lf, %lf, %lf}\n",
-				blurred_pixel[0], blurred_pixel[1], blurred_pixel[2], blurred_pixel[3]);
-			*/
-
 			*read_surface_pixel(blurred, x, y, bpp) = SDL_MapRGBA(format,
 				(byte) blurred_pixel[0], (byte) blurred_pixel[1], blurred_pixel[2], blurred_pixel[3]);
 		}
@@ -167,16 +146,17 @@ SDL_Surface* gaussian_blur(SDL_Surface* const image, const int radius) {
 
 	SDL_UnlockSurface(image);
 	SDL_UnlockSurface(blurred);
+	wfree(kernel);
 
 	return blurred;
 }
 
 void gauss_blur_test(void) {
-	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/rug_2.bmp");
+	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/mesa.bmp");
 	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);
 	SDL_FreeSurface(unconverted_image);
 
-	SDL_Surface* const blurred = gaussian_blur(image, 50);
+	SDL_Surface* const blurred = gaussian_blur(image, 10);
 	SDL_SaveBMP(blurred, "out.bmp");
 	SDL_FreeSurface(blurred);
 

@@ -210,3 +210,12 @@ color4 rgba_from_pixel(const SDL_Surface* const image, int x, int y) {
 }
 
 /////
+
+/*
+printf("kernel = {\n\t{%lf, %lf, %lf},\n\t{%lf, %lf, %lf},\n\t{%lf, %lf, %lf}\n}\n",
+	kernel[0][0], kernel[0][1], kernel[0][2],
+	kernel[1][0], kernel[1][1], kernel[1][2],
+	kernel[2][0], kernel[2][1], kernel[2][2]);
+*/
+
+/////

@@ -74,7 +74,7 @@ int main(void) {
 	p = init_psprite("assets/walls/dune.bmp");
 
 	// box_blur_test();
-	gauss_blur_test();
+	// gauss_blur_test();
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
