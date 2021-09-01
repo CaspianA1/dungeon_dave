@@ -51,6 +51,8 @@
 
 /*
 TODO:
+- make calculate_shade return a byte
+- distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
 - highlight menus when the mouse is over them, detect clicks, rescale stuff (maybe), and figure out the full-screen error
 - gaussian blur edge handling
@@ -68,7 +70,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	SDL_ShowCursor(SDL_FALSE);
@@ -79,6 +81,7 @@ int main(void) {
 	// box_blur_test();
 	// gauss_blur_test();
 	// menu_test();
+	// lightmap_test();
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();

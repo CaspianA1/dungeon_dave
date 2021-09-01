@@ -83,6 +83,13 @@ typedef struct {
 //////////
 
 typedef struct {
+	byte* data;
+	ivec size;
+} Lightmap;
+
+//////////
+
+typedef struct {
 	const ivec map_size;
 	const vec init_pos;
 	const double init_height;
@@ -100,7 +107,8 @@ typedef struct {
 
 	byte (*get_point_height) (const byte, const vec);
 	double (*shader) (const vec);
-	// for cache optimization; `shader` and `walls` are typically used together
+
+	Lightmap lightmap;
 
 	Sprite* walls;
 	Billboard* billboards;

@@ -9,6 +9,9 @@ inlinable Uint32* read_texture_row(const void* const pixels, const int pixel_pit
 #ifdef SHADING_ENABLED
 
 inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const double shade) {
+	/* byte r = (byte) (pixel >> 16), g = (byte) (pixel >> 8), b = pixel;
+	r *= shade; g *= shade; b *= shade; // these multiplies are slow */
+
 	const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
 	return 0xFF000000 | (r << 16) | (g << 8) | b;
 }

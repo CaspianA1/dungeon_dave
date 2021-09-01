@@ -129,9 +129,10 @@ Player load_player(const double jump_up_v0,
 }
 
 void load_all_defaults(void (*load_first_level) (void), Player* const player, Weapon* const weapon) {
-	load_default_settings();
+	const Uint32 before_loading_defaults = SDL_GetTicks();
 
-	srand(time(NULL));
+	STARTUP_LOG("default settings");
+	load_default_settings();
 
 	STARTUP_LOG("screen");
 	void init_screen(void);
@@ -140,6 +141,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	STARTUP_LOG("audio subsystem");
 	init_audio_subsystem();
 
+	srand(time(NULL));
 	keys = SDL_GetKeyboardState(NULL);
 	val_buffer = wmalloc(settings.screen_width * sizeof(BufferVal));
 
@@ -159,8 +161,8 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	load_first_level();
 
 	STARTUP_LOG("lightmap");
-	void init_lightmap(void);
-	init_lightmap();
+	Lightmap init_lightmap(void);
+	current_level.lightmap = init_lightmap();
 
 	void init_teleporter_data(void);
 	init_teleporter_data();
@@ -195,6 +197,8 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 	memcpy(player, &first_player, sizeof(Player));
 	memcpy(weapon, &first_weapon, sizeof(Weapon));
+
+	printf("Startup took %u milliseconds\n", SDL_GetTicks() - before_loading_defaults);
 }
 
 void deinit_all(const Player* const player, const Weapon* const weapon) {

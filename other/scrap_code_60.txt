@@ -471,3 +471,33 @@ inlinable void update_theta_and_y_pitch(double* const theta, int* const y_pitch,
 }
 
 /////
+
+/*
+vec vec_tex_offset(const vec pos, const vec tex_size);
+const vec tex_pos = vec_tex_offset(pos, (vec) {10 * 10, 10 * 10});
+return (double) lm.data[(int) (tex_pos[1] * lm.size.x + tex_pos[0])];
+*/
+
+/*
+const ivec int_pos = ivec_from_vec(pos);
+return (double) lm.data[int_pos.y * lm.size.x + int_pos.x];
+*/
+
+/*
+const ivec int_pos = ivec_from_vec(pos);
+return lm.data[int_pos.y * lm.size.x + int_pos.x] / 255.0;
+*/
+
+/*
+static double p;
+const byte pressed = keys[SDL_SCANCODE_T];
+if (pressed) {
+	p += 0.000001;
+	DEBUG(p, lf);
+}
+
+// return lm.data[(int) (p * lm.size.x + p)] / 255.0;
+// return lm.data[(int) (pos[1] * lm.size.x + pos[0])] / 255.0;
+*/
+
+/////
