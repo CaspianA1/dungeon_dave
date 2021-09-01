@@ -33,7 +33,7 @@ inlinable byte flat_triangle(const vec pos, const Triangle triangle) {
 
 //////////
 
-const byte lightmap_samples_per_tile = 10;
+const byte lightmap_samples_per_tile = 15;
 const double lightmap_shader_downscaler = 0.1;
 
 Lightmap init_lightmap(void) {
