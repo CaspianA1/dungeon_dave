@@ -50,7 +50,7 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface, byte* const depth) {
 		if (*depth <= 1) dest.y = 0;
 		else dest.y += surface -> h >> (*depth - 1);
 
-		SDL_BlitScaled(surface, NULL, mipmap, &dest);
+		SDL_BlitScaled(surface, NULL, mipmap, &dest); // an ideal function would filter the texture here
 		box_blur_image_portion(mipmap, dest, *depth / 3);
 
 		dest.w >>= 1;
@@ -59,8 +59,12 @@ SDL_Surface* load_mipmap(SDL_Surface* const surface, byte* const depth) {
 	}
 
 	/*
-	system("mkdir imgs");
-	static byte id = 0;
+	static byte first = 1, id = 0;
+	if (first) {
+		system("mkdir imgs");
+		first = 0;
+	}
+
 	char buf[15];
 	sprintf(buf, "imgs/out_%d.bmp", id);
 	SDL_SaveBMP(mipmap, buf);

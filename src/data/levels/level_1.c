@@ -33,7 +33,7 @@ inlinable double level_1_shader(const vec pos) {
 void load_level_1(void) {
 	enum {
 		map_width = 25, map_height = 15,
-		wall_count = 10, billboard_count = 7, teleporter_count = 0,
+		wall_count = 7, billboard_count = 7, teleporter_count = 0,
 		animated_billboard_count = 3, enemy_instance_count = 1
 	};
 
@@ -96,10 +96,7 @@ void load_level_1(void) {
 		"assets/walls/pyramid_bricks_3.bmp",
 		"assets/walls/hieroglyphics.bmp",
 		"assets/walls/desert_snake.bmp",
-		"assets/wolf/colorstone.bmp",
-		"assets/walls/water.bmp",
-		"assets/walls/dirt.bmp",
-		"assets/walls/grass.bmp");
+		"assets/wolf/colorstone.bmp");
 
 	set_level_billboards(&level_1, billboard_count,
 		"assets/objects/tomato.bmp", 6.0, 2.0, 1.0,
