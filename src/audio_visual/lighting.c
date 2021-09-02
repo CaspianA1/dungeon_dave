@@ -87,6 +87,7 @@ byte calculate_shade(const double wall_h, vec pos) {
 	*/
 }
 
+/*
 void lightmap_test(void) {
 	SDL_Surface* const test = SDL_CreateRGBSurfaceWithFormat(
 		0, current_level.map_size.x, current_level.map_size.y, 32, PIXEL_FORMAT);
@@ -104,6 +105,7 @@ void lightmap_test(void) {
 	SDL_SaveBMP(test, "lightmap_sample.bmp");
 	SDL_FreeSurface(test);
 }
+*/
 
 #else
 
