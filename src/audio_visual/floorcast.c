@@ -100,7 +100,8 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 
 			/*
 			The remaining bottlenecks:
-			Checking for out-of-bound hits will not be needed with a visplane system -> speedup
+			Checking for statemap bits will not be needed with a visplane system -> speedup
+			Checking for out-of-bound hits won't be needed either -> speedup
 			Checking for wall points that do not equal the floor height won't be needed either -> speedup
 			Sadly, I do not know if there is a way to calculate a hit with just the straight dist
 			*/
@@ -108,6 +109,7 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 			const BufferVal buffer_val = val_buffer[screen_x];
 
 			const double actual_dist = straight_dist / (double) buffer_val.cos_beta;
+
 			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
 			// hit = align_vec_from_out_of_bounds(hit);
 
