@@ -108,7 +108,9 @@ typedef struct {
 	byte (*get_point_height) (const byte, const vec);
 	double (*shader) (const vec);
 
+	#ifdef SHADING_ENABLED
 	Lightmap lightmap;
+	#endif
 
 	Sprite* walls;
 	Billboard* billboards;

@@ -199,7 +199,10 @@ void deinit_level(const Level* const level) {
 	for (byte i = 0; i < 4; i++) wfree(map_data[i]);
 
 	deinit_statemap(level -> bfs_visited);
+
+	#ifdef SHADING_ENABLED
 	wfree(level -> lightmap.data);
+	#endif
 
 	if (level -> skybox.enabled) deinit_sprite(level -> skybox.sprite);
 	deinit_sound(&level -> background_sound);
