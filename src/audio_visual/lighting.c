@@ -75,10 +75,9 @@ double calculate_shade(const double wall_h, vec pos) {
 	(void) wall_h;
 
 	static const double small = 0.000000001, one_over_255 = 1.0 / 255.0;
-
-	const Lightmap lightmap = current_level.lightmap;
 	const vec lightmap_pos = (pos - vec_fill(small)) * vec_fill(lightmap_samples_per_tile);
 
+	const Lightmap lightmap = current_level.lightmap;
 	return lightmap.data[(int) lightmap_pos[1] * lightmap.size.x + (int) lightmap_pos[0]] * one_over_255;
 
 	/*

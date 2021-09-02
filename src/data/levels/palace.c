@@ -65,6 +65,7 @@ inlinable double palace_shader(const vec pos) {
 		+ diffuse_circle(pos, hidden_area_circle_2) * 0.4
 		+ diffuse_circle(pos, hidden_area_circle_3) * 0.8
 		+ flat_triangle(pos, ravine_jump_entrance) * 1.8
+		+ fabs(sin(pos[0]))
 		+ 2.0;
 }
 
