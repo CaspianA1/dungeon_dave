@@ -71,14 +71,14 @@ functions like `diffuse_circle` above. */
 
 #ifdef SHADING_ENABLED
 
-double calculate_shade(const double wall_h, vec pos) {
+byte calculate_shade(const double wall_h, vec pos) {
 	(void) wall_h;
 
-	static const double small = 0.000000001, one_over_255 = 1.0 / 255.0;
+	static const double small = 0.000000001; // one_over_255 = 1.0 / 255.0;
 	const vec lightmap_pos = (pos - vec_fill(small)) * vec_fill(lightmap_samples_per_tile);
 
 	const Lightmap lightmap = current_level.lightmap;
-	return lightmap.data[(int) lightmap_pos[1] * lightmap.size.x + (int) lightmap_pos[0]] * one_over_255;
+	return lightmap.data[(int) lightmap_pos[1] * lightmap.size.x + (int) lightmap_pos[0]];
 
 	/*
 	double shade = wall_h / settings.screen_height * current_level.shader(pos);
@@ -87,13 +87,6 @@ double calculate_shade(const double wall_h, vec pos) {
 	*/
 }
 
-#else
-
-#define calculate_shade(a, b) 1.0
-
-#endif
-
-/*
 void lightmap_test(void) {
 	SDL_Surface* const test = SDL_CreateRGBSurfaceWithFormat(
 		0, current_level.map_size.x, current_level.map_size.y, 32, PIXEL_FORMAT);
@@ -102,13 +95,18 @@ void lightmap_test(void) {
 
 	for (int y = 0; y < current_level.map_size.y; y++) {
 		for (int x = 0; x < current_level.map_size.x; x++) {
-			const double light_val = calculate_shade(0.0, (vec) {x, y});
+			const byte light_val = calculate_shade(0.0, (vec) {x, y});
 			*read_surface_pixel(test, x, y, test -> format -> BytesPerPixel) =
-				SDL_MapRGBA(test -> format, light_val * 255, light_val * 255, light_val * 255, 255);
+				SDL_MapRGBA(test -> format, light_val, light_val, light_val, 255);
 		}
 	}
 
 	SDL_SaveBMP(test, "lightmap_sample.bmp");
 	SDL_FreeSurface(test);
 }
-*/
+
+#else
+
+#define calculate_shade(a, b) 1.0
+
+#endif

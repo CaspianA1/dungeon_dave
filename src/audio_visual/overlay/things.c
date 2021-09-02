@@ -54,7 +54,7 @@ static void draw_processed_things(const Player* const player, const double y_shi
 		SDL_Texture* const texture = thing.sprite -> texture;
 
 		#ifdef SHADING_ENABLED
-		const byte shade = 255 * calculate_shade(size, billboard_data.pos);
+		const byte shade = calculate_shade(size, billboard_data.pos);
 		SDL_SetTextureColorMod(texture, shade, shade, shade);
 		#endif
 
