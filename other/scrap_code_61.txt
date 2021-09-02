@@ -1,0 +1,9 @@
+/* // The floating-point version of the pixel shader:
+static const double one_over_255 = 1.0 / 255.0;
+const double shade = byte_shade * one_over_255;
+
+const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
+return 0xFF000000 | (r << 16) | (g << 8) | b;
+*/
+
+/////

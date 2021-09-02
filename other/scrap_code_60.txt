@@ -501,3 +501,118 @@ if (pressed) {
 */
 
 /////
+
+/* byte r = (byte) (pixel >> 16), g = (byte) (pixel >> 8), b = pixel;
+// r *= shade; g *= shade; b *= shade; // these multiplies are slow
+// r *= shade; // even one multiply slows everything down
+return 0xFF000000 | (r << 16) | (g << 8) | b; */
+
+byte r = (byte) (pixel >> 16), g = (byte) (pixel >> 8), b = pixel;
+
+r /= 5;
+g /= 5;
+b /= 5;
+
+return 0xFF000000 | (r << 16) | (g << 8) | b;
+
+/*
+static const double one_over_255 = 1.0 / 255.0;
+const double shade = byte_shade * one_over_255;
+
+const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
+return 0xFF000000 | (r << 16) | (g << 8) | b;
+*/
+
+/////
+
+/* The old way:
+_shade_ARGB_pixel:
+	push	rbp (27 lines)
+	mov	rbp, rsp
+	mov	eax, edi
+	vcvtsi2sd	xmm0, xmm0, esi
+	vmulsd	xmm0, xmm0, qword ptr [rip + LCPI59_0]
+	movzx	ecx, ah
+	mov	edx, edi
+	shr	edx, 16
+	movzx	edx, dl
+	vcvtsi2sd	xmm1, xmm1, edx
+	vmulsd	xmm1, xmm0, xmm1
+	vcvttsd2si	edx, xmm1
+	movzx	eax, al
+	vcvtsi2sd	xmm1, xmm2, ecx
+	vmulsd	xmm1, xmm0, xmm1
+	vcvttsd2si	ecx, xmm1
+	vcvtsi2sd	xmm1, xmm2, eax
+	vmulsd	xmm0, xmm0, xmm1
+	vcvttsd2si	eax, xmm0
+	shl	edx, 16
+	movzx	ecx, cl
+	shl	ecx, 8
+	movzx	eax, al
+	or	eax, ecx
+	or	eax, edx
+	or	eax, -16777216
+	pop	rbp
+	ret
+*/
+
+
+/* The new way:
+_shade_ARGB_pixel: (24 lines)
+	push	rbp
+	mov	rbp, rsp
+	mov	eax, edi
+	movzx	ecx, ah
+	movzx	edx, al
+	shr	eax, 16
+	movzx	eax, al
+	mov	edi, esi
+	shl	edi, 8
+	or	edi, esi
+	imul	eax, edi
+	add	eax, 257
+	and	eax, 16711680
+	imul	ecx, edi
+	add	ecx, 257
+	shr	ecx, 8
+	and	ecx, 261888
+	imul	edi, edx
+	add	edi, 257
+	shr	edi, 16
+	or	eax, edi
+	or	eax, ecx
+	or	eax, -16777216
+	pop	rbp
+	ret
+*/
+
+/* the compiler's version:
+
+_shade_ARGB_pixel: (22 lines)
+	push	rbp
+	mov	rbp, rsp
+	mov	eax, edi
+	movzx	ecx, ah
+	movzx	edx, al
+	shr	eax, 16
+	movzx	eax, al
+	imul	eax, esi
+	imul	ecx, esi
+	imul	edx, esi
+	imul	esi, eax, 32897
+	shr	esi, 7
+	and	esi, 16711680
+	imul	ecx, ecx, 32897
+	shr	ecx, 15
+	and	ecx, 130816
+	imul	eax, edx, 32897
+	shr	eax, 23
+	or	eax, ecx
+	or	eax, esi
+	or	eax, -16777216
+	pop	rbp
+	ret
+*/
+
+/////

@@ -8,16 +8,17 @@ inlinable Uint32* read_texture_row(const void* const pixels, const int pixel_pit
 
 #ifdef SHADING_ENABLED
 
-inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte byte_shade) {
-	/* byte r = (byte) (pixel >> 16), g = (byte) (pixel >> 8), b = pixel;
-	// r *= shade; g *= shade; b *= shade; // these multiplies are slow
-	// r *= shade; // even one multiply slows everything down
-	return 0xFF000000 | (r << 16) | (g << 8) | b; */
+inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
+	unsigned r = (byte) (pixel >> 16), g = (byte) (pixel >> 8), b = (byte) pixel;
 
-	static const double one_over_255 = 1.0 / 255.0;
-	const double shade = byte_shade * one_over_255;
+	r *= shade;
+	g *= shade;
+	b *= shade;
 
-	const byte r = (byte) (pixel >> 16) * shade, g = (byte) (pixel >> 8) * shade, b = (byte) pixel * shade;
+	r /= 255;
+	g /= 255;
+	b /= 255;
+
 	return 0xFF000000 | (r << 16) | (g << 8) | b;
 }
 
@@ -96,6 +97,13 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 		// const vec step = lerp_floor(pos, straight_dist, &hit);
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x++) {
 			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
+
+			/*
+			The remaining bottlenecks:
+			Checking for out-of-bound hits will not be needed with a visplane system -> speedup
+			Checking for wall points that do not equal the floor height won't be needed either -> speedup
+			Sadly, I do not know if there is a way to calculate a hit with just the straight dist
+			*/
 
 			const BufferVal buffer_val = val_buffer[screen_x];
 
