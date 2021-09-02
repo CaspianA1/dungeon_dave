@@ -57,7 +57,7 @@ TODO:
 - gaussian blur edge handling
 - the polygon floor algorithm
 - 3D DDA pitch-angle translation
-- arms on the trooper
+- the rest of the trooper animations
 - different enemy AIs
 - a unique hitbox size for each billboard
 - correct height translation, and then stop rendering early if possible

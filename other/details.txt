@@ -35,6 +35,7 @@ features:
 	- health pickups
 	- clear walls and things
 	- bump and bounce back against walls when running at them
+	- bigger things
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

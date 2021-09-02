@@ -82,7 +82,13 @@ void handle_ray(const DataRaycast* const d) {
 
 	/* void draw_colored_rect(const byte, const byte, const byte, const double, const SDL_Rect* const);
 	const SDL_Rect top = {d -> screen_x, projected_wall_top, 10, 10}, bottom = {d -> screen_x, projected_wall_bottom, 10, 5};
-	draw_colored_rect(255, 0, 0, 1.0, &top); draw_colored_rect(0, 0, 255, 1.0, &bottom); // red, blue */
+	draw_colored_rect(255, 0, 0, 1.0, &top); draw_colored_rect(0, 0, 255, 1.0, &bottom); // red = top, blue = bottom */
+
+	/* floor = last red to curr blue (initial red = bottom of screen), wall = blue to red
+	last red = last last wall top, curr blue = curr wall bottom */
+
+	/* SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderDrawLine(screen.renderer, d -> screen_x, projected_wall_bottom, d -> screen_x, projected_wall_top); */
 	//////////
 
 	/* this will work once player heights are accurate to the world
