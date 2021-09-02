@@ -51,7 +51,6 @@
 
 /*
 TODO:
-- make calculate_shade return a byte
 - distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
 - highlight menus when the mouse is over them, detect clicks, rescale stuff (maybe), and figure out the full-screen error
