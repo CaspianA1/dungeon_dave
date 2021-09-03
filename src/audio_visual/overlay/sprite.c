@@ -4,7 +4,12 @@ inlinable byte is_pow_of_2(const int num) {
 
 Sprite init_sprite(const char* const path, const byte enable_mipmap) {
 	SDL_Surface* surface = SDL_LoadBMP(path);
+
 	if (surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
+
+	SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, PIXEL_FORMAT, 0);
+	SDL_FreeSurface(surface);
+	surface = converted_surface;
 
 	Sprite sprite = {.max_mipmap_depth = 0};
 
