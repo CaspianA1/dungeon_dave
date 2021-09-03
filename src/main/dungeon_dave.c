@@ -51,7 +51,7 @@
 
 /*
 TODO:
-- make bilinear filtering better
+- make antialiasing better
 - distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
 - highlight menus when the mouse is over them, detect clicks, rescale stuff (maybe), and figure out the full-screen error
@@ -70,7 +70,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	SDL_ShowCursor(SDL_FALSE);
@@ -82,7 +82,7 @@ int main(void) {
 	// gauss_blur_test();
 	// menu_test();
 	// lightmap_test();
-	// bilinear_test();
+	// antialias_test();
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();

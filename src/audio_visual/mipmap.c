@@ -1,5 +1,4 @@
-/*
-void bilinear_test(void) {
+void antialias_test(void) {
 	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/horses.bmp");
 	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);
 	SDL_FreeSurface(unconverted_image);
@@ -12,16 +11,15 @@ void bilinear_test(void) {
 	SDL_SaveBMP(unfiltered, "unfiltered.bmp");
 	SDL_FreeSurface(unfiltered);
 
-	SDL_Surface* bilinear_downscale_by_2(const SDL_Surface* const, const byte);
-	SDL_Surface* const filtered = bilinear_downscale_by_2(image, scale);
+	SDL_Surface* antialiased_downscale_by_2(const SDL_Surface* const, const byte);
+	SDL_Surface* const filtered = antialiased_downscale_by_2(image, scale);
 	SDL_SaveBMP(filtered, "filtered.bmp");
 	SDL_FreeSurface(filtered);
 
 	exit(0);
 }
-*/
 
-SDL_Surface* bilinear_downscale_by_2(const SDL_Surface* const orig, const byte scale_factor) {
+SDL_Surface* antialiased_downscale_by_2(const SDL_Surface* const orig, const byte scale_factor) {
 	const byte dec_scale_factor = scale_factor - 1;
 	const int orig_size = orig -> w;
 	const int downscaled_size = orig_size >> dec_scale_factor;
@@ -32,15 +30,21 @@ SDL_Surface* bilinear_downscale_by_2(const SDL_Surface* const orig, const byte s
 
 	for (int y = 0; y < orig_size; y += inc_across) {
 		for (int x = 0; x < orig_size; x += inc_across) {
-			const ivec four_neighbors[4] = {{x - 1, y}, {x + 1, y}, {x, y - 1}, {x, y + 1}}; // as a cross
+			const int dec_x = x - 1, dec_y = y - 1, inc_x = x + 1, inc_y = y + 1;
+			const ivec pixel_group[9] = {
+				{dec_x, dec_y}, {x, dec_y}, {inc_x, dec_y},
+				{dec_x, y}, 	{x, y}, 	{inc_x, y},
+				{dec_x, inc_y}, {x, inc_y}, {inc_x, inc_y}
+			};
+
 			color4_t sum = {0, 0, 0, 0};
 			byte valid_neighbor_sum = 0;
 
-			for (byte i = 0; i < 4; i++) {
-				const ivec neighbor = four_neighbors[i];
+			for (byte i = 0; i < 9; i++) {
+				const ivec pixel_pos = pixel_group[i];
 
-				if (neighbor.x >= 0 && neighbor.y >= 0 && neighbor.x < orig_size && neighbor.y < orig_size) {
-					const Uint32 neighbor_val = *read_surface_pixel(orig, neighbor.x, neighbor.y, bpp);
+				if (pixel_pos.x >= 0 && pixel_pos.y >= 0 && pixel_pos.x < orig_size && pixel_pos.y < orig_size) {
+					const Uint32 neighbor_val = *read_surface_pixel(orig, pixel_pos.x, pixel_pos.y, bpp);
 					byte r, g, b, a;
 					SDL_GetRGBA(neighbor_val, format, &r, &g, &b, &a);
 					sum += (color4_t) {r, g, b, a};
@@ -58,10 +62,10 @@ SDL_Surface* bilinear_downscale_by_2(const SDL_Surface* const orig, const byte s
 
 //////////
 
-void filter_mipmap_level(SDL_Surface* image, SDL_Surface* const mipmap, SDL_Rect* const dest, const byte depth) {
+void filter_mipmap_level(SDL_Surface* const image, SDL_Surface* const mipmap, SDL_Rect* const dest, const byte depth) {
 	SDL_Surface* mipmap_level;
 	const byte create_downscaled = depth != 0;
-	mipmap_level = create_downscaled ? bilinear_downscale_by_2(image, depth + 1) : image;
+	mipmap_level = create_downscaled ? antialiased_downscale_by_2(image, depth + 1) : image;
 
 	SDL_BlitScaled(mipmap_level, NULL, mipmap, dest);
 	if (create_downscaled) SDL_FreeSurface(mipmap_level);
