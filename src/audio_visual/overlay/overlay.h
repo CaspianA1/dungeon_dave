@@ -4,15 +4,14 @@ typedef struct {
 	byte max_mipmap_depth;
 } Sprite;
 
-Sprite init_sprite(const char* const, const byte);
-#define deinit_sprite(sprite) SDL_DestroyTexture(sprite.texture);
-#define deinit_psprite(p) SDL_DestroyTexture(p.texture);
-
 typedef struct {
-	void* pixels;
-	int pitch, size; // for pixelwise access, equal dimensions are needed
-	SDL_Texture* texture;
-} PSprite; // pixelwise access
+	Uint32* pixels;
+	int size;
+} PixSprite; // intended for optimal pixel access
+
+Sprite init_sprite(const char* const, const byte);
+#define deinit_sprite(sprite) SDL_DestroyTexture(sprite.texture)
+#define deinit_pix_sprite(pix_sprite) wfree(pix_sprite.pixels)
 
 /////
 

@@ -52,7 +52,7 @@ typedef struct {
 } Screen;
 
 typedef struct {
-	float depth, cos_beta;
+	float depth, one_over_cos_beta;
 	vec dir;
 } BufferVal;
 

@@ -310,4 +310,95 @@ void filter_mipmap_level(SDL_Surface* const image, SDL_Surface* const mipmap, SD
 	if (first) first = 0;
 }
 
+///// The old psprite code:
+
+// p = init_psprite("assets/walls/grass.bmp");
+
+/*
+PSprite init_psprite(const char* const path) {
+	SDL_Surface* const unconverted_surface = SDL_LoadBMP(path);
+	if (unconverted_surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
+	SDL_Surface* const surface = SDL_ConvertSurfaceFormat(unconverted_surface, PIXEL_FORMAT, 0);
+	if (surface == NULL) FAIL("Could not convert a surface type for path %s\n", path);
+
+	SDL_FreeSurface(unconverted_surface);
+	SDL_LockSurface(surface);
+
+	const ivec size = {surface -> w, surface -> h};
+
+	PSprite p = {
+		.texture = SDL_CreateTexture(screen.renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_STREAMING, size.x, size.y),
+		.size = size.x
+	};
+
+	SDL_LockTexture(p.texture, NULL, &p.pixels, &p.pitch);
+
+	// SDL_UpdateTexture(p.texture, NULL, surface -> pixels, surface -> pitch);
+
+	// memcpy(p.pixels, surface -> pixels, p.pitch * size.y);
+	SDL_UnlockTexture(p.texture);
+
+	SDL_UnlockSurface(surface);
+	SDL_FreeSurface(surface);
+
+	return p;
+}
+*/
+
+/* for mesa.bmp
+static byte print_bad = 1;
+const Uint32 top = read_texture_row(p.pixels, p.pitch, 0)[0];
+if (top != 4293837722 && print_bad) {
+	printf("Schlecht; reads = %llu\n", reads);
+	// 8427098
+	print_bad = 0;
+}
+*/
+
+const vec offset = vec_tex_offset(hit, ground.size.x);
+// Uint32 pixel = read_texture_row(p.pixels, p.pitch, offset[1])[(long) offset[0]];
+Uint32 pixel = read_surface_pixel(ground.pixels, offset[0], offset[1], ground.) {
+
+
+/////
+
+#define deinit_psprite(p) SDL_DestroyTexture(p.texture);
+
+/////
+
+typedef struct {
+	void* pixels;
+	int pitch, size; // for pixelwise access, equal dimensions are needed
+	SDL_Texture* texture;
+} PSprite; // pixelwise access
+
+///// Old lerp code for floorcast.c:
+
+vec lerp_floor(const vec pos, const double straight_dist, vec* const hit) {
+	const BufferVal
+		start_buf_val = val_buffer[0],
+		end_buf_val = val_buffer[settings.screen_width - 1];
+
+	const double
+		start_actual_dist = straight_dist * (double) start_buf_val.one_over_cos_beta,
+		end_actual_dist = straight_dist * (double) end_buf_val.one_over_cos_beta;
+
+	const vec
+		start_hit = vec_line_pos(pos, start_buf_val.dir, start_actual_dist),
+		end_hit = vec_line_pos(pos, end_buf_val.dir, end_actual_dist);
+
+	const vec step = (end_hit - start_hit) / vec_fill(settings.screen_width);
+	*hit = start_hit;
+
+	return step;
+}
+
+vec hit;
+const vec step = lerp_floor(pos, straight_dist, &hit);
+
+const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
+// hit = align_vec_from_out_of_bounds(hit);
+
+hit += step;
+
 /////

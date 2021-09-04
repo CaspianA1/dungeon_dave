@@ -5,9 +5,10 @@ priority:
 features:
 	- doors
 	- a settings/menu option in the title screen and status bar
-	- a level opener, with a cool spinning effect
-	- a sprite pool
+	- a level opener, with a cool spinning effect and a fade-up effect too
+	- a billboard pool
 	- an airship + maze level
+	- a metro/inner city level
 	- collide with billboards
 	- accelerate sideways
 	- a gui system
@@ -18,7 +19,6 @@ features:
 	- mipmapping for things
 	- a shotgun more in the art style of Adam's whip
 	- Attacked state for enemy
-	- a metro level
 	- draw sprite sections in chunks
 	- make each file an .o file, and then link them all together
 	- faster enemy movement when nearer player (a logarithmic scale)
@@ -26,13 +26,11 @@ features:
 	- long-range attacking enemies via guns + weapon projectiles (i.e shooting enemies)
 	- slow enemies down by hitting them - or stop them in some way
 	- make the minimap full-screen, meaning that it's rendered separately from the health percentage
-	- a fade-up effect that starts when a level begins
-	- a lightmap system (and load defaults on a different thread, if lightmap creation is slow enough)
 	- hit head on things above player
 	- heightmap instead of get_point_height fn
 	- health pickups
 	- clear walls and things
-	- bump and bounce back against walls when running at them
+	- bump and bounce back against certain things or walls when running at them
 	- bigger things
 	- change the weapon size based on the FOV
 	- an app: https://gist.github.com/mathiasbynens/674099
@@ -43,13 +41,10 @@ problems:
 	- min and max projection distance
 	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
 	- don't intersect the player dot with walls in the minimap
-	- shading is slow (it's all down to one line, the calculate_shade line)
 	- disabling vsync makes everything choppy (not a big problem, just curious why)
-	- sometimes, psprites disappear mid-game (use memory sanitizer to resolve the problem: https://github.com/google/sanitizers/wiki/MemorySanitizer)
 	- bogo is completely light with -Ofast when he shouldn't be
 	- enemies have jerky movement sometimes that can make them temporarily clip into a wall (reproduce it by jumping around, wait till the enemy moves at a slant, and then go to their position)
 	- fix enemy merging by making enemies account for thing collisions
-	- blurring doesn't handle edges
 	- jitters when jumping on top of things
 	- a flickering gap on the left side (one column wide) of the screen for things (specifically the cactus in the palace)
 

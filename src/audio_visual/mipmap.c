@@ -1,3 +1,9 @@
+typedef __v4si color4_t;
+
+Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
+	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
+}
+
 void antialias_test(void) {
 	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/horses.bmp");
 	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);

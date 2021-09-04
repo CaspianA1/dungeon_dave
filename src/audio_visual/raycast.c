@@ -31,7 +31,7 @@ void handle_ray(const DataRaycast* const d) {
 		wall_h
 	};
 
-	if (d -> first_wall_hit) update_val_buffer(d -> screen_x, corrected_dist, cos_beta, d -> dir);
+	if (d -> first_wall_hit) update_val_buffer(wall_dest.x, corrected_dist, cos_beta, d -> dir);
 
 	const Sprite wall_sprite = current_level.walls[d -> point - 1];
 	const SDL_Rect mipmap_crop = get_mipmap_crop_from_wall(&wall_sprite, wall_h);
@@ -78,17 +78,19 @@ void handle_ray(const DataRaycast* const d) {
 	align_from_out_of_vert_bounds(&projected_wall_top);
 	align_from_out_of_vert_bounds(&projected_wall_bottom);
 	for (double y = round(projected_wall_top); y < round(projected_wall_bottom); y++)
-		set_statemap_bit(occluded_by_walls, d -> screen_x, y);
+		set_statemap_bit(occluded_by_walls, wall_dest.x, y);
 
-	/* void draw_colored_rect(const byte, const byte, const byte, const double, const SDL_Rect* const);
-	const SDL_Rect top = {d -> screen_x, projected_wall_top, 10, 10}, bottom = {d -> screen_x, projected_wall_bottom, 10, 5};
-	draw_colored_rect(255, 0, 0, 1.0, &top); draw_colored_rect(0, 0, 255, 1.0, &bottom); // red = top, blue = bottom */
+	/*
+	void draw_colored_rect(const byte, const byte, const byte, const double, const SDL_Rect* const);
+	const SDL_Rect top = {wall_dest.x, projected_wall_top, 10, 10}, bottom = {wall_dest.x, projected_wall_bottom, 10, 5};
+	draw_colored_rect(255, 0, 0, 1.0, &top); draw_colored_rect(0, 0, 255, 1.0, &bottom); // red = top, blue = bottom
+	*/
 
 	/* floor = last red to curr blue (initial red = bottom of screen), wall = blue to red
 	last red = last last wall top, curr blue = curr wall bottom */
 
 	/* SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderDrawLine(screen.renderer, d -> screen_x, projected_wall_bottom, d -> screen_x, projected_wall_top); */
+	SDL_RenderDrawLine(screen.renderer, wall_dest.x, projected_wall_bottom, wall_dest.x, projected_wall_top); */
 	//////////
 
 	/* this will work once player heights are accurate to the world

@@ -121,7 +121,7 @@ void update_val_buffer(const int screen_x, const float dist, const float cos_bet
 	BufferVal* buffer_val = &val_buffer[screen_x];
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++, buffer_val++) {
 		buffer_val -> depth = dist;
-		buffer_val -> cos_beta = cos_beta;
+		buffer_val -> one_over_cos_beta = 1.0f / cos_beta;
 		buffer_val -> dir = dir;
 	}
 }

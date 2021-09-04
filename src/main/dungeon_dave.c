@@ -17,8 +17,6 @@
 
 #include "../audio_visual/screen.c"
 #include "../audio_visual/lighting.c"
-
-#include "../audio_visual/blur_filter.c"
 #include "../audio_visual/mipmap.c"
 
 #include "../audio_visual/overlay/sprite.c"
@@ -51,7 +49,6 @@
 
 /*
 TODO:
-- stop the player from going out of bounds
 - make antialiasing better
 - distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
@@ -71,13 +68,13 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	SDL_ShowCursor(SDL_FALSE);
 
 	play_sound(&current_level.background_sound, 1);
-	p = init_psprite("assets/walls/dune.bmp");
+	ground = init_pix_sprite("assets/walls/dune.bmp");
 
 	// box_blur_test();
 	// gauss_blur_test();

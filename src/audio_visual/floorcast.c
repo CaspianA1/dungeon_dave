@@ -24,20 +24,10 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 
 #endif
 
-PSprite p;
-inlinable void draw_from_hit(const vec hit, const double dist, const int screen_x, Uint32* const pixbuf_row) {
-	/* for mesa.bmp
-	static byte print_bad = 1;
-	const Uint32 top = read_texture_row(p.pixels, p.pitch, 0)[0];
-	if (top != 4293837722 && print_bad) {
-		printf("Schlecht; reads = %llu\n", reads);
-		// 8427098
-		print_bad = 0;
-	}
-	*/
-
-	const vec offset = vec_tex_offset(hit, p.size);
-	Uint32 pixel = read_texture_row(p.pixels, p.pitch, offset[1])[(long) offset[0]];
+PixSprite ground;
+inlinable Uint32 get_pixel_from_hit(const vec hit, const double dist) {
+	const vec offset = vec_tex_offset(hit, ground.size);
+	Uint32 pixel = ground.pixels[(long) ((long) offset[1] * ground.size + offset[0])];
 
 	#ifdef SHADING_ENABLED
 	pixel = shade_ARGB_pixel(pixel, calculate_shade(settings.proj_dist / dist, hit));
@@ -45,31 +35,7 @@ inlinable void draw_from_hit(const vec hit, const double dist, const int screen_
 	(void) dist;
 	#endif
 
-	for (byte x = 0; x < settings.ray_column_width; x++) pixbuf_row[x + screen_x] = pixel;
-}
-
-vec lerp_floor(const vec pos, const double straight_dist, vec* const hit) {
-	const BufferVal
-		start_buf_val = val_buffer[0],
-		end_buf_val = val_buffer[settings.screen_width - 1];
-
-	const double
-		start_actual_dist = straight_dist / (double) start_buf_val.cos_beta,
-		end_actual_dist = straight_dist / (double) end_buf_val.cos_beta;
-
-	const vec
-		start_hit = vec_line_pos(pos, start_buf_val.dir, start_actual_dist),
-		end_hit = vec_line_pos(pos, end_buf_val.dir, end_actual_dist);
-
-	/*
-	DEBUG_VEC(start_hit);
-	DEBUG_VEC(end_hit);
-	*/
-
-	const vec step = (end_hit - start_hit) / vec_fill(settings.screen_width);
-	*hit = start_hit;
-
-	return step;
+	return pixel;
 }
 
 void fast_affine_floor(const byte floor_height, const vec pos,
@@ -93,25 +59,19 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 		const int pace_y = y + pace;
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 
-		// vec hit;
-		// const vec step = lerp_floor(pos, straight_dist, &hit);
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x++) {
 			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
 
-			/*
-			The remaining bottlenecks:
+			/* The remaining bottlenecks:
 			Checking for statemap bits will not be needed with a visplane system -> speedup
+			Also, that means that the statemap won't be needed anymore -> speedup
 			Checking for out-of-bound hits won't be needed either -> speedup
 			Checking for wall points that do not equal the floor height won't be needed either -> speedup
-			Sadly, I do not know if there is a way to calculate a hit with just the straight dist
-			*/
+			Also, with a visplane system, less y and x coordinates will be iterated over -> speedup */
 
 			const BufferVal buffer_val = val_buffer[screen_x];
-
-			const double actual_dist = straight_dist / (double) buffer_val.cos_beta;
-
+			const double actual_dist = straight_dist * (double) buffer_val.one_over_cos_beta;
 			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
-			// hit = align_vec_from_out_of_bounds(hit);
 
 			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_size.x - 1.0
 				|| hit[1] > current_level.map_size.y - 1.0) continue;
@@ -121,8 +81,8 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 			if (current_level.get_point_height(wall_point, hit) != floor_height) continue;
 			#endif
 
-			draw_from_hit(hit, actual_dist, screen_x, pixbuf_row);
-			// hit += step;
+			const Uint32 pixel = get_pixel_from_hit(hit, actual_dist);
+			for (byte x = 0; x < settings.ray_column_width; x++) pixbuf_row[x + screen_x] = pixel;
 		}
 	}
 }
