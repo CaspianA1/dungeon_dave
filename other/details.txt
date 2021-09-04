@@ -20,8 +20,6 @@ features:
 	- Attacked state for enemy
 	- a metro level
 	- draw sprite sections in chunks
-	- a sol enemy
-	- figure out lcov (?)
 	- make each file an .o file, and then link them all together
 	- faster enemy movement when nearer player (a logarithmic scale)
 	- only one sound effect at once - otherwise, out of channels (?)
@@ -36,6 +34,7 @@ features:
 	- clear walls and things
 	- bump and bounce back against walls when running at them
 	- bigger things
+	- change the weapon size based on the FOV
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed

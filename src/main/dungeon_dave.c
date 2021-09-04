@@ -51,6 +51,7 @@
 
 /*
 TODO:
+- stop the player from going out of bounds
 - make antialiasing better
 - distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
@@ -70,7 +71,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_hallway, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 	SDL_ShowCursor(SDL_FALSE);
