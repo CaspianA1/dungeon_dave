@@ -24,7 +24,7 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 
 #endif
 
-PixSprite ground;
+static PixSprite ground;
 inlinable Uint32 get_pixel_from_hit(const vec hit, const double dist) {
 	const vec offset = vec_tex_offset(hit, ground.size);
 	Uint32 pixel = ground.pixels[(long) ((long) offset[1] * ground.size + offset[0])];
