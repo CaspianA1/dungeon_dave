@@ -4,6 +4,7 @@ Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const 
 	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
 }
 
+/*
 void antialias_test(void) {
 	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/horses.bmp");
 	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);
@@ -24,14 +25,13 @@ void antialias_test(void) {
 
 	exit(0);
 }
+*/
 
-SDL_Surface* antialiased_downscale_by_2(const SDL_Surface* const orig, const byte scale_factor) {
+void antialiased_downscale_by_2(const SDL_Surface* const orig, SDL_Surface* const mipmap, const SDL_Rect dest, const byte scale_factor) {
 	const byte dec_scale_factor = scale_factor - 1;
 	const int orig_size = orig -> w;
-	const int downscaled_size = orig_size >> dec_scale_factor;
 
-	SDL_Surface* const filtered = SDL_CreateRGBSurfaceWithFormat(0, downscaled_size, downscaled_size, 32, PIXEL_FORMAT);
-	const SDL_PixelFormat* const format = filtered -> format;
+	const SDL_PixelFormat* const format = orig -> format;
 	const int bpp = format -> BytesPerPixel, inc_across = 1 << dec_scale_factor;
 
 	for (int y = 0; y < orig_size; y += inc_across) {
@@ -58,24 +58,14 @@ SDL_Surface* antialiased_downscale_by_2(const SDL_Surface* const orig, const byt
 				}
 			}
 
-			*read_surface_pixel(filtered, x >> dec_scale_factor, y >> dec_scale_factor, bpp) = SDL_MapRGBA(format,
-				sum[0] / valid_neighbor_sum, sum[1] / valid_neighbor_sum,
-				sum[2] / valid_neighbor_sum, sum[3] / valid_neighbor_sum);
+			*read_surface_pixel(mipmap, (x >> dec_scale_factor) + dest.x, (y >> dec_scale_factor) + dest.y, bpp) =
+				SDL_MapRGBA(format, sum[0] / valid_neighbor_sum, sum[1] / valid_neighbor_sum,
+					sum[2] / valid_neighbor_sum, sum[3] / valid_neighbor_sum);
 		}
 	}
-	return filtered;
 }
 
 //////////
-
-void filter_mipmap_level(SDL_Surface* const image, SDL_Surface* const mipmap, SDL_Rect* const dest, const byte depth) {
-	SDL_Surface* mipmap_level;
-	const byte create_downscaled = depth != 0;
-	mipmap_level = create_downscaled ? antialiased_downscale_by_2(image, depth + 1) : image;
-
-	SDL_BlitScaled(mipmap_level, NULL, mipmap, dest);
-	if (create_downscaled) SDL_FreeSurface(mipmap_level);
-}
 
 inlinable SDL_Rect get_mipmap_crop(const int orig_size, const byte depth_offset) {
 	const int crop_size = orig_size >> depth_offset;
@@ -116,7 +106,7 @@ inlinable SDL_Rect get_mipmap_crop_from_wall(const Sprite* const mipmap, const i
 	return get_mipmap_crop(orig_size, depth_offset);
 }
 
-SDL_Surface* load_mipmap(SDL_Surface* image, byte* const depth) {
+SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth) {
 	SDL_Surface* const mipmap = SDL_CreateRGBSurfaceWithFormat(0,
 		image -> w + (image -> w >> 1), image -> h, 32, PIXEL_FORMAT);
 
@@ -128,12 +118,11 @@ SDL_Surface* load_mipmap(SDL_Surface* image, byte* const depth) {
 		if (*depth <= 1) dest.y = 0;
 		else dest.y += image -> h >> (*depth - 1);
 
-		filter_mipmap_level(image, mipmap, &dest, *depth);
-
-		/*
-		SDL_BlitScaled(image, NULL, mipmap, &dest);
-		box_blur_image_portion(mipmap, dest, *depth / 3);
-		*/
+		#ifndef ANTIALIAS_FIRST_MIP_LEVEL
+		if (*depth == 0) SDL_BlitScaled(image, NULL, mipmap, &dest);
+		else
+		#endif
+		antialiased_downscale_by_2(image, mipmap, dest, *depth + 1);
 
 		dest.w >>= 1;
 		dest.h >>= 1;
