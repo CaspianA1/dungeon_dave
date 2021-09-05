@@ -4,29 +4,6 @@ Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const 
 	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
 }
 
-/*
-void antialias_test(void) {
-	SDL_Surface* const unconverted_image = SDL_LoadBMP("assets/walls/horses.bmp");
-	SDL_Surface* const image = SDL_ConvertSurfaceFormat(unconverted_image, PIXEL_FORMAT, 0);
-	SDL_FreeSurface(unconverted_image);
-
-	const byte scale = 3;
-	const byte dec_scale = scale - 1;
-
-	SDL_Surface* const unfiltered = SDL_CreateRGBSurfaceWithFormat(0, image -> w >> dec_scale, image -> h >> dec_scale, 32, PIXEL_FORMAT);
-	SDL_BlitScaled(image, NULL, unfiltered, NULL);
-	SDL_SaveBMP(unfiltered, "unfiltered.bmp");
-	SDL_FreeSurface(unfiltered);
-
-	SDL_Surface* antialiased_downscale_by_2(const SDL_Surface* const, const byte);
-	SDL_Surface* const filtered = antialiased_downscale_by_2(image, scale);
-	SDL_SaveBMP(filtered, "filtered.bmp");
-	SDL_FreeSurface(filtered);
-
-	exit(0);
-}
-*/
-
 void antialiased_downscale_by_2(const SDL_Surface* const orig, SDL_Surface* const mipmap, const SDL_Rect dest, const byte scale_factor) {
 	const byte dec_scale_factor = scale_factor - 1;
 	const int orig_size = orig -> w;
