@@ -8,7 +8,18 @@ inlinable Uint32* read_texture_row(const void* const pixels, const int pixel_pit
 
 #ifdef SHADING_ENABLED
 
+/*
+inlinable __m128i _mm_div_epi32(const __m128i a, const __m128i b) {
+	return _mm_setr_epi32(a[0] / b[0], a[1] / b[1], a[2] / b[2], a[3] / b[3]);
+}
+*/
+
 inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
+	/* const __m128i colors = _mm_setr_epi32(0, (byte) pixel, (byte) (pixel >> 8), (byte) (pixel >> 16));
+	const __m128i first_part_shaded = _mm_mul_epi32(colors, _mm_set1_epi16(shade));
+	const __m128i divided = _mm_div_epi32(first_part_shaded, _mm_set1_epi16(255)); // why no _mm_div_epi32 instruction?
+	return 0xFF000000 | (_mm_extract_epi32(divided, 0) << 16) | (_mm_extract_epi32(divided, 1) << 8) | divided[2]; */
+
 	unsigned r = (byte) (pixel >> 16), g = (byte) (pixel >> 8), b = (byte) pixel;
 
 	r *= shade;
@@ -27,6 +38,7 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 static PixSprite ground;
 inlinable Uint32 get_pixel_from_hit(const vec hit, const double dist) {
 	const vec offset = vec_tex_offset(hit, ground.size);
+
 	Uint32 pixel = ground.pixels[(long) ((long) offset[1] * ground.size + offset[0])];
 
 	#ifdef SHADING_ENABLED

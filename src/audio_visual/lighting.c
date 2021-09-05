@@ -71,7 +71,7 @@ functions like `diffuse_circle` above. */
 
 #ifdef SHADING_ENABLED
 
-byte calculate_shade(const double wall_h, vec pos) {
+byte calculate_shade(const double wall_h, const vec pos) {
 	(void) wall_h;
 
 	static const double small = 0.000000001; // one_over_255 = 1.0 / 255.0;
