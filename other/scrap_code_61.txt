@@ -427,3 +427,9 @@ void antialias_test(void) {
 */
 
 /////
+
+const ivec pixel_group[4] = {
+	{x - 1, y}, {x + 1, y}, {x, y - 1}, {x, y + 1}
+};
+
+/////

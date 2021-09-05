@@ -4,7 +4,9 @@ Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const 
 	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
 }
 
-void antialiased_downscale_by_2(const SDL_Surface* const orig, SDL_Surface* const mipmap, const SDL_Rect dest, const byte scale_factor) {
+void antialiased_downscale_by_2(const SDL_Surface* const orig,
+	SDL_Surface* const mipmap, const ivec dest_corner, const byte scale_factor) {
+
 	const byte dec_scale_factor = scale_factor - 1;
 	const int orig_size = orig -> w;
 
@@ -14,6 +16,7 @@ void antialiased_downscale_by_2(const SDL_Surface* const orig, SDL_Surface* cons
 	for (int y = 0; y < orig_size; y += inc_across) {
 		for (int x = 0; x < orig_size; x += inc_across) {
 			const int dec_x = x - 1, dec_y = y - 1, inc_x = x + 1, inc_y = y + 1;
+
 			const ivec pixel_group[9] = {
 				{dec_x, dec_y}, {x, dec_y}, {inc_x, dec_y},
 				{dec_x, y}, 	{x, y}, 	{inc_x, y},
@@ -35,7 +38,7 @@ void antialiased_downscale_by_2(const SDL_Surface* const orig, SDL_Surface* cons
 				}
 			}
 
-			*read_surface_pixel(mipmap, (x >> dec_scale_factor) + dest.x, (y >> dec_scale_factor) + dest.y, bpp) =
+			*read_surface_pixel(mipmap, (x >> dec_scale_factor) + dest_corner.x, (y >> dec_scale_factor) + dest_corner.y, bpp) =
 				SDL_MapRGBA(format, sum[0] / valid_neighbor_sum, sum[1] / valid_neighbor_sum,
 					sum[2] / valid_neighbor_sum, sum[3] / valid_neighbor_sum);
 		}
@@ -99,7 +102,7 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth) {
 		if (*depth == 0) SDL_BlitScaled(image, NULL, mipmap, &dest);
 		else
 		#endif
-		antialiased_downscale_by_2(image, mipmap, dest, *depth + 1);
+		antialiased_downscale_by_2(image, mipmap, (ivec) {dest.x, dest.y}, *depth + 1);
 
 		dest.w >>= 1;
 		dest.h >>= 1;
