@@ -98,8 +98,8 @@ int main(void) {
 
 		#ifndef PLANAR_MODE
 		raycast(&player, wall_y_shift, player.jump.height * settings.screen_height); // scr h b/c height is vertical
-
 		draw_things(&player, wall_y_shift);
+		fast_affine_floor(0, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
 
 		#ifndef DISABLE_ENEMIES
 		if (!player.is_dead) update_all_enemy_instances(&player, &weapon);
@@ -113,7 +113,7 @@ int main(void) {
 		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, &weapon);
 
-		fast_affine_floor(0, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
+
 		teleport_player_if_needed(&player);
 
 		refresh(&player, wall_y_shift);
