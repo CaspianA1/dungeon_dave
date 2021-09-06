@@ -9,12 +9,10 @@ features:
 	- a billboard pool
 	- an airship + maze level
 	- a metro/inner city level
-	- collide with billboards
 	- accelerate sideways
 	- a gui system
 	- a file format
 	- a map editor
-	- linearly interpolate actual_dist for more speed
 	- floors at different height levels
 	- mipmapping for things
 	- a shotgun more in the art style of Adam's whip
@@ -32,7 +30,6 @@ features:
 	- clear walls and things
 	- bump and bounce back against certain things or walls when running at them
 	- bigger things
-	- change the weapon size based on the FOV
 	- an app: https://gist.github.com/mathiasbynens/674099
 problems:
 	- slowing down -> a keypress, resets speed
@@ -58,11 +55,11 @@ completed:
 	- rudimentary level creation interface
 	- shading of diffuse circles and flat triangles, as well as environments that get darker when farther away
 	- static and animated billboards (with only 1D Z-buffering for now)
-	- texture mapping, with mipmapping that incorporates box blur (for cache coherency and reduced moiré patterns)
-	- audio system that allows for sound effects, background music, and volume tweaking based on a sound-emitter's distance from the player
+	- texture mapping, with mipmapping that incorporates antialiasing (for cache coherency and reduced moiré patterns)
+	- audio system that allows for sound effects, background music, and volume tweaking based on an enemy's distance from the player
 	- skyboxes that also change the portion shown based on the y-pitch
 	- raycasting with multiple floor heights (no multi-dimensional floors though, yet)
-	- use of vector intrinsics and an optimized bitmatrix data structure to ease performance on older devices
+	- use of vector intrinsics and an optimized Statemap data structure to ease performance on older devices
 	- free look, with y-shearing and turning controlled by the mouse
 	- accurate movement physics, both in terms of 2D acceleration + deceleration, and Y-axis jumping
 	- increase in FOV while accelerating, screen tilt when strafing, and additional y-shearing when moving, giving a 'pacing' effect

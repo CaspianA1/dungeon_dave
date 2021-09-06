@@ -53,11 +53,9 @@ TODO:
 - distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
 - highlight menus when the mouse is over them, detect clicks, rescale stuff (maybe), and figure out the full-screen error
-- gaussian blur edge handling
 - the polygon floor algorithm
 - 3D DDA pitch-angle translation
-- the rest of the trooper animations
-- different enemy AIs
+- the rest of the trooper animations + long range AI
 - a unique hitbox size for each billboard
 - correct height translation, and then stop rendering early if possible
 - screen width and height to screen size via sublime text substitutions
