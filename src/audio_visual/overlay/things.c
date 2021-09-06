@@ -144,7 +144,7 @@ DEF_THING_ADDER(enemy_instance) {
 		update_thing_values(billboard_data -> pos, p_pos, p_angle,
 			&billboard_data -> beta, &billboard_data -> dist);
 
-		DataAnimation animation_data = {*immut_animation_data, enemy_instance -> mut_animation_data};
+		const DataAnimation animation_data = {*immut_animation_data, enemy_instance -> mut_animation_data};
 
 		const ivec frame_origin = get_spritesheet_frame_origin(&animation_data);
 		progress_enemy_instance_frame_ind(enemy_instance);
