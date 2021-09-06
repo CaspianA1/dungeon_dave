@@ -18,7 +18,7 @@
 */
 
 #define ANTIALIAS_FIRST_MIP_LEVEL
-// #define DISABLE_ENEMIES
+#define DISABLE_ENEMIES
 #define SHADING_ENABLED
 // #define SOUND_ENABLED
 // #define TRACK_MEMORY
