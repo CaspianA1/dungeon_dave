@@ -58,7 +58,7 @@ typedef struct {
 	DataAnimationMut mut_animation_data;
 	
 	EnemyState state;
-	byte recently_attacked;
+	byte status; // recently attacked, long range
 	double hp, time_at_attack;
 	DataBillboard billboard_data;
 	Navigator nav;

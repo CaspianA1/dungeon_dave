@@ -70,7 +70,7 @@ void update_pos(vec* const ref_pos, vec* const dir,
 	const double curr_time = SDL_GetTicks() / 1000.0; // in seconds
 	byte increasing_fov = 0;
 
-	if (body -> status & mask_forward_or_backward) {
+	if (body -> status & mask_forward_or_backward_movement) {
 		const double t = curr_time - body -> time_of_move;
 		body -> v = body -> a * t;
 
@@ -107,8 +107,8 @@ void update_pos(vec* const ref_pos, vec* const dir,
 
 	vec movement = {0.0, 0.0};
 
-	if (body -> status & mask_forward) movement += forward_back_movement;
-	if (body -> status & mask_backward) movement -= forward_back_movement;
+	if (body -> status & mask_forward_movement) movement += forward_back_movement;
+	if (body -> status & mask_backward_movement) movement -= forward_back_movement;
 
 	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];

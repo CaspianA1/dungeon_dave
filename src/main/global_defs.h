@@ -12,12 +12,14 @@
 
 #endif
 
-// #define PLANAR_MODE
+/*
+#define PLANAR_MODE
 #define NOCLIP_MODE
+*/
 
 #define ANTIALIAS_FIRST_MIP_LEVEL
 // #define DISABLE_ENEMIES
-#define SHADING_ENABLED
+// #define SHADING_ENABLED
 // #define SOUND_ENABLED
 // #define TRACK_MEMORY
 
@@ -95,14 +97,17 @@ const double
 
 const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
 
-#define mask_forward_or_backward bitmasks[0]
-#define mask_forward bitmasks[1]
-#define mask_backward bitmasks[2]
+#define mask_forward_or_backward_movement bitmasks[0]
+#define mask_forward_movement bitmasks[1]
+#define mask_backward_movement bitmasks[2]
 
-#define mask_in_use bitmasks[0]
-#define mask_short_range bitmasks[1]
-#define mask_paces_sideways bitmasks[2]
-#define mask_recently_used bitmasks[3]
+#define mask_in_use_weapon bitmasks[0]
+#define mask_short_range_weapon bitmasks[1]
+#define mask_paces_sideways_weapon bitmasks[2]
+#define mask_recently_used_weapon bitmasks[3]
+
+#define mask_recently_attacked_enemy bitmasks[0]
+#define mask_long_range_attack_enemy bitmasks[1]
 
 /*
 https://www.spriters-resource.com/pc_computer/doomdoomii/

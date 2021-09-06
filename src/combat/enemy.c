@@ -23,6 +23,37 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 	enemy_instance -> mut_animation_data.frame_ind = new_frame_ind;
 }
 
+/*
+The long-range enemy AI:
+If the player meets the activation distance:
+	While not reached target:
+		Step closer
+		Wait a bit
+		Shoot
+*/
+
+void short_range_enemy_attack(const Enemy* const enemy, EnemyInstance* const enemy_instance,
+	Player* const player, const double dist, const double height_diff) {
+
+	const double curr_time = SDL_GetTicks() / 1000.0;
+	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing && dist <= 1.0
+		&& height_diff <= height_diff_for_interaction) {
+
+		enemy_instance -> time_at_attack = curr_time;
+
+		// when the decr hp is less than zero, the enemy instance clips into walls - why?
+		const double decr_hp = enemy -> power * (1.0 - dist * dist); // more damage closer
+
+		if ((player -> hp -= decr_hp) <= 0.0) {
+			player -> is_dead = 1;
+			player -> hp = 0.0;
+			for (byte i = 0; i < current_level.enemy_instance_count; i++)
+				set_enemy_instance_state(enemy_instance, Idle, 1);
+		}
+		else play_sound(&player -> sound_when_attacked, 0);
+	}
+}
+
 static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* const player, const Weapon* const weapon) {
 	if (enemy_instance -> state == Dead) return;
 
@@ -48,14 +79,14 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 			if (height_diff >= height_diff_for_interaction) break;
 
 			const byte awoke_from_sound = (dist <= dist_wake_from_sound) &&
-				((weapon -> status & mask_recently_used) || player -> jump.made_noise);
+				((weapon -> status & mask_recently_used_weapon) || player -> jump.made_noise);
 
-			if (awoke_from_sound || (dist <= enemy -> dist_wake_from_idle) || enemy_instance -> recently_attacked)
+			if (awoke_from_sound || (dist <= enemy -> dist_wake_from_idle) || (enemy_instance -> status & mask_recently_attacked_enemy))
 				set_enemy_instance_state(enemy_instance, Chasing, 0);
 		}
 			break;
 		
-		case Chasing: { // only the case for short range enemies
+		case Chasing: {
 			const NavigationState nav_state = update_route_if_needed(nav, player -> pos);
 			if (nav_state == ReachedDest)
 				set_enemy_instance_state(enemy_instance, Attacking, 0);
@@ -64,7 +95,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 		}
 			break;
 
-		case Attacking: {
+		case Attacking: { // only the case for short range
 			const NavigationState nav_state = update_route_if_needed(nav, player -> pos);
 
 			if (nav_state == Navigating)
@@ -72,25 +103,10 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 			else if (nav_state == FailedBFS)
 				set_enemy_instance_state(enemy_instance, Idle, 0);
 
-			else { // only the case for short range enemies
-				const double curr_time = SDL_GetTicks() / 1000.0;
-				if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing && dist <= 1.0
-					&& height_diff <= height_diff_for_interaction) {
+			else if (enemy_instance -> status & mask_long_range_attack_enemy)
+				puts("Long range enemies are not supported yet");
 
-					enemy_instance -> time_at_attack = curr_time;
-
-					// when the decr hp is less than zero, the enemy instance clips into walls - why?
-					const double decr_hp = enemy -> power * (1.0 - dist * dist); // more damage closer
-
-					if ((player -> hp -= decr_hp) <= 0.0) {
-						player -> is_dead = 1;
-						player -> hp = 0.0;
-						for (byte i = 0; i < current_level.enemy_instance_count; i++)
-							set_enemy_instance_state(enemy_instance, Idle, 1);
-					}
-					else play_sound(&player -> sound_when_attacked, 0);
-				}
-			}
+			else short_range_enemy_attack(enemy, enemy_instance, player, dist, height_diff);
 		}
 			break;
 
@@ -103,7 +119,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 		if (rand_num <= numerator_sound_chance) play_sound(&enemy -> sounds[enemy_instance -> state], 0);
 	}
 
-	enemy_instance -> recently_attacked = 0;
+	clear_nth_bit(&enemy_instance -> status, 0); // not recently attacked anymore
 }
 
 inlinable void update_all_enemy_instances(Player* const player, const Weapon* const weapon) {

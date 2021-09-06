@@ -27,7 +27,8 @@ static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec di
 			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon -> dist_for_hit)
 				&& fabs(enemy_instance -> billboard_data.height - p_height) <= height_diff_for_interaction) {
 
-				enemy_instance -> recently_attacked = 1;
+				// enemy_instance -> recently_attacked = 1;
+				set_nth_bit(&enemy_instance -> status, 0);
 				enemy_instance -> hp -= weapon -> power;
 
 				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte);
@@ -36,7 +37,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec di
 				return;
 			}
 		}
-		if (weapon -> status & mask_short_range) break;
+		if (weapon -> status & mask_short_range_weapon) break;
 	}
 }
 
@@ -47,7 +48,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 
 	if (player -> is_dead) *frame_ind = 0;
 
-	const byte first_in_use = weapon -> status & mask_in_use;
+	const byte first_in_use = weapon -> status & mask_in_use_weapon;
 
 	if (first_in_use && *frame_ind == 0)
 		clear_nth_bit(&weapon -> status, 0); // not in use
@@ -60,8 +61,8 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	else clear_nth_bit(&weapon -> status, 3);
 
 	// -1 -> cycle frame, 0 -> first frame
-	animate_weapon(&weapon -> animation_data, player -> pos, weapon -> status & mask_paces_sideways,
-		weapon -> status & mask_in_use, player -> y_pitch, player -> body.v);
+	animate_weapon(&weapon -> animation_data, player -> pos, weapon -> status & mask_paces_sideways_weapon,
+		weapon -> status & mask_in_use_weapon, player -> y_pitch, player -> body.v);
 }
 
 #else

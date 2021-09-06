@@ -78,9 +78,9 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 		KinematicBody* const body = &player -> body;
 		const double curr_secs = SDL_GetTicks() / 1000.0;
 
-		if (moved_any_direction && !(body -> status & mask_forward_or_backward))
+		if (moved_any_direction && !(body -> status & mask_forward_or_backward_movement))
 			body -> time_of_move = curr_secs;
-		else if (!moved_any_direction && (body -> status & mask_forward_or_backward))
+		else if (!moved_any_direction && (body -> status & mask_forward_or_backward_movement))
 			body -> time_of_stop = curr_secs;
 
 		nth_bit_to_x(&body -> status, 0, moved_forward_or_backward);

@@ -168,7 +168,7 @@ void set_level_enemy_instances(Level* const level, const unsigned enemy_instance
 		const EnemyInstance enemy_instance = {
 			.enemy = enemy,
 			.state = Idle,
-			.recently_attacked = 0,
+			.status = 0,
 			.hp = enemy -> init_hp,
 			.time_at_attack = 0.0,
 			.billboard_data = {
