@@ -7,10 +7,10 @@ OUT = $(MAIN).app
 
 OPTIMIZE = -Ofast
 DEBUG = -ggdb3
-DEBUG_2_FLAGS = -fsanitize=address
+DEBUG_2= -fsanitize=address
 
 ifeq ($(CC),gcc-10)
-	DEBUG_2_FLAGS += -fsanitize=leak # -fsanitize=memory
+	DEBUG_2 += -fsanitize=leak # -fsanitize=memory
 endif
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
@@ -45,7 +45,7 @@ profile_gcov:
 	@echo Profiling data is in any .gcov file in bin/profiling.
 
 debug_2: # finds writes to unallocated memory and such
-	$(CC) $(CFLAGS) $(DEBUG) $(DEBUG_2_FLAGS) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(DEBUG) $(DEBUG_2) $(LDFLAGS)
 	make run
 
 clean:
