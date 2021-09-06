@@ -1,7 +1,13 @@
-typedef __v4si color4_t;
-
 Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
 	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
+}
+
+inlinable void get_ARGB_components(const Uint32 pixel, byte* const a, byte* const r, byte* const g, byte* const b) {
+	*a = (byte) (pixel >> 24), *r = (byte) (pixel >> 16), *g = (byte) (pixel >> 8), *b = (byte) pixel;
+}
+
+inlinable Uint32 combine_ARGB_components(const int a, const byte r, const byte g, const byte b) {
+	return a | (r << 16) | (g << 8) | b;
 }
 
 void antialiased_downscale_by_2(const SDL_Surface* const orig,
@@ -23,7 +29,7 @@ void antialiased_downscale_by_2(const SDL_Surface* const orig,
 				{dec_x, inc_y}, {x, inc_y}, {inc_x, inc_y}
 			};
 
-			color4_t sum = {0, 0, 0, 0};
+			int sum[4] = {0, 0, 0, 0};
 			byte valid_neighbor_sum = 0;
 
 			for (byte i = 0; i < 9; i++) {
@@ -31,16 +37,20 @@ void antialiased_downscale_by_2(const SDL_Surface* const orig,
 
 				if (pixel_pos.x >= 0 && pixel_pos.y >= 0 && pixel_pos.x < orig_size && pixel_pos.y < orig_size) {
 					const Uint32 neighbor_val = *read_surface_pixel(orig, pixel_pos.x, pixel_pos.y, bpp);
-					byte r, g, b, a;
-					SDL_GetRGBA(neighbor_val, format, &r, &g, &b, &a);
-					sum += (color4_t) {r, g, b, a};
+					byte a, r, g, b;
+					get_ARGB_components(neighbor_val, &a, &r, &g, &b); // this fn is here b/c SDL_GetRGBA is pretty slow
+					sum[0] += a;
+					sum[1] += r;
+					sum[2] += g;
+					sum[3] += b;
 					valid_neighbor_sum++;
 				}
 			}
 
-			*read_surface_pixel(mipmap, (x >> dec_scale_factor) + dest_corner.x, (y >> dec_scale_factor) + dest_corner.y, bpp) =
-				SDL_MapRGBA(format, sum[0] / valid_neighbor_sum, sum[1] / valid_neighbor_sum,
-					sum[2] / valid_neighbor_sum, sum[3] / valid_neighbor_sum);
+			const Uint32 result = SDL_MapRGBA(format, sum[1] / valid_neighbor_sum, sum[2] / valid_neighbor_sum,
+				sum[3] / valid_neighbor_sum, sum[0] / valid_neighbor_sum);
+
+			*read_surface_pixel(mipmap, (x >> dec_scale_factor) + dest_corner.x, (y >> dec_scale_factor) + dest_corner.y, bpp) = result;
 		}
 	}
 }
