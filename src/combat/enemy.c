@@ -86,7 +86,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 		}
 			break;
 		
-		case Chasing: {
+		case Chasing: { // pause and transition to attacking for long-range enemies
 			const NavigationState nav_state = update_route_if_needed(nav, player -> pos);
 			if (nav_state == ReachedDest)
 				set_enemy_instance_state(enemy_instance, Attacking, 0);
@@ -95,7 +95,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 		}
 			break;
 
-		case Attacking: { // only the case for short range
+		case Attacking: {
 			const NavigationState nav_state = update_route_if_needed(nav, player -> pos);
 
 			if (nav_state == Navigating)
