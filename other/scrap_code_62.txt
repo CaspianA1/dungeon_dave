@@ -1,0 +1,253 @@
+/*
+a 2D z-buffer with floats, worst case: 1440 * 900 * 4 = 5,184,000 bytes
+a more optimal structure: a list of v_depths
+
+enum {MAX_V_DEPTHS = 20};
+
+typedef struct {
+	short start_y, end_y;
+	float depth;
+} Column;
+
+typedef struct {
+	Column columns[MAX_V_DEPTHS];
+} ScrColumn;
+*/
+
+/////
+
+(void) texture;
+(void) src_column;
+(void) thing_crop;
+(void) screen_pos;
+(void) start_x;
+(void) end_x;
+(void) corrected_dist;
+(void) size;
+
+//////////
+
+typedef struct {
+	int start_x, end_x;
+} VisSpan;
+
+enum {max_vis_spans = 20};
+static VisSpan vis_spans[max_vis_spans];
+memset(&vis_spans, -1, max_vis_spans * sizeof(VisSpan));
+
+int vis_span_ind = 0;
+byte in_vis_span = 0;
+
+// for (; (double) screen_pos.x < end_x; screen_pos.x += settings.ray_column_width) {
+for (double x = start_x; x < end_x; x += settings.ray_column_width) {
+	if (x < 0.0) continue;
+
+	else if ((double) val_buffer[(int) x].depth > corrected_dist) { // yes, span is visible
+		VisSpan* const vis_span = &vis_spans[vis_span_ind];
+		if (!in_vis_span) {
+			vis_span -> start_x = x;
+			in_vis_span = 1;
+		}
+		else vis_span -> end_x = x;
+	}
+	else { // no, span is not visible
+		if (in_vis_span) {
+			vis_spans[vis_span_ind].end_x = x - 1;
+			in_vis_span = 0;
+		}
+	}
+}
+
+for (byte i = 0; i < vis_span_ind + 1; i++) {
+	VisSpan* const vis_span = &vis_spans[i];
+	if (vis_span -> end_x == -1) vis_span -> end_x = end_x;
+
+	printf("vis_span = {%d, %d}\n", vis_span -> start_x, vis_span -> end_x);
+	// how are some vis spans able to get a negative start x?
+}
+puts("---");
+
+/////
+
+
+/*
+const double screen_range = screen_pos.x - vis_span_start;
+const double range_over_size = screen_range / size;
+
+screen_pos.w = screen_range;
+
+src_column.x = 
+src_column.w = ((double) (d_x - vis_span.start_x) / size) * thing_crop.w;
+
+SDL_RenderCopy(screen.renderer, texture, &src_column, &screen_pos);
+*/
+
+/*
+const int src_offset = (((double) screen_pos.x - (int) vis_span_start) / size) * thing_crop.w;
+src_column.x = src_offset + thing_crop.x;
+src_column.w = 
+*/
+
+in_vis_span = 0;
+
+/*
+src_column.x = (((double) screen_pos.x - start_x) / size) * thing_crop.w;
+src_column.w = ((double) (vis_span.end_x - vis_span.start_x) / size) * thing_crop.w;
+DEBUG(src_column.w, d);
+SDL_RenderCopyF(screen.renderer, texture, &src_column, &screen_pos);
+in_vis_span = 0;
+*/
+
+/////
+
+
+/*
+screen_pos.w = end_x - start_x;
+DEBUG(screen_pos.w, d);
+src_column.x = (double) screen_pos.w / size * thing_crop.w;
+src_column.w = thing_crop.w;
+SDL_RenderCopy(screen.renderer, texture, &src_column, &screen_pos);
+*/
+
+/*
+for (; (double) screen_pos.x < end_x; screen_pos.x += settings.ray_column_width) {
+	if (screen_pos.x < 0.0f || (double) val_buffer[(int) screen_pos.x].depth < corrected_dist) continue;
+	const int src_offset = (((double) screen_pos.x - (int) start_x) / size) * thing_crop.w;
+	src_column.x = src_offset + thing_crop.x;
+
+	SDL_RenderCopy(screen.renderer, texture, &src_column, &screen_pos);
+}
+*/
+
+/////
+
+// thing_crop.w += (double) -start_x / size;
+
+if (start_x < 0) {
+	// thing_crop.w += -start_x;
+	/*
+	printf("Time for the magic; add %f\n", (double) screen_pos.x / size * thing_crop.x);
+	thing_crop.w += (double) screen_pos.x / size * thing_crop.x;
+	*/
+}
+
+/////
+
+/*
+thing_crop.x = (((double) vis_span_start - (int) start_x) / size) * thing_crop.w;
+thing_crop.w *= (double) screen_pos.w / size;
+*/
+
+/*
+// const int src_offset = (((double) vis_span_start - (int) start_x) / size) * thing_crop.w;
+printf("Thing crop w before = %d\n", thing_crop.w);
+thing_crop.w *= (double) screen_pos.w / size;
+DEBUG(thing_crop.w, d);
+*/
+
+/////
+
+/*
+const double thing_columns_per_screen_columns = screen_pos.w / size;
+thing_crop.w *= thing_columns_per_screen_columns;
+
+if (screen_pos.x < 0) {
+	const int screen_columns_lost = -screen_pos.x;
+	DEBUG(screen_columns_lost, d);
+	DEBUG(thing_columns_per_screen_columns, lf);
+	const double thing_columns_lost = screen_columns_lost * thing_columns_per_screen_columns;
+	DEBUG(thing_columns_lost, lf);
+	puts("---");
+}
+*/
+
+/*
+const double thing_columns_per_screen_columns = screen_pos.w / size;
+thing_crop.w *= thing_columns_per_screen_columns;
+
+const double numba = (((double) x - vis_span_start_x) / size) * thing_crop.w;
+thing_crop.w = numba;
+*/
+
+/////
+
+(void) size;
+
+screen_pos.x = start_x;
+screen_pos.w = x - vis_span_start_x; // == dest_x_range
+
+DEBUG(screen_pos.x, d);
+DEBUG(screen_pos.w, d);
+
+/*
+thing_crop.x += 20;
+thing_crop.w -= 20; // find the change amt
+*/
+
+/*
+DEBUG(thing_crop.x, d);
+const double thing_columns_per_screen_columns = screen_pos.w / size;
+thing_crop.w *= thing_columns_per_screen_columns;
+*/
+
+/*
+const double thing_columns_per_screen_columns = screen_pos.w / size;
+thing_crop.w *= thing_columns_per_screen_columns;
+
+if (screen_pos.x < 0) {
+	const int screen_columns_lost = -screen_pos.x;
+	DEBUG(screen_columns_lost, d);
+	DEBUG(thing_columns_per_screen_columns, lf);
+	const double thing_columns_lost = screen_columns_lost * thing_columns_per_screen_columns;
+	DEBUG(thing_columns_lost, lf);
+	puts("---");
+}
+*/
+
+/*
+const double thing_columns_per_screen_columns = screen_pos.w / size;
+thing_crop.w *= thing_columns_per_screen_columns;
+
+const double numba = (((double) x - vis_span_start_x) / size) * thing_crop.w;
+thing_crop.w = numba;
+*/
+
+/////
+
+// DEBUG_RECT(thing_crop);
+
+/*
+static int a;
+if (keys[SDL_SCANCODE_T]) a++;
+if (keys[SDL_SCANCODE_Y]) a--;
+if (keys[SDL_SCANCODE_U]) a = 0;
+
+screen_pos.x += a;
+screen_pos.w += a;
+*/
+
+/////
+
+const double thing_cols_per_screen_cols = screen_pos.w / size;
+thing_crop.w *= thing_cols_per_screen_cols;
+
+if (screen_pos.x < 0) {
+	/*
+	// printf("This is where the bug arises\n");
+	static int a, b;
+	if (keys[SDL_SCANCODE_T]) a++;
+	if (keys[SDL_SCANCODE_Y]) a--;
+	if (keys[SDL_SCANCODE_U]) a = 0;
+
+	if (keys[SDL_SCANCODE_H]) b++;
+	if (keys[SDL_SCANCODE_J]) b--;
+	if (keys[SDL_SCANCODE_K]) b = 0;
+
+	thing_crop.x += a;
+	thing_crop.w += b;
+
+	DEBUG_RECT(thing_crop);
+	*/
+}
+
+/////

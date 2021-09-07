@@ -11,6 +11,48 @@ static int cmp_things(const void* const a, const void* const b) {
 	else return 0;
 }
 
+static void vis_drawing_fn(const double start_x, const int x, SDL_Rect thing_crop,
+	SDL_FRect screen_pos, const double size, SDL_Texture* const texture) {
+
+	screen_pos.x = start_x;
+	screen_pos.w = x - start_x; // == dest_x_range
+
+	thing_crop.w *= (double) screen_pos.w / size; // screen_pos.w / size = thing columns per screen columns
+	// what would thing_crop.x be?
+	// one last occlusion problem, on the right side of the dirt pillars, where start_x must be greater than 0
+
+	SDL_RenderCopyF(screen.renderer, texture, &thing_crop, &screen_pos);
+}
+
+inlinable void draw_thing_as_cols(SDL_Texture* const texture,
+	const SDL_Rect thing_crop, const SDL_FRect screen_pos, const double start_x,
+	const double end_x, const double corrected_dist, const double size) {
+
+	//////////
+
+	byte in_vis_span = 0;
+	int vis_span_start = start_x;
+
+	for (int x = start_x; x < end_x; x++) {
+		if (x < 0 || (double) val_buffer[x].depth > corrected_dist) { // yes, span is visible
+			if (!in_vis_span) {
+				vis_span_start = x;
+				in_vis_span = 1;
+			}
+		}
+
+		else { // no, span is not visible, so draw the last one
+			if (in_vis_span) { // draws from vis_span_start to x
+				vis_drawing_fn(vis_span_start, x, thing_crop, screen_pos, size, texture);
+				in_vis_span = 0;
+			}
+		}
+	}
+
+	// printf("Final vis_drawing_fn call from x = %d to x = %d\n", vis_span_start, (int) end_x);
+	if (in_vis_span) vis_drawing_fn(vis_span_start, end_x, thing_crop, screen_pos, size, texture);
+}
+
 static void draw_processed_things(const Player* const player, const double y_shift) {
 	for (byte i = 0; i < current_level.thing_count; i++) {
 		const Thing thing = current_level.thing_container[i];
@@ -43,12 +85,10 @@ static void draw_processed_things(const Player* const player, const double y_shi
 		if (end_x < 0.0) continue;
 		else if (end_x > settings.screen_width) end_x = settings.screen_width;
 
-		SDL_Rect src_column = {.y = thing.src_crop.y, .w = 1, .h = thing.src_crop.h};
-
-		SDL_FRect screen_pos = {
-			start_x, y_shift - half_size
+		const SDL_FRect screen_pos = {
+			.y = y_shift - half_size
 			+ (player -> jump.height - billboard_data.height) * settings.screen_height / corrected_dist,
-			settings.ray_column_width, size
+			.h = size
 		};
 
 		SDL_Texture* const texture = thing.sprite -> texture;
@@ -58,13 +98,7 @@ static void draw_processed_things(const Player* const player, const double y_shi
 		SDL_SetTextureColorMod(texture, shade, shade, shade);
 		#endif
 
-		for (; (double) screen_pos.x < end_x; screen_pos.x += settings.ray_column_width) {
-			if (screen_pos.x < 0.0f || (double) val_buffer[(int) screen_pos.x].depth < corrected_dist) continue;
-			const int src_offset = (((double) screen_pos.x - (int) start_x) / size) * thing.src_crop.w;
-			src_column.x = src_offset + thing.src_crop.x;
-
-			SDL_RenderCopyF(screen.renderer, texture, &src_column, &screen_pos);
-		}
+		draw_thing_as_cols(texture, thing.src_crop, screen_pos, start_x, end_x, corrected_dist, size);
 	}
 }
 
