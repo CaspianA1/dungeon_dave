@@ -76,7 +76,7 @@ int main(void) {
 
 	// box_blur_test();
 	// gauss_blur_test();
-	// menu_test();
+	menu_test();
 	// lightmap_test();
 	// antialias_test();
 

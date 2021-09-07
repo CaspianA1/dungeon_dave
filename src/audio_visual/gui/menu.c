@@ -57,6 +57,8 @@ InputStatus render_menu(const Menu* const menu) {
 	SDL_SetRenderDrawColor(screen.renderer, bg_color.r, bg_color.g, bg_color.b, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(screen.renderer);
 
+	// SDL_RenderCopy(screen.renderer, current_level.walls[0].texture, NULL, NULL); // mipmap appeared
+
 	for (byte i = 0; i < menu -> textbox_count; i++) {
 		Textbox* const textbox = &menu -> textboxes[i];
 		const SDL_Rect box = textbox -> pos_and_size_fn();
@@ -77,18 +79,17 @@ InputStatus render_menu(const Menu* const menu) {
 		SDL_RenderCopy(screen.renderer, textbox -> rendered_text, NULL, &box);
 	}
 
-	SDL_RenderPresent(screen.renderer);
 	return ProceedAsNormal;
 }
 
 //////////
 
 SDL_Rect textbox_1_pos(void) {
-	return (SDL_Rect) {20, 20, 160, 80};
+	return (SDL_Rect) {0, 0, settings.half_screen_width >> 1, settings.half_screen_height >> 1};
 }
 
 SDL_Rect textbox_2_pos(void) {
-	return (SDL_Rect) {settings.half_screen_width, settings.half_screen_height, 150, 50};
+	return (SDL_Rect) {settings.half_screen_width, settings.half_screen_height, settings.screen_width / 10, settings.screen_height / 10};
 }
 
 InputStatus textbox_1_on_click(void) {
@@ -110,11 +111,16 @@ void menu_test(void) {
 
 	byte testing_menu = 1;
 	while (testing_menu) {
+		const Uint32 before = SDL_GetTicks();
+
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) testing_menu = 0;
 		}
 
 		if (render_menu(&menu) == Exit) testing_menu = 0;
+
+		byte after_gui_event(const Uint32);
+		after_gui_event(before);
 	}
 
 	SDL_ShowCursor(SDL_FALSE);

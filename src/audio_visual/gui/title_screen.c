@@ -40,7 +40,7 @@ inlinable void draw_message(const OldMessage* const message) {
 }
 
 // returns if the screen dimensions changed
-inlinable byte after_gui_event(const Uint32 before) {
+byte after_gui_event(const Uint32 before) {
 	SDL_RenderPresent(screen.renderer);
 	const byte dimensions_changed = update_screen_dimensions();
 	tick_delay(before);
