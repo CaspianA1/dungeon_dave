@@ -92,6 +92,7 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space,
 	*projected_wall_bottom = proj_wall_bottom;
 }
 
+// once the colors are correct per vertical line, this will be done
 void mark_floor(const DataRaycast* const d, double last_projected_wall_top, const double projected_wall_bottom) {
 	if (last_projected_wall_top >= settings.screen_height)
 		last_projected_wall_top = settings.screen_height - 1.0;
