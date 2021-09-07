@@ -17,9 +17,16 @@ static void vis_drawing_fn(const double start_x, const int x, SDL_Rect* const th
 	screen_pos -> x = start_x;
 	screen_pos -> w = x - start_x; // == dest_x_range
 
-	thing_crop -> w *= (double) screen_pos -> w / size; // screen_pos.w / size = thing columns per screen columns
+	const double new_thing_crop_w = round(thing_crop -> w * (double) screen_pos -> w / size);
+	thing_crop -> w = new_thing_crop_w;
+
+	/*
 	// what would thing_crop.x be?
 	// one last occlusion problem, on the right side of the dirt pillars, where start_x must be greater than 0
+
+	thing_crop -> x = new_thing_crop_w; // this almost works:
+	thing_crop -> w = 64 - new_thing_crop_w;
+	*/
 
 	SDL_RenderCopyF(screen.renderer, texture, thing_crop, screen_pos);
 }
