@@ -118,8 +118,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 			const vec hit = vec_line_pos(player -> pos, dir, ray.dist);
 			const byte point_height = current_level.get_point_height(point, hit);
 
-			// if (last_point_height != point_height) {
-			if (1) {
+			if (last_point_height != point_height) {
 				if (point) {
 					const DataRaycast raycast_data = {
 						&last_wall_top, p_angle, theta, ray.dist, wall_y_shift, full_jump_height, player -> pos,
