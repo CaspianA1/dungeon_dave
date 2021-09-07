@@ -250,4 +250,49 @@ if (screen_pos.x < 0) {
 	*/
 }
 
+///// Another attempt at floor interpolation:
+
+vec tex_offset_for_straight_dist(const vec pos, const double straight_dist, const int screen_x) {
+	const BufferVal buffer_val = val_buffer[screen_x];
+	const double actual_dist = straight_dist * (double) buffer_val.one_over_cos_beta;
+	const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
+	return vec_tex_offset(hit, ground.size);
+}
+
+typedef struct {
+	const vec y0, dx, slope;
+} FloorLerp;
+
+FloorLerp init_floor_lerp(const vec pos, const double straight_dist) {
+	const vec
+		y0 = tex_offset_for_straight_dist(pos, straight_dist, 0),
+		y1 = tex_offset_for_straight_dist(pos, straight_dist, settings.screen_width - 1);
+
+	const vec dy = y1 - y0;
+	DEBUG_VEC(dy);
+
+	const vec dx = vec_fill(settings.screen_width - 1);
+	const vec slope = (y1 - y0) / dx;
+
+	return (FloorLerp) {y0, dx, slope};
+}
+
+vec floor_lerp_offset(const FloorLerp floor_lerp, const int x) {
+	return floor_lerp.y0 + vec_fill(x) * floor_lerp.slope;
+}
+
+/////
+
+const FloorLerp floor_lerp = init_floor_lerp(pos, straight_dist);
+
+/////
+
+//////////
+vec offset = floor_lerp_offset(floor_lerp, screen_x);
+ivec aligned_offset = {(int) offset[0] & 63, (int) offset[1] & 63};
+const Uint32 lerp_pixel = ground.pixels[aligned_offset.y * ground.size + aligned_offset.x];
+//////////
+
+const Uint32 out = keys[SDL_SCANCODE_T] ? lerp_pixel : pixel;
+
 /////

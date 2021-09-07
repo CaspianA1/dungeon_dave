@@ -25,20 +25,6 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 #endif
 
 static PixSprite ground;
-inlinable Uint32 get_pixel_from_hit(const vec hit, const double dist) {
-	const vec offset = vec_tex_offset(hit, ground.size);
-
-	Uint32 pixel = ground.pixels[(long) ((long) offset[1] * ground.size + offset[0])];
-
-	#ifdef SHADING_ENABLED
-	pixel = shade_ARGB_pixel(pixel, calculate_shade(settings.proj_dist / dist, hit));
-	#else
-	(void) dist;
-	#endif
-
-	return pixel;
-}
-
 void fast_affine_floor(const byte floor_height, const vec pos,
 	const double p_height, const double pace, double y_shift, const int y_pitch) {
 
@@ -82,8 +68,14 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 			if (current_level.get_point_height(wall_point, hit) != floor_height) continue;
 			#endif
 
-			const Uint32 pixel = get_pixel_from_hit(hit, actual_dist);
-			for (byte x = 0; x < settings.ray_column_width; x++) pixbuf_row[x + screen_x] = pixel;
+			const vec offset = vec_tex_offset(hit, ground.size);
+			Uint32 pixel = ground.pixels[(long) ((long) offset[1] * ground.size + offset[0])];
+
+			#ifdef SHADING_ENABLED
+			pixel = shade_ARGB_pixel(pixel, calculate_shade(settings.proj_dist / actual_dist, hit));
+			#endif
+
+			for (int x = 0; x < settings.ray_column_width; x++) pixbuf_row[x + screen_x] = pixel;
 		}
 	}
 }
