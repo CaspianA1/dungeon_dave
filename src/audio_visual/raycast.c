@@ -71,36 +71,25 @@ void handle_ray(const DataRaycast* const d) {
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &frect);
 	}
 
-	//////////
+	*d -> last_point_height = d -> point_height;
+
 	double projected_wall_top = *d -> last_wall_top;
 	double projected_wall_bottom = projected_wall_top + wall_dest_h_sum;
 
-	align_from_out_of_vert_bounds(&projected_wall_top);
-	align_from_out_of_vert_bounds(&projected_wall_bottom);
-	for (double y = round(projected_wall_top); y < round(projected_wall_bottom); y++)
+	if (projected_wall_bottom < 0.0 || projected_wall_top >= settings.screen_height) return;
+	if (projected_wall_bottom >= settings.screen_height) projected_wall_bottom = settings.screen_height - 1;
+	if (projected_wall_top < 0.0) projected_wall_top = 0.0;
+
+	for (int y = round(projected_wall_top); y < round(projected_wall_bottom); y++)
 		set_statemap_bit(occluded_by_walls, wall_dest.x, y);
 
-	/*
-	void draw_colored_rect(const byte, const byte, const byte, const double, const SDL_Rect* const);
-	const SDL_Rect top = {wall_dest.x, projected_wall_top, 10, 10}, bottom = {wall_dest.x, projected_wall_bottom, 10, 5};
-	draw_colored_rect(255, 0, 0, 1.0, &top); draw_colored_rect(0, 0, 255, 1.0, &bottom); // red = top, blue = bottom
-	*/
-
-	/* floor = last red to curr blue (initial red = bottom of screen), wall = blue to red
-	last red = last last wall top, curr blue = curr wall bottom */
-
-	/* SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderDrawLine(screen.renderer, wall_dest.x, projected_wall_bottom, wall_dest.x, projected_wall_top); */
 	//////////
-
-	/* this will work once player heights are accurate to the world
-	const byte below_highest_point =
-		(d -> full_jump_height / settings.screen_height) <= current_level.max_point_height - 1.0;
-
-	DEBUG(below_highest_point, d);
-	if (d -> point_height == current_level.max_point_height && below_highest_point) set exit status; */
-
-	*d -> last_point_height = d -> point_height;
+	/*
+	SDL_Rect top = {wall_dest.x, projected_wall_top, 5, 5};
+	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRect(screen.renderer, &top);
+	*/
+	//////////
 }
 
 void raycast(const Player* const player, const double wall_y_shift, const double full_jump_height) {

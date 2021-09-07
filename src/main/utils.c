@@ -112,11 +112,6 @@ inlinable void set_map_point(byte* const map, const byte val, const int x, const
 	map[y * map_width + x] = val;
 }
 
-inlinable void align_from_out_of_vert_bounds(double* const val) {
-	if (*val < 0.0) *val = 0.0;
-	else if (*val > settings.screen_height) *val = settings.screen_height;
-}
-
 void update_val_buffer(const int screen_x, const float dist, const float cos_beta, const vec dir) {
 	BufferVal* buffer_val = &val_buffer[screen_x];
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++, buffer_val++) {
