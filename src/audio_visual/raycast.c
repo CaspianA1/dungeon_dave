@@ -92,10 +92,11 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space,
 	*projected_wall_bottom = proj_wall_bottom;
 }
 
-void mark_floor(const DataRaycast* const d, const double last_projected_wall_top, const double projected_wall_bottom) {
-	const int x = d -> screen_x;
+void mark_floor(const DataRaycast* const d, double last_projected_wall_top, const double projected_wall_bottom) {
+	if (last_projected_wall_top >= settings.screen_height)
+		last_projected_wall_top = settings.screen_height - 1.0;
 
-	// floor from last projected_wall_top (red) to current projected_wall_bottom (blue) (green rgb = 0, 255, 0)
+	const int x = d -> screen_x;
 	SDL_SetRenderDrawColor(screen.renderer, 0, 255 / (*d -> last_point_height + 1), 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderDrawLine(screen.renderer, x, last_projected_wall_top, x, projected_wall_bottom);
 }
@@ -107,7 +108,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + p_angle;
 		const vec dir = {cos(theta), sin(theta)};
 
-		double last_wall_top = settings.screen_height;
+		double last_wall_top = DBL_MAX;
 
 		byte at_first_hit = 1, last_point_height = player -> jump.height;
 		DataDDA ray = init_dda((double[2]) UNPACK_2(player -> pos), (double[2]) UNPACK_2(dir), 1.0);
@@ -117,7 +118,8 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 			const vec hit = vec_line_pos(player -> pos, dir, ray.dist);
 			const byte point_height = current_level.get_point_height(point, hit);
 
-			if (last_point_height != point_height) {
+			// if (last_point_height != point_height) {
+			if (1) {
 				if (point) {
 					const DataRaycast raycast_data = {
 						&last_wall_top, p_angle, theta, ray.dist, wall_y_shift, full_jump_height, player -> pos,
