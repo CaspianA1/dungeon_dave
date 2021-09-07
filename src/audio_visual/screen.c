@@ -58,7 +58,7 @@ void refresh(const Player* const player, const double y_shift) {
 
 	const Domain tilt = player -> tilt;
 	if (tilt.val >= -tilt.step - 0.01 && tilt.val <= tilt.step + 0.01) {
-		// SDL_RenderCopy(screen.renderer, screen.pixel_buffer, NULL, NULL); // copy everything?
+		SDL_RenderCopy(screen.renderer, screen.pixel_buffer, NULL, NULL); // copy everything?
 		SDL_RenderCopy(screen.renderer, screen.shape_buffer, NULL, NULL);
 	}
 
@@ -79,7 +79,7 @@ void refresh(const Player* const player, const double y_shift) {
 			settings.screen_height + y_crop_adjust * 2.0
 		};
 
-		// draw_tilted(screen.pixel_buffer, &dest_crop, tilt.val);
+		draw_tilted(screen.pixel_buffer, &dest_crop, tilt.val);
 		draw_tilted(screen.shape_buffer, &dest_crop, tilt.val);
 	}
 

@@ -128,7 +128,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 					byte mark_floor_space;
 					double last_projected_wall_top, projected_wall_bottom;
 					handle_ray(&raycast_data, &mark_floor_space, &last_projected_wall_top, &projected_wall_bottom);
-					if (mark_floor_space) mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
+					// if (mark_floor_space) mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
 					at_first_hit = 0;
 				}
 
