@@ -317,4 +317,26 @@ const byte below_highest_point =
 DEBUG(below_highest_point, d);
 if (d -> point_height == current_level.max_point_height && below_highest_point) set exit status; */
 
+///// A very good mark_floor function:
+
+void mark_floor(const DataRaycast* const d, double last_projected_wall_top,
+	const double projected_wall_top, const double projected_wall_bottom) {
+
+	const int x = d -> screen_x;
+
+	SDL_SetRenderDrawColor(screen.renderer, 0, 255 / (*d -> last_point_height + 1), 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderDrawLine(screen.renderer, x, last_projected_wall_top, x, projected_wall_bottom);
+	// floor from last projected_wall_top (red) to current projected_wall_bottom (blue) (green rgb = 0, 255, 0)
+
+	/*
+	SDL_Rect bottom_or_top = {x, projected_wall_bottom, 5, 5};
+	SDL_SetRenderDrawColor(screen.renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRect(screen.renderer, &bottom_or_top);
+
+	bottom_or_top.y = projected_wall_top;
+	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRect(screen.renderer, &bottom_or_top);
+	*/
+}
+
 /////
