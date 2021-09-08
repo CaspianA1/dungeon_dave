@@ -60,7 +60,7 @@ void deinit_menu(const Menu* const menu) {
 	TTF_CloseFont(menu -> font);
 }
 
-InputStatus render_menu(const Menu* const menu) {
+InputStatus render_menu(const Menu* const menu, const byte mouse_ready) {
 	const Color3 bg_color = menu -> bg_color, fg_color = menu -> fg_color, border_color = menu -> border_color;
 
 	SDL_SetRenderDrawColor(screen.renderer, border_color.r, border_color.g, border_color.b, SDL_ALPHA_OPAQUE);
@@ -87,7 +87,8 @@ InputStatus render_menu(const Menu* const menu) {
 
 		if (mouse.x >= box.x && mouse.x <= box.x + box.w && mouse.y >= box.y && mouse.y <= box.y + box.h) {
 			SDL_SetRenderDrawColor(screen.renderer, 255 - fg_color.r, 255 - fg_color.g, 255 - fg_color.b, SDL_ALPHA_OPAQUE);
-			if (event.type == SDL_MOUSEBUTTONDOWN) {
+
+			if (mouse_ready && event.type == SDL_MOUSEBUTTONDOWN) {
 				const InputStatus click_response = textbox -> on_click_fn();
 				if (click_response != ProceedAsNormal) return click_response;
 			}
@@ -102,28 +103,45 @@ InputStatus render_menu(const Menu* const menu) {
 	return ProceedAsNormal;
 }
 
-InputStatus menu_loop(const Menu* const menu) {
+InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_menu) {
 	SDL_ShowCursor(SDL_TRUE);
-	InputStatus input = ProceedAsNormal;
-	byte done = 0;
-	while (!done) {
-			const Uint32 before = SDL_GetTicks();
 
-			while (SDL_PollEvent(&event)) {
-				if (event.type == SDL_QUIT) {
+	InputStatus input = ProceedAsNormal;
+
+	byte drawing_image = image_before_menu != NULL;
+	byte mouse_down_after_image = !drawing_image, mouse_up_after_image = !drawing_image, done = 0;
+
+	while (!done) {
+		const Uint32 before = SDL_GetTicks();
+
+		while (SDL_PollEvent(&event)) {
+			switch (event.type) {
+				case SDL_QUIT:
 					input = Exit;
 					done = 1;
-				}
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					if (drawing_image) mouse_down_after_image = 1;
+					break;
+				case SDL_MOUSEBUTTONUP:
+					if (drawing_image && mouse_down_after_image) {
+						drawing_image = 0;
+						mouse_up_after_image = 1;
+					}
 			}
+		}
 
-			const InputStatus menu_input = render_menu(menu);
+		if (drawing_image) SDL_RenderCopy(screen.renderer, image_before_menu, NULL, NULL);
+		else {
+			const InputStatus menu_input = render_menu(menu, mouse_down_after_image && mouse_up_after_image && !drawing_image);
 			if (menu_input == Exit || menu_input == NextScreen) {
 				if (menu_input == Exit) input = Exit;
 				done = 1;
 			}
-
-			after_gui_event(before);
 		}
+
+		after_gui_event(before);
+	}
 
 	SDL_ShowCursor(SDL_FALSE);
 	return input;

@@ -15,13 +15,15 @@ InputStatus display_title_screen(void) {
 	const Sound title_track = init_sound("assets/audio/themes/title.wav", 0);
 	play_sound(&title_track, 1);
 
-	// next up: for the menu loop, pass in an optional pre-menu image
+	const Sprite logo = init_sprite("assets/logo.bmp", 0);
 
 	const Menu start_screen = init_menu((Color3) {255, 99, 71}, (Color3) {139, 0, 0}, (Color3) {228, 29, 29}, 1,
 		start_button_pos, start_button_on_click, "Start!");
 
-	const InputStatus input = menu_loop(&start_screen);
+	// next up: a noise for clicking things
+	const InputStatus input = menu_loop(&start_screen, logo.texture);
 
+	deinit_sprite(logo);
 	deinit_menu(&start_screen);
 	deinit_sound(&title_track);
 

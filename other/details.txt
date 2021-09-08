@@ -1,7 +1,3 @@
-priority:
-	- lightmapping
-	- weapon projectiles
-
 features:
 	- doors
 	- a settings/menu option in the title screen and status bar
