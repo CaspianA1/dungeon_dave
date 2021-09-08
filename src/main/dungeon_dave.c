@@ -81,7 +81,11 @@ int main(void) {
 
 		update_screen_dimensions();
 		const InputStatus input_status = handle_input(&player, player.is_dead);
-		if (input_status == Exit) deinit_all(&player, &weapon);
+r
+		if (input_status == Exit) {
+			deinit_pix_sprite(ground);
+			deinit_all(&player, &weapon);
+		}
 
 		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 

@@ -15,6 +15,8 @@ InputStatus display_title_screen(void) {
 	const Sound title_track = init_sound("assets/audio/themes/title.wav", 0);
 	play_sound(&title_track, 1);
 
+	// next up: for the menu loop, pass in an optional pre-menu image
+
 	const Menu start_screen = init_menu((Color3) {255, 99, 71}, (Color3) {139, 0, 0}, (Color3) {228, 29, 29}, 1,
 		start_button_pos, start_button_on_click, "Start!");
 
