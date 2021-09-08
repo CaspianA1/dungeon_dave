@@ -1,8 +1,3 @@
-struct {
-	TTF_Font* font;
-	SDL_Texture* hp_texture;
-} hud_resources = {NULL, NULL};
-
 enum {
 	HUD, BackgroundHP, PlayerMinimap
 } ColorID;
@@ -14,27 +9,6 @@ static const Color3 hud_colors[3] = {
 };
 
 //////////
-
-void deinit_hud_resources(void) {
-	SDL_DestroyTexture(hud_resources.hp_texture);
-	TTF_CloseFont(hud_resources.font);
-}
-
-byte update_toggle(Toggle* const toggle) { // returns if the toggle is set
-	const byte pressed_key = keys[toggle -> key];
-	if (pressed_key && !toggle -> enabled_previously)
-		toggle -> enabled = !toggle -> enabled;
-
-	toggle -> enabled_previously = pressed_key;
-	return toggle -> enabled;
-}
-
-inlinable void draw_colored_frect(const byte r, const byte g, const byte b,
-	const double shade, const SDL_FRect* const frect) {
-
-	SDL_SetRenderDrawColor(screen.renderer, r * shade, g * shade, b * shade, SDL_ALPHA_OPAQUE);
-	SDL_RenderFillRectF(screen.renderer, frect);
-}
 
 inlinable void draw_minimap(const vec pos) {
 	toggledef(KEY_TOGGLE_MINIMAP);
@@ -81,20 +55,12 @@ inlinable void draw_crosshair(const int y_shift) {
 	SDL_RenderFillRect(screen.renderer, &down);
 }
 
-inlinable void make_hp_text(const double hp, TTF_Font** const font, SDL_Texture** const texture) {
+inlinable SDL_Texture* make_hp_text(const double hp, SDL_Texture* const* const texture) {
 	char percent_str[5]; // max 4 characters = 100% + null terminator
 	sprintf(percent_str, "%d%%", (byte) round(hp / INIT_HP * 100));
 
-	if (font != NULL) TTF_CloseFont(*font);
-	*font = TTF_OpenFont(gui_font_path, settings.avg_dimensions / font_size_divisor);
-
-	const Color3 color = hud_colors[HUD];
-	SDL_Surface* const surface = TTF_RenderText_Solid(*font, percent_str,
-		(SDL_Color) {color.r, color.g, color.b, SDL_ALPHA_OPAQUE});
-
 	if (texture != NULL) SDL_DestroyTexture(*texture);
-	*texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
-	SDL_FreeSurface(surface);
+	return make_texture_from_text(percent_str, hud_colors[HUD]);
 }
 
 inlinable void draw_hp(const double hp) {
@@ -103,7 +69,7 @@ inlinable void draw_hp(const double hp) {
 	static double last_hp = -1.0;
 	static int last_screen_width = -1, last_screen_height = -1;
 	if (last_screen_width != settings.screen_width || last_screen_height != settings.screen_height || last_hp != hp) {
-		make_hp_text(hp, &hud_resources.font, &hud_resources.hp_texture);
+		gui_resources.hp_texture = make_hp_text(hp, &gui_resources.hp_texture);
 		last_hp = hp;
 		last_screen_width = settings.screen_width;
 		last_screen_height = settings.screen_height;
@@ -116,7 +82,7 @@ inlinable void draw_hp(const double hp) {
 	const Color3 color = hud_colors[BackgroundHP];
 	SDL_SetRenderDrawColor(screen.renderer, color.r, color.g, color.b, SDL_ALPHA_OPAQUE); // black
 	SDL_RenderFillRectF(screen.renderer, &hp_box);
-	SDL_RenderCopyF(screen.renderer, hud_resources.hp_texture, NULL, &hp_box);
+	SDL_RenderCopyF(screen.renderer, gui_resources.hp_texture, NULL, &hp_box);
 }
 
 // these are drawn to the window because if it were to the shape buffer, they would be rotated

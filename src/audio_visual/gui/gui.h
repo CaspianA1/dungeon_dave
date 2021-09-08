@@ -13,3 +13,8 @@ typedef struct {
 
 const char* const gui_font_path = "assets/dnd.ttf";
 const byte font_size_divisor = 10;
+
+struct {
+	TTF_Font* font;
+	SDL_Texture* hp_texture;
+} gui_resources = {NULL, NULL};

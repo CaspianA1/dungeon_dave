@@ -8,24 +8,14 @@ typedef struct {
 } Textbox;
 
 typedef struct {
-	TTF_Font* const font;
 	Textbox* const textboxes;
 	const byte textbox_count;
-	const Color3 fg_color, bg_color, border_color; // foreground color is for the textbox
+	const Color3 fg_color, bg_color, border_color;
 } Menu;
-
-// returns if the screen dimensions changed
-byte after_gui_event(const Uint32 before) {
-	SDL_RenderPresent(screen.renderer);
-	const byte dimensions_changed = update_screen_dimensions();
-	tick_delay(before);
-	return dimensions_changed;
-}
 
 // variadic params: pos fn, on_click fn, text
 Menu init_menu(const Color3 fg_color, const Color3 bg_color, const Color3 border_color, const unsigned textbox_count, ...) {
 	const Menu menu = {
-		TTF_OpenFont(gui_font_path, settings.avg_dimensions / font_size_divisor),
 		wmalloc(textbox_count * sizeof(Textbox)), textbox_count, fg_color, bg_color, border_color
 	};
 
@@ -36,14 +26,7 @@ Menu init_menu(const Color3 fg_color, const Color3 bg_color, const Color3 border
 		Textbox* const textbox = &menu.textboxes[i];
 		textbox -> pos_and_size_fn = va_arg(textbox_data, pos_and_size_fn_t);
 		textbox -> on_click_fn = va_arg(textbox_data, on_click_fn_t);
-
-		SDL_Surface* const surface = TTF_RenderText_Solid(
-			menu.font, va_arg(textbox_data, const char*),
-			(SDL_Color) {fg_color.r, fg_color.g, fg_color.b, SDL_ALPHA_OPAQUE});
-
-		textbox -> rendered_text = SDL_CreateTextureFromSurface(screen.renderer, surface);
-
-		SDL_FreeSurface(surface);
+		textbox -> rendered_text = make_texture_from_text(va_arg(textbox_data, const char*), fg_color);
 	}
 
 	va_end(textbox_data);
@@ -57,7 +40,6 @@ void deinit_menu(const Menu* const menu) {
 		SDL_DestroyTexture(textboxes[i].rendered_text);
 
 	wfree(textboxes);
-	TTF_CloseFont(menu -> font);
 }
 
 InputStatus render_menu(const Menu* const menu, const byte mouse_ready) {

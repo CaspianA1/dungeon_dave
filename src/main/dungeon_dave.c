@@ -1,12 +1,11 @@
 #include "global_defs.h"
 #include "../audio_visual/sound.c"
 #include "../audio_visual/overlay/overlay.h"
-#include "../combat/combat.h"
 #include "../audio_visual/gui/gui.h"
+#include "../combat/combat.h"
 #include "global_types.h"
 
 #include "utils.c"
-
 #include "dda.c"
 #include "statemap.c"
 #include "settings.c"
@@ -27,9 +26,9 @@
 #include "../audio_visual/raycast.c"
 #include "../audio_visual/floorcast.c"
 
+#include "../audio_visual/gui/gui_utils.c"
 #include "../audio_visual/gui/menu.c"
 #include "../audio_visual/gui/hud.c"
-
 
 #include "../combat/bfs_types.c"
 #include "../combat/bfs.c"

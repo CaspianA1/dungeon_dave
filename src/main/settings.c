@@ -144,6 +144,10 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	STARTUP_LOG("font subsystem");
 	if (TTF_Init() == -1) FAIL("Unable to initialize the font library: %s", SDL_GetError());
 
+	STARTUP_LOG("gui resources");
+	void init_gui_resources(void);
+	init_gui_resources();
+
 	srand(time(NULL));
 	keys = SDL_GetKeyboardState(NULL);
 	val_buffer = wmalloc(settings.screen_width * sizeof(BufferVal));
@@ -209,7 +213,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 void deinit_all(const Player* const player, const Weapon* const weapon) {
 	void deinit_weapon(const Weapon* const);
 	void deinit_level(const Level* const);
-	void deinit_hud_resources(void);
+	void deinit_gui_resources(void);
 	void deinit_teleporter_data(void);
 	void deinit_screen(void);
 
@@ -227,7 +231,7 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	deinit_teleporter_data();
 
 	deinit_audio_subsystem();
-	deinit_hud_resources();
+	deinit_gui_resources();
 	deinit_screen();
 
 	wfree(val_buffer);
