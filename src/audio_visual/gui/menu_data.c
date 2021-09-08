@@ -8,7 +8,7 @@ SDL_Rect start_button_pos(void) {
 }
 
 InputStatus start_button_on_click(void) {
-	return Exit;
+	return NextScreen;
 }
 
 InputStatus display_title_screen(void) {
@@ -18,9 +18,10 @@ InputStatus display_title_screen(void) {
 	const Menu start_screen = init_menu((Color3) {255, 99, 71}, (Color3) {139, 0, 0}, (Color3) {228, 29, 29}, 1,
 		start_button_pos, start_button_on_click, "Start!");
 
-	menu_loop(&start_screen);
+	const InputStatus input = menu_loop(&start_screen);
 
+	deinit_menu(&start_screen);
 	deinit_sound(&title_track);
 
-	return ProceedAsNormal;
+	return input;
 }

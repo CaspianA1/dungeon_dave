@@ -87,7 +87,10 @@ InputStatus render_menu(const Menu* const menu) {
 
 		if (mouse.x >= box.x && mouse.x <= box.x + box.w && mouse.y >= box.y && mouse.y <= box.y + box.h) {
 			SDL_SetRenderDrawColor(screen.renderer, 255 - fg_color.r, 255 - fg_color.g, 255 - fg_color.b, SDL_ALPHA_OPAQUE);
-			if (event.type == SDL_MOUSEBUTTONDOWN && textbox -> on_click_fn() == Exit) return Exit;
+			if (event.type == SDL_MOUSEBUTTONDOWN) {
+				const InputStatus click_response = textbox -> on_click_fn();
+				if (click_response != ProceedAsNormal) return click_response;
+			}
 		}
 
 		else SDL_SetRenderDrawColor(screen.renderer, bg_color.r, bg_color.g, bg_color.b, SDL_ALPHA_OPAQUE);
@@ -99,22 +102,29 @@ InputStatus render_menu(const Menu* const menu) {
 	return ProceedAsNormal;
 }
 
-void menu_loop(const Menu* const menu) {
+InputStatus menu_loop(const Menu* const menu) {
 	SDL_ShowCursor(SDL_TRUE);
+	InputStatus input = ProceedAsNormal;
 	byte done = 0;
 	while (!done) {
 			const Uint32 before = SDL_GetTicks();
 
 			while (SDL_PollEvent(&event)) {
-				if (event.type == SDL_QUIT) done = 1;
+				if (event.type == SDL_QUIT) {
+					input = Exit;
+					done = 1;
+				}
 			}
 
-			if (render_menu(menu) == Exit) done = 1;
+			const InputStatus menu_input = render_menu(menu);
+			if (menu_input == Exit || menu_input == NextScreen) {
+				if (menu_input == Exit) input = Exit;
+				done = 1;
+			}
 
-			byte after_gui_event(const Uint32);
 			after_gui_event(before);
 		}
 
 	SDL_ShowCursor(SDL_FALSE);
-	deinit_menu(menu);
+	return input;
 }
