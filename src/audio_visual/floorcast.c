@@ -46,7 +46,7 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 		const int pace_y = y + pace;
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 
-		for (int screen_x = 0; screen_x < settings.screen_width; screen_x++) {
+		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
 
 			/* The remaining bottlenecks:
