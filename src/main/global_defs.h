@@ -12,12 +12,14 @@
 
 #endif
 
-// #define PLANAR_MODE
+/*
+#define PLANAR_MODE
 #define NOCLIP_MODE
+*/
 
 #define ANTIALIAS_FIRST_MIP_LEVEL
 #define DISABLE_ENEMIES
-// #define SHADING_ENABLED
+#define SHADING_ENABLED
 // #define SOUND_ENABLED
 // #define TRACK_MEMORY
 
