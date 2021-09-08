@@ -71,6 +71,7 @@ InputStatus render_menu(const Menu* const menu, const byte mouse_ready) {
 			SDL_SetRenderDrawColor(screen.renderer, 255 - fg_color.r, 255 - fg_color.g, 255 - fg_color.b, SDL_ALPHA_OPAQUE);
 
 			if (mouse_ready && event.type == SDL_MOUSEBUTTONDOWN) {
+				play_sound(&gui_resources.sound_on_click, 0);
 				const InputStatus click_response = textbox -> on_click_fn();
 				if (click_response != ProceedAsNormal) return click_response;
 			}
@@ -103,7 +104,10 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 					done = 1;
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					if (drawing_image) mouse_down_after_image = 1;
+					if (drawing_image) {
+						play_sound(&gui_resources.sound_on_click, 0);
+						mouse_down_after_image = 1;
+					}
 					break;
 				case SDL_MOUSEBUTTONUP:
 					if (drawing_image && mouse_down_after_image) {

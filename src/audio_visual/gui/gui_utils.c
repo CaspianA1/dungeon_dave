@@ -1,13 +1,16 @@
 void init_gui_resources(void) {
 	gui_resources.font = TTF_OpenFont(gui_font_path, settings.avg_dimensions / font_size_divisor);
+	gui_resources.sound_on_click = init_sound(menu_click_sound_path, 1);
 }
 
 void deinit_gui_resources(void) {
 	if (gui_resources.hp_texture != NULL) SDL_DestroyTexture(gui_resources.hp_texture);
 	TTF_CloseFont(gui_resources.font);
+	deinit_sound(&gui_resources.sound_on_click);
 }
 
-byte update_toggle(Toggle* const toggle) { // returns if the toggle is set
+// returns if the toggle is set
+byte update_toggle(Toggle* const toggle) {
 	const byte pressed_key = keys[toggle -> key];
 	if (pressed_key && !toggle -> enabled_previously)
 		toggle -> enabled = !toggle -> enabled;

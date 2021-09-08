@@ -20,7 +20,6 @@ InputStatus display_title_screen(void) {
 	const Menu start_screen = init_menu((Color3) {255, 99, 71}, (Color3) {139, 0, 0}, (Color3) {228, 29, 29}, 1,
 		start_button_pos, start_button_on_click, "Start!");
 
-	// next up: a noise for clicking things
 	const InputStatus input = menu_loop(&start_screen, logo.texture);
 
 	deinit_sprite(logo);
