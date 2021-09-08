@@ -49,7 +49,9 @@
 
 /*
 TODO:
-- a thin line on the bottom of the screen for the colored floor, and the top of each wall
+- cannot move mouse anymore for a full-size screen
+- purple vertical scanlines for a full-size menu
+- an odd thin line on the bottom of the screen for the colored floor, and the top of each wall
 - better antialiasing
 - distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)

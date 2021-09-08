@@ -412,3 +412,12 @@ menu_test();
 start_screen_test();
 
 /////
+
+else if (mouse_pos.x <= 1) {
+	SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos.y);
+	printf("Warp from left, where the original pos is %d, ", mouse_pos.x);
+	SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+	printf("and the new left position is %d\n", mouse_pos.x);
+}
+
+/////
