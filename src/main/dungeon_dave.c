@@ -28,8 +28,8 @@
 #include "../audio_visual/floorcast.c"
 
 #include "../audio_visual/gui/menu.c"
-#include "../audio_visual/gui/title_screen.c"
 #include "../audio_visual/gui/hud.c"
+
 
 #include "../combat/bfs_types.c"
 #include "../combat/bfs.c"
@@ -37,6 +37,7 @@
 #include "../combat/weapon.c"
 #include "../combat/enemy.c"
 
+#include "../audio_visual/gui/menu_data.c"
 #include "../data/enemies.c"
 
 #include "../data/levels/level_1.c"
@@ -70,16 +71,9 @@ int main(void) {
 	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
-	SDL_ShowCursor(SDL_FALSE);
 
 	play_sound(&current_level.background_sound, 1);
 	ground = init_pix_sprite("assets/walls/dune.bmp");
-
-	// box_blur_test();
-	// gauss_blur_test();
-	// menu_test();
-	// lightmap_test();
-	// antialias_test();
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();

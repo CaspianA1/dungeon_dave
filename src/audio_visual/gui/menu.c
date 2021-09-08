@@ -11,14 +11,22 @@ typedef struct {
 	TTF_Font* const font;
 	Textbox* const textboxes;
 	const byte textbox_count;
-	const Color3 fg_color, bg_color; // foreground color is for the textbox
+	const Color3 fg_color, bg_color, border_color; // foreground color is for the textbox
 } Menu;
 
+// returns if the screen dimensions changed
+byte after_gui_event(const Uint32 before) {
+	SDL_RenderPresent(screen.renderer);
+	const byte dimensions_changed = update_screen_dimensions();
+	tick_delay(before);
+	return dimensions_changed;
+}
+
 // variadic params: pos fn, on_click fn, text
-Menu init_menu(const Color3 fg_color, const Color3 bg_color, const unsigned textbox_count, ...) {
+Menu init_menu(const Color3 fg_color, const Color3 bg_color, const Color3 border_color, const unsigned textbox_count, ...) {
 	const Menu menu = {
 		TTF_OpenFont(gui_font_path, settings.avg_dimensions / font_size_divisor),
-		wmalloc(textbox_count * sizeof(Textbox)), textbox_count, fg_color, bg_color
+		wmalloc(textbox_count * sizeof(Textbox)), textbox_count, fg_color, bg_color, border_color
 	};
 
 	va_list textbox_data;
@@ -53,11 +61,22 @@ void deinit_menu(const Menu* const menu) {
 }
 
 InputStatus render_menu(const Menu* const menu) {
-	const Color3 bg_color = menu -> bg_color, fg_color = menu -> fg_color;
-	SDL_SetRenderDrawColor(screen.renderer, bg_color.r, bg_color.g, bg_color.b, SDL_ALPHA_OPAQUE);
+	const Color3 bg_color = menu -> bg_color, fg_color = menu -> fg_color, border_color = menu -> border_color;
+
+	SDL_SetRenderDrawColor(screen.renderer, border_color.r, border_color.g, border_color.b, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(screen.renderer);
 
-	// SDL_RenderCopy(screen.renderer, current_level.walls[0].texture, NULL, NULL); // mipmap appeared
+	const int border_width = settings.avg_dimensions / 50;
+	const int twice_border_width = border_width << 1;
+	SDL_SetRenderDrawColor(screen.renderer, bg_color.r, bg_color.g, bg_color.b, SDL_ALPHA_OPAQUE);
+
+	const SDL_Rect main_bg_rect = {
+		border_width, border_width,
+		settings.screen_width - twice_border_width,
+		settings.screen_height - twice_border_width
+	};
+
+	SDL_RenderFillRect(screen.renderer, &main_bg_rect);
 
 	for (byte i = 0; i < menu -> textbox_count; i++) {
 		Textbox* const textbox = &menu -> textboxes[i];
@@ -68,12 +87,10 @@ InputStatus render_menu(const Menu* const menu) {
 
 		if (mouse.x >= box.x && mouse.x <= box.x + box.w && mouse.y >= box.y && mouse.y <= box.y + box.h) {
 			SDL_SetRenderDrawColor(screen.renderer, 255 - fg_color.r, 255 - fg_color.g, 255 - fg_color.b, SDL_ALPHA_OPAQUE);
-			if (event.type == SDL_MOUSEBUTTONDOWN) {
-				if (textbox -> on_click_fn() == Exit) return Exit;
-			}
+			if (event.type == SDL_MOUSEBUTTONDOWN && textbox -> on_click_fn() == Exit) return Exit;
 		}
-		else
-			SDL_SetRenderDrawColor(screen.renderer, bg_color.r, bg_color.g, bg_color.b, SDL_ALPHA_OPAQUE);
+
+		else SDL_SetRenderDrawColor(screen.renderer, bg_color.r, bg_color.g, bg_color.b, SDL_ALPHA_OPAQUE);
 
 		SDL_RenderFillRect(screen.renderer, &box);
 		SDL_RenderCopy(screen.renderer, textbox -> rendered_text, NULL, &box);
@@ -82,47 +99,22 @@ InputStatus render_menu(const Menu* const menu) {
 	return ProceedAsNormal;
 }
 
-//////////
-
-SDL_Rect textbox_1_pos(void) {
-	return (SDL_Rect) {0, 0, settings.half_screen_width >> 1, settings.half_screen_height >> 1};
-}
-
-SDL_Rect textbox_2_pos(void) {
-	return (SDL_Rect) {settings.half_screen_width, settings.half_screen_height, settings.screen_width / 10, settings.screen_height / 10};
-}
-
-InputStatus textbox_1_on_click(void) {
-	puts("Clicked textbox 1");
-	return Exit;
-}
-
-InputStatus textbox_2_on_click(void) {
-	puts("Clicked textbox 2");
-	return ProceedAsNormal;
-}
-
-void menu_test(void) {
-	const Menu menu = init_menu((Color3) {205, 92, 92}, (Color3) {135, 206, 235}, 2,
-		textbox_1_pos, textbox_1_on_click, "Textbox 1",
-		textbox_2_pos, textbox_2_on_click, "Textbox 2");
-
+void menu_loop(const Menu* const menu) {
 	SDL_ShowCursor(SDL_TRUE);
+	byte done = 0;
+	while (!done) {
+			const Uint32 before = SDL_GetTicks();
 
-	byte testing_menu = 1;
-	while (testing_menu) {
-		const Uint32 before = SDL_GetTicks();
+			while (SDL_PollEvent(&event)) {
+				if (event.type == SDL_QUIT) done = 1;
+			}
 
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) testing_menu = 0;
+			if (render_menu(menu) == Exit) done = 1;
+
+			byte after_gui_event(const Uint32);
+			after_gui_event(before);
 		}
 
-		if (render_menu(&menu) == Exit) testing_menu = 0;
-
-		byte after_gui_event(const Uint32);
-		after_gui_event(before);
-	}
-
 	SDL_ShowCursor(SDL_FALSE);
-	deinit_menu(&menu);
+	deinit_menu(menu);
 }

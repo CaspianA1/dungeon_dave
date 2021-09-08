@@ -339,4 +339,76 @@ void mark_floor(const DataRaycast* const d, double last_projected_wall_top,
 	*/
 }
 
+///// Some old tests:
+
+// box_blur_test();
+// gauss_blur_test();
+// menu_test();
+start_screen_test();
+// lightmap_test();
+
+/////
+
+/*
+void lightmap_test(void) {
+	SDL_Surface* const test = SDL_CreateRGBSurfaceWithFormat(
+		0, current_level.map_size.x, current_level.map_size.y, 32, PIXEL_FORMAT);
+
+	Uint32* read_surface_pixel(const SDL_Surface* const, const int, const int, const int);
+
+	for (int y = 0; y < current_level.map_size.y; y++) {
+		for (int x = 0; x < current_level.map_size.x; x++) {
+			const byte light_val = calculate_shade(0.0, (vec) {x, y});
+			*read_surface_pixel(test, x, y, test -> format -> BytesPerPixel) =
+				SDL_MapRGBA(test -> format, light_val, light_val, light_val, 255);
+		}
+	}
+
+	SDL_SaveBMP(test, "lightmap_sample.bmp");
+	SDL_FreeSurface(test);
+}
+*/
+
+///// An old menu test:
+
+SDL_Rect textbox_1_pos(void) {
+	return (SDL_Rect) {0, 0, settings.half_screen_width >> 1, settings.half_screen_height >> 1};
+}
+
+SDL_Rect textbox_2_pos(void) {
+	return (SDL_Rect) {settings.half_screen_width, settings.half_screen_height, settings.screen_width / 10, settings.screen_height / 10};
+}
+
+InputStatus textbox_1_on_click(void) {
+	puts("Clicked textbox 1");
+	return Exit;
+}
+
+InputStatus textbox_2_on_click(void) {
+	puts("Clicked textbox 2");
+	return ProceedAsNormal;
+}
+
+void menu_test(void) {
+	const Menu menu = init_menu((Color3) {205, 92, 92}, (Color3) {135, 206, 235}, (Color3) {0, 255, 0}, 2,
+		textbox_1_pos, textbox_1_on_click, "Textbox 1",
+		textbox_2_pos, textbox_2_on_click, "Textbox 2");
+
+	menu_loop(&menu);
+}
+
+/////
+
+void start_screen_test(void) {
+	const Menu start_screen = init_menu((Color3) {255, 99, 71}, (Color3) {139, 0, 0}, (Color3) {228, 29, 29}, 1,
+		start_button_pos, start_button_on_click, "Start!");
+
+	menu_loop(&start_screen);
+}
+
+/////
+
+menu_test();
+start_screen_test();
+
 /////

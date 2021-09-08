@@ -3,14 +3,6 @@ typedef struct {
 } Color3;
 
 typedef struct {
-	TTF_Font* font;
-	Sprite sprite;
-	Color3 color;
-	byte has_background;
-	SDL_Rect pos;
-} OldMessage;
-
-typedef struct {
 	byte enabled, enabled_previously;
 	const int key;
 } Toggle;

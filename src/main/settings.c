@@ -141,6 +141,9 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	STARTUP_LOG("audio subsystem");
 	init_audio_subsystem();
 
+	STARTUP_LOG("font subsystem");
+	if (TTF_Init() == -1) FAIL("Unable to initialize the font library: %s", SDL_GetError());
+
 	srand(time(NULL));
 	keys = SDL_GetKeyboardState(NULL);
 	val_buffer = wmalloc(settings.screen_width * sizeof(BufferVal));

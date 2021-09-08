@@ -29,6 +29,13 @@ byte update_toggle(Toggle* const toggle) { // returns if the toggle is set
 	return toggle -> enabled;
 }
 
+inlinable void draw_colored_frect(const byte r, const byte g, const byte b,
+	const double shade, const SDL_FRect* const frect) {
+
+	SDL_SetRenderDrawColor(screen.renderer, r * shade, g * shade, b * shade, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRectF(screen.renderer, frect);
+}
+
 inlinable void draw_minimap(const vec pos) {
 	toggledef(KEY_TOGGLE_MINIMAP);
 

@@ -1,3 +1,12 @@
+/*
+typedef struct {
+	TTF_Font* font;
+	Sprite sprite;
+	Color3 color;
+	byte has_background;
+	SDL_Rect pos;
+} OldMessage;
+
 OldMessage init_message(const char* const text, const byte r, const byte g, const byte b, const byte has_background) {
 	OldMessage message = {
 		TTF_OpenFont("assets/dnd.ttf", settings.avg_dimensions / font_size_divisor),
@@ -39,14 +48,6 @@ inlinable void draw_message(const OldMessage* const message) {
 	SDL_RenderCopy(screen.renderer, message -> sprite.texture, NULL, &message -> pos);
 }
 
-// returns if the screen dimensions changed
-byte after_gui_event(const Uint32 before) {
-	SDL_RenderPresent(screen.renderer);
-	const byte dimensions_changed = update_screen_dimensions();
-	tick_delay(before);
-	return dimensions_changed;
-}
-
 inlinable byte mouse_over_message(const OldMessage* const message) {
 	int mouse_x, mouse_y;
 	SDL_GetMouseState(&mouse_x, &mouse_y);
@@ -60,7 +61,9 @@ inlinable void deinit_message(const OldMessage* const message) {
 	TTF_CloseFont(message -> font);
 	deinit_sprite(message -> sprite);
 }
+*/
 
+/*
 InputStatus display_logo(void) {
 	Sprite logo;
 	InputStatus logo_input = Exit;
@@ -97,14 +100,36 @@ InputStatus display_logo(void) {
 	}
 	return logo_input;
 }
+*/
+
+SDL_Rect start_button_pos(void) {
+	const ivec dimensions = {settings.avg_dimensions >> 2, settings.avg_dimensions / 10};
+	return (SDL_Rect) {
+		settings.half_screen_width - (dimensions.x >> 1),
+		settings.half_screen_height - (dimensions.y >> 1),
+		dimensions.x, dimensions.y
+	};
+}
+
+InputStatus start_button_on_click(void) {
+	return Exit;
+}
 
 InputStatus display_title_screen(void) {
 	const Sound title_track = init_sound("assets/audio/themes/title.wav", 0);
 	play_sound(&title_track, 1);
-	if (display_logo() == Exit) return Exit;
 
-	if (TTF_Init() == -1)
-		FAIL("Unable to initialize the font library: %s", SDL_GetError());
+	const Menu start_screen = init_menu((Color3) {255, 99, 71}, (Color3) {139, 0, 0}, (Color3) {228, 29, 29}, 1,
+		start_button_pos, start_button_on_click, "Start!");
+
+	menu_loop(&start_screen);
+
+	return ProceedAsNormal;
+
+	/*
+	const Sound title_track = init_sound("assets/audio/themes/title.wav", 0);
+	play_sound(&title_track, 1);
+	if (display_logo() == Exit) return Exit;
 
 	OldMessage start;
 	InputStatus title_screen_input = Exit;
@@ -162,4 +187,5 @@ InputStatus display_title_screen(void) {
 
 	deinit_sound(&title_track);
 	return title_screen_input;
+	*/
 }
