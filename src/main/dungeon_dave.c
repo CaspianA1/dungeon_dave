@@ -81,7 +81,7 @@ int main(void) {
 
 		update_screen_dimensions();
 		const InputStatus input_status = handle_input(&player, player.is_dead);
-r
+
 		if (input_status == Exit) {
 			deinit_pix_sprite(ground);
 			deinit_all(&player, &weapon);
