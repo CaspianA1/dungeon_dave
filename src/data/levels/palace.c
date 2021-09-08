@@ -58,12 +58,12 @@ inlinable double palace_shader(const vec pos) {
 	static const Triangle ravine_jump_entrance = {{15.0001, 24.0}, {15.5, 31.5}, {5.0, 28.0}};
 
 	return
-		diffuse_circle(pos, first_health_kit) * 5.0
-		+ diffuse_circle(pos, first_downward_stairs) * 0.2
-		+ diffuse_circle(pos, torch) * 5.0
-		+ diffuse_circle(pos, hidden_area_circle_1) * 0.2
-		+ diffuse_circle(pos, hidden_area_circle_2) * 0.4
-		+ diffuse_circle(pos, hidden_area_circle_3) * 0.8
+		bloom_circle(pos, first_health_kit) * 5.0
+		+ bloom_circle(pos, first_downward_stairs) * 0.2
+		+ bloom_circle(pos, torch) * 5.0
+		+ bloom_circle(pos, hidden_area_circle_1) * 0.2
+		+ bloom_circle(pos, hidden_area_circle_2) * 0.4
+		+ bloom_circle(pos, hidden_area_circle_3) * 0.8
 		+ flat_triangle(pos, ravine_jump_entrance) * 1.8
 		+ fabs(sin(pos[0]))
 		+ 2.0;

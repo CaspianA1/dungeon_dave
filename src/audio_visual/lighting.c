@@ -5,7 +5,7 @@ typedef struct {
 	const double radius;
 } Circle;
 
-inlinable double diffuse_circle(const vec pos, const Circle circle) {
+inlinable double bloom_circle(const vec pos, const Circle circle) {
 	const vec center_diff = pos - circle.center;
 	const double
 		radius_squared = circle.radius * circle.radius,
