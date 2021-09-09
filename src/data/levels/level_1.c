@@ -73,6 +73,7 @@ void load_level_1(void) {
 	fill_level_data(level_1.floor_data, 9, 18, 20, 8, 10, map_width); // dirt
 
 	for (byte y = 2; y <= 4; y++) {
+		/*
 		set_map_point(level_1.floor_data, 10, 16, y, map_width); // grass
 		set_map_point(level_1.floor_data, 10, 20, y, map_width);
 		set_map_point(level_1.floor_data, 10, y + 15, 5, map_width);
@@ -80,12 +81,15 @@ void load_level_1(void) {
 
 		for (byte x = 17; x <= 19; x++)
 			set_map_point(level_1.floor_data, 8, x, y, map_width); // water
+		*/
 	}
 
+	/*
 	set_map_point(level_1.floor_data, 10, 16, 5, map_width);
 	set_map_point(level_1.floor_data, 10, 16, 1, map_width);
 	set_map_point(level_1.floor_data, 10, 20, 1, map_width);
 	set_map_point(level_1.floor_data, 10, 20, 5, map_width);
+	*/
 
 	set_level_skybox(&level_1, "assets/skyboxes/mossy_mountains_2.bmp");
 

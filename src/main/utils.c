@@ -104,10 +104,6 @@ byte point_exists_at(const double x, const double y, const double z) {
 		(pos_2D[0] < 1.0 || pos_2D[0] > current_level.map_size.x - 1 || pos_2D[1] < 1.0 || pos_2D[1] > current_level.map_size.y - 1);
 }
 
-inlinable void set_map_point(byte* const map, const byte val, const int x, const int y, const int map_width) {
-	map[y * map_width + x] = val;
-}
-
 void update_val_buffer(const int screen_x, const float dist, const float cos_beta, const vec dir) {
 	BufferVal* buffer_val = &val_buffer[screen_x];
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++, buffer_val++) {
