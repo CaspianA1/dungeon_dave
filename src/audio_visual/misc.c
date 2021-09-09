@@ -32,7 +32,7 @@ byte death_effect(Player* const player) {
 
 	const double lowest_fall_height = current_level.get_point_height(*map_point(current_level.wall_data, pos[0], pos[1]), pos) - 0.45;
 	const double dist_from_bottom = *p_height - lowest_fall_height;
-	if (dist_from_bottom > 0.0) *p_height -= dist_from_bottom / 10.0; // 15.0
+	if (dist_from_bottom > 0.0) *p_height -= dist_from_bottom / 15.0;
 
 	player -> angle += dist_from_bottom * 6.0;
 	player -> tilt.val += 0.1;

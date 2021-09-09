@@ -50,8 +50,8 @@
 
 /*
 TODO:
+- a small point_height function
 - sometimes, a delay when pressing start
-- fix the more visible wall disappearances
 - a stitch for floorcasting
 - proper sprite clipping
 - cannot wrap the mouse from the left to the right for a full-size screen
