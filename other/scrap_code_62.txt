@@ -420,4 +420,18 @@ else if (mouse_pos.x <= 1) {
 	printf("and the new left position is %d\n", mouse_pos.x);
 }
 
+///// These are the calculations needed for one pixel:
+
+const BufferVal buffer_val = val_buffer[screen_x];
+const double actual_dist = straight_dist * (double) buffer_val.one_over_cos_beta;
+const vec hit = buffer_val.dir * vec_fill(actual_dist) + pos;
+const vec offset = vec_fill(ground.size) * (hit - vec_trunc(hit));
+//////////
+static const double small = 0.000000001;
+const vec lightmap_pos = (hit - vec_fill(small)) * vec_fill(lightmap_samples_per_tile);
+const Lightmap lightmap = current_level.lightmap;
+const byte shade = lightmap.data[(int) lightmap_pos[1] * lightmap.size.x + (int) lightmap_pos[0]];
+//////////
+pixbuf_row[screen_x] = shade_ARGB_pixel(ground.pixels[(long) ((long) offset[1] * ground.size + offset[0])], shade);
+
 /////

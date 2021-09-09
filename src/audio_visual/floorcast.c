@@ -47,14 +47,14 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
-			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
-
 			/* The remaining bottlenecks:
 			Checking for statemap bits will not be needed with a visplane system -> speedup
 			Also, that means that the statemap won't be needed anymore -> speedup
 			Checking for out-of-bound hits won't be needed either -> speedup
 			Checking for wall points that do not equal the floor height won't be needed either -> speedup
 			Also, with a visplane system, less y and x coordinates will be iterated over -> speedup */
+
+			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
 
 			const BufferVal buffer_val = val_buffer[screen_x];
 			const double actual_dist = straight_dist * (double) buffer_val.one_over_cos_beta;
