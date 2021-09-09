@@ -8,7 +8,7 @@ enum {w = 800, h = 600};
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
 // https://www.khronos.org/opengl/wiki/Tutorial1:_Creating_a_Cross_Platform_OpenGL_3.2_Context_in_SDL_(C_/_SDL)
-// cl; clang -O3 -lSDL2 -lGL -lglew gl_sdl.c && ./a.out
+// clang -O3 -lSDL2 -lGL -lglew gl_sdl.c && ./a.out
 
 int main(void) {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) FAIL("initialize SDL");
@@ -37,14 +37,8 @@ int main(void) {
 	// This makes our buffer swap syncronized with the monitor's vertical refresh
 	g = SDL_GL_SetSwapInterval(1);
 
-	DEBUG(a, d);
-	DEBUG(b, d);
-	DEBUG(c, d);
-	DEBUG(d, d);
-	DEBUG(e, d);
-	DEBUG(f, d);
-	DEBUG(g, d);
-
+	// Checking for any possible errors from SDL_GL calls
+	printf("a = %d, b = %d, c = %d, d = %d, e = %d, f = %d, g = %d\n", a, b, c, d, e, f, g);
 	printf("vendor = %s\nrenderer = %s\nversion = %s\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 
 	SDL_Event event;
