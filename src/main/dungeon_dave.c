@@ -51,7 +51,6 @@
 /*
 TODO:
 - a stitch for floorcasting
-- resize screen data for the title screen
 - shader floor calculations
 - cannot move mouse anymore for a full-size screen
 - purple vertical scanlines for a full-size menu

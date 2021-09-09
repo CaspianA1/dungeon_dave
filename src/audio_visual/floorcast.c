@@ -33,12 +33,12 @@ void fast_affine_floor(const byte floor_height, const vec pos, const double p_he
 	const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
 
 	for (int row = 1; row <= settings.screen_height - y_shift; row++) {
+		const int pixbuf_y = y_shift + row - 1;
+		if (pixbuf_y < 0) continue;
+
+		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pixbuf_y);
+
 		const double straight_dist = opp_h / row * settings.proj_dist;
-		const int pace_y = y_shift + row - 1;
-
-		if (pace_y < 0) continue;
-
-		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			/* The remaining bottlenecks:
@@ -48,7 +48,7 @@ void fast_affine_floor(const byte floor_height, const vec pos, const double p_he
 			Checking for wall points that do not equal the floor height won't be needed either -> speedup
 			Also, with a visplane system, less y and x coordinates will be iterated over -> speedup */
 
-			if (get_statemap_bit(occluded_by_walls, screen_x, pace_y)) continue;
+			if (get_statemap_bit(occluded_by_walls, screen_x, pixbuf_y)) continue;
 
 			const BufferVal buffer_val = val_buffer[screen_x];
 			const double actual_dist = straight_dist * (double) buffer_val.one_over_cos_beta;
