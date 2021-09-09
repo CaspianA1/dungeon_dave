@@ -38,6 +38,14 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 
 	if (y_shift < 0.0) y_shift = 0.0;
 	for (int y = y_shift - pace; y < settings.screen_height - pace; y++) {
+		/*
+		const int row = (y_shift - pace) - settings.half_screen_height - y_pitch + 1;
+		const int row = (settings.half_screen_height + player.y_pitch + player.pace.screen_offset
+			- player.pace.screen_offset) - settings.half_screen_height - player.y_pitch + 1;
+
+		const int row = (settings.half_screen_height + player.y_pitch)
+		*/
+
 		const int row = y - settings.half_screen_height - y_pitch + 1;
 		if (row == 0) continue;
 
