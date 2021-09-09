@@ -442,3 +442,48 @@ void check_err(void) {
 }
 
 /////
+
+/*
+row = (y_shift - pace) - half_screen_height - y_pitch + 1
+row = ((half_screen_height + y_pitch + pace) - pace) - half_screen_height - y_pitch + 1
+row = (half_screen_height + y_pitch) - half_screen_height - y_pitch + 1
+row = 1
+
+pace_y = y + pace
+pace_y = (y_shift - pace) + pace
+pace_y = y_shift
+*/
+
+/////
+
+const double p_height, const int pace, int y_shift, const int y_pitch) {
+
+(void) y_pitch;
+
+const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
+const double world_height = p_height - floor_height / screen_height_proj_ratio;
+
+// if the player is under the floor plane
+if (world_height < settings.plane_bottom) return;
+
+const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
+
+/*
+start = y_shift - pace
+end = screen_height - pace
+
+diff = (screen_height - pace) - (y_shift - pace)
+diff = (screen_height - pace) - y_shift + pace
+diff = screen_height - pace - y_shift + pace
+diff = screen_height - y_shift
+*/
+
+/*
+puts("-");
+DEBUG(settings.screen_height - y_shift, d);
+*/
+// for (int y = y_shift - pace, row = 1; y < settings.screen_height - pace; y++, row++) {
+for (int row = 1; row <= settings.screen_height - y_shift; row++) {
+	// DEBUG(row, d);
+
+/////

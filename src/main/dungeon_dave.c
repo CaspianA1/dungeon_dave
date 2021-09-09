@@ -50,6 +50,8 @@
 
 /*
 TODO:
+- a stitch for floorcasting
+- resize screen data for the title screen
 - shader floor calculations
 - cannot move mouse anymore for a full-size screen
 - purple vertical scanlines for a full-size menu
@@ -112,7 +114,7 @@ int main(void) {
 		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, &weapon);
 
-		fast_affine_floor(0, player.pos, player.jump.height, player.pace.screen_offset, wall_y_shift, player.y_pitch);
+		fast_affine_floor(0, player.pos, player.jump.height, wall_y_shift);
 
 		teleport_player_if_needed(&player);
 

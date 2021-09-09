@@ -25,9 +25,7 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 #endif
 
 static PixSprite ground;
-void fast_affine_floor(const byte floor_height, const vec pos,
-	const double p_height, const double pace, double y_shift, const int y_pitch) {
-
+void fast_affine_floor(const byte floor_height, const vec pos, const double p_height, const int y_shift) {
 	const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
 	const double world_height = p_height - floor_height / screen_height_proj_ratio;
 
@@ -36,22 +34,12 @@ void fast_affine_floor(const byte floor_height, const vec pos,
 
 	const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
 
-	if (y_shift < 0.0) y_shift = 0.0;
-	for (int y = y_shift - pace; y < settings.screen_height - pace; y++) {
-		/*
-		const int row = (y_shift - pace) - settings.half_screen_height - y_pitch + 1;
-		const int row = (settings.half_screen_height + player.y_pitch + player.pace.screen_offset
-			- player.pace.screen_offset) - settings.half_screen_height - player.y_pitch + 1;
-
-		const int row = (settings.half_screen_height + player.y_pitch)
-		*/
-
-		const int row = y - settings.half_screen_height - y_pitch + 1;
-		if (row == 0) continue;
-
+	for (int row = 1; row <= settings.screen_height - y_shift; row++) {
 		const double straight_dist = opp_h / row * settings.proj_dist;
+		const int pace_y = y_shift + row - 1;
 
-		const int pace_y = y + pace;
+		if (pace_y < 0) continue;
+
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pace_y);
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
