@@ -7,7 +7,7 @@ OUT = $(MAIN).app
 
 OPTIMIZE = -Ofast
 DEBUG = -ggdb3
-DEBUG_2= -fsanitize=address
+DEBUG_2 = -fsanitize=address
 
 ifeq ($(CC),gcc-10)
 	DEBUG_2 += -fsanitize=leak # -fsanitize=memory

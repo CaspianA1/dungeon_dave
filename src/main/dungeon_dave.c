@@ -50,11 +50,9 @@
 
 /*
 TODO:
-- check errors w clang
 - sometimes, a delay when pressing start
 - map_point and set_map_point to one fn
 - more visible wall disappearance
-- probably broken death plane bottom
 - plane bottom code removal
 - a stitch for floorcasting
 - proper sprite clipping
@@ -104,7 +102,7 @@ int main(void) {
 		// draw_colored_floor(horizon_line);
 
 		#ifndef PLANAR_MODE
-		raycast(&player, horizon_line, player.jump.height); // scr h b/c height is vertical
+		raycast(&player, horizon_line, player.jump.height);
 		draw_things(player.pos, to_radians(player.angle), player.jump.height, horizon_line);
 
 		#ifndef DISABLE_ENEMIES
