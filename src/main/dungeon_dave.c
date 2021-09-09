@@ -51,10 +51,10 @@
 /*
 TODO:
 - sometimes, a delay when pressing start
-- more visible wall disappearance
+- fix the more visible wall disappearances
 - a stitch for floorcasting
 - proper sprite clipping
-- cannot move mouse anymore for a full-size screen
+- cannot wrap the mouse from the left to the right for a full-size screen
 - purple vertical scanlines for a full-size menu
 - an odd thin line on the bottom of the screen for the colored floor, and the top of each wall
 - better antialiasing
