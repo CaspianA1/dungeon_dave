@@ -1,14 +1,19 @@
 typedef struct {
 	byte drawer_id;
-	const byte floor_height;
+	const byte num_drawing_ids, floor_height;
 	const vec pos;
 	const double p_height, pace, y_shift;
 	const int y_pitch;
 } FloorcastCallerParams;
 
 void* floorcast_caller(void* const void_fcp) {
-	FloorcastCallerParams fcp = *(FloorcastCallerParams*) void_fcp;
-	(void) fcp;
+	const FloorcastCallerParams fcp = *(FloorcastCallerParams*) void_fcp;
+
+	const int start = fcp.y_shift - fcp.pace, end = settings.screen_height - fcp.pace;
+	const int step = (end - start) / fcp.num_drawing_ids;
+	const int progression = step * fcp.drawer_id;
+
+	(void) progression;
 
 	pthread_exit(NULL);
 }
@@ -26,7 +31,7 @@ void manage_floorcast(const byte floor_height, const vec pos,
 	const byte drawing_units_in_parallel = 4;
 
 	FloorcastCallerParams fcp = {
-		.floor_height = floor_height,
+		.num_drawing_ids = drawing_units_in_parallel, .floor_height = floor_height,
 		.pos = pos, .p_height = p_height, .pace = pace, .y_shift = y_shift, .y_pitch = y_pitch
 	};
 
