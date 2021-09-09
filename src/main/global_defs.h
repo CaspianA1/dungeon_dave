@@ -12,6 +12,8 @@
 
 #endif
 
+#include <pthread.h>
+
 /*
 #define PLANAR_MODE
 #define NOCLIP_MODE

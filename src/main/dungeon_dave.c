@@ -25,6 +25,7 @@
 #include "../audio_visual/misc.c"
 #include "../audio_visual/raycast.c"
 #include "../audio_visual/floorcast.c"
+#include "../audio_visual/floorcast_manager.c"
 
 #include "../audio_visual/gui/gui_utils.c"
 #include "../audio_visual/gui/menu.c"
