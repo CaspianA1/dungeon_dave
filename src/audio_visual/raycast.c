@@ -116,7 +116,7 @@ void raycast(const Player* const player, const double horizon_line, const double
 		DataDDA ray = init_dda((double[2]) UNPACK_2(player -> pos), (double[2]) UNPACK_2(dir), 1.0);
 
 		while (iter_dda(&ray)) {
-			const byte point = map_point(current_level.wall_data, ray.curr_tile[0], ray.curr_tile[1]);
+			const byte point = *map_point(current_level.wall_data, ray.curr_tile[0], ray.curr_tile[1]);
 			const vec hit = vec_line_pos(player -> pos, dir, ray.dist);
 			const byte point_height = current_level.get_point_height(point, hit);
 

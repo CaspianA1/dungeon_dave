@@ -3,7 +3,7 @@ void print_heightmap(void) {
 	for (int y = 0; y < current_level.map_size.y; y++) {
 		printf("\t{");
 		for (int x = 0; x < current_level.map_size.x; x++) {
-			const byte point = map_point(current_level.wall_data, x, y);
+			const byte point = *map_point(current_level.wall_data, x, y);
 			const byte point_height = current_level.get_point_height(point, (vec) {x, y});
 			const char* const str = (x < current_level.map_size.x - 1) ? "%d, " : "%d},\n";
 

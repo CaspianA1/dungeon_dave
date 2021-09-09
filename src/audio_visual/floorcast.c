@@ -55,7 +55,7 @@ void fast_affine_floor(const byte floor_height, const vec pos, const double p_he
 				|| hit[1] > current_level.map_size.y - 1.0) continue;
 
 			#ifndef PLANAR_MODE
-			const byte wall_point = map_point(current_level.wall_data, hit[0], hit[1]);
+			const byte wall_point = *map_point(current_level.wall_data, hit[0], hit[1]);
 			if (current_level.get_point_height(wall_point, hit) != floor_height) continue;
 			#endif
 

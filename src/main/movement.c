@@ -196,7 +196,7 @@ void update_jump(Jump* const jump, const vec pos) {
 	#endif
 
 	if (!landed_on_thing) {
-		const byte point = map_point(current_level.wall_data, pos[0], pos[1]);
+		const byte point = *map_point(current_level.wall_data, pos[0], pos[1]);
 		ground_height = current_level.get_point_height(point, pos);
 	}
 

@@ -6,7 +6,7 @@ typedef enum {
 
 inlinable byte neighbor_map_point(const ivec neighbors[8], const NeighborID neighbor_id) {
 	const ivec neighbor = neighbors[neighbor_id];
-	return map_point(current_level.wall_data, neighbor.x, neighbor.y);
+	return *map_point(current_level.wall_data, neighbor.x, neighbor.y);
 }
 
 // returns if updating the queue succeeded
@@ -21,7 +21,7 @@ static byte update_queue_with_neighbors(RouteQueue* const routes, Route route, c
 	for (NeighborID i = 0; i < 8; i++) {
 		const ivec neighbor = neighbors[i];
 
-		if  ((ivec_out_of_bounds(neighbor) || map_point(current_level.wall_data, neighbor.x, neighbor.y)) ||
+		if  ((ivec_out_of_bounds(neighbor) || *map_point(current_level.wall_data, neighbor.x, neighbor.y)) ||
 			(i == BottomLeft && (neighbor_map_point(neighbors, Left) || neighbor_map_point(neighbors, Bottom))) ||
 			(i == BottomRight && (neighbor_map_point(neighbors, Bottom) || neighbor_map_point(neighbors, Right))) ||
 			(i == TopLeft && (neighbor_map_point(neighbors, Left) || neighbor_map_point(neighbors, Top))) ||
@@ -47,8 +47,7 @@ ResultBFS bfs(const vec begin, const vec end) {
 	ResultBFS result = {.state = FailedBFS};
 
 	while (routes.length > 0) {
-		Route route = dequeue_from_routes(&routes);
-
+		const Route route = dequeue_from_routes(&routes);
 		const ivec vertex = route.data[route.length - 1];
 
 		if (vertex.x == int_end.x && vertex.y == int_end.y) {
@@ -64,6 +63,5 @@ ResultBFS bfs(const vec begin, const vec end) {
 	}
 
 	deinit_routes(routes);
-
 	return result;
 }
