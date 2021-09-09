@@ -50,6 +50,7 @@
 
 /*
 TODO:
+- planar mode alone has weird issues with jumping
 - a small point_height function
 - sometimes, a delay when pressing start
 - a stitch for floorcasting
