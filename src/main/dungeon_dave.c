@@ -50,7 +50,6 @@
 
 /*
 TODO:
-- floorcast projection math
 - map_point and set_map_point to one fn
 - more visible wall disappearance
 - probably broken death plane bottom
@@ -118,7 +117,7 @@ int main(void) {
 		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, &weapon);
 
-		fast_affine_floor(1, player.pos, player.jump.height, horizon_line);
+		fast_affine_floor(0, player.pos, player.jump.height, horizon_line);
 
 		teleport_player_if_needed(&player);
 

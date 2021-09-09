@@ -26,14 +26,7 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 
 static PixSprite ground;
 void fast_affine_floor(const byte floor_height, const vec pos, const double p_height, const int horizon_line) {
-	/*
-	static double a;
-	if (keys[SDL_SCANCODE_T]) a += 0.01;
-	if (keys[SDL_SCANCODE_T]) a -= 0.01;
-	*/
-
-	const double world_height = p_height - floor_height; // + a;
-	const double eye_height = world_height + 0.5;
+	const double eye_height = (p_height - floor_height) + 0.5;
 	if (eye_height < 0.0) return;
 
 	for (int row = 1; row <= settings.screen_height - horizon_line; row++) {
