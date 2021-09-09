@@ -29,9 +29,7 @@ void fast_affine_floor(const byte floor_height, const vec pos, const double p_he
 	const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
 	const double world_height = p_height - floor_height / screen_height_proj_ratio;
 
-	// if the player is under the floor plane
-	if (world_height < settings.plane_bottom) return;
-
+	if (world_height < settings.plane_bottom) return; // if the player is under the floor plane
 	const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
 
 	for (int row = 1; row <= settings.screen_height - y_shift; row++) {
