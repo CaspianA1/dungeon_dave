@@ -53,7 +53,6 @@ TODO:
 - sometimes, a delay when pressing start
 - map_point and set_map_point to one fn
 - more visible wall disappearance
-- plane bottom code removal
 - a stitch for floorcasting
 - proper sprite clipping
 - cannot move mouse anymore for a full-size screen

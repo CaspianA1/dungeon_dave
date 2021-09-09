@@ -58,7 +58,6 @@ void load_default_settings(void) {
 	settings.fov_step = INIT_FOV_STEP;
 	settings.max_fov = INIT_MAX_FOV;
 	settings.minimap_scale = INIT_MINIMAP_SCALE;
-	settings.plane_bottom = -1.0 / ((settings.screen_height / settings.proj_dist) * 2.0);
 }
 
 byte update_screen_dimensions(void) {
@@ -86,7 +85,6 @@ byte update_screen_dimensions(void) {
 		if (height_not_eq) {
 			settings.screen_height = new_height;
 			settings.half_screen_height = new_height / 2;
-			settings.plane_bottom = -1.0 / ((settings.screen_height / settings.proj_dist) * 2.0);
 		}
 		return 1;
 	}
