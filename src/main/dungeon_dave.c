@@ -50,12 +50,11 @@
 
 /*
 TODO:
+- floorcast projection math
 - map_point and set_map_point to one fn
 - more visible wall disappearance
-- a projecting fn
 - probably broken death plane bottom
 - plane bottom code removal
-- full jump h perspective distortion
 - a stitch for floorcasting
 - proper sprite clipping
 - cannot move mouse anymore for a full-size screen
@@ -119,7 +118,7 @@ int main(void) {
 		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, &weapon);
 
-		// fast_affine_floor(0, player.pos, player.jump.height, horizon_line);
+		fast_affine_floor(1, player.pos, player.jump.height, horizon_line);
 
 		teleport_player_if_needed(&player);
 

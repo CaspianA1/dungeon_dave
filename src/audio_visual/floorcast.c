@@ -26,11 +26,15 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 
 static PixSprite ground;
 void fast_affine_floor(const byte floor_height, const vec pos, const double p_height, const int horizon_line) {
-	const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
-	const double world_height = p_height - floor_height / screen_height_proj_ratio;
+	/*
+	static double a;
+	if (keys[SDL_SCANCODE_T]) a += 0.01;
+	if (keys[SDL_SCANCODE_T]) a -= 0.01;
+	*/
 
-	if (world_height < settings.plane_bottom) return; // if the player is under the floor plane
-	const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
+	const double world_height = p_height - floor_height; // + a;
+	const double eye_height = world_height + 0.5;
+	if (eye_height < 0.0) return;
 
 	for (int row = 1; row <= settings.screen_height - horizon_line; row++) {
 		const int pixbuf_y = horizon_line + row - 1;
@@ -38,7 +42,7 @@ void fast_affine_floor(const byte floor_height, const vec pos, const double p_he
 
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pixbuf_y);
 
-		const double straight_dist = opp_h / row * settings.proj_dist;
+		const double straight_dist = eye_height / row * settings.proj_dist;
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 			/* The remaining bottlenecks:
