@@ -30,16 +30,14 @@ features:
 problems:
 	- slowing down -> a keypress, resets speed
 	- small screen -> bigger screen or very small screen, edge triangles
-	- z-buffering issues with sprites for higher point heights
-	- min and max projection distance
-	- FOV effect increases more higher up (maybe change the max FOV for different height limits?)
+	- z-buffering issues with things for higher point heights
 	- don't intersect the player dot with walls in the minimap
 	- disabling vsync makes everything choppy (not a big problem, just curious why)
 	- bogo is completely light with -Ofast when he shouldn't be
 	- enemies have jerky movement sometimes that can make them temporarily clip into a wall (reproduce it by jumping around, wait till the enemy moves at a slant, and then go to their position)
 	- fix enemy merging by making enemies account for thing collisions
 	- jitters when jumping on top of things
-	- a flickering gap on the left side (one column wide) of the screen for things (specifically the cactus in the palace)
+	- a flickering gap on the left side (one column wide) of the screen for things with the old thing drawer (specifically the cactus in the palace)
 	- some disappearing pixels for some textures far away
 
 completed:
