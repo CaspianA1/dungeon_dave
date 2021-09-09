@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <GL/glew.h>
 #include <GL/gl.h>
 
 enum {w = 800, h = 600};
@@ -7,7 +8,7 @@ enum {w = 800, h = 600};
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
 // https://www.khronos.org/opengl/wiki/Tutorial1:_Creating_a_Cross_Platform_OpenGL_3.2_Context_in_SDL_(C_/_SDL)
-// cl; clang -O3 -lSDL2 -lGL gl_sdl.c && ./a.out
+// cl; clang -O3 -lSDL2 -lGL -lglew gl_sdl.c && ./a.out
 
 int main(void) {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) FAIL("initialize SDL");
@@ -28,6 +29,10 @@ int main(void) {
 
 	SDL_GLContext context = SDL_GL_CreateContext(window);
 	if (context == NULL) FAIL("create a context");
+
+	glewExperimental = GL_TRUE;
+	GLenum maybe_error = glewInit();
+	if (maybe_error != GLEW_OK) FAIL("initialize GLEW");
 
 	// This makes our buffer swap syncronized with the monitor's vertical refresh
 	g = SDL_GL_SetSwapInterval(1);
