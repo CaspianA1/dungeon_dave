@@ -50,6 +50,7 @@
 
 /*
 TODO:
+- check errors w clang
 - sometimes, a delay when pressing start
 - map_point and set_map_point to one fn
 - more visible wall disappearance
@@ -77,7 +78,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
