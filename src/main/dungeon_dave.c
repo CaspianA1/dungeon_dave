@@ -49,6 +49,7 @@
 
 /*
 TODO:
+- shader floor calculations
 - cannot move mouse anymore for a full-size screen
 - purple vertical scanlines for a full-size menu
 - an odd thin line on the bottom of the screen for the colored floor, and the top of each wall

@@ -435,3 +435,10 @@ const byte shade = lightmap.data[(int) lightmap_pos[1] * lightmap.size.x + (int)
 pixbuf_row[screen_x] = shade_ARGB_pixel(ground.pixels[(long) ((long) offset[1] * ground.size + offset[0])], shade);
 
 /////
+
+void check_err(void) {
+	const GLenum error = glGetError();
+	if (error != GL_NO_ERROR) printf("There is an opengl error: %d\n", error);
+}
+
+/////
