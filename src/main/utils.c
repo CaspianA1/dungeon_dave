@@ -92,10 +92,6 @@ inlinable void tick_delay(const Uint32 before) {
 	if (wait > 0) SDL_Delay(wait);
 }
 
-inlinable double double_max(const double a, const double b) {
-	return (a > b) ? a : b;
-}
-
 inlinable byte map_point(const byte* const map, const int x, const int y) {
 	return map[y * current_level.map_size.x + x];
 }
@@ -119,6 +115,10 @@ void update_val_buffer(const int screen_x, const float dist, const float cos_bet
 		buffer_val -> one_over_cos_beta = 1.0f / cos_beta;
 		buffer_val -> dir = dir;
 	}
+}
+
+inlinable double get_projected_y(const double horizon_line, const double half_screen_h, const double screen_h, const double world_h) {
+	return horizon_line - half_screen_h + world_h * screen_h;
 }
 
 //////////

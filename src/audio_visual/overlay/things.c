@@ -60,7 +60,7 @@ inlinable void draw_thing_as_cols(SDL_Texture* const texture,
 	if (in_vis_span) vis_drawing_fn(vis_span_start, end_x, thing_crop, screen_pos, size, texture);
 }
 
-static void draw_processed_things(const Player* const player, const double y_shift) {
+static void draw_processed_things(const double p_height, const double horizon_line) {
 	for (byte i = 0; i < current_level.thing_count; i++) {
 		Thing thing = current_level.thing_container[i];
 		const DataBillboard billboard_data = *thing.billboard_data;
@@ -93,8 +93,7 @@ static void draw_processed_things(const Player* const player, const double y_shi
 		else if (end_x > settings.screen_width) end_x = settings.screen_width;
 
 		SDL_FRect screen_pos = {
-			.y = y_shift - half_size
-			+ (player -> jump.height - billboard_data.height) * settings.screen_height / corrected_dist,
+			.y = get_projected_y(horizon_line, half_size, size, p_height - billboard_data.height),
 			.h = size
 		};
 
@@ -201,17 +200,15 @@ DEF_THING_ADDER(enemy_instance) {
 	}
 }
 
-void draw_things(const Player* const player, const double y_shift) {
-	const double p_angle = to_radians(player -> angle);
-
+void draw_things(const vec p_pos, const double p_angle, const double p_height, const double horizon_line) {
 	enum {num_thing_adders = 4};
 	void (*thing_adders[num_thing_adders])(THING_ADDER_SIGNATURE) = {
 		THING_ADDER(still), THING_ADDER(teleporter), THING_ADDER(animated), THING_ADDER(enemy_instance)
 	};
 
 	for (byte i = 0; i < num_thing_adders; i++)
-		thing_adders[i](player -> pos, p_angle);
+		thing_adders[i](p_pos, p_angle);
 
 	qsort(current_level.thing_container, current_level.thing_count, sizeof(Thing), cmp_things);
-	draw_processed_things(player, y_shift);
+	draw_processed_things(p_height, horizon_line);
 }

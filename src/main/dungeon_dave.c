@@ -50,8 +50,14 @@
 
 /*
 TODO:
+- map_point and set_map_point to one fn
+- more visible wall disappearance
+- a projecting fn
+- probably broken death plane bottom
+- plane bottom code removal
+- full jump h perspective distortion
 - a stitch for floorcasting
-- shader floor calculations
+- proper sprite clipping
 - cannot move mouse anymore for a full-size screen
 - purple vertical scanlines for a full-size menu
 - an odd thin line on the bottom of the screen for the colored floor, and the top of each wall
@@ -72,7 +78,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
@@ -91,15 +97,15 @@ int main(void) {
 			deinit_all(&player, &weapon);
 		}
 
-		const double wall_y_shift = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
+		const double horizon_line = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
 		prepare_for_drawing();
-		draw_skybox(player.angle, wall_y_shift);
-		// draw_colored_floor(wall_y_shift);
+		draw_skybox(player.angle, horizon_line);
+		// draw_colored_floor(horizon_line);
 
 		#ifndef PLANAR_MODE
-		raycast(&player, wall_y_shift, player.jump.height * settings.screen_height); // scr h b/c height is vertical
-		draw_things(&player, wall_y_shift);
+		raycast(&player, horizon_line, player.jump.height); // scr h b/c height is vertical
+		draw_things(player.pos, to_radians(player.angle), player.jump.height, horizon_line);
 
 		#ifndef DISABLE_ENEMIES
 		if (!player.is_dead) update_all_enemy_instances(&player, &weapon);
@@ -113,11 +119,11 @@ int main(void) {
 		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, &weapon);
 
-		fast_affine_floor(0, player.pos, player.jump.height, wall_y_shift);
+		// fast_affine_floor(0, player.pos, player.jump.height, horizon_line);
 
 		teleport_player_if_needed(&player);
 
-		refresh(&player, wall_y_shift);
+		refresh(&player, horizon_line);
 		tick_delay(before);
 	}
 }

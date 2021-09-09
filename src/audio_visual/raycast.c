@@ -1,6 +1,6 @@
 typedef struct {
 	double* const last_wall_top;
-	const double p_angle, theta, dist, wall_y_shift, full_jump_height;
+	const double p_angle, p_height, theta, dist, horizon_line;
 	const vec begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
 	const byte point, point_height, side, first_wall_hit;
@@ -28,7 +28,7 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space,
 
 	const DRect wall_dest = {
 		d -> screen_x,
-		d -> wall_y_shift - (wall_h / 2.0) + (d -> full_jump_height / corrected_dist),
+		get_projected_y(d -> horizon_line, wall_h / 2.0, wall_h, d -> p_height),
 		settings.ray_column_width,
 		wall_h
 	};
@@ -102,7 +102,7 @@ void mark_floor(const DataRaycast* const d, double last_projected_wall_top, cons
 	SDL_RenderDrawLine(screen.renderer, x, last_projected_wall_top, x, projected_wall_bottom);
 }
 
-void raycast(const Player* const player, const double wall_y_shift, const double full_jump_height) {
+void raycast(const Player* const player, const double horizon_line, const double p_height) {
 	const double p_angle = to_radians(player -> angle);
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
@@ -123,7 +123,7 @@ void raycast(const Player* const player, const double wall_y_shift, const double
 			if (last_point_height != point_height) {
 				if (point) {
 					const DataRaycast raycast_data = {
-						&last_wall_top, p_angle, theta, ray.dist, wall_y_shift, full_jump_height, player -> pos,
+						&last_wall_top, p_angle, p_height, theta, ray.dist, horizon_line, player -> pos,
 						hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x
 					};
 

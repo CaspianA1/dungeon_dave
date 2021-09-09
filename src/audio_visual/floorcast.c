@@ -25,15 +25,15 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 #endif
 
 static PixSprite ground;
-void fast_affine_floor(const byte floor_height, const vec pos, const double p_height, const int y_shift) {
+void fast_affine_floor(const byte floor_height, const vec pos, const double p_height, const int horizon_line) {
 	const double screen_height_proj_ratio = settings.screen_height / settings.proj_dist;
 	const double world_height = p_height - floor_height / screen_height_proj_ratio;
 
 	if (world_height < settings.plane_bottom) return; // if the player is under the floor plane
 	const double opp_h = 0.5 + world_height * screen_height_proj_ratio;
 
-	for (int row = 1; row <= settings.screen_height - y_shift; row++) {
-		const int pixbuf_y = y_shift + row - 1;
+	for (int row = 1; row <= settings.screen_height - horizon_line; row++) {
+		const int pixbuf_y = horizon_line + row - 1;
 		if (pixbuf_y < 0) continue;
 
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pixbuf_y);
@@ -87,8 +87,8 @@ void fill_val_buffers_for_planar_mode(const double angle_degrees) {
 
 #endif
 
-void draw_colored_floor(const double y_shift) {
-	const SDL_FRect floor = {0.0, y_shift - 1.0, settings.screen_width, settings.screen_height - y_shift + 1.0};
+void draw_colored_floor(const double horizon_line) {
+	const SDL_FRect floor = {0.0, horizon_line - 1.0, settings.screen_width, settings.screen_height - horizon_line + 1.0};
 	SDL_SetRenderDrawColor(screen.renderer, 148, 107, 69, SDL_ALPHA_OPAQUE);
 	SDL_RenderFillRectF(screen.renderer, &floor);
 }
