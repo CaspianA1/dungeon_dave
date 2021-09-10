@@ -14,7 +14,7 @@ byte aabb_axis_collision(const BoundingBox a, const BoundingBox b, const byte ax
 }
 
 inlinable byte aabb_collision(const BoundingBox a, const BoundingBox b) {
-	return aabb_axis_collision(a, b, 0) &&  aabb_axis_collision(a, b, 1);
+	return aabb_axis_collision(a, b, 0) && aabb_axis_collision(a, b, 1);
 }
 
 BoundingBox bounding_box_from_pos(const vec pos) {

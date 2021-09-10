@@ -96,7 +96,7 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 
 		update_jump(&player -> jump, player -> pos);
 		update_tilt(&player -> tilt, strafe, lstrafe);
-		update_pace(&player -> pace, *pos, prev_pos, player -> body.v, player -> body.limit_v);
+		update_pace(&player -> pace, *pos, prev_pos, body -> v, body -> limit_v);
 	}
 
 	return input_status;
