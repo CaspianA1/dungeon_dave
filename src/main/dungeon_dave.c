@@ -50,6 +50,7 @@
 
 /*
 TODO:
+- threaded floorcast doesn't work yet
 - planar mode alone has weird issues with jumping
 - a small point_height function
 - sometimes, a delay when pressing start
@@ -114,7 +115,8 @@ int main(void) {
 		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, &weapon);
 
-		fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
+		parallel_floorcast(1, 0, player.pos, player.jump.height, horizon_line, settings.screen_height);
+		// fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
 
 		teleport_player_if_needed(&player);
 

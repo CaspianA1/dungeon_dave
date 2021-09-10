@@ -583,3 +583,18 @@ else if (tilt -> val + tilt -> step < 0.0) tilt -> val += tilt -> step;
 else if (tilt -> val - tilt -> step > 0.0) tilt -> val -= tilt -> step;
 
 /////
+
+DEBUG(cast_start, d);
+DEBUG(cast_end, d);
+DEBUG((double) (cast_end - cast_start) / total_drawers, lf);
+puts("---");
+
+/////
+
+/*
+pthread_t thread;
+pthread_create(&thread, NULL, floorcast_caller, &fcp);
+pthread_join(thread, NULL);
+*/
+
+/////

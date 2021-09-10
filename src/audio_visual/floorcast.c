@@ -30,10 +30,8 @@ void fast_affine_floor(const byte floor_height, const vec pos, const double p_he
 	if (eye_height < 0.0) return;
 
 	// horizon_line is y_start
-
 	for (int row = 1; row <= y_end - horizon_line; row++) {
 		const int pixbuf_y = horizon_line + row - 1;
-
 		if (pixbuf_y < 0) continue;
 
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pixbuf_y);
