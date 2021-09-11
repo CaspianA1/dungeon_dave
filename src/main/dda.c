@@ -77,4 +77,4 @@ inlinable byte iter_fn(typename* const d_ref) {\
 }
 
 DDA_DEF(2, DataDDA,   init_dda,    peek_dda,    iter_dda,    APPLY_2, UNPACK_2, BIGGEST_IND_OF_2, OUT_OF_BOUNDS_2)
-DDA_DEF(3, DataDDA3D, init_dda_3D, peek_dda_3D, iter_dda_3D, APPLY_3, UNPACK_3, biggest_ind_of_3, OUT_OF_BOUNDS_3)
+// DDA_DEF(3, DataDDA3D, init_dda_3D, peek_dda_3D, iter_dda_3D, APPLY_3, UNPACK_3, biggest_ind_of_3, OUT_OF_BOUNDS_3)

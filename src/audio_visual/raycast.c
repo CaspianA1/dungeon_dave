@@ -83,7 +83,7 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space, byte* 
 	double proj_wall_top = *d -> last_wall_top;
 	double proj_wall_bottom = proj_wall_top + wall_dest_h_sum;
 
-	if (proj_wall_bottom < 0.0 || proj_wall_top >= settings.screen_height) {
+	if (proj_wall_top >= settings.screen_height) {
 		*mark_floor_space = 0;
 		return;
 	}
@@ -104,9 +104,11 @@ void mark_floor(const DataRaycast* const d, double last_projected_wall_top, cons
 	if (last_projected_wall_top >= settings.screen_height)
 		last_projected_wall_top = settings.screen_height - 1.0;
 
+	if (doubles_eq(last_projected_wall_top - projected_wall_bottom, 0.0)) return;
+
 	const int x = d -> screen_x;
 	SDL_SetRenderDrawColor(screen.renderer, 0, 255 / (*d -> last_point_height + 1), 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderDrawLine(screen.renderer, x, last_projected_wall_top, x, projected_wall_bottom);
+	SDL_RenderDrawLine(screen.renderer, x, last_projected_wall_top, x, projected_wall_bottom); // last wall top -> curr wall bottom
 }
 
 void raycast(const Player* const player, const double horizon_line, const double p_height) {
@@ -140,8 +142,7 @@ void raycast(const Player* const player, const double horizon_line, const double
 					double last_projected_wall_top, projected_wall_bottom;
 					handle_ray(&raycast_data, &mark_floor_space, &stop_from_tallest_wall, &last_projected_wall_top, &projected_wall_bottom);
 					if (stop_from_tallest_wall) break;
-
-					// if (mark_floor_space) mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
+					else if (mark_floor_space) mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
 					at_first_hit = 0;
 				}
 
