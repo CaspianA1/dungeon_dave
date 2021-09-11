@@ -56,7 +56,7 @@ typedef struct {
 typedef struct {
 	const Enemy* const enemy;
 	DataAnimationMut mut_animation_data;
-	
+
 	EnemyState state;
 	byte status; // recently attacked, long range
 	double hp, time_at_attack;

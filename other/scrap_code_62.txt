@@ -597,4 +597,14 @@ pthread_create(&thread, NULL, floorcast_caller, &fcp);
 pthread_join(thread, NULL);
 */
 
+///// A part of a sprite occlusion idea:
+
+/*
+// what would thing_crop.x be?
+// one last occlusion problem, on the right side of the dirt pillars, where start_x must be greater than 0
+
+thing_crop -> x = new_thing_crop_w; // this almost works:
+thing_crop -> w = 64 - new_thing_crop_w;
+*/
+
 /////

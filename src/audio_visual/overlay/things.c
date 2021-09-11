@@ -11,7 +11,7 @@ static int cmp_things(const void* const a, const void* const b) {
 	else return 0;
 }
 
-static void vis_drawing_fn(const double start_x, const int x, SDL_Rect* const thing_crop,
+static void vis_drawing_fn(const double start_x, const double x, SDL_Rect* const thing_crop,
 	SDL_FRect* const screen_pos, const double size, SDL_Texture* const texture) {
 
 	screen_pos -> x = start_x;
@@ -19,14 +19,6 @@ static void vis_drawing_fn(const double start_x, const int x, SDL_Rect* const th
 
 	const double new_thing_crop_w = round(thing_crop -> w * (double) screen_pos -> w / size);
 	thing_crop -> w = new_thing_crop_w;
-
-	/*
-	// what would thing_crop.x be?
-	// one last occlusion problem, on the right side of the dirt pillars, where start_x must be greater than 0
-
-	thing_crop -> x = new_thing_crop_w; // this almost works:
-	thing_crop -> w = 64 - new_thing_crop_w;
-	*/
 
 	SDL_RenderCopyF(screen.renderer, texture, thing_crop, screen_pos);
 }
@@ -38,7 +30,7 @@ inlinable void draw_thing_as_cols(SDL_Texture* const texture,
 	//////////
 
 	byte in_vis_span = 0;
-	int vis_span_start = start_x;
+	double vis_span_start = start_x;
 
 	for (int x = start_x; x < end_x; x++) {
 		if (x < 0 || (double) val_buffer[x].depth > corrected_dist) { // yes, span is visible
@@ -56,7 +48,6 @@ inlinable void draw_thing_as_cols(SDL_Texture* const texture,
 		}
 	}
 
-	// printf("Final vis_drawing_fn call from x = %d to x = %d\n", vis_span_start, (int) end_x);
 	if (in_vis_span) vis_drawing_fn(vis_span_start, end_x, thing_crop, screen_pos, size, texture);
 }
 
