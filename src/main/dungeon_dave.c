@@ -50,7 +50,6 @@
 
 /*
 TODO:
-- plane finding errors near the heighest point height
 - threaded floorcast doesn't work yet
 - planar mode alone has weird issues with jumping
 - a small point_height function

@@ -73,28 +73,25 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space, byte* 
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &frect);
 	}
 
-	*stop_from_tallest_wall = d -> point_height == current_level.max_point_height && d -> p_height <= current_level.max_point_height - 0.5;
-	if (*stop_from_tallest_wall) return;
-
+	//////////
 	double proj_wall_top = *d -> last_wall_top;
 	double proj_wall_bottom = proj_wall_top + wall_dest_h_sum;
-
 	*mark_floor_space = proj_wall_top < settings.screen_height;
-	if (!(*mark_floor_space)) return;
-
+	//////////
 	if (proj_wall_bottom >= settings.screen_height) proj_wall_bottom = settings.screen_height - 1;
 	if (proj_wall_top < 0.0) proj_wall_top = 0.0;
 
 	for (int y = round(proj_wall_top); y < round(proj_wall_bottom); y++)
 		set_statemap_bit(occluded_by_walls, wall_dest.x, y);
-
+	//////////
 	*projected_wall_bottom = proj_wall_bottom;
+	*stop_from_tallest_wall = d -> point_height == current_level.max_point_height && d -> p_height <= current_level.max_point_height - 0.5;
 }
 
 // once the colors are correct per vertical line, this will be done
 void mark_floor(const DataRaycast* const d, double last_projected_wall_top, const double projected_wall_bottom) {
 	if (last_projected_wall_top >= settings.screen_height)
-		last_projected_wall_top = settings.screen_height - 1.0;
+		last_projected_wall_top = settings.screen_height - 1.0; // stop overflow from the DBL_MAX
 
 	if (doubles_eq(last_projected_wall_top - projected_wall_bottom, 0.0)) return;
 
@@ -133,8 +130,8 @@ void raycast(const Player* const player, const double horizon_line, const double
 					byte mark_floor_space, stop_from_tallest_wall;
 					double last_projected_wall_top, projected_wall_bottom;
 					handle_ray(&raycast_data, &mark_floor_space, &stop_from_tallest_wall, &last_projected_wall_top, &projected_wall_bottom);
+					if (mark_floor_space) mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
 					if (stop_from_tallest_wall) break;
-					else if (mark_floor_space) mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
 					at_first_hit = 0;
 				}
 
