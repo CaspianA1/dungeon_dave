@@ -78,10 +78,11 @@ NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos) {
 		if (nav_state != SucceededBFS) return nav_state;
 	}
 
-	if (nav -> route_ind < end_ind) {
-		const vec next_vertex = route -> data[nav -> route_ind + 1];
+	const int route_ind = nav -> route_ind;
+	if (route_ind < end_ind) {
+		const vec next_vertex = route -> data[route_ind + 1];
 
-		const vec dir = next_vertex - route -> data[nav -> route_ind];
+		const vec dir = next_vertex - route -> data[route_ind];
 		vec* const ref_pos = nav -> pos;
 		vec pos = *ref_pos + dir * vec_fill(nav -> v);
 
