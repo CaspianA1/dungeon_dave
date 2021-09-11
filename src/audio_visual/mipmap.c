@@ -2,14 +2,6 @@ Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const 
 	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
 }
 
-inlinable void get_ARGB_components(const Uint32 pixel, byte* const a, byte* const r, byte* const g, byte* const b) {
-	*a = (byte) (pixel >> 24), *r = (byte) (pixel >> 16), *g = (byte) (pixel >> 8), *b = (byte) pixel;
-}
-
-inlinable Uint32 combine_ARGB_components(const int a, const byte r, const byte g, const byte b) {
-	return a | (r << 16) | (g << 8) | b;
-}
-
 void antialiased_downscale_by_2(const SDL_Surface* const orig,
 	SDL_Surface* const mipmap, const ivec dest_corner, const byte scale_factor) {
 
@@ -36,13 +28,12 @@ void antialiased_downscale_by_2(const SDL_Surface* const orig,
 				const ivec pixel_pos = pixel_group[i];
 
 				if (pixel_pos.x >= 0 && pixel_pos.y >= 0 && pixel_pos.x < orig_size && pixel_pos.y < orig_size) {
-					const Uint32 neighbor_val = *read_surface_pixel(orig, pixel_pos.x, pixel_pos.y, bpp);
-					byte a, r, g, b;
-					get_ARGB_components(neighbor_val, &a, &r, &g, &b); // this fn is here b/c SDL_GetRGBA is pretty slow
-					sum[0] += a;
-					sum[1] += r;
-					sum[2] += g;
-					sum[3] += b;
+					const Uint32 neighbor = *read_surface_pixel(orig, pixel_pos.x, pixel_pos.y, bpp);
+
+					sum[0] += (byte) (neighbor >> 24);
+					sum[1] += (byte) (neighbor >> 16);
+					sum[2] += (byte) (neighbor >> 8);
+					sum[3] += (byte) neighbor;
 					valid_neighbor_sum++;
 				}
 			}
