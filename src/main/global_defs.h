@@ -94,8 +94,8 @@ const double
 	three_pi_over_two = 3.0 * M_PI / 2.0,
 	five_pi_over_two = 5.0 * M_PI / 2.0,
 	g = -9.8,
-	std_double_epsilon = 0.01,
-	small_double_epsilon = 0.000001;
+	almost_zero = 0.000001,
+	almost_almost_zero = 0.000000001;
 
 const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
 

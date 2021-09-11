@@ -75,9 +75,7 @@ functions like `diffuse_circle` above. */
 byte calculate_shade(const double wall_h, const vec pos) {
 	(void) wall_h;
 
-	static const double small = 0.000000001;
-	const vec lightmap_pos = (pos - vec_fill(small)) * vec_fill(lightmap_samples_per_tile);
-
+	const vec lightmap_pos = (pos - vec_fill(almost_almost_zero)) * vec_fill(lightmap_samples_per_tile);
 	const Lightmap lightmap = current_level.lightmap;
 	return lightmap.data[(int) lightmap_pos[1] * lightmap.size.x + (int) lightmap_pos[0]];
 

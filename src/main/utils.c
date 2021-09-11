@@ -72,7 +72,7 @@ inlinable double to_radians(const double degrees) {
 }
 
 inlinable byte doubles_eq(const double a, const double b) {
-	return fabs(a - b) < small_double_epsilon;
+	return fabs(a - b) < almost_zero;
 }
 
 inlinable void nth_bit_to_x(byte* const bits, const byte n, const byte x) {
@@ -134,7 +134,7 @@ inlinable vec vec_diff(const vec a, const vec b) {
 }
 
 inlinable byte vec_in_range(const double p, const vec range) {
-	return p >= range[0] - small_double_epsilon && p <= range[1] + small_double_epsilon;
+	return p >= range[0] - almost_zero && p <= range[1] + almost_zero;
 }
 
 inlinable vec vec_line_pos(const vec pos, const vec dir, const double slope) {
