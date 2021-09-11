@@ -73,22 +73,14 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space, byte* 
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &frect);
 	}
 
-	if (d -> point_height == current_level.max_point_height && d -> p_height <= current_level.max_point_height - 0.5) {
-		*stop_from_tallest_wall = 1;
-		return;
-	}
-
-	*stop_from_tallest_wall = 0;
+	*stop_from_tallest_wall = d -> point_height == current_level.max_point_height && d -> p_height <= current_level.max_point_height - 0.5;
+	if (*stop_from_tallest_wall) return;
 
 	double proj_wall_top = *d -> last_wall_top;
 	double proj_wall_bottom = proj_wall_top + wall_dest_h_sum;
 
-	if (proj_wall_top >= settings.screen_height) {
-		*mark_floor_space = 0;
-		return;
-	}
-
-	*mark_floor_space = 1;
+	*mark_floor_space = proj_wall_top < settings.screen_height;
+	if (!(*mark_floor_space)) return;
 
 	if (proj_wall_bottom >= settings.screen_height) proj_wall_bottom = settings.screen_height - 1;
 	if (proj_wall_top < 0.0) proj_wall_top = 0.0;
