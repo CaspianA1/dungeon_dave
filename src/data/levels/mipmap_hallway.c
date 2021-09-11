@@ -11,8 +11,8 @@ inlinable double hallway_shader(const vec pos) {
 void load_hallway(void) {
 	enum {
 		map_width = 10, map_height = 60,
-		wall_count = 2, billboard_count = 0, teleporter_count = 1, // 3
-		animated_billboard_count = 0, enemy_instance_count = 0 // 1
+		wall_count = 2, billboard_count = 0, teleporter_count = 3,
+		animated_billboard_count = 0, enemy_instance_count = 1
 	};
 
 	static const byte wall_data[map_height][map_width] = {
@@ -97,17 +97,15 @@ void load_hallway(void) {
 
 	set_level_teleporters(&hallway, teleporter_count,
 		5.0, 4.0, 0.0, // from pos + height
-		5.5, 10.5 /* to pos */);
+		5.5, 10.5, /* to pos */
 
-		/*
 		6.0, 4.0, 0.0, 4.0, 45.0,
 		4.0, 4.0, 0.0, 5.5, 4.5);
-		*/
 
 	set_level_animated_billboards(&hallway, animated_billboard_count);
 
 	memcpy(&current_level, &hallway, sizeof(Level));
 
-	set_level_enemy_instances(&current_level, enemy_instance_count); // 0, 5.0, 8.0, 0.0);
+	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 5.0, 8.0, 0.0);
 	set_level_thing_container(&current_level);
 }

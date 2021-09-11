@@ -607,4 +607,12 @@ thing_crop -> x = new_thing_crop_w; // this almost works:
 thing_crop -> w = 64 - new_thing_crop_w;
 */
 
+///// A little experiment with varying the enemy speed:
+const double percent_done = (double) nav -> route_ind / nav -> route.length;
+
+const int a = (rand() % 2) + 1;
+DEBUG(a, d);
+
+const double v = nav -> max_v * (1.0 - percent_done) * a;
+
 /////
