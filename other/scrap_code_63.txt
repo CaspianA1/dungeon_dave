@@ -1,6 +1,5 @@
 ///// The old sprite chunking code:
 
-
 static void vis_drawing_fn(const double start_x, const double x, SDL_Rect* const thing_crop,
 	SDL_FRect* const screen_pos, const double size, SDL_Texture* const texture) {
 
@@ -70,5 +69,19 @@ inlinable void draw_thing_as_cols(SDL_Texture* const texture,
 /////
 
 if (screen_pos.x < -0.99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999f || (double) val_buffer[round].depth < corrected_dist) {
+
+/////
+
+if (doubles_eq(last_projected_wall_top - projected_wall_bottom, 0.0)) return;
+
+if (*d -> last_point_height == 1 && keys[SDL_SCANCODE_T]) return;
+
+/////
+
+// if (slice.x - mipmap_crop.x == 0 && d -> first_wall_hit) goto bob;
+
+// if (doubles_eq(d -> hit[0], round(d -> hit[0])) && doubles_eq(d -> hit[1], round(d -> hit[1]))) {
+if (0) {
+	bob:
 
 /////

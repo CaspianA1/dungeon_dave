@@ -25,7 +25,7 @@
 #include "../audio_visual/misc.c"
 #include "../audio_visual/raycast.c"
 #include "../audio_visual/floorcast.c"
-#include "../audio_visual/floorcast_manager.c"
+#include "../audio_visual/parallel_floorcast.c"
 
 #include "../audio_visual/gui/gui_utils.c"
 #include "../audio_visual/gui/menu.c"
@@ -50,6 +50,7 @@
 
 /*
 TODO:
+- the wall corner floor algorithm
 - threaded floorcast doesn't work yet
 - a small point_height function
 - sometimes, a delay when pressing start
@@ -60,7 +61,6 @@ TODO:
 - better antialiasing
 - distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
-- the polygon floor algorithm
 - 3D DDA pitch-angle translation
 - the rest of the trooper animations + long range AI
 - a unique hitbox size for each billboard
@@ -72,7 +72,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_debug_level, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
@@ -113,8 +113,8 @@ int main(void) {
 		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, &weapon);
 
-		// parallel_floorcast(1, 0, player.pos, player.jump.height, horizon_line, settings.screen_height);
-		fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
+		parallel_floorcast(1, 0, player.pos, player.jump.height, horizon_line, settings.screen_height);
+		// fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
 
 		teleport_player_if_needed(&player);
 

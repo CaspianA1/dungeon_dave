@@ -86,6 +86,14 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space, byte* 
 	//////////
 	*projected_wall_bottom = proj_wall_bottom;
 	*stop_from_tallest_wall = d -> point_height == current_level.max_point_height && d -> p_height <= current_level.max_point_height - 0.5;
+
+	/*
+	if (slice.x - mipmap_crop.x == 0 && d -> first_wall_hit) {
+		const SDL_Rect corner = {d -> screen_x, proj_wall_top, 20, 20};
+		SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_RenderFillRect(screen.renderer, &corner);
+	}
+	*/
 }
 
 // once the colors are correct per vertical line, this will be done

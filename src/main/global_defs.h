@@ -14,10 +14,8 @@
 
 #include <pthread.h>
 
-/*
 #define PLANAR_MODE
 #define NOCLIP_MODE
-*/
 
 #define ANTIALIAS_FIRST_MIP_LEVEL
 #define DISABLE_ENEMIES
@@ -94,7 +92,7 @@ const double
 	three_pi_over_two = 3.0 * M_PI / 2.0,
 	five_pi_over_two = 5.0 * M_PI / 2.0,
 	g = -9.8,
-	almost_zero = 0.000001,
+	almost_zero = 0.001,
 	almost_almost_zero = 0.000000001;
 
 const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
