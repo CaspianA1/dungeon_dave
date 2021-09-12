@@ -16,8 +16,8 @@ inlinable double level_1_shader(const vec pos) {
 		plaza_y_range = {1.0, 6.0};
 
 	if (vec_in_range(pos[0], plaza_x_range) && vec_in_range(pos[1], plaza_y_range))
-		return pos[1] / 2.5; // tan was too expensive for this
-		// return fabs(tan(pos[0] - pos[1]));
+		// return pos[1] / 2.5;
+		return fabs(tan(pos[0] - pos[1])) + 1.0;
 
 	const vec pillar_center_diff = vec_diff(pos, pillar_center);
 	if (pillar_center_diff[0] < 0.75 && pillar_center_diff[1] < 0.75)

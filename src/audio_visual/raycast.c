@@ -28,7 +28,7 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space, byte* 
 
 	const DRect wall_dest = {
 		d -> screen_x,
-		get_projected_y(d -> horizon_line, wall_h / 2.0, wall_h, d -> p_height),
+		get_projected_y(d -> horizon_line, wall_h * 0.5, wall_h, d -> p_height),
 		settings.ray_column_width,
 		wall_h
 	};
@@ -131,7 +131,7 @@ void raycast(const Player* const player, const double horizon_line, const double
 					double last_projected_wall_top, projected_wall_bottom;
 
 					handle_ray(&raycast_data, &mark_floor_space, &stop_from_tallest_wall, &last_projected_wall_top, &projected_wall_bottom);
-					if (mark_floor_space) mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
+					// if (mark_floor_space) mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
 					if (stop_from_tallest_wall) break;
 
 					at_first_hit = 0;

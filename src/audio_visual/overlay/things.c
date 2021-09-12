@@ -11,46 +11,6 @@ static int cmp_things(const void* const a, const void* const b) {
 	else return 0;
 }
 
-static void vis_drawing_fn(const double start_x, const double x, SDL_Rect* const thing_crop,
-	SDL_FRect* const screen_pos, const double size, SDL_Texture* const texture) {
-
-	screen_pos -> x = start_x;
-	screen_pos -> w = x - start_x; // == dest_x_range
-
-	const double new_thing_crop_w = round(thing_crop -> w * (double) screen_pos -> w / size);
-	thing_crop -> w = new_thing_crop_w;
-
-	SDL_RenderCopyF(screen.renderer, texture, thing_crop, screen_pos);
-}
-
-inlinable void draw_thing_as_cols(SDL_Texture* const texture,
-	SDL_Rect* const thing_crop, SDL_FRect* const screen_pos, const double start_x,
-	const double end_x, const double corrected_dist, const double size) {
-
-	//////////
-
-	byte in_vis_span = 0;
-	double vis_span_start = start_x;
-
-	for (int x = start_x; x < end_x; x++) {
-		if (x < 0 || (double) val_buffer[x].depth > corrected_dist) { // yes, span is visible
-			if (!in_vis_span) {
-				vis_span_start = x;
-				in_vis_span = 1;
-			}
-		}
-
-		else { // no, span is not visible, so draw the last one
-			if (in_vis_span) { // draws from vis_span_start to x
-				vis_drawing_fn(vis_span_start, x, thing_crop, screen_pos, size, texture);
-				in_vis_span = 0;
-			}
-		}
-	}
-
-	if (in_vis_span) vis_drawing_fn(vis_span_start, end_x, thing_crop, screen_pos, size, texture);
-}
-
 static void draw_processed_things(const double p_height, const double horizon_line) {
 	for (byte i = 0; i < current_level.thing_count; i++) {
 		Thing thing = current_level.thing_container[i];
@@ -60,7 +20,7 @@ static void draw_processed_things(const double p_height, const double horizon_li
 			abs_billboard_beta = fabs(billboard_data.beta),
 			cos_billboard_beta = cos(billboard_data.beta);
 
-		if (billboard_data.dist <= 0.01 // if too close
+		if (billboard_data.dist <= 0.08 // if too close
 			|| cos_billboard_beta <= 0.0 // if out of view
 			|| doubles_eq(abs_billboard_beta, half_pi) // if tan of beta equals inf val for tan
 			|| doubles_eq(abs_billboard_beta, three_pi_over_two))
@@ -74,19 +34,21 @@ static void draw_processed_things(const double p_height, const double horizon_li
 			center_x = settings.half_screen_width + center_offset,
 			size = settings.proj_dist / corrected_dist;
 
-		const double half_size = size / 2.0;
+		const double half_size = size * 0.5;
 
 		const double start_x = center_x - half_size;
-		if (start_x >= settings.screen_width) continue;
-
 		double end_x = center_x + half_size;
-		if (end_x < 0.0) continue;
+
+		if (start_x >= settings.screen_width || end_x < 0.0) continue; // if projected out of view
 		else if (end_x > settings.screen_width) end_x = settings.screen_width;
 
 		SDL_FRect screen_pos = {
-			.y = get_projected_y(horizon_line, half_size, size, p_height - billboard_data.height),
-			.h = size
+			round(start_x < 0.0 ? 0.0 : start_x),
+			get_projected_y(horizon_line, half_size, size, p_height - billboard_data.height),
+			settings.ray_column_width, size
 		};
+
+		SDL_Rect src_column = {.y = thing.src_crop.y, .w = 1, .h = thing.src_crop.h};
 
 		SDL_Texture* const texture = thing.sprite -> texture;
 
@@ -95,7 +57,16 @@ static void draw_processed_things(const double p_height, const double horizon_li
 		SDL_SetTextureColorMod(texture, shade, shade, shade);
 		#endif
 
-		draw_thing_as_cols(texture, &thing.src_crop, &screen_pos, start_x, end_x, corrected_dist, size);
+		const double src_size_over_dest_size = thing.src_crop.w / size;
+
+		for (; (double) screen_pos.x < end_x; screen_pos.x += settings.ray_column_width) {
+			if ((double) val_buffer[(long) screen_pos.x].depth < corrected_dist) continue;
+
+			const int src_offset = ((double) screen_pos.x - start_x) * src_size_over_dest_size;
+			src_column.x = src_offset + thing.src_crop.x;
+
+			SDL_RenderCopyF(screen.renderer, texture, &src_column, &screen_pos);
+		}
 	}
 }
 

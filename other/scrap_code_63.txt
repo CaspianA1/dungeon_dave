@@ -1,0 +1,74 @@
+///// The old sprite chunking code:
+
+
+static void vis_drawing_fn(const double start_x, const double x, SDL_Rect* const thing_crop,
+	SDL_FRect* const screen_pos, const double size, SDL_Texture* const texture) {
+
+	screen_pos -> x = start_x;
+	screen_pos -> w = x - start_x; // == dest_x_range
+
+	// const byte is_idol = texture == current_level.billboards[4].sprite.texture;
+	// if (is_idol) DEBUG((double) screen_pos -> w, lf);
+
+	const double new_thing_crop_w = round(thing_crop -> w * (double) screen_pos -> w / size);
+	thing_crop -> w = new_thing_crop_w;
+
+	SDL_RenderCopyF(screen.renderer, texture, thing_crop, screen_pos);
+}
+
+inlinable void draw_thing_as_cols(SDL_Texture* const texture,
+	SDL_Rect* const thing_crop, SDL_FRect* const screen_pos, const double screen_start_x,
+	const double screen_end_x, const double corrected_dist, const double screen_size) {
+
+	//////////
+
+	byte in_vis_span = 1;
+	double x_draw_start = screen_start_x;
+
+	for (int screen_x = screen_start_x; screen_x < screen_end_x; screen_x++) {
+		if (screen_x < 0 || screen_x == (int) screen_end_x - 1 || (double) val_buffer[screen_x].depth < corrected_dist) { // occluded column
+			printf("Don't draw at screen_x %d\n", screen_x);
+
+			if (in_vis_span) {
+				vis_drawing_fn(x_draw_start, screen_x, thing_crop, screen_pos, screen_size, texture);
+				in_vis_span = 0;
+			}
+		}
+		else if (!in_vis_span) {
+			in_vis_span = 1;	
+			x_draw_start = screen_x;
+		}
+	}
+
+	/*
+	byte in_vis_span = 0;
+	double vis_span_start = screen_start_x;
+
+	const byte is_idol = texture == current_level.billboards[4].sprite.texture;
+
+	for (int screen_x = screen_start_x; screen_x < screen_end_x; screen_x++) {
+		if (screen_x < 0 || (double) val_buffer[screen_x].depth > corrected_dist) { // yes, span is visible
+			if (!in_vis_span) {
+				if (is_idol) printf("Begin vis span at x = %d\n", screen_x);
+				vis_span_start = screen_x;
+				in_vis_span = 1;
+			}
+		}
+
+		else { // no, span is not visible, so draw the last one
+			if (in_vis_span) { // draws from vis_span_start to start_x
+				vis_drawing_fn(vis_span_start, screen_x, thing_crop, screen_pos, screen_size, texture);
+				in_vis_span = 0;
+			}
+		}
+	}
+
+	if (in_vis_span) vis_drawing_fn(vis_span_start, screen_end_x, thing_crop, screen_pos, screen_size, texture);
+	*/
+}
+
+/////
+
+if (screen_pos.x < -0.99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999f || (double) val_buffer[round].depth < corrected_dist) {
+
+/////

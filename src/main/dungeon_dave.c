@@ -50,12 +50,12 @@
 
 /*
 TODO:
+- thing occlusion seems to have some one-off errors
 - threaded floorcast doesn't work yet
 - planar mode alone has weird issues with jumping
 - a small point_height function
 - sometimes, a delay when pressing start
 - a stitch for floorcasting
-- proper sprite clipping
 - cannot wrap the mouse from the left to the right for a full-size screen
 - purple vertical scanlines for a full-size menu
 - an odd thin line on the bottom of the screen for the colored floor, and the top of each wall
@@ -74,7 +74,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
@@ -116,7 +116,7 @@ int main(void) {
 			deinit_all(&player, &weapon);
 
 		// parallel_floorcast(1, 0, player.pos, player.jump.height, horizon_line, settings.screen_height);
-		// fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
+		fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
 
 		teleport_player_if_needed(&player);
 
