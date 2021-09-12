@@ -50,7 +50,6 @@
 
 /*
 TODO:
-- thing occlusion seems to have some one-off errors
 - threaded floorcast doesn't work yet
 - planar mode alone has weird issues with jumping
 - a small point_height function
