@@ -5,7 +5,16 @@ inlinable byte get_debug_level_point_height(const byte point, const vec pos) {
 }
 
 inlinable double debug_level_shader(const vec pos) {
-	return pos[0] / 2.0;
+	// return pos[0] / 2.0;
+
+	const vec center = {current_level.map_size.x >> 1, current_level.map_size.y >> 1};
+	const Circle center_circle = {center[0], center[1], 0.9};
+
+	const vec center_delta = pos - center;
+	return
+		fabs(center_delta[0] * center_delta[1]) * 2.0
+		+ bloom_circle(pos, center_circle) * 8.0
+		+ fabs(tan(pos[0] + pos[1])) * 0.5;
 }
 
 void load_debug_level(void) {

@@ -51,7 +51,6 @@
 /*
 TODO:
 - threaded floorcast doesn't work yet
-- planar mode alone has weird issues with jumping
 - a small point_height function
 - sometimes, a delay when pressing start
 - a stitch for floorcasting
@@ -73,7 +72,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_debug_level, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
