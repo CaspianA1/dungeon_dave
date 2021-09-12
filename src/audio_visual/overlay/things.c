@@ -164,12 +164,11 @@ DEF_THING_ADDER(enemy_instance) {
 
 void draw_things(const vec p_pos, const double p_angle, const double p_height, const double horizon_line) {
 	enum {num_thing_adders = 4};
-	void (*thing_adders[num_thing_adders])(THING_ADDER_SIGNATURE) = {
+	void (*const thing_adders[num_thing_adders])(THING_ADDER_SIGNATURE) = {
 		THING_ADDER(still), THING_ADDER(teleporter), THING_ADDER(animated), THING_ADDER(enemy_instance)
 	};
 
-	for (byte i = 0; i < num_thing_adders; i++)
-		thing_adders[i](p_pos, p_angle);
+	for (byte i = 0; i < num_thing_adders; i++) thing_adders[i](p_pos, p_angle);
 
 	qsort(current_level.thing_container, current_level.thing_count, sizeof(Thing), cmp_things);
 	draw_processed_things(p_height, horizon_line);
