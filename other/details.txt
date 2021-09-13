@@ -45,13 +45,13 @@ completed:
 	- enemy AI with idle, chasing, attacking, and dead states, with BFS pathfinding; enemies have different sounds and animations depending on their state as well that get quieter when farther away; can wake up enemies by getting too close, or making a sound through using a weapon, jumping, or landing from a large height
 	- weapons use DDA to detect collisions; option to allow weapon to have close and far range as well
 	- rudimentary level creation interface
-	- shading of diffuse circles and flat triangles, as well as environments that get darker when farther away
+	- shading with bloom circles, flat triangles, and perlin noise (cached via lightmaps), as well as environments that get darker when farther away
 	- static and animated billboards (with only 1D Z-buffering for now)
 	- texture mapping, with mipmapping that incorporates antialiasing (for cache coherency and reduced moiré patterns)
 	- audio system that allows for sound effects, background music, and volume tweaking based on an enemy's distance from the player
 	- skyboxes that also change the portion shown based on the y-pitch
 	- raycasting with multiple floor heights (no multi-dimensional floors though, yet)
-	- use of vector intrinsics and an optimized Statemap data structure to ease performance on older devices
+	- use of vector intrinsics and an optimized StateMap data structure to ease performance on older devices
 	- free look, with y-shearing and turning controlled by the mouse
 	- accurate movement physics, both in terms of 2D acceleration + deceleration, and Y-axis jumping
 	- increase in FOV while accelerating, screen tilt when strafing, and additional y-shearing when moving, giving a 'pacing' effect

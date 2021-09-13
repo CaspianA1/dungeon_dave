@@ -49,4 +49,3 @@ double perlin(const double x, const double y, const double freq, const int depth
 
 	return fin / div;
 }
-

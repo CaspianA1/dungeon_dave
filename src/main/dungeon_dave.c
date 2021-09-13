@@ -51,7 +51,6 @@
 
 /*
 TODO:
-- perlin noise lightmapping
 - the wall corner floor algorithm
 - threaded floorcast doesn't work yet
 - a small point_height function
