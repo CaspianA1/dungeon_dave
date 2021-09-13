@@ -401,3 +401,43 @@ double smooth_lerp(const double x0, const double x1, const double width) { // al
 }
 
 /////
+
+inlinable double render_wall_column(const DRect* const wall_dest, const SDL_Rect* const slice,
+	const byte last_point_height, const byte point_height, const double last_wall_top, const int max_sprite_h) {
+
+}
+
+///// Doesn't work:
+
+// once the colors are correct per vertical line, this will be done
+void mark_floor(const DataRaycast* const d, const double last_projected_wall_top, const double projected_wall_bottom) {
+	(void) last_projected_wall_top;
+	(void) projected_wall_bottom;
+
+	const vec hit = d -> hit;
+	if (doubles_eq(hit[0], round(hit[0])) && doubles_eq(hit[1], round(hit[1]))) {
+		puts("Lala\n");
+		SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+		const SDL_Rect r = {d -> screen_x, last_projected_wall_top, 20, 20};
+		SDL_RenderFillRect(screen.renderer, &r);
+	}
+
+	/*
+	if (doubles_eq(last_projected_wall_top - projected_wall_bottom, 0.0)) return;
+	const int x = d -> screen_x;
+	SDL_SetRenderDrawColor(screen.renderer, 0, 255 / (*d -> last_point_height + 1), 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderDrawLine(screen.renderer, x, last_projected_wall_top, x, projected_wall_bottom); // last wall top -> curr wall bottom
+	*/
+}
+
+/////
+
+/*
+if (slice.x - mipmap_crop.x == 0 && d -> first_wall_hit) {
+	const SDL_Rect corner = {d -> screen_x, proj_wall_top, 20, 20};
+	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRect(screen.renderer, &corner);
+}
+*/
+
+/////

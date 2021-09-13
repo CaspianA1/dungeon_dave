@@ -49,10 +49,10 @@ void handle_ray(const DataRaycast* const d, byte* const stop_from_tallest_wall,
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 	#endif
 
-	double wall_dest_h_sum = 0.0;
-
 	*last_projected_wall_top = *d -> last_wall_top;
 	if (*last_projected_wall_top == DBL_MAX) *last_projected_wall_top = settings.screen_height - 1;
+
+	double wall_dest_h_sum = 0.0;
 
 	for (byte i = *d -> last_point_height; i < d -> point_height; i++) {
 		DRect raised_wall_dest = wall_dest;
@@ -76,6 +76,7 @@ void handle_ray(const DataRaycast* const d, byte* const stop_from_tallest_wall,
 	}
 
 	//////////
+
 	double proj_wall_top = *d -> last_wall_top;
 	double proj_wall_bottom = proj_wall_top + wall_dest_h_sum;
 
@@ -88,24 +89,21 @@ void handle_ray(const DataRaycast* const d, byte* const stop_from_tallest_wall,
 
 	*projected_wall_bottom = proj_wall_bottom;
 	*stop_from_tallest_wall = d -> point_height == current_level.max_point_height && d -> p_height <= current_level.max_point_height - 0.5;
-	//////////
-
-	/*
-	if (slice.x - mipmap_crop.x == 0 && d -> first_wall_hit) {
-		const SDL_Rect corner = {d -> screen_x, proj_wall_top, 20, 20};
-		SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-		SDL_RenderFillRect(screen.renderer, &corner);
-	}
-	*/
 }
 
 // once the colors are correct per vertical line, this will be done
-void mark_floor(const DataRaycast* const d, double last_projected_wall_top, const double projected_wall_bottom) {
+void mark_floor(const DataRaycast* const d, const double last_projected_wall_top, const double projected_wall_bottom) {
 	if (doubles_eq(last_projected_wall_top - projected_wall_bottom, 0.0)) return;
-
 	const int x = d -> screen_x;
 	SDL_SetRenderDrawColor(screen.renderer, 0, 255 / (*d -> last_point_height + 1), 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderDrawLine(screen.renderer, x, last_projected_wall_top, x, projected_wall_bottom); // last wall top -> curr wall bottom
+
+	static double offset = 0.0;
+	const double step = 0.001;
+	if (keys[SDL_SCANCODE_T]) offset -= step;
+	if (keys[SDL_SCANCODE_Y]) offset += step;
+	if (keys[SDL_SCANCODE_U]) offset = 0.0;
+
+	SDL_RenderDrawLineF(screen.renderer, x + offset, last_projected_wall_top, x, projected_wall_bottom); // last wall top -> curr wall bottom
 }
 
 void raycast(const Player* const player, const double horizon_line, const double p_height) {
@@ -139,7 +137,7 @@ void raycast(const Player* const player, const double horizon_line, const double
 					double last_projected_wall_top, projected_wall_bottom;
 
 					handle_ray(&raycast_data, &stop_from_tallest_wall, &last_projected_wall_top, &projected_wall_bottom);
-					// mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
+					mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
 					if (stop_from_tallest_wall) break;
 
 					at_first_hit = 0;
