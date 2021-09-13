@@ -1,6 +1,6 @@
-// derived greatly from https://gist.github.com/nowl/828013
+// derived greatly from https://gist.github.com/nowl/828013 and https://en.wikipedia.org/wiki/Perlin_noise
 
-static const byte perlin_seed = 17, permutations[256] = {
+static const byte perlin_seed = 17, rand_256[256] = {
 	208, 34, 231, 213, 32, 248, 233, 56, 161, 78, 24, 140, 71, 48, 140, 254, 245, 255, 247, 247, 40,
 	185, 248, 251, 245, 28, 124, 204, 204, 76, 36, 1, 107, 28, 234, 163, 202, 224, 245, 128, 167, 204,
 	9, 92, 217, 54, 239, 174, 173, 102, 193, 189, 190, 121, 100, 108, 167, 44, 43, 77, 180, 204, 8, 81,
@@ -15,29 +15,25 @@ static const byte perlin_seed = 17, permutations[256] = {
 	114, 20, 218, 113, 154, 27, 127, 246, 250, 1, 8, 198, 250, 209, 92, 222, 173, 21, 88, 102, 219
 };
 
-int noise2(const int x, const int y) {
-	const int tmp = permutations[(y + perlin_seed) % 256];
-	return permutations[(tmp + x) % 256];
+int rand_gradient_vec(const int x, const int y) {
+	const int temp = rand_256[(y + perlin_seed) & 255];
+	return rand_256[(temp + x) & 255];
 }
 
-double lerp(const double x, const double y, const double s) {
-	return x + s * (y - x);
+double smooth_lerp(const double start, const double end, const double weight) {
+	return (end - start) * ((weight * (weight * 6.0 - 15.0) + 10.0) * weight * weight * weight) + start;
 }
 
-double smooth_lerp(const double x, const double y, const double s) {
-	return lerp(x, y, s * s * (3.0 - 2.0 * s));
-}
-
-double noise2d(const double x, const double y) {
+inlinable double noise(const double x, const double y) {
 	const ivec whole = {x, y};
 	const double frac_x = x - whole.x;
 
 	const int
-		s = noise2(whole.x, whole.y), t = noise2(whole.x + 1, whole.y),
-		u = noise2(whole.x, whole.y + 1), v = noise2(whole.x + 1, whole.y + 1);
+		origin = rand_gradient_vec(whole.x, whole.y), top_right = rand_gradient_vec(whole.x + 1, whole.y),
+		bottom_left = rand_gradient_vec(whole.x, whole.y + 1), bottom_right = rand_gradient_vec(whole.x + 1, whole.y + 1);
 
-	const double low = smooth_lerp(s, t, frac_x), high = smooth_lerp(u, v, frac_x);
-	return smooth_lerp(low, high, y - whole.y);
+	const double y_start = smooth_lerp(origin, top_right, frac_x), y_end = smooth_lerp(bottom_left, bottom_right, frac_x);
+	return smooth_lerp(y_start, y_end, y - whole.y);
 }
 
 double perlin(const double x, const double y, const double freq, const int depth) {
@@ -45,7 +41,7 @@ double perlin(const double x, const double y, const double freq, const int depth
 
 	for(int i = 0; i < depth; i++) {
 		div += 256.0 * amplitude;
-		fin += noise2d(xa, ya) * amplitude;
+		fin += noise(xa, ya) * amplitude;
 		amplitude *= 0.5;
 		xa *= 2.0;
 		ya *= 2.0;
@@ -53,3 +49,4 @@ double perlin(const double x, const double y, const double freq, const int depth
 
 	return fin / div;
 }
+
