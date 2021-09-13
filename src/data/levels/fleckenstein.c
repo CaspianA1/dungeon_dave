@@ -67,7 +67,6 @@ void load_fleckenstein(void) {
 	Level fleckenstein = init_level(map_width, map_height, 13.0, 27.0, 0.0);
 
 	set_level_skybox(&fleckenstein, "assets/skyboxes/mossy_mountains.bmp");
-	fleckenstein.darkest_shade = 0.1;
 	fleckenstein.max_point_height = 20;
 	fleckenstein.out_of_bounds_point = 1;
 	fleckenstein.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);

@@ -35,7 +35,8 @@ inlinable byte flat_triangle(const vec pos, const Triangle triangle) {
 
 // samples per tile -> 150 = 36 million bytes, 50 -> 4 million bytes, 30 -> 1.44 million bytes
 static const byte lightmap_samples_per_tile = 30; // 15
-static const double lightmap_shader_downscaler = 0.1;
+static const double perlin_frequency = 0.01, shader_downscaler = 0.1;
+static const int perlin_amplitude = 10;
 
 Lightmap init_lightmap(void) {
 	Lightmap lightmap = {
@@ -52,10 +53,37 @@ Lightmap init_lightmap(void) {
 		pos[1] = (double) y / lightmap_samples_per_tile;
 		for (int x = 0; x < lightmap.size.x; x++) {
 			pos[0] = (double) x / lightmap_samples_per_tile;
-			const double light = current_level.shader(pos) * lightmap_shader_downscaler;
+
+			double light = current_level.shader(pos) * shader_downscaler;
+
+			#ifdef PERLIN_SHADING
+			light += perlin(x, y, perlin_frequency, perlin_amplitude);
+			#endif
+
 			lightmap.data[y * lightmap.size.x + x] = ((light > 1.0) ? 1.0 : light) * 255;
 		}
 	}
+
+	/*
+	SDL_Surface* const image = SDL_CreateRGBSurfaceWithFormat(0, lightmap.size.x, lightmap.size.y, 32, PIXEL_FORMAT);
+
+	const SDL_PixelFormat* const format = image -> format;
+	const int bpp = format -> BytesPerPixel;
+
+	SDL_LockSurface(image);
+	Uint32* read_surface_pixel(const SDL_Surface* const, const int, const int, const int);
+
+	for (int y = 0; y < lightmap.size.y; y++) {
+		for (int x = 0; x < lightmap.size.x; x++) {
+			const byte color = lightmap.data[y * lightmap.size.x + x];
+			*read_surface_pixel(image, x, y, bpp) = SDL_MapRGBA(format, color, color, color, 255);
+		}
+	}
+
+	SDL_SaveBMP(image, "out.bmp");
+	SDL_UnlockSurface(image);
+	SDL_FreeSurface(image);
+	*/
 
 	return lightmap;
 }

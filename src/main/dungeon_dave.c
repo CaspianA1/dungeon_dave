@@ -15,6 +15,7 @@
 #include "level.c"
 
 #include "../audio_visual/screen.c"
+#include "../audio_visual/perlin.c"
 #include "../audio_visual/lighting.c"
 #include "../audio_visual/mipmap.c"
 

@@ -93,7 +93,6 @@ typedef struct {
 	const ivec map_size;
 	const vec init_pos;
 	const double init_height;
-	double darkest_shade;
 
 	byte
 		wall_count, billboard_count, animated_billboard_count, enemy_instance_count,

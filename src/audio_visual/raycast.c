@@ -80,6 +80,7 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space, byte* 
 	//////////
 	if (proj_wall_bottom >= settings.screen_height) proj_wall_bottom = settings.screen_height - 1;
 	if (proj_wall_top < 0.0) proj_wall_top = 0.0;
+	else if (proj_wall_top >= settings.screen_height) proj_wall_top = settings.screen_height - 1;
 
 	for (int y = round(proj_wall_top); y < round(proj_wall_bottom); y++)
 		set_statemap_bit(occluded_by_walls, wall_dest.x, y);

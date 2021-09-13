@@ -79,7 +79,6 @@ void load_hallway(void) {
 	};
 
 	Level hallway = init_level(map_width, map_height, 5.0, 3.4, 0.0);
-	hallway.darkest_shade = 0.4;
 	hallway.max_point_height = 2;
 	hallway.out_of_bounds_point = 1;
 	hallway.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);

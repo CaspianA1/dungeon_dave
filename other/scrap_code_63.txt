@@ -145,4 +145,166 @@ void fast_affine_floor_2(const byte floor_height, const vec pos, const double p_
 		}
 	}
 
+///// The old perlin noise code:
+
+double rand_double(void) {
+	const double val = rand() / (double) RAND_MAX;
+	return (rand() % 2) ? val : -val;
+}
+
+double dot_product(const vec a, const vec b) {
+	return a[0] * a[0] + b[1] * b[1];
+}
+
+SDL_Surface* generate_perlin_noise(const ivec image_size) {
+	const int grid_size = 20;
+
+	vec gradient_vecs[grid_size][grid_size];
+
+	for (int y = 0; y < grid_size; y++) {
+		for (int x = 0; x < grid_size; x++)
+			gradient_vecs[y][x] = (vec) {rand_double(), rand_double()};
+	}
+
+	double dot_products[grid_size][grid_size][4];
+
+	for (int y = 0; y < grid_size; y++) {
+		for (int x = 0; x < grid_size; x++) {
+			const vec gradient_vec = gradient_vecs[y][x];
+
+			static const vec offset_vecs[4] = {{-1, 1}, {-1, 1}, {1, -1}, {1, 1}};
+			for (byte i = 0; i < 4; i++) dot_products[y][x][i] = dot_product(gradient_vec, offset_vecs[i]);
+		}
+	}
+
+	SDL_Surface* const image = SDL_CreateRGBSurfaceWithFormat(0, image_size.x, image_size.y, 32, PIXEL_FORMAT);
+
+	const double gradients_per_pixel[2] = {(double) image_size.x / grid_size, (double) image_size.y / grid_size};
+	double gradient_pos[2] = {0.0, 0.0};
+
+	for (int y = 0; y < image_size.y; y++, gradient_pos[1] += gradients_per_pixel[1]) {
+		for (int x = 0; x < image_size.x; x++, gradient_pos[0] += gradients_per_pixel[0]) {
+
+		}
+	}
+
+	return image;	
+}
+
+///// Version 2:
+
+double dot(const vec a, const vec b) {
+	return a[0] * a[0] + b[1] * b[1];
+}
+
+function Shuffle(tab){
+	for(let e = tab.length-1; e > 0; e--){
+		let index = Math.round(Math.random()*(e-1)),
+			temp  = tab[e];
+		
+		tab[e] = tab[index];
+		tab[index] = temp;
+	}
+}
+
+function MakePermutation(){
+
+	/*
+	let P = [];
+	for(let i = 0; i < 256; i++){
+		P.push(i);
+	}
+	Shuffle(P);
+	for(let i = 0; i < 256; i++){
+		P.push(P[i]);
+	}
+	
+	return P;
+	*/
+}
+let P = MakePermutation();
+
+vec GetConstantVector(int v){
+	int h = v & 3;
+
+	switch (h) {
+		case 0: return (vec) {1.0, 1.0};
+		case 1: return (vec) {-1.0, 1.0};
+		case 2: return (vec) {-1.0, -1.0};
+		default: return (vec) {1.0, -1.0};
+	}
+}
+
+double Fade(double t){
+	return ((6*t - 15)*t + 10)*t*t*t;
+}
+
+double Lerp(double t, double a1, double a2){
+	return a1 + t*(a2-a1);
+}
+
+double Noise2D(int x, int y){
+	int X = Math.floor(x) & 255;
+	int Y = Math.floor(y) & 255;
+
+	double xf = x-Math.floor(x);
+	double yf = y-Math.floor(y);
+
+	vec topRight = (vec) {xf-1.0, yf-1.0};
+	vec topLeft = (vec) {xf, yf-1.0};
+	vec bottomRight = (vec) {xf-1.0, yf};
+	vec bottomLeft = (vec) {xf, yf};
+	
+	//Select a value in the array for each of the 4 corners
+	double valueTopRight = P[P[X+1]+Y+1];
+	double valueTopLeft = P[P[X]+Y+1];
+	double valueBottomRight = P[P[X+1]+Y];
+	double valueBottomLeft = P[P[X]+Y];
+	
+	double dotTopRight = dot(GetConstantVector(valueTopRight));
+	double dotTopLeft = dot(GetConstantVector(valueTopLeft));
+	double dotBottomRight = dot(GetConstantVector(valueBottomRight));
+	double dotBottomLeft = dot(GetConstantVector(valueBottomLeft));
+	
+	double u = Fade(xf);
+	double v = Fade(yf);
+	
+	return Lerp(u,
+		Lerp(v, dotBottomLeft, dotTopLeft),
+		Lerp(v, dotBottomRight, dotTopRight)
+	);
+
+}
+
+///// Some old, working perlin code:
+
+void perlin(SDL_Surface* const image) {
+	const SDL_PixelFormat* const format = image -> format;
+	const int bpp = format -> BytesPerPixel;
+
+	Uint32* read_surface_pixel(const SDL_Surface* const, const int, const int, const int);
+
+	for (int y = 0; y < image -> h; y++) {
+		for (int x = 0; x < image -> w; x++) {
+			const byte color = perlin2d(x, y, 0.01, 10) * 255; // 0.1, 4 (0.05, 10 is also good for 128x128)
+			*read_surface_pixel(image, x, y, bpp) = SDL_MapRGBA(format, color, color, color, 255);
+		}
+	}
+}
+
+void perlin_test(void) {
+	const int size = 64;
+
+	SDL_Surface* const image = SDL_CreateRGBSurfaceWithFormat(0, size, size, 32, PIXEL_FORMAT);
+	SDL_LockSurface(image);
+
+	perlin(image);
+	SDL_SaveBMP(image, "out.bmp");
+
+	SDL_UnlockSurface(image);
+	SDL_FreeSurface(image);
+
+	// exit(0);
+}
+
 /////

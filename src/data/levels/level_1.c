@@ -58,7 +58,6 @@ void load_level_1(void) {
 
 	// old init positions: {18.5, 9.0}, {3.0, 3.0}, {7.0, 12.0}
 	Level level_1 = init_level(map_width, map_height, 17.5, 11.5, 0.0);
-	level_1.darkest_shade = 0.1;
 	level_1.max_point_height = 5;
 	level_1.out_of_bounds_point = 7;
 	level_1.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);

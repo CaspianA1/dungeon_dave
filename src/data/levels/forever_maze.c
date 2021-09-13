@@ -83,7 +83,6 @@ void load_maze(void) {
 	};
 
 	Level maze = init_level(map_width, map_height, 1.5, 1.5, 0.0);
-	maze.darkest_shade = 0.1;
 	maze.max_point_height = 3;
 	maze.out_of_bounds_point = 1;
 	maze.background_sound = init_sound("assets/audio/themes/red_room_track.wav", 0);
