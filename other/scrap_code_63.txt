@@ -85,3 +85,64 @@ if (0) {
 	bob:
 
 /////
+
+void draw_colored_floor(const double horizon_line) {
+	const SDL_FRect floor = {0.0, horizon_line - 1.0, settings.screen_width, settings.screen_height - horizon_line + 1.0};
+	SDL_SetRenderDrawColor(screen.renderer, 148, 107, 69, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRectF(screen.renderer, &floor);
+}
+
+/////
+
+void fast_affine_floor_2(const byte floor_height, const vec pos, const double p_height, const int horizon_line, const int y_end) {
+	const double eye_height = (p_height - floor_height) + 0.5;
+	if (eye_height < 0.0) return;
+
+	// horizon_line is y_start
+	for (int row = 1; row <= y_end - horizon_line; row++) {
+		const int pixbuf_y = horizon_line + row - 1;
+		if (pixbuf_y < 0) continue;
+
+		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pixbuf_y);
+
+		const vec straight_dist = vec_fill(eye_height / row * settings.proj_dist);
+
+		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += 2) {
+			const BufferVal buffer_vals[2] = {val_buffer[screen_x], val_buffer[screen_x + 1]};
+
+			const vec actual_dists = straight_dist * (vec) {
+				(double) buffer_vals[0].one_over_cos_beta,
+				(double) buffer_vals[1].one_over_cos_beta
+			};
+
+			const __m256d hits = (__m256d) {buffer_vals[0].dir[0], buffer_vals[0].dir[1], buffer_vals[1].dir[0], buffer_vals[1].dir[1]}
+				*  + (__m256d) {pos[0], pos[1], pos[0], pos[1]};
+
+			// const vec hit = buffer_val.dir * vec_fill(actual_dist) + pos;
+
+			/*
+			const BufferVal buffer_val = val_buffer[screen_x];
+			const double actual_dist = straight_dist * (double) buffer_val.one_over_cos_beta;
+			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
+
+			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_size.x - 1.0
+				|| hit[1] > current_level.map_size.y - 1.0) continue;
+
+			#ifndef PLANAR_MODE
+			const byte wall_point = *map_point(current_level.wall_data, hit[0], hit[1]);
+			if (current_level.get_point_height(wall_point, hit) != floor_height) continue;
+			#endif
+
+			const vec offset = vec_tex_offset(hit, ground.size);
+			Uint32 pixel = ground.pixels[(long) ((long) offset[1] * ground.size + offset[0])];
+
+			#ifdef SHADING_ENABLED
+			pixel = shade_ARGB_pixel(pixel, calculate_shade(settings.proj_dist / actual_dist, hit));
+			#endif
+
+			for (int x = 0; x < settings.ray_column_width; x++) pixbuf_row[x + screen_x] = pixel;
+			*/
+		}
+	}
+
+/////

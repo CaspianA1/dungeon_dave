@@ -84,9 +84,3 @@ void fill_val_buffers_for_planar_mode(const double angle_degrees) {
 }
 
 #endif
-
-void draw_colored_floor(const double horizon_line) {
-	const SDL_FRect floor = {0.0, horizon_line - 1.0, settings.screen_width, settings.screen_height - horizon_line + 1.0};
-	SDL_SetRenderDrawColor(screen.renderer, 148, 107, 69, SDL_ALPHA_OPAQUE);
-	SDL_RenderFillRectF(screen.renderer, &floor);
-}

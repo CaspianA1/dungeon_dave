@@ -50,6 +50,7 @@
 
 /*
 TODO:
+- perlin noise lightmapping
 - the wall corner floor algorithm
 - threaded floorcast doesn't work yet
 - a small point_height function
@@ -95,7 +96,6 @@ int main(void) {
 
 		prepare_for_drawing();
 		draw_skybox(player.angle, horizon_line);
-		// draw_colored_floor(horizon_line);
 
 		#ifndef PLANAR_MODE
 		raycast(&player, horizon_line, player.jump.height);
@@ -113,8 +113,8 @@ int main(void) {
 		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, &weapon);
 
-		parallel_floorcast(1, 0, player.pos, player.jump.height, horizon_line, settings.screen_height);
-		// fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
+		// parallel_floorcast(1, 0, player.pos, player.jump.height, horizon_line, settings.screen_height);
+		fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
 
 		teleport_player_if_needed(&player);
 
