@@ -1,6 +1,6 @@
-// https://gist.github.com/nowl/828013
+// derived greatly from https://gist.github.com/nowl/828013
 
-static const byte perlin_seed = 17, hash[256] = {
+static const byte perlin_seed = 17, permutations[256] = {
 	208, 34, 231, 213, 32, 248, 233, 56, 161, 78, 24, 140, 71, 48, 140, 254, 245, 255, 247, 247, 40,
 	185, 248, 251, 245, 28, 124, 204, 204, 76, 36, 1, 107, 28, 234, 163, 202, 224, 245, 128, 167, 204,
 	9, 92, 217, 54, 239, 174, 173, 102, 193, 189, 190, 121, 100, 108, 167, 44, 43, 77, 180, 204, 8, 81,
@@ -16,8 +16,8 @@ static const byte perlin_seed = 17, hash[256] = {
 };
 
 int noise2(const int x, const int y) {
-	const int tmp = hash[(y + perlin_seed) % 256];
-	return hash[(tmp + x) % 256];
+	const int tmp = permutations[(y + perlin_seed) % 256];
+	return permutations[(tmp + x) % 256];
 }
 
 double lerp(const double x, const double y, const double s) {
@@ -25,7 +25,7 @@ double lerp(const double x, const double y, const double s) {
 }
 
 double smooth_lerp(const double x, const double y, const double s) {
-	return lerp(x, y, s * s * (3 - s * 2));
+	return lerp(x, y, s * s * (3.0 - 2.0 * s));
 }
 
 double noise2d(const double x, const double y) {
@@ -44,11 +44,11 @@ double perlin(const double x, const double y, const double freq, const int depth
 	double xa = x * freq, ya = y * freq, amplitude = 1.0, fin = 0.0, div = 0.0;
 
 	for(int i = 0; i < depth; i++) {
-		div += 256 * amplitude;
+		div += 256.0 * amplitude;
 		fin += noise2d(xa, ya) * amplitude;
-		amplitude /= 2;
-		xa *= 2;
-		ya *= 2;
+		amplitude *= 0.5;
+		xa *= 2.0;
+		ya *= 2.0;
 	}
 
 	return fin / div;
