@@ -19,7 +19,7 @@ inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir,
 	return cond ? (width - 1) - offset : offset;
 }
 
-void handle_ray(const DataRaycast* const d, byte* const mark_floor_space, byte* const stop_from_tallest_wall,
+void handle_ray(const DataRaycast* const d, byte* const stop_from_tallest_wall,
 	double* const last_projected_wall_top, double* const projected_wall_bottom) {
 
 	const double cos_beta = cos(d -> p_angle - d -> theta);
@@ -50,7 +50,9 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space, byte* 
 	#endif
 
 	double wall_dest_h_sum = 0.0;
+
 	*last_projected_wall_top = *d -> last_wall_top;
+	if (*last_projected_wall_top == DBL_MAX) *last_projected_wall_top = settings.screen_height - 1;
 
 	for (byte i = *d -> last_point_height; i < d -> point_height; i++) {
 		DRect raised_wall_dest = wall_dest;
@@ -76,17 +78,17 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space, byte* 
 	//////////
 	double proj_wall_top = *d -> last_wall_top;
 	double proj_wall_bottom = proj_wall_top + wall_dest_h_sum;
-	*mark_floor_space = proj_wall_top < settings.screen_height;
-	//////////
+
 	if (proj_wall_bottom >= settings.screen_height) proj_wall_bottom = settings.screen_height - 1;
 	if (proj_wall_top < 0.0) proj_wall_top = 0.0;
 	else if (proj_wall_top >= settings.screen_height) proj_wall_top = settings.screen_height - 1;
 
 	for (int y = round(proj_wall_top); y < round(proj_wall_bottom); y++)
 		set_statemap_bit(occluded_by_walls, wall_dest.x, y);
-	//////////
+
 	*projected_wall_bottom = proj_wall_bottom;
 	*stop_from_tallest_wall = d -> point_height == current_level.max_point_height && d -> p_height <= current_level.max_point_height - 0.5;
+	//////////
 
 	/*
 	if (slice.x - mipmap_crop.x == 0 && d -> first_wall_hit) {
@@ -99,9 +101,6 @@ void handle_ray(const DataRaycast* const d, byte* const mark_floor_space, byte* 
 
 // once the colors are correct per vertical line, this will be done
 void mark_floor(const DataRaycast* const d, double last_projected_wall_top, const double projected_wall_bottom) {
-	if (last_projected_wall_top >= settings.screen_height)
-		last_projected_wall_top = settings.screen_height - 1.0; // stop overflow from the DBL_MAX
-
 	if (doubles_eq(last_projected_wall_top - projected_wall_bottom, 0.0)) return;
 
 	const int x = d -> screen_x;
@@ -136,11 +135,11 @@ void raycast(const Player* const player, const double horizon_line, const double
 						hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x
 					};
 
-					byte mark_floor_space, stop_from_tallest_wall;
+					byte stop_from_tallest_wall;
 					double last_projected_wall_top, projected_wall_bottom;
 
-					handle_ray(&raycast_data, &mark_floor_space, &stop_from_tallest_wall, &last_projected_wall_top, &projected_wall_bottom);
-					// if (mark_floor_space) mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
+					handle_ray(&raycast_data, &stop_from_tallest_wall, &last_projected_wall_top, &projected_wall_bottom);
+					mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
 					if (stop_from_tallest_wall) break;
 
 					at_first_hit = 0;

@@ -114,7 +114,7 @@ int main(void) {
 			deinit_all(&player, &weapon);
 
 		// parallel_floorcast(1, 0, player.pos, player.jump.height, horizon_line, settings.screen_height);
-		fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
+		// fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
 
 		teleport_player_if_needed(&player);
 
