@@ -469,3 +469,19 @@ if (ray.curr_tile[0] == 2.0 && ray.curr_tile[1] == 6.0) {
 }
 
 /////
+
+/*
+if (height_delta > 0.0) {
+	printf("Landed on thing, with a height delta of %lf\n", height_delta);
+	landed_on_thing = 1;
+	ground_height = thing_height + 1.0;
+	// jump -> jumping = 0;
+	break;
+}
+else if (height_delta > -0.05) {
+	hit_head = 1;
+	break;
+}
+*/
+
+/////

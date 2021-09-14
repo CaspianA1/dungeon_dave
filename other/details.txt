@@ -35,7 +35,6 @@ problems:
 	- bogo is completely light with -Ofast when he shouldn't be
 	- enemies have jerky movement sometimes that can make them temporarily clip into a wall (reproduce it by jumping around, wait till the enemy moves at a slant, and then go to their position)
 	- fix enemy merging by making enemies account for thing collisions
-	- jitters when jumping on top of things
 	- some disappearing pixels for some textures far away
 
 completed:

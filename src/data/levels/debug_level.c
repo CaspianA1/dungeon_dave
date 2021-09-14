@@ -63,7 +63,7 @@ void load_debug_level(void) {
 	set_level_teleporters(&debug_level, teleporter_count);
 
 	set_level_animated_billboards(&debug_level, animated_billboard_count,
-		"assets/spritesheets/sonic.bmp", 6, 5, 30, 30, 2.5, 2.5, 0.0);
+		"assets/spritesheets/sonic.bmp", 6, 5, 30, 30, 2.5, 2.5, 0.1);
 
 	memcpy(&current_level, &debug_level, sizeof(Level));
 	set_level_enemy_instances(&current_level, enemy_instance_count);

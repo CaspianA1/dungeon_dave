@@ -1,6 +1,5 @@
 static const double
 	thing_hit_dist = 0.5,
-	thing_y_collision_delta = 0.5,
 	thing_box_axis_len = 0.3;
 
 const double min_fall_height_for_sound = 2.0;
@@ -51,8 +50,8 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	for (byte i = 0; i < current_level.thing_count; i++) {
 		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
 
-		const double y_delta = billboard_data -> height - p_height;
-		if (fabs(y_delta) >= thing_y_collision_delta) continue;
+		const double y_delta = fabs(billboard_data -> height - p_height);
+		if (y_delta >= 1.0) continue;
 
 		const BoundingBox thing_box = bounding_box_from_pos(billboard_data -> pos);
 
@@ -178,15 +177,15 @@ void update_jump(Jump* const jump, const vec pos) {
 		for (byte i = 0; i < current_level.thing_count; i++) {
 			const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
 			const double thing_height = billboard_data -> height;
-			const double height_delta = jump -> height - thing_height;
 
 			if (!vec_delta_exceeds(billboard_data -> pos, pos, thing_hit_dist)) {
-				if (height_delta > 0.0) {
+				const double top_thing_height = thing_height + 1.0;
+				if (jump -> height >= top_thing_height) {
 					landed_on_thing = 1;
-					ground_height = thing_height + 1.0;
+					ground_height = top_thing_height;
 					break;
 				}
-				else if (height_delta > -0.05) {
+				else if (jump -> height + 1.0 > thing_height) {
 					hit_head = 1;
 					break;
 				}
@@ -230,8 +229,9 @@ void update_jump(Jump* const jump, const vec pos) {
 		}
 	}
 
-	else if (ground_height < jump -> height) // falling
+	else if (ground_height < jump -> height) { // falling from running off an object
 		init_a_jump(jump, 1);
+	}
 
 	#endif
 
