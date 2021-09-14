@@ -441,3 +441,15 @@ if (slice.x - mipmap_crop.x == 0 && d -> first_wall_hit) {
 */
 
 /////
+
+static int x;
+if (keys[SDL_SCANCODE_T]) x++;
+if (keys[SDL_SCANCODE_Y]) x--;
+if (keys[SDL_SCANCODE_U]) x = 0;
+
+SDL_Rect r = {x, x, settings.screen_width - (x << 1), settings.screen_height - (x << 1)};
+
+SDL_RenderCopy(screen.renderer, screen.pixel_buffer, &r, NULL); // copy everything?
+SDL_RenderCopy(screen.renderer, screen.shape_buffer, &r, NULL);
+
+/////

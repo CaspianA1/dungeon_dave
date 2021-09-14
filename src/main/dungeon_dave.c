@@ -51,6 +51,7 @@
 
 /*
 TODO:
+- separate the z-buffer from the val buffer
 - the wall corner floor algorithm
 - threaded floorcast doesn't work yet
 - a small point_height function
