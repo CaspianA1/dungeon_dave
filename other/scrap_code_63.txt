@@ -453,3 +453,19 @@ SDL_RenderCopy(screen.renderer, screen.pixel_buffer, &r, NULL); // copy everythi
 SDL_RenderCopy(screen.renderer, screen.shape_buffer, &r, NULL);
 
 /////
+
+static double a = 0.0;
+const double step = 0.0001;
+if (keys[SDL_SCANCODE_T]) a += step;
+if (keys[SDL_SCANCODE_Y]) a -= step;
+if (keys[SDL_SCANCODE_U]) a = 0.0;
+
+ray.dist += a;
+
+/////
+
+if (ray.curr_tile[0] == 2.0 && ray.curr_tile[1] == 6.0) {
+	ray.dist++;
+}
+
+/////
