@@ -24,7 +24,7 @@ inlinable void update_max_fps(const int new_max_fps) {
 	settings.max_delay = 1000.0 / new_max_fps;
 }
 
-void init_SDL_buffers(const int new_width, const int new_height, const byte should_free) {
+void init_SDL_framebuffers(const int new_width, const int new_height, const byte should_free) {
 	SDL_Texture** const buffers[2] = {
 		&screen.pixel_buffer, &screen.shape_buffer
 	};
@@ -69,7 +69,7 @@ byte update_screen_dimensions(void) {
 		height_not_eq = new_height != settings.screen_height;
 
 	if (width_not_eq || height_not_eq) {
-		init_SDL_buffers(new_width, new_height, 1);
+		init_SDL_framebuffers(new_width, new_height, 1);
 		settings.avg_dimensions = (new_width + new_height) / 2;
 
 		deinit_statemap(occluded_by_walls);
@@ -80,7 +80,8 @@ byte update_screen_dimensions(void) {
 			settings.half_screen_width = new_width / 2;
 			update_proj_dist();
 
-			val_buffer = wrealloc(val_buffer, new_width * sizeof(BufferVal));
+			floorcast_val_buffer = wrealloc(floorcast_val_buffer, new_width * sizeof(FloorcastBufferVal));
+			depth_buffer = wrealloc(depth_buffer, new_width * sizeof(float));
 		}
 		if (height_not_eq) {
 			settings.screen_height = new_height;
@@ -148,7 +149,8 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 	srand(time(NULL));
 	keys = SDL_GetKeyboardState(NULL);
-	val_buffer = wmalloc(settings.screen_width * sizeof(BufferVal));
+	floorcast_val_buffer = wmalloc(settings.screen_width * sizeof(FloorcastBufferVal));
+	depth_buffer = wmalloc(settings.screen_width * sizeof(float));
 
 	StateMap init_statemap(const int, const int);
 	occluded_by_walls = init_statemap(settings.screen_width, settings.screen_height);
@@ -232,7 +234,8 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	deinit_gui_resources();
 	deinit_screen();
 
-	wfree(val_buffer);
+	wfree(floorcast_val_buffer);
+	wfree(depth_buffer);
 	deinit_statemap(occluded_by_walls);
 
 	TTF_Quit();

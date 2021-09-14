@@ -11,7 +11,7 @@ void init_screen(void) {
 	SDL_SetWindowTitle(screen.window, "Dungeon Dave");
 
 	screen.pixel_format = SDL_AllocFormat(PIXEL_FORMAT);
-	init_SDL_buffers(settings.screen_width, settings.screen_height, 0);
+	init_SDL_framebuffers(settings.screen_width, settings.screen_height, 0);
 }
 
 void deinit_screen(void) {

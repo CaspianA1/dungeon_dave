@@ -33,7 +33,7 @@ void handle_ray(const DataRaycast* const d, byte* const stop_from_tallest_wall,
 		wall_h
 	};
 
-	if (d -> first_wall_hit) update_val_buffer(wall_dest.x, corrected_dist, cos_beta, d -> dir);
+	if (d -> first_wall_hit) update_buffers(wall_dest.x, corrected_dist, cos_beta, d -> dir);
 
 	const Sprite wall_sprite = current_level.walls[d -> point - 1];
 	const SDL_Rect mipmap_crop = get_mipmap_crop_from_wall(&wall_sprite, wall_h);

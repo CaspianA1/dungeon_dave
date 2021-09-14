@@ -46,11 +46,13 @@ void fast_affine_floor(const byte floor_height, const vec pos, const double p_he
 			Checking for wall points that do not equal the floor height won't be needed either -> speedup
 			Also, with a visplane system, less y and x coordinates will be iterated over -> speedup */
 
+			#ifndef PLANAR_MODE
 			if (get_statemap_bit(occluded_by_walls, screen_x, pixbuf_y)) continue;
+			#endif
 
-			const BufferVal buffer_val = val_buffer[screen_x];
-			const double actual_dist = straight_dist * (double) buffer_val.one_over_cos_beta;
-			const vec hit = vec_line_pos(pos, buffer_val.dir, actual_dist);
+			const FloorcastBufferVal floorcast_buffer_val = floorcast_val_buffer[screen_x];
+			const double actual_dist = straight_dist * (double) floorcast_buffer_val.one_over_cos_beta;
+			const vec hit = vec_line_pos(pos, floorcast_buffer_val.dir, actual_dist);
 
 			if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_size.x - 1.0
 				|| hit[1] > current_level.map_size.y - 1.0) continue;
@@ -79,7 +81,7 @@ void fill_val_buffers_for_planar_mode(const double angle_degrees) {
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + p_angle;
-		update_val_buffer(screen_x, 0.0f, cosf(p_angle - theta), (vec) {cos(theta), sin(theta)});
+		update_buffers(screen_x, 0.0f, cosf(p_angle - theta), (vec) {cos(theta), sin(theta)});
 	}
 }
 

@@ -60,7 +60,7 @@ static void draw_processed_things(const double p_height, const double horizon_li
 		const double src_size_over_dest_size = thing.src_crop.w / size;
 
 		for (; (double) screen_pos.x < end_x; screen_pos.x += settings.ray_column_width) {
-			if ((double) val_buffer[(long) screen_pos.x].depth < corrected_dist) continue;
+			if ((double) depth_buffer[(long) screen_pos.x] < corrected_dist) continue;
 
 			const int src_offset = ((double) screen_pos.x - start_x) * src_size_over_dest_size;
 			src_column.x = src_offset + thing.src_crop.x;

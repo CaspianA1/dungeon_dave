@@ -52,9 +52,9 @@ typedef struct {
 } Screen;
 
 typedef struct {
-	float depth, one_over_cos_beta;
+	float one_over_cos_beta;
 	vec dir;
-} BufferVal;
+} FloorcastBufferVal;
 
 //////////
 
@@ -122,10 +122,12 @@ typedef struct {
 /////
 
 Screen screen;
-BufferVal* val_buffer;
-StateMap occluded_by_walls;
 Settings settings;
 Level current_level;
+
+FloorcastBufferVal* floorcast_val_buffer;
+float* depth_buffer;
+StateMap occluded_by_walls;
 
 SDL_Event event;
 const Uint8* keys;
