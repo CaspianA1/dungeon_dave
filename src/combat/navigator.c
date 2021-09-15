@@ -6,7 +6,7 @@ static void print_navigator(const CorrectedRoute corrected_route, const vec floa
 
 	for (int y = 0; y < current_level.map_size.y; y++) {
 		for (int x = 0; x < current_level.map_size.x; x++) {
-			const byte wall = map_point(current_level.wall_data, x, y);
+			const byte wall = *map_point(current_level.wall_data, x, y);
 			byte color;
 
 			if (pos.x == x && pos.y == y) color = 200;

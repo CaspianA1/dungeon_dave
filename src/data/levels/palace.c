@@ -1,6 +1,6 @@
 inlinable byte get_palace_point_height(const byte point, const vec pos) {
 	/* (void) point;
-	const double p = 0.0000001;
+	const double p = 0.0000001; // if used again, the map_point calls must be dereferenced
 	return map_point(current_level.heightmap, pos[0] - p, pos[1] - p); */
 
 	// return map_point(current_level.heightmap, pos[0] + p, pos[1] - p);

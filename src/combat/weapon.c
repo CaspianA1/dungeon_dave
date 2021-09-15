@@ -13,7 +13,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec di
 	DataDDA bullet = init_dda((double[2]) UNPACK_2(pos), (double[2]) UNPACK_2(dir), 0.4);
 
 	while (iter_dda(&bullet)) {
-		if (map_point(current_level.wall_data, bullet.curr_tile[0], bullet.curr_tile[1])) break;
+		if (*map_point(current_level.wall_data, bullet.curr_tile[0], bullet.curr_tile[1])) break;
 
 		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
 			EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
