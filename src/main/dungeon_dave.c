@@ -52,6 +52,7 @@
 /*
 TODO:
 - y-aiming for weapons
+- bilinear filtering for the lightmap
 - the wall corner floor algorithm
 - threaded floorcast doesn't work yet
 - a small point_height function
