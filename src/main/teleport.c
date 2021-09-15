@@ -19,7 +19,7 @@ byte teleport_if_needed(vec* const pos, double* const height, const byte drop_ac
 		const Teleporter teleporter = current_level.teleporters[i];
 
 		if (!vec_delta_exceeds(*pos, teleporter.from_billboard.pos, thing_collision_dist) &&
-			fabs(teleporter.from_billboard.height - *height) <= 1.0) {
+			fabs(teleporter.from_billboard.height - *height) < 1.0) {
 
 			play_sound(&teleporter_sound, 0);
 
