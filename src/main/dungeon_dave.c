@@ -51,7 +51,6 @@
 
 /*
 TODO:
-- keep the weapon centered in the middle of the screen
 - can no longer kill enemies
 - the wall corner floor algorithm
 - threaded floorcast doesn't work yet
@@ -75,7 +74,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 

@@ -61,7 +61,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 
 	// -1 -> cycle frame, 0 -> first frame
 	animate_weapon(&weapon -> animation_data, player -> pos, weapon -> status & mask_paces_sideways_weapon,
-		weapon -> status & mask_in_use_weapon, player -> y_pitch, player -> body.v);
+		weapon -> status & mask_in_use_weapon, player -> body.v);
 }
 
 #else

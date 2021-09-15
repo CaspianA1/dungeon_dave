@@ -64,7 +64,7 @@ inlinable ivec get_spritesheet_frame_origin(const DataAnimation* const animation
 }
 
 void animate_weapon(DataAnimation* const animation_data, const vec pos,
-	const byte paces_sideways_on_use, const byte in_use, const int y_pitch, const double v) {
+	const byte paces_sideways_on_use, const byte in_use, const double v) {
 
 	#ifndef SHADING_ENABLED
 	(void) pos;
@@ -99,7 +99,7 @@ void animate_weapon(DataAnimation* const animation_data, const vec pos,
 
 	const SDL_Rect screen_pos = {
 		(!paces_sideways_on_use && in_use) ? 0 : weapon_arc,
-		fabs(weapon_arc) + ((y_pitch < 0) ? 0 : y_pitch),
+		fabs(weapon_arc),
 		settings.screen_width, settings.screen_height
 	};
 
