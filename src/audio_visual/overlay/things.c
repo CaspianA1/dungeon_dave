@@ -13,7 +13,7 @@ static int cmp_things(const void* const a, const void* const b) {
 
 static void draw_processed_things(const double p_height, const double horizon_line) {
 	for (byte i = 0; i < current_level.thing_count; i++) {
-		Thing thing = current_level.thing_container[i];
+		const Thing thing = current_level.thing_container[i];
 		const DataBillboard billboard_data = *thing.billboard_data;
 
 		const double
