@@ -38,11 +38,11 @@ inlinable void draw_minimap(const vec pos) {
 	draw_colored_frect(color.r, color.g, color.b, 1.0, &player_dot);
 }
 
-inlinable void draw_crosshair(const int horizon_line) {
+inlinable void draw_crosshair(void) {
 	toggledef(KEY_TOGGLE_CROSSHAIR);
 
 	const byte half_dimensions = settings.screen_width / 40, thickness = settings.screen_width / 200;
-	const ivec center = {settings.half_screen_width, horizon_line};
+	const ivec center = {settings.half_screen_width, settings.half_screen_height};
 
 	const Color3 color = hud_colors[HUD];
 	SDL_SetRenderDrawColor(screen.renderer, color.r, color.g, color.b, SDL_ALPHA_OPAQUE);
@@ -86,9 +86,9 @@ inlinable void draw_hp(const double hp) {
 }
 
 // these are drawn to the window because if it were to the shape buffer, they would be rotated
-void draw_hud_elements(const Player* const player, const int horizon_line) {
+void draw_hud_elements(const Player* const player) {
 	if (player -> is_dead) return;
 	draw_minimap(player -> pos);
 	draw_hp(player -> hp);
-	draw_crosshair(horizon_line);
+	draw_crosshair();
 }

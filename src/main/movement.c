@@ -1,5 +1,5 @@
 static const double
-	thing_hit_dist = 0.5,
+	thing_collision_dist = 0.5,
 	thing_box_axis_len = 0.3;
 
 const double min_fall_height_for_sound = 2.0;
@@ -178,7 +178,7 @@ void update_jump(Jump* const jump, const vec pos) {
 			const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
 			const double thing_height = billboard_data -> height;
 
-			if (!vec_delta_exceeds(billboard_data -> pos, pos, thing_hit_dist)) {
+			if (!vec_delta_exceeds(billboard_data -> pos, pos, thing_collision_dist)) {
 				const double top_thing_height = thing_height + 1.0;
 				if (jump -> height >= top_thing_height) {
 					landed_on_thing = 1;

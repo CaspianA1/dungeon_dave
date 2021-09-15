@@ -40,7 +40,7 @@ inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const des
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
-void refresh(const Player* const player, const int horizon_line) {
+void refresh(const Player* const player) {
 	SDL_UnlockTexture(screen.pixel_buffer);
 	SDL_SetRenderTarget(screen.renderer, NULL);
 
@@ -83,8 +83,8 @@ void refresh(const Player* const player, const int horizon_line) {
 		draw_tilted(screen.shape_buffer, &dest_crop, tilt.val);
 	}
 
-	void draw_hud_elements(const Player* const, const int);
-	draw_hud_elements(player, horizon_line);
+	void draw_hud_elements(const Player* const);
+	draw_hud_elements(player);
 	
 	SDL_RenderPresent(screen.renderer);
 }

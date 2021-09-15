@@ -57,6 +57,13 @@ static void draw_processed_things(const double p_height, const double horizon_li
 		SDL_SetTextureColorMod(texture, shade, shade, shade);
 		#endif
 
+		//////////
+		if (settings.half_screen_height >= screen_pos.y && screen_pos.y + screen_pos.h >= settings.half_screen_height)
+			SDL_SetTextureColorMod(texture, 220, 20, 60);
+		else
+			SDL_SetTextureColorMod(texture, 255, 255, 255);
+		//////////
+
 		const double src_size_over_dest_size = thing.src_crop.w / size;
 
 		for (; (double) screen_pos.x < end_x; screen_pos.x += settings.ray_column_width) {

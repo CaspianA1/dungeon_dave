@@ -12,7 +12,6 @@ void deinit_weapon(const Weapon* const weapon) {
 static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir, const double p_height) {
 	DataDDA bullet = init_dda((double[2]) UNPACK_2(pos), (double[2]) UNPACK_2(dir), 0.4);
 
-	extern const double height_diff_for_interaction;
 	while (iter_dda(&bullet)) {
 		if (map_point(current_level.wall_data, bullet.curr_tile[0], bullet.curr_tile[1])) break;
 
@@ -25,7 +24,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec di
 				bullet_pos = vec_line_pos(pos, dir, bullet.dist);
 
 			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon -> dist_for_hit)
-				&& fabs(enemy_instance -> billboard_data.height - p_height) <= height_diff_for_interaction) {
+				&& fabs(enemy_instance -> billboard_data.height - p_height) <= 1.0) {
 
 				// enemy_instance -> recently_attacked = 1;
 				set_nth_bit(&enemy_instance -> status, 0);

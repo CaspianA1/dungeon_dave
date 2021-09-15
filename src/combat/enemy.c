@@ -6,8 +6,6 @@ static const byte // sound chance at tick = numerator_sound_chancee / max_rand_s
 	max_rand_sound_chance = 200, numerator_sound_chance = 1,
 	dist_wake_from_sound = 5, attack_time_spacing = 1;
 
-const double height_diff_for_interaction = 0.6;
-
 void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemyState new_state, const byte silent) {
 	if (enemy_instance -> state == new_state) return;
 
@@ -37,7 +35,7 @@ void short_range_enemy_attack(const Enemy* const enemy, EnemyInstance* const ene
 
 	const double curr_time = SDL_GetTicks() / 1000.0;
 	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing && dist <= 1.0
-		&& height_diff <= height_diff_for_interaction) {
+		&& height_diff < 1.0) {
 
 		enemy_instance -> time_at_attack = curr_time;
 
@@ -67,7 +65,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 		return;
 	}
 
-	double dist = billboard_data -> dist;
+	const double dist = billboard_data -> dist;
 	const double height_diff = fabs(player -> jump.height - billboard_data -> height);
 	for (byte i = 0; i < 5; i++) set_sound_volume_from_dist(&enemy -> sounds[i], dist);
 	const EnemyState last_state = enemy_instance -> state;
@@ -76,7 +74,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 	and only play the Dead animation once, stopping on the last frame */
 	switch (enemy_instance -> state) {
 		case Idle: {
-			if (height_diff >= height_diff_for_interaction) break;
+			if (height_diff >= 1.0) break;
 
 			const byte awoke_from_sound = (dist <= dist_wake_from_sound) &&
 				((weapon -> status & mask_recently_used_weapon) || player -> jump.made_noise);
