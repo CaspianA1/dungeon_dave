@@ -13,7 +13,7 @@ Sprite init_sprite(const char* const, const byte);
 #define deinit_sprite(sprite) SDL_DestroyTexture(sprite.texture)
 #define deinit_pix_sprite(pix_sprite) wfree(pix_sprite.pixels)
 
-/////
+//////////
 
 typedef struct {
 	vec pos;
@@ -50,12 +50,12 @@ typedef struct {
 typedef struct {
 	const DataBillboard* const billboard_data;
 	const Sprite* const sprite;
-	SDL_Rect src_crop;
+	const SDL_Rect src_crop;
 } Thing;
 
 DataAnimation init_animation_data(const char* const, const int, const int, const int, const int, const byte);
 
-/////
+//////////
 
 typedef struct {
 	byte enabled;
