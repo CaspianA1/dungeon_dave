@@ -51,6 +51,7 @@ typedef struct {
 	const DataBillboard* const billboard_data;
 	const Sprite* const sprite;
 	const SDL_Rect src_crop;
+	// void (*const on_hit) (int, int);
 } Thing;
 
 DataAnimation init_animation_data(const char* const, const int, const int, const int, const int, const byte);

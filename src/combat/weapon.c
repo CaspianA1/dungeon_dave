@@ -9,8 +9,8 @@ void deinit_weapon(const Weapon* const weapon) {
 #define shoot_weapon(a, b, c, d)
 #else
 
-static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec dir, const double p_height) {
-	DataDDA bullet = init_dda((double[2]) UNPACK_2(pos), (double[2]) UNPACK_2(dir), 0.4);
+static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec p_dir, const double p_height) {
+	DataDDA bullet = init_dda(p_pos, p_dir, 0.4);
 
 	while (iter_dda(&bullet)) {
 		if (*map_point(current_level.wall_data, bullet.curr_tile[0], bullet.curr_tile[1])) break;
@@ -21,7 +21,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec pos, const vec di
 
 			const vec
 				enemy_pos = enemy_instance -> billboard_data.pos,
-				bullet_pos = vec_line_pos(pos, dir, bullet.dist);
+				bullet_pos = vec_line_pos(p_pos, p_dir, bullet.dist);
 
 			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon -> dist_for_hit)
 				&& fabs(enemy_instance -> billboard_data.height - p_height) <= 1.0) {

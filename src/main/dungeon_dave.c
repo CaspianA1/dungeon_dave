@@ -51,6 +51,7 @@
 
 /*
 TODO:
+- y-aiming for weapons
 - the wall corner floor algorithm
 - threaded floorcast doesn't work yet
 - a small point_height function
@@ -62,7 +63,6 @@ TODO:
 - better antialiasing
 - distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
-- 3D DDA pitch-angle translation
 - the rest of the trooper animations + long range AI
 - a unique hitbox size for each billboard
 - screen width and height to screen size via sublime text substitutions
