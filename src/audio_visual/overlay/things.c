@@ -48,6 +48,10 @@ static void draw_processed_things(const double p_height, const double horizon_li
 			settings.ray_column_width, size
 		};
 
+		void update_enemy_weapon_y_state(EnemyInstance* const, const SDL_FRect* const);
+		if (thing.possible_enemy_instance != NULL)
+			update_enemy_weapon_y_state((EnemyInstance* const) thing.possible_enemy_instance, &screen_pos);
+
 		SDL_Rect src_column = {.y = thing.src_crop.y, .w = 1, .h = thing.src_crop.h};
 
 		SDL_Texture* const texture = thing.sprite -> texture;
@@ -56,14 +60,6 @@ static void draw_processed_things(const double p_height, const double horizon_li
 		const byte shade = calculate_shade(size, billboard_data.pos);
 		SDL_SetTextureColorMod(texture, shade, shade, shade);
 		#endif
-
-		//////////
-		if (thing.possible_enemy_instance != NULL) {
-			const byte weapon_y_matches_enemy_y =
-				settings.half_screen_height >= screen_pos.y && screen_pos.y + screen_pos.h >= settings.half_screen_height;
-
-			// nth_bit_to_x(&thing.possible_enemy_instance -> status, 2, weapon_y_matches_enemy_y);
-		}
 
 		const double src_size_over_dest_size = thing.src_crop.w / size;
 

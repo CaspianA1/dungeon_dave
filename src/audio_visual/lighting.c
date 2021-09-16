@@ -35,7 +35,7 @@ inlinable byte flat_triangle(const vec pos, const Triangle triangle) {
 
 // samples per tile -> 150 = 36 million bytes, 50 -> 4 million bytes, 30 -> 1.44 million bytes
 static const byte lightmap_samples_per_tile = 30; // 15
-static const double perlin_frequency = 0.01, shader_downscaler = 0.1;
+static const double shader_downscaler = 0.1, perlin_downscaler = 0.8, perlin_frequency = 0.01;
 static const int perlin_amplitude = 10;
 
 Lightmap init_lightmap(void) {
@@ -57,7 +57,7 @@ Lightmap init_lightmap(void) {
 			double light = current_level.shader(pos) * shader_downscaler;
 
 			#ifdef PERLIN_SHADING
-			light += perlin(x, y, perlin_frequency, perlin_amplitude);
+			light += perlin(x, y, perlin_frequency, perlin_amplitude) * perlin_downscaler;
 			#endif
 
 			lightmap.data[y * lightmap.size.x + x] = ((light > 1.0) ? 1.0 : light) * 255;

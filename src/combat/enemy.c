@@ -6,6 +6,16 @@ static const byte // sound chance at tick = numerator_sound_chancee / max_rand_s
 	max_rand_sound_chance = 200, numerator_sound_chance = 1,
 	dist_wake_from_sound = 5, attack_time_spacing = 1;
 
+/* If the player's weapon has a y-pitch that is within the vertical bounds of the enemy, 
+a flag is set in the enemy instance to allow them to be attacked by a weapon */
+void update_enemy_weapon_y_state(EnemyInstance* const enemy_instance, const SDL_FRect* const thing_screen_pos) {
+	const byte weapon_y_matches_enemy_y =
+		settings.half_screen_height >= thing_screen_pos -> y &&
+		thing_screen_pos -> y + thing_screen_pos -> h >= settings.half_screen_height;
+
+	nth_bit_to_x(&enemy_instance -> status, 2, weapon_y_matches_enemy_y); // 3rd bit, set if weapon's vertical aim matches it
+}
+
 void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemyState new_state, const byte silent) {
 	if (enemy_instance -> state == new_state) return;
 

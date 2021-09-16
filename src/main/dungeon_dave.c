@@ -1,8 +1,10 @@
 #include "global_defs.h"
 #include "../audio_visual/sound.c"
+
 #include "../audio_visual/overlay/overlay.h"
-#include "../audio_visual/gui/gui.h"
 #include "../combat/combat.h"
+
+#include "../audio_visual/gui/gui.h"
 #include "global_types.h"
 
 #include "utils.c"
