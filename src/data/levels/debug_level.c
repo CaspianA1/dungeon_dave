@@ -40,7 +40,7 @@ void load_debug_level(void) {
 	Level debug_level = init_level(map_width, map_height, 2.0, 2.0, 0.0);
 
 	set_level_skybox(&debug_level, "assets/skyboxes/red_mountains_2.bmp");
-	debug_level.max_point_height = 4; // is 5?
+	debug_level.max_point_height = 4;
 	debug_level.out_of_bounds_point = 1;
 	debug_level.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);
 	debug_level.get_point_height = get_debug_level_point_height;
