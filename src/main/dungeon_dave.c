@@ -53,7 +53,6 @@
 
 /*
 TODO:
-- set the crosshair to red if aiming at an enemy
 - delta time for time-dependent physics
 - increase shotgun loudness and eddie death loudness
 - nth_bit_to_x should use bitmasks in some way

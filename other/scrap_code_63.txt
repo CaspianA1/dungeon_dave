@@ -590,4 +590,16 @@ SDL_Texture* const texture = enemy_instance -> enemy -> animation_data.sprite.te
 if (weapon_y_matches_enemy_y) SDL_SetTextureColorMod(texture, 255, 0, 0);
 else SDL_SetTextureColorMod(texture, 255, 255, 255);
 
+///// An attempt at making the crosshair red when the enemy is on it (didn't work b/c also have to see if shot will actually hit)
+
+byte red_crosshair_for_enemy = 0;
+for (byte i = 0; i < current_level.enemy_instance_count; i++) {
+	if (bit_is_set(current_level.enemy_instances[i].status, mask_recently_attacked_enemy)) {
+		red_crosshair_for_enemy = 1;
+		break;
+	}
+}
+
+const Color3 color = red_crosshair_for_enemy ? (Color3) {255, 0, 0} : hud_colors[HUD];
+
 /////
