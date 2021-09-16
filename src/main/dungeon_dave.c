@@ -53,10 +53,10 @@
 
 /*
 TODO:
+- set the crosshair to red if aiming at an enemy
 - delta time for time-dependent physics
-- increase shotgun loudness
+- increase shotgun loudness and eddie death loudness
 - nth_bit_to_x should use bitmasks in some way
-- y-aiming for weapons
 - a blurred skybox
 - bilinear filtering for the lightmap
 - the wall corner floor algorithm

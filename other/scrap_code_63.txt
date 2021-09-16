@@ -585,3 +585,9 @@ else SDL_SetTextureColorMod(texture, 255, 255, 255);
 // SDL_SetTextureColorMod(current_level.skybox.sprite.texture, 255, 0, 0);
 
 /////
+
+SDL_Texture* const texture = enemy_instance -> enemy -> animation_data.sprite.texture;
+if (weapon_y_matches_enemy_y) SDL_SetTextureColorMod(texture, 255, 0, 0);
+else SDL_SetTextureColorMod(texture, 255, 255, 255);
+
+/////

@@ -13,7 +13,9 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 	DataDDA bullet = init_dda(p_pos, p_dir, 0.4);
 
 	while (iter_dda(&bullet)) {
-		if (*map_point(current_level.wall_data, bullet.curr_tile[0], bullet.curr_tile[1])) break;
+		const byte point = *map_point(current_level.wall_data, bullet.curr_tile[0], bullet.curr_tile[1]);
+		if (current_level.get_point_height(point, (vec) {bullet.curr_tile[0], bullet.curr_tile[1]}) > p_height)
+			break;
 
 		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
 			EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
@@ -24,7 +26,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 				bullet_pos = vec_line_pos(p_pos, p_dir, bullet.dist);
 
 			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon -> dist_for_hit)
-				&& fabs(enemy_instance -> billboard_data.height - p_height) <= 1.0) {
+				&& bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy)) {
 
 				set_bit(enemy_instance -> status, mask_recently_attacked_enemy);
 				enemy_instance -> hp -= weapon -> power;
