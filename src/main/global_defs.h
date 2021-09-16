@@ -111,6 +111,7 @@ const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
 
 #define mask_recently_attacked_enemy bitmasks[0]
 #define mask_long_range_attack_enemy bitmasks[1]
+#define mask_weapon_y_pitch_in_range_of_enemy bitmasks[2];
 
 /*
 https://www.spriters-resource.com/pc_computer/doomdoomii/
