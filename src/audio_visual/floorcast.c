@@ -8,6 +8,7 @@ inlinable Uint32* read_texture_row(const void* const pixels, const int pixel_pit
 
 #ifdef SHADING_ENABLED
 
+// this fn is fast b/c it depends on no floating-point operations
 inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 	int r = (byte) (pixel >> 16), g = (byte) (pixel >> 8), b = (byte) pixel;
 
@@ -15,7 +16,7 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 	g *= shade;
 	b *= shade;
 
-	r /= 255;
+	r /= 255; // the divs by 255 are optimized out by the compiler
 	g /= 255;
 	b /= 255;
 

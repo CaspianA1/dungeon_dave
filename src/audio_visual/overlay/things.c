@@ -102,7 +102,7 @@ DEF_THING_ADDER(still) {
 
 		const Sprite* const sprite = &billboard -> sprite;
 		const ivec size = sprite -> size;
-		const Thing thing = {billboard_data, sprite, {0, 0, size.x, size.y}};
+		const Thing thing = {billboard_data, sprite, {0, 0, size.x, size.y}, NULL};
 		memcpy(&current_level.thing_container[i], &thing, sizeof(Thing));
 	}
 }
@@ -115,7 +115,7 @@ DEF_THING_ADDER(teleporter) {
 		update_thing_values(billboard_data -> pos, p_pos, p_angle, &billboard_data -> beta, &billboard_data -> dist);
 
 		const Thing thing = {
-			billboard_data, &teleporter_sprite, {0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}
+			billboard_data, &teleporter_sprite, {0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}, NULL
 		};
 
 		memcpy(&current_level.thing_container[i + current_level.billboard_count], &thing, sizeof(Thing));
@@ -135,7 +135,7 @@ DEF_THING_ADDER(animated) {
 		const Thing thing = {
 			billboard_data, &immut_animation_data -> sprite,
 			rect_from_ivecs(get_spritesheet_frame_origin(&animated_billboard -> animation_data),
-				immut_animation_data -> frame_size)
+				immut_animation_data -> frame_size), NULL
 		};
 
 		progress_animation_data_frame_ind(animation_data);
@@ -160,7 +160,7 @@ DEF_THING_ADDER(enemy_instance) {
 
 		const Thing thing = {
 			billboard_data, &immut_animation_data -> sprite,
-			rect_from_ivecs(frame_origin, animation_data.immut.frame_size)
+			rect_from_ivecs(frame_origin, animation_data.immut.frame_size), NULL
 		};
 
 		memcpy(&current_level.thing_container
