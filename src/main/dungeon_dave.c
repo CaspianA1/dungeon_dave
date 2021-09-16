@@ -51,7 +51,9 @@
 
 /*
 TODO:
-- remove set_nth_bit calls, and replace with bitwise or sets
+- delta time for time-dependent physics
+- increase shotgun loudness
+- remove set_nth_bit calls, replace with bitwise or sets, and check_bit too
 - y-aiming for weapons
 - a blurred skybox
 - bilinear filtering for the lightmap

@@ -77,9 +77,9 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 			if (height_diff >= 1.0) break;
 
 			const byte awoke_from_sound = (dist <= dist_wake_from_sound) &&
-				((weapon -> status & mask_recently_used_weapon) || player -> jump.made_noise);
+				(bit_is_set(weapon -> status, mask_recently_used_weapon) || player -> jump.made_noise);
 
-			if (awoke_from_sound || (dist <= enemy -> dist_wake_from_idle) || (enemy_instance -> status & mask_recently_attacked_enemy))
+			if (awoke_from_sound || (dist <= enemy -> dist_wake_from_idle) || bit_is_set(enemy_instance -> status, mask_recently_attacked_enemy))
 				set_enemy_instance_state(enemy_instance, Chasing, 0);
 		}
 			break;
@@ -101,7 +101,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 			else if (nav_state == FailedBFS)
 				set_enemy_instance_state(enemy_instance, Idle, 0);
 
-			else if (enemy_instance -> status & mask_long_range_attack_enemy)
+			else if (bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy))
 				puts("Long range enemies are not supported yet");
 
 			else short_range_enemy_attack(enemy, enemy_instance, player, dist, height_diff);
@@ -117,7 +117,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 		if (rand_num <= numerator_sound_chance) play_sound(&enemy -> sounds[enemy_instance -> state], 0);
 	}
 
-	clear_nth_bit(&enemy_instance -> status, 0); // not recently attacked anymore
+	clear_bit(enemy_instance -> status, mask_recently_attacked_enemy);
 }
 
 inlinable void update_all_enemy_instances(Player* const player, const Weapon* const weapon) {

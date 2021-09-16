@@ -65,18 +65,6 @@ static void draw_processed_things(const double p_height, const double horizon_li
 			// nth_bit_to_x(&thing.possible_enemy_instance -> status, 2, weapon_y_matches_enemy_y);
 		}
 
-		/*
-		if (settings.half_screen_height >= screen_pos.y && screen_pos.y + screen_pos.h >= settings.half_screen_height
-			&& thing.possible_enemy_instance != NULL) {
-			thing.possible_enemy_instance -> flags |= mask_weapon_y_pitch_in_range_of_enemy;
-			SDL_SetTextureColorMod(texture, 220, 20, 60);
-		}
-		else SDL_SetTextureColorMod(texture, 255, 255, 255);
-		*/
-		//////////
-
-		// SDL_SetTextureColorMod(current_level.skybox.sprite.texture, 255, 0, 0);
-
 		const double src_size_over_dest_size = thing.src_crop.w / size;
 
 		for (; (double) screen_pos.x < end_x; screen_pos.x += settings.ray_column_width) {

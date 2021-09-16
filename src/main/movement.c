@@ -69,7 +69,7 @@ void update_pos(vec* const ref_pos, vec* const dir,
 	const double curr_time = SDL_GetTicks() / 1000.0; // in seconds
 	byte increasing_fov = 0;
 
-	if (body -> status & mask_forward_or_backward_movement) {
+	if (bit_is_set(body -> status, mask_forward_or_backward_movement)) {
 		const double t = curr_time - body -> time_of_move;
 		body -> v = body -> a * t;
 
@@ -106,8 +106,8 @@ void update_pos(vec* const ref_pos, vec* const dir,
 
 	vec movement = {0.0, 0.0};
 
-	if (body -> status & mask_forward_movement) movement += forward_back_movement;
-	if (body -> status & mask_backward_movement) movement -= forward_back_movement;
+	if (bit_is_set(body -> status, mask_forward_movement)) movement += forward_back_movement;
+	else if (bit_is_set(body -> status, mask_backward_movement)) movement -= forward_back_movement;
 
 	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
@@ -176,7 +176,7 @@ void update_jump(Jump* const jump, const vec pos) {
 	if (!first_call) { // first_call avoided for the same reason as explained in handle_thing_collisions
 		for (byte i = 0; i < current_level.thing_count; i++) {
 			const Thing* const thing = &current_level.thing_container[i];
-			if (!(thing -> status & mask_can_jump_on_thing)) continue;
+			if (!bit_is_set(thing -> status, mask_can_jump_on_thing)) continue;
 
 			const DataBillboard* const billboard_data = thing -> billboard_data;
 			const double thing_height = billboard_data -> height;

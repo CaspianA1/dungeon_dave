@@ -26,8 +26,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon -> dist_for_hit)
 				&& fabs(enemy_instance -> billboard_data.height - p_height) <= 1.0) {
 
-				// enemy_instance -> recently_attacked = 1;
-				set_nth_bit(&enemy_instance -> status, 0);
+				set_bit(enemy_instance -> status, mask_recently_attacked_enemy);
 				enemy_instance -> hp -= weapon -> power;
 
 				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte);
@@ -36,7 +35,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 				return;
 			}
 		}
-		if (weapon -> status & mask_short_range_weapon) break;
+		if (bit_is_set(weapon -> status, mask_short_range_weapon)) break;
 	}
 }
 
@@ -47,20 +46,20 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 
 	if (player -> is_dead) *frame_ind = 0;
 
-	const byte first_in_use = weapon -> status & mask_in_use_weapon;
+	const byte first_in_use = bit_is_set(weapon -> status, mask_in_use_weapon);
 
 	if (first_in_use && *frame_ind == 0)
-		clear_nth_bit(&weapon -> status, 0); // not in use
+		clear_bit(weapon -> status, mask_in_use_weapon);
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
-		weapon -> status |= mask_in_use_weapon | mask_recently_used_weapon;
+		set_bit(weapon -> status, mask_in_use_weapon | mask_recently_used_weapon);
 		play_sound(&weapon -> sound, 0);
 		shoot_weapon(weapon, player -> pos, player -> dir, player -> jump.height);
 	}
-	else clear_nth_bit(&weapon -> status, 3);
+	else clear_bit(weapon -> status, mask_recently_used_weapon); // recently used = within the last tick
 
 	// -1 -> cycle frame, 0 -> first frame
-	animate_weapon(&weapon -> animation_data, player -> pos, weapon -> status & mask_paces_sideways_weapon,
-		weapon -> status & mask_in_use_weapon, player -> body.v);
+	animate_weapon(&weapon -> animation_data, player -> pos, bit_is_set(weapon -> status, mask_paces_sideways_weapon),
+		bit_is_set(weapon -> status, mask_in_use_weapon), player -> body.v);
 }
 
 #else
