@@ -162,7 +162,7 @@ DEF_THING_ADDER(enemy_instance) {
 
 		const Thing thing = {
 			billboard_data, &immut_animation_data -> sprite,
-			rect_from_ivecs(frame_origin, animation_data.immut.frame_size), (struct EnemyInstance *const) enemy_instance
+			rect_from_ivecs(frame_origin, animation_data.immut.frame_size), (struct EnemyInstance*) enemy_instance
 		};
 
 		memcpy(&current_level.thing_container
