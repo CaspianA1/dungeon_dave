@@ -158,9 +158,11 @@ DEF_THING_ADDER(enemy_instance) {
 		const ivec frame_origin = get_spritesheet_frame_origin(&animation_data);
 		progress_enemy_instance_frame_ind(enemy_instance);
 
+		// the enemy instance ptr is cast with the explicit struct b/c EnemyInstance is a forward declaration in overlay.h
+
 		const Thing thing = {
 			billboard_data, &immut_animation_data -> sprite,
-			rect_from_ivecs(frame_origin, animation_data.immut.frame_size), NULL
+			rect_from_ivecs(frame_origin, animation_data.immut.frame_size), (struct EnemyInstance *const) enemy_instance
 		};
 
 		memcpy(&current_level.thing_container
