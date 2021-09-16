@@ -91,6 +91,9 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth) {
 	SDL_Surface* const mipmap = SDL_CreateRGBSurfaceWithFormat(0,
 		image -> w + (image -> w >> 1), image -> h, 32, PIXEL_FORMAT);
 
+	SDL_LockSurface(image);
+	SDL_LockSurface(mipmap);
+
 	SDL_Rect dest = {.w = image -> w, .h = image -> h};
 	while (dest.w != 0 || dest.h != 0) {
 		if (*depth == 0) dest.x = 0;
@@ -100,7 +103,13 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth) {
 		else dest.y += image -> h >> (*depth - 1);
 
 		#ifndef ANTIALIAS_FIRST_MIP_LEVEL
-		if (*depth == 0) SDL_BlitScaled(image, NULL, mipmap, &dest);
+		if (*depth == 0) {
+			SDL_UnlockSurface(image);
+			SDL_UnlockSurface(mipmap);
+			SDL_BlitScaled(image, NULL, mipmap, &dest);
+			SDL_LockSurface(image);
+			SDL_LockSurface(mipmap);
+		}
 		else
 		#endif
 		antialiased_downscale_by_2(image, mipmap, (ivec) {dest.x, dest.y}, *depth + 1);
@@ -122,6 +131,9 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth) {
 	SDL_SaveBMP(mipmap, buf);
 	id++;
 	*/
+
+	SDL_UnlockSurface(image);
+	SDL_UnlockSurface(mipmap);
 
 	return mipmap;
 }
