@@ -66,7 +66,7 @@ TODO:
 - distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
 - the rest of the trooper animations + long range AI
-- a unique hitbox size for each billboard
+- a unique hitbox size for each thing, and can run through some things
 - screen width and height to screen size via sublime text substitutions
 - heightmaps
 */

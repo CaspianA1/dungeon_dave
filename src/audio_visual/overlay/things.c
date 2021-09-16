@@ -103,7 +103,7 @@ DEF_THING_ADDER(still) {
 
 		const Sprite* const sprite = &billboard -> sprite;
 		const ivec size = sprite -> size;
-		const Thing thing = {billboard_data, sprite, {0, 0, size.x, size.y}, NULL};
+		const Thing thing = {mask_can_jump_on_thing, billboard_data, sprite, {0, 0, size.x, size.y}, NULL};
 		memcpy(&current_level.thing_container[i], &thing, sizeof(Thing));
 	}
 }
@@ -116,7 +116,7 @@ DEF_THING_ADDER(teleporter) {
 		update_thing_values(billboard_data -> pos, p_pos, p_angle, &billboard_data -> beta, &billboard_data -> dist);
 
 		const Thing thing = {
-			billboard_data, &teleporter_sprite, {0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}, NULL
+			0, billboard_data, &teleporter_sprite, {0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}, NULL
 		};
 
 		memcpy(&current_level.thing_container[i + current_level.billboard_count], &thing, sizeof(Thing));
@@ -134,7 +134,7 @@ DEF_THING_ADDER(animated) {
 			&billboard_data -> beta, &billboard_data -> dist);
 
 		const Thing thing = {
-			billboard_data, &immut_animation_data -> sprite,
+			mask_can_jump_on_thing, billboard_data, &immut_animation_data -> sprite,
 			rect_from_ivecs(get_spritesheet_frame_origin(&animated_billboard -> animation_data),
 				immut_animation_data -> frame_size), NULL
 		};
@@ -162,7 +162,7 @@ DEF_THING_ADDER(enemy_instance) {
 		// the enemy instance ptr is cast with the explicit struct b/c EnemyInstance is a forward declaration in overlay.h
 
 		const Thing thing = {
-			billboard_data, &immut_animation_data -> sprite,
+			mask_can_jump_on_thing, billboard_data, &immut_animation_data -> sprite,
 			rect_from_ivecs(frame_origin, animation_data.immut.frame_size), (struct EnemyInstance*) enemy_instance
 		};
 

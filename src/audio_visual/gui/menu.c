@@ -104,10 +104,7 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 					done = 1;
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					if (drawing_image) {
-						play_sound(&gui_resources.sound_on_click, 0);
-						mouse_down_after_image = 1;
-					}
+					if (drawing_image) mouse_down_after_image = 1;
 					break;
 				case SDL_MOUSEBUTTONUP:
 					if (drawing_image && mouse_down_after_image) {

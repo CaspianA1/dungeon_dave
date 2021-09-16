@@ -20,10 +20,10 @@
 */
 
 #define ANTIALIAS_FIRST_MIP_LEVEL
-// #define DISABLE_ENEMIES
+#define DISABLE_ENEMIES
 #define PERLIN_SHADING
 #define SHADING_ENABLED
-// #define SOUND_ENABLED
+#define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 // max: 1440 by 900
@@ -111,7 +111,9 @@ const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
 
 #define mask_recently_attacked_enemy bitmasks[0]
 #define mask_long_range_attack_enemy bitmasks[1]
-#define mask_weapon_y_pitch_in_range_of_enemy bitmasks[2];
+#define mask_weapon_y_pitch_in_range_of_enemy bitmasks[2]
+
+#define mask_can_jump_on_thing bitmasks[0]
 
 /*
 https://www.spriters-resource.com/pc_computer/doomdoomii/
