@@ -51,6 +51,7 @@
 
 /*
 TODO:
+- remove set_nth_bit calls, and replace with bitwise or sets
 - y-aiming for weapons
 - a blurred skybox
 - bilinear filtering for the lightmap

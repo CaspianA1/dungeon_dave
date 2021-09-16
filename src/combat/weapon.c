@@ -52,8 +52,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	if (first_in_use && *frame_ind == 0)
 		clear_nth_bit(&weapon -> status, 0); // not in use
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
-		set_nth_bit(&weapon -> status, 0); // in use
-		set_nth_bit(&weapon -> status, 3); // recently used
+		weapon -> status |= mask_in_use_weapon | mask_recently_used_weapon;
 		play_sound(&weapon -> sound, 0);
 		shoot_weapon(weapon, player -> pos, player -> dir, player -> jump.height);
 	}
