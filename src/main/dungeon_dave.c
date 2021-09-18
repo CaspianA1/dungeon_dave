@@ -54,7 +54,7 @@
 /*
 TODO:
 - delta time for time-dependent physics
-- increase shotgun loudness and eddie death loudness
+- increase shotgun loudness and eddie death loudness, and make the zap noise quieter
 - nth_bit_to_x should use bitmasks in some way
 - a blurred skybox
 - bilinear filtering for the lightmap

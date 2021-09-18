@@ -1,3 +1,7 @@
+static const double
+	weapon_dda_step = 0.4,
+	weapon_max_hit_dist = 0.5;
+
 void deinit_weapon(const Weapon* const weapon) {
 	deinit_sound(&weapon -> sound);
 	deinit_sprite(weapon -> animation_data.immut.sprite);
@@ -10,22 +14,21 @@ void deinit_weapon(const Weapon* const weapon) {
 #else
 
 static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec p_dir, const double p_height) {
-	DataDDA bullet = init_dda(p_pos, p_dir, 0.4);
+	DataDDA bullet = init_dda(p_pos, p_dir, weapon_dda_step);
 
 	while (iter_dda(&bullet)) {
-		const byte point = *map_point(current_level.wall_data, bullet.curr_tile[0], bullet.curr_tile[1]);
-		if (current_level.get_point_height(point, (vec) {bullet.curr_tile[0], bullet.curr_tile[1]}) > p_height)
-			break;
+		const vec bullet_pos = vec_line_pos(p_pos, p_dir, bullet.dist);
+
+		const byte point = *map_point(current_level.wall_data, bullet_pos[0], bullet_pos[1]);
+		if (current_level.get_point_height(point, (vec) {bullet_pos[0], bullet_pos[1]}) > p_height) break;
 
 		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
 			EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
 			if (enemy_instance -> state == Dead) continue;
 
-			const vec
-				enemy_pos = enemy_instance -> billboard_data.pos,
-				bullet_pos = vec_line_pos(p_pos, p_dir, bullet.dist);
+			const vec enemy_pos = enemy_instance -> billboard_data.pos;
 
-			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon -> dist_for_hit)
+			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon_max_hit_dist)
 				&& bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy)) {
 
 				set_bit(enemy_instance -> status, mask_recently_attacked_enemy);

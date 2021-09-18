@@ -123,10 +123,14 @@ inlinable double get_projected_y(const double horizon_line, const double half_sc
 #define vec_fill _mm_set1_pd
 #define vec_trunc(vec) _mm_round_pd(vec, _MM_FROUND_TRUNC)
 
-inlinable byte vec_delta_exceeds(const vec a, const vec b, const double dist) {
+inlinable byte vec_delta_exceeds(const vec a, const vec b, const double max_dist) {
 	const vec delta = a - b;
 	const double dist_squared = delta[0] * delta[0] + delta[1] * delta[1];
-	return dist_squared > dist * dist;
+	return dist_squared > max_dist * max_dist;
+}
+
+inlinable byte vec_out_of_bounds(const vec v) {
+	return v[0] < 0.0 || v[0] > current_level.map_size.x - 1.0 || v[1] < 0.0 || v[1] > current_level.map_size.y - 1.0;
 }
 
 inlinable vec vec_diff(const vec a, const vec b) {

@@ -184,21 +184,21 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 	/*
 	const Weapon first_weapon = {
-		.status = mask_short_range_weapon, .power = 4.0, .dist_for_hit = 0.5,
+		.status = mask_short_range_weapon, .power = 4.0,
 		.sound = init_sound("assets/audio/sound_effects/whip_crack.wav", 1),
 		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60, 0), {0.0, 0}}
 	};
 	*/
 
 	const Weapon first_weapon = {
-		.status = mask_paces_sideways_weapon, .power = 10.0, .dist_for_hit = 0.5,
+		.status = mask_paces_sideways_weapon, .power = 10.0,
 		.sound = init_sound("assets/audio/sound_effects/shotgun.wav", 1),
 		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30, 0), {0.0, 0}}
 	};
 
 	/*
 	const Weapon first_weapon = {
-		.status = mask_short_range_weapon | mask_paces_sideways_weapon, .power = 4.0, .dist_for_hit = 0.5,
+		.status = mask_short_range_weapon | mask_paces_sideways_weapon, .power = 4.0,
 		.sound = init_sound("assets/audio/enemy_sound_test/attack.wav", 1),
 		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/golden_dagger.bmp", 2, 5, 9, 22, 0), {0.0, 0}}
 	};

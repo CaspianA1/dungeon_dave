@@ -17,7 +17,7 @@ DataDDA init_dda(const vec origin, const vec dir, const double step) {
 	}
 	else {
 		ray_step[0] = step;
-		ray_length[0] = (curr_tile[0] + 1.0 - origin[0]) * unit_step_size[0];
+		ray_length[0] = (curr_tile[0] + step - origin[0]) * unit_step_size[0];
 	}
 
 	if (dir[1] < 0.0) {
@@ -26,7 +26,7 @@ DataDDA init_dda(const vec origin, const vec dir, const double step) {
 	}
 	else {
 		ray_step[1] = step;
-		ray_length[1] = (curr_tile[1] + 1.0 - origin[1]) * unit_step_size[1];
+		ray_length[1] = (curr_tile[1] + step - origin[1]) * unit_step_size[1];
 	}
 
 	// origin and dir are braced b/c vec -> double[2], and the arrays can't be copied directly
@@ -49,7 +49,7 @@ inlinable DataDDA peek_dda(DataDDA d) {
 
 inlinable byte iter_dda(DataDDA* const d_ref) {
 	DataDDA d = peek_dda(*d_ref);
-	if (ivec_out_of_bounds((ivec) {(int) d.curr_tile[0], (int) d.curr_tile[1]})) return 0;
+	if (vec_out_of_bounds((vec) {d.curr_tile[0], d.curr_tile[1]})) return 0;
 
 	d.step_count++;
 	memcpy(d_ref, &d, sizeof(DataDDA));

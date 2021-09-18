@@ -44,9 +44,7 @@ void short_range_enemy_attack(const Enemy* const enemy, EnemyInstance* const ene
 	Player* const player, const double dist, const double height_diff) {
 
 	const double curr_time = SDL_GetTicks() / 1000.0;
-	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing && dist <= 1.0
-		&& height_diff < 1.0) {
-
+	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing && dist <= 1.0 && height_diff < 1.0) {
 		enemy_instance -> time_at_attack = curr_time;
 
 		// when the decr hp is less than zero, the enemy instance clips into walls - why?
@@ -93,7 +91,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 				set_enemy_instance_state(enemy_instance, Chasing, 0);
 		}
 			break;
-		
+
 		case Chasing: { // pause and transition to attacking for long-range enemies
 			const NavigationState nav_state = update_route_if_needed(nav, player -> pos);
 			if (nav_state == ReachedDest)
