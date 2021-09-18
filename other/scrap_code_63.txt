@@ -603,3 +603,29 @@ for (byte i = 0; i < current_level.enemy_instance_count; i++) {
 const Color3 color = red_crosshair_for_enemy ? (Color3) {255, 0, 0} : hud_colors[HUD];
 
 /////
+
+/*
+double step, max_hit_dist;
+const byte short_range_weapon = bit_is_set(weapon -> status, mask_short_range_weapon);
+
+if (short_range_weapon) {
+	step = short_range_weapon_dda_step;
+	max_hit_dist = short_range_weapon_max_hit_dist;
+}
+else {
+	step = long_range_weapon_dda_step;
+	max_hit_dist = long_range_weapon_max_hit_dist;
+}
+*/
+
+/////
+
+/*
+{
+	const vec delta = enemy_pos - bullet_pos;
+	const double dist_squared = delta[0] * delta[0] + delta[1] * delta[1];
+	DEBUG(sqrt(dist_squared), lf);
+}
+*/
+
+/////

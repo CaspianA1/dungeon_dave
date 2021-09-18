@@ -1,5 +1,5 @@
 static const double
-	weapon_dda_step = 0.4,
+	weapon_dda_step = 0.3,
 	weapon_max_hit_dist = 0.5;
 
 void deinit_weapon(const Weapon* const weapon) {
@@ -13,6 +13,8 @@ void deinit_weapon(const Weapon* const weapon) {
 #define shoot_weapon(a, b, c, d)
 #else
 
+// the whip doesn't work up close
+
 static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec p_dir, const double p_height) {
 	DataDDA bullet = init_dda(p_pos, p_dir, weapon_dda_step);
 
@@ -22,6 +24,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 		const byte point = *map_point(current_level.wall_data, bullet_pos[0], bullet_pos[1]);
 		if (current_level.get_point_height(point, (vec) {bullet_pos[0], bullet_pos[1]}) > p_height) break;
 
+		byte collided = 0;
 		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
 			EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
 			if (enemy_instance -> state == Dead) continue;
@@ -31,16 +34,18 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon_max_hit_dist)
 				&& bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy)) {
 
+				// if (i == 1) puts("Hit");
+
 				set_bit(enemy_instance -> status, mask_recently_attacked_enemy);
 				enemy_instance -> hp -= weapon -> power;
 
 				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte);
 				if (enemy_instance -> hp <= 0.0) set_enemy_instance_state(enemy_instance, Dead, 0);
 				else play_sound(&enemy_instance -> enemy -> sounds[4], 0); // attacked
-				return;
+				collided = 1;
 			}
 		}
-		if (bit_is_set(weapon -> status, mask_short_range_weapon)) break;
+		if (collided || bit_is_set(weapon -> status, mask_short_range_weapon)) break;
 	}
 }
 

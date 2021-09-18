@@ -53,6 +53,7 @@
 
 /*
 TODO:
+- reject weapon hits if the player is facing the opposite direction, and accept all hits that are close enough + are facing the right direction
 - delta time for time-dependent physics
 - increase shotgun loudness and eddie death loudness, and make the zap noise quieter
 - nth_bit_to_x should use bitmasks in some way
@@ -66,7 +67,6 @@ TODO:
 - cannot wrap the mouse from the left to the right for a full-size screen
 - purple vertical scanlines for a full-size menu
 - an odd thin line on the bottom of the screen for the colored floor, and the top of each wall
-- better antialiasing
 - distance shading
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
 - the rest of the trooper animations + long range AI
