@@ -2,6 +2,8 @@ static const double
 	weapon_dda_step = 0.3,
 	weapon_max_hit_dist = 0.5;
 
+static const vec bullet_size = {0.1, 0.25};
+
 void deinit_weapon(const Weapon* const weapon) {
 	deinit_sound(&weapon -> sound);
 	deinit_sprite(weapon -> animation_data.immut.sprite);
@@ -17,24 +19,23 @@ void deinit_weapon(const Weapon* const weapon) {
 
 static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec p_dir, const double p_height) {
 	DataDDA bullet = init_dda(p_pos, p_dir, weapon_dda_step);
+	const byte is_short_range = bit_is_set(weapon -> status, mask_short_range_weapon);
 
 	while (iter_dda(&bullet)) {
-		const vec bullet_pos = vec_line_pos(p_pos, p_dir, bullet.dist);
+		const vec projectile_pos = vec_line_pos(p_pos, p_dir, bullet.dist);
+		const BoundingBox projectile_box = {projectile_pos, bullet_size};
 
-		const byte point = *map_point(current_level.wall_data, bullet_pos[0], bullet_pos[1]);
-		if (current_level.get_point_height(point, (vec) {bullet_pos[0], bullet_pos[1]}) > p_height) break;
+		const byte point = *map_point(current_level.wall_data, projectile_pos[0], projectile_pos[1]);
+		if (current_level.get_point_height(point, (vec) {projectile_pos[0], projectile_pos[1]}) > p_height) break;
 
 		byte collided = 0;
 		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
 			EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
 			if (enemy_instance -> state == Dead) continue;
+			const BoundingBox enemy_box = bounding_box_from_pos(enemy_instance -> billboard_data.pos);
 
-			const vec enemy_pos = enemy_instance -> billboard_data.pos;
-
-			if (!vec_delta_exceeds(enemy_pos, bullet_pos, weapon_max_hit_dist)
-				&& bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy)) {
-
-				// if (i == 1) puts("Hit");
+			if (aabb_collision(projectile_box, enemy_box) &&
+				bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy)) {
 
 				set_bit(enemy_instance -> status, mask_recently_attacked_enemy);
 				enemy_instance -> hp -= weapon -> power;
@@ -42,10 +43,11 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte);
 				if (enemy_instance -> hp <= 0.0) set_enemy_instance_state(enemy_instance, Dead, 0);
 				else play_sound(&enemy_instance -> enemy -> sounds[4], 0); // attacked
+
 				collided = 1;
 			}
 		}
-		if (collided || bit_is_set(weapon -> status, mask_short_range_weapon)) break;
+		if (collided || is_short_range) break;
 	}
 }
 

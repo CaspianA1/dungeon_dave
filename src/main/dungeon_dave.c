@@ -53,7 +53,7 @@
 
 /*
 TODO:
-- reject weapon hits if the player is facing the opposite direction, and accept all hits that are close enough + are facing the right direction
+- make the weapon bullet pos the center of its bounding box
 - delta time for time-dependent physics
 - increase shotgun loudness and eddie death loudness, and make the zap noise quieter
 - nth_bit_to_x should use bitmasks in some way
@@ -68,6 +68,7 @@ TODO:
 - purple vertical scanlines for a full-size menu
 - an odd thin line on the bottom of the screen for the colored floor, and the top of each wall
 - distance shading
+- better antialiasing by sampling from just the last mip level
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
 - the rest of the trooper animations + long range AI
 - a unique hitbox size for each thing, and can run through some things
@@ -79,7 +80,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
