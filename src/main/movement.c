@@ -1,6 +1,6 @@
 static const double
 	thing_collision_dist = 0.5,
-	thing_box_axis_len = 0.3;
+	thing_box_axis_len = 0.45; // 0.3
 
 const double min_fall_height_for_sound = 2.0;
 
@@ -16,9 +16,15 @@ inlinable byte aabb_collision(const BoundingBox a, const BoundingBox b) {
 	return aabb_axis_collision(a, b, 0) && aabb_axis_collision(a, b, 1);
 }
 
+/*
+BoundingBox init_bounding_box(const vec pos, const vec size) {
+
+}
+*/
+
 BoundingBox bounding_box_from_pos(const vec pos) {
 	const vec box_axis_side_len = vec_fill(thing_box_axis_len);
-	return (BoundingBox) {pos - box_axis_side_len / vec_fill(2.0), box_axis_side_len};
+	return (BoundingBox) {pos - box_axis_side_len * vec_fill(0.5), box_axis_side_len};
 }
 
 // aabb = axis-aligned bounding box

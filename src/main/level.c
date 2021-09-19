@@ -52,8 +52,9 @@ inlinable void fill_level_data(byte* const md, const byte point,
 
 inlinable void set_level_skybox(Level* const level, const char* const path) {
 	level -> skybox.enabled = 1;
-	const Sprite sprite = init_sprite(path, 0);
-	level -> skybox.sprite = sprite;
+	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);
+	level -> skybox.sprite = init_sprite(path, 0);
+	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "0", SDL_HINT_OVERRIDE);
 }
 
 // path
