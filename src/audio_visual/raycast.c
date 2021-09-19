@@ -94,16 +94,19 @@ void handle_ray(const DataRaycast* const d, byte* const stop_from_tallest_wall,
 // once the colors are correct per vertical line, this will be done
 void mark_floor(const DataRaycast* const d, const double last_projected_wall_top, const double projected_wall_bottom) {
 	if (doubles_eq(last_projected_wall_top - projected_wall_bottom, 0.0)) return;
+
 	const int x = d -> screen_x;
 	SDL_SetRenderDrawColor(screen.renderer, 0, 255 / (*d -> last_point_height + 1), 0, SDL_ALPHA_OPAQUE);
 
+	/*
 	static double offset = 0.0;
 	const double step = 0.001;
 	if (keys[SDL_SCANCODE_T]) offset -= step;
 	if (keys[SDL_SCANCODE_Y]) offset += step;
 	if (keys[SDL_SCANCODE_U]) offset = 0.0;
+	*/
 
-	SDL_RenderDrawLineF(screen.renderer, x + offset, last_projected_wall_top, x, projected_wall_bottom); // last wall top -> curr wall bottom
+	SDL_RenderDrawLineF(screen.renderer, x, last_projected_wall_top, x, projected_wall_bottom); // last wall top -> curr wall bottom
 }
 
 void raycast(const Player* const player, const double horizon_line, const double p_height) {
