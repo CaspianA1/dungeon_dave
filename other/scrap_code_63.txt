@@ -628,4 +628,58 @@ else {
 }
 */
 
+///// diffs:
+
+static byte first = 1;
+vec last_hit = {0.0, 0.0}, last_diff = {0.0, 0.0};
+
+for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
+	/* The remaining bottlenecks:
+	Checking for statemap bits will not be needed with a visplane system -> speedup
+	Also, that means that the statemap won't be needed anymore -> speedup
+	Checking for out-of-bound hits won't be needed either -> speedup
+	Checking for wall points that do not equal the floor height won't be needed either -> speedup
+	Also, with a visplane system, less y and x coordinates will be iterated over -> speedup */
+
+	#ifndef PLANAR_MODE
+	if (get_statemap_bit(occluded_by_walls, screen_x, pixbuf_y)) continue;
+	#endif
+
+	const FloorcastBufferVal floorcast_buffer_val = floorcast_val_buffer[screen_x];
+	const double actual_dist = straight_dist * (double) floorcast_buffer_val.one_over_cos_beta;
+	const vec hit = vec_line_pos(pos, floorcast_buffer_val.dir, actual_dist);
+
+	if (first) {
+		const vec diff = hit - last_hit;
+		const vec diff_diff = diff - last_diff;
+
+		DEBUG(screen_x, d);
+		DEBUG_VEC(hit);
+		DEBUG_VEC(diff);
+		DEBUG_VEC(diff_diff);
+		puts("---");
+
+		last_hit = hit;
+		last_diff = diff;
+	}
+
+	if (hit[0] < 1.0 || hit[1] < 1.0 || hit[0] > current_level.map_size.x - 1.0
+		|| hit[1] > current_level.map_size.y - 1.0) continue;
+
+	#ifndef PLANAR_MODE
+	const byte wall_point = *map_point(current_level.wall_data, hit[0], hit[1]);
+	if (current_level.get_point_height(wall_point, hit) != floor_height) continue;
+	#endif
+
+	const vec offset = vec_tex_offset(hit, ground.size);
+	Uint32 pixel = ground.pixels[(long) ((long) offset[1] * ground.size + offset[0])];
+
+	#ifdef SHADING_ENABLED
+	pixel = shade_ARGB_pixel(pixel, calculate_shade(settings.proj_dist / actual_dist, hit));
+	#endif
+
+	for (int x = 0; x < settings.ray_column_width; x++) pixbuf_row[x + screen_x] = pixel;
+}
+if (first) first = 0;
+
 /////

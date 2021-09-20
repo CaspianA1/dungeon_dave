@@ -15,11 +15,14 @@ void deinit_teleporter_data(void) {
 }
 
 byte teleport_if_needed(vec* const pos, double* const height, const byte drop_actor) {
+	const vec teleporter_box_dimensions = vec_fill(actor_box_side_len + 0.2); // teleporter box is a bit bigger than the actor box
+	const BoundingBox player_box = init_bounding_box(*pos, vec_fill(actor_box_side_len));
+
 	for (byte i = 0; i < current_level.teleporter_count; i++) {
 		const Teleporter teleporter = current_level.teleporters[i];
 
-		if (!vec_delta_exceeds(*pos, teleporter.from_billboard.pos, thing_box_side_len) &&
-			fabs(teleporter.from_billboard.height - *height) < 1.0) {
+		if (aabb_collision(player_box, init_bounding_box(teleporter.from_billboard.pos, teleporter_box_dimensions))
+			&& fabs(teleporter.from_billboard.height - *height) < 1.0) {
 
 			play_sound(&teleporter_sound, 0);
 

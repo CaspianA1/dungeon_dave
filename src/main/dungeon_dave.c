@@ -53,6 +53,7 @@
 
 /*
 TODO:
+- close-range attacks still don't work
 - make the weapon bullet pos the center of its bounding box
 - delta time for time-dependent physics
 - increase shotgun loudness and eddie death loudness, and make the zap noise quieter
@@ -80,7 +81,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_level_1, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 

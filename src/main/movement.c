@@ -1,5 +1,5 @@
 static const double
-	thing_box_side_len = 0.4, // the player's bounding box has the same size
+	actor_box_side_len = 0.4, // actor = player or enemy
 	min_fall_height_for_sound = 2.0;
 
 typedef struct {
@@ -39,7 +39,7 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	pos_change_with_x[0] += movement[0];
 	pos_change_with_y[1] += movement[1];
 
-	const vec box_dimensions = vec_fill(thing_box_side_len);
+	const vec box_dimensions = vec_fill(actor_box_side_len);
 
 	const BoundingBox player_boxes[2] = {
 		init_bounding_box(pos_change_with_x, box_dimensions),
@@ -47,7 +47,8 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	};
 
 	for (byte i = 0; i < current_level.thing_count; i++) {
-		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
+		Thing* const thing = &current_level.thing_container[i];
+		const DataBillboard* const billboard_data = thing -> billboard_data;
 
 		const double y_delta = fabs(billboard_data -> height - p_height);
 		if (y_delta >= 1.0) continue;
@@ -180,7 +181,7 @@ void update_jump(Jump* const jump, const vec pos) {
 			const DataBillboard* const billboard_data = thing -> billboard_data;
 			const double thing_height = billboard_data -> height;
 
-			if (!vec_delta_exceeds(billboard_data -> pos, pos, thing_box_side_len)) {
+			if (!vec_delta_exceeds(billboard_data -> pos, pos, actor_box_side_len)) {
 				const double top_thing_height = thing_height + 1.0;
 				if (jump -> height >= top_thing_height) {
 					landed_on_thing = 1;

@@ -2,7 +2,7 @@ static const double
 	weapon_dda_step = 0.3,
 	weapon_max_hit_dist = 0.5;
 
-static const vec bullet_size = {0.1, 0.25};
+static const vec projectile_size = {0.3, 0.3};
 
 void deinit_weapon(const Weapon* const weapon) {
 	deinit_sound(&weapon -> sound);
@@ -23,7 +23,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 
 	while (iter_dda(&bullet)) {
 		const vec projectile_pos = vec_line_pos(p_pos, p_dir, bullet.dist);
-		const BoundingBox projectile_box = {projectile_pos, bullet_size};
+		const BoundingBox projectile_box = init_bounding_box(projectile_pos, projectile_size);
 
 		const byte point = *map_point(current_level.wall_data, projectile_pos[0], projectile_pos[1]);
 		if (current_level.get_point_height(point, (vec) {projectile_pos[0], projectile_pos[1]}) > p_height) break;
@@ -32,7 +32,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
 			EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
 			if (enemy_instance -> state == Dead) continue;
-			const BoundingBox enemy_box = bounding_box_from_pos(enemy_instance -> billboard_data.pos);
+			const BoundingBox enemy_box = init_bounding_box(enemy_instance -> billboard_data.pos, vec_fill(actor_box_side_len));
 
 			if (aabb_collision(projectile_box, enemy_box) &&
 				bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy)) {
