@@ -709,3 +709,9 @@ for (byte i = 0; i < FLOORCAST_THREADS; i++) {
 puts("---");
 
 /////
+
+all: build run
+# all:
+	# clang -lSDL2 -Wall -Wextra -O3 purple_vline_q.c && ./a.out
+
+/////

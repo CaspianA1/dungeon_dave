@@ -26,14 +26,12 @@ void deinit_screen(void) {
 }
 
 inlinable void prepare_for_drawing(void) {
-	clear_statemap(occluded_by_walls);
-
 	SDL_SetRenderDrawColor(screen.renderer, 0, 0, 0, 0);
-	SDL_RenderClear(screen.renderer); // clearing the window
+	SDL_RenderClear(screen.renderer); // clearing the window; this should not be needed once all floor parts are drawn
 
 	SDL_LockTexture(screen.pixel_buffer, NULL, &screen.pixels, &screen.pixel_pitch);
 	SDL_SetRenderTarget(screen.renderer, screen.shape_buffer);
-	SDL_RenderClear(screen.renderer); // cleaning the shape buffer
+	SDL_RenderClear(screen.renderer); // clearing the shape buffer
 }
 
 inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const dest_crop, const double tilt) {
@@ -69,7 +67,7 @@ void refresh(const Player* const player) {
 			y_crop_adjust = tan_tilt * settings.screen_height;
 
 		/*
-		const double new_virtual_scr_w = settings.screen_width - x_crop_adjust * 2.0;;
+		const double new_virtual_scr_w = settings.screen_width - x_crop_adjust * 2.0;
 		settings.proj_dist = new_virtual_scr_w / 2.0 / tan(to_radians(settings.fov / 2.0));
 		*/
 

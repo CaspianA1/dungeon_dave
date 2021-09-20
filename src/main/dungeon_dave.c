@@ -62,7 +62,6 @@ TODO:
 - a small point_height function
 - sometimes, a delay when pressing start
 - cannot wrap the mouse from the left to the right for a full-size screen
-- purple vertical scanlines for a full-size menu
 - distance shading
 - better antialiasing by sampling from just the last mip level
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
@@ -108,6 +107,7 @@ int main(void) {
 		draw_skybox(player.angle, horizon_line);
 
 		#ifndef PLANAR_MODE
+		clear_statemap(occluded_by_walls);
 		raycast(&player, horizon_line, player.jump.height);
 		draw_things(player.pos, to_radians(player.angle), player.jump.height, horizon_line);
 

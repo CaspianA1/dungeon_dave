@@ -10,13 +10,13 @@ typedef struct {
 typedef struct {
 	Textbox* const textboxes;
 	const byte textbox_count;
-	const Color3 fg_color, bg_color, border_color;
+	const Color3 text_color, main_color, border_color;
 } Menu;
 
 // variadic params: pos fn, on_click fn, text
-Menu init_menu(const Color3 fg_color, const Color3 bg_color, const Color3 border_color, const unsigned textbox_count, ...) {
+Menu init_menu(const Color3 text_color, const Color3 main_color, const Color3 border_color, const unsigned textbox_count, ...) {
 	const Menu menu = {
-		wmalloc(textbox_count * sizeof(Textbox)), textbox_count, fg_color, bg_color, border_color
+		wmalloc(textbox_count * sizeof(Textbox)), textbox_count, text_color, main_color, border_color
 	};
 
 	va_list textbox_data;
@@ -26,7 +26,7 @@ Menu init_menu(const Color3 fg_color, const Color3 bg_color, const Color3 border
 		Textbox* const textbox = &menu.textboxes[i];
 		textbox -> pos_and_size_fn = va_arg(textbox_data, pos_and_size_fn_t);
 		textbox -> on_click_fn = va_arg(textbox_data, on_click_fn_t);
-		textbox -> rendered_text = make_texture_from_text(va_arg(textbox_data, const char*), fg_color);
+		textbox -> rendered_text = make_texture_from_text(va_arg(textbox_data, const char*), text_color);
 	}
 
 	va_end(textbox_data);
@@ -43,22 +43,27 @@ void deinit_menu(const Menu* const menu) {
 }
 
 InputStatus render_menu(const Menu* const menu, const byte mouse_ready) {
-	const Color3 bg_color = menu -> bg_color, fg_color = menu -> fg_color, border_color = menu -> border_color;
+	const Color3 main_color = menu -> main_color, text_color = menu -> text_color;
 
-	SDL_SetRenderDrawColor(screen.renderer, border_color.r, border_color.g, border_color.b, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(screen.renderer);
+	/* This is done instead of a SDL_RenderClear call because there's an odd Metal bug
+	where the background becomes corrupted when clearing with a whole color in full-screen mode. */
+	const SDL_Rect background = {0, 0, settings.screen_width, settings.screen_height};
+	draw_colored_rect(menu -> border_color, &background);
 
+	//////////
 	const int border_width = settings.avg_dimensions / 50;
 	const int twice_border_width = border_width << 1;
-	SDL_SetRenderDrawColor(screen.renderer, bg_color.r, bg_color.g, bg_color.b, SDL_ALPHA_OPAQUE);
 
-	const SDL_Rect main_bg_rect = {
+	const SDL_Rect main_color_rect = {
 		border_width, border_width,
 		settings.screen_width - twice_border_width,
 		settings.screen_height - twice_border_width
 	};
 
-	SDL_RenderFillRect(screen.renderer, &main_bg_rect);
+	draw_colored_rect(main_color, &main_color_rect);
+	//////////
+
+	const Color3 inverse_text_color = {255 - text_color.r, 255 - text_color.g, 255 - text_color.b};
 
 	for (byte i = 0; i < menu -> textbox_count; i++) {
 		Textbox* const textbox = &menu -> textboxes[i];
@@ -68,7 +73,7 @@ InputStatus render_menu(const Menu* const menu, const byte mouse_ready) {
 		SDL_GetMouseState(&mouse.x, &mouse.y);
 
 		if (mouse.x >= box.x && mouse.x <= box.x + box.w && mouse.y >= box.y && mouse.y <= box.y + box.h) {
-			SDL_SetRenderDrawColor(screen.renderer, 255 - fg_color.r, 255 - fg_color.g, 255 - fg_color.b, SDL_ALPHA_OPAQUE);
+			draw_colored_rect(inverse_text_color, &box);
 
 			if (mouse_ready && event.type == SDL_MOUSEBUTTONDOWN) {
 				play_sound(&gui_resources.sound_on_click, 0);
@@ -77,10 +82,7 @@ InputStatus render_menu(const Menu* const menu, const byte mouse_ready) {
 			}
 		}
 
-		else SDL_SetRenderDrawColor(screen.renderer, bg_color.r, bg_color.g, bg_color.b, SDL_ALPHA_OPAQUE);
-
-		SDL_RenderFillRect(screen.renderer, &box);
-		SDL_RenderCopy(screen.renderer, textbox -> rendered_text, NULL, &box);
+		SDL_RenderCopy(screen.renderer, textbox -> rendered_text, NULL, &box); // render text
 	}
 
 	return ProceedAsNormal;
@@ -90,7 +92,6 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 	SDL_ShowCursor(SDL_ENABLE);
 
 	InputStatus input = ProceedAsNormal;
-
 	byte drawing_image = image_before_menu != NULL;
 	byte mouse_down_after_image = !drawing_image, mouse_up_after_image = !drawing_image, done = 0;
 

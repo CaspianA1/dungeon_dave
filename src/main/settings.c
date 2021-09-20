@@ -141,7 +141,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	init_audio_subsystem();
 
 	STARTUP_LOG("font subsystem");
-	if (TTF_Init() == -1) FAIL("Unable to initialize the font library: %s", SDL_GetError());
+	if (TTF_Init() == -1) FAIL("Unable to initialize the font library: %s\n", TTF_GetError());
 
 	STARTUP_LOG("gui resources");
 	void init_gui_resources(void);

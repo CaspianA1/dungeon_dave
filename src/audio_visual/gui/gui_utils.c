@@ -19,10 +19,13 @@ byte update_toggle(Toggle* const toggle) {
 	return toggle -> enabled;
 }
 
-inlinable void draw_colored_frect(const byte r, const byte g, const byte b,
-	const double shade, const SDL_FRect* const frect) {
+inlinable void draw_colored_rect(const Color3 color, const SDL_Rect* const rect) {
+	SDL_SetRenderDrawColor(screen.renderer, color.r, color.g, color.b, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRect(screen.renderer, rect);
+}
 
-	SDL_SetRenderDrawColor(screen.renderer, r * shade, g * shade, b * shade, SDL_ALPHA_OPAQUE);
+inlinable void draw_shaded_frect(const Color3 color, const double shade, const SDL_FRect* const frect) {
+	SDL_SetRenderDrawColor(screen.renderer, color.r * shade, color.g * shade, color.b * shade, SDL_ALPHA_OPAQUE);
 	SDL_RenderFillRectF(screen.renderer, frect);
 }
 
