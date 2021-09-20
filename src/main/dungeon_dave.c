@@ -54,7 +54,7 @@
 /*
 TODO:
 - close-range attacks still don't work
-- delta time for time-dependent physics
+- delta time for time-independent physics
 - increase shotgun loudness and eddie death loudness, and make the zap noise quieter
 - nth_bit_to_x should use bitmasks in some way
 - a blurred skybox
