@@ -13,7 +13,7 @@ void* floorcast_caller(void* const data) {
 	const FloorcastCallerParams params = *(FloorcastCallerParams*) data;
 	const ImmutFloorcastCallerParams* const i_params = params.immut;
 
-	fast_affine_floor(i_params -> floor_height, i_params -> pos, i_params -> p_height, params.y_start, params.y_end);
+	fast_affine_floor(i_params -> floor_height, params.y_start, params.y_end, i_params -> pos, i_params -> p_height);
 	pthread_exit(NULL);
 }
 

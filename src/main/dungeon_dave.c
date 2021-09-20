@@ -80,7 +80,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_hallway, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
@@ -121,7 +121,7 @@ int main(void) {
 			deinit_all(&player, &weapon);
 
 		// parallel_floorcast(1, 0, player.pos, player.jump.height, horizon_line, settings.screen_height);
-		fast_affine_floor(0, player.pos, player.jump.height, horizon_line, settings.screen_height);
+		fast_affine_floor(0, horizon_line, settings.screen_height, player.pos, player.jump.height);
 
 		teleport_player_if_needed(&player);
 

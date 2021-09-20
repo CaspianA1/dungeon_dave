@@ -26,17 +26,16 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 #endif
 
 static PixSprite ground;
-void fast_affine_floor(const byte floor_height, const vec pos, const double p_height, const int horizon_line, const int y_end) {
+void fast_affine_floor(const byte floor_height, const int horizon_line, const int end_y, const vec pos, const double p_height) {
 	const double eye_height = (p_height - floor_height) + 0.5;
 	if (eye_height < 0.0) return;
 
-	// horizon_line is y_start
-	for (int row = 1; row <= y_end - horizon_line; row++) {
-		const int pixbuf_y = horizon_line + row - 1;
-		if (pixbuf_y < 0) continue;
+	const int start_y = (horizon_line < 0) ? 0 : horizon_line;
 
-		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, pixbuf_y);
+	for (int screen_y = start_y; screen_y < end_y; screen_y++) {
+		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, screen_y);
 
+		const int row = screen_y - horizon_line + 1;
 		const double straight_dist = eye_height / row * settings.proj_dist;
 
 		for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
@@ -48,7 +47,7 @@ void fast_affine_floor(const byte floor_height, const vec pos, const double p_he
 			Also, with a visplane system, less y and x coordinates will be iterated over -> speedup */
 
 			#ifndef PLANAR_MODE
-			if (get_statemap_bit(occluded_by_walls, screen_x, pixbuf_y)) continue;
+			if (get_statemap_bit(occluded_by_walls, screen_x, screen_y)) continue;
 			#endif
 
 			const FloorcastBufferVal floorcast_buffer_val = floorcast_val_buffer[screen_x];
