@@ -1,5 +1,7 @@
 // derived greatly from https://gist.github.com/nowl/828013 and https://en.wikipedia.org/wiki/Perlin_noise
 
+#ifdef PERLIN_SHADING
+
 static const byte perlin_seed = 17, rand_256[256] = {
 	208, 34, 231, 213, 32, 248, 233, 56, 161, 78, 24, 140, 71, 48, 140, 254, 245, 255, 247, 247, 40,
 	185, 248, 251, 245, 28, 124, 204, 204, 76, 36, 1, 107, 28, 234, 163, 202, 224, 245, 128, 167, 204,
@@ -49,3 +51,5 @@ double perlin(const double x, const double y, const double freq, const int depth
 
 	return fin / div;
 }
+
+#endif
