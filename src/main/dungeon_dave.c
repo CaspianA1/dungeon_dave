@@ -28,7 +28,6 @@
 #include "../audio_visual/misc.c"
 #include "../audio_visual/raycast.c"
 #include "../audio_visual/floorcast.c"
-#include "../audio_visual/parallel_floorcast.c"
 
 #include "../audio_visual/gui/gui_utils.c"
 #include "../audio_visual/gui/menu.c"
@@ -53,8 +52,7 @@
 
 /*
 TODO:
-- all floorcasting code in one file
-- bottom stitch for parallel floorcast, and a small occasional top stitch
+- a small occasional top stitch for floorcasting
 - close-range attacks still don't work
 - delta time for time-independent physics
 - increase shotgun loudness and eddie death loudness, and make the zap noise quieter
