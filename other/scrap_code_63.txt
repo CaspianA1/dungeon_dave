@@ -696,3 +696,16 @@ printf("For drawer #%d, draw from %d to %d\n", i + 1, params.y_start, params.y_e
 */
 
 /////
+
+for (byte i = 0; i < FLOORCAST_THREADS; i++) {
+	const int drawer_start = cast_start + y_step * i;
+	const int drawer_end = (i == FLOORCAST_THREADS - 1) ? cast_end : drawer_start + y_step;
+	printf("From y = %d to y = %d\n", drawer_start, drawer_end);
+
+	const FloorcastCallerParams copy_params = {&immut_params, drawer_start, drawer_end};
+	memcpy(params + i, &copy_params, sizeof(FloorcastCallerParams));
+	pthread_create(threads + i, NULL, floorcast_caller, params + i);
+}
+puts("---");
+
+/////

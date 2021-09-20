@@ -87,7 +87,7 @@ InputStatus render_menu(const Menu* const menu, const byte mouse_ready) {
 }
 
 InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_menu) {
-	SDL_ShowCursor(SDL_TRUE);
+	SDL_ShowCursor(SDL_ENABLE);
 
 	InputStatus input = ProceedAsNormal;
 
@@ -126,6 +126,6 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 		after_gui_event(before);
 	}
 
-	SDL_ShowCursor(SDL_FALSE);
+	SDL_ShowCursor(SDL_DISABLE);
 	return input;
 }

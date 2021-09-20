@@ -127,7 +127,7 @@ int main(void) {
 			deinit_all(&player, &weapon);
 
 		parallel_floorcast(0, player.pos, player.jump.height, horizon_line);
-		floorcast(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
+		// floorcast(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
 
 		teleport_player_if_needed(&player);
 

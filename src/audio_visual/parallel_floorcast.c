@@ -32,11 +32,13 @@ void parallel_floorcast(const byte floor_height, const vec pos, const double p_h
 	FloorcastCallerParams params[FLOORCAST_THREADS];
 
 	for (byte i = 0; i < FLOORCAST_THREADS; i++) {
-		const int new_start = cast_start + y_step * i;
-		const FloorcastCallerParams copy_params = {&immut_params, new_start, new_start + y_step};
-		memcpy(params + i, &copy_params, sizeof(FloorcastCallerParams));
+		const int drawer_start = cast_start + y_step * i;
+		const int drawer_end = (i == FLOORCAST_THREADS - 1) ? cast_end : drawer_start + y_step;
 
+		const FloorcastCallerParams copy_params = {&immut_params, drawer_start, drawer_end};
+		memcpy(params + i, &copy_params, sizeof(FloorcastCallerParams));
 		pthread_create(threads + i, NULL, floorcast_caller, params + i);
 	}
+
 	for (byte i = 0; i < FLOORCAST_THREADS; i++) pthread_join(threads[i], NULL);
 }
