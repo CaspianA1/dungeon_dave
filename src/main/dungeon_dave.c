@@ -53,6 +53,7 @@
 
 /*
 TODO:
+- bottom stitch for parallel floorcast
 - close-range attacks still don't work
 - delta time for time-independent physics
 - increase shotgun loudness and eddie death loudness, and make the zap noise quieter
@@ -60,7 +61,6 @@ TODO:
 - a blurred skybox
 - bilinear filtering for the lightmap
 - the wall corner floor algorithm
-- threaded floorcast doesn't work yet
 - a small point_height function
 - sometimes, a delay when pressing start
 - a stitch for floorcasting
@@ -80,7 +80,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_hallway, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
@@ -127,9 +127,8 @@ int main(void) {
 		if (player.is_dead && death_effect(&player))
 			deinit_all(&player, &weapon);
 
-		// parallel_floorcast(3, 0, player.pos, player.jump.height, horizon_line);
-		fast_affine_floor(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
-		// fast_affine_floor(0, horizon_line, settings.half_screen_height, settings.screen_height, player.pos, player.jump.height);
+		parallel_floorcast(0, player.pos, player.jump.height, horizon_line);
+		// fast_affine_floor(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
 
 		teleport_player_if_needed(&player);
 

@@ -20,28 +20,23 @@ void* floorcast_caller(void* const data) {
 	pthread_exit(NULL);
 }
 
-// expected: total_drawers = 4
-void parallel_floorcast(const byte total_drawers, const byte floor_height, const vec pos, const double p_height, const int horizon_line) {
+void parallel_floorcast(const byte floor_height, const vec pos, const double p_height, const int horizon_line) {
 	const int cast_start = horizon_line, cast_end = settings.screen_height;
-	const int y_step = (double) (cast_end - cast_start) / total_drawers;
+	const int y_step = (double) (cast_end - cast_start) / FLOORCAST_THREADS;
 
 	const ImmutFloorcastCallerParams immut_params = {
 		.floor_height = floor_height, .pos = pos, .p_height = p_height, .horizon_line = horizon_line
 	};
 
-	// why is the lower part of the screen not drawn?
-	pthread_t threads[total_drawers];
-	for (byte i = 0; i < total_drawers; i++) {
+	pthread_t threads[FLOORCAST_THREADS];
+	FloorcastCallerParams params[FLOORCAST_THREADS];
+
+	for (byte i = 0; i < FLOORCAST_THREADS; i++) {
 		const int new_start = cast_start + y_step * i;
-		FloorcastCallerParams params = {&immut_params, new_start, new_start + y_step};
+		const FloorcastCallerParams copy_params = {&immut_params, new_start, new_start + y_step};
+		memcpy(params + i, &copy_params, sizeof(FloorcastCallerParams));
 
-		DEBUG(params.start_y, d);
-		DEBUG(params.end_y, d);
-
-		// printf("For drawer #%d, draw from %d to %d\n", i + 1, params.y_start, params.y_end);
-		pthread_create(threads + i, NULL, floorcast_caller, &params);
+		pthread_create(threads + i, NULL, floorcast_caller, params + i);
 	}
-	for (byte i = 0; i < total_drawers; i++) pthread_join(threads[i], NULL);
-
-	puts("---");
+	for (byte i = 0; i < FLOORCAST_THREADS; i++) pthread_join(threads[i], NULL);
 }

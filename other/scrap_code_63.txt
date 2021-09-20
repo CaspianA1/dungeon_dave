@@ -689,3 +689,10 @@ if (v > 255) v = 255;
 return v;
 
 /////
+
+/*
+printf("params.start_y = %d, params.end_y = %d\n", params.start_y, params.end_y);
+printf("For drawer #%d, draw from %d to %d\n", i + 1, params.y_start, params.y_end);
+*/
+
+/////
