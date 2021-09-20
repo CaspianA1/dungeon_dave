@@ -54,7 +54,7 @@
 /*
 TODO:
 - all floorcasting code in one file
-- bottom stitch for parallel floorcast
+- bottom stitch for parallel floorcast, and a small occasional top stitch
 - close-range attacks still don't work
 - delta time for time-independent physics
 - increase shotgun loudness and eddie death loudness, and make the zap noise quieter
@@ -64,10 +64,8 @@ TODO:
 - the wall corner floor algorithm
 - a small point_height function
 - sometimes, a delay when pressing start
-- a stitch for floorcasting
 - cannot wrap the mouse from the left to the right for a full-size screen
 - purple vertical scanlines for a full-size menu
-- an odd thin line on the bottom of the screen for the colored floor, and the top of each wall
 - distance shading
 - better antialiasing by sampling from just the last mip level
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
