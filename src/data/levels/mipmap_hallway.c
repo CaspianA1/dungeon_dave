@@ -11,7 +11,7 @@ inlinable double hallway_shader(const vec pos) {
 void load_hallway(void) {
 	enum {
 		map_width = 10, map_height = 60,
-		wall_count = 2, billboard_count = 0, teleporter_count = 3,
+		wall_count = 2, billboard_count = 15, teleporter_count = 3,
 		animated_billboard_count = 0, enemy_instance_count = 1
 	};
 
@@ -92,7 +92,25 @@ void load_hallway(void) {
 
 	set_level_skybox(&hallway, "assets/skyboxes/desert.bmp");
 	set_level_walls(&hallway, wall_count, "assets/walls/arthouse_bricks.bmp", "assets/walls/dirt.bmp");
-	set_level_billboards(&hallway, billboard_count);
+
+	const char* const repeated_billboard = "assets/objects/robot.bmp";
+
+	set_level_billboards(&hallway, billboard_count,
+		repeated_billboard, 5.0, 43.0, 0.0,
+		repeated_billboard, 5.0, 44.0, 1.0,
+		repeated_billboard, 5.0, 45.0, 2.0,
+		repeated_billboard, 5.0, 46.0, 3.0,
+		repeated_billboard, 5.0, 47.0, 4.0,
+		repeated_billboard, 5.0, 48.0, 5.0,
+		repeated_billboard, 5.0, 49.0, 6.0,
+		repeated_billboard, 5.0, 50.0, 7.0,
+		repeated_billboard, 5.0, 51.0, 8.0,
+		repeated_billboard, 5.0, 52.0, 9.0,
+		repeated_billboard, 5.0, 53.0, 10.0,
+		repeated_billboard, 5.0, 54.0, 11.0,
+		repeated_billboard, 5.0, 55.0, 12.0,
+		repeated_billboard, 5.0, 56.0, 13.0,
+		repeated_billboard, 5.0, 57.0, 14.0);
 
 	set_level_teleporters(&hallway, teleporter_count,
 		5.0, 4.0, 0.0, // from pos + height
