@@ -16,7 +16,7 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 	g *= shade;
 	b *= shade;
 
-	r /= 255; // the divs by 255 are optimized out by the compiler
+	r /= 255; // the divs by 255 are optimized out by the compiler as bitwise ops
 	g /= 255;
 	b /= 255;
 
@@ -26,11 +26,12 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 #endif
 
 static PixSprite ground;
-void fast_affine_floor(const byte floor_height, const int horizon_line, const int end_y, const vec pos, const double p_height) {
+void fast_affine_floor(const byte floor_height, const int horizon_line, int start_y, const int end_y,
+	const vec pos, const double p_height) {
+
 	const double eye_height = (p_height - floor_height) + 0.5;
 	if (eye_height < 0.0) return;
-
-	const int start_y = (horizon_line < 0) ? 0 : horizon_line;
+	else if (start_y < 0) start_y = 0;
 
 	for (int screen_y = start_y; screen_y < end_y; screen_y++) {
 		Uint32* const pixbuf_row = read_texture_row(screen.pixels, screen.pixel_pitch, screen_y);

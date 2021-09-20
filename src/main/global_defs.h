@@ -21,14 +21,14 @@
 
 #define ANTIALIAS_FIRST_MIP_LEVEL
 #define DISABLE_ENEMIES
-// #define PERLIN_SHADING
+#define PERLIN_SHADING
 #define SHADING_ENABLED
 // #define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 // max: 1440 by 900
-#define INIT_W 640
-#define INIT_H 480
+#define INIT_W 800
+#define INIT_H 600
 #define INIT_MAX_FPS 60
 #define INIT_RAY_COLUMN_W 1
 
