@@ -54,7 +54,6 @@
 /*
 TODO:
 - close-range attacks still don't work
-- make the weapon bullet pos the center of its bounding box
 - delta time for time-dependent physics
 - increase shotgun loudness and eddie death loudness, and make the zap noise quieter
 - nth_bit_to_x should use bitmasks in some way
