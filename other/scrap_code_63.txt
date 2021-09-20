@@ -683,3 +683,9 @@ for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ra
 if (first) first = 0;
 
 /////
+
+int v = val * wall_h / settings.screen_height;
+if (v > 255) v = 255;
+return v;
+
+/////
