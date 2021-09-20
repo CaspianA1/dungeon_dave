@@ -5,7 +5,8 @@ inlinable byte get_hallway_point_height(const byte point, const vec pos) {
 
 inlinable double hallway_shader(const vec pos) {
 	// return (pos[0] + pos[1]) / current_level.map_size.y;
-	return pos[1] / 3.0;
+	// return pos[1] / 3.0;
+	return fabs(cos(pos[0] + sin(pos[1]))) * 3.0;
 }
 
 void load_hallway(void) {

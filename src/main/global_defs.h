@@ -27,8 +27,8 @@
 // #define TRACK_MEMORY
 
 // max: 1440 by 900
-#define INIT_W 320
-#define INIT_H 200
+#define INIT_W 640
+#define INIT_H 480
 #define INIT_MAX_FPS 60
 #define INIT_RAY_COLUMN_W 1
 
