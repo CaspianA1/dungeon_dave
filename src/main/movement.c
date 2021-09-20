@@ -1,5 +1,5 @@
 static const double
-	thing_box_side_len = 0.5, // the player's bounding box has the same size
+	thing_box_side_len = 0.4, // the player's bounding box has the same size
 	min_fall_height_for_sound = 2.0;
 
 typedef struct {
@@ -14,7 +14,7 @@ inlinable byte aabb_collision(const BoundingBox a, const BoundingBox b) {
 	return aabb_axis_collision(a, b, 0) && aabb_axis_collision(a, b, 1);
 }
 
-inlinable BoundingBox bounding_box_from_pos(const vec pos, const vec size) {
+inlinable BoundingBox init_bounding_box(const vec pos, const vec size) {
 	return (BoundingBox) {pos - size * vec_fill(0.5), size};
 }
 
@@ -42,8 +42,8 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	const vec box_dimensions = vec_fill(thing_box_side_len);
 
 	const BoundingBox player_boxes[2] = {
-		bounding_box_from_pos(pos_change_with_x, box_dimensions),
-		bounding_box_from_pos(pos_change_with_y, box_dimensions)
+		init_bounding_box(pos_change_with_x, box_dimensions),
+		init_bounding_box(pos_change_with_y, box_dimensions)
 	};
 
 	for (byte i = 0; i < current_level.thing_count; i++) {
@@ -52,7 +52,7 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 		const double y_delta = fabs(billboard_data -> height - p_height);
 		if (y_delta >= 1.0) continue;
 
-		const BoundingBox thing_box = bounding_box_from_pos(billboard_data -> pos, box_dimensions);
+		const BoundingBox thing_box = init_bounding_box(billboard_data -> pos, box_dimensions);
 
 		if (aabb_collision(thing_box, player_boxes[0])) *hit_x = 1;
 		if (aabb_collision(thing_box, player_boxes[1])) *hit_y = 1;
