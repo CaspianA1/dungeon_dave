@@ -57,7 +57,6 @@ TODO:
 - delta time for time-independent physics
 - increase shotgun loudness and eddie death loudness, and make the zap noise quieter
 - nth_bit_to_x should use bitmasks in some way
-- a blurred skybox
 - bilinear filtering for the lightmap
 - the wall corner floor algorithm
 - a small point_height function
