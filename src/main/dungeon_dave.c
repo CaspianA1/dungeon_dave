@@ -53,6 +53,7 @@
 
 /*
 TODO:
+- all floorcasting code in one file
 - bottom stitch for parallel floorcast
 - close-range attacks still don't work
 - delta time for time-independent physics
@@ -128,7 +129,7 @@ int main(void) {
 			deinit_all(&player, &weapon);
 
 		parallel_floorcast(0, player.pos, player.jump.height, horizon_line);
-		// fast_affine_floor(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
+		floorcast(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
 
 		teleport_player_if_needed(&player);
 

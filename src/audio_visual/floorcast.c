@@ -26,7 +26,7 @@ inlinable Uint32 shade_ARGB_pixel(const Uint32 pixel, const byte shade) {
 #endif
 
 static PixSprite ground;
-void fast_affine_floor(const byte floor_height, const int horizon_line, int start_y, const int end_y,
+void floorcast(const byte floor_height, const int horizon_line, int start_y, const int end_y,
 	const vec pos, const double p_height) {
 
 	const double eye_height = (p_height - floor_height) + 0.5;
