@@ -94,9 +94,16 @@ int main(void) {
 		update_screen_dimensions();
 		const InputStatus input_status = handle_input(&player, player.is_dead);
 
-		if (input_status == Exit) {
-			deinit_pix_sprite(ground);
-			deinit_all(&player, &weapon);
+		switch (input_status) {
+			case Exit:
+				deinit_pix_sprite(ground);
+				deinit_all(&player, &weapon);
+				break;
+			case OptionsMenu:
+				puts("Options menu");
+				break;
+			default: break;
+
 		}
 
 		const double horizon_line = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;

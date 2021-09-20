@@ -1,5 +1,5 @@
 typedef enum {
-	Exit, ProceedAsNormal, BeginAnimatingWeapon, NextScreen
+	Exit, ProceedAsNormal, BeginAnimatingWeapon, NextScreen, OptionsMenu
 } InputStatus;
 
 //////////

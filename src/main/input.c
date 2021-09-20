@@ -58,8 +58,10 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 				break;
 
 			case SDL_MOUSEBUTTONDOWN:
-				if (event.button.button == KEY_USE_WEAPON)
-					input_status = BeginAnimatingWeapon;
+				if (event.button.button == KEY_USE_WEAPON) input_status = BeginAnimatingWeapon;
+				break;
+
+			default: if (keys[SDL_SCANCODE_ESCAPE]) input_status = OptionsMenu;
 		}
 	}
 
