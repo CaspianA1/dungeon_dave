@@ -1,11 +1,9 @@
 static const double
-	thing_collision_dist = 0.5,
-	thing_box_axis_len = 0.45; // 0.3
-
-const double min_fall_height_for_sound = 2.0;
+	thing_box_side_len = 0.5, // the player's bounding box has the same size
+	min_fall_height_for_sound = 2.0;
 
 typedef struct {
-	const vec origin, size;
+	const vec origin, size; // origin = top left corner
 } BoundingBox;
 
 byte aabb_axis_collision(const BoundingBox a, const BoundingBox b, const byte axis) {
@@ -16,15 +14,8 @@ inlinable byte aabb_collision(const BoundingBox a, const BoundingBox b) {
 	return aabb_axis_collision(a, b, 0) && aabb_axis_collision(a, b, 1);
 }
 
-/*
-BoundingBox init_bounding_box(const vec pos, const vec size) {
-
-}
-*/
-
-BoundingBox bounding_box_from_pos(const vec pos) {
-	const vec box_axis_side_len = vec_fill(thing_box_axis_len);
-	return (BoundingBox) {pos - box_axis_side_len * vec_fill(0.5), box_axis_side_len};
+inlinable BoundingBox bounding_box_from_pos(const vec pos, const vec size) {
+	return (BoundingBox) {pos - size * vec_fill(0.5), size};
 }
 
 // aabb = axis-aligned bounding box
@@ -48,9 +39,11 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	pos_change_with_x[0] += movement[0];
 	pos_change_with_y[1] += movement[1];
 
+	const vec box_dimensions = vec_fill(thing_box_side_len);
+
 	const BoundingBox player_boxes[2] = {
-		bounding_box_from_pos(pos_change_with_x),
-		bounding_box_from_pos(pos_change_with_y)
+		bounding_box_from_pos(pos_change_with_x, box_dimensions),
+		bounding_box_from_pos(pos_change_with_y, box_dimensions)
 	};
 
 	for (byte i = 0; i < current_level.thing_count; i++) {
@@ -59,7 +52,7 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 		const double y_delta = fabs(billboard_data -> height - p_height);
 		if (y_delta >= 1.0) continue;
 
-		const BoundingBox thing_box = bounding_box_from_pos(billboard_data -> pos);
+		const BoundingBox thing_box = bounding_box_from_pos(billboard_data -> pos, box_dimensions);
 
 		if (aabb_collision(thing_box, player_boxes[0])) *hit_x = 1;
 		if (aabb_collision(thing_box, player_boxes[1])) *hit_y = 1;
@@ -187,7 +180,7 @@ void update_jump(Jump* const jump, const vec pos) {
 			const DataBillboard* const billboard_data = thing -> billboard_data;
 			const double thing_height = billboard_data -> height;
 
-			if (!vec_delta_exceeds(billboard_data -> pos, pos, thing_collision_dist)) {
+			if (!vec_delta_exceeds(billboard_data -> pos, pos, thing_box_side_len)) {
 				const double top_thing_height = thing_height + 1.0;
 				if (jump -> height >= top_thing_height) {
 					landed_on_thing = 1;
