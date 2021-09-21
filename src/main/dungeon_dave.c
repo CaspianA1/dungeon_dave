@@ -82,8 +82,6 @@ int main(void) {
 	play_sound(&current_level.background_sound, 1);
 	ground = init_pix_sprite("assets/walls/pyramid_bricks_3.bmp");
 
-	// hitscan_test();
-
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
