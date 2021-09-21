@@ -715,3 +715,12 @@ all: build run
 	# clang -lSDL2 -Wall -Wextra -O3 purple_vline_q.c && ./a.out
 
 /////
+
+void hitscan_test(void) {
+	const double angle = to_radians(60.0);
+	const Hitscan hitscan = {{20.0, 20.0}, {cos(angle), sin(angle)}, 0.0, 0.2};
+	const double magnitude = sqrt(hitscan.dir[0] * hitscan.dir[0] + hitscan.dir[1] * hitscan.dir[1]) * hitscan.step;
+	DEBUG(magnitude, lf);
+}
+
+/////

@@ -52,8 +52,8 @@
 
 /*
 TODO:
+- 3D weapon line of sight tracing
 - a small occasional top stitch for floorcasting
-- close-range attacks still don't work
 - delta time for time-independent physics
 - increase shotgun loudness and eddie death loudness, and make the zap noise quieter
 - nth_bit_to_x should use bitmasks in some way
@@ -81,6 +81,8 @@ int main(void) {
 
 	play_sound(&current_level.background_sound, 1);
 	ground = init_pix_sprite("assets/walls/pyramid_bricks_3.bmp");
+
+	// hitscan_test();
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();

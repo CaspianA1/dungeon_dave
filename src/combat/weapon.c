@@ -1,8 +1,25 @@
+////////// Hitscanning is separate from DDA because DDA inherently steps on whole grids, while weapons do not
+
+typedef struct {
+	vec pos;
+	const vec dir;
+	double dist;
+	const double step; // the magnitude of the velocity vector
+} Hitscan;
+
+inlinable byte iter_hitscan(Hitscan* const hitscan) {
+	hitscan -> pos += hitscan -> dir * vec_fill(hitscan -> step);
+	hitscan -> dist += hitscan -> step;
+	return !vec_out_of_bounds(hitscan -> pos);
+}
+
+//////////
+
 static const double
-	weapon_dda_step = 0.3,
+	weapon_hitscan_step = 0.3,
 	weapon_max_hit_dist = 0.5;
 
-static const vec projectile_size = {0.3, 0.3};
+static const vec projectile_size = {0.2, 0.2};
 
 void deinit_weapon(const Weapon* const weapon) {
 	deinit_sound(&weapon -> sound);
@@ -18,25 +35,22 @@ void deinit_weapon(const Weapon* const weapon) {
 // the whip doesn't work up close
 
 static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec p_dir, const double p_height) {
-	DataDDA bullet = init_dda(p_pos, p_dir, weapon_dda_step);
-	const byte is_short_range = bit_is_set(weapon -> status, mask_short_range_weapon);
+	(void) p_height;
 
-	while (iter_dda(&bullet)) {
-		const vec projectile_pos = vec_line_pos(p_pos, p_dir, bullet.dist);
-		const BoundingBox projectile_box = init_bounding_box(projectile_pos, projectile_size);
+	Hitscan hitscan = {p_pos, p_dir, 0.0, weapon_hitscan_step};
+	const byte short_range_weapon = bit_is_set(weapon -> status, mask_short_range_weapon);
 
-		const byte point = *map_point(current_level.wall_data, projectile_pos[0], projectile_pos[1]);
-		if (current_level.get_point_height(point, (vec) {projectile_pos[0], projectile_pos[1]}) > p_height) break;
-
+	while (iter_hitscan(&hitscan)) {
+		const BoundingBox projectile_box = init_bounding_box(hitscan.pos, projectile_size); 
 		byte collided = 0;
+
 		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
 			EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
-			if (enemy_instance -> state == Dead) continue;
+			if (enemy_instance -> state == Dead || !bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy))
+				continue;
+
 			const BoundingBox enemy_box = init_bounding_box(enemy_instance -> billboard_data.pos, vec_fill(actor_box_side_len));
-
-			if (aabb_collision(projectile_box, enemy_box) &&
-				bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy)) {
-
+			if (aabb_collision(projectile_box, enemy_box)) {
 				set_bit(enemy_instance -> status, mask_recently_attacked_enemy);
 				enemy_instance -> hp -= weapon -> power;
 
@@ -47,7 +61,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 				collided = 1;
 			}
 		}
-		if (collided || is_short_range) break;
+		if (collided || short_range_weapon) break;
 	}
 }
 
