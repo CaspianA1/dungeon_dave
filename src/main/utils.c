@@ -80,6 +80,7 @@ inlinable byte doubles_eq(const double a, const double b) {
 #define bit_is_set(bits, mask) ((bits) & (mask))
 #define set_bit(bits, mask) ((bits) |= (mask))
 #define clear_bit(bits, mask) ((bits) &= ~(mask))
+// #define bit_to_x(bits, mask, x) ((bits) ^= (-(x) ^ (bits) & (mask)))
 
 inlinable void nth_bit_to_x(byte* const bits, const byte n, const byte x) {
 	*bits ^= (-x ^ *bits) & (1 << n);

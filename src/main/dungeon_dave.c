@@ -57,6 +57,7 @@ TODO:
 - a small occasional top stitch for floorcasting
 - delta time for time-independent physics
 - nth_bit_to_x should use bitmasks in some way
+- mipmapping for the floor (based on the wall height)
 - bilinear filtering for the lightmap
 - the wall corner floor algorithm
 - a small point_height function
