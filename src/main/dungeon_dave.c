@@ -80,7 +80,7 @@ int main(void) {
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
 	play_sound(&current_level.background_sound, 1);
-	ground = init_pix_sprite("assets/walls/mesa.bmp");
+	ground = init_pix_sprite("assets/walls/pyramid_bricks_3.bmp");
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();

@@ -88,7 +88,7 @@ void fill_val_buffers_for_planar_mode(const double angle_degrees) {
 
 #endif
 
-////////// the two structs below + the two functions above manage parallel floorcasting
+////////// The two structs + the two functions below manage parallel floorcasting
 
 typedef struct {
 	const byte floor_height;
