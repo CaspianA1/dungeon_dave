@@ -15,10 +15,7 @@ inlinable byte iter_hitscan(Hitscan* const hitscan) {
 
 //////////
 
-static const double
-	weapon_hitscan_step = 0.3,
-	weapon_max_hit_dist = 0.5;
-
+static const double weapon_hitscan_step = 0.3;
 static const vec projectile_size = {0.2, 0.2};
 
 void deinit_weapon(const Weapon* const weapon) {
