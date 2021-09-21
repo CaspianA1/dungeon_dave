@@ -52,10 +52,10 @@
 
 /*
 TODO:
+- sound crackles when many sound effects are layered
 - 3D weapon line of sight tracing
 - a small occasional top stitch for floorcasting
 - delta time for time-independent physics
-- increase shotgun loudness and eddie death loudness, and make the zap noise quieter
 - nth_bit_to_x should use bitmasks in some way
 - bilinear filtering for the lightmap
 - the wall corner floor algorithm
@@ -75,7 +75,7 @@ TODO:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
