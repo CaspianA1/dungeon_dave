@@ -53,10 +53,9 @@
 /*
 TODO:
 - sound crackles when many sound effects are layered
-- 3D weapon line of sight tracing
+- need 3D weapon line of sight tracing + weapons can shoot through walls, which is bad
 - a small occasional top stitch for floorcasting
 - delta time for time-independent physics
-- nth_bit_to_x should use bitmasks in some way
 - mipmapping for the floor (based on the wall height)
 - bilinear filtering for the lightmap
 - the wall corner floor algorithm

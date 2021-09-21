@@ -87,7 +87,7 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 		else if (!moved_any_direction && forward_or_backward)
 			body -> time_of_stop = curr_secs;
 
-		nth_bit_to_x(&body -> status, 0, moved_forward_or_backward);
+		bit_to_x(body -> status, mask_forward_or_backward_movement, moved_forward_or_backward);
 
 		double* const theta = &player -> angle;
 		vec* const pos = &player -> pos;

@@ -13,7 +13,7 @@ void update_enemy_weapon_y_state(EnemyInstance* const enemy_instance, const SDL_
 		settings.half_screen_height >= thing_screen_pos -> y &&
 		thing_screen_pos -> y + thing_screen_pos -> h >= settings.half_screen_height;
 
-	nth_bit_to_x(&enemy_instance -> status, 2, weapon_y_matches_enemy_y); // 3rd bit, set if weapon's vertical aim matches it
+	bit_to_x(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy, weapon_y_matches_enemy_y);
 }
 
 void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemyState new_state, const byte silent) {

@@ -84,9 +84,10 @@ void update_pos(vec* const ref_pos, vec* const dir,
 		if (body -> v > body -> limit_v)
 			body -> v = body -> limit_v;
 
-		body -> max_v_reached = body -> v,
-		nth_bit_to_x(&body -> status, 1, forward);
-		nth_bit_to_x(&body -> status, 2, backward);
+		body -> max_v_reached = body -> v;
+
+		bit_to_x(body -> status, mask_forward_movement, forward);
+		bit_to_x(body -> status, mask_backward_movement, backward);
 	}
 
 	else {

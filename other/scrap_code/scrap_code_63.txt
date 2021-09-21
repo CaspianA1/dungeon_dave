@@ -724,3 +724,9 @@ void hitscan_test(void) {
 }
 
 /////
+
+inlinable void nth_bit_to_x(byte* const bits, const byte n, const byte x) {
+	*bits ^= (-x ^ *bits) & (1 << n);
+}
+
+/////
