@@ -67,6 +67,13 @@ void dynamic_memory_report(void) {
 #define num_leading_zeroes __builtin_clz
 #define exp_for_pow_of_2(num) (__builtin_ffs(num) - 1)
 
+#define bit_is_set(bits, mask) ((bits) & (mask))
+#define set_bit(bits, mask) ((bits) |= (mask))
+#define clear_bit(bits, mask) ((bits) &= ~(mask))
+#define bit_to_x(bits, mask, x) ((bits) ^= (-(x) ^ (bits)) & (mask))
+
+//////////
+
 inlinable double to_radians(const double degrees) {
 	return degrees * M_PI / 180.0;
 }
@@ -74,15 +81,6 @@ inlinable double to_radians(const double degrees) {
 inlinable byte doubles_eq(const double a, const double b) {
 	return fabs(a - b) < almost_zero;
 }
-
-//////////
-
-#define bit_is_set(bits, mask) ((bits) & (mask))
-#define set_bit(bits, mask) ((bits) |= (mask))
-#define clear_bit(bits, mask) ((bits) &= ~(mask))
-#define bit_to_x(bits, mask, x) ((bits) ^= (-(x) ^ (bits)) & (mask))
-
-//////////
 
 inlinable void tick_delay(const Uint32 before) {
 	const int wait = settings.max_delay - (SDL_GetTicks() - before);

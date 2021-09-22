@@ -1,3 +1,4 @@
+/*
 void print_heightmap(void) {
 	printf("static const byte heightmap[map_height][map_width] = {\n");
 	for (int y = 0; y < current_level.map_size.y; y++) {
@@ -13,6 +14,7 @@ void print_heightmap(void) {
 	}
 	puts("};");
 }
+*/
 
 inlinable Level init_level(const int map_width, const int map_height,
 	const double init_x, const double init_y, const double init_height) {

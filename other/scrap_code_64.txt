@@ -1,0 +1,130 @@
+/* (void) point;
+const double p = 0.0000001; // if used again, the map_point calls must be dereferenced
+return map_point(current_level.heightmap, pos[0] - p, pos[1] - p); */
+
+// return map_point(current_level.heightmap, pos[0] + p, pos[1] - p);
+// return map_point(current_level.heightmap, pos[0] - p, pos[1] + p);
+// return map_point(current_level.heightmap, pos[0] + p, pos[1] + p);
+
+// return map_point(current_level.heightmap, pos[0], pos[1]);
+// return map_point(current_level.heightmap, pos[0] - p, pos[1]);
+// return map_point(current_level.heightmap, pos[0] + p, pos[1]);
+// return map_point(current_level.heightmap, pos[0], pos[1] - p);
+// return map_point(current_level.heightmap, pos[0], pos[1] + p);
+
+/////
+
+// pos[0] -= almost_almost_zero; // good for left side
+// pos[0] += almost_almost_zero; // good for right side
+// pos[0] -= almost_almost_zero;
+
+/*
+const double x_diff = ceil(pos[0]) - pos[0];
+if (doubles_eq(x_diff, almost_zero) && !doubles_eq(x_diff, 0.0)) {
+	printf("Case: %lf\n", pos[0]);
+	pos[0] -= almost_almost_zero;
+}
+*/
+
+/////
+
+/*
+const double x_diff = ceil(pos[0]) - pos[0];
+if (x_diff < almost_almost_zero) {
+	DEBUG(x_diff, lf);
+	pos[0] += almost_almost_zero;
+}
+*/
+
+/////
+
+// if (ceil(pos[0]) - pos[0] == 0.0) pos[0] += almost_almost_zero; // right side fix
+
+/*
+else if (floor(pos[0] - pos[0]) == 0.0) {
+	pos[0] -= almost_almost_zero; // left side fix
+}
+*/
+
+/* all bad:
+if (ceil(pos[0] - pos[0]) == 0.0) pos[0] += almost_almost_zero; // right side fix
+else if (floor(pos[0] - pos[0]) == 0.0) {
+	pos[0] -= almost_almost_zero; // left side fix
+}
+
+if (floor(pos[1] - pos[1]) == 0.0) pos[1] -= almost_almost_zero; // top side fix
+else if (ceil(pos[1] - pos[1]) == 0.0) pos[1] += almost_almost_zero; // bottom side fix
+*/
+
+/*
+const byte
+	bottom_left_fix = floor(pos[1] - pos[1]) == 0.0,
+	top_right_fix = ceil(pos[0] - pos[0]) == 0.0;
+
+if (bottom_left_fix && !top_right_fix) // fixes bottom and left side
+	pos += (vec) {-almost_almost_zero, almost_almost_zero};
+
+else if (top_right_fix && !bottom_left_fix) // fixes top and right side
+	pos += (vec) {almost_almost_zero, -almost_almost_zero};
+*/
+
+/////
+
+/* all bad:
+if (ceil(pos[0] - pos[0]) == 0.0) pos[0] += almost_almost_zero; // right side fix
+else if (floor(pos[0] - pos[0]) == 0.0) {
+	pos[0] -= almost_almost_zero; // left side fix
+}
+
+if (floor(pos[1] - pos[1]) == 0.0) pos[1] -= almost_almost_zero; // top side fix
+else if (ceil(pos[1] - pos[1]) == 0.0) pos[1] += almost_almost_zero; // bottom side fix
+*/
+
+/*
+const byte
+	bottom_left_fix = floor(pos[1] - pos[1]) == 0.0,
+	top_right_fix = ceil(pos[0] - pos[0]) == 0.0;
+
+if (bottom_left_fix && !top_right_fix) // fixes bottom and left side
+	pos += (vec) {-almost_almost_zero, almost_almost_zero};
+
+else if (top_right_fix && !bottom_left_fix) // fixes top and right side
+	pos += (vec) {almost_almost_zero, -almost_almost_zero};
+*/
+
+/////
+
+// else if (doubles_eq(floor(pos[0]) - pos[0], 0.0)) pos[0] -= almost_almost_zero;
+
+// DEBUG(floor(pos[0] - pos[0]), lf);
+
+// if (doubles_eq(ceil(pos[1]) - pos[1], 0.0)) pos[1] += almost_almost_zero; // bottom side fix
+
+///// A bunch of experiments, with some probably good ideas in there:
+
+#ifdef HM_TEST
+
+(void) point;
+
+// pos += (vec) {almost_almost_zero, -almost_almost_zero}; // good for top and right side
+// pos += (vec) {-almost_almost_zero, almost_almost_zero}; // good for left and bottom side
+// pos += (vec) {almost_almost_zero, almost_almost_zero}; // good for right and bottom side
+// pos += (vec) {-almost_almost_zero, -almost_almost_zero}; // good for top and left side
+
+/* good sign changes:	
+	sub pos[1]: top, add pos[1]: bottom
+	sub pos[0]: left, add pos[0]: right */
+
+//////////
+
+// if (doubles_eq(ceil(pos[0]) - pos[0], 0.0)) pos[0] += almost_almost_zero; // right side fix
+// if (doubles_eq(ceil(pos[1]) - pos[1], 0.0)) pos[1] += almost_almost_zero; // bottom side fix
+// each version works fine wihtout the branch, but I'm figuring that I'll have to figure out which side to fix
+
+// if (doubles_eq(floor(pos[1]) - pos[1], 0.0)) pos[1] -= almost_almost_zero;
+if ((floor(pos[1]) - pos[1]) < almost_almost_zero && floor(pos[1]) - pos[1] >= 0.0) {
+	printf("Here: %lf\n", floor(pos[1]) - pos[1]);
+	pos[0] += almost_almost_zero;
+}
+
+/////
