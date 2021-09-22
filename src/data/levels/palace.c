@@ -20,6 +20,8 @@ byte get_palace_point_height(const byte point, vec pos) {
 	// if (doubles_eq(ceil(pos[1]) - pos[1], 0.0)) pos[1] += almost_almost_zero; // bottom side fix
 	// each version works fine wihtout the branch, but I'm figuring that I'll have to figure out which side to fix
 
+	// maybe different additions based on the wall side or direction?
+
 	//////////
 
 	return *map_point(current_level.heightmap, pos[0], pos[1]);
