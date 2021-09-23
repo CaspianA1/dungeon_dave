@@ -8,10 +8,6 @@ typedef struct {
 	const int screen_x;
 } DataRaycast;
 
-typedef struct {
-	double x, y, w, h;
-} DRect;
-
 inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir, const int width) {
 	const double component = hit[!side];
 	const int offset = (component - (int) component) * width;
@@ -19,12 +15,15 @@ inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir,
 	return cond ? (width - 1) - offset : offset;
 }
 
-void handle_ray(const DataRaycast* const d, byte* const stop_from_tallest_wall,
-	double* const last_projected_wall_top, double* const projected_wall_bottom) {
-
+// returns if a tallest wall was encountered and raycasting should stop
+void handle_ray(const DataRaycast* const d, double* const last_projected_wall_top, double* const projected_wall_bottom) {
 	const double cos_beta = cos(d -> p_angle - d -> theta);
 	const double corrected_dist = d -> dist * cos_beta;
 	const double wall_h = settings.proj_dist / corrected_dist;
+
+	typedef struct {
+		double x, y, w, h;
+	} DRect;
 
 	const DRect wall_dest = {
 		d -> screen_x,
@@ -71,7 +70,7 @@ void handle_ray(const DataRaycast* const d, byte* const stop_from_tallest_wall,
 		wall_dest_h_sum += raised_wall_dest.h;
 
 		*d -> last_wall_top = raised_wall_dest.y;
-		SDL_FRect frect = {raised_wall_dest.x, raised_wall_dest.y, raised_wall_dest.w, raised_wall_dest.h};
+		const SDL_FRect frect = {raised_wall_dest.x, raised_wall_dest.y, raised_wall_dest.w, raised_wall_dest.h};
 		SDL_RenderCopyF(screen.renderer, wall_sprite.texture, &slice, &frect);
 	}
 
@@ -88,7 +87,6 @@ void handle_ray(const DataRaycast* const d, byte* const stop_from_tallest_wall,
 		set_statemap_bit(occluded_by_walls, wall_dest.x, y);
 
 	*projected_wall_bottom = proj_wall_bottom;
-	*stop_from_tallest_wall = d -> point_height == current_level.max_point_height && d -> p_height <= current_level.max_point_height - 0.5;
 }
 
 // once the colors are correct per vertical line, this will be done
@@ -97,15 +95,6 @@ void mark_floor(const DataRaycast* const d, const double last_projected_wall_top
 
 	const int x = d -> screen_x;
 	SDL_SetRenderDrawColor(screen.renderer, 0, 255 / (*d -> last_point_height + 1), 0, SDL_ALPHA_OPAQUE);
-
-	/*
-	static double offset = 0.0;
-	const double step = 0.001;
-	if (keys[SDL_SCANCODE_T]) offset -= step;
-	if (keys[SDL_SCANCODE_Y]) offset += step;
-	if (keys[SDL_SCANCODE_U]) offset = 0.0;
-	*/
-
 	SDL_RenderDrawLineF(screen.renderer, x, last_projected_wall_top, x, projected_wall_bottom); // last wall top -> curr wall bottom
 }
 
@@ -136,12 +125,11 @@ void raycast(const Player* const player, const double horizon_line, const double
 						hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x
 					};
 
-					byte stop_from_tallest_wall;
 					double last_projected_wall_top, projected_wall_bottom;
 
-					handle_ray(&raycast_data, &stop_from_tallest_wall, &last_projected_wall_top, &projected_wall_bottom);
+					handle_ray(&raycast_data, &last_projected_wall_top, &projected_wall_bottom);
 					// mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
-					if (stop_from_tallest_wall) break;
+					if (point_height == current_level.max_point_height && p_height <= current_level.max_point_height - 0.5) break;
 
 					at_first_hit = 0;
 				}

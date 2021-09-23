@@ -128,3 +128,13 @@ if ((floor(pos[1]) - pos[1]) < almost_almost_zero && floor(pos[1]) - pos[1] >= 0
 }
 
 /////
+
+/*
+static double offset = 0.0;
+const double step = 0.001;
+if (keys[SDL_SCANCODE_T]) offset -= step;
+if (keys[SDL_SCANCODE_Y]) offset += step;
+if (keys[SDL_SCANCODE_U]) offset = 0.0;
+*/
+
+/////
