@@ -17,10 +17,7 @@ inlinable void init_audio_subsystem(void) {
 		FAIL("Could not initialize SDL2_mixer: %s\n", Mix_GetError());
 }
 
-inlinable void deinit_audio_subsystem(void) {
-	Mix_CloseAudio();
-	Mix_Quit();
-}
+#define deinit_audio_subsystem Mix_CloseAudio
 
 inlinable void fail_sound(const Sound* const sound, const char* const error_type) {
 	FAIL("Could not %s a %s sound of path %s: %s\n",
