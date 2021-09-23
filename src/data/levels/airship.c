@@ -1,8 +1,3 @@
-inlinable byte get_airship_point_height(const byte point, const vec pos) {
-	(void) pos;
-	return point;
-}
-
 inlinable double airship_shader(const vec pos) {
 	(void) pos;
 	return 4.5;

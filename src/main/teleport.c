@@ -27,8 +27,7 @@ byte teleport_if_needed(vec* const pos, double* const height, const byte drop_ac
 			play_sound(&teleporter_sound, 0);
 
 			const vec dest = teleporter.to;
-			const byte dest_point = *map_point(current_level.wall_data, dest[0], dest[1]);
-			*height = current_level.get_point_height(dest_point, dest);
+			*height = *map_point(current_level.heightmap, dest[0], dest[1]);
 			if (drop_actor) *height += min_fall_height_for_sound;
 
 			*pos = dest;

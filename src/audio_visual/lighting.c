@@ -100,7 +100,7 @@ functions like `diffuse_circle` above. */
 
 #ifdef SHADING_ENABLED
 
-byte calculate_shade(const double wall_h, const vec pos) {
+byte shade_at(const double wall_h, const vec pos) {
 	(void) wall_h;
 
 	const vec lightmap_pos = (pos - vec_fill(almost_almost_zero)) * vec_fill(lightmap_samples_per_tile);

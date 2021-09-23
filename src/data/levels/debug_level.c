@@ -1,9 +1,3 @@
-inlinable byte get_debug_level_point_height(const byte point, const vec pos) {
-	(void) pos;
-	if (point == 5 || point == 6) return 1;
-	return point;
-}
-
 inlinable double debug_level_shader(const vec pos) {
 	// return pos[0] / 2.0;
 
@@ -35,6 +29,19 @@ void load_debug_level(void) {
 		{5, 0, 2, 0, 4, 4, 4, 4, 4, 4, 0, 5},
 		{5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5},
 		{5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
+	},
+
+	heightmap[map_height][map_width] = {
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 4, 4, 3, 3, 0, 1, 1, 1},
+		{1, 0, 0, 0, 4, 4, 3, 3, 2, 2, 0, 1},
+		{1, 0, 2, 0, 4, 0, 3, 3, 0, 0, 0, 1},
+		{1, 0, 1, 0, 4, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 2, 0, 4, 4, 4, 4, 4, 4, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
 	Level debug_level = init_level(map_width, map_height, 2.0, 2.0, 0.0);
@@ -43,11 +50,11 @@ void load_debug_level(void) {
 	debug_level.max_point_height = 4;
 	debug_level.out_of_bounds_point = 1;
 	debug_level.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);
-	debug_level.get_point_height = get_debug_level_point_height;
 	debug_level.shader = debug_level_shader;
 
 	const int bytes = map_width * map_height;
 	memcpy(debug_level.wall_data, wall_data, bytes);
+	memcpy(debug_level.heightmap, heightmap, bytes);
 	memset(debug_level.ceiling_data, 2, bytes);
 	memset(debug_level.floor_data, 2, bytes);
 

@@ -64,8 +64,7 @@ inlinable Navigator init_navigator(const vec p_pos, vec* const pos_ref, const do
 }
 
 NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos) {
-	const byte base_height = current_level.get_point_height(
-		*map_point(current_level.wall_data, p_pos[0], p_pos[1]), p_pos);
+	const byte base_height = *map_point(current_level.heightmap, p_pos[0], p_pos[1]);
 
 	if (base_height > 0 || (nav -> route_ind == -1 && update_route(nav, p_pos) != SucceededBFS))
 		return FailedBFS;

@@ -59,15 +59,14 @@ void floorcast(const byte floor_height, const int horizon_line, int start_y, con
 				|| hit[1] > current_level.map_size.y - 1.0) continue;
 
 			#ifndef PLANAR_MODE
-			const byte wall_point = *map_point(current_level.wall_data, hit[0], hit[1]);
-			if (current_level.get_point_height(wall_point, hit) != floor_height) continue;
+			if (*map_point(current_level.heightmap, hit[0], hit[1]) != floor_height) continue;
 			#endif
 
 			const vec offset = vec_tex_offset(hit, ground.size);
 			Uint32 pixel = ground.pixels[(long) ((long) offset[1] * ground.size + offset[0])];
 
 			#ifdef SHADING_ENABLED
-			pixel = shade_ARGB_pixel(pixel, calculate_shade(settings.proj_dist / actual_dist, hit));
+			pixel = shade_ARGB_pixel(pixel, shade_at(settings.proj_dist / actual_dist, hit));
 			#endif
 
 			for (int x = 0; x < settings.ray_column_width; x++) pixbuf_row[x + screen_x] = pixel;

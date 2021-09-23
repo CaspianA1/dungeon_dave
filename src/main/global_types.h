@@ -104,7 +104,6 @@ typedef struct {
 	Skybox skybox;
 	Sound background_sound;
 
-	byte (*get_point_height) (const byte, const vec);
 	double (*shader) (const vec);
 
 	#ifdef SHADING_ENABLED

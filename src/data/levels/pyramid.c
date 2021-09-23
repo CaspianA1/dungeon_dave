@@ -1,14 +1,3 @@
-inlinable byte get_pyramid_point_height(const byte point, const vec pos) {
-	if (point != 2) return point;
-
-	const vec half_size = {current_level.map_size.x / 2.0, current_level.map_size.y / 2.0};
-	vec diff = pos - half_size;
-	diff = (vec) {fabs(diff[0]), fabs(diff[1])};
-
-	const vec slopes_to_center = half_size - diff + vec_fill(0) - vec_fill(3.0);
-	return (slopes_to_center[0] + slopes_to_center[1]) / 2.0;
-}
-
 inlinable double pyramid_shader(const vec pos) {
 	const vec diff = pos - (vec) {current_level.map_size.x / 2.0, current_level.map_size.y / 2.0};
 	const double dist_squared = diff[0] * diff[0] + diff[1] * diff[1];
@@ -55,6 +44,39 @@ void load_pyramid(void) {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
+	static const byte heightmap[map_height][map_width] = {
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 0, 0, 0, 1},
+		{1, 0, 0, 0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 0, 0, 0, 1},
+		{1, 0, 0, 0, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 0, 0, 0, 1},
+		{1, 0, 0, 0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 0, 0, 0, 1},
+		{1, 0, 0, 0, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 0, 0, 0, 1},
+		{1, 0, 0, 0, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 0, 0, 0, 1},
+		{1, 0, 0, 0, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 0, 0, 0, 1},
+		{1, 0, 0, 0, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 0, 0, 0, 1},
+		{1, 0, 0, 0, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,10,9, 9, 8, 8, 7, 7, 6, 6, 5, 0, 0, 0, 1},
+		{1, 0, 0, 0, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,11,10,10,9, 9, 8, 8, 7, 7, 6, 6, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,11,11,11,10,10,9, 9, 8, 8, 7, 7, 6, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 7, 7, 8, 8, 9, 9, 10,10,11,11,12,11,11,10,10,9, 9, 8, 8, 7, 7, 0, 0, 0, 1},
+		{1, 0, 0, 0, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,11,11,11,10,10,9, 9, 8, 8, 7, 7, 6, 0, 0, 0, 1},
+		{1, 0, 0, 0, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,11,10,10,9, 9, 8, 8, 7, 7, 6, 6, 0, 0, 0, 1},
+		{1, 0, 0, 0, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,10,9, 9, 8, 8, 7, 7, 6, 6, 5, 0, 0, 0, 1},
+		{1, 0, 0, 0, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 0, 0, 0, 1},
+		{1, 0, 0, 0, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 0, 0, 0, 1},
+		{1, 0, 0, 0, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 0, 0, 0, 1},
+		{1, 0, 0, 0, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 0, 0, 0, 1},
+		{1, 0, 0, 0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 0, 0, 0, 1},
+		{1, 0, 0, 0, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 0, 0, 0, 1},
+		{1, 0, 0, 0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+	};
+
 	const byte border_size = 3;
 	const byte border_offset = border_size + 1;
 	fill_level_data((byte*) wall_data, 2, border_offset, map_width - border_offset,
@@ -62,14 +84,14 @@ void load_pyramid(void) {
 
 	Level pyramid = init_level(map_width, map_height, 2.0, 2.0, 0.0);
 	set_level_skybox(&pyramid, "assets/skyboxes/desert_eyes.bmp");
-	pyramid.max_point_height = 11;
+	pyramid.max_point_height = 12;
 	pyramid.out_of_bounds_point = 1;
 	pyramid.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);
-	pyramid.get_point_height = get_pyramid_point_height;
 	pyramid.shader = pyramid_shader;
 
 	const int bytes = map_width * map_height;
 	memcpy(pyramid.wall_data, wall_data, bytes);
+	memcpy(pyramid.heightmap, heightmap, bytes);
 	memset(pyramid.ceiling_data, 1, bytes);
 	memset(pyramid.floor_data, 1, bytes);
 

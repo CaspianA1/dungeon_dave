@@ -106,7 +106,7 @@ void animate_weapon(DataAnimation* const animation_data, const vec pos,
 	SDL_Texture* const texture = animation_data -> immut.sprite.texture;
 
 	#ifdef SHADING_ENABLED
-	byte shade = calculate_shade(settings.screen_height, pos);
+	byte shade = shade_at(settings.screen_height, pos);
 	if (shade < 70) shade = 70;
 	SDL_SetTextureColorMod(texture, shade, shade, shade);
 	#endif

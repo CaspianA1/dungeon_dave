@@ -1,8 +1,3 @@
-inlinable byte get_red_room_point_height(const byte point, const vec pos) {
-	(void) pos;
-	return (point == 2) ? 3 : 0;
-}
-
 inlinable double red_room_shader(const vec pos) {
 	(void) pos;
 	return 0.5;
@@ -26,17 +21,30 @@ void load_red_room(void) {
 		{2, 0, 2, 2, 2, 0, 0, 0, 0, 2},
 		{2, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 		{2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
+	},
+
+	heightmap[map_height][map_width] = {
+		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+		{3, 0, 3, 0, 0, 0, 0, 0, 0, 3},
+		{3, 0, 3, 0, 0, 0, 0, 0, 0, 3},
+		{3, 0, 3, 0, 0, 0, 0, 0, 0, 3},
+		{3, 0, 3, 0, 0, 0, 0, 0, 0, 3},
+		{3, 0, 3, 0, 0, 0, 0, 0, 0, 3},
+		{3, 0, 3, 3, 3, 0, 0, 0, 0, 3},
+		{3, 0, 3, 3, 3, 0, 0, 0, 0, 3},
+		{3, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
 	};
 
 	Level red_room = init_level(map_width, map_height, 1.5, 1.5, 0.0);
 	red_room.max_point_height = 3;
 	red_room.out_of_bounds_point = 1;
 	red_room.background_sound = init_sound("assets/audio/themes/red_room_track.wav", 0);
-	red_room.get_point_height = get_red_room_point_height;
 	red_room.shader = red_room_shader;
 
 	const int bytes = map_width * map_height;
 	memcpy(red_room.wall_data, wall_data, bytes);
+	memcpy(red_room.heightmap, heightmap, bytes);
 	memset(red_room.ceiling_data, 1, bytes);
 	memset(red_room.floor_data, 1, bytes);
 

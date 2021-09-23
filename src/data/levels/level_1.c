@@ -1,13 +1,3 @@
-inlinable byte get_level_1_point_height(const byte point, const vec pos) {
-	switch (point) {
-		case 0: return 0;
-		case 1: return 3; // cobblestone edges
-		case 3: case 5: return 2; // stone, hieroglyphics
-		case 4: return (pos[0] < 5.0001) ? 5 : 1;
-		default: return 1;
-	}
-}
-
 inlinable double level_1_shader(const vec pos) {
 	static const vec
 		pillar_center = {4.5, 11.5},
@@ -54,6 +44,24 @@ void load_level_1(void) {
 		{1, 0, 0, 2, 0, 1, 0, 0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 0, 1},
 		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+	},
+
+	heightmap[map_height][map_width] = {
+		{5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+		{5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+		{5, 0, 0, 0, 5, 0, 0, 0, 0, 2, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 3},
+		{5, 0, 0, 0, 5, 0, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 0, 0, 0, 0, 2, 2, 0, 3},
+		{5, 5, 5, 0, 5, 0, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 0, 0, 0, 0, 2, 2, 0, 3},
+		{3, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 1, 0, 0, 0, 0, 3},
+		{3, 0, 5, 5, 5, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 0, 3},
+		{3, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 1, 0, 3},
+		{3, 0, 0, 1, 0, 3, 0, 2, 0, 1, 0, 0, 0, 1, 0, 2, 0, 1, 0, 0, 1, 0, 1, 0, 3},
+		{3, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 1, 0, 1, 0, 3},
+		{3, 0, 0, 3, 0, 1, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 0, 1, 1, 1, 1, 0, 1, 0, 3},
+		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 3},
+		{3, 0, 0, 1, 0, 3, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 3},
+		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}
 	};
 
 	// old init positions: {18.5, 9.0}, {3.0, 3.0}, {7.0, 12.0}
@@ -61,11 +69,11 @@ void load_level_1(void) {
 	level_1.max_point_height = 5;
 	level_1.out_of_bounds_point = 7;
 	level_1.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);
-	level_1.get_point_height = get_level_1_point_height;
 	level_1.shader = level_1_shader;
 
 	const int bytes = map_width * map_height;
 	memcpy(level_1.wall_data, wall_data, bytes);
+	memcpy(level_1.heightmap, heightmap, bytes);
 	memset(level_1.ceiling_data, 4, bytes); // sand
 	memset(level_1.floor_data, 4, bytes);
 

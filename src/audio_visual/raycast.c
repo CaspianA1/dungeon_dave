@@ -44,7 +44,7 @@ void handle_ray(const DataRaycast* const d, double* const last_projected_wall_to
 	};
 
 	#ifdef SHADING_ENABLED
-	const byte shade = calculate_shade(wall_h, d -> hit);
+	const byte shade = shade_at(wall_h, d -> hit);
 	SDL_SetTextureColorMod(wall_sprite.texture, shade, shade, shade);
 	#endif
 
@@ -108,15 +108,16 @@ void raycast(const Player* const player, const double horizon_line, const double
 
 		double last_wall_top = DBL_MAX;
 
-		byte at_first_hit = 1, last_point_height = current_level.get_point_height(
-			*map_point(current_level.wall_data, p_pos[0], p_pos[1]), p_pos);
+		byte at_first_hit = 1, last_point_height = *map_point(current_level.heightmap, p_pos[0], p_pos[1]);
 
 		DataDDA ray = init_dda(p_pos, dir);
 
 		while (iter_dda(&ray)) {
-			const byte point = *map_point(current_level.wall_data, ray.curr_tile.x, ray.curr_tile.y);
+			const byte
+				point = *map_point(current_level.wall_data, ray.curr_tile.x, ray.curr_tile.y),
+				point_height = *map_point(current_level.heightmap, ray.curr_tile.x, ray.curr_tile.y);
+
 			const vec hit = vec_line_pos(p_pos, dir, ray.dist);
-			const byte point_height = current_level.get_point_height(point, hit);
 
 			if (last_point_height != point_height) {
 				if (point) {

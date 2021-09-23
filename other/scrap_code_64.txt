@@ -163,3 +163,156 @@ return half_x_size - x_diff + almost_zero - 3;
 */
 
 /////
+
+/*
+made heightmaps for:
+	- palace
+	- pyramid
+	- debug level
+	- fleckenstein
+	- forever maze
+	- level 1
+	- mipmap hallway
+	- red room
+
+left:
+*/
+
+///// All of the point height functions:
+
+inlinable byte get_airship_point_height(const byte point, const vec pos) {
+	(void) pos;
+	return point;
+}
+
+inlinable byte get_debug_level_point_height(const byte point, const vec pos) {
+	(void) pos;
+	if (point == 5 || point == 6) return 1;
+	return point;
+}
+
+inlinable byte get_fleckenstein_point_height(const byte point, const vec pos) {
+	switch (point) {
+		case 1:
+			if (pos[1] < 19.0001) return 5;
+			else if (pos[1] < 24.0001) return 24.0001 - pos[1];
+			else return 5;
+
+		case 2: return 3;
+
+		case 3:
+			if (pos[1] < 21.0001) return 9;
+			else return 6;
+
+		case 4: return 6;
+
+		default: return point;
+	}
+}
+
+inlinable byte get_maze_point_height(const byte point, const vec pos) {
+	(void) pos;
+	switch (point) {
+		case 1: return 3;
+		default: return point;
+	}
+}
+
+inlinable byte get_level_1_point_height(const byte point, const vec pos) {
+	switch (point) {
+		case 0: return 0;
+		case 1: return 3; // cobblestone edges
+		case 3: case 5: return 2; // stone, hieroglyphics
+		case 4: return (pos[0] < 5.0001) ? 5 : 1;
+		default: return 1;
+	}
+}
+
+inlinable byte get_hallway_point_height(const byte point, const vec pos) {
+	(void) pos;
+	return point;
+}
+
+
+// #define HM_TEST
+
+// sides: 0 = left and right, 1 = top and bottom; determining which fourth side will allow the heightmap to work
+
+inlinable byte get_palace_point_height(const byte point, vec pos) {
+	#ifdef HM_TEST
+
+	(void) point;
+
+	// pos += (vec) {almost_almost_zero, -almost_almost_zero}; // good for top and right side
+	// pos += (vec) {-almost_almost_zero, almost_almost_zero}; // good for left and bottom side
+	// pos += (vec) {almost_almost_zero, almost_almost_zero}; // good for right and bottom side
+	// pos += (vec) {-almost_almost_zero, -almost_almost_zero}; // good for top and left side
+
+	/* good sign changes:
+		sub pos[1]: top, add pos[1]: bottom
+		sub pos[0]: left, add pos[0]: right */
+
+	//////////
+
+	// if (doubles_eq(ceil(pos[0]) - pos[0], 0.0)) pos[0] += almost_almost_zero; // right side fix
+	// if (doubles_eq(ceil(pos[1]) - pos[1], 0.0)) pos[1] += almost_almost_zero; // bottom side fix
+	// each version works fine wihtout the branch, but I'm figuring that I'll have to figure out which side to fix
+
+	// maybe different additions based on the wall side or direction?
+
+	//////////
+
+	return *map_point(current_level.heightmap, pos[0], pos[1]);
+
+	#else
+
+	if (point == 1) {
+		if (pos[0] <= 8.9999 && pos[1] <= 5.9999) return 3;
+		else return 5;
+	}
+
+	else if (point == 2) {
+		if (pos[1] <= 9.9999) return 1;
+		else if (pos[0] >= 21.0001 || pos[1] <= 10.9999) return 2;
+		return 3;
+	}
+
+	else if (point == 6) {
+		if (pos[0] <= 3.9999) return pos[0] + 0.0001;
+		else if (pos[0] <= 13.0001) return 3;
+		return 2;
+	}
+
+	else if (point == 7) {
+		if (pos[1] >= 30.9999) return 2;
+		return 1;
+	}
+
+	switch (point) {
+		case 3: return 6;
+		case 4: return 3;
+		case 5: return 8; // 6 before
+		case 8: return 1;
+		case 9: return 2;
+		case 10: return 10;
+		default: return point;
+	}
+
+	#endif
+}
+
+inlinable byte get_pyramid_point_height(const byte point, const vec pos) {
+	if (point != 2) return point;
+
+	const vec half_size = {current_level.map_size.x / 2.0, current_level.map_size.y / 2.0};
+	vec diff = pos - half_size;
+	diff = (vec) {fabs(diff[0]), fabs(diff[1])};
+
+	const vec slopes_to_center = half_size - diff + vec_fill(0) - vec_fill(3.0);
+	return (slopes_to_center[0] + slopes_to_center[1]) / 2.0;
+}
+
+inlinable byte get_red_room_point_height(const byte point, const vec pos) {
+	(void) pos;
+	return (point == 2) ? 3 : 0;
+}
