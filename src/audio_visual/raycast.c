@@ -133,7 +133,6 @@ void raycast(const Player* const player, const double horizon_line, const double
 
 					at_first_hit = 0;
 				}
-
 				last_point_height = point_height;
 			}
 		}
