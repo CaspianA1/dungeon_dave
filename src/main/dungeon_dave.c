@@ -55,8 +55,8 @@ TODO:
 audio todo:
 	- sound crackles when many sound effects are layered
 	- call SDL_OpenAudio before Mix_LoadWAV
-	- no Mix_FreeChunk for audio that's still being played (doesn't apply to Mix_FreeMusic)
-	- allocate channels (12 of them) - also, num channels = Mix_Playing(-1)
+	- no Mix_FreeChunk for audio that's still being played (stop the chunk before) (doesn't apply to Mix_FreeMusic)
+	- allocate channels (12 of them) - also, num channels = Mix_Playing(-1). Curr amt channels = 8
 	- Mix_SetPanning for enemies depending on their position. Mix_SetDistance and Mix_SetPosition are cool too
 
 - need 3D weapon line of sight tracing + weapons can shoot through walls, which is bad
