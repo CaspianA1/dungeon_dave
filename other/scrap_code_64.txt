@@ -137,4 +137,29 @@ if (keys[SDL_SCANCODE_Y]) offset += step;
 if (keys[SDL_SCANCODE_U]) offset = 0.0;
 */
 
+///// This is not used anymore:
+
+/*
+void randomize_map(const Level level, byte* const md, const byte* const points, const byte len_points) {
+	for (int x = 0; x < current_level.map_size.x; x++) {
+		for (int y = 0; y < current_level.map_size.y; y++)
+			md[y * level.map_size.x + x] = points[rand() % len_points];
+	}
+}
+*/
+
+/////
+
+const byte
+	x_part = half_size[0] - diff[0] + almost_zero - 3.0,
+	y_part = half_size[1] - diff[1] + almost_zero - 3.0;
+
+return (x_part + y_part) >> 1;
+
+/*
+const double half_x_size = current_level.map_size.x / 2.0;
+const double x_diff = fabs(pos[0] - half_x_size);
+return half_x_size - x_diff + almost_zero - 3;
+*/
+
 /////

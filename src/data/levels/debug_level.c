@@ -7,7 +7,7 @@ inlinable byte get_debug_level_point_height(const byte point, const vec pos) {
 inlinable double debug_level_shader(const vec pos) {
 	// return pos[0] / 2.0;
 
-	const vec center = {current_level.map_size.x >> 1, current_level.map_size.y >> 1};
+	const vec center = {current_level.map_size.x / 2.0, current_level.map_size.y / 2.0};
 	const Circle center_circle = {{center[0], center[1]}, 0.9};
 
 	const vec center_delta = pos - center;
