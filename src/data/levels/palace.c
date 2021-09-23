@@ -2,7 +2,7 @@
 
 // sides: 0 = left and right, 1 = top and bottom; determining which fourth side will allow the heightmap to work
 
-byte get_palace_point_height(const byte point, vec pos) {
+inlinable byte get_palace_point_height(const byte point, vec pos) {
 	#ifdef HM_TEST
 
 	(void) point;

@@ -49,6 +49,7 @@
 #include "../data/levels/palace.c"
 #include "../data/levels/mipmap_hallway.c"
 #include "../data/levels/fleckenstein.c"
+#include "../data/levels/pyramid.c"
 
 /*
 TODO:
@@ -80,7 +81,7 @@ audio todo:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_pyramid, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
