@@ -12,8 +12,6 @@
 
 #endif
 
-#include <pthread.h>
-
 /*
 #define PLANAR_MODE
 #define NOCLIP_MODE
@@ -23,7 +21,7 @@
 // #define DISABLE_ENEMIES
 #define PERLIN_SHADING
 #define SHADING_ENABLED
-#define SOUND_ENABLED
+// #define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 #define FLOORCAST_THREADS 4
