@@ -52,14 +52,20 @@
 
 /*
 TODO:
-- sound crackles when many sound effects are layered
+audio todo:
+	- sound crackles when many sound effects are layered
+	- call SDL_OpenAudio before Mix_LoadWAV
+	- no Mix_FreeChunk for audio that's still being played (doesn't apply to Mix_FreeMusic)
+	- allocate channels (12 of them) - also, num channels = Mix_Playing(-1)
+	- Mix_SetPanning for enemies depending on their position. Mix_SetDistance and Mix_SetPosition are cool too
+
 - need 3D weapon line of sight tracing + weapons can shoot through walls, which is bad
 - a small occasional top stitch for floorcasting
 - delta time for time-independent physics
 - mipmapping for the floor (based on the wall height)
 - bilinear filtering for the lightmap
 - the wall corner floor algorithm
-- a small point_height function
+- a small point_height function + heightmaps
 - sometimes, a delay when pressing start
 - cannot wrap the mouse from the left to the right for a full-size screen
 - distance shading
@@ -68,7 +74,6 @@ TODO:
 - the rest of the trooper animations + long range AI
 - a unique hitbox size for each thing, and can run through some things
 - screen width and height to screen size via sublime text substitutions
-- heightmaps
 */
 
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
