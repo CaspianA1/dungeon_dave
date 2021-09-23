@@ -130,7 +130,7 @@ void parallel_floorcast(const byte floor_height, const vec pos, const double p_h
 
 		const FloorcastCallerParams copy_params = {&immut_params, drawer_start, drawer_end};
 		memcpy(params + i, &copy_params, sizeof(FloorcastCallerParams));
-		threads[i] = SDL_CreateThread(floorcast_caller, "ftc_instance", params + i);
+		threads[i] = SDL_CreateThread(floorcast_caller, "floorcast_thread_instance", params + i);
 	}
 
 	for (byte i = 0; i < FLOORCAST_THREADS; i++) SDL_WaitThread(threads[i], 0);
