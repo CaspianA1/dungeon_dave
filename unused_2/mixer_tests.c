@@ -8,27 +8,38 @@ typedef uint_fast8_t byte;
 
 // cl; gcc -lSDL2 -lSDL2_mixer mixer_tests.c && ./a.out
 
-// quietest at 255
-void sound_at_dist(Mix_Chunk* const sound, const byte distance) {
-	const int channel = Mix_PlayChannel(-1, sound, 0);
-	Mix_SetDistance(channel, distance);
-	// SDL_Delay(800);
+void sound_dist_test(void) {
+	Mix_Chunk* const sound = Mix_LoadWAV("../assets/audio/sound_effects/whip_crack.wav");
+
+	for (byte i = 1; i < 255; i++) { // silent at 255
+		DEBUG(i, d);
+		const int channel = Mix_PlayChannel(-1, sound, 0);
+		Mix_SetDistance(channel, i);
+		SDL_Delay(800);
+	}
+
+	Mix_FreeChunk(sound);
 }
 
-void sound_test(const int seconds) {
-	Mix_Chunk* const sound = Mix_LoadWAV("assets/audio/sound_effects/whip_crack.wav");
+void sound_pos_test(void) {
+	Mix_Chunk* const sound = Mix_LoadWAV("../assets/audio/enemy_sound_test/chase.wav");
 
-	for (byte i = 1; i < 255; i += 9) {
+	// 0 = in front, 90 = to right, 180 = behind, 270 = to left, 360 = in front again
+
+	for (int i = 0; i < 360; i += 5) {
 		DEBUG(i, d);
-		sound_at_dist(sound, i);
+		const int channel = Mix_PlayChannel(-1, sound, 0);
+		Mix_SetPosition(channel, i, 0);
+		SDL_Delay(800);
 	}
 
 	Mix_FreeChunk(sound);
 }
 
 int main(void) {
-	int a = SDL_Init(SDL_INIT_AUDIO);
+	SDL_Init(SDL_INIT_AUDIO);
 	Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, AUDIO_CHUNK_SIZE);
-	sound_test(10);
+	// sound_dist_test();
+	sound_pos_test();
 	SDL_Quit();
 }
