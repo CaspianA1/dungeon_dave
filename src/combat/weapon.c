@@ -53,7 +53,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 
 				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte);
 				if (enemy_instance -> hp <= 0.0) set_enemy_instance_state(enemy_instance, Dead, 0);
-				else play_sound(&enemy_instance -> enemy -> sounds[4], 0); // attacked
+				else play_sound(&enemy_instance -> enemy -> sounds[4]); // attacked
 
 				collided = 1;
 			}
@@ -75,7 +75,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 		clear_bit(weapon -> status, mask_in_use_weapon);
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
 		set_bit(weapon -> status, mask_in_use_weapon | mask_recently_used_weapon);
-		play_sound(&weapon -> sound, 0);
+		play_sound(&weapon -> sound);
 		shoot_weapon(weapon, player -> pos, player -> dir, player -> jump.height);
 	}
 	else clear_bit(weapon -> status, mask_recently_used_weapon); // recently used = within the last tick

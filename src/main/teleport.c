@@ -24,7 +24,7 @@ byte teleport_if_needed(vec* const pos, double* const height, const byte drop_ac
 		if (aabb_collision(player_box, init_bounding_box(teleporter.from_billboard.pos, teleporter_box_dimensions))
 			&& fabs(teleporter.from_billboard.height - *height) < 1.0) {
 
-			play_sound(&teleporter_sound, 0);
+			play_sound(&teleporter_sound);
 
 			const vec dest = teleporter.to;
 			*height = *map_point(current_level.heightmap, dest[0], dest[1]);

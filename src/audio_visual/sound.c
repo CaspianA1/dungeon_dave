@@ -19,12 +19,12 @@ inlinable void init_audio_subsystem(void) {
 
 #define deinit_audio_subsystem Mix_CloseAudio
 
-inlinable void fail_sound(const Sound* const sound, const char* const error_type) {
+void fail_sound(const Sound* const sound, const char* const error_type) {
 	FAIL("Could not %s a %s sound of path %s: %s\n",
 		error_type, sound -> is_short ? "short" : "long", sound -> path, Mix_GetError());
 }
 
-inlinable Sound init_sound(const char* const path, const byte is_short) {
+Sound init_sound(const char* const path, const byte is_short) {
 	Sound sound = {.is_short = is_short, .path = path};
 	if (is_short) {
 		if ((sound.type.short_sound = Mix_LoadWAV(path)) == NULL)
@@ -41,25 +41,28 @@ inlinable void deinit_sound(const Sound* const sound) {
 	else Mix_FreeMusic(sound -> type.long_sound);
 }
 
-// this expects a short sound
-inlinable void set_sound_volume_from_dist(const Sound* const sound, const double dist) {
-	double percent_audible = 1.0 - dist / max_sound_dist;
-	if (percent_audible < min_percent_audible) percent_audible = min_percent_audible; // can't let stuff get too quiet
-	Mix_VolumeChunk(sound -> type.short_sound, percent_audible * MIX_MAX_VOLUME);
+//////////
+
+static int play_short_sound(const Sound* const sound) { // returns the channel played on
+	const int channel = Mix_PlayChannel(-1, sound -> type.short_sound, 0);
+	if (channel == -1 && strcmp(Mix_GetError(), out_of_channel_error) != 0)
+		fail_sound(sound, "play");
+
+	return channel;
 }
 
-void play_sound(const Sound* const sound, const byte should_loop) {
-	const char loop_status = -should_loop; // -1 -> infinite loop, 0 -> play once
+//////////
 
-	if (sound -> is_short) {
-		if (Mix_PlayChannel(-1, sound -> type.short_sound, loop_status) == -1) {
-			// out of channel error ignored b/c it is not fatal
-			if (strcmp(Mix_GetError(), out_of_channel_error) != 0)
-				fail_sound(sound, "play");
-		}
-	}
-	else if (Mix_PlayMusic(sound -> type.long_sound, loop_status) == -1)
-		fail_sound(sound, "play");
+void play_short_sound_from_dist(const Sound* const sound, const double dist) {
+	const int channel = play_short_sound(sound);
+	(void) channel;
+	(void) dist;
+}
+
+// this loops long sounds
+void play_sound(const Sound* const sound) {
+	if (sound -> is_short) play_short_sound(sound);
+	else if (Mix_PlayMusic(sound -> type.long_sound, -1) == -1) fail_sound(sound, "play");
 }
 
 #else
@@ -71,6 +74,6 @@ typedef byte Sound;
 #define init_sound(a, b) 0
 #define deinit_sound(a) (void) a
 #define set_sound_volume_from_dist(a, b)
-#define play_sound(a, b)
+#define play_sound(a)
 
 #endif

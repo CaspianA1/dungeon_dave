@@ -161,7 +161,7 @@ void update_jump(Jump* const jump, const vec pos) {
 
 	if (keys[KEY_JUMP] && !jump -> jumping) {
 		init_a_jump(jump, 0);
-		play_sound(&jump -> sound_at_jump, 0);
+		play_sound(&jump -> sound_at_jump);
 		jump -> made_noise = 1;
 	}
 	else jump -> made_noise = 0;
@@ -220,7 +220,7 @@ void update_jump(Jump* const jump, const vec pos) {
 
 				// for big jumps only
 				if (jump -> highest_height - ground_height >= min_fall_height_for_sound) {
-					play_sound(&jump -> sound_at_land, 0);
+					play_sound(&jump -> sound_at_land);
 					jump -> made_noise = 1;
 				}
 				else jump -> made_noise = 0;

@@ -60,6 +60,7 @@ audio todo:
 	- allocate channels (12 of them) - also, num channels = Mix_Playing(-1). Curr amt channels = 8
 	- Mix_SetPanning for enemies depending on their position. Mix_SetDistance and Mix_SetPosition are cool too
 
+- quieter teleporter farther away
 - sometimes, no drop sound for teleporting
 - avoid recalculating cos_beta in handle_ray
 - need 3D weapon line of sight tracing + weapons can shoot through walls, which is bad
@@ -82,11 +83,11 @@ audio todo:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_pyramid, &player, &weapon);
+	load_all_defaults(load_palace, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
-	play_sound(&current_level.background_sound, 1);
+	play_sound(&current_level.background_sound);
 	ground = init_pix_sprite("assets/walls/pyramid_bricks_3.bmp");
 
 	while (1) {

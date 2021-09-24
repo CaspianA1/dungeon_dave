@@ -316,3 +316,26 @@ inlinable byte get_red_room_point_height(const byte point, const vec pos) {
 	(void) pos;
 	return (point == 2) ? 3 : 0;
 }
+
+/////
+
+// this expects a short sound
+inlinable void set_sound_volume_from_dist(const Sound* const sound, const double dist) {
+	/*
+	double percent_audible = 1.0 - (dist / max_sound_dist);
+	DEBUG(percent_audible, lf);
+	*/
+
+	/*
+	double percent_audible = 1.0 - dist / max_sound_dist;
+	DEBUG(percent_audible, lf);
+	if (percent_audible < min_percent_audible) percent_audible = min_percent_audible; // can't let stuff get too quiet
+	Mix_VolumeChunk(sound -> type.short_sound, percent_audible * MIX_MAX_VOLUME);
+	*/
+
+	double percent_close = 1.0 - (dist / max_sound_dist);
+	if (percent_close < 0.0) percent_close = 0.0;
+	DEBUG(percent_close, lf);
+}
+
+/////

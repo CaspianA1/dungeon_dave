@@ -121,7 +121,7 @@ void load_palace(void) {
 	Level palace = init_level(map_width, map_height, 2.5, 28.5, 2.0);
 	palace.max_point_height = 10;
 	palace.out_of_bounds_point = 1;
-	palace.background_sound = init_sound("assets/audio/themes/sultan.wav", 0);
+	palace.background_sound = init_sound("assets/audio/themes/storm.wav", 0);
 	palace.shader = palace_shader;
 
 	const int bytes = map_width * map_height;

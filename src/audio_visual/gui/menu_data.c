@@ -13,7 +13,7 @@ InputStatus start_button_on_click(void) {
 
 InputStatus display_title_screen(void) {
 	const Sound title_track = init_sound("assets/audio/themes/title.wav", 0);
-	play_sound(&title_track, 1);
+	play_sound(&title_track);
 
 	const Sprite logo = init_sprite("assets/logo.bmp", 0);
 
