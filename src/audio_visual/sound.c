@@ -49,7 +49,7 @@ inlinable void set_sound_volume_from_dist(const Sound* const sound, const double
 }
 
 void play_sound(const Sound* const sound, const byte should_loop) {
-	const int loop_status = should_loop ? -1 : 0;
+	const char loop_status = -should_loop; // -1 -> infinite loop, 0 -> play once
 
 	if (sound -> is_short) {
 		if (Mix_PlayChannel(-1, sound -> type.short_sound, loop_status) == -1) {

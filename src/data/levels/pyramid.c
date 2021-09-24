@@ -86,7 +86,7 @@ void load_pyramid(void) {
 	set_level_skybox(&pyramid, "assets/skyboxes/desert_eyes.bmp");
 	pyramid.max_point_height = 12;
 	pyramid.out_of_bounds_point = 1;
-	pyramid.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);
+	pyramid.background_sound = init_sound("assets/audio/themes/spelunk.wav", 0);
 	pyramid.shader = pyramid_shader;
 
 	const int bytes = map_width * map_height;
