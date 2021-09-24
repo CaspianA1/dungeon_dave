@@ -35,7 +35,7 @@ typedef struct {
 	Sound sound_when_attacked, sound_when_dying;
 	int y_pitch;
 	Jump jump;
-	Domain tilt;
+	Domain tilt; // this is in degrees, while other in-game measurements are in radians b/c SDL/s SDL_RenderCopyEx uses degrees
 	Pace pace;
 	KinematicBody body;
 } Player;
@@ -62,7 +62,7 @@ typedef struct {
 	int screen_width, screen_height, half_screen_width, half_screen_height,
 		avg_dimensions, max_fps, max_delay, ray_column_width;
 
-	double fov, fov_step, max_fov, proj_dist, minimap_scale;
+	double init_fov, fov, fov_step, max_fov, proj_dist, minimap_scale;
 } Settings;
 
 //////////

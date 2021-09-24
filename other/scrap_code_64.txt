@@ -338,4 +338,20 @@ inlinable void set_sound_volume_from_dist(const Sound* const sound, const double
 	DEBUG(percent_close, lf);
 }
 
+///// The old branch-y tilt code:
+
+/*
+if (strafe) {
+	tilt -> val += lstrafe ? tilt -> step : -tilt -> step;
+
+	if (tilt -> val > tilt -> max)
+		tilt -> val = tilt -> max;
+	else if (tilt -> val < -tilt -> max)
+		tilt -> val = -tilt -> max;
+}
+
+else if (tilt -> val + tilt -> step < 0.0) tilt -> val += tilt -> step;
+else if (tilt -> val - tilt -> step > 0.0) tilt -> val -= tilt -> step;
+*/
+
 /////

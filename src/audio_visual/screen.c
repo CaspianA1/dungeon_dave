@@ -68,7 +68,7 @@ void refresh(const Player* const player) {
 
 		/*
 		const double new_virtual_scr_w = settings.screen_width - x_crop_adjust * 2.0;
-		settings.proj_dist = new_virtual_scr_w / 2.0 / tan(to_radians(settings.fov / 2.0));
+		settings.proj_dist = new_virtual_scr_w / 2.0 / tan(settings.fov / 2.0);
 		*/
 
 		const SDL_FRect dest_crop = {

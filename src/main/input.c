@@ -12,22 +12,27 @@ inlinable void update_theta_and_y_pitch(double* const theta, int* const y_pitch)
 	else if (mouse_pos.y == 0)
 		SDL_WarpMouseInWindow(screen.window, mouse_pos.x, 0);
 
-	*theta = (double) mouse_pos.x / settings.screen_width * 360.0;
+	*theta = (double) mouse_pos.x / settings.screen_width * two_pi;
 	*y_pitch = -mouse_pos.y + settings.half_screen_height;
 }
 
 inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lstrafe) {
-	if (strafe) {
-		tilt -> val += lstrafe ? tilt -> step : -tilt -> step;
+	double tilt_val = tilt -> val;
+	const double tilt_step = tilt -> step;
+	const char tilt_dir = (lstrafe << 1) - strafe; // 1 -> left, 0 -> none, -1 -> right
 
-		if (tilt -> val > tilt -> max)
-			tilt -> val = tilt -> max;
-		else if (tilt -> val < -tilt -> max)
-			tilt -> val = -tilt -> max;
+	if (strafe) {
+		const double old_tilt = tilt_val, tilt_max = tilt -> max;
+		tilt_val += tilt_step * tilt_dir;
+		if (tilt_val >= tilt_max || tilt_val <= -tilt_max) tilt_val = old_tilt;
 	}
 
-	else if (tilt -> val + tilt -> step < 0.0) tilt -> val += tilt -> step;
-	else if (tilt -> val - tilt -> step > 0.0) tilt -> val -= tilt -> step;
+	else if (!doubles_eq(tilt_val, 0.0)) {
+		const char readjust_tilt_dir = (tilt_val < 0.0) ? 1 : -1;
+		tilt_val += tilt_step * readjust_tilt_dir;
+	}
+
+	tilt -> val = tilt_val;
 }
 
 #ifdef NOCLIP_MODE
@@ -95,8 +100,7 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 		const vec prev_pos = *pos;
 
 		update_theta_and_y_pitch(theta, &player -> y_pitch);
-		update_pos(pos, &player -> dir, body, to_radians(*theta),
-			player -> jump.height, forward, backward, lstrafe, rstrafe);
+		update_pos(pos, &player -> dir, body, *theta, player -> jump.height, forward, backward, lstrafe, rstrafe);
 
 		update_jump(&player -> jump, player -> pos);
 		update_tilt(&player -> tilt, strafe, lstrafe);

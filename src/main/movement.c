@@ -96,7 +96,7 @@ void update_pos(vec* const ref_pos, vec* const dir,
 		if (body -> v < 0.0) body -> v = 0.0;
 	}
 
-	if (!increasing_fov && settings.fov > INIT_FOV)
+	if (!increasing_fov && settings.fov > settings.init_fov)
 		update_fov(settings.fov - settings.fov_step);
 
 	*dir = (vec) {cos(rad_theta), sin(rad_theta)};

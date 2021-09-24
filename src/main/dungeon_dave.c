@@ -117,7 +117,7 @@ int main(void) {
 		#ifndef PLANAR_MODE
 		clear_statemap(occluded_by_walls);
 		raycast(&player, horizon_line, player.jump.height);
-		draw_things(player.pos, to_radians(player.angle), player.jump.height, horizon_line);
+		draw_things(player.pos, player.angle, player.jump.height, horizon_line);
 
 		#ifndef DISABLE_ENEMIES
 		if (!player.is_dead) update_all_enemy_instances(&player, &weapon);

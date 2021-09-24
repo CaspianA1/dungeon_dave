@@ -1,5 +1,5 @@
 inlinable void update_proj_dist(void) {
-	settings.proj_dist = settings.half_screen_width / tan(to_radians(settings.fov / 2.0));
+	settings.proj_dist = settings.half_screen_width / tan(settings.fov / 2.0);
 
 	/*
 	fov = 2 * atan(x / 2f), where x = some number (usually diagonal of film), and f = focal length	
@@ -13,7 +13,7 @@ inlinable void update_proj_dist(void) {
 
 // see how other raycasters use the fov to determine things
 inlinable void update_fov(const double new_fov) {
-	if (new_fov <= 0.0 || new_fov >= 180.0) return;
+	if (new_fov <= 0.0 || new_fov >= M_PI) return;
 	settings.fov = new_fov;
 	update_proj_dist();
 }
@@ -54,9 +54,11 @@ void load_default_settings(void) {
 	update_max_fps(INIT_MAX_FPS);
 	settings.ray_column_width = INIT_RAY_COLUMN_W;
 
-	update_fov(INIT_FOV);
-	settings.fov_step = INIT_FOV_STEP;
-	settings.max_fov = INIT_MAX_FOV;
+	const double radians_init_fov = to_radians(INIT_FOV);
+	update_fov(radians_init_fov);
+	settings.init_fov = radians_init_fov;
+	settings.fov_step = to_radians(INIT_FOV_STEP);
+	settings.max_fov = to_radians(INIT_MAX_FOV);
 	settings.minimap_scale = INIT_MINIMAP_SCALE;
 }
 

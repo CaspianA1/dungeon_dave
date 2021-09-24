@@ -76,9 +76,7 @@ void floorcast(const byte floor_height, const int horizon_line, int start_y, con
 
 #ifdef PLANAR_MODE
 
-void fill_val_buffers_for_planar_mode(const double angle_degrees) {
-	const double p_angle = to_radians(angle_degrees);
-
+void fill_val_buffers_for_planar_mode(const double p_angle) {
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + p_angle;
 		update_buffers(screen_x, 0.0f, cosf(p_angle - theta), (vec) {cos(theta), sin(theta)});

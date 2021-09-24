@@ -100,7 +100,7 @@ void mark_floor(const DataRaycast* const d, const double last_projected_wall_top
 
 void raycast(const Player* const player, const double horizon_line, const double p_height) {
 	const vec p_pos = player -> pos;
-	const double p_angle = to_radians(player -> angle);
+	const double p_angle = player -> angle;
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
 		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + p_angle;
