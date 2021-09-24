@@ -58,7 +58,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- no Mix_FreeChunk for audio that's still being played (stop the chunk before) (doesn't apply to Mix_FreeMusic)
 	- allocate channels (12 of them) - also, num channels = Mix_Playing(-1). Curr amt channels = 8
-	- Mix_SetPanning for enemies depending on their position. Mix_SetDistance and Mix_SetPosition are cool too
+	- use Mix_SetPosition for object surround sound
 
 - quieter teleporter farther away
 - sometimes, no drop sound for teleporting
