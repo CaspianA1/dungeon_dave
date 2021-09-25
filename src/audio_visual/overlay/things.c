@@ -16,22 +16,19 @@ static void draw_processed_things(const double p_height, const double horizon_li
 		const Thing thing = current_level.thing_container[i];
 		const DataBillboard billboard_data = *thing.billboard_data;
 
-		const double
-			abs_billboard_beta = fabs(billboard_data.beta),
-			cos_billboard_beta = cos(billboard_data.beta);
+		const double cos_billboard_beta = cos(billboard_data.beta);
 
 		if (billboard_data.dist <= 0.08 // if too close
 			|| cos_billboard_beta <= 0.0 // if out of view
-			|| doubles_eq(abs_billboard_beta, half_pi) // if tan of beta equals inf val for tan
-			|| doubles_eq(abs_billboard_beta, three_pi_over_two))
-			continue;
+			|| doubles_eq(billboard_data.beta, half_pi) // if tan of beta equals inf val for tan
+			|| doubles_eq(billboard_data.beta, three_pi_over_two)) continue;
 
 		const double
 			corrected_dist = billboard_data.dist * cos_billboard_beta,
 			center_offset = tan(billboard_data.beta) * settings.proj_dist;
 
 		const double
-			center_x = settings.half_screen_width + center_offset,
+			center_x = settings.half_screen_width - center_offset,
 			size = settings.proj_dist / corrected_dist;
 
 		const double half_size = size * 0.5;
@@ -80,8 +77,8 @@ void update_thing_values(const vec thing_pos, const vec p_pos, // p_pos = player
 	const double p_angle, double* const beta, double* const dist) {
 
 	const vec delta = thing_pos - p_pos;
-	*beta = atan2(delta[1], delta[0]) - p_angle;
-	if (*beta < -two_pi) *beta += two_pi;
+	*beta = p_angle - atan2(delta[1], delta[0]);
+	if (*beta > two_pi) *beta -= two_pi;
 	*dist = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
 }
 

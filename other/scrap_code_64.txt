@@ -355,3 +355,9 @@ else if (tilt -> val - tilt -> step > 0.0) tilt -> val -= tilt -> step;
 */
 
 /////
+
+double to_degrees(const double radians) {
+	return radians * 180 / M_PI;
+}
+
+/////
