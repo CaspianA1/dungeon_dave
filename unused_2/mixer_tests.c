@@ -9,8 +9,6 @@ typedef uint_fast8_t byte;
 #define AUDIO_CHUNK_SIZE 4096
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
-
-
 void sound_dist_test(void) {
 	Mix_Chunk* const sound = Mix_LoadWAV("../assets/audio/sound_effects/whip_crack.wav");
 
@@ -39,10 +37,25 @@ void sound_pos_test(void) {
 	Mix_FreeChunk(sound);
 }
 
+void immediate_sound_pos_test(void) {
+	Mix_Chunk* const sound = Mix_LoadWAV("../assets/audio/themes/spelunk.wav");
+	DEBUG(sound, p);
+	const int channel = Mix_PlayChannel(-1, sound, 0);
+
+	for (int i = 0;; i += 5) {
+		DEBUG(i, d);
+		Mix_SetPosition(channel, i, 0);
+		SDL_Delay(100);
+	}
+
+	Mix_FreeChunk(sound);
+}
+
 int main(void) {
 	SDL_Init(SDL_INIT_AUDIO);
 	Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, AUDIO_CHUNK_SIZE);
 	// sound_dist_test();
-	sound_pos_test();
+	// sound_pos_test();
+	immediate_sound_pos_test();
 	SDL_Quit();
 }

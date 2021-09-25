@@ -53,10 +53,14 @@ static int play_short_sound(const Sound* const sound) { // returns the channel p
 
 //////////
 
-void play_short_sound_from_dist(const Sound* const sound, const double dist) {
+void play_billboard_data_sound(const Sound* const sound, const DataBillboard* const billboard_data) {
 	const int channel = play_short_sound(sound);
 	(void) channel;
-	(void) dist;
+	(void) billboard_data;
+
+	// int Mix_SetPosition(int channel, Sint16 angle, Uint8 distance)
+
+	// Mix_SetPosition(channel, to_degrees(thing -> billboard_data))
 }
 
 // this loops long sounds
