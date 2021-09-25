@@ -34,7 +34,7 @@ byte death_effect(Player* const player) {
 	const double dist_from_bottom = *p_height - lowest_fall_height;
 	if (dist_from_bottom > 0.0) *p_height -= dist_from_bottom / 15.0;
 
-	player -> angle += dist_from_bottom * 6.0;
+	player -> angle += dist_from_bottom * 0.2;
 	player -> tilt.val += 0.1;
 
 	return 0;
