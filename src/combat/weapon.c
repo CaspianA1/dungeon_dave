@@ -51,9 +51,14 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 				set_bit(enemy_instance -> status, mask_recently_attacked_enemy);
 				enemy_instance -> hp -= weapon -> power;
 
-				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte);
-				if (enemy_instance -> hp <= 0.0) set_enemy_instance_state(enemy_instance, Dead, 0);
-				else play_sound(&enemy_instance -> enemy -> sounds[4]); // attacked
+				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte, const vec, const double);
+
+				if (enemy_instance -> hp <= 0.0)
+					set_enemy_instance_state(enemy_instance, Dead, 0, p_pos, p_height);
+				else
+					play_sound_from_billboard_data(
+					&enemy_instance -> enemy -> sounds[4], // attacked
+					&enemy_instance -> billboard_data, p_pos, p_height);
 
 				collided = 1;
 			}

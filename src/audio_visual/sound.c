@@ -1,6 +1,6 @@
 #ifdef SOUND_ENABLED
 
-static const double max_sound_dist = 10.0, min_percent_audible = 0.05;
+static const byte quietest_sound_dist = 10;
 static const char* const out_of_channel_error = "No free channels available";
 
 typedef struct {
@@ -53,14 +53,23 @@ static int play_short_sound(const Sound* const sound) { // returns the channel p
 
 //////////
 
-void play_billboard_data_sound(const Sound* const sound, const DataBillboard* const billboard_data) {
+void play_sound_from_billboard_data(const Sound* const sound,
+	const DataBillboard* const billboard_data, const vec p_pos, const double p_height) {
+
+	const int beta_degrees = billboard_data -> beta * 180.0 / M_PI;
+
+	const vec delta_2D = billboard_data -> pos - p_pos;
+	const double delta_height = billboard_data -> height - p_height;
+
+	const double distance_3D = sqrt(delta_2D[0] * delta_2D[0] + delta_2D[1] * delta_2D[1] + delta_height * delta_height);
+	const double distance_3D_percent = distance_3D / quietest_sound_dist;
+
+	int audio_library_distance = distance_3D_percent * 255;
+	if (audio_library_distance == 0) audio_library_distance = 1;
+	else if (audio_library_distance > 254) audio_library_distance = 254;
+
 	const int channel = play_short_sound(sound);
-	(void) channel;
-	(void) billboard_data;
-
-	// int Mix_SetPosition(int channel, Sint16 angle, Uint8 distance)
-
-	// Mix_SetPosition(channel, to_degrees(thing -> billboard_data))
+	Mix_SetPosition(channel, 360 - beta_degrees, audio_library_distance);
 }
 
 // this loops long sounds
@@ -77,7 +86,7 @@ typedef byte Sound;
 #define fail_sound(a, b)
 #define init_sound(a, b) 0
 #define deinit_sound(a) (void) a
-#define set_sound_volume_from_dist(a, b)
+#define play_sound_from_billboard_data(a, b, c, d) {(void) c; (void) d;}
 #define play_sound(a)
 
 #endif

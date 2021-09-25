@@ -29,7 +29,7 @@ problems:
 	- don't intersect the player dot with walls in the minimap
 	- disabling vsync makes everything choppy (not a big problem, just curious why)
 	- bogo is completely light with -Ofast when he shouldn't be
-	- enemies have jerky movement sometimes that can make them temporarily clip into a wall (reproduce it by jumping around, wait till the enemy moves at a slant, and then go to their position)
+	- enemies have jerky movement sometimes that can make them temporarily clip into a wall (reproduce it by jumping around, wait till the enemy moves at a slant, and then go to their position) (other way: fly into them)
 	- fix enemy merging by making enemies account for thing collisions
 	- some disappearing pixels for some textures far away
 

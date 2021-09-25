@@ -14,7 +14,7 @@ void deinit_teleporter_data(void) {
 	deinit_sound(&teleporter_sound);
 }
 
-byte teleport_if_needed(vec* const pos, double* const height, const byte drop_actor) {
+byte teleport_if_needed(vec* const pos, double* const height, const Player* const player, const byte drop_actor) {
 	const vec teleporter_box_dimensions = vec_fill(actor_box_side_len + 0.2); // teleporter box is a bit bigger than the actor box
 	const BoundingBox player_box = init_bounding_box(*pos, vec_fill(actor_box_side_len));
 
@@ -24,7 +24,9 @@ byte teleport_if_needed(vec* const pos, double* const height, const byte drop_ac
 		if (aabb_collision(player_box, init_bounding_box(teleporter.from_billboard.pos, teleporter_box_dimensions))
 			&& fabs(teleporter.from_billboard.height - *height) < 1.0) {
 
-			play_sound(&teleporter_sound);
+			// if the player isn't teleporting, the pos and height data needs to be passed twice
+			play_sound_from_billboard_data(&teleporter_sound,
+				&teleporter.from_billboard, player -> pos, player -> jump.height);
 
 			const vec dest = teleporter.to;
 			*height = *map_point(current_level.heightmap, dest[0], dest[1]);
@@ -60,6 +62,6 @@ void teleport_player_if_needed(Player* const player) {
 		}
 	}
 
-	if (teleport_if_needed(&player -> pos, &player -> jump.height, 1))
+	if (teleport_if_needed(&player -> pos, &player -> jump.height, player, 1))
 		fuzz_ticks--;
 }
