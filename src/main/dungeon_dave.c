@@ -60,7 +60,6 @@ audio todo:
 
 - enemies won't chase you if you're far away enough
 - sometimes, no drop sound for teleporting
-- avoid recalculating cos_beta in handle_ray
 - need 3D weapon line of sight tracing + weapons can shoot through walls, which is bad
 - a small occasional top stitch for floorcasting
 - delta time for time-independent physics

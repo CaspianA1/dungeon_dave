@@ -1,6 +1,6 @@
 typedef struct {
 	double* const last_wall_top;
-	const double p_angle, p_height, theta, dist, horizon_line;
+	const double cos_beta, p_height, dist, horizon_line;
 	const vec begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
 	const byte point, point_height, side, first_wall_hit;
@@ -17,8 +17,7 @@ inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir,
 
 // returns if a tallest wall was encountered and raycasting should stop
 void handle_ray(const DataRaycast* const d, double* const last_projected_wall_top, double* const projected_wall_bottom) {
-	const double cos_beta = cos(d -> p_angle - d -> theta);
-	const double corrected_dist = d -> dist * cos_beta;
+	const double corrected_dist = d -> dist * d -> cos_beta;
 	const double wall_h = settings.proj_dist / corrected_dist;
 
 	typedef struct {
@@ -32,11 +31,10 @@ void handle_ray(const DataRaycast* const d, double* const last_projected_wall_to
 		wall_h
 	};
 
-	if (d -> first_wall_hit) update_buffers(wall_dest.x, corrected_dist, cos_beta, d -> dir);
+	if (d -> first_wall_hit) update_buffers(wall_dest.x, corrected_dist, d -> cos_beta, d -> dir);
 
 	const Sprite wall_sprite = current_level.walls[d -> point - 1];
 	const SDL_Rect mipmap_crop = get_mipmap_crop_from_wall(&wall_sprite, wall_h);
-	const int max_sprite_h = mipmap_crop.h;
 
 	SDL_Rect slice = {
 		get_wall_tex_offset(d -> side, d -> hit, d -> dir, mipmap_crop.w) + mipmap_crop.x,
@@ -63,9 +61,9 @@ void handle_ray(const DataRaycast* const d, double* const last_projected_wall_to
 		// partially obscured: bottom of wall somewhere in middle of tallest
 		else if (raised_wall_dest.y + raised_wall_dest.h > *d -> last_wall_top) {
 			raised_wall_dest.h = *d -> last_wall_top - raised_wall_dest.y;
-			slice.h = ceil(max_sprite_h * raised_wall_dest.h / wall_h);
+			slice.h = ceil(mipmap_crop.h * raised_wall_dest.h / wall_h);
 		}
-		else slice.h = max_sprite_h;
+		else slice.h = mipmap_crop.h;
 
 		wall_dest_h_sum += raised_wall_dest.h;
 
@@ -103,13 +101,15 @@ void raycast(const Player* const player, const double horizon_line, const double
 	const double p_angle = player -> angle;
 
 	for (int screen_x = 0; screen_x < settings.screen_width; screen_x += settings.ray_column_width) {
-		const double theta = atan((screen_x - settings.half_screen_width) / settings.proj_dist) + p_angle;
+		const double beta = atan((screen_x - settings.half_screen_width) / settings.proj_dist); // relative ray angle
+		const double cos_beta = cos(beta);
+
+		const double theta = beta + p_angle;
 		const vec dir = {cos(theta), sin(theta)};
 
 		double last_wall_top = DBL_MAX;
 
 		byte at_first_hit = 1, last_point_height = *map_point(current_level.heightmap, p_pos[0], p_pos[1]);
-
 		DataDDA ray = init_dda(p_pos, dir);
 
 		while (iter_dda(&ray)) {
@@ -122,7 +122,7 @@ void raycast(const Player* const player, const double horizon_line, const double
 			if (last_point_height != point_height) {
 				if (point) {
 					const DataRaycast raycast_data = {
-						&last_wall_top, p_angle, p_height, theta, ray.dist, horizon_line, p_pos,
+						&last_wall_top, cos_beta, p_height, ray.dist, horizon_line, p_pos,
 						hit, dir, point, point_height, ray.side, at_first_hit, &last_point_height, screen_x
 					};
 
