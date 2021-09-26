@@ -10,7 +10,7 @@ inlinable byte neighbor_map_point(const ivec neighbors[8], const NeighborID neig
 }
 
 // returns if updating the queue succeeded
-static byte update_queue_with_neighbors(RouteQueue* const routes, Route route, const ivec vertex) {
+byte update_queue_with_neighbors(RouteQueue* const routes, const Route* const route, const ivec vertex) {
 	const int dec_x = vertex.x - 1, dec_y = vertex.y - 1, inc_x = vertex.x + 1, inc_y = vertex.y + 1;
 	const ivec neighbors[8] = {
 		{dec_x, dec_y}, {vertex.x, dec_y}, {inc_x, dec_y},
@@ -47,7 +47,7 @@ ResultBFS bfs(const vec begin, const vec end) {
 	ResultBFS result = {.state = FailedBFS};
 
 	while (routes.length > 0) {
-		const Route route = dequeue_from_routes(&routes);
+		const Route route = *dequeue_from_routes(&routes);
 		const ivec vertex = route.data[route.length - 1];
 
 		if (vertex.x == int_end.x && vertex.y == int_end.y) {
@@ -56,7 +56,7 @@ ResultBFS bfs(const vec begin, const vec end) {
 			break;
 		}
 
-		if (!update_queue_with_neighbors(&routes, route, vertex)) {
+		if (!update_queue_with_neighbors(&routes, &route, vertex)) {
 			result.state = PathTooLongBFS;
 			break;
 		}

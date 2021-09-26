@@ -42,6 +42,7 @@
 #include "../audio_visual/gui/menu_data.c"
 #include "../data/enemies.c"
 
+/*
 #include "../data/levels/level_1.c"
 #include "../data/levels/debug_level.c"
 #include "../data/levels/red_room.c"
@@ -50,6 +51,9 @@
 #include "../data/levels/mipmap_hallway.c"
 #include "../data/levels/fleckenstein.c"
 #include "../data/levels/pyramid.c"
+*/
+
+#include "../data/levels/level_1.c"
 
 /*
 TODO:
@@ -86,7 +90,7 @@ audio todo:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_level_1, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 

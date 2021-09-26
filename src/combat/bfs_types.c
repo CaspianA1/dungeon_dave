@@ -1,10 +1,12 @@
-Route extend_route(Route route, const ivec node) {
-	if (++route.length == max_route_length)
-		route.creation_error = 1;
-	else
-		route.data[route.length - 1] = node;
+Route extend_route(const Route* const route, const ivec node) {
+	Route route_copy = *route;
 
-	return route;
+	if (++route_copy.length == max_route_length)
+		route_copy.creation_error = 1;
+	else
+		route_copy.data[route_copy.length - 1] = node;
+
+	return route_copy;
 }
 
 RouteQueue init_routes(const ivec starting_node) {
@@ -30,7 +32,7 @@ void enqueue_to_routes(RouteQueue* const routes_ref, const Route route) {
 	*routes_ref = routes;
 }
 
-Route dequeue_from_routes(RouteQueue* const routes_ref) {
+Route* dequeue_from_routes(RouteQueue* const routes_ref) {
 	if (routes_ref -> length == 0) FAIL("Cannot dequeue from an empty route queue\n");
-	return routes_ref -> data[--routes_ref -> length];
+	return &routes_ref -> data[--routes_ref -> length];
 }
