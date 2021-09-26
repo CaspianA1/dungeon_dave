@@ -56,7 +56,6 @@ TODO:
 audio todo:
 	- find less crackly enemy sounds
 	- call SDL_OpenAudio before Mix_LoadWAV
-	- no Mix_FreeChunk for audio that's still being played (stop the chunk before) (doesn't apply to Mix_FreeMusic)
 	- make enemy sound directions be constantly updated when they're playing
 
 - enemies won't chase you if you're far away enough

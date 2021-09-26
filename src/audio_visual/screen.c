@@ -16,11 +16,12 @@ void init_screen(void) {
 
 void deinit_screen(void) {
 	SDL_FreeFormat(screen.pixel_format);
-	SDL_DestroyWindow(screen.window);
-	SDL_DestroyRenderer(screen.renderer);
 
 	SDL_DestroyTexture(screen.pixel_buffer);
 	SDL_DestroyTexture(screen.shape_buffer);
+
+	SDL_DestroyRenderer(screen.renderer);
+	SDL_DestroyWindow(screen.window);
 
 	SDL_Quit();
 }

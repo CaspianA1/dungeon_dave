@@ -139,8 +139,8 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	void init_screen(void);
 	init_screen();
 
-	STARTUP_LOG("audio subsystem");
-	init_audio_subsystem();
+	STARTUP_LOG("sound subsystem");
+	init_sound_subsystem();
 
 	STARTUP_LOG("font subsystem");
 	if (TTF_Init() == -1) FAIL("Unable to initialize the font library: %s\n", TTF_GetError());
@@ -219,6 +219,8 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	void deinit_teleporter_data(void);
 	void deinit_screen(void);
 
+	Mix_HaltChannel(-1); // stops all channels before deiniting the associated sounds
+
 	deinit_sound(&player -> sound_when_attacked);
 	deinit_sound(&player -> sound_when_dying);
 	deinit_sound(&player -> jump.sound_at_jump);
@@ -231,16 +233,15 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	deinit_enemy(&enemies[0]);
 
 	deinit_teleporter_data();
-
-	deinit_audio_subsystem();
 	deinit_gui_resources();
+
+	deinit_sound_subsystem();
+	TTF_Quit();
 	deinit_screen();
 
 	wfree(floorcast_val_buffer);
 	wfree(depth_buffer);
 	deinit_statemap(occluded_by_walls);
-
-	TTF_Quit();
 
 	#ifdef TRACK_MEMORY
 	dynamic_memory_report();

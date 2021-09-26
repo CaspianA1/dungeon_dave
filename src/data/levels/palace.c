@@ -24,7 +24,7 @@ inlinable double palace_shader(const vec pos) {
 void load_palace(void) {
 	enum {
 		map_width = 40, map_height = 40,
-		wall_count = 10, billboard_count = 6, teleporter_count = 1,
+		wall_count = 10, billboard_count = 6, teleporter_count = 2,
 		animated_billboard_count = 2, enemy_instance_count = 7
 	};
 
@@ -166,7 +166,9 @@ void load_palace(void) {
 
 	set_level_teleporters(&palace, teleporter_count,
 		8.5, 25.5, 0.0, // from pos + height
-		2.0, 36.0 /* to pos */);
+		2.0, 36.0, /* to pos */
+
+		12.5, 38.5, 0.0, 2.0, 2.0);
 
 	set_level_animated_billboards(&palace, animated_billboard_count,
 		// "assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,

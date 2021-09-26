@@ -16,7 +16,7 @@ static void when_channel_done(const int channel) {
 	Mix_UnregisterAllEffects(channel);
 }
 
-inlinable void init_audio_subsystem(void) {
+inlinable void init_sound_subsystem(void) {
 	if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, AUDIO_CHUNK_SIZE) == -1)
 		FAIL("Could not initialize SDL2_mixer: %s\n", Mix_GetError());
 
@@ -24,7 +24,7 @@ inlinable void init_audio_subsystem(void) {
 	Mix_AllocateChannels(num_sound_channels);
 }
 
-#define deinit_audio_subsystem Mix_CloseAudio
+#define deinit_sound_subsystem Mix_CloseAudio
 
 void fail_sound(const Sound* const sound, const char* const error_type) {
 	FAIL("Could not %s a %s sound of path %s: %s\n",
