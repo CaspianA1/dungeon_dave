@@ -115,6 +115,20 @@ static EnemyState next_enemy_state(EnemyInstance* const enemy_instance, Player* 
 }
 */
 
+/*
+static void new_update_enemy_instance(EnemyInstance* const enemy_instance,
+	Player* const player, Weapon* const weapon) {
+
+	if (enemy_instance -> state == Dead) return;
+
+	DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
+	if (teleport_if_needed(&billboard_data -> pos, &billboard_data -> height, player, 0)) {
+		set_enemy_instance_state(enemy_instance, Idle, 0, player -> pos, player -> jump.height);
+		return;
+	}
+}
+*/
+
 static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* const player, const Weapon* const weapon) {
 	if (enemy_instance -> state == Dead) return;
 
