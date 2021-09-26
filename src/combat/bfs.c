@@ -10,7 +10,7 @@ inlinable byte neighbor_map_point(const ivec neighbors[8], const NeighborID neig
 }
 
 // returns if updating the queue succeeded
-byte update_queue_with_neighbors(RouteQueue* const routes, const Route* const route, const ivec vertex) {
+inlinable byte update_queue_with_neighbors(RouteQueue* const routes, const Route* const route, const ivec vertex) {
 	const int dec_x = vertex.x - 1, dec_y = vertex.y - 1, inc_x = vertex.x + 1, inc_y = vertex.y + 1;
 	const ivec neighbors[8] = {
 		{dec_x, dec_y}, {vertex.x, dec_y}, {inc_x, dec_y},
