@@ -17,7 +17,7 @@ void update_enemy_weapon_y_state(EnemyInstance* const enemy_instance, const SDL_
 }
 
 void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemyState new_state,
-	const byte silent, vec p_pos, const double p_height) {
+	const byte silent, const vec p_pos, const double p_height) {
 
 	if (enemy_instance -> state == new_state) return;
 
@@ -65,7 +65,6 @@ void short_range_enemy_attack(const Enemy* const enemy, EnemyInstance* const ene
 	}
 }
 
-/*
 static EnemyState next_enemy_state(EnemyInstance* const enemy_instance, Player* const player, const Weapon* const weapon) {
 	const Enemy* const enemy = enemy_instance -> enemy;
 	const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
@@ -101,101 +100,45 @@ static EnemyState next_enemy_state(EnemyInstance* const enemy_instance, Player* 
 
 			if (nav_state == Navigating) return Chasing;
 			else if (nav_state == FailedBFS) return Idle;
-			else if (bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy)) {
+			else if (bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy))
 				puts("Long range enemies are not supported yet");
-				break;
-			}
+			else short_range_enemy_attack(enemy, enemy_instance, player, dist, height_diff);
 
-			short_range_enemy_attack(enemy, enemy_instance, player, dist, height_diff);
 			break;
 		}
 		case Dead: break;
 	}
 	return prev_state;
 }
-*/
 
-/*
 static void new_update_enemy_instance(EnemyInstance* const enemy_instance,
-	Player* const player, Weapon* const weapon) {
+	Player* const player, const Weapon* const weapon) {
 
 	if (enemy_instance -> state == Dead) return;
-
-	DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
-	if (teleport_if_needed(&billboard_data -> pos, &billboard_data -> height, player, 0)) {
-		set_enemy_instance_state(enemy_instance, Idle, 0, player -> pos, player -> jump.height);
-		return;
-	}
-}
-*/
-
-static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* const player, const Weapon* const weapon) {
-	if (enemy_instance -> state == Dead) return;
-
-	const Enemy* const enemy = enemy_instance -> enemy;
-
-	Navigator* const nav = &enemy_instance -> nav;
-	DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
 
 	const vec p_pos = player -> pos;
 	const double p_height = player -> jump.height;
+	DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
 
 	if (teleport_if_needed(&billboard_data -> pos, &billboard_data -> height, player, 0)) {
 		set_enemy_instance_state(enemy_instance, Idle, 0, p_pos, p_height);
 		return;
 	}
 
-	const double
-		dist = billboard_data -> dist,
-		height_diff = fabs(p_height - billboard_data -> height);
+	const EnemyState
+		last_state = enemy_instance -> state,
+		new_state = next_enemy_state(enemy_instance, player, weapon);
 
-	const EnemyState last_state = enemy_instance -> state;
+	set_enemy_instance_state(enemy_instance, new_state,
+		0, player -> pos, player -> jump.height);
 
-	/* for each state (excluding Dead), periodically play the sound from that state,
-	and only play the Dead animation once, stopping on the last frame */
-	switch (enemy_instance -> state) {
-		case Idle: {
-			if (height_diff >= 1.0) break;
-
-			const byte awoke_from_sound = (dist <= dist_wake_from_sound) &&
-				(bit_is_set(weapon -> status, mask_recently_used_weapon) || player -> jump.made_noise);
-
-			if (awoke_from_sound || (dist <= enemy -> dist_wake_from_idle) || bit_is_set(enemy_instance -> status, mask_recently_attacked_enemy))
-				set_enemy_instance_state(enemy_instance, Chasing, 0, p_pos, p_height);
-		}
-			break;
-
-		case Chasing: { // pause and transition to attacking for long-range enemies
-			const NavigationState nav_state = update_route_if_needed(nav, p_pos);
-			if (nav_state == ReachedDest)
-				set_enemy_instance_state(enemy_instance, Attacking, 0, p_pos, p_height);
-			else if (nav_state == PathTooLongBFS || nav_state == FailedBFS)
-				set_enemy_instance_state(enemy_instance, Idle, 0, p_pos, p_height);
-		}
-			break;
-
-		case Attacking: {
-			const NavigationState nav_state = update_route_if_needed(nav, p_pos);
-
-			if (nav_state == Navigating)
-				set_enemy_instance_state(enemy_instance, Chasing, 0, p_pos, p_height);
-			else if (nav_state == FailedBFS)
-				set_enemy_instance_state(enemy_instance, Idle, 0, p_pos, p_height);
-
-			else if (bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy))
-				puts("Long range enemies are not supported yet");
-
-			else short_range_enemy_attack(enemy, enemy_instance, player, dist, height_diff);
-		}
-			break;
-
-		case Dead: break;
-	}
-
-	// sound happens at state change, so only one sound at once
-	if (enemy_instance -> state == last_state) {
+	/* For each state (excluding Dead), this periodically play the sound
+	from that state. Sounds only happen at state changes. */
+	if (new_state == last_state) {
 		const byte rand_num = (rand() % max_rand_sound_chance) + 1; // inclusive, 1 to max
-		if (rand_num <= numerator_sound_chance) play_sound_from_billboard_data(&enemy -> sounds[enemy_instance -> state], &enemy_instance -> billboard_data, player -> pos, player -> jump.height);
+		if (rand_num <= numerator_sound_chance)
+			play_sound_from_billboard_data(&enemy_instance -> enemy -> sounds[new_state],
+				billboard_data, p_pos, p_height);
 	}
 
 	clear_bit(enemy_instance -> status, mask_recently_attacked_enemy);
@@ -203,7 +146,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance, Player* c
 
 inlinable void update_all_enemy_instances(Player* const player, const Weapon* const weapon) {
 	for (byte i = 0; i < current_level.enemy_instance_count; i++)
-		update_enemy_instance(&current_level.enemy_instances[i], player, weapon);
+		new_update_enemy_instance(&current_level.enemy_instances[i], player, weapon);
 }
 
 void deinit_enemy(const Enemy* const enemy) {

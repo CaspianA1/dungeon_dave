@@ -1,6 +1,6 @@
 #ifdef SOUND_ENABLED
 
-static const byte quietest_sound_dist = 10;
+static const byte quietest_sound_dist = 10, num_sound_channels = 20;
 static const char* const out_of_channel_error = "No free channels available";
 
 typedef struct {
@@ -21,6 +21,7 @@ inlinable void init_audio_subsystem(void) {
 		FAIL("Could not initialize SDL2_mixer: %s\n", Mix_GetError());
 
 	Mix_ChannelFinished(when_channel_done);
+	Mix_AllocateChannels(num_sound_channels);
 }
 
 #define deinit_audio_subsystem Mix_CloseAudio

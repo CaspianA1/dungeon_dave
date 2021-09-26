@@ -182,8 +182,11 @@ void update_jump(Jump* const jump, const vec pos) {
 			const DataBillboard* const billboard_data = thing -> billboard_data;
 			const double thing_height = billboard_data -> height;
 
+			/* Circular approximation of closeness b/c AABB collisions
+			are resolved otherwise and won't stay across ticks */
 			if (!vec_delta_exceeds(billboard_data -> pos, pos, actor_box_side_len)) {
 				const double top_thing_height = thing_height + 1.0;
+
 				if (jump -> height >= top_thing_height) {
 					landed_on_thing = 1;
 					ground_height = top_thing_height;
@@ -230,9 +233,8 @@ void update_jump(Jump* const jump, const vec pos) {
 		}
 	}
 
-	else if (ground_height < jump -> height) { // falling from running off an object
+	else if (ground_height < jump -> height) // Falling from running off of an object
 		init_a_jump(jump, 1);
-	}
 
 	#endif
 

@@ -57,13 +57,9 @@ audio todo:
 	- find less crackly enemy sounds
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- no Mix_FreeChunk for audio that's still being played (stop the chunk before) (doesn't apply to Mix_FreeMusic)
-	- allocate channels (12 of them) - also, num channels = Mix_Playing(-1). Curr amt channels = 8
 	- make enemy sound directions be constantly updated when they're playing
 
 - enemies won't chase you if you're far away enough
-
-- fn get_new_state in enemy.c
-- quieter teleporter farther away
 - sometimes, no drop sound for teleporting
 - avoid recalculating cos_beta in handle_ray
 - need 3D weapon line of sight tracing + weapons can shoot through walls, which is bad
