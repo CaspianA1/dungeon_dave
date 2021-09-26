@@ -88,8 +88,8 @@ void play_sound(const Sound* const sound) {
 #else
 
 typedef byte Sound;
-#define init_audio_subsystem()
-#define deinit_audio_subsystem()
+#define init_sound_subsystem()
+#define deinit_sound_subsystem()
 #define fail_sound(a, b)
 #define init_sound(a, b) 0
 #define deinit_sound(a) (void) a

@@ -149,7 +149,7 @@ void load_palace(void) {
 		"assets/walls/hieroglyph.bmp", // hieroglyphics.bmp
 
 		"assets/walls/window.bmp",
-		"assets/walls/smooth_rug_1.bmp",
+		"assets/walls/saqqara.bmp",
 		"assets/walls/sandstone.bmp",
 		"assets/walls/cobblestone_3.bmp",
 		"assets/walls/horses.bmp",
