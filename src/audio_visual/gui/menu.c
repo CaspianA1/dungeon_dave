@@ -110,7 +110,8 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 			}
 		}
 
-		if (rendering_image_before) SDL_RenderCopy(screen.renderer, image_before_menu, NULL, NULL);
+		if (rendering_image_before)
+			SDL_RenderCopy(screen.renderer, image_before_menu, NULL, NULL);
 		else {
 			const InputStatus menu_input = render_menu(menu);
 			if (menu_input == Exit || menu_input == NextScreen) {
