@@ -64,7 +64,7 @@ InputStatus handle_input(Player* const player, const byte restrict_movement) {
 				if (event.button.button == KEY_USE_WEAPON) input_status = BeginAnimatingWeapon;
 				break;
 
-			default: if (keys[KEY_TOGGLE_OPTIONS_MENU]) input_status = OptionsMenu;
+			default: if (keys[KEY_TOGGLE_OPTIONS_MENU]) input_status = ToOptionsMenu;
 		}
 	}
 

@@ -99,7 +99,8 @@ int main(void) {
 				deinit_pix_sprite(ground);
 				deinit_all(&player, &weapon);
 				break;
-			case OptionsMenu:
+			case ToOptionsMenu:
+				display_options_menu();
 				puts("Options menu");
 				break;
 			default: break;
