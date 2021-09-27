@@ -67,7 +67,6 @@ audio todo:
 - mipmapping for the floor (based on the wall height)
 - bilinear filtering for the lightmap
 - the wall corner floor algorithm
-- sometimes, a delay when pressing start
 - distance shading
 - better antialiasing by sampling from just the last mip level
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
@@ -137,9 +136,9 @@ int main(void) {
 		teleport_player_if_needed(&player);
 
 		if (begin_level_tint != 255) {
+			begin_level_tint++;
 			SDL_SetTextureColorMod(screen.pixel_buffer, begin_level_tint, begin_level_tint, begin_level_tint);
 			SDL_SetTextureColorMod(screen.shape_buffer, begin_level_tint, begin_level_tint, begin_level_tint);
-			begin_level_tint++;
 		}
 
 		refresh(&player);
