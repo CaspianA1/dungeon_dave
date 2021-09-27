@@ -42,7 +42,7 @@ void deinit_menu(const Menu* const menu) {
 	wfree(textboxes);
 }
 
-InputStatus render_menu(const Menu* const menu, const byte mouse_ready) {
+InputStatus render_menu(const Menu* const menu) {
 	const Color3 main_color = menu -> main_color, text_color = menu -> text_color;
 
 	/* This is done instead of a SDL_RenderClear call because there's an odd Metal bug
@@ -75,7 +75,7 @@ InputStatus render_menu(const Menu* const menu, const byte mouse_ready) {
 		if (mouse.x >= box.x && mouse.x <= box.x + box.w && mouse.y >= box.y && mouse.y <= box.y + box.h) {
 			draw_colored_rect(inverse_text_color, &box);
 
-			if (mouse_ready && event.type == SDL_MOUSEBUTTONDOWN) {
+			if (event.type == SDL_MOUSEBUTTONDOWN) {
 				play_sound(&gui_resources.sound_on_click);
 				const InputStatus click_response = textbox -> on_click_fn();
 				if (click_response != ProceedAsNormal) return click_response;
@@ -92,8 +92,7 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 	SDL_SetRelativeMouseMode(SDL_FALSE);
 
 	InputStatus input = ProceedAsNormal;
-	byte drawing_image = image_before_menu != NULL;
-	byte mouse_down_after_image = !drawing_image, mouse_up_after_image = !drawing_image, done = 0;
+	byte done = 0, rendering_image_before = image_before_menu != NULL;
 
 	while (!done) {
 		const Uint32 before = SDL_GetTicks();
@@ -104,20 +103,16 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 					input = Exit;
 					done = 1;
 					break;
-				case SDL_MOUSEBUTTONDOWN:
-					if (drawing_image) mouse_down_after_image = 1;
-					break;
+
 				case SDL_MOUSEBUTTONUP:
-					if (drawing_image && mouse_down_after_image) {
-						drawing_image = 0;
-						mouse_up_after_image = 1;
-					}
+					if (rendering_image_before)
+						rendering_image_before = 0;
 			}
 		}
 
-		if (drawing_image) SDL_RenderCopy(screen.renderer, image_before_menu, NULL, NULL);
+		if (rendering_image_before) SDL_RenderCopy(screen.renderer, image_before_menu, NULL, NULL);
 		else {
-			const InputStatus menu_input = render_menu(menu, mouse_down_after_image && mouse_up_after_image && !drawing_image);
+			const InputStatus menu_input = render_menu(menu);
 			if (menu_input == Exit || menu_input == NextScreen) {
 				if (menu_input == Exit) input = Exit;
 				done = 1;

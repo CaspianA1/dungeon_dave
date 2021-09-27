@@ -429,4 +429,51 @@ else if (mouse_pos.y == 0)
 *y_pitch = -mouse_pos.y + settings.half_screen_height;
 */
 
+///// The older, messier menu loop:
+
+/*
+InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_menu) {
+	SDL_SetRelativeMouseMode(SDL_FALSE);
+
+	InputStatus input = ProceedAsNormal;
+	byte drawing_image = image_before_menu != NULL;
+	byte mouse_down_after_image = !drawing_image, mouse_up_after_image = !drawing_image, done = 0;
+
+	while (!done) {
+		const Uint32 before = SDL_GetTicks();
+
+		while (SDL_PollEvent(&event)) {
+			switch (event.type) {
+				case SDL_QUIT:
+					input = Exit;
+					done = 1;
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					if (drawing_image) mouse_down_after_image = 1;
+					break;
+				case SDL_MOUSEBUTTONUP:
+					if (drawing_image && mouse_down_after_image) {
+						drawing_image = 0;
+						mouse_up_after_image = 1;
+					}
+			}
+		}
+
+		if (drawing_image) SDL_RenderCopy(screen.renderer, image_before_menu, NULL, NULL);
+		else {
+			const InputStatus menu_input = render_menu(menu, mouse_down_after_image && mouse_up_after_image && !drawing_image);
+			if (menu_input == Exit || menu_input == NextScreen) {
+				if (menu_input == Exit) input = Exit;
+				done = 1;
+			}
+		}
+
+		after_gui_event(before);
+	}
+
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	return input;
+}
+*/
+
 /////
