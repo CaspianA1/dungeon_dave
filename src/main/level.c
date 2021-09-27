@@ -155,7 +155,8 @@ void set_level_enemy_instances(Level* const level, const unsigned enemy_instance
 	va_list enemy_instance_data;
 	va_start(enemy_instance_data, enemy_instance_count);
 
-	extern Enemy enemies[1];
+	extern Enemy enemies[enemy_count];
+
 	for (byte i = 0; i < enemy_instance_count; i++) {
 		const byte enemy_ind = va_arg(enemy_instance_data, unsigned);
 		Enemy* const enemy = &enemies[enemy_ind];

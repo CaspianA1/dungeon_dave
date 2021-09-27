@@ -92,6 +92,8 @@ typedef uint_fast8_t byte;
 typedef __m128d vec;
 typedef struct {int x, y;} ivec;
 
+enum {enemy_count = 2};
+
 const double
 	two_pi = M_PI * 2.0,
 	half_pi = M_PI / 2.0,

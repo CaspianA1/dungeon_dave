@@ -154,14 +154,9 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	StateMap init_statemap(const int, const int);
 	occluded_by_walls = init_statemap(settings.screen_width, settings.screen_height);
 
-	//////////
 	STARTUP_LOG("enemies");
-	extern Enemy enemies[1];
-	Enemy init_eddie(void);
-
-	const Enemy eddie = init_eddie();
-	memcpy(&enemies[0], &eddie, sizeof(Enemy));
-	//////////
+	void init_all_enemies(void);
+	init_all_enemies();
 
 	STARTUP_LOG("first level");
 	load_first_level();
@@ -181,19 +176,19 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 	DataAnimationImmut init_immut_animation_data(const char* const, const int, const int, const int, const int, const byte);
 
+	/*
 	const Weapon first_weapon = {
 		.status = mask_short_range_weapon, .power = 4.0,
 		.sound = init_sound("assets/audio/sound_effects/whip_crack.wav", 1),
 		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60, 0), {0.0, 0}}
 	};
+	*/
 
-	/*
 	const Weapon first_weapon = {
 		.status = mask_paces_sideways_weapon, .power = 10.0,
 		.sound = init_sound("assets/audio/sound_effects/shotgun.wav", 1),
 		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30, 0), {0.0, 0}}
 	};
-	*/
 
 	/*
 	const Weapon first_weapon = {
@@ -225,9 +220,8 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	deinit_weapon(weapon);
 	deinit_level(&current_level);
 
-	extern Enemy enemies[1];
-	void deinit_enemy(const Enemy* const);
-	deinit_enemy(&enemies[0]);
+	void deinit_all_enemies(void);
+	deinit_all_enemies();
 
 	deinit_teleporter_data();
 	deinit_gui_resources();

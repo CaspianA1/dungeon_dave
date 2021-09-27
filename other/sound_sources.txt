@@ -6,14 +6,22 @@ https://freesound.org/people/kfatehi/sounds/363921/ (jump up)
 https://freesound.org/people/ceberation/sounds/235521/ (jump land) (I think?)
 https://freesound.org/people/Dirtjm/sounds/262279/ (damage taken)
 
-https://freesound.org/people/lendrick/sounds/77632/ (enemy audio test, idle)
-https://freesound.org/people/Disagree/sounds/433725/ (enemy audio test, chase)
-https://freesound.org/people/smokebomb99/sounds/147288/ (enemy audio test, attack)
-https://freesound.org/people/Saltbearer/sounds/476852/ (enemy audio test, attacked)
-https://freesound.org/people/ludist/sounds/204450/ (enemy audio test, death)
+https://freesound.org/people/lendrick/sounds/77632/ (eddie, idle)
+https://freesound.org/people/Disagree/sounds/433725/ (eddie, chase)
+https://freesound.org/people/smokebomb99/sounds/147288/ (eddie, attack)
+https://freesound.org/people/Saltbearer/sounds/476852/ (eddie, attacked)
+https://freesound.org/people/ludist/sounds/204450/ (eddie, death)
+
+https://freesound.org/people/ShaneF91/sounds/386573/ (trooper, idle)
+
+https://freesound.org/people/CBJ_Student/sounds/560577/ (trooper, attack)
+https://freesound.org/people/MrFossy/sounds/547191/ (trooper, attacked)
+https://freesound.org/people/ArtOrDie/sounds/338145/ (trooper, death)
 
 https://freesound.org/people/LamaMakesMusic/sounds/403639/ (wall hit, not used at the moment)
 
 https://freesound.org/people/michael_grinnell/sounds/512471/ (teleporter sound)
 
 https://freesound.org/people/GameAudio/sounds/220178/ (menu click)
+
+https://freesound.org/people/tonsil5/sounds/416838/ (player death)
