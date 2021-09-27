@@ -89,7 +89,7 @@ InputStatus render_menu(const Menu* const menu, const byte mouse_ready) {
 }
 
 InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_menu) {
-	SDL_ShowCursor(SDL_ENABLE);
+	SDL_SetRelativeMouseMode(SDL_FALSE);
 
 	InputStatus input = ProceedAsNormal;
 	byte drawing_image = image_before_menu != NULL;
@@ -127,6 +127,6 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 		after_gui_event(before);
 	}
 
-	SDL_ShowCursor(SDL_DISABLE);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
 	return input;
 }

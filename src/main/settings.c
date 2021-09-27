@@ -103,15 +103,12 @@ Player load_player(const double jump_up_v0,
 
 	return (Player) {
 		.pos = current_level.init_pos,
-
 		.dir = {1.0, 0.0},
-
 		.angle = 0.0, .hp = INIT_HP, .is_dead = 0,
+		.y_pitch = 0,
 
 		.sound_when_attacked = init_sound("assets/audio/sound_effects/attacked.wav", 1),
 		.sound_when_dying = init_sound("assets/audio/sound_effects/dying.wav", 1),
-
-		.y_pitch = 0,
 
 		.jump = {.jumping = 0, .up_v0 = jump_up_v0, .v0 = 0.0,
 			.height = init_height, .start_height = init_height,

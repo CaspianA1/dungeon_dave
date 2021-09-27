@@ -1,19 +1,17 @@
-inlinable void update_theta_and_y_pitch(double* const theta, int* const y_pitch) {
-	ivec mouse_pos;
-	SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+inlinable void update_theta_and_y_pitch(double* const ref_theta, int* const ref_y_pitch) {
+	ivec mouse_delta;
+	SDL_GetRelativeMouseState(&mouse_delta.x, &mouse_delta.y);
 
-	if (mouse_pos.x == settings.screen_width - 1)
-		SDL_WarpMouseInWindow(screen.window, 1, mouse_pos.y);
-	else if (mouse_pos.x == 0)
-		SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos.y);
+	double theta = *ref_theta + ((double) mouse_delta.x / settings.screen_width * two_pi);
+	if (theta > two_pi) theta = 0.0;
+	else if (theta < 0.0) theta = two_pi;
+	*ref_theta = theta;
 
-	if (mouse_pos.y == settings.screen_height - 1)
-		SDL_WarpMouseInWindow(screen.window, mouse_pos.x, settings.screen_height - 1);
-	else if (mouse_pos.y == 0)
-		SDL_WarpMouseInWindow(screen.window, mouse_pos.x, 0);
+	int y_pitch = *ref_y_pitch - mouse_delta.y;
+	if (y_pitch > settings.half_screen_height) y_pitch = settings.half_screen_height;
+	else if (y_pitch < -settings.half_screen_height) y_pitch = -settings.half_screen_height;
 
-	*theta = (double) mouse_pos.x / settings.screen_width * two_pi;
-	*y_pitch = -mouse_pos.y + settings.half_screen_height;
+	*ref_y_pitch = y_pitch;
 }
 
 inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lstrafe) {

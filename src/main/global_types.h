@@ -32,8 +32,8 @@ typedef struct {
 	vec pos, dir;
 	double angle, hp;
 	byte is_dead;
-	Sound sound_when_attacked, sound_when_dying;
 	int y_pitch;
+	Sound sound_when_attacked, sound_when_dying;
 	Jump jump;
 	Domain tilt; // this is in degrees, while other in-game measurements are in radians b/c SDL/s SDL_RenderCopyEx uses degrees
 	Pace pace;
