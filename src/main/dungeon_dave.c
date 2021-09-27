@@ -68,7 +68,6 @@ audio todo:
 - bilinear filtering for the lightmap
 - the wall corner floor algorithm
 - sometimes, a delay when pressing start
-- cannot wrap the mouse from the left to the right for a full-size screen
 - distance shading
 - better antialiasing by sampling from just the last mip level
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)

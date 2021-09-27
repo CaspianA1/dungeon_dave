@@ -28,3 +28,11 @@ InputStatus display_title_screen(void) {
 
 	return input;
 }
+
+//////////
+
+/*
+InputStatus display_options_menu(void) {
+
+}
+*/

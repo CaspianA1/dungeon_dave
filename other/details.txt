@@ -54,3 +54,4 @@ completed:
 	- memory leak tracking system
 	- planar + noclip mode
 	- teleportation
+	- enemy + teleporter surround sound
