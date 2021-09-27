@@ -24,7 +24,7 @@
 #define SOUND_ENABLED
 // #define TRACK_MEMORY
 
-#define FLOORCAST_THREADS 2
+#define FLOORCAST_THREADS 3
 
 // max: 1440 by 900
 #define INIT_W 800

@@ -58,6 +58,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- less intermediate point datums; wall data -> pyramid.wall_data -> current_level.wall_data
 - enemies won't chase you if you're far away enough
 - sometimes, no drop sound for teleporting
 - need 3D weapon line of sight tracing + weapons can shoot through walls, which is bad
@@ -80,7 +81,7 @@ audio todo:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	load_all_defaults(load_pyramid, &player, &weapon);
 
 	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
 
