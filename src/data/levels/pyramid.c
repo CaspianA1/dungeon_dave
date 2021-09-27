@@ -1,7 +1,7 @@
 inlinable double pyramid_shader(const vec pos) {
-	const vec diff = pos - (vec) {current_level.map_size.x / 2.0, current_level.map_size.y / 2.0};
+	const vec diff = pos - (vec) {current_level.map_size.x / 2.0, 15.0};
 	const double dist_squared = diff[0] * diff[0] + diff[1] * diff[1];
-	return sqrt(dist_squared) / 3.0;
+	return sqrt(dist_squared) / 5.0;
 }
 
 void load_pyramid(void) {

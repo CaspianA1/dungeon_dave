@@ -35,7 +35,7 @@ inlinable byte flat_triangle(const vec pos, const Triangle triangle) {
 
 // samples per tile -> 150 = 36 million bytes, 50 -> 4 million bytes, 30 -> 1.44 million bytes
 static const byte lightmap_samples_per_tile = 30; // 15
-static const double shader_downscaler = 0.1, perlin_downscaler = 0.5, perlin_frequency = 0.01;
+static const double shader_downscaler = 0.1, perlin_downscaler = 0.4, perlin_frequency = 0.01;
 static const int perlin_amplitude = 10;
 
 Lightmap init_lightmap(void) {
