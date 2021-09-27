@@ -90,12 +90,6 @@ int main(void) {
 	byte begin_level_tint = INIT_BEGIN_LEVEL_TINT;
 
 	while (1) {
-		if (begin_level_tint != 255) {
-			SDL_SetTextureColorMod(screen.pixel_buffer, begin_level_tint, begin_level_tint, begin_level_tint);
-			SDL_SetTextureColorMod(screen.shape_buffer, begin_level_tint, begin_level_tint, begin_level_tint);
-			begin_level_tint++;
-		}
-
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
@@ -141,6 +135,12 @@ int main(void) {
 		// floorcast(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
 
 		teleport_player_if_needed(&player);
+
+		if (begin_level_tint != 255) {
+			SDL_SetTextureColorMod(screen.pixel_buffer, begin_level_tint, begin_level_tint, begin_level_tint);
+			SDL_SetTextureColorMod(screen.shape_buffer, begin_level_tint, begin_level_tint, begin_level_tint);
+			begin_level_tint++;
+		}
 
 		refresh(&player);
 		tick_delay(before);
