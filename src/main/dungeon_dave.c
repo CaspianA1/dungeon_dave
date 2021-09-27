@@ -39,7 +39,7 @@
 #include "../combat/weapon.c"
 #include "../combat/enemy.c"
 
-#include "../audio_visual/gui/menu_data.c"
+#include "../data/menus.c"
 #include "../data/enemies.c"
 
 #include "../data/levels/level_1.c"
