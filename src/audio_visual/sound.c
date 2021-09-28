@@ -79,7 +79,7 @@ void play_sound_from_billboard_data(const Sound* const sound,
 	Mix_SetPosition(channel, 360 - beta_degrees, audio_library_distance);
 }
 
-// this loops long sounds
+// This loops long sounds
 void play_sound(const Sound* const sound) {
 	if (sound -> is_short) play_short_sound(sound);
 	else if (Mix_PlayMusic(sound -> type.long_sound, -1) == -1) fail_sound(sound, "play");

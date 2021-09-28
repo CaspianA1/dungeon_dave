@@ -33,12 +33,12 @@ static void print_navigator(const CorrectedRoute corrected_route, const vec floa
 }
 */
 
-static CorrectedRoute make_corrected_route(const Route route, const vec nav_pos) {
-	CorrectedRoute corrected_route = {.length = route.length};
+static CorrectedRoute make_corrected_route(const Route* const route, const vec nav_pos) {
+	CorrectedRoute corrected_route = {.length = route -> length};
 
 	corrected_route.data[0] = nav_pos;
-	for (int i = 1; i < route.length; i++)
-		corrected_route.data[i] = vec_from_ivec(route.data[i]) + vec_fill(0.5);
+	for (int i = 1; i < corrected_route.length; i++)
+		corrected_route.data[i] = vec_from_ivec(route -> data[i]) + vec_fill(0.5);
 
 	return corrected_route;
 }
@@ -49,7 +49,7 @@ inlinable NavigationState update_route(Navigator* const nav, const vec p_pos) {
 	const ResultBFS bfs_result = bfs(nav_pos, p_pos); // allocate integer BFS path
 
 	if (bfs_result.state == SucceededBFS) {
-		const CorrectedRoute corrected_route = make_corrected_route(bfs_result.route, nav_pos);
+		const CorrectedRoute corrected_route = make_corrected_route(&bfs_result.route, nav_pos);
 		nav -> route = corrected_route;
 		nav -> route_ind = 0;
 	}
@@ -82,14 +82,14 @@ NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos) {
 		const vec next_vertex = route -> data[route_ind + 1];
 
 		const vec dir = next_vertex - route -> data[route_ind];
-		vec* const ref_pos = nav -> pos;
-		vec pos = *ref_pos + dir * vec_fill(nav -> v);
+		vec* const pos_ref = nav -> pos;
+		vec pos = *pos_ref + dir * vec_fill(nav -> v);
 
 		if ((dir[0] > 0.0 && pos[0] >= next_vertex[0]) || (dir[0] < 0.0 && pos[0] <= next_vertex[0])
 			|| (dir[1] > 0.0 && pos[1] >= next_vertex[1]) || (dir[1] < 0.0 && pos[1] <= next_vertex[1]))
 			nav -> route_ind++;
 
-		*ref_pos = pos;
+		*pos_ref = pos;
 		return Navigating;
 	}
 	return ReachedDest;

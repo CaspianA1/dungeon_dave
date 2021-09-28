@@ -1,6 +1,6 @@
 #ifdef TRACK_MEMORY
 
-unsigned
+static unsigned
 	alloc_count = 0,
 	malloc_count = 0,
 	calloc_count = 0,
@@ -28,21 +28,19 @@ inlinable void* wrealloc(void* ptr, size_t new_size) {
 
 inlinable void wfree(void* ptr) {
 	if (ptr == NULL) {
-		printf("Error: attempt to free a null pointer\n");
+		puts("Error: attempt to free a null pointer!");
 		abort();
 	}
 	free_count++;
 	// printf("%p free, %d free total\n", ptr, free_count);
 	free(ptr);
-	ptr = NULL;
 }
 
 void dynamic_memory_report(void) {
-	printf("Leak report:\n"
-		"There were %u allocations made.\n"
-		"There were %u calls to malloc, %u calls to calloc, and %u calls to realloc.\n"
-		"There were %u deallocations made.\n",
-		alloc_count, malloc_count, calloc_count, realloc_count, free_count);
+	printf("Leak report:\nThere were %u allocations made.\nThere were %u "
+		"calls to malloc, %u calls to calloc, and %u calls to realloc.\n"
+		"There were %u deallocations made.\n", alloc_count, malloc_count,
+		calloc_count, realloc_count, free_count);
 
 	if (alloc_count > free_count)
 		printf("You have a memory leak! (%u weren't freed.)\n", alloc_count - free_count);
@@ -50,7 +48,7 @@ void dynamic_memory_report(void) {
 		printf("You freed too much memory! (%u pointers were accidentally freed.)\n",
 			free_count - alloc_count);
 	else
-		printf("You have no memory problems.\n");
+		puts("You have no memory problems.");
 }
 
 #else
@@ -106,7 +104,9 @@ void update_buffers(const int screen_x, const float dist, const float cos_beta, 
 	}
 }
 
-inlinable double get_projected_y(const double horizon_line, const double half_screen_h, const double screen_h, const double world_h) {
+inlinable double get_projected_y(const double horizon_line, const double half_screen_h,
+	const double screen_h, const double world_h) {
+
 	return horizon_line - half_screen_h + world_h * screen_h;
 }
 
@@ -123,15 +123,6 @@ inlinable byte vec_delta_exceeds(const vec a, const vec b, const double max_dist
 
 inlinable byte vec_out_of_bounds(const vec v) {
 	return v[0] < 0.0 || v[0] > current_level.map_size.x - 1.0 || v[1] < 0.0 || v[1] > current_level.map_size.y - 1.0;
-}
-
-inlinable vec vec_diff(const vec a, const vec b) {
-	const vec delta = a - b;
-	return (vec) {fabs(delta[0]), fabs(delta[1])};
-}
-
-inlinable byte vec_in_range(const double p, const vec range) {
-	return p >= range[0] - almost_zero && p <= range[1] + almost_zero;
 }
 
 inlinable vec vec_line_pos(const vec pos, const vec dir, const double slope) {
@@ -152,8 +143,4 @@ inlinable SDL_Rect rect_from_ivecs(const ivec v1, const ivec v2) {
 
 inlinable byte ivec_out_of_bounds(const ivec v) {
 	return v.x < 0 || v.x > current_level.map_size.x - 1 || v.y < 0 || v.y > current_level.map_size.y - 1;
-}
-
-inlinable vec align_vec_from_out_of_bounds(const vec v) {
-	return (vec) {fmod(fabs(v[0]), current_level.map_size.x), fmod(fabs(v[1]), current_level.map_size.y)};
 }

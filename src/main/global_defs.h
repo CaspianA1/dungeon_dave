@@ -27,8 +27,8 @@
 #define FLOORCAST_THREADS 3
 
 // max: 1440 by 900
-#define INIT_W 300
-#define INIT_H 300
+#define INIT_W 800
+#define INIT_H 600
 #define INIT_MAX_FPS 60
 #define INIT_RAY_COLUMN_W 1
 
@@ -86,7 +86,7 @@
 #define DEBUG_FRECT(frect) printf(#frect " = {.x = %lf, .y = %lf, .w = %lf, .h = %lf}\n",\
 	(double) frect.x, (double) frect.y, (double) frect.w, (double) frect.h)
 
-/////
+//////////
 
 typedef uint_fast8_t byte;
 typedef __m128d vec;

@@ -118,7 +118,7 @@ typedef struct {
 	Thing* thing_container;
 } Level;
 
-/////
+//////////
 
 Screen screen;
 Settings settings;

@@ -5,17 +5,17 @@ inlinable double level_1_shader(const vec pos) {
 		plaza_x_range = {16.0, 21.0},
 		plaza_y_range = {1.0, 6.0};
 
-	if (vec_in_range(pos[0], plaza_x_range) && vec_in_range(pos[1], plaza_y_range))
-		// return pos[1] / 2.5;
+	if (pos[0] >= plaza_x_range[0] && pos[0] <= plaza_x_range[1]
+		&& pos[1] >= plaza_y_range[0] && pos[1] <= plaza_y_range[1])
 		return fabs(tan(pos[0] - pos[1])) + 1.0;
 
-	const vec pillar_center_diff = vec_diff(pos, pillar_center);
-	if (pillar_center_diff[0] < 0.75 && pillar_center_diff[1] < 0.75)
-		return pillar_center_diff[0] / pillar_center_diff[1];
+	const vec pillar_center_diff = pos - pillar_center;
+	if (fabs(pillar_center_diff[0]) < 0.75 && fabs(pillar_center_diff[1]) < 0.75)
+		return fabs(pillar_center_diff[0] / pillar_center_diff[1]);
 
-	const vec tunnel_center_diff = vec_diff(pos, tunnel_center);
-	if (tunnel_center_diff[0] < 3.99 && tunnel_center_diff[1] < 1.99)
-		return tunnel_center_diff[0] + tunnel_center_diff[1];
+	const vec tunnel_center_diff = pos - tunnel_center;
+	if (fabs(tunnel_center_diff[0]) < 3.99 && fabs(tunnel_center_diff[1]) < 1.99)
+		return fabs(tunnel_center_diff[0] + tunnel_center_diff[1]);
 
 	return 3.5;
 }

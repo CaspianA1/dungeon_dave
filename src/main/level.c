@@ -39,9 +39,8 @@ inlinable Level init_level(const int map_width, const int map_height,
 inlinable void fill_level_data(byte* const md, const byte point,
 	const int x0, const int x1, const int y0, const int y1, const int width) {
 
-	for (int x = x0; x < x1; x++) {
-		for (int y = y0; y < y1; y++)
-			md[y * width + x] = point;
+	for (int y = y0; y < y1; y++) {
+		for (int x = x0; x < x1; x++) md[y * width + x] = point;
 	}
 }
 
@@ -128,7 +127,6 @@ void set_level_animated_billboards(Level* const level, const unsigned animated_b
 			frame_count = va_arg(animation_data, int),
 			fps = va_arg(animation_data, int);
 
-
 		DataAnimationImmut init_immut_animation_data(const char* const, const int,
 			const int, const int, const int, const byte);
 
@@ -159,7 +157,7 @@ void set_level_enemy_instances(Level* const level, const unsigned enemy_instance
 
 	for (byte i = 0; i < enemy_instance_count; i++) {
 		const byte enemy_ind = va_arg(enemy_instance_data, unsigned);
-		Enemy* const enemy = &enemies[enemy_ind];
+		const Enemy* const enemy = &enemies[enemy_ind];
 		EnemyInstance* const enemy_instance_dest = &level -> enemy_instances[i];
 
 		const EnemyInstance enemy_instance = {

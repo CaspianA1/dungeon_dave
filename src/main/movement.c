@@ -47,8 +47,7 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	};
 
 	for (byte i = 0; i < current_level.thing_count; i++) {
-		Thing* const thing = &current_level.thing_container[i];
-		const DataBillboard* const billboard_data = thing -> billboard_data;
+		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
 
 		const double y_delta = fabs(billboard_data -> height - p_height);
 		if (y_delta >= 1.0) continue;
@@ -62,8 +61,8 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	}
 }
 
-void update_pos(vec* const ref_pos, vec* const dir,
-	KinematicBody* const body, const double rad_theta, const double p_height,
+void update_pos(vec* const pos, vec* const dir,
+	KinematicBody* const body, const double theta, const double p_height,
 	const byte forward, const byte backward, const byte lstrafe, const byte rstrafe) {
 
 	const double curr_time = SDL_GetTicks() / 1000.0; // in seconds
@@ -99,7 +98,7 @@ void update_pos(vec* const ref_pos, vec* const dir,
 	if (!increasing_fov && settings.fov > settings.init_fov)
 		update_fov(settings.fov - settings.fov_step);
 
-	*dir = (vec) {cos(rad_theta), sin(rad_theta)};
+	*dir = (vec) {cos(theta), sin(theta)};
 
 	const vec
 		forward_back_movement = *dir * vec_fill(body -> v),
@@ -116,19 +115,18 @@ void update_pos(vec* const ref_pos, vec* const dir,
 	////////// collision detection
 	#ifdef NOCLIP_MODE
 	(void) p_height;
-	*ref_pos += movement;
-
+	*pos += movement;
 	#else
 	byte thing_hit_x, thing_hit_y;
-	vec pos = *ref_pos;
-	report_aabb_thing_collisions(pos, movement, &thing_hit_x, &thing_hit_y, p_height);
+	vec new_pos = *pos;
+	report_aabb_thing_collisions(new_pos, movement, &thing_hit_x, &thing_hit_y, p_height);
 
-	if (!point_exists_at(pos[0] + movement[0], pos[1], p_height) && !thing_hit_x)
-		pos[0] += movement[0];
-	if (!point_exists_at(pos[0], pos[1] + movement[1], p_height) && !thing_hit_y)
-		pos[1] += movement[1];
+	if (!point_exists_at(new_pos[0] + movement[0], new_pos[1], p_height) && !thing_hit_x)
+		new_pos[0] += movement[0];
+	if (!point_exists_at(new_pos[0], new_pos[1] + movement[1], p_height) && !thing_hit_y)
+		new_pos[1] += movement[1];
 
-	*ref_pos = pos;
+	*pos = new_pos;
 	#endif
 	//////////
 }
@@ -202,10 +200,8 @@ void update_jump(Jump* const jump, const vec pos) {
 	#endif
 
 	if (!landed_on_thing) ground_height = *map_point(current_level.heightmap, pos[0], pos[1]);
-
 	first_call = 0;
 	//////////
-
 	if (jump -> jumping) {
 		const double t = SDL_GetTicks() / 1000.0 - jump -> time_at_jump;
 
@@ -221,22 +217,15 @@ void update_jump(Jump* const jump, const vec pos) {
 				jump -> start_height = ground_height;
 				jump -> height = ground_height;
 
-				// for big jumps only
-				if (jump -> highest_height - ground_height >= min_fall_height_for_sound) {
-					play_sound(&jump -> sound_at_land);
-					jump -> made_noise = 1;
-				}
-				else jump -> made_noise = 0;
+				jump -> made_noise = jump -> highest_height - ground_height >= min_fall_height_for_sound;
+				if (jump -> made_noise) play_sound(&jump -> sound_at_land);
 
 				jump -> highest_height = jump -> height; // + 0.001;
 			}
 		}
 	}
 
-	else if (ground_height < jump -> height) // Falling from running off of an object
-		init_a_jump(jump, 1);
-
+	// Falling from running off of an object
+	else if (ground_height < jump -> height) init_a_jump(jump, 1);
 	#endif
-
-	if (jump -> height < 0.0) jump -> height = 0.0;
 }

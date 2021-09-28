@@ -1,17 +1,17 @@
-inlinable void update_theta_and_y_pitch(double* const ref_theta, int* const ref_y_pitch) {
+inlinable void update_theta_and_y_pitch(double* const theta, int* const y_pitch) {
 	ivec mouse_delta;
 	SDL_GetRelativeMouseState(&mouse_delta.x, &mouse_delta.y);
 
-	double theta = *ref_theta + ((double) mouse_delta.x / settings.screen_width * two_pi);
-	if (theta > two_pi) theta = 0.0;
-	else if (theta < 0.0) theta = two_pi;
-	*ref_theta = theta;
+	double new_theta = *theta + ((double) mouse_delta.x / settings.screen_width * two_pi);
+	if (new_theta > two_pi) new_theta = 0.0;
+	else if (new_theta < 0.0) new_theta = two_pi;
+	*theta = new_theta;
 
-	int y_pitch = *ref_y_pitch - mouse_delta.y;
-	if (y_pitch > settings.half_screen_height) y_pitch = settings.half_screen_height;
-	else if (y_pitch < -settings.half_screen_height) y_pitch = -settings.half_screen_height;
+	int new_y_pitch = *y_pitch - mouse_delta.y;
+	if (new_y_pitch > settings.half_screen_height) new_y_pitch = settings.half_screen_height;
+	else if (new_y_pitch < -settings.half_screen_height) new_y_pitch = -settings.half_screen_height;
 
-	*ref_y_pitch = y_pitch;
+	*y_pitch = new_y_pitch;
 }
 
 inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lstrafe) {

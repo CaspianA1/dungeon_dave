@@ -48,9 +48,9 @@ void init_SDL_framebuffers(const int new_width, const int new_height, const byte
 void load_default_settings(void) {
 	settings.screen_width = INIT_W;
 	settings.screen_height = INIT_H;
-	settings.half_screen_width = settings.screen_width / 2;
-	settings.half_screen_height = settings.screen_height / 2;
-	settings.avg_dimensions = (INIT_W + INIT_H) / 2;
+	settings.half_screen_width = settings.screen_width >> 1;
+	settings.half_screen_height = settings.screen_height >> 1;
+	settings.avg_dimensions = (INIT_W + INIT_H) >> 1;
 	update_max_fps(INIT_MAX_FPS);
 	settings.ray_column_width = INIT_RAY_COLUMN_W;
 
@@ -72,14 +72,14 @@ byte update_screen_dimensions(void) {
 
 	if (width_not_eq || height_not_eq) {
 		init_SDL_framebuffers(new_width, new_height, 1);
-		settings.avg_dimensions = (new_width + new_height) / 2;
+		settings.avg_dimensions = (new_width + new_height) >> 1;
 
 		deinit_statemap(occluded_by_walls);
 		occluded_by_walls = init_statemap(new_width, new_height);
 
 		if (width_not_eq) {
 			settings.screen_width = new_width;
-			settings.half_screen_width = new_width / 2;
+			settings.half_screen_width = new_width >> 1;
 			update_proj_dist();
 
 			floorcast_val_buffer = wrealloc(floorcast_val_buffer, new_width * sizeof(FloorcastBufferVal));
@@ -87,7 +87,7 @@ byte update_screen_dimensions(void) {
 		}
 		if (height_not_eq) {
 			settings.screen_height = new_height;
-			settings.half_screen_height = new_height / 2;
+			settings.half_screen_height = new_height >> 1;
 		}
 		return 1;
 	}

@@ -515,4 +515,19 @@ static byte can_see_player(const DataBillboard* const billboard_data, const Play
 	return 0;
 }
 
+///// Some unused functions:
+
+vec align_vec_from_out_of_bounds(const vec v) {
+	return (vec) {fmod(fabs(v[0]), current_level.map_size.x), fmod(fabs(v[1]), current_level.map_size.y)};
+}
+
+inlinable byte vec_in_range(const double p, const vec range) {
+	return p >= range[0] - almost_zero && p <= range[1] + almost_zero;
+}
+
+inlinable vec vec_diff(const vec a, const vec b) {
+	const vec delta = a - b;
+	return (vec) {fabs(delta[0]), fabs(delta[1])};
+}
+
 /////
