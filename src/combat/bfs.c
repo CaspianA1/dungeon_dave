@@ -31,7 +31,7 @@ inlinable byte update_queue_with_neighbors(RouteQueue* const routes, const Route
 		if (!set_statemap_bit_with_status(current_level.bfs_visited, neighbor.x, neighbor.y)) { // if not visited before
 			const Route next_route = extend_route(route, neighbor);
 			if (next_route.creation_error) return 0;
-			enqueue_to_routes(routes, next_route);
+			enqueue_to_routes(routes, &next_route);
 		}
 	}
 	return 1;

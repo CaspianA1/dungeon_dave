@@ -477,3 +477,13 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 */
 
 /////
+
+/* An enemy instance will transition from its Idle state to Chasing if:
+	- the height difference between the player and enemy instance is less than 1.0, and
+	- or if the distance between the player and the enemy is less than the enemy instance's dist_wake_from_idle
+	- the player made a sound, guaranteed if:
+		- the distance between the player and enemy instance is less than dist_wake_from_sound
+		- the player's weapon was recently used, or they made a noise while jumping
+*/
+
+/////

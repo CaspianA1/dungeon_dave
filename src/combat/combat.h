@@ -1,4 +1,4 @@
-enum {max_route_length = 12, route_queue_init_alloc = 5};
+enum {max_route_length = 16, route_queue_init_alloc = 4};
 
 typedef struct {
 	byte creation_error;

@@ -65,13 +65,37 @@ void short_range_enemy_attack(const Enemy* const enemy, EnemyInstance* const ene
 	}
 }
 
-static EnemyState next_enemy_state(EnemyInstance* const enemy_instance, Player* const player, const Weapon* const weapon) {
+/*
+// returns if no walls are in the way of the player
+byte can_see_player(const DataBillboard* const billboard_data) {
+	const vec dir = {cos(billboard_data -> beta), sin(billboard_data -> beta)};
+	DataDDA eye_trace = init_dda(billboard_data -> pos, dir);
+
+	while (iter_dda(&eye_trace)) {
+		const ivec curr_tile = eye_trace.curr_tile;
+		const byte point_height = *map_point(current_level.heightmap, curr_tile.x, curr_tile.y);
+		if (point_height > billboard_data -> height) return 0;
+	}
+	return 1;
+}
+*/
+
+static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
+	Player* const player, const Weapon* const weapon) {
+
 	const Enemy* const enemy = enemy_instance -> enemy;
 	const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
 
 	const double
 		dist = billboard_data -> dist,
 		height_diff = fabs(player -> jump.height) - billboard_data -> height;
+
+	extern Enemy enemies[enemy_count];
+
+	/*
+	const byte trooper = enemy_instance -> enemy == enemies + 1;
+	if (trooper) DEBUG(can_see_player(&enemy_instance -> billboard_data), d);
+	*/
 
 	const EnemyState prev_state = enemy_instance -> state;
 	switch (prev_state) {

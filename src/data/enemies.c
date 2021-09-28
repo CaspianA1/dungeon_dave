@@ -15,7 +15,7 @@ Enemy init_eddie(void) {
 
 Enemy init_trooper(void) {
 	return (Enemy) {
-		.dist_wake_from_idle = 7.0, .power = 8.0, .init_hp = 30.0, .nav_speed = 0.02,
+		.dist_wake_from_idle = 7.0, .power = 8.0, .init_hp = 30.0, .nav_speed = 0.022,
 		.short_range = 1, /* change later */ .animation_seg_lengths = {4, 7, 11, 11},
 		.animation_data = init_immut_animation_data("assets/spritesheets/trooper.bmp", 33, 1, 33, 15, 0),
 

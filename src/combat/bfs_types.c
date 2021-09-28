@@ -17,7 +17,7 @@ RouteQueue init_routes(const ivec starting_node) {
 
 #define deinit_routes(routes) wfree(routes.data)
 
-void enqueue_to_routes(RouteQueue* const routes_ref, const Route route) {
+void enqueue_to_routes(RouteQueue* const routes_ref, const Route* const route) {
 	RouteQueue routes = *routes_ref;
 
 	if (routes.length++ == routes.max_alloc) {
@@ -27,7 +27,7 @@ void enqueue_to_routes(RouteQueue* const routes_ref, const Route route) {
 
 	for (int i = routes.length - 1; i > 0; i--)
 		routes.data[i] = routes.data[i - 1];
-	routes.data[0] = route;
+	routes.data[0] = *route;
 
 	*routes_ref = routes;
 }

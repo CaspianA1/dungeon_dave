@@ -58,6 +58,8 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- can_see_player for enemy ai -> will stop rapid steps for trooper
+- a memory leak + too much memory being used in general for bfs; work from last path perhaps
 - less intermediate point datums; wall data -> pyramid.wall_data -> current_level.wall_data
 - enemies won't chase you if you're far away enough
 - sometimes, no drop sound for teleporting
