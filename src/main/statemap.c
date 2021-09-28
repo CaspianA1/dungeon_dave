@@ -24,25 +24,29 @@ inlinable byte* statemap_byte(const StateMap statemap, const int x, const int y)
 	return statemap.data + (y * statemap.chunk_dimensions.x + x);
 }
 
+/* For an x-offset in the statemap, this returns the bit offset
+that should be set or returned in a function below */
 inlinable byte get_n_for_bits_x(const int bits_x) {
 	return 7 - (bits_x & 7); // bits_x & 7 == bits_x % 8
 }
 
-// returns if bit was previously set
+// Returns if a bit was previously set + sets a bit all in one
 inlinable byte set_statemap_bit_with_status(const StateMap statemap, const int bits_x, const int bits_y) {
-	byte* const bits = statemap_byte(statemap, bits_x / 8, bits_y);
-	const byte n = get_n_for_bits_x(bits_x);
-	const byte was_set = (*bits >> n) & 1; // if bit was set
-	*bits |= 1 << n; // sets nth bit
+	byte* const bits = statemap_byte(statemap, bits_x >> 3, bits_y); // shr 3 = div 8
+	const byte n_mask = 1 << get_n_for_bits_x(bits_x);
+	const byte was_set = bit_is_set(*bits, n_mask);
+	set_bit(*bits, n_mask);
 	return was_set;
 }
 
 void set_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
-	*statemap_byte(statemap, bits_x / 8, bits_y) |= (1 << get_n_for_bits_x(bits_x));
+	byte* const smb = statemap_byte(statemap, bits_x >> 3, bits_y);
+	set_bit(*smb, 1 << get_n_for_bits_x(bits_x));
 }
 
 inlinable byte get_statemap_bit(const StateMap statemap, const int bits_x, const int bits_y) {
-	return (*statemap_byte(statemap, bits_x / 8, bits_y) >> get_n_for_bits_x(bits_x)) & 1;
+	const byte smb = *statemap_byte(statemap, bits_x >> 3, bits_y);
+	return bit_is_set(smb, 1 << get_n_for_bits_x(bits_x));
 }
 
 /*
