@@ -88,7 +88,9 @@ int main(void) {
 	play_sound(&current_level.background_sound);
 	ground = init_pix_sprite("assets/walls/pyramid_bricks_3.bmp");
 
+	#ifdef SHADING_ENABLED
 	byte begin_level_tint = INIT_BEGIN_LEVEL_TINT;
+	#endif
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
@@ -137,11 +139,13 @@ int main(void) {
 
 		teleport_player_if_needed(&player);
 
+		#ifdef SHADING_ENABLED
 		if (begin_level_tint != 255) {
 			begin_level_tint++;
 			SDL_SetTextureColorMod(screen.pixel_buffer, begin_level_tint, begin_level_tint, begin_level_tint);
 			SDL_SetTextureColorMod(screen.shape_buffer, begin_level_tint, begin_level_tint, begin_level_tint);
 		}
+		#endif
 
 		refresh(&player);
 		tick_delay(before);
