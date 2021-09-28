@@ -486,4 +486,33 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 		- the player's weapon was recently used, or they made a noise while jumping
 */
 
+///// Older versions of can_see_player:
+
+/*
+// returns if no walls are in the way of the player
+byte can_see_player(const DataBillboard* const billboard_data) {
+	const vec dir = {cos(billboard_data -> beta), sin(billboard_data -> beta)};
+	DataDDA eye_trace = init_dda(billboard_data -> pos, dir);
+
+	while (iter_dda(&eye_trace)) {
+		const ivec curr_tile = eye_trace.curr_tile;
+		const byte point_height = *map_point(current_level.heightmap, curr_tile.x, curr_tile.y);
+		if (point_height > billboard_data -> height) return 0;
+	}
+	return 1;
+}
+*/
+
+// don't check one direction; make a line between instead
+static byte can_see_player(const DataBillboard* const billboard_data, const Player* const player) {
+	// if the player can see the enemy, the enemy can see the player
+	const ivec billboard_tile = ivec_from_vec(billboard_data -> pos);
+	DataDDA eye_trace = init_dda(player -> pos, player -> dir);
+	while (iter_dda(&eye_trace)) { // no heights considered b/c thought that enemies can look up
+		const ivec curr_tile = eye_trace.curr_tile;
+		if (curr_tile.x == billboard_tile.x && curr_tile.y == billboard_tile.y) return 1;
+	}
+	return 0;
+}
+
 /////

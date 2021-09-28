@@ -65,20 +65,28 @@ void short_range_enemy_attack(const Enemy* const enemy, EnemyInstance* const ene
 	}
 }
 
-/*
-// returns if no walls are in the way of the player
-byte can_see_player(const DataBillboard* const billboard_data) {
-	const vec dir = {cos(billboard_data -> beta), sin(billboard_data -> beta)};
-	DataDDA eye_trace = init_dda(billboard_data -> pos, dir);
+// returns if the enemy can see the player
+static byte can_see_player(const DataBillboard* const billboard_data, const Player* const player) {
+	const vec start_pos = billboard_data -> pos, possible_end_pos = player -> pos;
 
-	while (iter_dda(&eye_trace)) {
-		const ivec curr_tile = eye_trace.curr_tile;
-		const byte point_height = *map_point(current_level.heightmap, curr_tile.x, curr_tile.y);
-		if (point_height > billboard_data -> height) return 0;
-	}
-	return 1;
+	const double src_height = billboard_data -> height;
+	const ivec player_tile = ivec_from_vec(possible_end_pos);
+
+	// direction = normalized delta vector between player and billboard
+	DataDDA eye_ray = init_dda(start_pos, (possible_end_pos - start_pos) / vec_fill(billboard_data -> dist));
+
+	do {
+		const ivec curr_tile = eye_ray.curr_tile;
+
+		if (*map_point(current_level.heightmap, curr_tile.x, curr_tile.y) > src_height)
+			return 0;
+		else if (curr_tile.x == player_tile.x && curr_tile.y == player_tile.y)
+			return 1;
+
+	} while (iter_dda(&eye_ray));
+
+	return 0;
 }
-*/
 
 static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 	Player* const player, const Weapon* const weapon) {
@@ -93,8 +101,8 @@ static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 	extern Enemy enemies[enemy_count];
 
 	/*
-	const byte trooper = enemy_instance -> enemy == enemies + 1;
-	if (trooper) DEBUG(can_see_player(&enemy_instance -> billboard_data), d);
+	const byte trooper = enemy_instance == current_level.enemy_instances + 7;
+	if (trooper) DEBUG(can_see_player(&enemy_instance -> billboard_data, player), d);
 	*/
 
 	const EnemyState prev_state = enemy_instance -> state;
