@@ -531,3 +531,85 @@ inlinable vec vec_diff(const vec a, const vec b) {
 }
 
 /////
+
+/*
+const byte trooper = enemy_instance == current_level.enemy_instances + 7;
+if (trooper) DEBUG(can_see_player(&enemy_instance -> billboard_data, player), d);
+*/
+
+/////
+
+/* if height diff is small enough:
+	if player in line of sight at reasonable distance
+	  or player made sound at reasonable distance
+	  or player shot enemy instance at any distance:
+		transition to Chasing */
+
+///// The old enemy state getter:
+
+/*
+static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
+	Player* const player, const Weapon* const weapon) {
+
+	const Enemy* const enemy = enemy_instance -> enemy;
+	const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
+
+	const double dist = billboard_data -> dist;
+
+	extern Enemy enemies[enemy_count];
+	const EnemyState prev_state = enemy_instance -> state;
+
+	if (*map_point(current_level.heightmap, player -> pos[0], player -> pos[1])
+		!= *map_point(current_level.heightmap, billboard_data -> pos[0], billboard_data -> pos[1]))
+		return prev_state;
+
+	switch (prev_state) {
+		case Idle: {
+			const byte awoke_from_sound = (dist <= enemy -> dist_awaken.sound) &&
+				(bit_is_set(weapon -> status, mask_recently_used_weapon) || player -> jump.made_noise);
+
+			// if made a sound, or can see player, or shot enemy from any distance
+			if (awoke_from_sound || (dist <= enemy -> dist_awaken.sight)
+				|| bit_is_set(enemy_instance -> status, mask_recently_attacked_enemy))
+				return Chasing;
+			}
+
+			break;
+
+		case Chasing: { // pause and transition to attacking for long-range enemies
+			const NavigationState nav_state = update_route_if_needed(&enemy_instance -> nav, player -> pos);
+			if (nav_state == ReachedDest) return Attacking;
+			else if (nav_state == PathTooLongBFS || nav_state == FailedBFS) return Idle;
+			break;
+		}
+
+		case Attacking: {
+			const NavigationState nav_state = update_route_if_needed(&enemy_instance -> nav, player -> pos);
+
+			if (nav_state == Navigating) return Chasing;
+			else if (nav_state == FailedBFS) return Idle;
+			else if (bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy))
+				puts("Long range enemies are not supported yet");
+			else short_range_enemy_attack(enemy, enemy_instance, player, dist);
+
+			break;
+		}
+		case Dead: break;
+	}
+	return prev_state;
+}
+*/
+
+/////
+
+/*
+The long-range enemy AI:
+If the player meets the activation distance:
+	While not reached target:
+		Step closer
+		Wait a bit
+		Shoot
+*/
+
+
+/////

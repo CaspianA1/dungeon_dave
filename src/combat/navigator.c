@@ -63,16 +63,18 @@ inlinable Navigator init_navigator(const vec p_pos, vec* const pos_ref, const do
 	return nav;
 }
 
-NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos) {
-	const byte base_height = *map_point(current_level.heightmap, p_pos[0], p_pos[1]);
+inlinable byte player_diverged_from_route_dest(const CorrectedRoute* const route, const vec p_pos) {
+	return vec_delta_exceeds(p_pos, route -> data[route -> length - 1], 1.0);
+}
 
-	if (base_height > 0 || (nav -> route_ind == -1 && update_route(nav, p_pos) != SucceededBFS))
+NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos) {
+	if (nav -> route_ind == -1 && update_route(nav, p_pos) != SucceededBFS)
 		return FailedBFS;
 
 	const CorrectedRoute* const route = &nav -> route;
-
 	const int end_ind = route -> length - 1;
-	if (vec_delta_exceeds(p_pos, route -> data[end_ind], 1.0)) {
+
+	if (player_diverged_from_route_dest(route, p_pos)) {
 		const NavigationState nav_state = update_route(nav, p_pos);
 		if (nav_state != SucceededBFS) return nav_state;
 	}

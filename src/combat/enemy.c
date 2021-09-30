@@ -3,8 +3,7 @@ The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Attacked added after Dead. */
 
 static const byte // sound chance at tick = numerator_sound_chancee / max_rand_sound_chance
-	max_rand_sound_chance = 200, numerator_sound_chance = 1,
-	dist_wake_from_sound = 5, attack_time_spacing = 1;
+	max_rand_sound_chance = 200, numerator_sound_chance = 1, attack_time_spacing = 1;
 
 /* If the player's weapon has a y-pitch that is within the vertical bounds of the enemy, 
 a flag is set in the enemy instance to allow them to be attacked by a weapon */
@@ -36,20 +35,11 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 	enemy_instance -> mut_animation_data.frame_ind = new_frame_ind;
 }
 
-/*
-The long-range enemy AI:
-If the player meets the activation distance:
-	While not reached target:
-		Step closer
-		Wait a bit
-		Shoot
-*/
-
-void short_range_enemy_attack(const Enemy* const enemy, EnemyInstance* const enemy_instance, Player* const player,
-	const double dist, const double height_diff) {
+void short_range_enemy_attack(const Enemy* const enemy,
+	EnemyInstance* const enemy_instance, Player* const player, const double dist) {
 
 	const double curr_time = SDL_GetTicks() / 1000.0;
-	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing && dist <= 1.0 && height_diff < 1.0) {
+	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing) {
 		enemy_instance -> time_at_attack = curr_time;
 
 		// when the decr hp is less than zero, the enemy instance clips into walls - why?
@@ -65,7 +55,6 @@ void short_range_enemy_attack(const Enemy* const enemy, EnemyInstance* const ene
 	}
 }
 
-/*
 static byte billboard_can_see_player(const DataBillboard* const billboard_data, const Player* const player) {
 	const vec start_pos = billboard_data -> pos, possible_end_pos = player -> pos;
 
@@ -87,58 +76,53 @@ static byte billboard_can_see_player(const DataBillboard* const billboard_data, 
 
 	return 0;
 }
-*/
 
-static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
+EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 	Player* const player, const Weapon* const weapon) {
 
-	const Enemy* const enemy = enemy_instance -> enemy;
 	const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
-
-	const double
-		dist = billboard_data -> dist,
-		height_diff = fabs(player -> jump.height) - billboard_data -> height;
-
-	extern Enemy enemies[enemy_count];
-
-	/*
-	const byte trooper = enemy_instance == current_level.enemy_instances + 7;
-	if (trooper) DEBUG(can_see_player(&enemy_instance -> billboard_data, player), d);
-	*/
+	const double dist = billboard_data -> dist;
+	const vec p_pos = player -> pos, enemy_instance_pos = billboard_data -> pos;
+	const Enemy* const enemy = enemy_instance -> enemy;
 
 	const EnemyState prev_state = enemy_instance -> state;
+
+	if (*map_point(current_level.heightmap, p_pos[0], p_pos[1])
+		!= *map_point(current_level.heightmap, enemy_instance_pos[0], enemy_instance_pos[1]))
+		return Idle;
+
 	switch (prev_state) {
 		case Idle: {
-			if (height_diff >= 1.0) break;
+			const byte
+				chase_from_sight = dist <= enemy -> dist_awaken.sight
+					&& billboard_can_see_player(billboard_data, player),
 
-			const byte awoke_from_sound = (dist <= dist_wake_from_sound) &&
-				(bit_is_set(weapon -> status, mask_recently_used_weapon) || player -> jump.made_noise);
+				chase_from_sound = dist <= enemy -> dist_awaken.sound
+					&& (player -> jump.made_noise || bit_is_set(weapon -> status, mask_recently_used_weapon));
 
-			if (awoke_from_sound || (dist <= enemy -> dist_wake_from_idle)
-				|| bit_is_set(enemy_instance -> status, mask_recently_attacked_enemy))
+			if (chase_from_sight || chase_from_sound || bit_is_set(enemy_instance -> status, mask_recently_attacked_enemy))
 				return Chasing;
 
 			break;
 		}
 
-		case Chasing: { // pause and transition to attacking for long-range enemies
-			const NavigationState nav_state = update_route_if_needed(&enemy_instance -> nav, player -> pos);
-			if (nav_state == ReachedDest) return Attacking;
-			else if (nav_state == PathTooLongBFS || nav_state == FailedBFS) return Idle;
+		case Chasing:
+			switch (update_route_if_needed(&enemy_instance -> nav, p_pos)) {
+				case ReachedDest: return Attacking;
+				case PathTooLongBFS: case FailedBFS: return Idle;
+				default: break;
+			}
 			break;
-		}
 
-		case Attacking: {
-			const NavigationState nav_state = update_route_if_needed(&enemy_instance -> nav, player -> pos);
-
-			if (nav_state == Navigating) return Chasing;
-			else if (nav_state == FailedBFS) return Idle;
+		case Attacking:
+			if (player_diverged_from_route_dest(&enemy_instance -> nav.route, p_pos))
+				return Chasing;
 			else if (bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy))
 				puts("Long range enemies are not supported yet");
-			else short_range_enemy_attack(enemy, enemy_instance, player, dist, height_diff);
+			else short_range_enemy_attack(enemy, enemy_instance, player, dist);
 
 			break;
-		}
+
 		case Dead: break;
 	}
 	return prev_state;
@@ -159,15 +143,14 @@ static void new_update_enemy_instance(EnemyInstance* const enemy_instance,
 	}
 
 	const EnemyState
-		last_state = enemy_instance -> state,
+		prev_state = enemy_instance -> state,
 		new_state = next_enemy_state(enemy_instance, player, weapon);
 
-	set_enemy_instance_state(enemy_instance, new_state,
-		0, player -> pos, player -> jump.height);
+	set_enemy_instance_state(enemy_instance, new_state, 0, player -> pos, player -> jump.height);
 
 	/* For each state (excluding Dead), this periodically play the sound
 	from that state. Sounds only happen at state changes. */
-	if (new_state == last_state) {
+	if (new_state == prev_state) {
 		const byte rand_num = (rand() % max_rand_sound_chance) + 1; // inclusive, 1 to max
 		if (rand_num <= numerator_sound_chance)
 			play_sound_from_billboard_data(&enemy_instance -> enemy -> sounds[new_state],
