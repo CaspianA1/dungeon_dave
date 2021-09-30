@@ -1,6 +1,6 @@
 typedef struct {
 	double* const last_wall_top;
-	const double cos_beta, p_height, dist, horizon_line;
+	const double cos_beta, p_height, actual_dist, horizon_line;
 	const vec begin, hit, dir;
 	// const double begin[2], hit[2], dir[2];
 	const byte point, point_height, side, first_wall_hit;
@@ -17,8 +17,8 @@ inlinable int get_wall_tex_offset(const byte side, const vec hit, const vec dir,
 
 // returns if a tallest wall was encountered and raycasting should stop
 void handle_ray(const DataRaycast* const d, double* const last_projected_wall_top, double* const projected_wall_bottom) {
-	const double corrected_dist = d -> dist * d -> cos_beta;
-	const double wall_h = settings.proj_dist / corrected_dist;
+	const double straight_dist = d -> actual_dist * d -> cos_beta;
+	const double wall_h = settings.proj_dist / straight_dist;
 
 	typedef struct {
 		double x, y, w, h;
@@ -31,7 +31,7 @@ void handle_ray(const DataRaycast* const d, double* const last_projected_wall_to
 		wall_h
 	};
 
-	if (d -> first_wall_hit) update_buffers(wall_dest.x, corrected_dist, d -> cos_beta, d -> dir);
+	if (d -> first_wall_hit) update_buffers(wall_dest.x, straight_dist, d -> cos_beta, d -> dir);
 
 	const Sprite wall_sprite = current_level.walls[d -> point - 1];
 	const SDL_Rect mipmap_crop = get_mipmap_crop_from_wall(&wall_sprite, wall_h);

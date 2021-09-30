@@ -65,8 +65,8 @@ void short_range_enemy_attack(const Enemy* const enemy, EnemyInstance* const ene
 	}
 }
 
-// returns if the enemy can see the player
-static byte can_see_player(const DataBillboard* const billboard_data, const Player* const player) {
+/*
+static byte billboard_can_see_player(const DataBillboard* const billboard_data, const Player* const player) {
 	const vec start_pos = billboard_data -> pos, possible_end_pos = player -> pos;
 
 	const double src_height = billboard_data -> height;
@@ -87,6 +87,7 @@ static byte can_see_player(const DataBillboard* const billboard_data, const Play
 
 	return 0;
 }
+*/
 
 static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 	Player* const player, const Weapon* const weapon) {
