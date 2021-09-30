@@ -211,7 +211,7 @@ void update_jump(Jump* const jump, const vec pos) {
 		if (jump -> height > jump -> highest_height)
 			jump -> highest_height = jump -> height;
 
-		if (jump -> height < ground_height) { // v = v0 + at
+		else if (jump -> height < ground_height) { // v = v0 + at
 			if (jump -> highest_height > ground_height && (jump -> v0 + g * t) < 0.0) { // reset jump
 				jump -> jumping = 0;
 				jump -> start_height = ground_height;
