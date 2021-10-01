@@ -59,6 +59,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- lightmap seed to init_level
 - make sure that thread creation doesn't stall
 - no more constant copying of many static amount things
 - wall_data to wallmap
