@@ -16,10 +16,10 @@ Enemy init_eddie(void) {
 
 Enemy init_trooper(void) {
 	return (Enemy) {
-		.power = 8.0, .init_hp = 30.0, .nav_speed = 0.022,
+		.power = 8.0, .init_hp = 30.0, .nav_speed = 0.03,
 		.dist_awaken = {.sight = 7, .sound = 8},
 		.is_short_range = 1, /* change later */ .animation_seg_lengths = {4, 7, 11, 11},
-		.animation_data = init_immut_animation_data("assets/spritesheets/trooper.bmp", 33, 1, 33, 15),
+		.animation_data = init_immut_animation_data("assets/spritesheets/trooper.bmp", 33, 1, 33, 18),
 
 		.sounds = {
 			init_sound("assets/audio/enemy_sounds/trooper_idle.wav", 1),
