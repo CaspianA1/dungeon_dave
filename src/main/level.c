@@ -32,15 +32,15 @@ void init_level(const int map_width, const int map_height,
 	twice would be redundant. */
 
 	current_level.map_size = (ivec) {map_width, map_height};
-
+	//////////
 	const int bytes = map_width * map_height;
 
-	current_level.wall_data = wmalloc(bytes); // TODO: alloc all at once
+	current_level.wall_data = wmalloc(bytes);
 	memcpy(current_level.wall_data, wall_data, bytes);
 
 	current_level.heightmap = wmalloc(bytes);
 	memcpy(current_level.heightmap, heightmap, bytes);
-
+	//////////
 	current_level.init_pos = (vec) {init_x, init_y};
 	current_level.init_height = init_height;
 

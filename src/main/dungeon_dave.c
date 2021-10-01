@@ -59,9 +59,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
-- cache player ptr
 - make sure that thread creation doesn't stall
-- TODOs in place
 - pass the skybox as null or not to init_level
 - no more constant copying of many static amount things
 - wall_data to wallmap
@@ -89,9 +87,10 @@ audio todo:
 int main(void) {
 	Player player;
 	Weapon weapon;
-	load_all_defaults(load_palace, &player, &weapon);
+	Player* const player_ref = &player;
 
-	if (display_title_screen() == Exit) deinit_all(&player, &weapon);
+	load_all_defaults(load_palace, player_ref, &weapon);
+	if (display_title_screen() == Exit) deinit_all(player_ref, &weapon);
 
 	play_sound(&current_level.background_sound);
 	ground = init_pix_sprite("assets/walls/pyramid_bricks_3.bmp");
@@ -107,7 +106,7 @@ int main(void) {
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
 		update_screen_dimensions();
-		const InputStatus input_status = handle_input(&player, player.is_dead);
+		const InputStatus input_status = handle_input(player_ref, player.is_dead);
 
 		switch (input_status) {
 			case Exit:
@@ -127,25 +126,25 @@ int main(void) {
 
 		#ifndef PLANAR_MODE
 		clear_statemap(occluded_by_walls);
-		raycast(&player, horizon_line, player.jump.height);
+		raycast(player_ref, horizon_line, player.jump.height);
 		draw_things(player.pos, player.angle, player.jump.height, horizon_line);
 
 		#ifndef DISABLE_ENEMIES
-		if (!player.is_dead) update_all_enemy_instances(&player, &weapon);
+		if (!player.is_dead) update_all_enemy_instances(player_ref, &weapon);
 		#endif
 
-		use_weapon_if_needed(&weapon, &player, input_status);
+		use_weapon_if_needed(&weapon, player_ref, input_status);
 		#else
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
 
-		if (player.is_dead && death_effect(&player))
+		if (player.is_dead && death_effect(player_ref))
 			running = 0;
 
 		parallel_floorcast(0, player.pos, player.jump.height, horizon_line);
 		// floorcast(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
 
-		teleport_player_if_needed(&player);
+		teleport_player_if_needed(player_ref);
 
 		#ifdef SHADING_ENABLED
 		if (begin_level_tint != 255) {
@@ -155,9 +154,9 @@ int main(void) {
 		}
 		#endif
 
-		refresh(&player);
+		refresh(player_ref);
 		tick_delay(before);
 	}
 	deinit_pix_sprite(ground);
-	deinit_all(&player, &weapon);
+	deinit_all(player_ref, &weapon);
 }
