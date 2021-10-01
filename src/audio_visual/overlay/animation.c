@@ -1,5 +1,3 @@
-// b4 = 16055, after =
-
 DataAnimationImmut init_immut_animation_data(const char* const path, const int frames_per_row,
 	const int frames_per_col, const int frame_count, const int fps) {
 
@@ -89,13 +87,9 @@ void animate_weapon(DataAnimation* const animation_data, const vec pos,
 	of the weapon - would be shown.
 	*/
 
-	static vec prev_pos = {-1.0, -1.0};
 	static double x = 0.0;
-	if (prev_pos[0] != pos[0] || prev_pos[1] != pos[1]) {
-		x += log(v + 1.0) * 1.2; // if stuck in corner, you'll still have speed, so line above removes weapon movement
-		if (x > two_pi) x = 0.0;
-	}
-	prev_pos = pos;
+	x += log(v + 1.0) * 1.2;
+	if (x > two_pi) x = 0.0;
 
 	const double weapon_arc = sin(x) * settings.screen_width / 15.0; // pulsating back-and-forth movement
 

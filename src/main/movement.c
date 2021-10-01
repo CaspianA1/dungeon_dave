@@ -112,19 +112,23 @@ void update_pos(vec* const pos, vec* const dir,
 	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
 
-	////////// collision detection
+	////////// Collision detection
 	#ifdef NOCLIP_MODE
 	(void) p_height;
 	*pos += movement;
 	#else
 	byte thing_hit_x, thing_hit_y;
 	vec new_pos = *pos;
+	const vec orig_pos = new_pos;
 	report_aabb_thing_collisions(new_pos, movement, &thing_hit_x, &thing_hit_y, p_height);
 
 	if (!point_exists_at(new_pos[0] + movement[0], new_pos[1], p_height) && !thing_hit_x)
 		new_pos[0] += movement[0];
 	if (!point_exists_at(new_pos[0], new_pos[1] + movement[1], p_height) && !thing_hit_y)
 		new_pos[1] += movement[1];
+
+	if (new_pos[0] == orig_pos[0] && new_pos[1] == orig_pos[1])
+		body -> v = 0.0;
 
 	*pos = new_pos;
 	#endif
