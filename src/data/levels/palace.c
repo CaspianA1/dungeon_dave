@@ -1,5 +1,4 @@
 inlinable double palace_shader(const vec pos) {
-	return 1.0;
 	static const Circle
 		first_health_kit = {{5.0, 2.0}, 1.0},
 		first_downward_stairs = {{22.0, 24.0}, 5.0},
