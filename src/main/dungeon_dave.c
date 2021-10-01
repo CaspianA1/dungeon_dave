@@ -60,13 +60,11 @@ audio todo:
 	- make enemy sound directions be constantly updated when they're playing
 
 - make sure that thread creation doesn't stall
-- pass the skybox as null or not to init_level
 - no more constant copying of many static amount things
 - wall_data to wallmap
 - teleporters initialized without a height
 - a vantage point map element
 - stop player from hitting head by doing head-hit detection after jumping, and then stopping jumping after
-- less intermediate point datums; wall data -> pyramid.wall_data -> current_level.wall_data
 - enemies won't chase you if you're far away enough
 - sometimes, no drop sound for teleporting
 - need 3D weapon line of sight tracing + weapons can shoot through walls, which is bad
