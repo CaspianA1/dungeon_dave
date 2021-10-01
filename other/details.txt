@@ -15,7 +15,6 @@ features:
 	- slow enemies down by hitting them - or stop them in some way
 	- make the minimap full-screen, meaning that it's rendered separately from the health percentage
 	- hit head on things above player
-	- heightmap instead of get_point_height fn
 	- health pickups
 	- clear walls and things
 	- bump and bounce back against certain things or walls when running at them
@@ -27,7 +26,6 @@ problems:
 	- z-buffering issues with things for higher point heights
 	- don't intersect the player dot with walls in the minimap
 	- disabling vsync makes everything choppy (not a big problem, just curious why)
-	- bogo is completely light with -Ofast when he shouldn't be
 	- enemies have jerky movement sometimes that can make them temporarily clip into a wall (reproduce it by jumping around, wait till the enemy moves at a slant, and then go to their position) (other way: fly into them)
 	- fix enemy merging by making enemies account for thing collisions
 	- some disappearing pixels for some textures far away
@@ -54,3 +52,4 @@ completed:
 	- planar + noclip mode
 	- teleportation
 	- enemy + teleporter surround sound
+	- dynamic FOV changing when accelerating

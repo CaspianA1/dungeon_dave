@@ -58,6 +58,8 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- teleporters initialized without a height
+- a vantage point map element
 - stop player from hitting head by doing head-hit detection after jumping, and then stopping jumping after
 - less intermediate point datums; wall data -> pyramid.wall_data -> current_level.wall_data
 - enemies won't chase you if you're far away enough

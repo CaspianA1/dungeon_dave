@@ -83,7 +83,7 @@ void update_billboard_values(DataBillboard* const billboard_data, const vec p_po
 }
 
 #define THING_ADDER(name) add_##name##_things_to_thing_container
-#define THING_ADDER_SIGNATURE const vec p_pos, const double p_angle
+#define THING_ADDER_SIGNATURE Thing* thing_buffer_start, const vec p_pos, const double p_angle
 #define DEF_THING_ADDER(type) inlinable void THING_ADDER(type)(THING_ADDER_SIGNATURE)
 
 DEF_THING_ADDER(still) {
@@ -96,7 +96,7 @@ DEF_THING_ADDER(still) {
 		const Sprite* const sprite = &billboard -> sprite;
 		const ivec size = sprite -> size;
 		const Thing thing = {mask_can_jump_on_thing, billboard_data, sprite, {0, 0, size.x, size.y}, NULL};
-		memcpy(&current_level.thing_container[i], &thing, sizeof(Thing));
+		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
 }
 
@@ -111,7 +111,7 @@ DEF_THING_ADDER(teleporter) {
 			0, billboard_data, &teleporter_sprite, {0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}, NULL
 		};
 
-		memcpy(&current_level.thing_container[i + current_level.billboard_count], &thing, sizeof(Thing));
+		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
 }
 
@@ -132,7 +132,7 @@ DEF_THING_ADDER(animated) {
 
 		progress_animation_data_frame_ind(animation_data);
 
-		memcpy(&current_level.thing_container[i + current_level.billboard_count + current_level.teleporter_count], &thing, sizeof(Thing));
+		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
 }
 
@@ -149,26 +149,38 @@ DEF_THING_ADDER(enemy_instance) {
 		const ivec frame_origin = get_spritesheet_frame_origin(&animation_data);
 		progress_enemy_instance_frame_ind(enemy_instance);
 
-		// the enemy instance ptr is cast with the explicit struct b/c EnemyInstance is a forward declaration in overlay.h
-
 		const Thing thing = {
 			mask_can_jump_on_thing, billboard_data, &immut_animation_data -> sprite,
-			rect_from_ivecs(frame_origin, animation_data.immut.frame_size), (struct EnemyInstance*) enemy_instance
+			rect_from_ivecs(frame_origin, animation_data.immut.frame_size),
+			// cast with struct keyword b/c EnemyInstance is forward declared
+			(struct EnemyInstance*) enemy_instance
 		};
 
-		memcpy(&current_level.thing_container
-			[i + current_level.billboard_count + current_level.teleporter_count + current_level.animated_billboard_count],
-			&thing, sizeof(Thing));
+		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
 }
 
 void draw_things(const vec p_pos, const double p_angle, const double p_height, const double horizon_line) {
+	typedef struct {
+		const byte thing_type_count;
+		void (*const adder_fn)(THING_ADDER_SIGNATURE);
+	} ThingAdder;
+
 	enum {num_thing_adders = 4};
-	void (*const thing_adders[num_thing_adders])(THING_ADDER_SIGNATURE) = {
-		THING_ADDER(still), THING_ADDER(teleporter), THING_ADDER(animated), THING_ADDER(enemy_instance)
+
+	const ThingAdder thing_adders[num_thing_adders] = {
+		{current_level.billboard_count, THING_ADDER(still)},
+		{current_level.teleporter_count, THING_ADDER(teleporter)},
+		{current_level.animated_billboard_count, THING_ADDER(animated)},
+		{current_level.enemy_instance_count, THING_ADDER(enemy_instance)}
 	};
 
-	for (byte i = 0; i < num_thing_adders; i++) thing_adders[i](p_pos, p_angle);
+	Thing* thing_buffer_start = current_level.thing_container;
+	for (byte i = 0; i < num_thing_adders; i++) {
+		const ThingAdder thing_adder = thing_adders[i];
+		thing_adder.adder_fn(thing_buffer_start, p_pos, p_angle);
+		thing_buffer_start += thing_adder.thing_type_count;
+	}
 
 	qsort(current_level.thing_container, current_level.thing_count, sizeof(Thing), cmp_things);
 	draw_processed_things(p_height, horizon_line);
