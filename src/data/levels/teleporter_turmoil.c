@@ -37,9 +37,8 @@ void load_tpt(void) {
 	};
 
 	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
-		1.5, 1.5, 0.0, 2, 1, "assets/audio/themes/red_room_track.wav", tpt_shader);
-
-	set_level_skybox("assets/skyboxes/red_mountains_2.bmp");
+		1.5, 1.5, 0.0, 2, 1, "assets/audio/themes/red_room_track.wav",
+		"assets/skyboxes/red_mountains_2.bmp", tpt_shader);
 
 	set_level_walls(wall_count, "assets/walls/cross_blue.bmp");
 

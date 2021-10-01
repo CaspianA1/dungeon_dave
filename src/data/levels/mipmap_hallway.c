@@ -138,9 +138,9 @@ void load_hallway(void) {
 	};
 
 	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
-		5.0, 3.4, 0.0, 2, 1, "assets/audio/ambient_wind.wav", hallway_shader);
+		5.0, 3.4, 0.0, 2, 1, "assets/audio/themes/ambient_wind.wav",
+		"assets/skyboxes/desert.bmp", hallway_shader);
 
-	set_level_skybox("assets/skyboxes/desert.bmp");
 	set_level_walls(wall_count, "assets/walls/arthouse_bricks.bmp", "assets/walls/dirt.bmp");
 
 	const char* const repeated_billboard = "assets/objects/robot.bmp";

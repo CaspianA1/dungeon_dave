@@ -45,9 +45,8 @@ void load_debug_level(void) {
 	};
 
 	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
-		2.0, 2.0, 0.0, 4, 1, "assets/audio/themes/ambient_wind.wav", debug_level_shader);
-
-	set_level_skybox("assets/skyboxes/red_mountains_2.bmp");
+		2.0, 2.0, 0.0, 4, 1, "assets/audio/themes/ambient_wind.wav",
+		"assets/skyboxes/red_mountains_2.bmp", debug_level_shader);
 
 	set_level_walls(wall_count,
 		"assets/wolf/mossy.bmp",

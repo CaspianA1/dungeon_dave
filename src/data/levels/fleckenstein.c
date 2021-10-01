@@ -78,9 +78,8 @@ void load_fleckenstein(void) {
 	};
 
 	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
-		13.0, 27.0, 0.0, 9, 1, "assets/audio/themes/ambient_wind.wav", fleckenstein_shader);
-
-	set_level_skybox("assets/skyboxes/mossy_mountains.bmp");
+		13.0, 27.0, 0.0, 9, 1, "assets/audio/themes/ambient_wind.wav",
+		"assets/skyboxes/mossy_mountains.bmp", fleckenstein_shader);
 
 	set_level_walls(wall_count,
 		"assets/walls/stone_2.bmp",

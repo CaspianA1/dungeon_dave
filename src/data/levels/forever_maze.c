@@ -139,9 +139,8 @@ void load_maze(void) {
 	};
 
 	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
-		1.5, 1.5, 0.0, 3, 1, "assets/audio/themes/red_room_track.wav", maze_shader);
-
-	set_level_skybox("assets/skyboxes/night.bmp");
+		1.5, 1.5, 0.0, 3, 1, "assets/audio/themes/red_room_track.wav",
+		"assets/skyboxes/night.bmp", maze_shader);
 
 	set_level_walls(wall_count,
 		"assets/walls/ivy.bmp",

@@ -103,9 +103,8 @@ void load_pyramid(void) {
 		border_offset, map_height - 10 - border_offset, map_width);
 
 	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
-		2.5, 2.5, 0.0, 15, 1, "assets/audio/themes/spelunk.wav", pyramid_shader);
-
-	set_level_skybox("assets/skyboxes/desert_eyes.bmp");
+		2.5, 2.5, 0.0, 15, 1, "assets/audio/themes/spelunk.wav",
+		"assets/skyboxes/desert_eyes.bmp", pyramid_shader);
 
 	set_level_walls(wall_count,
 		"assets/walls/pyramid_bricks_3.bmp",

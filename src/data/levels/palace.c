@@ -121,7 +121,8 @@ void load_palace(void) {
 
 	init_level(map_width, map_height,
 		(byte*) wall_data, (byte*) heightmap, 2.5, 28.5, 2.0,
-		10, 1, "assets/audio/themes/storm.wav", palace_shader);
+		10, 1, "assets/audio/themes/storm.wav",
+		"assets/skyboxes/palace_city.bmp", palace_shader);
 
 	/* fill_level_data(current_level.floor_data, 5, 4, 6, 1, 3, map_height); // the flying carpet area
 	fill_level_data(current_level.floor_data, 7, 11, 13, 27, 29, map_height); // the entrance near the obstacle course
@@ -133,8 +134,6 @@ void load_palace(void) {
 	/* assets/skyboxes/desert.bmp
 	assets/skyboxes/palace_city.bmp
 	assets/skyboxes/desert_eyes.bmp */
-
-	set_level_skybox("assets/skyboxes/palace_city.bmp");
 
 	set_level_walls(wall_count,
 		"assets/walls/pyramid_bricks_3.bmp",

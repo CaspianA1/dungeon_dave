@@ -20,7 +20,8 @@ void init_level(const int map_width, const int map_height,
 	const byte* const wall_data, const byte* const heightmap,
 	const double init_x, const double init_y, const double init_height,
 	const byte max_point_height, const byte out_of_bounds_point,
-	const char* const background_sound_path, double (*const shader) (const vec)) {
+	const char* const background_sound_path, const char* const skybox_path,
+	double (*const shader) (const vec)) {
 
 	#ifndef SOUND_ENABLED
 	(void) background_sound_path;
@@ -48,6 +49,13 @@ void init_level(const int map_width, const int map_height,
 	current_level.out_of_bounds_point = out_of_bounds_point;
 	current_level.background_sound = init_sound(background_sound_path, 0);
 
+	current_level.skybox.enabled = skybox_path != NULL;
+	if (current_level.skybox.enabled) {
+		SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);
+		current_level.skybox.sprite = init_sprite(skybox_path, 0);
+		SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "0", SDL_HINT_OVERRIDE);
+	}
+
 	current_level.shader = shader;
 	current_level.skybox.enabled = 0;
 	current_level.bfs_visited = init_statemap(map_width, map_height);
@@ -59,13 +67,6 @@ inlinable void fill_level_data(byte* const md, const byte point,
 	for (int y = y0; y < y1; y++) {
 		for (int x = x0; x < x1; x++) md[y * width + x] = point;
 	}
-}
-
-inlinable void set_level_skybox(const char* const path) {
-	current_level.skybox.enabled = 1;
-	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);
-	current_level.skybox.sprite = init_sprite(path, 0);
-	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "0", SDL_HINT_OVERRIDE);
 }
 
 // path

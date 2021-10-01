@@ -37,7 +37,7 @@ void load_red_room(void) {
 	};
 
 	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
-		1.5, 1.5, 0.0, 3, 1, "assets/audio/themes/red_room_track.wav", red_room_shader);
+		1.5, 1.5, 0.0, 3, 1, "assets/audio/themes/red_room_track.wav", NULL, red_room_shader);
 
 	set_level_walls(wall_count,
 		"assets/walls/red_room_floor.bmp",

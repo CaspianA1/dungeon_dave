@@ -66,7 +66,8 @@ void load_level_1(void) {
 
 	// {18.5, 9.0}, {3.0, 3.0}, {7.0, 12.0}
 	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
-		17.5, 11.5, 0.0, 5, 7, "assets/audio/themes/ambient_wind.wav", level_1_shader);
+		17.5, 11.5, 0.0, 5, 7, "assets/audio/themes/ambient_wind.wav",
+		"assets/skyboxes/mossy_mountains_2.bmp", level_1_shader);
 
 	// fill_level_data(level_1.floor_data, 9, 18, 20, 8, 10, map_width); // dirt
 
@@ -86,8 +87,6 @@ void load_level_1(void) {
 	set_map_point(level_1.floor_data, 10, 20, 1, map_width);
 	set_map_point(level_1.floor_data, 10, 20, 5, map_width);
 	*/
-
-	set_level_skybox("assets/skyboxes/mossy_mountains_2.bmp");
 
 	set_level_walls(wall_count,
 		"assets/walls/cobblestone_2.bmp",
