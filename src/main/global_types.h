@@ -35,7 +35,7 @@ typedef struct {
 	int y_pitch;
 	Sound sound_when_attacked, sound_when_dying;
 	Jump jump;
-	Domain tilt; // this is in degrees, while other in-game measurements are in radians b/c SDL/s SDL_RenderCopyEx uses degrees
+	Domain tilt; // tilt is in degrees, while other values are in radians b/c SDL_RenderCopyEx uses degrees
 	Pace pace;
 	KinematicBody body;
 } Player;
@@ -90,14 +90,14 @@ typedef struct {
 //////////
 
 typedef struct {
-	const ivec map_size;
-	const vec init_pos;
-	const double init_height;
+	ivec map_size;
+	vec init_pos;
+	double init_height;
 
 	byte
+		*wall_data, *heightmap, /* *ceiling_data, *floor_data */
 		wall_count, billboard_count, animated_billboard_count, enemy_instance_count,
-		teleporter_count, thing_count, max_point_height, out_of_bounds_point,
- 		*wall_data, *ceiling_data, *floor_data, *heightmap;
+		teleporter_count, thing_count, max_point_height, out_of_bounds_point;
 
  	StateMap bfs_visited;
 

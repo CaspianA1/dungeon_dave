@@ -118,32 +118,25 @@ void load_palace(void) {
 	/* previous:
 		{1.1, 1.1, 0.0}, {22.5, 16.0, 5.0}, {2.0, 2.0, 2.0}, {12.0, 37.0, 0.0},
 		{15.5, 24.5, 2.0}, {2.5, 28.5, 2.0}, {37.5, 9.5, 5.0}, {3.5, 24.5, 0.0} */
-	Level palace = init_level(map_width, map_height, 2.5, 28.5, 2.0);
-	palace.max_point_height = 10;
-	palace.out_of_bounds_point = 1;
-	palace.background_sound = init_sound("assets/audio/themes/storm.wav", 0);
-	palace.shader = palace_shader;
 
-	const int bytes = map_width * map_height;
-	memcpy(palace.wall_data, wall_data, bytes);
-	memcpy(palace.heightmap, heightmap, bytes);
-	memset(palace.ceiling_data, 1, bytes);
-	memset(palace.floor_data, 1, bytes);
+	init_level(map_width, map_height,
+		(byte*) wall_data, (byte*) heightmap, 2.5, 28.5, 2.0,
+		10, 1, "assets/audio/themes/storm.wav", palace_shader);
 
-	fill_level_data(palace.floor_data, 5, 4, 6, 1, 3, map_height); // the flying carpet area
-	fill_level_data(palace.floor_data, 7, 11, 13, 27, 29, map_height); // the entrance near the obstacle course
-	fill_level_data(palace.floor_data, 6, 16, 22, 24, 30, map_height); // the sandstone around the pillars
-	fill_level_data(palace.floor_data, 2, 1, 12, 24, 26, map_height); // part 1 of the hidden area's marble
-	fill_level_data(palace.floor_data, 2, 1, 9, 19, 26, map_height); // part 2 of the aforementioned
-	fill_level_data(palace.floor_data, 2, 1, 4, 25, 39, map_height); // part 3 of the aforementioned
+	/* fill_level_data(current_level.floor_data, 5, 4, 6, 1, 3, map_height); // the flying carpet area
+	fill_level_data(current_level.floor_data, 7, 11, 13, 27, 29, map_height); // the entrance near the obstacle course
+	fill_level_data(current_level.floor_data, 6, 16, 22, 24, 30, map_height); // the sandstone around the pillars
+	fill_level_data(current_level.floor_data, 2, 1, 12, 24, 26, map_height); // part 1 of the hidden area's marble
+	fill_level_data(current_level.floor_data, 2, 1, 9, 19, 26, map_height); // part 2 of the aforementioned
+	fill_level_data(current_level.floor_data, 2, 1, 4, 25, 39, map_height); // part 3 of the aforementioned */
 
 	/* assets/skyboxes/desert.bmp
 	assets/skyboxes/palace_city.bmp
 	assets/skyboxes/desert_eyes.bmp */
 
-	set_level_skybox(&palace, "assets/skyboxes/palace_city.bmp");
+	set_level_skybox("assets/skyboxes/palace_city.bmp");
 
-	set_level_walls(&palace, wall_count,
+	set_level_walls(wall_count,
 		"assets/walls/pyramid_bricks_3.bmp",
 		"assets/walls/marble.bmp",
 		"assets/walls/hieroglyph.bmp", // hieroglyphics.bmp
@@ -156,7 +149,7 @@ void load_palace(void) {
 		"assets/walls/mesa.bmp",
 		"assets/walls/arthouse_bricks.bmp");
 
-	set_level_billboards(&palace, billboard_count,
+	set_level_billboards(billboard_count,
 		"assets/objects/health_kit.bmp", 4.5, 22.5, 0.0, // 11.5, 28.0
 		"assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0,
 		"assets/objects/golden_dome.bmp", 13.0, 28.0, 1.0,
@@ -164,21 +157,18 @@ void load_palace(void) {
 		"assets/objects/cactus.bmp", 2.5, 27.5, 1.0,
 		"assets/objects/cactus.bmp", 3.5, 27.5, 2.0);
 
-	set_level_teleporters(&palace, teleporter_count,
+	set_level_teleporters(teleporter_count,
 		8.5, 25.5, 0.0, // from pos + height
 		2.0, 36.0, /* to pos */
 
 		12.5, 38.5, 0.0, 2.0, 2.0);
 
-	set_level_animated_billboards(&palace, animated_billboard_count,
+	set_level_animated_billboards(animated_billboard_count,
 		// "assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,
 		"assets/spritesheets/flying_carpet.bmp", 5, 10, 46, 25, 5.0, 2.0, 0.0,
 		"assets/spritesheets/torch_2.bmp", 2, 3, 5, 12, 7.5, 12.5, 0.0);
 
-	memcpy(&current_level, &palace, sizeof(Level));
-
-	// this is set after b/c it depends on fns that read from current_level
-	set_level_enemy_instances(&current_level, enemy_instance_count,
+	set_level_enemy_instances(enemy_instance_count,
 		0, 6.5, 21.5, 0.0,
 		0, 3.5, 21.5, 0.0,
 		0, 34.5, 19.5, 0.0,
@@ -190,5 +180,5 @@ void load_palace(void) {
 		1, 1.5, 8.5, 0.0,
 		1, 7.5, 1.5, 0.0);
 
-	set_level_thing_container(&current_level);
+	set_level_thing_container();
 }

@@ -44,21 +44,12 @@ void load_debug_level(void) {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
-	Level debug_level = init_level(map_width, map_height, 2.0, 2.0, 0.0);
+	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+		2.0, 2.0, 0.0, 4, 1, "assets/audio/themes/ambient_wind.wav", debug_level_shader);
 
-	set_level_skybox(&debug_level, "assets/skyboxes/red_mountains_2.bmp");
-	debug_level.max_point_height = 4;
-	debug_level.out_of_bounds_point = 1;
-	debug_level.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);
-	debug_level.shader = debug_level_shader;
+	set_level_skybox("assets/skyboxes/red_mountains_2.bmp");
 
-	const int bytes = map_width * map_height;
-	memcpy(debug_level.wall_data, wall_data, bytes);
-	memcpy(debug_level.heightmap, heightmap, bytes);
-	memset(debug_level.ceiling_data, 2, bytes);
-	memset(debug_level.floor_data, 2, bytes);
-
-	set_level_walls(&debug_level, wall_count,
+	set_level_walls(wall_count,
 		"assets/wolf/mossy.bmp",
 		"assets/walls/cobblestone.bmp",
 		"assets/wolf/eagle.bmp",
@@ -66,13 +57,12 @@ void load_debug_level(void) {
 		"assets/wolf/bluestone.bmp",
 		"assets/walls/arthouse_bricks.bmp");
 
-	set_level_billboards(&debug_level, billboard_count);
-	set_level_teleporters(&debug_level, teleporter_count);
+	set_level_billboards(billboard_count);
+	set_level_teleporters(teleporter_count);
 
-	set_level_animated_billboards(&debug_level, animated_billboard_count,
+	set_level_animated_billboards(animated_billboard_count,
 		"assets/spritesheets/sonic.bmp", 6, 5, 30, 30, 2.5, 2.5, 0.1);
 
-	memcpy(&current_level, &debug_level, sizeof(Level));
-	set_level_enemy_instances(&current_level, enemy_instance_count);
-	set_level_thing_container(&current_level);
+	set_level_enemy_instances(enemy_instance_count);
+	set_level_thing_container();
 }

@@ -138,30 +138,19 @@ void load_maze(void) {
 		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}
 	};
 
-	Level maze = init_level(map_width, map_height, 1.5, 1.5, 0.0);
-	maze.max_point_height = 3;
-	maze.out_of_bounds_point = 1;
-	maze.background_sound = init_sound("assets/audio/themes/red_room_track.wav", 0);
-	maze.shader = maze_shader;
+	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+		1.5, 1.5, 0.0, 3, 1, "assets/audio/themes/red_room_track.wav", maze_shader);
 
-	set_level_skybox(&maze, "assets/skyboxes/night.bmp");
+	set_level_skybox("assets/skyboxes/night.bmp");
 
-	const int bytes = map_width * map_height;
-	memcpy(maze.wall_data, wall_data, bytes);
-	memcpy(maze.heightmap, heightmap, bytes);
-	memset(maze.ceiling_data, 2, bytes);
-	memset(maze.floor_data, 2, bytes);
-
-	set_level_walls(&maze, wall_count,
+	set_level_walls(wall_count,
 		"assets/walls/ivy.bmp",
 		"assets/walls/grass.bmp");
 
-	set_level_billboards(&maze, billboard_count);	
-	set_level_teleporters(&maze, teleporter_count);
-	set_level_animated_billboards(&maze, animated_billboard_count);	
+	set_level_billboards(billboard_count);
+	set_level_teleporters(teleporter_count);
+	set_level_animated_billboards(animated_billboard_count);
 
-	memcpy(&current_level, &maze, sizeof(Level));
-
-	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 28.5, 21.5, 0.0);
-	set_level_thing_container(&current_level);
+	set_level_enemy_instances(enemy_instance_count, 0, 28.5, 21.5, 0.0);
+	set_level_thing_container();
 }

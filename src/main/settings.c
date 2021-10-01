@@ -118,7 +118,7 @@ Player load_player(const double jump_up_v0,
 
 		.tilt = {.val = 0.0, .step = tilt_step, .max = tilt_max},
 
-		.pace = {.domain = {.val = 0.0, .step = pace_step},
+		.pace = {.domain = {.val = 0.0, .step = pace_step, .max = two_pi},
 			.offset_scaler = pace_offset_scaler, .screen_offset = 0},
 
 		.body = {.status = 0, .v = 0.0, .max_v_reached = 0.0, .a = body_a, .limit_v = body_limit_v,
@@ -206,9 +206,10 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 void deinit_all(const Player* const player, const Weapon* const weapon) {
 	void deinit_weapon(const Weapon* const);
-	void deinit_level(const Level* const);
-	void deinit_gui_resources(void);
+	void deinit_level(void);
+	void deinit_all_enemies(void);
 	void deinit_teleporter_data(void);
+	void deinit_gui_resources(void);
 	void deinit_screen(void);
 
 	Mix_HaltChannel(-1); // stops all channels before deiniting the associated sounds
@@ -218,9 +219,8 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	deinit_sound(&player -> jump.sound_at_jump);
 	deinit_sound(&player -> jump.sound_at_land);
 	deinit_weapon(weapon);
-	deinit_level(&current_level);
+	deinit_level();
 
-	void deinit_all_enemies(void);
 	deinit_all_enemies();
 
 	deinit_teleporter_data();

@@ -90,12 +90,15 @@ inlinable byte* map_point(byte* const map, const int x, const int y) {
 }
 
 byte point_exists_at(const double x, const double y, const double height) {
-	const byte out_of_bounds = x < 1.0 || x > current_level.map_size.x - 1 || y < 1.0 || y > current_level.map_size.y - 1;
+	const byte out_of_bounds =
+		x < 1.0 || x > current_level.map_size.x - 1
+		|| y < 1.0 || y > current_level.map_size.y - 1;
+
 	return out_of_bounds || height < *map_point(current_level.heightmap, x, y);
 }
 
 void update_buffers(const int screen_x, const float dist, const float cos_beta, const vec dir) {
-	FloorcastBufferVal* floorcast_buffer_val = &floorcast_val_buffer[screen_x];
+	FloorcastBufferVal* floorcast_buffer_val = floorcast_val_buffer + screen_x;
 
 	for (int x = screen_x; x < screen_x + settings.ray_column_width; x++, floorcast_buffer_val++) {
 		floorcast_buffer_val -> one_over_cos_beta = 1.0f / cos_beta;

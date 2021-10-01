@@ -16,24 +16,41 @@ void print_heightmap(void) {
 }
 */
 
-inlinable Level init_level(const int map_width, const int map_height,
-	const double init_x, const double init_y, const double init_height) {
+void init_level(const int map_width, const int map_height,
+	const byte* const wall_data, const byte* const heightmap,
+	const double init_x, const double init_y, const double init_height,
+	const byte max_point_height, const byte out_of_bounds_point,
+	const char* const background_sound_path, double (*const shader) (const vec)) {
+
+	#ifndef SOUND_ENABLED
+	(void) background_sound_path;
+	#endif
 
 	/* The wall, billboard, and animation count are not
 	initialized here as constant because for them to be set variadically,
 	they need the count variable as the last argument, and specifying it
 	twice would be redundant. */
 
-	Level level = {
-		.map_size = {map_width, map_height},
-		.init_pos = {init_x, init_y}, .init_height = init_height, .skybox.enabled = 0,
-		.bfs_visited = init_statemap(map_width, map_height)
-	};
+	current_level.map_size = (ivec) {map_width, map_height};
 
-	byte** const map_data[4] = {&level.wall_data, &level.ceiling_data, &level.floor_data, &level.heightmap};
-	for (byte i = 0; i < 4; i++) *map_data[i] = wmalloc(map_width * map_height);
+	const int bytes = map_width * map_height;
 
-	return level;
+	current_level.wall_data = wmalloc(bytes); // TODO: alloc all at once
+	memcpy(current_level.wall_data, wall_data, bytes);
+
+	current_level.heightmap = wmalloc(bytes);
+	memcpy(current_level.heightmap, heightmap, bytes);
+
+	current_level.init_pos = (vec) {init_x, init_y};
+	current_level.init_height = init_height;
+
+	current_level.max_point_height = max_point_height;
+	current_level.out_of_bounds_point = out_of_bounds_point;
+	current_level.background_sound = init_sound(background_sound_path, 0);
+
+	current_level.shader = shader;
+	current_level.skybox.enabled = 0;
+	current_level.bfs_visited = init_statemap(map_width, map_height);
 }
 
 inlinable void fill_level_data(byte* const md, const byte point,
@@ -44,37 +61,37 @@ inlinable void fill_level_data(byte* const md, const byte point,
 	}
 }
 
-inlinable void set_level_skybox(Level* const level, const char* const path) {
-	level -> skybox.enabled = 1;
+inlinable void set_level_skybox(const char* const path) {
+	current_level.skybox.enabled = 1;
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);
-	level -> skybox.sprite = init_sprite(path, 0);
+	current_level.skybox.sprite = init_sprite(path, 0);
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "0", SDL_HINT_OVERRIDE);
 }
 
 // path
-void set_level_walls(Level* const level, const unsigned wall_count, ...) {
-	level -> wall_count = wall_count; // unsigned b/c of type promotion semantics
-	level -> walls = wmalloc(wall_count * sizeof(Sprite));
+void set_level_walls(const unsigned wall_count, ...) {
+	current_level.wall_count = wall_count; // unsigned b/c of type promotion semantics
+	current_level.walls = wmalloc(wall_count * sizeof(Sprite));
 
 	va_list wall_data;
 	va_start(wall_data, wall_count);
 
 	for (byte i = 0; i < wall_count; i++)
-		level -> walls[i] = init_sprite(va_arg(wall_data, const char*), 1);
+		current_level.walls[i] = init_sprite(va_arg(wall_data, const char*), 1);
 
 	va_end(wall_data);
 }
 
 // path, x, y, height
-void set_level_billboards(Level* const level, const unsigned billboard_count, ...) {
-	level -> billboard_count = billboard_count;
-	level -> billboards = wmalloc(billboard_count * sizeof(Billboard));
+void set_level_billboards(const unsigned billboard_count, ...) {
+	current_level.billboard_count = billboard_count;
+	current_level.billboards = wmalloc(billboard_count * sizeof(Billboard));
 
 	va_list billboard_data;
 	va_start(billboard_data, billboard_count);
 
 	for (byte i = 0; i < billboard_count; i++) {
-		Billboard* const billboard = &level -> billboards[i];
+		Billboard* const billboard = current_level.billboards + i;
 		billboard -> sprite = init_sprite(va_arg(billboard_data, const char*), 0);
 		billboard -> billboard_data.pos = (vec) {
 			va_arg(billboard_data, double),
@@ -86,15 +103,15 @@ void set_level_billboards(Level* const level, const unsigned billboard_count, ..
 }
 
 // from, height, to
-void set_level_teleporters(Level* const level, const unsigned teleporter_count, ...) {
-	level -> teleporter_count = teleporter_count;
-	level -> teleporters = wmalloc(teleporter_count * sizeof(Teleporter));
+void set_level_teleporters(const unsigned teleporter_count, ...) {
+	current_level.teleporter_count = teleporter_count;
+	current_level.teleporters = wmalloc(teleporter_count * sizeof(Teleporter));
 
 	va_list teleporter_data;
 	va_start(teleporter_data, teleporter_count);
 
 	for (byte i = 0; i < teleporter_count; i++) {
-		Teleporter* const teleporter = &level -> teleporters[i];
+		Teleporter* const teleporter = current_level.teleporters + i;
 		DataBillboard* const billboard_data = &teleporter -> from_billboard;
 
 		billboard_data -> pos = (vec) {
@@ -111,9 +128,9 @@ void set_level_teleporters(Level* const level, const unsigned teleporter_count, 
 }
 
 // path, frames/row, frames/col, frame_count, fps, x, y, height
-void set_level_animated_billboards(Level* const level, const unsigned animated_billboard_count, ...) {
-	level -> animated_billboard_count = animated_billboard_count;
-	level -> animated_billboards = wmalloc(animated_billboard_count * sizeof(AnimatedBillboard));
+void set_level_animated_billboards(const unsigned animated_billboard_count, ...) {
+	current_level.animated_billboard_count = animated_billboard_count;
+	current_level.animated_billboards = wmalloc(animated_billboard_count * sizeof(AnimatedBillboard));
 
 	va_list animation_data;
 	va_start(animation_data, animated_billboard_count);
@@ -140,15 +157,15 @@ void set_level_animated_billboards(Level* const level, const unsigned animated_b
 		};
 
 		const AnimatedBillboard animated_billboard = {_animation_data, billboard_data};
-		memcpy(&level -> animated_billboards[i], &animated_billboard, sizeof(AnimatedBillboard));
+		memcpy(current_level.animated_billboards + i, &animated_billboard, sizeof(AnimatedBillboard));
 	}
 	va_end(animation_data);
 }
 
 // enemy index, x, y, height
-void set_level_enemy_instances(Level* const level, const unsigned enemy_instance_count, ...) {
-	level -> enemy_instance_count = enemy_instance_count;
-	level -> enemy_instances = wmalloc(enemy_instance_count * sizeof(EnemyInstance));
+void set_level_enemy_instances(const unsigned enemy_instance_count, ...) {
+	current_level.enemy_instance_count = enemy_instance_count;
+	current_level.enemy_instances = wmalloc(enemy_instance_count * sizeof(EnemyInstance));
 
 	va_list enemy_instance_data;
 	va_start(enemy_instance_data, enemy_instance_count);
@@ -156,9 +173,8 @@ void set_level_enemy_instances(Level* const level, const unsigned enemy_instance
 	extern Enemy enemies[enemy_count];
 
 	for (byte i = 0; i < enemy_instance_count; i++) {
-		const byte enemy_ind = va_arg(enemy_instance_data, unsigned);
-		const Enemy* const enemy = &enemies[enemy_ind];
-		EnemyInstance* const enemy_instance_dest = &level -> enemy_instances[i];
+		const Enemy* const enemy = enemies + va_arg(enemy_instance_data, unsigned);
+		EnemyInstance* const enemy_instance_dest = current_level.enemy_instances + i;
 
 		const EnemyInstance enemy_instance = {
 			.enemy = enemy,
@@ -174,7 +190,7 @@ void set_level_enemy_instances(Level* const level, const unsigned enemy_instance
 
 		memcpy(enemy_instance_dest, &enemy_instance, sizeof(EnemyInstance));
 
-		const Navigator nav = init_navigator(level -> init_pos,
+		const Navigator nav = init_navigator(current_level.init_pos,
 			&enemy_instance_dest -> billboard_data.pos, enemy -> nav_speed);
 
 		memcpy(&enemy_instance_dest -> nav, &nav, sizeof(Navigator));
@@ -182,40 +198,41 @@ void set_level_enemy_instances(Level* const level, const unsigned enemy_instance
 	va_end(enemy_instance_data);
 }
 
-inlinable void set_level_thing_container(Level* const level) {
-	level -> thing_count = level -> billboard_count + level -> teleporter_count
-		+ level -> animated_billboard_count + level -> enemy_instance_count;
+inlinable void set_level_thing_container(void) {
+	current_level.thing_count =
+		current_level.billboard_count + current_level.teleporter_count
+		+ current_level.animated_billboard_count + current_level.enemy_instance_count;
 
-	level -> thing_container = wmalloc(level -> thing_count * sizeof(Thing));
+	current_level.thing_container = wmalloc(current_level.thing_count * sizeof(Thing));
 }
 
-void deinit_level(const Level* const level) {
-	byte* const map_data[4] = {level -> wall_data, level -> ceiling_data, level -> floor_data, level -> heightmap};
-	for (byte i = 0; i < 4; i++) wfree(map_data[i]);
+void deinit_level(void) {
+	byte* const map_data[2] = {current_level.wall_data, current_level.heightmap};
+	for (byte i = 0; i < 2; i++) wfree(map_data[i]);
 
-	deinit_statemap(level -> bfs_visited);
+	deinit_statemap(current_level.bfs_visited);
 
 	#ifdef SHADING_ENABLED
-	wfree(level -> lightmap.data);
+	wfree(current_level.lightmap.data);
 	#endif
 
-	if (level -> skybox.enabled) deinit_sprite(level -> skybox.sprite);
-	deinit_sound(&level -> background_sound);
+	if (current_level.skybox.enabled) deinit_sprite(current_level.skybox.sprite);
+	deinit_sound(&current_level.background_sound);
 
-	for (byte i = 0; i < level -> wall_count; i++)
-		deinit_sprite(level -> walls[i]);
-	wfree(level -> walls);
+	for (byte i = 0; i < current_level.wall_count; i++)
+		deinit_sprite(current_level.walls[i]);
+	wfree(current_level.walls);
 
-	for (byte i = 0; i < level -> billboard_count; i++)
-		deinit_sprite(level -> billboards[i].sprite);
-	wfree(level -> billboards);
+	for (byte i = 0; i < current_level.billboard_count; i++)
+		deinit_sprite(current_level.billboards[i].sprite);
+	wfree(current_level.billboards);
 
-	wfree(level -> teleporters);
+	wfree(current_level.teleporters);
 
-	for (byte i = 0; i < level -> animated_billboard_count; i++)
-		deinit_sprite(level -> animated_billboards[i].animation_data.immut.sprite);
-	wfree(level -> animated_billboards);
+	for (byte i = 0; i < current_level.animated_billboard_count; i++)
+		deinit_sprite(current_level.animated_billboards[i].animation_data.immut.sprite);
+	wfree(current_level.animated_billboards);
 
-	wfree(level -> enemy_instances);
-	wfree(level -> thing_container);
+	wfree(current_level.enemy_instances);
+	wfree(current_level.thing_container);
 }

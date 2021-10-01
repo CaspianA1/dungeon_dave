@@ -25,7 +25,7 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 	enemy_instance -> state = new_state;
 	if (!silent)
 		play_sound_from_billboard_data(
-			&enemy -> sounds[enemy_instance -> state],
+			enemy -> sounds + new_state,
 			&enemy_instance -> billboard_data, p_pos, p_height);
 
 	int new_frame_ind = 0;
@@ -128,7 +128,7 @@ EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 	return prev_state;
 }
 
-static void new_update_enemy_instance(EnemyInstance* const enemy_instance,
+static void update_enemy_instance(EnemyInstance* const enemy_instance,
 	Player* const player, const Weapon* const weapon) {
 
 	if (enemy_instance -> state == Dead) return;
@@ -146,7 +146,7 @@ static void new_update_enemy_instance(EnemyInstance* const enemy_instance,
 		prev_state = enemy_instance -> state,
 		new_state = next_enemy_state(enemy_instance, player, weapon);
 
-	set_enemy_instance_state(enemy_instance, new_state, 0, player -> pos, player -> jump.height);
+	set_enemy_instance_state(enemy_instance, new_state, 0, p_pos, p_height);
 
 	/* For each state (excluding Dead), this periodically play the sound
 	from that state. Sounds only happen at state changes. */
@@ -162,10 +162,10 @@ static void new_update_enemy_instance(EnemyInstance* const enemy_instance,
 
 inlinable void update_all_enemy_instances(Player* const player, const Weapon* const weapon) {
 	for (byte i = 0; i < current_level.enemy_instance_count; i++)
-		new_update_enemy_instance(&current_level.enemy_instances[i], player, weapon);
+		update_enemy_instance(current_level.enemy_instances + i, player, weapon);
 }
 
 void deinit_enemy(const Enemy* const enemy) {
 	deinit_sprite(enemy -> animation_data.sprite);
-	for (byte i = 0; i < 5; i++) deinit_sound(&enemy -> sounds[i]);
+	for (byte i = 0; i < 5; i++) deinit_sound(enemy -> sounds + i);
 }

@@ -64,31 +64,20 @@ void load_level_1(void) {
 		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}
 	};
 
-	// old init positions: {18.5, 9.0}, {3.0, 3.0}, {7.0, 12.0}
-	Level level_1 = init_level(map_width, map_height, 17.5, 11.5, 0.0);
-	level_1.max_point_height = 5;
-	level_1.out_of_bounds_point = 7;
-	level_1.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);
-	level_1.shader = level_1_shader;
+	// {18.5, 9.0}, {3.0, 3.0}, {7.0, 12.0}
+	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+		17.5, 11.5, 0.0, 5, 7, "assets/audio/themes/ambient_wind.wav", level_1_shader);
 
-	const int bytes = map_width * map_height;
-	memcpy(level_1.wall_data, wall_data, bytes);
-	memcpy(level_1.heightmap, heightmap, bytes);
-	memset(level_1.ceiling_data, 4, bytes); // sand
-	memset(level_1.floor_data, 4, bytes);
-
-	fill_level_data(level_1.floor_data, 9, 18, 20, 8, 10, map_width); // dirt
+	// fill_level_data(level_1.floor_data, 9, 18, 20, 8, 10, map_width); // dirt
 
 	for (byte y = 2; y <= 4; y++) {
-		/*
-		set_map_point(level_1.floor_data, 10, 16, y, map_width); // grass
+		/* set_map_point(level_1.floor_data, 10, 16, y, map_width); // grass
 		set_map_point(level_1.floor_data, 10, 20, y, map_width);
 		set_map_point(level_1.floor_data, 10, y + 15, 5, map_width);
 		set_map_point(level_1.floor_data, 10, y + 15, 1, map_width);
 
 		for (byte x = 17; x <= 19; x++)
-			set_map_point(level_1.floor_data, 8, x, y, map_width); // water
-		*/
+			set_map_point(level_1.floor_data, 8, x, y, map_width); // water */
 	}
 
 	/*
@@ -98,9 +87,9 @@ void load_level_1(void) {
 	set_map_point(level_1.floor_data, 10, 20, 5, map_width);
 	*/
 
-	set_level_skybox(&level_1, "assets/skyboxes/mossy_mountains_2.bmp");
+	set_level_skybox("assets/skyboxes/mossy_mountains_2.bmp");
 
-	set_level_walls(&level_1, wall_count,
+	set_level_walls(wall_count,
 		"assets/walls/cobblestone_2.bmp",
 		"assets/walls/cobblestone_3.bmp",
 		"assets/walls/stone_2.bmp",
@@ -109,7 +98,7 @@ void load_level_1(void) {
 		"assets/walls/desert_snake.bmp",
 		"assets/wolf/colorstone.bmp");
 
-	set_level_billboards(&level_1, billboard_count,
+	set_level_billboards(billboard_count,
 		"assets/objects/tomato.bmp", 6.0, 2.0, 1.0,
 		"assets/objects/demon_head.bmp", 23.5, 1.5, 0.0,
 		"assets/objects/jungle.bmp", 11.5, 11.5, 0.0,
@@ -118,15 +107,13 @@ void load_level_1(void) {
 		"assets/objects/axe.bmp", 11.0, 7.5, 0.0,
 		"assets/wolf/lamp.bmp", 18.5, 11.5, 0.0);
 
-	set_level_teleporters(&level_1, teleporter_count);
+	set_level_teleporters(teleporter_count);
 
-	set_level_animated_billboards(&level_1, animated_billboard_count,
+	set_level_animated_billboards(animated_billboard_count,
 		"assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 4.5, 11.5, 0.0,
 		"assets/spritesheets/gold_key.bmp", 3, 4, 12, 6, 1.5, 1.4, 0.0,
 		"assets/spritesheets/torch.bmp", 3, 3, 9, 9, 19.0, 9.5, 0.0);
 
-	memcpy(&current_level, &level_1, sizeof(Level));
-
-	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 8.5, 7.5, 0.0);
-	set_level_thing_container(&current_level);
+	set_level_enemy_instances(enemy_instance_count, 0, 8.5, 7.5, 0.0);
+	set_level_thing_container();
 }

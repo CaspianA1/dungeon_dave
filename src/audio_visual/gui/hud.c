@@ -45,9 +45,11 @@ inlinable void draw_crosshair(void) {
 	const Color3 color = hud_colors[HUD];
 	SDL_SetRenderDrawColor(screen.renderer, color.r, color.g, color.b, SDL_ALPHA_OPAQUE);
 
+	const int width_or_height = (half_dimensions << 1) + thickness;
+
 	const SDL_Rect
-		across = {center.x - half_dimensions, center.y, half_dimensions * 2 + thickness, thickness},
-		down = {center.x, center.y - half_dimensions, thickness, half_dimensions * 2 + thickness};
+		across = {center.x - half_dimensions, center.y, width_or_height, thickness},
+		down = {center.x, center.y - half_dimensions, thickness, width_or_height};
 	
 	SDL_RenderFillRect(screen.renderer, &across);
 	SDL_RenderFillRect(screen.renderer, &down);

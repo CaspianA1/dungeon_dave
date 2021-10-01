@@ -23,7 +23,7 @@ Menu init_menu(const Color3 text_color, const Color3 main_color, const Color3 bo
 	va_start(textbox_data, textbox_count);
 
 	for (byte i = 0; i < textbox_count; i++) {
-		Textbox* const textbox = &menu.textboxes[i];
+		Textbox* const textbox = menu.textboxes + i;
 		textbox -> pos_and_size_fn = va_arg(textbox_data, pos_and_size_fn_t);
 		textbox -> on_click_fn = va_arg(textbox_data, on_click_fn_t);
 		textbox -> rendered_text = make_texture_from_text(va_arg(textbox_data, const char*), text_color);
@@ -66,7 +66,7 @@ InputStatus render_menu(const Menu* const menu) {
 	const Color3 inverse_text_color = {255 - text_color.r, 255 - text_color.g, 255 - text_color.b};
 
 	for (byte i = 0; i < menu -> textbox_count; i++) {
-		Textbox* const textbox = &menu -> textboxes[i];
+		Textbox* const textbox = menu -> textboxes + i;
 		const SDL_Rect box = textbox -> pos_and_size_fn();
 
 		ivec mouse;

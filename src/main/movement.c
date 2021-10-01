@@ -178,7 +178,7 @@ void update_jump(Jump* const jump, const vec pos) {
 
 	if (!first_call) { // first_call avoided for the same reason as explained in handle_thing_collisions
 		for (byte i = 0; i < current_level.thing_count; i++) {
-			const Thing* const thing = &current_level.thing_container[i];
+			const Thing* const thing = current_level.thing_container + i;
 			if (!bit_is_set(thing -> status, mask_can_jump_on_thing)) continue;
 
 			const DataBillboard* const billboard_data = thing -> billboard_data;

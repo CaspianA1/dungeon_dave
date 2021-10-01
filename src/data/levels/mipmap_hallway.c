@@ -137,24 +137,15 @@ void load_hallway(void) {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
-	Level hallway = init_level(map_width, map_height, 5.0, 3.4, 0.0);
-	hallway.max_point_height = 2;
-	hallway.out_of_bounds_point = 1;
-	hallway.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);
-	hallway.shader = hallway_shader;
+	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+		5.0, 3.4, 0.0, 2, 1, "assets/audio/ambient_wind.wav", hallway_shader);
 
-	const int bytes = map_width * map_height;
-	memcpy(hallway.wall_data, wall_data, bytes);
-	memcpy(hallway.heightmap, heightmap, bytes);
-	memset(hallway.ceiling_data, 1, bytes);
-	memset(hallway.floor_data, 1, bytes);
-
-	set_level_skybox(&hallway, "assets/skyboxes/desert.bmp");
-	set_level_walls(&hallway, wall_count, "assets/walls/arthouse_bricks.bmp", "assets/walls/dirt.bmp");
+	set_level_skybox("assets/skyboxes/desert.bmp");
+	set_level_walls(wall_count, "assets/walls/arthouse_bricks.bmp", "assets/walls/dirt.bmp");
 
 	const char* const repeated_billboard = "assets/objects/robot.bmp";
 
-	set_level_billboards(&hallway, billboard_count,
+	set_level_billboards(billboard_count,
 		repeated_billboard, 5.0, 43.0, 0.0,
 		repeated_billboard, 5.0, 44.0, 1.0,
 		repeated_billboard, 5.0, 45.0, 2.0,
@@ -171,17 +162,15 @@ void load_hallway(void) {
 		repeated_billboard, 5.0, 56.0, 13.0,
 		repeated_billboard, 5.0, 57.0, 14.0);
 
-	set_level_teleporters(&hallway, teleporter_count,
+	set_level_teleporters(teleporter_count,
 		5.0, 4.0, 0.0, // from pos + height
 		5.5, 10.5, /* to pos */
 
 		6.0, 4.0, 0.0, 4.0, 45.0,
 		4.0, 4.0, 0.0, 5.5, 4.5);
 
-	set_level_animated_billboards(&hallway, animated_billboard_count);
+	set_level_animated_billboards(animated_billboard_count);
 
-	memcpy(&current_level, &hallway, sizeof(Level));
-
-	set_level_enemy_instances(&current_level, enemy_instance_count, 0, 5.0, 8.0, 0.0);
-	set_level_thing_container(&current_level);
+	set_level_enemy_instances(enemy_instance_count, 0, 5.0, 8.0, 0.0);
+	set_level_thing_container();
 }

@@ -102,30 +102,21 @@ void load_pyramid(void) {
 	fill_level_data((byte*) wall_data, 2, border_offset, map_width - border_offset,
 		border_offset, map_height - 10 - border_offset, map_width);
 
-	Level pyramid = init_level(map_width, map_height, 2.5, 2.5, 0.0);
-	set_level_skybox(&pyramid, "assets/skyboxes/desert_eyes.bmp");
-	pyramid.max_point_height = 15;
-	pyramid.out_of_bounds_point = 1;
-	pyramid.background_sound = init_sound("assets/audio/themes/spelunk.wav", 0);
-	pyramid.shader = pyramid_shader;
+	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+		2.5, 2.5, 0.0, 15, 1, "assets/audio/themes/spelunk.wav", pyramid_shader);
 
-	const int bytes = map_width * map_height;
-	memcpy(pyramid.wall_data, wall_data, bytes);
-	memcpy(pyramid.heightmap, heightmap, bytes);
-	memset(pyramid.ceiling_data, 1, bytes);
-	memset(pyramid.floor_data, 1, bytes);
+	set_level_skybox("assets/skyboxes/desert_eyes.bmp");
 
-	set_level_walls(&pyramid, wall_count,
+	set_level_walls(wall_count,
 		"assets/walls/pyramid_bricks_3.bmp",
 		"assets/walls/greece.bmp",
 		"assets/walls/saqqara.bmp");
 
-	set_level_billboards(&pyramid, billboard_count);
-	set_level_teleporters(&pyramid, teleporter_count, 15.0, 15.0, 0.0, 1.5, 38.5);
+	set_level_billboards(billboard_count);
+	set_level_teleporters(teleporter_count, 15.0, 15.0, 0.0, 1.5, 38.5);
 
-	set_level_animated_billboards(&pyramid, animated_billboard_count);
+	set_level_animated_billboards(animated_billboard_count);
 
-	memcpy(&current_level, &pyramid, sizeof(Level));
-	set_level_enemy_instances(&current_level, enemy_instance_count);
-	set_level_thing_container(&current_level);
+	set_level_enemy_instances(enemy_instance_count);
+	set_level_thing_container();
 }

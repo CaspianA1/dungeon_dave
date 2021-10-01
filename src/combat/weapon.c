@@ -42,7 +42,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 		byte collided = 0;
 
 		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
-			EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
+			EnemyInstance* const enemy_instance = current_level.enemy_instances + i;
 			if (enemy_instance -> state == Dead || !bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy))
 				continue;
 
@@ -57,7 +57,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 					set_enemy_instance_state(enemy_instance, Dead, 0, p_pos, p_height);
 				else
 					play_sound_from_billboard_data(
-					&enemy_instance -> enemy -> sounds[4], // attacked
+					enemy_instance -> enemy -> sounds + 4, // attacked
 					&enemy_instance -> billboard_data, p_pos, p_height);
 
 				collided = 1;
@@ -86,7 +86,8 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	else clear_bit(weapon -> status, mask_recently_used_weapon); // recently used = within the last tick
 
 	// -1 -> cycle frame, 0 -> first frame
-	animate_weapon(&weapon -> animation_data, player -> pos, bit_is_set(weapon -> status, mask_paces_sideways_weapon),
+	animate_weapon(&weapon -> animation_data, player -> pos,
+		bit_is_set(weapon -> status, mask_paces_sideways_weapon),
 		bit_is_set(weapon -> status, mask_in_use_weapon), player -> body.v);
 }
 

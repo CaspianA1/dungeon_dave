@@ -77,33 +77,22 @@ void load_fleckenstein(void) {
 		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}
 	};
 
-	Level fleckenstein = init_level(map_width, map_height, 13.0, 27.0, 0.0);
+	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+		13.0, 27.0, 0.0, 9, 1, "assets/audio/themes/ambient_wind.wav", fleckenstein_shader);
 
-	set_level_skybox(&fleckenstein, "assets/skyboxes/mossy_mountains.bmp");
-	fleckenstein.max_point_height = 9;
+	set_level_skybox("assets/skyboxes/mossy_mountains.bmp");
 
-	fleckenstein.out_of_bounds_point = 1;
-	fleckenstein.background_sound = init_sound("assets/audio/themes/ambient_wind.wav", 0);
-	fleckenstein.shader = fleckenstein_shader;
-
-	const int bytes = map_width * map_height;
-	memcpy(fleckenstein.wall_data, wall_data, bytes);
-	memcpy(fleckenstein.heightmap, heightmap, bytes);
-	memset(fleckenstein.ceiling_data, 1, bytes);
-	memset(fleckenstein.floor_data, 1, bytes);
-
-	set_level_walls(&fleckenstein, wall_count,
+	set_level_walls(wall_count,
 		"assets/walls/stone_2.bmp",
 		"assets/walls/cobblestone_3.bmp",
 		"assets/walls/cobblestone_2.bmp",
 		"assets/walls/marble.bmp");
 
-	set_level_billboards(&fleckenstein, billboard_count);
-	set_level_teleporters(&fleckenstein, teleporter_count, 9.5, 26.5, 0.0, 15.5, 6.5);
+	set_level_billboards(billboard_count);
+	set_level_teleporters(teleporter_count, 9.5, 26.5, 0.0, 15.5, 6.5);
 
-	set_level_animated_billboards(&fleckenstein, animated_billboard_count);
+	set_level_animated_billboards(animated_billboard_count);
 
-	memcpy(&current_level, &fleckenstein, sizeof(Level));
-	set_level_enemy_instances(&current_level, enemy_instance_count);
-	set_level_thing_container(&current_level);
+	set_level_enemy_instances(enemy_instance_count);
+	set_level_thing_container();
 }

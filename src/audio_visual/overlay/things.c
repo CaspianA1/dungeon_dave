@@ -88,7 +88,7 @@ void update_billboard_values(DataBillboard* const billboard_data, const vec p_po
 
 DEF_THING_ADDER(still) {
 	for (byte i = 0; i < current_level.billboard_count; i++) {
-		Billboard* const billboard = &current_level.billboards[i];
+		Billboard* const billboard = current_level.billboards + i;
 		DataBillboard* const billboard_data = &billboard -> billboard_data;
 
 		update_billboard_values(billboard_data, p_pos, p_angle);
@@ -96,19 +96,21 @@ DEF_THING_ADDER(still) {
 		const Sprite* const sprite = &billboard -> sprite;
 		const ivec size = sprite -> size;
 		const Thing thing = {mask_can_jump_on_thing, billboard_data, sprite, {0, 0, size.x, size.y}, NULL};
+
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
 }
 
 DEF_THING_ADDER(teleporter) {
 	for (byte i = 0; i < current_level.teleporter_count; i++) {
-		Teleporter* const teleporter = &current_level.teleporters[i];
+		Teleporter* const teleporter = current_level.teleporters + i;
 		DataBillboard* const billboard_data = &teleporter -> from_billboard;
 
 		update_billboard_values(billboard_data, p_pos, p_angle);
 
 		const Thing thing = {
-			0, billboard_data, &teleporter_sprite, {0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}, NULL
+			0, billboard_data, &teleporter_sprite,
+			{0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}, NULL
 		};
 
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
@@ -117,7 +119,7 @@ DEF_THING_ADDER(teleporter) {
 
 DEF_THING_ADDER(animated) {
 	for (byte i = 0; i < current_level.animated_billboard_count; i++) {
-		AnimatedBillboard* const animated_billboard = &current_level.animated_billboards[i];
+		AnimatedBillboard* const animated_billboard = current_level.animated_billboards + i;
 		DataBillboard* const billboard_data = &animated_billboard -> billboard_data;
 		DataAnimation* const animation_data = &animated_billboard -> animation_data;
 		const DataAnimationImmut* const immut_animation_data = &animation_data -> immut;
@@ -138,7 +140,7 @@ DEF_THING_ADDER(animated) {
 
 DEF_THING_ADDER(enemy_instance) {
 	for (byte i = 0; i < current_level.enemy_instance_count; i++) {
-		EnemyInstance* const enemy_instance = &current_level.enemy_instances[i];
+		EnemyInstance* const enemy_instance = current_level.enemy_instances + i;
 		DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
 		const DataAnimationImmut* const immut_animation_data = &enemy_instance -> enemy -> animation_data;
 

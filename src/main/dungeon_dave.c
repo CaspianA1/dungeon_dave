@@ -50,6 +50,7 @@
 #include "../data/levels/mipmap_hallway.c"
 #include "../data/levels/fleckenstein.c"
 #include "../data/levels/pyramid.c"
+#include "../data/levels/teleporter_turmoil.c"
 
 /*
 TODO:
@@ -58,6 +59,12 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- cache player ptr
+- make sure that thread creation doesn't stall
+- TODOs in place
+- pass the skybox as null or not to init_level
+- no more constant copying of many static amount things
+- wall_data to wallmap
 - teleporters initialized without a height
 - a vantage point map element
 - stop player from hitting head by doing head-hit detection after jumping, and then stopping jumping after
