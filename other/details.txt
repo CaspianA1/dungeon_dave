@@ -8,7 +8,6 @@ features:
 	- a file format
 	- a map editor
 	- floors at different height levels
-	- mipmapping for things
 	- a shotgun more in the art style of Adam's whip
 	- Attacked state for enemy
 	- make each file an .o file, and then link them all together

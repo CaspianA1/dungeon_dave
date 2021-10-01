@@ -1,7 +1,9 @@
-DataAnimationImmut init_immut_animation_data(const char* const path, const int frames_per_row,
-	const int frames_per_col, const int frame_count, const int fps, const byte enable_mipmap) {
+// b4 = 16055, after =
 
-	const Sprite sprite = init_sprite(path, enable_mipmap);
+DataAnimationImmut init_immut_animation_data(const char* const path, const int frames_per_row,
+	const int frames_per_col, const int frame_count, const int fps) {
+
+	const Sprite sprite = init_sprite(path, 0);
 
 	return (DataAnimationImmut) {
 		sprite, {frames_per_row, frames_per_col},

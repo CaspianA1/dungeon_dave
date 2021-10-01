@@ -128,10 +128,10 @@ void set_level_animated_billboards(Level* const level, const unsigned animated_b
 			fps = va_arg(animation_data, int);
 
 		DataAnimationImmut init_immut_animation_data(const char* const, const int,
-			const int, const int, const int, const byte);
+			const int, const int, const int);
 
 		const DataAnimation _animation_data = {
-			init_immut_animation_data(path, frames_per_row, frames_per_col, frame_count, fps, 0), {0.0, 0}
+			init_immut_animation_data(path, frames_per_row, frames_per_col, frame_count, fps), {0.0, 0}
 		};
 
 		const DataBillboard billboard_data = {
