@@ -91,7 +91,9 @@ int main(void) {
 	byte begin_level_tint = INIT_BEGIN_LEVEL_TINT;
 	#endif
 
-	while (1) {
+	byte running = 1;
+
+	while (running) {
 		const Uint32 before = SDL_GetTicks();
 		if (keys[SDL_SCANCODE_C]) DEBUG_VEC(player.pos);
 
@@ -100,15 +102,13 @@ int main(void) {
 
 		switch (input_status) {
 			case Exit:
-				deinit_pix_sprite(ground);
-				deinit_all(&player, &weapon);
+				running = 0;
 				break;
 			case ToOptionsMenu:
 				display_options_menu();
 				puts("Options menu");
 				break;
 			default: break;
-
 		}
 
 		const double horizon_line = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
@@ -131,7 +131,7 @@ int main(void) {
 		#endif
 
 		if (player.is_dead && death_effect(&player))
-			deinit_all(&player, &weapon);
+			running = 0;
 
 		parallel_floorcast(0, player.pos, player.jump.height, horizon_line);
 		// floorcast(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
@@ -149,4 +149,6 @@ int main(void) {
 		refresh(&player);
 		tick_delay(before);
 	}
+	deinit_pix_sprite(ground);
+	deinit_all(&player, &weapon);
 }
