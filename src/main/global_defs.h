@@ -12,8 +12,10 @@
 
 #endif
 
-// #define PLANAR_MODE
+/*
+#define PLANAR_MODE
 #define NOCLIP_MODE
+*/
 
 #define ANTIALIASED_MIPMAPPING
 // #define DISABLE_ENEMIES

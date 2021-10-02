@@ -59,6 +59,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- don't deal damage if height diff too big for short range
 - lightmap seed to init_level
 - make sure that thread creation doesn't stall
 - no more constant copying of many static amount things
@@ -88,7 +89,7 @@ int main(void) {
 	Weapon weapon;
 	Player* const player_ref = &player;
 
-	load_all_defaults(load_hallway, player_ref, &weapon);
+	load_all_defaults(load_palace, player_ref, &weapon);
 	if (display_title_screen() == Exit) deinit_all(player_ref, &weapon);
 
 	play_sound(&current_level.background_sound);

@@ -62,8 +62,6 @@ void dynamic_memory_report(void) {
 
 //////////
 
-#define exp_for_pow_of_2(num) (__builtin_ffs(num) - 1)
-
 #define bit_is_set(bits, mask) ((bits) & (mask))
 #define set_bit(bits, mask) ((bits) |= (mask))
 #define clear_bit(bits, mask) ((bits) &= ~(mask))

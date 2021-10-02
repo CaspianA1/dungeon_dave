@@ -64,21 +64,23 @@ inlinable SDL_Rect get_mipmap_crop(const int orig_size, const byte depth_offset)
 	return dest;
 }
 
-int nearest_pow_2(int n) {
-	int v = n; 
+inlinable int nearest_pow_2(const int num) {
+	int next_pow = num - 1;
 
-	v--;
-	v |= v >> 1;
-	v |= v >> 2;
-	v |= v >> 4;
-	v |= v >> 8;
-	v |= v >> 16;
-	v++; // next power of 2
+	next_pow |= next_pow >> 1;
+	next_pow |= next_pow >> 2;
+	next_pow |= next_pow >> 4;
+	next_pow |= next_pow >> 8;
+	next_pow |= next_pow >> 16;
+	next_pow++;
 
-	int x = v >> 1; // previous power of 2
+	const int prev_pow = next_pow >> 1;
 
-	return (v - n) > (n - x) ? x : v;
+	// smallest difference between powers of 2
+	return (next_pow - num) > (num - prev_pow) ? prev_pow : next_pow;
 }
+
+#define one_plus_exp_for_pow_2 __builtin_ffs
 
 SDL_Rect get_mipmap_crop_from_wall(const Sprite* const mipmap, const int wall_h) {
 	/* A texture is displayed best if each texture pixel corresponds to one on-screen pixel,
@@ -92,9 +94,10 @@ SDL_Rect get_mipmap_crop_from_wall(const Sprite* const mipmap, const int wall_h)
 
 	const int orig_size = mipmap -> size.y; // orig_size = full w and h of the original full-res texture
 
-	int closest_exp_2 = nearest_pow_2(wall_h);
-	if (closest_exp_2 > orig_size) closest_exp_2 = orig_size; // assumes that orig_size is a power of 2
-	const byte depth_offset = exp_for_pow_of_2(orig_size) - exp_for_pow_of_2(closest_exp_2);
+	int pow_2 = nearest_pow_2(wall_h);
+	if (pow_2 > orig_size) pow_2 = orig_size;
+
+	const byte depth_offset = one_plus_exp_for_pow_2(orig_size) - one_plus_exp_for_pow_2(pow_2);
 	return get_mipmap_crop(orig_size, depth_offset);
 }
 
@@ -138,6 +141,7 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth) {
 		(*depth)++;
 	}
 
+	/*
 	static byte first = 1, id = 0;
 	if (first) {
 		system("mkdir -p imgs");
@@ -153,6 +157,7 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth) {
 	SDL_UnlockSurface(image);
 	SDL_UnlockSurface(mipmap);
 	#endif
+	*/
 
 	return mipmap;
 }
