@@ -92,7 +92,7 @@ typedef byte Sound;
 #define deinit_sound_subsystem()
 #define fail_sound(a, b)
 #define init_sound(a, b) 0
-#define deinit_sound(a) (void) a
+#define deinit_sound(a) (void) (a)
 #define play_sound_from_billboard_data(a, b, c, d) {(void) c; (void) d;}
 #define play_sound(a)
 

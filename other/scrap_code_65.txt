@@ -1,0 +1,35 @@
+///// My fast closest_pow_2 version that rounded up:
+
+inlinable int my_closest_pow_2(const int x) {
+	return 1 << (sizeof(x) * 8 - num_leading_zeroes(x));
+}
+
+///// Another version of that (did not round up on power of 2 inputs):
+
+static int nearest_pow(int num) {
+	int n = num > 0 ? num - 1 : 0;
+
+	n |= n >> 1;
+	n |= n >> 2;
+	n |= n >> 4;
+	n |= n >> 8;
+	n |= n >> 16;
+
+	return n + 1;
+}
+
+///// And the num_leading_zeroes function:
+
+#define num_leading_zeroes __builtin_clz
+
+///// The attempt at screen scaling:
+
+/*
+DEBUG(mipmap -> size.y, d);
+const double tex_to_scr = mipmap -> size.y / (double) wall_h;
+double level = tex_to_scr * mipmap -> max_mipmap_depth;
+// level = log2(level + 1);
+DEBUG(level, lf);
+*/
+
+/////

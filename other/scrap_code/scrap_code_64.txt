@@ -1,0 +1,626 @@
+/* (void) point;
+const double p = 0.0000001; // if used again, the map_point calls must be dereferenced
+return map_point(current_level.heightmap, pos[0] - p, pos[1] - p); */
+
+// return map_point(current_level.heightmap, pos[0] + p, pos[1] - p);
+// return map_point(current_level.heightmap, pos[0] - p, pos[1] + p);
+// return map_point(current_level.heightmap, pos[0] + p, pos[1] + p);
+
+// return map_point(current_level.heightmap, pos[0], pos[1]);
+// return map_point(current_level.heightmap, pos[0] - p, pos[1]);
+// return map_point(current_level.heightmap, pos[0] + p, pos[1]);
+// return map_point(current_level.heightmap, pos[0], pos[1] - p);
+// return map_point(current_level.heightmap, pos[0], pos[1] + p);
+
+/////
+
+// pos[0] -= almost_almost_zero; // good for left side
+// pos[0] += almost_almost_zero; // good for right side
+// pos[0] -= almost_almost_zero;
+
+/*
+const double x_diff = ceil(pos[0]) - pos[0];
+if (doubles_eq(x_diff, almost_zero) && !doubles_eq(x_diff, 0.0)) {
+	printf("Case: %lf\n", pos[0]);
+	pos[0] -= almost_almost_zero;
+}
+*/
+
+/////
+
+/*
+const double x_diff = ceil(pos[0]) - pos[0];
+if (x_diff < almost_almost_zero) {
+	DEBUG(x_diff, lf);
+	pos[0] += almost_almost_zero;
+}
+*/
+
+/////
+
+// if (ceil(pos[0]) - pos[0] == 0.0) pos[0] += almost_almost_zero; // right side fix
+
+/*
+else if (floor(pos[0] - pos[0]) == 0.0) {
+	pos[0] -= almost_almost_zero; // left side fix
+}
+*/
+
+/* all bad:
+if (ceil(pos[0] - pos[0]) == 0.0) pos[0] += almost_almost_zero; // right side fix
+else if (floor(pos[0] - pos[0]) == 0.0) {
+	pos[0] -= almost_almost_zero; // left side fix
+}
+
+if (floor(pos[1] - pos[1]) == 0.0) pos[1] -= almost_almost_zero; // top side fix
+else if (ceil(pos[1] - pos[1]) == 0.0) pos[1] += almost_almost_zero; // bottom side fix
+*/
+
+/*
+const byte
+	bottom_left_fix = floor(pos[1] - pos[1]) == 0.0,
+	top_right_fix = ceil(pos[0] - pos[0]) == 0.0;
+
+if (bottom_left_fix && !top_right_fix) // fixes bottom and left side
+	pos += (vec) {-almost_almost_zero, almost_almost_zero};
+
+else if (top_right_fix && !bottom_left_fix) // fixes top and right side
+	pos += (vec) {almost_almost_zero, -almost_almost_zero};
+*/
+
+/////
+
+/* all bad:
+if (ceil(pos[0] - pos[0]) == 0.0) pos[0] += almost_almost_zero; // right side fix
+else if (floor(pos[0] - pos[0]) == 0.0) {
+	pos[0] -= almost_almost_zero; // left side fix
+}
+
+if (floor(pos[1] - pos[1]) == 0.0) pos[1] -= almost_almost_zero; // top side fix
+else if (ceil(pos[1] - pos[1]) == 0.0) pos[1] += almost_almost_zero; // bottom side fix
+*/
+
+/*
+const byte
+	bottom_left_fix = floor(pos[1] - pos[1]) == 0.0,
+	top_right_fix = ceil(pos[0] - pos[0]) == 0.0;
+
+if (bottom_left_fix && !top_right_fix) // fixes bottom and left side
+	pos += (vec) {-almost_almost_zero, almost_almost_zero};
+
+else if (top_right_fix && !bottom_left_fix) // fixes top and right side
+	pos += (vec) {almost_almost_zero, -almost_almost_zero};
+*/
+
+/////
+
+// else if (doubles_eq(floor(pos[0]) - pos[0], 0.0)) pos[0] -= almost_almost_zero;
+
+// DEBUG(floor(pos[0] - pos[0]), lf);
+
+// if (doubles_eq(ceil(pos[1]) - pos[1], 0.0)) pos[1] += almost_almost_zero; // bottom side fix
+
+///// A bunch of experiments, with some probably good ideas in there:
+
+#ifdef HM_TEST
+
+(void) point;
+
+// pos += (vec) {almost_almost_zero, -almost_almost_zero}; // good for top and right side
+// pos += (vec) {-almost_almost_zero, almost_almost_zero}; // good for left and bottom side
+// pos += (vec) {almost_almost_zero, almost_almost_zero}; // good for right and bottom side
+// pos += (vec) {-almost_almost_zero, -almost_almost_zero}; // good for top and left side
+
+/* good sign changes:	
+	sub pos[1]: top, add pos[1]: bottom
+	sub pos[0]: left, add pos[0]: right */
+
+//////////
+
+// if (doubles_eq(ceil(pos[0]) - pos[0], 0.0)) pos[0] += almost_almost_zero; // right side fix
+// if (doubles_eq(ceil(pos[1]) - pos[1], 0.0)) pos[1] += almost_almost_zero; // bottom side fix
+// each version works fine wihtout the branch, but I'm figuring that I'll have to figure out which side to fix
+
+// if (doubles_eq(floor(pos[1]) - pos[1], 0.0)) pos[1] -= almost_almost_zero;
+if ((floor(pos[1]) - pos[1]) < almost_almost_zero && floor(pos[1]) - pos[1] >= 0.0) {
+	printf("Here: %lf\n", floor(pos[1]) - pos[1]);
+	pos[0] += almost_almost_zero;
+}
+
+/////
+
+/*
+static double offset = 0.0;
+const double step = 0.001;
+if (keys[SDL_SCANCODE_T]) offset -= step;
+if (keys[SDL_SCANCODE_Y]) offset += step;
+if (keys[SDL_SCANCODE_U]) offset = 0.0;
+*/
+
+///// This is not used anymore:
+
+/*
+void randomize_map(const Level level, byte* const md, const byte* const points, const byte len_points) {
+	for (int x = 0; x < current_level.map_size.x; x++) {
+		for (int y = 0; y < current_level.map_size.y; y++)
+			md[y * level.map_size.x + x] = points[rand() % len_points];
+	}
+}
+*/
+
+/////
+
+const byte
+	x_part = half_size[0] - diff[0] + almost_zero - 3.0,
+	y_part = half_size[1] - diff[1] + almost_zero - 3.0;
+
+return (x_part + y_part) >> 1;
+
+/*
+const double half_x_size = current_level.map_size.x / 2.0;
+const double x_diff = fabs(pos[0] - half_x_size);
+return half_x_size - x_diff + almost_zero - 3;
+*/
+
+/////
+
+/*
+made heightmaps for:
+	- palace
+	- pyramid
+	- debug level
+	- fleckenstein
+	- forever maze
+	- level 1
+	- mipmap hallway
+	- red room
+
+left:
+*/
+
+///// All of the point height functions:
+
+inlinable byte get_airship_point_height(const byte point, const vec pos) {
+	(void) pos;
+	return point;
+}
+
+inlinable byte get_debug_level_point_height(const byte point, const vec pos) {
+	(void) pos;
+	if (point == 5 || point == 6) return 1;
+	return point;
+}
+
+inlinable byte get_fleckenstein_point_height(const byte point, const vec pos) {
+	switch (point) {
+		case 1:
+			if (pos[1] < 19.0001) return 5;
+			else if (pos[1] < 24.0001) return 24.0001 - pos[1];
+			else return 5;
+
+		case 2: return 3;
+
+		case 3:
+			if (pos[1] < 21.0001) return 9;
+			else return 6;
+
+		case 4: return 6;
+
+		default: return point;
+	}
+}
+
+inlinable byte get_maze_point_height(const byte point, const vec pos) {
+	(void) pos;
+	switch (point) {
+		case 1: return 3;
+		default: return point;
+	}
+}
+
+inlinable byte get_level_1_point_height(const byte point, const vec pos) {
+	switch (point) {
+		case 0: return 0;
+		case 1: return 3; // cobblestone edges
+		case 3: case 5: return 2; // stone, hieroglyphics
+		case 4: return (pos[0] < 5.0001) ? 5 : 1;
+		default: return 1;
+	}
+}
+
+inlinable byte get_hallway_point_height(const byte point, const vec pos) {
+	(void) pos;
+	return point;
+}
+
+
+// #define HM_TEST
+
+// sides: 0 = left and right, 1 = top and bottom; determining which fourth side will allow the heightmap to work
+
+inlinable byte get_palace_point_height(const byte point, vec pos) {
+	#ifdef HM_TEST
+
+	(void) point;
+
+	// pos += (vec) {almost_almost_zero, -almost_almost_zero}; // good for top and right side
+	// pos += (vec) {-almost_almost_zero, almost_almost_zero}; // good for left and bottom side
+	// pos += (vec) {almost_almost_zero, almost_almost_zero}; // good for right and bottom side
+	// pos += (vec) {-almost_almost_zero, -almost_almost_zero}; // good for top and left side
+
+	/* good sign changes:
+		sub pos[1]: top, add pos[1]: bottom
+		sub pos[0]: left, add pos[0]: right */
+
+	//////////
+
+	// if (doubles_eq(ceil(pos[0]) - pos[0], 0.0)) pos[0] += almost_almost_zero; // right side fix
+	// if (doubles_eq(ceil(pos[1]) - pos[1], 0.0)) pos[1] += almost_almost_zero; // bottom side fix
+	// each version works fine wihtout the branch, but I'm figuring that I'll have to figure out which side to fix
+
+	// maybe different additions based on the wall side or direction?
+
+	//////////
+
+	return *map_point(current_level.heightmap, pos[0], pos[1]);
+
+	#else
+
+	if (point == 1) {
+		if (pos[0] <= 8.9999 && pos[1] <= 5.9999) return 3;
+		else return 5;
+	}
+
+	else if (point == 2) {
+		if (pos[1] <= 9.9999) return 1;
+		else if (pos[0] >= 21.0001 || pos[1] <= 10.9999) return 2;
+		return 3;
+	}
+
+	else if (point == 6) {
+		if (pos[0] <= 3.9999) return pos[0] + 0.0001;
+		else if (pos[0] <= 13.0001) return 3;
+		return 2;
+	}
+
+	else if (point == 7) {
+		if (pos[1] >= 30.9999) return 2;
+		return 1;
+	}
+
+	switch (point) {
+		case 3: return 6;
+		case 4: return 3;
+		case 5: return 8; // 6 before
+		case 8: return 1;
+		case 9: return 2;
+		case 10: return 10;
+		default: return point;
+	}
+
+	#endif
+}
+
+inlinable byte get_pyramid_point_height(const byte point, const vec pos) {
+	if (point != 2) return point;
+
+	const vec half_size = {current_level.map_size.x / 2.0, current_level.map_size.y / 2.0};
+	vec diff = pos - half_size;
+	diff = (vec) {fabs(diff[0]), fabs(diff[1])};
+
+	const vec slopes_to_center = half_size - diff + vec_fill(0) - vec_fill(3.0);
+	return (slopes_to_center[0] + slopes_to_center[1]) / 2.0;
+}
+
+inlinable byte get_red_room_point_height(const byte point, const vec pos) {
+	(void) pos;
+	return (point == 2) ? 3 : 0;
+}
+
+/////
+
+// this expects a short sound
+inlinable void set_sound_volume_from_dist(const Sound* const sound, const double dist) {
+	/*
+	double percent_audible = 1.0 - (dist / max_sound_dist);
+	DEBUG(percent_audible, lf);
+	*/
+
+	/*
+	double percent_audible = 1.0 - dist / max_sound_dist;
+	DEBUG(percent_audible, lf);
+	if (percent_audible < min_percent_audible) percent_audible = min_percent_audible; // can't let stuff get too quiet
+	Mix_VolumeChunk(sound -> type.short_sound, percent_audible * MIX_MAX_VOLUME);
+	*/
+
+	double percent_close = 1.0 - (dist / max_sound_dist);
+	if (percent_close < 0.0) percent_close = 0.0;
+	DEBUG(percent_close, lf);
+}
+
+///// The old branch-y tilt code:
+
+/*
+if (strafe) {
+	tilt -> val += lstrafe ? tilt -> step : -tilt -> step;
+
+	if (tilt -> val > tilt -> max)
+		tilt -> val = tilt -> max;
+	else if (tilt -> val < -tilt -> max)
+		tilt -> val = -tilt -> max;
+}
+
+else if (tilt -> val + tilt -> step < 0.0) tilt -> val += tilt -> step;
+else if (tilt -> val - tilt -> step > 0.0) tilt -> val -= tilt -> step;
+*/
+
+/////
+
+double to_degrees(const double radians) {
+	return radians * 180 / M_PI;
+}
+
+///// The old pyramid heightmap:
+
+static const byte heightmap[map_height][map_width] = {
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 20,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20,1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 1, 2, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 0, 0, 0, 1},
+	{1, 0, 0, 0, 2, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 0, 0, 0, 1},
+	{1, 0, 0, 0, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 0, 0, 0, 1},
+	{1, 0, 0, 0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 0, 0, 0, 1},
+	{1, 0, 0, 0, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 0, 0, 0, 1},
+	{1, 0, 0, 0, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 0, 0, 0, 1},
+	{1, 0, 0, 0, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 0, 0, 0, 1},
+	{1, 0, 0, 0, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 0, 0, 0, 1},
+	{1, 0, 0, 0, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,10,9, 9, 8, 8, 7, 7, 6, 6, 5, 0, 0, 0, 1},
+	{1, 0, 0, 0, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,11,10,10,9, 9, 8, 8, 7, 7, 6, 6, 0, 0, 0, 1},
+	{1, 0, 0, 0, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,11,11,11,10,10,9, 9, 8, 8, 7, 7, 6, 0, 0, 0, 1},
+	{1, 0, 0, 0, 6, 7, 7, 8, 8, 9, 9, 10,10,11,11,20,11,11,10,10,9, 9, 8, 8, 7, 7, 0, 0, 0, 1},
+	{1, 0, 0, 0, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,11,11,11,10,10,9, 9, 8, 8, 7, 7, 6, 0, 0, 0, 1},
+	{1, 0, 0, 0, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,11,10,10,9, 9, 8, 8, 7, 7, 6, 6, 0, 0, 0, 1},
+	{1, 0, 0, 0, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,10,10,9, 9, 8, 8, 7, 7, 6, 6, 5, 0, 0, 0, 1},
+	{1, 0, 0, 0, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 0, 0, 0, 1},
+	{1, 0, 0, 0, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 0, 0, 0, 1},
+	{1, 0, 0, 0, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 0, 0, 0, 1},
+	{1, 0, 0, 0, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 0, 0, 0, 1},
+	{1, 0, 0, 0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 0, 0, 0, 1},
+	{1, 0, 0, 0, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 0, 0, 0, 1},
+	{1, 0, 0, 0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 1, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 20,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20,1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+};
+
+/////
+
+wall_data[28][1] = 3;
+wall_data[1][28] = 3;
+wall_data[1][1] = 3;
+wall_data[28][28] = 3;
+
+/////
+
+SDL_RendererInfo info;
+SDL_GetRendererInfo(screen.renderer, &info);
+printf("name = \"%s\", flags = %u, tex_formats = %u, max tex size = {%d, %d}\n",
+	info.name, info.flags, info.num_texture_formats, info.max_texture_width, info.max_texture_height);
+
+///// The old mouse code:
+
+/*
+ivec mouse_pos;
+SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+
+if (mouse_pos.x == settings.screen_width - 1)
+	SDL_WarpMouseInWindow(screen.window, 1, mouse_pos.y);
+else if (mouse_pos.x == 0)
+	SDL_WarpMouseInWindow(screen.window, settings.screen_width - 1, mouse_pos.y);
+
+if (mouse_pos.y == settings.screen_height - 1)
+	SDL_WarpMouseInWindow(screen.window, mouse_pos.x, settings.screen_height - 1);
+else if (mouse_pos.y == 0)
+	SDL_WarpMouseInWindow(screen.window, mouse_pos.x, 0);
+
+*theta = (double) mouse_pos.x / settings.screen_width * two_pi;
+*y_pitch = -mouse_pos.y + settings.half_screen_height;
+*/
+
+///// The older, messier menu loop:
+
+/*
+InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_menu) {
+	SDL_SetRelativeMouseMode(SDL_FALSE);
+
+	InputStatus input = ProceedAsNormal;
+	byte drawing_image = image_before_menu != NULL;
+	byte mouse_down_after_image = !drawing_image, mouse_up_after_image = !drawing_image, done = 0;
+
+	while (!done) {
+		const Uint32 before = SDL_GetTicks();
+
+		while (SDL_PollEvent(&event)) {
+			switch (event.type) {
+				case SDL_QUIT:
+					input = Exit;
+					done = 1;
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					if (drawing_image) mouse_down_after_image = 1;
+					break;
+				case SDL_MOUSEBUTTONUP:
+					if (drawing_image && mouse_down_after_image) {
+						drawing_image = 0;
+						mouse_up_after_image = 1;
+					}
+			}
+		}
+
+		if (drawing_image) SDL_RenderCopy(screen.renderer, image_before_menu, NULL, NULL);
+		else {
+			const InputStatus menu_input = render_menu(menu, mouse_down_after_image && mouse_up_after_image && !drawing_image);
+			if (menu_input == Exit || menu_input == NextScreen) {
+				if (menu_input == Exit) input = Exit;
+				done = 1;
+			}
+		}
+
+		after_gui_event(before);
+	}
+
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	return input;
+}
+*/
+
+/////
+
+/* An enemy instance will transition from its Idle state to Chasing if:
+	- the height difference between the player and enemy instance is less than 1.0, and
+	- or if the distance between the player and the enemy is less than the enemy instance's dist_wake_from_idle
+	- the player made a sound, guaranteed if:
+		- the distance between the player and enemy instance is less than dist_wake_from_sound
+		- the player's weapon was recently used, or they made a noise while jumping
+*/
+
+///// Older versions of can_see_player:
+
+/*
+// returns if no walls are in the way of the player
+byte can_see_player(const DataBillboard* const billboard_data) {
+	const vec dir = {cos(billboard_data -> beta), sin(billboard_data -> beta)};
+	DataDDA eye_trace = init_dda(billboard_data -> pos, dir);
+
+	while (iter_dda(&eye_trace)) {
+		const ivec curr_tile = eye_trace.curr_tile;
+		const byte point_height = *map_point(current_level.heightmap, curr_tile.x, curr_tile.y);
+		if (point_height > billboard_data -> height) return 0;
+	}
+	return 1;
+}
+*/
+
+// don't check one direction; make a line between instead
+static byte can_see_player(const DataBillboard* const billboard_data, const Player* const player) {
+	// if the player can see the enemy, the enemy can see the player
+	const ivec billboard_tile = ivec_from_vec(billboard_data -> pos);
+	DataDDA eye_trace = init_dda(player -> pos, player -> dir);
+	while (iter_dda(&eye_trace)) { // no heights considered b/c thought that enemies can look up
+		const ivec curr_tile = eye_trace.curr_tile;
+		if (curr_tile.x == billboard_tile.x && curr_tile.y == billboard_tile.y) return 1;
+	}
+	return 0;
+}
+
+///// Some unused functions:
+
+vec align_vec_from_out_of_bounds(const vec v) {
+	return (vec) {fmod(fabs(v[0]), current_level.map_size.x), fmod(fabs(v[1]), current_level.map_size.y)};
+}
+
+inlinable byte vec_in_range(const double p, const vec range) {
+	return p >= range[0] - almost_zero && p <= range[1] + almost_zero;
+}
+
+inlinable vec vec_diff(const vec a, const vec b) {
+	const vec delta = a - b;
+	return (vec) {fabs(delta[0]), fabs(delta[1])};
+}
+
+/////
+
+/*
+const byte trooper = enemy_instance == current_level.enemy_instances + 7;
+if (trooper) DEBUG(can_see_player(&enemy_instance -> billboard_data, player), d);
+*/
+
+/////
+
+/* if height diff is small enough:
+	if player in line of sight at reasonable distance
+	  or player made sound at reasonable distance
+	  or player shot enemy instance at any distance:
+		transition to Chasing */
+
+///// The old enemy state getter:
+
+/*
+static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
+	Player* const player, const Weapon* const weapon) {
+
+	const Enemy* const enemy = enemy_instance -> enemy;
+	const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
+
+	const double dist = billboard_data -> dist;
+
+	extern Enemy enemies[enemy_count];
+	const EnemyState prev_state = enemy_instance -> state;
+
+	if (*map_point(current_level.heightmap, player -> pos[0], player -> pos[1])
+		!= *map_point(current_level.heightmap, billboard_data -> pos[0], billboard_data -> pos[1]))
+		return prev_state;
+
+	switch (prev_state) {
+		case Idle: {
+			const byte awoke_from_sound = (dist <= enemy -> dist_awaken.sound) &&
+				(bit_is_set(weapon -> status, mask_recently_used_weapon) || player -> jump.made_noise);
+
+			// if made a sound, or can see player, or shot enemy from any distance
+			if (awoke_from_sound || (dist <= enemy -> dist_awaken.sight)
+				|| bit_is_set(enemy_instance -> status, mask_recently_attacked_enemy))
+				return Chasing;
+			}
+
+			break;
+
+		case Chasing: { // pause and transition to attacking for long-range enemies
+			const NavigationState nav_state = update_route_if_needed(&enemy_instance -> nav, player -> pos);
+			if (nav_state == ReachedDest) return Attacking;
+			else if (nav_state == PathTooLongBFS || nav_state == FailedBFS) return Idle;
+			break;
+		}
+
+		case Attacking: {
+			const NavigationState nav_state = update_route_if_needed(&enemy_instance -> nav, player -> pos);
+
+			if (nav_state == Navigating) return Chasing;
+			else if (nav_state == FailedBFS) return Idle;
+			else if (bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy))
+				puts("Long range enemies are not supported yet");
+			else short_range_enemy_attack(enemy, enemy_instance, player, dist);
+
+			break;
+		}
+		case Dead: break;
+	}
+	return prev_state;
+}
+*/
+
+/////
+
+/*
+The long-range enemy AI:
+If the player meets the activation distance:
+	While not reached target:
+		Step closer
+		Wait a bit
+		Shoot
+*/
+
+
+///// A numbered mipmap thing:
+
+//////////
+SDL_Surface* const s = SDL_LoadBMP("assets/walls/numbered_mipmap.bmp");
+current_level.walls[3] = (Sprite) {
+	SDL_CreateTextureFromSurface(screen.renderer, s),
+	{s -> w, s -> h}, 4
+};
+SDL_FreeSurface(s);
+//////////
+
+/////

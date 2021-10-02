@@ -12,16 +12,14 @@
 
 #endif
 
-/*
-#define PLANAR_MODE
+// #define PLANAR_MODE
 #define NOCLIP_MODE
-*/
 
-#define ANTIALIAS_FIRST_MIP_LEVEL
+#define ANTIALIASED_MIPMAPPING
 // #define DISABLE_ENEMIES
 #define PERLIN_SHADING
-#define SHADING_ENABLED
-#define SOUND_ENABLED
+// #define SHADING_ENABLED
+// #define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 #define FLOORCAST_THREADS 3
@@ -33,9 +31,9 @@
 #define INIT_RAY_COLUMN_W 1
 
 // #define INIT_FOV 66.849622365373434718
-#define INIT_FOV 90.0
+#define INIT_FOV 100.0
 #define INIT_FOV_STEP 1.0
-#define INIT_MAX_FOV 105.0
+#define INIT_MAX_FOV 110.0
 
 #define INIT_MINIMAP_SCALE 4.8
 #define INIT_HP 30.0
