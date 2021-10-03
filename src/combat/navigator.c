@@ -44,9 +44,9 @@ static CorrectedRoute make_corrected_route(const Route* const route, const vec n
 }
 
 // navigator idle if path too long
-inlinable NavigationState update_route(Navigator* const nav, const vec p_pos) {
+inlinable NavigationState update_route(Navigator* const nav, const vec p_pos, const byte height) {
 	const vec nav_pos = *nav -> pos;
-	const ResultBFS bfs_result = bfs(nav_pos, p_pos); // allocate integer BFS path
+	const ResultBFS bfs_result = bfs(nav_pos, p_pos, height); // allocate integer BFS path
 
 	if (bfs_result.state == SucceededBFS) {
 		const CorrectedRoute corrected_route = make_corrected_route(&bfs_result.route, nav_pos);
@@ -57,9 +57,9 @@ inlinable NavigationState update_route(Navigator* const nav, const vec p_pos) {
 	return bfs_result.state;
 }
 
-inlinable Navigator init_navigator(const vec p_pos, vec* const pos_ref, const double v) {
+inlinable Navigator init_navigator(const vec p_pos, vec* const pos_ref, const double v, const byte height) {
 	Navigator nav = {.pos = pos_ref, .route_ind = -1, .v = v};
-	update_route(&nav, p_pos);
+	update_route(&nav, p_pos, height);
 	return nav;
 }
 
@@ -67,15 +67,15 @@ inlinable byte player_diverged_from_route_dest(const CorrectedRoute* const route
 	return vec_delta_exceeds(p_pos, route -> data[route -> length - 1], 1.0);
 }
 
-NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos) {
-	if (nav -> route_ind == -1 && update_route(nav, p_pos) != SucceededBFS)
+NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos, const byte height) {
+	if (nav -> route_ind == -1 && update_route(nav, p_pos, height) != SucceededBFS)
 		return FailedBFS;
 
 	const CorrectedRoute* const route = &nav -> route;
 	const int end_ind = route -> length - 1;
 
 	if (player_diverged_from_route_dest(route, p_pos)) {
-		const NavigationState nav_state = update_route(nav, p_pos);
+		const NavigationState nav_state = update_route(nav, p_pos, height);
 		if (nav_state != SucceededBFS) return nav_state;
 	}
 

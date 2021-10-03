@@ -4,13 +4,15 @@ typedef enum {
 	BottomLeft, Bottom, BottomRight
 } NeighborID;
 
-inlinable byte neighbor_map_point(const ivec neighbors[8], const NeighborID neighbor_id) {
+inlinable byte blocking_neighbor(const ivec neighbors[8], const NeighborID neighbor_id, const byte height) {
 	const ivec neighbor = neighbors[neighbor_id];
-	return *map_point(current_level.wall_data, neighbor.x, neighbor.y);
+	return *map_point(current_level.heightmap, neighbor.x, neighbor.y) != height;
 }
 
 // returns if updating the queue succeeded
-inlinable byte update_queue_with_neighbors(RouteQueue* const routes, const Route* const route, const ivec vertex) {
+inlinable byte update_queue_with_neighbors(RouteQueue* const routes, const Route* const route,
+	const ivec vertex, const byte h) { // h = height
+
 	const int dec_x = vertex.x - 1, dec_y = vertex.y - 1, inc_x = vertex.x + 1, inc_y = vertex.y + 1;
 	const ivec neighbors[8] = {
 		{dec_x, dec_y}, {vertex.x, dec_y}, {inc_x, dec_y},
@@ -21,11 +23,11 @@ inlinable byte update_queue_with_neighbors(RouteQueue* const routes, const Route
 	for (NeighborID i = 0; i < 8; i++) {
 		const ivec neighbor = neighbors[i];
 
-		if  ((ivec_out_of_bounds(neighbor) || *map_point(current_level.wall_data, neighbor.x, neighbor.y)) ||
-			(i == BottomLeft && (neighbor_map_point(neighbors, Left) || neighbor_map_point(neighbors, Bottom))) ||
-			(i == BottomRight && (neighbor_map_point(neighbors, Bottom) || neighbor_map_point(neighbors, Right))) ||
-			(i == TopLeft && (neighbor_map_point(neighbors, Left) || neighbor_map_point(neighbors, Top))) ||
-			(i == TopRight && (neighbor_map_point(neighbors, Top) || neighbor_map_point(neighbors, Right))))
+		if  ((ivec_out_of_bounds(neighbor) || *map_point(current_level.heightmap, neighbor.x, neighbor.y) != h) ||
+			(i == BottomLeft && (blocking_neighbor(neighbors, Left, h) || blocking_neighbor(neighbors, Bottom, h))) ||
+			(i == BottomRight && (blocking_neighbor(neighbors, Bottom, h) || blocking_neighbor(neighbors, Right, h))) ||
+			(i == TopLeft && (blocking_neighbor(neighbors, Left, h) || blocking_neighbor(neighbors, Top, h))) ||
+			(i == TopRight && (blocking_neighbor(neighbors, Top, h) || blocking_neighbor(neighbors, Right, h))))
 		continue;
 
 		if (!set_statemap_bit_with_status(current_level.bfs_visited, neighbor.x, neighbor.y)) { // if not visited before
@@ -37,7 +39,7 @@ inlinable byte update_queue_with_neighbors(RouteQueue* const routes, const Route
 	return 1;
 }
 
-ResultBFS bfs(const vec begin, const vec end) {
+ResultBFS bfs(const vec begin, const vec end, const byte height) {
 	const ivec int_begin = ivec_from_vec(begin), int_end = ivec_from_vec(end);
 
 	clear_statemap(current_level.bfs_visited);
@@ -56,7 +58,7 @@ ResultBFS bfs(const vec begin, const vec end) {
 			break;
 		}
 
-		if (!update_queue_with_neighbors(&routes, &route, vertex)) {
+		if (!update_queue_with_neighbors(&routes, &route, vertex, height)) {
 			result.state = PathTooLongBFS;
 			break;
 		}

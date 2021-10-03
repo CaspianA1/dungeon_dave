@@ -37,7 +37,7 @@ typedef struct {
 	const double v;
 } Navigator;
 
-inlinable Navigator init_navigator(const vec, vec* const, const double);
+inlinable Navigator init_navigator(const vec, vec* const, const double, const byte);
 
 //////////
 

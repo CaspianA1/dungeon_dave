@@ -59,7 +59,6 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
-- enemy ai doesn't work at larger point heights
 - two jump sounds when teleporting
 - don't deal damage if height diff too big for short range
 - lightmap seed to init_level

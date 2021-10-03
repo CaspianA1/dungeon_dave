@@ -192,7 +192,8 @@ void set_level_enemy_instances(const unsigned enemy_instance_count, ...) {
 		memcpy(enemy_instance_dest, &enemy_instance, sizeof(EnemyInstance));
 
 		const Navigator nav = init_navigator(current_level.init_pos,
-			&enemy_instance_dest -> billboard_data.pos, enemy -> nav_speed);
+			&enemy_instance_dest -> billboard_data.pos, enemy -> nav_speed,
+			enemy_instance.billboard_data.height);
 
 		memcpy(&enemy_instance_dest -> nav, &nav, sizeof(Navigator));
 	}

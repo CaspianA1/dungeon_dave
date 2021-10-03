@@ -16,8 +16,8 @@ inlinable double tpt_shader(const vec pos) {
 void load_tpt(void) {
 	enum {
 		map_width = 10, map_height = 20,
-		wall_count = 2, billboard_count = 1, teleporter_count = 3,
-		animated_billboard_count = 0, enemy_instance_count = 9
+		wall_count = 2, billboard_count = 2, teleporter_count = 3,
+		animated_billboard_count = 0, enemy_instance_count = 8
 	};
 
 	static const byte wall_data[map_height][map_width] = {
@@ -74,7 +74,9 @@ void load_tpt(void) {
 		"assets/walls/pyramid_bricks_2.bmp",
 		"assets/walls/window.bmp");
 
-	set_level_billboards(billboard_count, "assets/objects/health_kit.bmp", 7.5, 2.5, 6.0);
+	set_level_billboards(billboard_count,
+		"assets/objects/health_kit.bmp", 7.5, 2.5, 6.0,
+		"assets/objects/health_kit.bmp", 1.5, 5.5, 0.0);
 
 	set_level_teleporters(teleporter_count,
 		6.5, 16.5, 0.0, 8.5, 1.5,
@@ -89,7 +91,6 @@ void load_tpt(void) {
 		1, 6.5, 8.5, 0.0,
 		0, 6.5, 14.5, 0.0,
 		1, 8.5, 5.5, 2.0,
-		1, 8.5, 14.5, 2.0,
 		0, 1.5, 17.5, 3.0,
 		0, 4.5, 16.5, 3.0,
 		1, 1.5, 8.5, 4.0);

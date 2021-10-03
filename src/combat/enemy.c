@@ -107,7 +107,7 @@ EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 		}
 
 		case Chasing:
-			switch (update_route_if_needed(&enemy_instance -> nav, p_pos)) {
+			switch (update_route_if_needed(&enemy_instance -> nav, p_pos, billboard_data -> height)) {
 				case ReachedDest: return Attacking;
 				case PathTooLongBFS: case FailedBFS: return Idle;
 				default: break;

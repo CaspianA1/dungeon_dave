@@ -87,14 +87,13 @@ Lightmap init_lightmap(void) {
 }
 
 /* Shading explained:
-The `SHADING_ENABLED` flag is mostly for debugging (full visibility).
-For a given wall, if it is far away, its height will be small.
-Therefore, if a wall's height is small, it should be rendererd darker.
-Dividing the wall height by the screen height gives an accurate darkness ratio.
-Depending on the object's position (a floor pixel, or a wall/sprite column),
-it may be considered darker or lighter (a dark corridor vs. a light plaza),
-and that is what `current_level.shader` calculates. That shader may call sub-shading
-functions like `diffuse_circle` above. */
+The `SHADING_ENALED` flag is mostly for debugging (full visibility).
+For a given wall, if it is far away, its height will be small. Therefore,
+it should be rendered darker. Dividing the wall height by the screen height
+gives an accurate darkness ratio. Depending on the object's position
+(a floor pixel, or a wall/sprite column), it may be considered darker or lighter
+(a dark corridor vs. a light plaza), and `shade_at` reads from the lightmap
+to find the nearest-neighbor light value at a certain position. */
 
 #ifdef SHADING_ENABLED
 
