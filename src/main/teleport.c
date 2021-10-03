@@ -63,8 +63,10 @@ void teleport_player_if_needed(Player* const player) {
 		}
 	}
 
-	if (teleport_if_needed(&player -> pos, &player -> jump.height, player, 1))
+	if (teleport_if_needed(&player -> pos, &player -> jump.height, player, 1)) {
+		player -> jump.jumping = 0;
 		fuzz_ticks--;
+	}
 }
 #else
 #define teleport_player_if_needed(a)

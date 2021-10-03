@@ -59,6 +59,8 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- enemy ai doesn't work at larger point heights
+- two jump sounds when teleporting
 - don't deal damage if height diff too big for short range
 - lightmap seed to init_level
 - make sure that thread creation doesn't stall
@@ -68,7 +70,6 @@ audio todo:
 - a vantage point map element
 - stop player from hitting head by doing head-hit detection after jumping, and then stopping jumping after
 - enemies won't chase you if you're far away enough
-- sometimes, no drop sound for teleporting
 - need 3D weapon line of sight tracing + weapons can shoot through walls, which is bad
 - a small occasional top stitch for floorcasting
 - delta time for time-independent physics
@@ -89,11 +90,11 @@ int main(void) {
 	Weapon weapon;
 	Player* const player_ref = &player;
 
-	load_all_defaults(load_palace, player_ref, &weapon);
+	load_all_defaults(load_tpt, player_ref, &weapon);
 	if (display_title_screen() == Exit) deinit_all(player_ref, &weapon);
 
 	play_sound(&current_level.background_sound);
-	ground = init_pix_sprite("assets/walls/pyramid_bricks_3.bmp");
+	ground = init_pix_sprite("assets/walls/sand.bmp");
 
 	#ifdef SHADING_ENABLED
 	byte begin_level_tint = INIT_BEGIN_LEVEL_TINT;
