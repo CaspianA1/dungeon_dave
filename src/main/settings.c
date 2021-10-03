@@ -161,12 +161,6 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	STARTUP_LOG("first level");
 	load_first_level();
 
-	#ifdef SHADING_ENABLED
-	STARTUP_LOG("lightmap");
-	Lightmap init_lightmap(void);
-	current_level.lightmap = init_lightmap();
-	#endif
-
 	void init_teleporter_data(void);
 	init_teleporter_data();
 
