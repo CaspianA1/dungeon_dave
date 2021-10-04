@@ -134,6 +134,23 @@ void set_level_teleporters(const unsigned teleporter_count, ...) {
 			va_arg(teleporter_data, double)
 		};
 	}
+	va_end(teleporter_data);
+}
+
+// x, y
+void set_level_health_kits(const unsigned health_kit_count, ...) {
+	current_level.health_kit_count = health_kit_count;
+	current_level.health_kits = wmalloc(health_kit_count * sizeof(HealthKit));
+
+	va_list health_kit_data;
+	va_start(health_kit_data, health_kit_count);
+
+	for (byte i = 0; i < health_kit_count; i++)
+		current_level.health_kits[i] = (HealthKit) {
+			0, (vec) {va_arg(health_kit_data, double), va_arg(health_kit_data, double)}
+		};
+
+	va_end(health_kit_data);
 }
 
 // path, frames/row, frames/col, frame_count, fps, x, y, height

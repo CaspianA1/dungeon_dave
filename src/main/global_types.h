@@ -87,7 +87,7 @@ typedef struct {
 
 typedef struct {
 	byte used;
-	const vec pos;
+	vec pos;
 } HealthKit;
 
 //////////
