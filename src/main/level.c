@@ -137,7 +137,7 @@ void set_level_teleporters(const unsigned teleporter_count, ...) {
 	va_end(teleporter_data);
 }
 
-// x, y
+// x, y, height
 void set_level_health_kits(const unsigned health_kit_count, ...) {
 	current_level.health_kit_count = health_kit_count;
 	current_level.health_kits = wmalloc(health_kit_count * sizeof(HealthKit));
@@ -147,7 +147,8 @@ void set_level_health_kits(const unsigned health_kit_count, ...) {
 
 	for (byte i = 0; i < health_kit_count; i++)
 		current_level.health_kits[i] = (HealthKit) {
-			0, (vec) {va_arg(health_kit_data, double), va_arg(health_kit_data, double)}
+			0, {.pos = (vec) {va_arg(health_kit_data, double), va_arg(health_kit_data, double)},
+				.height = va_arg(health_kit_data, double)}
 		};
 
 	va_end(health_kit_data);
@@ -227,7 +228,7 @@ void set_level_enemy_instances(const unsigned enemy_instance_count, ...) {
 
 inlinable void set_level_thing_container(void) {
 	current_level.thing_count =
-		current_level.billboard_count + current_level.teleporter_count
+		current_level.billboard_count + current_level.teleporter_count + current_level.health_kit_count
 		+ current_level.animated_billboard_count + current_level.enemy_instance_count;
 
 	current_level.thing_container = wmalloc(current_level.thing_count * sizeof(Thing));

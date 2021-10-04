@@ -60,7 +60,6 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
-- rem billboard health kits in levels
 - in the window area of tpt, one of the enemies can attack the player through the wall
 - don't deal damage if height diff too big for short range
 - lightmap seed to init_level, or perlin shading in shader fn
@@ -90,7 +89,7 @@ int main(void) {
 	Weapon weapon;
 	Player* const player_ref = &player;
 
-	load_all_defaults(load_palace, player_ref, &weapon);
+	load_all_defaults(load_tpt, player_ref, &weapon);
 	if (display_title_screen() == Exit) deinit_all(player_ref, &weapon);
 
 	play_sound(&current_level.background_sound);
@@ -146,6 +145,7 @@ int main(void) {
 		// floorcast(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
 
 		teleport_player_if_needed(player_ref);
+		use_health_kit_if_needed(player_ref);
 
 		#ifdef SHADING_ENABLED
 		if (begin_level_tint != 255) {

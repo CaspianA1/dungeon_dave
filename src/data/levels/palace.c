@@ -24,8 +24,8 @@ inlinable double palace_shader(const vec pos) {
 void load_palace(void) {
 	enum {
 		map_width = 40, map_height = 40,
-		wall_count = 10, billboard_count = 6, teleporter_count = 2,
-		health_kit_count = 0, animated_billboard_count = 2, enemy_instance_count = 10
+		wall_count = 10, billboard_count = 5, teleporter_count = 2,
+		health_kit_count = 1, animated_billboard_count = 2, enemy_instance_count = 10
 	};
 
 	// in the horse area: a health kit and two eddies
@@ -149,7 +149,6 @@ void load_palace(void) {
 		"assets/walls/arthouse_bricks.bmp");
 
 	set_level_billboards(billboard_count,
-		"assets/objects/health_kit.bmp", 4.5, 22.5, 0.0, // 11.5, 28.0
 		"assets/objects/hot_dog.bmp", 16.5, 29.5, 0.0,
 		"assets/objects/golden_dome.bmp", 13.0, 28.0, 1.0,
 		"assets/objects/cactus.bmp", 1.5, 27.5, 0.0,
@@ -160,7 +159,7 @@ void load_palace(void) {
 		8.5, 25.5, 2.0, 36.0,
 		12.5, 38.5, 2.0, 2.0);
 
-	set_level_health_kits(health_kit_count);
+	set_level_health_kits(health_kit_count, 4.5, 22.5, 0.0);
 
 	set_level_animated_billboards(animated_billboard_count,
 		// "assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,

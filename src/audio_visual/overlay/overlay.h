@@ -48,7 +48,7 @@ typedef struct {
 } AnimatedBillboard;
 
 typedef struct {
-	const byte status; // can pass through thing when moving
+	const byte status; // can pass through thing when moving, should skip rendering thing
 	const DataBillboard* const billboard_data;
 	const Sprite* const sprite;
 	const SDL_Rect src_crop;

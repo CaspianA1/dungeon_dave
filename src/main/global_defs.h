@@ -119,6 +119,7 @@ const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
 #define mask_weapon_y_pitch_in_range_of_enemy bitmasks[2]
 
 #define mask_can_move_through_thing bitmasks[0]
+#define mask_skip_rendering_thing bitmasks[1]
 
 /*
 https://www.spriters-resource.com/pc_computer/doomdoomii/

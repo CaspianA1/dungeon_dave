@@ -87,7 +87,7 @@ typedef struct {
 
 typedef struct {
 	byte used;
-	vec pos;
+	DataBillboard billboard;
 } HealthKit;
 
 //////////

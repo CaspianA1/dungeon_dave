@@ -23,8 +23,8 @@ inlinable double level_1_shader(const vec pos) {
 void load_level_1(void) {
 	enum {
 		map_width = 25, map_height = 15,
-		wall_count = 7, billboard_count = 7, teleporter_count = 0,
-		health_kit_count = 0, animated_billboard_count = 3, enemy_instance_count = 1
+		wall_count = 7, billboard_count = 6, teleporter_count = 0,
+		health_kit_count = 1, animated_billboard_count = 3, enemy_instance_count = 1
 	};
 
 	// static b/c may be too big for stack
@@ -101,13 +101,12 @@ void load_level_1(void) {
 		"assets/objects/tomato.bmp", 6.0, 2.0, 1.0,
 		"assets/objects/demon_head.bmp", 23.5, 1.5, 0.0,
 		"assets/objects/jungle.bmp", 11.5, 11.5, 0.0,
-		"assets/objects/health_kit.bmp", 12.0, 7.5, 0.0,
 		"assets/objects/idol.bmp", 18.5, 3.5, 0.0,
 		"assets/objects/axe.bmp", 11.0, 7.5, 0.0,
 		"assets/wolf/lamp.bmp", 18.5, 11.5, 0.0);
 
 	set_level_teleporters(teleporter_count);
-	set_level_health_kits(health_kit_count);
+	set_level_health_kits(health_kit_count, 12.0, 7.5, 0.0);
 
 	set_level_animated_billboards(animated_billboard_count,
 		"assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 4.5, 11.5, 0.0,

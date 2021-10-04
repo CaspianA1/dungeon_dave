@@ -14,8 +14,9 @@ static int cmp_things(const void* const a, const void* const b) {
 static void draw_processed_things(const double p_height, const double horizon_line) {
 	for (byte i = 0; i < current_level.thing_count; i++) {
 		const Thing thing = current_level.thing_container[i];
-		const DataBillboard billboard_data = *thing.billboard_data;
+		if (bit_is_set(thing.status, mask_skip_rendering_thing)) continue;
 
+		const DataBillboard billboard_data = *thing.billboard_data;
 		const double cos_billboard_beta = cos(billboard_data.beta);
 
 		if (billboard_data.dist <= 0.08 // if too close
@@ -117,6 +118,23 @@ DEF_THING_ADDER(teleporter) {
 	}
 }
 
+DEF_THING_ADDER(health_kit) {
+	for (byte i = 0; i < current_level.health_kit_count; i++) {
+		HealthKit* const health_kit = current_level.health_kits + i;
+		DataBillboard* const billboard_data = &health_kit -> billboard;
+
+		update_billboard_values(billboard_data, p_pos, p_angle);
+
+		const Thing thing = {
+			(mask_skip_rendering_thing * health_kit -> used) | mask_can_move_through_thing,
+			billboard_data, &health_kit_sprite,
+			{0, 0, health_kit_sprite.size.x, health_kit_sprite.size.y}, NULL
+		};
+
+		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
+	}
+}
+
 DEF_THING_ADDER(animated) {
 	for (byte i = 0; i < current_level.animated_billboard_count; i++) {
 		AnimatedBillboard* const animated_billboard = current_level.animated_billboards + i;
@@ -176,11 +194,12 @@ void draw_things(const vec p_pos, const double p_angle, const double p_height, c
 		void (*const adder_fn)(THING_ADDER_SIGNATURE);
 	} ThingAdder;
 
-	enum {num_thing_adders = 4};
+	enum {num_thing_adders = 5};
 
 	const ThingAdder thing_adders[num_thing_adders] = {
 		{current_level.billboard_count, THING_ADDER(still)},
 		{current_level.teleporter_count, THING_ADDER(teleporter)},
+		{current_level.health_kit_count, THING_ADDER(health_kit)},
 		{current_level.animated_billboard_count, THING_ADDER(animated)},
 		{current_level.enemy_instance_count, THING_ADDER(enemy_instance)}
 	};
