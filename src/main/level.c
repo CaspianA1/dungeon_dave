@@ -186,7 +186,7 @@ void set_level_enemy_instances(const unsigned enemy_instance_count, ...) {
 		const EnemyInstance enemy_instance = {
 			.enemy = enemy,
 			.state = Idle,
-			.status = 0,
+			.status = mask_long_range_attack_enemy * enemy -> is_long_range,
 			.hp = enemy -> init_hp,
 			.time_at_attack = 0.0,
 			.billboard_data = {

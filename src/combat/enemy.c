@@ -145,8 +145,7 @@ EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 				return Chasing;
 			else
 				(bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy)
-					? long_range_enemy_attack
-					: short_range_enemy_attack)
+				? long_range_enemy_attack : short_range_enemy_attack)
 				(enemy, enemy_instance, player, dist);
 
 			break;

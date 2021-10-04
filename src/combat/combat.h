@@ -49,7 +49,7 @@ typedef struct {
 	const double power, init_hp, nav_speed;
 
 	const struct {const byte sight, sound;} dist_awaken;
-	const byte is_short_range, animation_seg_lengths[4];
+	const byte is_long_range, animation_seg_lengths[4];
 
 	const DataAnimationImmut animation_data;
 	const Sound sounds[5]; // a sound for each state + Attacked
