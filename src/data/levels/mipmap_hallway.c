@@ -8,7 +8,7 @@ void load_hallway(void) {
 	enum {
 		map_width = 10, map_height = 60,
 		wall_count = 2, billboard_count = 15, teleporter_count = 3,
-		animated_billboard_count = 0, enemy_instance_count = 1
+		health_kit_count = 0, animated_billboard_count = 0, enemy_instance_count = 1
 	};
 
 	static const byte wallmap[map_height][map_width] = {
@@ -166,6 +166,8 @@ void load_hallway(void) {
 		5.0, 4.0, 5.5, 10.5, // from pos, to pos
 		6.0, 4.0, 4.0, 45.0,
 		4.0, 4.0, 5.5, 4.5);
+
+	set_level_health_kits(health_kit_count);
 
 	set_level_animated_billboards(animated_billboard_count);
 

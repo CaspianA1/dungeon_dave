@@ -255,6 +255,7 @@ void deinit_level(void) {
 	wfree(current_level.billboards);
 
 	wfree(current_level.teleporters);
+	wfree(current_level.health_kits);
 
 	for (byte i = 0; i < current_level.animated_billboard_count; i++)
 		deinit_sprite(current_level.animated_billboards[i].animation_data.immut.sprite);

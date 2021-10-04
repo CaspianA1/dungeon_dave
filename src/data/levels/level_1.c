@@ -24,7 +24,7 @@ void load_level_1(void) {
 	enum {
 		map_width = 25, map_height = 15,
 		wall_count = 7, billboard_count = 7, teleporter_count = 0,
-		animated_billboard_count = 3, enemy_instance_count = 1
+		health_kit_count = 0, animated_billboard_count = 3, enemy_instance_count = 1
 	};
 
 	// static b/c may be too big for stack
@@ -107,6 +107,7 @@ void load_level_1(void) {
 		"assets/wolf/lamp.bmp", 18.5, 11.5, 0.0);
 
 	set_level_teleporters(teleporter_count);
+	set_level_health_kits(health_kit_count);
 
 	set_level_animated_billboards(animated_billboard_count,
 		"assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 4.5, 11.5, 0.0,

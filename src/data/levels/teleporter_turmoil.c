@@ -17,7 +17,7 @@ void load_tpt(void) {
 	enum {
 		map_width = 10, map_height = 20,
 		wall_count = 2, billboard_count = 2, teleporter_count = 3,
-		animated_billboard_count = 0, enemy_instance_count = 8
+		health_kit_count = 0, animated_billboard_count = 0, enemy_instance_count = 8
 	};
 
 	static const byte wallmap[map_height][map_width] = {
@@ -83,6 +83,7 @@ void load_tpt(void) {
 		3.5, 16.5, 3.5, 13.5,
 		4.5, 4.5, 4.5, 3.5);
 
+	set_level_health_kits(health_kit_count);
 	set_level_animated_billboards(animated_billboard_count);	
 
 	set_level_enemy_instances(enemy_instance_count,

@@ -8,7 +8,7 @@ void load_pyramid(void) {
 	enum {
 		map_width = 30, map_height = 40,
 		wall_count = 3, billboard_count = 0, teleporter_count = 1,
-		animated_billboard_count = 0, enemy_instance_count = 0
+		health_kit_count = 0, animated_billboard_count = 0, enemy_instance_count = 0
 	};
 
 	static byte wallmap[map_height][map_width] = {
@@ -113,6 +113,7 @@ void load_pyramid(void) {
 
 	set_level_billboards(billboard_count);
 	set_level_teleporters(teleporter_count, 15.0, 15.0, 1.5, 38.5);
+	set_level_health_kits(health_kit_count);
 
 	set_level_animated_billboards(animated_billboard_count);
 

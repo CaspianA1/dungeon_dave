@@ -60,6 +60,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- rem billboard health kits in levels
 - in the window area of tpt, one of the enemies can attack the player through the wall
 - don't deal damage if height diff too big for short range
 - lightmap seed to init_level, or perlin shading in shader fn

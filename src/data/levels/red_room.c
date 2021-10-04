@@ -7,7 +7,7 @@ void load_red_room(void) {
 	enum {
 		map_width = 10, map_height = 10,
 		wall_count = 2, billboard_count = 0, teleporter_count = 0,
-		animated_billboard_count = 0, enemy_instance_count = 0
+		health_kit_count = 0, animated_billboard_count = 0, enemy_instance_count = 0
 	};
 
 	static const byte wallmap[map_height][map_width] = {
@@ -45,6 +45,7 @@ void load_red_room(void) {
 
 	set_level_billboards(billboard_count);
 	set_level_teleporters(teleporter_count);
+	set_level_health_kits(health_kit_count);
 	set_level_animated_billboards(animated_billboard_count);
 
 	set_level_enemy_instances(enemy_instance_count);

@@ -7,7 +7,7 @@ void load_maze(void) {
 	enum {
 		map_width = 90, map_height = 61,
 		wall_count = 2, billboard_count = 0, teleporter_count = 0,
-		animated_billboard_count = 0, enemy_instance_count = 1
+		health_kit_count = 0, animated_billboard_count = 0, enemy_instance_count = 1
 	};
 
 	static const byte wallmap[map_height][map_width] = { // https://www.dcode.fr/maze-generator
@@ -148,6 +148,7 @@ void load_maze(void) {
 
 	set_level_billboards(billboard_count);
 	set_level_teleporters(teleporter_count);
+	set_level_health_kits(health_kit_count);
 	set_level_animated_billboards(animated_billboard_count);
 
 	set_level_enemy_instances(enemy_instance_count, 0, 28.5, 21.5, 0.0);
