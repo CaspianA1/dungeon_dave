@@ -136,7 +136,7 @@ void load_palace(void) {
 	assets/skyboxes/desert_eyes.bmp */
 
 	set_level_walls(wall_count,
-		"assets/walls/pyramid_bricks_3.bmp",
+		"assets/walls/pyramid_bricks_4.bmp",
 		"assets/walls/marble.bmp",
 		"assets/walls/hieroglyph.bmp", // hieroglyphics.bmp
 
