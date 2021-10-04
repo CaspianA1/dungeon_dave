@@ -1,9 +1,9 @@
 typedef struct {
 	byte side;
+	ivec curr_tile;
+	const ivec ray_step;
 	double dist, ray_length_components[2];
 	const double unit_step_size[2];
-	const ivec ray_step;
-	ivec curr_tile;
 } DataDDA;
 
 DataDDA init_dda(const vec origin, const vec dir) {
@@ -33,8 +33,8 @@ DataDDA init_dda(const vec origin, const vec dir) {
 
 	// origin and dir are braced b/c vec -> double[2], and the arrays can't be copied directly
 	return (DataDDA) {
-		0, 0.0, {ray_length_components[0], ray_length_components[1]},
-		{unit_step_size[0], unit_step_size[1]}, ray_step, curr_tile
+		0, curr_tile, ray_step, 0.0, {ray_length_components[0], ray_length_components[1]},
+		{unit_step_size[0], unit_step_size[1]}
 	};
 }
 
@@ -50,10 +50,8 @@ inlinable DataDDA peek_dda(DataDDA d) {
 }
 
 inlinable byte iter_dda(DataDDA* const d_ref) {
-	DataDDA d = peek_dda(*d_ref);
+	const DataDDA d = peek_dda(*d_ref);
 	if (ivec_out_of_bounds(d.curr_tile)) return 0;
-
-	// d.step_count++;
 	memcpy(d_ref, &d, sizeof(DataDDA));
 	return 1;
 }

@@ -38,7 +38,16 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 void short_range_enemy_attack(const Enemy* const enemy,
 	EnemyInstance* const enemy_instance, Player* const player, const double dist) {
 
+	/*
+	const byte height_diff_too_big =
+		player -> jump.jumping &&
+		fabs(enemy_instance -> billboard_data.height - player -> jump.height) > 1.0;
+
+	if (height_diff_too_big) return;
+	*/
+
 	const double curr_time = SDL_GetTicks() / 1000.0;
+
 	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing) {
 		enemy_instance -> time_at_attack = curr_time;
 
