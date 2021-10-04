@@ -33,8 +33,11 @@ inlinable byte flat_triangle(const vec pos, const Triangle triangle) {
 
 //////////
 
+#ifdef SHADING_ENABLED
+
 static const byte lightmap_samples_per_tile = 50, /* 15 */ perlin_amplitude = 10;
 static const double shader_downscaler = 0.15, perlin_downscaler = 0.3, perlin_frequency = 0.01;
+
 
 Lightmap init_lightmap(void) {
 	Lightmap lightmap = {
@@ -94,8 +97,6 @@ gives an accurate darkness ratio. Depending on the object's position
 (a floor pixel, or a wall/sprite column), it may be considered darker or lighter
 (a dark corridor vs. a light plaza), and `shade_at` reads from the lightmap
 to find the nearest-neighbor light value at a certain position. */
-
-#ifdef SHADING_ENABLED
 
 byte shade_at(const double wall_h, const vec pos) {
 	(void) wall_h;

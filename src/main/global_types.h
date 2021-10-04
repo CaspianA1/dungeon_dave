@@ -104,9 +104,8 @@ typedef struct {
 	Skybox skybox;
 	Sound background_sound;
 
-	double (*shader) (const vec);
-
 	#ifdef SHADING_ENABLED
+	double (*shader) (const vec);
 	Lightmap lightmap;
 	#endif
 

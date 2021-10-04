@@ -56,13 +56,15 @@ void init_level(const int map_width, const int map_height,
 		SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "0", SDL_HINT_OVERRIDE);
 	}
 
-	current_level.shader = shader;
 	current_level.skybox.enabled = 0;
 	current_level.bfs_visited = init_statemap(map_width, map_height);
 
 	#ifdef SHADING_ENABLED
+	current_level.shader = shader;
 	Lightmap init_lightmap(void);
 	current_level.lightmap = init_lightmap();
+	#else
+	(void) shader;
 	#endif
 }
 
