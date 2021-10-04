@@ -79,9 +79,9 @@ void load_tpt(void) {
 		"assets/objects/health_kit.bmp", 1.5, 5.5, 0.0);
 
 	set_level_teleporters(teleporter_count,
-		6.5, 16.5, 0.0, 8.5, 1.5,
-		3.5, 16.5, 3.0, 3.5, 13.5,
-		4.5, 4.5, 3.0, 4.5, 3.5);
+		6.5, 16.5, 8.5, 1.5,
+		3.5, 16.5, 3.5, 13.5,
+		4.5, 4.5, 4.5, 3.5);
 
 	set_level_animated_billboards(animated_billboard_count);	
 

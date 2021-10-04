@@ -65,8 +65,6 @@ audio todo:
 - lightmap seed to init_level, or perlin shading in shader fn
 - make sure that thread creation doesn't stall
 - no more constant copying of many static amount things
-- wall_data to wallmap
-- teleporters initialized without a height
 - a vantage point map element
 - stop player from hitting head by doing head-hit detection after jumping, and then stopping jumping after
 - enemies won't chase you if you're far away enough

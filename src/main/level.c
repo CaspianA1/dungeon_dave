@@ -109,7 +109,7 @@ void set_level_billboards(const unsigned billboard_count, ...) {
 	va_end(billboard_data);
 }
 
-// from, height, to
+// from, to
 void set_level_teleporters(const unsigned teleporter_count, ...) {
 	current_level.teleporter_count = teleporter_count;
 	current_level.teleporters = wmalloc(teleporter_count * sizeof(Teleporter));
@@ -126,7 +126,9 @@ void set_level_teleporters(const unsigned teleporter_count, ...) {
 			va_arg(teleporter_data, double)
 		};
 
-		billboard_data -> height = va_arg(teleporter_data, double);
+		billboard_data -> height = *map_point(current_level.heightmap,
+			billboard_data -> pos[0], billboard_data -> pos[1]);
+
 		teleporter -> to = (vec) {
 			va_arg(teleporter_data, double),
 			va_arg(teleporter_data, double)

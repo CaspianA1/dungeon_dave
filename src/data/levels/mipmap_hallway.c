@@ -163,11 +163,9 @@ void load_hallway(void) {
 		repeated_billboard, 5.0, 57.0, 14.0);
 
 	set_level_teleporters(teleporter_count,
-		5.0, 4.0, 0.0, // from pos + height
-		5.5, 10.5, /* to pos */
-
-		6.0, 4.0, 0.0, 4.0, 45.0,
-		4.0, 4.0, 0.0, 5.5, 4.5);
+		5.0, 4.0, 5.5, 10.5, // from pos, to pos
+		6.0, 4.0, 4.0, 45.0,
+		4.0, 4.0, 5.5, 4.5);
 
 	set_level_animated_billboards(animated_billboard_count);
 

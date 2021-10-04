@@ -112,7 +112,7 @@ void load_pyramid(void) {
 		"assets/walls/saqqara.bmp");
 
 	set_level_billboards(billboard_count);
-	set_level_teleporters(teleporter_count, 15.0, 15.0, 0.0, 1.5, 38.5);
+	set_level_teleporters(teleporter_count, 15.0, 15.0, 1.5, 38.5);
 
 	set_level_animated_billboards(animated_billboard_count);
 

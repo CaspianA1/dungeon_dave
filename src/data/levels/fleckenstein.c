@@ -88,7 +88,7 @@ void load_fleckenstein(void) {
 		"assets/walls/marble.bmp");
 
 	set_level_billboards(billboard_count);
-	set_level_teleporters(teleporter_count, 9.5, 26.5, 0.0, 15.5, 6.5);
+	set_level_teleporters(teleporter_count, 9.5, 26.5, 15.5, 6.5);
 
 	set_level_animated_billboards(animated_billboard_count);
 
