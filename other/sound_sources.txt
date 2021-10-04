@@ -24,3 +24,5 @@ https://freesound.org/people/michael_grinnell/sounds/512471/ (teleporter sound)
 https://freesound.org/people/GameAudio/sounds/220178/ (menu click)
 
 https://freesound.org/people/tonsil5/sounds/416838/ (player death)
+
+https://freesound.org/people/gamer127/sounds/463202/ (health increase)

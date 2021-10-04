@@ -73,6 +73,11 @@ typedef struct {
 	byte* data;
 } StateMap;
 
+typedef struct {
+	byte* data;
+	ivec size;
+} Lightmap;
+
 //////////
 
 typedef struct {
@@ -80,12 +85,10 @@ typedef struct {
 	vec to;
 } Teleporter;
 
-//////////
-
 typedef struct {
-	byte* data;
-	ivec size;
-} Lightmap;
+	byte used;
+	const vec pos;
+} HealthKit;
 
 //////////
 
@@ -97,7 +100,7 @@ typedef struct {
 	byte
 		*wallmap, *heightmap, /* *ceiling_data, *floor_data */
 		wall_count, billboard_count, animated_billboard_count, enemy_instance_count,
-		teleporter_count, thing_count, max_point_height, out_of_bounds_point;
+		teleporter_count, health_kit_count, thing_count, max_point_height, out_of_bounds_point;
 
  	StateMap bfs_visited;
 
@@ -111,9 +114,12 @@ typedef struct {
 
 	Sprite* walls;
 	Billboard* billboards;
+	Teleporter* teleporters;
+	HealthKit* health_kits;
+
 	AnimatedBillboard* animated_billboards;
 	EnemyInstance* enemy_instances;
-	Teleporter* teleporters;
+
 	Thing* thing_container;
 } Level;
 
