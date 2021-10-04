@@ -95,7 +95,7 @@ typedef struct {
 	double init_height;
 
 	byte
-		*wall_data, *heightmap, /* *ceiling_data, *floor_data */
+		*wallmap, *heightmap, /* *ceiling_data, *floor_data */
 		wall_count, billboard_count, animated_billboard_count, enemy_instance_count,
 		teleporter_count, thing_count, max_point_height, out_of_bounds_point;
 

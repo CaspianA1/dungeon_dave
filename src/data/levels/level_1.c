@@ -28,7 +28,7 @@ void load_level_1(void) {
 	};
 
 	// static b/c may be too big for stack
-	static const byte wall_data[map_height][map_width] = {
+	static const byte wallmap[map_height][map_width] = {
 		{4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		{4, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{4, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 1},
@@ -65,7 +65,7 @@ void load_level_1(void) {
 	};
 
 	// {18.5, 9.0}, {3.0, 3.0}, {7.0, 12.0}
-	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+	init_level(map_width, map_height, (byte*) wallmap, (byte*) heightmap,
 		17.5, 11.5, 0.0, 5, 7, "assets/audio/themes/ambient_wind.wav",
 		"assets/skyboxes/mossy_mountains_2.bmp", level_1_shader);
 

@@ -11,7 +11,7 @@ void load_fleckenstein(void) {
 		animated_billboard_count = 0, enemy_instance_count = 0
 	};
 
-	static const byte wall_data[map_height][map_width] = {
+	static const byte wallmap[map_height][map_width] = {
 		{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
 		{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 		{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
@@ -77,7 +77,7 @@ void load_fleckenstein(void) {
 		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}
 	};
 
-	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+	init_level(map_width, map_height, (byte*) wallmap, (byte*) heightmap,
 		13.0, 27.0, 0.0, 9, 1, "assets/audio/themes/ambient_wind.wav",
 		"assets/skyboxes/mossy_mountains.bmp", fleckenstein_shader);
 

@@ -114,7 +114,7 @@ void raycast(const Player* const player, const double horizon_line, const double
 
 		while (iter_dda(&ray)) {
 			const byte
-				point = *map_point(current_level.wall_data, ray.curr_tile.x, ray.curr_tile.y),
+				point = *map_point(current_level.wallmap, ray.curr_tile.x, ray.curr_tile.y),
 				point_height = *map_point(current_level.heightmap, ray.curr_tile.x, ray.curr_tile.y);
 
 			const vec hit = vec_line_pos(p_pos, dir, ray.dist);

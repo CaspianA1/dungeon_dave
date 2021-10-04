@@ -6,11 +6,11 @@ inlinable double airship_shader(const vec pos) {
 void load_airship(void) {
 	enum {
 		map_width = 10, map_height = 20,
-		wall_count = 1, billboard_count = 0,
+		wall_count = 1, billboard_count = 0, teleporter_count = 0,
 		animated_billboard_count = 0, enemy_count = 0
 	};
 
-	static const byte wall_data[map_height][map_width] = {
+	static const byte wallmap[map_height][map_width] = {
 		{0, 0, 1, 1, 1, 1, 1, 1, 0, 0},
 		{0, 1, 0, 0, 0, 0, 0, 0, 1, 0},
 		{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},

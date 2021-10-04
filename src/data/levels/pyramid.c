@@ -11,7 +11,7 @@ void load_pyramid(void) {
 		animated_billboard_count = 0, enemy_instance_count = 0
 	};
 
-	static byte wall_data[map_height][map_width] = {
+	static byte wallmap[map_height][map_width] = {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -99,10 +99,10 @@ void load_pyramid(void) {
 
 	const byte border_size = 3;
 	const byte border_offset = border_size + 1;
-	fill_level_data((byte*) wall_data, 2, border_offset, map_width - border_offset,
+	fill_level_data((byte*) wallmap, 2, border_offset, map_width - border_offset,
 		border_offset, map_height - 10 - border_offset, map_width);
 
-	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+	init_level(map_width, map_height, (byte*) wallmap, (byte*) heightmap,
 		2.5, 2.5, 0.0, 15, 1, "assets/audio/themes/spelunk.wav",
 		"assets/skyboxes/desert_eyes.bmp", pyramid_shader);
 

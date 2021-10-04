@@ -11,7 +11,7 @@ void load_hallway(void) {
 		animated_billboard_count = 0, enemy_instance_count = 1
 	};
 
-	static const byte wall_data[map_height][map_width] = {
+	static const byte wallmap[map_height][map_width] = {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 		{1, 0, 0, 0, 2, 2, 0, 0, 0, 1},
@@ -137,7 +137,7 @@ void load_hallway(void) {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
-	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+	init_level(map_width, map_height, (byte*) wallmap, (byte*) heightmap,
 		5.0, 3.4, 0.0, 2, 1, "assets/audio/themes/ambient_wind.wav",
 		"assets/skyboxes/desert.bmp", hallway_shader);
 

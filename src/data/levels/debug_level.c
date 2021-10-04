@@ -18,7 +18,7 @@ void load_debug_level(void) {
 		animated_billboard_count = 1, enemy_instance_count = 0
 	};
 
-	static const byte wall_data[map_height][map_width] = {
+	static const byte wallmap[map_height][map_width] = {
 		{5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
 		{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
 		{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
@@ -44,7 +44,7 @@ void load_debug_level(void) {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	};
 
-	init_level(map_width, map_height, (byte*) wall_data, (byte*) heightmap,
+	init_level(map_width, map_height, (byte*) wallmap, (byte*) heightmap,
 		2.0, 2.0, 0.0, 4, 1, "assets/audio/themes/ambient_wind.wav",
 		"assets/skyboxes/red_mountains_2.bmp", debug_level_shader);
 

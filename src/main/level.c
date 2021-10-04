@@ -17,7 +17,7 @@ void print_heightmap(void) {
 */
 
 void init_level(const int map_width, const int map_height,
-	const byte* const wall_data, const byte* const heightmap,
+	const byte* const wallmap, const byte* const heightmap,
 	const double init_x, const double init_y, const double init_height,
 	const byte max_point_height, const byte out_of_bounds_point,
 	const char* const background_sound_path, const char* const skybox_path,
@@ -36,8 +36,8 @@ void init_level(const int map_width, const int map_height,
 	//////////
 	const int bytes = map_width * map_height;
 
-	current_level.wall_data = wmalloc(bytes);
-	memcpy(current_level.wall_data, wall_data, bytes);
+	current_level.wallmap = wmalloc(bytes);
+	memcpy(current_level.wallmap, wallmap, bytes);
 
 	current_level.heightmap = wmalloc(bytes);
 	memcpy(current_level.heightmap, heightmap, bytes);
@@ -215,8 +215,8 @@ inlinable void set_level_thing_container(void) {
 }
 
 void deinit_level(void) {
-	byte* const map_data[2] = {current_level.wall_data, current_level.heightmap};
-	for (byte i = 0; i < 2; i++) wfree(map_data[i]);
+	wfree(current_level.wallmap);
+	wfree(current_level.heightmap);
 
 	deinit_statemap(current_level.bfs_visited);
 
