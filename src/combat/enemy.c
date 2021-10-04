@@ -35,7 +35,7 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 	enemy_instance -> mut_animation_data.frame_ind = new_frame_ind;
 }
 
-void short_range_enemy_attack(const Enemy* const enemy,
+inlinable void short_range_enemy_attack(const Enemy* const enemy,
 	EnemyInstance* const enemy_instance, Player* const player, const double dist) {
 
 	/*
@@ -51,6 +51,12 @@ void short_range_enemy_attack(const Enemy* const enemy,
 	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing) {
 		enemy_instance -> time_at_attack = curr_time;
 
+		/* The reason why this test isn't in the if statement above
+		is because if it were, the enemy would try to attack again at the next tick,
+		making it very hard to jump over them to avoid their attack; so this essentially
+		gives enemies a recharge time for their next attack. */
+		if (fabs(enemy_instance -> billboard_data.height - player -> jump.height) > 1.0) return;
+
 		// when the decr hp is less than zero, the enemy instance clips into walls - why?
 		const double decr_hp = enemy -> power * (1.0 - dist * dist); // more damage closer
 
@@ -62,6 +68,17 @@ void short_range_enemy_attack(const Enemy* const enemy,
 		}
 		else play_sound(&player -> sound_when_attacked);
 	}
+}
+
+inlinable void long_range_enemy_attack(const Enemy* const enemy,
+	EnemyInstance* const enemy_instance, Player* const player, const double dist) {
+
+	(void) enemy;
+	(void) enemy_instance;
+	(void) player;
+	(void) dist;
+
+	puts("Long range enemies are not supported yet");
 }
 
 static byte billboard_can_see_player(const DataBillboard* const billboard_data, const Player* const player) {
@@ -126,9 +143,11 @@ EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 		case Attacking:
 			if (player_diverged_from_route_dest(&enemy_instance -> nav.route, p_pos))
 				return Chasing;
-			else if (bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy))
-				puts("Long range enemies are not supported yet");
-			else short_range_enemy_attack(enemy, enemy_instance, player, dist);
+			else
+				(bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy)
+					? long_range_enemy_attack
+					: short_range_enemy_attack)
+				(enemy, enemy_instance, player, dist);
 
 			break;
 
