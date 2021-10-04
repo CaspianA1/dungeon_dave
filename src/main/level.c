@@ -56,7 +56,6 @@ void init_level(const int map_width, const int map_height,
 		SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "0", SDL_HINT_OVERRIDE);
 	}
 
-	current_level.skybox.enabled = 0;
 	current_level.bfs_visited = init_statemap(map_width, map_height);
 
 	#ifdef SHADING_ENABLED
@@ -99,7 +98,7 @@ void set_level_billboards(const unsigned billboard_count, ...) {
 	va_start(billboard_data, billboard_count);
 
 	for (byte i = 0; i < billboard_count; i++) {
-		Billboard* const billboard = current_level.billboards + i;
+		Billboard* const billboard = current_level.billboards + i; // see if sprite allocated before
 		billboard -> sprite = init_sprite(va_arg(billboard_data, const char*), 0);
 		billboard -> billboard_data.pos = (vec) {
 			va_arg(billboard_data, double),
