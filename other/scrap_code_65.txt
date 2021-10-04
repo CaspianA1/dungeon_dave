@@ -33,3 +33,14 @@ DEBUG(level, lf);
 */
 
 /////
+
+void add_temp_thing(Thing (*const spawner)(void), byte (*thing_done_spawning)) {
+	if (current_level.thing_count < current_level.max_alloc_thing_count) {
+		current_level.thing_container = realloc(current_level.thing_container, ++current_level.max_alloc_thing_count);
+	}
+	current_level.thing_count++;
+}
+
+// - need an indication of when a thing is done in-game, and when so, don't spawn it anymore
+
+/////

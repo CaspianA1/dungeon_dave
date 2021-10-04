@@ -127,13 +127,22 @@ Player load_player(const double jump_up_v0,
 }
 
 void load_all_defaults(void (*load_first_level) (void), Player* const player, Weapon* const weapon) {
+	void init_screen(void);
+	StateMap init_statemap(const int, const int);
+	void init_all_enemies(void);
+
+	void init_teleporter_resources(void);
+	void init_health_kit_resources(void);
+	void init_gui_resources(void);
+
+	DataAnimationImmut init_immut_animation_data(const char* const, const int, const int, const int, const int);
+
 	const Uint32 before_loading_defaults = SDL_GetTicks();
 
 	STARTUP_LOG("default settings");
 	load_default_settings();
 
 	STARTUP_LOG("screen");
-	void init_screen(void);
 	init_screen();
 
 	STARTUP_LOG("sound subsystem");
@@ -142,33 +151,27 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	STARTUP_LOG("font subsystem");
 	if (TTF_Init() == -1) FAIL("Unable to initialize the font library: %s\n", TTF_GetError());
 
-	STARTUP_LOG("gui resources");
-	void init_gui_resources(void);
+	STARTUP_LOG("gui, health kit, teleporter resources");
 	init_gui_resources();
+	init_health_kit_resources();
+	init_teleporter_resources();
 
 	srand(time(NULL));
 	keys = SDL_GetKeyboardState(NULL);
 	floorcast_val_buffer = wmalloc(settings.screen_width * sizeof(FloorcastBufferVal));
 	depth_buffer = wmalloc(settings.screen_width * sizeof(float));
-
-	StateMap init_statemap(const int, const int);
 	occluded_by_walls = init_statemap(settings.screen_width, settings.screen_height);
 
 	STARTUP_LOG("enemies");
-	void init_all_enemies(void);
 	init_all_enemies();
 
 	STARTUP_LOG("first level");
 	load_first_level();
 
-	void init_teleporter_data(void);
-	init_teleporter_data();
-
+	STARTUP_LOG("player");
 	const Player first_player = load_player(4.8, 0.35, 3.0, 0.12, 15.0, 0.08, 0.09, 0.05, 1.9);
 
 	STARTUP_LOG("primary weapon");
-
-	DataAnimationImmut init_immut_animation_data(const char* const, const int, const int, const int, const int);
 
 	/*
 	const Weapon first_weapon = {
@@ -202,8 +205,11 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	void deinit_weapon(const Weapon* const);
 	void deinit_level(void);
 	void deinit_all_enemies(void);
-	void deinit_teleporter_data(void);
+
+	void deinit_teleporter_resources(void);
+	void deinit_health_kit_resources(void);
 	void deinit_gui_resources(void);
+
 	void deinit_screen(void);
 
 	Mix_HaltChannel(-1); // stops all channels before deiniting the associated sounds
@@ -217,7 +223,8 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 
 	deinit_all_enemies();
 
-	deinit_teleporter_data();
+	deinit_teleporter_resources();
+	deinit_health_kit_resources();
 	deinit_gui_resources();
 
 	deinit_sound_subsystem();

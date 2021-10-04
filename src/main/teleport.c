@@ -4,12 +4,12 @@ static Sound teleporter_sound;
 static const byte ticks_for_teleporter_fuzz = 50, num_fuzz_dots_on_screen = 80, dot_dimension_divisor = 15;
 static const Color3 teleporter_color = {255, 204, 0};
 
-void init_teleporter_data(void) {
+void init_teleporter_resources(void) {
 	teleporter_sprite = init_sprite("assets/objects/teleporter.bmp", 0);
 	teleporter_sound = init_sound("assets/audio/sound_effects/teleporter_zap.wav", 1);
 }
 
-void deinit_teleporter_data(void) {
+void deinit_teleporter_resources(void) {
 	deinit_sprite(teleporter_sprite);
 	deinit_sound(&teleporter_sound);
 }

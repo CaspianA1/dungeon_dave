@@ -14,6 +14,7 @@
 #include "movement.c" // previously a part of input.c
 #include "input.c"
 #include "teleport.c"
+#include "health_kit.c"
 #include "level.c"
 
 #include "../audio_visual/screen.c"
