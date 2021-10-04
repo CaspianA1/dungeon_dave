@@ -157,9 +157,7 @@ void load_palace(void) {
 		"assets/objects/cactus.bmp", 3.5, 27.5, 2.0);
 
 	set_level_teleporters(teleporter_count,
-		8.5, 25.5, 0.0, // from pos + height
-		2.0, 36.0, /* to pos */
-
+		8.5, 25.5, 0.0, 2.0, 36.0, // from pos + height, to pos
 		12.5, 38.5, 0.0, 2.0, 2.0);
 
 	set_level_animated_billboards(animated_billboard_count,

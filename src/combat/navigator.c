@@ -85,13 +85,13 @@ NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos, co
 
 		const vec dir = next_vertex - route -> data[route_ind];
 		vec* const pos_ref = nav -> pos;
-		vec pos = *pos_ref + dir * vec_fill(nav -> v);
+		vec new_pos = *pos_ref + dir * vec_fill(nav -> v);
 
-		if ((dir[0] > 0.0 && pos[0] >= next_vertex[0]) || (dir[0] < 0.0 && pos[0] <= next_vertex[0])
-			|| (dir[1] > 0.0 && pos[1] >= next_vertex[1]) || (dir[1] < 0.0 && pos[1] <= next_vertex[1]))
+		if ((dir[0] > 0.0 && new_pos[0] >= next_vertex[0]) || (dir[0] < 0.0 && new_pos[0] <= next_vertex[0])
+			|| (dir[1] > 0.0 && new_pos[1] >= next_vertex[1]) || (dir[1] < 0.0 && new_pos[1] <= next_vertex[1]))
 			nav -> route_ind++;
 
-		*pos_ref = pos;
+		*pos_ref = new_pos;
 		return Navigating;
 	}
 	return ReachedDest;

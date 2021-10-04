@@ -60,7 +60,6 @@ audio todo:
 	- make enemy sound directions be constantly updated when they're playing
 
 - in the window area of tpt, one of the enemies can attack the player through the wall
-- two jump sounds when teleporting
 - don't deal damage if height diff too big for short range
 - lightmap seed to init_level, or perlin shading in shader fn
 - make sure that thread creation doesn't stall

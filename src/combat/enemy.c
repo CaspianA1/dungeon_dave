@@ -146,7 +146,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance,
 	const double p_height = player -> jump.height;
 	DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
 
-	if (teleport_if_needed(&billboard_data -> pos, &billboard_data -> height, player, 0)) {
+	if (teleport_if_needed(&billboard_data -> pos, &billboard_data -> height, player)) {
 		set_enemy_instance_state(enemy_instance, Idle, 0, p_pos, p_height);
 		return;
 	}

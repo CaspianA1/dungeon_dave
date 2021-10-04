@@ -47,8 +47,10 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	};
 
 	for (byte i = 0; i < current_level.thing_count; i++) {
-		const DataBillboard* const billboard_data = current_level.thing_container[i].billboard_data;
+		const Thing* const thing = current_level.thing_container + i;
+		if (bit_is_set(thing -> status, mask_can_move_through_thing)) continue;
 
+		const DataBillboard* const billboard_data = thing -> billboard_data;
 		const double y_delta = fabs(billboard_data -> height - p_height);
 		if (y_delta >= 1.0) continue;
 
@@ -179,7 +181,7 @@ void update_jump(Jump* const jump, const vec pos) {
 	if (!first_call) { // first_call avoided for the same reason as explained in handle_thing_collisions
 		for (byte i = 0; i < current_level.thing_count; i++) {
 			const Thing* const thing = current_level.thing_container + i;
-			if (!bit_is_set(thing -> status, mask_can_jump_on_thing)) continue;
+			if (bit_is_set(thing -> status, mask_can_move_through_thing)) continue;
 
 			const DataBillboard* const billboard_data = thing -> billboard_data;
 			const double thing_height = billboard_data -> height;

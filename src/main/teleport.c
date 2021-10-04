@@ -14,7 +14,7 @@ void deinit_teleporter_data(void) {
 	deinit_sound(&teleporter_sound);
 }
 
-byte teleport_if_needed(vec* const pos, double* const height, const Player* const player, const byte drop_actor) {
+byte teleport_if_needed(vec* const pos, double* const height, const Player* const player) {
 	const vec teleporter_box_dimensions = vec_fill(actor_box_side_len + 0.2); // teleporter box is a bit bigger than the actor box
 	const BoundingBox player_box = init_bounding_box(*pos, vec_fill(actor_box_side_len));
 
@@ -30,7 +30,6 @@ byte teleport_if_needed(vec* const pos, double* const height, const Player* cons
 
 			const vec dest = teleporter.to;
 			*height = *map_point(current_level.heightmap, dest[0], dest[1]);
-			if (drop_actor) *height += min_fall_height_for_sound;
 
 			*pos = dest;
 			return 1;
@@ -63,8 +62,8 @@ void teleport_player_if_needed(Player* const player) {
 		}
 	}
 
-	if (teleport_if_needed(&player -> pos, &player -> jump.height, player, 1)) {
-		player -> jump.jumping = 0;
+	if (teleport_if_needed(&player -> pos, &player -> jump.height, player)) {
+		player -> jump.start_height = player -> jump.height;
 		fuzz_ticks--;
 	}
 }

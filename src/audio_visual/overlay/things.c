@@ -83,7 +83,7 @@ void update_billboard_values(DataBillboard* const billboard_data, const vec p_po
 }
 
 #define THING_ADDER(name) add_##name##_things_to_thing_container
-#define THING_ADDER_SIGNATURE Thing* thing_buffer_start, const vec p_pos, const double p_angle
+#define THING_ADDER_SIGNATURE Thing* const thing_buffer_start, const vec p_pos, const double p_angle
 #define DEF_THING_ADDER(type) inlinable void THING_ADDER(type)(THING_ADDER_SIGNATURE)
 
 DEF_THING_ADDER(still) {
@@ -95,7 +95,7 @@ DEF_THING_ADDER(still) {
 
 		const Sprite* const sprite = &billboard -> sprite;
 		const ivec size = sprite -> size;
-		const Thing thing = {mask_can_jump_on_thing, billboard_data, sprite, {0, 0, size.x, size.y}, NULL};
+		const Thing thing = {0, billboard_data, sprite, {0, 0, size.x, size.y}, NULL};
 
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
@@ -109,7 +109,7 @@ DEF_THING_ADDER(teleporter) {
 		update_billboard_values(billboard_data, p_pos, p_angle);
 
 		const Thing thing = {
-			0, billboard_data, &teleporter_sprite,
+			mask_can_move_through_thing, billboard_data, &teleporter_sprite,
 			{0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}, NULL
 		};
 
@@ -127,13 +127,12 @@ DEF_THING_ADDER(animated) {
 		update_billboard_values(billboard_data, p_pos, p_angle);
 
 		const Thing thing = {
-			mask_can_jump_on_thing, billboard_data, &immut_animation_data -> sprite,
+			0, billboard_data, &immut_animation_data -> sprite,
 			rect_from_ivecs(get_spritesheet_frame_origin(&animated_billboard -> animation_data),
 				immut_animation_data -> frame_size), NULL
 		};
 
 		progress_animation_data_frame_ind(animation_data);
-
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
 }
@@ -148,19 +147,23 @@ DEF_THING_ADDER(enemy_instance) {
 
 		const DataAnimation animation_data = {*immut_animation_data, enemy_instance -> mut_animation_data};
 
-		const ivec frame_origin = get_spritesheet_frame_origin(&animation_data);
-		progress_enemy_instance_frame_ind(enemy_instance);
-
-		const Thing thing = {
-			mask_can_jump_on_thing, billboard_data, &immut_animation_data -> sprite,
-			rect_from_ivecs(frame_origin, animation_data.immut.frame_size),
+		const Thing thing = { // if enemy dead, can move through it
+			mask_can_move_through_thing * (enemy_instance -> state == Dead),
+			billboard_data, &immut_animation_data -> sprite,
+			rect_from_ivecs(get_spritesheet_frame_origin(&animation_data), animation_data.immut.frame_size),
 			// cast with struct keyword b/c EnemyInstance is forward declared
 			(struct EnemyInstance*) enemy_instance
 		};
 
+		progress_enemy_instance_frame_ind(enemy_instance);
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
 }
+
+/* On the topic of filling the thing buffer just once:
+	- It would work for still things and teleporters without any extra hassle
+	- Animated things and enemies would have to have their frame origins updated
+	- For intra (between-frame) projectiles, they would have to be dynamically removed and added */
 
 void draw_things(const vec p_pos, const double p_angle, const double p_height, const double horizon_line) {
 	typedef struct {

@@ -71,7 +71,7 @@ typedef struct {
 typedef struct {
 	byte status; // in_use, short_range, paces_sideways, recently_used (in the last tick)
 	const double power;
-	Sound sound;
+	const Sound sound;
 	DataAnimation animation_data;
 } Weapon;
 
