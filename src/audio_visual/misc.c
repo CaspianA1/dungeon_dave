@@ -42,6 +42,7 @@ byte death_effect(Player* const player) {
 
 void draw_skybox(const double p_angle, const double horizon_line) {
 	const Skybox skybox = current_level.skybox;
+	if (!skybox.enabled) return;
 	const ivec max_size = skybox.sprite.size;
 
 	const double turn_percent = p_angle / two_pi;
