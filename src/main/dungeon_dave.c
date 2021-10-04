@@ -62,7 +62,7 @@ audio todo:
 - in the window area of tpt, one of the enemies can attack the player through the wall
 - two jump sounds when teleporting
 - don't deal damage if height diff too big for short range
-- lightmap seed to init_level
+- lightmap seed to init_level, or perlin shading in shader fn
 - make sure that thread creation doesn't stall
 - no more constant copying of many static amount things
 - wall_data to wallmap
@@ -75,6 +75,7 @@ audio todo:
 - delta time for time-independent physics
 - mipmapping for the floor (based on the wall height)
 - bilinear filtering for the lightmap
+- anisotropic filtering for angled walls
 - the wall corner floor algorithm
 - distance shading
 - better antialiasing by sampling from just the last mip level
