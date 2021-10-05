@@ -11,7 +11,7 @@ SDL_Surface* load_surface(const char* const path) {
 Sprite init_sprite(const char* const path, const byte enable_mipmap) {
 	SDL_Surface* surface = load_surface(path);
 
-	Sprite sprite;
+	Sprite sprite = {.max_mipmap_depth = 0};
 
 	if (enable_mipmap) {
 		SDL_Surface* const mipmap = load_mipmap(surface, &sprite.max_mipmap_depth);
