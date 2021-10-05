@@ -44,3 +44,21 @@ void add_temp_thing(Thing (*const spawner)(void), byte (*thing_done_spawning)) {
 // - need an indication of when a thing is done in-game, and when so, don't spawn it anymore
 
 /////
+
+const int orig_size = mipmap -> size.y; // orig_size = full w and h of the original full-res texture
+
+/*
+int pow = one_plus_exp_for_pow_2(orig_size) - 1 - log2(wall_h);
+if (pow > orig_size) pow = orig_size;
+return get_mipmap_crop(orig_size, pow);
+*/
+
+int pow_2 = log2(wall_h); // nearest_pow_2(wall_h);
+if (pow_2 > orig_size) pow_2 = orig_size;
+
+char depth_offset = one_plus_exp_for_pow_2(orig_size) - one_plus_exp_for_pow_2(pow_2);
+if (depth_offset < 0) depth_offset = 0;
+
+return get_mipmap_crop(orig_size, one_plus_exp_for_pow_2(pow_2) - 1);
+
+/////

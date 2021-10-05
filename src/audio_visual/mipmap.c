@@ -2,8 +2,10 @@ Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const 
 	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
 }
 
+#ifdef ANTIALIASED_MIPMAPPING
+
 void antialiased_downscale_by_2(const SDL_Surface* const orig,
-	SDL_Surface* const mipmap, const ivec dest_corner, const byte scale_factor) {
+	SDL_Surface* const mipmap, const ivec dest_origin, const byte scale_factor) {
 
 	const byte dec_scale_factor = scale_factor - 1;
 	const int orig_size = orig -> w;
@@ -41,10 +43,12 @@ void antialiased_downscale_by_2(const SDL_Surface* const orig,
 			const Uint32 result = SDL_MapRGBA(format, sum[1] / valid_neighbor_sum, sum[2] / valid_neighbor_sum,
 				sum[3] / valid_neighbor_sum, sum[0] / valid_neighbor_sum);
 
-			*read_surface_pixel(mipmap, (x >> dec_scale_factor) + dest_corner.x, (y >> dec_scale_factor) + dest_corner.y, bpp) = result;
+			*read_surface_pixel(mipmap, (x >> dec_scale_factor) + dest_origin.x, (y >> dec_scale_factor) + dest_origin.y, bpp) = result;
 		}
 	}
 }
+
+#endif
 
 //////////
 
@@ -90,7 +94,7 @@ SDL_Rect get_mipmap_crop_from_wall(const Sprite* const mipmap, const int wall_h)
 	Example: a 64x64 texture with a projected wall height of 27 will look best if its mipmap level's height is 32,
 	as that is the closest to a 1:1 mapping. Since the nearest power of 2 is 32, the exponent is 5 (2 ** 5 == 32),
 	meaning that the depth offset should be the max power of two for the full-size texture minus the current
-	nearest power of two. In this case, that is 6 - 1, which means it should have a depth offset of 1. */
+	nearest power of two. In this case, that is 6 - 5 (b/c 2 ** 6 == 64), meaning the depth offset is 1). */
 
 	const int orig_size = mipmap -> size.y; // orig_size = full w and h of the original full-res texture
 
@@ -101,45 +105,52 @@ SDL_Rect get_mipmap_crop_from_wall(const Sprite* const mipmap, const int wall_h)
 	return get_mipmap_crop(orig_size, depth_offset);
 }
 
-SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth) {
+SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth_ref) {
+	const int image_size = image -> w; // assumed that the image has uniform dimensions
+
 	SDL_Surface* const mipmap = SDL_CreateRGBSurfaceWithFormat(0,
-		image -> w + (image -> w >> 1), image -> h, 32, PIXEL_FORMAT);
+		image_size + (image_size >> 1), image_size, PIXEL_FORMAT_DEPTH, PIXEL_FORMAT);
+
+	byte depth = 0;
 
 	#ifdef ANTIALIASED_MIPMAPPING
+
 	SDL_LockSurface(image);
 	SDL_LockSurface(mipmap);
+
+	int dest_size = image_size;
+	ivec dest_origin = {0, 0};
+	while (dest_size != 0) {
+		if (depth >= 2) dest_origin.y += image_size >> (depth - 1);
+		antialiased_downscale_by_2(image, mipmap, dest_origin, depth + 1);
+
+		dest_origin.x = image_size;
+		dest_size >>= 1;
+		depth++;
+	}
+
+	SDL_UnlockSurface(image);
+	SDL_UnlockSurface(mipmap);
+
 	#else
-	SDL_Rect top_left_corner = {0, 0, image -> w, image -> h};
-	SDL_BlitSurface(image, NULL, mipmap, &top_left_corner);
-	#endif
 
-
-	SDL_Rect dest = {.w = image -> w, .h = image -> h};
-
-	#ifndef ANTIALIASED_MIPMAPPING
+	SDL_Rect dest = {0, 0, image_size, image_size};
 	SDL_Rect last_dest = dest;
-	last_dest.x = 0;
-	last_dest.y = 0;
-	#endif
+	SDL_BlitSurface(image, NULL, mipmap, &dest);
 
-	while (dest.w != 0 || dest.h != 0) {
-		if (*depth == 0) dest.x = 0;
-		else dest.x = image -> w;
+	while (dest.w != 0) {
+		if (depth >= 2) dest.y += image_size >> (depth - 1);
 
-		if (*depth <= 1) dest.y = 0;
-		else dest.y += image -> h >> (*depth - 1);
-
-		#ifdef ANTIALIASED_MIPMAPPING
-		antialiased_downscale_by_2(image, mipmap, (ivec) {dest.x, dest.y}, *depth + 1);
-		#else
 		SDL_BlitScaled(mipmap, &last_dest, mipmap, &dest);
 		last_dest = dest;
-		#endif
 
+		dest.x = image_size;
 		dest.w >>= 1;
 		dest.h >>= 1;
-		(*depth)++;
+		depth++;
 	}
+
+	#endif
 
 	/*
 	static byte first = 1, id = 0;
@@ -152,12 +163,8 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth) {
 	sprintf(buf, "imgs/out_%d.bmp", id);
 	SDL_SaveBMP(mipmap, buf);
 	id++;
-
-	#ifdef ANTIALIASED_MIPMAPPING
-	SDL_UnlockSurface(image);
-	SDL_UnlockSurface(mipmap);
-	#endif
 	*/
 
+	*depth_ref = depth;
 	return mipmap;
 }

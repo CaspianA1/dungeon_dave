@@ -25,7 +25,8 @@ Sprite init_sprite(const char* const path, const byte enable_mipmap) {
 
 	sprite.size = (ivec) {surface -> w, surface -> h};
 
-	if (enable_mipmap && (!is_pow_of_2(sprite.size.x * 2 / 3) || !is_pow_of_2(sprite.size.y))) // mipmaps need powers of 2 dimensions
+	// mipmaps need powers of 2 dimensions
+	if (enable_mipmap && (!is_pow_of_2(sprite.size.x * 2 / 3) || !is_pow_of_2(sprite.size.y)))
 		FAIL("The sprite with the path %s must have dimensions that are powers of two!\n", path);
 
 	sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, surface); // make a texture from the surface
