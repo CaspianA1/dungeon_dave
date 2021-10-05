@@ -226,7 +226,7 @@ void update_jump(Jump* const jump, const vec pos) {
 				jump -> made_noise = jump -> highest_height - ground_height >= min_fall_height_for_sound;
 				if (jump -> made_noise) play_sound(&jump -> sound_at_land);
 
-				jump -> highest_height = jump -> height; // + 0.001;
+				jump -> highest_height = jump -> height;
 			}
 		}
 	}

@@ -67,7 +67,9 @@ void load_tpt(void) {
 	};
 
 	init_level(map_width, map_height, (byte*) wallmap, (byte*) heightmap,
-		1.5, 1.5, 0.0, 6, 1, "assets/audio/themes/dream_fractal.wav",
+		1.5, 1.5, 0.0,
+		// 2.5, 4.5, 4.0,
+		6, 1, "assets/audio/themes/dream_fractal.wav",
 		"assets/skyboxes/night.bmp", tpt_shader);
 
 	set_level_walls(wall_count,
