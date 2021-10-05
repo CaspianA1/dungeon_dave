@@ -81,9 +81,11 @@ Lightmap init_lightmap(void) {
 		}
 	}
 
+	/*
 	SDL_SaveBMP(image, "out.bmp");
 	SDL_UnlockSurface(image);
 	SDL_FreeSurface(image);
+	*/
 
 	return lightmap;
 }
