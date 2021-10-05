@@ -1,7 +1,7 @@
 static Sprite teleporter_sprite;
 static Sound teleporter_sound;
 
-static const byte ticks_for_teleporter_fuzz = 50, num_fuzz_dots_on_screen = 80, dot_dimension_divisor = 15;
+static const byte ticks_for_teleporter_fuzz = INIT_MAX_FPS, num_fuzz_dots_on_screen = 80, dot_dimension_divisor = 15;
 static const Color3 teleporter_color = {255, 204, 0};
 
 void init_teleporter_resources(void) {
@@ -24,7 +24,8 @@ byte teleport_if_needed(vec* const pos, double* const height, const Player* cons
 		if (aabb_collision(player_box, init_bounding_box(teleporter.from_billboard.pos, teleporter_box_dimensions))
 			&& fabs(teleporter.from_billboard.height - *height) < 1.0) {
 
-			// if the player isn't teleporting, the pos and height data needs to be passed twice
+			/* if the player isn't teleporting, the pos and height data
+			need to be passed twice through the player struct */
 			play_sound_from_billboard_data(&teleporter_sound,
 				&teleporter.from_billboard, player -> pos, player -> jump.height);
 

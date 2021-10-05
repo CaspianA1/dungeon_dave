@@ -89,7 +89,7 @@ int main(void) {
 	Weapon weapon;
 	Player* const player_ref = &player;
 
-	load_all_defaults(load_tpt, player_ref, &weapon);
+	load_all_defaults(load_palace, player_ref, &weapon);
 	if (display_title_screen() == Exit) deinit_all(player_ref, &weapon);
 
 	play_sound(&current_level.background_sound);
