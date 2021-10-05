@@ -1,7 +1,3 @@
-inlinable byte is_pow_of_2(const int num) {
-	return (num & (num - 1)) == 0;
-}
-
 SDL_Surface* load_surface(const char* const path) {
 	SDL_Surface* surface = SDL_LoadBMP(path);
 	if (surface == NULL) FAIL("Could not load a surface with the path of %s\n", path);
@@ -15,20 +11,20 @@ SDL_Surface* load_surface(const char* const path) {
 Sprite init_sprite(const char* const path, const byte enable_mipmap) {
 	SDL_Surface* surface = load_surface(path);
 
-	Sprite sprite = {.max_mipmap_depth = 0};
+	Sprite sprite;
 
 	if (enable_mipmap) {
 		SDL_Surface* const mipmap = load_mipmap(surface, &sprite.max_mipmap_depth);
-		SDL_FreeSurface(surface); // free the previous surface
-		surface = mipmap; // replace it with the mipmap
+		if (mipmap == NULL) {
+			FAIL("The sprite with the path %s must have dimensions that are powers of two\n", path);
+		}
+		else {
+			SDL_FreeSurface(surface); // free the previous surface
+			surface = mipmap; // replace it with the mipmap
+		}
 	}
 
 	sprite.size = (ivec) {surface -> w, surface -> h};
-
-	// mipmaps need powers of 2 dimensions
-	if (enable_mipmap && (!is_pow_of_2(sprite.size.x * 2 / 3) || !is_pow_of_2(sprite.size.y)))
-		FAIL("The sprite with the path %s must have dimensions that are powers of two!\n", path);
-
 	sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, surface); // make a texture from the surface
 	SDL_FreeSurface(surface); // free the surface, it isn't used anymore
 

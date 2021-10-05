@@ -105,8 +105,14 @@ SDL_Rect get_mipmap_crop_from_wall(const Sprite* const mipmap, const int wall_h)
 	return get_mipmap_crop(orig_size, depth_offset);
 }
 
+inlinable byte is_pow_of_2(const int num) {
+	return (num & (num - 1)) == 0;
+}
+
+// returns null if the image dimensions aren't powers of 2
 SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth_ref) {
-	const int image_size = image -> w; // assumed that the image has uniform dimensions
+	const int image_size = image -> w; // image must have uniform dimensions
+	if (!is_pow_of_2(image_size) || !is_pow_of_2(image -> h)) return NULL;
 
 	SDL_Surface* const mipmap = SDL_CreateRGBSurfaceWithFormat(0,
 		image_size + (image_size >> 1), image_size, PIXEL_FORMAT_DEPTH, PIXEL_FORMAT);
