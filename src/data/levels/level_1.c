@@ -1,7 +1,14 @@
 inlinable double level_1_shader(const vec pos) {
 	static const vec pillar_center = {4.5, 11.5};
-	static const Circle idol_center_circle = {{18.5, 3.5}, 3.0};
-	static const Triangle enemy_area_triangle = {{11.0, 10.0}, {12.0, 10.0}, {10.0, 8.0}};
+
+	static const Circle
+		idol_center_circle = {{18.5, 3.5}, 3.0},
+		key_center_circle = {{2.5, 2.5}, 1.5};
+
+	static const Triangle
+		enemy_area_triangle_1 = {{11.0, 10.0}, {12.0, 10.0}, {10.0, 8.0}},
+		enemy_area_triangle_2 = {{11.0, 10.0}, {12.0, 10.0}, {13.0, 8.0}},
+		enemy_area_triangle_3 = {{11.0, 10.0}, {12.0, 10.0}, {11.5, 7.0}};
 
 	const vec pillar_center_diff = pos - pillar_center;
 	if (fabs(pillar_center_diff[0]) < 0.75 && fabs(pillar_center_diff[1]) < 0.75)
@@ -9,8 +16,11 @@ inlinable double level_1_shader(const vec pos) {
 
 	return
 		fabs(tan(bloom_circle(pos, idol_center_circle)))
-		+ flat_triangle(pos, enemy_area_triangle)
-		+ 3.5;
+		+ bloom_circle(pos, key_center_circle)
+		+ flat_triangle(pos, enemy_area_triangle_1)
+		+ flat_triangle(pos, enemy_area_triangle_2)
+		+ flat_triangle(pos, enemy_area_triangle_3)
+		+ 2.2; // 3.5
 }
 
 void load_level_1(void) {
