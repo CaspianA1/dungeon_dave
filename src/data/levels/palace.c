@@ -7,7 +7,7 @@ inlinable double palace_shader(const vec pos) {
 		hidden_area_circle_2 = {{2.5, 26.5}, 1.5},
 		hidden_area_circle_3 = {{5.0, 22.5}, 3.5};
 
-	static const Triangle ravine_jump_entrance = {{15.0001, 24.0}, {15.5, 31.5}, {5.0, 28.0}};
+	static const Triangle ravine_jump_entrance = {{15.0, 24.0}, {17.5, 30.5}, {5.0, 28.0}};
 
 	return
 		bloom_circle(pos, first_health_kit) * 5.0

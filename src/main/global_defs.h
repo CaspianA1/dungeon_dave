@@ -12,16 +12,14 @@
 
 #endif
 
-/*
-#define PLANAR_MODE
+// #define PLANAR_MODE
 #define NOCLIP_MODE
-*/
 
 // #define ANTIALIASED_MIPMAPPING
 // #define DISABLE_ENEMIES
 #define PERLIN_SHADING
 #define SHADING_ENABLED
-#define SOUND_ENABLED
+// #define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 #define FLOORCAST_THREADS 3
@@ -68,8 +66,9 @@
 #define WINDOW_RENDERER_FLAGS SDL_RENDERER_ACCELERATED | SDL_WINDOW_RESIZABLE
 
 #define inlinable static inline
-#define ASM_I_AM_HERE __asm__ volatile ("nop # I AM HERE")
 
+// used for finding a code snippet in an output assembly file
+#define ASM_COMMENT(msg) __asm__ __volatile__ ("nop # " msg)
 #define STARTUP_LOG(activity) puts("Initializing " activity)
 #define LOOP(max) for (int i = 0; i < max; i++)
 #define FAIL(...) {fprintf(stderr, __VA_ARGS__); exit(1);}
@@ -104,7 +103,7 @@ const double
 	almost_zero = 0.001,
 	almost_almost_zero = 0.000000001;
 
-const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
+static const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
 
 #define mask_forward_or_backward_movement bitmasks[0]
 #define mask_forward_movement bitmasks[1]

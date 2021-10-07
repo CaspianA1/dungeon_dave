@@ -1,6 +1,4 @@
 inlinable double debug_level_shader(const vec pos) {
-	// return pos[0] / 2.0;
-
 	const vec center = {current_level.map_size.x / 2.0, current_level.map_size.y / 2.0};
 	const Circle center_circle = {{center[0], center[1]}, 0.9};
 

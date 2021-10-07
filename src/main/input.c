@@ -17,9 +17,9 @@ inlinable void update_theta_and_y_pitch(double* const theta, int* const y_pitch)
 inlinable void update_tilt(Domain* const tilt, const byte strafe, const byte lstrafe) {
 	double tilt_val = tilt -> val;
 	const double tilt_step = tilt -> step;
-	const char tilt_dir = (lstrafe << 1) - strafe; // 1 -> left, 0 -> none, -1 -> right
 
 	if (strafe) {
+		const char tilt_dir = (lstrafe << 1) - strafe; // 1 -> left, 0 -> none, -1 -> right
 		const double old_tilt = tilt_val, tilt_max = tilt -> max;
 		tilt_val += tilt_step * tilt_dir;
 		if (tilt_val >= tilt_max || tilt_val <= -tilt_max) tilt_val = old_tilt;
