@@ -96,7 +96,7 @@ int main(void) {
 	ground = init_pix_sprite("assets/walls/sand.bmp");
 
 	#ifdef SHADING_ENABLED
-	byte begin_level_tint = INIT_BEGIN_LEVEL_TINT;
+	byte begin_level_fade = INIT_BEGIN_LEVEL_FADE;
 	#endif
 
 	byte running = 1;
@@ -148,10 +148,10 @@ int main(void) {
 		use_health_kit_if_needed(player_ref);
 
 		#ifdef SHADING_ENABLED
-		if (begin_level_tint != 255) {
-			begin_level_tint++;
-			SDL_SetTextureColorMod(screen.pixel_buffer, begin_level_tint, begin_level_tint, begin_level_tint);
-			SDL_SetTextureColorMod(screen.shape_buffer, begin_level_tint, begin_level_tint, begin_level_tint);
+		if (begin_level_fade != 255) {
+			begin_level_fade++;
+			SDL_SetTextureColorMod(screen.pixel_buffer, begin_level_fade, begin_level_fade, begin_level_fade);
+			SDL_SetTextureColorMod(screen.shape_buffer, begin_level_fade, begin_level_fade, begin_level_fade);
 		}
 		#endif
 

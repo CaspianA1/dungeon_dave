@@ -87,9 +87,8 @@ inlinable byte* map_point(byte* const map, const int x, const int y) {
 }
 
 byte point_exists_at(const double x, const double y, const double height) {
-	const byte out_of_bounds =
-		x < 1.0 || x > current_level.map_size.x - 1
-		|| y < 1.0 || y > current_level.map_size.y - 1;
+	const byte out_of_bounds = (x < 1.0) || (x > current_level.map_size.x - 1)
+		|| (y < 1.0) || (y > current_level.map_size.y - 1);
 
 	return out_of_bounds || height < *map_point(current_level.heightmap, x, y);
 }
@@ -122,7 +121,8 @@ inlinable byte vec_delta_exceeds(const vec a, const vec b, const double max_dist
 }
 
 inlinable byte vec_out_of_bounds(const vec v) {
-	return v[0] < 0.0 || v[0] > current_level.map_size.x - 1.0 || v[1] < 0.0 || v[1] > current_level.map_size.y - 1.0;
+	return (v[0] < 0.0) || (v[0] > current_level.map_size.x - 1.0)
+		|| (v[1] < 0.0) || (v[1] > current_level.map_size.y - 1.0);
 }
 
 inlinable vec vec_line_pos(const vec pos, const vec dir, const double slope) {
@@ -142,5 +142,6 @@ inlinable SDL_Rect rect_from_ivecs(const ivec v1, const ivec v2) {
 }
 
 inlinable byte ivec_out_of_bounds(const ivec v) {
-	return v.x < 0 || v.x > current_level.map_size.x - 1 || v.y < 0 || v.y > current_level.map_size.y - 1;
+	return (v.x < 0) || (v.x > current_level.map_size.x - 1)
+		|| (v.y < 0) || (v.y > current_level.map_size.y - 1);
 }
