@@ -1,4 +1,4 @@
-static Sprite health_kit_sprite;
+Sprite health_kit_sprite;
 static Sound health_kit_sound;
 static const byte health_incr_amount = INIT_HP / 10;
 

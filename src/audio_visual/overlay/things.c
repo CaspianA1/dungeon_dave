@@ -41,7 +41,7 @@ static void draw_processed_things(const double p_height, const double horizon_li
 		else if (end_x > settings.screen_width) end_x = settings.screen_width;
 
 		SDL_FRect screen_pos = {
-			round(start_x < 0.0 ? 0.0 : start_x),
+			(start_x < 0.0) ? 0.0 : round(start_x),
 			get_projected_y(horizon_line, half_size, size, p_height - billboard_data.height),
 			settings.ray_column_width, size
 		};
@@ -119,6 +119,8 @@ DEF_THING_ADDER(teleporter) {
 }
 
 DEF_THING_ADDER(health_kit) {
+	extern Sprite health_kit_sprite;
+
 	for (byte i = 0; i < current_level.health_kit_count; i++) {
 		HealthKit* const health_kit = current_level.health_kits + i;
 		DataBillboard* const billboard_data = &health_kit -> billboard;

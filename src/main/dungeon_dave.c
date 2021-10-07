@@ -14,7 +14,6 @@
 #include "movement.c" // previously a part of input.c
 #include "input.c"
 #include "teleport.c"
-#include "health_kit.c"
 #include "level.c"
 
 #include "../audio_visual/screen.c"
@@ -39,6 +38,7 @@
 #include "../combat/navigator.c"
 #include "../combat/weapon.c"
 #include "../combat/enemy.c"
+#include "../combat/health_kit.c"
 
 #include "../data/menus.c"
 #include "../data/enemies.c"
