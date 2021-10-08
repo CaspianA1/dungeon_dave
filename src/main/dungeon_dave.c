@@ -83,6 +83,29 @@ audio todo:
 - screen width and height to screen size via sublime text substitutions
 */
 
+/*
+void y_pitch_test(const int horizon_line, Player* const player) {
+	const SDL_Rect horizon_rect = {0, horizon_line, settings.screen_width, 1};
+	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRect(screen.renderer, &horizon_rect);
+
+	// DEBUG(player -> y_pitch, d);
+
+	if (keys[SDL_SCANCODE_T]) {
+		player -> pos[0] = round(player -> pos[0]);
+		player -> pos[1] = round(player -> pos[1]);
+	}
+
+	const double max_down_pitch_angle = atan(2.0);
+	const double y_pitch_percent = (double) player -> y_pitch / (INIT_H / 2);
+
+	const double view_angle = max_down_pitch_angle * y_pitch_percent;
+	const double view_angle_degrees = view_angle * 180 / M_PI;
+	(void) view_angle_degrees;
+	// DEBUG(view_angle_degrees, lf);
+}
+*/
+
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
 int main(void) {
 	Player player;
@@ -119,6 +142,8 @@ int main(void) {
 			default: break;
 		}
 
+		// player.pace.screen_offset = 0;
+
 		const double horizon_line = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
 		prepare_for_drawing();
@@ -154,6 +179,8 @@ int main(void) {
 			SDL_SetTextureColorMod(screen.shape_buffer, begin_level_fade, begin_level_fade, begin_level_fade);
 		}
 		#endif
+
+		// y_pitch_test(horizon_line, player_ref);
 
 		refresh(player_ref);
 		tick_delay(before);

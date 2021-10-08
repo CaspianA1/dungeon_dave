@@ -65,6 +65,7 @@ Lightmap init_lightmap(void) {
 		}
 	}
 
+	/*
 	SDL_Surface* const image = SDL_CreateRGBSurfaceWithFormat(0, lightmap.size.x, lightmap.size.y,
 		PIXEL_FORMAT_DEPTH, PIXEL_FORMAT);
 
@@ -81,7 +82,6 @@ Lightmap init_lightmap(void) {
 		}
 	}
 
-	/*
 	SDL_SaveBMP(image, "out.bmp");
 	SDL_UnlockSurface(image);
 	SDL_FreeSurface(image);
