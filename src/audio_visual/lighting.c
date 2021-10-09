@@ -35,15 +35,15 @@ inlinable byte flat_triangle(const vec pos, const Triangle triangle) {
 
 #ifdef SHADING_ENABLED
 
-static const byte lightmap_samples_per_tile = 50, /* 15 */ perlin_amplitude = 10;
+static const byte lightmap_samples_per_tile_row = 50, /* 15 */ perlin_amplitude = 10;
 static const double shader_downscaler = 0.15, perlin_downscaler = 0.3, perlin_frequency = 0.01;
 
 
 Lightmap init_lightmap(void) {
 	Lightmap lightmap = {
 		.size = (ivec) {
-			current_level.map_size.x * lightmap_samples_per_tile,
-			current_level.map_size.y * lightmap_samples_per_tile
+			current_level.map_size.x * lightmap_samples_per_tile_row,
+			current_level.map_size.y * lightmap_samples_per_tile_row
 		}
 	};
 
@@ -51,9 +51,9 @@ Lightmap init_lightmap(void) {
 
 	vec pos;
 	for (int y = 0; y < lightmap.size.y; y++) {
-		pos[1] = (double) y / lightmap_samples_per_tile;
+		pos[1] = (double) y / lightmap_samples_per_tile_row;
 		for (int x = 0; x < lightmap.size.x; x++) {
-			pos[0] = (double) x / lightmap_samples_per_tile;
+			pos[0] = (double) x / lightmap_samples_per_tile_row;
 
 			double light = current_level.shader(pos) * shader_downscaler;
 
@@ -102,7 +102,7 @@ to find the nearest-neighbor light value at a certain position. */
 byte shade_at(const double wall_h, const vec pos) {
 	(void) wall_h;
 
-	const vec lightmap_pos = (pos - vec_fill(almost_almost_zero)) * vec_fill(lightmap_samples_per_tile);
+	const vec lightmap_pos = (pos - vec_fill(almost_almost_zero)) * vec_fill(lightmap_samples_per_tile_row);
 	const Lightmap lightmap = current_level.lightmap;
 	return lightmap.data[(int) lightmap_pos[1] * lightmap.size.x + (int) lightmap_pos[0]];
 
