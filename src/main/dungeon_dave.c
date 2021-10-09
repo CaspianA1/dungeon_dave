@@ -11,6 +11,7 @@
 #include "dda.c"
 #include "statemap.c"
 #include "settings.c"
+#include "bounding_box.c"
 #include "movement.c" // previously a part of input.c
 #include "input.c"
 #include "teleport.c"
@@ -60,6 +61,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- world collision detection with 3D bounding boxes
 - in the window area of tpt, one of the enemies can attack the player through the wall
 - don't deal damage if height diff too big for short range
 - lightmap seed to init_level, or perlin shading in shader fn
@@ -83,36 +85,13 @@ audio todo:
 - screen width and height to screen size via sublime text substitutions
 */
 
-/*
-void y_pitch_test(const int horizon_line, Player* const player) {
-	const SDL_Rect horizon_rect = {0, horizon_line, settings.screen_width, 1};
-	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderFillRect(screen.renderer, &horizon_rect);
-
-	// DEBUG(player -> y_pitch, d);
-
-	if (keys[SDL_SCANCODE_T]) {
-		player -> pos[0] = round(player -> pos[0]);
-		player -> pos[1] = round(player -> pos[1]);
-	}
-
-	const double max_down_pitch_angle = atan(2.0);
-	const double y_pitch_percent = (double) player -> y_pitch / (INIT_H / 2);
-
-	const double view_angle = max_down_pitch_angle * y_pitch_percent;
-	const double view_angle_degrees = view_angle * 180 / M_PI;
-	(void) view_angle_degrees;
-	// DEBUG(view_angle_degrees, lf);
-}
-*/
-
 // drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
 int main(void) {
 	Player player;
 	Weapon weapon;
 	Player* const player_ref = &player;
 
-	load_all_defaults(load_level_1, player_ref, &weapon);
+	load_all_defaults(load_palace, player_ref, &weapon);
 	if (display_title_screen() == Exit) deinit_all(player_ref, &weapon);
 
 	play_sound(&current_level.background_sound);
@@ -141,8 +120,6 @@ int main(void) {
 				break;
 			default: break;
 		}
-
-		// player.pace.screen_offset = 0;
 
 		const double horizon_line = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
@@ -179,8 +156,6 @@ int main(void) {
 			SDL_SetTextureColorMod(screen.shape_buffer, begin_level_fade, begin_level_fade, begin_level_fade);
 		}
 		#endif
-
-		// y_pitch_test(horizon_line, player_ref);
 
 		refresh(player_ref);
 		tick_delay(before);

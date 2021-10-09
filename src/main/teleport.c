@@ -15,8 +15,8 @@ void deinit_teleporter_resources(void) {
 }
 
 byte teleport_if_needed(vec* const pos, double* const height, const Player* const player) {
-	const vec teleporter_box_dimensions = vec_fill(actor_box_side_len + 0.2); // teleporter box is a bit bigger than the actor box
-	const BoundingBox player_box = init_bounding_box(*pos, vec_fill(actor_box_side_len));
+	const double teleporter_box_dimensions = actor_box_side_len + 0.2; // teleporter box is a bit bigger than the actor box
+	const BoundingBox player_box = init_bounding_box(*pos, actor_box_side_len);
 
 	for (byte i = 0; i < current_level.teleporter_count; i++) {
 		const Teleporter teleporter = current_level.teleporters[i];

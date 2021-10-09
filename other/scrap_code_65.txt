@@ -62,3 +62,130 @@ if (depth_offset < 0) depth_offset = 0;
 return get_mipmap_crop(orig_size, one_plus_exp_for_pow_2(pow_2) - 1);
 
 /////
+
+float max_enemy_instance_height = DBL_MIN;
+for (byte i = 0; i < current_level.enemy_instance_count; i++) {
+	const float enemy_instance_height = current_level.enemy_instances[i].billboard_data.height;
+	if (enemy_instance_height > max_enemy_instance_height) max_enemy_instance_height = enemy_instance_height;
+}
+max_enemy_instance_height++; // enemies have a height of 1, hitscans should only stop once fully over an enemy
+
+/////
+
+/*
+void y_pitch_test(const int horizon_line, Player* const player) {
+	const SDL_Rect horizon_rect = {0, horizon_line, settings.screen_width, 1};
+	SDL_SetRenderDrawColor(screen.renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRect(screen.renderer, &horizon_rect);
+
+	// DEBUG(player -> y_pitch, d);
+
+	if (keys[SDL_SCANCODE_T]) {
+		player -> pos[0] = round(player -> pos[0]);
+		player -> pos[1] = round(player -> pos[1]);
+	}
+
+	const double max_down_pitch_angle = atan(2.0);
+	const double y_pitch_percent = (double) player -> y_pitch / (INIT_H / 2);
+
+	const double view_angle = max_down_pitch_angle * y_pitch_percent;
+	const double view_angle_degrees = view_angle * 180.0 / M_PI;
+	(void) view_angle_degrees;
+	// DEBUG(view_angle_degrees, lf);
+
+	const double all_tilt = player -> y_pitch + player -> pace.screen_offset;
+	DEBUG(all_tilt, lf);
+
+	const double test_tilt = atan(all_tilt / settings.proj_dist);
+	DEBUG(test_tilt * 180.0 / M_PI, lf);
+}
+*/
+
+///// Old max_height checking; only useful for if aiming upwards
+
+////////// This stops unnecessary hitscan iterations
+float max_enemy_instance_height = DBL_MIN;
+for (byte i = 0; i < current_level.enemy_instance_count; i++) {
+	const float enemy_instance_height = current_level.enemy_instances[i].billboard_data.height;
+	if (enemy_instance_height > max_enemy_instance_height) max_enemy_instance_height = enemy_instance_height;
+}
+max_enemy_instance_height++; // enemies have a height of 1, hitscans should only stop once fully over an enemy
+//////////
+
+/////
+
+#define print_bbx_3D(bbx)\
+	printf(#bbx " = {.origin = {%lf, %lf, %lf}, .size = {%lf, %lf, %lf}}\n",\
+		(double) bbx.origin[0], (double) bbx.origin[1], (double) bbx.origin[2],\
+		(double) bbx.size[0], (double) bbx.size[1], (double) bbx.size[2]);\
+	
+///// The old hitscan code:
+
+/*
+typedef struct {
+	vec pos;
+	const vec dir;
+	double dist;
+} Hitscan;
+
+inlinable byte iter_hitscan(Hitscan* const hitscan) {
+	hitscan -> pos += hitscan -> dir * vec_fill(weapon_hitscan_step);
+	hitscan -> dist += weapon_hitscan_step;
+	return !vec_out_of_bounds(hitscan -> pos);
+}
+*/
+
+/*
+void shoot_weapon(const Weapon* const weapon, const Player* const player) {
+	const vec p_pos = player -> pos, p_dir = player -> dir;
+	const double p_height = player -> jump.height;
+
+	(void) p_height;
+
+	Hitscan hitscan = {p_pos, p_dir, 0.0};
+	const byte short_range_weapon = bit_is_set(weapon -> status, mask_short_range_weapon);
+
+	while (iter_hitscan(&hitscan)) {
+		const BoundingBox projectile_box = init_bounding_box(hitscan.pos, projectile_size);
+		byte collided = 0;
+
+		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
+			EnemyInstance* const enemy_instance = current_level.enemy_instances + i;
+			if (enemy_instance -> state == Dead || !bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy))
+				continue;
+
+			const BoundingBox enemy_box = init_bounding_box(enemy_instance -> billboard_data.pos, actor_box_side_len);
+			if (aabb_collision(projectile_box, enemy_box)) {
+				set_bit(enemy_instance -> status, mask_recently_attacked_enemy);
+				enemy_instance -> hp -= weapon -> power;
+
+				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte, const vec, const double);
+
+				if (enemy_instance -> hp <= 0.0)
+					set_enemy_instance_state(enemy_instance, Dead, 0, p_pos, p_height);
+				else
+					play_sound_from_billboard_data(
+					enemy_instance -> enemy -> sounds + 4, // attacked
+					&enemy_instance -> billboard_data, p_pos, p_height);
+
+				collided = 1;
+			}
+		}
+		if (collided || short_range_weapon) break;
+	}
+}
+*/
+
+/////
+
+/* If the player's weapon has a y-pitch that is within the vertical bounds of the enemy, 
+a flag is set in the enemy instance to allow them to be attacked by a weapon */
+void update_enemy_weapon_y_state(EnemyInstance* const enemy_instance, const SDL_FRect* const thing_screen_pos) {
+	const byte weapon_y_matches_enemy_y =
+		settings.half_screen_height >= thing_screen_pos -> y &&
+		thing_screen_pos -> y + thing_screen_pos -> h >= settings.half_screen_height;
+
+	bit_to_x(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy, weapon_y_matches_enemy_y);
+}
+
+/////

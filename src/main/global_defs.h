@@ -18,10 +18,10 @@
 */
 
 // #define ANTIALIASED_MIPMAPPING
-// #define DISABLE_ENEMIES
+#define DISABLE_ENEMIES
 #define SHADING_ENABLED
 #define PERLIN_SHADING
-// #define SOUND_ENABLED
+#define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 #define FLOORCAST_THREADS 3
@@ -92,6 +92,7 @@
 
 typedef uint_fast8_t byte;
 typedef __m128d vec;
+typedef __m128 vec3D; // 4 32-bit floats instead of 2 64-bit floats (one extra float)
 typedef struct {int x, y;} ivec;
 
 enum {enemy_count = 2};
@@ -118,7 +119,6 @@ static const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
 
 #define mask_recently_attacked_enemy bitmasks[0]
 #define mask_long_range_attack_enemy bitmasks[1]
-#define mask_weapon_y_pitch_in_range_of_enemy bitmasks[2]
 
 #define mask_can_move_through_thing bitmasks[0]
 #define mask_skip_rendering_thing bitmasks[1]

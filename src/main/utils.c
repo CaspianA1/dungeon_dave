@@ -90,7 +90,7 @@ byte point_exists_at(const double x, const double y, const double height) {
 	const byte out_of_bounds = (x < 1.0) || (x > current_level.map_size.x - 1)
 		|| (y < 1.0) || (y > current_level.map_size.y - 1);
 
-	return out_of_bounds || height < *map_point(current_level.heightmap, x, y);
+	return out_of_bounds || (height < *map_point(current_level.heightmap, x, y));
 }
 
 void update_buffers(const int screen_x, const float dist, const float cos_beta, const vec dir) {
@@ -112,6 +112,7 @@ inlinable double get_projected_y(const double horizon_line, const double half_sc
 //////////
 
 #define vec_fill _mm_set1_pd
+#define vec_fill_3D _mm_set1_ps
 #define vec_trunc(vec) _mm_round_pd(vec, _MM_FROUND_TRUNC)
 
 inlinable byte vec_delta_exceeds(const vec a, const vec b, const double max_dist) {

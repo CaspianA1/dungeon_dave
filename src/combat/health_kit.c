@@ -15,8 +15,7 @@ void deinit_health_kit_resources(void) {
 #ifndef PLANAR_MODE
 
 void use_health_kit_if_needed(Player* const player) {
-	const vec teleporter_box_dimensions = vec_fill(actor_box_side_len);
-	const BoundingBox player_box = init_bounding_box(player -> pos, vec_fill(actor_box_side_len));
+	const BoundingBox player_box = init_bounding_box(player -> pos, actor_box_side_len);
 
 	for (byte i = 0; i < current_level.health_kit_count; i++) {
 		HealthKit* const health_kit = current_level.health_kits + i;
@@ -25,7 +24,7 @@ void use_health_kit_if_needed(Player* const player) {
 		if (!health_kit -> used
 			&& fabs(billboard_data -> height - player -> jump.height) < 1.0
 			&& aabb_collision(player_box,
-				init_bounding_box(billboard_data -> pos, teleporter_box_dimensions))) {
+				init_bounding_box(billboard_data -> pos, actor_box_side_len))) {
 
 			player -> hp += health_incr_amount;
 			if (player -> hp > INIT_HP) player -> hp = INIT_HP;

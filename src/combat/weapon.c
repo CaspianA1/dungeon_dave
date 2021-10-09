@@ -1,22 +1,11 @@
 ////////// Hitscanning is separate from DDA because DDA inherently steps on whole grids, while weapons do not
 
-typedef struct {
-	vec pos;
-	const vec dir;
-	double dist;
-	const double step; // the magnitude of the velocity vector
-} Hitscan;
-
-inlinable byte iter_hitscan(Hitscan* const hitscan) {
-	hitscan -> pos += hitscan -> dir * vec_fill(hitscan -> step);
-	hitscan -> dist += hitscan -> step;
-	return !vec_out_of_bounds(hitscan -> pos);
-}
+static const double
+	short_range_weapon_hitscan_step = 0.3,
+	long_range_weapon_hitscan_step = 0.1, // the magnitude of the velocity vector
+	projectile_size = 0.2;
 
 //////////
-
-static const double weapon_hitscan_step = 0.3;
-static const vec projectile_size = {0.2, 0.2};
 
 void deinit_weapon(const Weapon* const weapon) {
 	deinit_sound(&weapon -> sound);
@@ -25,35 +14,65 @@ void deinit_weapon(const Weapon* const weapon) {
 
 #ifndef NOCLIP_MODE
 
+typedef struct {
+	vec3D pos; // x, y, z
+	const vec3D dir;
+	double dist;
+	const byte short_range_scan;
+} Hitscan;
+
+// make _3D to 3D
+
+// returns if hitscanning should continue
+inlinable byte iter_hitscan(Hitscan* const hitscan) {
+	const double step = hitscan -> short_range_scan ? short_range_weapon_hitscan_step : long_range_weapon_hitscan_step;
+
+	hitscan -> dist += step;
+	const vec3D new_pos = hitscan -> pos + hitscan -> dir * vec_fill_3D(step);
+	hitscan -> pos = new_pos;
+
+	const float height = new_pos[2];
+	return (height >= 0.0f) && (!point_exists_at((double) new_pos[0], (double) new_pos[1], (double) height));
+}
+
 #ifdef DISABLE_ENEMIES
-#define shoot_weapon(a, b, c, d)
+
+#define use_hitscan_weapon(a, b)
+
 #else
 
-// the whip doesn't work up close
+static void use_hitscan_weapon(const Weapon* const weapon, const Player* const player) {
+	const vec p_pos = player -> pos, p_dir = player -> dir; // these are 2D
 
-static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec p_dir, const double p_height) {
-	(void) p_height;
+	const double
+		p_height = player -> jump.height,
+		p_pitch_angle = atan((player -> y_pitch + player -> pace.screen_offset) / settings.proj_dist);
 
-	Hitscan hitscan = {p_pos, p_dir, 0.0, weapon_hitscan_step};
-	const byte short_range_weapon = bit_is_set(weapon -> status, mask_short_range_weapon);
+	Hitscan hitscan = {
+		{p_pos[0], p_pos[1], p_height + 0.5}, {p_dir[0], p_dir[1], p_pitch_angle}, 0.0,
+		bit_is_set(weapon -> status, mask_short_range_weapon)
+	};
 
 	while (iter_hitscan(&hitscan)) {
-		const BoundingBox projectile_box = init_bounding_box(hitscan.pos, projectile_size); 
+		const BoundingBox_3D projectile_box = init_bounding_box_3D(hitscan.pos, projectile_size);
+
 		byte collided = 0;
 
 		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
 			EnemyInstance* const enemy_instance = current_level.enemy_instances + i;
-			if (enemy_instance -> state == Dead || !bit_is_set(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy))
-				continue;
+			if (enemy_instance -> state == Dead) continue;
 
-			const BoundingBox enemy_box = init_bounding_box(enemy_instance -> billboard_data.pos, vec_fill(actor_box_side_len));
-			if (aabb_collision(projectile_box, enemy_box)) {
+			const BoundingBox_3D enemy_box = init_actor_bounding_box(
+				enemy_instance -> billboard_data.pos,
+				enemy_instance -> billboard_data.height);
+
+			if (aabb_collision_3D(projectile_box, enemy_box)) {
 				set_bit(enemy_instance -> status, mask_recently_attacked_enemy);
-				enemy_instance -> hp -= weapon -> power;
 
-				void set_enemy_instance_state(EnemyInstance* const, const EnemyState, const byte, const vec, const double);
+				void set_enemy_instance_state(EnemyInstance* const, const EnemyState,
+					const byte, const vec, const double);
 
-				if (enemy_instance -> hp <= 0.0)
+				if ((enemy_instance -> hp -= weapon -> power) <= 0.0)
 					set_enemy_instance_state(enemy_instance, Dead, 0, p_pos, p_height);
 				else
 					play_sound_from_billboard_data(
@@ -63,7 +82,7 @@ static void shoot_weapon(const Weapon* const weapon, const vec p_pos, const vec 
 				collided = 1;
 			}
 		}
-		if (collided || short_range_weapon) break;
+		if (collided || hitscan.short_range_scan) break;
 	}
 }
 
@@ -81,7 +100,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
 		set_bit(weapon -> status, mask_in_use_weapon | mask_recently_used_weapon);
 		play_sound(&weapon -> sound);
-		shoot_weapon(weapon, player -> pos, player -> dir, player -> jump.height);
+		use_hitscan_weapon(weapon, player);
 	}
 	else clear_bit(weapon -> status, mask_recently_used_weapon); // recently used = within the last tick
 

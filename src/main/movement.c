@@ -1,24 +1,3 @@
-static const double
-	actor_box_side_len = 0.4, // actor = player or enemy
-	min_fall_height_for_sound = 2.0;
-
-typedef struct {
-	const vec origin, size; // origin = top left corner
-} BoundingBox;
-
-byte aabb_axis_collision(const BoundingBox a, const BoundingBox b, const byte axis) {
-	return (a.origin[axis] < b.origin[axis] + b.size[axis]) && (a.origin[axis] + a.size[axis] > b.origin[axis]);
-}
-
-inlinable byte aabb_collision(const BoundingBox a, const BoundingBox b) {
-	return aabb_axis_collision(a, b, 0) && aabb_axis_collision(a, b, 1);
-}
-
-inlinable BoundingBox init_bounding_box(const vec pos, const vec size) {
-	return (BoundingBox) {pos - size * vec_fill(0.5), size};
-}
-
-// aabb = axis-aligned bounding box
 inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	byte* const hit_x, byte* const hit_y, const double p_height) { 
 
@@ -39,11 +18,9 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	pos_change_with_x[0] += movement[0];
 	pos_change_with_y[1] += movement[1];
 
-	const vec box_dimensions = vec_fill(actor_box_side_len);
-
 	const BoundingBox player_boxes[2] = {
-		init_bounding_box(pos_change_with_x, box_dimensions),
-		init_bounding_box(pos_change_with_y, box_dimensions)
+		init_bounding_box(pos_change_with_x, actor_box_side_len),
+		init_bounding_box(pos_change_with_y, actor_box_side_len)
 	};
 
 	for (byte i = 0; i < current_level.thing_count; i++) {
@@ -54,7 +31,7 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 		const double y_delta = fabs(billboard_data -> height - p_height);
 		if (y_delta >= 1.0) continue;
 
-		const BoundingBox thing_box = init_bounding_box(billboard_data -> pos, box_dimensions);
+		const BoundingBox thing_box = init_bounding_box(billboard_data -> pos, actor_box_side_len);
 
 		if (aabb_collision(thing_box, player_boxes[0])) *hit_x = 1;
 		if (aabb_collision(thing_box, player_boxes[1])) *hit_y = 1;

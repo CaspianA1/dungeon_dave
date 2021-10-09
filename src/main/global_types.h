@@ -29,7 +29,7 @@ typedef struct {
 } Jump;
 
 typedef struct {
-	vec pos, dir;
+	vec pos, dir; // 2D vectors
 	double angle, hp;
 	byte is_dead;
 	int y_pitch;

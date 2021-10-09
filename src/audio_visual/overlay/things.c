@@ -46,10 +46,6 @@ static void draw_processed_things(const double p_height, const double horizon_li
 			settings.ray_column_width, size
 		};
 
-		void update_enemy_weapon_y_state(EnemyInstance* const, const SDL_FRect* const);
-		if (thing.possible_enemy_instance != NULL)
-			update_enemy_weapon_y_state((EnemyInstance* const) thing.possible_enemy_instance, &screen_pos);
-
 		SDL_Rect src_column = {.y = thing.src_crop.y, .w = 1, .h = thing.src_crop.h};
 
 		SDL_Texture* const texture = thing.sprite -> texture;
@@ -96,7 +92,7 @@ DEF_THING_ADDER(still) {
 
 		const Sprite* const sprite = &billboard -> sprite;
 		const ivec size = sprite -> size;
-		const Thing thing = {0, billboard_data, sprite, {0, 0, size.x, size.y}, NULL};
+		const Thing thing = {0, billboard_data, sprite, {0, 0, size.x, size.y}};
 
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
@@ -111,7 +107,7 @@ DEF_THING_ADDER(teleporter) {
 
 		const Thing thing = {
 			mask_can_move_through_thing, billboard_data, &teleporter_sprite,
-			{0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}, NULL
+			{0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}
 		};
 
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
@@ -130,7 +126,7 @@ DEF_THING_ADDER(health_kit) {
 		const Thing thing = {
 			(mask_skip_rendering_thing * health_kit -> used) | mask_can_move_through_thing,
 			billboard_data, &health_kit_sprite,
-			{0, 0, health_kit_sprite.size.x, health_kit_sprite.size.y}, NULL
+			{0, 0, health_kit_sprite.size.x, health_kit_sprite.size.y}
 		};
 
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
@@ -149,7 +145,7 @@ DEF_THING_ADDER(animated) {
 		const Thing thing = {
 			0, billboard_data, &immut_animation_data -> sprite,
 			rect_from_ivecs(get_spritesheet_frame_origin(&animated_billboard -> animation_data),
-				immut_animation_data -> frame_size), NULL
+				immut_animation_data -> frame_size)
 		};
 
 		progress_animation_data_frame_ind(animation_data);
@@ -170,9 +166,7 @@ DEF_THING_ADDER(enemy_instance) {
 		const Thing thing = { // if enemy dead, can move through it
 			mask_can_move_through_thing * (enemy_instance -> state == Dead),
 			billboard_data, &immut_animation_data -> sprite,
-			rect_from_ivecs(get_spritesheet_frame_origin(&animation_data), animation_data.immut.frame_size),
-			// cast with struct keyword b/c EnemyInstance is forward declared
-			(struct EnemyInstance*) enemy_instance
+			rect_from_ivecs(get_spritesheet_frame_origin(&animation_data), animation_data.immut.frame_size)
 		};
 
 		progress_enemy_instance_frame_ind(enemy_instance);

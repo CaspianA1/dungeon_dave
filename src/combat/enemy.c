@@ -3,17 +3,9 @@ The spritesheet layout is in the order of the enemy states.
 The sounds are in the same order, but with Attacked added after Dead. */
 
 static const byte // sound chance at tick = numerator_sound_chancee / max_rand_sound_chance
-	max_rand_sound_chance = 200, numerator_sound_chance = 1, attack_time_spacing = 1;
-
-/* If the player's weapon has a y-pitch that is within the vertical bounds of the enemy, 
-a flag is set in the enemy instance to allow them to be attacked by a weapon */
-void update_enemy_weapon_y_state(EnemyInstance* const enemy_instance, const SDL_FRect* const thing_screen_pos) {
-	const byte weapon_y_matches_enemy_y =
-		settings.half_screen_height >= thing_screen_pos -> y &&
-		thing_screen_pos -> y + thing_screen_pos -> h >= settings.half_screen_height;
-
-	bit_to_x(enemy_instance -> status, mask_weapon_y_pitch_in_range_of_enemy, weapon_y_matches_enemy_y);
-}
+	max_rand_sound_chance = 200,
+	numerator_sound_chance = 1,
+	attack_time_spacing = 1;
 
 void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemyState new_state,
 	const byte silent, const vec p_pos, const double p_height) {
@@ -146,7 +138,7 @@ EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 			else
 				(bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy)
 				? long_range_enemy_attack : short_range_enemy_attack)
-				(enemy, enemy_instance, player, dist);
+					(enemy, enemy_instance, player, dist);
 
 			break;
 
