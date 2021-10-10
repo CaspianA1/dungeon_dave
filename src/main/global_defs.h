@@ -12,16 +12,14 @@
 
 #endif
 
-/*
-#define PLANAR_MODE
+// #define PLANAR_MODE
 #define NOCLIP_MODE
-*/
 
 // #define ANTIALIASED_MIPMAPPING
 // #define DISABLE_ENEMIES
 #define SHADING_ENABLED
 #define PERLIN_SHADING
-#define SOUND_ENABLED
+// #define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 #define FLOORCAST_THREADS 3

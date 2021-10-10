@@ -61,6 +61,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- sometimes, the mouse can escape the window when it shouldn't be able to
 - bigger projectile size for inter-tick projectiles
 - world collision detection with 3D bounding boxes
 - in the window area of tpt, one of the enemies can attack the player through the wall

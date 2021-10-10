@@ -90,6 +90,7 @@ InputStatus render_menu(const Menu* const menu) {
 
 InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_menu) {
 	SDL_SetRelativeMouseMode(SDL_FALSE);
+	SDL_WarpMouseInWindow(screen.window, settings.half_screen_width, settings.half_screen_height);
 
 	InputStatus input = ProceedAsNormal;
 	byte done = 0, rendering_image_before = image_before_menu != NULL;
@@ -123,6 +124,7 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 		after_gui_event(before);
 	}
 
+	SDL_WarpMouseInWindow(screen.window, settings.half_screen_width, settings.half_screen_height);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	return input;
 }
