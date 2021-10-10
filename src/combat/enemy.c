@@ -5,7 +5,7 @@ The sounds are in the same order, but with Attacked added after Dead. */
 static const byte // sound chance at tick = numerator_sound_chancee / max_rand_sound_chance
 	max_rand_sound_chance = 200,
 	numerator_sound_chance = 1,
-	attack_time_spacing = 1;
+	attack_time_spacing_secs = 1;
 
 void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemyState new_state,
 	const byte silent, const vec p_pos, const double p_height) {
@@ -40,7 +40,7 @@ inlinable void short_range_enemy_attack(const Enemy* const enemy,
 
 	const double curr_time = SDL_GetTicks() / 1000.0;
 
-	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing) {
+	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing_secs) {
 		enemy_instance -> time_at_attack = curr_time;
 
 		/* The reason why this test isn't in the if statement above
