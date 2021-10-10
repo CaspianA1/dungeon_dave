@@ -61,6 +61,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- 3D enemy line of sight tracing
 - sometimes, the mouse can escape the window when it shouldn't be able to
 - bigger projectile size for inter-tick projectiles
 - world collision detection with 3D bounding boxes
@@ -72,7 +73,6 @@ audio todo:
 - a vantage point map element
 - stop player from hitting head by doing head-hit detection after jumping, and then stopping jumping after
 - enemies won't chase you if you're far away enough
-- need 3D weapon line of sight tracing + weapons can shoot through walls, which is bad
 - a small occasional top stitch for floorcasting
 - delta time for time-independent physics
 - mipmapping for the floor (based on the wall height)

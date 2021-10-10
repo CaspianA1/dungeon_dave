@@ -1,8 +1,8 @@
 ////////// Hitscanning is separate from DDA because DDA inherently steps on whole grids, while weapons do not
 
 static const double
-	short_range_weapon_hitscan_step = 0.3,
-	long_range_weapon_hitscan_step = 0.1, // the magnitude of the velocity vector
+	short_range_hitscan_step = 0.3,
+	long_range_hitscan_step = 0.1, // the magnitude of the velocity vector
 	projectile_size = 0.2;
 
 //////////
@@ -25,7 +25,7 @@ typedef struct {
 
 // returns if hitscanning should continue
 inlinable byte iter_hitscan(Hitscan* const hitscan) {
-	const double step = hitscan -> short_range_scan ? short_range_weapon_hitscan_step : long_range_weapon_hitscan_step;
+	const double step = hitscan -> short_range_scan ? short_range_hitscan_step : long_range_hitscan_step;
 
 	hitscan -> dist += step;
 	const vec3D new_pos = hitscan -> pos + hitscan -> dir * vec_fill_3D(step);

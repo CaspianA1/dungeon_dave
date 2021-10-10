@@ -73,6 +73,24 @@ inlinable void long_range_enemy_attack(const Enemy* const enemy,
 	puts("Long range enemies are not supported yet");
 }
 
+byte enemy_instance_can_see_player(const EnemyInstance* const enemy_instance, const Player* const player) {
+	const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
+
+	const double dist_diff = billboard_data -> dist; // TODO: to one over
+	const double height_diff = fabs(billboard_data -> height - player -> jump.height);
+	const vec dir_2D = (player -> pos - billboard_data -> pos) / vec_fill(dist_diff);
+
+	Hitscan hitscan = {
+		{billboard_data -> pos[0], billboard_data -> pos[1], billboard_data -> height + 0.5},
+		{dir_2D[0], dir_2D[1], atan(height_diff / dist_diff)}, 0.0, 0
+
+	};
+
+	(void) hitscan;
+
+	return 0;
+}
+
 static byte billboard_can_see_player(const DataBillboard* const billboard_data, const Player* const player) {
 	const vec start_pos = billboard_data -> pos, possible_end_pos = player -> pos;
 
