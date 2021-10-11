@@ -143,7 +143,7 @@ static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 			break;
 
 		case Attacking:
-			if (player_diverged_from_route_dest(&enemy_instance -> nav.route, p_pos))
+			if (player_diverged_from_route_dest(&enemy_instance -> nav.route, p_pos) && !base_heights_not_eq)
 				return Chasing;
 			else
 				(long_range_attacker ? long_range_enemy_attack : short_range_enemy_attack)
