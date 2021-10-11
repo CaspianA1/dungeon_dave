@@ -90,11 +90,11 @@ static byte billboard_can_see_player(const DataBillboard* const billboard_data, 
 
 	const BoundingBox_3D player_box = init_actor_bounding_box(p_pos, p_height);
 
-	do {
+	while (iter_hitscan(&hitscan)) {
 		const BoundingBox_3D eye_box = init_bounding_box_3D(hitscan.pos, eye_box_size);
 		if (aabb_collision_3D(player_box, eye_box)) return 1;
 		else if (point_exists_at((double) hitscan.pos[0], (double) hitscan.pos[1], (double) hitscan.pos[2])) return 0;
-	} while (iter_hitscan(&hitscan));
+	}
 
 	return 0;
 }
