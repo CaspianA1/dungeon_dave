@@ -73,47 +73,33 @@ inlinable void long_range_enemy_attack(const Enemy* const enemy,
 	puts("Long range enemies are not supported yet");
 }
 
-byte enemy_instance_can_see_player(const EnemyInstance* const enemy_instance, const Player* const player) {
-	const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
+static byte billboard_can_see_player(const DataBillboard* const billboard_data, const Player* const player) {
+	static const double eye_trace_step = 0.1, eye_box_size = 0.2;
+
+	const vec p_pos = player -> pos;
+	const double p_height = player -> jump.height;
 
 	const double dist_diff = billboard_data -> dist; // TODO: to one over
-	const double height_diff = fabs(billboard_data -> height - player -> jump.height);
-	const vec dir_2D = (player -> pos - billboard_data -> pos) / vec_fill(dist_diff);
+	const double height_diff = fabs(billboard_data -> height - p_height);
+	const vec dir_2D = (p_pos - billboard_data -> pos) / vec_fill(dist_diff);
 
 	Hitscan hitscan = {
-		{billboard_data -> pos[0], billboard_data -> pos[1], billboard_data -> height + 0.5},
-		{dir_2D[0], dir_2D[1], atan(height_diff / dist_diff)}, 0.0, 0
-
+		{billboard_data -> pos[0], billboard_data -> pos[1], billboard_data -> height + 0.5}, // 0.5 -> eye height
+		{dir_2D[0], dir_2D[1], atan(height_diff / dist_diff)}, 0.0, eye_trace_step
 	};
 
-	(void) hitscan;
-
-	return 0;
-}
-
-static byte billboard_can_see_player(const DataBillboard* const billboard_data, const Player* const player) {
-	const vec start_pos = billboard_data -> pos, possible_end_pos = player -> pos;
-
-	const double src_height = billboard_data -> height;
-	const ivec player_tile = ivec_from_vec(possible_end_pos);
-
-	// direction = normalized delta vector between player and billboard
-	DataDDA eye_ray = init_dda(start_pos, (possible_end_pos - start_pos) / vec_fill(billboard_data -> dist));
+	const BoundingBox_3D player_box = init_actor_bounding_box(p_pos, p_height);
 
 	do {
-		const ivec curr_tile = eye_ray.curr_tile;
-
-		if (*map_point(current_level.heightmap, curr_tile.x, curr_tile.y) > src_height)
-			return 0;
-		else if (curr_tile.x == player_tile.x && curr_tile.y == player_tile.y)
-			return 1;
-
-	} while (iter_dda(&eye_ray));
+		const BoundingBox_3D eye_box = init_bounding_box_3D(hitscan.pos, eye_box_size);
+		if (aabb_collision_3D(player_box, eye_box)) return 1;
+		else if (point_exists_at((double) hitscan.pos[0], (double) hitscan.pos[1], (double) hitscan.pos[2])) return 0;
+	} while (iter_hitscan(&hitscan));
 
 	return 0;
 }
 
-EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
+static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 	Player* const player, const Weapon* const weapon) {
 
 	const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
@@ -123,9 +109,12 @@ EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 
 	const EnemyState prev_state = enemy_instance -> state;
 
-	if (*map_point(current_level.heightmap, p_pos[0], p_pos[1])
-		!= *map_point(current_level.heightmap, enemy_instance_pos[0], enemy_instance_pos[1]))
-		return Idle;
+	const byte
+		base_heights_not_eq =
+			*map_point(current_level.heightmap, p_pos[0], p_pos[1])
+			!= *map_point(current_level.heightmap, enemy_instance_pos[0], enemy_instance_pos[1]),
+
+		long_range_attacker = bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy);
 
 	switch (prev_state) {
 		case Idle: {
@@ -136,13 +125,16 @@ EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 				chase_from_sound = dist <= enemy -> dist_awaken.sound
 					&& (player -> jump.made_noise || bit_is_set(weapon -> status, mask_recently_used_weapon));
 
-			if (chase_from_sight || chase_from_sound || bit_is_set(enemy_instance -> status, mask_recently_attacked_enemy))
-				return Chasing;
+			if (!long_range_attacker && base_heights_not_eq) break;
 
+			else if (chase_from_sight || chase_from_sound || bit_is_set(enemy_instance -> status, mask_recently_attacked_enemy))
+				return Chasing;
 			break;
 		}
 
 		case Chasing:
+			if (base_heights_not_eq && long_range_attacker) return Attacking;
+
 			switch (update_route_if_needed(&enemy_instance -> nav, p_pos, billboard_data -> height)) {
 				case ReachedDest: return Attacking;
 				case PathTooLongBFS: case FailedBFS: return Idle;
@@ -154,8 +146,7 @@ EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 			if (player_diverged_from_route_dest(&enemy_instance -> nav.route, p_pos))
 				return Chasing;
 			else
-				(bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy)
-				? long_range_enemy_attack : short_range_enemy_attack)
+				(long_range_attacker ? long_range_enemy_attack : short_range_enemy_attack)
 					(enemy, enemy_instance, player, dist);
 
 			break;

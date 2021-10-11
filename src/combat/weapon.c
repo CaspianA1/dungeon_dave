@@ -18,14 +18,14 @@ typedef struct {
 	vec3D pos; // x, y, z
 	const vec3D dir;
 	double dist;
-	const byte short_range_scan;
+	const double step;
 } Hitscan;
 
 // make _3D to 3D
 
 // returns if hitscanning should continue
 inlinable byte iter_hitscan(Hitscan* const hitscan) {
-	const double step = hitscan -> short_range_scan ? short_range_hitscan_step : long_range_hitscan_step;
+	const double step = hitscan -> step;
 
 	hitscan -> dist += step;
 	const vec3D new_pos = hitscan -> pos + hitscan -> dir * vec_fill_3D(step);
@@ -48,9 +48,11 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 		p_height = player -> jump.height,
 		p_pitch_angle = atan((player -> y_pitch + player -> pace.screen_offset) / settings.proj_dist);
 
+	const byte short_range_weapon = bit_is_set(weapon -> status, mask_short_range_weapon);
+
 	Hitscan hitscan = {
 		{p_pos[0], p_pos[1], p_height + 0.5}, {p_dir[0], p_dir[1], p_pitch_angle}, 0.0,
-		bit_is_set(weapon -> status, mask_short_range_weapon)
+		short_range_weapon ? short_range_hitscan_step : long_range_hitscan_step
 	};
 
 	while (iter_hitscan(&hitscan)) {
@@ -82,7 +84,7 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 				collided = 1;
 			}
 		}
-		if (collided || hitscan.short_range_scan) break;
+		if (collided || short_range_weapon) break;
 	}
 }
 

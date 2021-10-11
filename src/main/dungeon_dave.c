@@ -61,7 +61,6 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
-- 3D enemy line of sight tracing
 - sometimes, the mouse can escape the window when it shouldn't be able to
 - bigger projectile size for inter-tick projectiles
 - world collision detection with 3D bounding boxes

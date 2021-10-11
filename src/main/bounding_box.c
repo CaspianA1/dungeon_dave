@@ -22,8 +22,6 @@ inlinable name##suffix init_bounding_box##suffix(const vec_type pos, const subty
 }\
 
 DEF_BOUNDING_BOX_TYPE(BoundingBox, , vec, vec_fill, double, 2)
-
-// A separate init_actor_bounding_box (for both the player and the enemy)
 DEF_BOUNDING_BOX_TYPE(BoundingBox, _3D, vec3D, vec_fill_3D, float, 3)
 
 inlinable BoundingBox_3D init_actor_bounding_box(const vec pos_2D, const double height) {
