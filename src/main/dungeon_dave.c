@@ -63,7 +63,7 @@ audio todo:
 
 - sometimes, the mouse can escape the window when it shouldn't be able to
 - bigger projectile size for inter-tick projectiles
-- world collision detection with 3D bounding boxes
+- thing collision detection with 3D bounding boxes
 - in the window area of tpt, one of the enemies can attack the player through the wall
 - don't deal damage if height diff too big for short range
 - lightmap seed to init_level, or perlin shading in shader fn
