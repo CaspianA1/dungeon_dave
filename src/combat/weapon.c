@@ -48,7 +48,7 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 		p_height = player -> jump.height,
 		p_pitch_angle = atan((player -> y_pitch + player -> pace.screen_offset) / settings.proj_dist);
 
-	const byte short_range_weapon = bit_is_set(weapon -> status, mask_short_range_weapon);
+	const byte short_range_weapon = bit_is_set(weapon -> flags, mask_short_range_weapon);
 
 	Hitscan hitscan = {
 		{p_pos[0], p_pos[1], p_height + 0.5}, {p_dir[0], p_dir[1], p_pitch_angle}, 0.0,
@@ -69,7 +69,7 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 				enemy_instance -> billboard_data.height);
 
 			if (aabb_collision_3D(projectile_box, enemy_box)) {
-				set_bit(enemy_instance -> status, mask_recently_attacked_enemy);
+				set_bit(enemy_instance -> flags, mask_recently_attacked_enemy);
 
 				void set_enemy_instance_state(EnemyInstance* const, const EnemyState,
 					const byte, const vec, const double);
@@ -95,21 +95,21 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 
 	if (player -> is_dead) *frame_ind = 0;
 
-	const byte first_in_use = bit_is_set(weapon -> status, mask_in_use_weapon);
+	const byte first_in_use = bit_is_set(weapon -> flags, mask_in_use_weapon);
 
 	if (first_in_use && *frame_ind == 0)
-		clear_bit(weapon -> status, mask_in_use_weapon);
+		clear_bit(weapon -> flags, mask_in_use_weapon);
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
-		set_bit(weapon -> status, mask_in_use_weapon | mask_recently_used_weapon);
+		set_bit(weapon -> flags, mask_in_use_weapon | mask_recently_used_weapon);
 		play_sound(&weapon -> sound);
 		use_hitscan_weapon(weapon, player);
 	}
-	else clear_bit(weapon -> status, mask_recently_used_weapon); // recently used = within the last tick
+	else clear_bit(weapon -> flags, mask_recently_used_weapon); // recently used = within the last tick
 
 	// -1 -> cycle frame, 0 -> first frame
 	animate_weapon(&weapon -> animation_data, player -> pos,
-		bit_is_set(weapon -> status, mask_paces_sideways_weapon),
-		bit_is_set(weapon -> status, mask_in_use_weapon), player -> body.v);
+		bit_is_set(weapon -> flags, mask_paces_sideways_weapon),
+		bit_is_set(weapon -> flags, mask_in_use_weapon), player -> body.v);
 }
 
 #else

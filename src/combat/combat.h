@@ -60,7 +60,7 @@ typedef struct {
 	DataAnimationMut mut_animation_data;
 
 	EnemyState state;
-	byte status; // recently attacked, long range
+	byte flags; // recently attacked, long range
 	double hp, time_at_attack;
 	DataBillboard billboard_data;
 	Navigator nav;
@@ -69,7 +69,7 @@ typedef struct {
 //////////
 
 typedef struct {
-	byte status; // in_use, short_range, paces_sideways, recently_used (in the last tick)
+	byte flags; // in_use, short_range, paces_sideways, recently_used (in the last tick)
 	const double power;
 	const Sound sound;
 	DataAnimation animation_data;

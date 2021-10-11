@@ -25,7 +25,7 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 
 	for (byte i = 0; i < current_level.thing_count; i++) {
 		const Thing* const thing = current_level.thing_container + i;
-		if (bit_is_set(thing -> status, mask_can_move_through_thing)) continue;
+		if (bit_is_set(thing -> flags, mask_can_move_through_thing)) continue;
 
 		const DataBillboard* const billboard_data = thing -> billboard_data;
 		const double y_delta = fabs(billboard_data -> height - p_height);
@@ -47,7 +47,7 @@ void update_pos(vec* const pos, vec* const dir,
 	const double curr_time = SDL_GetTicks() / 1000.0; // in seconds
 	byte increasing_fov = 0;
 
-	if (bit_is_set(body -> status, mask_forward_or_backward_movement)) {
+	if (bit_is_set(body -> flags, mask_forward_or_backward_movement)) {
 		const double t = curr_time - body -> time_of_move;
 		body -> v = body -> a * t;
 
@@ -64,8 +64,8 @@ void update_pos(vec* const pos, vec* const dir,
 
 		body -> max_v_reached = body -> v;
 
-		bit_to_x(body -> status, mask_forward_movement, forward);
-		bit_to_x(body -> status, mask_backward_movement, backward);
+		bit_to_x(body -> flags, mask_forward_movement, forward);
+		bit_to_x(body -> flags, mask_backward_movement, backward);
 	}
 
 	else {
@@ -85,8 +85,8 @@ void update_pos(vec* const pos, vec* const dir,
 
 	vec movement = {0.0, 0.0};
 
-	if (bit_is_set(body -> status, mask_forward_movement)) movement += forward_back_movement;
-	else if (bit_is_set(body -> status, mask_backward_movement)) movement -= forward_back_movement;
+	if (bit_is_set(body -> flags, mask_forward_movement)) movement += forward_back_movement;
+	else if (bit_is_set(body -> flags, mask_backward_movement)) movement -= forward_back_movement;
 
 	if (lstrafe) movement[0] += sideways_movement[1], movement[1] -= sideways_movement[0];
 	if (rstrafe) movement[0] -= sideways_movement[1], movement[1] += sideways_movement[0];
@@ -115,7 +115,7 @@ void update_pos(vec* const pos, vec* const dir,
 }
 
 inlinable void init_a_jump(Jump* const jump, const byte falling) {
-	jump -> jumping = 1;
+	set_bit(jump -> flags, mask_currently_jumping);
 	jump -> time_at_jump = SDL_GetTicks() / 1000.0;
 	jump -> start_height = jump -> height;
 	jump -> highest_height = jump -> height;
@@ -140,13 +140,13 @@ void update_jump(Jump* const jump, const vec pos) {
 
 	#else
 
-	if (keys[KEY_JUMP] && !jump -> jumping) {
+	const byte starting_jump = keys[KEY_JUMP] && !bit_is_set(jump -> flags, mask_currently_jumping);
+	bit_to_x(jump -> flags, mask_made_noise_jump, starting_jump);
+	if (starting_jump) {
 		init_a_jump(jump, 0);
 		play_sound(&jump -> sound_at_jump);
-		jump -> made_noise = 1;
 	}
-	else jump -> made_noise = 0;
-	
+
 	//////////
 	double ground_height;
 	static byte first_call = 1;
@@ -158,7 +158,7 @@ void update_jump(Jump* const jump, const vec pos) {
 	if (!first_call) { // first_call avoided for the same reason as explained in handle_thing_collisions
 		for (byte i = 0; i < current_level.thing_count; i++) {
 			const Thing* const thing = current_level.thing_container + i;
-			if (bit_is_set(thing -> status, mask_can_move_through_thing)) continue;
+			if (bit_is_set(thing -> flags, mask_can_move_through_thing)) continue;
 
 			const DataBillboard* const billboard_data = thing -> billboard_data;
 			const double thing_height = billboard_data -> height;
@@ -185,7 +185,7 @@ void update_jump(Jump* const jump, const vec pos) {
 	if (!landed_on_thing) ground_height = *map_point(current_level.heightmap, pos[0], pos[1]);
 	first_call = 0;
 	//////////
-	if (jump -> jumping) {
+	if (bit_is_set(jump -> flags, mask_currently_jumping)) {
 		const double t = SDL_GetTicks() / 1000.0 - jump -> time_at_jump;
 
 		// y = y0 + v0t + 0.5at^2
@@ -196,12 +196,13 @@ void update_jump(Jump* const jump, const vec pos) {
 
 		else if (jump -> height < ground_height) { // v = v0 + at
 			if (jump -> highest_height > ground_height && (jump -> v0 + g * t) < 0.0) { // reset jump
-				jump -> jumping = 0;
+				clear_bit(jump -> flags, mask_currently_jumping);
 				jump -> start_height = ground_height;
 				jump -> height = ground_height;
 
-				jump -> made_noise = jump -> highest_height - ground_height >= min_fall_height_for_sound;
-				if (jump -> made_noise) play_sound(&jump -> sound_at_land);
+				const byte made_noise = jump -> highest_height - ground_height >= min_fall_height_for_sound;
+				bit_to_x(jump -> flags, mask_made_noise_jump, made_noise);
+				if (made_noise) play_sound(&jump -> sound_at_land);
 
 				jump -> highest_height = jump -> height;
 			}

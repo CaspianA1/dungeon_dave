@@ -31,15 +31,15 @@ inlinable void progress_animation_data_frame_ind(DataAnimation* const animation_
 inlinable void progress_enemy_instance_frame_ind(EnemyInstance* const enemy_instance) {
 	const Enemy* const enemy = enemy_instance -> enemy;
 	const byte* const seg_lengths = enemy -> animation_seg_lengths;
+	const EnemyState enemy_state = enemy_instance -> state;
 
 	int begin = 0;
-	for (byte i = 0; i < enemy_instance -> state; i++)
-		begin += seg_lengths[i];
+	for (byte i = 0; i < enemy_state; i++) begin += seg_lengths[i];
 
-	const int end = begin + seg_lengths[enemy_instance -> state];
+	const int end = begin + seg_lengths[enemy_state];
 
 	DataAnimationMut* const mut_animation_data = &enemy_instance -> mut_animation_data;
-	if (enemy_instance -> state == Dead && mut_animation_data -> frame_ind == end - 1) return;
+	if (enemy_state == Dead && mut_animation_data -> frame_ind == end - 1) return;
 
 	DataAnimation animation_data = {enemy -> animation_data, *mut_animation_data};
 	progress_frame_ind(&animation_data, begin, end);
@@ -65,10 +65,6 @@ inlinable ivec get_spritesheet_frame_origin(const DataAnimation* const animation
 
 void animate_weapon(DataAnimation* const animation_data, const vec pos,
 	const byte paces_sideways_on_use, const byte in_use, const double v) {
-
-	#ifndef SHADING_ENABLED
-	(void) pos;
-	#endif
 
 	const ivec
 		frame_origin = get_spritesheet_frame_origin(animation_data),
@@ -102,9 +98,12 @@ void animate_weapon(DataAnimation* const animation_data, const vec pos,
 	SDL_Texture* const texture = animation_data -> immut.sprite.texture;
 
 	#ifdef SHADING_ENABLED
+	static const byte min_weapon_shade = 70;
 	byte shade = shade_at(settings.screen_height, pos);
-	if (shade < 70) shade = 70;
+	if (shade < min_weapon_shade) shade = min_weapon_shade;
 	SDL_SetTextureColorMod(texture, shade, shade, shade);
+	#else
+	(void) pos;
 	#endif
 
 	// renders to shape buffer

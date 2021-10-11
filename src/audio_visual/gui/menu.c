@@ -14,7 +14,9 @@ typedef struct {
 } Menu;
 
 // variadic params: pos fn, on_click fn, text
-Menu init_menu(const Color3 text_color, const Color3 main_color, const Color3 border_color, const unsigned textbox_count, ...) {
+Menu init_menu(const Color3 text_color, const Color3 main_color, const Color3 border_color,
+	const unsigned textbox_count, ...) {
+
 	const Menu menu = {
 		wmalloc(textbox_count * sizeof(Textbox)), textbox_count, text_color, main_color, border_color
 	};

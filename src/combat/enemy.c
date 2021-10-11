@@ -114,7 +114,7 @@ static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 			*map_point(current_level.heightmap, p_pos[0], p_pos[1])
 			!= *map_point(current_level.heightmap, enemy_instance_pos[0], enemy_instance_pos[1]),
 
-		long_range_attacker = bit_is_set(enemy_instance -> status, mask_long_range_attack_enemy);
+		long_range_attacker = bit_is_set(enemy_instance -> flags, mask_long_range_attack_enemy);
 
 	switch (prev_state) {
 		case Idle: {
@@ -123,11 +123,12 @@ static EnemyState next_enemy_state(EnemyInstance* const enemy_instance,
 					&& billboard_can_see_player(billboard_data, player),
 
 				chase_from_sound = dist <= enemy -> dist_awaken.sound
-					&& (player -> jump.made_noise || bit_is_set(weapon -> status, mask_recently_used_weapon));
+					&& (bit_is_set(player -> jump.flags, mask_made_noise_jump)
+						|| bit_is_set(weapon -> flags, mask_recently_used_weapon));
 
 			if (!long_range_attacker && base_heights_not_eq) break;
 
-			else if (chase_from_sight || chase_from_sound || bit_is_set(enemy_instance -> status, mask_recently_attacked_enemy))
+			else if (chase_from_sight || chase_from_sound || bit_is_set(enemy_instance -> flags, mask_recently_attacked_enemy))
 				return Chasing;
 			break;
 		}
@@ -188,7 +189,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance,
 				billboard_data, p_pos, p_height);
 	}
 
-	clear_bit(enemy_instance -> status, mask_recently_attacked_enemy);
+	clear_bit(enemy_instance -> flags, mask_recently_attacked_enemy);
 }
 
 inlinable void update_all_enemy_instances(Player* const player, const Weapon* const weapon) {

@@ -68,7 +68,7 @@ void teleport_player_if_needed(Player* const player) {
 	if (teleport_if_needed(&player -> pos, &player -> jump.height, player)) {
 		/* If the player position curve is on its downward sloper, jumping is disabled
 		because otherwise, the player may clip into the floor and fall into oblivion */
-		if (prev_height < player -> jump.start_height) player -> jump.jumping = 0;
+		if (prev_height < player -> jump.start_height) clear_bit(player -> jump.flags, mask_currently_jumping);
 		else player -> jump.start_height = player -> jump.height;
 
 		fuzz_ticks--;

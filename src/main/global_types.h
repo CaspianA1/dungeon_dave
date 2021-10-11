@@ -17,12 +17,12 @@ typedef struct {
 } Pace;
 
 typedef struct {
-	byte status; // moving forward or backward, was forward, was backward
+	byte flags; // moving forward or backward, was forward, was backward
 	double v, max_v_reached, a, limit_v, strafe_v, time_of_move, time_of_stop, v_incr_multiplier;
 } KinematicBody;
 
 typedef struct {
-	byte jumping, made_noise;
+	byte flags; // jumping, made noise
 	const double up_v0;
 	double v0, height, start_height, highest_height, time_at_jump;
 	const Sound sound_at_jump, sound_at_land;

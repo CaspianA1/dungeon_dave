@@ -24,7 +24,7 @@
 
 #define FLOORCAST_THREADS 3
 
-// max: 1440 by 900
+// max: 1440 by 900; and 960 by 540 is 1920 by 1080 ratio
 #define INIT_W 800
 #define INIT_H 600
 #define INIT_MAX_FPS 60
@@ -120,6 +120,9 @@ static const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
 
 #define mask_can_move_through_thing bitmasks[0]
 #define mask_skip_rendering_thing bitmasks[1]
+
+#define mask_currently_jumping bitmasks[0]
+#define mask_made_noise_jump bitmasks[1]
 
 /*
 https://www.spriters-resource.com/pc_computer/doomdoomii/

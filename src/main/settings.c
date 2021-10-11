@@ -110,7 +110,7 @@ Player load_player(const double jump_up_v0,
 		.sound_when_attacked = init_sound("assets/audio/sound_effects/attacked.wav", 1),
 		.sound_when_dying = init_sound("assets/audio/sound_effects/dying.wav", 1),
 
-		.jump = {.jumping = 0, .up_v0 = jump_up_v0, .v0 = 0.0,
+		.jump = {.flags = 0, .up_v0 = jump_up_v0, .v0 = 0.0,
 			.height = init_height, .start_height = init_height,
 			.highest_height = init_height, .time_at_jump = 0.0,
 			.sound_at_jump = init_sound("assets/audio/sound_effects/jump_up.wav", 1),
@@ -121,7 +121,7 @@ Player load_player(const double jump_up_v0,
 		.pace = {.domain = {.val = 0.0, .step = pace_step, .max = two_pi},
 			.offset_scaler = pace_offset_scaler, .screen_offset = 0},
 
-		.body = {.status = 0, .v = 0.0, .max_v_reached = 0.0, .a = body_a, .limit_v = body_limit_v,
+		.body = {.flags = 0, .v = 0.0, .max_v_reached = 0.0, .a = body_a, .limit_v = body_limit_v,
 			.strafe_v = body_strafe_v, .v_incr_multiplier = body_v_incr_multiplier}
 	};
 }
@@ -175,21 +175,21 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 	/*
 	const Weapon first_weapon = {
-		.status = mask_short_range_weapon, .power = 4.0,
+		.flags = mask_short_range_weapon, .power = 4.0,
 		.sound = init_sound("assets/audio/sound_effects/whip_crack.wav", 1),
 		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60), {0.0, 0}}
 	};
 	*/
 
 	const Weapon first_weapon = {
-		.status = mask_paces_sideways_weapon, .power = 10.0,
+		.flags = mask_paces_sideways_weapon, .power = 10.0,
 		.sound = init_sound("assets/audio/sound_effects/shotgun.wav", 1),
 		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30), {0.0, 0}}
 	};
 
 	/*
 	const Weapon first_weapon = {
-		.status = mask_short_range_weapon | mask_paces_sideways_weapon, .power = 4.0,
+		.flags = mask_short_range_weapon | mask_paces_sideways_weapon, .power = 4.0,
 		.sound = init_sound("assets/audio/enemy_sounds/eddie_attack.wav", 1),
 		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/golden_dagger.bmp", 2, 5, 9, 22), {0.0, 0}}
 	};
