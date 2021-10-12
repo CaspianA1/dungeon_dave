@@ -25,7 +25,7 @@ void load_palace(void) {
 	enum {
 		map_width = 40, map_height = 40,
 		wall_count = 10, billboard_count = 5, teleporter_count = 2,
-		health_kit_count = 1, animated_billboard_count = 2, enemy_instance_count = 10
+		health_kit_count = 2, animated_billboard_count = 2, enemy_instance_count = 10
 	};
 
 	// in the horse area: a health kit and two eddies
@@ -159,7 +159,9 @@ void load_palace(void) {
 		8.5, 25.5, 2.0, 36.0,
 		12.5, 38.5, 2.0, 2.0);
 
-	set_level_health_kits(health_kit_count, 4.5, 22.5, 0.0);
+	set_level_health_kits(health_kit_count,
+		4.5, 22.5, 0.0,
+		28.5, 31.0, 2.0);
 
 	set_level_animated_billboards(animated_billboard_count,
 		// "assets/spritesheets/bogo.bmp", 2, 3, 6, 3, 3.5, 7.0, 0.0,
