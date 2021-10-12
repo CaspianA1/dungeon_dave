@@ -61,6 +61,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- sometimes, when at an angle of 0 and pressed into a corner, a wall disappears
 - sometimes, the mouse can escape the window when it shouldn't be able to
 - bigger projectile size for inter-tick projectiles
 - thing collision detection with 3D bounding boxes
