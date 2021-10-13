@@ -61,7 +61,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
-- you can clip into enemies when you teleport to where they are
+- you can clip into enemies when you teleport to where they are (make a teleport_enemy_if_needed, maybe)
 - make eye height a constant
 - to one_over in billboard_can_see_player
 - don't let enemies attack if the player-enemy height diff is too big for short range enemies
