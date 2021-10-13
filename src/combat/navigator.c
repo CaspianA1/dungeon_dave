@@ -88,8 +88,11 @@ NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos, co
 		vec new_pos = *pos_ref + dir * vec_fill(nav -> v);
 
 		if ((dir[0] > 0.0 && new_pos[0] >= next_vertex[0]) || (dir[0] < 0.0 && new_pos[0] <= next_vertex[0])
-			|| (dir[1] > 0.0 && new_pos[1] >= next_vertex[1]) || (dir[1] < 0.0 && new_pos[1] <= next_vertex[1]))
+			|| (dir[1] > 0.0 && new_pos[1] >= next_vertex[1]) || (dir[1] < 0.0 && new_pos[1] <= next_vertex[1])) {
+
+			new_pos = (vec) {(int) new_pos[0], (int) new_pos[1]} + vec_fill(0.5);
 			nav -> route_ind++;
+		}
 
 		*pos_ref = new_pos;
 		return Navigating;
