@@ -81,9 +81,22 @@ NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos, co
 
 	/*
 	const vec last_pos = route -> data[end_ind];
-	printf("End pos: {%lf, %lf}, length = %d\n", last_pos[0], last_pos[1], route -> length);
-	puts("---");
+	if (last_pos[0] == 0.0 && last_pos[1] == 0.0) {
+		printf("Last is zero; route -> length = %d, end_ind = %d\n", route -> length, end_ind);
+		for (int i = 0; i < route -> length; i++) {
+			const vec node = route -> data[i];
+			printf("{%lf, %lf} ", node[0], node[1]);
+		}
+		putchar('\n');
+	}
 	*/
+
+	DEBUG(end_ind, d);
+	DEBUG(route -> length, d);
+	if (end_ind >= route -> length) puts("Problem");
+	puts("---");
+
+	// in some cases, the end ind is often longer than the route length, which shouldn't be
 
 	const int route_ind = nav -> route_ind;
 	if (route_ind < end_ind) {
