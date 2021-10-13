@@ -23,8 +23,9 @@ typedef struct {
 
 //////////
 
-/* this path accomodates for the previous pos of the Navigator
-and aligns the navigator to the middle of the tile it's on */
+/* This route makes its starting point the end of the previous route,
+which may not be axis-aligned (which avoids janky movement); and it
+aligns the navigator to the middle of the tile it's on */
 typedef struct {
 	int length;
 	vec data[max_route_length];
@@ -32,8 +33,8 @@ typedef struct {
 
 typedef struct {
 	CorrectedRoute route;
-	vec* const pos;
 	int route_ind;
+	vec* const pos;
 	const double v;
 } Navigator;
 

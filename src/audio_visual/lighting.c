@@ -109,7 +109,7 @@ byte shade_at(const double wall_h, const vec pos) {
 	/*
 	double shade = wall_h / settings.screen_height * current_level.shader(pos);
 	if (shade < current_level.darkest_shade) shade = current_level.darkest_shade;
-	return shade > 1.0 ? 1.0 : shade;
+	return (shade > 1.0) ? 1.0 : shade;
 	*/
 }
 

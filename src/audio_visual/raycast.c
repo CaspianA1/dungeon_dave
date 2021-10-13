@@ -130,7 +130,8 @@ void raycast(const Player* const player, const double horizon_line, const double
 
 					handle_ray(&raycast_data, &last_projected_wall_top, &projected_wall_bottom);
 					// mark_floor(&raycast_data, last_projected_wall_top, projected_wall_bottom);
-					if (point_height == current_level.max_point_height && p_height <= current_level.max_point_height - 0.5) break;
+					if (point_height == current_level.max_point_height
+						&& p_height <= current_level.max_point_height - actor_eye_height) break;
 
 					at_first_hit = 0;
 				}

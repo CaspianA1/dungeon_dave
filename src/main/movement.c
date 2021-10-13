@@ -29,7 +29,7 @@ inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 
 		const DataBillboard* const billboard_data = thing -> billboard_data;
 		const double y_delta = fabs(billboard_data -> height - p_height);
-		if (y_delta >= 1.0) continue;
+		if (y_delta >= actor_height) continue;
 
 		const BoundingBox thing_box = init_bounding_box(billboard_data -> pos, actor_box_side_len);
 
@@ -166,14 +166,14 @@ void update_jump(Jump* const jump, const vec pos) {
 			/* Circular approximation of closeness b/c AABB collisions
 			are resolved otherwise and won't stay across ticks */
 			if (!vec_delta_exceeds(billboard_data -> pos, pos, actor_box_side_len)) {
-				const double top_thing_height = thing_height + 1.0;
+				const double top_thing_height = thing_height + actor_height;
 
 				if (jump -> height >= top_thing_height) {
 					landed_on_thing = 1;
 					ground_height = top_thing_height;
 					break;
 				}
-				else if (jump -> height + 1.0 > thing_height) {
+				else if (jump -> height + actor_height > thing_height) {
 					hit_head = 1;
 					break;
 				}

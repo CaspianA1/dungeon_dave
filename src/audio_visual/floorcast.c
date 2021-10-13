@@ -29,7 +29,7 @@ static PixSprite ground;
 void floorcast(const byte floor_height, const int horizon_line, int start_y, const int end_y,
 	const vec pos, const double p_height) {
 
-	const double eye_height = (p_height - floor_height) + 0.5;
+	const double eye_height = (p_height - floor_height) + actor_eye_height;
 	if (eye_height < 0.0) return;
 	else if (start_y < 0) start_y = 0;
 

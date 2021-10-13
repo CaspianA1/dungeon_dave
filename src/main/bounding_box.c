@@ -29,6 +29,6 @@ inlinable BoundingBox_3D init_actor_bounding_box(const vec pos_2D, const double 
 
 	return (BoundingBox_3D) {
 		{part_2D.origin[0], part_2D.origin[1], height},
-		{part_2D.size[0], part_2D.size[1], 1.0}
+		{part_2D.size[0], part_2D.size[1], actor_height}
 	};
 }

@@ -22,7 +22,7 @@ byte teleport_if_needed(vec* const pos, double* const height, const Player* cons
 		const Teleporter teleporter = current_level.teleporters[i];
 
 		if (aabb_collision(player_box, init_bounding_box(teleporter.from_billboard.pos, teleporter_box_dimensions))
-			&& fabs(teleporter.from_billboard.height - *height) < 1.0) {
+			&& fabs(teleporter.from_billboard.height - *height) < actor_height) {
 
 			/* if the player isn't teleporting, the pos and height data
 			need to be passed twice through the player struct */
@@ -51,7 +51,8 @@ void teleport_player_if_needed(Player* const player) {
 				teleporter_color.g * percent_ticks, teleporter_color.b * percent_ticks, SDL_ALPHA_OPAQUE);
 
 			for (byte i = 0; i < num_fuzz_dots_on_screen; i++) {
-				const byte dot_size = (rand() % (settings.avg_dimensions / dot_dimension_divisor)) * (1.0 - percent_ticks);
+				const byte dot_size =
+					(rand() % (settings.avg_dimensions / dot_dimension_divisor)) * (1.0 - percent_ticks);
 
 				const SDL_Rect dot_pos = {
 					rand() % settings.screen_width, rand() % settings.screen_height,

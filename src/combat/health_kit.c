@@ -22,7 +22,7 @@ void use_health_kit_if_needed(Player* const player) {
 		const DataBillboard* const billboard_data = &health_kit -> billboard;
 
 		if (!health_kit -> used
-			&& fabs(billboard_data -> height - player -> jump.height) < 1.0
+			&& fabs(billboard_data -> height - player -> jump.height) < actor_height
 			&& aabb_collision(player_box,
 				init_bounding_box(billboard_data -> pos, actor_box_side_len))) {
 

@@ -49,7 +49,7 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 	const byte short_range_weapon = bit_is_set(weapon -> flags, mask_short_range_weapon);
 
 	Hitscan hitscan = { // shoots from center of player
-		{p_pos[0], p_pos[1], p_height + 0.5}, {p_dir[0], p_dir[1], p_pitch_angle}, 0.0,
+		{p_pos[0], p_pos[1], p_height + actor_eye_height}, {p_dir[0], p_dir[1], p_pitch_angle}, 0.0,
 		short_range_weapon ? short_range_hitscan_step : long_range_hitscan_step
 	};
 

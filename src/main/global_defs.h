@@ -102,7 +102,10 @@ const double
 	five_pi_over_two = 5.0 * M_PI / 2.0,
 	g = -9.8,
 	almost_zero = 0.001,
-	almost_almost_zero = 0.000000001;
+	almost_almost_zero = 0.000000001,
+	actor_eye_height = 0.5,
+	actor_height = 1.0,
+	enemy_dist_for_attack = 1.0;
 
 static const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
 

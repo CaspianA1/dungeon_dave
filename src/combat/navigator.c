@@ -33,7 +33,7 @@ static void print_navigator(const CorrectedRoute* const corrected_route, const v
 }
 */
 
-static CorrectedRoute make_corrected_route(const Route* const route, const vec nav_pos) {
+inlinable CorrectedRoute make_corrected_route(const Route* const route, const vec nav_pos) {
 	CorrectedRoute corrected_route = {.length = route -> length};
 
 	corrected_route.data[0] = nav_pos;
@@ -43,7 +43,6 @@ static CorrectedRoute make_corrected_route(const Route* const route, const vec n
 	return corrected_route;
 }
 
-// navigator idle if path too long
 inlinable NavigationState update_route(Navigator* const nav, const vec p_pos, const byte height) {
 	const vec nav_pos = *nav -> pos;
 	const ResultBFS bfs_result = bfs(nav_pos, p_pos, height); // allocate integer BFS path
@@ -58,13 +57,13 @@ inlinable NavigationState update_route(Navigator* const nav, const vec p_pos, co
 }
 
 inlinable Navigator init_navigator(const vec p_pos, vec* const pos_ref, const double v, const byte height) {
-	Navigator nav = {.pos = pos_ref, .route_ind = -1, .v = v};
+	Navigator nav = {.route_ind = -1, .pos = pos_ref, .v = v};
 	update_route(&nav, p_pos, height);
 	return nav;
 }
 
 inlinable byte player_diverged_from_route_dest(const CorrectedRoute* const route, const vec p_pos) {
-	return vec_delta_exceeds(p_pos, route -> data[route -> length - 1], 1.0);
+	return vec_delta_exceeds(p_pos, route -> data[route -> length - 1], enemy_dist_for_attack);
 }
 
 NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos, const byte height) {
@@ -81,23 +80,23 @@ NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos, co
 	const int route_ind = nav -> route_ind;
 	if (route_ind < route -> length - 1) {
 		const vec next_vertex = route -> data[route_ind + 1];
-
 		const vec dir = next_vertex - route -> data[route_ind];
+
 		vec* const pos_ref = nav -> pos;
 		vec new_pos = *pos_ref + dir * vec_fill(nav -> v);
 
-		// if player has passed the next vertex
+		// If the navigator has passed the next vertex
 		if ((dir[0] > 0.0 && new_pos[0] >= next_vertex[0]) || (dir[0] < 0.0 && new_pos[0] <= next_vertex[0])
 			|| (dir[1] > 0.0 && new_pos[1] >= next_vertex[1]) || (dir[1] < 0.0 && new_pos[1] <= next_vertex[1])) {
 
-			// fully aligns the new position to the middle of the tile, to guarantee that no wall clipping occurs
-			new_pos = (vec) {(int) new_pos[0], (int) new_pos[1]} + vec_fill(0.5);
+			/* Fully aligns the new position to the middle
+			of the tile, to guarantee no wall clipping */
+			new_pos = next_vertex;
 			nav -> route_ind++;
 		}
 
 		*pos_ref = new_pos;
 		return Navigating;
 	}
-
 	return ReachedDest;
 }
