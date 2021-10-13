@@ -40,8 +40,6 @@ inlinable byte iter_hitscan(Hitscan* const hitscan) {
 static void use_projectile_weapon(const Weapon* const weapon, const Player* const player) {
 	(void) weapon;
 	(void) player;
-
-
 }
 
 static void use_hitscan_weapon(const Weapon* const weapon, const Player* const player) {
