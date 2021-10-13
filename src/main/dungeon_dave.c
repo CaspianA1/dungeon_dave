@@ -61,6 +61,10 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- you can clip into enemies when you teleport to where they are
+- make eye height a constant
+- to one_over in billboard_can_see_player
+- don't let enemies attack if the player-enemy height diff is too big for short range enemies
 - get rid of CorrectedRoute once it's possible
 - set a static limit to y-pitch (probably 45 degrees) (if that works with the pace)
 - sometimes, when at an angle of 0 and pressed into a corner, a wall disappears
@@ -68,7 +72,6 @@ audio todo:
 - bigger projectile size for inter-tick projectiles
 - thing collision detection with 3D bounding boxes
 - in the window area of tpt, one of the enemies can attack the player through the wall
-- don't deal damage if height diff too big for short range
 - lightmap seed to init_level, or perlin shading in shader fn
 - make sure that thread creation doesn't stall
 - no more constant copying of many static amount things

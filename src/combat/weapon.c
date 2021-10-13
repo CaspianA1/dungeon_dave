@@ -21,8 +21,6 @@ typedef struct {
 	const double step;
 } Hitscan;
 
-// make _3D to 3D
-
 // returns if hitscanning should continue
 inlinable byte iter_hitscan(Hitscan* const hitscan) {
 	const double step = hitscan -> step;
@@ -50,7 +48,7 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 
 	const byte short_range_weapon = bit_is_set(weapon -> flags, mask_short_range_weapon);
 
-	Hitscan hitscan = {
+	Hitscan hitscan = { // shoots from center of player
 		{p_pos[0], p_pos[1], p_height + 0.5}, {p_dir[0], p_dir[1], p_pitch_angle}, 0.0,
 		short_range_weapon ? short_range_hitscan_step : long_range_hitscan_step
 	};
@@ -71,8 +69,8 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 			if (aabb_collision_3D(projectile_box, enemy_box)) {
 				set_bit(enemy_instance -> flags, mask_recently_attacked_enemy);
 
-				void set_enemy_instance_state(EnemyInstance* const, const EnemyState,
-					const byte, const vec, const double);
+				void set_enemy_instance_state(EnemyInstance* const,
+					const EnemyState, const byte, const vec, const double);
 
 				if ((enemy_instance -> hp -= weapon -> power) <= 0.0)
 					set_enemy_instance_state(enemy_instance, Dead, 0, p_pos, p_height);

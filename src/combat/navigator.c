@@ -72,46 +72,26 @@ NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos, co
 		return FailedBFS;
 
 	const CorrectedRoute* const route = &nav -> route;
-	const int end_ind = route -> length - 1;
 
 	if (player_diverged_from_route_dest(route, p_pos)) {
 		const NavigationState nav_state = update_route(nav, p_pos, height);
 		if (nav_state != SucceededBFS) return nav_state;
 	}
 
-	/*
-	const vec last_pos = route -> data[end_ind];
-	if (last_pos[0] == 0.0 && last_pos[1] == 0.0) {
-		printf("Last is zero; route -> length = %d, end_ind = %d\n", route -> length, end_ind);
-		for (int i = 0; i < route -> length; i++) {
-			const vec node = route -> data[i];
-			printf("{%lf, %lf} ", node[0], node[1]);
-		}
-		putchar('\n');
-	}
-	*/
-
-	/*
-	DEBUG(end_ind, d);
-	DEBUG(route -> length, d);
-	if (end_ind >= route -> length) puts("Problem");
-	puts("---");
-	*/
-
-	// in some cases, the end ind is often longer than the route length, which shouldn't be
-
 	const int route_ind = nav -> route_ind;
-	if (route_ind < end_ind) {
+	if (route_ind < route -> length - 1) {
 		const vec next_vertex = route -> data[route_ind + 1];
 
 		const vec dir = next_vertex - route -> data[route_ind];
 		vec* const pos_ref = nav -> pos;
 		vec new_pos = *pos_ref + dir * vec_fill(nav -> v);
 
+		// if player has passed the next vertex
 		if ((dir[0] > 0.0 && new_pos[0] >= next_vertex[0]) || (dir[0] < 0.0 && new_pos[0] <= next_vertex[0])
 			|| (dir[1] > 0.0 && new_pos[1] >= next_vertex[1]) || (dir[1] < 0.0 && new_pos[1] <= next_vertex[1])) {
 
-			new_pos = (vec) {(int) new_pos[0], (int) new_pos[1]} + vec_fill(0.5); // fully aligns pos to middle of tile
+			// fully aligns the new position to the middle of the tile, to guarantee that no wall clipping occurs
+			new_pos = (vec) {(int) new_pos[0], (int) new_pos[1]} + vec_fill(0.5);
 			nav -> route_ind++;
 		}
 

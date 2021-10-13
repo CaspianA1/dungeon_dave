@@ -30,26 +30,25 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 inlinable void short_range_enemy_attack(const Enemy* const enemy,
 	EnemyInstance* const enemy_instance, Player* const player, const double dist) {
 
-	/*
-	const byte height_diff_too_big =
+	/* const byte height_diff_too_big =
 		player -> jump.jumping &&
 		fabs(enemy_instance -> billboard_data.height - player -> jump.height) > 1.0;
 
-	if (height_diff_too_big) return;
-	*/
+	if (height_diff_too_big) return; */
 
 	const double curr_time = SDL_GetTicks() / 1000.0;
 
 	if (curr_time - enemy_instance -> time_at_attack > attack_time_spacing_secs) {
 		enemy_instance -> time_at_attack = curr_time;
 
-		/* The reason why this test isn't in the if statement above
-		is because if it were, the enemy would try to attack again at the next tick,
-		making it very hard to jump over them to avoid their attack; so this essentially
-		gives enemies a recharge time for their next attack. */
+		/* The reason why this test isn't in the if statement above is because
+		if it were, the enemy would try to attack again at the next tick,
+		making it very hard to jump over them to avoid their attack; so this
+		essentially gives enemies a recharge time for their next attack. */
 		if (fabs(enemy_instance -> billboard_data.height - player -> jump.height) > 1.0) return;
 
-		// when the decr hp is less than zero, the enemy instance clips into walls - why?
+		/* dist is guaranteed to be less than 1, according to the code in
+		update_route_if_neede; so decr_hp will never be negative */
 		const double decr_hp = enemy -> power * (1.0 - dist * dist); // more damage closer
 
 		if ((player -> hp -= decr_hp) <= 0.0) {
@@ -84,7 +83,7 @@ static byte billboard_can_see_player(const DataBillboard* const billboard_data, 
 	const vec dir_2D = (p_pos - billboard_data -> pos) / vec_fill(dist_diff);
 
 	Hitscan hitscan = {
-		{billboard_data -> pos[0], billboard_data -> pos[1], billboard_data -> height + 0.5}, // 0.5 -> eye height
+		{billboard_data -> pos[0], billboard_data -> pos[1], billboard_data -> height + 0.5}, // 0.5 = eye height
 		{dir_2D[0], dir_2D[1], atan(height_diff / dist_diff)}, 0.0, eye_trace_step
 	};
 

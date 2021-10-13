@@ -53,13 +53,6 @@ ResultBFS bfs(const vec begin, const vec end, const byte height) {
 		const ivec vertex = route.data[route.length - 1];
 
 		if (vertex.x == int_end.x && vertex.y == int_end.y) {
-			/*
-			const ivec last = route.data[route.length - 1];
-			DEBUG_IVEC(last);
-			DEBUG(route.length, d);
-			puts("---");
-			*/
-
 			result.state = SucceededBFS;
 			result.route = route;
 			break;
