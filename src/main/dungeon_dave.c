@@ -63,7 +63,6 @@ audio todo:
 
 - more weapon damage from player closer
 - you can clip into enemies when you teleport to where they are (make a teleport_enemy_if_needed, maybe)
-- to one_over in billboard_can_see_player
 - set a static limit to y-pitch (probably 45 degrees) (if that works with the pace)
 - sometimes, when at an angle of 0 and pressed into a corner, a wall disappears
 - sometimes, the mouse can escape the window when it shouldn't be able to
@@ -95,7 +94,7 @@ int main(void) {
 	Weapon weapon;
 	Player* const player_ref = &player;
 
-	load_all_defaults(load_tpt, player_ref, &weapon);
+	load_all_defaults(load_palace, player_ref, &weapon);
 	if (display_title_screen() == Exit) deinit_all(player_ref, &weapon);
 
 	play_sound(&current_level.background_sound);

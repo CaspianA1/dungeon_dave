@@ -72,13 +72,13 @@ static byte billboard_can_see_player(const DataBillboard* const billboard_data, 
 	const vec p_pos = player -> pos;
 	const double p_height = player -> jump.height;
 
-	const double dist_diff = billboard_data -> dist; // TODO: to one over
+	const double one_over_dist_diff = 1.0 / billboard_data -> dist;
 	const double height_diff = fabs(billboard_data -> height - p_height);
-	const vec dir_2D = (p_pos - billboard_data -> pos) / vec_fill(dist_diff);
+	const vec dir_2D = (p_pos - billboard_data -> pos) * vec_fill(one_over_dist_diff);
 
 	Hitscan hitscan = {
 		{billboard_data -> pos[0], billboard_data -> pos[1], billboard_data -> height + actor_eye_height},
-		{dir_2D[0], dir_2D[1], atan(height_diff / dist_diff)}, 0.0, eye_trace_step
+		{dir_2D[0], dir_2D[1], atan(height_diff * one_over_dist_diff)}, 0.0, eye_trace_step
 	};
 
 	const BoundingBox_3D player_box = init_actor_bounding_box(p_pos, p_height);
