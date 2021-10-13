@@ -91,10 +91,12 @@ NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos, co
 	}
 	*/
 
+	/*
 	DEBUG(end_ind, d);
 	DEBUG(route -> length, d);
 	if (end_ind >= route -> length) puts("Problem");
 	puts("---");
+	*/
 
 	// in some cases, the end ind is often longer than the route length, which shouldn't be
 
