@@ -61,7 +61,6 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
-- more weapon damage from player closer
 - you can clip into enemies when you teleport to where they are (make a teleport_enemy_if_needed, maybe)
 - set a static limit to y-pitch (probably 45 degrees) (if that works with the pace)
 - sometimes, when at an angle of 0 and pressed into a corner, a wall disappears

@@ -1,11 +1,9 @@
-////////// Hitscanning is separate from DDA because DDA inherently steps on whole grids, while weapons do not
+// Hitscanning is separate from DDA because DDA inherently steps on whole grids, while weapons do not
 
 static const double
 	short_range_hitscan_step = 0.3,
 	long_range_hitscan_step = 0.1, // the magnitude of the velocity vector
 	projectile_size = 0.2;
-
-//////////
 
 void deinit_weapon(const Weapon* const weapon) {
 	deinit_sound(&weapon -> sound);
@@ -71,6 +69,11 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 
 				void set_enemy_instance_state(EnemyInstance* const,
 					const EnemyState, const byte, const vec, const double);
+
+				// `f(x) = 1.0 - (log2(x) / 8)`, range zero and below to infinity (smoothly decreasing slope)
+				double percent_damage = 1.0 - (log2(enemy_instance -> billboard_data.dist) / 8.0);
+				if (percent_damage > 1.0) percent_damage = 1.0;
+				else if (percent_damage < 0.0) percent_damage = 0.0;
 
 				if ((enemy_instance -> hp -= weapon -> power) <= 0.0)
 					set_enemy_instance_state(enemy_instance, Dead, 0, p_pos, p_height);

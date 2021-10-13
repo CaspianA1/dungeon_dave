@@ -1,6 +1,7 @@
 https://freesound.org/people/Burning_Cicada_Ltd./sounds/496320/ (ambient wind)
 https://freesound.org/people/magnuswaker/sounds/523091/ (shotgun)
 https://freesound.org/people/SciFiSounds/sounds/529925/ (whip crack)
+https://freesound.org/people/mensageirocs/sounds/232680/ (desecrator launch)
 
 https://freesound.org/people/kfatehi/sounds/363921/ (jump up)
 https://freesound.org/people/ceberation/sounds/235521/ (jump land) (I think?)
@@ -18,11 +19,7 @@ https://freesound.org/people/MrFossy/sounds/547191/ (trooper, attacked)
 https://freesound.org/people/ArtOrDie/sounds/338145/ (trooper, death)
 
 https://freesound.org/people/LamaMakesMusic/sounds/403639/ (wall hit, not used at the moment)
-
 https://freesound.org/people/michael_grinnell/sounds/512471/ (teleporter sound)
-
 https://freesound.org/people/GameAudio/sounds/220178/ (menu click)
-
 https://freesound.org/people/tonsil5/sounds/416838/ (player death)
-
 https://freesound.org/people/ryusa/sounds/531176/ (health increase)
