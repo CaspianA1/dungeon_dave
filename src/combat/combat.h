@@ -70,7 +70,7 @@ typedef struct {
 //////////
 
 typedef struct {
-	byte flags; // in_use, short_range, paces_sideways, recently_used (in the last tick)
+	byte flags; // in_use, short_range, spawns_projectile, paces_sideways, recently_used (in the last tick)
 	const double power;
 	const Sound sound;
 	DataAnimation animation_data;

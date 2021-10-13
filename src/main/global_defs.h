@@ -107,7 +107,7 @@ const double
 	actor_height = 1.0,
 	enemy_dist_for_attack = 1.0;
 
-static const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
+static const byte bitmasks[5] = {1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4};
 
 #define mask_forward_or_backward_movement bitmasks[0]
 #define mask_forward_movement bitmasks[1]
@@ -115,8 +115,9 @@ static const byte bitmasks[4] = {1 << 0, 1 << 1, 1 << 2, 1 << 3};
 
 #define mask_in_use_weapon bitmasks[0]
 #define mask_short_range_weapon bitmasks[1]
-#define mask_paces_sideways_weapon bitmasks[2]
-#define mask_recently_used_weapon bitmasks[3]
+#define mask_spawns_projectile_weapon bitmasks[2]
+#define mask_paces_sideways_weapon bitmasks[3]
+#define mask_recently_used_weapon bitmasks[4]
 
 #define mask_recently_attacked_enemy bitmasks[0]
 #define mask_long_range_attack_enemy bitmasks[1]

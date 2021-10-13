@@ -37,6 +37,13 @@ inlinable byte iter_hitscan(Hitscan* const hitscan) {
 
 #else
 
+static void use_projectile_weapon(const Weapon* const weapon, const Player* const player) {
+	(void) weapon;
+	(void) player;
+
+
+}
+
 static void use_hitscan_weapon(const Weapon* const weapon, const Player* const player) {
 	const vec p_pos = player -> pos, p_dir = player -> dir; // these are 2D
 
@@ -96,14 +103,16 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 
 	if (player -> is_dead) *frame_ind = 0;
 
-	const byte first_in_use = bit_is_set(weapon -> flags, mask_in_use_weapon);
+	const byte
+		first_in_use = bit_is_set(weapon -> flags, mask_in_use_weapon),
+		spawns_projectile = bit_is_set(weapon -> flags, mask_spawns_projectile_weapon);
 
 	if (first_in_use && *frame_ind == 0)
 		clear_bit(weapon -> flags, mask_in_use_weapon);
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
-		set_bit(weapon -> flags, mask_in_use_weapon | mask_recently_used_weapon);
 		play_sound(&weapon -> sound);
-		use_hitscan_weapon(weapon, player);
+		set_bit(weapon -> flags, mask_in_use_weapon | mask_recently_used_weapon);
+		(spawns_projectile ? use_projectile_weapon : use_hitscan_weapon)(weapon, player);
 	}
 	else clear_bit(weapon -> flags, mask_recently_used_weapon); // recently used = within the last tick
 
