@@ -189,3 +189,50 @@ void update_enemy_weapon_y_state(EnemyInstance* const enemy_instance, const SDL_
 }
 
 /////
+
+/*
+if (nav == &current_level.enemy_instances[7].nav) {
+	for (int i = 0; i < nav -> route.length; i++) {
+		const vec pos = nav -> route.data[i];
+		if (*map_point(current_level.wallmap, pos[0], pos[1])) puts("Warning, in a wall");
+		else DEBUG_VEC(pos);
+	}
+}
+*/
+
+/*
+const byte trooper = nav == &current_level.enemy_instances[7].nav;
+if (nav -> route.length == 1 && trooper) {
+	puts("The route length is 1");
+}
+else if (trooper) printf("The route length is not 1: %d\n", nav -> route.length);
+*/
+
+/////
+
+const vec last_pos = route -> data[end_ind];
+printf("End pos: {%lf, %lf}\n", last_pos[0], last_pos[1]);
+DEBUG(route -> length, d);
+puts("---");
+
+/*
+else {
+	const vec last_pos = route -> data[end_ind];
+	*nav -> pos = (vec) {(int) last_pos[0], (int) last_pos[1]} + vec_fill(0.5);
+}
+*/
+
+/////
+
+/*
+const EnemyInstance* const trooper = current_level.enemy_instances + 7;
+const vec trooper_pos = trooper -> billboard_data.pos;
+const byte in_wall = !!*map_point(current_level.wallmap, trooper_pos[0], trooper_pos[1]);
+const int path_len = trooper -> nav.route.length;
+DEBUG_VEC(trooper_pos);
+DEBUG(in_wall, d);
+DEBUG(path_len, d);
+puts("---");
+*/
+
+/////

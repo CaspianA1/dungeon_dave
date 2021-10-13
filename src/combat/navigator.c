@@ -79,6 +79,12 @@ NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos, co
 		if (nav_state != SucceededBFS) return nav_state;
 	}
 
+	/*
+	const vec last_pos = route -> data[end_ind];
+	printf("End pos: {%lf, %lf}, length = %d\n", last_pos[0], last_pos[1], route -> length);
+	puts("---");
+	*/
+
 	const int route_ind = nav -> route_ind;
 	if (route_ind < end_ind) {
 		const vec next_vertex = route -> data[route_ind + 1];
@@ -90,12 +96,13 @@ NavigationState update_route_if_needed(Navigator* const nav, const vec p_pos, co
 		if ((dir[0] > 0.0 && new_pos[0] >= next_vertex[0]) || (dir[0] < 0.0 && new_pos[0] <= next_vertex[0])
 			|| (dir[1] > 0.0 && new_pos[1] >= next_vertex[1]) || (dir[1] < 0.0 && new_pos[1] <= next_vertex[1])) {
 
-			new_pos = (vec) {(int) new_pos[0], (int) new_pos[1]} + vec_fill(0.5);
+			new_pos = (vec) {(int) new_pos[0], (int) new_pos[1]} + vec_fill(0.5); // fully aligns pos to middle of tile
 			nav -> route_ind++;
 		}
 
 		*pos_ref = new_pos;
 		return Navigating;
 	}
+
 	return ReachedDest;
 }

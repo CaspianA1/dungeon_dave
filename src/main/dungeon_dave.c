@@ -61,6 +61,8 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- get rid of CorrectedRoute once it's possible
+- set a static limit to y-pitch (probably 45 degrees) (if that works with the pace)
 - sometimes, when at an angle of 0 and pressed into a corner, a wall disappears
 - sometimes, the mouse can escape the window when it shouldn't be able to
 - bigger projectile size for inter-tick projectiles
