@@ -174,10 +174,7 @@ DEF_THING_ADDER(enemy_instance) {
 	}
 }
 
-/*
-- health kits = fixed number first, amount decreases later
-- projectiles are the only temp thing
-*/
+// - projectiles are the only temp thing
 
 /* On the topic of filling the thing buffer just once:
 	- It would work for still things and teleporters without any extra hassle
