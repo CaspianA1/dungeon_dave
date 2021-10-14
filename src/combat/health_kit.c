@@ -1,4 +1,4 @@
-Sprite health_kit_sprite;
+Sprite health_kit_sprite; // not static b/c used in things.c
 static Sound health_kit_sound;
 static const byte health_incr_amount = INIT_HP / 10;
 

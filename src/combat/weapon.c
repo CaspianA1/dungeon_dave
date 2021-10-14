@@ -92,7 +92,7 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 					const EnemyState, const byte, const vec, const double);
 
 				// `f(x) = 1.0 - (log2(x) / 8)`, range zero and below to infinity (smoothly decreasing slope)
-				double percent_damage = 1.0 - (log2(enemy_instance -> billboard_data.dist) / 8.0);
+				double percent_damage = 1.0 - (log2(tracer.dist) / 8.0);
 				if (percent_damage > 1.0) percent_damage = 1.0;
 				else if (percent_damage < 0.0) percent_damage = 0.0;
 

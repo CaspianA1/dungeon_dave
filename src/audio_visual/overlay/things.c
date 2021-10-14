@@ -1,4 +1,4 @@
-// a rewrite of render_overlay.c; thing = billboard or animation or enemy
+// a rewrite of render_overlay.c; thing = billboard | teleporter | health kit | projectile | animation | enemy
 
 static int cmp_things(const void* const a, const void* const b) {
 	const double distances[2] = {
@@ -134,9 +134,24 @@ DEF_THING_ADDER(health_kit) {
 }
 
 DEF_THING_ADDER(projectile) {
-	(void) thing_buffer_start;
-	(void) p_pos;
-	(void) p_angle;
+	static byte first_call = 1;
+	static Sprite projectile_sprite;
+
+	if (first_call) {
+		projectile_sprite = init_sprite("assets/objects/fireball.bmp", 0);
+		first_call = 0;
+	}
+
+	/*
+	projectiles: one billboard
+	they can't have a tracer and billboard
+	perhaps make a billboard, billboard -> tracer, update tracer, tracer -> billboard
+	a new tracer type, which is just a billboard (?)
+	need to store a dir though
+
+	projectile details in weapon.c; projectile type = of DataBillboard and step
+	projectile -> tracer -> projectile
+	*/
 
 	for (byte i = 0; i < current_level.projectile_count; i++) {
 		Tracer* const projectile = current_level.projectiles + i;
@@ -148,6 +163,13 @@ DEF_THING_ADDER(projectile) {
 		};
 
 		update_billboard_values(&billboard_data, p_pos, p_angle);
+
+		const Thing thing = {
+			0, &billboard_data, &projectile_sprite,
+			{0, 0, projectile_sprite.size.x, projectile_sprite.size.y}
+		};
+
+		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
 }
 
