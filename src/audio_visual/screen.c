@@ -39,7 +39,7 @@ inlinable void draw_tilted(SDL_Texture* const buffer, const SDL_FRect* const des
 	SDL_RenderCopyExF(screen.renderer, buffer, NULL, dest_crop, tilt, NULL, SDL_FLIP_NONE);
 }
 
-void refresh(const Player* const player) {
+void refresh(const Player* const player, Weapon* const weapon) {
 	SDL_UnlockTexture(screen.pixel_buffer);
 	SDL_SetRenderTarget(screen.renderer, NULL);
 
@@ -82,8 +82,15 @@ void refresh(const Player* const player) {
 		draw_tilted(screen.shape_buffer, &dest_crop, tilt.val);
 	}
 
+
+	void animate_weapon(DataAnimation* const, const vec, const byte, const byte, const double);
 	void draw_hud_elements(const Player* const);
+
+	animate_weapon(&weapon -> animation_data, player -> pos,
+		bit_is_set(weapon -> flags, mask_paces_sideways_weapon),
+		bit_is_set(weapon -> flags, mask_in_use_weapon), player -> body.v);
+
 	draw_hud_elements(player);
-	
+
 	SDL_RenderPresent(screen.renderer);
 }

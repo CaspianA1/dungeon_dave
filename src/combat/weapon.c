@@ -51,16 +51,17 @@ static void use_projectile_weapon(const Weapon* const weapon, const Player* cons
 			++current_level.alloc_thing_count * sizeof(Thing));
 	}
 
+	Tracer tracer = init_tracer_from_player(player, long_range_projectile_tracer_step);
+	memcpy(current_level.projectiles + current_level.projectile_count, &tracer, sizeof(Tracer));
+
 	current_level.thing_count++;
 	current_level.projectile_count++;
-
-	Tracer tracer = init_tracer_from_player(player, long_range_projectile_tracer_step);
-	(void) tracer;
 	*/
 
 	/*
 	- the new tracer projectile will call init_tracer_from_player
 	- for projectile in projectiles, if it hit a wall, thing count and projectile count decrement
+		(make an update_projectiles method)
 	*/
 }
 
@@ -128,11 +129,6 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 		(spawns_projectile ? use_projectile_weapon : use_hitscan_weapon)(weapon, player);
 	}
 	else clear_bit(weapon -> flags, mask_recently_used_weapon); // recently used = within the last tick
-
-	// -1 -> cycle frame, 0 -> first frame
-	animate_weapon(&weapon -> animation_data, player -> pos,
-		bit_is_set(weapon -> flags, mask_paces_sideways_weapon),
-		bit_is_set(weapon -> flags, mask_in_use_weapon), player -> body.v);
 }
 
 #endif

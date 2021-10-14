@@ -61,6 +61,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- compressed audio
 - counts to uint16_t's
 - account for 0-length allocs of level items in a special way, since malloc's return val is implementation dependent
 - you can clip into enemies when you teleport to where they are (make a teleport_enemy_if_needed, maybe)
@@ -89,14 +90,15 @@ audio todo:
 - screen width and height to screen size via sublime text substitutions
 */
 
-// drawing order: skybox, walls, things, weapon, floor, minimap, hp, crosshair
+// drawing order: skybox, walls, things, floor, weapon, minimap, hp, crosshair
 int main(void) {
 	Player player;
 	Weapon weapon;
 	Player* const player_ref = &player;
+	Weapon* const weapon_ref = &weapon;
 
 	load_all_defaults(load_palace, player_ref, &weapon);
-	if (display_title_screen() == Exit) deinit_all(player_ref, &weapon);
+	if (display_title_screen() == Exit) deinit_all(player_ref, weapon_ref);
 
 	play_sound(&current_level.background_sound);
 	ground = init_pix_sprite("assets/walls/sand.bmp");
@@ -133,16 +135,17 @@ int main(void) {
 		#ifndef PLANAR_MODE
 		clear_statemap(occluded_by_walls);
 		raycast(player_ref, horizon_line, player.jump.height);
-		draw_things(player.pos, player.angle, player.jump.height, horizon_line);
 
 		#ifndef DISABLE_ENEMIES
-		if (!player.is_dead) update_all_enemy_instances(player_ref, &weapon);
+		if (!player.is_dead) update_all_enemy_instances(player_ref, weapon_ref);
 		#endif
 
-		use_weapon_if_needed(&weapon, player_ref, input_status);
+		use_weapon_if_needed(weapon_ref, player_ref, input_status);
 		#else
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
+
+		draw_things(player.pos, player.angle, player.jump.height, horizon_line);
 
 		if (player.is_dead && death_effect(player_ref))
 			running = 0;
@@ -161,9 +164,9 @@ int main(void) {
 		}
 		#endif
 
-		refresh(player_ref);
+		refresh(player_ref, weapon_ref);
 		tick_delay(before);
 	}
 	deinit_pix_sprite(ground);
-	deinit_all(player_ref, &weapon);
+	deinit_all(player_ref, weapon_ref);
 }
