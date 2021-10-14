@@ -32,11 +32,11 @@ Enemy init_trooper(void) {
 }
 
 Enemy enemies[enemy_count];
-Enemy (*const enemy_loader[enemy_count])(void) = {init_eddie, init_trooper};
+Enemy (*const enemy_loaders[enemy_count])(void) = {init_eddie, init_trooper};
 
 void init_all_enemies(void) {
 	for (byte i = 0; i < enemy_count; i++) {
-		const Enemy enemy = enemy_loader[i]();
+		const Enemy enemy = enemy_loaders[i]();
 		memcpy(enemies + i, &enemy, sizeof(Enemy));
 	}
 }
