@@ -179,7 +179,7 @@ void set_level_animated_billboards(const unsigned animated_billboard_count, ...)
 		};
 
 		const DataBillboard billboard_data = {
-			{va_arg(animation_data, double), va_arg(animation_data, double)},
+			.pos = {va_arg(animation_data, double), va_arg(animation_data, double)},
 			.height = va_arg(animation_data, double)
 		};
 
@@ -211,7 +211,7 @@ void set_level_enemy_instances(const unsigned enemy_instance_count, ...) {
 			.time_at_attack = 0.0,
 			.billboard_data = {
 				.pos = {va_arg(enemy_instance_data, double), va_arg(enemy_instance_data, double)},
-				.beta = 0.0, .dist = 0.0, .height = va_arg(enemy_instance_data, double)
+				.height = va_arg(enemy_instance_data, double), .dist = 0.0, .beta = 0.0
 			}
 		};
 

@@ -17,7 +17,7 @@ Sprite init_sprite(const char* const, const byte);
 
 typedef struct {
 	vec pos;
-	double beta, dist, height; // `height` here is a point height
+	double height, dist, beta;
 } DataBillboard;
 
 typedef struct {

@@ -73,10 +73,10 @@ static void draw_processed_things(const double p_height, const double horizon_li
 void update_billboard_values(DataBillboard* const billboard_data, const vec p_pos, const double p_angle) {
 	const vec delta_2D = billboard_data -> pos - p_pos;
 
+	billboard_data -> dist = sqrt(delta_2D[0] * delta_2D[0] + delta_2D[1] * delta_2D[1]);
+
 	billboard_data -> beta = p_angle - atan2(delta_2D[1], delta_2D[0]);
 	if (billboard_data -> beta > two_pi) billboard_data -> beta -= two_pi;
-
-	billboard_data -> dist = sqrt(delta_2D[0] * delta_2D[0] + delta_2D[1] * delta_2D[1]);
 }
 
 #define THING_ADDER(name) add_##name##_things_to_thing_container
@@ -137,6 +137,18 @@ DEF_THING_ADDER(projectile) {
 	(void) thing_buffer_start;
 	(void) p_pos;
 	(void) p_angle;
+
+	for (byte i = 0; i < current_level.projectile_count; i++) {
+		Tracer* const projectile = current_level.projectiles + i;
+		const vec3D projectile_pos = projectile -> pos;
+
+		DataBillboard billboard_data = {
+			.pos = {(double) projectile_pos[0], (double) projectile_pos[1]},
+			.height = (double) projectile_pos[2]
+		};
+
+		update_billboard_values(&billboard_data, p_pos, p_angle);
+	}
 }
 
 DEF_THING_ADDER(animated) {
@@ -193,12 +205,13 @@ void draw_things(const vec p_pos, const double p_angle, const double p_height, c
 		void (*const adder_fn)(THING_ADDER_SIGNATURE);
 	} ThingAdder;
 
-	enum {num_thing_adders = 5};
+	enum {num_thing_adders = 6};
 
 	const ThingAdder thing_adders[num_thing_adders] = {
 		{current_level.billboard_count, THING_ADDER(still)},
 		{current_level.teleporter_count, THING_ADDER(teleporter)},
 		{current_level.health_kit_count, THING_ADDER(health_kit)},
+		{current_level.projectile_count, THING_ADDER(projectile)},
 		{current_level.animated_billboard_count, THING_ADDER(animated)},
 		{current_level.enemy_instance_count, THING_ADDER(enemy_instance)}
 	};

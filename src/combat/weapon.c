@@ -42,7 +42,6 @@ static void use_projectile_weapon(const Weapon* const weapon, const Player* cons
 	(void) weapon;
 	(void) player;
 
-	/*
 	if (current_level.projectile_count <= current_level.alloc_projectile_count) {
 		current_level.projectiles = realloc(current_level.projectiles,
 			++current_level.alloc_projectile_count * sizeof(Tracer));
@@ -56,7 +55,6 @@ static void use_projectile_weapon(const Weapon* const weapon, const Player* cons
 
 	current_level.thing_count++;
 	current_level.projectile_count++;
-	*/
 
 	/*
 	- the new tracer projectile will call init_tracer_from_player

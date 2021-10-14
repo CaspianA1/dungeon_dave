@@ -61,8 +61,9 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- maybe update some things like health kits and projectiles in their thing adders
 - compressed audio
-- counts to uint16_t's
+- counts to uint16_t's (not level unsigned to uint16_t's too)
 - account for 0-length allocs of level items in a special way, since malloc's return val is implementation dependent
 - you can clip into enemies when you teleport to where they are (make a teleport_enemy_if_needed, maybe)
 - set a static limit to y-pitch (probably 45 degrees) (if that works with the pace)
