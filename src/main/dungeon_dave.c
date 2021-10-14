@@ -105,7 +105,7 @@ int main(void) {
 	ground = init_pix_sprite("assets/walls/sand.bmp");
 
 	#ifdef SHADING_ENABLED
-	byte begin_level_fade = INIT_BEGIN_LEVEL_FADE;
+	byte curr_level_fade = BEGIN_LEVEL_FADE;
 	#endif
 
 	byte running = 1;
@@ -128,6 +128,9 @@ int main(void) {
 			default: break;
 		}
 
+		use_weapon_if_needed(weapon_ref, player_ref, input_status);
+		// update_projectiles
+
 		const double horizon_line = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
 		prepare_for_drawing();
@@ -141,7 +144,6 @@ int main(void) {
 		if (!player.is_dead) update_all_enemy_instances(player_ref, weapon_ref);
 		#endif
 
-		use_weapon_if_needed(weapon_ref, player_ref, input_status);
 		#else
 		fill_val_buffers_for_planar_mode(player.angle);
 		#endif
@@ -158,10 +160,10 @@ int main(void) {
 		use_health_kit_if_needed(player_ref);
 
 		#ifdef SHADING_ENABLED
-		if (begin_level_fade != 255) {
-			begin_level_fade++;
-			SDL_SetTextureColorMod(screen.pixel_buffer, begin_level_fade, begin_level_fade, begin_level_fade);
-			SDL_SetTextureColorMod(screen.shape_buffer, begin_level_fade, begin_level_fade, begin_level_fade);
+		if (curr_level_fade != 255) {
+			curr_level_fade++;
+			SDL_SetTextureColorMod(screen.pixel_buffer, curr_level_fade, curr_level_fade, curr_level_fade);
+			SDL_SetTextureColorMod(screen.shape_buffer, curr_level_fade, curr_level_fade, curr_level_fade);
 		}
 		#endif
 

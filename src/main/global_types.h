@@ -93,8 +93,8 @@ typedef struct {
 typedef struct {
 	vec3D pos; // x, y, z
 	const vec3D dir;
-	double dist;
-	const double step;
+	float dist; // 32-bit dist used here b/c pos and dir have float components
+	const float step;
 } Tracer;
 
 //////////

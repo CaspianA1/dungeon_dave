@@ -1,8 +1,8 @@
 /*
-static void print_navigator(const CorrectedRoute* const corrected_route, const vec floating_pos) {
+static void print_navigator(const CorrectedRoute* const route, const vec floating_pos) {
 	const ivec
 		pos = ivec_from_vec(floating_pos),
-		end = ivec_from_vec(corrected_route -> data[corrected_route -> length - 1]);
+		end = ivec_from_vec(route -> data[route -> length - 1]);
 
 	for (int y = 0; y < current_level.map_size.y; y++) {
 		for (int x = 0; x < current_level.map_size.x; x++) {
@@ -13,8 +13,8 @@ static void print_navigator(const CorrectedRoute* const corrected_route, const v
 			else if (wall) color = 0;
 			else {
 				byte visited_point = 0;
-				for (int i = 0; i < corrected_route -> length; i++) {
-					const ivec node = ivec_from_vec(corrected_route -> data[i]);
+				for (int i = 0; i < route -> length; i++) {
+					const ivec node = ivec_from_vec(route -> data[i]);
 					if (node.x == x && node.y == y) {
 						visited_point = 1;
 						break;

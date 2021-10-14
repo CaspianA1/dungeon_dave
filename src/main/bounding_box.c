@@ -1,10 +1,8 @@
-static const double
-	actor_box_side_len = 0.4, // actor = player or enemy
-	min_fall_height_for_sound = 2.0;
+static const double actor_box_side_len = 0.4; // Actor = player or thing
 
 #define DEF_BOUNDING_BOX_TYPE(name, suffix, vec_type, vec_type_filler, subtype, num_axes)\
 \
-typedef struct {const vec_type origin, size;} name##suffix; /* Origin for left = top-left corner */\
+typedef struct {const vec_type origin, size;} name##suffix; /* Origin for left = top-left corner */ \
 \
 byte aabb_axis_collision##suffix(const name##suffix a, const name##suffix b, const byte axis) {\
 	return (a.origin[axis] < b.origin[axis] + b.size[axis]) && (a.origin[axis] + a.size[axis] > b.origin[axis]);\

@@ -1,6 +1,6 @@
 // Tracing is separate from DDA because DDA inherently steps on whole grids, while weapons do not
 
-static const double
+static const float
 	short_range_tracer_step = 0.3, // the magnitude of the velocity vector
 	long_range_tracer_step = 0.1,
 	long_range_projectile_tracer_step = 0.04,
@@ -11,7 +11,7 @@ void deinit_weapon(const Weapon* const weapon) {
 	deinit_sprite(weapon -> animation_data.immut.sprite);
 }
 
-inlinable Tracer init_tracer_from_player(const Player* const player, const double step) {
+inlinable Tracer init_tracer_from_player(const Player* const player, const float step) {
 	const vec p_pos = player -> pos, p_dir = player -> dir; // these are 2D
 
 	return (Tracer) { // shoots from center of player
@@ -22,7 +22,7 @@ inlinable Tracer init_tracer_from_player(const Player* const player, const doubl
 
 // returns if tracing should continue
 inlinable byte iter_tracer(Tracer* const tracer) {
-	const double step = tracer -> step;
+	const float step = tracer -> step;
 
 	tracer -> dist += step;
 	const vec3D new_pos = tracer -> pos + tracer -> dir * vec_fill_3D(step);
@@ -42,7 +42,7 @@ static void use_projectile_weapon(const Weapon* const weapon, const Player* cons
 	(void) weapon;
 	(void) player;
 
-	if (current_level.projectile_count <= current_level.alloc_projectile_count) {
+	if (current_level.projectile_count == current_level.alloc_projectile_count) {
 		current_level.projectiles = realloc(current_level.projectiles,
 			++current_level.alloc_projectile_count * sizeof(Tracer));
 
@@ -92,7 +92,7 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 					const EnemyState, const byte, const vec, const double);
 
 				// `f(x) = 1.0 - (log2(x) / 8)`, range zero and below to infinity (smoothly decreasing slope)
-				double percent_damage = 1.0 - (log2(tracer.dist) / 8.0);
+				double percent_damage = 1.0 - (log2((double) tracer.dist) / 8.0);
 				if (percent_damage > 1.0) percent_damage = 1.0;
 				else if (percent_damage < 0.0) percent_damage = 0.0;
 

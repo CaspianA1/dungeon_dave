@@ -19,7 +19,7 @@
 // #define DISABLE_ENEMIES
 #define SHADING_ENABLED
 // #define PERLIN_SHADING
-// #define SOUND_ENABLED
+#define SOUND_ENABLED
 // #define TRACK_MEMORY
 
 #define FLOORCAST_THREADS 3
@@ -40,7 +40,7 @@
 
 #define AUDIO_CHUNK_SIZE 512 // 1024 before
 
-#define INIT_BEGIN_LEVEL_FADE 100
+#define BEGIN_LEVEL_FADE 100
 
 #define KEY_TOGGLE_OPTIONS_MENU SDL_SCANCODE_ESCAPE
 #define KEY_TOGGLE_MINIMAP SDL_SCANCODE_1
@@ -75,9 +75,10 @@
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
-#define DEBUG_BYTE(byte)\
+#define DEBUG_BYTE(byte) {\
 	for (int i = 7; i >= 0; i--) putchar((byte & (1 << i)) ? '1' : '0');\
-	putchar('\n');
+	putchar('\n');\
+}
 
 #define DEBUG_VEC(vec) printf(#vec " = {%lf, %lf}\n", vec[0], vec[1])
 #define DEBUG_IVEC(vec) printf(#vec " = {%d, %d}\n", vec.x, vec.y)

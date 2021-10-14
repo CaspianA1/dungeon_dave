@@ -1,3 +1,5 @@
+static const double min_fall_height_for_sound = 2.0;
+
 inlinable void report_aabb_thing_collisions(const vec pos, const vec movement,
 	byte* const hit_x, byte* const hit_y, const double p_height) { 
 
