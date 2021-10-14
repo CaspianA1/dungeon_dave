@@ -90,6 +90,13 @@ typedef struct {
 	DataBillboard billboard;
 } HealthKit;
 
+typedef struct {
+	vec3D pos; // x, y, z
+	const vec3D dir;
+	double dist;
+	const double step;
+} Tracer;
+
 //////////
 
 typedef struct {
@@ -100,8 +107,10 @@ typedef struct {
 	byte
 		*wallmap, *heightmap, /* *ceiling_data, *floor_data */
 		wall_count, billboard_count, animated_billboard_count, enemy_instance_count,
-		teleporter_count, health_kit_count, thing_count, max_alloc_thing_count,
-		max_point_height, out_of_bounds_point;
+		teleporter_count, health_kit_count,
+
+		projectile_count, alloc_projectile_count,
+		thing_count, alloc_thing_count, max_point_height, out_of_bounds_point;
 
  	StateMap bfs_visited;
 
@@ -117,6 +126,7 @@ typedef struct {
 	Billboard* billboards;
 	Teleporter* teleporters;
 	HealthKit* health_kits;
+	Tracer* projectiles;
 
 	AnimatedBillboard* animated_billboards;
 	EnemyInstance* enemy_instances;

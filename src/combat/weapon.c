@@ -1,8 +1,9 @@
-// Hitscanning is separate from DDA because DDA inherently steps on whole grids, while weapons do not
+// Tracing is separate from DDA because DDA inherently steps on whole grids, while weapons do not
 
 static const double
-	short_range_hitscan_step = 0.3,
-	long_range_hitscan_step = 0.1, // the magnitude of the velocity vector
+	short_range_tracer_step = 0.3, // the magnitude of the velocity vector
+	long_range_tracer_step = 0.1,
+	long_range_projectile_tracer_step = 0.04,
 	projectile_size = 0.2;
 
 void deinit_weapon(const Weapon* const weapon) {
@@ -10,31 +11,22 @@ void deinit_weapon(const Weapon* const weapon) {
 	deinit_sprite(weapon -> animation_data.immut.sprite);
 }
 
-typedef struct {
-	vec3D pos; // x, y, z
-	const vec3D dir;
-	double dist;
-	const double step;
-} Hitscan;
-
-
-
-inlinable Hitscan init_player_hitscan(const Player* const player, const double step) {
+inlinable Tracer init_tracer_from_player(const Player* const player, const double step) {
 	const vec p_pos = player -> pos, p_dir = player -> dir; // these are 2D
 
-	return (Hitscan) { // shoots from center of player
+	return (Tracer) { // shoots from center of player
 		{p_pos[0], p_pos[1], player -> jump.height + actor_eye_height}, {p_dir[0], p_dir[1],
 		atan((player -> y_pitch + player -> pace.screen_offset) / settings.proj_dist)}, 0.0, step
 	};
 }
 
-// returns if hitscanning should continue
-inlinable byte iter_hitscan(Hitscan* const hitscan) {
-	const double step = hitscan -> step;
+// returns if tracing should continue
+inlinable byte iter_tracer(Tracer* const tracer) {
+	const double step = tracer -> step;
 
-	hitscan -> dist += step;
-	const vec3D new_pos = hitscan -> pos + hitscan -> dir * vec_fill_3D(step);
-	hitscan -> pos = new_pos;
+	tracer -> dist += step;
+	const vec3D new_pos = tracer -> pos + tracer -> dir * vec_fill_3D(step);
+	tracer -> pos = new_pos;
 
 	const float height = new_pos[2];
 	return (height >= 0.0f) && (!point_exists_at((double) new_pos[0], (double) new_pos[1], (double) height));
@@ -51,14 +43,25 @@ static void use_projectile_weapon(const Weapon* const weapon, const Player* cons
 	(void) player;
 
 	/*
-	if (current_level.thing_count <= current_level.max_alloc_thing_count) {
-		current_level.thing_count++;
-		current_level.thing_container = wrealloc(current_level.thing_container,
-			++current_level.max_alloc_thing_count * sizeof(Thing));
+	if (current_level.projectile_count <= current_level.alloc_projectile_count) {
+		current_level.projectiles = realloc(current_level.projectiles,
+			++current_level.alloc_projectile_count * sizeof(Tracer));
+
+		current_level.thing_container = realloc(current_level.thing_container,
+			++current_level.alloc_thing_count * sizeof(Thing));
 	}
+
+	current_level.thing_count++;
+	current_level.projectile_count++;
+
+	Tracer tracer = init_tracer_from_player(player, long_range_projectile_tracer_step);
+	(void) tracer;
 	*/
 
-	// the new hitscan projectile will call init_player_hitscan
+	/*
+	- the new tracer projectile will call init_tracer_from_player
+	- for projectile in projectiles, if it hit a wall, thing count and projectile count decrement
+	*/
 }
 
 static void use_hitscan_weapon(const Weapon* const weapon, const Player* const player) {
@@ -67,11 +70,11 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 
 	const byte short_range_weapon = bit_is_set(weapon -> flags, mask_short_range_weapon);
 
-	Hitscan hitscan = init_player_hitscan(player,
-		short_range_weapon ? short_range_hitscan_step : long_range_hitscan_step);
+	Tracer tracer = init_tracer_from_player(player,
+		short_range_weapon ? short_range_tracer_step : long_range_tracer_step);
 
-	while (iter_hitscan(&hitscan)) {
-		const BoundingBox_3D projectile_box = init_bounding_box_3D(hitscan.pos, projectile_size);
+	while (iter_tracer(&tracer)) {
+		const BoundingBox_3D projectile_box = init_bounding_box_3D(tracer.pos, projectile_size);
 
 		byte collided = 0;
 

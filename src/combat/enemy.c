@@ -76,17 +76,17 @@ static byte billboard_can_see_player(const DataBillboard* const billboard_data, 
 	const double height_diff = fabs(billboard_data -> height - p_height);
 	const vec dir_2D = (p_pos - billboard_data -> pos) * vec_fill(one_over_dist_diff);
 
-	Hitscan hitscan = {
+	Tracer tracer = {
 		{billboard_data -> pos[0], billboard_data -> pos[1], billboard_data -> height + actor_eye_height},
 		{dir_2D[0], dir_2D[1], atan(height_diff * one_over_dist_diff)}, 0.0, eye_trace_step
 	};
 
 	const BoundingBox_3D player_box = init_actor_bounding_box(p_pos, p_height);
 
-	while (iter_hitscan(&hitscan)) {
-		const BoundingBox_3D eye_box = init_bounding_box_3D(hitscan.pos, eye_box_size);
+	while (iter_tracer(&tracer)) {
+		const BoundingBox_3D eye_box = init_bounding_box_3D(tracer.pos, eye_box_size);
 		if (aabb_collision_3D(player_box, eye_box)) return 1;
-		else if (point_exists_at((double) hitscan.pos[0], (double) hitscan.pos[1], (double) hitscan.pos[2])) return 0;
+		else if (point_exists_at((double) tracer.pos[0], (double) tracer.pos[1], (double) tracer.pos[2])) return 0;
 	}
 
 	return 0;

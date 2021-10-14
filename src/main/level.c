@@ -232,7 +232,7 @@ inlinable void set_level_thing_container(void) {
 		+ current_level.animated_billboard_count + current_level.enemy_instance_count;
 
 	current_level.thing_container = wmalloc(current_level.thing_count * sizeof(Thing));
-	current_level.max_alloc_thing_count = current_level.thing_count;
+	current_level.alloc_thing_count = current_level.thing_count;
 }
 
 void deinit_level(void) {
