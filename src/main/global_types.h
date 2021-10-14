@@ -97,6 +97,11 @@ typedef struct {
 	const float step;
 } Tracer;
 
+typedef struct {
+	DataBillboard billboard_data;
+	Tracer tracer;
+} Projectile;
+
 //////////
 
 typedef struct {
@@ -126,7 +131,7 @@ typedef struct {
 	Billboard* billboards;
 	Teleporter* teleporters;
 	HealthKit* health_kits;
-	Tracer* projectiles;
+	Projectile* projectiles;
 
 	AnimatedBillboard* animated_billboards;
 	EnemyInstance* enemy_instances;

@@ -44,22 +44,31 @@ static void use_projectile_weapon(const Weapon* const weapon, const Player* cons
 
 	if (current_level.projectile_count == current_level.alloc_projectile_count) {
 		current_level.projectiles = realloc(current_level.projectiles,
-			++current_level.alloc_projectile_count * sizeof(Tracer));
+			++current_level.alloc_projectile_count * sizeof(Projectile));
 
 		current_level.thing_container = realloc(current_level.thing_container,
 			++current_level.alloc_thing_count * sizeof(Thing));
 	}
 
-	Tracer tracer = init_tracer_from_player(player, long_range_projectile_tracer_step);
-	memcpy(current_level.projectiles + current_level.projectile_count, &tracer, sizeof(Tracer));
+	const Tracer tracer = init_tracer_from_player(player, long_range_projectile_tracer_step);
+	const Projectile projectile = {
+		.billboard_data = {
+			.pos = {(double) tracer.pos[0], (double) tracer.pos[1]},
+			.height = player -> jump.height
+		},
+		.tracer = tracer
+	};
+
+	memcpy(current_level.projectiles + current_level.projectile_count, &projectile, sizeof(Projectile));
 
 	current_level.thing_count++;
 	current_level.projectile_count++;
 
 	/*
-	- the new tracer projectile will call init_tracer_from_player
-	- for projectile in projectiles, if it hit a wall, thing count and projectile count decrement
-		(make an update_projectiles method)
+	- start the projectile a bit out from the player
+	- for p in projectiles:
+		if it hit an enemy or wall, dec thing count and projectile count
+		if it hit an enemy, reduce the enemy health some, and make a noise or some cool effect
 	*/
 }
 

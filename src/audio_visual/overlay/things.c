@@ -142,31 +142,15 @@ DEF_THING_ADDER(projectile) {
 		first_call = 0;
 	}
 
-	/*
-	projectiles: one billboard
-	they can't have a tracer and billboard
-	perhaps make a billboard, billboard -> tracer, update tracer, tracer -> billboard
-	a new tracer type, which is just a billboard (?)
-	need to store a dir though
-
-	projectile details in weapon.c; projectile type = of DataBillboard and step
-	projectile -> tracer -> projectile
-	*/
-
 	for (byte i = 0; i < current_level.projectile_count; i++) {
-		Tracer* const projectile = current_level.projectiles + i;
-		const vec3D projectile_pos = projectile -> pos;
+		Projectile* const projectile = current_level.projectiles + i;
+		DataBillboard* const billboard_data = &projectile -> billboard_data;
 
-		DataBillboard billboard_data = {
-			.pos = {(double) projectile_pos[0], (double) projectile_pos[1]},
-			.height = (double) projectile_pos[2]
-		};
-
-		update_billboard_values(&billboard_data, p_pos, p_angle);
+		update_billboard_values(billboard_data, p_pos, p_angle);
 
 		const Thing thing = {
-			0, &billboard_data, &projectile_sprite,
-			{0, 0, projectile_sprite.size.x, projectile_sprite.size.y}
+			0, billboard_data, &projectile_sprite,
+			{0, 0, projectile_sprite.size.x, projectile_sprite.size.y},
 		};
 
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));

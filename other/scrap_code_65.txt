@@ -259,3 +259,16 @@ puts("---");
 // in some cases, the end ind is often longer than the route length, which shouldn't be
 
 /////
+
+/*
+projectiles: one billboard
+they can't have a tracer and billboard
+perhaps make a billboard, billboard -> tracer, update tracer, tracer -> billboard
+a new tracer type, which is just a billboard (?)
+need to store a dir though
+
+projectile details in weapon.c; projectile type = of DataBillboard and step
+projectile -> tracer -> projectile
+*/
+
+/////
