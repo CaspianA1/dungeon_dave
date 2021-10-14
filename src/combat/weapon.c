@@ -3,24 +3,25 @@
 static const float
 	short_range_tracer_step = 0.3, // the magnitude of the velocity vector
 	long_range_tracer_step = 0.1,
-	long_range_projectile_tracer_step = 0.04,
-	projectile_size = 0.2;
+	long_range_projectile_tracer_step = 0.12,
+	hitscan_projectile_size = 0.2,
+	inter_tick_projectile_size = 1.0;
 
 void deinit_weapon(const Weapon* const weapon) {
 	deinit_sound(&weapon -> sound);
 	deinit_sprite(weapon -> animation_data.immut.sprite);
 }
 
-inlinable Tracer init_tracer_from_player(const Player* const player, const float step) {
+inlinable Tracer init_tracer_from_player(const Player* const player, const float step, const byte is_hitscan) {
 	const vec p_pos = player -> pos, p_dir = player -> dir; // these are 2D
 
 	return (Tracer) { // shoots from center of player
 		{p_pos[0], p_pos[1], player -> jump.height + actor_eye_height}, {p_dir[0], p_dir[1],
-		atan((player -> y_pitch + player -> pace.screen_offset) / settings.proj_dist)}, 0.0, step
+		atan((player -> y_pitch + player -> pace.screen_offset) / settings.proj_dist)}, 0.0, step, is_hitscan
 	};
 }
 
-// returns if tracing should continue
+// Returns if tracing should continue
 inlinable byte iter_tracer(Tracer* const tracer) {
 	const float step = tracer -> step;
 
@@ -28,8 +29,27 @@ inlinable byte iter_tracer(Tracer* const tracer) {
 	const vec3D new_pos = tracer -> pos + tracer -> dir * vec_fill_3D(step);
 	tracer -> pos = new_pos;
 
-	const float height = new_pos[2];
-	return (height >= 0.0f) && (!point_exists_at((double) new_pos[0], (double) new_pos[1], (double) height));
+	float height = new_pos[2];
+
+	const byte above_ground = (tracer -> is_hitscan) ? (height >= 0.0f) : (height >= 0.5f);
+	return above_ground && !point_exists_at((double) new_pos[0], (double) new_pos[1], (double) height);
+}
+
+inlinable void update_inter_tick_projectiles(void) {
+	for (byte i = 0; i < current_level.projectile_count; i++) {
+		if (!iter_tracer(&current_level.projectiles[i].tracer)) {
+			/* This shifts all projectiles after the current projectile
+			left by one, therefore deleting the current projectile */
+
+			memmove(current_level.projectiles + i,
+				current_level.projectiles + i + 1,
+				current_level.projectile_count - i - 1);
+
+			current_level.projectile_count--;
+			current_level.thing_count--;
+
+		}
+	}
 }
 
 #ifdef NOCLIP_MODE
@@ -38,9 +58,8 @@ inlinable byte iter_tracer(Tracer* const tracer) {
 
 #else
 
-static void use_projectile_weapon(const Weapon* const weapon, const Player* const player) {
+static void use_inter_tick_projectile_weapon(const Weapon* const weapon, const Player* const player) {
 	(void) weapon;
-	(void) player;
 
 	if (current_level.projectile_count == current_level.alloc_projectile_count) {
 		current_level.projectiles = realloc(current_level.projectiles,
@@ -50,7 +69,7 @@ static void use_projectile_weapon(const Weapon* const weapon, const Player* cons
 			++current_level.alloc_thing_count * sizeof(Thing));
 	}
 
-	const Tracer tracer = init_tracer_from_player(player, long_range_projectile_tracer_step);
+	const Tracer tracer = init_tracer_from_player(player, long_range_projectile_tracer_step, 0);
 	const Projectile projectile = {
 		.billboard_data = {
 			.pos = {(double) tracer.pos[0], (double) tracer.pos[1]},
@@ -79,10 +98,10 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 	const byte short_range_weapon = bit_is_set(weapon -> flags, mask_short_range_weapon);
 
 	Tracer tracer = init_tracer_from_player(player,
-		short_range_weapon ? short_range_tracer_step : long_range_tracer_step);
+		short_range_weapon ? short_range_tracer_step : long_range_tracer_step, 1);
 
 	while (iter_tracer(&tracer)) {
-		const BoundingBox_3D projectile_box = init_bounding_box_3D(tracer.pos, projectile_size);
+		const BoundingBox_3D projectile_box = init_bounding_box_3D(tracer.pos, hitscan_projectile_size);
 
 		byte collided = 0;
 
@@ -133,7 +152,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
 		play_sound(&weapon -> sound);
 		set_bit(weapon -> flags, mask_in_use_weapon | mask_recently_used_weapon);
-		(spawns_projectile ? use_projectile_weapon : use_hitscan_weapon)(weapon, player);
+		(spawns_projectile ? use_inter_tick_projectile_weapon : use_hitscan_weapon)(weapon, player);
 	}
 	else clear_bit(weapon -> flags, mask_recently_used_weapon); // recently used = within the last tick
 }

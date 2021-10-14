@@ -272,3 +272,68 @@ projectile -> tracer -> projectile
 */
 
 /////
+
+memmove(test_array + del_ind, test_array + del_ind + 1, len - del_ind - 1);
+for (int i = 0; i < 5; i++) {
+	printf("%d ", test_array[i]);
+}
+putchar('\n');	
+
+
+/*
+for (int i = del_ind; i < len; i++) {
+	test_array[i] = test_array[i + 1];
+}
+
+for (int i = 0; i < 5; i++) {
+	printf("%d ", test_array[i]);
+}
+putchar('\n');
+*/
+//////////
+
+/////
+
+//////////
+enum {len = 5};
+byte test_array[len] = {4, 5, 6, 7, 8};
+
+int del_ind = 2;
+
+memmove(test_array + del_ind, test_array + del_ind + 1, len - del_ind - 1);
+for (int i = 0; i < 5; i++) {
+	printf("%d ", test_array[i]);
+}
+putchar('\n');	
+
+
+/*
+for (int i = del_ind; i < len; i++) {
+	test_array[i] = test_array[i + 1];
+}
+
+for (int i = 0; i < 5; i++) {
+	printf("%d ", test_array[i]);
+}
+putchar('\n');
+*/
+//////////
+
+/////
+
+inlinable void delete_from_array(void* array, const int del_ind, const int length) {
+	// memmove(test_array + del_ind, test_array + del_ind + 1, len - del_ind - 1);
+	memmove(array + del_ind, array + del_ind + 1, length - del_ind - 1);
+}
+
+/////
+
+/*
+if (current_level.projectile_count > 0) puts("All projectiles:");
+for (byte i = 0; i < current_level.projectile_count; i++)
+	printf("%lf ", (double) current_level.projectiles[i].tracer.pos[0]);
+if (current_level.projectile_count > 0) puts("\n---");
+else puts("No projectiles");
+*/
+
+/////

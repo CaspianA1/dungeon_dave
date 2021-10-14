@@ -144,9 +144,14 @@ DEF_THING_ADDER(projectile) {
 
 	for (byte i = 0; i < current_level.projectile_count; i++) {
 		Projectile* const projectile = current_level.projectiles + i;
+		const vec3D projectile_pos = projectile -> tracer.pos;
+
 		DataBillboard* const billboard_data = &projectile -> billboard_data;
 
 		update_billboard_values(billboard_data, p_pos, p_angle);
+
+		billboard_data -> pos = (vec) {(double) projectile_pos[0], (double) projectile_pos[1]};
+		billboard_data -> height = (double) projectile_pos[2] - actor_eye_height;
 
 		const Thing thing = {
 			0, billboard_data, &projectile_sprite,

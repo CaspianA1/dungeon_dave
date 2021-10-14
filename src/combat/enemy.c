@@ -78,7 +78,7 @@ static byte billboard_can_see_player(const DataBillboard* const billboard_data, 
 
 	Tracer tracer = {
 		{billboard_data -> pos[0], billboard_data -> pos[1], billboard_data -> height + actor_eye_height},
-		{dir_2D[0], dir_2D[1], atan(height_diff * one_over_dist_diff)}, 0.0, eye_trace_step
+		{dir_2D[0], dir_2D[1], atan(height_diff * one_over_dist_diff)}, 0.0, eye_trace_step, 1
 	};
 
 	const BoundingBox_3D player_box = init_actor_bounding_box(p_pos, p_height);

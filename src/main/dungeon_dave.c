@@ -61,8 +61,15 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
-- give some init amount to the projectiles (no realloc from 0)
-- maybe update some things like health kits and projectiles in their thing adders
+projectile todo:
+	- a sound that happens when projectiles travel
+	- an explosion effect + sound when a projectile collides
+	- collide with projectile edges for walls with projectiles
+	- an upper height limit to projectiles
+	- shoot projectiles into teleporters
+	- give some init amount to the projectile container (no realloc from 0)
+	- some projectile shots fail for some reason
+
 - compressed audio
 - counts to uint16_t's (not level unsigned to uint16_t's too)
 - account for 0-length allocs of level items in a special way, since malloc's return val is implementation dependent
@@ -70,7 +77,6 @@ audio todo:
 - set a static limit to y-pitch (probably 45 degrees) (if that works with the pace)
 - sometimes, when at an angle of 0 and pressed into a corner, a wall disappears
 - sometimes, the mouse can escape the window when it shouldn't be able to
-- bigger projectile size for inter-tick projectiles
 - thing collision detection with 3D bounding boxes
 - lightmap seed to init_level, or perlin shading in shader fn
 - make sure that thread creation doesn't stall
@@ -99,7 +105,7 @@ int main(void) {
 	Player* const player_ref = &player;
 	Weapon* const weapon_ref = &weapon;
 
-	load_all_defaults(load_palace, player_ref, &weapon);
+	load_all_defaults(load_palace, player_ref, weapon_ref);
 	if (display_title_screen() == Exit) deinit_all(player_ref, weapon_ref);
 
 	play_sound(&current_level.background_sound);
@@ -130,7 +136,7 @@ int main(void) {
 		}
 
 		use_weapon_if_needed(weapon_ref, player_ref, input_status);
-		// update_projectiles
+		update_inter_tick_projectiles();
 
 		const double horizon_line = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
