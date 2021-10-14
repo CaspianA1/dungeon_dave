@@ -133,6 +133,12 @@ DEF_THING_ADDER(health_kit) {
 	}
 }
 
+DEF_THING_ADDER(projectile) {
+	(void) thing_buffer_start;
+	(void) p_pos;
+	(void) p_angle;
+}
+
 DEF_THING_ADDER(animated) {
 	for (byte i = 0; i < current_level.animated_billboard_count; i++) {
 		AnimatedBillboard* const animated_billboard = current_level.animated_billboards + i;

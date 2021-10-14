@@ -106,10 +106,10 @@ typedef struct {
 
 	byte
 		*wallmap, *heightmap, /* *ceiling_data, *floor_data */
-		wall_count, billboard_count, animated_billboard_count, enemy_instance_count,
-		teleporter_count, health_kit_count,
+		wall_count, billboard_count, teleporter_count,
+		health_kit_count, projectile_count, alloc_projectile_count,
+		animated_billboard_count, enemy_instance_count,
 
-		projectile_count, alloc_projectile_count,
 		thing_count, alloc_thing_count, max_point_height, out_of_bounds_point;
 
  	StateMap bfs_visited;
