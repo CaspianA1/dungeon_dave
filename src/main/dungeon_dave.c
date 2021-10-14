@@ -61,6 +61,7 @@ audio todo:
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
 
+- give some init amount to the projectiles (no realloc from 0)
 - maybe update some things like health kits and projectiles in their thing adders
 - compressed audio
 - counts to uint16_t's (not level unsigned to uint16_t's too)
