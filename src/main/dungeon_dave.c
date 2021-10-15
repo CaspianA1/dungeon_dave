@@ -163,7 +163,6 @@ int main(void) {
 		parallel_floorcast(0, player.pos, player.jump.height, horizon_line);
 		// floorcast(0, horizon_line, horizon_line, settings.screen_height, player.pos, player.jump.height);
 
-		// teleport_player_if_needed(player_ref);
 		use_health_kit_if_needed(player_ref);
 
 		#ifdef SHADING_ENABLED
