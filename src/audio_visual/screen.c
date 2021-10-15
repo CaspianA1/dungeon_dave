@@ -82,17 +82,23 @@ void refresh(Player* const player, Weapon* const weapon) {
 		draw_tilted(screen.shape_buffer, &dest_crop, tilt.val);
 	}
 
-
+	#ifndef NOCLIP_MODE
 	void animate_weapon(DataAnimation* const, const vec, const byte, const byte, const double);
-	void draw_hud_elements(const Player* const);
-	void teleport_player_if_needed(Player* const);
 
 	animate_weapon(&weapon -> animation_data, player -> pos,
 		bit_is_set(weapon -> flags, mask_paces_sideways_weapon),
 		bit_is_set(weapon -> flags, mask_in_use_weapon), player -> body.v);
 
-	teleport_player_if_needed(player);
+	#else
+	(void) weapon;
+	#endif
 
+	#ifndef PLANAR_MODE
+	void teleport_player_if_needed(Player* const);
+	teleport_player_if_needed(player);
+	#endif
+
+	void draw_hud_elements(const Player* const);
 	draw_hud_elements(player);
 
 	SDL_RenderPresent(screen.renderer);

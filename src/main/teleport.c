@@ -39,7 +39,6 @@ byte teleport_if_needed(vec* const pos, double* const height, const Player* cons
 	return 0;
 }
 
-#ifndef PLANAR_MODE
 void teleport_player_if_needed(Player* const player) {
 	static byte fuzz_ticks = ticks_for_teleporter_fuzz;
 
@@ -75,6 +74,3 @@ void teleport_player_if_needed(Player* const player) {
 		fuzz_ticks--;
 	}
 }
-#else
-#define teleport_player_if_needed(a)
-#endif
