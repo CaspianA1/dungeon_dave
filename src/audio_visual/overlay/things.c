@@ -13,8 +13,9 @@ static int cmp_things(const void* const a, const void* const b) {
 
 static void draw_processed_things(const double p_height, const double horizon_line) {
 	for (byte i = 0; i < current_level.thing_count; i++) {
-		const Thing thing = current_level.thing_container[i];
-		if (bit_is_set(thing.flags, mask_skip_rendering_thing)) continue;
+		const Thing* const thing_ref = current_level.thing_container + i;
+		if (bit_is_set(thing_ref -> flags, mask_skip_rendering_thing)) continue;
+		const Thing thing = *thing_ref;
 
 		const DataBillboard billboard_data = *thing.billboard_data;
 		const double cos_billboard_beta = cos(billboard_data.beta);
