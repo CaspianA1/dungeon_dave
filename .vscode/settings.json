@@ -1,5 +1,23 @@
 {
     "files.associations": {
-        "cstddef": "c"
+        "cstddef": "c",
+        "__functional_base": "c",
+        "__functional_base_03": "c",
+        "__hash_table": "c",
+        "__tuple": "c",
+        "algorithm": "c",
+        "array": "c",
+        "chrono": "c",
+        "compare": "c",
+        "type_traits": "c",
+        "filesystem": "c",
+        "functional": "c",
+        "iterator": "c",
+        "limits": "c",
+        "memory": "c",
+        "random": "c",
+        "ratio": "c",
+        "tuple": "c",
+        "utility": "c"
     }
 }

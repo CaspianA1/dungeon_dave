@@ -24,6 +24,7 @@
 
 #include "../audio_visual/overlay/sprite.c"
 #include "../audio_visual/overlay/animation.c"
+#include "../audio_visual/overlay/thing_adders.c"
 #include "../audio_visual/overlay/things.c"
 
 #include "../audio_visual/misc.c"
