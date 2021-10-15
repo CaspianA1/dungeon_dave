@@ -67,7 +67,6 @@ projectile todo:
 	- collide with projectile edges for walls with projectiles
 	- an upper height limit to projectiles
 	- shoot projectiles into teleporters
-	- give some init amount to the projectile container (no realloc from 0)
 	- some projectile shots fail for some reason
 
 - compressed audio
