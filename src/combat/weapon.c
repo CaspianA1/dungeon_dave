@@ -28,9 +28,10 @@ void deinit_weapon(const Weapon* const weapon) {
 inlinable Tracer init_tracer_from_player(const Player* const player, const float step, const byte is_hitscan) {
 	const vec p_pos = player -> pos, p_dir = player -> dir; // these are 2D
 
-	return (Tracer) { // shoots from center of player
-		{p_pos[0], p_pos[1], player -> jump.height + actor_eye_height}, {p_dir[0], p_dir[1],
-		atan((player -> y_pitch + player -> pace.screen_offset) / settings.proj_dist)}, 0.0, step, is_hitscan
+	return (Tracer) { // Shoots from center of player
+		{p_pos[0], p_pos[1], player -> jump.height + actor_eye_height},
+		{p_dir[0], p_dir[1], atan((player -> y_pitch + player -> pace.screen_offset) / settings.proj_dist)},
+		0.0, step, is_hitscan
 	};
 }
 
@@ -49,20 +50,19 @@ inlinable byte iter_tracer(Tracer* const tracer) {
 }
 
 inlinable void update_inter_tick_projectiles(void) {
+	byte new_projectile_count = current_level.projectile_count;
 	for (byte i = 0; i < current_level.projectile_count; i++) {
-		if (!iter_tracer(&current_level.projectiles[i].tracer)) {
-			/* This shifts all projectiles after the current projectile
-			left by one, therefore deleting the current projectile */
+		Projectile* const projectile_ref = current_level.projectiles + i;
+		if (!iter_tracer(&projectile_ref -> tracer)) {
 
-			memmove(current_level.projectiles + i,
-				current_level.projectiles + i + 1,
-				current_level.projectile_count - i - 1);
-
-			current_level.projectile_count--;
 			current_level.thing_count--;
-
+			new_projectile_count--;
+			/* Below, all projectiles on the right side are shifted left by 1,
+			 essentially deleting the projectile at position `i` */
+			memmove(projectile_ref, projectile_ref + 1, (current_level.projectile_count - i - 1) * sizeof(Projectile));
 		}
 	}
+	current_level.projectile_count = new_projectile_count;
 }
 
 #ifdef NOCLIP_MODE
@@ -83,6 +83,7 @@ static void use_inter_tick_projectile_weapon(const Weapon* const weapon, const P
 	}
 
 	const Tracer tracer = init_tracer_from_player(player, long_range_projectile_tracer_step, 0);
+
 	const Projectile projectile = {
 		.billboard_data = {
 			.pos = {(double) tracer.pos[0], (double) tracer.pos[1]},

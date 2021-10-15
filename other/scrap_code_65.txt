@@ -337,3 +337,58 @@ else puts("No projectiles");
 */
 
 /////
+
+
+	/*
+	byte i = 0;
+	while (i < current_level.projectile_count) {
+		Projectile* const projectile_ref = current_level.projectiles + i;
+		printf("i = %d, {%lf, %lf}\n", i, (double) projectile_ref -> tracer.pos[0], (double) projectile_ref -> tracer.pos[1]);	
+
+		enum {s = 4};
+		int foo[s] = {1, 2, 3, 4};
+
+		for (int i = 1; i < s - 1; i++) {
+		}
+
+		for (int i = 0; i < s; i++) {
+			printf("%d ", foo[i]);
+		}
+		putchar('\n');
+
+		i++;
+	}
+	*/
+
+/////
+
+			/*
+			for (int j = i; j < current_level.projectile_count - 1; j++) {
+				// current_level.projectiles[j] = current_level.projectiles[j + 1];
+				const Projectile ahead = current_level.projectiles[j + 1];
+				memcpy(current_level.projectiles + j, &ahead, sizeof(Projectile));
+			}
+			memset(current_level.projectiles + current_level.projectile_count - 1, 0, sizeof(Projectile));
+			*/
+
+			/*
+			enum {s = 5};
+			int t[s] = {1, 2, 3, 4, 5};
+			for (int j = 1; j < s - 1; j++) {
+				t[j] = t[j + 1];
+			}
+			for (int j = 0; j < s; j++) {
+				printf("%d ", t[j]);
+			}
+			putchar('\n');
+			*/
+
+/////
+
+	#define PR_LIST(msg)\
+		puts(msg ":");\
+		for (byte i = 0; i < current_level.projectile_count; i++)\
+			printf("i = %d, {%lf, %lf}\n", i, (double) current_level.projectiles[i].tracer.pos[0], (double) current_level.projectiles[i].tracer.pos[1]);\
+		putchar('\n');
+
+/////

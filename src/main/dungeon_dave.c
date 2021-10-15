@@ -65,12 +65,12 @@ audio todo:
 
 projectile todo:
 	- a sound that happens when projectiles travel
-	- an explosion effect + sound when a projectile collides
+	- an explosion effect + sound when a projectile collides with a thing or a wall
 	- collide with projectile edges for walls with projectiles
 	- an upper height limit to projectiles
 	- shoot projectiles into teleporters
-	- some projectile shots fail for some reason
 
+- repeat weapon attack if holding down key
 - counts to uint16_t's (not level unsigned to uint16_t's too)
 - account for 0-length allocs of level items in a special way, since malloc's return val is implementation dependent
 - you can clip into enemies when you teleport to where they are (make a teleport_enemy_if_needed, maybe)
