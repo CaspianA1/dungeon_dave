@@ -93,7 +93,8 @@ typedef byte Sound;
 #define fail_sound(a, b)
 #define init_sound(a, b) 0
 #define deinit_sound(a) (void) (a)
-#define update_channel_from_billboard_data(a, b, c, d) // {(void) c; (void) d;}
+#define update_channel_from_billboard_data(a, b, c, d) {(void) a; (void) c; (void) d;}
 #define play_sound(a)
+#define play_short_sound(a) 0
 
 #endif
