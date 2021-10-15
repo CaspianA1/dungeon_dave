@@ -72,10 +72,10 @@ static void use_inter_tick_projectile_weapon(const Weapon* const weapon, const P
 	(void) weapon;
 
 	if (current_level.projectile_count == current_level.alloc_projectile_count) {
-		current_level.projectiles = realloc(current_level.projectiles,
+		current_level.projectiles = wrealloc(current_level.projectiles,
 			++current_level.alloc_projectile_count * sizeof(Projectile));
 
-		current_level.thing_container = realloc(current_level.thing_container,
+		current_level.thing_container = wrealloc(current_level.thing_container,
 			++current_level.alloc_thing_count * sizeof(Thing));
 	}
 

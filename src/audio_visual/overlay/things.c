@@ -147,7 +147,7 @@ DEF_THING_ADDER(projectile) {
 		billboard_data -> height = (double) projectile_pos[2] - actor_eye_height;
 
 		const Thing thing = {
-			0, billboard_data, &projectile_sprite,
+			mask_can_move_through_thing, billboard_data, &projectile_sprite,
 			{0, 0, projectile_sprite.size.x, projectile_sprite.size.y},
 		};
 

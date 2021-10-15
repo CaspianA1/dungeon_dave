@@ -65,6 +65,11 @@ void init_level(const int map_width, const int map_height,
 	#else
 	(void) shader;
 	#endif
+
+	current_level.projectile_count = 0;
+	current_level.alloc_projectile_count = 0;
+	// Reallocing a null ptr is undefined, so some memory has to be allocated
+	current_level.projectiles = wmalloc(1);
 }
 
 inlinable void fill_level_data(byte* const md, const byte point,
@@ -258,6 +263,7 @@ void deinit_level(void) {
 
 	wfree(current_level.teleporters);
 	wfree(current_level.health_kits);
+	wfree(current_level.projectiles);
 
 	for (byte i = 0; i < current_level.animated_billboard_count; i++)
 		deinit_sprite(current_level.animated_billboards[i].animation_data.immut.sprite);
