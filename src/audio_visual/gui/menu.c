@@ -78,7 +78,7 @@ InputStatus render_menu(const Menu* const menu) {
 			draw_colored_rect(inverse_text_color, &box);
 
 			if (event.type == SDL_MOUSEBUTTONDOWN) {
-				play_sound(&gui_resources.sound_on_click);
+				play_short_sound(&gui_resources.sound_on_click);
 				const InputStatus click_response = textbox -> on_click_fn();
 				if (click_response != ProceedAsNormal) return click_response;
 			}

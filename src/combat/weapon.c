@@ -163,7 +163,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	if (first_in_use && *frame_ind == 0)
 		clear_bit(weapon -> flags, mask_in_use_weapon);
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
-		play_sound(&weapon -> sound);
+		play_short_sound(&weapon -> sound);
 		set_bit(weapon -> flags, mask_in_use_weapon | mask_recently_used_weapon);
 		(spawns_projectile ? use_inter_tick_projectile_weapon : use_hitscan_weapon)(weapon, player);
 	}

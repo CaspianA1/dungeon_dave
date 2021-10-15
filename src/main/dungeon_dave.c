@@ -61,6 +61,7 @@ audio todo:
 	- find less crackly enemy sounds
 	- call SDL_OpenAudio before Mix_LoadWAV
 	- make enemy sound directions be constantly updated when they're playing
+	- compressed audio
 
 projectile todo:
 	- a sound that happens when projectiles travel
@@ -70,8 +71,6 @@ projectile todo:
 	- shoot projectiles into teleporters
 	- some projectile shots fail for some reason
 
-- replace play_sound with play_short_sound
-- compressed audio
 - counts to uint16_t's (not level unsigned to uint16_t's too)
 - account for 0-length allocs of level items in a special way, since malloc's return val is implementation dependent
 - you can clip into enemies when you teleport to where they are (make a teleport_enemy_if_needed, maybe)
@@ -109,7 +108,7 @@ int main(void) {
 	load_all_defaults(load_palace, player_ref, weapon_ref);
 	if (display_title_screen() == Exit) deinit_all(player_ref, weapon_ref);
 
-	play_sound(&current_level.background_sound);
+	play_long_sound(&current_level.background_sound);
 	ground = init_pix_sprite("assets/walls/sand.bmp");
 
 	#ifdef SHADING_ENABLED

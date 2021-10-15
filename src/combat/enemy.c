@@ -51,7 +51,7 @@ inlinable void short_range_enemy_attack(const Enemy* const enemy,
 			for (byte i = 0; i < current_level.enemy_instance_count; i++)
 				set_enemy_instance_state(enemy_instance, Idle, 1, player -> pos, player -> jump.height);
 		}
-		else play_sound(&player -> sound_when_attacked);
+		else play_short_sound(&player -> sound_when_attacked);
 	}
 }
 

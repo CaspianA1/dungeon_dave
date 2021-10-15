@@ -4,7 +4,7 @@ byte death_effect(Player* const player) {
 
 	if (first_call) {
 		player -> body.v = 0.0;
-		play_sound(&player -> sound_when_dying);
+		play_short_sound(&player -> sound_when_dying);
 		first_call = 0;
 	}
 

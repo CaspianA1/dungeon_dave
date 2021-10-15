@@ -146,7 +146,7 @@ void update_jump(Jump* const jump, const vec pos) {
 	bit_to_x(jump -> flags, mask_made_noise_jump, starting_jump);
 	if (starting_jump) {
 		init_a_jump(jump, 0);
-		play_sound(&jump -> sound_at_jump);
+		play_short_sound(&jump -> sound_at_jump);
 	}
 
 	//////////
@@ -204,7 +204,7 @@ void update_jump(Jump* const jump, const vec pos) {
 
 				const byte made_noise = jump -> highest_height - ground_height >= min_fall_height_for_sound;
 				bit_to_x(jump -> flags, mask_made_noise_jump, made_noise);
-				if (made_noise) play_sound(&jump -> sound_at_land);
+				if (made_noise) play_short_sound(&jump -> sound_at_land);
 
 				jump -> highest_height = jump -> height;
 			}

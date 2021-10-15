@@ -50,12 +50,17 @@ inlinable void deinit_sound(const Sound* const sound) {
 
 //////////
 
-static int play_short_sound(const Sound* const sound) { // returns the channel played on
+int play_short_sound(const Sound* const sound) { // returns the channel played on
 	const int channel = Mix_PlayChannel(-1, sound -> type.short_sound, 0);
 	if (channel == -1 && strcmp(Mix_GetError(), out_of_channel_error) != 0)
 		fail_sound(sound, "play");
 
 	return channel;
+}
+
+// this loops the long sound given
+void play_long_sound(const Sound* const sound) {
+	if (Mix_PlayMusic(sound -> type.long_sound, -1) == -1) fail_sound(sound, "play");
 }
 
 //////////
@@ -75,14 +80,7 @@ void update_channel_from_billboard_data(const int channel,
 	if (audio_library_distance == 0) audio_library_distance = 1;
 	else if (audio_library_distance > 254) audio_library_distance = 254;
 
-	// const int channel = play_short_sound(sound);
 	Mix_SetPosition(channel, 360 - beta_degrees, audio_library_distance);
-}
-
-// This loops long sounds
-void play_sound(const Sound* const sound) {
-	if (sound -> is_short) play_short_sound(sound);
-	else if (Mix_PlayMusic(sound -> type.long_sound, -1) == -1) fail_sound(sound, "play");
 }
 
 #else
@@ -94,7 +92,7 @@ typedef byte Sound;
 #define init_sound(a, b) 0
 #define deinit_sound(a) (void) (a)
 #define update_channel_from_billboard_data(a, b, c, d) {(void) a; (void) c; (void) d;}
-#define play_sound(a)
 #define play_short_sound(a) 0
+#define play_long_sound(a)
 
 #endif

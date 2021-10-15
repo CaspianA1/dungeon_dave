@@ -28,7 +28,7 @@ void use_health_kit_if_needed(Player* const player) {
 
 			player -> hp += health_incr_amount;
 			if (player -> hp > INIT_HP) player -> hp = INIT_HP;
-			play_sound(&health_kit_sound);
+			play_short_sound(&health_kit_sound);
 			health_kit -> used = 1;
 			break;
 		}
