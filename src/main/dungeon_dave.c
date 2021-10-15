@@ -91,7 +91,7 @@ projectile todo:
 - anisotropic filtering for angled walls
 - the wall corner floor algorithm
 - distance shading
-- better antialiasing by sampling from just the last mip level
+- better antialiasing by sampling from just the last mip level for the pixel-wise downscaling
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
 - long range AI
 - a unique hitbox size for each thing, and can run through some things

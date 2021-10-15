@@ -134,14 +134,7 @@ DEF_THING_ADDER(health_kit) {
 }
 
 DEF_THING_ADDER(projectile) {
-	static byte first_call = 1;
-	static Sprite projectile_sprite;
-
-	if (first_call) {
-		projectile_sprite = init_sprite("assets/objects/fireball.bmp", 0);
-		first_call = 0;
-	}
-
+	extern Sprite projectile_sprite;
 	for (byte i = 0; i < current_level.projectile_count; i++) {
 		Projectile* const projectile = current_level.projectiles + i;
 		const vec3D projectile_pos = projectile -> tracer.pos;

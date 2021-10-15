@@ -132,6 +132,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	void init_all_enemies(void);
 
 	void init_teleporter_resources(void);
+	void init_projectile_resources(void);
 	void init_health_kit_resources(void);
 	void init_gui_resources(void);
 
@@ -152,9 +153,10 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	if (TTF_Init() == -1) FAIL("Unable to initialize the font library: %s\n", TTF_GetError());
 
 	STARTUP_LOG("gui, health kit, and teleporter resources");
-	init_gui_resources();
-	init_health_kit_resources();
 	init_teleporter_resources();
+	init_projectile_resources();
+	init_health_kit_resources();
+	init_gui_resources();
 
 	srand(time(NULL));
 	keys = SDL_GetKeyboardState(NULL);
@@ -215,6 +217,7 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	void deinit_all_enemies(void);
 
 	void deinit_teleporter_resources(void);
+	void deinit_projectile_resources(void);
 	void deinit_health_kit_resources(void);
 	void deinit_gui_resources(void);
 
@@ -232,6 +235,7 @@ void deinit_all(const Player* const player, const Weapon* const weapon) {
 	deinit_all_enemies();
 
 	deinit_teleporter_resources();
+	deinit_projectile_resources();
 	deinit_health_kit_resources();
 	deinit_gui_resources();
 

@@ -7,6 +7,16 @@ static const float
 	hitscan_projectile_size = 0.2,
 	inter_tick_projectile_size = 1.0;
 
+Sprite projectile_sprite;
+
+void init_projectile_resources(void) {
+	projectile_sprite = init_sprite("assets/objects/fireball.bmp", 0);
+}
+
+void deinit_projectile_resources(void) {
+	deinit_sprite(projectile_sprite);
+}
+
 void deinit_weapon(const Weapon* const weapon) {
 	deinit_sound(&weapon -> sound);
 	deinit_sprite(weapon -> animation_data.immut.sprite);
