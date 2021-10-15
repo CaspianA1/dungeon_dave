@@ -1,4 +1,4 @@
-// Tracing is separate from DDA because DDA inherently steps on whole grids, while weapons do not
+// Tracing is separate from DDA because DDA inherently steps on whole grids, while tracers do not
 
 static const float
 	short_range_tracer_step = 0.3, // the magnitude of the velocity vector
@@ -8,13 +8,16 @@ static const float
 	inter_tick_projectile_size = 1.0;
 
 Sprite projectile_sprite;
+Sound projectile_sound;
 
 void init_projectile_resources(void) {
 	projectile_sprite = init_sprite("assets/objects/fireball.bmp", 0);
+	projectile_sound = init_sound("rocket.wav", 0);
 }
 
 void deinit_projectile_resources(void) {
 	deinit_sprite(projectile_sprite);
+	deinit_sound(&projectile_sound);
 }
 
 void deinit_weapon(const Weapon* const weapon) {
@@ -136,10 +139,10 @@ static void use_hitscan_weapon(const Weapon* const weapon, const Player* const p
 
 				if ((enemy_instance -> hp -= weapon -> power) <= 0.0)
 					set_enemy_instance_state(enemy_instance, Dead, 0, p_pos, p_height);
-				else
-					play_sound_from_billboard_data(
-					enemy_instance -> enemy -> sounds + 4, // attacked
-					&enemy_instance -> billboard_data, p_pos, p_height);
+				else {
+					const int channel = play_short_sound(enemy_instance -> enemy -> sounds + 4); // attacked
+					update_channel_from_billboard_data(channel, &enemy_instance -> billboard_data, p_pos, p_height);
+				}
 
 				collided = 1;
 			}

@@ -70,6 +70,7 @@ projectile todo:
 	- shoot projectiles into teleporters
 	- some projectile shots fail for some reason
 
+- replace play_sound with play_short_sound
 - compressed audio
 - counts to uint16_t's (not level unsigned to uint16_t's too)
 - account for 0-length allocs of level items in a special way, since malloc's return val is implementation dependent

@@ -26,7 +26,7 @@ inlinable void init_sound_subsystem(void) {
 
 #define deinit_sound_subsystem Mix_CloseAudio
 
-void fail_sound(const Sound* const sound, const char* const error_type) {
+static void fail_sound(const Sound* const sound, const char* const error_type) {
 	FAIL("Could not %s a %s sound of path %s: %s\n",
 		error_type, sound -> is_short ? "short" : "long", sound -> path, Mix_GetError());
 }
@@ -60,7 +60,7 @@ static int play_short_sound(const Sound* const sound) { // returns the channel p
 
 //////////
 
-void play_sound_from_billboard_data(const Sound* const sound,
+void update_channel_from_billboard_data(const int channel,
 	const DataBillboard* const billboard_data, const vec p_pos, const double p_height) {
 
 	const int beta_degrees = billboard_data -> beta * 180.0 / M_PI;
@@ -75,7 +75,7 @@ void play_sound_from_billboard_data(const Sound* const sound,
 	if (audio_library_distance == 0) audio_library_distance = 1;
 	else if (audio_library_distance > 254) audio_library_distance = 254;
 
-	const int channel = play_short_sound(sound);
+	// const int channel = play_short_sound(sound);
 	Mix_SetPosition(channel, 360 - beta_degrees, audio_library_distance);
 }
 
@@ -93,7 +93,7 @@ typedef byte Sound;
 #define fail_sound(a, b)
 #define init_sound(a, b) 0
 #define deinit_sound(a) (void) (a)
-#define play_sound_from_billboard_data(a, b, c, d) {(void) c; (void) d;}
+#define update_channel_from_billboard_data(a, b, c, d) // {(void) c; (void) d;}
 #define play_sound(a)
 
 #endif

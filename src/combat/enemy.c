@@ -15,10 +15,10 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 	const Enemy* const enemy = enemy_instance -> enemy;
 
 	enemy_instance -> state = new_state;
-	if (!silent)
-		play_sound_from_billboard_data(
-			enemy -> sounds + new_state,
-			&enemy_instance -> billboard_data, p_pos, p_height);
+	if (!silent) {
+		const int channel = play_short_sound(enemy -> sounds + new_state);
+		update_channel_from_billboard_data(channel, &enemy_instance -> billboard_data, p_pos, p_height);
+	}
 
 	int new_frame_ind = 0;
 	for (byte i = 0; i < enemy_instance -> state; i++)
@@ -177,9 +177,10 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance,
 	from that state. Sounds only happen at state changes. */
 	if (new_state == prev_state) {
 		const byte rand_num = (rand() % max_rand_sound_chance) + 1; // inclusive, 1 to max
-		if (rand_num <= numerator_sound_chance)
-			play_sound_from_billboard_data(&enemy_instance -> enemy -> sounds[new_state],
-				billboard_data, p_pos, p_height);
+		if (rand_num <= numerator_sound_chance) {
+			const int channel = play_short_sound(enemy_instance -> enemy -> sounds + new_state);
+			update_channel_from_billboard_data(channel, billboard_data, p_pos, p_height);
+		}
 	}
 
 	clear_bit(enemy_instance -> flags, mask_recently_attacked_enemy);
