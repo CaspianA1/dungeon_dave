@@ -3,7 +3,7 @@
 static const float
 	short_range_tracer_step = 0.3, // the magnitude of the velocity vector
 	long_range_tracer_step = 0.1,
-	long_range_projectile_tracer_step = 0.12,
+	long_range_projectile_tracer_step = 0.1,
 	hitscan_projectile_size = 0.2,
 	inter_tick_projectile_size = 1.0;
 
@@ -40,10 +40,10 @@ inlinable byte iter_tracer(Tracer* const tracer) {
 	const vec3D new_pos = tracer -> pos + tracer -> dir * vec_fill_3D(step);
 	tracer -> pos = new_pos;
 
-	float height = new_pos[2];
+	double height = (double) new_pos[2];
+	if (!tracer -> is_hitscan) height -= (double) inter_tick_projectile_size * 0.5;
 
-	const byte above_ground = (tracer -> is_hitscan) ? (height >= 0.0f) : (height >= 0.5f);
-	return above_ground && !point_exists_at((double) new_pos[0], (double) new_pos[1], (double) height);
+	return !point_exists_at((double) new_pos[0], (double) new_pos[1], height);
 }
 
 inlinable void update_inter_tick_projectiles(void) {
