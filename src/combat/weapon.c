@@ -8,16 +8,13 @@ static const float
 	inter_tick_projectile_size = 1.0;
 
 Sprite projectile_sprite;
-Sound projectile_sound;
 
 void init_projectile_resources(void) {
 	projectile_sprite = init_sprite("assets/objects/fireball.bmp", 0);
-	projectile_sound = init_sound("rocket.wav", 0);
 }
 
 void deinit_projectile_resources(void) {
 	deinit_sprite(projectile_sprite);
-	deinit_sound(&projectile_sound);
 }
 
 void deinit_weapon(const Weapon* const weapon) {
@@ -54,7 +51,7 @@ inlinable void update_inter_tick_projectiles(void) {
 	for (byte i = 0; i < current_level.projectile_count; i++) {
 		Projectile* const projectile_ref = current_level.projectiles + i;
 		const int channel = projectile_ref -> sound_channel;
-		if (!iter_tracer(&projectile_ref -> tracer)) {
+		if (!iter_tracer(&projectile_ref -> tracer) || !channel_still_playing(channel)) {
 
 			current_level.thing_count--;
 			new_projectile_count--;
@@ -67,12 +64,10 @@ inlinable void update_inter_tick_projectiles(void) {
 
 			stop_sound_channel(channel);
 		}
-		else {
-			update_channel_from_dist_3D_and_beta(
-				channel, quietest_projectile_sound_dist,
-				(double) projectile_ref -> tracer.dist,
-				projectile_ref -> billboard_data.beta);
-		}
+		else update_channel_from_dist_3D_and_beta(
+			channel, quietest_projectile_sound_dist,
+			(double) projectile_ref -> tracer.dist,
+			projectile_ref -> billboard_data.beta);
 	}
 	current_level.projectile_count = new_projectile_count;
 }

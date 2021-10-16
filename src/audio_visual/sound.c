@@ -1,7 +1,7 @@
 #ifdef SOUND_ENABLED
 
 static const byte num_sound_channels = 20;
-const byte quietest_thing_sound_dist = 10, quietest_projectile_sound_dist = 20;
+const byte quietest_thing_sound_dist = 10, quietest_projectile_sound_dist = 25;
 static const char* const out_of_channel_error = "No free channels available";
 
 typedef struct {
@@ -25,9 +25,10 @@ inlinable void init_sound_subsystem(void) {
 	Mix_AllocateChannels(num_sound_channels);
 }
 
+#define deinit_sound_subsystem Mix_CloseAudio
+#define channel_still_playing Mix_Playing
 #define stop_sound_channel Mix_HaltChannel
 #define stop_all_sound_channels() Mix_HaltChannel(-1)
-#define deinit_sound_subsystem Mix_CloseAudio
 
 static void fail_sound(const Sound* const sound, const char* const error_type) {
 	FAIL("Could not %s a %s sound of path %s: %s\n",
@@ -95,6 +96,24 @@ void update_channel_from_thing_billboard_data(const int channel,
 #else
 
 typedef byte Sound;
+
+#define init_sound_subsystem()
+#define deinit_sound_subsystem()
+
+#define channel_still_playing(a) 1
+#define stop_sound_channel(a) (void) a
+#define stop_all_sound_channels()
+
+#define init_sound(a, b) 0
+#define deinit_sound(a) (void) (a)
+
+#define play_short_sound(a) 0
+#define play_long_sound(a)
+
+#define update_channel_from_thing_billboard_data(a, b, c, d) {(void) a; (void) c; (void) d;}
+#define update_channel_from_dist_3D_and_beta(a, b, c, d)
+
+/*
 #define init_sound_subsystem()
 #define deinit_sound_subsystem()
 #define fail_sound(a, b)
@@ -103,5 +122,6 @@ typedef byte Sound;
 #define update_channel_from_billboard_data(a, b, c, d) {(void) a; (void) c; (void) d;}
 #define play_short_sound(a) 0
 #define play_long_sound(a)
+*/
 
 #endif

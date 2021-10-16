@@ -177,7 +177,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 
 	const Weapon first_weapon = {
 		.flags = mask_paces_sideways_weapon | mask_spawns_projectile_weapon, .power = 8.0,
-		.sound = init_sound("rocket.wav", 1), // init_sound("assets/audio/sound_effects/rocket_launch.wav", 1),
+		.sound = init_sound("assets/audio/sound_effects/rocket.wav", 1),
 		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/desecrator.bmp", 8, 1, 8, 20), {0.0, 0}}
 	};
 
@@ -201,7 +201,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	const Weapon first_weapon = {
 		.flags = mask_short_range_weapon | mask_paces_sideways_weapon, .power = 4.0,
 		.sound = init_sound("assets/audio/enemy_sounds/eddie_attack.wav", 1),
-		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/golden_dagger.bmp", 2, 5, 9, 22), {0.0, 0}}
+		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/golden_dagger.bmp", 2, 5, 9, 40), {0.0, 0}}
 	};
 	*/
 
