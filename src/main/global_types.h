@@ -90,19 +90,6 @@ typedef struct {
 	DataBillboard billboard;
 } HealthKit;
 
-typedef struct {
-	vec3D pos; // x, y, z
-	const vec3D dir;
-	float dist; // 32-bit dist used here b/c pos and dir have float components
-	const float step;
-	const byte is_hitscan;
-} Tracer;
-
-typedef struct {
-	DataBillboard billboard_data;
-	Tracer tracer;
-} Projectile;
-
 //////////
 
 typedef struct {

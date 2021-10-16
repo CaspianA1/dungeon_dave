@@ -27,7 +27,7 @@ byte teleport_if_needed(vec* const pos, double* const height, const Player* cons
 			/* if the player isn't teleporting, the pos and height data
 			need to be passed twice through the player struct */
 			const int channel = play_short_sound(&teleporter_sound);
-			update_channel_from_billboard_data(channel,
+			update_channel_from_thing_billboard_data(channel,
 				&teleporter.from_billboard, player -> pos, player -> jump.height);
 
 			const vec dest = teleporter.to;

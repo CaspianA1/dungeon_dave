@@ -69,6 +69,7 @@ projectile todo:
 	- collide with projectile edges for walls with projectiles
 	- an upper height limit to projectiles
 	- shoot projectiles into teleporters
+	- wake up enemies with a traveling projectile sound
 
 - repeat weapon attack if holding down key
 - counts to uint16_t's (not level unsigned to uint16_t's too)

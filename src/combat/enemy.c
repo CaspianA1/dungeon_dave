@@ -17,7 +17,7 @@ void set_enemy_instance_state(EnemyInstance* const enemy_instance, const EnemySt
 	enemy_instance -> state = new_state;
 	if (!silent) {
 		const int channel = play_short_sound(enemy -> sounds + new_state);
-		update_channel_from_billboard_data(channel, &enemy_instance -> billboard_data, p_pos, p_height);
+		update_channel_from_thing_billboard_data(channel, &enemy_instance -> billboard_data, p_pos, p_height);
 	}
 
 	int new_frame_ind = 0;
@@ -178,7 +178,7 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance,
 		const byte rand_num = (rand() % max_rand_sound_chance) + 1; // inclusive, 1 to max
 		if (rand_num <= numerator_sound_chance) {
 			const int channel = play_short_sound(enemy_instance -> enemy -> sounds + new_state);
-			update_channel_from_billboard_data(channel, billboard_data, p_pos, p_height);
+			update_channel_from_thing_billboard_data(channel, billboard_data, p_pos, p_height);
 		}
 	}
 

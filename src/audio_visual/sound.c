@@ -1,6 +1,7 @@
 #ifdef SOUND_ENABLED
 
-static const byte quietest_sound_dist = 10, num_sound_channels = 20;
+static const byte num_sound_channels = 20;
+const byte quietest_thing_sound_dist = 10, quietest_projectile_sound_dist = 20;
 static const char* const out_of_channel_error = "No free channels available";
 
 typedef struct {
@@ -24,6 +25,8 @@ inlinable void init_sound_subsystem(void) {
 	Mix_AllocateChannels(num_sound_channels);
 }
 
+#define stop_sound_channel Mix_HaltChannel
+#define stop_all_sound_channels() Mix_HaltChannel(-1)
 #define deinit_sound_subsystem Mix_CloseAudio
 
 static void fail_sound(const Sound* const sound, const char* const error_type) {
@@ -65,22 +68,28 @@ void play_long_sound(const Sound* const sound) {
 
 //////////
 
-void update_channel_from_billboard_data(const int channel,
-	const DataBillboard* const billboard_data, const vec p_pos, const double p_height) {
+void update_channel_from_dist_3D_and_beta(const int channel, const byte quietest_dist,
+	const double dist_3D, const double beta) {
 
-	const int beta_degrees = billboard_data -> beta * 180.0 / M_PI;
-
-	const vec delta_2D = billboard_data -> pos - p_pos;
-	const double delta_height = billboard_data -> height - p_height;
-
-	const double distance_3D = sqrt(delta_2D[0] * delta_2D[0] + delta_2D[1] * delta_2D[1] + delta_height * delta_height);
-	const double distance_3D_percent = distance_3D / quietest_sound_dist;
+	const double distance_3D_percent = dist_3D / quietest_dist;
 
 	int audio_library_distance = distance_3D_percent * 255;
 	if (audio_library_distance == 0) audio_library_distance = 1;
 	else if (audio_library_distance > 254) audio_library_distance = 254;
 
+	const int beta_degrees = beta * 180.0 / M_PI;
 	Mix_SetPosition(channel, 360 - beta_degrees, audio_library_distance);
+}
+
+// Assumed that the thing passed here is not a projectile, as projectiles call the fn above
+void update_channel_from_thing_billboard_data(const int channel,
+	const DataBillboard* const billboard_data, const vec p_pos, const double p_height) {
+
+	const vec delta_2D = billboard_data -> pos - p_pos;
+	const double delta_height = billboard_data -> height - p_height;
+	const double dist_3D = sqrt(delta_2D[0] * delta_2D[0] + delta_2D[1] * delta_2D[1] + delta_height * delta_height);
+
+	update_channel_from_dist_3D_and_beta(channel, quietest_thing_sound_dist, dist_3D, billboard_data -> beta);
 }
 
 #else
