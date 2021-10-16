@@ -70,7 +70,7 @@ static byte billboard_can_see_player(const DataBillboard* const billboard_data, 
 	static byte first_call = 1;
 	if (first_call) { // First call ignored b/c billboard data will not be initialized yet
 		first_call = 0;
-		return 1;
+		return 0;
 	}
 
 	static const double eye_trace_step = 0.1, eye_box_size = 0.2;

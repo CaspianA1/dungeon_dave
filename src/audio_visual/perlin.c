@@ -41,7 +41,7 @@ inlinable double noise(const double x, const double y) {
 double perlin(const double x, const double y, const double freq, const int depth) {
 	double xa = x * freq, ya = y * freq, amplitude = 1.0, fin = 0.0, div = 0.0;
 
-	for(int i = 0; i < depth; i++) {
+	for (int i = 0; i < depth; i++) {
 		div += 256.0 * amplitude;
 		fin += noise(xa, ya) * amplitude;
 		amplitude *= 0.5;
