@@ -78,11 +78,6 @@ void update_billboard_values(DataBillboard* const billboard_data, const vec p_po
 	if (billboard_data -> beta > two_pi) billboard_data -> beta -= two_pi;
 }
 
-/* On the topic of filling the thing buffer just once:
-	- It would work for still things and teleporters without any extra hassle
-	- Animated things and enemies would have to have their frame origins updated
-	- For intra (between-frame) projectiles, they would have to be dynamically removed and added */
-
 void draw_things(const vec p_pos, const double p_angle, const double p_height, const double horizon_line) {
 	typedef struct {
 		const byte thing_type_count;

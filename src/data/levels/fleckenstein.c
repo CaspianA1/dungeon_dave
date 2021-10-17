@@ -7,7 +7,7 @@ inlinable double fleckenstein_shader(const vec pos) {
 void load_fleckenstein(void) {
 	enum {
 		map_width = 30, map_height = 30,
-		wall_count = 4, billboard_count = 0, teleporter_count = 1,
+		wall_count = 4, billboard_count = 1, teleporter_count = 1,
 		health_kit_count = 0, animated_billboard_count = 0, enemy_instance_count = 0
 	};
 
@@ -87,7 +87,7 @@ void load_fleckenstein(void) {
 		"assets/walls/cobblestone_2.bmp",
 		"assets/walls/marble.bmp");
 
-	set_level_billboards(billboard_count);
+	set_level_billboards(billboard_count, "assets/objects/tomato.bmp", 17.5, 27.5, 0.0);
 	set_level_teleporters(teleporter_count, 9.5, 26.5, 15.5, 6.5);
 	set_level_health_kits(health_kit_count);
 

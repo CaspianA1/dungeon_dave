@@ -4,15 +4,15 @@ inlinable double debug_level_shader(const vec pos) {
 
 	const vec center_delta = pos - center;
 	return
-		fabs(center_delta[0] * center_delta[1]) * 2.0
-		+ bloom_circle(pos, center_circle) * 8.0
+		fabs(center_delta[0] * center_delta[1]) * 0.2
+		+ bloom_circle(pos, center_circle) * 0.8
 		+ fabs(tan(pos[0] + pos[1])) * 0.5;
 }
 
 void load_debug_level(void) {
 	enum {
 		map_width = 12, map_height = 10,
-		wall_count = 6, billboard_count = 0, teleporter_count = 0,
+		wall_count = 6, billboard_count = 1, teleporter_count = 0,
 		health_kit_count = 0, animated_billboard_count = 1, enemy_instance_count = 0
 	};
 
@@ -54,7 +54,7 @@ void load_debug_level(void) {
 		"assets/wolf/bluestone.bmp",
 		"assets/walls/arthouse_bricks.bmp");
 
-	set_level_billboards(billboard_count);
+	set_level_billboards(billboard_count, "assets/walls/saqqara.bmp", 6.5, 2.0, 0.0);
 	set_level_teleporters(teleporter_count);
 	set_level_health_kits(health_kit_count);
 

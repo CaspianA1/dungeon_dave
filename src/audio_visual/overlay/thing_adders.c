@@ -13,7 +13,7 @@ DEF_THING_ADDER(still) {
 
 		const Sprite* const sprite = &billboard -> sprite;
 		const ivec size = sprite -> size;
-		const Thing thing = {0, billboard_data, sprite, {0, 0, size.x, size.y}};
+		const Thing thing = {0, T_Still, billboard_data, sprite, {0, 0, size.x, size.y}};
 
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
@@ -27,7 +27,8 @@ DEF_THING_ADDER(teleporter) {
 		update_billboard_values(billboard_data, p_pos, p_angle);
 
 		const Thing thing = {
-			mask_can_move_through_thing, billboard_data, &teleporter_sprite,
+			mask_can_move_through_thing,
+			T_Teleporter, billboard_data, &teleporter_sprite,
 			{0, 0, teleporter_sprite.size.x, teleporter_sprite.size.y}
 		};
 
@@ -46,6 +47,7 @@ DEF_THING_ADDER(health_kit) {
 
 		const Thing thing = {
 			(mask_skip_rendering_thing * health_kit -> used) | mask_can_move_through_thing,
+			T_HealthKit,
 			billboard_data, &health_kit_sprite,
 			{0, 0, health_kit_sprite.size.x, health_kit_sprite.size.y}
 		};
@@ -68,7 +70,7 @@ DEF_THING_ADDER(projectile) {
 		billboard_data -> height = (double) projectile_pos[2] - actor_eye_height;
 
 		const Thing thing = {
-			mask_can_move_through_thing, billboard_data, &projectile_sprite,
+			mask_can_move_through_thing, T_Projectile, billboard_data, &projectile_sprite,
 			{0, 0, projectile_sprite.size.x, projectile_sprite.size.y},
 		};
 
@@ -86,7 +88,7 @@ DEF_THING_ADDER(animated) {
 		update_billboard_values(billboard_data, p_pos, p_angle);
 
 		const Thing thing = {
-			0, billboard_data, &immut_animation_data -> sprite,
+			0, T_Animated, billboard_data, &immut_animation_data -> sprite,
 			rect_from_ivecs(get_spritesheet_frame_origin(&animated_billboard -> animation_data),
 				immut_animation_data -> frame_size)
 		};
@@ -108,6 +110,7 @@ DEF_THING_ADDER(enemy_instance) {
 
 		const Thing thing = { // if enemy dead, can move through it
 			mask_can_move_through_thing * (enemy_instance -> state == Dead),
+			T_EnemyInstance,
 			billboard_data, &immut_animation_data -> sprite,
 			rect_from_ivecs(get_spritesheet_frame_origin(&animation_data), animation_data.immut.frame_size)
 		};

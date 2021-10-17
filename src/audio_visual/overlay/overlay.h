@@ -47,8 +47,14 @@ typedef struct {
 	DataBillboard billboard_data;
 } AnimatedBillboard;
 
+typedef enum {
+	T_Still, T_Teleporter, T_HealthKit,
+	T_Projectile, T_Animated, T_EnemyInstance
+} ThingType;
+
 typedef struct {
 	const byte flags; // can pass through thing when moving, should skip rendering thing
+	const ThingType type;
 	const DataBillboard* const billboard_data;
 	const Sprite* const sprite;
 	const SDL_Rect src_crop;

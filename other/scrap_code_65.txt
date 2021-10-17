@@ -392,3 +392,10 @@ else puts("No projectiles");
 		putchar('\n');
 
 /////
+
+/* On the topic of filling the thing buffer just once:
+	- It would work for still things and teleporters without any extra hassle
+	- Animated things and enemies would have to have their frame origins updated
+	- For intra (between-frame) projectiles, they would have to be dynamically removed and added */
+
+/////

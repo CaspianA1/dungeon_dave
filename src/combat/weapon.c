@@ -51,8 +51,19 @@ inlinable void update_inter_tick_projectiles(void) {
 	for (byte i = 0; i < current_level.projectile_count; i++) {
 		Projectile* const projectile_ref = current_level.projectiles + i;
 		const int channel = projectile_ref -> sound_channel;
-		if (!iter_tracer(&projectile_ref -> tracer) || !channel_still_playing(channel)) {
+		byte hit_enemy_instance = 0;
+		const BoundingBox_3D projectile_box = init_bounding_box_3D(projectile_ref -> tracer.pos, inter_tick_projectile_size);
 
+		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
+			const DataBillboard* const billboard_data = &current_level.enemy_instances[i].billboard_data;
+				const BoundingBox_3D thing_box = init_actor_bounding_box(billboard_data -> pos, billboard_data -> height);
+				if (aabb_collision_3D(projectile_box, thing_box)) {
+					hit_enemy_instance = 1;
+					break; // For future, allow collision with many, so don't break
+				}
+		}
+
+		if (hit_enemy_instance || !iter_tracer(&projectile_ref -> tracer) || !channel_still_playing(channel)) {
 			current_level.thing_count--;
 			new_projectile_count--;
 			/* Below, all projectiles on the right side of the current element are shifted left by 1,
@@ -60,7 +71,7 @@ inlinable void update_inter_tick_projectiles(void) {
 			memmove(projectile_ref, projectile_ref + 1,
 				(current_level.projectile_count - i - 1) * sizeof(Projectile));
 
-			// Do a boom noise here + check for thing collisions
+			// Do a boom noise here; and if hit an enemy instance, apply damage
 
 			stop_sound_channel(channel);
 		}
@@ -104,13 +115,6 @@ static void use_inter_tick_projectile_weapon(const Weapon* const weapon, const P
 
 	current_level.thing_count++;
 	current_level.projectile_count++;
-
-	/*
-	- start the projectile a bit out from the player
-	- for p in projectiles:
-		if it hit an enemy or wall, dec thing count and projectile count
-		if it hit an enemy, reduce the enemy health some, and make a noise or some cool effect
-	*/
 }
 
 static void use_hitscan_weapon(const Weapon* const weapon, const Player* const player) {
