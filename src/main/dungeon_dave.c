@@ -42,7 +42,6 @@
 #include "../combat/weapon/tracer.c"
 #include "../combat/weapon/weapon.c"
 #include "../combat/weapon/projectile.c"
-#include "../combat/weapon/hitscan.c"
 
 #include "../combat/enemy.c"
 #include "../combat/health_kit.c"
