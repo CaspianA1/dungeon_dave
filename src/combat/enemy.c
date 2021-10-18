@@ -174,16 +174,16 @@ static void update_enemy_instance(EnemyInstance* const enemy_instance,
 
 	const EnemyState
 		prev_state = enemy_instance -> state,
-		new_state = next_enemy_state(enemy_instance, player, weapon);
+		next_state = next_enemy_state(enemy_instance, player, weapon);
 
-	set_enemy_instance_state(enemy_instance, new_state, 0, p_pos, p_height);
+	set_enemy_instance_state(enemy_instance, next_state, 0, p_pos, p_height);
 
 	/* For each state (excluding Dead), this periodically play the sound
 	from that state. Sounds only happen at state changes. */
-	if (new_state == prev_state) {
+	if (next_state == prev_state) {
 		const byte rand_num = (rand() % max_rand_sound_chance) + 1; // inclusive, 1 to max
 		if (rand_num <= numerator_sound_chance) {
-			const int channel = play_short_sound(enemy_instance -> enemy -> sounds + new_state);
+			const int channel = play_short_sound(enemy_instance -> enemy -> sounds + next_state);
 			update_channel_from_thing_billboard_data(channel, billboard_data, p_pos, p_height);
 		}
 	}
