@@ -63,16 +63,16 @@ DEF_THING_ADDER(projectile) {
 		const vec3D projectile_pos = projectile -> tracer.pos;
 
 		DataBillboard* const billboard_data = &projectile -> billboard_data;
+		update_billboard_values(billboard_data, p_pos, p_angle);
+
 		DataAnimationMut* const traveling_animation_data = &projectile -> traveling_animation_data;
 		DataAnimation animation_data = {projectile_traveling_animation, *traveling_animation_data};
-
-		update_billboard_values(billboard_data, p_pos, p_angle);
 
 		billboard_data -> pos = (vec) {(double) projectile_pos[0], (double) projectile_pos[1]};
 		billboard_data -> height = (double) projectile_pos[2] - actor_eye_height;
 
 		const Thing thing = {
-			mask_can_move_through_thing, T_Projectile, billboard_data, &projectile_traveling_animation.sprite, // &projectile_sprite,
+			mask_can_move_through_thing, T_Projectile, billboard_data, &projectile_traveling_animation.sprite,
 			rect_from_ivecs(get_spritesheet_frame_origin(&animation_data), projectile_traveling_animation.frame_size)
 		};
 
