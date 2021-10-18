@@ -35,9 +35,9 @@
 #include "../audio_visual/gui/menu.c"
 #include "../audio_visual/gui/hud.c"
 
-#include "../combat/bfs_types.c"
-#include "../combat/bfs.c"
-#include "../combat/navigator.c"
+#include "../combat/pathfinding/bfs_types.c"
+#include "../combat/pathfinding/bfs.c"
+#include "../combat/pathfinding/navigator.c"
 
 #include "../combat/weapon/tracer.c"
 #include "../combat/weapon/projectile.c"
