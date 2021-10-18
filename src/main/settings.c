@@ -24,27 +24,6 @@ inlinable void update_max_fps(const int new_max_fps) {
 	settings.max_delay = 1000.0 / new_max_fps;
 }
 
-void init_SDL_framebuffers(const int new_width, const int new_height, const byte should_free) {
-	SDL_Texture** const buffers[2] = {
-		&screen.pixel_buffer, &screen.shape_buffer
-	};
-
-	const SDL_TextureAccess buffer_access_types[2] = {
-		SDL_TEXTUREACCESS_STREAMING, SDL_TEXTUREACCESS_TARGET
-	};
-
-	for (byte i = 0; i < 2; i++) {
-		SDL_Texture** const buffer = buffers[i];
-
-		if (should_free) SDL_DestroyTexture(*buffer);
-
-		*buffer = SDL_CreateTexture(screen.renderer, PIXEL_FORMAT,
-			buffer_access_types[i], new_width, new_height);
-
-		SDL_SetTextureBlendMode(*buffer, SDL_BLENDMODE_BLEND);
-	}
-}
-
 void load_default_settings(void) {
 	settings.screen_width = INIT_W;
 	settings.screen_height = INIT_H;
@@ -71,6 +50,7 @@ byte update_screen_dimensions(void) {
 		height_not_eq = new_height != settings.screen_height;
 
 	if (width_not_eq || height_not_eq) {
+		void init_SDL_framebuffers(const int, const int, const byte);
 		init_SDL_framebuffers(new_width, new_height, 1);
 		settings.avg_dimensions = (new_width + new_height) >> 1;
 

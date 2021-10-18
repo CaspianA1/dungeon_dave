@@ -50,7 +50,7 @@ void init_level(const int map_width, const int map_height,
 	current_level.background_sound = init_sound(background_sound_path, 0);
 
 	current_level.skybox.enabled = skybox_path != NULL;
-	if (current_level.skybox.enabled) {
+	if (current_level.skybox.enabled) { // linear filtering
 		SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);
 		current_level.skybox.sprite = init_sprite(skybox_path, 0);
 		SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "0", SDL_HINT_OVERRIDE);

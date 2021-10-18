@@ -398,4 +398,15 @@ else puts("No projectiles");
 	- Animated things and enemies would have to have their frame origins updated
 	- For intra (between-frame) projectiles, they would have to be dynamically removed and added */
 
+///// Hints:
+
+	/*
+	int a = SDL_SetHintWithPriority(SDL_HINT_FRAMEBUFFER_ACCELERATION, "2", SDL_HINT_OVERRIDE);
+	int b = SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING, "1", SDL_HINT_OVERRIDE);
+	DEBUG(a, d);
+	DEBUG(b, d);
+	*/
+
+	// SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);
+
 /////

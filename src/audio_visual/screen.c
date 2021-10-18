@@ -1,15 +1,44 @@
+void init_SDL_framebuffers(const int new_width, const int new_height, const byte should_free) {
+	SDL_Texture** const buffers[2] = {
+		&screen.pixel_buffer, &screen.shape_buffer
+	};
+
+	const SDL_TextureAccess buffer_access_types[2] = {
+		SDL_TEXTUREACCESS_STREAMING, SDL_TEXTUREACCESS_TARGET
+	};
+
+	for (byte i = 0; i < 2; i++) {
+		SDL_Texture** const buffer = buffers[i];
+
+		if (should_free) SDL_DestroyTexture(*buffer);
+
+		*buffer = SDL_CreateTexture(screen.renderer, PIXEL_FORMAT,
+			buffer_access_types[i], new_width, new_height);
+	}
+	SDL_SetTextureBlendMode(screen.shape_buffer, SDL_BLENDMODE_BLEND);
+}
+
 void init_screen(void) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0)
 		FAIL("Unable to launch Dungeon Dave: %s\n", SDL_GetError());
 
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1", SDL_HINT_OVERRIDE);
-	// SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);
+	#ifdef FORCE_USE_OPENGL
+	SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "opengl", SDL_HINT_OVERRIDE);
+	#endif
 
-	SDL_CreateWindowAndRenderer(settings.screen_width, settings.screen_height,
-		WINDOW_RENDERER_FLAGS, &screen.window, &screen.renderer);
+	screen.window = SDL_CreateWindow("Dungeon Dave", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		settings.screen_width, settings.screen_height, WINDOW_FLAGS);
 
-	SDL_SetWindowTitle(screen.window, "Dungeon Dave");
+	const int renderer_index =
+		#ifdef FORCE_USE_OPENGL
+		1
+		#else
+		-1
+		#endif
+		;
 
+	screen.renderer = SDL_CreateRenderer(screen.window, renderer_index, RENDERER_FLAGS);
 	screen.pixel_format = SDL_AllocFormat(PIXEL_FORMAT);
 	init_SDL_framebuffers(settings.screen_width, settings.screen_height, 0);
 }
