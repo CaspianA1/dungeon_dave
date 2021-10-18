@@ -70,6 +70,7 @@ projectile todo:
 	- shoot projectiles into teleporters
 	- wake up enemies with a traveling projectile sound
 
+- gradually lower the weapon if dead
 - store bounding boxes
 - repeat weapon attack if holding down key
 - counts to uint16_t's (not level unsigned to uint16_t's too)

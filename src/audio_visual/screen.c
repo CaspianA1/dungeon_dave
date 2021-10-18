@@ -83,11 +83,14 @@ void refresh(Player* const player, Weapon* const weapon) {
 	}
 
 	#ifndef NOCLIP_MODE
-	void animate_weapon(DataAnimation* const, const vec, const byte, const byte, const double);
 
-	animate_weapon(&weapon -> animation_data, player -> pos,
-		bit_is_set(weapon -> flags, mask_paces_sideways_weapon),
-		bit_is_set(weapon -> flags, mask_in_use_weapon), player -> body.v);
+	if (!player -> is_dead) {
+		void animate_weapon(DataAnimation* const, const vec, const byte, const byte, const double);
+
+		animate_weapon(&weapon -> animation_data, player -> pos,
+			bit_is_set(weapon -> flags, mask_paces_sideways_weapon),
+			bit_is_set(weapon -> flags, mask_in_use_weapon), player -> body.v);
+	}
 
 	#else
 	(void) weapon;
