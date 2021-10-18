@@ -27,7 +27,8 @@ void init_screen(void) {
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "opengl", SDL_HINT_OVERRIDE);
 	#endif
 
-	screen.window = SDL_CreateWindow("Dungeon Dave", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+	screen.window = SDL_CreateWindow("Dungeon Dave",
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		settings.screen_width, settings.screen_height, WINDOW_FLAGS);
 
 	const int renderer_index =
