@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.pl": "prolog",
         "cstddef": "c",
         "__functional_base": "c",
         "__functional_base_03": "c",
@@ -18,6 +19,8 @@
         "random": "c",
         "ratio": "c",
         "tuple": "c",
-        "utility": "c"
+        "utility": "c",
+        "queue": "c",
+        "stack": "c"
     }
 }

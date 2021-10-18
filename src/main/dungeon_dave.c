@@ -38,7 +38,11 @@
 #include "../combat/bfs_types.c"
 #include "../combat/bfs.c"
 #include "../combat/navigator.c"
-#include "../combat/weapon.c"
+
+#include "../combat/weapon/tracer.c"
+#include "../combat/weapon/projectile.c"
+#include "../combat/weapon/weapon.c"
+
 #include "../combat/enemy.c"
 #include "../combat/health_kit.c"
 
