@@ -57,12 +57,14 @@ DEF_THING_ADDER(health_kit) {
 }
 
 DEF_THING_ADDER(projectile) {
-	extern Sprite projectile_sprite;
+	extern DataAnimationImmut projectile_traveling_animation;
 	for (byte i = 0; i < current_level.projectile_count; i++) {
 		Projectile* const projectile = current_level.projectiles + i;
 		const vec3D projectile_pos = projectile -> tracer.pos;
 
 		DataBillboard* const billboard_data = &projectile -> billboard_data;
+		DataAnimationMut* const traveling_animation_data = &projectile -> traveling_animation_data;
+		DataAnimation animation_data = {projectile_traveling_animation, *traveling_animation_data};
 
 		update_billboard_values(billboard_data, p_pos, p_angle);
 
@@ -70,9 +72,12 @@ DEF_THING_ADDER(projectile) {
 		billboard_data -> height = (double) projectile_pos[2] - actor_eye_height;
 
 		const Thing thing = {
-			mask_can_move_through_thing, T_Projectile, billboard_data, &projectile_sprite,
-			{0, 0, projectile_sprite.size.x, projectile_sprite.size.y},
+			mask_can_move_through_thing, T_Projectile, billboard_data, &projectile_traveling_animation.sprite, // &projectile_sprite,
+			rect_from_ivecs(get_spritesheet_frame_origin(&animation_data), projectile_traveling_animation.frame_size)
 		};
+
+		progress_animation_data_frame_ind(&animation_data);
+		memcpy(traveling_animation_data, &animation_data.mut, sizeof(DataAnimationMut));
 
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
@@ -89,8 +94,7 @@ DEF_THING_ADDER(animated) {
 
 		const Thing thing = {
 			0, T_Animated, billboard_data, &immut_animation_data -> sprite,
-			rect_from_ivecs(get_spritesheet_frame_origin(&animated_billboard -> animation_data),
-				immut_animation_data -> frame_size)
+			rect_from_ivecs(get_spritesheet_frame_origin(animation_data), immut_animation_data -> frame_size)
 		};
 
 		progress_animation_data_frame_ind(animation_data);

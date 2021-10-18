@@ -1,11 +1,19 @@
-Sprite projectile_sprite;
+DataAnimationImmut
+	projectile_traveling_animation,
+	projectile_exploding_animation;
 
 void init_projectile_resources(void) {
-	projectile_sprite = init_sprite("assets/objects/fireball.bmp", 0);
+	const DataAnimationImmut
+		traveling = init_immut_animation_data("assets/spritesheets/fireball_travel.bmp", 12, 1, 12, 15),
+		exploding = init_immut_animation_data("assets/spritesheets/fireball_explode.bmp", 8, 1, 8, 20);
+
+	memcpy(&projectile_traveling_animation, &traveling, sizeof(DataAnimationImmut));
+	memcpy(&projectile_exploding_animation, &exploding, sizeof(DataAnimationImmut));
 }
 
 void deinit_projectile_resources(void) {
-	deinit_sprite(projectile_sprite);
+	deinit_sprite(projectile_traveling_animation.sprite);
+	deinit_sprite(projectile_exploding_animation.sprite);
 }
 
 inlinable void update_inter_tick_projectiles(const Player* const player, const Weapon* const weapon) {

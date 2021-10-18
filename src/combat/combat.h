@@ -90,6 +90,7 @@ typedef struct {
 	DataBillboard billboard_data;
 	Tracer tracer;
 	int sound_channel;
+	DataAnimationMut traveling_animation_data, exploding_animation_data;
 } Projectile;
 
 //////////
