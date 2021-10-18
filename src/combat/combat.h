@@ -89,8 +89,9 @@ typedef struct {
 typedef struct {
 	DataBillboard billboard_data;
 	Tracer tracer;
+	byte is_exploding;
 	int sound_channel;
-	DataAnimationMut traveling_animation_data, exploding_animation_data;
+	DataAnimationMut curr_animation_data;
 } Projectile;
 
 //////////

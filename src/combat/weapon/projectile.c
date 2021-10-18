@@ -2,6 +2,8 @@ DataAnimationImmut
 	projectile_traveling_animation,
 	projectile_exploding_animation;
 
+static Sound projectile_exploding_sound;
+
 void init_projectile_resources(void) {
 	const DataAnimationImmut
 		traveling = init_immut_animation_data("assets/spritesheets/fireball_travel.bmp", 12, 1, 12, 15),
@@ -9,11 +11,22 @@ void init_projectile_resources(void) {
 
 	memcpy(&projectile_traveling_animation, &traveling, sizeof(DataAnimationImmut));
 	memcpy(&projectile_exploding_animation, &exploding, sizeof(DataAnimationImmut));
+
+	projectile_exploding_sound = init_sound("assets/audio/sound_effects/rocket_explosion.wav", 1);
 }
 
 void deinit_projectile_resources(void) {
 	deinit_sprite(projectile_traveling_animation.sprite);
 	deinit_sprite(projectile_exploding_animation.sprite);
+	deinit_sound(&projectile_exploding_sound);
+}
+
+inlinable void update_projectile_sound(const Projectile* const projectile) {
+	update_channel_from_dist_3D_and_beta(
+		projectile -> sound_channel,
+		quietest_projectile_sound_dist,
+		(double) projectile -> tracer.dist,
+		projectile -> billboard_data.beta);
 }
 
 inlinable void update_inter_tick_projectiles(const Player* const player, const Weapon* const weapon) {
@@ -26,22 +39,29 @@ inlinable void update_inter_tick_projectiles(const Player* const player, const W
 		const BoundingBox_3D projectile_box = init_bounding_box_3D(tracer -> pos, inter_tick_projectile_size);
 		const byte collided = apply_damage_from_weapon_if_needed(player, weapon, tracer -> dist, projectile_box);
 
-		if (collided || !iter_tracer(&projectile_ref -> tracer) || !channel_still_playing(channel)) {
+		if (!projectile_ref -> is_exploding &&
+			(collided || !iter_tracer(&projectile_ref -> tracer) || !channel_still_playing(channel))) {
+			projectile_ref -> is_exploding = 1;
+			projectile_ref -> curr_animation_data.frame_ind = -1;
+			stop_sound_channel(channel);
+			projectile_ref -> sound_channel = play_short_sound(&projectile_exploding_sound);
+			update_projectile_sound(projectile_ref);
+		}
+		else if (projectile_ref -> is_exploding) {
+			// DEBUG(projectile_ref -> curr_animation_data.frame_ind, d);
+			// how can I tell when it's done?
+
+			/*
 			current_level.thing_count--;
 			new_projectile_count--;
-			/* Below, all projectiles on the right side of the current element are shifted left by 1,
-			essentially deleting the projectile at position `i` */
+			// Below, all projectiles on the right side of the current element are shifted left by 1,
+			// essentially deleting the projectile at position `i`
 			memmove(projectile_ref, projectile_ref + 1,
 				(current_level.projectile_count - i - 1) * sizeof(Projectile));
-
-			// Do a boom noise here; and if hit an enemy instance, apply damage
-
-			stop_sound_channel(channel);
+			*/
 		}
-		else update_channel_from_dist_3D_and_beta(
-			channel, quietest_projectile_sound_dist,
-			(double) projectile_ref -> tracer.dist,
-			projectile_ref -> billboard_data.beta);
+
+		else update_projectile_sound(projectile_ref);
 	}
 	current_level.projectile_count = new_projectile_count;
 }
@@ -64,8 +84,9 @@ void use_inter_tick_projectile_weapon(const Weapon* const weapon, const Player* 
 			.pos = {(double) tracer.pos[0], (double) tracer.pos[1]},
 			.height = player -> jump.height
 		},
-		.tracer = tracer,
-		.sound_channel = channel
+		.is_exploding = 0,
+		.sound_channel = channel,
+		.tracer = tracer
 	};
 
 	memcpy(current_level.projectiles + current_level.projectile_count, &projectile, sizeof(Projectile));

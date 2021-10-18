@@ -57,7 +57,7 @@ DEF_THING_ADDER(health_kit) {
 }
 
 DEF_THING_ADDER(projectile) {
-	extern DataAnimationImmut projectile_traveling_animation;
+	extern DataAnimationImmut projectile_traveling_animation, projectile_exploding_animation;
 	for (byte i = 0; i < current_level.projectile_count; i++) {
 		Projectile* const projectile = current_level.projectiles + i;
 		const vec3D projectile_pos = projectile -> tracer.pos;
@@ -65,19 +65,22 @@ DEF_THING_ADDER(projectile) {
 		DataBillboard* const billboard_data = &projectile -> billboard_data;
 		update_billboard_values(billboard_data, p_pos, p_angle);
 
-		DataAnimationMut* const traveling_animation_data = &projectile -> traveling_animation_data;
-		DataAnimation animation_data = {projectile_traveling_animation, *traveling_animation_data};
+		DataAnimationMut* const mut_animation_data = &projectile -> curr_animation_data;
+		const DataAnimationImmut* const immut_animation_data = (projectile -> is_exploding)
+			? &projectile_exploding_animation : &projectile_traveling_animation;
+
+		DataAnimation animation_data = {*immut_animation_data, *mut_animation_data};
 
 		billboard_data -> pos = (vec) {(double) projectile_pos[0], (double) projectile_pos[1]};
 		billboard_data -> height = (double) projectile_pos[2] - actor_eye_height;
 
 		const Thing thing = {
-			mask_can_move_through_thing, T_Projectile, billboard_data, &projectile_traveling_animation.sprite,
-			rect_from_ivecs(get_spritesheet_frame_origin(&animation_data), projectile_traveling_animation.frame_size)
+			mask_can_move_through_thing, T_Projectile, billboard_data, &immut_animation_data -> sprite,
+			rect_from_ivecs(get_spritesheet_frame_origin(&animation_data), immut_animation_data -> frame_size)
 		};
 
 		progress_animation_data_frame_ind(&animation_data);
-		memcpy(traveling_animation_data, &animation_data.mut, sizeof(DataAnimationMut));
+		memcpy(mut_animation_data, &animation_data.mut, sizeof(DataAnimationMut));
 
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
