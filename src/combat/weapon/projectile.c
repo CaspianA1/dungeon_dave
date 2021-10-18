@@ -8,24 +8,17 @@ void deinit_projectile_resources(void) {
 	deinit_sprite(projectile_sprite);
 }
 
-inlinable void update_inter_tick_projectiles(void) {
+inlinable void update_inter_tick_projectiles(const Player* const player, const Weapon* const weapon) {
 	byte new_projectile_count = current_level.projectile_count;
 	for (byte i = 0; i < current_level.projectile_count; i++) {
 		Projectile* const projectile_ref = current_level.projectiles + i;
 		const int channel = projectile_ref -> sound_channel;
-		byte hit_enemy_instance = 0;
-		const BoundingBox_3D projectile_box = init_bounding_box_3D(projectile_ref -> tracer.pos, inter_tick_projectile_size);
+		const Tracer* const tracer = &projectile_ref -> tracer;
 
-		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
-			const DataBillboard* const billboard_data = &current_level.enemy_instances[i].billboard_data;
-				const BoundingBox_3D thing_box = init_actor_bounding_box(billboard_data -> pos, billboard_data -> height);
-				if (aabb_collision_3D(projectile_box, thing_box)) {
-					hit_enemy_instance = 1;
-					break; // For future, allow collision with many, so don't break
-				}
-		}
+		const BoundingBox_3D projectile_box = init_bounding_box_3D(tracer -> pos, inter_tick_projectile_size);
+		const byte collided = apply_damage_from_weapon_if_needed(player, weapon, tracer -> dist, projectile_box);
 
-		if (hit_enemy_instance || !iter_tracer(&projectile_ref -> tracer) || !channel_still_playing(channel)) {
+		if (collided || !iter_tracer(&projectile_ref -> tracer) || !channel_still_playing(channel)) {
 			current_level.thing_count--;
 			new_projectile_count--;
 			/* Below, all projectiles on the right side of the current element are shifted left by 1,
@@ -45,7 +38,7 @@ inlinable void update_inter_tick_projectiles(void) {
 	current_level.projectile_count = new_projectile_count;
 }
 
-static void use_inter_tick_projectile_weapon(const Weapon* const weapon, const Player* const player, const int channel) {
+void use_inter_tick_projectile_weapon(const Weapon* const weapon, const Player* const player, const int channel) {
 	(void) weapon;
 
 	if (current_level.projectile_count == current_level.alloc_projectile_count) {
@@ -56,7 +49,7 @@ static void use_inter_tick_projectile_weapon(const Weapon* const weapon, const P
 			++current_level.alloc_thing_count * sizeof(Thing));
 	}
 
-	const Tracer tracer = init_tracer_from_player(player, long_range_projectile_tracer_step, 0);
+	const Tracer tracer = init_tracer_from_player(player, inter_tick_projectile_tracer_step, 0);
 
 	const Projectile projectile = {
 		.billboard_data = {

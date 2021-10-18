@@ -3,58 +3,46 @@ void deinit_weapon(const Weapon* const weapon) {
 	deinit_sprite(weapon -> animation_data.immut.sprite);
 }
 
-#ifdef NOCLIP_MODE
+// returns if it did apply damage
+byte apply_damage_from_weapon_if_needed(const Player* const player,
+	const Weapon* const weapon, const float dist, const BoundingBox_3D projectile_box) {
 
-#define use_weapon_if_needed(a, b, c)
-
-#else
-
-static void use_hitscan_weapon(const Weapon* const weapon, const Player* const player) {
 	const vec p_pos = player -> pos;
 	const double p_height = player -> jump.height;
 
-	const byte short_range_weapon = bit_is_set(weapon -> flags, mask_short_range_weapon);
+	byte collided = 0;
 
-	Tracer tracer = init_tracer_from_player(player,
-		short_range_weapon ? short_range_tracer_step : long_range_tracer_step, 1);
+	for (byte i = 0; i < current_level.enemy_instance_count; i++) {
+		EnemyInstance* const enemy_instance = current_level.enemy_instances + i;
+		if (enemy_instance -> state == Dead) continue;
 
-	while (iter_tracer(&tracer)) {
-		const BoundingBox_3D projectile_box = init_bounding_box_3D(tracer.pos, hitscan_projectile_size);
+		const DataBillboard* const billboard_data = &enemy_instance -> billboard_data;
+		const BoundingBox_3D enemy_box = init_actor_bounding_box(billboard_data -> pos, billboard_data -> height);
 
-		byte collided = 0;
+		if (aabb_collision_3D(projectile_box, enemy_box)) {
+			set_bit(enemy_instance -> flags, mask_recently_attacked_enemy);
+			collided = 1;
 
-		for (byte i = 0; i < current_level.enemy_instance_count; i++) {
-			EnemyInstance* const enemy_instance = current_level.enemy_instances + i;
-			if (enemy_instance -> state == Dead) continue;
+			// `f(x) = 1 - (log2(x) / 8)`, range zero and below to infinity (smoothly decreasing slope)
+			double percent_damage = 1.0 - (log2((double) dist) / 8.0);
+			if (percent_damage > 1.0) percent_damage = 1.0;
+			else if (percent_damage < 0.0) percent_damage = 0.0;
 
-			const BoundingBox_3D enemy_box = init_actor_bounding_box(
-				enemy_instance -> billboard_data.pos,
-				enemy_instance -> billboard_data.height);
+			void set_enemy_instance_state(EnemyInstance* const,
+				const EnemyState, const byte, const vec, const double);
 
-			if (aabb_collision_3D(projectile_box, enemy_box)) {
-				set_bit(enemy_instance -> flags, mask_recently_attacked_enemy);
-
-				void set_enemy_instance_state(EnemyInstance* const,
-					const EnemyState, const byte, const vec, const double);
-
-				// `f(x) = 1.0 - (log2(x) / 8)`, range zero and below to infinity (smoothly decreasing slope)
-				double percent_damage = 1.0 - (log2((double) tracer.dist) / 8.0);
-				if (percent_damage > 1.0) percent_damage = 1.0;
-				else if (percent_damage < 0.0) percent_damage = 0.0;
-
-				if ((enemy_instance -> hp -= weapon -> power) <= 0.0)
-					set_enemy_instance_state(enemy_instance, Dead, 0, p_pos, p_height);
-				else {
-					const int channel = play_short_sound(enemy_instance -> enemy -> sounds + 4); // attacked
-					update_channel_from_thing_billboard_data(channel, &enemy_instance -> billboard_data, p_pos, p_height);
-				}
-
-				collided = 1;
+			if ((enemy_instance -> hp -= weapon -> power) <= 0.0)
+				set_enemy_instance_state(enemy_instance, Dead, 0, p_pos, p_height);
+			else {
+				const int channel = play_short_sound(enemy_instance -> enemy -> sounds + 4); // attacked
+				update_channel_from_thing_billboard_data(channel, &enemy_instance -> billboard_data, p_pos, p_height);
 			}
 		}
-		if (collided || short_range_weapon) break;
 	}
+	return collided;
 }
+
+#ifndef NOCLIP_MODE
 
 void use_weapon_if_needed(Weapon* const weapon, const Player* const player, const InputStatus input_status) {
 	int* const frame_ind = &weapon -> animation_data.mut.frame_ind;
@@ -64,6 +52,9 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	const byte
 		first_in_use = bit_is_set(weapon -> flags, mask_in_use_weapon),
 		spawns_projectile = bit_is_set(weapon -> flags, mask_spawns_projectile_weapon);
+
+	void use_inter_tick_projectile_weapon(const Weapon* const, const Player* const, const int);
+	void use_hitscan_weapon(const Weapon* const, const Player* const);
 
 	if (first_in_use && *frame_ind == 0)
 		clear_bit(weapon -> flags, mask_in_use_weapon);
@@ -75,5 +66,9 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	}
 	else clear_bit(weapon -> flags, mask_recently_used_weapon); // recently used = within the last tick
 }
+
+#else
+
+#define use_weapon_if_need(a, b, c)
 
 #endif

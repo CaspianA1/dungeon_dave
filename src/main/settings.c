@@ -176,7 +176,7 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	STARTUP_LOG("primary weapon");
 
 	const Weapon first_weapon = {
-		.flags = mask_paces_sideways_weapon | mask_spawns_projectile_weapon, .power = 8.0,
+		.flags = mask_paces_sideways_weapon | mask_spawns_projectile_weapon, .power = 15.0,
 		.sound = init_sound("assets/audio/sound_effects/rocket.wav", 1),
 		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/desecrator.bmp", 8, 1, 8, 20), {0.0, 0}}
 	};

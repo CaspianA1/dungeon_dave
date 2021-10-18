@@ -3,7 +3,7 @@
 static const float
 	short_range_tracer_step = 0.3f, // the magnitude of the velocity vector
 	long_range_tracer_step = 0.1f,
-	long_range_projectile_tracer_step = 0.1f,
+	inter_tick_projectile_tracer_step = 0.07f,
 	hitscan_projectile_size = 0.2f,
 	inter_tick_projectile_size = 1.0f;
 

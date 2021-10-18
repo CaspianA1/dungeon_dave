@@ -40,8 +40,9 @@
 #include "../combat/pathfinding/navigator.c"
 
 #include "../combat/weapon/tracer.c"
-#include "../combat/weapon/projectile.c"
 #include "../combat/weapon/weapon.c"
+#include "../combat/weapon/projectile.c"
+#include "../combat/weapon/hitscan.c"
 
 #include "../combat/enemy.c"
 #include "../combat/health_kit.c"
@@ -142,7 +143,7 @@ int main(void) {
 		}
 
 		use_weapon_if_needed(weapon_ref, player_ref, input_status);
-		update_inter_tick_projectiles();
+		update_inter_tick_projectiles(player_ref, weapon_ref);
 
 		const double horizon_line = settings.half_screen_height + player.y_pitch + player.pace.screen_offset;
 
