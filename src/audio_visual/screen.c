@@ -45,6 +45,7 @@ void init_screen(void) {
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);
 	glewExperimental = GL_TRUE;
 	glewInit();
+
 	#endif
 
 	const int renderer_index =

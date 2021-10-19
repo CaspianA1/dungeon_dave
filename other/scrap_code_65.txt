@@ -409,4 +409,139 @@ else puts("No projectiles");
 
 	// SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);
 
+///// The antialiased_downscale_by_2 function:
+
+void antialiased_downscale_by_2(const SDL_Surface* const orig,
+	SDL_Surface* const mipmap, const ivec dest_origin, const byte scale_factor) {
+
+	const byte dec_scale_factor = scale_factor - 1;
+	const int orig_size = orig -> w;
+
+	const SDL_PixelFormat* const format = orig -> format;
+	const int bpp = format -> BytesPerPixel, inc_across = 1 << dec_scale_factor;
+
+	for (int y = 0; y < orig_size; y += inc_across) {
+		for (int x = 0; x < orig_size; x += inc_across) {
+			const int dec_x = x - 1, dec_y = y - 1, inc_x = x + 1, inc_y = y + 1;
+
+			const ivec pixel_group[9] = {
+				{dec_x, dec_y}, {x, dec_y}, {inc_x, dec_y},
+				{dec_x, y}, 	{x, y}, 	{inc_x, y},
+				{dec_x, inc_y}, {x, inc_y}, {inc_x, inc_y}
+			};
+
+			int sum[4] = {0, 0, 0, 0};
+			byte valid_neighbor_sum = 0;
+
+			for (byte i = 0; i < 9; i++) {
+				const ivec pixel_pos = pixel_group[i];
+
+				if (pixel_pos.x >= 0 && pixel_pos.y >= 0 && pixel_pos.x < orig_size && pixel_pos.y < orig_size) {
+					const Uint32 neighbor = *read_surface_pixel(orig, pixel_pos.x, pixel_pos.y, bpp);
+
+					sum[0] += (byte) (neighbor >> 24);
+					sum[1] += (byte) (neighbor >> 16);
+					sum[2] += (byte) (neighbor >> 8);
+					sum[3] += (byte) neighbor;
+					valid_neighbor_sum++;
+				}
+			}
+
+			const Uint32 result = SDL_MapRGBA(format, sum[1] / valid_neighbor_sum, sum[2] / valid_neighbor_sum,
+				sum[3] / valid_neighbor_sum, sum[0] / valid_neighbor_sum);
+
+			*read_surface_pixel(mipmap, (x >> dec_scale_factor) + dest_origin.x, (y >> dec_scale_factor) + dest_origin.y, bpp) = result;
+		}
+	}
+}
+
+///// And the old load_mipmap with that:
+
+// returns null if the image dimensions aren't powers of 2
+SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth_ref) {
+	const int image_size = image -> w; // image must have uniform dimensions
+	if (!is_pow_of_2(image_size) || !is_pow_of_2(image -> h)) return NULL;
+
+	SDL_Surface* const mipmap = SDL_CreateRGBSurfaceWithFormat(0,
+		image_size + (image_size >> 1), image_size, PIXEL_FORMAT_DEPTH, PIXEL_FORMAT);
+
+	byte depth = 0;
+
+	#ifdef ANTIALIASED_MIPMAPPING
+
+	SDL_LockSurface(image);
+	SDL_LockSurface(mipmap);
+
+	int dest_size = image_size;
+	ivec dest_origin = {0, 0};
+	while (dest_size != 0) {
+		if (depth >= 2) dest_origin.y += image_size >> (depth - 1);
+		antialiased_downscale_by_2(image, mipmap, dest_origin, depth + 1);
+
+		dest_origin.x = image_size;
+		dest_size >>= 1;
+		depth++;
+	}
+
+	SDL_UnlockSurface(image);
+	SDL_UnlockSurface(mipmap);
+
+	#else
+
+	SDL_Rect dest = {0, 0, image_size, image_size};
+	SDL_Rect last_dest = dest;
+	SDL_BlitSurface(image, NULL, mipmap, &dest);
+
+	while (dest.w != 0) {
+		if (depth >= 2) dest.y += image_size >> (depth - 1);
+
+		SDL_BlitScaled(mipmap, &last_dest, mipmap, &dest);
+		last_dest = dest;
+
+		dest.x = image_size;
+		dest.w >>= 1;
+		dest.h >>= 1;
+		depth++;
+	}
+
+	#endif
+
+	/*
+	static byte first = 1, id = 0;
+	if (first) {
+		system("mkdir -p imgs");
+		first = 0;
+	}
+
+	char buf[15];
+	sprintf(buf, "imgs/out_%d.bmp", id);
+	SDL_SaveBMP(mipmap, buf);
+	id++;
+	*/
+
+	*depth_ref = depth;
+	return mipmap;
+}
+
+/////
+
+
+	/*
+	SDL_Surface* const mipmap = load_mipmap(surface, &sprite.max_mipmap_depth);
+	if (mipmap == NULL) {
+		FAIL("The sprite with the path %s must have dimensions that are powers of two\n", path);
+	}
+	else {
+		SDL_FreeSurface(surface); // free the previous surface
+		surface = mipmap; // replace it with the mipmap
+	}
+
+	sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, surface); // make a texture from the surface
+	#endif
+
+	SDL_FreeSurface(surface); // free the surface, it isn't used anymore
+
+	sprite.size = (ivec) {surface -> w, surface -> h};
+	*/
+
 /////

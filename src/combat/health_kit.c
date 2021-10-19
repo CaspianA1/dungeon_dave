@@ -3,7 +3,7 @@ static Sound health_kit_sound;
 static const byte health_incr_amount = INIT_HP / 10;
 
 void init_health_kit_resources(void) {
-	health_kit_sprite = init_sprite("assets/objects/health_kit.bmp", 0);
+	health_kit_sprite = init_sprite("assets/objects/health_kit.bmp", D_Thing);
 	health_kit_sound = init_sound("assets/audio/sound_effects/health_increase.wav", 1);
 }
 

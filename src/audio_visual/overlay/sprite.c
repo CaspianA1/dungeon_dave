@@ -8,31 +8,56 @@ SDL_Surface* load_surface(const char* const path) {
 	return converted_surface;
 }
 
-Sprite init_sprite(const char* const path, const byte enable_mipmap) {
+/*
+Texture filtering:
+
+If OpenGL filtering enabled:
+	If a wall or a thing: enable trilinear filtering with mipmapping
+	If overlay, no mipmapping
+	If a skybox, enable linear filtering via OpenGL (same as via SDL)
+
+Else:
+	If a wall, enable software mipmapping
+	If a thing or overlay, no mipmapping
+	If a skybox, enable linear filtering via SDL
+*/
+
+Sprite init_sprite(const char* const path, const DrawableType drawable_type) {
 	SDL_Surface* surface = load_surface(path);
 
-	Sprite sprite = {.max_mipmap_depth = 0};
-
-	if (enable_mipmap) {
-		SDL_Surface* const mipmap = load_mipmap(surface, &sprite.max_mipmap_depth);
-		if (mipmap == NULL) {
-			FAIL("The sprite with the path %s must have dimensions that are powers of two\n", path);
-		}
-		else {
-			SDL_FreeSurface(surface); // free the previous surface
-			surface = mipmap; // replace it with the mipmap
-		}
-	}
-
-	sprite.size = (ivec) {surface -> w, surface -> h};
-	sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, surface); // make a texture from the surface
-	SDL_FreeSurface(surface); // free the surface, it isn't used anymore
+	Sprite sprite;
 
 	#ifdef OPENGL_TEXTURE_FILTERING
-	SDL_GL_BindTexture(sprite.texture, NULL, NULL);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	create_filtered_texture(surface, &sprite, drawable_type);
+	#else
+
+	switch (drawable_type) {
+		case D_Wall: {
+			SDL_Surface* const mipmap = load_mipmap(surface, &sprite.max_mipmap_depth);
+			if (mipmap == NULL) {
+				FAIL("The sprite with the path %s must have dimensions that are powers of two\n", path);
+			}
+
+			SDL_FreeSurface(surface); // free the previous surface
+			surface = mipmap; // replace it with the mipmap
+			break;
+		}
+		case D_Skybox:
+			SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE); // linear filtering
+			break;
+		default:
+			break;
+	}
+
+	sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
+
+	if (drawable_type == D_Skybox) // reset linear filtering hint
+		SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "0", SDL_HINT_OVERRIDE);
+
 	#endif
 
+	sprite.size = (ivec) {surface -> w, surface -> h};
+	SDL_FreeSurface(surface);
 	return sprite;
 }
 

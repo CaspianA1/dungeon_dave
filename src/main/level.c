@@ -50,11 +50,7 @@ void init_level(const int map_width, const int map_height,
 	current_level.background_sound = init_sound(background_sound_path, 0);
 
 	current_level.skybox.enabled = skybox_path != NULL;
-	if (current_level.skybox.enabled) { // linear filtering
-		SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);
-		current_level.skybox.sprite = init_sprite(skybox_path, 0);
-		SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "0", SDL_HINT_OVERRIDE);
-	}
+	if (current_level.skybox.enabled) current_level.skybox.sprite = init_sprite(skybox_path, D_Skybox);
 
 	current_level.bfs_visited = init_statemap(map_width, map_height);
 
@@ -89,7 +85,7 @@ void set_level_walls(const unsigned wall_count, ...) {
 	va_start(wall_data, wall_count);
 
 	for (byte i = 0; i < wall_count; i++)
-		current_level.walls[i] = init_sprite(va_arg(wall_data, const char*), 1);
+		current_level.walls[i] = init_sprite(va_arg(wall_data, const char*), D_Wall);
 
 	va_end(wall_data);
 }
@@ -104,7 +100,7 @@ void set_level_billboards(const unsigned billboard_count, ...) {
 
 	for (byte i = 0; i < billboard_count; i++) {
 		Billboard* const billboard = current_level.billboards + i; // see if sprite allocated before
-		billboard -> sprite = init_sprite(va_arg(billboard_data, const char*), 0);
+		billboard -> sprite = init_sprite(va_arg(billboard_data, const char*), D_Thing);
 		billboard -> billboard_data.pos = (vec) {
 			va_arg(billboard_data, double),
 			va_arg(billboard_data, double)
@@ -176,11 +172,11 @@ void set_level_animated_billboards(const unsigned animated_billboard_count, ...)
 			frame_count = va_arg(animation_data, int),
 			fps = va_arg(animation_data, int);
 
-		DataAnimationImmut init_immut_animation_data(const char* const, const int,
-			const int, const int, const int);
+		DataAnimationImmut init_immut_animation_data(const char* const, const DrawableType,
+			const int, const int, const int, const int);
 
 		const DataAnimation _animation_data = {
-			init_immut_animation_data(path, frames_per_row, frames_per_col, frame_count, fps), {0.0, 0}
+			init_immut_animation_data(path, D_Thing, frames_per_row, frames_per_col, frame_count, fps), {0.0, 0}
 		};
 
 		const DataBillboard billboard_data = {

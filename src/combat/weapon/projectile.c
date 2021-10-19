@@ -6,8 +6,8 @@ static Sound projectile_exploding_sound;
 
 void init_projectile_resources(void) {
 	const DataAnimationImmut
-		traveling = init_immut_animation_data("assets/spritesheets/fireball_travel.bmp", 12, 1, 12, 15),
-		exploding = init_immut_animation_data("assets/spritesheets/fireball_explode.bmp", 8, 1, 8, 20);
+		traveling = init_immut_animation_data("assets/spritesheets/fireball_travel.bmp", D_Thing, 12, 1, 12, 15),
+		exploding = init_immut_animation_data("assets/spritesheets/fireball_explode.bmp", D_Thing, 8, 1, 8, 20);
 
 	memcpy(&projectile_traveling_animation, &traveling, sizeof(DataAnimationImmut));
 	memcpy(&projectile_exploding_animation, &exploding, sizeof(DataAnimationImmut));

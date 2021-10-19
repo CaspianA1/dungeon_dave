@@ -74,6 +74,10 @@ projectile todo:
 	- shoot projectiles into teleporters
 	- wake up enemies with a traveling projectile sound
 
+- weird wall texture patterns when pressed up against walls with the gl version
+- make bomb explosion a bit quieter perhaps, or update its sound pos
+- clear floor buffer for gl version
+- make other mipmaps work for other texture sizes with the software version
 - gradually lower the weapon if dead
 - store bounding boxes
 - repeat weapon attack if holding down key
@@ -97,10 +101,9 @@ projectile todo:
 - anisotropic filtering for angled walls
 - the wall corner floor algorithm
 - distance shading
-- better antialiasing by sampling from just the last mip level for the pixel-wise downscaling
 - a pause menu activated by esc, instead of escaping a window by pressing esc (screen size would be changed there too)
 - long range AI
-- a unique hitbox size for each thing, and can run through some things
+- a unique hitbox size for each thing, and can run through some things (set from level creation)
 - screen width and height to screen size via sublime text substitutions
 */
 

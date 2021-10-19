@@ -116,7 +116,8 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	void init_health_kit_resources(void);
 	void init_gui_resources(void);
 
-	DataAnimationImmut init_immut_animation_data(const char* const, const int, const int, const int, const int);
+	DataAnimationImmut init_immut_animation_data(const char* const, const DrawableType,
+		const int, const int, const int, const int);
 
 	const Uint32 before_loading_defaults = SDL_GetTicks();
 
@@ -158,14 +159,16 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	const Weapon first_weapon = {
 		.flags = mask_paces_sideways_weapon | mask_spawns_projectile_weapon, .power = 15.0,
 		.sound = init_sound("assets/audio/sound_effects/rocket_travel.wav", 1),
-		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/desecrator.bmp", 8, 1, 8, 20), {0.0, 0}}
+		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/desecrator.bmp",
+			D_Overlay, 8, 1, 8, 20), {0.0, 0}}
 	};
 
 	/*
 	const Weapon first_weapon = {
 		.flags = mask_short_range_weapon, .power = 4.0,
 		.sound = init_sound("assets/audio/sound_effects/whip_crack.wav", 1),
-		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/whip.bmp", 4, 6, 22, 60), {0.0, 0}}
+		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/whip.bmp",
+			D_Overlay, 4, 6, 22, 60), {0.0, 0}}
 	};
 	*/
 
@@ -173,7 +176,8 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	const Weapon first_weapon = {
 		.flags = mask_paces_sideways_weapon, .power = 10.0,
 		.sound = init_sound("assets/audio/sound_effects/shotgun.wav", 1),
-		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59, 30), {0.0, 0}}
+		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/snazzy_shotgun.bmp",
+			D_Overlay, 6, 10, 59, 30), {0.0, 0}}
 	};
 	*/
 
@@ -181,7 +185,8 @@ void load_all_defaults(void (*load_first_level) (void), Player* const player, We
 	const Weapon first_weapon = {
 		.flags = mask_short_range_weapon | mask_paces_sideways_weapon, .power = 4.0,
 		.sound = init_sound("assets/audio/enemy_sounds/eddie_attack.wav", 1),
-		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/golden_dagger.bmp", 2, 5, 9, 40), {0.0, 0}}
+		.animation_data = {init_immut_animation_data("assets/spritesheets/weapons/golden_dagger.bmp",
+			D_Overlay, 2, 5, 9, 40), {0.0, 0}}
 	};
 	*/
 

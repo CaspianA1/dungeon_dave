@@ -23,7 +23,7 @@ InputStatus display_title_screen(void) {
 	const Sound title_track = init_sound("assets/audio/themes/title.wav", 0);
 	play_long_sound(&title_track);
 
-	const Sprite logo = init_sprite("assets/logo.bmp", 0);
+	const Sprite logo = init_sprite("assets/logo.bmp", D_Overlay);
 
 	const Menu start_screen = init_menu(menu_text_color_1, menu_main_color, menu_border_color, 1,
 		start_button_pos, start_button_on_click, "Start!");

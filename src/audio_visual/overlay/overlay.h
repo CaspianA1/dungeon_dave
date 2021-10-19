@@ -1,7 +1,10 @@
 typedef struct {
 	SDL_Texture* texture;
 	ivec size;
+
+	#ifndef OPENGL_TEXTURE_FILTERING
 	byte max_mipmap_depth;
+	#endif
 } Sprite;
 
 typedef struct {
@@ -9,7 +12,14 @@ typedef struct {
 	int size;
 } PixSprite; // intended for optimal pixel access
 
-Sprite init_sprite(const char* const, const byte);
+typedef enum {
+	D_Wall,
+	D_Thing,
+	D_Overlay,
+	D_Skybox
+} DrawableType;
+
+Sprite init_sprite(const char* const, const DrawableType);
 #define deinit_sprite(sprite) SDL_DestroyTexture(sprite.texture)
 #define deinit_pix_sprite(pix_sprite) wfree(pix_sprite.pixels)
 

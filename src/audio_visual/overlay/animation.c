@@ -1,7 +1,7 @@
-DataAnimationImmut init_immut_animation_data(const char* const path, const int frames_per_row,
-	const int frames_per_col, const int frame_count, const int fps) {
+DataAnimationImmut init_immut_animation_data(const char* const path, const DrawableType drawable_type,
+	const int frames_per_row, const int frames_per_col, const int frame_count, const int fps) {
 
-	const Sprite sprite = init_sprite(path, 0);
+	const Sprite sprite = init_sprite(path, drawable_type);
 
 	return (DataAnimationImmut) {
 		sprite, {frames_per_row, frames_per_col},

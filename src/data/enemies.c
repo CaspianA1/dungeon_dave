@@ -3,7 +3,7 @@ Enemy init_eddie(void) {
 		.power = 3.0, .init_hp = 20.0, .nav_speed = 0.035,
 		.dist_awaken = {.sight = 2, .sound = 6},
 		.is_long_range = 0, .animation_seg_lengths = {5, 2, 3, 13},
-		.animation_data = init_immut_animation_data("assets/spritesheets/eddie.bmp", 23, 1, 23, 12),
+		.animation_data = init_immut_animation_data("assets/spritesheets/eddie.bmp", D_Thing, 23, 1, 23, 12),
 		.sounds = {
 			init_sound("assets/audio/enemy_sounds/eddie_idle.wav", 1),
 			init_sound("assets/audio/enemy_sounds/eddie_chase.wav", 1),
@@ -19,7 +19,7 @@ Enemy init_trooper(void) {
 		.power = 8.0, .init_hp = 30.0, .nav_speed = 0.03,
 		.dist_awaken = {.sight = 12, .sound = 7},
 		.is_long_range = 1, /* change later */ .animation_seg_lengths = {4, 7, 11, 11},
-		.animation_data = init_immut_animation_data("assets/spritesheets/trooper.bmp", 33, 1, 33, 18),
+		.animation_data = init_immut_animation_data("assets/spritesheets/trooper.bmp", D_Thing, 33, 1, 33, 18),
 
 		.sounds = {
 			init_sound("assets/audio/enemy_sounds/trooper_idle.wav", 1),

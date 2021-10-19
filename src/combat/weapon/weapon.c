@@ -82,6 +82,6 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 
 #else
 
-#define use_weapon_if_need(a, b, c)
+#define use_weapon_if_needed(a, b, c)
 
 #endif

@@ -5,7 +5,7 @@ static const byte ticks_for_teleporter_fuzz = INIT_MAX_FPS, num_fuzz_dots_on_scr
 static const Color3 teleporter_color = {255, 204, 0};
 
 void init_teleporter_resources(void) {
-	teleporter_sprite = init_sprite("assets/objects/teleporter.bmp", 0);
+	teleporter_sprite = init_sprite("assets/objects/teleporter.bmp", D_Thing);
 	teleporter_sound = init_sound("assets/audio/sound_effects/teleporter_zap.wav", 1);
 }
 

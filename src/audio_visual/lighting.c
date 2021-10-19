@@ -5,6 +5,10 @@ typedef struct {
 	const double radius;
 } Circle;
 
+Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
+	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
+}
+
 inlinable double bloom_circle(const vec pos, const Circle circle) {
 	const vec center_diff = pos - circle.center;
 	const double

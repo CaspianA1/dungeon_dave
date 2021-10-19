@@ -34,7 +34,12 @@ void handle_ray(const DataRaycast* const d, double* const last_projected_wall_to
 	if (d -> first_wall_hit) update_buffers(wall_dest.x, straight_dist, d -> cos_beta, d -> dir);
 
 	const Sprite wall_sprite = current_level.walls[d -> point - 1];
-	const SDL_Rect mipmap_crop = get_mipmap_crop_from_wall(&wall_sprite, wall_h);
+	const SDL_Rect mipmap_crop =
+		#ifndef OPENGL_TEXTURE_FILTERING
+		get_mipmap_crop_from_wall(&wall_sprite, wall_h);
+		#else
+		{0, 0, wall_sprite.size.x, wall_sprite.size.y};
+		#endif
 
 	SDL_Rect slice = {
 		get_wall_tex_offset(d -> side, d -> hit, d -> dir, mipmap_crop.w) + mipmap_crop.x,

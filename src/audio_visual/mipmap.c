@@ -1,56 +1,33 @@
-Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
-	return (Uint32*) ((Uint8*) surface -> pixels + y * surface -> pitch + x * bpp);
-}
+#ifdef OPENGL_TEXTURE_FILTERING
 
-#ifdef ANTIALIASED_MIPMAPPING
+void create_filtered_texture(SDL_Surface* const surface, Sprite* const sprite, const DrawableType drawable_type) {
+	sprite -> texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
+	SDL_GL_BindTexture(sprite -> texture, NULL, NULL);
 
-void antialiased_downscale_by_2(const SDL_Surface* const orig,
-	SDL_Surface* const mipmap, const ivec dest_origin, const byte scale_factor) {
+	GLenum min_filter, mag_filter;
+	byte generate_mipmap = 0;
 
-	const byte dec_scale_factor = scale_factor - 1;
-	const int orig_size = orig -> w;
+	switch (drawable_type) {
+		case D_Wall: case D_Thing:
+			min_filter = GL_LINEAR_MIPMAP_LINEAR;
+			mag_filter = GL_NEAREST;
+			generate_mipmap = 1;
+			break;
+		case D_Overlay:
+			return;
 
-	const SDL_PixelFormat* const format = orig -> format;
-	const int bpp = format -> BytesPerPixel, inc_across = 1 << dec_scale_factor;
-
-	for (int y = 0; y < orig_size; y += inc_across) {
-		for (int x = 0; x < orig_size; x += inc_across) {
-			const int dec_x = x - 1, dec_y = y - 1, inc_x = x + 1, inc_y = y + 1;
-
-			const ivec pixel_group[9] = {
-				{dec_x, dec_y}, {x, dec_y}, {inc_x, dec_y},
-				{dec_x, y}, 	{x, y}, 	{inc_x, y},
-				{dec_x, inc_y}, {x, inc_y}, {inc_x, inc_y}
-			};
-
-			int sum[4] = {0, 0, 0, 0};
-			byte valid_neighbor_sum = 0;
-
-			for (byte i = 0; i < 9; i++) {
-				const ivec pixel_pos = pixel_group[i];
-
-				if (pixel_pos.x >= 0 && pixel_pos.y >= 0 && pixel_pos.x < orig_size && pixel_pos.y < orig_size) {
-					const Uint32 neighbor = *read_surface_pixel(orig, pixel_pos.x, pixel_pos.y, bpp);
-
-					sum[0] += (byte) (neighbor >> 24);
-					sum[1] += (byte) (neighbor >> 16);
-					sum[2] += (byte) (neighbor >> 8);
-					sum[3] += (byte) neighbor;
-					valid_neighbor_sum++;
-				}
-			}
-
-			const Uint32 result = SDL_MapRGBA(format, sum[1] / valid_neighbor_sum, sum[2] / valid_neighbor_sum,
-				sum[3] / valid_neighbor_sum, sum[0] / valid_neighbor_sum);
-
-			*read_surface_pixel(mipmap, (x >> dec_scale_factor) + dest_origin.x, (y >> dec_scale_factor) + dest_origin.y, bpp) = result;
-		}
+		case D_Skybox:
+			min_filter = GL_LINEAR;
+			mag_filter = GL_LINEAR;
 	}
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
+
+	if (generate_mipmap) glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-#endif
-
-//////////
+#else
 
 inlinable SDL_Rect get_mipmap_crop(const int orig_size, const byte depth_offset) {
 	const int crop_size = orig_size >> depth_offset;
@@ -119,27 +96,6 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth_ref) {
 
 	byte depth = 0;
 
-	#ifdef ANTIALIASED_MIPMAPPING
-
-	SDL_LockSurface(image);
-	SDL_LockSurface(mipmap);
-
-	int dest_size = image_size;
-	ivec dest_origin = {0, 0};
-	while (dest_size != 0) {
-		if (depth >= 2) dest_origin.y += image_size >> (depth - 1);
-		antialiased_downscale_by_2(image, mipmap, dest_origin, depth + 1);
-
-		dest_origin.x = image_size;
-		dest_size >>= 1;
-		depth++;
-	}
-
-	SDL_UnlockSurface(image);
-	SDL_UnlockSurface(mipmap);
-
-	#else
-
 	SDL_Rect dest = {0, 0, image_size, image_size};
 	SDL_Rect last_dest = dest;
 	SDL_BlitSurface(image, NULL, mipmap, &dest);
@@ -155,8 +111,6 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth_ref) {
 		dest.h >>= 1;
 		depth++;
 	}
-
-	#endif
 
 	/*
 	static byte first = 1, id = 0;
@@ -174,3 +128,5 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth_ref) {
 	*depth_ref = depth;
 	return mipmap;
 }
+
+#endif
