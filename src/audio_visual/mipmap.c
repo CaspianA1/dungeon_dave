@@ -2,6 +2,7 @@
 
 void create_filtered_texture(SDL_Surface* const surface, Sprite* const sprite, const DrawableType drawable_type) {
 	sprite -> texture = SDL_CreateTextureFromSurface(screen.renderer, surface);
+
 	SDL_GL_BindTexture(sprite -> texture, NULL, NULL);
 
 	GLenum min_filter, mag_filter;
@@ -14,7 +15,9 @@ void create_filtered_texture(SDL_Surface* const surface, Sprite* const sprite, c
 			generate_mipmap = 1;
 			break;
 		case D_Overlay:
-			return;
+			min_filter = GL_LINEAR;
+			mag_filter = GL_NEAREST;
+			break;
 		case D_Skybox:
 			min_filter = GL_LINEAR;
 			mag_filter = GL_LINEAR;

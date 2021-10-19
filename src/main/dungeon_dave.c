@@ -74,6 +74,7 @@ projectile todo:
 	- shoot projectiles into teleporters
 	- wake up enemies with a traveling projectile sound
 
+- make projectiles only emit damage for one tick
 - some growling enemies when they should be dead
 - sometimes, the explosion doesn't show up
 - weird wall texture patterns when pressed up against walls with GL_NEAREST for mag
