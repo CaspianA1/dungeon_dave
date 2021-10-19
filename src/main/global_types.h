@@ -47,6 +47,11 @@ typedef struct {
 	SDL_Renderer* renderer;
 	SDL_PixelFormat* pixel_format;
 	SDL_Texture *pixel_buffer, *shape_buffer;
+
+	#ifdef OPENGL_TEXTURE_FILTERING
+	SDL_GLContext opengl_context;
+	#endif
+
 	void* pixels;
 	int pixel_pitch; // `pixels` and `pixel_pitch` pertain to the pixel buffer
 } Screen;
@@ -139,7 +144,3 @@ StateMap occluded_by_walls;
 
 SDL_Event event;
 const Uint8* keys;
-
-#ifdef OPENGL_TEXTURE_FILTERING
-
-#endif

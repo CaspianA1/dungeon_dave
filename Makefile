@@ -15,7 +15,7 @@ endif
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
 CFLAGS = -std=c99 -march=native $(WARNINGS)
-LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm
+LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm -framework OpenGL -lglew
 LDFLAGS = $(LIBS) -o bin/$(OUT) src/main/$(MAIN).c
 
 all: build run

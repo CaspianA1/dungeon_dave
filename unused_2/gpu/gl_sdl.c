@@ -1,5 +1,5 @@
 #include <SDL2/SDL.h>
-// #include <GL/glew.h>
+#include <GL/glew.h>
 #include <GL/gl.h>
 
 enum {w = 800, h = 600};
@@ -8,7 +8,7 @@ enum {w = 800, h = 600};
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
 // https://www.khronos.org/opengl/wiki/Tutorial1:_Creating_a_Cross_Platform_OpenGL_3.2_Context_in_SDL_(C_/_SDL)
-// clang -O3 -lSDL2 -framework OpenGL gl_sdl.c && ./a.out
+// clang -O3 -lSDL2 -lglew -framework OpenGL gl_sdl.c && ./a.out
 
 int main(void) {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) FAIL("initialize SDL");
@@ -42,6 +42,8 @@ int main(void) {
 	// Checking for any possible errors from SDL_GL calls
 	printf("a = %d, b = %d, c = %d, d = %d, e = %d, f = %d, g = %d\n", a, b, c, d, e, f, g);
 	printf("vendor = %s\nrenderer = %s\nversion = %s\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
+
+	glGenerateMipmap(GL_TEXTURE_2D);
 
 	SDL_Event event;
 	while (1) {

@@ -24,16 +24,31 @@ void init_screen(void) {
 
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1", SDL_HINT_OVERRIDE);
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING, "1", SDL_HINT_OVERRIDE);
-	#ifdef FORCE_USE_OPENGL
+
+	Uint32 window_flags = WINDOW_FLAGS;
+
+	#ifdef OPENGL_TEXTURE_FILTERING
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "opengl", SDL_HINT_OVERRIDE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	window_flags |= SDL_WINDOW_OPENGL;
 	#endif
 
 	screen.window = SDL_CreateWindow("Dungeon Dave",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		settings.screen_width, settings.screen_height, WINDOW_FLAGS);
+		settings.screen_width, settings.screen_height, window_flags);
+
+	#ifdef OPENGL_TEXTURE_FILTERING
+	screen.opengl_context = SDL_GL_CreateContext(screen.window);
+	glewExperimental = GL_TRUE;
+	glewInit();
+	#endif
 
 	const int renderer_index =
-		#ifdef FORCE_USE_OPENGL
+		#ifdef OPENGL_TEXTURE_FILTERING
 		1
 		#else
 		-1
@@ -46,6 +61,10 @@ void init_screen(void) {
 }
 
 void deinit_screen(void) {
+	#ifdef OPENGL_TEXTURE_FILTERING
+	SDL_GL_DeleteContext(screen.opengl_context);
+	#endif
+
 	SDL_FreeFormat(screen.pixel_format);
 
 	SDL_DestroyTexture(screen.pixel_buffer);

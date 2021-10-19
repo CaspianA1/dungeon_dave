@@ -28,6 +28,11 @@ Sprite init_sprite(const char* const path, const byte enable_mipmap) {
 	sprite.texture = SDL_CreateTextureFromSurface(screen.renderer, surface); // make a texture from the surface
 	SDL_FreeSurface(surface); // free the surface, it isn't used anymore
 
+	#ifdef OPENGL_TEXTURE_FILTERING
+	SDL_GL_BindTexture(sprite.texture, NULL, NULL);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	#endif
+
 	return sprite;
 }
 
