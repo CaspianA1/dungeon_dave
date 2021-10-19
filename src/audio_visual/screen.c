@@ -23,6 +23,7 @@ void init_screen(void) {
 		FAIL("Unable to launch Dungeon Dave: %s\n", SDL_GetError());
 
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1", SDL_HINT_OVERRIDE);
+	SDL_SetHintWithPriority(SDL_HINT_RENDER_BATCHING, "1", SDL_HINT_OVERRIDE);
 	#ifdef FORCE_USE_OPENGL
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "opengl", SDL_HINT_OVERRIDE);
 	#endif

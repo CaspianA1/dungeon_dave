@@ -22,6 +22,7 @@
 #define SOUND_ENABLED
 // #define TRACK_MEMORY
 // #define FORCE_USE_OPENGL
+// #define OPENGL_TEXTURE_FILTERING
 
 #define FLOORCAST_THREADS 3
 

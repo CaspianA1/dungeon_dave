@@ -139,3 +139,7 @@ StateMap occluded_by_walls;
 
 SDL_Event event;
 const Uint8* keys;
+
+#ifdef OPENGL_TEXTURE_FILTERING
+
+#endif
