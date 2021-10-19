@@ -15,7 +15,6 @@ void create_filtered_texture(SDL_Surface* const surface, Sprite* const sprite, c
 			break;
 		case D_Overlay:
 			return;
-
 		case D_Skybox:
 			min_filter = GL_LINEAR;
 			mag_filter = GL_LINEAR;
@@ -23,8 +22,9 @@ void create_filtered_texture(SDL_Surface* const surface, Sprite* const sprite, c
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
-
 	if (generate_mipmap) glGenerateMipmap(GL_TEXTURE_2D);
+
+	SDL_GL_UnbindTexture(sprite -> texture);
 }
 
 #else
@@ -86,9 +86,9 @@ inlinable byte is_pow_of_2(const int num) {
 	return (num & (num - 1)) == 0;
 }
 
-// returns null if the image dimensions aren't powers of 2
+// Returns null if the image dimensions aren't powers of 2
 SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth_ref) {
-	const int image_size = image -> w; // image must have uniform dimensions
+	const int image_size = image -> w; // Image must have uniform dimensions
 	if (!is_pow_of_2(image_size) || !is_pow_of_2(image -> h)) return NULL;
 
 	SDL_Surface* const mipmap = SDL_CreateRGBSurfaceWithFormat(0,

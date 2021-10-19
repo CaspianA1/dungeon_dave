@@ -30,22 +30,21 @@ void init_screen(void) {
 	#ifdef OPENGL_TEXTURE_FILTERING
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "opengl", SDL_HINT_OVERRIDE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, OPENGL_MAJOR_VERSION);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, OPENGL_MINOR_VERSION);
 	window_flags |= SDL_WINDOW_OPENGL;
 	#endif
 
 	screen.window = SDL_CreateWindow("Dungeon Dave",
-		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		settings.screen_width, settings.screen_height, window_flags);
 
 	#ifdef OPENGL_TEXTURE_FILTERING
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);
-	glewExperimental = GL_TRUE;
-	glewInit();
 
+	glewExperimental = GL_TRUE;
+	const GLenum maybe_error = glewInit();
+	if (maybe_error != GLEW_OK) FAIL("Could not initialize glew: %s\n", glewGetErrorString(maybe_error));
 	#endif
 
 	const int renderer_index =

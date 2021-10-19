@@ -21,6 +21,7 @@
         "tuple": "c",
         "utility": "c",
         "queue": "c",
-        "stack": "c"
+        "stack": "c",
+        "glew.h": "c"
     }
 }

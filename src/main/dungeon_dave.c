@@ -74,7 +74,7 @@ projectile todo:
 	- shoot projectiles into teleporters
 	- wake up enemies with a traveling projectile sound
 
-- weird wall texture patterns when pressed up against walls with the gl version
+- weird wall texture patterns when pressed up against walls with GL_NEAREST for mag
 - make bomb explosion a bit quieter perhaps, or update its sound pos
 - clear floor buffer for gl version
 - make other mipmaps work for other texture sizes with the software version

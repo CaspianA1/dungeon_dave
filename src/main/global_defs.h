@@ -21,10 +21,11 @@
 #define SOUND_ENABLED
 // #define TRACK_MEMORY
 #define OPENGL_TEXTURE_FILTERING
+#define OPENGL_MAJOR_VERSION 3
+#define OPENGL_MINOR_VERSION 1
 
 #ifdef OPENGL_TEXTURE_FILTERING
 #include <GL/glew.h>
-#include <GL/gl.h>
 #endif
 
 #define FLOORCAST_THREADS 3
