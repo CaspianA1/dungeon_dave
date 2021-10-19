@@ -111,7 +111,7 @@ typedef byte Sound;
 #define play_long_sound(a)
 
 #define update_channel_from_thing_billboard_data(a, b, c, d) {(void) a; (void) c; (void) d;}
-#define update_channel_from_dist_3D_and_beta(a, b, c, d)
+#define update_channel_from_dist_3D_and_beta(a, b, c, d) (void) a
 
 /*
 #define init_sound_subsystem()
