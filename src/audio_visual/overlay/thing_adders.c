@@ -66,7 +66,7 @@ DEF_THING_ADDER(projectile) {
 		update_billboard_values(billboard_data, p_pos, p_angle);
 
 		DataAnimationMut* const mut_animation_data = &projectile -> curr_animation_data;
-		const DataAnimationImmut* const immut_animation_data = (projectile -> is_exploding)
+		const DataAnimationImmut* const immut_animation_data = (projectile -> state == P_Exploding)
 			? &projectile_exploding_animation : &projectile_traveling_animation;
 
 		DataAnimation animation_data = {*immut_animation_data, *mut_animation_data};
@@ -79,7 +79,10 @@ DEF_THING_ADDER(projectile) {
 			rect_from_ivecs(get_spritesheet_frame_origin(&animation_data), immut_animation_data -> frame_size)
 		};
 
-		progress_animation_data_frame_ind(&animation_data);
+		// If animation cycle done
+		if (progress_animation_data_frame_ind(&animation_data) && projectile -> state == P_Exploding)
+			projectile -> state = P_DoneExploding;
+
 		memcpy(mut_animation_data, &animation_data.mut, sizeof(DataAnimationMut));
 
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));

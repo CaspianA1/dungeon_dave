@@ -11,21 +11,24 @@ DataAnimationImmut init_immut_animation_data(const char* const path, const Drawa
 	};
 }
 
-inlinable void progress_frame_ind(DataAnimation* const animation_data, const int begin, const int end) {
+inlinable byte progress_frame_ind(DataAnimation* const animation_data, const int begin, const int end) {
 	const double current_time = SDL_GetTicks() / 1000.0;
 	DataAnimationMut* const mut_animation_data = &animation_data -> mut;
 	const double time_delta = current_time - mut_animation_data -> last_frame_time;
 
+	byte animation_cycle_done = 0;
 	if (time_delta >= animation_data -> immut.secs_per_frame) {
-		if (++mut_animation_data -> frame_ind == end)
+		if (++mut_animation_data -> frame_ind == end) {
 			mut_animation_data -> frame_ind = begin;
-
+			animation_cycle_done = 1;
+		}
 		mut_animation_data -> last_frame_time = current_time;
 	}
+	return animation_cycle_done;
 }
 
-inlinable void progress_animation_data_frame_ind(DataAnimation* const animation_data) {
-	progress_frame_ind(animation_data, 0, animation_data -> immut.frame_count);
+inlinable byte progress_animation_data_frame_ind(DataAnimation* const animation_data) {
+	return progress_frame_ind(animation_data, 0, animation_data -> immut.frame_count);
 }
 
 inlinable void progress_enemy_instance_frame_ind(EnemyInstance* const enemy_instance) {
@@ -43,7 +46,7 @@ inlinable void progress_enemy_instance_frame_ind(EnemyInstance* const enemy_inst
 
 	DataAnimation animation_data = {enemy -> animation_data, *mut_animation_data};
 	progress_frame_ind(&animation_data, begin, end);
-	*mut_animation_data = animation_data.mut; // reassignment not expensive b/c struct is small
+	*mut_animation_data = animation_data.mut; // Reassignment not expensive b/c struct is small
 }
 
 inlinable ivec get_spritesheet_frame_origin(const DataAnimation* const animation_data) {

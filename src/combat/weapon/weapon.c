@@ -66,7 +66,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 		first_in_use = bit_is_set(weapon -> flags, mask_in_use_weapon),
 		spawns_projectile = bit_is_set(weapon -> flags, mask_spawns_projectile_weapon);
 
-	void use_inter_tick_projectile_weapon(const Weapon* const, const Player* const, const int);
+	void use_inter_tick_projectile_weapon(const Player* const, const int);
 	void use_hitscan_weapon(const Weapon* const, const Player* const);
 
 	if (first_in_use && *frame_ind == 0)
@@ -74,7 +74,7 @@ void use_weapon_if_needed(Weapon* const weapon, const Player* const player, cons
 	else if (input_status == BeginAnimatingWeapon && !first_in_use && !player -> is_dead) {
 		set_bit(weapon -> flags, mask_in_use_weapon | mask_recently_used_weapon);
 		const int channel = play_short_sound(&weapon -> sound);
-		if (spawns_projectile) use_inter_tick_projectile_weapon(weapon, player, channel);
+		if (spawns_projectile) use_inter_tick_projectile_weapon(player, channel);
 		else use_hitscan_weapon(weapon, player);
 	}
 	else clear_bit(weapon -> flags, mask_recently_used_weapon); // recently used = within the last tick

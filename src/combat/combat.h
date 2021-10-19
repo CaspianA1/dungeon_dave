@@ -86,10 +86,16 @@ typedef struct {
 	const byte is_hitscan;
 } Tracer;
 
+typedef enum {
+	P_Traveling,
+	P_Exploding,
+	P_DoneExploding
+} ProjectileState;
+
 typedef struct {
 	DataBillboard billboard_data;
 	Tracer tracer;
-	byte is_exploding;
+	ProjectileState state;
 	int sound_channel;
 	DataAnimationMut curr_animation_data;
 } Projectile;

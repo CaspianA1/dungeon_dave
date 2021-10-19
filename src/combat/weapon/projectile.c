@@ -7,7 +7,7 @@ static Sound projectile_exploding_sound;
 void init_projectile_resources(void) {
 	const DataAnimationImmut
 		traveling = init_immut_animation_data("assets/spritesheets/fireball_travel.bmp", D_Thing, 12, 1, 12, 15),
-		exploding = init_immut_animation_data("assets/spritesheets/fireball_explode.bmp", D_Thing, 8, 1, 8, 20);
+		exploding = init_immut_animation_data("assets/spritesheets/fireball_explode.bmp", D_Thing, 8, 1, 8, 15);
 
 	memcpy(&projectile_traveling_animation, &traveling, sizeof(DataAnimationImmut));
 	memcpy(&projectile_exploding_animation, &exploding, sizeof(DataAnimationImmut));
@@ -39,26 +39,20 @@ inlinable void update_inter_tick_projectiles(const Player* const player, const W
 		const BoundingBox_3D projectile_box = init_bounding_box_3D(tracer -> pos, inter_tick_projectile_size);
 		const byte collided = apply_damage_from_weapon_if_needed(player, weapon, tracer -> dist, projectile_box);
 
-		if (!projectile_ref -> is_exploding &&
+		if ((projectile_ref -> state == P_Traveling) &&
 			(collided || !iter_tracer(&projectile_ref -> tracer) || !channel_still_playing(channel))) {
-			projectile_ref -> is_exploding = 1;
-			projectile_ref -> curr_animation_data.frame_ind = -1;
+			projectile_ref -> state = P_Exploding;
 			stop_sound_channel(channel);
 			projectile_ref -> sound_channel = play_short_sound(&projectile_exploding_sound);
 			update_projectile_sound(projectile_ref);
 		}
-		else if (projectile_ref -> is_exploding) {
-			// DEBUG(projectile_ref -> curr_animation_data.frame_ind, d);
-			// how can I tell when it's done?
-
-			/*
+		else if (projectile_ref -> state == P_DoneExploding) {
 			current_level.thing_count--;
 			new_projectile_count--;
 			// Below, all projectiles on the right side of the current element are shifted left by 1,
 			// essentially deleting the projectile at position `i`
 			memmove(projectile_ref, projectile_ref + 1,
 				(current_level.projectile_count - i - 1) * sizeof(Projectile));
-			*/
 		}
 
 		else update_projectile_sound(projectile_ref);
@@ -66,9 +60,7 @@ inlinable void update_inter_tick_projectiles(const Player* const player, const W
 	current_level.projectile_count = new_projectile_count;
 }
 
-void use_inter_tick_projectile_weapon(const Weapon* const weapon, const Player* const player, const int channel) {
-	(void) weapon;
-
+void use_inter_tick_projectile_weapon(const Player* const player, const int channel) {
 	if (current_level.projectile_count == current_level.alloc_projectile_count) {
 		current_level.projectiles = wrealloc(current_level.projectiles,
 			++current_level.alloc_projectile_count * sizeof(Projectile));
@@ -84,7 +76,7 @@ void use_inter_tick_projectile_weapon(const Weapon* const weapon, const Player* 
 			.pos = {(double) tracer.pos[0], (double) tracer.pos[1]},
 			.height = player -> jump.height
 		},
-		.is_exploding = 0,
+		.state = P_Traveling,
 		.sound_channel = channel,
 		.tracer = tracer
 	};
