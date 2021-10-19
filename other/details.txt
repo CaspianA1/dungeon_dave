@@ -26,7 +26,6 @@ problems:
 	- don't intersect the player dot with walls in the minimap
 	- disabling vsync makes everything choppy (not a big problem, just curious why)
 	- fix enemy merging by making enemies account for thing collisions
-	- some disappearing pixels for some textures far away
 
 completed:
 	- minimap that conveys height data

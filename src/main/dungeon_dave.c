@@ -76,7 +76,6 @@ projectile todo:
 
 - weird wall texture patterns when pressed up against walls with GL_NEAREST for mag
 - make bomb explosion a bit quieter perhaps, or update its sound pos
-- clear floor buffer for gl version
 - make other mipmaps work for other texture sizes with the software version
 - gradually lower the weapon if dead
 - store bounding boxes
