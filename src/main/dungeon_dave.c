@@ -72,7 +72,7 @@ projectile todo:
 	- shoot projectiles into teleporters
 	- wake up enemies with a traveling projectile sound
 	- it seems that sometimes, the projectile sound channel affects the jumping sound channel
-	- make projectiles only emit damage for one tick
+	- make projectiles only emit damage for one tick, or emit less damage over many ticks
 	- sometimes, the explosion doesn't show up
 	- make bomb explosion a bit quieter perhaps, or update its sound pos
 
