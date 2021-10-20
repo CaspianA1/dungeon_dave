@@ -1,6 +1,6 @@
 #include "utils.c"
 
-// how to make the shader work?
+// SDL2, SDL2_ttf, SDL2_mixer, OpenGL, glew, cglm
 
 DemoVars triangle_init(void) {
 	DemoVars dv;

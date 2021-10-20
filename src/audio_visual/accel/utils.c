@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
+// #include <cglm/cglm.h> include for demo2.c
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
