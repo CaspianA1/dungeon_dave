@@ -15,8 +15,9 @@ endif
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
 CFLAGS = -std=c99 -march=native $(WARNINGS)
-LIBS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm -framework OpenGL -lglew
-LDFLAGS = $(LIBS) -o bin/$(OUT) src/main/$(MAIN).c
+SDL_EXTENSION_LIBS = -lSDL2_ttf -lSDL2_mixer
+CORE_LIBS = -lm -framework OpenGL -lglew -lSDL2
+LDFLAGS = $(CORE_LIBS) $(SDL_EXTENSION_LIBS) -o bin/$(OUT) src/main/$(MAIN).c
 
 all: build run
 
@@ -28,6 +29,9 @@ build:
 
 build_debug:
 	$(CC) $(CFLAGS) $(DEBUG) $(LDFLAGS)
+
+accel:
+	$(CC) $(CFLAGS) $(OPTIMIZE) $(CORE_LIBS) -o bin/accel_demo.c src/audio_visual/accel/utils.c
 
 asm:
 	$(CC) $(CFLAGS) -S -masm=intel $(OPTIMIZE) -o bin/$(MAIN).asm src/main/$(MAIN).c

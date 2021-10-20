@@ -30,23 +30,25 @@ inlinable void update_projectile_sound(const Projectile* const projectile) {
 }
 
 inlinable void update_inter_tick_projectiles(const Player* const player, const Weapon* const weapon) {
+	// size is 128
 	byte new_projectile_count = current_level.projectile_count;
 	for (byte i = 0; i < current_level.projectile_count; i++) {
 		Projectile* const projectile_ref = current_level.projectiles + i;
+
 		const int channel = projectile_ref -> sound_channel;
-		const Tracer* const tracer = &projectile_ref -> tracer;
-
+		Tracer* const tracer = &projectile_ref -> tracer;
 		const BoundingBox_3D projectile_box = init_projectile_bounding_box(tracer -> pos);
-		const byte collided = apply_damage_from_weapon_if_needed(player, weapon, tracer -> dist, projectile_box);
+		const ProjectileState curr_state = projectile_ref -> state;
 
-		if ((projectile_ref -> state == P_Traveling) &&
-			(collided || !iter_tracer(&projectile_ref -> tracer) || !channel_still_playing(channel))) {
-			projectile_ref -> state = P_Exploding;
-			stop_sound_channel(channel);
-			projectile_ref -> sound_channel = play_short_sound(&projectile_exploding_sound);
-			update_projectile_sound(projectile_ref);
+		if (curr_state == P_Traveling) {
+			const byte collided = apply_damage_from_weapon_if_needed(player, weapon, tracer -> dist, projectile_box);
+			if (collided || !iter_tracer(tracer) || !channel_still_playing(channel)) {
+				projectile_ref -> state = P_Exploding;
+				stop_sound_channel(channel);
+				projectile_ref -> sound_channel = play_short_sound(&projectile_exploding_sound);
+			}
 		}
-		else if (projectile_ref -> state == P_DoneExploding) {
+		else if (curr_state == P_DoneExploding) {
 			current_level.thing_count--;
 			new_projectile_count--;
 			/* Below, all projectiles on the right side of the current element
