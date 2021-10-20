@@ -20,9 +20,9 @@ static void draw_processed_things(const double p_height, const double horizon_li
 		const DataBillboard billboard_data = *thing.billboard_data;
 		const double cos_billboard_beta = cos(billboard_data.beta);
 
-		if (billboard_data.dist <= 0.05 // if too close
-			|| cos_billboard_beta <= 0.0 // if out of view
-			|| doubles_eq(billboard_data.beta, half_pi) // if tan of beta equals inf val for tan
+		if (billboard_data.dist <= 0.05 // If too close
+			|| cos_billboard_beta <= 0.0 // If out of view
+			|| doubles_eq(billboard_data.beta, half_pi) // If tan of beta equals inf val for tan
 			|| doubles_eq(billboard_data.beta, three_pi_over_two)) continue;
 
 		const double
@@ -38,7 +38,7 @@ static void draw_processed_things(const double p_height, const double horizon_li
 		const double start_x = center_x - half_size;
 		double end_x = center_x + half_size;
 
-		if (start_x >= settings.screen_width || end_x < 0.0) continue; // if projected out of view
+		if (start_x >= settings.screen_width || end_x < 0.0) continue; // If projected out of view
 		else if (end_x > settings.screen_width) end_x = settings.screen_width;
 
 		SDL_FRect screen_pos = {

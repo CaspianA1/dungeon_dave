@@ -73,13 +73,14 @@ projectile todo:
 	- collide with projectile edges for walls with projectiles
 	- shoot projectiles into teleporters
 	- wake up enemies with a traveling projectile sound
+	- it seems that sometimes, the projectile sound channel affects the jumping sound channel
+	- make projectiles only emit damage for one tick
+	- sometimes, the explosion doesn't show up
+	- make bomb explosion a bit quieter perhaps, or update its sound pos
 
-- make projectiles only emit damage for one tick
+- put enemy bounding box sizes in the Enemy struct
 - some growling enemies when they should be dead
-- sometimes, the explosion doesn't show up
 - weird wall texture patterns when pressed up against walls with GL_NEAREST for mag
-- make bomb explosion a bit quieter perhaps, or update its sound pos
-- make other mipmaps work for other texture sizes with the software version
 - gradually lower the weapon if dead
 - store bounding boxes
 - repeat weapon attack if holding down key

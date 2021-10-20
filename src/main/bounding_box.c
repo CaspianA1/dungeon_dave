@@ -22,6 +22,11 @@ inlinable name##suffix init_bounding_box##suffix(const vec_type pos, const subty
 DEF_BOUNDING_BOX_TYPE(BoundingBox, , vec, vec_fill, double, 2)
 DEF_BOUNDING_BOX_TYPE(BoundingBox, _3D, vec3D, vec_fill_3D, float, 3)
 
+inlinable BoundingBox_3D init_projectile_bounding_box(const vec3D pos) {
+	extern const vec3D inter_tick_projectile_size;
+	return (BoundingBox_3D) {pos - inter_tick_projectile_size * vec_fill_3D(0.5f), inter_tick_projectile_size};
+}
+
 inlinable BoundingBox_3D init_actor_bounding_box(const vec pos_2D, const double height) {
 	const BoundingBox part_2D = init_bounding_box(pos_2D, actor_box_side_len);
 

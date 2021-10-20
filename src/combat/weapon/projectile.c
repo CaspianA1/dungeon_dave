@@ -36,7 +36,7 @@ inlinable void update_inter_tick_projectiles(const Player* const player, const W
 		const int channel = projectile_ref -> sound_channel;
 		const Tracer* const tracer = &projectile_ref -> tracer;
 
-		const BoundingBox_3D projectile_box = init_bounding_box_3D(tracer -> pos, inter_tick_projectile_size);
+		const BoundingBox_3D projectile_box = init_projectile_bounding_box(tracer -> pos);
 		const byte collided = apply_damage_from_weapon_if_needed(player, weapon, tracer -> dist, projectile_box);
 
 		if ((projectile_ref -> state == P_Traveling) &&

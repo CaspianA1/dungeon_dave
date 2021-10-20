@@ -84,7 +84,6 @@ DEF_THING_ADDER(projectile) {
 			projectile -> state = P_DoneExploding;
 
 		memcpy(mut_animation_data, &animation_data.mut, sizeof(DataAnimationMut));
-
 		memcpy(thing_buffer_start + i, &thing, sizeof(Thing));
 	}
 }

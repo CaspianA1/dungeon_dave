@@ -3,7 +3,7 @@ void deinit_weapon(const Weapon* const weapon) {
 	deinit_sprite(weapon -> animation_data.immut.sprite);
 }
 
-// returns if it did apply damage
+// Returns if damage was applied
 byte apply_damage_from_weapon_if_needed(const Player* const player,
 	const Weapon* const weapon, const float dist, const BoundingBox_3D projectile_box) {
 

@@ -545,3 +545,8 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth_ref) {
 	*/
 
 /////
+
+printf("projectile_box.origin = {%f, %f, %f}\n",
+	(double) projectile_box.origin[0], (double) projectile_box.origin[1], (double) projectile_box.origin[2]);
+
+/////

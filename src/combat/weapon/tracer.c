@@ -4,8 +4,9 @@ static const float
 	short_range_tracer_step = 0.3f, // the magnitude of the velocity vector
 	long_range_tracer_step = 0.1f,
 	inter_tick_projectile_tracer_step = 0.07f,
-	hitscan_projectile_size = 0.2f,
-	inter_tick_projectile_size = 1.0f;
+	hitscan_projectile_size = 0.2f;
+
+const vec3D inter_tick_projectile_size = {0.5f, 0.5f, 0.34375f}; // 0.34375f = 22 / 64, b/c the sprite is 22 pixels high
 
 inlinable Tracer init_tracer_from_player(const Player* const player, const float step, const byte is_hitscan) {
 	const vec p_pos = player -> pos, p_dir = player -> dir; // these are 2D
@@ -26,7 +27,7 @@ inlinable byte iter_tracer(Tracer* const tracer) {
 	tracer -> pos = new_pos;
 
 	double height = (double) new_pos[2];
-	if (!tracer -> is_hitscan) height -= (double) inter_tick_projectile_size * 0.5;
+	if (!tracer -> is_hitscan) height -= (double) inter_tick_projectile_size[2] * 0.5;
 
 	return !point_exists_at((double) new_pos[0], (double) new_pos[1], height);
 }
