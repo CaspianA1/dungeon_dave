@@ -30,7 +30,6 @@ inlinable void update_projectile_sound(const Projectile* const projectile) {
 }
 
 inlinable void update_inter_tick_projectiles(const Player* const player, const Weapon* const weapon) {
-	// size is 128
 	byte new_projectile_count = current_level.projectile_count;
 	for (byte i = 0; i < current_level.projectile_count; i++) {
 		Projectile* const projectile_ref = current_level.projectiles + i;
