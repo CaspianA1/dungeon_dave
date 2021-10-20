@@ -49,8 +49,8 @@ inlinable void update_inter_tick_projectiles(const Player* const player, const W
 		else if (projectile_ref -> state == P_DoneExploding) {
 			current_level.thing_count--;
 			new_projectile_count--;
-			// Below, all projectiles on the right side of the current element are shifted left by 1,
-			// essentially deleting the projectile at position `i`
+			/* Below, all projectiles on the right side of the current element
+			are shifted left by 1, essentially deleting the projectile at position `i` */
 			memmove(projectile_ref, projectile_ref + 1,
 				(current_level.projectile_count - i - 1) * sizeof(Projectile));
 		}
