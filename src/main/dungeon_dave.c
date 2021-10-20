@@ -68,8 +68,6 @@ audio todo:
 	- compressed audio
 
 projectile todo:
-	- an explosion effect + sound when a projectile collides with an enemy or a wall, or the projectile sound is done
-		(note: the current lack of sound when shooting downwards is okay because there will be an explosion sound there)
 	- collide with projectile edges for walls with projectiles
 	- shoot projectiles into teleporters
 	- wake up enemies with a traveling projectile sound
