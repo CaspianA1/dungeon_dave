@@ -20,7 +20,7 @@ static void draw_processed_things(const double p_height, const double horizon_li
 		const DataBillboard billboard_data = *thing.billboard_data;
 		const double cos_billboard_beta = cos(billboard_data.beta);
 
-		if (billboard_data.dist <= 0.08 // if too close
+		if (billboard_data.dist <= 0.05 // if too close
 			|| cos_billboard_beta <= 0.0 // if out of view
 			|| doubles_eq(billboard_data.beta, half_pi) // if tan of beta equals inf val for tan
 			|| doubles_eq(billboard_data.beta, three_pi_over_two)) continue;
