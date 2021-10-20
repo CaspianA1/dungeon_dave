@@ -550,3 +550,12 @@ printf("projectile_box.origin = {%f, %f, %f}\n",
 	(double) projectile_box.origin[0], (double) projectile_box.origin[1], (double) projectile_box.origin[2]);
 
 /////
+
+	puts("Before draw arrays");
+	GL_ERR_CHECK;
+	glDrawArrays(GL_TRIANGLES, 0, 3); // From vertex 0 to 3
+	puts("After");
+	GL_ERR_CHECK;
+	puts("---");
+
+/////
