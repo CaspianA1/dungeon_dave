@@ -32,9 +32,11 @@ typedef enum {
 } FailureType;
 
 typedef struct {
-	GLenum shader_program;
-	GLuint vertex_array, vertex_buffer;
-} DemoVars;
+	GLuint shader_program;
+	GLuint vertex_array;
+	GLuint* vertex_buffers;
+	int num_vertex_buffers;
+} StateGL;
 
 inline void fail(const char* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s; SDL error = '%s', OpenGL error = '%s'\n", msg,
@@ -76,13 +78,13 @@ void deinit_screen(const Screen* const screen) {
 	SDL_Quit();
 }
 
-void loop_application(const Screen* const screen, void (*const drawer)(const DemoVars),
-	DemoVars (*const init)(void), void (*const deinit)(DemoVars), const byte fps) {
+void loop_application(const Screen* const screen, void (*const drawer)(const StateGL),
+	StateGL (*const init)(void), void (*const deinit)(StateGL), const byte fps) {
 
 	const double max_delay = 1000.0 / fps;
 	byte running = 1;
 	SDL_Event event;
-	const DemoVars dv = init();
+	const StateGL sgl = init();
 
 	while (running) {
 		const Uint32 before = SDL_GetTicks();
@@ -92,18 +94,18 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Dem
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		drawer(dv);
+		drawer(sgl);
 		SDL_GL_SwapWindow(screen -> window);
 
 		const int wait = max_delay - (SDL_GetTicks() - before);
 		if (wait > 0) SDL_Delay(wait);
 	}
 
-	deinit(dv);
+	deinit(sgl);
 }
 
-void make_application(void (*const drawer)(const DemoVars),
-	DemoVars (*const init)(void), void (*const deinit)(DemoVars)) {
+void make_application(void (*const drawer)(const StateGL),
+	StateGL (*const init)(void), void (*const deinit)(StateGL)) {
 
 	const Screen screen = init_screen("Accel Demo");
 
@@ -114,7 +116,7 @@ void make_application(void (*const drawer)(const DemoVars),
 	deinit_screen(&screen);
 }
 
-GLenum init_shader_program(const char* const vertex_shader, const char* const fragment_shader) {
+GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader) {
 	typedef enum {Vertex, Fragment} ShaderType;
 
 	const char* const shaders[2] = {vertex_shader, fragment_shader};
@@ -124,7 +126,7 @@ GLenum init_shader_program(const char* const vertex_shader, const char* const fr
 	for (ShaderType type = 0; type < 2; type++) {
 		shader_ids[type] = glCreateShader(gl_shader_types[type]);
 
-		const GLenum shader_id = shader_ids[type];
+		const GLuint shader_id = shader_ids[type];
 		glShaderSource(shader_id, 1, shaders + type, NULL);
 		glCompileShader(shader_id);
 
@@ -138,7 +140,6 @@ GLenum init_shader_program(const char* const vertex_shader, const char* const fr
 			free(error_msg);
 			fail("compile shader", CompileShader);
 		}
-
 		glAttachShader(program_id, shader_id);
 	}
 
@@ -148,14 +149,74 @@ GLenum init_shader_program(const char* const vertex_shader, const char* const fr
 	if (info_log_length > 0) fail("link shaders", LinkShaders);
 
 	for (ShaderType type = 0; type < 2; type++) {
-		const GLenum shader_id = shader_ids[type];
+		const GLuint shader_id = shader_ids[type];
 		glDetachShader(program_id, shader_id);
 		glDeleteShader(shader_id);
 	}
 
 	glUseProgram(program_id);
-
 	return program_id;
+}
+
+void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos) {
+	for (int i = 0; i < num_vbos; i++) {
+		glEnableVertexAttribArray(i);
+		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
+
+		glVertexAttribPointer(
+			i, 3, GL_FLOAT, // attribute i, num points for a vertex, type
+			GL_FALSE, 0, // not normalized, stride
+			NULL // array buffer offset
+		);
+	}
+}
+
+void unbind_vbos_from_vao(const int num_vbos) {
+	for (int i = 0; i < num_vbos; i++) glDisableVertexAttribArray(i);
+}
+
+GLuint init_vao(void) {
+	GLuint vertex_array;
+	glGenVertexArrays(1, &vertex_array);
+	glBindVertexArray(vertex_array);
+	return vertex_array;
+}
+
+// buffer data ptr, number of points in buffer
+GLuint* init_vbos(const int num_buffers, ...) {
+	va_list args;
+	va_start(args, num_buffers);
+
+	GLuint* const vbos = malloc(num_buffers * sizeof(GLuint));
+	for (int i = 0; i < num_buffers; i++) {
+		const GLfloat* const buffer_data_ptr = va_arg(args, GLfloat*);
+		const int num_points_in_buffer = va_arg(args, int);
+
+		GLuint* const vertex_buffer_ref = vbos + i;
+		glGenBuffers(1, vertex_buffer_ref);
+		glBindBuffer(GL_ARRAY_BUFFER, *vertex_buffer_ref);
+		glBufferData(GL_ARRAY_BUFFER, num_points_in_buffer * sizeof(GLfloat), buffer_data_ptr, GL_STATIC_DRAW);
+
+		vbos[i] = *vertex_buffer_ref;
+	}
+
+	va_end(args);
+	return vbos;
+}
+
+void deinit_vbos(const int num_buffers, GLuint* const vbos) {
+	for (int i = 0; i < num_buffers; i++) glDeleteBuffers(1, vbos + i);
+	free(vbos);
+}
+
+#define deinit_shader_program glDeleteProgram
+#define draw_from_bound_vbo(num_vertices) glDrawArrays(GL_TRIANGLES, 0, num_vertices)
+#define deinit_vao(vao) glDeleteVertexArrays(1, &vao)
+
+void deinit_demo_vars(const StateGL sgl) {
+	deinit_shader_program(sgl.shader_program);
+	deinit_vbos(sgl.num_vertex_buffers, sgl.vertex_buffers);
+	deinit_vao(sgl.vertex_array);
 }
 
 #endif

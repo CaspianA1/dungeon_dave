@@ -1,0 +1,110 @@
+///// Old demo 3 stuff:
+
+#include "demo_2.c"
+#define deinit_texture(t) glDeleteTextures(1, &t)
+
+DemoVars demo_3_init(void) {
+	DemoVars dv;
+
+	const char* const vertex_shader =
+		"#version 330 core\n"
+		"layout(location = 0) in vec3 vertexPosition_modelspace\n"
+		"layout(location = 1) in vec2 vertexUV\n"
+		"out vec2 UV;\n"
+		"uniform mat4 MVP;\n"
+		"void main() {\n"
+			"gl_Position =  MVP * vec4(vertexPosition_modelspace, 1);\n"
+			"UV = vertexUV;\n"
+		"}\n",
+
+	*const fragment_shader =
+		"#version 330 core\n"
+		"in vec2 UV;\n"
+		"out vec3 color;\n"
+		"uniform sampler2D myTextureSampler;\n"
+		"void main() {\n"
+    		"color = texture(myTextureSampler, UV).rgb;\n"
+		"}\n";
+	
+	dv.shader_program = init_shader_program(vertex_shader, fragment_shader);
+
+	const GLfloat uv_buffer_data[] = {
+    	0.000059f, 1.0f-0.000004f,
+    	0.000103f, 1.0f-0.336048f,
+    	0.335973f, 1.0f-0.335903f,
+    	1.000023f, 1.0f-0.000013f,
+    	0.667979f, 1.0f-0.335851f,
+    	0.999958f, 1.0f-0.336064f,
+    	0.667979f, 1.0f-0.335851f,
+    	0.336024f, 1.0f-0.671877f,
+    	0.667969f, 1.0f-0.671889f,
+    	1.000023f, 1.0f-0.000013f,
+    	0.668104f, 1.0f-0.000013f,
+    	0.667979f, 1.0f-0.335851f,
+    	0.000059f, 1.0f-0.000004f,
+    	0.335973f, 1.0f-0.335903f,
+    	0.336098f, 1.0f-0.000071f,
+    	0.667979f, 1.0f-0.335851f,
+    	0.335973f, 1.0f-0.335903f,
+    	0.336024f, 1.0f-0.671877f,
+    	1.000004f, 1.0f-0.671847f,
+    	0.999958f, 1.0f-0.336064f,
+    	0.667979f, 1.0f-0.335851f,
+    	0.668104f, 1.0f-0.000013f,
+    	0.335973f, 1.0f-0.335903f,
+    	0.667979f, 1.0f-0.335851f,
+    	0.335973f, 1.0f-0.335903f,
+    	0.668104f, 1.0f-0.000013f,
+    	0.336098f, 1.0f-0.000071f,
+    	0.000103f, 1.0f-0.336048f,
+    	0.000004f, 1.0f-0.671870f,
+    	0.336024f, 1.0f-0.671877f,
+    	0.000103f, 1.0f-0.336048f,
+    	0.336024f, 1.0f-0.671877f,
+    	0.335973f, 1.0f-0.335903f,
+    	0.667969f, 1.0f-0.671889f,
+    	1.000004f, 1.0f-0.671847f,
+    	0.667979f, 1.0f-0.335851f
+	};
+
+	(void) uv_buffer_data;
+
+	return dv;
+}
+
+GLuint init_texture(const char* const path) {
+	SDL_Surface* const image = SDL_LoadBMP(path);
+	if (image == NULL) fail("open image file", OpenImageFile);
+	SDL_LockSurface(image);
+
+	GLuint texture;
+
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image -> w, image -> h, 0, GL_BGR, GL_UNSIGNED_BYTE, image -> pixels);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	SDL_UnlockSurface(image);
+	SDL_FreeSurface(image);
+	return texture;
+}
+
+void demo_3_drawer(const DemoVars dv) {
+	/*
+	GLuint foo = init_texture("assets/walls/mesa.bmp");
+	deinit_texture(foo);
+	*/
+
+	demo_2_drawer(dv);
+}
+
+int main(void) {
+	// load_texture("assets/walls/mesa.bmp");
+	make_application(demo_3_drawer, demo_2_init, demo_1_deinit);
+}
+
+/////

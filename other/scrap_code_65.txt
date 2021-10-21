@@ -581,3 +581,18 @@ void demo_2_drawer(const DemoVars dv) {
 	// glm_mat4_mulN((mat4 *[]){&projection, &view, &model}, 3, model_view_projection);
 
 /////
+
+/*
+void bind_vbo_to_vao(const GLuint index, const GLuint vbo, const GLint num_vertices) {
+	glEnableVertexAttribArray(index);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	glVertexAttribPointer(
+		index, num_vertices, GL_FLOAT, // attribute 0, num vertices, type
+		GL_FALSE, 0, // not normalized, stride
+		NULL // array buffer offset
+	);
+}
+*/
+
+/////
