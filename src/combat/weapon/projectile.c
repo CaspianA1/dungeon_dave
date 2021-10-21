@@ -54,8 +54,10 @@ inlinable void update_inter_tick_projectiles(const Player* const player, const W
 			are shifted left by 1, essentially deleting the projectile at position `i` */
 			memmove(projectile_ref, projectile_ref + 1,
 				(current_level.projectile_count - i - 1) * sizeof(Projectile));
+
+			// The projectile sound can go on for a big longer after it explodes
 		}
-		else update_projectile_sound(projectile_ref);
+		update_projectile_sound(projectile_ref);
 	}
 	current_level.projectile_count = new_projectile_count;
 }

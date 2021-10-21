@@ -74,7 +74,6 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Dem
 	const double max_delay = 1000.0 / fps;
 	byte running = 1;
 	SDL_Event event;
-
 	const DemoVars dv = init();
 
 	while (running) {
