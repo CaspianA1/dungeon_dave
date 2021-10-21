@@ -123,6 +123,10 @@ StateGL demo_3_init(void) {
 	
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
 
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	return sgl;
 }
 
