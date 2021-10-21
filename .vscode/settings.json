@@ -23,6 +23,7 @@
         "queue": "c",
         "stack": "c",
         "glew.h": "c",
-        "sdl.h": "c"
+        "sdl.h": "c",
+        "cglm.h": "c"
     }
 }

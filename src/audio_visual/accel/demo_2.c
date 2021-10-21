@@ -1,6 +1,10 @@
 #include "utils.c"
 #include "demo_1.c"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdouble-promotion"
 #include <cglm/cglm.h>
+#pragma GCC diagnostic pop
 
 DemoVars demo_2_init(void) {
 	DemoVars dv;
