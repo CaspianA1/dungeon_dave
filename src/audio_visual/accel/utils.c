@@ -1,6 +1,8 @@
+#ifndef UTILS_C
+#define UTILS_C
+
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
-// #include <cglm/cglm.h> include for demo2.c
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
@@ -145,5 +147,9 @@ GLenum init_shader_program(const char* const vertex_shader, const char* const fr
 		glDeleteShader(shader_id);
 	}
 
+	glUseProgram(program_id);
+
 	return program_id;
 }
+
+#endif

@@ -559,3 +559,25 @@ printf("projectile_box.origin = {%f, %f, %f}\n",
 	puts("---");
 
 /////
+
+void demo_2_drawer(const DemoVars dv) {
+	mat4s projection_matrix = glms_perspective(to_radians(90.0), (float) SCR_H / SCR_W, 0.1f, 100.0f);
+	const vec3s camera_pos = {{4.0f, 3.0f, 3.0f}}, origin = {{0.0f, 0.0f, 0.0f}}, up = {{0.0f, 1.0f, 0.0f}};
+	mat4s view_matrix = glms_lookat(camera_pos, origin, up); // Camera matrix
+	mat4s model_matrix = GLMS_MAT4_IDENTITY_INIT;
+	mat4s view_times_model_matrix = glms_mat4_mul(model_matrix, view_matrix);
+	mat4s model_view_projection_matrix = glms_mat4_mul(projection_matrix, view_times_model_matrix);
+
+	GLuint matrix_id = glGetUniformLocation(dv.shader_program, "MVP");
+}
+
+///// These two variations work:
+
+	glm_mul(view, model, view_times_model);
+	glm_mul(projection, view_times_model, model_view_projection);
+
+	// void glm_mat4_mulN(mat4 * __restrict matrices[], int len, mat4 dest)
+	// glm_mat4_mulN((mat4 *[]){&m1, &m2, &m3, &m4}, 4, res);
+	// glm_mat4_mulN((mat4 *[]){&projection, &view, &model}, 3, model_view_projection);
+
+/////
