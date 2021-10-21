@@ -20,14 +20,16 @@ inlinable Tracer init_tracer_from_player(const Player* const player, const float
 
 // Returns if tracing should continue
 inlinable byte iter_tracer(Tracer* const tracer) {
+	const vec3D old_pos = tracer -> pos;
+
+	double old_height = (double) old_pos[2];
+	if (!tracer -> is_hitscan) old_height -= (double) inter_tick_projectile_size[2] * 0.5;
+
+	if (point_exists_at((double) old_pos[0], (double) old_pos[1], old_height)) return 0;
+
 	const float step = tracer -> step;
-
 	tracer -> dist += step;
-	const vec3D new_pos = tracer -> pos + tracer -> dir * vec_fill_3D(step);
-	tracer -> pos = new_pos;
+	tracer -> pos += tracer -> dir * vec_fill_3D(step);
 
-	double height = (double) new_pos[2];
-	if (!tracer -> is_hitscan) height -= (double) inter_tick_projectile_size[2] * 0.5;
-
-	return !point_exists_at((double) new_pos[0], (double) new_pos[1], height);
+	return 1;
 }

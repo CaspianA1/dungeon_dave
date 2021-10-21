@@ -75,6 +75,7 @@ projectile todo:
 	- make projectiles only emit damage for one tick, or emit less damage over many ticks
 	- sometimes, the explosion doesn't show up
 	- make bomb explosion a bit quieter perhaps, or update its sound pos
+	- it looks like projectiles don't detect the ground perfectly (that may be b/c the explosion sprite grows)
 
 - put enemy bounding box sizes in the Enemy struct
 - some growling enemies when they should be dead
