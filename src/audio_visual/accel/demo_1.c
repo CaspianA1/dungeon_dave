@@ -1,3 +1,6 @@
+#ifndef DEMO_1_C
+#define DEMO_1_C
+
 #include "utils.c"
 
 // SDL2, SDL2_ttf, SDL2_mixer, OpenGL, glew, cglm
@@ -66,3 +69,5 @@ int main(void) {
 	make_application(demo_1_drawer, demo_1_init, demo_1_deinit);
 }
 */
+
+#endif

@@ -4,6 +4,11 @@
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdouble-promotion"
+#include <cglm/cglm.h>
+#pragma GCC diagnostic pop
+
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
 #define OPENGL_MAJOR_VERSION 3
@@ -22,7 +27,8 @@ typedef enum {
 	LaunchSDL,
 	LaunchGLEW,
 	CompileShader,
-	LinkShaders
+	LinkShaders,
+	OpenImageFile
 } FailureType;
 
 typedef struct {

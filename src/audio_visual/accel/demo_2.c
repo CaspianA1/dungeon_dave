@@ -1,11 +1,6 @@
 #include "utils.c"
 #include "demo_1.c"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdouble-promotion"
-#include <cglm/cglm.h>
-#pragma GCC diagnostic pop
-
 DemoVars demo_2_init(void) {
 	DemoVars dv;
 	demo_1_init_vertex_data(&dv);
@@ -53,6 +48,8 @@ void demo_2_drawer(const DemoVars dv) {
 	demo_1_drawer(dv);
 }
 
+/*
 int main(void) {
 	make_application(demo_2_drawer, demo_2_init, demo_1_deinit);
 }
+*/
