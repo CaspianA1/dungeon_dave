@@ -55,6 +55,7 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 	byte running = 1;
 	SDL_Event event;
 	const StateGL sgl = init();
+	keys = SDL_GetKeyboardState(NULL);
 
 	while (running) {
 		const Uint32 before = SDL_GetTicks();

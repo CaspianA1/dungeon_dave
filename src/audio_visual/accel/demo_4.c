@@ -8,7 +8,10 @@ StateGL demo_4_init(void) {
 
 	sgl.vertex_array = init_vao();
 
-	static const GLfloat uv_data[cube_num_points] = {
+	enum {floats_per_uv = 2, uvs_per_triangle = 3};
+	enum {num_uv_floats = triangles_per_cube * uvs_per_triangle * floats_per_uv};
+
+	static const GLfloat uv_data[num_uv_floats] = {
 		0.000059f, 1.0f-0.000004f,
 		0.000103f, 1.0f-0.336048f,
 		0.335973f, 1.0f-0.335903f,
@@ -74,9 +77,11 @@ StateGL demo_4_init(void) {
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
 
+	// "src/audio_visual/accel/tutorial_test/uv.bmp"
+	// "assets/walls/saqqara.bmp"
 
-	sgl.num_textures = 1; // "src/audio_visual/accel/uvtemplate.bmp"
-	sgl.textures = init_textures(sgl.num_textures, "assets/walls/saqqara.bmp");
+	sgl.num_textures = 1;
+	sgl.textures = init_textures(sgl.num_textures, "assets/walls/dial.bmp");
 
 	// For textures with an alpha channel, enable this
 	/* glEnable(GL_BLEND);
@@ -85,13 +90,21 @@ StateGL demo_4_init(void) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-	vec3 camera_pos = {4.0f, 3.0f, -3.0f};
-	demo_2_matrix_setup(sgl.shader_program, camera_pos);
-
 	return sgl;
 }
 
 void demo_4_drawer(const StateGL sgl) {
+	static vec3 camera_pos = {-2.0f, 0.5f, 0.0f};
+	const double step = 0.05;
+	if (keys[SDL_SCANCODE_W]) camera_pos[0] += step;
+	if (keys[SDL_SCANCODE_S]) camera_pos[0] -= step;
+	if (keys[SDL_SCANCODE_1]) camera_pos[1] += step;
+	if (keys[SDL_SCANCODE_2]) camera_pos[1] -= step;
+	if (keys[SDL_SCANCODE_A]) camera_pos[2] += step;
+	if (keys[SDL_SCANCODE_D]) camera_pos[2] -= step;
+
+	demo_2_matrix_setup(sgl.shader_program, camera_pos);
+
 	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "myTextureSampler");
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, sgl.textures[0]); // set the current bound texture

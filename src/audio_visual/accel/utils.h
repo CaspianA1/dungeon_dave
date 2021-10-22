@@ -65,3 +65,5 @@ GLuint* init_vbos(const int num_buffers, ...);
 GLuint* init_textures(const int num_textures, ...);
 
 void deinit_demo_vars(const StateGL sgl); // Deletes shader program, vbos, and vao
+
+const Uint8* keys;
