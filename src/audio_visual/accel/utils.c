@@ -1,3 +1,7 @@
+// #define DEMO_1
+// #define DEMO_2
+#define DEMO_3
+
 #ifndef UTILS_C
 #define UTILS_C
 

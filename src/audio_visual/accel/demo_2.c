@@ -53,8 +53,8 @@ void demo_2_drawer(const StateGL sgl) {
 	demo_1_drawer(sgl);
 }
 
-/*
+#ifdef DEMO_2
 int main(void) {
 	make_application(demo_2_drawer, demo_2_init, deinit_demo_vars);
 }
-*/
+#endif

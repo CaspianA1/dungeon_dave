@@ -139,6 +139,8 @@ void demo_3_drawer(const StateGL sgl) {
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 
+#ifdef DEMO_3
 int main(void) {
 	make_application(demo_3_drawer, demo_3_init, deinit_demo_vars);
 }
+#endif

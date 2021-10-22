@@ -48,10 +48,10 @@ void demo_1_drawer(const StateGL sgl) {
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 
-/*
+#ifdef DEMO_1
 int main(void) {
 	make_application(demo_1_drawer, demo_1_init, deinit_demo_vars);
 }
-*/
+#endif
 
 #endif
