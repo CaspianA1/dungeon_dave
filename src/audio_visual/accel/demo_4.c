@@ -64,7 +64,7 @@ StateGL demo_4_init(void) {
 	*const fragment_shader =
 		"#version 330 core\n"
 		"in vec2 UV;\n"
-		"out vec3 color;\n"
+		"out vec3 color;\n" // For textures with an alpha channel, enable 4 channels
 		"uniform sampler2D myTextureSampler;\n"
 		"void main() {\n"
 			"color = texture(myTextureSampler, UV).rgb;\n"
@@ -72,8 +72,13 @@ StateGL demo_4_init(void) {
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
 
+
 	sgl.num_textures = 1; // "src/audio_visual/accel/uvtemplate.bmp"
 	sgl.textures = init_textures(sgl.num_textures, "assets/walls/saqqara.bmp");
+
+	// For textures with an alpha channel, enable this
+	/* glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); */
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
