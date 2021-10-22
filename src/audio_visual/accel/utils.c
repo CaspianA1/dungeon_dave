@@ -188,16 +188,14 @@ GLuint* init_vbos(const int num_buffers, ...) {
 	va_start(args, num_buffers);
 
 	GLuint* const vbos = malloc(num_buffers * sizeof(GLuint));
+	glGenBuffers(num_buffers, vbos);
+
 	for (int i = 0; i < num_buffers; i++) {
 		const GLfloat* const buffer_data_ptr = va_arg(args, GLfloat*);
 		const int num_points_in_buffer = va_arg(args, int);
 
-		GLuint* const vertex_buffer_ref = vbos + i;
-		glGenBuffers(1, vertex_buffer_ref);
-		glBindBuffer(GL_ARRAY_BUFFER, *vertex_buffer_ref);
+		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
 		glBufferData(GL_ARRAY_BUFFER, num_points_in_buffer * sizeof(GLfloat), buffer_data_ptr, GL_STATIC_DRAW);
-
-		vbos[i] = *vertex_buffer_ref;
 	}
 
 	va_end(args);
@@ -207,8 +205,7 @@ GLuint* init_vbos(const int num_buffers, ...) {
 void deinit_demo_vars(const StateGL sgl) {
 	glDeleteProgram(sgl.shader_program);
 
-	for (int i = 0; i < sgl.num_vertex_buffers; i++)
-		glDeleteBuffers(1, sgl.vertex_buffers + i);
+	glDeleteBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 	free(sgl.vertex_buffers);
 
 	glDeleteVertexArrays(1, &sgl.vertex_array);
