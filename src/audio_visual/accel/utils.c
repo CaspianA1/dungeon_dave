@@ -1,52 +1,6 @@
-// #define DEMO_1
-// #define DEMO_2
-#define DEMO_3
-
 #ifndef UTILS_C
 #define UTILS_C
-
-#include <SDL2/SDL.h>
-#include <GL/glew.h>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdouble-promotion"
-#include <cglm/cglm.h>
-#pragma GCC diagnostic pop
-
-#define DEBUG(var, format) printf(#var " = %" #format "\n", var)
-#define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
-#define OPENGL_MAJOR_VERSION 3
-#define OPENGL_MINOR_VERSION 3
-#define SCR_W 800
-#define SCR_H 600
-
-typedef uint_fast8_t byte;
-
-typedef struct {
-	SDL_Window* const window;
-	SDL_GLContext opengl_context;
-} Screen;
-
-typedef enum {
-	LaunchSDL,
-	LaunchGLEW,
-	CompileShader,
-	LinkShaders,
-	OpenImageFile
-} FailureType;
-
-typedef struct {
-	GLuint shader_program;
-	GLuint vertex_array;
-	GLuint* vertex_buffers;
-	int num_vertex_buffers;
-} StateGL;
-
-inline void fail(const char* const msg, const FailureType failure_type) {
-	fprintf(stderr, "Could not %s; SDL error = '%s', OpenGL error = '%s'\n", msg,
-		SDL_GetError(), glewGetErrorString(glGetError()));
-	exit(failure_type + 1);
-}
+#include "utils.h"
 
 Screen init_screen(const char* const title) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) fail("launch SDL", LaunchSDL);
@@ -82,6 +36,18 @@ void deinit_screen(const Screen* const screen) {
 	SDL_Quit();
 }
 
+void make_application(void (*const drawer)(const StateGL),
+	StateGL (*const init)(void), void (*const deinit)(StateGL)) {
+
+	const Screen screen = init_screen("Accel Demo");
+
+	printf("vendor = %s\nrenderer = %s\nversion = %s\n---\n",
+		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
+
+	loop_application(&screen, drawer, init, deinit, 60);
+	deinit_screen(&screen);
+}
+
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL),
 	StateGL (*const init)(void), void (*const deinit)(StateGL), const byte fps) {
 
@@ -106,18 +72,6 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 	}
 
 	deinit(sgl);
-}
-
-void make_application(void (*const drawer)(const StateGL),
-	StateGL (*const init)(void), void (*const deinit)(StateGL)) {
-
-	const Screen screen = init_screen("Accel Demo");
-
-	printf("vendor = %s\nrenderer = %s\nversion = %s\n---\n",
-		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
-
-	loop_application(&screen, drawer, init, deinit, 60);
-	deinit_screen(&screen);
 }
 
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader) {
@@ -204,6 +158,30 @@ GLuint* init_vbos(const int num_buffers, ...) {
 
 	va_end(args);
 	return vbos;
+}
+
+GLuint init_texture(const char* const path) {
+	(void) path;
+	return 0;
+
+	/*
+	SDL_Surface* const surface = SDL_LoadBMP("assets/walls/saqqara.bmp");
+	(void) surface;
+	*/
+
+	// #define PIXEL_FORMAT SDL_PIXELFORMAT_ARGB8888
+
+	/*
+	byte* data;
+	int width, height;
+
+	GLuint texture;
+	glGenTextures(1, &texture);
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
+	*/
+
 }
 
 void deinit_demo_vars(const StateGL sgl) {
