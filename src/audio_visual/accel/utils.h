@@ -6,11 +6,6 @@
 #include <cglm/cglm.h>
 #pragma GCC diagnostic pop
 
-// #define DEMO_1
-// #define DEMO_2
-// #define DEMO_3
-#define DEMO_4
-
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
 #define OPENGL_MAJOR_VERSION 3
@@ -40,13 +35,11 @@ typedef enum {
 } FailureType;
 
 typedef struct {
-	GLuint shader_program;
-	GLuint vertex_array;
-	GLuint* vertex_buffers;
-	int num_vertex_buffers;
+	GLuint shader_program, vertex_array, *vertex_buffers, *textures;
+	int num_vertex_buffers, num_textures;
 } StateGL;
 
-inline void fail(const char* const msg, const FailureType failure_type) {
+extern inline void fail(const char* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s; SDL error = '%s', OpenGL error = '%s'\n", msg,
 		SDL_GetError(), glewGetErrorString(glGetError()));
 	exit(failure_type + 1);
@@ -62,10 +55,10 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 	StateGL (*const init)(void), void (*const deinit)(StateGL), const byte fps);
 
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader);
-void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos);
+void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...);
 void unbind_vbos_from_vao(const int num_vbos);
 GLuint init_vao(void);
 GLuint* init_vbos(const int num_buffers, ...);
-GLuint init_texture(const char* const path);
+GLuint* init_textures(const int num_textures, ...);
 
 void deinit_demo_vars(const StateGL sgl); // Deletes shader program, vbos, and vao

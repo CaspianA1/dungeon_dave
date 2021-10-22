@@ -14,12 +14,13 @@ void demo_1_init_vertex_data(StateGL* const sgl) {
 
 	sgl -> vertex_array = init_vao();
 	sgl -> num_vertex_buffers = 1;
-	sgl -> vertex_buffers = init_vbos(sgl -> num_vertex_buffers, triangle_data, 9);
+	sgl -> vertex_buffers = init_vbos(sgl -> num_vertex_buffers, triangle_data, sizeof(triangle_data));
 }
 
 StateGL demo_1_init(void) {
 	StateGL sgl;
 	demo_1_init_vertex_data(&sgl);
+	sgl.num_textures = 0;
 
 	const char* const vertex_shader =
 		"#version 330 core\n" // 140 -> OpenGL 3.1 (but that shader wouldn't compile)
@@ -37,14 +38,13 @@ StateGL demo_1_init(void) {
 		"}\n";
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
+
 	return sgl;
 }
 
 void demo_1_drawer(const StateGL sgl) {
-	const GLint num_vertices = 3;
-
-	bind_vbos_to_vao(sgl.vertex_buffers, 1);
-	draw_from_bound_vbo(num_vertices);
+	bind_vbos_to_vao(sgl.vertex_buffers, 1, 3);
+	draw_triangles(1);
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 

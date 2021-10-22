@@ -1,11 +1,49 @@
 #include "demo_2.c"
-#define deinit_texture(t) glDeleteTextures(1, &t)
+
+enum {points_per_triangle = 9, triangles_per_cube = 12};
+enum {cube_num_points = points_per_triangle * triangles_per_cube};
+
+const GLfloat demo_3_vertex_data[cube_num_points] = {
+	-1.0f, -1.0f, -1.0f, // triangle 1: begin
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f, // triangle 1: end
+	1.0f, 1.0f, -1.0f, // triangle 2: begin
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f, // triangle 2: end
+	1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f
+};
 
 StateGL demo_3_init(void) {
 	StateGL sgl;
-
-	enum {points_per_triangle = 9, triangles_per_cube = 12};
-	enum {num_points = points_per_triangle * triangles_per_cube};
 
 	/*
 	For a cube:
@@ -15,46 +53,7 @@ StateGL demo_3_init(void) {
 	- 9 points per triangle
 	*/
 
-	static const GLfloat vertex_data[num_points] = {
-		-1.0f, -1.0f, -1.0f, // triangle 1: begin
-		-1.0f, -1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f, // triangle 1: end
-		1.0f, 1.0f, -1.0f, // triangle 2: begin
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f, // triangle 2: end
-		1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f
-	},
-
-	color_data[num_points] = {
+	static const GLfloat color_data[cube_num_points] = {
 		0.583f, 0.771f, 0.014f,
 		0.609f, 0.115f, 0.436f,
 		0.327f, 0.483f, 0.844f,
@@ -97,8 +96,10 @@ StateGL demo_3_init(void) {
 
 	sgl.num_vertex_buffers = 2;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
-		vertex_data, num_points,
-		color_data, num_points);
+		demo_3_vertex_data, sizeof(demo_3_vertex_data),
+		color_data, sizeof(color_data));
+
+	sgl.num_textures = 0;
 
 	//////////
 
@@ -123,19 +124,20 @@ StateGL demo_3_init(void) {
 	
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
 
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
+
+	vec3 camera_pos = {4.0f, 3.0f, -3.0f};
+	demo_2_matrix_setup(sgl.shader_program, camera_pos);
 
 	return sgl;
 }
 
 void demo_3_drawer(const StateGL sgl) {
-	vec3 camera_pos = {4.0f, 3.0f, -3.0f};
-	demo_2_matrix_setup(sgl.shader_program, camera_pos);
-
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 3);
+	draw_triangles(12);
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 

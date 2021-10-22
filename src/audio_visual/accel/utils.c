@@ -116,17 +116,25 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 	return program_id;
 }
 
-void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos) {
+// size of component for vbo
+void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...) {
+	va_list args;
+	va_start(args, num_vbos);
+
 	for (int i = 0; i < num_vbos; i++) {
 		glEnableVertexAttribArray(i);
 		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
 
+		const int vbo_component_size = va_arg(args, int);
+
 		glVertexAttribPointer(
-			i, 3, GL_FLOAT, // attribute i, num points for a vertex, type
+			i, vbo_component_size, GL_FLOAT, // attribute i, component size, type
 			GL_FALSE, 0, // not normalized, stride
 			NULL // array buffer offset
 		);
 	}
+
+	va_end(args);
 }
 
 void unbind_vbos_from_vao(const int num_vbos) {
@@ -140,7 +148,7 @@ GLuint init_vao(void) {
 	return vertex_array;
 }
 
-// buffer data ptr, number of points in buffer
+// buffer data ptr, size of buffer
 GLuint* init_vbos(const int num_buffers, ...) {
 	va_list args;
 	va_start(args, num_buffers);
@@ -150,40 +158,50 @@ GLuint* init_vbos(const int num_buffers, ...) {
 
 	for (int i = 0; i < num_buffers; i++) {
 		const GLfloat* const buffer_data_ptr = va_arg(args, GLfloat*);
-		const int num_points_in_buffer = va_arg(args, int);
+		const int size_of_buffer = va_arg(args, int);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
-		glBufferData(GL_ARRAY_BUFFER, num_points_in_buffer * sizeof(GLfloat), buffer_data_ptr, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, size_of_buffer, buffer_data_ptr, GL_STATIC_DRAW);
 	}
 
 	va_end(args);
 	return vbos;
 }
 
-GLuint init_texture(const char* const path) {
-	SDL_Surface* const surface = SDL_LoadBMP(path);
-	if (surface == NULL) fail("open texture file", OpenImageFile);
+// Expects that num_textures > 0. Param: path.
+GLuint* init_textures(const int num_textures, ...) {
+	va_list args;
+	va_start(args, num_textures);
 
-	SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
-	SDL_FreeSurface(surface);
-	SDL_LockSurface(converted_surface);
+	GLuint* const textures = malloc(num_textures * sizeof(GLuint));
+	glGenTextures(num_textures, textures);
 
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	for (int i = 0; i < num_textures; i++) {
+		SDL_Surface* const surface = SDL_LoadBMP(va_arg(args, char*));
+		if (surface == NULL) fail("open texture file", OpenImageFile);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, OPENGL_PIXEL_FORMAT,
-		converted_surface -> w, converted_surface -> h,
-		0, OPENGL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, converted_surface -> pixels);
+		SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
+		SDL_FreeSurface(surface);
+		SDL_LockSurface(converted_surface);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OPENGL_TEX_MIN_FILTER);
-	glGenerateMipmap(GL_TEXTURE_2D);
+		//////////
+		glBindTexture(GL_TEXTURE_2D, textures[i]);
 
-	SDL_UnlockSurface(converted_surface);
-	SDL_FreeSurface(converted_surface);
+		glTexImage2D(GL_TEXTURE_2D, 0, OPENGL_PIXEL_FORMAT,
+			converted_surface -> w, converted_surface -> h,
+			0, OPENGL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, converted_surface -> pixels);
 
-	return texture;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OPENGL_TEX_MIN_FILTER);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		//////////
+
+		SDL_UnlockSurface(converted_surface);
+		SDL_FreeSurface(converted_surface);
+	}
+
+	va_end(args);
+	return textures;
 }
 
 void deinit_demo_vars(const StateGL sgl) {
@@ -192,9 +210,14 @@ void deinit_demo_vars(const StateGL sgl) {
 	glDeleteBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 	free(sgl.vertex_buffers);
 
+	if (sgl.num_textures > 0) {
+		glDeleteTextures(sgl.num_textures, sgl.textures);
+		free(sgl.textures);
+	}
+
 	glDeleteVertexArrays(1, &sgl.vertex_array);
 }
 
-#define draw_from_bound_vbo(num_vertices) glDrawArrays(GL_TRIANGLES, 0, num_vertices)
+#define draw_triangles(num_triangles) glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3)
 
 #endif

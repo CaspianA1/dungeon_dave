@@ -1,9 +1,31 @@
 #include "utils.c"
 #include "demo_1.c"
 
+static inline double to_radians(const double degrees) {
+	return degrees * M_PI / 180.0;
+}
+
+void demo_2_matrix_setup(const GLuint shader_program, vec3 camera_pos) {
+	mat4
+		projection, view, view_times_model, model_view_projection,
+		model = GLM_MAT4_IDENTITY_INIT;
+
+	vec3 origin = {0.0f, 0.0f, 0.0f}, up = {0.0f, 1.0f, 0.0f};
+
+	glm_perspective(to_radians(90.0), (float) SCR_W / SCR_H, 0.1f, 100.0f, projection);
+	glm_lookat(camera_pos, origin, up, view);
+
+	glm_mul(view, model, view_times_model);
+	glm_mul(projection, view_times_model, model_view_projection);
+
+	const GLuint matrix_id = glGetUniformLocation(shader_program, "MVP");
+	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &model_view_projection[0][0]);
+}
+
 StateGL demo_2_init(void) {
 	StateGL sgl;
 	demo_1_init_vertex_data(&sgl);
+	sgl.num_textures = 0;
 
 	const char* const vertex_shader =
 		"#version 330 core\n" // 140 -> OpenGL 3.1 (but that shader wouldn't compile)
@@ -22,39 +44,14 @@ StateGL demo_2_init(void) {
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
 
-	return sgl;
-}
-
-double to_radians(const double degrees) {
-	return degrees * M_PI / 180.0;
-}
-
-void demo_2_matrix_setup(const GLuint shader_program, vec3 camera_pos) {
-	mat4
-		projection, view, view_times_model, model_view_projection,
-		model = GLM_MAT4_IDENTITY_INIT;
-
-	// vec3 camera_pos = {4.0f, 3.0f, 3.0f}
-	vec3 origin = {0.0f, 0.0f, 0.0f}, up = {0.0f, 1.0f, 0.0f};
-
-	glm_perspective(to_radians(90.0), (float) SCR_W / SCR_H, 0.1f, 100.0f, projection);
-	glm_lookat(camera_pos, origin, up, view);
-
-	glm_mul(view, model, view_times_model);
-	glm_mul(projection, view_times_model, model_view_projection);
-
-	const GLuint matrix_id = glGetUniformLocation(shader_program, "MVP");
-	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &model_view_projection[0][0]);
-}
-
-void demo_2_drawer(const StateGL sgl) {
 	vec3 camera_pos = {4.0f, 3.0f, 3.0f};
 	demo_2_matrix_setup(sgl.shader_program, camera_pos);
-	demo_1_drawer(sgl);
+
+	return sgl;
 }
 
 #ifdef DEMO_2
 int main(void) {
-	make_application(demo_2_drawer, demo_2_init, deinit_demo_vars);
+	make_application(demo_1_drawer, demo_2_init, deinit_demo_vars);
 }
 #endif

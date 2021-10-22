@@ -19,6 +19,8 @@ SDL_EXTENSION_LIBS = -lSDL2_ttf -lSDL2_mixer
 CORE_LIBS = -lm -framework OpenGL -lglew -lSDL2
 LDFLAGS = $(CORE_LIBS) $(SDL_EXTENSION_LIBS) -o bin/$(OUT) src/main/$(MAIN).c
 
+ACCEL_DEMO = 3
+
 all: build run
 
 run:
@@ -34,7 +36,7 @@ accel: accel_build
 	./bin/accel_demo
 
 accel_build:
-	$(CC) $(CFLAGS) $(OPTIMIZE) $(CORE_LIBS) -o bin/accel_demo src/audio_visual/accel/demo_4.c
+	$(CC) $(CFLAGS) $(DEBUG_2) $(CORE_LIBS) -D DEMO_$(ACCEL_DEMO) -o bin/accel_demo src/audio_visual/accel/demo_$(ACCEL_DEMO).c
 
 asm:
 	$(CC) $(CFLAGS) -S -masm=intel $(OPTIMIZE) -o bin/$(MAIN).asm src/main/$(MAIN).c
