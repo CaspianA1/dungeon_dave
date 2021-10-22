@@ -161,27 +161,29 @@ GLuint* init_vbos(const int num_buffers, ...) {
 }
 
 GLuint init_texture(const char* const path) {
-	(void) path;
-	return 0;
+	SDL_Surface* const surface = SDL_LoadBMP(path);
+	if (surface == NULL) fail("open texture file", OpenImageFile);
 
-	/*
-	SDL_Surface* const surface = SDL_LoadBMP("assets/walls/saqqara.bmp");
-	(void) surface;
-	*/
-
-	// #define PIXEL_FORMAT SDL_PIXELFORMAT_ARGB8888
-
-	/*
-	byte* data;
-	int width, height;
+	SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
+	SDL_FreeSurface(surface);
+	SDL_LockSurface(converted_surface);
 
 	GLuint texture;
 	glGenTextures(1, &texture);
-
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
-	*/
 
+	glTexImage2D(GL_TEXTURE_2D, 0, OPENGL_PIXEL_FORMAT,
+		converted_surface -> w, converted_surface -> h,
+		0, OPENGL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, converted_surface -> pixels);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OPENGL_TEX_MIN_FILTER);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	SDL_UnlockSurface(converted_surface);
+	SDL_FreeSurface(converted_surface);
+
+	return texture;
 }
 
 void deinit_demo_vars(const StateGL sgl) {

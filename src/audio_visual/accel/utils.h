@@ -18,6 +18,12 @@
 #define SCR_W 800
 #define SCR_H 600
 
+#define SDL_PIXEL_FORMAT SDL_PIXELFORMAT_RGBA5551
+#define OPENGL_PIXEL_FORMAT GL_RGBA // internal format is same as input format from SDL
+#define OPENGL_COLOR_CHANNEL_TYPE GL_UNSIGNED_BYTE
+#define OPENGL_TEX_MAG_FILTER GL_NEAREST
+#define OPENGL_TEX_MIN_FILTER GL_LINEAR_MIPMAP_LINEAR
+
 typedef uint_fast8_t byte;
 
 typedef struct {
