@@ -121,12 +121,11 @@ StateGL demo_3_init(void) {
 		"void main() {\n"
 			"color = fragmentColor;\n"
 		"}\n";
-	
+
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-
 
 	vec3 camera_pos = {4.0f, 3.0f, -3.0f};
 	demo_2_matrix_setup(sgl.shader_program, camera_pos);

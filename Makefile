@@ -19,7 +19,7 @@ SDL_EXTENSION_LIBS = -lSDL2_ttf -lSDL2_mixer
 CORE_LIBS = -lm -framework OpenGL -lglew -lSDL2
 LDFLAGS = $(CORE_LIBS) $(SDL_EXTENSION_LIBS) -o bin/$(OUT) src/main/$(MAIN).c
 
-ACCEL_DEMO = 3
+ACCEL_DEMO = 4
 
 all: build run
 

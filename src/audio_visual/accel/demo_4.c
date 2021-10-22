@@ -72,18 +72,19 @@ StateGL demo_4_init(void) {
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
 
-	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "src/audio_visual/accel/uvtemplate.bmp");
+	sgl.num_textures = 1; // "src/audio_visual/accel/uvtemplate.bmp"
+	sgl.textures = init_textures(sgl.num_textures, "assets/walls/saqqara.bmp");
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
+	vec3 camera_pos = {4.0f, 3.0f, -3.0f};
+	demo_2_matrix_setup(sgl.shader_program, camera_pos);
 
 	return sgl;
 }
 
 void demo_4_drawer(const StateGL sgl) {
-	GL_ERR_CHECK;
-
 	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "myTextureSampler");
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, sgl.textures[0]); // set the current bound texture
