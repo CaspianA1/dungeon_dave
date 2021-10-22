@@ -204,19 +204,16 @@ GLuint* init_vbos(const int num_buffers, ...) {
 	return vbos;
 }
 
-void deinit_vbos(const int num_buffers, GLuint* const vbos) {
-	for (int i = 0; i < num_buffers; i++) glDeleteBuffers(1, vbos + i);
-	free(vbos);
-}
-
-#define deinit_shader_program glDeleteProgram
-#define draw_from_bound_vbo(num_vertices) glDrawArrays(GL_TRIANGLES, 0, num_vertices)
-#define deinit_vao(vao) glDeleteVertexArrays(1, &vao)
-
 void deinit_demo_vars(const StateGL sgl) {
-	deinit_shader_program(sgl.shader_program);
-	deinit_vbos(sgl.num_vertex_buffers, sgl.vertex_buffers);
-	deinit_vao(sgl.vertex_array);
+	glDeleteProgram(sgl.shader_program);
+
+	for (int i = 0; i < sgl.num_vertex_buffers; i++)
+		glDeleteBuffers(1, sgl.vertex_buffers + i);
+	free(sgl.vertex_buffers);
+
+	glDeleteVertexArrays(1, &sgl.vertex_array);
 }
+
+#define draw_from_bound_vbo(num_vertices) glDrawArrays(GL_TRIANGLES, 0, num_vertices)
 
 #endif
