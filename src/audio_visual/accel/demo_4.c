@@ -31,12 +31,12 @@ StateGL demo_4_init(void) {
 
 	const char* const vertex_shader =
 		"#version 330 core\n"
-		"layout(location = 0) in vec3 vertexPosition_modelspace;\n"
+		"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 		"layout(location = 1) in vec2 vertexUV;\n"
 		"out vec2 UV;\n"
 		"uniform mat4 MVP;\n"
 		"void main() {\n"
-			"gl_Position = MVP * vec4(vertexPosition_modelspace, 1);\n"
+			"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
 			"UV = vertexUV;\n"
 		"}\n",
 
@@ -44,15 +44,20 @@ StateGL demo_4_init(void) {
 		"#version 330 core\n"
 		"in vec2 UV;\n"
 		"out vec3 color;\n" // For textures with an alpha channel, enable 4 channels
-		"uniform sampler2D myTextureSampler;\n"
+		"uniform sampler2D texture_sampler;\n"
 		"void main() {\n"
-			"color = texture(myTextureSampler, UV).rgb;\n"
+			"color = texture(texture_sampler, UV).rgb;\n"
 		"}\n";
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "assets/walls/mesa.bmp");
+
+	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "texture_sampler");
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, sgl.textures[0]); // set the current bound texture
+	glUniform1i(shader_texture_sampler, 0); // make the sampler read from texture unit 0
 
 	// For textures with an alpha channel, enable this
 	/* glEnable(GL_BLEND);
@@ -75,11 +80,6 @@ void demo_4_drawer(const StateGL sgl) {
 	if (keys[SDL_SCANCODE_D]) camera_pos[2] -= step;
 
 	demo_2_matrix_setup(sgl.shader_program, camera_pos);
-
-	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "myTextureSampler");
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, sgl.textures[0]); // set the current bound texture
-	glUniform1i(shader_texture_sampler, 0); // make the sampler read from texture unit 0
 
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
