@@ -190,6 +190,12 @@ GLuint* init_textures(const int num_textures, ...) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OPENGL_TEX_MIN_FILTER);
 
+		#ifdef ENABLE_ANISOTROPIC_FILTERING
+		float aniso = 0.0f;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+		#endif
+
 		glTexImage2D(GL_TEXTURE_2D, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
 			converted_surface -> w, converted_surface -> h,
 			0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, converted_surface -> pixels);

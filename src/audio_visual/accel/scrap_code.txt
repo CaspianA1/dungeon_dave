@@ -282,4 +282,20 @@ GLfloat uv_data[] = {
   0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
 	};
 
+///// A note on UV reversals:
+
+	// rev
+	#define FIRST_UV 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	#define SECOND_UV 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+
+	// rev
+	#define THIRD_UV 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+	#define FOURTH_UV 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+
+	// fifth and sixth are reversed
+	#define FIFTH_UV 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+	#define SIXTH_UV 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+
+	// 1 2 2 3 4 3 3 2 5 1 4 6
+
 /////
