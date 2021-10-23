@@ -1,6 +1,8 @@
 #include "utils.c"
 #include "demo_3.c"
 
+// Next time: wrap textures around taller and wider rectangles
+
 StateGL demo_4_init(void) {
 	StateGL sgl;
 
