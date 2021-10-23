@@ -1,8 +1,6 @@
 #include "utils.c"
 #include "demo_3.c"
 
-// Next step: texture cube with whole texture on each side
-
 StateGL demo_4_init(void) {
 	StateGL sgl;
 
