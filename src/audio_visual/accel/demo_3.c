@@ -124,8 +124,7 @@ StateGL demo_3_init(void) {
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	enable_all_culling();
 
 	vec3 camera_pos = {4.0f, 3.0f, -3.0f};
 	demo_2_matrix_setup(sgl.shader_program, camera_pos);

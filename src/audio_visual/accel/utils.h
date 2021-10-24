@@ -64,6 +64,7 @@ void unbind_vbos_from_vao(const int num_vbos);
 GLuint init_vao(void);
 GLuint* init_vbos(const int num_buffers, ...);
 GLuint* init_textures(const int num_textures, ...);
+void enable_all_culling(void);
 
 void deinit_demo_vars(const StateGL sgl); // Deletes shader program, vbos, and vao
 

@@ -1,8 +1,6 @@
 #include "utils.c"
 #include "demo_3.c"
 
-// Next time: wrap textures around taller and wider rectangles
-
 StateGL demo_4_init(void) {
 	StateGL sgl;
 
@@ -63,10 +61,16 @@ StateGL demo_4_init(void) {
 	/* glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); */
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	enable_all_culling();
 
 	return sgl;
+}
+
+void demo_4_core_drawer(const StateGL sgl) {
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
+	draw_triangles(12);
+	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 
 void demo_4_drawer(const StateGL sgl) {
@@ -80,11 +84,7 @@ void demo_4_drawer(const StateGL sgl) {
 	if (keys[SDL_SCANCODE_D]) camera_pos[2] -= step;
 
 	demo_2_matrix_setup(sgl.shader_program, camera_pos);
-
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
-	draw_triangles(12);
-	unbind_vbos_from_vao(sgl.num_vertex_buffers);
+	demo_4_core_drawer(sgl);
 }
 
 #ifdef DEMO_4

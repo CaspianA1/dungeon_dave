@@ -1,25 +1,32 @@
 #include "utils.c"
 #include "demo_1.c"
 
-static inline double to_radians(const double degrees) {
-	return degrees * M_PI / 180.0;
+static inline float to_radians(const float degrees) {
+	return degrees * (float) M_PI / 180.0f;
 }
 
-void demo_2_matrix_setup(const GLuint shader_program, vec3 camera_pos) {
-	mat4
-		projection, view, view_times_model, model_view_projection,
-		model = GLM_MAT4_IDENTITY_INIT;
+void demo_2_configurable_matrix_setup(const GLuint shader_program,
+	vec3 pos, vec3 rel_origin, vec3 up) {
 
-	vec3 origin = {0.0f, 0.0f, 0.0f}, up = {0.0f, 1.0f, 0.0f};
+	const float
+		fov = 90.0f,
+		near_clip_plane = 0.1f,
+		far_clip_plane = 100.0f;
 
-	glm_perspective(to_radians(90.0), (float) SCR_W / SCR_H, 0.1f, 100.0f, projection);
-	glm_lookat(camera_pos, origin, up, view);
+	mat4 projection, view, model = GLM_MAT4_IDENTITY_INIT, view_times_model, model_view_projection;
 
+	glm_perspective(to_radians(fov), (float) SCR_W / SCR_H, near_clip_plane, far_clip_plane, projection);
+	glm_lookat(pos, rel_origin, up, view);
 	glm_mul(view, model, view_times_model);
 	glm_mul(projection, view_times_model, model_view_projection);
 
 	const GLuint matrix_id = glGetUniformLocation(shader_program, "MVP");
 	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &model_view_projection[0][0]);
+}
+
+void demo_2_matrix_setup(const GLuint shader_program, vec3 camera_pos) {
+	vec3 origin = {0.0f, 0.0f, 0.0f}, up = {0.0f, 1.0f, 0.0f};
+	demo_2_configurable_matrix_setup(shader_program, camera_pos, origin, up);
 }
 
 StateGL demo_2_init(void) {

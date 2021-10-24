@@ -24,6 +24,9 @@ Screen init_screen(const char* const title) {
 
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);
 
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_WarpMouseInWindow(screen.window, SCR_W >> 1, SCR_H >> 1);
+
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK) fail("initialize glew", LaunchGLEW);
 
@@ -209,6 +212,12 @@ GLuint* init_textures(const int num_textures, ...) {
 
 	va_end(args);
 	return textures;
+}
+
+void enable_all_culling(void) {
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);
 }
 
 void deinit_demo_vars(const StateGL sgl) {
