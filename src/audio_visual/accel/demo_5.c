@@ -17,7 +17,11 @@ void move(const GLuint shader_program) {
 		return;
 	}
 
-	const float move_speed = 3.0f, look_speed = 0.08f;
+	const float
+		move_speed = 3.0f,
+		look_speed = 0.08f,
+		half_pi = (float) M_PI / 2.0f,
+		max_look_up_angle = (float) M_PI * 2.0f / 3.0f;
 
 	int mouse_dx, mouse_dy;
 	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
@@ -26,10 +30,13 @@ void move(const GLuint shader_program) {
 	hori_angle += look_speed * delta_time * -mouse_dx;
 	vert_angle += look_speed * delta_time * -mouse_dy;
 
+	if (vert_angle > max_look_up_angle) vert_angle = max_look_up_angle;
+	else if (vert_angle < -half_pi) vert_angle = -half_pi;
+
 	const float cos_vert = cosf(vert_angle);
 	vec3 direction = {cos_vert * sinf(hori_angle), sinf(vert_angle), cos_vert * cosf(hori_angle)};
 
-	const float half_pi = (float) M_PI / 2.0f, hori_angle_minus_half_pi = hori_angle - half_pi;
+	const float hori_angle_minus_half_pi = hori_angle - half_pi;
 	vec3 right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
 
 	float delta_pos_times_speed = delta_time * move_speed;
@@ -51,8 +58,6 @@ void move(const GLuint shader_program) {
 	}
 
 	if (keys[SDL_SCANCODE_D]) glm_vec3_muladd(pos_delta, right, position);
-
-	DEBUG(glGetError(), d);
 
 	//////////
 
