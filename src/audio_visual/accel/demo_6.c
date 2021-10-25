@@ -6,14 +6,17 @@ Functions:
 - create_cuboid_vertices
 */
 
-void create_rect_plane_vertices(const int width, const int height,
+void create_rect_plane(vec3 top_left_corner, const int width, const int height,
 	GLfloat** const vertex_data, GLfloat** const uv_data) {
 
 	const size_t vertex_bytes = 18 * sizeof(GLfloat), uv_bytes = 12 * sizeof(GLfloat);
 	*vertex_data = malloc(vertex_bytes), *uv_data = malloc(uv_bytes);
 	const float s = 20.0f; // s = size
 
-	const GLfloat vertices[] = {
+	(void) top_left_corner;
+	// const float half_width = width / 2.0f, half_height = height / 2.0f;
+
+	const GLfloat vertices[18] = {
 		-s, s, 0.0f,
 		s, s, 0.0f,
 		-s, -s, 0.0f,
@@ -46,7 +49,8 @@ StateGL demo_6_init(void) {
 	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
 	GLfloat *flat_square_vertices, *uv_data;
-	create_rect_plane_vertices(3, 5, &flat_square_vertices, &uv_data);
+	vec3 top_left_corner = {5.0f, 5.0f, 5.0f};
+	create_rect_plane(top_left_corner, 2, 3, &flat_square_vertices, &uv_data);
 
 	sgl.num_vertex_buffers = 2;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
