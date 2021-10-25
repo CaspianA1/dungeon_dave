@@ -5,6 +5,7 @@ StateGL demo_4_init(void) {
 	StateGL sgl;
 
 	sgl.vertex_array = init_vao();
+	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
 	enum {floats_per_uv = 2, uvs_per_triangle = 3};
 	enum {num_uv_floats = triangles_per_cube * uvs_per_triangle * floats_per_uv};
@@ -16,7 +17,8 @@ StateGL demo_4_init(void) {
 	#define FIFTH_UV 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 	#define SIXTH_UV 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
 
-	static const GLfloat uv_data[num_uv_floats] = {
+	static const GLfloat uv_data[] = {
+		// FIRST_UV SECOND_UV THIRD_UV FOURTH_UV FIFTH_UV SIXTH_UV
 		FIRST_UV SECOND_UV SECOND_UV THIRD_UV
 		FOURTH_UV THIRD_UV THIRD_UV SECOND_UV
 		FIFTH_UV FIRST_UV FOURTH_UV SIXTH_UV
@@ -50,7 +52,7 @@ StateGL demo_4_init(void) {
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
 
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "assets/walls/mesa.bmp");
+	sgl.textures = init_textures(sgl.num_textures, "assets/walls/hieroglyph.bmp");
 
 	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "texture_sampler");
 	glActiveTexture(GL_TEXTURE0);
@@ -68,7 +70,7 @@ StateGL demo_4_init(void) {
 
 void demo_4_core_drawer(const StateGL sgl) {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
+	bind_vbos_to_vao(sgl.index_buffer, sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
 	draw_triangles(12);
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }

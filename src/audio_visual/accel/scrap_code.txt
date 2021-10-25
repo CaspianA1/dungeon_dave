@@ -298,4 +298,126 @@ GLfloat uv_data[] = {
 
 	// 1 2 2 3 4 3 3 2 5 1 4 6
 
+///// An indexing test
+
+// Possibilities
+#define P1 1.0f, 1.0f, 1.0f,
+#define P2 -1.0f, -1.0f, -1.0f,
+
+#define P3 -1.0f, 1.0f, 1.0f,
+#define P4 1.0f, -1.0f, 1.0f,
+#define P5 1.0f, 1.0f, -1.0f,
+
+#define P6 -1.0f, -1.0f, 1.0f,
+#define P7 1.0f, -1.0f, -1.0f,
+
+#define P8 -1.0f, 1.0f, -1.0f
+
+/*
+	P2 P6 P3
+
+	P5 P2 P8
+*/
+
+///// Stuff with automatic index generation:
+
+
+	int index_buf_len = 0;
+	int index_buffer[cube_num_points];
+
+	for (int i = 0; i < cube_num_points; i += 3) {
+		const float x = demo_3_vertex_data[i], y = demo_3_vertex_data[i + 1], z = demo_3_vertex_data[i + 2];
+
+		byte found_match = 0;
+		for (int j = 0; j < i; j += 3) {
+			const float cx = demo_3_vertex_data[j], cy = demo_3_vertex_data[j + 1], cz = demo_3_vertex_data[j + 2];
+			if (x == cx && y == cy && z == cz) {
+				index_buffer[index_buf_len++] = j / 3;
+				found_match = 1;
+				break;
+			}
+		}
+
+		if (!found_match) {
+			printf("%lf, %lf, %lf\n", (double) x, (double) y, (double) z);
+			index_buffer[index_buf_len] = index_buf_len;
+			index_buf_len++;
+		}
+	}
+
+	for (int i = 0; i < index_buf_len + 1; i++) {
+		printf("%d%s", index_buffer[i], (i == index_buf_len - 1) ? "" : ", ");
+	}
+	putchar('\n');
+
+///// And more of that:
+
+#define A -1.000000, -1.000000, -1.000000
+#define B -1.000000, -1.000000, 1.000000
+#define C -1.000000, 1.000000, 1.000000
+#define D 1.000000, 1.000000, -1.000000
+#define E -1.000000, 1.000000, -1.000000
+#define F 1.000000, -1.000000, 1.000000
+#define G 1.000000, -1.000000, -1.000000
+#define H 1.000000, 1.000000, 1.000000
+/* 0, 1, 2, 3, 0,
+5, 6, 0, 8, 3, 8,
+0, 0, 2, 5, 6, 1, 0, 2, 1, 6, 21, 8, 3, 8, 21, 6, 21, 3, 5, 21, 5, 2, 21, 2, 6
+*/
+
+const GLfloat demo_3_vertex_data[cube_num_points] = {
+	// A B C D A
+
+///// Old vertex data:
+
+	/*
+	-1.0f, -1.0f, -1.0f, // triangle 1: begin
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f, // triangle 1: end
+
+	1.0f, 1.0f, -1.0f, // triangle 2: begin
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f, // triangle 2: end
+
+	1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+
+	1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f,
+
+	1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f,
+
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, 1.0f, -1.0f,
+
+	1.0f, -1.0f, -1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f
+	*/
+
 /////

@@ -41,7 +41,7 @@ typedef enum {
 } FailureType;
 
 typedef struct {
-	GLuint shader_program, vertex_array, *vertex_buffers, *textures;
+	GLuint shader_program, vertex_array, index_buffer, *vertex_buffers, *textures;
 	int num_vertex_buffers, num_textures;
 } StateGL;
 
@@ -61,9 +61,10 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 	StateGL (*const init)(void), void (*const deinit)(StateGL), const byte fps);
 
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader);
-void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...);
+void bind_vbos_to_vao(const GLuint ibo, const GLuint* const vbos, const int num_vbos, ...);
 void unbind_vbos_from_vao(const int num_vbos);
 GLuint init_vao(void);
+GLuint init_ibo(const GLuint* const buffer_data_ptr, const int buffer_size);
 GLuint* init_vbos(const int num_buffers, ...);
 GLuint* init_textures(const int num_textures, ...);
 void enable_all_culling(void);

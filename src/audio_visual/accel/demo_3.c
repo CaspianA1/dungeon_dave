@@ -3,43 +3,94 @@
 enum {points_per_triangle = 9, triangles_per_cube = 12};
 enum {cube_num_points = points_per_triangle * triangles_per_cube};
 
-const GLfloat demo_3_vertex_data[cube_num_points] = {
-	-1.0f, -1.0f, -1.0f, // triangle 1: begin
-	-1.0f, -1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, // triangle 1: end
-	1.0f, 1.0f, -1.0f, // triangle 2: begin
+#define A -1.000000, -1.000000, -1.000000,
+#define B -1.000000, -1.000000, 1.000000,
+#define C -1.000000, 1.000000, 1.000000,
+#define D 1.000000, 1.000000, -1.000000,
+#define E -1.000000, 1.000000, -1.000000,
+#define F 1.000000, -1.000000, 1.000000,
+#define G 1.000000, -1.000000, -1.000000,
+#define H 1.000000, 1.000000, 1.000000,
+
+	/*
+	A B C
+	D A E
+	F A G
+	D G A
+	A C E
+	F B A
+	C B F
+	H G D
+	G H F
+	H D E
+	H E C
+	H C F
+	*/
+
+const GLfloat demo_3_vertex_data[] = {
+	// A B C D E F G H
 	-1.0f, -1.0f, -1.0f,
-	-1.0f, 1.0f, -1.0f, // triangle 2: end
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+
+	1.0f, 1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+
 	1.0f, -1.0f, 1.0f,
 	-1.0f, -1.0f, -1.0f,
 	1.0f, -1.0f, -1.0f,
+
 	1.0f, 1.0f, -1.0f,
 	1.0f, -1.0f, -1.0f,
 	-1.0f, -1.0f, -1.0f,
+
 	-1.0f, -1.0f, -1.0f,
 	-1.0f, 1.0f, 1.0f,
 	-1.0f, 1.0f, -1.0f,
+
 	1.0f, -1.0f, 1.0f,
 	-1.0f, -1.0f, 1.0f,
 	-1.0f, -1.0f, -1.0f,
+
 	-1.0f, 1.0f, 1.0f,
 	-1.0f, -1.0f, 1.0f,
 	1.0f, -1.0f, 1.0f,
+
 	1.0f, 1.0f, 1.0f,
 	1.0f, -1.0f, -1.0f,
 	1.0f, 1.0f, -1.0f,
+
 	1.0f, -1.0f, -1.0f,
 	1.0f, 1.0f, 1.0f,
 	1.0f, -1.0f, 1.0f,
+
 	1.0f, 1.0f, 1.0f,
 	1.0f, 1.0f, -1.0f,
 	-1.0f, 1.0f, -1.0f,
+
 	1.0f, 1.0f, 1.0f,
 	-1.0f, 1.0f, -1.0f,
 	-1.0f, 1.0f, 1.0f,
+
 	1.0f, 1.0f, 1.0f,
 	-1.0f, 1.0f, 1.0f,
 	1.0f, -1.0f, 1.0f
+};
+
+const GLuint demo_3_index_data[] = {
+	0, 1, 2,
+	3, 0, 4,
+	5, 0, 6,
+	3, 6, 0,
+	0, 2, 4,
+	5, 1, 0,
+	2, 1, 5,
+	7, 6, 3,
+	6, 7, 5,
+	7, 3, 4,
+	7, 4, 2,
+	7, 2, 5
 };
 
 StateGL demo_3_init(void) {
@@ -93,6 +144,7 @@ StateGL demo_3_init(void) {
 	};
 
 	sgl.vertex_array = init_vao();
+	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
 	sgl.num_vertex_buffers = 2;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
@@ -110,7 +162,7 @@ StateGL demo_3_init(void) {
 		"out vec3 fragmentColor;\n"
 		"uniform mat4 MVP;\n"
 		"void main() {\n"
-			"gl_Position =  MVP * vec4(vertexPosition_modelspace, 1);"
+			"gl_Position = MVP * vec4(vertexPosition_modelspace, 1);"
 			"fragmentColor = vertexColor;\n"
 		"}\n",
 
@@ -134,7 +186,7 @@ StateGL demo_3_init(void) {
 
 void demo_3_drawer(const StateGL sgl) {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 3);
+	bind_vbos_to_vao(sgl.index_buffer, sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 3);
 	draw_triangles(12);
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }

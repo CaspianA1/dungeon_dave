@@ -2,8 +2,7 @@
 #include "demo_4.c"
 
 /*
-- vbo indexing for demo 3, which can later carry on into the other demos
-- create rects through specifying origin vec3 and size vec3
+- create rects through specifying origin vec3 and size vec3, that uses vbo indexing
 - wrap textures around taller and wider rectangles
 */
 
