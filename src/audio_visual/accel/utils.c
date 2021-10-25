@@ -47,7 +47,7 @@ void make_application(void (*const drawer)(const StateGL),
 	printf("vendor = %s\nrenderer = %s\nversion = %s\n---\n",
 		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 
-	loop_application(&screen, drawer, init, deinit, 60);
+	loop_application(&screen, drawer, init, deinit, FPS);
 	deinit_screen(&screen);
 }
 
