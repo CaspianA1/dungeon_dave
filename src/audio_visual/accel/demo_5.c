@@ -50,7 +50,7 @@ void move(const GLuint shader_program) {
 
 	vec3 pos_plus_dir, up;
 	glm_vec3_add(position, direction, pos_plus_dir);
-	glm_cross(right, direction, up);
+	glm_vec3_cross(right, direction, up);
 	demo_2_configurable_matrix_setup(shader_program, position, pos_plus_dir, up);
 
 	last_time = SDL_GetTicks() / 1000.0f;
