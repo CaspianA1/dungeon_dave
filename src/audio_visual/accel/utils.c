@@ -190,8 +190,12 @@ GLuint* init_textures(const int num_textures, ...) {
 
 		//////////
 		glBindTexture(GL_TEXTURE_2D, textures[i]);
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OPENGL_TEX_MIN_FILTER);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
 		#ifdef ENABLE_ANISOTROPIC_FILTERING
 		float aniso = 0.0f;
