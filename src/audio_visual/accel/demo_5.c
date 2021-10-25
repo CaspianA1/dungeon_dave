@@ -36,28 +36,15 @@ void move(const GLuint shader_program) {
 	const float cos_vert = cosf(vert_angle);
 	vec3 direction = {cos_vert * sinf(hori_angle), sinf(vert_angle), cos_vert * cosf(hori_angle)};
 
-	const float hori_angle_minus_half_pi = hori_angle - half_pi;
+	const float hori_angle_minus_half_pi = hori_angle - half_pi, actual_speed = delta_time * move_speed;
 	vec3 right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
-
-	float delta_pos_times_speed = delta_time * move_speed;
-	vec3 pos_delta = {delta_pos_times_speed, delta_pos_times_speed, delta_pos_times_speed};
 
 	static vec3 position = {0.0f, 0.0f, 1.5f};
 
-	// position += pos_delta * direction
-	if (keys[SDL_SCANCODE_W]) glm_vec3_muladd(pos_delta, direction, position);
-
-	if (keys[SDL_SCANCODE_S]) {
-		vec3 neg_direction = {-direction[0], -direction[1], -direction[2]};
-		glm_vec3_muladd(pos_delta, neg_direction, position);
-	}
-
-	if (keys[SDL_SCANCODE_A]) {
-		vec3 neg_right = {-right[0], -right[1], -right[2]};
-		glm_vec3_muladd(pos_delta, neg_right, position);
-	}
-
-	if (keys[SDL_SCANCODE_D]) glm_vec3_muladd(pos_delta, right, position);
+	if (keys[SDL_SCANCODE_W]) glm_vec3_muladds(direction, actual_speed, position);
+	if (keys[SDL_SCANCODE_S]) glm_vec3_muladds(direction, -actual_speed, position);
+	if (keys[SDL_SCANCODE_A]) glm_vec3_muladds(right, -actual_speed, position);
+	if (keys[SDL_SCANCODE_D]) glm_vec3_muladds(right, actual_speed, position);
 
 	//////////
 
