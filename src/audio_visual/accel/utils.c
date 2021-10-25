@@ -120,7 +120,7 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 	return program_id;
 }
 
-// size of component for vbo
+// Size of component for vbo
 void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...) {
 	va_list args;
 	va_start(args, num_vbos);
@@ -132,9 +132,9 @@ void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...) {
 		const int vbo_component_size = va_arg(args, int);
 
 		glVertexAttribPointer(
-			i, vbo_component_size, GL_FLOAT, // attribute i, component size, type
-			GL_FALSE, 0, // not normalized, stride
-			NULL // array buffer offset
+			i, vbo_component_size, GL_FLOAT, // Attribute i, component size, type
+			GL_FALSE, 0, // Not normalized, stride
+			NULL // Array buffer offset
 		);
 	}
 
@@ -152,7 +152,7 @@ GLuint init_vao(void) {
 	return vertex_array;
 }
 
-// buffer data ptr, size of buffer
+// Buffer data ptr, size of buffer
 GLuint* init_vbos(const int num_buffers, ...) {
 	va_list args;
 	va_start(args, num_buffers);

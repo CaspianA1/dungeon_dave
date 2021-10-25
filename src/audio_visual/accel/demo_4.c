@@ -54,8 +54,8 @@ StateGL demo_4_init(void) {
 
 	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "texture_sampler");
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, sgl.textures[0]); // set the current bound texture
-	glUniform1i(shader_texture_sampler, 0); // make the sampler read from texture unit 0
+	glBindTexture(GL_TEXTURE_2D, sgl.textures[0]); // Set the current bound texture
+	glUniform1i(shader_texture_sampler, 0); // Make the sampler read from texture unit 0
 
 	// For textures with an alpha channel, enable this
 	/* glEnable(GL_BLEND);
