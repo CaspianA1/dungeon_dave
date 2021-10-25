@@ -1,6 +1,27 @@
 #include "utils.c"
 #include "demo_3.c"
 
+const char* const demo_4_vertex_shader =
+	"#version 330 core\n"
+	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
+	"layout(location = 1) in vec2 vertexUV;\n"
+	"out vec2 UV;\n"
+	"uniform mat4 MVP;\n"
+	"void main() {\n"
+		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
+		"UV = vertexUV;\n"
+	"}\n",
+
+*const demo_4_fragment_shader =
+	"#version 330 core\n"
+	"in vec2 UV;\n"
+	"out vec3 color;\n" // For textures with an alpha channel, enable 4 channels
+	"uniform sampler2D texture_sampler;\n"
+	"void main() {\n"
+		"color = texture(texture_sampler, UV).rgb;\n"
+	"}\n";
+
+
 StateGL demo_4_init(void) {
 	StateGL sgl;
 
@@ -29,27 +50,7 @@ StateGL demo_4_init(void) {
 		demo_3_vertex_data, sizeof(demo_3_vertex_data),
 		uv_data, sizeof(uv_data));
 
-	const char* const vertex_shader =
-		"#version 330 core\n"
-		"layout(location = 0) in vec3 vertex_pos_model_space;\n"
-		"layout(location = 1) in vec2 vertexUV;\n"
-		"out vec2 UV;\n"
-		"uniform mat4 MVP;\n"
-		"void main() {\n"
-			"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
-			"UV = vertexUV;\n"
-		"}\n",
-
-	*const fragment_shader =
-		"#version 330 core\n"
-		"in vec2 UV;\n"
-		"out vec3 color;\n" // For textures with an alpha channel, enable 4 channels
-		"uniform sampler2D texture_sampler;\n"
-		"void main() {\n"
-			"color = texture(texture_sampler, UV).rgb;\n"
-		"}\n";
-
-	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
+	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "assets/walls/hieroglyph.bmp");
