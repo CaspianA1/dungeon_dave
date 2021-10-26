@@ -21,7 +21,6 @@ const char* const demo_4_vertex_shader =
 		"color = texture(texture_sampler, UV).rgb;\n"
 	"}\n";
 
-
 StateGL demo_4_init(void) {
 	StateGL sgl;
 

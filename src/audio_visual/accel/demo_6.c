@@ -100,7 +100,7 @@ GLfloat* create_plane_mesh(const int num_planes, ...) {
 	GLfloat* const all_vertex_data = malloc(plane_vertex_bytes * num_planes);
 
 	for (int i = 0; i < num_planes; i++) {
-		PlaneDef plane_def = va_arg(args, PlaneDef);
+		const PlaneDef plane_def = va_arg(args, PlaneDef);
 
 		void (*const plane_creator)(PLANE_CREATOR_SIGNATURE) =
 			(plane_def.type == Hori) ? PLANE_CREATOR_NAME(hori) : PLANE_CREATOR_NAME(vert);
@@ -122,7 +122,6 @@ StateGL demo_6_init(void) {
 	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
 	const int size_hori = 50, size_vert = 5, num_planes = 3;
-
 	const ivec3 origin = {1, 1, 1};
 
 	GLfloat
