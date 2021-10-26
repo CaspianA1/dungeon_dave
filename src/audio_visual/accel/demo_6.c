@@ -7,12 +7,31 @@ Functions:
 - send integral points to the gpu
 */
 
-// top_left_corner should be composed of just integers
-void create_rect_plane(vec3 top_left_corner, const int width, const int height,
-	GLfloat** const vertex_data, GLfloat** const uv_data) {
+const size_t
+	plane_vertex_bytes = 18 * sizeof(GLfloat),
+	plane_uv_bytes = 12 * sizeof(GLfloat);
 
-	const size_t vertex_bytes = 18 * sizeof(GLfloat), uv_bytes = 12 * sizeof(GLfloat);
-	*vertex_data = malloc(vertex_bytes), *uv_data = malloc(uv_bytes);
+void create_uv_for_plane(const int width, const int height, GLfloat** const uv_data) {
+	*uv_data = malloc(plane_uv_bytes);
+
+	const GLfloat uv[] = {
+		0.0f, 0.0f,
+		width, 0.0f,
+		0.0f, height,
+
+		0.0f, height,
+		width, height,
+		width, 0.0f
+	};
+
+	memcpy(*uv_data, uv, plane_uv_bytes);
+}
+
+// top_left_corner should be composed of just integers
+void create_vert_rect_plane(const vec3 top_left_corner, const int width, const int height,
+	GLfloat** const vertex_data) {
+
+	*vertex_data = malloc(plane_vertex_bytes);
 
 	const float top_left_x = top_left_corner[0], top_left_y = top_left_corner[1], z = top_left_corner[2];
 	const float top_right_x = top_left_x + width, bottom_left_y = top_left_y - height;
@@ -25,20 +44,18 @@ void create_rect_plane(vec3 top_left_corner, const int width, const int height,
 		top_left_x, bottom_left_y, z,
 		top_right_x, bottom_left_y, z,
 		top_right_x, top_left_y, z
-	},
-
-	uv[] = {
-		0.0f, 0.0f,
-		width, 0.0f,
-		0.0f, height,
-
-		0.0f, height,
-		width, height,
-		width, 0.0f
 	};
 
-	memcpy(*vertex_data, vertices, vertex_bytes);
-	memcpy(*uv_data, uv, uv_bytes);
+	memcpy(*vertex_data, vertices, plane_vertex_bytes);
+}
+
+void create_hori_rect_plane(const vec3 top_left_corner, const int width, const int height,
+	GLfloat** const vertex_data) {
+
+	(void) top_left_corner;
+	(void) width;
+	(void) height;
+	(void) vertex_data;
 }
 
 void create_cuboid(vec3 origin, vec3 size);
@@ -51,12 +68,14 @@ StateGL demo_6_init(void) {
 
 	GLfloat *flat_square_vertices, *uv_data;
 	vec3 top_left_corner = {3.0f, 1.0f, -1.0f};
-	create_rect_plane(top_left_corner, 2, 3, &flat_square_vertices, &uv_data);
+	const int width = 2, height = 3;
+	create_vert_rect_plane(top_left_corner, width, height, &flat_square_vertices);
+	create_uv_for_plane(width, height, &uv_data);
 
 	sgl.num_vertex_buffers = 2;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
-		flat_square_vertices, 18 * sizeof(GLfloat),
-		uv_data, 12 * sizeof(GLfloat));
+		flat_square_vertices, plane_vertex_bytes,
+		uv_data, plane_uv_bytes);
 	
 	free(flat_square_vertices);
 	free(uv_data);
