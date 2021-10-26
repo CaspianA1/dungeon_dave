@@ -19,8 +19,7 @@ void move(const GLuint shader_program) {
 	const float
 		move_speed = 3.0f,
 		look_speed = 0.08f,
-		half_pi = (float) M_PI / 2.0f,
-		max_look_up_angle = (float) M_PI * 2.0f / 3.0f;
+		half_pi = (float) M_PI / 2.0f;
 
 	int mouse_dx, mouse_dy;
 	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
@@ -29,7 +28,7 @@ void move(const GLuint shader_program) {
 	hori_angle += look_speed * delta_time * -mouse_dx;
 	vert_angle += look_speed * delta_time * -mouse_dy;
 
-	if (vert_angle > max_look_up_angle) vert_angle = max_look_up_angle;
+	if (vert_angle > half_pi) vert_angle = half_pi;
 	else if (vert_angle < -half_pi) vert_angle = -half_pi;
 
 	const float cos_vert = cosf(vert_angle);
