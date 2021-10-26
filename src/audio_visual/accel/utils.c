@@ -241,7 +241,9 @@ void select_texture_for_use(const GLuint texture, const GLuint shader_program) {
 void enable_all_culling(void) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	#ifndef DEMO_6
 	glEnable(GL_CULL_FACE);
+	#endif
 }
 
 void deinit_demo_vars(const StateGL sgl) {

@@ -1,13 +1,12 @@
 #include "demo_5.c"
 
 /*
-Functions to make:
-- void create_cuboid(const vec3 origin, const vec3 size);
-- GLfloat* create_hori_plane(const vec3 top_left_corner, const int width, const int height);
-- GLfloat* join_plane_vertices(const GLfloat* const plane_1, const GLfloat* const plane_2);
-
 Other stuff:
-- send integral points to the gpu + plane functions top left corner -> just ints
+- vert planes facing the other direction
+- repeat uv data after one plane drawn, or shader determines uv from table
+- send integral points to the gpu
+- one big mesh, with a texture lookup system, or separate meshes + separate draw calls, with one texture per mesh?
+- but first, worry about 1 texture working for all meshes
 */
 
 /*
@@ -17,11 +16,13 @@ Other stuff:
 2/
 */
 
-enum {plane_vertex_floats = 18, plane_uv_floats = 12};
+enum {plane_vertex_floats = 18, plane_uv_floats = 36}; // 12
 
 const size_t
 	plane_vertex_bytes = plane_vertex_floats * sizeof(GLfloat),
 	plane_uv_bytes = plane_uv_floats * sizeof(GLfloat);
+
+//////////
 
 GLfloat* create_uv_for_plane(const int width, const int height) {
 	const GLfloat uv[plane_uv_floats] = {
@@ -39,8 +40,12 @@ GLfloat* create_uv_for_plane(const int width, const int height) {
 	return uv_data;
 }
 
-#define PLANE_CREATOR_FUNCTION(type) GLfloat* create_##type##_plane(const vec3 top_left_corner,\
-	const int size_hori, const int size_vert)
+#define PLANE_CREATOR_NAME(type) create_##type##_plane
+
+#define PLANE_CREATOR_SIGNATURE const ivec3 top_left_corner, const int size_hori,\
+	const int size_vert, GLfloat* const vertex_dest
+
+#define PLANE_CREATOR_FUNCTION(type) void PLANE_CREATOR_NAME(type)(PLANE_CREATOR_SIGNATURE)
 
 PLANE_CREATOR_FUNCTION(vert) {
 	const float left_x = top_left_corner[0], top_y = top_left_corner[1], z = top_left_corner[2];
@@ -53,12 +58,10 @@ PLANE_CREATOR_FUNCTION(vert) {
 
 		left_x, bottom_y, z,
 		right_x, bottom_y, z,
-		right_x, top_y, z
+		right_x, top_y, z,
 	};
 
-	GLfloat* const vertex_data = malloc(plane_vertex_bytes);
-	memcpy(vertex_data, vertices, plane_vertex_bytes);
-	return vertex_data;
+	memcpy(vertex_dest, vertices, plane_vertex_bytes);
 }
 
 PLANE_CREATOR_FUNCTION(hori) {
@@ -75,10 +78,42 @@ PLANE_CREATOR_FUNCTION(hori) {
 		right_x, height, depth_origin
 	};
 
-	GLfloat* const vertex_data = malloc(plane_vertex_bytes);
-	memcpy(vertex_data, vertices, plane_vertex_bytes);
-	return vertex_data;
+	memcpy(vertex_dest, vertices, plane_vertex_bytes);
 }
+
+//////////
+
+typedef enum {
+	Hori, Vert
+} PlaneType;
+
+typedef struct {
+	const PlaneType type;
+	const ivec3 top_left_corner;
+	const int size_hori, size_vert;
+} PlaneDef;
+
+// Plane type, top left corner (an ivec3), size hori, size vert
+GLfloat* create_plane_mesh(const int num_planes, ...) {
+	va_list args;
+	va_start(args, num_planes);
+	GLfloat* const all_vertex_data = malloc(plane_vertex_bytes * num_planes);
+
+	for (int i = 0; i < num_planes; i++) {
+		PlaneDef plane_def = va_arg(args, PlaneDef);
+
+		void (*const plane_creator)(PLANE_CREATOR_SIGNATURE) =
+			(plane_def.type == Hori) ? PLANE_CREATOR_NAME(hori) : PLANE_CREATOR_NAME(vert);
+
+		plane_creator(plane_def.top_left_corner, plane_def.size_hori,
+			plane_def.size_vert, all_vertex_data + i * plane_vertex_floats);
+	}
+
+	va_end(args);
+	return all_vertex_data;
+}
+
+//////////
 
 StateGL demo_6_init(void) {
 	StateGL sgl;
@@ -86,26 +121,34 @@ StateGL demo_6_init(void) {
 	sgl.vertex_array = init_vao();
 	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
-	const vec3 top_left_corner = {-5.0f, -2.0f, 1.0f};
-	const int size_hori = 2, size_vert = 3;
+	const int size_hori = 50, size_vert = 5, num_planes = 3;
+
+	const ivec3 origin = {1, 1, 1};
 
 	GLfloat
-		*const plane_vertices = create_hori_plane(top_left_corner, size_hori, size_vert),
+		*const plane_vertices = create_plane_mesh(num_planes,
+			(PlaneDef) {Hori, {origin[0], origin[1], origin[2]}, size_hori, size_vert},
+			(PlaneDef) {Vert, {origin[0], size_vert + origin[1], origin[2]}, size_hori, size_vert},
+			(PlaneDef) {Vert, {origin[0], origin[1] + size_vert, size_vert + origin[2]}, size_hori, size_vert}
+		),
+
 		*const uv_data = create_uv_for_plane(size_hori, size_vert);
 
 	sgl.num_vertex_buffers = 2;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
-		plane_vertices, plane_vertex_bytes,
+		plane_vertices, num_planes * plane_vertex_bytes,
 		uv_data, plane_uv_bytes);
-
+	
 	free(plane_vertices);
 	free(uv_data);
-	
+
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "assets/walls/saqqara.bmp");
+	sgl.textures = init_textures(sgl.num_textures, "assets/walls/dune.bmp");
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
+
+	enable_all_culling();
 	
 	return sgl;
 }

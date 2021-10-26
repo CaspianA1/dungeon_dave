@@ -514,3 +514,26 @@ const GLfloat demo_3_vertex_data[cube_num_points] = {
 		*/
 
 /////
+
+	/*
+	GLfloat
+		*const plane_vertices = create_vert_plane(top_left_corner, size_hori, size_vert),
+		*const uv_data = create_uv_for_plane(size_hori, size_vert);
+
+	sgl.num_vertex_buffers = 2;
+	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
+		plane_vertices, plane_vertex_bytes,
+		uv_data, plane_uv_bytes);
+
+	free(plane_vertices);
+	free(uv_data);
+	*/
+
+/////
+
+Functions to make:
+- void create_cuboid(const vec3 origin, const vec3 size);
+actually, instead of create_cuboid, make a make_planes fn (since sector meshes will not exactly be rectangles)
+- GLfloat* join_plane_vertices(const GLfloat* const plane_1, const GLfloat* const plane_2);
+
+/////
