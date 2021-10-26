@@ -53,7 +53,8 @@ void move(const GLuint shader_program) {
 	glm_vec3_cross(right, direction, up);
 	demo_2_configurable_matrix_setup(shader_program, position, pos_plus_dir, up);
 
-	printf("position = {%lf, %lf, %lf}\n", (double) position[0], (double) position[1], (double) position[2]);
+	if (keys[KEY_PRINT_POSITION])
+		printf("position = {%lf, %lf, %lf}\n", (double) position[0], (double) position[1], (double) position[2]);
 
 	last_time = SDL_GetTicks() / 1000.0f;
 }

@@ -10,10 +10,13 @@
 #define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
+
 #define SCR_W 800
 #define SCR_H 600
 #define FPS 120
 #define FOV 90.0f
+
+#define KEY_PRINT_POSITION SDL_SCANCODE_C
 
 #define SDL_PIXEL_FORMAT SDL_PIXELFORMAT_BGRA32
 #define OPENGL_INPUT_PIXEL_FORMAT GL_BGRA
@@ -67,6 +70,8 @@ GLuint init_vao(void);
 GLuint init_ibo(const GLuint* const buffer_data_ptr, const int buffer_size);
 GLuint* init_vbos(const int num_buffers, ...);
 GLuint* init_textures(const int num_textures, ...);
+
+void select_texture_for_use(const GLuint texture, const GLuint shader_program);
 void enable_all_culling(void);
 
 void deinit_demo_vars(const StateGL sgl); // Deletes shader program, vbos, and vao

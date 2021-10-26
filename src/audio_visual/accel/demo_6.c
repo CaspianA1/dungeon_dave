@@ -83,12 +83,8 @@ StateGL demo_6_init(void) {
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "assets/walls/saqqara.bmp");
-
-	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "texture_sampler");
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, sgl.textures[0]); // Set the current bound texture
-	glUniform1i(shader_texture_sampler, 0); // Make the sampler read from texture unit 0
+	sgl.textures = init_textures(sgl.num_textures, "assets/walls/cobblestone_3.bmp");
+	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 	
 	return sgl;
 }

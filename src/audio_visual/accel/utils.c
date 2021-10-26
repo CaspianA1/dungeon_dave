@@ -231,6 +231,13 @@ GLuint* init_textures(const int num_textures, ...) {
 	return textures;
 }
 
+void select_texture_for_use(const GLuint texture, const GLuint shader_program) {
+	const GLuint shader_texture_sampler = glGetUniformLocation(shader_program, "texture_sampler");
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture); // Set the current bound texture
+	glUniform1i(shader_texture_sampler, 0); // Make the sampler read from texture unit 0
+}
+
 void enable_all_culling(void) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);

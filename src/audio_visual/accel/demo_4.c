@@ -54,11 +54,7 @@ StateGL demo_4_init(void) {
 
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "assets/walls/hieroglyph.bmp");
-
-	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "texture_sampler");
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, sgl.textures[0]); // Set the current bound texture
-	glUniform1i(shader_texture_sampler, 0); // Make the sampler read from texture unit 0
+	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	// For textures with an alpha channel, enable this
 	/* glEnable(GL_BLEND);
