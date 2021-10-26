@@ -3,7 +3,7 @@
 /*
 Other stuff:
 - vert planes facing the other direction
-- repeat uv data after one plane drawn, or shader determines uv from table
+- repeat uv data after one plane drawn, or shader determines uv from table: every 2 triangles, start from 0 again
 - send integral points to the gpu
 - one big mesh, with a texture lookup system, or separate meshes + separate draw calls, with one texture per mesh?
 - but first, worry about 1 texture working for all meshes
