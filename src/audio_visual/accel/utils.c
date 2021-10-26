@@ -120,8 +120,6 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 	return program_id;
 }
 
-#define USE_IBO
-
 // Size of component for vbo
 void bind_vbos_to_vao(const GLuint ibo, const GLuint* const vbos, const int num_vbos, ...) {
 	va_list args;
