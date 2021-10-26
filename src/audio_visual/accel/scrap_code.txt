@@ -421,3 +421,70 @@ const GLfloat demo_3_vertex_data[cube_num_points] = {
 	*/
 
 /////
+
+
+		/*
+		top_left_x, 0.0f, z,
+		top_left_x + width, 0.0f, z,
+		top_left_x, -height, z,
+
+		top_left_x, -height, z,
+		top_left_x + width, -height, z,
+		top_left_x + width, 0.0f, z
+		*/
+
+		/*
+		0.0f, 0.0f, z,
+		width, 0.0f, z,
+		0.0f, -height, z,
+
+		0.0f, -height, z,
+		width, -height, z,
+		width, 0.0f, z
+		*/
+
+		/*
+		-s, s, 0.0f,
+		s, s, 0.0f,
+		-s, -s, 0.0f,
+
+		-s, -s, 0.0f,
+		s, -s, 0.0f,
+		s, s, 0.0f
+		*/
+
+/////
+
+		/*
+		top_left_x, top_left_y, z,
+		top_left_x + width, top_left_y, z,
+		top_left_x, top_left_y - height, z,
+
+		top_left_x, top_left_y - height, z,
+		top_left_x + width, top_left_y - height, z,
+		top_left_x + width, top_left_y, z
+		*/
+	
+/////
+
+	(void) top_left_corner;
+	// const float half_width = width / 2.0f, half_height = height / 2.0f;
+
+	/*
+	1____0
+	|  . |
+	2____|
+
+
+	0___1
+	|   /
+	|  /
+	| /
+	2/
+	*/
+
+	/*
+	Top left corner at {0, 0}
+	*/
+
+/////
