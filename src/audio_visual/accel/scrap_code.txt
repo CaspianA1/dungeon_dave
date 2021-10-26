@@ -488,3 +488,29 @@ const GLfloat demo_3_vertex_data[cube_num_points] = {
 	*/
 
 /////
+
+		/*
+		0.0f, 0.0f, far,
+		1.0f, 0.0f, far,
+		0.0f, 0.0f, near
+		*/
+
+		/*
+		-s, s, 0.0f,
+		s, s, 0.0f,
+		-s, -s, 0.0f,
+		*/
+
+		/*
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f
+		*/
+
+		/*
+		0.0f, height, far,
+		0.0f, height, near,
+		1.0f, height, far
+		*/
+
+/////

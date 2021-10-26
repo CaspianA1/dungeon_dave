@@ -10,6 +10,13 @@ Other stuff:
 - send integral points to the gpu + plane functions top left corner -> just ints
 */
 
+/*
+0__1
+|  /
+| /
+2/
+*/
+
 enum {plane_vertex_floats = 18, plane_uv_floats = 12};
 
 const size_t
@@ -33,20 +40,39 @@ GLfloat* create_uv_for_plane(const int width, const int height) {
 }
 
 #define PLANE_CREATOR_FUNCTION(type) GLfloat* create_##type##_plane(const vec3 top_left_corner,\
-	const int width, const int height)
+	const int size_hori, const int size_vert)
 
 PLANE_CREATOR_FUNCTION(vert) {
-	const float top_left_x = top_left_corner[0], top_left_y = top_left_corner[1], z = top_left_corner[2];
-	const float top_right_x = top_left_x + width, bottom_left_y = top_left_y - height;
+	const float left_x = top_left_corner[0], top_y = top_left_corner[1], z = top_left_corner[2];
+	const float right_x = left_x + size_hori, bottom_y = top_y - size_vert;
 
 	const GLfloat vertices[plane_vertex_floats] = {
-		top_left_x, top_left_y, z,
-		top_right_x, top_left_y, z,
-		top_left_x, bottom_left_y, z,
+		left_x, top_y, z,
+		right_x, top_y, z,
+		left_x, bottom_y, z,
 
-		top_left_x, bottom_left_y, z,
-		top_right_x, bottom_left_y, z,
-		top_right_x, top_left_y, z
+		left_x, bottom_y, z,
+		right_x, bottom_y, z,
+		right_x, top_y, z
+	};
+
+	GLfloat* const vertex_data = malloc(plane_vertex_bytes);
+	memcpy(vertex_data, vertices, plane_vertex_bytes);
+	return vertex_data;
+}
+
+PLANE_CREATOR_FUNCTION(hori) {
+	const float left_x = top_left_corner[0], height = top_left_corner[1], depth_origin = top_left_corner[2];
+	const float right_x = left_x + size_hori, largest_depth = depth_origin + size_vert;
+
+	const GLfloat vertices[plane_vertex_floats] = {
+		left_x, height, depth_origin,
+		right_x, height, depth_origin,
+		left_x, height, largest_depth,
+
+		left_x, height, largest_depth,
+		right_x, height, largest_depth,
+		right_x, height, depth_origin
 	};
 
 	GLfloat* const vertex_data = malloc(plane_vertex_bytes);
@@ -60,25 +86,25 @@ StateGL demo_6_init(void) {
 	sgl.vertex_array = init_vao();
 	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
-	vec3 v_top_left_corner = {3.0f, 3.0f, -1.0f};
-	const int v_width = 2, v_height = 3;
+	const vec3 top_left_corner = {-5.0f, -2.0f, 1.0f};
+	const int size_hori = 2, size_vert = 3;
 
 	GLfloat
-		*const flat_square_vertices = create_vert_plane(v_top_left_corner, v_width, v_height),
-		*const uv_data = create_uv_for_plane(v_width, v_height);
+		*const plane_vertices = create_hori_plane(top_left_corner, size_hori, size_vert),
+		*const uv_data = create_uv_for_plane(size_hori, size_vert);
 
 	sgl.num_vertex_buffers = 2;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
-		flat_square_vertices, plane_vertex_bytes,
+		plane_vertices, plane_vertex_bytes,
 		uv_data, plane_uv_bytes);
-	
-	free(flat_square_vertices);
+
+	free(plane_vertices);
 	free(uv_data);
 	
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "assets/walls/cobblestone_3.bmp");
+	sgl.textures = init_textures(sgl.num_textures, "assets/walls/saqqara.bmp");
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 	
 	return sgl;

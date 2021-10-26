@@ -13,7 +13,7 @@
 
 #define SCR_W 800
 #define SCR_H 600
-#define FPS 120
+#define FPS 60
 #define FOV 90.0f
 
 #define KEY_PRINT_POSITION SDL_SCANCODE_C
