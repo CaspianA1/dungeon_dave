@@ -10,7 +10,7 @@ Other stuff:
 - indexed rendering after figuring out textures
 
 Passing in rect sizes to shader:
-- a uniform var rectSizes, with some variable size
+- a uniform var rectSizes, with a size of all of the rects in scene (= num triangles in scene / 2)
 - pass those as uniforms into the vertex shader
 - then, make uv_for_rects non-const, and then fetch the right tex coordinates
 */
