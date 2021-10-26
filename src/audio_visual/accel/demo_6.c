@@ -67,7 +67,7 @@ StateGL demo_6_init(void) {
 	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
 	GLfloat *flat_square_vertices, *uv_data;
-	vec3 top_left_corner = {3.0f, 1.0f, -1.0f};
+	vec3 top_left_corner = {3.0f, 3.0f, -1.0f};
 	const int width = 2, height = 3;
 	create_vert_rect_plane(top_left_corner, width, height, &flat_square_vertices);
 	create_uv_for_plane(width, height, &uv_data);

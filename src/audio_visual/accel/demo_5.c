@@ -44,6 +44,7 @@ void move(const GLuint shader_program) {
 	if (keys[SDL_SCANCODE_S]) glm_vec3_muladds(direction, -actual_speed, position);
 	if (keys[SDL_SCANCODE_A]) glm_vec3_muladds(right, -actual_speed, position);
 	if (keys[SDL_SCANCODE_D]) glm_vec3_muladds(right, actual_speed, position);
+	// if (position[1] < 0.0f) position[1] = 0.0f;
 
 	//////////
 
