@@ -3,7 +3,7 @@
 /*
 Other stuff:
 - vert planes facing the other direction
-- repeat uv data after one plane drawn, or shader determines uv from table: every 2 triangles, start from 0 again
+- pass triangle size to shader for differently sized objects
 - send integral points to the gpu
 - one big mesh, with a texture lookup system, or separate meshes + separate draw calls, with one texture per mesh?
 - but first, worry about 1 texture working for all meshes
@@ -16,7 +16,7 @@ Other stuff:
 2/
 */
 
-enum {plane_vertex_floats = 18, plane_uv_floats = 36}; // 12
+enum {plane_vertex_floats = 18, plane_uv_floats = 12};
 
 const size_t
 	plane_vertex_bytes = plane_vertex_floats * sizeof(GLfloat),
@@ -115,6 +115,29 @@ GLfloat* create_plane_mesh(const int num_planes, ...) {
 
 //////////
 
+const char* const demo_6_vertex_shader =
+	"#version 330 core\n"
+	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
+	"layout(location = 1) in vec2 vertexUV;\n"
+	"out vec2 UV;\n"
+	"uniform mat4 MVP;\n"
+
+	"const float w = 50.0f, h = 5.0f;\n"
+
+	"const vec2 uv_for_rects[6] = vec2[6] (\n"
+		"vec2(0.0f, 0.0f), vec2(w, 0.0f), vec2(0.0f, h),\n"
+		"vec2(0.0f, h), vec2(w, h), vec2(w, 0.0f)\n"
+	");\n"
+
+	"void main() {\n"
+		""
+		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
+		// "UV = vertexUV;\n"
+		"UV = uv_for_rects[gl_VertexID % 6];\n"
+	"}\n";
+
+//////////
+
 StateGL demo_6_init(void) {
 	StateGL sgl;
 
@@ -129,19 +152,19 @@ StateGL demo_6_init(void) {
 			(PlaneDef) {Hori, {origin[0], origin[1], origin[2]}, size_hori, size_vert},
 			(PlaneDef) {Vert, {origin[0], size_vert + origin[1], origin[2]}, size_hori, size_vert},
 			(PlaneDef) {Vert, {origin[0], origin[1] + size_vert, size_vert + origin[2]}, size_hori, size_vert}
-		),
+		);
 
-		*const uv_data = create_uv_for_plane(size_hori, size_vert);
+		// *const uv_data = create_uv_for_plane(size_hori, size_vert);
 
-	sgl.num_vertex_buffers = 2;
+	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
-		plane_vertices, num_planes * plane_vertex_bytes,
-		uv_data, plane_uv_bytes);
+		plane_vertices, num_planes * plane_vertex_bytes);
+		// uv_data, plane_uv_bytes);
 	
 	free(plane_vertices);
-	free(uv_data);
+	// free(uv_data);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	sgl.shader_program = init_shader_program(demo_6_vertex_shader, demo_4_fragment_shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "assets/walls/dune.bmp");
