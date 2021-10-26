@@ -7,6 +7,12 @@ Other stuff:
 - send integral points to the gpu
 - one big mesh, with a texture lookup system, or separate meshes + separate draw calls, with one texture per mesh?
 - but first, worry about 1 texture working for all meshes
+- indexed rendering after figuring out textures
+
+Passing in rect sizes to shader:
+- a uniform var rectSizes, with some variable size
+- pass those as uniforms into the vertex shader
+- then, make uv_for_rects non-const, and then fetch the right tex coordinates
 */
 
 /*
@@ -118,7 +124,7 @@ GLfloat* create_plane_mesh(const int num_planes, ...) {
 const char* const demo_6_vertex_shader =
 	"#version 330 core\n"
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
-	"layout(location = 1) in vec2 vertexUV;\n"
+	// "layout(location = 1) in vec2 vertexUV;\n"
 	"out vec2 UV;\n"
 	"uniform mat4 MVP;\n"
 
