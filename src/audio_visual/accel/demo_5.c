@@ -7,7 +7,7 @@
 */
 
 void move(const GLuint shader_program) {
-	static float hori_angle = (float) M_PI, vert_angle = 0.0f, last_time;
+	static GLfloat hori_angle = (GLfloat) M_PI, vert_angle = 0.0f, last_time;
 
 	static byte first_call = 1;
 	if (first_call) {
@@ -16,25 +16,25 @@ void move(const GLuint shader_program) {
 		return;
 	}
 
-	const float
+	const GLfloat
 		move_speed = 3.0f,
 		look_speed = 0.08f,
-		half_pi = (float) M_PI / 2.0f;
+		half_pi = (GLfloat) M_PI / 2.0f;
 
 	int mouse_dx, mouse_dy;
 	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
 
-	const float delta_time = (SDL_GetTicks() / 1000.0f) - last_time;
+	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time;
 	hori_angle += look_speed * delta_time * -mouse_dx;
 	vert_angle += look_speed * delta_time * -mouse_dy;
 
 	if (vert_angle > half_pi) vert_angle = half_pi;
 	else if (vert_angle < -half_pi) vert_angle = -half_pi;
 
-	const float cos_vert = cosf(vert_angle);
+	const GLfloat cos_vert = cosf(vert_angle);
 	vec3 direction = {cos_vert * sinf(hori_angle), sinf(vert_angle), cos_vert * cosf(hori_angle)};
 
-	const float hori_angle_minus_half_pi = hori_angle - half_pi, actual_speed = delta_time * move_speed;
+	const GLfloat hori_angle_minus_half_pi = hori_angle - half_pi, actual_speed = delta_time * move_speed;
 	vec3 right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
 
 	static vec3 position = {1.5, 1.5, 3.5};

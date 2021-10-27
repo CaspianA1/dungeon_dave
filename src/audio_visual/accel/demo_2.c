@@ -1,20 +1,20 @@
 #include "utils.c"
 #include "demo_1.c"
 
-static inline float to_radians(const float degrees) {
-	return degrees * (float) M_PI / 180.0f;
+static inline GLfloat to_radians(const GLfloat degrees) {
+	return degrees * (GLfloat) M_PI / 180.0f;
 }
 
 void demo_2_configurable_matrix_setup(const GLuint shader_program,
 	vec3 pos, vec3 rel_origin, vec3 up) {
 
-	const float
+	const GLfloat
 		near_clip_plane = 0.1f,
 		far_clip_plane = 100.0f;
 
 	mat4 projection, view, model = GLM_MAT4_IDENTITY_INIT, view_times_model, model_view_projection;
 
-	glm_perspective(to_radians(FOV), (float) SCR_W / SCR_H, near_clip_plane, far_clip_plane, projection);
+	glm_perspective(to_radians(FOV), (GLfloat) SCR_W / SCR_H, near_clip_plane, far_clip_plane, projection);
 	glm_lookat(pos, rel_origin, up, view);
 	glm_mul(view, model, view_times_model);
 	glm_mul(projection, view_times_model, model_view_projection);

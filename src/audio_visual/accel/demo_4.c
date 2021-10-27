@@ -73,7 +73,7 @@ void demo_4_core_drawer(const StateGL sgl) {
 
 void demo_4_drawer(const StateGL sgl) {
 	static vec3 camera_pos = {2.0f, 2.0f, 0.0f};
-	const double step = 0.05;
+	const GLfloat step = 0.05;
 	if (keys[SDL_SCANCODE_W]) camera_pos[0] += step;
 	if (keys[SDL_SCANCODE_S]) camera_pos[0] -= step;
 	if (keys[SDL_SCANCODE_1]) camera_pos[1] += step;

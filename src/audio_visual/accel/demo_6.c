@@ -55,8 +55,8 @@ GLfloat* create_uv_for_plane(const int width, const int height) {
 #define PLANE_CREATOR_FUNCTION(type) void PLANE_CREATOR_NAME(type)(PLANE_CREATOR_SIGNATURE)
 
 PLANE_CREATOR_FUNCTION(vert) {
-	const float left_x = top_left_corner[0], top_y = top_left_corner[1], z = top_left_corner[2];
-	const float right_x = left_x + size_hori, bottom_y = top_y - size_vert;
+	const GLfloat left_x = top_left_corner[0], top_y = top_left_corner[1], z = top_left_corner[2];
+	const GLfloat right_x = left_x + size_hori, bottom_y = top_y - size_vert;
 
 	const GLfloat vertices[plane_vertex_floats] = {
 		left_x, top_y, z,
@@ -72,8 +72,8 @@ PLANE_CREATOR_FUNCTION(vert) {
 }
 
 PLANE_CREATOR_FUNCTION(hori) {
-	const float left_x = top_left_corner[0], height = top_left_corner[1], depth_origin = top_left_corner[2];
-	const float right_x = left_x + size_hori, largest_depth = depth_origin + size_vert;
+	const GLfloat left_x = top_left_corner[0], height = top_left_corner[1], depth_origin = top_left_corner[2];
+	const GLfloat right_x = left_x + size_hori, largest_depth = depth_origin + size_vert;
 
 	const GLfloat vertices[plane_vertex_floats] = {
 		left_x, height, depth_origin,
@@ -125,6 +125,7 @@ GLfloat* create_plane_mesh(const int num_planes, ...) {
 const char* const demo_6_vertex_shader =
 	"#version 330 core\n"
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
+	"layout(location = 1) in vec2 curr_plane_size;"
 	// "layout(location = 1) in vec2 vertexUV;\n"
 	"uniform mat4 MVP;\n"
 	"out vec2 UV;\n"
@@ -154,6 +155,8 @@ StateGL demo_6_init(void) {
 	const int size_hori = 50, size_vert = 5, num_planes = 3;
 	const ivec3 origin = {1, 1, 1};
 
+	GLfloat plane_sizes[6] = {size_hori, size_vert, size_hori, size_vert, size_hori, size_vert};
+
 	GLfloat
 		*const plane_vertices = create_plane_mesh(num_planes,
 			(PlaneDef) {Hori, {origin[0], origin[1], origin[2]}, size_hori, size_vert},
@@ -163,9 +166,10 @@ StateGL demo_6_init(void) {
 
 		// *const uv_data = create_uv_for_plane(size_hori, size_vert);
 
-	sgl.num_vertex_buffers = 1;
+	sgl.num_vertex_buffers = 2;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
-		plane_vertices, num_planes * plane_vertex_bytes);
+		plane_vertices, num_planes * plane_vertex_bytes,
+		plane_sizes, 6 * sizeof(GLfloat));
 		// uv_data, plane_uv_bytes);
 	
 	free(plane_vertices);
