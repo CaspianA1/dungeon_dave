@@ -2,12 +2,12 @@
 
 /*
 To figure out:
-- vert planes facing the other direction
-- create shader as format string w num planes
-- diff textures for diff planes - a PlaneDef struct
+- create shader as format string w num planes, if shader kept
+- diff textures for diff planes
 - indexed rendering
 - eliminate repeated corners, so no GL_TRIANGLES
 - then, get UVs not from shader, after that has been done (pack UVs next to triangle data in vbo)
+- demo 7
 */
 
 /*
@@ -29,7 +29,7 @@ const size_t plane_vertex_bytes = plane_vertex_floats * sizeof(GLfloat);
 
 #define PLANE_CREATOR_FUNCTION(type) void PLANE_CREATOR_NAME(type)(PLANE_CREATOR_SIGNATURE)
 
-PLANE_CREATOR_FUNCTION(vert) {
+PLANE_CREATOR_FUNCTION(vert_1) { // Faces towards north and south
 	const GLfloat left_x = top_left_corner[0], top_y = top_left_corner[1], z = top_left_corner[2];
 	const GLfloat right_x = left_x + size_hori, bottom_y = top_y - size_vert;
 
@@ -41,6 +41,23 @@ PLANE_CREATOR_FUNCTION(vert) {
 		left_x, bottom_y, z,
 		right_x, bottom_y, z,
 		right_x, top_y, z,
+	};
+
+	memcpy(vertex_dest, vertices, plane_vertex_bytes);
+}
+
+PLANE_CREATOR_FUNCTION(vert_2) { // Faces towards east and west
+	const float x = top_left_corner[0], top_y = top_left_corner[1], far_z = top_left_corner[2];
+	const float bottom_y = top_y - size_vert, near_z = far_z + size_hori;
+
+	const GLfloat vertices[plane_vertex_floats] = {
+		x, top_y, far_z,
+		x, top_y, near_z,
+		x, bottom_y, far_z,
+
+		x, bottom_y, far_z,
+		x, bottom_y, near_z,
+		x, top_y, near_z
 	};
 
 	memcpy(vertex_dest, vertices, plane_vertex_bytes);
@@ -66,7 +83,7 @@ PLANE_CREATOR_FUNCTION(hori) {
 //////////
 
 typedef enum {
-	Hori, Vert
+	Hori, Vert_1, Vert_2
 } PlaneType;
 
 typedef struct {
@@ -84,9 +101,16 @@ GLfloat* create_plane_mesh(const int num_planes, ...) {
 	for (int i = 0; i < num_planes; i++) {
 		const PlaneDef plane_def = va_arg(args, PlaneDef);
 
-		void (*const plane_creator)(PLANE_CREATOR_SIGNATURE) =
-			(plane_def.type == Hori) ? PLANE_CREATOR_NAME(hori) : PLANE_CREATOR_NAME(vert);
+		void (*plane_creator)(PLANE_CREATOR_SIGNATURE);
 
+		switch (plane_def.type) {
+			case Hori:
+				plane_creator = PLANE_CREATOR_NAME(hori); break;
+			case Vert_1:
+				plane_creator = PLANE_CREATOR_NAME(vert_1); break;
+			case Vert_2:
+				plane_creator = PLANE_CREATOR_NAME(vert_2); break;
+		}
 		plane_creator(plane_def.top_left_corner, plane_def.size_hori,
 			plane_def.size_vert, all_vertex_data + i * plane_vertex_floats);
 	}
@@ -101,7 +125,7 @@ const char* const demo_6_vertex_shader =
 	"#version 330 core\n"
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 
-	"uniform vec2 plane_sizes[3];\n"
+	"uniform vec2 plane_sizes[4];\n"
 
 	"uniform mat4 MVP;\n"
 	"out vec2 UV;\n"
@@ -127,19 +151,20 @@ StateGL demo_6_init(void) {
 	sgl.vertex_array = init_vao();
 	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
-	enum {size_hori = 8, size_vert = 5, num_planes = 3};
+	enum {size_hori = 8, size_vert = 5, num_planes = 4};
 	const ivec3 origin = {1, 1, 1};
-	enum {size_hori_2 = 2, size_vert_2 = 3};
+	enum {size_hori_2 = 2, size_vert_2 = 3, size_hori_3 = 5};
 
 	GLfloat plane_sizes[num_planes * 2] = {
-		size_hori_2, size_vert_2, size_hori, size_vert, size_hori, size_vert
+		size_hori_2, size_vert_2, size_hori, size_vert, size_hori, size_vert, size_hori_3, size_vert
 	};
 
 	GLfloat
 		*const plane_vertices = create_plane_mesh(num_planes,
 			(PlaneDef) {Hori, {origin[0], origin[1], origin[2]}, size_hori_2, size_vert_2},
-			(PlaneDef) {Vert, {origin[0], size_vert + origin[1], origin[2]}, size_hori, size_vert},
-			(PlaneDef) {Vert, {origin[0], origin[1] + size_vert, size_vert + origin[2]}, size_hori, size_vert}
+			(PlaneDef) {Vert_1, {origin[0], size_vert + origin[1], origin[2]}, size_hori, size_vert},
+			(PlaneDef) {Vert_1, {origin[0], origin[1] + size_vert, size_vert + origin[2]}, size_hori, size_vert},
+			(PlaneDef) {Vert_2, {9.0f, 6.0f, 1.0f}, size_hori_3, size_vert}
 		);
 
 	sgl.num_vertex_buffers = 1;
