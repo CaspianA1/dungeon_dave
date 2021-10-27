@@ -126,21 +126,20 @@ const char* const demo_6_vertex_shader =
 	"#version 330 core\n"
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 	// "layout(location = 1) in vec2 vertexUV;\n"
-	"out vec2 UV;\n"
 	"uniform mat4 MVP;\n"
+	"out vec2 UV;\n"
 
-	"const float w = 50.0f, h = 5.0f;\n"
+	"const vec2 plane_size = vec2(50.0f, 5.0f),\n"
 
-	"const vec2 uv_for_rects[6] = vec2[6] (\n"
-		"vec2(0.0f, 0.0f), vec2(w, 0.0f), vec2(0.0f, h),\n"
-		"vec2(0.0f, h), vec2(w, h), vec2(w, 0.0f)\n"
+	"uv_for_plane[6] = vec2[6] (\n"
+		"vec2(0.0f, 0.0f), vec2(1.0f, 0.0f), vec2(0.0f, 1.0f),\n"
+		"vec2(0.0f, 1.0f), vec2(1.0f, 1.0f), vec2(1.0f, 0.0f)\n"
 	");\n"
 
 	"void main() {\n"
-		""
 		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
 		// "UV = vertexUV;\n"
-		"UV = uv_for_rects[gl_VertexID % 6];\n"
+		"UV = uv_for_plane[gl_VertexID % 6] * plane_size;\n"
 	"}\n";
 
 //////////
