@@ -1,20 +1,13 @@
 #include "demo_5.c"
 
 /*
-Other stuff:
+To figure out:
 - vert planes facing the other direction
-- pass triangle size to shader for differently sized objects
-- send integral points to the gpu
-- one big mesh, with a texture lookup system, or separate meshes + separate draw calls, with one texture per mesh?
-- but first, worry about 1 texture working for all meshes
-- indexed rendering after figuring out textures
-- eliminate repeated corners with something other than GL_TRIANGLES
-- do separate draw calls for each face to avoid all of this pain, or indexed drawing
-
-Passing in rect sizes to shader:
-- a uniform var rectSizes, with a size of all of the rects in scene (= num triangles in scene / 2)
-- pass those as uniforms into the vertex shader
-- then, make uv_for_rects non-const, and then fetch the right tex coordinates
+- create shader as format string w num planes
+- diff textures for diff planes - a PlaneDef struct
+- indexed rendering
+- eliminate repeated corners, so no GL_TRIANGLES
+- then, get UVs not from shader, after that has been done (pack UVs next to triangle data in vbo)
 */
 
 /*
@@ -107,7 +100,8 @@ GLfloat* create_plane_mesh(const int num_planes, ...) {
 const char* const demo_6_vertex_shader =
 	"#version 330 core\n"
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
-	"layout(location = 1) in vec2 curr_plane_size;"
+
+	"uniform vec2 plane_sizes[3];\n"
 
 	"uniform mat4 MVP;\n"
 	"out vec2 UV;\n"
@@ -119,8 +113,10 @@ const char* const demo_6_vertex_shader =
 
 	"void main() {\n"
 		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
-		"int plane_index = gl_VertexID % 6;\n"
-		"UV = unscaled_plane_UV[plane_index] * curr_plane_size;"
+		"UV = vec2(0, 0);\n"
+
+		"int UV_index = gl_VertexID % 6, plane_index = gl_VertexID / 6;\n"
+		"UV = unscaled_plane_UV[UV_index] * plane_sizes[plane_index];\n"
 	"}\n";
 
 //////////
@@ -131,41 +127,30 @@ StateGL demo_6_init(void) {
 	sgl.vertex_array = init_vao();
 	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
-	enum {size_hori = 50, size_vert = 5, num_planes = 3};
+	enum {size_hori = 8, size_vert = 5, num_planes = 3};
 	const ivec3 origin = {1, 1, 1};
+	enum {size_hori_2 = 2, size_vert_2 = 3};
 
-	// Need to specify for every 6 vertices, not for every point
-	enum {plane_size_floats = 42};
-	GLfloat plane_sizes[plane_size_floats] = {
-		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
-
-		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
-		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
-
-		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
-		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
-
-		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
-		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert
+	GLfloat plane_sizes[num_planes * 2] = {
+		size_hori_2, size_vert_2, size_hori, size_vert, size_hori, size_vert
 	};
-
-	// I need access to the above array in the shader
 
 	GLfloat
 		*const plane_vertices = create_plane_mesh(num_planes,
-			(PlaneDef) {Hori, {origin[0], origin[1], origin[2]}, size_hori, size_vert},
+			(PlaneDef) {Hori, {origin[0], origin[1], origin[2]}, size_hori_2, size_vert_2},
 			(PlaneDef) {Vert, {origin[0], size_vert + origin[1], origin[2]}, size_hori, size_vert},
 			(PlaneDef) {Vert, {origin[0], origin[1] + size_vert, size_vert + origin[2]}, size_hori, size_vert}
 		);
 
-	sgl.num_vertex_buffers = 2;
+	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
-		plane_vertices, num_planes * plane_vertex_bytes,
-		plane_sizes, plane_size_floats * sizeof(GLfloat));
+		plane_vertices, num_planes * plane_vertex_bytes);
 
 	free(plane_vertices);
 
 	sgl.shader_program = init_shader_program(demo_6_vertex_shader, demo_4_fragment_shader);
+	const GLuint plane_sizes_id = glGetUniformLocation(sgl.shader_program, "plane_sizes");
+	glUniform2fv(plane_sizes_id, num_planes, plane_sizes);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "assets/walls/dune.bmp");

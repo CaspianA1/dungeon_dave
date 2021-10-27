@@ -20,3 +20,24 @@ GLfloat* create_uv_for_plane(const int width, const int height) {
 
 const size_t plane_uv_bytes = plane_uv_floats * sizeof(GLfloat);
 enum {plane_vertex_floats = 18, plane_uv_floats = 12};
+
+/////
+
+	GLfloat plane_sizes[6] = {
+		size_hori_2, size_vert_2, size_hori, size_vert, size_hori, size_vert
+
+		/*
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert
+		*/
+	};
+
+/////
