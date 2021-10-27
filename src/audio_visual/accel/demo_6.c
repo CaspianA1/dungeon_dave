@@ -139,7 +139,8 @@ const char* const demo_6_vertex_shader =
 	"void main() {\n"
 		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
 		// "UV = vertexUV;\n"
-		"UV = uv_for_plane[gl_VertexID % 6] * plane_size;\n"
+		"int plane_index = gl_VertexID % 6;\n"
+		"UV = uv_for_plane[plane_index] * plane_size;\n"
 	"}\n";
 
 //////////
