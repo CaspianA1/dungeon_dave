@@ -1,0 +1,22 @@
+///// The old UV creation function:
+
+GLfloat* create_uv_for_plane(const int width, const int height) {
+	const GLfloat uv[plane_uv_floats] = {
+		0.0f, 0.0f,
+		width, 0.0f,
+		0.0f, height,
+
+		0.0f, height,
+		width, height,
+		width, 0.0f
+	};
+
+	GLfloat* const uv_data = malloc(plane_uv_bytes);
+	memcpy(uv_data, uv, plane_uv_bytes);
+	return uv_data;
+}
+
+/////
+
+const size_t plane_uv_bytes = plane_uv_floats * sizeof(GLfloat);
+enum {plane_vertex_floats = 18, plane_uv_floats = 12};

@@ -247,6 +247,7 @@ void enable_all_culling(void) {
 void draw_triangles(const int num_triangles) {
 	// glDrawElements(GL_TRIANGLES, num_triangles * 3, GL_UNSIGNED_INT, NULL)
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+	// glDrawArraysInstanced(GL_TRIANGLES, 0, num_triangles * 3, 1);
 }
 
 void deinit_demo_vars(const StateGL sgl) {

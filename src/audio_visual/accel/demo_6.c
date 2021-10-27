@@ -9,6 +9,7 @@ Other stuff:
 - but first, worry about 1 texture working for all meshes
 - indexed rendering after figuring out textures
 - eliminate repeated corners with something other than GL_TRIANGLES
+- do separate draw calls for each face to avoid all of this pain
 
 Passing in rect sizes to shader:
 - a uniform var rectSizes, with a size of all of the rects in scene (= num triangles in scene / 2)
@@ -23,29 +24,10 @@ Passing in rect sizes to shader:
 2/
 */
 
-enum {plane_vertex_floats = 18, plane_uv_floats = 12};
-
-const size_t
-	plane_vertex_bytes = plane_vertex_floats * sizeof(GLfloat),
-	plane_uv_bytes = plane_uv_floats * sizeof(GLfloat);
+enum {plane_vertex_floats = 18};
+const size_t plane_vertex_bytes = plane_vertex_floats * sizeof(GLfloat);
 
 //////////
-
-GLfloat* create_uv_for_plane(const int width, const int height) {
-	const GLfloat uv[plane_uv_floats] = {
-		0.0f, 0.0f,
-		width, 0.0f,
-		0.0f, height,
-
-		0.0f, height,
-		width, height,
-		width, 0.0f
-	};
-
-	GLfloat* const uv_data = malloc(plane_uv_bytes);
-	memcpy(uv_data, uv, plane_uv_bytes);
-	return uv_data;
-}
 
 #define PLANE_CREATOR_NAME(type) create_##type##_plane
 
@@ -126,22 +108,19 @@ const char* const demo_6_vertex_shader =
 	"#version 330 core\n"
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 	"layout(location = 1) in vec2 curr_plane_size;"
-	// "layout(location = 1) in vec2 vertexUV;\n"
+
 	"uniform mat4 MVP;\n"
 	"out vec2 UV;\n"
 
-	"const vec2 plane_size = vec2(50.0f, 5.0f),\n"
-
-	"uv_for_plane[6] = vec2[6] (\n"
+	"const vec2 unscaled_plane_UV[6] = vec2[6] (\n"
 		"vec2(0.0f, 0.0f), vec2(1.0f, 0.0f), vec2(0.0f, 1.0f),\n"
 		"vec2(0.0f, 1.0f), vec2(1.0f, 1.0f), vec2(1.0f, 0.0f)\n"
 	");\n"
 
 	"void main() {\n"
 		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
-		// "UV = vertexUV;\n"
 		"int plane_index = gl_VertexID % 6;\n"
-		"UV = uv_for_plane[plane_index] * plane_size;\n"
+		"UV = unscaled_plane_UV[plane_index] * curr_plane_size;"
 	"}\n";
 
 //////////
@@ -152,10 +131,25 @@ StateGL demo_6_init(void) {
 	sgl.vertex_array = init_vao();
 	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
-	const int size_hori = 50, size_vert = 5, num_planes = 3;
+	enum {size_hori = 50, size_vert = 5, num_planes = 3};
 	const ivec3 origin = {1, 1, 1};
 
-	GLfloat plane_sizes[6] = {size_hori, size_vert, size_hori, size_vert, size_hori, size_vert};
+	// Need to specify for every 6 vertices, not for every point
+	enum {plane_size_floats = 42};
+	GLfloat plane_sizes[plane_size_floats] = {
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert,
+		size_hori, size_vert, size_hori, size_vert, size_hori, size_vert
+	};
+
+	// I need access to the above array in the shader
 
 	GLfloat
 		*const plane_vertices = create_plane_mesh(num_planes,
@@ -164,16 +158,12 @@ StateGL demo_6_init(void) {
 			(PlaneDef) {Vert, {origin[0], origin[1] + size_vert, size_vert + origin[2]}, size_hori, size_vert}
 		);
 
-		// *const uv_data = create_uv_for_plane(size_hori, size_vert);
-
 	sgl.num_vertex_buffers = 2;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
 		plane_vertices, num_planes * plane_vertex_bytes,
-		plane_sizes, 6 * sizeof(GLfloat));
-		// uv_data, plane_uv_bytes);
-	
+		plane_sizes, plane_size_floats * sizeof(GLfloat));
+
 	free(plane_vertices);
-	// free(uv_data);
 
 	sgl.shader_program = init_shader_program(demo_6_vertex_shader, demo_4_fragment_shader);
 
