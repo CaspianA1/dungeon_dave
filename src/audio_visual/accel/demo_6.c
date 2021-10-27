@@ -9,7 +9,7 @@ Other stuff:
 - but first, worry about 1 texture working for all meshes
 - indexed rendering after figuring out textures
 - eliminate repeated corners with something other than GL_TRIANGLES
-- do separate draw calls for each face to avoid all of this pain
+- do separate draw calls for each face to avoid all of this pain, or indexed drawing
 
 Passing in rect sizes to shader:
 - a uniform var rectSizes, with a size of all of the rects in scene (= num triangles in scene / 2)
