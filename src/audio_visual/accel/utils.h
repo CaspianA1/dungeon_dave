@@ -73,6 +73,7 @@ GLuint* init_textures(const int num_textures, ...);
 
 void select_texture_for_use(const GLuint texture, const GLuint shader_program);
 void enable_all_culling(void);
+void draw_triangles(const int num_triangles);
 
 void deinit_demo_vars(const StateGL sgl); // Deletes shader program, vbos, and vao
 

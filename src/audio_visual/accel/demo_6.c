@@ -8,6 +8,7 @@ Other stuff:
 - one big mesh, with a texture lookup system, or separate meshes + separate draw calls, with one texture per mesh?
 - but first, worry about 1 texture working for all meshes
 - indexed rendering after figuring out textures
+- eliminate repeated corners with something other than GL_TRIANGLES
 
 Passing in rect sizes to shader:
 - a uniform var rectSizes, with a size of all of the rects in scene (= num triangles in scene / 2)
