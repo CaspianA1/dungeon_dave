@@ -5,7 +5,7 @@
 - want a solid base before continuing
 - draw simple vert plane with GL_TRIANGLE_STRIP, or use indices if possible
 - now interleave UV
-- attrib ptr stuff in outer loop
+- bind to vao in init_vbos
 */
 
 /*
