@@ -239,14 +239,15 @@ void select_texture_for_use(const GLuint texture, const GLuint shader_program) {
 void enable_all_culling(void) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	#ifndef DEMO_6
+
+	#if !defined(DEMO_6) && !defined(DEMO_7)
 	glEnable(GL_CULL_FACE);
 	#endif
 }
 
 void draw_triangles(const int num_triangles) {
-	// glDrawElements(GL_TRIANGLES, num_triangles * 3, GL_UNSIGNED_INT, NULL)
-	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+	glDrawElements(GL_TRIANGLES, num_triangles * 3, GL_UNSIGNED_INT, NULL);
+	// glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 	// glDrawArraysInstanced(GL_TRIANGLES, 0, num_triangles * 3, 1);
 }
 

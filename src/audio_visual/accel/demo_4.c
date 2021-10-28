@@ -64,10 +64,10 @@ StateGL demo_4_init(void) {
 	return sgl;
 }
 
-void demo_4_core_drawer(const StateGL sgl) {
+void demo_4_core_drawer(const StateGL sgl, const int num_triangles) {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	bind_vbos_to_vao(sgl.index_buffer, sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
-	draw_triangles(12);
+	draw_triangles(num_triangles);
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 
@@ -82,7 +82,7 @@ void demo_4_drawer(const StateGL sgl) {
 	if (keys[SDL_SCANCODE_D]) camera_pos[2] -= step;
 
 	demo_2_matrix_setup(sgl.shader_program, camera_pos);
-	demo_4_core_drawer(sgl);
+	demo_4_core_drawer(sgl, 12);
 }
 
 #ifdef DEMO_4

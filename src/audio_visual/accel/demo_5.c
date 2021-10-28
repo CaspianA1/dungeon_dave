@@ -60,7 +60,7 @@ void move(const GLuint shader_program) {
 
 void demo_5_drawer(const StateGL sgl) {
 	move(sgl.shader_program);
-	demo_4_core_drawer(sgl);
+	demo_4_core_drawer(sgl, 12);
 }
 
 #ifdef DEMO_5

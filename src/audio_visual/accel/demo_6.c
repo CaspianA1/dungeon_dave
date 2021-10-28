@@ -145,6 +145,18 @@ const char* const demo_6_vertex_shader =
 
 //////////
 
+void demo_6_init_shader_and_textures_and_culling(StateGL* const sgl, const int num_planes, const GLfloat* const plane_sizes) {
+	sgl -> shader_program = init_shader_program(demo_6_vertex_shader, demo_4_fragment_shader);
+	const GLuint plane_sizes_id = glGetUniformLocation(sgl -> shader_program, "plane_sizes");
+	glUniform2fv(plane_sizes_id, num_planes, plane_sizes);
+
+	sgl -> num_textures = 1;
+	sgl -> textures = init_textures(sgl -> num_textures, "assets/walls/dune.bmp");
+	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
+
+	enable_all_culling();
+}
+
 StateGL demo_6_init(void) {
 	StateGL sgl;
 
@@ -173,6 +185,9 @@ StateGL demo_6_init(void) {
 
 	free(plane_vertices);
 
+	demo_6_init_shader_and_textures_and_culling(&sgl, num_planes, plane_sizes);
+
+	/*
 	sgl.shader_program = init_shader_program(demo_6_vertex_shader, demo_4_fragment_shader);
 	const GLuint plane_sizes_id = glGetUniformLocation(sgl.shader_program, "plane_sizes");
 	glUniform2fv(plane_sizes_id, num_planes, plane_sizes);
@@ -182,12 +197,25 @@ StateGL demo_6_init(void) {
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	enable_all_culling();
+	*/
 	
 	return sgl;
 }
 
+void demo_6_core_drawer(const StateGL sgl, const int num_triangles) {
+	move(sgl.shader_program);
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
+	bind_vbos_to_vao(sgl.index_buffer, sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
+	draw_triangles(num_triangles);
+	unbind_vbos_from_vao(sgl.num_vertex_buffers);
+}
+
+void demo_6_drawer(const StateGL sgl) {
+	demo_6_core_drawer(sgl, 8);
+}
+
 #ifdef DEMO_6
 int main(void) {
-    make_application(demo_5_drawer, demo_6_init, deinit_demo_vars);
+    make_application(demo_6_drawer, demo_6_init, deinit_demo_vars);
 }
 #endif
