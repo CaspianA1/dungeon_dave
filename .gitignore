@@ -1,6 +1,3 @@
-# other/
-# unused/
 .DS_Store
 bin/
-# assets/pre-sprite/
-.vscode
+.vscode/
