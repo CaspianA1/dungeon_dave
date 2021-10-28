@@ -42,6 +42,8 @@ StateGL demo_7_init(void) {
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
 		plane_vertices, num_planes * opt_plane_vertex_bytes);
 
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
+
 	free(plane_vertices);
 
 	demo_6_init_shader_and_textures_and_culling(&sgl, num_planes, plane_sizes);
@@ -52,9 +54,7 @@ StateGL demo_7_init(void) {
 void demo_7_drawer(const StateGL sgl) {
 	move(sgl.shader_program);
 	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 
 #ifdef DEMO_7

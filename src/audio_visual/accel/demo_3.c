@@ -91,7 +91,7 @@ StateGL demo_3_init(void) {
 	- 9 points per triangle
 	*/
 
-	static const GLfloat color_data[cube_num_points] = {
+	const GLfloat color_data[cube_num_points] = {
 		0.583f, 0.771f, 0.014f,
 		0.609f, 0.115f, 0.436f,
 		0.327f, 0.483f, 0.844f,
@@ -137,6 +137,8 @@ StateGL demo_3_init(void) {
 		demo_3_vertex_data, sizeof(demo_3_vertex_data),
 		color_data, sizeof(color_data));
 
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 3);
+
 	sgl.num_textures = 0;
 
 	//////////
@@ -171,10 +173,9 @@ StateGL demo_3_init(void) {
 }
 
 void demo_3_drawer(const StateGL sgl) {
+	(void) sgl;
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 3);
 	draw_triangles(12);
-	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 
 #ifdef DEMO_3

@@ -5,6 +5,7 @@
 - want a solid base before continuing
 - draw simple vert plane with GL_TRIANGLE_STRIP, or use indices if possible
 - now interleave UV
+- attrib ptr stuff in outer loop
 */
 
 /*
@@ -44,19 +45,28 @@ StateGL demo_8_init(void) {
 	GLfloat* const plane_data = malloc(interleaved_plane_bytes);
 	create_vert_plane_interleaved(top_left_corner, width, height, plane_data);
 
+	/////
 	sgl.num_vertex_buffers = 1;
-	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
-		plane_data, interleaved_plane_bytes);
+	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, plane_data, interleaved_plane_bytes);
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
+	/////
 
 	free(plane_data);
-	demo_6_core_init_shader_and_textures_and_culling(&sgl);
+	demo_6_core_init_shader_and_textures_and_culling(&sgl); // set different shader after vbo
 	return sgl;
 }
 
-void demo_8_drawer(const StateGL sgl);
+void demo_8_drawer(const StateGL sgl) {
+	(void) sgl;
+	/*
+	move(sgl.shader_program);
+	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	*/
+}
 
 #ifdef DEMO_8
 int main(void) {
-
+	make_application(demo_8_drawer, demo_8_init, deinit_demo_vars);
 }
 #endif

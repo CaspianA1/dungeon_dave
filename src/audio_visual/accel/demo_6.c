@@ -163,7 +163,7 @@ StateGL demo_6_init(void) {
 	const ivec3 origin = {1, 1, 1};
 	enum {size_hori_2 = 2, size_vert_2 = 3, size_hori_3 = 5};
 
-	GLfloat plane_sizes[num_planes * 2] = {
+	const GLfloat plane_sizes[num_planes * 2] = {
 		size_hori_2, size_vert_2, size_hori, size_vert, size_hori, size_vert, size_hori_3, size_vert
 	};
 
@@ -179,6 +179,8 @@ StateGL demo_6_init(void) {
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
 		plane_vertices, num_planes * plane_vertex_bytes);
 
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
+
 	free(plane_vertices);
 
 	demo_6_init_shader_and_textures_and_culling(&sgl, num_planes, plane_sizes);
@@ -189,9 +191,7 @@ StateGL demo_6_init(void) {
 void demo_6_drawer(const StateGL sgl) {
 	move(sgl.shader_program);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
 	draw_triangles(8);
-	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 
 #ifdef DEMO_6

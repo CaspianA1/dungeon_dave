@@ -36,7 +36,7 @@ StateGL demo_4_init(void) {
 	#define FIFTH_UV 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 	#define SIXTH_UV 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
 
-	static const GLfloat uv_data[] = {
+	const GLfloat uv_data[] = {
 		// FIRST_UV SECOND_UV THIRD_UV FOURTH_UV FIFTH_UV SIXTH_UV
 		FIRST_UV SECOND_UV SECOND_UV THIRD_UV
 		FOURTH_UV THIRD_UV THIRD_UV SECOND_UV
@@ -47,6 +47,8 @@ StateGL demo_4_init(void) {
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
 		demo_3_vertex_data, sizeof(demo_3_vertex_data),
 		uv_data, sizeof(uv_data));
+
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 
@@ -64,10 +66,9 @@ StateGL demo_4_init(void) {
 }
 
 void demo_4_core_drawer(const StateGL sgl, const int num_triangles) {
+	(void) sgl;
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
 	draw_triangles(num_triangles);
-	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 
 void demo_4_drawer(const StateGL sgl) {

@@ -546,3 +546,11 @@ void draw_triangles(const int num_triangles) {
 }
 
 /////
+
+	/////
+	glGenBuffers(sgl.num_vertex_buffers, &sgl.vertex_buffers);
+	glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers);
+	glBufferData(GL_ARRAY_BUFFER, interleaved_plane_bytes, plane_data, GL_STATIC_DRAW);
+	/////
+
+/////

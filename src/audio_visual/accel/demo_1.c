@@ -6,7 +6,7 @@
 // SDL2, SDL2_ttf, SDL2_mixer, OpenGL, glew, cglm
 
 void demo_1_init_vertex_data(StateGL* const sgl) {
-	static const GLfloat triangle_data[9] = {
+	const GLfloat triangle_data[9] = {
 		-1.0f, -1.0f, 0.0f,
 		1.0f, -1.0f, 0.0f,
 		0.0f, 1.0f, 0.0f
@@ -15,6 +15,7 @@ void demo_1_init_vertex_data(StateGL* const sgl) {
 	sgl -> vertex_array = init_vao();
 	sgl -> num_vertex_buffers = 1;
 	sgl -> vertex_buffers = init_vbos(sgl -> num_vertex_buffers, triangle_data, sizeof(triangle_data));
+	bind_vbos_to_vao(sgl -> vertex_buffers, 1, 3);
 }
 
 StateGL demo_1_init(void) {
@@ -43,9 +44,8 @@ StateGL demo_1_init(void) {
 }
 
 void demo_1_drawer(const StateGL sgl) {
-	bind_vbos_to_vao(sgl.vertex_buffers, 1, 3);
+	(void) sgl;
 	draw_triangles(1);
-	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 
 #ifdef DEMO_1

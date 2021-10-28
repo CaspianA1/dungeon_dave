@@ -241,6 +241,7 @@ void draw_triangles(const int num_triangles) {
 void deinit_demo_vars(const StateGL sgl) {
 	glDeleteProgram(sgl.shader_program);
 
+	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 	glDeleteBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 	free(sgl.vertex_buffers);
 
@@ -251,6 +252,5 @@ void deinit_demo_vars(const StateGL sgl) {
 
 	glDeleteVertexArrays(1, &sgl.vertex_array);
 }
-
 
 #endif
