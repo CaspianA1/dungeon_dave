@@ -11,6 +11,7 @@
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
 
+// 800 by 600
 #define SCR_W 800
 #define SCR_H 600
 #define FPS 60
@@ -61,7 +62,7 @@ void make_application(void (*const drawer)(const StateGL),
 	StateGL (*const init)(void), void (*const deinit)(StateGL));
 
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL),
-	StateGL (*const init)(void), void (*const deinit)(StateGL), const byte fps);
+	StateGL (*const init)(void), void (*const deinit)(const StateGL), const byte fps);
 
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader);
 void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...);
