@@ -1,19 +1,5 @@
 #include "demo_6.c"
 
-/*
-- optimized plane drawing
-- want a solid base before continuing
-- draw simple vert plane with GL_TRIANGLE_STRIP, or use indices if possible
-- now interleave UV
-*/
-
-/*
-0__1
-|  /
-| /
-2/
-*/
-
 enum {opt_plane_floats = 12};
 enum {opt_plane_vertex_bytes = opt_plane_floats * sizeof(GLfloat)};
 
@@ -35,9 +21,9 @@ PLANE_CREATOR_FUNCTION(vert_opt) {
 /*
 Indices:     0 1 2 3 4 5 ...
 Triangles:  {0 1 2}
-              {1 2 3}  drawing order is (2 1 3) to maintain proper winding
-                {2 3 4}
-                  {3 4 5}  drawing order is (4 3 5) to maintain proper winding
+			  {1 2 3} drawing order is (2 1 3) to maintain proper winding
+				{2 3 4}
+				  {3 4 5} drawing order is (4 3 5) to maintain proper winding
 */
 
 StateGL demo_7_init(void) {
