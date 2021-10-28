@@ -121,7 +121,7 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 }
 
 // Size of component for vbo
-void bind_vbos_to_vao(const GLuint ibo, const GLuint* const vbos, const int num_vbos, ...) {
+void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...) {
 	va_list args;
 	va_start(args, num_vbos);
 
@@ -139,7 +139,6 @@ void bind_vbos_to_vao(const GLuint ibo, const GLuint* const vbos, const int num_
 	}
 
 	va_end(args);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 }
 
 void unbind_vbos_from_vao(const int num_vbos) {
@@ -151,16 +150,6 @@ GLuint init_vao(void) {
 	glGenVertexArrays(1, &vertex_array);
 	glBindVertexArray(vertex_array);
 	return vertex_array;
-}
-
-GLuint init_ibo(const GLuint* const buffer_data_ptr, const int buffer_size) {
-	GLuint index_buffer;
-
-	glGenBuffers(1, &index_buffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer_size, &buffer_data_ptr[0], GL_STATIC_DRAW);
-
-	return index_buffer;
 }
 
 // Buffer data ptr, size of buffer
@@ -246,9 +235,10 @@ void enable_all_culling(void) {
 }
 
 void draw_triangles(const int num_triangles) {
-	glDrawElements(GL_TRIANGLES, num_triangles * 3, GL_UNSIGNED_INT, NULL);
-	// glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 	// glDrawArraysInstanced(GL_TRIANGLES, 0, num_triangles * 3, 1);
+	// glDrawElements(GL_TRIANGLES, num_triangles * 3, GL_UNSIGNED_INT, NULL);
+	// GL_ERR_CHECK;
 }
 
 void deinit_demo_vars(const StateGL sgl) {
@@ -262,7 +252,6 @@ void deinit_demo_vars(const StateGL sgl) {
 		free(sgl.textures);
 	}
 
-	glDeleteBuffers(1, &sgl.index_buffer);
 	glDeleteVertexArrays(1, &sgl.vertex_array);
 }
 

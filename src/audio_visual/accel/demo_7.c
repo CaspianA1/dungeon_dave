@@ -27,13 +27,18 @@ PLANE_CREATOR_FUNCTION(vert_opt) {
 	memcpy(vertex_dest, vertices, opt_plane_vertex_bytes);
 }
 
+/*
+Indices:     0 1 2 3 4 5 ...
+Triangles:  {0 1 2}
+              {1 2 3}  drawing order is (2 1 3) to maintain proper winding
+                {2 3 4}
+                  {3 4 5}  drawing order is (4 3 5) to maintain proper winding
+*/
+
 StateGL demo_7_init(void) {
 	StateGL sgl;
 
 	sgl.vertex_array = init_vao();
-	
-	static const GLuint index_data[] = {0, 1, 2, 0, 3, 1};
-	sgl.index_buffer = init_ibo(index_data, sizeof(index_data));
 
 	enum {num_planes = 1, size_hori = 3, size_vert = 2};
 	const ivec3 top_left_corner = {5, 5, 5};

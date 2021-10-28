@@ -161,7 +161,6 @@ StateGL demo_6_init(void) {
 	StateGL sgl;
 
 	sgl.vertex_array = init_vao();
-	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
 	enum {size_hori = 8, size_vert = 5, num_planes = 4};
 	const ivec3 origin = {1, 1, 1};
@@ -187,25 +186,13 @@ StateGL demo_6_init(void) {
 
 	demo_6_init_shader_and_textures_and_culling(&sgl, num_planes, plane_sizes);
 
-	/*
-	sgl.shader_program = init_shader_program(demo_6_vertex_shader, demo_4_fragment_shader);
-	const GLuint plane_sizes_id = glGetUniformLocation(sgl.shader_program, "plane_sizes");
-	glUniform2fv(plane_sizes_id, num_planes, plane_sizes);
-
-	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "assets/walls/dune.bmp");
-	select_texture_for_use(sgl.textures[0], sgl.shader_program);
-
-	enable_all_culling();
-	*/
-	
 	return sgl;
 }
 
 void demo_6_core_drawer(const StateGL sgl, const int num_triangles) {
 	move(sgl.shader_program);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	bind_vbos_to_vao(sgl.index_buffer, sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
 	draw_triangles(num_triangles);
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }

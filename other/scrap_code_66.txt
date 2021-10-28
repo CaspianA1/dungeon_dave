@@ -40,4 +40,35 @@ enum {plane_vertex_floats = 18, plane_uv_floats = 12};
 		*/
 	};
 
-/////
+///// Old IBO code:
+
+void deinit_demo_vars(const StateGL sgl) {
+	glDeleteProgram(sgl.shader_program);
+
+	glDeleteBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
+	free(sgl.vertex_buffers);
+
+	if (sgl.num_textures > 0) {
+		glDeleteTextures(sgl.num_textures, sgl.textures);
+		free(sgl.textures);
+	}
+
+	glDeleteBuffers(1, &sgl.index_buffer);
+	glDeleteVertexArrays(1, &sgl.vertex_array);
+}
+
+const GLuint demo_3_index_data[] = {
+	0, 1, 2,
+	3, 0, 4,
+	5, 0, 6,
+	3, 6, 0,
+	0, 2, 4,
+	5, 1, 0,
+	2, 1, 5,
+	7, 6, 3,
+	6, 7, 5,
+	7, 3, 4,
+	7, 4, 2,
+	7, 2, 5
+};
+

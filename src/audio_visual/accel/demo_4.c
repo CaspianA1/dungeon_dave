@@ -25,7 +25,6 @@ StateGL demo_4_init(void) {
 	StateGL sgl;
 
 	sgl.vertex_array = init_vao();
-	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
 	enum {floats_per_uv = 2, uvs_per_triangle = 3};
 	enum {num_uv_floats = triangles_per_cube * uvs_per_triangle * floats_per_uv};
@@ -66,7 +65,7 @@ StateGL demo_4_init(void) {
 
 void demo_4_core_drawer(const StateGL sgl, const int num_triangles) {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	bind_vbos_to_vao(sgl.index_buffer, sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
 	draw_triangles(num_triangles);
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }

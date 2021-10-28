@@ -3,6 +3,7 @@
 enum {points_per_triangle = 9, triangles_per_cube = 12};
 enum {cube_num_points = points_per_triangle * triangles_per_cube};
 
+/*
 #define A -1.000000, -1.000000, -1.000000,
 #define B -1.000000, -1.000000, 1.000000,
 #define C -1.000000, 1.000000, 1.000000,
@@ -11,6 +12,7 @@ enum {cube_num_points = points_per_triangle * triangles_per_cube};
 #define F 1.000000, -1.000000, 1.000000,
 #define G 1.000000, -1.000000, -1.000000,
 #define H 1.000000, 1.000000, 1.000000,
+*/
 
 	/*
 	A B C
@@ -78,21 +80,6 @@ const GLfloat demo_3_vertex_data[] = {
 	1.0f, -1.0f, 1.0f
 };
 
-const GLuint demo_3_index_data[] = {
-	0, 1, 2,
-	3, 0, 4,
-	5, 0, 6,
-	3, 6, 0,
-	0, 2, 4,
-	5, 1, 0,
-	2, 1, 5,
-	7, 6, 3,
-	6, 7, 5,
-	7, 3, 4,
-	7, 4, 2,
-	7, 2, 5
-};
-
 StateGL demo_3_init(void) {
 	StateGL sgl;
 
@@ -144,7 +131,6 @@ StateGL demo_3_init(void) {
 	};
 
 	sgl.vertex_array = init_vao();
-	sgl.index_buffer = init_ibo(demo_3_index_data, sizeof(demo_3_index_data));
 
 	sgl.num_vertex_buffers = 2;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
@@ -186,7 +172,7 @@ StateGL demo_3_init(void) {
 
 void demo_3_drawer(const StateGL sgl) {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	bind_vbos_to_vao(sgl.index_buffer, sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 3);
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 3);
 	draw_triangles(12);
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }

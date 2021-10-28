@@ -12,11 +12,7 @@ void demo_1_init_vertex_data(StateGL* const sgl) {
 		0.0f, 1.0f, 0.0f
 	};
 
-	static const GLuint index_data[] = {0, 1, 2};
-
 	sgl -> vertex_array = init_vao();
-	sgl -> index_buffer = init_ibo(index_data, sizeof(index_data));
-
 	sgl -> num_vertex_buffers = 1;
 	sgl -> vertex_buffers = init_vbos(sgl -> num_vertex_buffers, triangle_data, sizeof(triangle_data));
 }
@@ -47,7 +43,7 @@ StateGL demo_1_init(void) {
 }
 
 void demo_1_drawer(const StateGL sgl) {
-	bind_vbos_to_vao(sgl.index_buffer, sgl.vertex_buffers, 1, 3);
+	bind_vbos_to_vao(sgl.vertex_buffers, 1, 3);
 	draw_triangles(1);
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
