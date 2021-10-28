@@ -3,9 +3,7 @@
 /*
 - optimized plane drawing
 - want a solid base before continuing
-- draw simple vert plane with GL_TRIANGLE_STRIP, or use indices if possible
-- now interleave UV
-- bind to vao in init_vbos
+- make data int8s and int16s
 */
 
 /*
@@ -17,6 +15,19 @@
 
 enum {interleaved_plane_floats = 20};
 enum {interleaved_plane_bytes = interleaved_plane_floats * sizeof(GLfloat)};
+
+const char* const demo_8_vertex_shader =
+	"#version 330 core\n"
+	"layout (location = 0) in vec3 vertex_pos_model_space;\n"
+	"layout (location = 1) in vec2 vertexUV;\n"
+
+	"out vec2 UV;\n"
+	"uniform mat4 MVP;\n"
+
+	"void main() {\n"
+		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
+		"UV = vertexUV;\n"
+	"}\n";
 
 void create_vert_plane_interleaved(const ivec3 top_left_corner,
 	const int width, const int height, GLfloat* const plane_buffer) {
@@ -45,24 +56,33 @@ StateGL demo_8_init(void) {
 	GLfloat* const plane_data = malloc(interleaved_plane_bytes);
 	create_vert_plane_interleaved(top_left_corner, width, height, plane_data);
 
-	/////
+	//////////
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, plane_data, interleaved_plane_bytes);
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
-	/////
 
+	enum {interleaved_vertex_bytes = 5 * sizeof(GLfloat)};
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, interleaved_vertex_bytes, NULL);
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, interleaved_vertex_bytes, (void*) (3 * sizeof(GLfloat)));
 	free(plane_data);
-	demo_6_core_init_shader_and_textures_and_culling(&sgl); // set different shader after vbo
+	//////////
+
+	sgl.shader_program = init_shader_program(demo_8_vertex_shader, demo_4_fragment_shader);
+	sgl.num_textures = 1;
+	sgl.textures = init_textures(sgl.num_textures, "assets/walls/cobblestone.bmp");
+	select_texture_for_use(sgl.textures[0], sgl.shader_program);
+	enable_all_culling();
+
 	return sgl;
 }
 
 void demo_8_drawer(const StateGL sgl) {
-	(void) sgl;
-	/*
 	move(sgl.shader_program);
 	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	*/
 }
 
 #ifdef DEMO_8
