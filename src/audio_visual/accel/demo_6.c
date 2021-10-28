@@ -189,16 +189,12 @@ StateGL demo_6_init(void) {
 	return sgl;
 }
 
-void demo_6_core_drawer(const StateGL sgl, const int num_triangles) {
+void demo_6_drawer(const StateGL sgl) {
 	move(sgl.shader_program);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
-	draw_triangles(num_triangles);
+	draw_triangles(8);
 	unbind_vbos_from_vao(sgl.num_vertex_buffers);
-}
-
-void demo_6_drawer(const StateGL sgl) {
-	demo_6_core_drawer(sgl, 8);
 }
 
 #ifdef DEMO_6

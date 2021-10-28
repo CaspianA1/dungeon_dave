@@ -36,7 +36,7 @@ accel: accel_build
 	./bin/accel_demo
 
 accel_build:
-	$(CC) $(CFLAGS) $(DEBUG_2) $(CORE_LIBS) -D DEMO_$(ACCEL_DEMO) -o bin/accel_demo src/audio_visual/accel/demo_$(ACCEL_DEMO).c
+	$(CC) $(CFLAGS) $(OPTIMIZE) $(CORE_LIBS) -D DEMO_$(ACCEL_DEMO) -o bin/accel_demo src/audio_visual/accel/demo_$(ACCEL_DEMO).c
 
 asm:
 	$(CC) $(CFLAGS) -S -masm=intel $(OPTIMIZE) -o bin/$(MAIN).asm src/main/$(MAIN).c

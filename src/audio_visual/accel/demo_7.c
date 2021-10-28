@@ -4,6 +4,14 @@
 - optimized plane drawing
 - want a solid base before continuing
 - draw simple vert plane with GL_TRIANGLE_STRIP, or use indices if possible
+- now interleave UV
+*/
+
+/*
+0__1
+|  /
+| /
+2/
 */
 
 enum {opt_plane_floats = 12};
@@ -13,15 +21,12 @@ PLANE_CREATOR_FUNCTION(vert_opt) {
 	const GLfloat left_x = top_left_corner[0], top_y = top_left_corner[1], z = top_left_corner[2];
 	const GLfloat right_x = left_x + size_hori, bottom_y = top_y - size_vert;
 
-	// order is wrong
 	const GLfloat vertices[opt_plane_floats] = {
 		left_x, top_y, z,
 		right_x, top_y, z,
-		// left_x, bottom_y, z,
 
 		left_x, bottom_y, z,
-		right_x, bottom_y, z,
-		// right_x, top_y, z,
+		right_x, bottom_y, z
 	};
 
 	memcpy(vertex_dest, vertices, opt_plane_vertex_bytes);
@@ -59,7 +64,11 @@ StateGL demo_7_init(void) {
 }
 
 void demo_7_drawer(const StateGL sgl) {
-	demo_6_core_drawer(sgl, 2);
+	move(sgl.shader_program);
+	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
+	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	unbind_vbos_from_vao(sgl.num_vertex_buffers);
 }
 
 #ifdef DEMO_7
