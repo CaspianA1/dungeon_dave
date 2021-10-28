@@ -3,7 +3,8 @@
 /*
 - optimized plane drawing
 - want a solid base before continuing
-- make data int8s and int16s
+- check for negative vals with plane data in create_vert_plane_interleaved
+- make plane width and height params corresponding plane type
 */
 
 /*
@@ -13,8 +14,16 @@
 2/
 */
 
-enum {interleaved_plane_floats = 20};
-enum {interleaved_plane_bytes = interleaved_plane_floats * sizeof(GLfloat)};
+/*
+#define PLANE_TYPE GLfloat
+#define PLANE_TYPE_ENUM GL_FLOAT
+*/
+
+#define PLANE_TYPE GLushort
+#define PLANE_TYPE_ENUM GL_UNSIGNED_SHORT
+
+enum {interleaved_plane_vars = 20};
+enum {interleaved_plane_bytes = interleaved_plane_vars * sizeof(PLANE_TYPE)};
 
 const char* const demo_8_vertex_shader =
 	"#version 330 core\n"
@@ -30,12 +39,12 @@ const char* const demo_8_vertex_shader =
 	"}\n";
 
 void create_vert_plane_interleaved(const ivec3 top_left_corner,
-	const int width, const int height, GLfloat* const plane_buffer) {
+	const int width, const int height, PLANE_TYPE* const plane_buffer) {
 
-	const GLfloat left_x = top_left_corner[0], top_y = top_left_corner[1], z = top_left_corner[2];
-	const GLfloat right_x = left_x + width, bottom_y = top_y - height;
+	const PLANE_TYPE left_x = top_left_corner[0], top_y = top_left_corner[1], z = top_left_corner[2];
+	const PLANE_TYPE right_x = left_x + width, bottom_y = top_y - height;
 
-	const GLfloat vertices_with_UV[interleaved_plane_floats] = {
+	const PLANE_TYPE vertices_with_UV[interleaved_plane_vars] = {
 		left_x, top_y, z, 0.0f, 0.0f, // last two floats are UV
 		right_x, top_y, z, width, 0.0f,
 
@@ -51,22 +60,22 @@ StateGL demo_8_init(void) {
 	sgl.vertex_array = init_vao();
 
 	enum {width = 3, height = 5};
-	const ivec3 top_left_corner = {4, 4, 4};
+	const ivec3 top_left_corner = {10, 10, 10};
 
-	GLfloat* const plane_data = malloc(interleaved_plane_bytes);
+	PLANE_TYPE* const plane_data = malloc(interleaved_plane_bytes);
 	create_vert_plane_interleaved(top_left_corner, width, height, plane_data);
 
 	//////////
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, plane_data, interleaved_plane_bytes);
 
-	enum {interleaved_vertex_bytes = 5 * sizeof(GLfloat)};
+	enum {interleaved_vertex_bytes = 5 * sizeof(PLANE_TYPE)};
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, interleaved_vertex_bytes, NULL);
+	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, interleaved_vertex_bytes, NULL);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, interleaved_vertex_bytes, (void*) (3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 2, PLANE_TYPE_ENUM, GL_FALSE, interleaved_vertex_bytes, (void*) (3 * sizeof(PLANE_TYPE)));
 	free(plane_data);
 	//////////
 
@@ -75,6 +84,7 @@ StateGL demo_8_init(void) {
 	sgl.textures = init_textures(sgl.num_textures, "assets/walls/cobblestone.bmp");
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 	enable_all_culling();
+
 
 	return sgl;
 }
