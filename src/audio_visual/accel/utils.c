@@ -120,7 +120,7 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 	return program_id;
 }
 
-// Size of component for vbo
+// Num components for vbo
 void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...) {
 	va_list args;
 	va_start(args, num_vbos);
@@ -129,10 +129,10 @@ void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...) {
 		glEnableVertexAttribArray(i);
 		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
 
-		const int vbo_component_size = va_arg(args, int);
+		const int num_components = va_arg(args, int);
 
 		glVertexAttribPointer(
-			i, vbo_component_size, GL_FLOAT, // Attribute i, component size, type
+			i, num_components, GL_FLOAT, // Attribute index i, component size, type
 			GL_FALSE, 0, // Not normalized, stride
 			NULL // Array buffer offset
 		);
