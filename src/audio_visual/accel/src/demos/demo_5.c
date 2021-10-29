@@ -57,9 +57,9 @@ void move(const GLuint shader_program) {
 	last_time = SDL_GetTicks() / 1000.0f;
 }
 
-void demo_5_drawer(const StateGL sgl) {
-	move(sgl.shader_program);
-	demo_4_core_drawer(sgl, 12);
+void demo_5_drawer(const StateGL* const sgl) {
+	move(sgl -> shader_program);
+	demo_4_core_drawer(12);
 }
 
 #ifdef DEMO_5

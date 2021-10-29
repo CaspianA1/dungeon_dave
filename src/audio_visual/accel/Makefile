@@ -2,6 +2,7 @@ DEMO = 9
 
 OPTIMIZE = -Ofast
 DEBUG = -fsanitize=address
+BUILD_TYPE = $(DEBUG)
 
 OUT = accel_demo
 
@@ -13,7 +14,7 @@ accel: accel_build
 	./bin/accel_demo
 
 accel_build:
-	$(CC) $(CFLAGS) $(OPTIMIZE) $(LDFLAGS) -D DEMO_$(DEMO) -o bin/$(OUT) src/demos/demo_$(DEMO).c
+	$(CC) $(CFLAGS) $(BUILD_TYPE) $(LDFLAGS) -D DEMO_$(DEMO) -o bin/$(OUT) src/demos/demo_$(DEMO).c
 
 accel_test:
 	for i in {1..$(ACCEL_DEMO)}; do\

@@ -60,12 +60,13 @@ extern inline void fail(const char* const msg, const FailureType failure_type) {
 Screen init_screen(const char* const title);
 void deinit_screen(const Screen* const screen);
 
-void make_application(void (*const drawer)(const StateGL),
-	StateGL (*const init)(void), void (*const deinit)(StateGL));
-void loop_application(const Screen* const screen, void (*const drawer)(const StateGL),
-	StateGL (*const init)(void), void (*const deinit)(const StateGL), const byte fps);
+void make_application(void (*const drawer)(const StateGL* const),
+	StateGL (*const init)(void), void (*const deinit)(const StateGL* const));
+void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
+	StateGL (*const init)(void), void (*const deinit)(const StateGL* const), const byte fps);
 
-void deinit_demo_vars(const StateGL sgl); // Deletes shader program, vbos, and vao
+// Deinitializes shader, unbinds vbos from vao, deletes vbos, textures, and vao
+void deinit_demo_vars(const StateGL* const sgl);
 
 //////////
 

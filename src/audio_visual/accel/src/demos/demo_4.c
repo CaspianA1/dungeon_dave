@@ -66,13 +66,12 @@ StateGL demo_4_init(void) {
 	return sgl;
 }
 
-void demo_4_core_drawer(const StateGL sgl, const int num_triangles) {
-	(void) sgl;
+void demo_4_core_drawer(const int num_triangles) {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	draw_triangles(num_triangles);
 }
 
-void demo_4_drawer(const StateGL sgl) {
+void demo_4_drawer(const StateGL* const sgl) {
 	static vec3 camera_pos = {2.0f, 2.0f, 0.0f};
 	const GLfloat step = 0.05;
 	if (keys[SDL_SCANCODE_W]) camera_pos[0] += step;
@@ -82,8 +81,8 @@ void demo_4_drawer(const StateGL sgl) {
 	if (keys[SDL_SCANCODE_A]) camera_pos[2] += step;
 	if (keys[SDL_SCANCODE_D]) camera_pos[2] -= step;
 
-	demo_2_matrix_setup(sgl.shader_program, camera_pos);
-	demo_4_core_drawer(sgl, 12);
+	demo_2_matrix_setup(sgl -> shader_program, camera_pos);
+	demo_4_core_drawer(12);
 }
 
 #ifdef DEMO_4

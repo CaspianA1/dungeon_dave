@@ -188,8 +188,8 @@ StateGL demo_6_init(void) {
 	return sgl;
 }
 
-void demo_6_drawer(const StateGL sgl) {
-	move(sgl.shader_program);
+void demo_6_drawer(const StateGL* const sgl) {
+	move(sgl -> shader_program);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	draw_triangles(8);
 }

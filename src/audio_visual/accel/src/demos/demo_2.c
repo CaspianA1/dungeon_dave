@@ -1,4 +1,3 @@
-#include "../utils.c"
 #include "demo_1.c"
 
 static inline GLfloat to_radians(const GLfloat degrees) {

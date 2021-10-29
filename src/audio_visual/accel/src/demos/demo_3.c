@@ -172,7 +172,7 @@ StateGL demo_3_init(void) {
 	return sgl;
 }
 
-void demo_3_drawer(const StateGL sgl) {
+void demo_3_drawer(const StateGL* const sgl) {
 	(void) sgl;
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	draw_triangles(12);

@@ -39,8 +39,8 @@ void deinit_screen(const Screen* const screen) {
 	SDL_Quit();
 }
 
-void make_application(void (*const drawer)(const StateGL),
-	StateGL (*const init)(void), void (*const deinit)(StateGL)) {
+void make_application(void (*const drawer)(const StateGL* const),
+	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
 
 	const Screen screen = init_screen("Accel Demo");
 
@@ -51,8 +51,8 @@ void make_application(void (*const drawer)(const StateGL),
 	deinit_screen(&screen);
 }
 
-void loop_application(const Screen* const screen, void (*const drawer)(const StateGL),
-	StateGL (*const init)(void), void (*const deinit)(StateGL), const byte fps) {
+void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
+	StateGL (*const init)(void), void (*const deinit)(const StateGL* const), const byte fps) {
 
 	const double max_delay = 1000.0 / fps;
 	byte running = 1;
@@ -68,30 +68,29 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		drawer(sgl);
+		drawer(&sgl);
 		SDL_GL_SwapWindow(screen -> window);
 
 		const int wait = max_delay - (SDL_GetTicks() - before);
 		if (wait > 0) SDL_Delay(wait);
 	}
 
-	deinit(sgl);
+	deinit(&sgl);
 }
 
-// Deinitializes shader, unbinds vbos from vao, deletes vbos, textures, and vao
-void deinit_demo_vars(const StateGL sgl) {
-	glDeleteProgram(sgl.shader_program);
+void deinit_demo_vars(const StateGL* const sgl) {
+	glDeleteProgram(sgl -> shader_program);
 
-	for (int i = 0; i < sgl.num_vertex_buffers; i++) glDisableVertexAttribArray(i);
-	glDeleteBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
-	free(sgl.vertex_buffers);
+	for (int i = 0; i < sgl -> num_vertex_buffers; i++) glDisableVertexAttribArray(i);
+	glDeleteBuffers(sgl -> num_vertex_buffers, sgl -> vertex_buffers);
+	free(sgl -> vertex_buffers);
 
-	if (sgl.num_textures > 0) {
-		glDeleteTextures(sgl.num_textures, sgl.textures);
-		free(sgl.textures);
+	if (sgl -> num_textures > 0) {
+		glDeleteTextures(sgl -> num_textures, sgl -> textures);
+		free(sgl -> textures);
 	}
 
-	glDeleteVertexArrays(1, &sgl.vertex_array);
+	glDeleteVertexArrays(1, &sgl -> vertex_array);
 }
 
 GLuint init_vao(void) {

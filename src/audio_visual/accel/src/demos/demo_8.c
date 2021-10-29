@@ -149,8 +149,8 @@ StateGL demo_8_init(void) {
 	return sgl;
 }
 
-void demo_8_drawer(const StateGL sgl) {
-	move(sgl.shader_program);
+void demo_8_drawer(const StateGL* const sgl) {
+	move(sgl -> shader_program);
 	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
 	const int num_planes = 4;
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
