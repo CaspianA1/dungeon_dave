@@ -22,6 +22,13 @@ StateGL demo_9_init(void) {
 	return sgl;
 }
 
+void demo_9_drawer(const StateGL* const sgl) {
+	move(sgl -> shader_program);
+	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
+	const int num_planes = 1;
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
+}
+
 #ifdef DEMO_9
 int main(void) {
 
