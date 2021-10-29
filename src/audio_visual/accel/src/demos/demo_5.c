@@ -1,4 +1,3 @@
-#include "utils.c"
 #include "demo_4.c"
 
 /*

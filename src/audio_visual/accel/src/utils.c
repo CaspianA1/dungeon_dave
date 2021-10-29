@@ -94,6 +94,53 @@ void deinit_demo_vars(const StateGL sgl) {
 	glDeleteVertexArrays(1, &sgl.vertex_array);
 }
 
+GLuint init_vao(void) {
+	GLuint vertex_array;
+	glGenVertexArrays(1, &vertex_array);
+	glBindVertexArray(vertex_array);
+	return vertex_array;
+}
+
+// Buffer data ptr, size of buffer
+GLuint* init_vbos(const int num_buffers, ...) {
+	va_list args;
+	va_start(args, num_buffers);
+
+	GLuint* const vbos = malloc(num_buffers * sizeof(GLuint));
+	glGenBuffers(num_buffers, vbos);
+
+	for (int i = 0; i < num_buffers; i++) {
+		const GLfloat* const buffer_data_ptr = va_arg(args, GLfloat*);
+		const int size_of_buffer = va_arg(args, int);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
+		glBufferData(GL_ARRAY_BUFFER, size_of_buffer, buffer_data_ptr, GL_STATIC_DRAW);
+	}
+
+	va_end(args);
+	return vbos;
+}
+
+// Num components for vbo
+void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...) {
+	va_list args;
+	va_start(args, num_vbos);
+
+	for (int i = 0; i < num_vbos; i++) {
+		glEnableVertexAttribArray(i);
+		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
+
+		const int num_components = va_arg(args, int);
+
+		glVertexAttribPointer(
+			i, num_components, GL_FLOAT, // Attribute index i, component size, type
+			GL_FALSE, 0, // Not normalized, stride
+			NULL // Array buffer offset
+		);
+	}
+	va_end(args);
+}
+
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader) {
 	typedef enum {Vertex, Fragment} ShaderType;
 
@@ -134,54 +181,6 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 
 	glUseProgram(program_id);
 	return program_id;
-}
-
-// Num components for vbo
-void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...) {
-	va_list args;
-	va_start(args, num_vbos);
-
-	for (int i = 0; i < num_vbos; i++) {
-		glEnableVertexAttribArray(i);
-		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
-
-		const int num_components = va_arg(args, int);
-
-		glVertexAttribPointer(
-			i, num_components, GL_FLOAT, // Attribute index i, component size, type
-			GL_FALSE, 0, // Not normalized, stride
-			NULL // Array buffer offset
-		);
-	}
-
-	va_end(args);
-}
-
-GLuint init_vao(void) {
-	GLuint vertex_array;
-	glGenVertexArrays(1, &vertex_array);
-	glBindVertexArray(vertex_array);
-	return vertex_array;
-}
-
-// Buffer data ptr, size of buffer
-GLuint* init_vbos(const int num_buffers, ...) {
-	va_list args;
-	va_start(args, num_buffers);
-
-	GLuint* const vbos = malloc(num_buffers * sizeof(GLuint));
-	glGenBuffers(num_buffers, vbos);
-
-	for (int i = 0; i < num_buffers; i++) {
-		const GLfloat* const buffer_data_ptr = va_arg(args, GLfloat*);
-		const int size_of_buffer = va_arg(args, int);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
-		glBufferData(GL_ARRAY_BUFFER, size_of_buffer, buffer_data_ptr, GL_STATIC_DRAW);
-	}
-
-	va_end(args);
-	return vbos;
 }
 
 // Expects that num_textures > 0. Param: path.
@@ -241,7 +240,7 @@ void enable_all_culling(void) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-	#if !defined(DEMO_6) && !defined(DEMO_7) && !defined(DEMO_8)
+	#if !defined(DEMO_6) && !defined(DEMO_7) && !defined(DEMO_8) && !defined(DEMO_9)
 	glEnable(GL_CULL_FACE);
 	#endif
 }

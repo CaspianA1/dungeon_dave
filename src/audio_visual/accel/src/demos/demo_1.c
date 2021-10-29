@@ -1,7 +1,7 @@
 #ifndef DEMO_1_C
 #define DEMO_1_C
 
-#include "utils.c"
+#include "../utils.c"
 
 // SDL2, SDL2_ttf, SDL2_mixer, OpenGL, glew, cglm
 

@@ -1,4 +1,3 @@
-#include "utils.c"
 #include "demo_3.c"
 
 const char* const demo_4_vertex_shader =
@@ -55,7 +54,7 @@ StateGL demo_4_init(void) {
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "assets/walls/hieroglyph.bmp");
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/hieroglyph.bmp");
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	// For textures with an alpha channel, enable this

@@ -29,6 +29,8 @@
 #define OPENGL_TEX_MIN_FILTER GL_LINEAR_MIPMAP_LINEAR
 #define ENABLE_ANISOTROPIC_FILTERING
 
+const Uint8* keys;
+
 typedef uint_fast8_t byte;
 
 typedef struct {
@@ -65,17 +67,15 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 
 void deinit_demo_vars(const StateGL sgl); // Deletes shader program, vbos, and vao
 
-GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader);
-void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...);
-void unbind_vbos_from_vao(const int num_vbos);
+//////////
+
 GLuint init_vao(void);
 GLuint* init_vbos(const int num_buffers, ...);
-GLuint* init_textures(const int num_textures, ...);
+void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...);
 
+GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader);
+GLuint* init_textures(const int num_textures, ...);
 void select_texture_for_use(const GLuint texture, const GLuint shader_program);
+
 void enable_all_culling(void);
 void draw_triangles(const int num_triangles);
-
-
-
-const Uint8* keys;
