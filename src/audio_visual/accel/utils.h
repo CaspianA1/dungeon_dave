@@ -60,9 +60,10 @@ void deinit_screen(const Screen* const screen);
 
 void make_application(void (*const drawer)(const StateGL),
 	StateGL (*const init)(void), void (*const deinit)(StateGL));
-
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL),
 	StateGL (*const init)(void), void (*const deinit)(const StateGL), const byte fps);
+
+void deinit_demo_vars(const StateGL sgl); // Deletes shader program, vbos, and vao
 
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader);
 void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...);
@@ -75,6 +76,6 @@ void select_texture_for_use(const GLuint texture, const GLuint shader_program);
 void enable_all_culling(void);
 void draw_triangles(const int num_triangles);
 
-void deinit_demo_vars(const StateGL sgl); // Deletes shader program, vbos, and vao
+
 
 const Uint8* keys;

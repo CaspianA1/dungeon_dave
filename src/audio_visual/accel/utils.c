@@ -78,6 +78,22 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 	deinit(sgl);
 }
 
+// Deinitializes shader, unbinds vbos from vao, deletes vbos, textures, and vao
+void deinit_demo_vars(const StateGL sgl) {
+	glDeleteProgram(sgl.shader_program);
+
+	for (int i = 0; i < sgl.num_vertex_buffers; i++) glDisableVertexAttribArray(i);
+	glDeleteBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
+	free(sgl.vertex_buffers);
+
+	if (sgl.num_textures > 0) {
+		glDeleteTextures(sgl.num_textures, sgl.textures);
+		free(sgl.textures);
+	}
+
+	glDeleteVertexArrays(1, &sgl.vertex_array);
+}
+
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader) {
 	typedef enum {Vertex, Fragment} ShaderType;
 
@@ -139,10 +155,6 @@ void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...) {
 	}
 
 	va_end(args);
-}
-
-void unbind_vbos_from_vao(const int num_vbos) {
-	for (int i = 0; i < num_vbos; i++) glDisableVertexAttribArray(i);
 }
 
 GLuint init_vao(void) {
@@ -236,21 +248,6 @@ void enable_all_culling(void) {
 
 void draw_triangles(const int num_triangles) {
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
-}
-
-void deinit_demo_vars(const StateGL sgl) {
-	glDeleteProgram(sgl.shader_program);
-
-	unbind_vbos_from_vao(sgl.num_vertex_buffers);
-	glDeleteBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
-	free(sgl.vertex_buffers);
-
-	if (sgl.num_textures > 0) {
-		glDeleteTextures(sgl.num_textures, sgl.textures);
-		free(sgl.textures);
-	}
-
-	glDeleteVertexArrays(1, &sgl.vertex_array);
 }
 
 #endif
