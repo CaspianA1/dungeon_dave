@@ -12,8 +12,8 @@
 #define OPENGL_MINOR_VERSION 3
 
 // 800 by 600
-#define SCR_W 1440
-#define SCR_H 900
+#define SCR_W 800
+#define SCR_H 600
 #define FPS 60
 #define FOV 90.0f
 
@@ -28,6 +28,7 @@
 #define OPENGL_TEX_MAG_FILTER GL_LINEAR
 #define OPENGL_TEX_MIN_FILTER GL_LINEAR_MIPMAP_LINEAR
 #define ENABLE_ANISOTROPIC_FILTERING
+#define CHECK_FOR_BYTE_WORLD_SIZE // checks that meshes are not outside 0-255 boundary for each axis
 
 const Uint8* keys;
 
@@ -43,7 +44,8 @@ typedef enum {
 	LaunchGLEW,
 	CompileShader,
 	LinkShaders,
-	OpenImageFile
+	OpenImageFile,
+	MeshOutOfBounds
 } FailureType;
 
 typedef struct {

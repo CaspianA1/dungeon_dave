@@ -12,8 +12,13 @@ typedef GLfloat plane_type_t;
 #define PLANE_TYPE_ENUM GL_FLOAT
 */
 
+/*
 typedef GLshort plane_type_t;
 #define PLANE_TYPE_ENUM GL_SHORT
+*/
+
+typedef GLubyte plane_type_t;
+#define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
 
 //////////
 
@@ -42,7 +47,7 @@ const byte heightmap[map_height][map_width] = {
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 1, 2, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 1, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0}
 };
 
@@ -97,8 +102,22 @@ PLANE_CREATOR_FUNCTION(hori) {
 	memcpy(dest, vertices, bytes_per_plane);
 }
 
+void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type_t size[3]) {
+	for (byte i = 0; i < 3; i++) {
+		const GLfloat start = origin[i], length = size[i];
+		const GLfloat end = start + ((i == 1) ? -length : length);
+
+		if (start < 0.0f || start > 255.0f || end < 0.0f || end > 255.0f) {
+			fprintf(stderr, "Mesh out of bounds on %c axis\n", 'x' + i);
+			fail("create mesh: mesh out of bounds", MeshOutOfBounds);
+		}
+	}
+}
+
 // origin = top left corner
 plane_type_t* generate_sector_mesh(plane_type_t origin[3], const plane_type_t size[3]) {
+	check_for_mesh_out_of_bounds(origin, size);
+
 	plane_type_t* const sector_mesh = malloc(bytes_per_sector_mesh);
 
 	PLANE_CREATOR_NAME(vert_2)(origin, size[2], size[1], sector_mesh);
@@ -130,7 +149,7 @@ void bind_interleaved_planes_to_vao(void) {
 StateGL demo_7_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	plane_type_t origin[3] = {1, 1, 1}, size[3] = {20, 20, 50};
+	plane_type_t origin[3] = {5, 1, 5}, size[3] = {250, 1, 250};
 	plane_type_t* const sector_mesh = generate_sector_mesh(origin, size);
 
 	sgl.num_vertex_buffers = 1;
@@ -141,7 +160,7 @@ StateGL demo_7_init(void) {
 	
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/ivy.bmp");
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp");
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	enable_all_culling();

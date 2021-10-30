@@ -9,7 +9,12 @@ void demo_2_configurable_matrix_setup(const GLuint shader_program,
 
 	const GLfloat
 		near_clip_plane = 0.1f,
-		far_clip_plane = 100.0f;
+		far_clip_plane = 441.6729559300637f; // 100.0f before
+
+	/*
+	Max world size = 255 by 255 by 255 (with top left corner of block as origin)
+	So, max look distance in world = sqrt(255 * 255 + 255 * 255 + 255 * 255), which equals 441.6729559300637
+	*/
 
 	mat4 projection, view, model = GLM_MAT4_IDENTITY_INIT, view_times_model, model_view_projection;
 
