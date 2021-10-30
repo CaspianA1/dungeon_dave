@@ -106,10 +106,8 @@ plane_type_t* generate_sector_mesh(plane_type_t origin[3], const plane_type_t si
 	PLANE_CREATOR_NAME(vert_2)(origin, size[2], size[1], sector_mesh + vars_per_plane * 1);
 	origin[0] -= size[0];
 
+	// only the top horizontal plane; bottom one will always be invisible on map
 	PLANE_CREATOR_NAME(hori)(origin, size[0], size[2], sector_mesh + vars_per_plane * 2);
-	origin[1] -= size[1];
-	PLANE_CREATOR_NAME(hori)(origin, size[0], size[2], sector_mesh + vars_per_plane * 3);
-	origin[1] += size[1];
 
 	PLANE_CREATOR_NAME(vert_1)(origin, size[0], size[1], sector_mesh + vars_per_plane * 4);
 	origin[2] += size[2];

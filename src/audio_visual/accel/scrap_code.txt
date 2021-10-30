@@ -633,4 +633,11 @@ Only join if next to each other:
 		i++;
 	}
 
+///// Old hori plane creation:
+
+	PLANE_CREATOR_NAME(hori)(origin, size[0], size[2], sector_mesh + vars_per_plane * 2);
+	origin[1] -= size[1];
+	PLANE_CREATOR_NAME(hori)(origin, size[0], size[2], sector_mesh + vars_per_plane * 3);
+	origin[1] += size[1];
+
 /////
