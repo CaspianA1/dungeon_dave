@@ -10,9 +10,7 @@
 /*
 typedef GLfloat plane_type_t;
 #define PLANE_TYPE_ENUM GL_FLOAT
-*/
 
-/*
 typedef GLshort plane_type_t;
 #define PLANE_TYPE_ENUM GL_SHORT
 */
