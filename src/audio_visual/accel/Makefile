@@ -20,7 +20,7 @@ build_any:
 	$(CC) $(CFLAGS) $(BUILD_TYPE) $(LDFLAGS) -D DEMO_$(demo_id) -o bin/$(OUT) src/demos/demo_$(demo_id).c
 
 # tests demos from 1 to DEMO, stopping if one fails to build
-accel_test:
+test_all:
 	for i in {1..$(DEMO)}; do \
 		if !(make build_any demo_id=$$i) then break; \
 		else ./bin/accel_demo & \

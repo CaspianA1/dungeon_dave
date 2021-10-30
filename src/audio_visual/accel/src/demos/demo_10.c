@@ -29,25 +29,13 @@ typedef GLubyte plane_type_t;
 
 //////////
 
-enum {
-	map_width = 8, map_height = 5,
-	vars_per_vertex = 5, vertices_per_plane = 6, planes_per_mesh = 5
-};
-
+enum {vars_per_vertex = 5, vertices_per_plane = 6, planes_per_mesh = 5};
 enum {vars_per_plane = vars_per_vertex * vertices_per_plane};
 enum {bytes_per_plane = vars_per_plane * sizeof(plane_type_t)};
 enum {bytes_per_sector_mesh = bytes_per_plane * planes_per_mesh};
 // Sectors are meshes here
 
 //////////
-
-const byte heightmap[map_height][map_width] = {
-	{0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 1, 2, 0, 0, 0},
-	{0, 0, 0, 1, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0}
-};
 
 PLANE_CREATOR_FUNCTION(vert_1) { // Aligned on X axis
 	const plane_type_t left_x = top_left_corner[0], top_y = top_left_corner[1], z = top_left_corner[2];
@@ -144,7 +132,7 @@ void bind_interleaved_planes_to_vao(void) {
 	glVertexAttribPointer(1, 2, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(plane_type_t)));
 }
 
-StateGL demo_7_init(void) {
+StateGL demo_10_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
 	plane_type_t origin[3] = {5, 1, 5}, size[3] = {250, 1, 250};
@@ -166,7 +154,7 @@ StateGL demo_7_init(void) {
 	return sgl;
 }
 
-void demo_7_drawer(const StateGL* const sgl) {
+void demo_10_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	enum {num_meshes = 1};
@@ -175,6 +163,6 @@ void demo_7_drawer(const StateGL* const sgl) {
 
 #ifdef DEMO_10
 int main(void) {
-	  make_application(demo_7_drawer, demo_7_init, deinit_demo_vars);
+	  make_application(demo_10_drawer, demo_10_init, deinit_demo_vars);
 }
 #endif
