@@ -554,3 +554,83 @@ void draw_triangles(const int num_triangles) {
 	/////
 
 /////
+
+	/*
+	.A B C
+	C B D
+	C D D - deg
+	D D E - deg
+	D E E - deg
+	E E F - deg
+	E F G
+	G F H
+
+	in as {A, B, C, D,
+		D, E,
+		E, F, G, H} to gpu
+
+	plane_1 = {A, B, C, D}, plane_2 = {E, F, G, H};
+
+	B--D    F--H
+	|\ |    |\ |
+	| \|    | \|
+	A--C    E--G
+
+	Whoops, theirs were like that
+	Retrying
+	*/
+
+	/*
+	New order:
+	0 1 2
+	1 2 3
+
+	2 3 4
+	3 4 5
+
+	3 4 5
+	4 5 6
+	*/
+
+/////
+
+/*
+Only join if next to each other:
+
+
+0__1
+|  /
+| /
+2/
+
+    2
+   /|
+  / |
+1/__3
+
+2__4
+|  /
+| /
+3/
+*/
+
+///// A programmatic plane creator (didn't work, but only discarding b/c hard to maintain):
+
+	void (*const plane_creators[3])(PLANE_CREATOR_SIGNATURE) = {
+		PLANE_CREATOR_NAME(vert_2), PLANE_CREATOR_NAME(hori), PLANE_CREATOR_NAME(vert_1)
+	};
+
+	int i = 0;
+	for (byte varied_axis = 0; varied_axis < 3; varied_axis++) {
+		const byte size_axis_x = (varied_axis == 0) * 2, size_axis_y = (varied_axis == 1) + 1;
+		void (*const plane_creator)(PLANE_CREATOR_SIGNATURE) = plane_creators[varied_axis];
+
+		plane_creator(origin, size[size_axis_x], size[size_axis_y], sector_mesh + i);
+		i++;
+		origin[varied_axis] += size[varied_axis];
+		plane_creator(origin, size[size_axis_x], size[size_axis_y], sector_mesh + i);
+		origin[varied_axis] -= size[varied_axis];
+		i++;
+	}
+
+/////

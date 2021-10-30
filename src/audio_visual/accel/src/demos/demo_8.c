@@ -7,13 +7,6 @@
 - in demo 9, allow for 2 interleaved planes to be drawn in the same pass
 */
 
-/*
-0__1
-|  /
-| /
-2/
-*/
-
 #define PLANE_TYPE GLfloat
 #define PLANE_TYPE_ENUM GL_FLOAT
 
