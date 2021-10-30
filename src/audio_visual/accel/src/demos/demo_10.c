@@ -4,7 +4,7 @@
 - sectors must still be drawn separately
 - may be faster for GPU with more data and nothing fancy
 - sector making fn
-- fix culling
+- fix culling by a function called rearrange_mesh_for_culling
 */
 
 /*
@@ -45,13 +45,6 @@ const byte heightmap[map_height][map_width] = {
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0}
 };
-
-/*
-0__1
-|  /
-| /
-2/
-*/
 
 PLANE_CREATOR_FUNCTION(vert_1) { // Aligned on X axis
 	const plane_type_t left_x = top_left_corner[0], top_y = top_left_corner[1], z = top_left_corner[2];
