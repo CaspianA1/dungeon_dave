@@ -28,7 +28,7 @@ typedef GLshort plane_type_t;
 
 enum {
 	map_width = 8, map_height = 5,
-	vars_per_vertex = 5, vertices_per_plane = 6, planes_per_mesh = 6
+	vars_per_vertex = 5, vertices_per_plane = 6, planes_per_mesh = 5
 };
 
 enum {vars_per_plane = vars_per_vertex * vertices_per_plane};
@@ -109,9 +109,9 @@ plane_type_t* generate_sector_mesh(plane_type_t origin[3], const plane_type_t si
 	// only the top horizontal plane; bottom one will always be invisible on map
 	PLANE_CREATOR_NAME(hori)(origin, size[0], size[2], sector_mesh + vars_per_plane * 2);
 
-	PLANE_CREATOR_NAME(vert_1)(origin, size[0], size[1], sector_mesh + vars_per_plane * 4);
+	PLANE_CREATOR_NAME(vert_1)(origin, size[0], size[1], sector_mesh + vars_per_plane * 3);
 	origin[2] += size[2];
-	PLANE_CREATOR_NAME(vert_1)(origin, size[0], size[1], sector_mesh + vars_per_plane * 5);
+	PLANE_CREATOR_NAME(vert_1)(origin, size[0], size[1], sector_mesh + vars_per_plane * 4);
 	origin[2] -= size[2];
 
 	return sector_mesh;
