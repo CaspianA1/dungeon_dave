@@ -6,11 +6,9 @@
 typedef GLubyte plane_type_t;
 #define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
 
-// vert per plane 6 before
-enum {vars_per_vertex = 5, vertices_per_plane = 24, planes_per_mesh = 4};
-enum {vars_per_plane = vars_per_vertex * vertices_per_plane};
-enum {bytes_per_plane = vars_per_plane * sizeof(plane_type_t)};
-enum {bytes_per_sector_mesh = bytes_per_plane * planes_per_mesh};
+enum {vars_per_vertex = 5, vertices_per_plane_side = 6, planes_per_mesh = 4};
+enum {vars_per_mesh = vars_per_vertex * vertices_per_plane_side * planes_per_mesh};
+enum {bytes_per_mesh = vars_per_mesh * sizeof(plane_type_t)};
 
 void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type_t size[3]) {
 	for (byte i = 0; i < 3; i++) {
@@ -27,7 +25,7 @@ void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type
 plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_t size[3]) {
 	check_for_mesh_out_of_bounds(origin, size);
 
-	plane_type_t* const sector_mesh = malloc(bytes_per_sector_mesh);
+	plane_type_t* const sector_mesh = malloc(bytes_per_mesh);
 
 	const plane_type_t
 		size_x = size[0], size_y = size[1], size_z = size[2],
@@ -35,7 +33,7 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 
 	const plane_type_t far_x = near_x + size_x, bottom_y = top_y - size_y, far_z = near_z + size_z;
 
-	const plane_type_t vertices[vars_per_plane] = {
+	const plane_type_t vertices[vars_per_mesh] = {
 		// Top triangles aligned along Z axis (each pair in opposite winding order from each other)
 		near_x, bottom_y, near_z, 0.0f, size_y,
 		near_x, top_y, far_z, size_z, 0.0f,
@@ -91,11 +89,11 @@ void bind_interleaved_planes_to_vao(void) {
 StateGL demo_11_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	const plane_type_t origin[3] = {5, 5, 10}, size[3] = {1, 2, 8};
+	const plane_type_t origin[3] = {2, 2, 10}, size[3] = {1, 2, 8};
 	plane_type_t* const cuboid_mesh = create_sector_mesh(origin, size);
 
 	sgl.num_vertex_buffers = 1;
-	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, cuboid_mesh, bytes_per_sector_mesh);
+	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, cuboid_mesh, bytes_per_mesh);
 	bind_interleaved_planes_to_vao();
 	free(cuboid_mesh);
 
