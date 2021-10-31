@@ -12,7 +12,21 @@ enum {vars_per_plane = vars_per_vertex * vertices_per_plane};
 enum {bytes_per_plane = vars_per_plane * sizeof(plane_type_t)};
 enum {bytes_per_sector_mesh = bytes_per_plane * planes_per_mesh};
 
+void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type_t size[3]) {
+	for (byte i = 0; i < 3; i++) {
+		const GLfloat start = origin[i], length = size[i];
+		const GLfloat end = start + ((i == 1) ? -length : length);
+
+		if (start < 0.0f || start > 255.0f || end < 0.0f || end > 255.0f) {
+			fprintf(stderr, "Mesh out of bounds on %c axis\n", 'x' + i);
+			fail("create mesh: mesh out of bounds", MeshOutOfBounds);
+		}
+	}
+}
+
 plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_t size[3]) {
+	check_for_mesh_out_of_bounds(origin, size);
+
 	plane_type_t* const sector_mesh = malloc(bytes_per_sector_mesh);
 
 	const plane_type_t
@@ -77,7 +91,7 @@ void bind_interleaved_planes_to_vao(void) {
 StateGL demo_11_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	const plane_type_t origin[3] = {5, 5, 5}, size[3] = {1, 2, 3};
+	const plane_type_t origin[3] = {5, 5, 10}, size[3] = {1, 2, 8};
 	plane_type_t* const cuboid_mesh = create_sector_mesh(origin, size);
 
 	sgl.num_vertex_buffers = 1;
