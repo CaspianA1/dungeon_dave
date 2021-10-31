@@ -641,3 +641,30 @@ Only join if next to each other:
 	origin[1] += size[1];
 
 /////
+
+		/*
+		0____1
+		\   |
+		 \  |
+           2
+
+		tri is
+
+		0_1
+		| /
+		2/
+
+		from other side
+
+		b4: {0.0f, 0.0f}, {size_z, 0.0f}, {0.0f, size_y}
+		after: {size_z, 0.0f}, {0.0f, 0.0f}, {0.0f, size_y}
+		no
+		*/
+
+		/* orig flipped:
+		far_x, top_y, near_z, 0.0f, 0.0f,
+		far_x, top_y, far_z, size_z, 0.0f,
+		far_x, bottom_y, near_z, 0.0f, size_y,
+		*/
+
+/////
