@@ -28,7 +28,6 @@
 #define OPENGL_TEX_MAG_FILTER GL_LINEAR
 #define OPENGL_TEX_MIN_FILTER GL_LINEAR_MIPMAP_LINEAR
 #define ENABLE_ANISOTROPIC_FILTERING
-#define CHECK_FOR_BYTE_WORLD_SIZE // checks that meshes are not outside 0-255 boundary for each axis
 
 const Uint8* keys;
 

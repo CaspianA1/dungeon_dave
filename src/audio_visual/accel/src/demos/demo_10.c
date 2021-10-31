@@ -65,7 +65,7 @@ PLANE_CREATOR_FUNCTION(vert_2) { // Aligned on Z axis
 
 		x, bottom_y, far_z, 0.0f, size_vert,
 		x, bottom_y, near_z, size_hori, size_vert,
-		x, top_y, near_z, size_hori, 0.0f,
+		x, top_y, near_z, size_hori, 0.0f
 	};
 
 	memcpy(dest, vertices, bytes_per_plane);

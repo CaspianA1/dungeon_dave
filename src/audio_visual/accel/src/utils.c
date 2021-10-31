@@ -239,9 +239,9 @@ void enable_all_culling(void) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-	#if defined(DEMO_1) || defined(DEMO_2) || defined(DEMO_3) || defined(DEMO_5)
+	// #if defined(DEMO_1) || defined(DEMO_2) || defined(DEMO_3) || defined(DEMO_5)
 	glEnable(GL_CULL_FACE);
-	#endif
+	// #endif
 }
 
 void draw_triangles(const int num_triangles) {
