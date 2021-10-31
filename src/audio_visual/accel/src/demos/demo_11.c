@@ -1,6 +1,12 @@
 #include "demo_5.c"
 
-// demo 10, but just with triangles in correct winding order
+/* demo 10, but just with triangles in correct winding order
+handle top plane winding order
+in frag shader, cant check vertex ind
+there is fn fn gl_FrontFacing
+perhaps pass data about vertex int to frag shader
+or redundant data
+*/
 
 typedef GLubyte plane_type_t;
 #define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
@@ -55,7 +61,6 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 		far_x, top_y, far_z, 0.0f, 0.0f,
 		far_x, bottom_y, far_z, 0.0f, size_y,
 		far_x, bottom_y, near_z, size_z, size_y,
-
 
 		// Top triangles aligned along X axis
 		near_x, top_y, near_z, size_x, 0.0f,
