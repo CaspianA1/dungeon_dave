@@ -1,12 +1,13 @@
 #include "demo_5.c"
 
 // demo 10, but just with triangles in correct winding order
+// fix uv flip
 
 typedef GLubyte plane_type_t;
 #define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
 
 // vert per plane 6 before
-enum {vars_per_vertex = 5, vertices_per_plane = 18, planes_per_mesh = 3};
+enum {vars_per_vertex = 5, vertices_per_plane = 24, planes_per_mesh = 4};
 enum {vars_per_plane = vars_per_vertex * vertices_per_plane};
 enum {bytes_per_plane = vars_per_plane * sizeof(plane_type_t)};
 enum {bytes_per_sector_mesh = bytes_per_plane * planes_per_mesh};
@@ -20,7 +21,7 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 
 	const plane_type_t far_x = near_x + size_x, bottom_y = top_y - size_y, far_z = near_z + size_z;
 
-	const plane_type_t tri_pair_1[vars_per_plane] = { // extends along Z axis
+	const plane_type_t vertices[vars_per_plane] = {
 		// Top triangles aligned along Z axis (each pair in opposite winding order from each other)
 		near_x, bottom_y, near_z, 0.0f, size_y,
 		near_x, top_y, far_z, size_z, 0.0f,
@@ -49,16 +50,16 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 		near_x, top_y, far_z, 0.0f, 0.0f,
 
 		// Bottom triangles aligned along X axis
+		far_x, top_y, near_z, size_x, 0.0f,
+		far_x, bottom_y, near_z, size_x, size_y,
+		near_x, bottom_y, near_z, 0.0f, size_y,
+
+		near_x, bottom_y, far_z, 0.0f, size_y,
+		far_x, bottom_y, far_z, size_x, size_y,
+		far_x, top_y, far_z, size_x, 0.0f
 	};
 
-	/*
-	PLANE_CREATOR_NAME(vert_1)(origin, size[0], size[1], sector_mesh + vars_per_plane * 3);
-	origin[2] += size[2];
-	PLANE_CREATOR_NAME(vert_1)(origin, size[0], size[1], sector_mesh + vars_per_plane * 4);
-	origin[2] -= size[2];
-	*/
-
-	memcpy(sector_mesh, tri_pair_1, sizeof(tri_pair_1));
+	memcpy(sector_mesh, vertices, sizeof(vertices));
 
 	return sector_mesh;
 }
