@@ -19,7 +19,7 @@ typedef struct {
 	byte height, origin[2], size[2];
 } Sector;
 
-void generate_sectors_from_heightmap(byte* const* const heightmap, const byte map_width, const byte map_height) {
+void generate_sectors_from_heightmap(byte *const *const heightmap, const byte map_width, const byte map_height) {
 	(void) heightmap;
 	for (byte y = 0; y < map_height; y++) {
 		for (byte x = 0; x < map_width; x++) {
