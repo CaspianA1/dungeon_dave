@@ -14,7 +14,7 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 	(void) origin;
 	(void) size;
 
-	plane_type_t* sector_mesh = malloc(bytes_per_sector_mesh);
+	plane_type_t* const sector_mesh = malloc(bytes_per_sector_mesh);
 	return sector_mesh;
 }
 
