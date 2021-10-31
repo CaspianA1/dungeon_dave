@@ -163,6 +163,6 @@ void demo_10_drawer(const StateGL* const sgl) {
 
 #ifdef DEMO_10
 int main(void) {
-	  make_application(demo_10_drawer, demo_10_init, deinit_demo_vars);
+	make_application(demo_10_drawer, demo_10_init, deinit_demo_vars);
 }
 #endif
