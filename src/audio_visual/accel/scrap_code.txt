@@ -722,3 +722,71 @@ Only join if next to each other:
 	};
 
 /////
+
+void attempt_sector_fill_at(byte* const heightmap, const byte map_width,
+	const byte map_height, const byte x, const byte y) {
+
+	(void) heightmap;
+	(void) map_width;
+	(void) map_height;
+	(void) x;
+	(void) y;
+
+	const byte height = *map_point(heightmap, x, y, map_width);
+	// If the point is a potential corner
+	const int top_left_corner_vals[3][2] = {
+		{x - 1, y}, {x - 1, y - 1}, {x, y - 1}
+	};
+
+	byte corner_heights_not_eq_sum = 0;
+	for (byte i = 0; i < 3; i++) {
+		const int* const top_left_corner = top_left_corner_vals[i];
+		const int x = top_left_corner[0], y = top_left_corner[1];
+
+		if (x < 0 || x >= map_width || y < 0 || y >= map_height || *map_point(heightmap, x, y, map_width) != height)
+		corner_heights_not_eq_sum++;
+	}
+
+	/*
+	byte* const height_ref = map_point(heightmap, x, y, map_width);
+	const byte height = *height_ref;
+	if (height > 0) {
+		SectorArea area = {.height = height};
+	}
+	*/
+}
+
+/////
+
+	if (x < 0 || y < 0 || x >= map_width || y >= map_height) return;
+
+/////
+
+	// Not correct at the moment
+
+	// Attempting expansions
+
+	/*
+	while (bottom_right[1] < map_height) {
+		while (bottom_right[0] < map_width) {
+			if (area_is_valid(&area, map, map_width)) bottom_right[0]++;
+			else break;
+		}
+		if (area_is_valid(&area, map, map_width)) bottom_right[1]++;
+	}
+
+	for (byte y = area.origin[1]; y < bottom_right[1]; y++) {
+		for (byte x = area.origin[0]; x < bottom_right[0]; x++)
+			*map_point(map, x, y, map_width) = 0;
+	}
+
+	area.size[0] = bottom_right[0] - area.origin[0];
+	area.size[1] = bottom_right[1] - area.origin[1];
+	return area;
+	*/
+
+/////
+
+// byte bottom_right[2] = {area.origin[0] + area.size[0], area.origin[1] + area.size[1]}; // Stored as {x, y}
+
+/////
