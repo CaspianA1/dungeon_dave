@@ -6,9 +6,8 @@
 typedef GLubyte plane_type_t;
 #define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
 
-/* Since there's no bottom triangles, there would ideally just be 10 triangles; but one degenerate
-bottom triangle is needed to maintain a consistent winding order for backface culling, so 11 are needed */
-enum {vars_per_vertex = 5, vertices_per_triangle = 3, triangles_per_mesh = 11};
+// Bottom flat triangles of mesh excluded since they will never be seen
+enum {vars_per_vertex = 5, vertices_per_triangle = 3, triangles_per_mesh = 10};
 enum {vars_per_mesh = vars_per_vertex * vertices_per_triangle * triangles_per_mesh};
 enum {bytes_per_mesh = vars_per_mesh * sizeof(plane_type_t)};
 
@@ -73,19 +72,14 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 		far_x, top_y, far_z, size_x, 0,
 
 		// Top triangles aligned along Y axis (flat)
-		near_x, top_y, far_z, 0, size_z,
-		far_x, top_y, near_z, size_x, 0,
-		near_x, top_y, near_z, 0, 0,
-
-		// Degenerate bottom triangle
-		0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0,
+		near_x, top_y, far_z, size_z, size_x,
+		far_x, top_y, near_z, 0, 0,
+		near_x, top_y, near_z, 0, size_x,
 
 		// Bottom triangle aligned along Y axis (flat)
-		near_x, top_y, far_z, 0, size_z,
-		far_x, top_y, far_z, size_x, size_z,
-		far_x, top_y, near_z, size_x, 0
+		near_x, top_y, far_z, size_z, size_x,
+		far_x, top_y, far_z, size_z, 0,
+		far_x, top_y, near_z, 0, 0
 
 		// No matching degenerate bottom triangle under block here since not needed for sake of culling
 	};
@@ -112,8 +106,8 @@ StateGL demo_11_init(void) {
 
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, cuboid_mesh, bytes_per_mesh);
-	bind_interleaved_planes_to_vao();
 	free(cuboid_mesh);
+	bind_interleaved_planes_to_vao();
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	sgl.num_textures = 1;
