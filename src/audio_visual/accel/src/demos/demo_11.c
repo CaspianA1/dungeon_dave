@@ -34,54 +34,52 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 
 	const plane_type_t far_x = near_x + size_x, bottom_y = top_y - size_y, far_z = near_z + size_z;
 
+	// Side descriptions assume that camera direction is aligned to X axis
 	const plane_type_t vertices[vars_per_mesh] = {
-		// Top triangles aligned along Z axis (each pair in opposite winding order from each other)
+		// Face 1, pointing towards Z, near X, front face
 		near_x, bottom_y, near_z, 0, size_y,
 		near_x, top_y, far_z, size_z, 0,
 		near_x, top_y, near_z, 0, 0,
 
-		far_x, top_y, near_z, size_z, 0,
-		far_x, top_y, far_z, 0, 0,
-		far_x, bottom_y, near_z, size_z, size_y,
-
-		// Bottom triangles aligned along Z axis
 		near_x, bottom_y, near_z, 0, size_y,
 		near_x, bottom_y, far_z, size_z, size_y,
 		near_x, top_y, far_z, size_z, 0,
+
+		// Face 2, pointing towards Z, far X, back face
+		far_x, top_y, near_z, size_z, 0,
+		far_x, top_y, far_z, 0, 0,
+		far_x, bottom_y, near_z, size_z, size_y,
 
 		far_x, top_y, far_z, 0, 0,
 		far_x, bottom_y, far_z, 0, size_y,
 		far_x, bottom_y, near_z, size_z, size_y,
 
-		// Top triangles aligned along X axis
+		// Face 3, pointing towards X, left face
 		near_x, top_y, near_z, size_x, 0,
 		far_x, top_y, near_z, 0, 0,
 		near_x, bottom_y, near_z, size_x, size_y,
 
-		near_x, bottom_y, far_z, 0, size_y,
-		far_x, top_y, far_z, size_x, 0,
-		near_x, top_y, far_z, 0, 0,
-
-		// Bottom triangles aligned along X axis
 		far_x, top_y, near_z, 0, 0,
 		far_x, bottom_y, near_z, 0, size_y,
 		near_x, bottom_y, near_z, size_x, size_y,
+
+		// Face 4, pointing towards X, right face
+		near_x, bottom_y, far_z, 0, size_y,
+		far_x, top_y, far_z, size_x, 0,
+		near_x, top_y, far_z, 0, 0,
 
 		near_x, bottom_y, far_z, 0, size_y,
 		far_x, bottom_y, far_z, size_x, size_y,
 		far_x, top_y, far_z, size_x, 0,
 
-		// Top triangle aligned along Y axis (flat)
+		// Face 5, top flat face
 		near_x, top_y, far_z, size_z, size_x,
 		far_x, top_y, near_z, 0, 0,
 		near_x, top_y, near_z, 0, size_x,
 
-		// Bottom triangle aligned along Y axis (flat)
 		near_x, top_y, far_z, size_z, size_x,
 		far_x, top_y, far_z, size_z, 0,
 		far_x, top_y, near_z, 0, 0
-
-		// No matching degenerate bottom triangle under block here since not needed for sake of culling
 	};
 
 	memcpy(sector_mesh, vertices, bytes_per_mesh);
