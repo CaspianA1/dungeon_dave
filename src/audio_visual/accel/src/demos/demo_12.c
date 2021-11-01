@@ -28,7 +28,7 @@ void generate_sectors_from_heightmap(byte* const heightmap, const byte map_width
 }
 
 StateGL demo_12_init(void) {
-	StateGL sgl = demo_10_init();
+	StateGL sgl = demo_11_init();
 
 	enum {map_width = 8, map_height = 5};
 	const byte heightmap[map_height][map_width] = {
@@ -46,6 +46,6 @@ StateGL demo_12_init(void) {
 
 #ifdef DEMO_12
 int main(void) {
-	make_application(demo_10_drawer, demo_12_init, deinit_demo_vars);
+	make_application(demo_11_drawer, demo_12_init, deinit_demo_vars);
 }
 #endif
