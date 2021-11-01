@@ -21,7 +21,7 @@ build_any:
 
 # tests demos from 1 to DEMO, stopping if one fails to build
 test_all:
-	for i in {1..$(DEMO)}; do \
+	for i in {$(DEMO)..1}; do \
 		if !(make build_any demo_id=$$i) then break; \
 		else ./bin/accel_demo & \
 		fi \

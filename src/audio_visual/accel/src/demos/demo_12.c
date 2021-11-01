@@ -1,4 +1,6 @@
 #include "demo_11.c"
+#include "../sector.c"
+
 /*
 - Sectors contain their meshes
 - To begin with, don't clip sector heights based on adjacent heights
@@ -8,101 +10,108 @@
 - Ideal: BSPs, but not worth time
 - To start, one vbo + texture per sector
 - Form sectors of height 0 too, but do that later
+
+_____
+- Make height-zero sectors two-triangle planes
+- Clip sectors based on adjacent heights
+- Find which sectors are behind, and then skip rendering those
 */
 
-typedef struct {
-	const byte height, origin[2];
-	byte size[2];
-} SectorArea;
-
-typedef struct {
-	const SectorArea area;
-	const GLuint vbo, texture;
-} Sector;
-
-typedef struct {
-	Sector* const sectors;
-	int length, max_alloc;
-} SectorStack;
-
-byte* map_point(byte* const map, const byte x, const byte y, const byte map_width) {
-	return map + (y * map_width + x);
-}
-
-byte area_is_valid(const SectorArea* const area, byte* const map, const byte map_width) {
-	const byte start_x = area -> origin[0], start_y = area -> origin[1];
-	const byte end_x = start_x + area -> size[0], end_y = area -> size[1];
-
-	for (byte y = start_y; y < end_y; y++) {
-		for (byte x = start_x; x < end_x; x++) {
-			if (*map_point(map, x, y, map_width) != area -> height) return 0;
-		}
-	}
-	return 1;
-}
-
-// Corner is top left
-SectorArea attempt_area_fill(SectorArea area, byte* const map, const byte map_width, const byte map_height) {
-	// Not working correctly yet
-	for (byte y = area.origin[1]; y < map_height; y++) {
-		for (byte x = area.origin[0]; x < map_width; x++) {
-			if (area_is_valid(&area, map, map_width)) area.size[0]++;
-			else break;
-		}
-		if (area_is_valid(&area, map, map_width)) area.size[1]++;
-		else break;
-	}
-
-	for (byte y = area.origin[1]; y < area.origin[1] + area.size[1]; y++) {
-		for (byte x = area.origin[0]; x < area.origin[0] + area.size[0]; x++)
-			*map_point(map, x, y, map_width) = 0;
-	}
-
-	return area;
-}
-
-SectorStack* generate_sectors_from_heightmap(byte* const heightmap, const byte map_width, const byte map_height) {
-	SectorStack* const sectors = NULL;
-
-	for (byte y = 0; y < map_height; y++) {
-		for (byte x = 0; x < map_width; x++) {
-			const byte height = *map_point(heightmap, x, y, map_width);
-			if (height == 0) continue;
-			const SectorArea area = {.height = height, .origin = {x, y}, .size = {1, 1}};
-			const SectorArea expanded = attempt_area_fill(area, heightmap, map_width, map_height);
-			printf("expanded = {.height = %d, .origin = {%d, %d}, .size = {%d, %d}}\n",
-				expanded.height, expanded.origin[0], expanded.origin[1], expanded.size[0], expanded.size[1]);
-			// Clear area, and add to sectors
-		}
-	}
-
-	return sectors;
-}
-
 StateGL demo_12_init(void) {
-	StateGL sgl = demo_11_init();
+	StateGL sgl = {.vertex_array = init_vao()};
 
-	enum {map_width = 8, map_height = 10};
-	const byte heightmap[map_height][map_width] = {
-		{0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 2, 2, 0, 0},
-		{0, 0, 0, 1, 2, 2, 0, 0},
-		{0, 0, 1, 1, 1, 1, 0, 0},
-		{0, 0, 1, 1, 1, 1, 0, 0},
-		{0, 0, 1, 1, 1, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0}
+	enum {map_width = 40, map_height = 40};
+
+	byte heightmap[map_height][map_width] = {
+		{3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+		{3, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,10,10,10,10,0, 0, 0, 5},
+		{3, 0, 0, 3, 0, 0, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10,0, 10,10,10,10,10,0, 0, 0, 5},
+		{3, 0, 0, 0, 0, 0, 3, 0, 6, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 10,0, 10,10,10,10,10,0, 0, 0, 5},
+		{3, 3, 3, 3, 0, 0, 3, 0, 6, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 10,0, 10,10,10,10,10,0, 0, 0, 5},
+		{3, 0, 0, 0, 0, 0, 3, 0, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 10,0, 10,10,10,10,10,0, 0, 0, 5},
+		{5, 0, 0, 0, 0, 0, 5, 0, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 6, 10,0, 10,10,10,10,10,0, 0, 0, 5},
+		{5, 0, 0, 0, 0, 0, 5, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 6, 10,0, 10,10,10,10,10,0, 0, 0, 5},
+		{5, 0, 0, 0, 0, 0, 5, 0, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 6, 10,0, 10,10,10,10,10,0, 0, 0, 5},
+		{5, 1, 1, 1, 1, 5, 5, 0, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 10,0, 10,10,10,10,10,0, 0, 0, 5},
+		{6, 2, 2, 2, 2, 5, 5, 0, 6, 8, 2, 2, 2, 2, 2, 2, 2, 8, 2, 2, 2, 2, 8, 2, 2, 2, 2, 2, 6, 10,0, 10,10,10,10,10,1, 1, 1, 5},
+		{6, 3, 3, 3, 3, 5, 5, 0, 6, 8, 3, 3, 3, 3, 3, 3, 8, 3, 3, 3, 3, 8, 2, 2, 2, 2, 2, 2, 6, 10,0, 10,10,10,10,10,1, 1, 1, 5},
+		{6, 3, 3, 3, 3, 0, 0, 0, 6, 8, 8, 3, 3, 3, 3, 8, 3, 3, 3, 3, 8, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+		{6, 3, 3, 3, 3, 6, 6, 6, 6, 6, 8, 8, 8, 8, 8, 3, 3, 3, 3, 8, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 10,0, 10,0, 10,0, 10,5},
+		{6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 8, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+		{6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 8, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 10,0, 10,0, 10,0, 10,5},
+		{6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 8, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+		{6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 8, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 10,10,10,10,10,10,10,0, 5},
+		{6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 8, 8, 8, 8, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+		{5, 2, 2, 2, 2, 2, 2, 2, 2, 6, 8, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 0, 0, 0, 10,0, 10,10,5},
+		{5, 2, 1, 1, 1, 1, 1, 1, 2, 6, 8, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 10,0, 10,10,0, 0, 0, 0, 5},
+		{5, 2, 1, 0, 0, 0, 0, 1, 2, 6, 8, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 10,0, 10,0, 0, 0, 0, 0, 5},
+		{5, 2, 1, 0, 0, 0, 0, 1, 2, 6, 8, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 10,0, 10,0, 0, 0, 0, 0, 5},
+		{5, 2, 1, 0, 0, 0, 0, 1, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3, 3, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+		{5, 2, 1, 0, 1, 1, 1, 1, 2, 0, 0, 0, 3, 3, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 10,10, 0, 10,10,10, 0, 5},
+		{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+		{5, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+		{5, 0, 0, 0, 3, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 10, 10, 0, 0, 0, 0, 0, 5},
+		{5, 0, 0, 0, 3, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 6, 10,0, 0, 10, 0, 0, 0, 0, 0, 0, 5},
+		{5, 0, 0, 0, 3, 1, 1, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 10,0, 0, 10, 0, 10, 0, 0, 0, 0, 5},
+		{5, 0, 0, 0, 3, 1, 1, 3, 3, 3, 3, 3, 3, 0, 0, 2, 0, 2, 0, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 10,10, 10, 10, 0, 10, 0, 10, 0, 0, 5},
+		{5, 0, 0, 0, 3, 2, 2, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 10,0, 0, 10, 0, 10, 0, 10, 0, 0, 5},
+		{5, 1, 2, 3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,10, 10, 10, 10, 0, 0, 0, 0, 10, 0, 0, 0, 0, 5},
+		{5, 1, 2, 3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5},
+		{5, 0, 0, 0, 3, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5},
+		{5, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5},
+		{5, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5},
+		{5, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5},
+		{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5},
+		{10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10}
 	};
 
-	generate_sectors_from_heightmap((byte*) heightmap, map_width, map_height);
+	SectorList sectors = generate_sectors_from_heightmap((byte*) heightmap, map_width, map_height);
+
+	sgl.num_vertex_buffers = sectors.length;
+	sgl.vertex_buffers = malloc(sgl.num_vertex_buffers * sizeof(GLuint));
+	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
+
+	enum {bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
+
+	for (int i = 0; i < sectors.length; i++) {
+		const Sector* const sector = sectors.data + i;
+		const SectorArea area = sector -> area;
+
+		const plane_type_t
+			origin[3] = {area.origin[0], area.height, area.origin[1]},
+			size[3] = {area.size[0], area.height, area.size[1]};
+
+		plane_type_t* const cuboid_mesh = create_sector_mesh(origin, size);
+
+		glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers[i]);
+		glBufferData(GL_ARRAY_BUFFER, bytes_per_mesh, cuboid_mesh, GL_STATIC_DRAW);
+
+		free(cuboid_mesh);
+	}
+	deinit_sector_list(sectors);
+
+	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	sgl.num_textures = 1;
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/hieroglyph.bmp");
+	select_texture_for_use(sgl.textures[0], sgl.shader_program);
+	enable_all_culling();
 
 	return sgl;
 }
 
+void demo_12_drawer(const StateGL* const sgl) {
+	move(sgl -> shader_program);
+	glClearColor(0.8901960784313725f, 0.8549019607843137f, 0.788235294117647f, 0.0f); // Bone
+
+	for (int i = 0; i < sgl -> num_vertex_buffers; i++) {
+		glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[i]);
+		bind_interleaved_planes_to_vao();
+		draw_triangles(triangles_per_mesh);
+	}
+}
+
 #ifdef DEMO_12
 int main(void) {
-	make_application(demo_11_drawer, demo_12_init, deinit_demo_vars);
+	make_application(demo_12_drawer, demo_12_init, deinit_demo_vars);
 }
 #endif

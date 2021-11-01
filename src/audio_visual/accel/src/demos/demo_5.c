@@ -36,7 +36,7 @@ void move(const GLuint shader_program) {
 	const GLfloat hori_angle_minus_half_pi = hori_angle - half_pi, actual_speed = delta_time * move_speed;
 	vec3 right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
 
-	static vec3 position = {1.5, 1.5, 3.5};
+	static vec3 position = {1.5f, 1.5f, 3.5f};
 
 	if (keys[SDL_SCANCODE_W]) glm_vec3_muladds(direction, actual_speed, position);
 	if (keys[SDL_SCANCODE_S]) glm_vec3_muladds(direction, -actual_speed, position);

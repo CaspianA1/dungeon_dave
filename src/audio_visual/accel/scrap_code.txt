@@ -789,4 +789,38 @@ void attempt_sector_fill_at(byte* const heightmap, const byte map_width,
 
 // byte bottom_right[2] = {area.origin[0] + area.size[0], area.origin[1] + area.size[1]}; // Stored as {x, y}
 
+///// Old sector code:
+
+byte area_is_valid(const SectorArea* const area, byte* const map, const byte map_width) {
+	const byte start_x = area -> origin[0], start_y = area -> origin[1];
+	const byte end_x = start_x + area -> size[0], end_y = area -> size[1];
+
+	for (byte y = start_y; y < end_y; y++) {
+		for (byte x = start_x; x < end_x; x++) {
+			if (*map_point(map, x, y, map_width) != area -> height) return 0;
+		}
+	}
+	return 1;
+}
+
+// Corner is top left
+SectorArea attempt_area_fill(SectorArea area, byte* const map, const byte map_width, const byte map_height) {
+	// Not working correctly yet
+	for (byte y = area.origin[1]; y < map_height; y++) {
+		for (byte x = area.origin[0]; x < map_width; x++) {
+			if (area_is_valid(&area, map, map_width)) area.size[0]++;
+			else break;
+		}
+		if (area_is_valid(&area, map, map_width)) area.size[1]++;
+		else break;
+	}
+
+	for (byte y = area.origin[1]; y < area.origin[1] + area.size[1]; y++) {
+		for (byte x = area.origin[0]; x < area.origin[0] + area.size[0]; x++)
+			*map_point(map, x, y, map_width) = 0;
+	}
+
+	return area;
+}
+
 /////

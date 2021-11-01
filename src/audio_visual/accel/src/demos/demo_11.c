@@ -7,6 +7,7 @@ typedef GLubyte plane_type_t;
 
 // Bottom flat triangles of mesh excluded since they will never be seen
 enum {vars_per_vertex = 5, vertices_per_triangle = 3, triangles_per_mesh = 10};
+enum {bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
 enum {vars_per_mesh = vars_per_vertex * vertices_per_triangle * triangles_per_mesh};
 enum {bytes_per_mesh = vars_per_mesh * sizeof(plane_type_t)};
 
@@ -86,8 +87,6 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 }
 
 void bind_interleaved_planes_to_vao(void) {
-	enum {bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
-
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
 
