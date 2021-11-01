@@ -1,23 +1,14 @@
 #include "demo_5.c"
 
-/* demo 10, but just with triangles in correct winding order
-handle top plane winding order
-in frag shader, cant check vertex ind
-there is fn fn gl_FrontFacing
-perhaps pass data about vertex int to frag shader
-or redundant data
-*/
+// demo 10, but just with triangles in correct winding order
 
 typedef GLubyte plane_type_t;
 #define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
 
-/*
-typedef GLfloat plane_type_t;
-#define PLANE_TYPE_ENUM GL_FLOAT
-*/
-
-enum {vars_per_vertex = 5, vertices_per_plane_side = 6, planes_per_mesh = 5};
-enum {vars_per_mesh = vars_per_vertex * vertices_per_plane_side * planes_per_mesh};
+/* Since there's no bottom triangles, there would ideally just be 10 triangles; but one degenerate
+bottom triangle is needed to maintain a consistent winding order for backface culling, so 11 are needed */
+enum {vars_per_vertex = 5, vertices_per_triangle = 3, triangles_per_mesh = 11};
+enum {vars_per_mesh = vars_per_vertex * vertices_per_triangle * triangles_per_mesh};
 enum {bytes_per_mesh = vars_per_mesh * sizeof(plane_type_t)};
 
 void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type_t size[3]) {
@@ -80,12 +71,23 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 		far_x, bottom_y, far_z, size_x, size_y,
 		far_x, top_y, far_z, size_x, 0,
 
-		// Bottom triangles aligned along Y axis (flat)
-		near_x, top_y, near_z, 0, 0,
+		// Top triangles aligned along Y axis (flat)
+		near_x, top_y, far_z, 0, size_z,
 		far_x, top_y, near_z, size_x, 0,
-		near_x, top_y, far_z, 0, size_z
+		near_x, top_y, near_z, 0, 0,
+
+		// Degenerate bottom triangle
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+
+		// Bottom triangle aligned along Y axis (flat)
+		near_x, top_y, far_z, 0, size_z,
+		far_x, top_y, far_z, size_x, size_z,
+		far_x, top_y, near_z, size_x, 0
+
+		// No matching degenerate bottom triangle under block here since not needed for sake of culling
 	};
-	// PLANE_CREATOR_NAME(hori)(origin, size[0], size[2], sector_mesh + vars_per_plane * 2);
 
 	memcpy(sector_mesh, vertices, sizeof(vertices));
 	return sector_mesh;
@@ -125,7 +127,7 @@ void demo_11_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	enum {num_meshes = 1};
-	draw_triangles(num_meshes * planes_per_mesh * 2); // 2 = 2 triangles per plane
+	draw_triangles(num_meshes * triangles_per_mesh);
 }
 
 #ifdef DEMO_11
