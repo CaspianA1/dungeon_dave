@@ -16,7 +16,7 @@ typedef GLfloat plane_type_t;
 #define PLANE_TYPE_ENUM GL_FLOAT
 */
 
-enum {vars_per_vertex = 5, vertices_per_plane_side = 6, planes_per_mesh = 4};
+enum {vars_per_vertex = 5, vertices_per_plane_side = 6, planes_per_mesh = 5};
 enum {vars_per_mesh = vars_per_vertex * vertices_per_plane_side * planes_per_mesh};
 enum {bytes_per_mesh = vars_per_mesh * sizeof(plane_type_t)};
 
@@ -45,41 +45,47 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 
 	const plane_type_t vertices[vars_per_mesh] = {
 		// Top triangles aligned along Z axis (each pair in opposite winding order from each other)
-		near_x, bottom_y, near_z, 0.0f, size_y,
-		near_x, top_y, far_z, size_z, 0.0f,
-		near_x, top_y, near_z, 0.0f, 0.0f,
+		near_x, bottom_y, near_z, 0, size_y,
+		near_x, top_y, far_z, size_z, 0,
+		near_x, top_y, near_z, 0, 0,
 
-		far_x, top_y, near_z, size_z, 0.0f,
-		far_x, top_y, far_z, 0.0f, 0.0f,
+		far_x, top_y, near_z, size_z, 0,
+		far_x, top_y, far_z, 0, 0,
 		far_x, bottom_y, near_z, size_z, size_y,
 
 		// Bottom triangles aligned along Z axis
-		near_x, bottom_y, near_z, 0.0f, size_y,
+		near_x, bottom_y, near_z, 0, size_y,
 		near_x, bottom_y, far_z, size_z, size_y,
-		near_x, top_y, far_z, size_z, 0.0f,
+		near_x, top_y, far_z, size_z, 0,
 
-		far_x, top_y, far_z, 0.0f, 0.0f,
-		far_x, bottom_y, far_z, 0.0f, size_y,
+		far_x, top_y, far_z, 0, 0,
+		far_x, bottom_y, far_z, 0, size_y,
 		far_x, bottom_y, near_z, size_z, size_y,
 
 		// Top triangles aligned along X axis
-		near_x, top_y, near_z, size_x, 0.0f,
-		far_x, top_y, near_z, 0.0f, 0.0f,
+		near_x, top_y, near_z, size_x, 0,
+		far_x, top_y, near_z, 0, 0,
 		near_x, bottom_y, near_z, size_x, size_y,
 
-		near_x, bottom_y, far_z, 0.0f, size_y,
-		far_x, top_y, far_z, size_x, 0.0f,
-		near_x, top_y, far_z, 0.0f, 0.0f,
+		near_x, bottom_y, far_z, 0, size_y,
+		far_x, top_y, far_z, size_x, 0,
+		near_x, top_y, far_z, 0, 0,
 
 		// Bottom triangles aligned along X axis
-		far_x, top_y, near_z, 0.0f, 0.0f,
-		far_x, bottom_y, near_z, 0.0f, size_y,
+		far_x, top_y, near_z, 0, 0,
+		far_x, bottom_y, near_z, 0, size_y,
 		near_x, bottom_y, near_z, size_x, size_y,
 
-		near_x, bottom_y, far_z, 0.0f, size_y,
+		near_x, bottom_y, far_z, 0, size_y,
 		far_x, bottom_y, far_z, size_x, size_y,
-		far_x, top_y, far_z, size_x, 0.0f
+		far_x, top_y, far_z, size_x, 0,
+
+		// Bottom triangles aligned along Y axis (flat)
+		near_x, top_y, near_z, 0, 0,
+		far_x, top_y, near_z, size_x, 0,
+		near_x, top_y, far_z, 0, size_z
 	};
+	// PLANE_CREATOR_NAME(hori)(origin, size[0], size[2], sector_mesh + vars_per_plane * 2);
 
 	memcpy(sector_mesh, vertices, sizeof(vertices));
 	return sector_mesh;
