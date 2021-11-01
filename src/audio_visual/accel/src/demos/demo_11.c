@@ -71,7 +71,7 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 		far_x, bottom_y, far_z, size_x, size_y,
 		far_x, top_y, far_z, size_x, 0,
 
-		// Top triangles aligned along Y axis (flat)
+		// Top triangle aligned along Y axis (flat)
 		near_x, top_y, far_z, size_z, size_x,
 		far_x, top_y, near_z, 0, 0,
 		near_x, top_y, near_z, 0, size_x,
@@ -84,7 +84,7 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 		// No matching degenerate bottom triangle under block here since not needed for sake of culling
 	};
 
-	memcpy(sector_mesh, vertices, sizeof(vertices));
+	memcpy(sector_mesh, vertices, bytes_per_mesh);
 	return sector_mesh;
 }
 
