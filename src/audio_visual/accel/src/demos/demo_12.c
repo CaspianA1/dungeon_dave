@@ -15,14 +15,55 @@ _____
 - Make height-zero sectors two-triangle planes
 - Clip sectors based on adjacent heights
 - Find which sectors are behind, and then skip rendering those
+
+- Billboard sprites
+- Read sprite crop from spritesheet
+
+- Blit 2D sprite to whole screen
+- Blit color rect to screen
 */
 
-StateGL demo_12_init(void) {
+StateGL configurable_demo_12_init(const char* const texture_path, byte* const heightmap, const byte map_width, const byte map_height) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
+	SectorList sectors = generate_sectors_from_heightmap(heightmap, map_width, map_height);
+
+	sgl.num_vertex_buffers = sectors.length;
+	sgl.vertex_buffers = malloc(sgl.num_vertex_buffers * sizeof(GLuint));
+	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
+
+	enum {bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
+
+	for (int i = 0; i < sectors.length; i++) {
+		const Sector* const sector = sectors.data + i;
+		const SectorArea area = sector -> area;
+
+		const plane_type_t
+			origin[3] = {area.origin[0], area.height, area.origin[1]},
+			size[3] = {area.size[0], area.height, area.size[1]};
+
+		plane_type_t* const cuboid_mesh = create_sector_mesh(origin, size);
+
+		glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers[i]);
+		glBufferData(GL_ARRAY_BUFFER, bytes_per_mesh, cuboid_mesh, GL_STATIC_DRAW);
+
+		free(cuboid_mesh);
+	}
+	deinit_sector_list(sectors);
+
+	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	sgl.num_textures = 1;
+	sgl.textures = init_textures(sgl.num_textures, texture_path);
+	select_texture_for_use(sgl.textures[0], sgl.shader_program);
+	enable_all_culling();
+
+	return sgl;	
+}
+
+StateGL demo_12_palace_init(void) {
 	enum {map_width = 40, map_height = 40};
 
-	byte heightmap[map_height][map_width] = {
+	static byte heightmap[map_height][map_width] = {
 		{3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
 		{3, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,10,10,10,10,0, 0, 0, 5},
 		{3, 0, 0, 3, 0, 0, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10,0, 10,10,10,10,10,0, 0, 0, 5},
@@ -65,38 +106,85 @@ StateGL demo_12_init(void) {
 		{10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10}
 	};
 
-	SectorList sectors = generate_sectors_from_heightmap((byte*) heightmap, map_width, map_height);
+	return configurable_demo_12_init("../../../assets/walls/hi_res_pyramid_bricks_3.bmp", (byte*) heightmap, map_width, map_height);
+}
 
-	sgl.num_vertex_buffers = sectors.length;
-	sgl.vertex_buffers = malloc(sgl.num_vertex_buffers * sizeof(GLuint));
-	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
+StateGL demo_12_tpt_init(void) {
+	enum {map_width = 10, map_height = 20};
 
-	enum {bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
+	static byte heightmap[map_height][map_width] = {
+		{6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
+		{6, 0, 0, 0, 0, 0, 0, 6, 2, 6},
+		{6, 0, 0, 0, 0, 0, 0, 6, 2, 6},
+		{6, 0, 6, 6, 6, 6, 0, 6, 2, 6},
+		{6, 0, 4, 3, 3, 6, 0, 6, 2, 6},
+		{6, 0, 4, 4, 4, 0, 0, 6, 2, 6},
+		{6, 4, 4, 4, 4, 0, 0, 6, 2, 6},
+		{6, 4, 4, 4, 4, 0, 0, 6, 2, 6},
+		{6, 4, 0, 0, 0, 0, 0, 6, 2, 6},
+		{6, 4, 4, 0, 0, 0, 0, 6, 2, 6},
+		{6, 4, 4, 0, 0, 0, 0, 6, 2, 6},
+		{6, 4, 4, 0, 0, 0, 0, 6, 2, 6},
+		{6, 4, 6, 6, 6, 6, 0, 6, 2, 6},
+		{6, 3, 3, 3, 3, 6, 0, 6, 2, 6},
+		{6, 3, 3, 3, 3, 6, 0, 6, 2, 6},
+		{6, 6, 6, 6, 6, 6, 0, 6, 2, 6},
+		{6, 3, 3, 3, 3, 6, 0, 6, 2, 6},
+		{6, 3, 3, 3, 3, 6, 6, 6, 2, 6},
+		{6, 3, 2, 2, 2, 2, 2, 2, 2, 6},
+		{6, 6, 6, 6, 6, 6, 6, 6, 6, 6}
+	};
 
-	for (int i = 0; i < sectors.length; i++) {
-		const Sector* const sector = sectors.data + i;
-		const SectorArea area = sector -> area;
+	return configurable_demo_12_init("../../../assets/walls/pyramid_bricks_2.bmp", (byte*) heightmap, map_width, map_height);
+}
 
-		const plane_type_t
-			origin[3] = {area.origin[0], area.height, area.origin[1]},
-			size[3] = {area.size[0], area.height, area.size[1]};
+StateGL demo_12_pyramid_init(void) {
+	enum {map_width = 30, map_height = 40};
 
-		plane_type_t* const cuboid_mesh = create_sector_mesh(origin, size);
+	static byte heightmap[map_height][map_width] = {
+		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,10,10,10,9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,0, 0, 10,9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,0, 0, 10,9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,10,10,10,9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 3},
+		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+		{12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12},
+		{15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15},
+		{15,5, 1, 2, 7, 8, 9, 10,9, 8, 7, 11,11,11,7, 7, 7, 7, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 15},
+		{15,5, 1, 3, 6, 8, 9, 10,9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 15},
+		{15,5, 1, 3, 6, 8, 8, 10,9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 15},
+		{15,5, 1, 3, 6, 8, 8, 10,9, 7, 7, 7, 7, 7, 11,11,11,11,7, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 15},
+		{15,5, 1, 3, 6, 8, 8, 10,9, 7, 7, 7, 7, 7, 11,11,11,11,7, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 15},
+		{15,5, 1, 3, 6, 8, 8, 10,9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 15},
+		{15,5, 1, 3, 6, 8, 9, 10,9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 15},
+		{15,0, 1, 4, 5, 8, 9, 10,9, 8, 7, 11,11,11,7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 15},
+		{15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
+	};
 
-		glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers[i]);
-		glBufferData(GL_ARRAY_BUFFER, bytes_per_mesh, cuboid_mesh, GL_STATIC_DRAW);
-
-		free(cuboid_mesh);
-	}
-	deinit_sector_list(sectors);
-
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/hieroglyph.bmp");
-	select_texture_for_use(sgl.textures[0], sgl.shader_program);
-	enable_all_culling();
-
-	return sgl;
+	return configurable_demo_12_init("../../../assets/walls/greece.bmp", (byte*) heightmap, map_width, map_height);
 }
 
 void demo_12_drawer(const StateGL* const sgl) {
@@ -112,6 +200,6 @@ void demo_12_drawer(const StateGL* const sgl) {
 
 #ifdef DEMO_12
 int main(void) {
-	make_application(demo_12_drawer, demo_12_init, deinit_demo_vars);
+	make_application(demo_12_drawer, demo_12_pyramid_init, deinit_demo_vars);
 }
 #endif
