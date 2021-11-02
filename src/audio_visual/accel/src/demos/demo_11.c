@@ -5,22 +5,63 @@
 typedef GLubyte plane_type_t;
 #define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
 
-// Bottom flat triangles of mesh excluded since they will never be seen
-enum {vars_per_vertex = 5, vertices_per_triangle = 3, triangles_per_mesh = 10};
-enum {bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
-enum {vars_per_mesh = vars_per_vertex * vertices_per_triangle * triangles_per_mesh};
-enum {bytes_per_mesh = vars_per_mesh * sizeof(plane_type_t)};
+enum {
+	vars_per_vertex = 5, vertices_per_triangle = 3,
+	// Bottom flat triangles of mesh excluded since they will never be seen (so not 12, but 10)
+	triangles_per_mesh = 10, triangles_per_height_zero_mesh = 2
+};
+
+enum {
+	bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t),
+	vars_per_triangle = vars_per_vertex * vertices_per_triangle
+};
+
+enum {
+	vars_per_mesh = vars_per_triangle * triangles_per_mesh,
+	vars_per_height_zero_mesh = vars_per_triangle * triangles_per_height_zero_mesh
+};
+
+enum {
+	bytes_per_mesh = vars_per_mesh * sizeof(plane_type_t),
+	bytes_per_height_zero_mesh = vars_per_height_zero_mesh * sizeof(plane_type_t)
+	// bytes_per_height_zero_mesh = bytes_per_vertex * vertices_per_triangle * triangles_per_height_zero_mesh
+};
 
 void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type_t size[3]) {
 	for (byte i = 0; i < 3; i++) {
-		const GLfloat start = origin[i], length = size[i];
-		const GLfloat end = start + ((i == 1) ? -length : length);
+		const GLint start = origin[i], length = size[i];
+		const GLint end = start + ((i == 1) ? -length : length);
 
-		if (start < 0.0f || start > 255.0f || end < 0.0f || end > 255.0f) {
+		if (start < 0 || start > 255 || end < 0 || end > 255) {
 			fprintf(stderr, "Mesh out of bounds on %c axis\n", 'x' + i);
 			fail("create mesh: mesh out of bounds", MeshOutOfBounds);
 		}
 	}
+}
+
+/* Even if normal sector meshes can represent height zero meshes, it's worth it to make a separate type
+mesh for when a sector has height 0 because I save 120 bytes of memory that way (480 with floats!) */
+plane_type_t* create_height_zero_mesh(const plane_type_t origin[3], const plane_type_t size[2]) {
+	const plane_type_t size_3D[3] = {size[0], 0, size[1]};
+	check_for_mesh_out_of_bounds(origin, size_3D);
+
+	plane_type_t* const height_zero_mesh = malloc(bytes_per_height_zero_mesh);
+
+	const plane_type_t size_x = size[0], size_z = size[1];
+	const plane_type_t near_x = origin[0], top_y = origin[1], near_z = origin[2];
+	const plane_type_t far_x = near_x + size_x, far_z = near_z + size_z;
+
+	const plane_type_t vertices[vars_per_height_zero_mesh] = {
+		near_x, top_y, far_z, size_z, size_x,
+		far_x, top_y, near_z, 0, 0,
+		near_x, top_y, near_z, 0, size_x,
+
+		near_x, top_y, far_z, size_z, size_x,
+		far_x, top_y, far_z, size_z, 0,
+		far_x, top_y, near_z, 0, 0
+	};
+	memcpy(height_zero_mesh, vertices, bytes_per_height_zero_mesh);
+	return height_zero_mesh;
 }
 
 plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_t size[3]) {
