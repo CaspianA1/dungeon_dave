@@ -70,8 +70,8 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 	plane_type_t* const sector_mesh = malloc(bytes_per_mesh);
 
 	const plane_type_t
-		size_x = size[0], size_y = size[1], size_z = size[2],
-		near_x = origin[0], top_y = origin[1], near_z = origin[2];
+		near_x = origin[0], top_y = origin[1], near_z = origin[2],
+		size_x = size[0], size_y = size[1], size_z = size[2];
 
 	const plane_type_t far_x = near_x + size_x, bottom_y = top_y - size_y, far_z = near_z + size_z;
 

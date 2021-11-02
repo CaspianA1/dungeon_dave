@@ -8,8 +8,7 @@
 
 - Not perfect, but sectors + their meshes for clipping and rendering, and texmaps + heightmaps for game logic
 - Ideal: BSPs, but not worth time
-- To start, one vbo + texture per sector
-- Form sectors of height 0 too, but do that later
+- To start, one vbo + texture ptr per sector
 
 _____
 - Clip sectors based on adjacent heights
