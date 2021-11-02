@@ -71,19 +71,26 @@ SectorArea get_sector_area(SectorArea area, byte* const map, const byte map_widt
 	return area;
 }
 
-SectorList generate_sectors_from_heightmap(byte* const heightmap, const byte map_width, const byte map_height) {
+SectorList generate_sectors_from_heightmap(const byte* const heightmap, const byte map_width, const byte map_height) {
 	SectorList sectors = init_sector_list(5);
+
+	/* A copy of the heightmap is made b/c the heightmap data must
+	be modified, and the heightmap param should stay constant */
+	const size_t heightmap_bytes = map_width * map_height;
+	byte* const heightmap_copy = malloc(heightmap_bytes);
+	memcpy(heightmap_copy, heightmap, heightmap_bytes);
 
 	for (byte y = 0; y < map_height; y++) {
 		for (byte x = 0; x < map_width; x++) {
-			const byte height = *map_point(heightmap, x, y, map_width);
+			const byte height = *map_point(heightmap_copy, x, y, map_width);
 			if (height == NULL_MAP_POINT) continue;
 			const SectorArea area_seed = {.height = height, .origin = {x, y}, .size = {0, 0}};
-			const SectorArea expanded_area = get_sector_area(area_seed, heightmap, map_width, map_height);
+			const SectorArea expanded_area = get_sector_area(area_seed, heightmap_copy, map_width, map_height);
 			const Sector sector = {expanded_area, 0};
 			push_to_sector_list(&sectors, &sector);
 		}
 	}
 
+	free(heightmap_copy);
 	return sectors;
 }

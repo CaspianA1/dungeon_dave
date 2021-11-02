@@ -23,7 +23,7 @@ _____
 - Blit color rect to screen
 */
 
-StateGL configurable_demo_12_init(const char* const texture_path, byte* const heightmap, const byte map_width, const byte map_height) {
+StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
 	SectorList sectors = generate_sectors_from_heightmap(heightmap, map_width, map_height);
@@ -52,9 +52,6 @@ StateGL configurable_demo_12_init(const char* const texture_path, byte* const he
 	deinit_sector_list(sectors);
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, texture_path);
-	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 	enable_all_culling();
 
 	return sgl;	
@@ -63,7 +60,7 @@ StateGL configurable_demo_12_init(const char* const texture_path, byte* const he
 StateGL demo_12_palace_init(void) {
 	enum {map_width = 40, map_height = 40};
 
-	static byte heightmap[map_height][map_width] = {
+	static const byte heightmap[map_height][map_width] = {
 		{3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
 		{3, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,10,10,10,10,0, 0, 0, 5},
 		{3, 0, 0, 3, 0, 0, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10,0, 10,10,10,10,10,0, 0, 0, 5},
@@ -106,13 +103,21 @@ StateGL demo_12_palace_init(void) {
 		{10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10}
 	};
 
-	return configurable_demo_12_init("../../../assets/walls/hi_res_pyramid_bricks_3.bmp", (byte*) heightmap, map_width, map_height);
+	StateGL sgl = configurable_demo_12_init((byte*) heightmap, map_width, map_height);
+	sgl.num_textures = 4;
+	sgl.textures = init_textures(sgl.num_textures,
+		"../../../assets/walls/pyramid_bricks_4.bmp",
+		"../../../assets/walls/hieroglyph.bmp",
+		"../../../assets/walls/mesa.bmp",
+		"../../../assets/walls/hieroglyph.bmp");
+
+	return sgl;
 }
 
 StateGL demo_12_tpt_init(void) {
 	enum {map_width = 10, map_height = 20};
 
-	static byte heightmap[map_height][map_width] = {
+	static const byte heightmap[map_height][map_width] = {
 		{6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
 		{6, 0, 0, 0, 0, 0, 0, 6, 2, 6},
 		{6, 0, 0, 0, 0, 0, 0, 6, 2, 6},
@@ -135,13 +140,16 @@ StateGL demo_12_tpt_init(void) {
 		{6, 6, 6, 6, 6, 6, 6, 6, 6, 6}
 	};
 
-	return configurable_demo_12_init("../../../assets/walls/pyramid_bricks_2.bmp", (byte*) heightmap, map_width, map_height);
+	StateGL sgl = configurable_demo_12_init((byte*) heightmap, map_width, map_height);
+	sgl.num_textures = 1;
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/pyramid_bricks_2.bmp");
+	return sgl;
 }
 
 StateGL demo_12_pyramid_init(void) {
 	enum {map_width = 30, map_height = 40};
 
-	static byte heightmap[map_height][map_width] = {
+	static const byte heightmap[map_height][map_width] = {
 		{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
 		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
 		{3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
@@ -184,7 +192,10 @@ StateGL demo_12_pyramid_init(void) {
 		{15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
 	};
 
-	return configurable_demo_12_init("../../../assets/walls/greece.bmp", (byte*) heightmap, map_width, map_height);
+	StateGL sgl = configurable_demo_12_init((byte*) heightmap, map_width, map_height);
+	sgl.num_textures = 1;
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/greece.bmp");
+	return sgl;
 }
 
 void demo_12_drawer(const StateGL* const sgl) {
@@ -192,6 +203,10 @@ void demo_12_drawer(const StateGL* const sgl) {
 	glClearColor(0.8901960784313725f, 0.8549019607843137f, 0.788235294117647f, 0.0f); // Bone
 
 	for (int i = 0; i < sgl -> num_vertex_buffers; i++) {
+		// This puts various textures around the map
+		const int tex_ind = (double) i / sgl -> num_vertex_buffers * sgl -> num_textures;
+		select_texture_for_use(sgl -> textures[tex_ind], sgl -> shader_program);
+
 		glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[i]);
 		bind_interleaved_planes_to_vao();
 		draw_triangles(triangles_per_mesh);
@@ -200,6 +215,6 @@ void demo_12_drawer(const StateGL* const sgl) {
 
 #ifdef DEMO_12
 int main(void) {
-	make_application(demo_12_drawer, demo_12_tpt_init, deinit_demo_vars);
+	make_application(demo_12_drawer, demo_12_palace_init, deinit_demo_vars);
 }
 #endif
