@@ -200,6 +200,6 @@ void demo_12_drawer(const StateGL* const sgl) {
 
 #ifdef DEMO_12
 int main(void) {
-	make_application(demo_12_drawer, demo_12_pyramid_init, deinit_demo_vars);
+	make_application(demo_12_drawer, demo_12_tpt_init, deinit_demo_vars);
 }
 #endif

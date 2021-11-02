@@ -13,6 +13,9 @@ typedef struct {
 	int length, max_alloc;
 } SectorList;
 
+// This assumes that no map points will have that value
+const byte NULL_MAP_POINT = 255;
+
 SectorList init_sector_list(const int init_size) {
 	return (SectorList) {.data = malloc(init_size * sizeof(Sector)), 0, init_size};
 }
@@ -63,7 +66,7 @@ SectorArea get_sector_area(SectorArea area, byte* const map, const byte map_widt
 	clear_map_area:
 
 	for (byte y = area.origin[1]; y < area.origin[1] + area.size[1]; y++)
-		memset(map_point(map, area.origin[0], y, map_width), 0, area.size[0]);
+		memset(map_point(map, area.origin[0], y, map_width), NULL_MAP_POINT, area.size[0]);
 
 	return area;
 }
@@ -74,7 +77,7 @@ SectorList generate_sectors_from_heightmap(byte* const heightmap, const byte map
 	for (byte y = 0; y < map_height; y++) {
 		for (byte x = 0; x < map_width; x++) {
 			const byte height = *map_point(heightmap, x, y, map_width);
-			if (height == 0) continue;
+			if (height == NULL_MAP_POINT) continue;
 			const SectorArea area_seed = {.height = height, .origin = {x, y}, .size = {0, 0}};
 			const SectorArea expanded_area = get_sector_area(area_seed, heightmap, map_width, map_height);
 			const Sector sector = {expanded_area, 0};
