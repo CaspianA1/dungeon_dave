@@ -5,7 +5,7 @@ typedef struct {
 
 typedef struct {
 	const SectorArea area;
-	const GLuint vbo; // assoc texture later
+	GLuint vbo; // assoc texture later
 } Sector;
 
 typedef struct {

@@ -32,11 +32,17 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 	sgl.vertex_buffers = malloc(sgl.num_vertex_buffers * sizeof(GLuint));
 	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 
-	enum {bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
-
 	for (int i = 0; i < sectors.length; i++) {
-		const Sector* const sector = sectors.data + i;
+		Sector* const sector = sectors.data + i;
 		const SectorArea area = sector -> area;
+
+		sector -> vbo = sgl.vertex_buffers[i];
+
+		/*
+		if (area.height == 0) {
+			puts("Flat sector");
+		}
+		*/
 
 		const plane_type_t
 			origin[3] = {area.origin[0], area.height, area.origin[1]},
@@ -49,7 +55,10 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 
 		free(cuboid_mesh);
 	}
-	deinit_sector_list(sectors);
+	// any_data stores sector meshes
+	SectorList* const sector_list_on_heap = malloc(sizeof(SectorList));
+	*sector_list_on_heap = sectors;
+	sgl.any_data = sector_list_on_heap;
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	enable_all_culling();
@@ -192,6 +201,11 @@ StateGL demo_12_pyramid_init(void) {
 		{15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15}
 	};
 
+	/*
+	vbos store size internally
+	for flat plane, need to draw a diff num of triangles
+	*/
+
 	StateGL sgl = configurable_demo_12_init((byte*) heightmap, map_width, map_height);
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/greece.bmp");
@@ -202,19 +216,27 @@ void demo_12_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
 	glClearColor(0.8901960784313725f, 0.8549019607843137f, 0.788235294117647f, 0.0f); // Bone
 
-	for (int i = 0; i < sgl -> num_vertex_buffers; i++) {
-		// This puts various textures around the map
+	const SectorList* const sector_list = sgl -> any_data;
+	for (int i = 0; i < sector_list -> length; i++) {
 		const int tex_ind = (double) i / sgl -> num_vertex_buffers * sgl -> num_textures;
 		select_texture_for_use(sgl -> textures[tex_ind], sgl -> shader_program);
 
 		glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[i]);
 		bind_interleaved_planes_to_vao();
-		draw_triangles(triangles_per_mesh);
+		draw_triangles(triangles_per_mesh);	
 	}
+}
+
+void demo_12_deinit(const StateGL* const sgl) {
+	const SectorList* const sector_list = sgl -> any_data;
+	deinit_sector_list((*sector_list)); // This frees the internal sector data
+
+	free(sgl -> any_data); // This frees the sector list struct on the heap
+	deinit_demo_vars(sgl);
 }
 
 #ifdef DEMO_12
 int main(void) {
-	make_application(demo_12_drawer, demo_12_pyramid_init, deinit_demo_vars);
+	make_application(demo_12_drawer, demo_12_pyramid_init, demo_12_deinit);
 }
 #endif
