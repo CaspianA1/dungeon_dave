@@ -12,7 +12,7 @@
 - Form sectors of height 0 too, but do that later
 
 _____
-- Make height-zero sectors two-triangle planes
+- Height-zero sectors to two-triangle planes
 - Clip sectors based on adjacent heights
 - Find which sectors are behind, and then skip rendering those
 
