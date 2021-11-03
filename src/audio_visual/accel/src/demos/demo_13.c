@@ -48,18 +48,17 @@ const char* const demo_13_vertex_shader =
 	"}\n";
 
 void demo_13_matrix_setup(const GLuint shader_program) {
-	const GLuint
-		billboard_size = glGetUniformLocation(shader_program, "billboard_size"),
-		billboard_center = glGetUniformLocation(shader_program, "billboard_center_world_space"),
-		cam_right = glGetUniformLocation(shader_program, "cam_right_world_space"),
-		cam_up = glGetUniformLocation(shader_program, "cam_up_world_space"),
-		view_projection_matrix = glGetUniformLocation(shader_program, "VP");
+	static GLuint billboard_size, billboard_center, cam_right, cam_up, view_projection_matrix;
+	static byte first_call = 1;
 
-	(void) billboard_size;
-	(void) billboard_center;
-	(void) cam_right;
-	(void) cam_up;
-	(void) view_projection_matrix;
+	if (first_call) {
+		billboard_size = glGetUniformLocation(shader_program, "billboard_size");
+		billboard_center = glGetUniformLocation(shader_program, "billboard_center_world_space");
+		cam_right = glGetUniformLocation(shader_program, "cam_right_world_space");
+		cam_up = glGetUniformLocation(shader_program, "cam_up_world_space");
+		view_projection_matrix = glGetUniformLocation(shader_program, "VP");
+		first_call = 0;
+	}
 }
 
 StateGL demo_13_init(void) {
@@ -100,7 +99,7 @@ StateGL demo_13_init(void) {
 }
 
 void demo_13_drawer(const StateGL* const sgl) {
-	// demo_13_matrix_setup(sgl -> shader_program);
+	demo_13_matrix_setup(sgl -> shader_program);
 	move(sgl -> shader_program);
 
 	glClearColor(0.2f, 0.8f, 0.5f, 0.0f); // Barf green
