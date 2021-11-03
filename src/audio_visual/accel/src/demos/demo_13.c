@@ -5,28 +5,68 @@
 - https://github.com/opengl-tutorials/ogl/tree/master/tutorial18_billboards_and_particles
 */
 
+/*
+- Have 4 corners of sprite
+- Can get right vec and up vec in shader
+
+E = player vector
+P = billboard vector
+F = player-billboard-delta vector = P - E
+R = right vector = global up vector crossed with F
+U = up vector = F crossed with R
+
+Top right corner = U + R
+Top left corner = U - R
+*/
+
 #include "demo_12.c"
+
+typedef GLfloat billboard_type_t;
+#define BILLBOARD_TYPE_ENUM GL_FLOAT
+
+const size_t bytes_per_billboard_vertex = 5 * sizeof(billboard_type_t);
+
+void demo_13_matrix_setup(const GLuint shader_program) {
+	const GLuint
+		cam_right_world_space = glGetUniformLocation(shader_program, "cam_right_world_space"),
+		cam_up_world_space = glGetUniformLocation(shader_program, "cam_up_world_space"),
+		billboard_center_world_space = glGetUniformLocation(shader_program, "billboard_center_world_space"),
+		view_projection_matrix = glGetUniformLocation(shader_program, "VP");
+
+	(void) cam_right_world_space;
+	(void) cam_up_world_space;
+	(void) billboard_center_world_space;
+	(void) view_projection_matrix;
+}
 
 StateGL demo_13_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	const plane_type_t origin[3] = {1, 3, 0}, size[3] = {1, 3, 2};
-	const plane_type_t near_x = origin[0], top_y = origin[1], near_z = origin[2], size_y = size[1], size_z = size[2];
-	const plane_type_t bottom_y = top_y - size_y, far_z = near_z + size_z;
+	const billboard_type_t top_left_corner[3] = {8, 2, 7}, size[3] = {4, 2, 3};
 
-	const plane_type_t triangle_vertices[] = {
-		near_x, bottom_y, near_z, 0, size_y,
-		near_x, top_y, far_z, size_z, 0,
+	const billboard_type_t
+		near_x = top_left_corner[0], top_y = top_left_corner[1], near_z = top_left_corner[2],
+		size_y = size[1], size_z = size[2];
+
+	const billboard_type_t bottom_y = top_y - size_y, far_z = near_z + size_z;
+
+	const billboard_type_t vertices[20] = {
 		near_x, top_y, near_z, 0, 0,
+		near_x, top_y, far_z, size_z, 0,
 
 		near_x, bottom_y, near_z, 0, size_y,
-		near_x, bottom_y, far_z, size_z, size_y,
-		near_x, top_y, far_z, size_z, 0
+		near_x, bottom_y, far_z, size_z, size_y
 	};
 
 	sgl.num_vertex_buffers = 1;
-	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, triangle_vertices, sizeof(triangle_vertices));
-	bind_interleaved_planes_to_vao();
+	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, vertices, sizeof(vertices));
+	// bind_interleaved_planes_to_vao();
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, BILLBOARD_TYPE_ENUM, GL_FALSE, bytes_per_billboard_vertex, NULL);
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, BILLBOARD_TYPE_ENUM, GL_FALSE, bytes_per_billboard_vertex, (void*) (3 * sizeof(billboard_type_t)));
 
 	const char* const vertex_shader =
 		"#version 330 core\n"
@@ -51,6 +91,8 @@ StateGL demo_13_init(void) {
 	(void) vertex_shader;
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	demo_13_matrix_setup(sgl.shader_program);
+
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/objects/tomato.bmp");
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
@@ -62,7 +104,7 @@ StateGL demo_13_init(void) {
 void demo_13_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
 	glClearColor(0.2f, 0.8f, 0.5f, 0.0f); // Barf green
-	draw_triangles(2);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 #ifdef DEMO_13
