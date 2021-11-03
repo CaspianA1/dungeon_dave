@@ -24,7 +24,6 @@ StateGL demo_13_init(void) {
 		near_x, top_y, far_z, size_z, 0
 	};
 
-
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, triangle_vertices, sizeof(triangle_vertices));
 	bind_interleaved_planes_to_vao();
