@@ -21,7 +21,14 @@ void demo_2_configurable_matrix_setup(const GLuint shader_program,
 	glm_mul(view, model, view_times_model);
 	glm_mul(projection, view_times_model, model_view_projection);
 
-	const GLuint matrix_id = glGetUniformLocation(shader_program, "MVP");
+	static GLuint matrix_id;
+	static byte first_call = 1;
+
+	if (first_call) {
+		matrix_id = glGetUniformLocation(shader_program, "MVP");
+		first_call = 0;
+	}
+
 	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &model_view_projection[0][0]);
 }
 

@@ -30,34 +30,35 @@ const size_t bytes_per_billboard_vertex = 5 * sizeof(billboard_type_t);
 
 const char* const demo_13_vertex_shader =
 	"#version 330 core\n"
-	"layout(location = 0) in vec3 vertex;\n"
+	"layout(location = 0) in vec3 vertex_model_space;\n"
 	"layout(location = 1) in vec2 vertexUV;\n"
 
 	"out vec2 UV;\n"
 
 	"uniform vec2 billboard_size;\n"
-	"uniform vec3 cam_right_world_space, cam_up_world_space, billboard_center_world_space;\n"
+	"uniform vec3 billboard_center_world_space, cam_right_world_space, cam_up_world_space;\n"
 	"uniform mat4 VP;\n" // View-projection matrix
 
 	"void main() {\n"
 		"vec3 vertex_pos_world_space = billboard_center_world_space\n"
-			"+ cam_right_world_space * vertex.x * billboard_size.x\n"
-			"+ cam_up_world_space * vertex.y * billboard_size.y;\n"
+			"+ cam_right_world_space * vertex_model_space.x * billboard_size.x\n"
+			"+ cam_up_world_space * vertex_model_space.y * billboard_size.y;\n"
 
-		"gl_Position = VP * vec4(vertex_pos_world_space, 1.0f);\n"
-		"UV = vertexUV;\n"
+		"gl_Position = VP * vec4(vertex_model_space, 1.0f);\n"
 	"}\n";
 
 void demo_13_matrix_setup(const GLuint shader_program) {
 	const GLuint
-		cam_right_world_space = glGetUniformLocation(shader_program, "cam_right_world_space"),
-		cam_up_world_space = glGetUniformLocation(shader_program, "cam_up_world_space"),
-		billboard_center_world_space = glGetUniformLocation(shader_program, "billboard_center_world_space"),
+		billboard_size = glGetUniformLocation(shader_program, "billboard_size"),
+		billboard_center = glGetUniformLocation(shader_program, "billboard_center_world_space"),
+		cam_right = glGetUniformLocation(shader_program, "cam_right_world_space"),
+		cam_up = glGetUniformLocation(shader_program, "cam_up_world_space"),
 		view_projection_matrix = glGetUniformLocation(shader_program, "VP");
 
-	(void) cam_right_world_space;
-	(void) cam_up_world_space;
-	(void) billboard_center_world_space;
+	(void) billboard_size;
+	(void) billboard_center;
+	(void) cam_right;
+	(void) cam_up;
 	(void) view_projection_matrix;
 }
 
@@ -87,9 +88,8 @@ StateGL demo_13_init(void) {
 	glVertexAttribPointer(0, 3, BILLBOARD_TYPE_ENUM, GL_FALSE, bytes_per_billboard_vertex, NULL);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, BILLBOARD_TYPE_ENUM, GL_FALSE, bytes_per_billboard_vertex, (void*) (3 * sizeof(billboard_type_t)));
-	
+
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	demo_13_matrix_setup(sgl.shader_program);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/objects/tomato.bmp");
@@ -100,7 +100,9 @@ StateGL demo_13_init(void) {
 }
 
 void demo_13_drawer(const StateGL* const sgl) {
+	// demo_13_matrix_setup(sgl -> shader_program);
 	move(sgl -> shader_program);
+
 	glClearColor(0.2f, 0.8f, 0.5f, 0.0f); // Barf green
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
