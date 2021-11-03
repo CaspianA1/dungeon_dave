@@ -35,14 +35,14 @@ const char* const demo_13_vertex_shader =
 
 	"out vec2 UV;\n"
 
-	"uniform vec2 billboard_size;\n"
+	"uniform vec2 billboard_size_world_space;\n"
 	"uniform vec3 billboard_center_world_space, cam_right_world_space, cam_up_world_space;\n"
 	"uniform mat4 VP;\n" // View-projection matrix
 
 	"void main() {\n"
 		"vec3 vertex_pos_world_space = billboard_center_world_space\n"
-			"+ cam_right_world_space * vertex_model_space.x * billboard_size.x\n"
-			"+ cam_up_world_space * vertex_model_space.y * billboard_size.y;\n"
+			"+ cam_right_world_space * vertex_model_space.x * billboard_size_world_space.x\n"
+			"+ cam_up_world_space * vertex_model_space.y * billboard_size_world_space.y;\n"
 
 		"gl_Position = VP * vec4(vertex_model_space, 1.0f);\n"
 	"}\n";
@@ -51,14 +51,41 @@ void demo_13_matrix_setup(const GLuint shader_program) {
 	static GLuint billboard_size, billboard_center, cam_right, cam_up, view_projection_matrix;
 	static byte first_call = 1;
 
+	/*
+	set:
+	- size
+	- center
+	- view projection matrix
+	not set:
+	- cam right
+	- cam up
+	*/
+
 	if (first_call) {
-		billboard_size = glGetUniformLocation(shader_program, "billboard_size");
+		billboard_size = glGetUniformLocation(shader_program, "billboard_size_world_space");
 		billboard_center = glGetUniformLocation(shader_program, "billboard_center_world_space");
 		cam_right = glGetUniformLocation(shader_program, "cam_right_world_space");
 		cam_up = glGetUniformLocation(shader_program, "cam_up_world_space");
 		view_projection_matrix = glGetUniformLocation(shader_program, "VP");
 		first_call = 0;
 	}
+
+	//////////
+	static vec3 pos, origin = {0.0f, 0.0f, 0.0f}, up = {0.0f, 1.0f, 0.0f};
+	mat4 projection, view, model = GLM_MAT4_IDENTITY_INIT, view_times_model, projection_times_view;
+
+	glm_perspective(to_radians(FOV), (GLfloat) SCR_W / SCR_H, near_clip_plane, far_clip_plane, projection);
+	glm_lookat(pos, origin, up, view);
+	glm_mul(view, model, view_times_model);
+	glm_mul(projection, view, projection_times_view);
+
+	glUniform3f(cam_right, view[0][0], view[1][0], view[2][0]);
+	glUniform3f(cam_up, view[0][1], view[1][1], view[2][1]);
+
+	glUniform2f(billboard_size, 1.0f, 0.125f);
+	glUniform3f(billboard_center, 0.0f, 0.5f, 0.0f);
+	glUniformMatrix4fv(view_projection_matrix, 1, GL_FALSE, &projection_times_view[0][0]);
+
 }
 
 StateGL demo_13_init(void) {
@@ -99,7 +126,7 @@ StateGL demo_13_init(void) {
 }
 
 void demo_13_drawer(const StateGL* const sgl) {
-	demo_13_matrix_setup(sgl -> shader_program);
+	// demo_13_matrix_setup(sgl -> shader_program);
 	move(sgl -> shader_program);
 
 	glClearColor(0.2f, 0.8f, 0.5f, 0.0f); // Barf green
