@@ -6,6 +6,7 @@
 - waving the mouse a lot in the beginning can warp the initial position of the billboard
 - some input lag - updates in tick after, or something like that, it seems
 - the code is messy
+- make the billboard not turn when looking down or up
 */
 
 typedef GLfloat billboard_type_t;
