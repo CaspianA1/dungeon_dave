@@ -240,7 +240,7 @@ void enable_all_culling(void) {
 	glDepthFunc(GL_LESS);
 
 	// #if defined(DEMO_1) || defined(DEMO_2) || defined(DEMO_3) || defined(DEMO_5)
-	glEnable(GL_CULL_FACE);
+	// glEnable(GL_CULL_FACE);
 	// #endif
 }
 
