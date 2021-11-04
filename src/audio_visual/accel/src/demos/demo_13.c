@@ -28,7 +28,6 @@ const char* const demo_13_vertex_shader =
 			"+ cam_up_world_space * vertex_model_space.y * billboard_size_world_space.y;\n"
 
 		"gl_Position = VP * vec4(vertex_world_space, 1.0f);\n"
-
 		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + vec2(0.5f);\n"
 	"}\n",
 
@@ -56,8 +55,7 @@ void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint 
 		look_speed = 0.08f,
 		half_pi = (GLfloat) M_PI / 2.0f;
 
-	// int mouse_dx, mouse_dy;
-	// SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
+	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
 
 	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time;
 	hori_angle += look_speed * delta_time * -mouse_dx; // dx and dy are global from demo_5.c
@@ -128,8 +126,8 @@ void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t ce
 	mat4 view, view_times_projection;
 	demo_13_move(pos, view, view_times_projection, shader_program);
 
-	glUniform3f(cam_right_id, view[0][0], view[1][0], view[2][0]);
-	glUniform3f(cam_up_id, view[0][1], view[1][1], view[2][1]); // last to 0.0f for cool effect
+	glUniform3f(cam_right_id, view[0][0], view[1][0], view[2][0]); // Last to 0 for cool effect
+	glUniform3f(cam_up_id, view[0][1], view[1][1], view[2][1]);
 
 	glUniformMatrix4fv(view_projection_matrix_id, 1, GL_FALSE, &view_times_projection[0][0]);
 }
