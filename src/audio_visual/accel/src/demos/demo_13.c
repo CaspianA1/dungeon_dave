@@ -166,6 +166,8 @@ StateGL demo_13_init(void) {
 	sgl.shader_program = init_shader_program(demo_13_vertex_shader, demo_13_fragment_shader);
 	poly_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	enable_all_culling();
 	return sgl;
 }
@@ -185,7 +187,6 @@ void demo_13_drawer(const StateGL* const sgl) {
 
 	// Turning on alpha blending for billboards
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Drawing billboard
 	glUseProgram(sgl -> shader_program);
