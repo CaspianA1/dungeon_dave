@@ -2,8 +2,6 @@
 #include "demo_10.c"
 
 /*
-- waving the mouse a lot in the beginning can warp the initial position of the billboard
-- some input lag - updates in tick after, or something like that, it seems
 - the code is messy
 - make the billboard not turn when looking down or up
 */
@@ -80,7 +78,7 @@ void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint 
 	vec3 pos_plus_dir, up;
 	glm_vec3_add(pos, direction, pos_plus_dir);
 	glm_vec3_cross(right, direction, up);
-
+	//////////
 	mat4 projection, model_view_projection, view_times_model, model = GLM_MAT4_IDENTITY_INIT;
 	glm_perspective(to_radians(FOV), (GLfloat) SCR_W / SCR_H, near_clip_plane, far_clip_plane, projection);
 	glm_lookat(pos, pos_plus_dir, up, view);
@@ -94,10 +92,17 @@ void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint 
 		printf("pos = {%lf, %lf, %lf}\n", (double) pos[0], (double) pos[1], (double) pos[2]);
 
 	extern GLuint poly_shader;
-	glUseProgram(poly_shader); // Poly shader will have MVP in it
-	const GLuint matrix_id = glGetUniformLocation(shader_program, "MVP");
+	glUseProgram(poly_shader); // Binding poly_shader
+
+	static GLuint matrix_id;
+	static byte second_call = 1; // Not first_call b/c that is defined above
+	if (second_call) {
+		matrix_id = glGetUniformLocation(poly_shader, "MVP");
+		second_call = 0;
+	}
+
 	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &model_view_projection[0][0]);
-	glUseProgram(shader_program);
+	glUseProgram(shader_program); // Binding billboard shader back
 
 	last_time = SDL_GetTicks() / 1000.0f;
 }
@@ -105,6 +110,8 @@ void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint 
 void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t center[3], const billboard_type_t half_size[2]) {
 	static GLint billboard_size_id, billboard_center_id, cam_up_id, cam_right_id, view_projection_matrix_id;
 	static byte first_call = 1;
+
+	glUseProgram(shader_program); // Enable billboard shader
 
 	if (first_call) {
 		billboard_size_id = glGetUniformLocation(shader_program, "billboard_size_world_space");
@@ -119,7 +126,6 @@ void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t ce
 
 		first_call = 0;
 	}
-	//////////
 
 	static vec3 pos = {1.5f, 1.5f, 3.5f};
 	mat4 view, view_times_projection;
@@ -168,12 +174,13 @@ void demo_13_drawer(const StateGL* const sgl) {
 	// glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Black
 	glClearColor(0.2f, 0.8f, 0.5f, 0.0f); // Barf green
 
+	demo_13_matrix_setup(sgl -> shader_program, center, half_size);
+
 	// Drawing non-transparent objects first
 	glUseProgram(poly_shader);
 	select_texture_for_use(sgl -> textures[1], poly_shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[1]);
 	bind_interleaved_planes_to_vao();
-	move(poly_shader);
 	draw_triangles(2);
 
 	// Turning on alpha blending for billboards
@@ -186,7 +193,6 @@ void demo_13_drawer(const StateGL* const sgl) {
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, BILLBOARD_TYPE_ENUM, GL_FALSE, 0, NULL);
-	demo_13_matrix_setup(sgl -> shader_program, center, half_size);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	glDisable(GL_BLEND);
