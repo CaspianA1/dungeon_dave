@@ -1,10 +1,6 @@
-
 #include "demo_10.c"
 
-/*
-- the code is messy
-- make the billboard not turn when looking down or up
-*/
+// The code is messy
 
 typedef GLfloat billboard_type_t;
 #define BILLBOARD_TYPE_ENUM GL_FLOAT
@@ -15,8 +11,10 @@ const char* const demo_13_vertex_shader =
 
 	"out vec2 UV;\n"
 
+	"const vec3 cam_up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
+
 	"uniform vec2 billboard_size_world_space;\n"
-	"uniform vec3 billboard_center_world_space, cam_right_world_space, cam_up_world_space;\n"
+	"uniform vec3 billboard_center_world_space, cam_right_world_space;\n"
 	"uniform mat4 VP;\n" // View-projection matrix
 
 	"void main() {\n"
@@ -108,18 +106,19 @@ void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint 
 }
 
 void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t center[3], const billboard_type_t half_size[2]) {
-	static GLint billboard_size_id, billboard_center_id, cam_up_id, cam_right_id, view_projection_matrix_id;
+	// static GLint billboard_size_id, billboard_center_id, cam_right_id, view_projection_matrix_id;
+	static GLint cam_right_id, view_projection_matrix_id;
 	static byte first_call = 1;
 
 	glUseProgram(shader_program); // Enable billboard shader
 
 	if (first_call) {
-		billboard_size_id = glGetUniformLocation(shader_program, "billboard_size_world_space");
-		billboard_center_id = glGetUniformLocation(shader_program, "billboard_center_world_space");
-
-		cam_up_id = glGetUniformLocation(shader_program, "cam_up_world_space");
 		cam_right_id = glGetUniformLocation(shader_program, "cam_right_world_space");
 		view_projection_matrix_id = glGetUniformLocation(shader_program, "VP");
+
+		const GLint
+			billboard_size_id = glGetUniformLocation(shader_program, "billboard_size_world_space"),
+			billboard_center_id = glGetUniformLocation(shader_program, "billboard_center_world_space");
 
 		glUniform3f(billboard_center_id, center[0], center[1], center[2]);
 		glUniform2f(billboard_size_id, half_size[0] * 2.0f, half_size[1] * 2.0f);
@@ -127,13 +126,11 @@ void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t ce
 		first_call = 0;
 	}
 
-	static vec3 pos = {1.5f, 1.5f, 3.5f};
+	static vec3 pos = {0.0f, 0.0f, 0.0f};
 	mat4 view, view_times_projection;
 	demo_13_move(pos, view, view_times_projection, shader_program);
 
-	glUniform3f(cam_right_id, view[0][0], view[1][0], view[2][0]); // Last to 0 for cool effect
-	glUniform3f(cam_up_id, view[0][1], view[1][1], view[2][1]);
-
+	glUniform3f(cam_right_id, view[0][0], view[1][0], view[2][0]);
 	glUniformMatrix4fv(view_projection_matrix_id, 1, GL_FALSE, &view_times_projection[0][0]);
 }
 
