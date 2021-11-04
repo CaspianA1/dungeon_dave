@@ -2,7 +2,6 @@
 #include "demo_10.c"
 
 /*
-- alpha channel not working exactly as it should
 - waving the mouse a lot in the beginning can warp the initial position of the billboard
 - some input lag - updates in tick after, or something like that, it seems
 - the code is messy
@@ -155,42 +154,42 @@ StateGL demo_13_init(void) {
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, vertices, sizeof(vertices), flat_plane, bytes_per_plane);
 	free(flat_plane);
 
-	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/objects/tomato.bmp");
+	sgl.num_textures = 2;
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/objects/jungle.bmp", "../../../assets/walls/saqqara.bmp");
 
 	sgl.shader_program = init_shader_program(demo_13_vertex_shader, demo_13_fragment_shader);
-	select_texture_for_use(sgl.textures[0], sgl.shader_program);
-
 	poly_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	select_texture_for_use(sgl.textures[0], poly_shader);
 
 	enable_all_culling();
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	// glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	return sgl;
 }
 
 void demo_13_drawer(const StateGL* const sgl) {
+	// glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Black
 	glClearColor(0.2f, 0.8f, 0.5f, 0.0f); // Barf green
 
-	glUseProgram(sgl -> shader_program);
-	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, BILLBOARD_TYPE_ENUM, GL_FALSE, 0, NULL);
-
-	demo_13_matrix_setup(sgl -> shader_program, center, half_size);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-	//////////
-
+	// Drawing non-transparent objects first
 	glUseProgram(poly_shader);
+	select_texture_for_use(sgl -> textures[1], poly_shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[1]);
 	bind_interleaved_planes_to_vao();
 	move(poly_shader);
 	draw_triangles(2);
+
+	// Turning on alpha blending for billboards
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Drawing billboard
+	glUseProgram(sgl -> shader_program);
+	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
+	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, BILLBOARD_TYPE_ENUM, GL_FALSE, 0, NULL);
+	demo_13_matrix_setup(sgl -> shader_program, center, half_size);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	glDisable(GL_BLEND);
 }
 
 void demo_13_deinit(const StateGL* const sgl) {
