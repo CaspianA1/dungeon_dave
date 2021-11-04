@@ -158,7 +158,7 @@ StateGL demo_13_init(void) {
 	free(flat_plane);
 
 	sgl.num_textures = 2;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/objects/jungle.bmp", "../../../assets/walls/saqqara.bmp");
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/objects/tomato.bmp", "../../../assets/walls/saqqara.bmp");
 
 	sgl.shader_program = init_shader_program(demo_13_vertex_shader, demo_13_fragment_shader);
 	poly_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
