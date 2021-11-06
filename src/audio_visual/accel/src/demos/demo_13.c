@@ -1,7 +1,5 @@
 #include "demo_10.c"
 
-// The code is messy
-
 typedef GLfloat billboard_type_t;
 #define BILLBOARD_TYPE_ENUM GL_FLOAT
 
@@ -50,6 +48,7 @@ void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint 
 		look_speed = 0.08f,
 		half_pi = (GLfloat) M_PI / 2.0f;
 
+	int mouse_dx, mouse_dy;
 	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
 
 	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time;
@@ -92,10 +91,10 @@ void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint 
 	extern GLuint poly_shader;
 	glUseProgram(poly_shader); // Binding poly_shader
 
-	static GLuint matrix_id;
+	static GLint matrix_id;
 	static byte second_call = 1; // Not first_call b/c that is defined above
 	if (second_call) {
-		matrix_id = glGetUniformLocation(poly_shader, "MVP");
+		matrix_id = glGetUniformLocation(poly_shader, "MVP"); // MVP found in poly shader
 		second_call = 0;
 	}
 
@@ -106,7 +105,6 @@ void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint 
 }
 
 void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t center[3], const billboard_type_t half_size[2]) {
-	// static GLint billboard_size_id, billboard_center_id, cam_right_id, view_projection_matrix_id;
 	static GLint cam_right_id, view_projection_matrix_id;
 	static byte first_call = 1;
 
@@ -126,7 +124,7 @@ void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t ce
 		first_call = 0;
 	}
 
-	static vec3 pos = {0.0f, 0.0f, 0.0f};
+	static vec3 pos = {2.0f, 4.5f, 2.0f};
 	mat4 view, view_times_projection;
 	demo_13_move(pos, view, view_times_projection, shader_program);
 

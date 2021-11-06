@@ -15,7 +15,7 @@ typedef struct {
 
 // This assumes that no map points will have a value of 255
 const byte NULL_MAP_POINT = 255;
-const float sector_realloc_rate = 1.5;
+const float sector_realloc_rate = 1.5f;
 
 SectorList init_sector_list(const int init_size) {
 	return (SectorList) {.data = malloc(init_size * sizeof(Sector)), 0, init_size};
