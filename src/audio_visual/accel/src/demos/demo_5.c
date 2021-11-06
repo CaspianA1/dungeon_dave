@@ -5,7 +5,6 @@
 - wrap textures around taller and wider rectangles
 */
 
-int mouse_dx, mouse_dy;
 void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
 	mat4 view_times_projection, mat4 model_view_projection, const byte set_up_mvp) {
 
@@ -23,8 +22,8 @@ void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
 		look_speed = 0.08f,
 		half_pi = (GLfloat) M_PI / 2.0f;
 
-	// int mouse_dx, mouse_dy;
-	// SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
+	int mouse_dx, mouse_dy;
+	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
 
 	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time;
 	hori_angle += look_speed * delta_time * -mouse_dx;
