@@ -967,4 +967,48 @@ Bottom right corner = R - U
 		center[0] + half_size[0], center[1] + half_size[1]
 		/*
 
+///// Some manual frustum stuff:
+
+	/*
+	glm_vec3s_add((vec3) {1, 0, 0}, b, c);
+	glm_vec3s_add(c, glms_vec3_cross(a, b, c), c);
+	*/
+
+	/*
+	near.normal = pos + dir * near_clip
+	far.normal = pos + dir * far_clip
+	(left, right, top, bottom).normal = pos
+	near.dist = 
+	*/
+
+	/*
+	const GLfloat
+		*const pos = camera -> pos, *const dir = camera -> dir,
+		near_clip = camera -> clip_dists.near, far_clip = camera -> clip_dists.far;
+
+	const GLfloat
+		dir_times_far_clip[3] = {dir[0] * far_clip, dir[1] * far_clip, dir[2] * far_clip},
+		half_far_clip_rect_height = far_clip * tanf(camera -> vert_fov * 0.5f);
+
+	const GLfloat half_far_clip_rect_width = half_far_clip_rect_height * camera -> aspect_ratio;
+
+
+	Frustum frustum = {
+		.near = {{pos[0] + dir[0] * near_clip, pos[1] + dir[1] * near_clip, pos[2] + dir[2] * near_clip}, -1.0f},
+		.far = {{pos[0] + dir_times_far_clip[0], pos[1] + dir_times_far_clip[1], pos[2] + dir_times_far_clip[2]}, -1.0f},
+
+		.left = {{pos[0], pos[1], pos[2]}, -1.0f},
+	};
+
+/////
+
+typedef struct {
+	const GLfloat normal[3], dist; // Dist from origin to nearest point on plane
+} Plane;
+
+typedef struct {
+	// const Plane near, far, left, right, top, bottom;
+
+} Frustum;
+
 /////
