@@ -1,7 +1,8 @@
 #include "utils.c"
 
 typedef struct {
-	vec3 pos, dir, right; // The camera never moves from the origin, but `pos` here is more practical
+	vec2 right_xz; // X and Z of right (Y is always 0)
+	vec3 pos, dir; // The camera never moves from the origin, but `pos` here is more practical
 	GLfloat fov, hori_angle, vert_angle, aspect_ratio;
 	mat4 view_projection, model_view_projection; // Used the least, so last in struct
 } Camera;
@@ -15,7 +16,7 @@ void init_camera(Camera* const camera, const vec3 init_pos) {
 	camera -> aspect_ratio = (GLfloat) SCR_W / SCR_H;
 }
 
-void move_camera(Camera* const camera) {
+void update_camera(Camera* const camera) {
 	static GLfloat last_time;
 	static byte first_call = 1;
 
@@ -32,7 +33,6 @@ void move_camera(Camera* const camera) {
 	camera -> hori_angle += constants.speeds.look * delta_time * -mouse_dx;
 	camera -> vert_angle += constants.speeds.look * delta_time * -mouse_dy;
 
-	// half_pi = fully up, or -half_pi = fully down
 	if (camera -> vert_angle > constants.max_vert_angle) camera -> vert_angle = constants.max_vert_angle;
 	else if (camera -> vert_angle < -constants.max_vert_angle) camera -> vert_angle = -constants.max_vert_angle;
 
@@ -44,23 +44,25 @@ void move_camera(Camera* const camera) {
 	vec3 dir = {cos_vert * sinf(camera -> hori_angle), sinf(camera -> vert_angle), cos_vert * cosf(camera -> hori_angle)};
 	memcpy(camera -> dir, dir, sizeof(vec3));
 
-	// right[1] stays at 0.0f since initialization
-	camera -> right[0] = sinf(hori_angle_minus_half_pi);
-	camera -> right[2] = cosf(hori_angle_minus_half_pi);
+	camera -> right_xz[0] = sinf(hori_angle_minus_half_pi);
+	camera -> right_xz[1] = cosf(hori_angle_minus_half_pi);
 
+	vec3 right = {camera -> right_xz[0], 0.0f, camera -> right_xz[1]};
 	if (keys[constants.movement_keys.forward]) glm_vec3_muladds(dir, actual_speed, camera -> pos);
 	if (keys[constants.movement_keys.backward]) glm_vec3_muladds(dir, -actual_speed, camera -> pos);
-	if (keys[constants.movement_keys.left]) glm_vec3_muladds(camera -> right, -actual_speed, camera -> pos);
-	if (keys[constants.movement_keys.right]) glm_vec3_muladds(camera -> right, actual_speed, camera -> pos);
+	if (keys[constants.movement_keys.left]) glm_vec3_muladds(right, -actual_speed, camera -> pos);
+	if (keys[constants.movement_keys.right]) glm_vec3_muladds(right, actual_speed, camera -> pos);
 
 	vec3 rel_origin, up;
 	glm_vec3_add(camera -> pos, dir, rel_origin);
-	glm_vec3_cross(camera -> right, camera -> dir, up);
+	glm_vec3_cross(right, camera -> dir, up);
 
 	mat4 view, model_view, projection;
 	glm_lookat(camera -> pos, rel_origin, up, view);
 	glm_mul(view, (mat4) GLM_MAT4_IDENTITY_INIT, model_view);
-	glm_perspective(camera -> fov, camera -> aspect_ratio, constants.clip_dists.near, constants.clip_dists.far, projection);
+
+	glm_perspective(to_radians(camera -> fov), camera -> aspect_ratio,
+		constants.clip_dists.near, constants.clip_dists.far, projection);
 
 	glm_mul(projection, view, camera -> view_projection); // Used for billboard shader
 	glm_mul(projection, model_view, camera -> model_view_projection); // Used for sector shader

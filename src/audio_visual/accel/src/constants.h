@@ -15,12 +15,6 @@ static const struct {
         const GLfloat move, look;
     } speeds;
 
-    /*
-    const struct {
-        const GLfloat half_pi;
-    } numbers;
-    */
-
     const struct {
         const SDL_Scancode forward, backward, left, right;
     } movement_keys;

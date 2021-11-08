@@ -11,13 +11,13 @@ const char* const demo_13_vertex_shader =
 
 	"const vec3 cam_up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
 
-	"uniform vec2 billboard_size_world_space;\n"
-	"uniform vec3 billboard_center_world_space, cam_right_world_space;\n"
+	"uniform vec2 billboard_size_world_space, cam_right_xz_world_space;\n"
+	"uniform vec3 billboard_center_world_space;\n"
 	"uniform mat4 VP;\n" // View-projection matrix
 
 	"void main() {\n"
 		"vec3 vertex_world_space = billboard_center_world_space \n"
-			"+ cam_right_world_space * vertex_model_space.x * billboard_size_world_space.x\n"
+			"+ vec3(cam_right_xz_world_space, 0.0f).xzy * vertex_model_space.x * billboard_size_world_space.x\n"
 			"+ cam_up_world_space * vertex_model_space.y * billboard_size_world_space.y;\n"
 
 		"gl_Position = VP * vec4(vertex_world_space, 1.0f);\n"
@@ -112,7 +112,7 @@ void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t ce
 	glUseProgram(shader_program); // Enable billboard shader
 
 	if (first_call) {
-		cam_right_id = glGetUniformLocation(shader_program, "cam_right_world_space");
+		cam_right_id = glGetUniformLocation(shader_program, "cam_right_xz_world_space");
 		view_projection_matrix_id = glGetUniformLocation(shader_program, "VP");
 
 		const GLint
@@ -129,7 +129,7 @@ void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t ce
 	mat4 view_times_projection;
 	demo_13_move(pos, right, view_times_projection, shader_program);
 
-	glUniform3f(cam_right_id, right[0], right[1], right[2]);
+	glUniform2f(cam_right_id, right[0], right[2]);
 	glUniformMatrix4fv(view_projection_matrix_id, 1, GL_FALSE, &view_times_projection[0][0]);
 }
 
