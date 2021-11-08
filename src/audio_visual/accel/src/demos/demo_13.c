@@ -33,7 +33,7 @@ const char* const demo_13_vertex_shader =
 		"color = texture(texture_sampler, UV).rgba;\n"
 	"}\n";
 
-void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint shader_program) {
+void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint shader_program) {
 	static GLfloat hori_angle = (GLfloat) M_PI, vert_angle = 0.0f, last_time;
 
 	static byte first_call = 1;
@@ -63,7 +63,8 @@ void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint 
 
 	const GLfloat hori_angle_minus_half_pi = hori_angle - half_pi, actual_speed = delta_time * move_speed;
 
-	vec3 right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
+	vec3 _right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
+	memcpy(right, _right, sizeof(vec3));
 
 	if (keys[SDL_SCANCODE_W]) glm_vec3_muladds(direction, actual_speed, pos);
 	if (keys[SDL_SCANCODE_S]) glm_vec3_muladds(direction, -actual_speed, pos);
@@ -76,7 +77,7 @@ void demo_13_move(vec3 pos, mat4 view, mat4 view_times_projection, const GLuint 
 	glm_vec3_add(pos, direction, pos_plus_dir);
 	glm_vec3_cross(right, direction, up);
 	//////////
-	mat4 projection, model_view_projection, view_times_model, model = GLM_MAT4_IDENTITY_INIT;
+	mat4 projection, view, model_view_projection, view_times_model, model = GLM_MAT4_IDENTITY_INIT;
 	glm_perspective(to_radians(FOV), (GLfloat) SCR_W / SCR_H, constants.clip_dists.near, constants.clip_dists.far, projection);
 	glm_lookat(pos, pos_plus_dir, up, view);
 	glm_mul(projection, view, view_times_projection); // For external usage
@@ -124,11 +125,11 @@ void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t ce
 		first_call = 0;
 	}
 
-	static vec3 pos = {2.0f, 4.5f, 2.0f};
-	mat4 view, view_times_projection;
-	demo_13_move(pos, view, view_times_projection, shader_program);
+	static vec3 pos = {2.0f, 4.5f, 2.0f}, right;
+	mat4 view_times_projection;
+	demo_13_move(pos, right, view_times_projection, shader_program);
 
-	glUniform3f(cam_right_id, view[0][0], view[1][0], view[2][0]);
+	glUniform3f(cam_right_id, right[0], right[1], right[2]);
 	glUniformMatrix4fv(view_projection_matrix_id, 1, GL_FALSE, &view_times_projection[0][0]);
 }
 

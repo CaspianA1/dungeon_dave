@@ -1011,4 +1011,24 @@ typedef struct {
 
 } Frustum;
 
+///// An attempt at something branchless for movement:
+
+	// const GLfloat* move_dir, speed;
+	// const GLfloat* move_dirs[2] = {dir, camera -> right}, speeds[2] = {actual_speed, -actual_speed};
+
+
+	const GLfloat* const move_dir =
+		(keys[constants.movement_keys.forward] || keys[constants.movement_keys.backward]) ? dir : camera -> right,
+
+	speed = (keys[constants.movement_keys.])
+
+
+	// const GLfloat* const move_dir = ((GLfloat*[2]) {dir, camera -> right})[0];
+
+
+	/*
+	if (keys[constants.movement_keys.forward]) {
+		move_dir =
+	}
+
 /////

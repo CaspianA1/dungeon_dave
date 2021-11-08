@@ -31,13 +31,14 @@ void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
 	hori_angle += constants.speeds.look * delta_time * -mouse_dx;
 	vert_angle += constants.speeds.look * delta_time * -mouse_dy;
 
-	if (vert_angle > constants.numbers.half_pi) vert_angle = constants.numbers.half_pi;
-	else if (vert_angle < -constants.numbers.half_pi) vert_angle = -constants.numbers.half_pi;
+	const GLfloat half_pi = (GLfloat) M_PI_2;
+	if (vert_angle > half_pi) vert_angle = half_pi;
+	else if (vert_angle < -half_pi) vert_angle = -half_pi;
 
 	const GLfloat cos_vert = cosf(vert_angle);
 	vec3 direction = {cos_vert * sinf(hori_angle), sinf(vert_angle), cos_vert * cosf(hori_angle)};
 
-	const GLfloat hori_angle_minus_half_pi = hori_angle - constants.numbers.half_pi, actual_speed = delta_time * constants.speeds.move;
+	const GLfloat hori_angle_minus_half_pi = hori_angle - half_pi, actual_speed = delta_time * constants.speeds.move;
 
 	vec3 right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
 
