@@ -9,6 +9,7 @@
 - Not perfect, but sectors + their meshes for clipping and rendering, and texmaps + heightmaps for game logic
 - Ideal: BSPs, but not worth time
 - To start, one vbo + texture ptr per sector
+- For map edges, only render inside + top face
 
 _____
 - Clip sectors based on adjacent heights
@@ -26,7 +27,7 @@ _____
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	SectorList sectors = generate_sectors_from_heightmap(heightmap, map_width, map_height);
+	const SectorList sectors = generate_sectors_from_heightmap(heightmap, map_width, map_height);
 
 	sgl.num_vertex_buffers = sectors.length;
 	sgl.vertex_buffers = malloc(sgl.num_vertex_buffers * sizeof(GLuint));
