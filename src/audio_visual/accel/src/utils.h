@@ -82,3 +82,5 @@ void select_texture_for_use(const GLuint texture, const GLuint shader_program);
 
 void enable_all_culling(void);
 void draw_triangles(const int num_triangles);
+
+static inline GLfloat to_radians(const GLfloat degrees);

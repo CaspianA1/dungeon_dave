@@ -1,6 +1,7 @@
 #ifndef UTILS_C
 #define UTILS_C
 #include "utils.h"
+#include "constants.h"
 
 Screen init_screen(const char* const title) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) fail("launch SDL", LaunchSDL);
@@ -246,6 +247,10 @@ void enable_all_culling(void) {
 
 void draw_triangles(const int num_triangles) {
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+}
+
+static inline GLfloat to_radians(const GLfloat degrees) {
+	return degrees * (GLfloat) M_PI / 180.0f;
 }
 
 #endif
