@@ -5,6 +5,7 @@ which equals 441.6729559300637
 */
 
 static const struct {
+    // Angles are in radians
     const GLfloat init_fov, max_vert_angle;
 
     const struct {
@@ -20,7 +21,7 @@ static const struct {
     } movement_keys;
 
 } constants = {
-    .init_fov = 90.0f,
+    .init_fov = (GLfloat) M_PI_2, // 90 degrees
     .max_vert_angle = (GLfloat) M_PI_2,
     .clip_dists = {0.1f, 441.6729559300637f},
     .speeds = {3.0f, 0.08f},

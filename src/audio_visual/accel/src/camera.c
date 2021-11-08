@@ -51,21 +51,20 @@ void update_camera(Camera* const camera) {
 	if (keys[constants.movement_keys.left]) glm_vec3_muladds(right, -actual_speed, camera -> pos);
 	if (keys[constants.movement_keys.right]) glm_vec3_muladds(right, actual_speed, camera -> pos);
 
+	//////////
+
 	vec3 rel_origin, up;
 	glm_vec3_add(camera -> pos, dir, rel_origin);
 	glm_vec3_cross(right, camera -> dir, up);
 
-	mat4 view, model_view, projection;
+	mat4 view, projection;
 	glm_lookat(camera -> pos, rel_origin, up, view);
-	glm_mul(view, (mat4) GLM_MAT4_IDENTITY_INIT, model_view);
 
-	glm_perspective(to_radians(camera -> fov), camera -> aspect_ratio,
+	glm_perspective(camera -> fov, camera -> aspect_ratio,
 		constants.clip_dists.near, constants.clip_dists.far, projection);
 
 	glm_mul(projection, view, camera -> view_projection); // Used for billboard shader
-	glm_mul(projection, model_view, camera -> model_view_projection); // Used for sector shader
-
-	// TODO: See if I can reduce number of multiplies
+	glm_mul(camera -> view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, camera -> model_view_projection);
 
 	last_time = SDL_GetTicks() / 1000.0f;
 }
