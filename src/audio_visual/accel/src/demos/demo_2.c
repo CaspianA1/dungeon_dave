@@ -5,7 +5,7 @@ void demo_2_configurable_matrix_setup(const GLuint shader_program,
 
 	mat4 projection, model = GLM_MAT4_IDENTITY_INIT, view_times_model;
 
-	glm_perspective(to_radians(FOV), (GLfloat) SCR_W / SCR_H, clip_dists.near, clip_dists.far, projection);
+	glm_perspective(to_radians(FOV), (GLfloat) SCR_W / SCR_H, constants.clip_dists.near, constants.clip_dists.far, projection);
 	glm_lookat(pos, rel_origin, up, view);
 
 	glm_mul(view, projection, view_times_projection); // For external usage

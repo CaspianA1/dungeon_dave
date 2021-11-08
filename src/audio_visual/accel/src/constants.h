@@ -5,5 +5,9 @@ which equals 441.6729559300637
 */
 
 const struct {
-	const GLfloat near, far;
-} clip_dists = {0.1f, 441.6729559300637f};
+    const struct {
+        const GLfloat near, far;
+    } clip_dists;
+} constants = {
+    .clip_dists = {0.1f, 441.6729559300637f}
+};
