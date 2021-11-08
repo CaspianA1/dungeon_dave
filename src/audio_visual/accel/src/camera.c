@@ -7,8 +7,6 @@ typedef struct {
 	mat4 view_projection, model_view_projection; // Used the least, so last in struct
 } Camera;
 
-// An update_camera fn would be nice
-
 void init_camera(Camera* const camera, const vec3 init_pos) {
 	memset(camera, 0, sizeof(Camera));
 	memcpy(camera -> pos, init_pos, sizeof(vec3));
