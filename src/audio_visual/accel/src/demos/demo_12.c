@@ -12,6 +12,8 @@
 
 _____
 - Clip sectors based on adjacent heights
+- For neighboring sectors with the same height, make them into flat 2D planes
+- Or in the general case, if a plane is partially invisible, truncate it; otherwise, remove it
 - Find which sectors are behind, and then skip rendering those
 
 - Billboard sprites
@@ -112,12 +114,20 @@ StateGL demo_12_palace_init(void) {
 	};
 
 	StateGL sgl = configurable_demo_12_init((byte*) heightmap, map_width, map_height);
-	sgl.num_textures = 4;
+	sgl.num_textures = 12;
 	sgl.textures = init_textures(sgl.num_textures,
 		"../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../assets/walls/hieroglyph.bmp",
 		"../../../assets/walls/mesa.bmp",
-		"../../../assets/walls/hieroglyph.bmp");
+		"../../../assets/walls/dune.bmp",
+		"../../../assets/walls/cobblestone.bmp",
+		"../../../assets/walls/hieroglyph.bmp",
+		"../../../assets/walls/saqqara.bmp",
+		"../../../assets/walls/trinity.bmp",
+		"../../../assets/walls/cross_blue.bmp",
+		"../../../assets/walls/dial.bmp",
+		"../../../assets/walls/desert_snake.bmp",
+		"../../../assets/walls/arthouse_bricks.bmp");
 
 	return sgl;
 }
