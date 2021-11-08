@@ -74,14 +74,13 @@ void add_to_batch(Batch* const batch, const void* const data) {
 void get_matrices_from_camera(const Camera* const camera, mat4 model_view_projection) {
 	float* const pos = (float*) camera -> pos;
 	mat4 projection, view, model_view;
-
 	vec3 rel_origin;
+
 	glm_vec3_add(pos, (float*) camera -> dir, rel_origin);
+	glm_lookat(pos, rel_origin, (float*) camera -> up, view);
+	glm_mul(view, (mat4) GLM_MAT4_IDENTITY_INIT, model_view);
 
 	glm_perspective(camera -> fov, camera -> aspect_ratio, camera -> clip_dists.near, camera -> clip_dists.far, projection);
-	glm_lookat(pos, rel_origin, (float*) camera -> up, view);
-
-	glm_mul(view, (mat4) GLM_MAT4_IDENTITY_INIT, model_view);
 	glm_mul(projection, model_view, model_view_projection);
 }
 
