@@ -26,3 +26,6 @@ test_all:
 		else ./bin/accel_demo & \
 		fi \
 	done
+
+clean:
+	rm -r bin/*
