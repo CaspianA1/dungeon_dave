@@ -1,26 +1,65 @@
 typedef struct {
 	// Technically, the camera stays at {0, 0, 0}, but having the `pos` member is more practical
-	GLfloat pos[3], dir[3], right[3], up[3], move_speed, look_speed, fov, hori_angle, vert_angle, aspect_ratio;
+	GLfloat pos[3], dir[3], right[3], up[3], fov, hori_angle, vert_angle, aspect_ratio;
 } Camera;
 
 // An update_camera fn would be nice
 
-void init_camera(Camera* const camera, const plane_type_t map_size[2]) {
-	(void) camera;
+void init_camera(Camera* const camera, const GLfloat init_pos[3], const plane_type_t map_size[2]) {
 	(void) map_size;
+
+	memset(camera, 0, sizeof(Camera));
+	memcpy(camera -> pos, init_pos, sizeof(GLfloat) * 3);
+	camera -> fov = constants.init_fov;
+	camera -> aspect_ratio = (GLfloat) SCR_W / SCR_H;
 }
 
-/*
-void update_camera(Camera* const camera) {
-	(void) camera;
-
+void move_camera(Camera* const camera) {
+	static GLfloat last_time;
 	static byte first_call = 1;
+
 	if (first_call) {
+		last_time = SDL_GetTicks() / 1000.0f;
 		first_call = 0;
 		return;
 	}
+
+	int mouse_dx, mouse_dy;
+	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
+
+	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time;
+	camera -> hori_angle += constants.speeds.look * delta_time * -mouse_dx;
+	camera -> vert_angle += constants.speeds.look * delta_time * -mouse_dy;
+
+	// half_pi = fully up, or -half_pi = fully down
+	if (camera -> vert_angle > constants.numbers.half_pi) camera -> vert_angle = constants.numbers.half_pi;
+	else if (camera -> vert_angle < -constants.numbers.half_pi) camera -> vert_angle = -constants.numbers.half_pi;
+
+	const GLfloat
+		cos_vert = cosf(camera -> vert_angle),
+		hori_angle_minus_half_pi = camera -> hori_angle - constants.numbers.half_pi,
+		actual_speed = delta_time * constants.speeds.move;
+
+	vec3 dir = {cos_vert * sinf(camera -> hori_angle), sinf(camera -> vert_angle), cos_vert * cosf(camera -> hori_angle)};
+	memcpy(camera -> dir, dir, sizeof(vec3));
+
+	vec3 right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
+	memcpy(camera -> right, right, sizeof(vec3));
+
+	if (keys[constants.movement_keys.forward]) glm_vec3_muladds(dir, actual_speed, camera -> pos);
+	if (keys[constants.movement_keys.backward]) glm_vec3_muladds(dir, -actual_speed, camera -> pos);
+	if (keys[constants.movement_keys.left]) glm_vec3_muladds(right, -actual_speed, camera -> pos);
+	if (keys[constants.movement_keys.right]) glm_vec3_muladds(right, actual_speed, camera -> pos);
+
+	vec3 pos_plus_dir, up;
+	glm_vec3_add(camera -> pos, camera -> dir, pos_plus_dir);
+	glm_vec3_cross(right, camera -> dir, up);
+
+	// Configure matrices
+	puts("Configure matrices");
+
+	last_time = SDL_GetTicks() / 1000.0f;
 }
-*/
 
 // Later on, this may offer the caller different matrices as well, if needed
 void get_matrices_from_camera(const Camera* const camera, mat4 model_view_projection) {
