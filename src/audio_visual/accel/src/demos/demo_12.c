@@ -114,7 +114,7 @@ StateGL demo_12_palace_init(void) {
 	};
 
 	StateGL sgl = configurable_demo_12_init((byte*) heightmap, map_width, map_height);
-	sgl.num_textures = 12;
+	sgl.num_textures = 14;
 	sgl.textures = init_textures(sgl.num_textures,
 		"../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../assets/walls/hieroglyph.bmp",
@@ -125,8 +125,10 @@ StateGL demo_12_palace_init(void) {
 		"../../../assets/walls/saqqara.bmp",
 		"../../../assets/walls/trinity.bmp",
 		"../../../assets/walls/cross_blue.bmp",
+		"../../../assets/walls/dirt.bmp",
 		"../../../assets/walls/dial.bmp",
 		"../../../assets/walls/desert_snake.bmp",
+		"../../../assets/walls/greece.bmp",
 		"../../../assets/walls/arthouse_bricks.bmp");
 
 	return sgl;
