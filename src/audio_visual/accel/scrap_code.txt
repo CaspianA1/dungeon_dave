@@ -1032,3 +1032,10 @@ typedef struct {
 	}
 
 /////
+
+	/* The vertex shader needs a dummy input here - the vertex ID
+	could be gotten through gl_VertexID, but this only ranges from 0 to 3,
+	which fits within the domain needed to access vertices_model_space */
+	"layout(location = 0) in int vertex_id;"
+
+/////

@@ -1,13 +1,14 @@
 #include "demo_10.c"
 
-typedef GLfloat billboard_type_t;
-#define BILLBOARD_TYPE_ENUM GL_FLOAT
-
 const char* const demo_13_vertex_shader =
 	"#version 330 core\n"
-	"layout(location = 0) in vec2 vertex_model_space;\n"
 
 	"out vec2 UV;\n"
+
+	"const vec2 vertices_model_space[4] = vec2[4](\n"
+		"vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f),\n"
+		"vec2(-0.5f, 0.5f), vec2(0.5f, 0.5f)\n"
+	");"
 
 	"const vec3 cam_up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
 
@@ -16,12 +17,15 @@ const char* const demo_13_vertex_shader =
 	"uniform mat4 VP;\n" // View-projection matrix
 
 	"void main() {\n"
+		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
+
 		"vec3 vertex_world_space = billboard_center_world_space \n"
 			"+ vec3(cam_right_xz_world_space, 0.0f).xzy * vertex_model_space.x * billboard_size_world_space.x\n"
 			"+ cam_up_world_space * vertex_model_space.y * billboard_size_world_space.y;\n"
 
 		"gl_Position = VP * vec4(vertex_world_space, 1.0f);\n"
-		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + vec2(0.5f);\n"
+
+		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
 	"}\n",
 
 *const demo_13_fragment_shader =
@@ -30,7 +34,7 @@ const char* const demo_13_vertex_shader =
 	"out vec4 color;\n" // For textures with an alpha channel, enable 4 channels
 	"uniform sampler2D texture_sampler;\n"
 	"void main() {\n"
-		"color = texture(texture_sampler, UV).rgba;\n"
+		"color = texture(texture_sampler, UV);\n"
 	"}\n";
 
 void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint shader_program) {
@@ -105,7 +109,7 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 	last_time = SDL_GetTicks() / 1000.0f;
 }
 
-void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t center[3], const billboard_type_t half_size[2]) {
+void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) {
 	static GLint cam_right_id, view_projection_matrix_id;
 	static byte first_call = 1;
 
@@ -120,7 +124,7 @@ void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t ce
 			billboard_center_id = glGetUniformLocation(shader_program, "billboard_center_world_space");
 
 		glUniform3f(billboard_center_id, center[0], center[1], center[2]);
-		glUniform2f(billboard_size_id, half_size[0] * 2.0f, half_size[1] * 2.0f);
+		glUniform2f(billboard_size_id, 1.0f, 1.0f);
 
 		first_call = 0;
 	}
@@ -133,28 +137,26 @@ void demo_13_matrix_setup(const GLuint shader_program, const billboard_type_t ce
 	glUniformMatrix4fv(view_projection_matrix_id, 1, GL_FALSE, &view_times_projection[0][0]);
 }
 
-const billboard_type_t center[3] = {5.5f, 4.5f, 8.5f}, half_size[2] = {0.5f, 0.5f};
 GLuint poly_shader;
+const GLfloat center[3] = {5.5f, 4.5f, 8.5f};
 
 StateGL demo_13_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	const billboard_type_t vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		-0.5f, 0.5f, 0.0f,
-		0.5f, 0.5f, 0.0f
-	};
-
-	/////
 	const plane_type_t origin[3] = {1, 4, 1}, size[3] = {5, 1, 8};
 	plane_type_t* const flat_plane = malloc(bytes_per_plane);
 	PLANE_CREATOR_NAME(hori)(origin, size[0], size[2], flat_plane);
-	//////
 
-	sgl.num_vertex_buffers = 2;
-	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, vertices, sizeof(vertices), flat_plane, bytes_per_plane);
+	//////////
+	sgl.num_vertex_buffers = 1;
+	sgl.vertex_buffers = malloc(sgl.num_vertex_buffers * sizeof(GLuint));
+	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
+
+	glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers[0]);
+	glBufferData(GL_ARRAY_BUFFER, bytes_per_plane, flat_plane, GL_STATIC_DRAW);
+
 	free(flat_plane);
+	//////////
 
 	sgl.num_textures = 2;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/objects/tomato.bmp", "../../../assets/walls/saqqara.bmp");
@@ -169,27 +171,21 @@ StateGL demo_13_init(void) {
 }
 
 void demo_13_drawer(const StateGL* const sgl) {
-	// glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Black
 	glClearColor(0.2f, 0.8f, 0.5f, 0.0f); // Barf green
-
-	demo_13_matrix_setup(sgl -> shader_program, center, half_size);
+	demo_13_matrix_setup(sgl -> shader_program, center);
 
 	// Drawing non-transparent objects first
 	glUseProgram(poly_shader);
 	select_texture_for_use(sgl -> textures[1], poly_shader);
-	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	bind_interleaved_planes_to_vao();
 	draw_triangles(2);
+	glDisableVertexAttribArray(0);
 
-	// Turning on alpha blending for billboards
+	// Turning on alpha blending for drawing billboards
 	glEnable(GL_BLEND);
-
-	// Drawing billboard
 	glUseProgram(sgl -> shader_program);
 	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
-	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, BILLBOARD_TYPE_ENUM, GL_FALSE, 0, NULL);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	glDisable(GL_BLEND);

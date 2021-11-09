@@ -4,6 +4,7 @@ const char* const demo_4_vertex_shader =
 	"#version 330 core\n"
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 	"layout(location = 1) in vec2 vertexUV;\n"
+	// need info about type of face
 
 	"out vec2 UV;\n"
 	"uniform mat4 MVP;\n"
@@ -11,6 +12,20 @@ const char* const demo_4_vertex_shader =
 	"void main() {\n"
 		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
 		"UV = vertexUV;\n"
+
+		// "UV = 1.0f - vertex_pos_model_space.zx;\n"
+		/*
+		Swizzle arrangements:
+		zx for flat
+
+		side 1:
+		not right yet:
+			yz
+			xy
+
+			zy
+			yz
+		*/
 	"}\n",
 
 *const demo_4_fragment_shader =

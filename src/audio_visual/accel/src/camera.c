@@ -1,5 +1,3 @@
-#include "utils.c"
-
 typedef struct {
 	vec2 right_xz; // X and Z of right (Y is always 0)
 	vec3 pos, dir; // The camera never moves from the origin, but `pos` here is more practical

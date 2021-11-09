@@ -33,9 +33,10 @@ void demo_14_drawer(const StateGL* const sgl) {
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
 	select_texture_for_use(sgl -> textures[1], poly_shader);
-	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	bind_interleaved_planes_to_vao();
 	draw_triangles(2);
+	glDisableVertexAttribArray(0);
 
 	//////////
 
@@ -46,9 +47,6 @@ void demo_14_drawer(const StateGL* const sgl) {
 	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera.view_projection[0][0]);
 
 	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
-	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, BILLBOARD_TYPE_ENUM, GL_FALSE, 0, NULL);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	glDisable(GL_BLEND);
