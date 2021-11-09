@@ -61,8 +61,8 @@ void update_camera(Camera* const camera) {
 	glm_perspective(camera -> fov, camera -> aspect_ratio,
 		constants.clip_dists.near, constants.clip_dists.far, projection);
 
-	glm_mul(projection, view, camera -> view_projection); // Used for billboard shader
-	glm_mul(camera -> view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, camera -> model_view_projection);
+	glm_mul(projection, view, camera -> view_projection); // For billboard shader
+	glm_mul(camera -> view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, camera -> model_view_projection); // For sector shader
 
 	last_time = SDL_GetTicks() / 1000.0f;
 }

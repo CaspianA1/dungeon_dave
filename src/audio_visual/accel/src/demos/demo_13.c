@@ -31,7 +31,7 @@ const char* const demo_13_vertex_shader =
 *const demo_13_fragment_shader =
 	"#version 330 core\n"
 	"in vec2 UV;\n"
-	"out vec4 color;\n" // For textures with an alpha channel, enable 4 channels
+	"out vec4 color;\n"
 	"uniform sampler2D texture_sampler;\n"
 	"void main() {\n"
 		"color = texture(texture_sampler, UV);\n"
