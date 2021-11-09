@@ -4,28 +4,42 @@ const char* const demo_4_vertex_shader =
 	"#version 330 core\n"
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 	"layout(location = 1) in vec2 vertexUV;\n"
-	// need info about type of face
 
 	"out vec2 UV;\n"
 	"uniform mat4 MVP;\n"
 
+	// "const vec2 UV_subtraction_masks;"
+
+	/*
+	vert_1: on zy (2, 1)
+	vert_2: on xy (0, 1)
+	flat:   on zx (2, 0)
+
+	vert 1 masks: (0, 1), (1, 1)
+	vert 2 masks: (0, 1), (1, 1)
+	flat mask: (0, 1)
+
+	expanded:
+		Correct for first vert_1 wall side:
+		"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.y);\n"
+
+		Correct for second vert_1 wall side:
+		"UV = 1.0f - vertex_pos_model_space.zy;\n"
+
+		Correct for first vert_2 wall side:
+		"UV = vec2(vertex_pos_model_space.x, 1.0f - vertex_pos_model_space.y);\n"
+
+		Correct for second vert_2 wall side:
+		"UV = 1.0f - vec2(vertex_pos_model_space.x, vertex_pos_model_space.y);\n"
+
+		Correct for floors:
+		"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.x);\n"
+	*/
+
+	// a subtract mask later on, perhaps
 	"void main() {\n"
 		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
 		"UV = vertexUV;\n"
-
-		// "UV = 1.0f - vertex_pos_model_space.zx;\n"
-		/*
-		Swizzle arrangements:
-		zx for flat
-
-		side 1:
-		not right yet:
-			yz
-			xy
-
-			zy
-			yz
-		*/
 	"}\n",
 
 *const demo_4_fragment_shader =

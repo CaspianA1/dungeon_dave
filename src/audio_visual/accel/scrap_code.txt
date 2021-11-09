@@ -1039,3 +1039,12 @@ typedef struct {
 	"layout(location = 0) in int vertex_id;"
 
 /////
+
+		/* Swizzle arrangements:
+		flat: xz for demo 14, but actually something else not found
+		vert 1:
+		vert 2:
+
+		tried: yz, xy, zy, yz */
+
+/////
