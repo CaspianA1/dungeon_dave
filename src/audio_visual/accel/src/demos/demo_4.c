@@ -8,8 +8,6 @@ const char* const demo_4_vertex_shader =
 	"out vec2 UV;\n"
 	"uniform mat4 MVP;\n"
 
-	// "const vec2 UV_subtraction_masks;"
-
 	/*
 	vert_1: on zy (2, 1)
 	vert_2: on xy (0, 1)
@@ -36,7 +34,6 @@ const char* const demo_4_vertex_shader =
 		"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.x);\n"
 	*/
 
-	// a subtract mask later on, perhaps
 	"void main() {\n"
 		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
 		"UV = vertexUV;\n"
