@@ -205,6 +205,7 @@ GLuint* init_textures(const int num_textures, ...) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OPENGL_TEX_MIN_FILTER);
 
+		// GL_CLAMP_TO_EDGE to fix the tomato
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 

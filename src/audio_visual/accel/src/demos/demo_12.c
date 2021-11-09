@@ -10,6 +10,7 @@
 - Ideal: BSPs, but not worth time
 - To start, one vbo + texture ptr per sector
 - For map edges, only render inside + top face
+- an init_textures param that's passed to glTexParameteri
 
 _____
 - Clip sectors based on adjacent heights
