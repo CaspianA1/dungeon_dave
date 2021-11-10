@@ -142,7 +142,7 @@ void demo_6_core_init_shader_and_textures_and_culling(StateGL* const sgl) {
 	sgl -> shader_program = init_shader_program(demo_6_vertex_shader, demo_4_fragment_shader);
 
 	sgl -> num_textures = 1;
-	sgl -> textures = init_textures(sgl -> num_textures, "../../../assets/walls/dune.bmp");
+	sgl -> textures = init_textures(sgl -> num_textures, "../../../assets/walls/dune.bmp", tex_repeating);
 	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
 
 	enable_all_culling();

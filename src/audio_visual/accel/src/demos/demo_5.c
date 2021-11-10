@@ -17,13 +17,6 @@ void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
 		return;
 	}
 
-	/*
-	const GLfloat
-		move_speed = 3.0f,
-		look_speed = 0.08f,
-		half_pi = (GLfloat) M_PI / 2.0f;
-	*/
-
 	int mouse_dx, mouse_dy;
 	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
 

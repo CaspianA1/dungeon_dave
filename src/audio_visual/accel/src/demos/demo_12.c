@@ -10,7 +10,7 @@
 - Ideal: BSPs, but not worth time
 - To start, one vbo + texture ptr per sector
 - For map edges, only render inside + top face
-- an init_textures param that's passed to glTexParameteri
+- cubemapped skybox
 
 _____
 - Clip sectors based on adjacent heights
@@ -23,6 +23,7 @@ _____
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
+- Flat weapon
 */
 
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
@@ -118,20 +119,20 @@ StateGL demo_12_palace_init(void) {
 	StateGL sgl = configurable_demo_12_init((byte*) heightmap, map_width, map_height);
 	sgl.num_textures = 14;
 	sgl.textures = init_textures(sgl.num_textures,
-		"../../../assets/walls/pyramid_bricks_4.bmp",
-		"../../../assets/walls/hieroglyph.bmp",
-		"../../../assets/walls/mesa.bmp",
-		"../../../assets/walls/dune.bmp",
-		"../../../assets/walls/cobblestone.bmp",
-		"../../../assets/walls/hieroglyph.bmp",
-		"../../../assets/walls/saqqara.bmp",
-		"../../../assets/walls/trinity.bmp",
-		"../../../assets/walls/cross_blue.bmp",
-		"../../../assets/walls/dirt.bmp",
-		"../../../assets/walls/dial.bmp",
-		"../../../assets/walls/desert_snake.bmp",
-		"../../../assets/walls/greece.bmp",
-		"../../../assets/walls/arthouse_bricks.bmp");
+		"../../../assets/walls/pyramid_bricks_4.bmp", tex_repeating,
+		"../../../assets/walls/hieroglyph.bmp", tex_repeating,
+		"../../../assets/walls/mesa.bmp", tex_repeating,
+		"../../../assets/walls/dune.bmp", tex_repeating,
+		"../../../assets/walls/cobblestone.bmp", tex_repeating,
+		"../../../assets/walls/hieroglyph.bmp", tex_repeating,
+		"../../../assets/walls/saqqara.bmp", tex_repeating,
+		"../../../assets/walls/trinity.bmp", tex_repeating,
+		"../../../assets/walls/cross_blue.bmp", tex_repeating,
+		"../../../assets/walls/dirt.bmp", tex_repeating,
+		"../../../assets/walls/dial.bmp", tex_repeating,
+		"../../../assets/walls/desert_snake.bmp", tex_repeating,
+		"../../../assets/walls/greece.bmp", tex_repeating,
+		"../../../assets/walls/arthouse_bricks.bmp", tex_repeating);
 
 	return sgl;
 }
@@ -164,7 +165,7 @@ StateGL demo_12_tpt_init(void) {
 
 	StateGL sgl = configurable_demo_12_init((byte*) heightmap, map_width, map_height);
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/pyramid_bricks_2.bmp");
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/pyramid_bricks_2.bmp", tex_repeating);
 	return sgl;
 }
 
@@ -216,7 +217,7 @@ StateGL demo_12_pyramid_init(void) {
 
 	StateGL sgl = configurable_demo_12_init((byte*) heightmap, map_width, map_height);
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/greece.bmp");
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/greece.bmp", tex_repeating);
 	return sgl;
 }
 
@@ -246,6 +247,6 @@ void demo_12_deinit(const StateGL* const sgl) {
 
 #ifdef DEMO_12
 int main(void) {
-	make_application(demo_12_drawer, demo_12_palace_init, demo_12_deinit);
+	make_application(demo_12_drawer, demo_12_pyramid_init, demo_12_deinit);
 }
 #endif

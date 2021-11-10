@@ -148,7 +148,7 @@ StateGL demo_10_init(void) {
 	
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp");
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp", tex_repeating);
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	enable_all_culling();

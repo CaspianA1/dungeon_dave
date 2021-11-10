@@ -183,7 +183,7 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 	return program_id;
 }
 
-// Expects that num_textures > 0. Param: path.
+// Expects that num_textures > 0. Params: path, repeating texture.
 GLuint* init_textures(const int num_textures, ...) {
 	va_list args;
 	va_start(args, num_textures);
@@ -205,12 +205,12 @@ GLuint* init_textures(const int num_textures, ...) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OPENGL_TEX_MIN_FILTER);
 
-		// GL_CLAMP_TO_EDGE to fix the tomato
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		const GLint texture_param = va_arg(args, GLint);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_param);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_param);
 
 		#ifdef ENABLE_ANISOTROPIC_FILTERING
-		float aniso = 0.0f;
+		float aniso;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 		#endif

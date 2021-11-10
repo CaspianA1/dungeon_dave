@@ -29,6 +29,8 @@
 #define OPENGL_TEX_MIN_FILTER GL_LINEAR_MIPMAP_LINEAR
 #define ENABLE_ANISOTROPIC_FILTERING
 
+enum {tex_repeating = GL_REPEAT, tex_nonrepeating = GL_CLAMP_TO_EDGE};
+
 const Uint8* keys;
 
 typedef uint_fast8_t byte;
