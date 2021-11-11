@@ -30,6 +30,50 @@ const char* const demo_15_vertex_shader =
 		"color = texture(cubemap_sampler, UV_3D);\n"
 	"}\n";
 
+const GLfloat skybox_vertices[] = {
+	-1.0f, 1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f,
+
+	1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f,
+
+	-1.0f, 1.0f, -1.0f,
+	1.0f, 1.0f, -1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, 1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f
+};
+
 // This reads a skybox file into a OpenGL cubemap texture
 GLuint init_skybox_texture(const char* const path) {
 	SDL_Surface* const skybox_surface = init_surface(path);
@@ -89,52 +133,8 @@ GLuint init_skybox_texture(const char* const path) {
 StateGL demo_15_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	GLfloat vertices[] = {
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
-
-		-1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
-
-		1.0f, -1.0f, -1.0f,
-	 	1.0f, -1.0f, 1.0f,
-	 	1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-	 	1.0f, 1.0f, -1.0f,
-	 	1.0f, -1.0f, -1.0f,
-
-		-1.0f, -1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
-
-		-1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, -1.0f,
-
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, 1.0f,
-	 	1.0f, -1.0f, -1.0f,
-	 	1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, 1.0f,
-	 	1.0f, -1.0f, 1.0f
-	};
-
 	sgl.num_vertex_buffers = 1;
-	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, vertices, sizeof(vertices));
+	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, skybox_vertices, sizeof(skybox_vertices));
 	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
 
 	sgl.shader_program = init_shader_program(demo_15_vertex_shader, demo_15_fragment_shader);
@@ -150,7 +150,6 @@ StateGL demo_15_init(void) {
 	glUniform1i(shader_texture_sampler, 0);
 	//////////
 
-	glDepthMask(GL_FALSE);
 	glDepthFunc(GL_LEQUAL);
 
 	return sgl;
@@ -177,7 +176,10 @@ void demo_15_drawer(const StateGL* const sgl) {
 	camera.view_projection[3][3] = 0.0f;
 
 	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera.view_projection[0][0]);
+
+	glDepthMask(GL_FALSE);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDepthMask(GL_TRUE);
 }
 
 #ifdef DEMO_15
