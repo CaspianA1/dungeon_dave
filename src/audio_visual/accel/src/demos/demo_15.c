@@ -56,12 +56,13 @@ GLuint init_skybox_texture(const char* const path) {
 	ivec2 src_origins[6];
 
 	// right, left, top, bottom, back, front
-	src_origins[0] = (ivec2) {cube_size << 1, cube_size};
+	const GLint twice_cube_size = cube_size << 1;
+	src_origins[0] = (ivec2) {twice_cube_size, cube_size};
 	src_origins[1] = (ivec2) {0, cube_size};
 	src_origins[2] = (ivec2) {cube_size, 0};
-	src_origins[3] = (ivec2) {cube_size, cube_size << 1};
+	src_origins[3] = (ivec2) {cube_size, twice_cube_size};
 	src_origins[4] = (ivec2) {cube_size, cube_size};
-	src_origins[5] = (ivec2) {cube_size * 3, cube_size};
+	src_origins[5] = (ivec2) {twice_cube_size + cube_size, cube_size};
 
 	for (byte i = 0; i < 6; i++) {
 		const ivec2 src_origin = src_origins[i];
