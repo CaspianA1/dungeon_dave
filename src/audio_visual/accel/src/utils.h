@@ -12,8 +12,8 @@
 #define OPENGL_MINOR_VERSION 3
 
 // 800 by 600
-#define SCR_W 1440
-#define SCR_H 900
+#define SCR_W 200
+#define SCR_H 200
 #define FPS 60
 #define FOV 90.0f
 
@@ -27,6 +27,8 @@
 
 #define OPENGL_TEX_MAG_FILTER GL_LINEAR
 #define OPENGL_TEX_MIN_FILTER GL_LINEAR_MIPMAP_LINEAR
+// Mip level should not change per skybox, so no trilinear needed
+#define OPENGL_SKYBOX_TEX_MIN_FILTER GL_LINEAR_MIPMAP_NEAREST
 #define ENABLE_ANISOTROPIC_FILTERING
 
 enum {tex_repeating = GL_REPEAT, tex_nonrepeating = GL_CLAMP_TO_EDGE};
@@ -79,6 +81,10 @@ GLuint* init_vbos(const int num_buffers, ...);
 void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...);
 
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader);
+
+SDL_Surface* init_surface(const char* const path);
+void deinit_surface(SDL_Surface* const surface);
+
 GLuint* init_textures(const int num_textures, ...);
 void select_texture_for_use(const GLuint texture, const GLuint shader_program);
 

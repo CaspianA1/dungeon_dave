@@ -183,6 +183,22 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 	return program_id;
 }
 
+SDL_Surface* init_surface(const char* const path) {
+	SDL_Surface* const surface = SDL_LoadBMP(path);
+	if (surface == NULL) fail("open texture file", OpenImageFile);
+
+	SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
+	SDL_FreeSurface(surface);
+	SDL_LockSurface(converted_surface);
+
+	return converted_surface;
+}
+
+void deinit_surface(SDL_Surface* const surface) {
+	SDL_UnlockSurface(surface);
+	SDL_FreeSurface(surface);
+}
+
 // Expects that num_textures > 0. Params: path, repeating texture.
 GLuint* init_textures(const int num_textures, ...) {
 	va_list args;
@@ -192,20 +208,14 @@ GLuint* init_textures(const int num_textures, ...) {
 	glGenTextures(num_textures, textures);
 
 	for (int i = 0; i < num_textures; i++) {
-		SDL_Surface* const surface = SDL_LoadBMP(va_arg(args, char*));
-		if (surface == NULL) fail("open texture file", OpenImageFile);
+		const char* const surface_path = va_arg(args, char*);
+		const GLint texture_param = va_arg(args, GLint);
 
-		SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
-		SDL_FreeSurface(surface);
-		SDL_LockSurface(converted_surface);
-
-		//////////
 		glBindTexture(GL_TEXTURE_2D, textures[i]);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OPENGL_TEX_MIN_FILTER);
 
-		const GLint texture_param = va_arg(args, GLint);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_param);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_param);
 
@@ -215,15 +225,15 @@ GLuint* init_textures(const int num_textures, ...) {
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 		#endif
 
+		SDL_Surface* const surface = init_surface(surface_path);
+
 		glTexImage2D(GL_TEXTURE_2D, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
-			converted_surface -> w, converted_surface -> h,
-			0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, converted_surface -> pixels);
+			surface -> w, surface -> h,
+			0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
 
 		glGenerateMipmap(GL_TEXTURE_2D);
-		//////////
 
-		SDL_UnlockSurface(converted_surface);
-		SDL_FreeSurface(converted_surface);
+		deinit_surface(surface);
 	}
 
 	va_end(args);

@@ -1048,3 +1048,110 @@ typedef struct {
 		tried: yz, xy, zy, yz */
 
 /////
+
+const char* const demo_15_vertex_shader =
+    "#version 330 core\n"
+
+    "layout(location = 0) in vec3 vertex_pos_model_space;\n"
+    "out vec3 UV_3D;\n"
+    "uniform mat4 M, MVP;\n" // model, model-view-projection
+
+    "void main() {\n"
+        "vec4 pos = MVP * vec4(vertex_pos_model_space, 1.0);\n"
+        "gl_Position = pos.xyww;\n"
+
+        // Perhaps just vertex_pos_model_space
+        "UV_3D = vec3(model * vec4(vertex_pos_model_space, 1.0));\n"
+    "}\n",
+
+*const demo_15_fragment_shader =
+    "#version 330 core\n"
+
+    "in vec3 UV_3D;\n"
+    "out vec4 color;\n"
+    "uniform samplerCube skybox;\n"
+
+    "void main() {\n"
+        "color = texture(skybox, UV_3D);\n"
+    "}\n";
+
+/////
+
+	/*
+	for (int y = 0; y < 4; y++) {
+		for (int x = 0; x < 4; x++) {
+			printf("%lf ", (double) camera.view_projection[y][x]);
+		}
+		puts("|");
+	}
+	puts("---");
+
+/////
+
+// Skybox is a cubemap
+GLuint init_skybox_texture(const char* const path) {
+	// Start with same 6 faces
+
+	/*
+	const char* const paths[6] = {
+		"assets/right.bmp",
+		"assets/left.bmp",
+		"assets/top.bmp",
+		"assets/bottom.bmp",
+		"assets/front.bmp",
+		"assets/back.bmp"
+	};
+	*/
+
+	GLuint skybox;
+	glGenTextures(1, &skybox);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, OPENGL_SKYBOX_TEX_MIN_FILTER);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, tex_nonrepeating);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, tex_nonrepeating);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, tex_nonrepeating);
+
+	SDL_Surface* const surface = init_surface(path);
+	const void* const pixels = surface -> pixels;
+	const GLint surface_size[2] = {64, 64}; // surface -> w, surface -> h};
+	GL_ERR_CHECK;
+
+	// right, left, top, bottom, back, front
+
+	const GLsizei cube_size = surface_size[0] >> 2;
+
+	/*
+	const GLint origin_1[2] = {0, cube_size};
+
+	glTexImage2D(GL_TEXTURE_CUBE_MAP,
+		0, OPENGL_INTERNAL_PIXEL_FORMAT, surface_size[0],
+		surface_size[1], 0, OPENGL_INPUT_PIXEL_FORMAT,
+		OPENGL_COLOR_CHANNEL_TYPE, pixels);
+	*/
+	
+	for (byte i = 0; i < 6; i++) { // "../../../assets/walls/hieroglyph.bmp"
+		/*
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+			0, origin_1[0], origin_1[1], cube_size, cube_size,
+
+			OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, pixels
+		);
+		*/
+
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+			0, OPENGL_INTERNAL_PIXEL_FORMAT,
+			surface_size[0], surface_size[1], 0, OPENGL_INPUT_PIXEL_FORMAT,
+			OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
+		
+		GL_ERR_CHECK;
+	}
+	deinit_surface(surface);
+
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+	return skybox;
+}
+
+/////
