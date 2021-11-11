@@ -14,7 +14,7 @@ const char* const demo_13_vertex_shader =
 
 	"uniform vec2 billboard_size_world_space, cam_right_xz_world_space;\n"
 	"uniform vec3 billboard_center_world_space;\n"
-	"uniform mat4 VP;\n" // View-projection matrix
+	"uniform mat4 view_projection;\n"
 
 	"void main() {\n"
 		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
@@ -23,7 +23,7 @@ const char* const demo_13_vertex_shader =
 			"+ vec3(cam_right_xz_world_space, 0.0f).xzy * vertex_model_space.x * billboard_size_world_space.x\n"
 			"+ cam_up_world_space * vertex_model_space.y * billboard_size_world_space.y;\n"
 
-		"gl_Position = VP * vec4(vertex_world_space, 1.0f);\n"
+		"gl_Position = view_projection * vec4(vertex_world_space, 1.0f);\n"
 
 		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
 	"}\n",
@@ -99,7 +99,7 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 	static GLint matrix_id;
 	static byte second_call = 1; // Not first_call b/c that is defined above
 	if (second_call) {
-		matrix_id = glGetUniformLocation(poly_shader, "MVP"); // MVP found in poly shader
+		matrix_id = glGetUniformLocation(poly_shader, "model_view_projection"); // model_view_projection found in poly shader
 		second_call = 0;
 	}
 
@@ -117,7 +117,7 @@ void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) 
 
 	if (first_call) {
 		cam_right_id = glGetUniformLocation(shader_program, "cam_right_xz_world_space");
-		view_projection_matrix_id = glGetUniformLocation(shader_program, "VP");
+		view_projection_matrix_id = glGetUniformLocation(shader_program, "view_projection");
 
 		const GLint
 			billboard_size_id = glGetUniformLocation(shader_program, "billboard_size_world_space"),

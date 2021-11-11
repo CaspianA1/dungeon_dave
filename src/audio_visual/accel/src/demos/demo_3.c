@@ -145,21 +145,21 @@ StateGL demo_3_init(void) {
 
 	const char* const vertex_shader =
 		"#version 330 core\n"
-		"layout(location = 0) in vec3 vertexPosition_modelspace;\n"
-		"layout(location = 1) in vec3 vertexColor;\n"
-		"out vec3 fragmentColor;\n"
-		"uniform mat4 MVP;\n"
+		"layout(location = 0) in vec3 vertex_pos_model_space;\n"
+		"layout(location = 1) in vec3 vertex_color;\n"
+		"out vec3 fragment_color;\n"
+		"uniform mat4 model_view_projection;\n"
 		"void main() {\n"
-			"gl_Position = MVP * vec4(vertexPosition_modelspace, 1);"
-			"fragmentColor = vertexColor;\n"
+			"gl_Position = model_view_projection * vec4(vertex_pos_model_space, 1);"
+			"fragment_color = vertex_color;\n"
 		"}\n",
 
 	*const fragment_shader =
 		"#version 330 core\n"
-		"in vec3 fragmentColor;\n"
+		"in vec3 fragment_color;\n"
 		"out vec3 color;\n"
 		"void main() {\n"
-			"color = fragmentColor;\n"
+			"color = fragment_color;\n"
 		"}\n";
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);

@@ -18,7 +18,7 @@ void demo_2_configurable_matrix_setup(const GLuint shader_program,
 		static byte first_call = 1;
 
 		if (first_call) {
-			matrix_id = glGetUniformLocation(shader_program, "MVP");
+			matrix_id = glGetUniformLocation(shader_program, "model_view_projection");
 			first_call = 0;
 		}
 
@@ -38,11 +38,11 @@ StateGL demo_2_init(void) {
 	sgl.num_textures = 0;
 
 	const char* const vertex_shader =
-		"#version 330 core\n" // 140 -> OpenGL 3.1 (but that shader wouldn't compile)
-		"layout(location = 0) in vec3 vertexPosition_modelspace;\n"
-		"uniform mat4 MVP;\n"
+		"#version 330 core\n"
+		"layout(location = 0) in vec3 vertex_pos_model_space;\n"
+		"uniform mat4 model_view_projection;\n"
 		"void main() {\n"
-			"gl_Position = MVP * vec4(vertexPosition_modelspace, 1);\n"
+			"gl_Position = model_view_projection * vec4(vertex_pos_model_space, 1);\n"
 		"}\n",
 
 	*const fragment_shader =

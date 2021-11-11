@@ -22,9 +22,9 @@ StateGL demo_1_init(void) {
 
 	const char* const vertex_shader =
 		"#version 330 core\n" // 140 -> OpenGL 3.1 (but that shader wouldn't compile)
-		"layout(location = 0) in vec3 vertexPosition_modelspace;\n"
+		"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 		"void main() {\n"
-			"gl_Position.xyz = vertexPosition_modelspace;\n"
+			"gl_Position.xyz = vertex_pos_model_space;\n"
 			"gl_Position.w = 1.0;\n"
 		"}\n",
 

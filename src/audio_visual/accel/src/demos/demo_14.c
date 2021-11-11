@@ -13,9 +13,9 @@ void demo_14_drawer(const StateGL* const sgl) {
 	if (first_call) {
 		init_camera(&camera, (vec3) {7.0f, 5.0f, 10.0f});
 
-		model_view_projection_id = glGetUniformLocation(poly_shader, "MVP");
+		model_view_projection_id = glGetUniformLocation(poly_shader, "model_view_projection");
 		cam_right_xz_id = glGetUniformLocation(billboard_shader, "cam_right_xz_world_space");
-		view_projection_id = glGetUniformLocation(billboard_shader, "VP");
+		view_projection_id = glGetUniformLocation(billboard_shader, "view_projection");
 
 		glUseProgram(billboard_shader);
 		glUniform3f(glGetUniformLocation(billboard_shader, "billboard_center_world_space"), center[0], center[1], center[2]);

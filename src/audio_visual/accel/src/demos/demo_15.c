@@ -11,10 +11,10 @@ const char* const demo_15_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 
 	"out vec3 UV_3D;\n"
-	"uniform mat4 VP;\n"
+	"uniform mat4 view_projection;\n"
 
 	"void main() {\n"
-		"gl_Position = VP * vec4(vertex_pos_model_space, 1.0);\n"
+		"gl_Position = view_projection * vec4(vertex_pos_model_space, 1.0);\n"
 		"gl_Position = gl_Position.xyww;\n"
 		"UV_3D = vertex_pos_model_space;\n"
 	"}\n"
@@ -74,8 +74,6 @@ GLuint init_skybox_texture(const char* const path) {
 			0, OPENGL_INTERNAL_PIXEL_FORMAT,
 			cube_size, cube_size, 0, OPENGL_INPUT_PIXEL_FORMAT,
 			OPENGL_COLOR_CHANNEL_TYPE, face_pixels);
-
-		memset(face_pixels, 0, cube_size * cube_size * sizeof(Uint32));
 
 		SDL_UnlockSurface(face_surface); // Unlocking for next call to SDL_LowerBlit
 	}
@@ -142,7 +140,7 @@ StateGL demo_15_init(void) {
 
 	//////////
 	sgl.num_textures = 0;
-	const GLuint skybox_texture = init_skybox_texture("assets/hell.bmp");
+	const GLuint skybox_texture = init_skybox_texture("assets/snow.bmp");
 	sgl.any_data = (void*) (uint64_t) skybox_texture;
 
 	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "texture_sampler");
@@ -164,13 +162,13 @@ void demo_15_drawer(const StateGL* const sgl) {
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
-		view_projection_id = glGetUniformLocation(sgl -> shader_program, "VP");
+		view_projection_id = glGetUniformLocation(sgl -> shader_program, "view_projection");
 		first_call = 0;
 	}
 
 	update_camera(&camera);
 
-	/* Clears x, y, and w; z, depth, is not cleared b/c it's always set to 1
+	/* Clears x, y, and w; z (depth) is not cleared b/c it's always set to 1
 	in the vertex shader. If this matrix is modified here last, it's okay
 	because it will be newly generated at the next update_camera call. */
 	camera.view_projection[3][0] = 0.0f;

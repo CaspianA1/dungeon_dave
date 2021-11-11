@@ -120,7 +120,7 @@ const char* const demo_6_vertex_shader =
 
 	"uniform vec2 plane_sizes[4];\n"
 
-	"uniform mat4 MVP;\n"
+	"uniform mat4 model_view_projection;\n"
 	"out vec2 UV;\n"
 
 	"const vec2 unscaled_plane_UV[6] = vec2[6] (\n"
@@ -129,7 +129,7 @@ const char* const demo_6_vertex_shader =
 	");\n"
 
 	"void main() {\n"
-		"gl_Position = MVP * vec4(vertex_pos_model_space, 1);\n"
+		"gl_Position = model_view_projection * vec4(vertex_pos_model_space, 1);\n"
 		"UV = vec2(0, 0);\n"
 
 		"int UV_index = gl_VertexID % 6, plane_index = gl_VertexID / 6;\n"
