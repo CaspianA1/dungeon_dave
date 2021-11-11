@@ -3,7 +3,7 @@
 #include "../batch.c"
 #include "../camera.c"
 
-
+// http://www.humus.name/index.php?page=Textures
 
 const char* const demo_15_vertex_shader =
 	"#version 330 core\n"
