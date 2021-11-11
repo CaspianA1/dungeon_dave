@@ -148,7 +148,7 @@ StateGL demo_15_init(void) {
 
 	//////////
 	sgl.num_textures = 0;
-	const GLuint skybox_texture = init_skybox_texture("assets/skybox_2.bmp");
+	const GLuint skybox_texture = init_skybox_texture("assets/hell.bmp");
 	sgl.any_data = (void*) (uint64_t) skybox_texture;
 
 	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "texture_sampler");
