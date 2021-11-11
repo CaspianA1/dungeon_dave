@@ -1155,3 +1155,80 @@ GLuint init_skybox_texture(const char* const path) {
 }
 
 /////
+
+	/*
+	const char* const paths[6] = {
+		"assets/right.bmp",
+		"assets/left.bmp",
+		"assets/top.bmp",
+		"assets/bottom.bmp",
+		"assets/front.bmp",
+		"assets/back.bmp"
+	};
+
+	(void) path;
+	GLuint skybox;
+	glGenTextures(1, &skybox);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, OPENGL_SKYBOX_TEX_MIN_FILTER);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, tex_nonrepeating);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, tex_nonrepeating);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, tex_nonrepeating);
+
+	for (byte i = 0; i < 6; i++) {
+		SDL_Surface* const surface = init_surface(paths[i]);
+
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+			0, OPENGL_INTERNAL_PIXEL_FORMAT,
+			surface -> w, surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
+			OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
+
+		deinit_surface(surface);
+	}
+
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+	return skybox;
+	*/
+
+/////
+
+			/*
+			memset(face_pixels + y * pitch, 0xF0F8FF / (y + 1), row_bytes); // works
+			memset(face_pixels + y * pitch, 0xF0F8FF, row_bytes); // works
+			*/
+
+			/*
+			const void* dest = face_pixels + y * row_bytes;
+
+			int src_start = y + cube_size;
+			const void* src = skybox_pixels + src_start * row_bytes;
+
+			memcpy(dest, src, row_bytes);
+			*/
+
+/////
+
+		for (int y = 0; y < cube_size; y++) {
+			// pitch = width * 4
+			const int pitch = cube_size * 4;
+
+			Uint32* dest = read_texture_row(face_pixels, pitch, y);
+			Uint32* src = read_texture_row(skybox_pixels, pitch, y);		
+
+			memcpy(dest + 1, src, row_bytes);
+
+			/*
+			Uint32* dest = read_texture_row(face_pixels, pitch, y);
+			Uint32* src = read_texture_row(face_pixels, pitch, y + cube_size);
+			*/
+
+			/*
+			void* const ndest = face_pixels + y * pitch, *nsrc = skybox_pixels + (y) * pitch;
+			memcpy(ndest, nsrc, row_bytes);
+			*/
+		}
+
+/////

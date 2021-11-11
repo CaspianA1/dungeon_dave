@@ -39,16 +39,10 @@ const char* const demo_15_vertex_shader =
 
 // Skybox is a cubemap
 GLuint init_skybox_texture(const char* const path) {
-	const char* const paths[6] = {
-		"assets/right.bmp",
-		"assets/left.bmp",
-		"assets/top.bmp",
-		"assets/bottom.bmp",
-		"assets/front.bmp",
-		"assets/back.bmp"
-	};
+	SDL_Surface* const skybox_surface = init_surface(path);
+	SDL_UnlockSurface(skybox_surface);
+	const GLint cube_size = skybox_surface -> w >> 2;
 
-	(void) path;
 	GLuint skybox;
 	glGenTextures(1, &skybox);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
@@ -59,18 +53,42 @@ GLuint init_skybox_texture(const char* const path) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, tex_nonrepeating);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, tex_nonrepeating);
 
+	SDL_Surface* const face_surface = SDL_CreateRGBSurfaceWithFormat(0, cube_size, cube_size,
+		cube_size * sizeof(Uint32), SDL_PIXEL_FORMAT);
+
+	void* const face_pixels = face_surface -> pixels;
+
+	SDL_Rect dest_rect = {0, 0, cube_size, cube_size};
+
+	typedef struct {int x, y;} ivec2;
+	ivec2 src_origins[6];
+
+	// right, left, top, bottom, back, front
+	src_origins[0] = (ivec2) {cube_size << 1, cube_size};
+	src_origins[1] = (ivec2) {0, cube_size};
+	src_origins[2] = (ivec2) {cube_size, 0};
+	src_origins[3] = (ivec2) {cube_size, cube_size << 1};
+	src_origins[4] = (ivec2) {cube_size, cube_size};
+	src_origins[5] = (ivec2) {cube_size * 3, cube_size};
+
 	for (byte i = 0; i < 6; i++) {
-		SDL_Surface* const surface = init_surface(paths[i]);
+		const ivec2 src_origin = src_origins[i];
+		SDL_Rect src_rect = {src_origin.x, src_origin.y, cube_size, cube_size};
+		SDL_BlitSurface(skybox_surface, &src_rect, face_surface, &dest_rect);
+
+		SDL_LockSurface(face_surface); // Locking for read access to face_pixels
 
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 			0, OPENGL_INTERNAL_PIXEL_FORMAT,
-			surface -> w, surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
+			cube_size, cube_size, 0, OPENGL_INPUT_PIXEL_FORMAT,
+			OPENGL_COLOR_CHANNEL_TYPE, face_pixels);
 
-		deinit_surface(surface);
+		SDL_UnlockSurface(face_surface);
 	}
 
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	deinit_surface(face_surface);
+	deinit_surface(skybox_surface);
 
 	return skybox;
 }
@@ -129,8 +147,8 @@ StateGL demo_15_init(void) {
 	sgl.shader_program = init_shader_program(demo_15_vertex_shader, demo_15_fragment_shader);
 
 	//////////
-	sgl.num_textures = 0; // "../../../assets/walls/saqqara.bmp"
-	const GLuint skybox_texture = init_skybox_texture("assets/skybox_1.bmp");
+	sgl.num_textures = 0;
+	const GLuint skybox_texture = init_skybox_texture("assets/skybox_2.bmp");
 	sgl.any_data = (void*) (uint64_t) skybox_texture;
 
 	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "texture_sampler");

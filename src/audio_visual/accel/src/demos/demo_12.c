@@ -10,7 +10,6 @@
 - Ideal: BSPs, but not worth time
 - To start, one vbo + texture ptr per sector
 - For map edges, only render inside + top face
-- cubemapped skybox
 
 _____
 - Clip sectors based on adjacent heights
