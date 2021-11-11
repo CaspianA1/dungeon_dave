@@ -3,14 +3,7 @@
 #include "../batch.c"
 #include "../camera.c"
 
-/* right = GL_TEXTURE_CUBE_MAP_POSITIVE_X
-left = GL_TEXTURE_CUBE_MAP_NEGATIVE_X
 
-top = GL_TEXTURE_CUBE_MAP_POSITIVE_Y
-bottom = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
-
-back = GL_TEXTURE_CUBE_MAP_POSITIVE_Z
-front = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z */
 
 const char* const demo_15_vertex_shader =
 	"#version 330 core\n"
@@ -37,7 +30,7 @@ const char* const demo_15_vertex_shader =
 		"color = texture(cubemap_sampler, UV_3D);\n"
 	"}\n";
 
-// Skybox is a cubemap
+// This reads a skybox file into a OpenGL cubemap texture
 GLuint init_skybox_texture(const char* const path) {
 	SDL_Surface* const skybox_surface = init_surface(path);
 	SDL_UnlockSurface(skybox_surface);
@@ -57,7 +50,6 @@ GLuint init_skybox_texture(const char* const path) {
 		cube_size * sizeof(Uint32), SDL_PIXEL_FORMAT);
 
 	void* const face_pixels = face_surface -> pixels;
-
 	SDL_Rect dest_rect = {0, 0, cube_size, cube_size};
 
 	typedef struct {int x, y;} ivec2;
@@ -74,8 +66,8 @@ GLuint init_skybox_texture(const char* const path) {
 	for (byte i = 0; i < 6; i++) {
 		const ivec2 src_origin = src_origins[i];
 		SDL_Rect src_rect = {src_origin.x, src_origin.y, cube_size, cube_size};
-		SDL_BlitSurface(skybox_surface, &src_rect, face_surface, &dest_rect);
 
+		SDL_LowerBlit(skybox_surface, &src_rect, face_surface, &dest_rect);
 		SDL_LockSurface(face_surface); // Locking for read access to face_pixels
 
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
@@ -83,7 +75,9 @@ GLuint init_skybox_texture(const char* const path) {
 			cube_size, cube_size, 0, OPENGL_INPUT_PIXEL_FORMAT,
 			OPENGL_COLOR_CHANNEL_TYPE, face_pixels);
 
-		SDL_UnlockSurface(face_surface);
+		memset(face_pixels, 0, cube_size * cube_size * sizeof(Uint32));
+
+		SDL_UnlockSurface(face_surface); // Unlocking for next call to SDL_LowerBlit
 	}
 
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);

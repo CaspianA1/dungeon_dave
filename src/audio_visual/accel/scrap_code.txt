@@ -1232,3 +1232,14 @@ GLuint init_skybox_texture(const char* const path) {
 		}
 
 /////
+
+/* right = GL_TEXTURE_CUBE_MAP_POSITIVE_X
+left = GL_TEXTURE_CUBE_MAP_NEGATIVE_X
+
+top = GL_TEXTURE_CUBE_MAP_POSITIVE_Y
+bottom = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
+
+back = GL_TEXTURE_CUBE_MAP_POSITIVE_Z
+front = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z */
+
+/////
