@@ -7,6 +7,7 @@ which equals 441.6729559300637
 static const struct {
     // Angles are in radians
     const GLfloat init_fov, max_vert_angle;
+    const byte fps;
 
     const struct {
         const GLfloat near, far;
@@ -23,6 +24,7 @@ static const struct {
 } constants = {
     .init_fov = (GLfloat) M_PI_2, // 90 degrees
     .max_vert_angle = (GLfloat) M_PI_2,
+    .fps = 60,
     .clip_dists = {0.1f, 441.6729559300637f},
     .speeds = {3.0f, 0.08f},
     .movement_keys = {SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D}

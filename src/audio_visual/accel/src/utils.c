@@ -48,14 +48,14 @@ void make_application(void (*const drawer)(const StateGL* const),
 	printf("vendor = %s\nrenderer = %s\nversion = %s\n---\n",
 		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 
-	loop_application(&screen, drawer, init, deinit, FPS);
+	loop_application(&screen, drawer, init, deinit);
 	deinit_screen(&screen);
 }
 
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
-	StateGL (*const init)(void), void (*const deinit)(const StateGL* const), const byte fps) {
+	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
 
-	const int max_delay = 1000 / fps;
+	const int max_delay = 1000 / constants.fps;
 	byte running = 1;
 	SDL_Event event;
 	const StateGL sgl = init();

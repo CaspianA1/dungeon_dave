@@ -14,7 +14,6 @@
 // 800 by 600
 #define SCR_W 800
 #define SCR_H 600
-#define FPS 60
 #define FOV 90.0f
 
 #define KEY_PRINT_POSITION SDL_SCANCODE_1
@@ -71,7 +70,7 @@ void deinit_screen(const Screen* const screen);
 void make_application(void (*const drawer)(const StateGL* const),
 	StateGL (*const init)(void), void (*const deinit)(const StateGL* const));
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
-	StateGL (*const init)(void), void (*const deinit)(const StateGL* const), const byte fps);
+	StateGL (*const init)(void), void (*const deinit)(const StateGL* const));
 
 // Deinitializes shader, unbinds vbos from vao, deletes vbos, textures, and vao
 void deinit_demo_vars(const StateGL* const sgl);
