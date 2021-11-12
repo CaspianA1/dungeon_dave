@@ -4,7 +4,7 @@ OPTIMIZE = -Ofast
 DEBUG = -fsanitize=address
 BUILD_TYPE = $(DEBUG)
 
-DEMO = 14
+DEMO = 13
 OUT = accel_demo
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat

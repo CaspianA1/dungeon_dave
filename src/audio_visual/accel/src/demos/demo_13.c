@@ -1,4 +1,4 @@
-#include "demo_10.c"
+#include "demo_11.c"
 
 const char* const demo_13_vertex_shader =
 	"#version 330 core\n"
@@ -143,9 +143,14 @@ const GLfloat center[3] = {5.5f, 4.5f, 8.5f};
 StateGL demo_13_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
+	/*
 	const plane_type_t origin[3] = {1, 4, 1}, size[3] = {5, 1, 8};
 	plane_type_t* const flat_plane = malloc(bytes_per_plane);
 	PLANE_CREATOR_NAME(hori)(origin, size[0], size[2], flat_plane);
+	*/
+
+	const plane_type_t origin[3] = {1, 4, 1}, size[3] = {5, 4, 8};
+	plane_type_t* const cuboid = create_sector_mesh(origin, size);
 
 	//////////
 	sgl.num_vertex_buffers = 1;
@@ -153,9 +158,9 @@ StateGL demo_13_init(void) {
 	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 
 	glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers[0]);
-	glBufferData(GL_ARRAY_BUFFER, bytes_per_plane, flat_plane, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, bytes_per_mesh, cuboid, GL_STATIC_DRAW);
 
-	free(flat_plane);
+	free(cuboid);
 	//////////
 
 	sgl.num_textures = 2;
@@ -181,7 +186,7 @@ void demo_13_drawer(const StateGL* const sgl) {
 	select_texture_for_use(sgl -> textures[1], poly_shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	bind_interleaved_planes_to_vao();
-	draw_triangles(2);
+	draw_triangles(triangles_per_mesh);
 	glDisableVertexAttribArray(0);
 
 	// Turning on alpha blending for drawing billboards
