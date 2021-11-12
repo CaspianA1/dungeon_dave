@@ -71,9 +71,7 @@ void update_camera(Camera* const camera) {
 	last_time = SDL_GetTicks() / 1000.0f;
 }
 
-void add_unculled_sectors_to_batch(Camera* const camera, Batch* const batch, const SectorList sector_list) {
-	start_batch_adding(batch);
-
+void draw_unculled_sectors_via_batch(Camera* const camera, SectorBatch* const batch, const SectorList sector_list) {
 	vec4 frustum_planes[6];
 	glm_frustum_planes(camera -> model_view_projection, frustum_planes);
 
@@ -88,7 +86,9 @@ void add_unculled_sectors_to_batch(Camera* const camera, Batch* const batch, con
 		// If sector in view
 		if (glm_aabb_frustum(aabb_corners, frustum_planes)) {
 			printf("Draw #%d\n", i + 1);
-			add_to_batch(batch, NULL); // Feed sector vertices later on; store in sector, instead of vbo
+			add_to_sector_batch(batch, NULL); // Feed sector vertices later on; store in sector, instead of vbo
 		}
 	}
+
+	draw_sector_batch(batch);
 }

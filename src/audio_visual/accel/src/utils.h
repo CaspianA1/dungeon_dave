@@ -54,7 +54,7 @@ typedef enum {
 
 typedef struct {
 	GLuint shader_program, vertex_array, *vertex_buffers, *textures;
-	int num_vertex_buffers, num_textures;
+	GLsizei num_vertex_buffers, num_textures;
 	void* any_data; // If a demo need to pass in extra info to the drawer, it can do it through here
 } StateGL;
 

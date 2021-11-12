@@ -1311,3 +1311,79 @@ int main(void) {
 #endif
 
 /////
+
+#include "../utils.c"
+#include "../sector.c"
+#include "../batch.c"
+#include "../camera.c"
+
+/*
+typedef struct {
+	GLsizei num_textures;
+	GLuint vao, *const textures, shader;
+	Batch batch;
+} StateDemo17;
+
+void demo_17_drawer(const StateDemo17* const s) {
+	static byte first_call = 1;
+	static Camera camera;
+
+	if (first_call) {
+		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
+		first_call = 0;
+	}
+
+	glClearColor(0.8f, 0.8f, 0.5f, 0.0f);
+
+	(void) s;
+}
+
+StateDemo17 init_state_demo_17(void) {
+	StateDemo17 s;
+
+	glGenVertexArrays(1, &s.vao);
+	glBindVertexArray(s.vao);
+
+	return s;
+}
+
+void deinit_state_demo_17(const StateDemo17* const s) {
+	glDeleteTextures(s -> num_textures, rs -> textures);
+	deinit_batch(&s -> batch);
+	glDeleteVertexArrays(1, &s -> vao);
+}
+
+// #ifdef DEMO_17
+int main(void) {
+	Screen screen = init_screen("Culling Demo");
+
+	const int max_delay = 1000 / constants.fps;
+	(void) max_delay;
+
+	SDL_Event event;
+	keys = SDL_GetKeyboardState(NULL);
+	byte running = 1;
+
+	StateDemo17 s = init_state_demo_17();
+
+	while (running) {
+		const Uint32 before = SDL_GetTicks();
+
+		while (SDL_PollEvent(&event)) {
+			if (event.type == SDL_QUIT) running = 0;
+		}
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		demo_17_drawer(&s);
+		SDL_GL_SwapWindow(screen.window);
+		const int wait = max_delay - (SDL_GetTicks() - before);
+		if (wait > 0) SDL_Delay(wait);
+	}
+
+	deinit_state_demo_17(&s);
+	deinit_screen(&screen);
+}
+// #endif
+*/
+
+/////
