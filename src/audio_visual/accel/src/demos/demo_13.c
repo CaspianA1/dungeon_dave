@@ -138,7 +138,7 @@ void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) 
 }
 
 GLuint poly_shader;
-const GLfloat center[3] = {5.5f, 4.5f, 8.5f};
+GLfloat center[3] = {5.5f, 4.5f, 8.5f};
 
 StateGL demo_13_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
