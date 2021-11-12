@@ -1243,3 +1243,71 @@ back = GL_TEXTURE_CUBE_MAP_POSITIVE_Z
 front = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z */
 
 /////
+
+// This demo asserts that batching + culling work
+
+#include "demo_11.c"
+#include "../sector.c"
+#include "../batch.c"
+#include "../camera.c"
+
+StateGL demo_17_init(void) {
+	StateGL sgl = {.vertex_array = init_vao()};
+
+
+
+	/*
+	const plane_type_t origin[3] = {1, 2, 2}, size[3] = {1, 2, 3};
+	plane_type_t* const cuboid_mesh = create_sector_mesh(origin, size);
+
+	sgl.num_vertex_buffers = 1;
+	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, cuboid_mesh, bytes_per_mesh);
+	bind_interleaved_planes_to_vao();
+
+	free(cuboid_mesh);
+
+	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	sgl.num_textures = 1;
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/pyramid_bricks_3.bmp", tex_repeating);
+	select_texture_for_use(sgl.textures[0], sgl.shader_program);
+
+	enable_all_culling();
+	*/
+
+	return sgl;
+}
+
+void demo_17_drawer(const StateGL* const sgl) {
+	(void) sgl;
+	static Camera camera;
+	static Camera camera;
+	static Batch batch;
+	static GLint model_view_projection_id;
+	static byte first_call = 1;
+
+	/*
+	static Camera camera;
+	static Batch batch;
+	static GLint model_view_projection_id;
+	static byte first_call = 1;
+
+	if (first_call) {
+		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
+		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
+		first_call = 0;
+	}
+	update_camera(&camera);
+	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+
+	glClearColor(0.2f, 0.4f, 0.6f, 0.0f);
+	draw_triangles(triangles_per_mesh);
+	*/
+}
+
+#ifdef DEMO_17
+int main(void) {
+	make_application(demo_17_drawer, demo_17_init, deinit_demo_vars);
+}
+#endif
+
+/////

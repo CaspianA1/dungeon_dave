@@ -12,7 +12,7 @@ StateGL demo_16_init(void) {
 	plane_type_t* const cuboid_mesh = create_sector_mesh(origin, size);
 
 	sgl.num_vertex_buffers = 2;
-	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,cuboid_mesh, bytes_per_mesh, skybox_vertices, sizeof(skybox_vertices));
+	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, cuboid_mesh, bytes_per_mesh, skybox_vertices, sizeof(skybox_vertices));
 	glEnableVertexAttribArray(0);
 	free(cuboid_mesh);
 

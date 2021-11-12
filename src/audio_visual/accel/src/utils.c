@@ -55,7 +55,7 @@ void make_application(void (*const drawer)(const StateGL* const),
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
 	StateGL (*const init)(void), void (*const deinit)(const StateGL* const), const byte fps) {
 
-	const double max_delay = 1000.0 / fps;
+	const int max_delay = 1000 / fps;
 	byte running = 1;
 	SDL_Event event;
 	const StateGL sgl = init();
