@@ -14,7 +14,6 @@ StateGL demo_16_init(void) {
 	sgl.num_vertex_buffers = 2;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,cuboid_mesh, bytes_per_mesh, skybox_vertices, sizeof(skybox_vertices));
 	glEnableVertexAttribArray(0);
-	// glEnableVertexAttribArray(1);
 	free(cuboid_mesh);
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
