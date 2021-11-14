@@ -1,6 +1,6 @@
 #include "demo_5.c"
 
-// demo 10, but just with triangles in correct winding order
+// Demo 10, but just with triangles in correct winding order
 
 typedef GLubyte plane_type_t;
 #define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
