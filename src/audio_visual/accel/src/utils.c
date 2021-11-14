@@ -84,8 +84,11 @@ void deinit_demo_vars(const StateGL* const sgl) {
 	glDeleteProgram(sgl -> shader_program);
 
 	for (int i = 0; i < sgl -> num_vertex_buffers; i++) glDisableVertexAttribArray(i);
-	glDeleteBuffers(sgl -> num_vertex_buffers, sgl -> vertex_buffers);
-	free(sgl -> vertex_buffers);
+
+	if (sgl -> num_vertex_buffers > 0) {
+		glDeleteBuffers(sgl -> num_vertex_buffers, sgl -> vertex_buffers);
+		free(sgl -> vertex_buffers);
+	}
 
 	if (sgl -> num_textures > 0) {
 		glDeleteTextures(sgl -> num_textures, sgl -> textures);

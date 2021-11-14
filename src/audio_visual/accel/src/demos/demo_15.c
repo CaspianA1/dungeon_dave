@@ -1,6 +1,4 @@
-#include "../utils.c"
-#include "../sector.c"
-#include "../batch.c"
+#include "demo_11.c"
 #include "../camera.c"
 
 // http://www.humus.name/index.php?page=Textures

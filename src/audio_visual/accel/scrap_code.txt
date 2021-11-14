@@ -1387,3 +1387,41 @@ int main(void) {
 */
 
 /////
+
+	/*
+	sgl.num_vertex_buffers = sectors.length;
+	sgl.vertex_buffers = malloc(sgl.num_vertex_buffers * sizeof(GLuint));
+	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
+	*/
+
+	/*
+	sgl.num_vertex_buffers = 0;
+
+	for (int i = 0; i < sector_list.length; i++) {
+		Sector* const sector = sector_list.sectors + i;
+
+		// glGenBuffers(1, &sector -> vbo);
+		// sector -> vbo = sgl.vertex_buffers[i];
+		const plane_type_t origin[3] = {area.origin[0], area.height, area.origin[1]};
+
+		plane_type_t* mesh;
+		byte mesh_bytes;
+
+		if (area.height == 0) { // Flat sector
+			mesh = create_height_zero_mesh(origin, area.size);
+			mesh_bytes = bytes_per_height_zero_mesh;
+		}
+		else {
+			const plane_type_t size[3] = {area.size[0], area.height, area.size[1]};
+			mesh = create_sector_mesh(origin, size);
+			mesh_bytes = bytes_per_mesh;
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, sector -> vbo);
+		glBufferData(GL_ARRAY_BUFFER, mesh_bytes, mesh, GL_STATIC_DRAW);
+
+		// free(mesh);
+	}
+	*/
+
+/////

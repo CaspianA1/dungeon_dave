@@ -143,22 +143,19 @@ GLfloat center[3] = {5.5f, 4.5f, 8.5f};
 StateGL demo_13_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	/*
-	const plane_type_t origin[3] = {1, 4, 1}, size[3] = {5, 1, 8};
-	plane_type_t* const flat_plane = malloc(bytes_per_plane);
-	PLANE_CREATOR_NAME(hori)(origin, size[0], size[2], flat_plane);
-	*/
-
 	const plane_type_t origin[3] = {1, 4, 1}, size[3] = {5, 4, 8};
-	plane_type_t* const cuboid = create_sector_mesh(origin, size);
+	plane_type_t* const cuboid = malloc(bytes_per_mesh);
+	create_sector_mesh(origin, size, cuboid);
+	// bind_interleaved_planes_to_vao();
 
 	//////////
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = malloc(sgl.num_vertex_buffers * sizeof(GLuint));
-	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 
+	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers[0]);
 	glBufferData(GL_ARRAY_BUFFER, bytes_per_mesh, cuboid, GL_STATIC_DRAW);
+	bind_interleaved_planes_to_vao();
 
 	free(cuboid);
 	//////////
@@ -185,16 +182,13 @@ void demo_13_drawer(const StateGL* const sgl) {
 	glUseProgram(poly_shader);
 	select_texture_for_use(sgl -> textures[1], poly_shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
-	bind_interleaved_planes_to_vao();
 	draw_triangles(triangles_per_mesh);
-	glDisableVertexAttribArray(0);
 
-	// Turning on alpha blending for drawing billboards
-	glEnable(GL_BLEND);
 	glUseProgram(sgl -> shader_program);
 	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+	glEnable(GL_BLEND); // Turning on alpha blending for drawing billboards
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glDisable(GL_BLEND);
 }
 

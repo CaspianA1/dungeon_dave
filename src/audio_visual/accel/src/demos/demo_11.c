@@ -24,7 +24,6 @@ enum {
 enum {
 	bytes_per_mesh = vars_per_mesh * sizeof(plane_type_t),
 	bytes_per_height_zero_mesh = vars_per_height_zero_mesh * sizeof(plane_type_t)
-	// bytes_per_height_zero_mesh = bytes_per_vertex * vertices_per_triangle * triangles_per_height_zero_mesh
 };
 
 void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type_t size[3]) {
@@ -41,14 +40,13 @@ void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type
 
 /* Even if normal sector meshes can represent height zero meshes, it's worth it to make a separate type
 mesh for when a sector has height 0 because I save 120 bytes of memory that way (480 with floats!) */
-plane_type_t* create_height_zero_mesh(const plane_type_t origin[3], const plane_type_t size[2]) {
-	const plane_type_t size_3D[3] = {size[0], 0, size[1]};
-	check_for_mesh_out_of_bounds(origin, size_3D);
+void create_height_zero_mesh(const plane_type_t origin[3], const plane_type_t size[2], plane_type_t* const dest) {
+	check_for_mesh_out_of_bounds(origin, (plane_type_t[3]) {size[0], 0, size[1]});
 
-	plane_type_t* const height_zero_mesh = malloc(bytes_per_height_zero_mesh);
+	const plane_type_t
+		size_x = size[0], size_z = size[1],
+		near_x = origin[0], top_y = origin[1], near_z = origin[2];
 
-	const plane_type_t size_x = size[0], size_z = size[1];
-	const plane_type_t near_x = origin[0], top_y = origin[1], near_z = origin[2];
 	const plane_type_t far_x = near_x + size_x, far_z = near_z + size_z;
 
 	const plane_type_t vertices[vars_per_height_zero_mesh] = {
@@ -60,14 +58,12 @@ plane_type_t* create_height_zero_mesh(const plane_type_t origin[3], const plane_
 		far_x, top_y, far_z, size_z, 0,
 		far_x, top_y, near_z, 0, 0
 	};
-	memcpy(height_zero_mesh, vertices, bytes_per_height_zero_mesh);
-	return height_zero_mesh;
+
+	memcpy(dest, vertices, bytes_per_height_zero_mesh);
 }
 
-plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_t size[3]) {
+void create_sector_mesh(const plane_type_t origin[3], const plane_type_t size[3], plane_type_t* const dest) {
 	check_for_mesh_out_of_bounds(origin, size);
-
-	plane_type_t* const sector_mesh = malloc(bytes_per_mesh);
 
 	const plane_type_t
 		near_x = origin[0], top_y = origin[1], near_z = origin[2],
@@ -123,15 +119,14 @@ plane_type_t* create_sector_mesh(const plane_type_t origin[3], const plane_type_
 		far_x, top_y, near_z, 0, 0
 	};
 
-	memcpy(sector_mesh, vertices, bytes_per_mesh);
-	return sector_mesh;
+	memcpy(dest, vertices, bytes_per_mesh);
 }
 
 void bind_interleaved_planes_to_vao(void) {
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-
 	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
 	glVertexAttribPointer(1, 2, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(plane_type_t)));
 }
 
@@ -139,7 +134,9 @@ StateGL demo_11_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
 	const plane_type_t origin[3] = {2, 2, 5}, size[3] = {3, 2, 8};
-	plane_type_t* const cuboid_mesh = create_sector_mesh(origin, size);
+	// plane_type_t* const cuboid_mesh = create_sector_mesh(origin, size);
+	plane_type_t* const cuboid_mesh = malloc(bytes_per_mesh);
+	create_sector_mesh(origin, size, cuboid_mesh);
 
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, cuboid_mesh, bytes_per_mesh);

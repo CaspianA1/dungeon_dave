@@ -10,14 +10,14 @@
 - Ideal: BSPs, but not worth time
 - To start, one vbo + texture ptr per sector
 - For map edges, only render inside + top face
-
+- Store texture byte index in a plane (max 10 textures per level)
+- Frustum culling
 _____
 - Clip sectors based on adjacent heights
 - For neighboring sectors with the same height, make them into flat 2D planes
 - Or in the general case, if a plane is partially invisible, truncate it; otherwise, remove it
 - Find which sectors are behind, and then skip rendering those
 
-- Billboard sprites
 - Read sprite crop from spritesheet
 
 - Blit 2D sprite to whole screen
@@ -26,42 +26,15 @@ _____
 */
 
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
-	StateGL sgl = {.vertex_array = init_vao()};
+	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
-	const SectorList sectors = generate_sectors_from_heightmap(heightmap, map_width, map_height);
+	SectorList sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
+	init_sector_list_vbo(&sector_list);
+	bind_interleaved_planes_to_vao();
 
-	sgl.num_vertex_buffers = sectors.length;
-	sgl.vertex_buffers = malloc(sgl.num_vertex_buffers * sizeof(GLuint));
-	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
-
-	for (int i = 0; i < sectors.length; i++) {
-		Sector* const sector = sectors.data + i;
-		const SectorArea area = sector -> area;
-		sector -> vbo = sgl.vertex_buffers[i];
-		const plane_type_t origin[3] = {area.origin[0], area.height, area.origin[1]};
-
-		plane_type_t* mesh;
-		byte mesh_bytes;
-
-		if (area.height == 0) { // Flat sector
-			mesh = create_height_zero_mesh(origin, area.size);
-			mesh_bytes = bytes_per_height_zero_mesh;
-		}
-		else {
-			const plane_type_t size[3] = {area.size[0], area.height, area.size[1]};
-			mesh = create_sector_mesh(origin, size);
-			mesh_bytes = bytes_per_mesh;
-		}
-
-		glBindBuffer(GL_ARRAY_BUFFER, sector -> vbo);
-		glBufferData(GL_ARRAY_BUFFER, mesh_bytes, mesh, GL_STATIC_DRAW);
-
-		free(mesh);
-	}
-	// any_data stores sector meshes
 	SectorList* const sector_list_on_heap = malloc(sizeof(SectorList));
-	*sector_list_on_heap = sectors;
-	sgl.any_data = sector_list_on_heap; // any_data freed in demo_12_deinit
+	*sector_list_on_heap = sector_list;
+	sgl.any_data = sector_list_on_heap; // any_data stores sector meshes, and freed in demo_12_deinit
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	enable_all_culling();
@@ -224,21 +197,15 @@ void demo_12_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
 	glClearColor(0.8901960784313725f, 0.8549019607843137f, 0.788235294117647f, 0.0f); // Bone
 
+	select_texture_for_use(sgl -> textures[6], sgl -> shader_program);
+
 	const SectorList* const sector_list = sgl -> any_data;
-	for (int i = 0; i < sector_list -> length; i++) {
-		const int tex_ind = (double) i / sgl -> num_vertex_buffers * sgl -> num_textures;
-		select_texture_for_use(sgl -> textures[tex_ind], sgl -> shader_program);
-
-		glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[i]);
-		bind_interleaved_planes_to_vao();
-
-		draw_triangles((sector_list -> data[i].area.height == 0) ? triangles_per_height_zero_mesh : triangles_per_mesh);
-	}
+	draw_triangles(sector_list -> num_vertices);
 }
 
 void demo_12_deinit(const StateGL* const sgl) {
 	const SectorList* const sector_list = sgl -> any_data;
-	deinit_sector_list((*sector_list)); // This frees the internal sector data
+	deinit_sector_list(sector_list); // This frees the stored sector meshes + their vbo
 	free(sgl -> any_data); // This frees the sector list struct on the heap
 
 	deinit_demo_vars(sgl);
@@ -246,6 +213,6 @@ void demo_12_deinit(const StateGL* const sgl) {
 
 #ifdef DEMO_12
 int main(void) {
-	make_application(demo_12_drawer, demo_12_pyramid_init, demo_12_deinit);
+	make_application(demo_12_drawer, demo_12_palace_init, demo_12_deinit);
 }
 #endif

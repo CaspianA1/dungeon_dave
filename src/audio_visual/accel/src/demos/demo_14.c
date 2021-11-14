@@ -1,5 +1,4 @@
 #include "demo_13.c"
-#include "../batch.c"
 #include "../sector.c"
 #include "../camera.c"
 
@@ -50,21 +49,18 @@ void demo_14_drawer(const StateGL* const sgl) {
 
 	select_texture_for_use(sgl -> textures[1], poly_shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
-	bind_interleaved_planes_to_vao();
 	draw_triangles(triangles_per_mesh);
-	glDisableVertexAttribArray(0);
 
 	//////////
-
-	glEnable(GL_BLEND); // Blending on for billboard
 	glUseProgram(billboard_shader);
 
 	glUniform2f(cam_right_xz_id, camera.right_xz[0], camera.right_xz[1]);
 	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera.view_projection[0][0]);
 
 	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+	glEnable(GL_BLEND); // Blending on for billboard
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glDisable(GL_BLEND);
 }
 
