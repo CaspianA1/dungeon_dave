@@ -12,8 +12,8 @@
 #define OPENGL_MINOR_VERSION 3
 
 // 800 by 600
-#define SCR_W 1440
-#define SCR_H 900
+#define SCR_W 800
+#define SCR_H 600
 #define FOV 90.0f
 
 #define KEY_PRINT_POSITION SDL_SCANCODE_1
