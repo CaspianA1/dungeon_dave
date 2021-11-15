@@ -78,18 +78,18 @@ void deinit_demo_vars(const StateGL* const sgl);
 //////////
 
 GLuint init_vao(void);
-GLuint* init_vbos(const int num_buffers, ...);
-void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...);
+GLuint* init_vbos(const GLsizei num_buffers, ...);
+void bind_vbos_to_vao(const GLuint* const vbos, const GLsizei num_vbos, ...);
 
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader);
 
 SDL_Surface* init_surface(const char* const path);
 void deinit_surface(SDL_Surface* const surface);
 
-GLuint* init_textures(const int num_textures, ...);
+GLuint* init_textures(const GLsizei num_textures, ...);
 void select_texture_for_use(const GLuint texture, const GLuint shader_program);
 
 void enable_all_culling(void);
-void draw_triangles(const int num_triangles);
+void draw_triangles(const GLsizei num_triangles);
 
 static inline GLfloat to_radians(const GLfloat degrees);

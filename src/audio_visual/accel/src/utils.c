@@ -83,7 +83,7 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 void deinit_demo_vars(const StateGL* const sgl) {
 	glDeleteProgram(sgl -> shader_program);
 
-	for (int i = 0; i < sgl -> num_vertex_buffers; i++) glDisableVertexAttribArray(i);
+	for (GLsizei i = 0; i < sgl -> num_vertex_buffers; i++) glDisableVertexAttribArray(i);
 
 	if (sgl -> num_vertex_buffers > 0) {
 		glDeleteBuffers(sgl -> num_vertex_buffers, sgl -> vertex_buffers);
@@ -106,14 +106,14 @@ GLuint init_vao(void) {
 }
 
 // Buffer data ptr, size of buffer
-GLuint* init_vbos(const int num_buffers, ...) {
+GLuint* init_vbos(const GLsizei num_buffers, ...) {
 	va_list args;
 	va_start(args, num_buffers);
 
 	GLuint* const vbos = malloc(num_buffers * sizeof(GLuint));
 	glGenBuffers(num_buffers, vbos);
 
-	for (int i = 0; i < num_buffers; i++) {
+	for (GLsizei i = 0; i < num_buffers; i++) {
 		const GLfloat* const buffer_data_ptr = va_arg(args, GLfloat*);
 		const int size_of_buffer = va_arg(args, int);
 
@@ -126,11 +126,11 @@ GLuint* init_vbos(const int num_buffers, ...) {
 }
 
 // Num components for vbo
-void bind_vbos_to_vao(const GLuint* const vbos, const int num_vbos, ...) {
+void bind_vbos_to_vao(const GLuint* const vbos, const GLsizei num_vbos, ...) {
 	va_list args;
 	va_start(args, num_vbos);
 
-	for (int i = 0; i < num_vbos; i++) {
+	for (GLsizei i = 0; i < num_vbos; i++) {
 		glEnableVertexAttribArray(i);
 		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
 
@@ -159,11 +159,11 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 		glShaderSource(shader_id, 1, shaders + type, NULL);
 		glCompileShader(shader_id);
 
-		int info_log_length;
+		GLint info_log_length;
 		glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
 
 		if (info_log_length > 0) {
-			char* const error_msg = malloc(info_log_length + 1);
+			GLchar* const error_msg = malloc(info_log_length + 1);
 			glGetShaderInfoLog(shader_id, info_log_length, NULL, error_msg);
 			printf("GLSL compilation error for shader #%d:\n%s\n---\n", type + 1, error_msg);
 			free(error_msg);
@@ -173,7 +173,7 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 	}
 
 	glLinkProgram(program_id);
-	int info_log_length;
+	GLint info_log_length;
 	glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_log_length);
 	if (info_log_length > 0) fail("link shaders", LinkShaders);
 
@@ -204,7 +204,7 @@ void deinit_surface(SDL_Surface* const surface) {
 }
 
 // Expects that num_textures > 0. Params: path, repeating texture.
-GLuint* init_textures(const int num_textures, ...) {
+GLuint* init_textures(const GLsizei num_textures, ...) {
 	va_list args;
 	va_start(args, num_textures);
 
