@@ -1,6 +1,7 @@
 #include "demo_11.c"
 #include "../sector.c"
 #include "../maps.c"
+#include "../camera.c"
 
 /*
 - Sectors contain their meshes
@@ -13,6 +14,7 @@
 - For map edges, only render inside + top face
 - Store texture byte index in a plane (max 10 textures per level)
 - Frustum culling
+- A little seam between some textures - but inevitable
 _____
 - Clip sectors based on adjacent heights
 - For neighboring sectors with the same height, make them into flat 2D planes
@@ -90,9 +92,20 @@ StateGL demo_12_maze_init(void) {
 }
 
 void demo_12_drawer(const StateGL* const sgl) {
-	move(sgl -> shader_program);
-	glClearColor(0.8901960784313725f, 0.8549019607843137f, 0.788235294117647f, 0.0f); // Bone
+	static Camera camera;
+	static GLint model_view_projection_id;
+	static byte first_call = 1;
 
+	if (first_call) {
+		init_camera(&camera, (vec3) {1.5f, 1.0f, 1.5f});
+		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
+		first_call = 0;
+	}
+
+	update_camera(&camera);
+	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+
+	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
 
 	const SectorList* const sector_list = sgl -> any_data;
