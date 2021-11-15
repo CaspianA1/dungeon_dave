@@ -19,7 +19,8 @@ SectorList init_sector_list(const int init_size) {
 	return (SectorList) {
 		.sectors = malloc(init_size * sizeof(Sector)),
 		.length = 0,
-		.max_alloc = init_size
+		.max_alloc = init_size,
+		.num_vertices = 0
 	};
 }
 
@@ -103,7 +104,6 @@ SectorList generate_sectors_from_heightmap(const byte* const heightmap, const by
 
 void init_sector_list_vbo(SectorList* const sector_list) {
 	const int num_sectors = sector_list -> length;
-
 	size_t total_bytes = 0, total_components = 0;
 
 	for (int i = 0; i < num_sectors; i++)
@@ -114,8 +114,7 @@ void init_sector_list_vbo(SectorList* const sector_list) {
 
 	for (int i = 0; i < num_sectors; i++) {
 		const Sector sector = sector_list -> sectors[i];
-
-		plane_type_t origin[3] = {sector.origin[0], sector.height, sector.origin[1]};
+		const plane_type_t origin[3] = {sector.origin[0], sector.height, sector.origin[1]};
 
 		if (sector.height == 0) { // Flat sector
 			create_height_zero_mesh(origin, sector.size, vertices + total_components);
