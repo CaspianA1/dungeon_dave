@@ -22,6 +22,7 @@ StateGL demo_1_init(void) {
 
 	const char* const vertex_shader =
 		"#version 330 core\n" // 140 -> OpenGL 3.1 (but that shader wouldn't compile)
+
 		"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 		"void main() {\n"
 			"gl_Position.xyz = vertex_pos_model_space;\n"
@@ -30,6 +31,7 @@ StateGL demo_1_init(void) {
 
 	*const fragment_shader =
 		"#version 330 core\n"
+
 		"out vec3 color;\n"
 		"void main() {\n"
 			"color = vec3(1, 0, 0);\n" // Red

@@ -4,8 +4,8 @@ const char* const demo_4_vertex_shader =
 	"#version 330 core\n"
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 	"layout(location = 1) in vec2 vertex_UV;\n"
-
 	"out vec2 UV;\n"
+
 	"uniform mat4 model_view_projection;\n"
 
 	/*

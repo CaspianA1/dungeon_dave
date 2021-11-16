@@ -28,6 +28,18 @@ _____
 - Flat weapon
 */
 
+// Adds distance shading from the demo 4 fragment shader
+const char* const demo_12_fragment_shader =
+	"#version 330 core\n"
+	"in vec2 UV;\n"
+	"out vec3 color;\n" // For textures with an alpha channel, enable 4 channels
+
+	"uniform sampler2D texture_sampler;\n"
+
+	"void main() {\n"
+		"color = texture(texture_sampler, UV).rgb;\n"
+	"}\n";
+
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 

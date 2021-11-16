@@ -7,8 +7,8 @@ const char* const demo_15_vertex_shader =
 	"#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
-
 	"out vec3 UV_3D;\n"
+
 	"uniform mat4 view_projection;\n"
 
 	"void main() {\n"

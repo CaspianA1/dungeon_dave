@@ -39,6 +39,7 @@ StateGL demo_2_init(void) {
 
 	const char* const vertex_shader =
 		"#version 330 core\n"
+
 		"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 		"uniform mat4 model_view_projection;\n"
 		"void main() {\n"

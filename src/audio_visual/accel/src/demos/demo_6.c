@@ -117,11 +117,10 @@ GLfloat* create_plane_mesh(const int num_planes, ...) {
 const char* const demo_6_vertex_shader =
 	"#version 330 core\n"
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
+	"out vec2 UV;\n"
 
 	"uniform vec2 plane_sizes[4];\n"
-
 	"uniform mat4 model_view_projection;\n"
-	"out vec2 UV;\n"
 
 	"const vec2 unscaled_plane_UV[6] = vec2[6] (\n"
 		"vec2(0.0f, 0.0f), vec2(1.0f, 0.0f), vec2(0.0f, 1.0f),\n"

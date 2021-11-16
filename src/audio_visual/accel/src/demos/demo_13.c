@@ -2,7 +2,6 @@
 
 const char* const demo_13_vertex_shader =
 	"#version 330 core\n"
-
 	"out vec2 UV;\n"
 
 	"const vec2 vertices_model_space[4] = vec2[4](\n"
