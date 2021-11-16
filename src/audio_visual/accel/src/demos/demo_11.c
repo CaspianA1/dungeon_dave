@@ -126,7 +126,11 @@ void bind_interleaved_planes_to_vao(void) {
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	// If integers, glVertexAttribIPointer (no normalized) + uint inputs to vertex shader
+	/*
+	glVertexAttribIPointer(0, 3, PLANE_TYPE_ENUM, bytes_per_vertex, NULL);
+	glVertexAttribIPointer(1, 2, PLANE_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(plane_type_t)));
+	*/
+
 	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
 	glVertexAttribPointer(1, 2, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(plane_type_t)));
 }
