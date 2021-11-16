@@ -145,40 +145,50 @@ void bind_vbos_to_vao(const GLuint* const vbos, const GLsizei num_vbos, ...) {
 	va_end(args);
 }
 
-GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader) {
-	typedef enum {Vertex, Fragment} ShaderType;
+static void fail_on_shader_creation_error(
+	const GLuint object_id, const ShaderCompilationStep compilation_step,
+	void (*const creation_action) (const GLuint),
+	void (*const log_length_getter) (const GLuint, const GLenum, GLint* const),
+	void (*const log_getter)(const GLuint, const GLsizei, GLsizei* const, GLchar* const)) {
 
+	creation_action(object_id);
+
+	GLint log_length;
+	log_length_getter(object_id, GL_INFO_LOG_LENGTH, &log_length);
+
+	if (log_length > 0) {
+		GLchar* const error_message = malloc(log_length + 1);
+		log_getter(object_id, log_length, NULL, error_message);
+
+		const byte compilation_step_id = compilation_step + 1;
+		fprintf(stderr, "Shader creation step #%d - %s", compilation_step_id, error_message);
+		free(error_message);
+		exit(compilation_step_id);
+	}
+}
+
+GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader) {
 	const char* const shaders[2] = {vertex_shader, fragment_shader};
 	const GLenum gl_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
 	GLuint shader_ids[2], program_id = glCreateProgram();
 
-	for (ShaderType type = 0; type < 2; type++) {
-		shader_ids[type] = glCreateShader(gl_shader_types[type]);
+	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
+		shader_ids[step] = glCreateShader(gl_shader_types[step]);
 
-		const GLuint shader_id = shader_ids[type];
-		glShaderSource(shader_id, 1, shaders + type, NULL);
-		glCompileShader(shader_id);
+		const GLuint shader_id = shader_ids[step];
+		glShaderSource(shader_id, 1, shaders + step, NULL);
 
-		GLint info_log_length;
-		glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
+		fail_on_shader_creation_error(shader_id, step,
+			glCompileShader, glGetShaderiv, glGetShaderInfoLog);
 
-		if (info_log_length > 0) {
-			GLchar* const error_msg = malloc(info_log_length + 1);
-			glGetShaderInfoLog(shader_id, info_log_length, NULL, error_msg);
-			printf("GLSL compilation error for shader #%d:\n%s\n---\n", type + 1, error_msg);
-			free(error_msg);
-			fail("compile shader", CompileShader);
-		}
 		glAttachShader(program_id, shader_id);
 	}
 
-	glLinkProgram(program_id);
-	GLint info_log_length;
-	glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_log_length);
-	if (info_log_length > 0) fail("link shaders", LinkShaders);
+	fail_on_shader_creation_error(program_id, LinkShaders,
+		glLinkProgram, glGetProgramiv, glGetProgramInfoLog);
 
-	for (ShaderType type = 0; type < 2; type++) {
-		const GLuint shader_id = shader_ids[type];
+	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
+		const GLuint shader_id = shader_ids[step];
 		glDetachShader(program_id, shader_id);
 		glDeleteShader(shader_id);
 	}

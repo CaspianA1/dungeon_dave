@@ -28,16 +28,37 @@ _____
 - Flat weapon
 */
 
+const char* const demo_12_vertex_shader =
+	"#version 330 core\n"
+
+	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
+	"layout(location = 1) in vec2 vertex_UV;\n"
+
+	"out vec2 UV;\n"
+	"out float light_intensity;\n"
+
+	"uniform mat4 model_view_projection;\n"
+
+	"void main() {\n"
+		"gl_Position = model_view_projection * vec4(vertex_pos_model_space, 1);\n"
+		"UV = vertex_UV;\n"
+		"light_intensity = 1.0f;\n"
+	"}\n";
+
 // Adds distance shading from the demo 4 fragment shader
 const char* const demo_12_fragment_shader =
 	"#version 330 core\n"
-	"in vec2 UV;\n"
-	"out vec3 color;\n" // For textures with an alpha channel, enable 4 channels
 
+	"in vec2 UV;\n"
+	"in float light_intensity;\n"
+
+	"out vec3 color;\n"
+
+	"uniform vec3 player_pos;\n"
 	"uniform sampler2D texture_sampler;\n"
 
 	"void main() {\n"
-		"color = texture(texture_sampler, UV).rgb;\n"
+		"color = texture(texture_sampler, UV).rgb * light_intensity;\n"
 	"}\n";
 
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
@@ -51,7 +72,7 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 	*sector_list_on_heap = sector_list;
 	sgl.any_data = sector_list_on_heap; // any_data stores sector meshes, and freed in demo_12_deinit
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	sgl.shader_program = init_shader_program(demo_12_vertex_shader, demo_12_fragment_shader);
 	enable_all_culling();
 
 	return sgl;	

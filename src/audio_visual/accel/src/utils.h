@@ -44,10 +44,14 @@ typedef struct {
 } Screen;
 
 typedef enum {
+	CompileVertexShader,
+	CompileFragmentShader,
+	LinkShaders
+} ShaderCompilationStep;
+
+typedef enum {
 	LaunchSDL,
 	LaunchGLEW,
-	CompileShader,
-	LinkShaders,
 	OpenImageFile,
 	MeshOutOfBounds
 } FailureType;

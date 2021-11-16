@@ -116,6 +116,7 @@ GLfloat* create_plane_mesh(const int num_planes, ...) {
 
 const char* const demo_6_vertex_shader =
 	"#version 330 core\n"
+
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 	"out vec2 UV;\n"
 

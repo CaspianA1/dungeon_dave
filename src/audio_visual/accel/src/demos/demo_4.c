@@ -2,6 +2,7 @@
 
 const char* const demo_4_vertex_shader =
 	"#version 330 core\n"
+
 	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
 	"layout(location = 1) in vec2 vertex_UV;\n"
 	"out vec2 UV;\n"
@@ -41,8 +42,10 @@ const char* const demo_4_vertex_shader =
 
 *const demo_4_fragment_shader =
 	"#version 330 core\n"
+
 	"in vec2 UV;\n"
 	"out vec3 color;\n" // For textures with an alpha channel, enable 4 channels
+
 	"uniform sampler2D texture_sampler;\n"
 	"void main() {\n"
 		"color = texture(texture_sampler, UV).rgb;\n"
