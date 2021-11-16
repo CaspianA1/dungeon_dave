@@ -1429,3 +1429,10 @@ int main(void) {
 // printf("%d, %d, %d\n", (intO 0.89f / 1 * 255, 0.854f / 1 * 255, 0.788f / 1 * 255);
 
 /////
+		/*
+		"float depth = gl_FragCoord.z / gl_FragCoord.w;\n"
+		"float l = 1.0f / gl_ClipDistance;\n"
+		"light_intensity;\n"
+		*/
+
+/////

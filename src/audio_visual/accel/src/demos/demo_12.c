@@ -15,6 +15,8 @@
 - Store texture byte index in a plane (max 10 textures per level)
 - Frustum culling
 - A little seam between some textures - but inevitable
+- Lighting with normal
+- Fix little dots popping around
 _____
 - Clip sectors based on adjacent heights
 - For neighboring sectors with the same height, make them into flat 2D planes
@@ -28,36 +30,40 @@ _____
 - Flat weapon
 */
 
+// These two add distance shading from the demo 4 fragment shader
 const char* const demo_12_vertex_shader =
 	"#version 330 core\n"
 
-	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
+	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in vec2 vertex_UV;\n"
 
 	"out vec2 UV;\n"
-	"out float light_intensity;\n"
+	"out vec3 pos_delta_world_space;\n"
 
+	"uniform vec3 camera_pos_world_space;\n"
 	"uniform mat4 model_view_projection;\n"
 
 	"void main() {\n"
-		"gl_Position = model_view_projection * vec4(vertex_pos_model_space, 1);\n"
+		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
 		"UV = vertex_UV;\n"
-		"light_intensity = 1.0f;\n"
-	"}\n";
+		"pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
+	"}\n",
 
-// Adds distance shading from the demo 4 fragment shader
-const char* const demo_12_fragment_shader =
+*const demo_12_fragment_shader =
 	"#version 330 core\n"
 
 	"in vec2 UV;\n"
-	"in float light_intensity;\n"
+	"in vec3 pos_delta_world_space;\n"
 
 	"out vec3 color;\n"
 
-	"uniform vec3 player_pos;\n"
 	"uniform sampler2D texture_sampler;\n"
 
-	"void main() {\n"
+	"const float min_light = 0.2f, max_light = 1.0f;\n"
+
+	"void main() {\n" // dist_squared is distance squared from fragment
+		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
+		"float light_intensity = clamp(1.0f / dist_squared, min_light, max_light);\n"
 		"color = texture(texture_sampler, UV).rgb * light_intensity;\n"
 	"}\n";
 
@@ -126,16 +132,19 @@ StateGL demo_12_maze_init(void) {
 
 void demo_12_drawer(const StateGL* const sgl) {
 	static Camera camera;
-	static GLint model_view_projection_id;
+	static GLint camera_pos_id, model_view_projection_id;
 	static byte first_call = 1;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {1.5f, 1.0f, 1.5f});
+		camera_pos_id = glGetUniformLocation(sgl -> shader_program, "camera_pos_world_space");
 		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
 		first_call = 0;
 	}
 
 	update_camera(&camera);
+
+	glUniform3f(camera_pos_id, camera.pos[0], camera.pos[1], camera.pos[2]);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
 	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
