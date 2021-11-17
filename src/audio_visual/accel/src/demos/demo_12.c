@@ -59,13 +59,11 @@ const char* const demo_12_vertex_shader =
 
 	"uniform sampler2D texture_sampler;\n"
 
-	"const float min_light = 0.5f, max_light = 1.0f;\n"
+	"const float min_light = 0.1f, max_light = 1.0f, intensity_factor = 50.0f;\n"
 
 	"void main() {\n" // dist_squared is distance squared from fragment
 		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
-
-		// At the moment, the light changes over only 1 unit
-		"float light_intensity = clamp(1.0f / dist_squared, min_light, max_light);\n"
+		"float light_intensity = clamp(intensity_factor / dist_squared, min_light, max_light);\n"
 		"color = texture(texture_sampler, UV).rgb * light_intensity;\n"
 	"}\n";
 
