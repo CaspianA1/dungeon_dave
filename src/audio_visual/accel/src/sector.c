@@ -120,8 +120,8 @@ void init_sector_list_vbo(SectorList* const sector_list) {
 
 		if (sector.height == 0) { // Flat sector
 			create_height_zero_mesh(origin, sector.size, vertices + total_components);
-			sector_list -> num_vertices += vertices_per_triangle * triangles_per_height_zero_mesh;
-			total_components += vars_per_height_zero_mesh;
+			sector_list -> num_vertices += vertices_per_triangle * triangles_per_face;
+			total_components += vars_per_face;
 		}
 		else {
 			const plane_type_t size[3] = {sector.size[0], sector.height, sector.size[1]};

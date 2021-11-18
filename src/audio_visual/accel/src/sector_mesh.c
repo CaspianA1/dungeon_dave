@@ -2,8 +2,10 @@ typedef GLubyte plane_type_t;
 #define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
 
 enum {
-	vars_per_vertex = 5, vertices_per_triangle = 3,
-	triangles_per_mesh = 10 /* Bottom 2 triangles excluded*/, triangles_per_height_zero_mesh = 2
+	vars_per_vertex = 5,
+	vertices_per_triangle = 3,
+	triangles_per_face = 2,
+	triangles_per_mesh = 10 // Bottom 2 triangles excluded
 };
 
 enum {
@@ -12,13 +14,13 @@ enum {
 };
 
 enum {
-	vars_per_mesh = vars_per_triangle * triangles_per_mesh,
-	vars_per_height_zero_mesh = vars_per_triangle * triangles_per_height_zero_mesh
+	vars_per_face = vars_per_triangle * triangles_per_face,
+	vars_per_mesh = vars_per_triangle * triangles_per_mesh
 };
 
 enum {
 	bytes_per_mesh = vars_per_mesh * sizeof(plane_type_t),
-	bytes_per_height_zero_mesh = vars_per_height_zero_mesh * sizeof(plane_type_t)
+	bytes_per_height_zero_mesh = vars_per_face * sizeof(plane_type_t)
 };
 
 
@@ -45,7 +47,7 @@ void create_height_zero_mesh(const plane_type_t origin[3], const plane_type_t si
 
 	const plane_type_t far_x = near_x + size_x, far_z = near_z + size_z;
 
-	const plane_type_t vertices[vars_per_height_zero_mesh] = {
+	const plane_type_t vertices[vars_per_face] = {
 		near_x, top_y, far_z, size_z, size_x,
 		far_x, top_y, near_z, 0, 0,
 		near_x, top_y, near_z, 0, size_x,
