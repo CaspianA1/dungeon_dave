@@ -13,8 +13,8 @@ enum {
 	vars_per_face = vars_per_triangle * triangles_per_face,
 	vars_per_mesh = vars_per_triangle * triangles_per_mesh,
 
-	bytes_per_mesh = vars_per_mesh * sizeof(mesh_type_t),
-	bytes_per_height_zero_mesh = vars_per_face * sizeof(mesh_type_t)
+	bytes_per_face = vars_per_face * sizeof(mesh_type_t),
+	bytes_per_mesh = vars_per_mesh * sizeof(mesh_type_t)
 };
 
 void check_for_mesh_out_of_bounds(const mesh_type_t origin[3], const mesh_type_t size[3]) {
@@ -50,7 +50,7 @@ void create_height_zero_mesh(const mesh_type_t origin[3], const mesh_type_t size
 		far_x, top_y, near_z, 0, 0
 	};
 
-	memcpy(dest, vertices, bytes_per_height_zero_mesh);
+	memcpy(dest, vertices, bytes_per_face);
 }
 
 void create_sector_mesh(const mesh_type_t origin[3], const mesh_type_t size[3], mesh_type_t* const dest) {
