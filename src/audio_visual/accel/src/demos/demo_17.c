@@ -15,24 +15,8 @@ typedef struct {
 } Face;
 
 // Assumes that the faces are vertical
-
-/*
-byte vert_faces_are_joinable(const Face f1, const Face f2) {
-	if (f1.type != f2.type) return 0;
-
-	else if (f1.type == Vert_NS) {
-		puts("Vert type 1");
-	}
-	else {
-		puts("Vert type 2");
-	}
-
-	return 1;
-}
-*/
-
 void init_vert_ew_faces(const Sector sector, byte* const heightmap, const byte map_width) {
-		// This is for top side right now
+	// This is for top side right now
 
 	if (sector.origin[0] == 0) return;
 
