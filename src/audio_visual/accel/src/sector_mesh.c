@@ -114,7 +114,7 @@ void create_sector_mesh(const mesh_type_t origin[3], const mesh_type_t size[3], 
 	memcpy(dest, vertices, bytes_per_mesh);
 }
 
-void bind_interleaved_planes_to_vao(void) {
+void bind_sector_mesh_to_vao(void) {
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 

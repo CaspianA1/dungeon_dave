@@ -73,7 +73,7 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 
 	SectorList sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
 	init_sector_list_vbo(&sector_list);
-	bind_interleaved_planes_to_vao();
+	bind_sector_mesh_to_vao();
 
 	SectorList* const sector_list_on_heap = malloc(sizeof(SectorList));
 	*sector_list_on_heap = sector_list;

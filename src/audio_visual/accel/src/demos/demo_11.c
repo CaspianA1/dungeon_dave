@@ -2,7 +2,7 @@
 #include "../sector_mesh.c"
 #include "../camera.c"
 
-// Demo 10, but just with triangles in correct winding order
+// Demo 10, but just with triangles in correct winding order, utilizing sector_mesh.c
 
 StateGL demo_11_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
@@ -15,7 +15,7 @@ StateGL demo_11_init(void) {
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, cuboid_mesh, bytes_per_mesh);
 	free(cuboid_mesh);
-	bind_interleaved_planes_to_vao();
+	bind_sector_mesh_to_vao();
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	sgl.num_textures = 1;

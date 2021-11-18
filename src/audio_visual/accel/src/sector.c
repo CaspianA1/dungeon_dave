@@ -112,11 +112,11 @@ void init_sector_list_vbo(SectorList* const sector_list) {
 		total_bytes += (sector_list -> sectors[i].height == 0)
 			? bytes_per_height_zero_mesh : bytes_per_mesh;
 
-	plane_type_t* const vertices = malloc(total_bytes);
+	mesh_type_t* const vertices = malloc(total_bytes);
 
 	for (int i = 0; i < num_sectors; i++) {
 		const Sector sector = sector_list -> sectors[i];
-		const plane_type_t origin[3] = {sector.origin[0], sector.height, sector.origin[1]};
+		const mesh_type_t origin[3] = {sector.origin[0], sector.height, sector.origin[1]};
 
 		if (sector.height == 0) { // Flat sector
 			create_height_zero_mesh(origin, sector.size, vertices + total_components);
@@ -124,7 +124,7 @@ void init_sector_list_vbo(SectorList* const sector_list) {
 			total_components += vars_per_face;
 		}
 		else {
-			const plane_type_t size[3] = {sector.size[0], sector.height, sector.size[1]};
+			const mesh_type_t size[3] = {sector.size[0], sector.height, sector.size[1]};
 			create_sector_mesh(origin, size, vertices + total_components);
 			sector_list -> num_vertices += vertices_per_triangle * triangles_per_mesh;
 			total_components += vars_per_mesh;

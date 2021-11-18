@@ -154,7 +154,7 @@ StateGL demo_13_init(void) {
 	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers[0]);
 	glBufferData(GL_ARRAY_BUFFER, bytes_per_mesh, cuboid_mesh, GL_STATIC_DRAW);
-	bind_interleaved_planes_to_vao();
+	bind_sector_mesh_to_vao();
 
 	free(cuboid_mesh);
 	//////////
