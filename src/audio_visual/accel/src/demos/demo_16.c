@@ -9,8 +9,8 @@ GLuint skybox_shader, skybox_texture;
 StateGL demo_16_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	const plane_type_t origin[3] = {1, 2, 2}, size[3] = {1, 2, 3};
-	plane_type_t* const cuboid_mesh = malloc(bytes_per_mesh);
+	const mesh_type_t origin[3] = {1, 2, 2}, size[3] = {1, 2, 3};
+	mesh_type_t* const cuboid_mesh = malloc(bytes_per_mesh);
 	create_sector_mesh(origin, size, cuboid_mesh);
 
 	sgl.num_vertex_buffers = 2;
@@ -51,8 +51,9 @@ void demo_16_drawer(const StateGL* const sgl) {
 	glUseProgram(sector_shader);
 
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
-	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribPointer(1, 2, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(plane_type_t)));
+
+	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
+	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
 
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 

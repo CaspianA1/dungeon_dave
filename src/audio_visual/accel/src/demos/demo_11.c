@@ -7,9 +7,9 @@
 StateGL demo_11_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	const plane_type_t origin[3] = {2, 2, 5}, size[3] = {3, 2, 8};
+	const mesh_type_t origin[3] = {2, 2, 5}, size[3] = {3, 2, 8};
 	// plane_type_t* const cuboid_mesh = create_sector_mesh(origin, size);
-	plane_type_t* const cuboid_mesh = malloc(bytes_per_mesh);
+	mesh_type_t* const cuboid_mesh = malloc(bytes_per_mesh);
 	create_sector_mesh(origin, size, cuboid_mesh);
 
 	sgl.num_vertex_buffers = 1;

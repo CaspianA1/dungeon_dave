@@ -1,33 +1,27 @@
-typedef GLubyte plane_type_t;
-#define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
+typedef GLubyte mesh_type_t;
+#define MESH_TYPE_ENUM GL_UNSIGNED_BYTE
 
 enum {
 	vars_per_vertex = 5,
 	vertices_per_triangle = 3,
 	triangles_per_face = 2,
-	triangles_per_mesh = 10 // Bottom 2 triangles excluded
-};
+	triangles_per_mesh = 10, // Bottom 2 triangles excluded
 
-enum {
-	bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t),
-	vars_per_triangle = vars_per_vertex * vertices_per_triangle
-};
+	bytes_per_vertex = vars_per_vertex * sizeof(mesh_type_t),
+	vars_per_triangle = vars_per_vertex * vertices_per_triangle,
 
-enum {
 	vars_per_face = vars_per_triangle * triangles_per_face,
-	vars_per_mesh = vars_per_triangle * triangles_per_mesh
+	vars_per_mesh = vars_per_triangle * triangles_per_mesh,
+
+	bytes_per_mesh = vars_per_mesh * sizeof(mesh_type_t),
+	bytes_per_height_zero_mesh = vars_per_face * sizeof(mesh_type_t)
 };
 
-enum {
-	bytes_per_mesh = vars_per_mesh * sizeof(plane_type_t),
-	bytes_per_height_zero_mesh = vars_per_face * sizeof(plane_type_t)
-};
 
-
-void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type_t size[3]) {
+void check_for_mesh_out_of_bounds(const mesh_type_t origin[3], const mesh_type_t size[3]) {
 	for (byte i = 0; i < 3; i++) {
-		const GLint start = origin[i], length = size[i];
-		const GLint end = start + ((i == 1) ? -length : length);
+		const int start = origin[i], length = size[i];
+		const int end = start + ((i == 1) ? -length : length);
 
 		if (start < 0 || start > 255 || end < 0 || end > 255) {
 			fprintf(stderr, "Mesh out of bounds on %c axis\n", 'x' + i);
@@ -38,16 +32,16 @@ void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type
 
 /* Even if normal sector meshes can represent height zero meshes, it's worth it to make a separate type
 mesh for when a sector has height 0 because I save 120 bytes of memory that way (480 with floats!) */
-void create_height_zero_mesh(const plane_type_t origin[3], const plane_type_t size[2], plane_type_t* const dest) {
-	check_for_mesh_out_of_bounds(origin, (plane_type_t[3]) {size[0], 0, size[1]});
+void create_height_zero_mesh(const mesh_type_t origin[3], const mesh_type_t size[2], mesh_type_t* const dest) {
+	check_for_mesh_out_of_bounds(origin, (mesh_type_t[3]) {size[0], 0, size[1]});
 
-	const plane_type_t
+	const mesh_type_t
 		size_x = size[0], size_z = size[1],
 		near_x = origin[0], top_y = origin[1], near_z = origin[2];
 
-	const plane_type_t far_x = near_x + size_x, far_z = near_z + size_z;
+	const mesh_type_t far_x = near_x + size_x, far_z = near_z + size_z;
 
-	const plane_type_t vertices[vars_per_face] = {
+	const mesh_type_t vertices[vars_per_face] = {
 		near_x, top_y, far_z, size_z, size_x,
 		far_x, top_y, near_z, 0, 0,
 		near_x, top_y, near_z, 0, size_x,
@@ -60,17 +54,17 @@ void create_height_zero_mesh(const plane_type_t origin[3], const plane_type_t si
 	memcpy(dest, vertices, bytes_per_height_zero_mesh);
 }
 
-void create_sector_mesh(const plane_type_t origin[3], const plane_type_t size[3], plane_type_t* const dest) {
+void create_sector_mesh(const mesh_type_t origin[3], const mesh_type_t size[3], mesh_type_t* const dest) {
 	check_for_mesh_out_of_bounds(origin, size);
 
-	const plane_type_t
+	const mesh_type_t
 		near_x = origin[0], top_y = origin[1], near_z = origin[2],
 		size_x = size[0], size_y = size[1], size_z = size[2];
 
-	const plane_type_t far_x = near_x + size_x, bottom_y = top_y - size_y, far_z = near_z + size_z;
+	const mesh_type_t far_x = near_x + size_x, bottom_y = top_y - size_y, far_z = near_z + size_z;
 
 	// Side descriptions assume that camera direction is aligned to X axis
-	const plane_type_t vertices[vars_per_mesh] = {
+	const mesh_type_t vertices[vars_per_mesh] = {
 		// Face 1, pointing towards Z, near X, front face
 		near_x, bottom_y, near_z, 0, size_y,
 		near_x, top_y, far_z, size_z, 0,
@@ -125,10 +119,10 @@ void bind_interleaved_planes_to_vao(void) {
 	glEnableVertexAttribArray(1);
 
 	/*
-	glVertexAttribIPointer(0, 3, PLANE_TYPE_ENUM, bytes_per_vertex, NULL);
-	glVertexAttribIPointer(1, 2, PLANE_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(plane_type_t)));
+	glVertexAttribIPointer(0, 3, MESH_TYPE_ENUM, bytes_per_vertex, NULL);
+	glVertexAttribIPointer(1, 2, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
 	*/
 
-	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribPointer(1, 2, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(plane_type_t)));
+	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
+	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
 }

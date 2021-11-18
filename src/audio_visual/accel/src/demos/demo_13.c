@@ -143,10 +143,9 @@ GLfloat center[3] = {5.5f, 4.5f, 8.5f};
 StateGL demo_13_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	const plane_type_t origin[3] = {1, 4, 1}, size[3] = {5, 4, 8};
-	plane_type_t* const cuboid = malloc(bytes_per_mesh);
-	create_sector_mesh(origin, size, cuboid);
-	// bind_interleaved_planes_to_vao();
+	const mesh_type_t origin[3] = {1, 4, 1}, size[3] = {5, 4, 8};
+	mesh_type_t* const cuboid_mesh = malloc(bytes_per_mesh);
+	create_sector_mesh(origin, size, cuboid_mesh);
 
 	//////////
 	sgl.num_vertex_buffers = 1;
@@ -154,10 +153,10 @@ StateGL demo_13_init(void) {
 
 	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers[0]);
-	glBufferData(GL_ARRAY_BUFFER, bytes_per_mesh, cuboid, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, bytes_per_mesh, cuboid_mesh, GL_STATIC_DRAW);
 	bind_interleaved_planes_to_vao();
 
-	free(cuboid);
+	free(cuboid_mesh);
 	//////////
 
 	sgl.num_textures = 2;
