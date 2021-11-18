@@ -36,8 +36,8 @@ int main(void) {
 	DEBUG(sizeof(FaceType), zu);
 	DEBUG(sizeof(Face*), zu);
 
-	enum {test_map_width = 8, tes_map_height = 5};
-	static const byte test_heightmap[tes_map_height][test_map_width] = {
+	enum {test_map_width = 8, test_map_height = 5};
+	static const byte test_heightmap[test_map_height][test_map_width] = {
 		{0, 2, 2, 0, 0, 0, 0, 0},
 		{0, 2, 2, 1, 1, 1, 0, 0},
 		{0, 2, 2, 1, 1, 1, 0, 0},
