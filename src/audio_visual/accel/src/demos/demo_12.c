@@ -15,7 +15,8 @@
 - Store texture byte index in a plane (max 10 textures per level)
 - Frustum culling
 - A little seam between some textures - but inevitable
-- Lighting with normal
+- No real-time lighting (only via lightmaps); excluding distance lighting
+- Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
 - Fix little dots popping around
 _____
 - Clip sectors based on adjacent heights
@@ -64,7 +65,8 @@ const char* const demo_12_vertex_shader =
 	"void main() {\n" // dist_squared is distance squared from fragment
 		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
 		"float light_intensity = clamp(intensity_factor / dist_squared, min_light, max_light);\n"
-		"color = texture(texture_sampler, UV).rgb * light_intensity;\n"
+
+		"color = light_intensity * texture(texture_sampler, UV).rgb;\n"
 	"}\n";
 
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
