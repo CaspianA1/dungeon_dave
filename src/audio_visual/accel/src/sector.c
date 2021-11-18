@@ -1,3 +1,7 @@
+// This assumes that no map points will have a value of 255
+const byte init_sector_alloc_size = 20, NULL_MAP_POINT = 255;
+const float sector_realloc_rate = 1.5f;
+
 typedef struct {
 	const byte height, origin[2];
 	byte size[2];
@@ -11,9 +15,7 @@ typedef struct {
 	GLsizei num_vertices;
 } SectorList;
 
-// This assumes that no map points will have a value of 255
-const byte init_sector_alloc_size = 20, NULL_MAP_POINT = 255;
-const float sector_realloc_rate = 1.5f;
+//////////
 
 SectorList init_sector_list(const int init_size) {
 	return (SectorList) {

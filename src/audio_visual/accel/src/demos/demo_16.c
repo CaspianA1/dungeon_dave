@@ -1,4 +1,6 @@
+#include "demo_4.c"
 #include "demo_15.c"
+#include "../sector_mesh.c"
 
 // Objects in a skybox scene
 
@@ -30,8 +32,8 @@ StateGL demo_16_init(void) {
 
 void demo_16_drawer(const StateGL* const sgl) {
 	static Camera camera;
-	static byte first_call = 1;
 	static GLint view_projection_id, model_view_projection_id;
+	static byte first_call = 1;
 
 	const GLuint sector_shader = sgl -> shader_program;
 

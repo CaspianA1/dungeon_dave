@@ -1,4 +1,4 @@
-#include "demo_11.c"
+#include "../utils.c"
 #include "../camera.c"
 
 // http://www.humus.name/index.php?page=Textures
@@ -154,9 +154,9 @@ StateGL demo_15_init(void) {
 }
 
 void demo_15_drawer(const StateGL* const sgl) {
-	static byte first_call = 1;
 	static Camera camera;
 	static GLint view_projection_id;
+	static byte first_call = 1;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});

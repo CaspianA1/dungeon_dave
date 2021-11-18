@@ -10,16 +10,6 @@
 typedef GLfloat plane_type_t;
 #define PLANE_TYPE_ENUM GL_FLOAT
 
-/*
-typedef GLshort plane_type_t;
-#define PLANE_TYPE_ENUM GL_SHORT
-*/
-
-/*
-typedef GLubyte plane_type_t;
-#define PLANE_TYPE_ENUM GL_UNSIGNED_BYTE
-*/
-
 //////////
 
 #define PLANE_CREATOR_NAME(type) create_##type##_plane

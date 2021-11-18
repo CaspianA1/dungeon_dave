@@ -1,13 +1,11 @@
 #include "demo_13.c"
-#include "../sector.c"
-#include "../camera.c"
 
 // This differs from demo 13 in that it uses the new camera system, and asserts that sprite clipping works
 
 void demo_14_drawer(const StateGL* const sgl) {
-	static byte first_call = 1;
 	static Camera camera;
 	static GLint billboard_center_id, cam_right_xz_id, view_projection_id, model_view_projection_id;
+	static byte first_call = 1;
 
 	const GLuint billboard_shader = sgl -> shader_program;
 

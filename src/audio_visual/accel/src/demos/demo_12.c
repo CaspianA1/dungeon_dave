@@ -1,7 +1,6 @@
 #include "demo_11.c"
 #include "../sector.c"
 #include "../maps.c"
-#include "../camera.c"
 
 /*
 - Sectors contain their meshes
