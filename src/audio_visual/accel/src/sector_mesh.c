@@ -17,7 +17,6 @@ enum {
 	bytes_per_height_zero_mesh = vars_per_face * sizeof(mesh_type_t)
 };
 
-
 void check_for_mesh_out_of_bounds(const mesh_type_t origin[3], const mesh_type_t size[3]) {
 	for (byte i = 0; i < 3; i++) {
 		const int start = origin[i], length = size[i];
