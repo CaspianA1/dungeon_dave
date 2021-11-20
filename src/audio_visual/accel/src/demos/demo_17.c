@@ -60,6 +60,19 @@ byte get_next_ew_face(const Sector sector, const byte adjacent_y,
 	return 1;
 }
 
+/*
+Generic:
+- Face axis
+- `is_top` to `is_top_or_left`
+- Determine type from face axis
+- `adjacent_y` to adjacent_axis_val
+- Map width and height into an array, to index it for out of bounds checking
+- Find opp_axis
+- `init_vert_faces_for_axis`
+- `start_x` to `start_axis_val`, and same for `end_x`
+-  Check map point val in some way depending on axis val and adjacency
+*/
+
 // Param 'is_top' indicates if EW face is on top or bottom side of 2D sector
 void init_vert_ew_faces(const Sector sector, byte* const heightmap,
 	const byte map_width, const byte map_height, const byte is_top) {
