@@ -70,7 +70,7 @@ Generic:
 - Find opp_axis
 - `init_vert_faces_for_axis`
 - `start_x` to `start_axis_val`, and same for `end_x`
--  Check map point val in some way depending on axis val and adjacency
+- Check map point val in some way depending on axis val and adjacency
 */
 
 // Param 'is_top' indicates if EW face is on top or bottom side of 2D sector
