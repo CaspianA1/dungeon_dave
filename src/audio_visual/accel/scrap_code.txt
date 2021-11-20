@@ -1436,3 +1436,19 @@ int main(void) {
 		*/
 
 /////
+
+		/*
+		if (height_diff != 0) {
+			Face face;
+
+			if (height_diff > 0) {
+				printf("Sector is over other sector by %d\n", height_diff);
+			}
+			else if (height_diff < 0) {
+				printf("Sector is under other sector by %d; no face column\n", -height_diff);
+			}
+		}
+		last_height_diff = height_diff;
+		*/
+
+/////
