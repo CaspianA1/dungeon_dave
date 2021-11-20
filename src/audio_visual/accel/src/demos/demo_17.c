@@ -20,63 +20,50 @@ void print_face(const Face face, const char* const prefix_msg) {
 	const char* const type_string =
 		(char*[]) {"Flat", "Vert_NS", "Vert_EW"}[face.type];
 
-	printf("%s {.type = %s, .origin = {%d, %d}, .size = {%d, %d}}\n",
+	printf("%s{.type = %s, .origin = {%d, %d}, .size = {%d, %d}}\n",
 		prefix_msg, type_string, face.origin[0],
 		face.origin[1], face.size[0], face.size[1]);
 }
 
 // Assumes that the faces are vertical
 void init_vert_ew_faces(const Sector sector, byte* const heightmap, const byte map_width) {
-	/*
-	- this is for top side right now
-	- store last adjacent height
-	- get col height
-	*/
-
 	if (sector.origin[1] == 0) return;
 
 	const byte y_above = sector.origin[1] - 1;
+	byte face_skippable = 0;
+
 	int16_t last_height_diff = 0;
-
-	Face curr_face = {
-		Vert_EW, {sector.origin[0], sector.origin[1]}, {1, 0}
-	};
-
-	// How to handle generic lists?
+	Face curr_face = {Vert_EW, {sector.origin[0], sector.origin[1]}, {1, 0}};
 
 	for (byte x = sector.origin[0]; x < sector.origin[0] + sector.size[0]; x++) {
 		const byte height = *map_point(heightmap, x, y_above, map_width);
 		const int16_t height_diff = sector.height - height;
 
-		if (height_diff > 0) {
-			if (height_diff == last_height_diff) {
-				puts("Contiguous");
-				curr_face.size[0]++;
-			}
-			else if (last_height_diff != 0) {
-				printf("Sector is over other sector by %d\n", height_diff);
-				print_face(curr_face, "\tSubmit last done face:");
+		face_skippable = height_diff <= 0;
 
-				curr_face.origin[0] = x;
-				curr_face.size[0] = 1; // top-down x
+		if (!face_skippable) {
+			if (height_diff == last_height_diff) curr_face.size[0]++;
+			else {
+				if (last_height_diff != 0) { // Add face to list here
+					print_face(curr_face, "Face: ");
+					curr_face.origin[0] = x;
+					curr_face.size[0] = 1; // top-down x
+				}
 				curr_face.size[1] = height_diff; // top-down y
 			}
-			else curr_face.size[1] = height_diff; // Only ran once
 		}
 		last_height_diff = height_diff;
-		puts("---");
+		// puts("---");
 	}
 
-	if (curr_face.size[0] != 0) {
-		print_face(curr_face, "\tSubmit this contiguous face at the end:");
-	}
+	if (!face_skippable) print_face(curr_face, "Submit this contiguous face at the end: ");
 }
 
 #ifdef DEMO_17
 int main(void) {
 	enum {test_map_width = 8, test_map_height = 5};
 	static const byte test_heightmap[test_map_height][test_map_width] = {
-		{0, 2, 1, 1, 0, 5, 5, 3},
+		{2, 2, 1, 1, 2, 5, 9, 7},
 		{8, 8, 8, 8, 8, 8, 8, 8},
 		{8, 8, 8, 8, 8, 8, 8, 8},
 		{8, 8, 8, 8, 8, 8, 8, 8},
