@@ -60,13 +60,23 @@ byte get_next_ew_face(const Sector sector, const byte adjacent_y,
 	return 1;
 }
 
-void init_vert_ew_faces(const Sector sector, byte* const heightmap, const byte map_width) {
-	if (sector.origin[1] == 0) return;
+// Param 'is_top' indicates if EW face is on top or bottom side of 2D sector
+void init_vert_ew_faces(const Sector sector, byte* const heightmap,
+	const byte map_width, const byte map_height, const byte is_top) {
 
 	Face next_face = {.type = Vert_EW, .origin = {sector.origin[0], sector.origin[1]}};
-	const byte y_above = next_face.origin[1] - 1;
+	byte adjacent_y = next_face.origin[1];
 
-	while (get_next_ew_face(sector, y_above, map_width, heightmap, &next_face)) {
+	if (is_top) {
+		if (adjacent_y == 0) return;
+		adjacent_y--;
+	}
+	else {
+		adjacent_y += sector.size[1];
+		if (adjacent_y == map_height) return;
+	}
+
+	while (get_next_ew_face(sector, adjacent_y, map_width, heightmap, &next_face)) {
 		print_face(next_face, "");
 	}
 }
@@ -79,7 +89,7 @@ int main(void) {
 		{0, 8, 8, 8, 8, 8, 8, 8},
 		{0, 8, 8, 8, 8, 8, 8, 8},
 		{0, 8, 8, 8, 8, 8, 8, 8},
-		{0, 3, 3, 0, 0, 0, 9, 9}
+		{0, 3, 3, 4, 0, 0, 9, 9}
 	};
 
 	const SectorList sector_list = generate_sectors_from_heightmap((byte*) test_heightmap, test_map_width, test_map_height);
@@ -88,7 +98,9 @@ int main(void) {
 	for (int i = 0; i < sector_list.length; i++) {
 		const Sector sector = sector_list.sectors[i];
 		if (sector.height == 8) {
-			init_vert_ew_faces(sector, (byte*) test_heightmap, test_map_width);
+			init_vert_ew_faces(sector, (byte*) test_heightmap, test_map_width, test_map_height, 1);
+			puts("---");
+			init_vert_ew_faces(sector, (byte*) test_heightmap, test_map_width, test_map_height, 0);
 			break;
 		}
 	}
