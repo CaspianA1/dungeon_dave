@@ -65,15 +65,15 @@ void init_vert_ew_faces(const Sector sector, byte* const heightmap,
 	const byte map_width, const byte map_height, const byte is_top) {
 
 	Face next_face = {.type = Vert_EW, .origin = {sector.origin[0], sector.origin[1]}};
-	byte adjacent_y = next_face.origin[1];
+	byte adjacent_y;
 
 	if (is_top) {
-		if (adjacent_y == 0) return;
-		adjacent_y--;
+		if (next_face.origin[1] == 0) return;
+		adjacent_y = next_face.origin[1] - 1;
 	}
 	else {
-		adjacent_y += sector.size[1];
-		if (adjacent_y == map_height) return;
+		if ((next_face.origin[1] += sector.size[1]) == map_height) return;
+		adjacent_y = next_face.origin[1];
 	}
 
 	while (get_next_ew_face(sector, adjacent_y, map_width, heightmap, &next_face)) {
@@ -85,11 +85,19 @@ void init_vert_ew_faces(const Sector sector, byte* const heightmap,
 int main(void) {
 	enum {test_map_width = 8, test_map_height = 5};
 	static const byte test_heightmap[test_map_height][test_map_width] = {
-		{2, 2, 4, 9, 9, 1, 1, 2},
+		{2, 2, 4, 9, 9, 1, 7, 7},
 		{0, 8, 8, 8, 8, 8, 8, 8},
 		{0, 8, 8, 8, 8, 8, 8, 8},
 		{0, 8, 8, 8, 8, 8, 8, 8},
 		{0, 3, 3, 4, 0, 0, 9, 9}
+
+		/*
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 8, 8, 8, 8, 8, 8, 0},
+		*/
 	};
 
 	const SectorList sector_list = generate_sectors_from_heightmap((byte*) test_heightmap, test_map_width, test_map_height);

@@ -1553,3 +1553,19 @@ void init_vert_ew_faces(const Sector sector, byte* const heightmap, const byte m
 */
 
 /////
+
+	/*
+	if (!is_top) next_face.origin[1] += sector.size[1];
+
+	byte adjacent_y = next_face.origin[1];
+
+	DEBUG(is_top, d);
+
+	if (is_top && adjacent_y-- == 0) return;
+	else if (adjacent_y == map_height) {
+		// DEBUG(is_top, d);
+		return;
+	}
+	*/
+
+/////
