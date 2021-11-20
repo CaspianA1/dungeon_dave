@@ -1452,3 +1452,104 @@ int main(void) {
 		*/
 
 /////
+
+/*
+void generic_init_vert_ew_faces(const Sector sector, byte* const heightmap, const byte map_width,
+	const byte map_height, const byte is_bottom_side) {
+
+	const byte start_x = sector.origin[0];
+	byte start_y = sector.origin[1];
+
+	if (is_bottom_side) {
+		start_y += sector.size[1] - 1;
+
+		DEBUG(sector.origin[1], d);
+		DEBUG(sector.size[1], d);
+		DEBUG(start_y, d);
+		if (start_y == map_height - 1) return;
+	}
+	else if (start_y == 0) return;
+
+	//////////
+
+	const byte adjacent_y = start_y + (is_bottom_side ? 1 : -1);
+	byte face_skippable = 0;
+
+	int16_t last_height_diff = 0;
+	Face curr_face = {Vert_EW, {start_x, start_y}, {1, 0}};
+
+	for (byte x = start_x; x < start_x + sector.size[0]; x++) {
+		const byte height = *map_point(heightmap, x, adjacent_y, map_width);
+		const int16_t height_diff = sector.height - height;
+
+		const byte not_skippable_before = !face_skippable;
+		face_skippable = height_diff <= 0;
+
+		if (not_skippable_before && face_skippable) {
+			puts("Continuity error");
+		}
+
+		if (!face_skippable) {
+			if (height_diff == last_height_diff) curr_face.size[0]++;
+			else {
+				if (last_height_diff != 0) {
+					print_face(curr_face, "Face: ");
+					curr_face.origin[0] = x;
+					curr_face.size[0] = 1;
+				}
+				curr_face.size[1] = height_diff;
+			}
+		}
+		last_height_diff = height_diff;
+	}
+	if (!face_skippable) print_face(curr_face, "End face: ");
+}
+*/
+
+// Assumes that the faces are vertical
+/*
+void init_vert_ew_faces(const Sector sector, byte* const heightmap, const byte map_width) {
+	// == edge
+	if (sector.origin[1] == 0) return;
+
+	// Side decr
+	const byte y_above = sector.origin[1] - 1;
+
+	byte face_skippable = 1;
+
+	int16_t last_height_diff = 0;
+	Face curr_face = {Vert_EW, {sector.origin[0], sector.origin[1]}, {1, 0}};
+
+	for (byte x = sector.origin[0]; x < sector.origin[0] + sector.size[0]; x++) {
+		const byte height = *map_point(heightmap, x, y_above, map_width);
+		const int16_t height_diff = sector.height - height;
+
+		const byte had_face_before = !face_skippable;
+		face_skippable = height_diff <= 0;
+
+		if (face_skippable && had_face_before) {
+			puts("Catch it");
+			print_face(curr_face, "Face: ");
+			curr_face.origin[0] = x;
+			curr_face.size[0] = 1; // top-down x
+		}
+
+		else if (!face_skippable) {
+			if (height_diff == last_height_diff) curr_face.size[0]++;
+			else {
+				if (last_height_diff != 0) { // Add face to list here
+					print_face(curr_face, "Face: ");
+					curr_face.origin[0] = x;
+					curr_face.size[0] = 1; // top-down x
+				}
+				curr_face.size[1] = height_diff; // top-down y
+			}
+		}
+		last_height_diff = height_diff;
+	}
+
+	if (!face_skippable) print_face(curr_face, "End face: ");
+}
+*/
+
+/////
