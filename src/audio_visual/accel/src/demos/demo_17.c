@@ -11,8 +11,8 @@ typedef enum { // NS = north-sorth, and EW = east-west
 // Faces don't store their height beginning, since sectors will store that
 typedef struct {
 	const FaceType type;
-	/* 3rd component specified by type.
-	For vert faces, [0] indicates depth, and [1] indicates rel height from sector top. */
+	/* 3rd component specified by type. For vert faces, [0] indicates
+	axis dist, and [1] indicates rel downwards-dist from sector top. */
 	byte origin[2], size[2];
 } Face;
 
@@ -53,10 +53,9 @@ void init_vert_ew_faces(const Sector sector, byte* const heightmap, const byte m
 			}
 		}
 		last_height_diff = height_diff;
-		// puts("---");
 	}
 
-	if (!face_skippable) print_face(curr_face, "Submit this contiguous face at the end: ");
+	if (!face_skippable) print_face(curr_face, "End face: ");
 }
 
 #ifdef DEMO_17
