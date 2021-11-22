@@ -21,7 +21,7 @@ StateMap init_statemap(const int bits_across, const int bits_down) {
 //////////
 
 inlinable byte* statemap_byte(const StateMap statemap, const int x, const int y) {
-	return statemap.data + (y * statemap.chunk_dimensions.x + x);
+	return statemap.data + (y * statemap.chunk_dimensions[0] + x);
 }
 
 /* For an x-offset in the statemap, this returns the bit offset
