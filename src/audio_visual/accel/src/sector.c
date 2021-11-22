@@ -1,5 +1,21 @@
-// This assumes that no map points will have a value of 255
-const byte init_sector_alloc_size = 20, NULL_MAP_POINT = 255;
+#define inlinable static inline
+#define wmalloc malloc
+#define wfree free
+
+#define bit_is_set(bits, mask) ((bits) & (mask))
+#define set_bit(bits, mask) ((bits) |= (mask))
+
+typedef struct {
+	int chunk_dimensions[2];
+	size_t alloc_bytes;
+	byte* data;
+} StateMap;
+
+#include "../../../main/statemap.c"
+
+//////////
+
+const byte init_sector_alloc_size = 20;
 const float sector_realloc_rate = 1.5f;
 
 typedef struct {
@@ -56,10 +72,12 @@ byte* map_point(byte* const map, const byte x, const byte y, const byte map_widt
 }
 
 // Gets length acros, and then adds to area size y until out of map or length across not eq
-Sector form_sector_area(Sector sector, byte* const map, const byte map_width, const byte map_height) {
+Sector form_sector_area(Sector sector, const StateMap traversed_points,
+	const byte* const map, const byte map_width, const byte map_height) {
+
 	byte top_right_corner = sector.origin[0];
 
-	while (top_right_corner < map_width && *map_point(map, top_right_corner, sector.origin[1], map_width) == sector.height) {
+	while (top_right_corner < map_width && *map_point((byte*) map, top_right_corner, sector.origin[1], map_width) == sector.height) {
 		sector.size[0]++;
 		top_right_corner++;
 	}
@@ -68,15 +86,17 @@ Sector form_sector_area(Sector sector, byte* const map, const byte map_width, co
 	for (byte y = sector.origin[1]; y < map_height; y++, sector.size[1]++) {
 		for (byte x = sector.origin[0]; x < top_right_corner; x++) {
 			// If consecutive heights didn't continue
-			if (*map_point(map, x, y, map_width) != sector.height)
+			if (*map_point((byte*) map, x, y, map_width) != sector.height)
 				goto clear_map_area;
 		}
 	}
 
 	clear_map_area:
 
-	for (byte y = sector.origin[1]; y < sector.origin[1] + sector.size[1]; y++)
-		memset(map_point(map, sector.origin[0], y, map_width), NULL_MAP_POINT, sector.size[0]);
+	for (byte y = sector.origin[1]; y < sector.origin[1] + sector.size[1]; y++) {
+		for (byte x = sector.origin[0]; x < sector.origin[0] + sector.size[0]; x++)
+			set_statemap_bit(traversed_points, x, y);
+	}
 
 	return sector;
 }
@@ -84,23 +104,23 @@ Sector form_sector_area(Sector sector, byte* const map, const byte map_width, co
 SectorList generate_sectors_from_heightmap(const byte* const heightmap, const byte map_width, const byte map_height) {
 	SectorList sector_list = init_sector_list(init_sector_alloc_size);
 
-	/* A copy of the heightmap is made b/c the heightmap data must
-	be modified, and the heightmap param should stay constant */
-	const size_t heightmap_bytes = map_width * map_height;
-	byte* const heightmap_copy = malloc(heightmap_bytes);
-	memcpy(heightmap_copy, heightmap, heightmap_bytes);
+	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used
+	and 2. for forming faces, will need original heightmap to be unmodified */
+	const StateMap traversed_points = init_statemap(map_width, map_height);
 
 	for (byte y = 0; y < map_height; y++) {
 		for (byte x = 0; x < map_width; x++) {
-			const byte height = *map_point(heightmap_copy, x, y, map_width);
-			if (height == NULL_MAP_POINT) continue;
+			if (get_statemap_bit(traversed_points, x, y)) continue;
+
+			const byte height = *map_point((byte*) heightmap, x, y, map_width);
 			const Sector seed_area = {.height = height, .origin = {x, y}, .size = {0, 0}};
-			const Sector expanded_area = form_sector_area(seed_area, heightmap_copy, map_width, map_height);
+			const Sector expanded_area = form_sector_area(seed_area, traversed_points, heightmap, map_width, map_height);
 			push_to_sector_list(&sector_list, &expanded_area);
 		}
 	}
 
-	free(heightmap_copy);
+	deinit_statemap(traversed_points);
+
 	return sector_list;
 }
 
