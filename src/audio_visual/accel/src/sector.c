@@ -71,13 +71,15 @@ byte* map_point(byte* const map, const byte x, const byte y, const byte map_widt
 	return map + (y * map_width + x);
 }
 
-// Gets length acros, and then adds to area size y until out of map or length across not eq
+// Gets length across, and then adds to area size y until out of map or length across not eq
 Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	const byte* const map, const byte map_width, const byte map_height) {
 
 	byte top_right_corner = sector.origin[0];
 
-	while (top_right_corner < map_width && *map_point((byte*) map, top_right_corner, sector.origin[1], map_width) == sector.height) {
+	while (top_right_corner < map_width &&
+		*map_point((byte*) map, top_right_corner, sector.origin[1], map_width) == sector.height) {
+
 		sector.size[0]++;
 		top_right_corner++;
 	}
@@ -101,7 +103,9 @@ Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	return sector;
 }
 
-SectorList generate_sectors_from_heightmap(const byte* const heightmap, const byte map_width, const byte map_height) {
+SectorList generate_sectors_from_heightmap(const byte* const heightmap,
+	const byte map_width, const byte map_height) {
+
 	SectorList sector_list = init_sector_list(init_sector_alloc_size);
 
 	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used
