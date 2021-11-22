@@ -27,14 +27,14 @@ void print_face(const Face face, const char* const prefix_msg) {
 
 // Returns if there's another face to get
 byte get_next_ew_face(const Sector sector, const byte adjacent_y,
-	const byte map_width, byte* const heightmap, Face* const face) {
+	const byte map_width, const byte* const heightmap, Face* const face) {
 	
 	int16_t face_height_diff = 0;
 	const byte right_edge_x = sector.origin[0] + sector.size[0];
-
 	byte start_x = face -> origin[0] + face -> size[0];
+
 	while (start_x < right_edge_x) { // Find starting point for face, where face will be visible against adjacent sector
-		const int16_t height_diff = sector.height - *map_point(heightmap, start_x, adjacent_y, map_width);
+		const int16_t height_diff = sector.height - *map_point((byte*) heightmap, start_x, adjacent_y, map_width);
 		if (height_diff > 0) { // If face will be visible against adjacent side
 			face_height_diff = height_diff;
 			break;
@@ -47,7 +47,7 @@ byte get_next_ew_face(const Sector sector, const byte adjacent_y,
 
 	byte end_x = start_x;
 	while (end_x < right_edge_x) { // Extend the face's side until a height discontinuity is found
-		const int16_t height_diff = sector.height - *map_point(heightmap, end_x, adjacent_y, map_width);
+		const int16_t height_diff = sector.height - *map_point((byte*) heightmap, end_x, adjacent_y, map_width);
 		if (height_diff != face_height_diff) break;
 		end_x++;
 	}
@@ -57,6 +57,23 @@ byte get_next_ew_face(const Sector sector, const byte adjacent_y,
 	face -> size[1] = face_height_diff;
 
 	printf("%d to %d\n", start_x, end_x - 1);
+	return 1;
+}
+
+// Sides of top-down sector
+byte get_next_ns_face(const Sector sector, const byte adjacent_x,
+	const byte map_width, const byte* const heightmap, Face* const face) {
+
+	int16_t face_height_diff = 0;
+	const byte bottom_edge_y = sector.origin[1] + sector.size[1];
+	byte start_y = face -> origin[1] + face -> size[1];
+
+	(void) face_height_diff;
+
+	while (start_y < bottom_edge_y) {
+		const int16_t height_diff = sector.height - *map_point((byte*) heightmap, adjacent_x, start_y, map_width);
+		(void) height_diff;
+	}
 	return 1;
 }
 
@@ -74,7 +91,7 @@ Generic:
 */
 
 // Param 'is_top' indicates if EW face is on top or bottom side of 2D sector
-void init_vert_ew_faces(const Sector sector, byte* const heightmap,
+void init_vert_ew_faces(const Sector sector, const byte* const heightmap,
 	const byte map_width, const byte map_height, const byte is_top) {
 
 	Face next_face = {.type = Vert_EW, .origin = {sector.origin[0], sector.origin[1]}};
