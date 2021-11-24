@@ -89,6 +89,7 @@ void init_vert_faces(const Sector sector, const byte* const heightmap,
 				adjacent_side_val = next_face.origin[axis];
 			}
 
+			// TODO: store sectors in a generic container
 			DEBUG(axis, d);
 
 			while (get_next_face(sector, !axis, adjacent_side_val, map_width, heightmap, &next_face)) {
