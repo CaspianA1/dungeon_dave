@@ -15,11 +15,11 @@ typedef struct {
 } StateMap;
 
 #include "../../../main/statemap.c"
+#include "list.c"
 
 //////////
 
-const byte init_sector_alloc_size = 20;
-const float sector_realloc_rate = 1.5f;
+const byte init_sector_alloc = 20;
 
 typedef struct {
 	const byte height, origin[2];
@@ -27,35 +27,27 @@ typedef struct {
 } Sector;
 
 typedef struct {
-	Sector* sectors;
-	int length, max_alloc;
-
+	List list;
 	GLuint vbo;
 	GLsizei num_vertices;
 } SectorList;
 
 //////////
 
-SectorList init_sector_list(const int init_size) {
+SectorList init_sector_list(void) {
 	return (SectorList) {
-		.sectors = malloc(init_size * sizeof(Sector)),
-		.length = 0,
-		.max_alloc = init_size,
+		.list = init_list(init_sector_alloc, Sector),
 		.num_vertices = 0
 	};
 }
 
-void push_to_sector_list(SectorList* const s, const Sector* const sector) {
-	if (s -> length == s -> max_alloc)
-		s -> sectors = realloc(s -> sectors, (s -> max_alloc *= sector_realloc_rate) * sizeof(Sector));
-
-	memcpy(s -> sectors + s -> length++, sector, sizeof(Sector));
-}
-
 void print_sector_list(const SectorList* const s) {
+	const List list = s -> list;
+
 	puts("[");
-	for (int i = 0; i < s -> length; i++) {
-		const Sector* const sector = &s -> sectors[i];
+	for (size_t i = 0; i < list.length; i++) {
+		const Sector* const sector = ((Sector*) list.data) + i;
+		// const Sector* const sector = &s -> sectors[i];
 		printf("\t{.height = %d, .origin = {%d, %d}, .size = {%d, %d}}\n",
 			sector -> height, sector -> origin[0], sector -> origin[1],
 			sector -> size[0], sector -> size[1]);
@@ -65,7 +57,7 @@ void print_sector_list(const SectorList* const s) {
 
 void deinit_sector_list(const SectorList* const sector_list) {
 	glDeleteBuffers(1, &sector_list -> vbo);
-	free(sector_list -> sectors);
+	deinit_list(sector_list -> list);
 }
 
 //////////
@@ -109,7 +101,8 @@ Sector form_sector_area(Sector sector, const StateMap traversed_points,
 SectorList generate_sectors_from_heightmap(const byte* const heightmap,
 	const byte map_width, const byte map_height) {
 
-	SectorList sector_list = init_sector_list(init_sector_alloc_size);
+	// SectorList sector_list = init_sector_list(init_sector_alloc_size);
+	SectorList sector_list = init_sector_list();
 
 	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used
 	and 2. for forming faces, will need original heightmap to be unmodified */
@@ -122,7 +115,8 @@ SectorList generate_sectors_from_heightmap(const byte* const heightmap,
 			const byte height = *map_point((byte*) heightmap, x, y, map_width);
 			const Sector seed_area = {.height = height, .origin = {x, y}, .size = {0, 0}};
 			const Sector expanded_area = form_sector_area(seed_area, traversed_points, heightmap, map_width, map_height);
-			push_to_sector_list(&sector_list, &expanded_area);
+			// push_to_sector_list(&sector_list, &expanded_area);
+			push_ptr_to_list(&sector_list.list, &expanded_area);
 		}
 	}
 
@@ -132,17 +126,19 @@ SectorList generate_sectors_from_heightmap(const byte* const heightmap,
 }
 
 void init_sector_list_vbo(SectorList* const sector_list) {
-	const int num_sectors = sector_list -> length;
+	const List list = sector_list -> list;
+
 	size_t total_bytes = 0, total_components = 0;
 
-	for (int i = 0; i < num_sectors; i++)
-		total_bytes += (sector_list -> sectors[i].height == 0)
-			? bytes_per_face : bytes_per_mesh;
+	for (size_t i = 0; i < list.length; i++) {
+		const byte height = ((Sector*) list.data)[i].height;
+		total_bytes += (height == 0) ? bytes_per_face : bytes_per_mesh;
+	}
 
 	mesh_type_t* const vertices = malloc(total_bytes);
 
-	for (int i = 0; i < num_sectors; i++) {
-		const Sector sector = sector_list -> sectors[i];
+	for (size_t i = 0; i < list.length; i++) {
+		const Sector sector = ((Sector*) list.data)[i];
 		const mesh_type_t origin[3] = {sector.origin[0], sector.height, sector.origin[1]};
 
 		if (sector.height == 0) { // Flat sector

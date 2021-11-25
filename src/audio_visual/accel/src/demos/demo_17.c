@@ -116,14 +116,15 @@ int main(void) {
 	const SectorList sector_list = generate_sectors_from_heightmap((byte*) test_heightmap, test_map_width, test_map_height);
 	// print_sector_list(&sector_list);
 
-	for (int i = 0; i < sector_list.length; i++) {
-		const Sector sector = sector_list.sectors[i];
+	const List list = sector_list.list;
+	for (size_t i = 0; i < list.length; i++) {
+		const Sector sector = ((Sector*) list.data)[i];
 		if (sector.height == 8) {
 			init_vert_faces(sector, (byte*) test_heightmap, test_map_width, test_map_height);
 			break;
 		}
 	}
 
-	free(sector_list.sectors);
+	deinit_list(list); // vbo not freed through call to deinit_sector_list b/c vbo not initialized
 }
 #endif
