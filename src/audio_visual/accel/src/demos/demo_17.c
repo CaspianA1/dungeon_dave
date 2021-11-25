@@ -3,7 +3,6 @@
 #include "../utils.c"
 #include "../sector_mesh.c"
 #include "../sector.c"
-#include "../list.c"
 
 typedef enum {
 	/* NS - north-south, and EW = east-west.
