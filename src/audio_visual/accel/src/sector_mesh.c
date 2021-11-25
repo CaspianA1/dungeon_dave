@@ -1,3 +1,6 @@
+#ifndef SECTOR_MESH_C
+#define SECTOR_MESH_C
+
 typedef GLubyte mesh_type_t;
 #define MESH_TYPE_ENUM GL_UNSIGNED_BYTE
 
@@ -125,3 +128,5 @@ void bind_sector_mesh_to_vao(void) {
 	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
 	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
 }
+
+#endif

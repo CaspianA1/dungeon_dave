@@ -1,3 +1,6 @@
+#ifndef CAMERA_C
+#define CAMERA_C
+
 typedef struct {
 	vec2 right_xz; // X and Z of right (Y is always 0)
 	vec3 pos, dir; // The camera never moves from the origin, but `pos` here is more practical
@@ -71,3 +74,4 @@ void update_camera(Camera* const camera) {
 	last_time = SDL_GetTicks() / 1000.0f;
 }
 
+#endif

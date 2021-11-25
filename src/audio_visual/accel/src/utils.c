@@ -1,5 +1,6 @@
 #ifndef UTILS_C
 #define UTILS_C
+
 #include "utils.h"
 #include "constants.h"
 

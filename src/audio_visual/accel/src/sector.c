@@ -1,3 +1,6 @@
+#ifndef SECTOR_C
+#define SECTOR_C
+
 #define inlinable static inline
 #define wmalloc malloc
 #define wfree free
@@ -159,3 +162,5 @@ void init_sector_list_vbo(SectorList* const sector_list) {
 	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
 	glBufferData(GL_ARRAY_BUFFER, total_bytes, vertices, GL_STATIC_DRAW);
 }
+
+#endif

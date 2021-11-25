@@ -1,3 +1,6 @@
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
 /*
 Max world size = 255 by 255 by 255 (with top left corner of block as origin).
 So, max look distance in world = sqrt(255 * 255 + 255 * 255 + 255 * 255),
@@ -29,3 +32,5 @@ static const struct {
     .speeds = {3.0f, 0.08f},
     .movement_keys = {SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D}
 };
+
+#endif

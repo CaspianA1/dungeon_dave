@@ -1,3 +1,6 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 
@@ -97,3 +100,5 @@ void enable_all_culling(void);
 void draw_triangles(const GLsizei num_triangles);
 
 static inline GLfloat to_radians(const GLfloat degrees);
+
+#endif

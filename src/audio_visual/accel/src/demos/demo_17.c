@@ -4,6 +4,8 @@
 #include "../sector_mesh.c"
 #include "../sector.c"
 
+#include "../list.c"
+
 typedef enum {
 	/* NS - north-south, and EW = east-west.
 	If a face is NS, its two ends lie on a vertical top-down axis;
