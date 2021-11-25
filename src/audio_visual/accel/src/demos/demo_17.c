@@ -3,7 +3,6 @@
 #include "../utils.c"
 #include "../sector_mesh.c"
 #include "../sector.c"
-
 #include "../list.c"
 
 typedef enum {
@@ -101,6 +100,27 @@ void init_vert_faces(const Sector sector, const byte* const heightmap,
 		}
 	}
 }
+
+//////////
+void create_flat_mesh(const byte origin[2], const byte size[2], mesh_type_t* const dest) {
+	(void) origin;
+	(void) size;
+	(void) dest;
+}
+
+void create_vert_ns_mesh(const byte origin[2], const byte size[2], mesh_type_t* const dest) {
+	(void) origin;
+	(void) size;
+	(void) dest;
+}
+
+void create_vert_ew_mesh(const byte origin[2], const byte size[2], mesh_type_t* const dest) {
+	(void) origin;
+	(void) size;
+	(void) dest;
+}
+
+//////////
 
 #ifdef DEMO_17
 int main(void) {
