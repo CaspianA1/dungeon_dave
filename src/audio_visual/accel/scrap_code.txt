@@ -1569,3 +1569,25 @@ void init_vert_ew_faces(const Sector sector, byte* const heightmap, const byte m
 	*/
 
 /////
+
+/*
+void create_flat_mesh(const mesh_type_t origin[2], const mesh_type_t size[2], mesh_type_t* const dest) {
+	(void) origin;
+	(void) size;
+	(void) dest;
+}
+
+void create_vert_ns_mesh(const mesh_type_t origin[2], const mesh_type_t size[2], mesh_type_t* const dest) {
+	(void) origin;
+	(void) size;
+	(void) dest;
+}
+
+void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2], mesh_type_t* const dest) {
+	(void) origin;
+	(void) size;
+	(void) dest;
+}
+*/
+
+/////
