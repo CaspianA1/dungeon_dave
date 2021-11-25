@@ -121,7 +121,6 @@ SectorList generate_sectors_from_heightmap(const byte* const heightmap,
 	}
 
 	deinit_statemap(traversed_points);
-
 	return sector_list;
 }
 
