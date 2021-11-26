@@ -1,5 +1,3 @@
-// This aims to optimize meshes when they are created, expanding upon sector_mesh.c.
-
 #include "demo_4.c"
 #include "../sector.c"
 #include "../face.c"
