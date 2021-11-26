@@ -2,7 +2,7 @@
 
 #include "demo_4.c"
 
-#include "../sector_mesh.c"
+// #include "../sector_mesh.c"
 #include "../sector.c"
 #include "../face.c"
 
@@ -23,11 +23,15 @@ StateGL demo_17_init(void) {
 	glGenBuffers(1, &sector_list_17 -> vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, sector_list_17 -> vbo);
 	glBufferData(GL_ARRAY_BUFFER, total_bytes, face_list_17.data, GL_STATIC_DRAW);
-	bind_sector_mesh_to_vao();
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
+	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/tmr.bmp", tex_repeating);
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp", tex_repeating);
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	enable_all_culling();
@@ -70,18 +74,10 @@ int main(void) {
 	enum {map_width = palace_width, map_height = palace_height};
 	const byte* const heightmap = (byte*) palace_map;
 
-	SectorList sector_list = generate_sectors_from_heightmap((byte*) heightmap, map_width, map_height);
-	List face_list = init_list(sector_list.list.length * 1.8f, mesh_type_t[vars_per_face]);
+	SectorList s;
+	init_face_and_sector_lists(&face_list_17, &s, heightmap, map_width, map_height);
+	sector_list_17 = &s;
 
-	for (size_t i = 0; i < sector_list.list.length; i++) {
-		const Sector sector = ((Sector*) sector_list.list.data)[i];
-		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
-		add_face_mesh_to_vertex_list(flat_face, sector.height, &face_list);
-		init_vert_faces(sector, &face_list, heightmap, map_width, map_height);
-	}
-
-	face_list_17 = face_list;
-	sector_list_17 = &sector_list;
 	make_application(demo_17_drawer, demo_17_init, demo_17_deinit);
 }
 #endif

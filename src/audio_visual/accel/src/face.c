@@ -1,6 +1,19 @@
 #ifndef FACE_C
 #define FACE_C
 
+typedef GLubyte mesh_type_t;
+#define MESH_TYPE_ENUM GL_UNSIGNED_BYTE
+
+enum {
+	vars_per_vertex = 5,
+	vertices_per_triangle = 3,
+	triangles_per_face = 2,
+
+	bytes_per_vertex = vars_per_vertex * sizeof(mesh_type_t),
+	vars_per_triangle = vars_per_vertex * vertices_per_triangle,
+	vars_per_face = vars_per_triangle * triangles_per_face
+};
+
 /* NS - north-south, and EW = east-west.
 If a face is NS, its two ends lie on a vertical top-down axis;
 and if a face is EW, its two ends lie on a horizontal axis. */
@@ -153,6 +166,22 @@ void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, Lis
 		}
 	}
 	push_ptr_to_list(vertex_list, face_mesh);
+}
+
+void init_face_and_sector_lists(List* const face_list, SectorList* const sector_list,
+	const byte* const heightmap, const byte map_width, const byte map_height) {
+
+	*sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
+
+	const List underlying_sector_list = sector_list -> list;
+	*face_list = init_list(underlying_sector_list.length * 1.8f, mesh_type_t[vars_per_face]);
+
+	for (size_t i = 0; i < underlying_sector_list.length; i++) {
+		const Sector sector = ((Sector*) underlying_sector_list.data)[i];
+		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
+		add_face_mesh_to_vertex_list(flat_face, sector.height, face_list);
+		init_vert_faces(sector, face_list, heightmap, map_width, map_height);
+	}
 }
 
 #endif

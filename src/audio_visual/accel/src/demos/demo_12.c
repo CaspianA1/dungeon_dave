@@ -14,8 +14,7 @@
 - Store texture byte index in a plane (max 10 textures per level)
 - Frustum culling
 - A little seam between some textures + little dots popping around - find a way to share vertices, if possible
-- NEXT: Demo 17 functions into a dedicated file, or a preexisting one
-- NEXT 2: Find a way to swap ordering of face vertices based on front/back facing status
+- NEXT: Find a way to swap ordering of face vertices based on front/back facing status
 - Maybe no real-time lighting (only via lightmaps); excluding distance lighting
 - Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
 

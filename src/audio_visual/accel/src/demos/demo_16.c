@@ -1,6 +1,5 @@
-#include "demo_4.c"
+#include "demo_14.c"
 #include "demo_15.c"
-#include "../sector_mesh.c"
 
 // Objects in a skybox scene
 
