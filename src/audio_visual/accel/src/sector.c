@@ -125,38 +125,4 @@ SectorList generate_sectors_from_heightmap(const byte* const heightmap,
 	return sector_list;
 }
 
-void init_sector_list_vbo(SectorList* const sector_list) {
-	const List list = sector_list -> list;
-
-	size_t total_bytes = 0, total_components = 0;
-
-	for (size_t i = 0; i < list.length; i++) {
-		const byte height = ((Sector*) list.data)[i].height;
-		total_bytes += (height == 0) ? bytes_per_face : bytes_per_mesh;
-	}
-
-	mesh_type_t* const vertices = malloc(total_bytes);
-
-	for (size_t i = 0; i < list.length; i++) {
-		const Sector sector = ((Sector*) list.data)[i];
-		const mesh_type_t origin[3] = {sector.origin[0], sector.height, sector.origin[1]};
-
-		if (sector.height == 0) { // Flat sector
-			create_height_zero_mesh(origin, sector.size, vertices + total_components);
-			sector_list -> num_vertices += vertices_per_triangle * triangles_per_face;
-			total_components += vars_per_face;
-		}
-		else {
-			const mesh_type_t size[3] = {sector.size[0], sector.height, sector.size[1]};
-			create_sector_mesh(origin, size, vertices + total_components);
-			sector_list -> num_vertices += vertices_per_triangle * triangles_per_mesh;
-			total_components += vars_per_mesh;
-		}
-	}
-
-	glGenBuffers(1, &sector_list -> vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
-	glBufferData(GL_ARRAY_BUFFER, total_bytes, vertices, GL_STATIC_DRAW);
-}
-
 #endif

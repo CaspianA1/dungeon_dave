@@ -1,8 +1,6 @@
 #ifndef LIST_C
 #define LIST_C
 
-#include <stdlib.h>
-
 const float list_realloc_rate = 1.5f;
 
 typedef struct {
