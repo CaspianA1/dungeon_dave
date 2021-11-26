@@ -271,7 +271,7 @@ void enable_all_culling(void) {
 	// #endif
 }
 
-void draw_triangles(const int num_triangles) {
+void draw_triangles(const GLsizei num_triangles) {
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 }
 

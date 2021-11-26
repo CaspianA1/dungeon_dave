@@ -1591,3 +1591,61 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 */
 
 /////
+
+				/*
+				1, 2, 3, 4, 5,
+				6, 7, 8, 9, 10,
+				11, 12, 13, 14, 15,
+
+				16, 17, 18, 19, 20,
+				21, 22, 23, 24, 25,
+				26, 27, 28, 29, 30
+				*/
+
+/////
+
+			/*
+			For flat, origin[0] = x, sector.height = y, origin[1] = z
+			_______
+			|     |
+			|     |
+			|_____|
+
+			origin size[0] top down, and size[1] depth
+			*/
+
+/////
+
+			/*
+			For flat, origin[0] = x, sector.height = y, origin[1] = z
+			_____
+			|   |
+			|___|
+			*/
+
+
+			/*
+			Note: x across top-down is also x across in 3D
+			origin
+			|
+
+			For vert ns,
+				origin[0] = x,
+				sector.height = top_y,
+				sector.height - size[1] = bottom_y,
+				origin[1] = near_z (which is top z),
+				origin[1] - size[0] = far_z
+			*/
+
+			/*
+			origin -
+
+			For vert ew,
+				origin[0] = near_x,
+				sector.height = top_y,
+				sector.height - size[1] = bottom_y
+				origin[1] = near_x (which is left x),
+				origin[1] - size[0] = far_x (which is right_x)
+			*/
+
+/////

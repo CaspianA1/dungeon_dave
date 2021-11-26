@@ -10,24 +10,21 @@
 - Not perfect, but sectors + their meshes for clipping and rendering, and texmaps + heightmaps for game logic
 - Ideal: BSPs, but not worth time
 - To start, one vbo + texture ptr per sector
-- For map edges, only render inside + top face
+
 - Store texture byte index in a plane (max 10 textures per level)
 - Frustum culling
-- A little seam between some textures - but inevitable
-- No real-time lighting (only via lightmaps); excluding distance lighting
+- A little seam between some textures + little dots popping around - find a way to share vertices, if possible
+- NEXT: Demo 17 functions into a dedicated file, or a preexisting one
+- NEXT 2: Find a way to swap ordering of face vertices based on front/back facing status
+- Maybe no real-time lighting (only via lightmaps); excluding distance lighting
 - Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
-- Fix little dots popping around
-_____
-- Clip sectors based on adjacent heights
-- For neighboring sectors with the same height, make them into flat 2D planes
-- Or in the general case, if a plane is partially invisible, truncate it; otherwise, remove it
-- Find which sectors are behind, and then skip rendering those
 
 - Read sprite crop from spritesheet
-
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
 - Flat weapon
+
+- In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
 */
 
 // These two add distance shading from the demo 4 fragment shader
@@ -126,7 +123,7 @@ StateGL demo_12_pyramid_init(void) {
 
 StateGL demo_12_maze_init(void) {
 	StateGL sgl = configurable_demo_12_init((byte*) maze_map, maze_width, maze_height);
-	sgl.num_textures = 1;
+	sgl.num_textures = 1; // ivy
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/ivy.bmp", tex_repeating);
 	return sgl;
 }
@@ -152,7 +149,7 @@ void demo_12_drawer(const StateGL* const sgl) {
 	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
 
 	const SectorList* const sector_list = sgl -> any_data;
-	draw_triangles(sector_list -> num_vertices);
+	draw_triangles(sector_list -> num_vertices / 3);
 }
 
 void demo_12_deinit(const StateGL* const sgl) {
