@@ -1671,3 +1671,19 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 				*/
 
 /////
+
+	/*
+	Visible face sides:
+
+	Bottom = invisible
+	Top = visible
+	Right = invisible
+	Left = visible
+
+	Find alternate face orientations, and switch between, or programatically swizzle vars in it
+
+	With normal vert NS: bottom = invisible, and top UV is correct.
+	With alternative vert NS: bottom = visible + correct UVs, and top is invisible.
+	*/
+
+/////

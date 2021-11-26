@@ -90,7 +90,7 @@ void init_vert_faces(const Sector sector, List* const vertex_list,
 		for (byte side = 0; side < 2; side++) {
 
 			Face next_face = {
-				.type = Vert_EW - unvarying_axis,
+				.type = Vert_NS + unvarying_axis,
 				.origin = {sector.origin[0], sector.origin[1]}
 			};
 
@@ -106,15 +106,15 @@ void init_vert_faces(const Sector sector, List* const vertex_list,
 				adjacent_side_val = next_face.origin[unvarying_axis];
 			}
 
-			void add_face_mesh_to_vertex_list(const Face, const byte, List* const);
+			void add_face_mesh_to_vertex_list(const Face, const byte, const byte, List* const);
 
 			while (get_next_face(sector, !unvarying_axis, adjacent_side_val, map_width, heightmap, &next_face))
-				add_face_mesh_to_vertex_list(next_face, sector.height, vertex_list);
+				add_face_mesh_to_vertex_list(next_face, sector.height, side, vertex_list);
 		}
 	}
 }
 
-void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, List* const vertex_list) {
+void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, const byte side, List* const vertex_list) {
 	const byte near_x = face.origin[0], near_z = face.origin[1];
 	const mesh_type_t* face_mesh;
 
@@ -123,7 +123,7 @@ void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, Lis
 			const byte size_x = face.size[0], size_z = face.size[1];
 			const byte far_x = near_x + size_x, far_z = near_z + size_z;
 
-			face_mesh = (mesh_type_t[vars_per_face]) { // Used to be face 5 from sector_mesh.c; now UVs flipped
+			face_mesh = (mesh_type_t[vars_per_face]) { // Top side - face 5, but UVs rotated
 				near_x, sector_height, far_z, size_x, 0,
 				far_x, sector_height, near_z, 0, size_z,
 				near_x, sector_height, near_z, size_x, size_z,
@@ -135,33 +135,53 @@ void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, Lis
 			break;
 		}
 		case Vert_NS: {
-			const byte size_x = face.size[0], size_y = face.size[1];
-			const byte far_x = near_x + size_x, bottom_y = sector_height - size_y;
-
-			face_mesh = (mesh_type_t[vars_per_face]) { // Face 3
-				near_x, sector_height, near_z, size_x, 0,
-				far_x, sector_height, near_z, 0, 0,
-				near_x, bottom_y, near_z, size_x, size_y,
-
-				far_x, sector_height, near_z, 0, 0,
-				far_x, bottom_y, near_z, 0, size_y,
-				near_x, bottom_y, near_z, size_x, size_y
-			};
-			break;
-		}
-		case Vert_EW: {
 			const byte size_z = face.size[0], size_y = face.size[1];
 			const byte far_z = near_z + size_z, bottom_y = sector_height - size_y;
 
-			face_mesh = (mesh_type_t[vars_per_face]) { // Face 1
-				near_x, bottom_y, near_z, 0, size_y,
-				near_x, sector_height, far_z, size_z, 0,
-				near_x, sector_height, near_z, 0, 0,
+			face_mesh = side
+				? (mesh_type_t[vars_per_face]) { // Left side - face 1
+					near_x, bottom_y, near_z, 0, size_y,
+					near_x, sector_height, far_z, size_z, 0,
+					near_x, sector_height, near_z, 0, 0,
 
-				near_x, bottom_y, near_z, 0, size_y,
-				near_x, bottom_y, far_z, size_z, size_y,
-				near_x, sector_height, far_z, size_z, 0
-			};
+					near_x, bottom_y, near_z, 0, size_y,
+					near_x, bottom_y, far_z, size_z, size_y,
+					near_x, sector_height, far_z, size_z, 0
+				}
+				: (mesh_type_t[vars_per_face]) { // Right side - face 2
+					near_x, sector_height, near_z, size_z, 0,
+					near_x, sector_height, far_z, 0, 0,
+					near_x, bottom_y, near_z, size_z, size_y,
+
+					near_x, sector_height, far_z, 0, 0,
+					near_x, bottom_y, far_z, 0, size_y,
+					near_x, bottom_y, near_z, size_z, size_y
+				};
+			break;
+		}
+		case Vert_EW: {
+			const byte size_x = face.size[0], size_y = face.size[1];
+			const byte far_x = near_x + size_x, bottom_y = sector_height - size_y;
+
+			face_mesh = side
+				? (mesh_type_t[vars_per_face]) { // Bottom side - face 3
+					near_x, sector_height, near_z, size_x, 0,
+					far_x, sector_height, near_z, 0, 0,
+					near_x, bottom_y, near_z, size_x, size_y,
+
+					far_x, sector_height, near_z, 0, 0,
+					far_x, bottom_y, near_z, 0, size_y,
+					near_x, bottom_y, near_z, size_x, size_y
+				}
+				: (mesh_type_t[vars_per_face]) { // Top side - face 4
+					near_x, bottom_y, near_z, 0, size_y,
+					far_x, sector_height, near_z, size_x, 0,
+					near_x, sector_height, near_z, 0, 0,
+
+					near_x, bottom_y, near_z, 0, size_y,
+					far_x, bottom_y, near_z, size_x, size_y,
+					far_x, sector_height, near_z, size_x, 0
+				};
 			break;
 		}
 	}
@@ -179,7 +199,7 @@ void init_face_and_sector_lists(List* const face_list, SectorList* const sector_
 	for (size_t i = 0; i < underlying_sector_list.length; i++) {
 		const Sector sector = ((Sector*) underlying_sector_list.data)[i];
 		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
-		add_face_mesh_to_vertex_list(flat_face, sector.height, face_list);
+		add_face_mesh_to_vertex_list(flat_face, sector.height, 0, face_list);
 		init_vert_faces(sector, face_list, heightmap, map_width, map_height);
 	}
 }
