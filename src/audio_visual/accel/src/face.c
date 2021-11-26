@@ -184,4 +184,22 @@ void init_face_and_sector_lists(List* const face_list, SectorList* const sector_
 	}
 }
 
+void init_sector_list_vbo(const List* const face_list, SectorList* const sector_list) {
+	const size_t total_triangles = face_list -> length * triangles_per_face;
+	const size_t total_bytes = total_triangles * vertices_per_triangle * bytes_per_vertex;
+
+	glGenBuffers(1, &sector_list -> vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
+	glBufferData(GL_ARRAY_BUFFER, total_bytes, face_list -> data, GL_STATIC_DRAW);
+}
+
+void bind_sector_list_vbo_to_vao(const SectorList* const sector_list) {
+	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
+	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
+}
+
 #endif
