@@ -72,8 +72,9 @@ Sector form_sector_area(Sector sector, const StateMap traversed_points,
 
 	byte top_right_corner = sector.origin[0];
 
-	while (top_right_corner < map_width &&
-		*map_point((byte*) map, top_right_corner, sector.origin[1], map_width) == sector.height) {
+	while (top_right_corner < map_width
+		&& *map_point((byte*) map, top_right_corner, sector.origin[1], map_width) == sector.height
+		&& !get_statemap_bit(traversed_points, top_right_corner, sector.origin[1])) {
 
 		sector.size[0]++;
 		top_right_corner++;
