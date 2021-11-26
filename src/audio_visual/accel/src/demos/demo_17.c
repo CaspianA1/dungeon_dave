@@ -97,6 +97,20 @@ void init_vert_faces(const Sector sector, List* const vertex_list,
 	}
 }
 
+/*
+2,6_____5
+|     |
+|     |
+3_____1,4
+
+and rotate to
+
+_______
+|     |
+|     |
+|_____|
+*/
+
 void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, List* const vertex_list) {
 	const byte near_x = face.origin[0], near_z = face.origin[1];
 	const mesh_type_t* face_mesh;
@@ -106,14 +120,14 @@ void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, Lis
 			const byte size_x = face.size[0], size_z = face.size[1];
 			const byte far_x = near_x + size_x, far_z = near_z + size_z;
 
-			face_mesh = (mesh_type_t[vars_per_face]) { // Face 5 (from sector_mesh.c)
-				near_x, sector_height, far_z, size_z, size_x,
-				far_x, sector_height, near_z, 0, 0,
-				near_x, sector_height, near_z, 0, size_x,
+			face_mesh = (mesh_type_t[vars_per_face]) { // Used to be face 5 from sector_mesh.c; now UVs flipped
+				near_x, sector_height, far_z, size_x, 0,
+				far_x, sector_height, near_z, 0, size_z,
+				near_x, sector_height, near_z, size_x, size_z,
 
-				near_x, sector_height, far_z, size_z, size_x,
-				far_x, sector_height, far_z, size_z, 0,
-				far_x, sector_height, near_z, 0, 0
+				near_x, sector_height, far_z, size_x, 0,
+				far_x, sector_height, far_z, 0, 0,
+				far_x, sector_height, near_z, 0, size_z
 			};
 			break;
 		}
@@ -169,7 +183,7 @@ StateGL demo_17_init(void) {
 
 	sgl.shader_program = init_shader_program(demo_12_vertex_shader, demo_12_fragment_shader);
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/cobblestone.bmp", tex_repeating);
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/tmr.bmp", tex_repeating);
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	enable_all_culling();

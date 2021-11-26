@@ -1648,4 +1648,26 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 				origin[1] - size[0] = far_x (which is right_x)
 			*/
 
+///// Some UV stuff:
+
+			/*
+				near_x, sector_height, far_z, 1, 0,
+				far_x, sector_height, near_z, 0, 1,
+				near_x, sector_height, near_z, 1, 1,
+
+				near_x, sector_height, far_z, 1, 0,
+				far_x, sector_height, far_z, 0, 0,
+				far_x, sector_height, near_z, 0, 1
+				*/
+
+				/*
+				near_x, sector_height, far_z, size_z, size_x,
+				far_x, sector_height, near_z, 0, 0,
+				near_x, sector_height, near_z, 0, size_x,
+
+				near_x, sector_height, far_z, size_z, size_x,
+				far_x, sector_height, far_z, size_z, 0,
+				far_x, sector_height, near_z, 0, 0
+				*/
+
 /////
