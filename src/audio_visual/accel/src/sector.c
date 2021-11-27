@@ -102,7 +102,6 @@ Sector form_sector_area(Sector sector, const StateMap traversed_points,
 SectorList generate_sectors_from_heightmap(const byte* const heightmap,
 	const byte map_width, const byte map_height) {
 
-	// SectorList sector_list = init_sector_list(init_sector_alloc_size);
 	SectorList sector_list = init_sector_list();
 
 	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used
