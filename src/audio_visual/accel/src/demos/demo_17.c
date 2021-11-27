@@ -10,13 +10,13 @@ static SectorList sl;
 StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
-	init_face_and_sector_mesh_lists(&fml, &sl, (byte*) palace_map, palace_width, palace_height);
+	init_face_and_sector_mesh_lists(&fml, &sl, (byte*) terrain_map, terrain_width, terrain_height);
 	init_sector_list_vbo(&fml, &sl);
 	bind_sector_list_vbo_to_vao(&sl);
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/cobblestone.bmp", tex_repeating);
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/dirt.bmp", tex_repeating);
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	enable_all_culling();
@@ -30,7 +30,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	static byte first_call = 1;
 
 	if (first_call) {
-		init_camera(&camera, (vec3) {1.5f, 0.5f, 1.5f});
+		init_camera(&camera, (vec3) {34.5f, 13.50f, 25.2f});
 		camera_pos_id = glGetUniformLocation(sgl -> shader_program, "camera_pos_world_space");
 		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
 		first_call = 0;
@@ -43,7 +43,11 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 	glClearColor(0.89f, 0.355f, 0.288f, 0.0f); // Light tomato
 
-	// (triangle counts, 12 vs 17) palace: 1466 vs 1114. tpt: 232 vs 146. pyramid: 816 vs 542. maze: 5796 vs 6114.
+	/* (triangle counts, 12 vs 17)
+	palace: 1466 vs 1114. tpt: 232 vs 146.
+	pyramid: 816 vs 542. maze: 5796 vs 6114.
+	terrain: 150620 vs 86588.
+	*/
 	const GLsizei num_triangles = fml.length * triangles_per_face;
 	draw_triangles(num_triangles);
 }

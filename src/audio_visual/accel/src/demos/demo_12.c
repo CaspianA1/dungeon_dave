@@ -13,6 +13,7 @@
 
 - Store texture byte index in a plane (max 10 textures per level)
 - NEXT: Frustum culling
+- NEXT 2: Skybox code into its own dedicated file
 - A little seam between some textures + little dots popping around - find a way to share vertices, if possible
 - Maybe no real-time lighting (only via lightmaps); excluding distance lighting
 - Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps

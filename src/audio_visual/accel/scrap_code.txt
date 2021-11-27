@@ -1686,4 +1686,23 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 	With alternative vert NS: bottom = visible + correct UVs, and top is invisible.
 	*/
 
+///// Heightmap modification based on perlin noise from the main project:
+
+	for (int y = 0; y < terrain_height - 1; y++) {
+		printf("\t{");
+		for (int x = 0; x < terrain_width - 1; x++) {
+
+			byte* val = map_point((byte*) terrain_map, x, y, terrain_width);
+			int smaller = *val - 40;
+			if (smaller < 0) smaller = 0;
+
+			int v = fabs(tan(*val / 16.0) / 3.0) * *val;
+			if (v > 255) v = 255;
+			*val = v;
+
+			printf("%d%s", *val, (x == terrain_width - 2) ? "" : ", ");
+		}
+		puts("},");
+	}
+
 /////
