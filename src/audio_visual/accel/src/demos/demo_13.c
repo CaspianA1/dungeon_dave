@@ -1,5 +1,6 @@
 #include "demo_11.c"
 
+/*
 const char* const demo_13_vertex_shader =
 	"#version 330 core\n"
 
@@ -36,6 +37,7 @@ const char* const demo_13_vertex_shader =
 	"void main() {\n"
 		"color = texture(texture_sampler, UV);\n"
 	"}\n";
+*/
 
 void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint shader_program) {
 	static GLfloat hori_angle = (GLfloat) M_PI, vert_angle = 0.0f, last_time;
@@ -93,13 +95,13 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 	if (keys[KEY_PRINT_POSITION])
 		printf("pos = {%lf, %lf, %lf}\n", (double) pos[0], (double) pos[1], (double) pos[2]);
 
-	extern GLuint poly_shader;
-	glUseProgram(poly_shader); // Binding poly_shader
+	extern GLuint sector_shader;
+	glUseProgram(sector_shader); // Binding sector_shader
 
 	static GLint matrix_id;
 	static byte second_call = 1; // Not first_call b/c that is defined above
 	if (second_call) {
-		matrix_id = glGetUniformLocation(poly_shader, "model_view_projection"); // model_view_projection found in poly shader
+		matrix_id = glGetUniformLocation(sector_shader, "model_view_projection"); // model_view_projection found in sector shader
 		second_call = 0;
 	}
 
@@ -137,7 +139,7 @@ void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) 
 	glUniformMatrix4fv(view_projection_matrix_id, 1, GL_FALSE, &view_times_projection[0][0]);
 }
 
-GLuint poly_shader;
+GLuint sector_shader;
 GLfloat center[3] = {5.5f, 4.5f, 8.5f};
 
 StateGL demo_13_init(void) {
@@ -164,8 +166,8 @@ StateGL demo_13_init(void) {
 		"../../../assets/objects/tomato.bmp", tex_nonrepeating,
 		"../../../assets/walls/saqqara.bmp", tex_repeating);
 
-	sgl.shader_program = init_shader_program(demo_13_vertex_shader, demo_13_fragment_shader);
-	poly_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	sgl.shader_program = init_shader_program(billboard_vertex_shader, billboard_fragment_shader);
+	sector_shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -178,8 +180,8 @@ void demo_13_drawer(const StateGL* const sgl) {
 	demo_13_matrix_setup(sgl -> shader_program, center);
 
 	// Drawing non-transparent objects first
-	glUseProgram(poly_shader);
-	select_texture_for_use(sgl -> textures[1], poly_shader);
+	glUseProgram(sector_shader);
+	select_texture_for_use(sgl -> textures[1], sector_shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	draw_triangles(triangles_per_mesh);
 
@@ -192,7 +194,7 @@ void demo_13_drawer(const StateGL* const sgl) {
 }
 
 void demo_13_deinit(const StateGL* const sgl) {
-	glDeleteProgram(poly_shader);
+	glDeleteProgram(sector_shader);
 	deinit_demo_vars(sgl);
 }
 

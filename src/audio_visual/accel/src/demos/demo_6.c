@@ -139,7 +139,8 @@ const char* const demo_6_vertex_shader =
 //////////
 
 void demo_6_core_init_shader_and_textures_and_culling(StateGL* const sgl) {
-	sgl -> shader_program = init_shader_program(demo_6_vertex_shader, demo_4_fragment_shader);
+	sgl -> shader_program = init_shader_program(demo_6_vertex_shader, sector_fragment_shader);
+	glUseProgram(sgl -> shader_program);
 
 	sgl -> num_textures = 1;
 	sgl -> textures = init_textures(sgl -> num_textures, "../../../assets/walls/dune.bmp", tex_repeating);

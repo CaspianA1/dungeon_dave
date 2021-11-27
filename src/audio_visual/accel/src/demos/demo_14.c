@@ -15,7 +15,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 		billboard_center_id = glGetUniformLocation(billboard_shader, "billboard_center_world_space");
 		cam_right_xz_id = glGetUniformLocation(billboard_shader, "cam_right_xz_world_space");
 		view_projection_id = glGetUniformLocation(billboard_shader, "view_projection");
-		model_view_projection_id = glGetUniformLocation(poly_shader, "model_view_projection");
+		model_view_projection_id = glGetUniformLocation(sector_shader, "model_view_projection");
 
 		glUseProgram(billboard_shader);
 		glUniform2f(glGetUniformLocation(billboard_shader, "billboard_size_world_space"), 1.0f, 1.0f);
@@ -42,10 +42,10 @@ void demo_14_drawer(const StateGL* const sgl) {
 
 	//////////
 
-	glUseProgram(poly_shader);
+	glUseProgram(sector_shader);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
-	select_texture_for_use(sgl -> textures[1], poly_shader);
+	select_texture_for_use(sgl -> textures[1], sector_shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	draw_triangles(triangles_per_mesh);
 

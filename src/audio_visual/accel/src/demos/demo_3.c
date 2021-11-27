@@ -167,6 +167,7 @@ StateGL demo_3_init(void) {
 		"}\n";
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
+	glUseProgram(sgl.shader_program);
 
 	enable_all_culling();
 

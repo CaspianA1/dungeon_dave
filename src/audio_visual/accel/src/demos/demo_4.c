@@ -1,55 +1,32 @@
 #include "demo_3.c"
+#include "../shaders.c"
 
-const char* const demo_4_vertex_shader =
-	"#version 330 core\n"
 
-	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
-	"layout(location = 1) in vec2 vertex_UV;\n"
-	"out vec2 UV;\n"
+/*
+vert_1: on zy (2, 1)
+vert_2: on xy (0, 1)
+flat:   on zx (2, 0)
 
-	"uniform mat4 model_view_projection;\n"
+vert 1 masks: (0, 1), (1, 1)
+vert 2 masks: (0, 1), (1, 1)
+flat mask: (0, 1)
 
-	/*
-	vert_1: on zy (2, 1)
-	vert_2: on xy (0, 1)
-	flat:   on zx (2, 0)
+expanded:
+	Correct for first vert_1 wall side:
+	"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.y);\n"
 
-	vert 1 masks: (0, 1), (1, 1)
-	vert 2 masks: (0, 1), (1, 1)
-	flat mask: (0, 1)
+	Correct for second vert_1 wall side:
+	"UV = 1.0f - vertex_pos_model_space.zy;\n"
 
-	expanded:
-		Correct for first vert_1 wall side:
-		"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.y);\n"
+	Correct for first vert_2 wall side:
+	"UV = vec2(vertex_pos_model_space.x, 1.0f - vertex_pos_model_space.y);\n"
 
-		Correct for second vert_1 wall side:
-		"UV = 1.0f - vertex_pos_model_space.zy;\n"
+	Correct for second vert_2 wall side:
+	"UV = 1.0f - vec2(vertex_pos_model_space.x, vertex_pos_model_space.y);\n"
 
-		Correct for first vert_2 wall side:
-		"UV = vec2(vertex_pos_model_space.x, 1.0f - vertex_pos_model_space.y);\n"
-
-		Correct for second vert_2 wall side:
-		"UV = 1.0f - vec2(vertex_pos_model_space.x, vertex_pos_model_space.y);\n"
-
-		Correct for floors:
-		"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.x);\n"
-	*/
-
-	"void main() {\n"
-		"gl_Position = model_view_projection * vec4(vertex_pos_model_space, 1);\n"
-		"UV = vertex_UV;\n"
-	"}\n",
-
-*const demo_4_fragment_shader =
-	"#version 330 core\n"
-
-	"in vec2 UV;\n"
-	"out vec3 color;\n" // For textures with an alpha channel, enable 4 channels
-
-	"uniform sampler2D texture_sampler;\n"
-	"void main() {\n"
-		"color = texture(texture_sampler, UV).rgb;\n"
-	"}\n";
+	Correct for floors:
+	"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.x);\n"
+*/
 
 StateGL demo_4_init(void) {
 	StateGL sgl;
@@ -80,7 +57,8 @@ StateGL demo_4_init(void) {
 
 	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+	glUseProgram(sgl.shader_program);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/hieroglyph.bmp", tex_nonrepeating);

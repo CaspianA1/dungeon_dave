@@ -194,7 +194,6 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 		glDeleteShader(shader_id);
 	}
 
-	glUseProgram(program_id);
 	return program_id;
 }
 

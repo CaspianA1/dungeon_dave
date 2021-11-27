@@ -1,32 +1,8 @@
 #include "../utils.c"
 #include "../camera.c"
+#include "../shaders.c"
 
 // http://www.humus.name/index.php?page=Textures
-
-const char* const demo_15_vertex_shader =
-	"#version 330 core\n"
-
-	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
-	"out vec3 UV_3D;\n"
-
-	"uniform mat4 view_projection;\n"
-
-	"void main() {\n"
-		"gl_Position = view_projection * vec4(vertex_pos_model_space, 1.0);\n"
-		"gl_Position = gl_Position.xyww;\n"
-		"UV_3D = vertex_pos_model_space;\n"
-	"}\n"
-	,
-
-*const demo_15_fragment_shader =
-	"#version 330 core\n"
-	"in vec3 UV_3D;\n"
-	"uniform samplerCube cubemap_sampler;\n"
-	"out vec4 color;\n"
-
-	"void main() {\n"
-		"color = texture(cubemap_sampler, UV_3D);\n"
-	"}\n";
 
 const GLfloat skybox_vertices[] = {
 	-1.0f, 1.0f, -1.0f,
@@ -135,7 +111,8 @@ StateGL demo_15_init(void) {
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, skybox_vertices, sizeof(skybox_vertices));
 	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
 
-	sgl.shader_program = init_shader_program(demo_15_vertex_shader, demo_15_fragment_shader);
+	sgl.shader_program = init_shader_program(skybox_vertex_shader, skybox_fragment_shader);
+	glUseProgram(sgl.shader_program);
 
 	//////////
 	sgl.num_textures = 0;

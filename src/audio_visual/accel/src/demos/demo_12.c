@@ -12,8 +12,8 @@
 - To start, one vbo + texture ptr per sector
 
 - Store texture byte index in a plane (max 10 textures per level)
-- NEXT: Frustum culling
-- NEXT 2: Skybox code into its own dedicated file
+- NEXT: Skybox code into its own dedicated file
+- NEXT 2: Frustum culling
 - A little seam between some textures + little dots popping around - find a way to share vertices, if possible
 - Maybe no real-time lighting (only via lightmaps); excluding distance lighting
 - Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
@@ -60,44 +60,6 @@ void init_sector_list_vbo(SectorList* const sector_list) {
 	glBufferData(GL_ARRAY_BUFFER, total_bytes, vertices, GL_STATIC_DRAW);
 }
 
-// These two add distance shading from the demo 4 fragment shader
-const char* const demo_12_vertex_shader =
-	"#version 330 core\n"
-
-	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
-	"layout(location = 1) in vec2 vertex_UV;\n"
-
-	"out vec2 UV;\n"
-	"out vec3 pos_delta_world_space;\n"
-
-	"uniform vec3 camera_pos_world_space;\n"
-	"uniform mat4 model_view_projection;\n"
-
-	"void main() {\n"
-		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
-		"UV = vertex_UV;\n"
-		"pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
-	"}\n",
-
-*const demo_12_fragment_shader =
-	"#version 330 core\n"
-
-	"in vec2 UV;\n"
-	"in vec3 pos_delta_world_space;\n"
-
-	"out vec3 color;\n"
-
-	"uniform sampler2D texture_sampler;\n"
-
-	"const float min_light = 0.1f, max_light = 1.0f, intensity_factor = 50.0f;\n"
-
-	"void main() {\n" // dist_squared is distance squared from fragment
-		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
-		"float light_intensity = clamp(intensity_factor / dist_squared, min_light, max_light);\n"
-
-		"color = light_intensity * texture(texture_sampler, UV).rgb;\n"
-	"}\n";
-
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
@@ -109,7 +71,8 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 	*sector_list_on_heap = sector_list;
 	sgl.any_data = sector_list_on_heap; // any_data stores sector meshes, and freed in demo_12_deinit
 
-	sgl.shader_program = init_shader_program(demo_12_vertex_shader, demo_12_fragment_shader);
+	sgl.shader_program = init_shader_program(sector_lighting_vertex_shader, sector_lighting_fragment_shader);
+	glUseProgram(sgl.shader_program);
 	enable_all_culling();
 
 	return sgl;	

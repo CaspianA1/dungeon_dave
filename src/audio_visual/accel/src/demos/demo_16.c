@@ -17,11 +17,11 @@ StateGL demo_16_init(void) {
 	glEnableVertexAttribArray(0);
 	free(cuboid_mesh);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp", tex_repeating);
 
-	skybox_shader = init_shader_program(demo_15_vertex_shader, demo_15_fragment_shader);
+	skybox_shader = init_shader_program(skybox_vertex_shader, skybox_fragment_shader);
 	skybox_texture = init_skybox_texture("assets/sky_2.bmp");
 
 	glEnable(GL_DEPTH_TEST);
