@@ -12,7 +12,8 @@
 - To start, one vbo + texture ptr per sector
 
 - Store texture byte index in a plane (max 10 textures per level)
-- NEXT: Frustum culling
+- NEXT: a draw_sectors function, which will allow for skybox + sector drawers together
+- NEXT 2: Frustum culling
 - A little seam between some textures + little dots popping around - find a way to share vertices, if possible
 - Maybe no real-time lighting (only via lightmaps); excluding distance lighting
 - Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
