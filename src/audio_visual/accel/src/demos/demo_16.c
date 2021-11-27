@@ -20,7 +20,7 @@ StateGL demo_16_init(void) {
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp", tex_repeating);
 
-	Skybox const skybox = init_skybox("assets/sky_2.bmp");
+	const Skybox skybox = init_skybox("assets/sky_2.bmp");
 	sgl.any_data = malloc(sizeof(Skybox));
 	memcpy(sgl.any_data, &skybox, sizeof(Skybox));
 
