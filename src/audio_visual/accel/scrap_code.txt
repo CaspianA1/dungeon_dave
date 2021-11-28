@@ -1706,3 +1706,41 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 	}
 
 /////
+
+	/*
+	const GLsizeiptr total_index_bytes = num_faces * indices_per_face * sizeof(index_type_t);
+	GLuint* const cpu_index_buffer = malloc(total_index_bytes);
+	for (size_t i = 0; i < num_faces; i++) {
+		const int s = i * 4;
+
+		const GLuint index_set_1[6] =
+			// {s, s + 1, s + 2, s + 1, s + 3, s + 2};
+			{s, s + 1, s + 2, s, s + 3, s + 1};
+
+		for (int j = 0; j < 6; j++) printf("%d ", index_set_1[j]);
+		putchar('\n');
+	
+		memcpy(cpu_index_buffer + i * 6, index_set_1, sizeof(index_set_1));
+	}
+
+	glGenBuffers(1, &sector_list -> ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sector_list -> ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_index_bytes, cpu_index_buffer, GL_STATIC_DRAW);
+
+	free(cpu_index_buffer);
+	*/
+
+	/*
+	const GLuint num_indices = 6 * face_mesh_list.length;
+	// DEBUG(face_mesh_list.length, d);
+	for (int i = 0; i < 3; i++) {
+		GLuint index_set_1[6] = {i, i + 1, i + 2, i, i + 3, i + 1};
+
+		for (int i = 0; i < 6; i++) {
+			printf("%d ", index_set_1[i]);
+		}
+		putchar('\n');
+	}
+	*/
+
+/////

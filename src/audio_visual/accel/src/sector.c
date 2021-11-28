@@ -28,7 +28,7 @@ typedef struct {
 
 typedef struct {
 	List list;
-	GLuint vbo;
+	GLuint vbo, ibo;
 	GLsizei num_vertices;
 } SectorList;
 

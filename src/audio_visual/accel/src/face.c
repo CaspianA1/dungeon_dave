@@ -2,16 +2,19 @@
 #define FACE_C
 
 typedef GLubyte mesh_type_t;
+typedef GLuint index_type_t;
+
 #define MESH_TYPE_ENUM GL_UNSIGNED_BYTE
+#define INDEX_TYPE_ENUM GL_UNSIGNED_INT
 
 enum {
 	vars_per_vertex = 5,
-	vertices_per_triangle = 3,
 	triangles_per_face = 2,
+	vertices_per_face = 6, // 4 with an ibo
+	indices_per_face = 6,
 
 	bytes_per_vertex = vars_per_vertex * sizeof(mesh_type_t),
-	vars_per_triangle = vars_per_vertex * vertices_per_triangle,
-	vars_per_face = vars_per_triangle * triangles_per_face
+	vars_per_face = vars_per_vertex * vertices_per_face
 };
 
 /* NS - north-south, and EW = east-west.
@@ -81,7 +84,7 @@ byte get_next_face(const Sector sector, const byte varying_axis,
 	return 1;
 }
 
-void init_vert_faces(const Sector sector, List* const vertex_list,
+void init_vert_faces(const Sector sector, List* const face_mesh_list, List* const index_list,
 	const byte* const heightmap, const byte map_width, const byte map_height) {
 
 	const byte dimensions[2] = {map_width, map_height};
@@ -106,15 +109,17 @@ void init_vert_faces(const Sector sector, List* const vertex_list,
 				adjacent_side_val = next_face.origin[unvarying_axis];
 			}
 
-			void add_face_mesh_to_vertex_list(const Face, const byte, const byte, List* const);
+			void add_face_mesh_to_list(const Face, const byte, const byte, List* const, List* const);
 
 			while (get_next_face(sector, !unvarying_axis, adjacent_side_val, map_width, heightmap, &next_face))
-				add_face_mesh_to_vertex_list(next_face, sector.height, side, vertex_list);
+				add_face_mesh_to_list(next_face, sector.height, side, face_mesh_list, index_list);
 		}
 	}
 }
 
-void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, const byte side, List* const vertex_list) {
+void add_face_mesh_to_list(const Face face, const byte sector_height,
+	const byte side, List* const face_mesh_list, List* const index_list) {
+
 	const byte near_x = face.origin[0], near_z = face.origin[1];
 	const mesh_type_t* face_mesh;
 
@@ -128,9 +133,9 @@ void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, con
 				far_x, sector_height, near_z, 0, size_z,
 				near_x, sector_height, near_z, size_x, size_z,
 
-				near_x, sector_height, far_z, size_x, 0,
+				near_x, sector_height, far_z, size_x, 0, // out
 				far_x, sector_height, far_z, 0, 0,
-				far_x, sector_height, near_z, 0, size_z
+				far_x, sector_height, near_z, 0, size_z // out
 			};
 			break;
 		}
@@ -144,18 +149,18 @@ void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, con
 					near_x, sector_height, far_z, size_z, 0,
 					near_x, sector_height, near_z, 0, 0,
 
-					near_x, bottom_y, near_z, 0, size_y,
+					near_x, bottom_y, near_z, 0, size_y, // out
 					near_x, bottom_y, far_z, size_z, size_y,
-					near_x, sector_height, far_z, size_z, 0
+					near_x, sector_height, far_z, size_z, 0 // out
 				}
 				: (mesh_type_t[vars_per_face]) { // Right side - face 2
 					near_x, sector_height, near_z, size_z, 0,
 					near_x, sector_height, far_z, 0, 0,
 					near_x, bottom_y, near_z, size_z, size_y,
 
-					near_x, sector_height, far_z, 0, 0,
+					near_x, sector_height, far_z, 0, 0, // out
 					near_x, bottom_y, far_z, 0, size_y,
-					near_x, bottom_y, near_z, size_z, size_y
+					near_x, bottom_y, near_z, size_z, size_y // out
 				};
 			break;
 		}
@@ -169,48 +174,78 @@ void add_face_mesh_to_vertex_list(const Face face, const byte sector_height, con
 					far_x, sector_height, near_z, 0, 0,
 					near_x, bottom_y, near_z, size_x, size_y,
 
-					far_x, sector_height, near_z, 0, 0,
+					far_x, sector_height, near_z, 0, 0, // out
 					far_x, bottom_y, near_z, 0, size_y,
-					near_x, bottom_y, near_z, size_x, size_y
+					near_x, bottom_y, near_z, size_x, size_y // out
 				}
 				: (mesh_type_t[vars_per_face]) { // Top side - face 4
 					near_x, bottom_y, near_z, 0, size_y,
 					far_x, sector_height, near_z, size_x, 0,
 					near_x, sector_height, near_z, 0, 0,
 
-					near_x, bottom_y, near_z, 0, size_y,
+					near_x, bottom_y, near_z, 0, size_y, // out
 					far_x, bottom_y, near_z, size_x, size_y,
-					far_x, sector_height, near_z, size_x, 0
+					far_x, sector_height, near_z, size_x, 0 // out
 				};
 			break;
 		}
 	}
-	push_ptr_to_list(vertex_list, face_mesh);
+	push_ptr_to_list(face_mesh_list, face_mesh);
+
+	/*
+	TODO: add to index list here
+
+	const GLuint index_set_1[6] =
+		// {s, s + 1, s + 2, s + 1, s + 3, s + 2};
+		{s, s + 1, s + 2, s, s + 3, s + 1};
+
+	flat || vert ns first || vert ew second -> 0, 1, 2, 0, 3, 1
+	vert ns second || vert ew first -> 0, 1, 2, 1, 3, 2
+
+	- If second variant, add 1 to entry[3] and entry[5]
+	- How to find start of ibo indices here?
+	*/
+	(void) index_list;
 }
 
-void init_face_and_sector_mesh_lists(List* const face_mesh_list, SectorList* const sector_list,
-	const byte* const heightmap, const byte map_width, const byte map_height) {
+void init_face_and_sector_mesh_lists(List* const face_mesh_list, List* const index_list,
+	SectorList* const sector_list, const byte* const heightmap, const byte map_width, const byte map_height) {
 
 	*sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
 
 	const List underlying_sector_list = sector_list -> list;
 	*face_mesh_list = init_list(underlying_sector_list.length * 1.8f, mesh_type_t[vars_per_face]);
+	*index_list = init_list(underlying_sector_list.length * 2.0f, index_type_t[vertices_per_face]);
 
 	for (size_t i = 0; i < underlying_sector_list.length; i++) {
 		const Sector sector = ((Sector*) underlying_sector_list.data)[i];
 		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
-		add_face_mesh_to_vertex_list(flat_face, sector.height, 0, face_mesh_list);
-		init_vert_faces(sector, face_mesh_list, heightmap, map_width, map_height);
+		add_face_mesh_to_list(flat_face, sector.height, 0, face_mesh_list, index_list);
+		init_vert_faces(sector, face_mesh_list, index_list, heightmap, map_width, map_height);
 	}
 }
 
-void init_sector_list_vbo(const List* const face_list, SectorList* const sector_list) {
-	const size_t total_triangles = face_list -> length * triangles_per_face;
-	const size_t total_bytes = total_triangles * vertices_per_triangle * bytes_per_vertex;
+void init_sector_list_vbo_and_ibo(const List* const face_list, SectorList* const sector_list) {
+	const size_t num_faces = face_list -> length;
+	const GLsizeiptr total_vertex_bytes = num_faces * vars_per_face * sizeof(mesh_type_t);
 
 	glGenBuffers(1, &sector_list -> vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
-	glBufferData(GL_ARRAY_BUFFER, total_bytes, face_list -> data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, total_vertex_bytes, face_list -> data, GL_STATIC_DRAW);
+
+	/*
+	ibo entries:
+		flat:
+			0, 1, 2, 0, 3, 1
+		vert ns, first side:
+			0, 1, 2, 0, 3, 1
+		vert ns, second side:
+			0, 1, 2, 1, 3, 2
+		vert ew, first side:
+			0, 1, 2, 1, 3, 2
+		vert ew, second side:
+			0, 1, 2, 0, 3, 1
+	*/
 }
 
 void bind_sector_list_vbo_to_vao(const SectorList* const sector_list) {

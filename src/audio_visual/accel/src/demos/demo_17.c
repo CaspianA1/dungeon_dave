@@ -4,15 +4,18 @@
 #include "../camera.c"
 #include "../maps.c"
 
-static List fml;
 static SectorList sl;
+static GLsizei num_indices;
 
 StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
-	init_face_and_sector_mesh_lists(&fml, &sl, (byte*) terrain_map, terrain_width, terrain_height);
-	init_sector_list_vbo(&fml, &sl);
+	static List face_mesh_list, index_list;
+	init_face_and_sector_mesh_lists(&face_mesh_list, &index_list, &sl, (byte*) palace_map, palace_width, palace_height);
+	init_sector_list_vbo_and_ibo(&face_mesh_list, &sl);
 	bind_sector_list_vbo_to_vao(&sl);
+
+	num_indices = face_mesh_list.length * indices_per_face;
 
 	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 	glUseProgram(sgl.shader_program);
@@ -21,6 +24,8 @@ StateGL demo_17_init(void) {
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	enable_all_culling();
+	deinit_list(face_mesh_list);
+	deinit_list(index_list);
 
 	return sgl;
 }
@@ -48,13 +53,18 @@ void demo_17_drawer(const StateGL* const sgl) {
 	palace: 1466 vs 1114. tpt: 232 vs 146.
 	pyramid: 816 vs 542. maze: 5796 vs 6114.
 	terrain: 150620 vs 86588. */
-	const GLsizei num_triangles = fml.length * triangles_per_face;
-	draw_triangles(num_triangles);
+
+	bind_sector_list_vbo_to_vao(&sl);
+	draw_triangles(num_indices * 2 / 3);
+
+	/*
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sl.ibo);
+	glDrawElements(GL_TRIANGLES, num_indices, INDEX_TYPE_ENUM, NULL);
+	*/
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
 	deinit_sector_list(&sl);
-	deinit_list(fml);
 	deinit_demo_vars(sgl);
 }
 
