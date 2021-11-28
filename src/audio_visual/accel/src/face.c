@@ -1,6 +1,9 @@
 #ifndef FACE_C
 #define FACE_C
 
+#include "utils.h"
+#include "sector.c"
+
 typedef GLubyte mesh_type_t;
 typedef GLuint index_type_t;
 
@@ -10,7 +13,7 @@ typedef GLuint index_type_t;
 enum {
 	vars_per_vertex = 5,
 	triangles_per_face = 2,
-	vertices_per_face = 6, // 4 with an ibo
+	vertices_per_face = 4,
 	indices_per_face = 6,
 
 	bytes_per_vertex = vars_per_vertex * sizeof(mesh_type_t),
@@ -133,9 +136,9 @@ void add_face_mesh_to_list(const Face face, const byte sector_height,
 				far_x, sector_height, near_z, 0, size_z,
 				near_x, sector_height, near_z, size_x, size_z,
 
-				near_x, sector_height, far_z, size_x, 0, // out
-				far_x, sector_height, far_z, 0, 0,
-				far_x, sector_height, near_z, 0, size_z // out
+				// near_x, sector_height, far_z, size_x, 0,
+				far_x, sector_height, far_z, 0, 0
+				// far_x, sector_height, near_z, 0, size_z
 			};
 			break;
 		}
@@ -149,18 +152,18 @@ void add_face_mesh_to_list(const Face face, const byte sector_height,
 					near_x, sector_height, far_z, size_z, 0,
 					near_x, sector_height, near_z, 0, 0,
 
-					near_x, bottom_y, near_z, 0, size_y, // out
-					near_x, bottom_y, far_z, size_z, size_y,
-					near_x, sector_height, far_z, size_z, 0 // out
+					// near_x, bottom_y, near_z, 0, size_y,
+					near_x, bottom_y, far_z, size_z, size_y
+					// near_x, sector_height, far_z, size_z, 0
 				}
 				: (mesh_type_t[vars_per_face]) { // Right side - face 2
 					near_x, sector_height, near_z, size_z, 0,
 					near_x, sector_height, far_z, 0, 0,
 					near_x, bottom_y, near_z, size_z, size_y,
 
-					near_x, sector_height, far_z, 0, 0, // out
-					near_x, bottom_y, far_z, 0, size_y,
-					near_x, bottom_y, near_z, size_z, size_y // out
+					// near_x, sector_height, far_z, 0, 0,
+					near_x, bottom_y, far_z, 0, size_y
+					// near_x, bottom_y, near_z, size_z, size_y
 				};
 			break;
 		}
@@ -174,38 +177,35 @@ void add_face_mesh_to_list(const Face face, const byte sector_height,
 					far_x, sector_height, near_z, 0, 0,
 					near_x, bottom_y, near_z, size_x, size_y,
 
-					far_x, sector_height, near_z, 0, 0, // out
-					far_x, bottom_y, near_z, 0, size_y,
-					near_x, bottom_y, near_z, size_x, size_y // out
+					// far_x, sector_height, near_z, 0, 0,
+					far_x, bottom_y, near_z, 0, size_y
+					// near_x, bottom_y, near_z, size_x, size_y
 				}
 				: (mesh_type_t[vars_per_face]) { // Top side - face 4
 					near_x, bottom_y, near_z, 0, size_y,
 					far_x, sector_height, near_z, size_x, 0,
 					near_x, sector_height, near_z, 0, 0,
 
-					near_x, bottom_y, near_z, 0, size_y, // out
-					far_x, bottom_y, near_z, size_x, size_y,
-					far_x, sector_height, near_z, size_x, 0 // out
+					// near_x, bottom_y, near_z, 0, size_y,
+					far_x, bottom_y, near_z, size_x, size_y
+					// far_x, sector_height, near_z, size_x, 0
 				};
 			break;
 		}
 	}
 	push_ptr_to_list(face_mesh_list, face_mesh);
 
-	/*
-	TODO: add to index list here
+	//////////
 
-	const GLuint index_set_1[6] =
-		// {s, s + 1, s + 2, s + 1, s + 3, s + 2};
-		{s, s + 1, s + 2, s, s + 3, s + 1};
+	const index_type_t s = index_list -> length * vertices_per_face; // s = index set start
+	index_type_t index_set[indices_per_face] = {s, s + 1, s + 2, s, s + 3, s + 1};
 
-	flat || vert ns first || vert ew second -> 0, 1, 2, 0, 3, 1
-	vert ns second || vert ew first -> 0, 1, 2, 1, 3, 2
+	if ((face.type == Vert_NS && !side) || (face.type == Vert_EW && side)) {
+		index_set[3]++;
+		index_set[5]++;
+	}
 
-	- If second variant, add 1 to entry[3] and entry[5]
-	- How to find start of ibo indices here?
-	*/
-	(void) index_list;
+	push_ptr_to_list(index_list, index_set);
 }
 
 void init_face_and_sector_mesh_lists(List* const face_mesh_list, List* const index_list,
@@ -215,7 +215,7 @@ void init_face_and_sector_mesh_lists(List* const face_mesh_list, List* const ind
 
 	const List underlying_sector_list = sector_list -> list;
 	*face_mesh_list = init_list(underlying_sector_list.length * 1.8f, mesh_type_t[vars_per_face]);
-	*index_list = init_list(underlying_sector_list.length * 2.0f, index_type_t[vertices_per_face]);
+	*index_list = init_list(underlying_sector_list.length * 2.0f, index_type_t[indices_per_face]);
 
 	for (size_t i = 0; i < underlying_sector_list.length; i++) {
 		const Sector sector = ((Sector*) underlying_sector_list.data)[i];
@@ -225,27 +225,22 @@ void init_face_and_sector_mesh_lists(List* const face_mesh_list, List* const ind
 	}
 }
 
-void init_sector_list_vbo_and_ibo(const List* const face_list, SectorList* const sector_list) {
+void init_sector_list_vbo_and_ibo(const List* const face_list, const List* const index_list, SectorList* const sector_list) {
 	const size_t num_faces = face_list -> length;
-	const GLsizeiptr total_vertex_bytes = num_faces * vars_per_face * sizeof(mesh_type_t);
+	const GLsizeiptr
+		total_vertex_bytes = num_faces * vars_per_face * sizeof(mesh_type_t),
+		total_index_bytes = num_faces * sizeof(index_type_t[indices_per_face]);
 
-	glGenBuffers(1, &sector_list -> vbo);
+	GLuint buffers[2];
+	glGenBuffers(2, buffers);
+
+	sector_list -> vbo = buffers[0];
 	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
 	glBufferData(GL_ARRAY_BUFFER, total_vertex_bytes, face_list -> data, GL_STATIC_DRAW);
 
-	/*
-	ibo entries:
-		flat:
-			0, 1, 2, 0, 3, 1
-		vert ns, first side:
-			0, 1, 2, 0, 3, 1
-		vert ns, second side:
-			0, 1, 2, 1, 3, 2
-		vert ew, first side:
-			0, 1, 2, 1, 3, 2
-		vert ew, second side:
-			0, 1, 2, 0, 3, 1
-	*/
+	sector_list -> ibo = buffers[1];
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sector_list -> ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_index_bytes, index_list -> data, GL_STATIC_DRAW);
 }
 
 void bind_sector_list_vbo_to_vao(const SectorList* const sector_list) {

@@ -11,9 +11,11 @@ StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
 	static List face_mesh_list, index_list;
-	init_face_and_sector_mesh_lists(&face_mesh_list, &index_list, &sl, (byte*) palace_map, palace_width, palace_height);
-	init_sector_list_vbo_and_ibo(&face_mesh_list, &sl);
+	init_face_and_sector_mesh_lists(&face_mesh_list, &index_list, &sl, (byte*) terrain_map, terrain_width, terrain_height);
+
+	init_sector_list_vbo_and_ibo(&face_mesh_list, &index_list, &sl);
 	bind_sector_list_vbo_to_vao(&sl);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sl.ibo);
 
 	num_indices = face_mesh_list.length * indices_per_face;
 
@@ -54,16 +56,12 @@ void demo_17_drawer(const StateGL* const sgl) {
 	pyramid: 816 vs 542. maze: 5796 vs 6114.
 	terrain: 150620 vs 86588. */
 
-	bind_sector_list_vbo_to_vao(&sl);
-	draw_triangles(num_indices * 2 / 3);
-
-	/*
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sl.ibo);
+	// draw_triangles(num_indices * 2 / 3);
 	glDrawElements(GL_TRIANGLES, num_indices, INDEX_TYPE_ENUM, NULL);
-	*/
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
+	glDeleteBuffers(1, &sl.ibo); // This should be in deinit_sector_list, but demo 12 doesn't use an ibo
 	deinit_sector_list(&sl);
 	deinit_demo_vars(sgl);
 }
