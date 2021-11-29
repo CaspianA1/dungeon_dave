@@ -29,6 +29,4 @@ byte* map_point(byte* const map, const byte x, const byte y, const byte map_widt
 SectorList generate_sectors_from_heightmap(const byte* const heightmap,
 	const byte map_width, const byte map_height);
 
-
-
 #endif
