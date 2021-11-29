@@ -23,7 +23,8 @@ const byte init_sector_alloc = 20;
 
 typedef struct {
 	const byte height, origin[2];
-	byte size[2];
+	byte size[2]; // TODO: below member to index_type_t
+	struct {int32_t start, end;} ibo_range; // start and end indices in ibo that encompasssectors' faces
 } Sector;
 
 typedef struct {
@@ -37,7 +38,7 @@ typedef struct {
 SectorList init_sector_list(void) {
 	return (SectorList) {
 		.list = init_list(init_sector_alloc, Sector),
-		.num_vertices = 0
+		.num_vertices = 0 // TODO: remove and isolate to demo 12
 	};
 }
 

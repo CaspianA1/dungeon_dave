@@ -216,10 +216,15 @@ void init_face_and_sector_mesh_lists(List* const face_mesh_list, List* const ind
 	*index_list = init_list(underlying_sector_list.length * 2.0f, index_type_t[indices_per_face]);
 
 	for (size_t i = 0; i < underlying_sector_list.length; i++) {
-		const Sector sector = ((Sector*) underlying_sector_list.data)[i];
+		Sector* const sector_ref = ((Sector*) underlying_sector_list.data) + i;
+		sector_ref -> ibo_range.start = index_list -> length * indices_per_face;
+
+		const Sector sector = *sector_ref;
 		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
 		add_face_mesh_to_list(flat_face, sector.height, 0, face_mesh_list, index_list);
 		init_vert_faces(sector, face_mesh_list, index_list, heightmap, map_width, map_height);
+
+		sector_ref -> ibo_range.end = index_list -> length * indices_per_face;
 	}
 }
 
