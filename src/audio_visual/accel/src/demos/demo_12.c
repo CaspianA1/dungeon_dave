@@ -39,7 +39,7 @@ byte* map_point(byte* const map, const byte x, const byte y, const byte map_widt
 OldSectorList init_sector_list(void) {
 	return (OldSectorList) {
 		.list = init_list(20, OldSector),
-		.num_vertices = 0 // TODO: remove and isolate to demo 12
+		.num_vertices = 0
 	};
 }
 
