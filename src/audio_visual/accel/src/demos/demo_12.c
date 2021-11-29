@@ -1,45 +1,124 @@
 #include "demo_11.c"
-#include "../sector.c"
-#include "../maps.c"
+#include "../list.c"
+#include "../data/maps.c"
 
-/*
-- Sectors contain their meshes
-- To begin with, don't clip sector heights based on adjacent heights
-- Sectors are rectangular
+//////////
 
-- Not perfect, but sectors + their meshes for clipping and rendering, and texmaps + heightmaps for game logic
-- Ideal: BSPs, but not worth time
-- To start, one vbo + texture ptr per sector
+#define inlinable static inline
+#define wmalloc malloc
+#define wfree free
 
-- Store texture byte index in a plane (max 10 textures per level)
-- NEXT: Frustum culling
-- NEXT 2: a draw_sectors function, which will allow for skybox + sector drawers together
-- A little seam between some textures + little dots popping around - find a way to share vertices, if possible - only happens/seen when it's dark?
-- Maybe no real-time lighting (only via lightmaps); excluding distance lighting
-- Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
+#define bit_is_set(bits, mask) ((bits) & (mask))
+#define set_bit(bits, mask) ((bits) |= (mask))
 
-- Read sprite crop from spritesheet
-- Blit 2D sprite to whole screen
-- Blit color rect to screen
-- Flat weapon
+typedef struct {
+	int chunk_dimensions[2];
+	size_t alloc_bytes;
+	byte* data;
+} StateMap;
 
-- In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
-*/
+#include "../../../../main/statemap.c"
 
-void init_sector_list_vbo(SectorList* const sector_list) {
+//////////
+
+typedef struct {
+	List list;
+	GLuint vbo, ibo;
+	GLsizei num_vertices;
+} OldSectorList;
+
+typedef struct {
+	const byte height, origin[2];
+	byte size[2];
+} OldSector;
+
+byte* map_point(byte* const map, const byte x, const byte y, const byte map_width) {
+	return map + (y * map_width + x);
+}
+
+OldSectorList init_sector_list(void) {
+	return (OldSectorList) {
+		.list = init_list(20, OldSector),
+		.num_vertices = 0 // TODO: remove and isolate to demo 12
+	};
+}
+
+void deinit_sector_list(const OldSectorList* const s) {
+	glDeleteBuffers(1, &s -> vbo);
+	deinit_list(s -> list);
+}
+
+// Gets length across, and then adds to area size y until out of map or length across not eq
+OldSector form_sector_area(OldSector sector, const StateMap traversed_points,
+	const byte* const map, const byte map_width, const byte map_height) {
+
+	byte top_right_corner = sector.origin[0];
+
+	while (top_right_corner < map_width
+		&& *map_point((byte*) map, top_right_corner, sector.origin[1], map_width) == sector.height
+		&& !get_statemap_bit(traversed_points, top_right_corner, sector.origin[1])) {
+
+		sector.size[0]++;
+		top_right_corner++;
+	}
+
+	// Now, area.size[0] equals the first horizontal length of equivalent height found
+	for (byte y = sector.origin[1]; y < map_height; y++, sector.size[1]++) {
+		for (byte x = sector.origin[0]; x < top_right_corner; x++) {
+			// If consecutive heights didn't continue
+			if (*map_point((byte*) map, x, y, map_width) != sector.height)
+				goto clear_map_area;
+		}
+	}
+
+	clear_map_area:
+
+	for (byte y = sector.origin[1]; y < sector.origin[1] + sector.size[1]; y++) {
+		for (byte x = sector.origin[0]; x < sector.origin[0] + sector.size[0]; x++)
+			set_statemap_bit(traversed_points, x, y);
+	}
+
+	return sector;
+}
+
+OldSectorList generate_sectors_from_heightmap(const byte* const heightmap,
+	const byte map_width, const byte map_height) {
+
+	OldSectorList sector_list = init_sector_list();
+
+	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used
+	and 2. for forming faces, will need original heightmap to be unmodified */
+	const StateMap traversed_points = init_statemap(map_width, map_height);
+
+	for (byte y = 0; y < map_height; y++) {
+		for (byte x = 0; x < map_width; x++) {
+			if (get_statemap_bit(traversed_points, x, y)) continue;
+
+			const byte height = *map_point((byte*) heightmap, x, y, map_width);
+			const OldSector seed_area = {.height = height, .origin = {x, y}, .size = {0, 0}};
+			const OldSector expanded_area = form_sector_area(seed_area, traversed_points, heightmap, map_width, map_height);
+			push_ptr_to_list(&sector_list.list, &expanded_area);
+		}
+	}
+
+	deinit_statemap(traversed_points);
+	return sector_list;
+}
+
+void init_sector_list_vbo(OldSectorList* const sector_list) {
 	const List list = sector_list -> list;
 
 	size_t total_bytes = 0, total_components = 0;
 
 	for (size_t i = 0; i < list.length; i++) {
-		const byte height = ((Sector*) list.data)[i].height;
+		const byte height = ((OldSector*) list.data)[i].height;
 		total_bytes += (height == 0) ? bytes_per_face : bytes_per_mesh;
 	}
 
 	mesh_type_t* const vertices = malloc(total_bytes);
 
 	for (size_t i = 0; i < list.length; i++) {
-		const Sector sector = ((Sector*) list.data)[i];
+		const OldSector sector = ((OldSector*) list.data)[i];
 		const mesh_type_t origin[3] = {sector.origin[0], sector.height, sector.origin[1]};
 
 		if (sector.height == 0) { // Flat sector
@@ -63,11 +142,11 @@ void init_sector_list_vbo(SectorList* const sector_list) {
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
-	SectorList sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
+	OldSectorList sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
 	init_sector_list_vbo(&sector_list);
 	bind_sector_mesh_to_vao();
 
-	SectorList* const sector_list_on_heap = malloc(sizeof(SectorList));
+	OldSectorList* const sector_list_on_heap = malloc(sizeof(OldSectorList));
 	*sector_list_on_heap = sector_list;
 	sgl.any_data = sector_list_on_heap; // any_data stores sector meshes, and freed in demo_12_deinit
 
@@ -144,12 +223,12 @@ void demo_12_drawer(const StateGL* const sgl) {
 	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
 
-	const SectorList* const sector_list = sgl -> any_data;
+	const OldSectorList* const sector_list = sgl -> any_data;
 	draw_triangles(sector_list -> num_vertices / 3);
 }
 
 void demo_12_deinit(const StateGL* const sgl) {
-	const SectorList* const sector_list = sgl -> any_data;
+	const OldSectorList* const sector_list = sgl -> any_data;
 	deinit_sector_list(sector_list); // This frees the stored sector meshes + their vbo
 	free(sgl -> any_data); // This frees the sector list struct on the heap
 

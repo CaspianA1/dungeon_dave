@@ -1,6 +1,8 @@
 #ifndef MAPS_C
 #define MAPS_C
 
+#include "../headers/utils.h"
+
 enum {
 	palace_width = 40, palace_height = 40,
 	tpt_width = 10, tpt_height = 20,

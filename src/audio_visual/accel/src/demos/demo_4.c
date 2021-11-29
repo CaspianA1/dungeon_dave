@@ -1,6 +1,5 @@
 #include "demo_3.c"
-#include "../shaders.c"
-
+#include "../data/shaders.c"
 
 /*
 vert_1: on zy (2, 1)

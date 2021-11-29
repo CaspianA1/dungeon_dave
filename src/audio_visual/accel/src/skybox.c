@@ -1,9 +1,7 @@
 #ifndef SKYBOX_C
 #define SKYBOX_C
 
-typedef struct {
-	GLuint vbo, shader, texture;
-} Skybox;
+#include "headers/skybox.h"
 
 const GLbyte skybox_vertices[] = {
 	-1, 1, -1,
@@ -49,7 +47,7 @@ const GLbyte skybox_vertices[] = {
 	1, -1, 1
 };
 
-static GLuint init_skybox_texture(const char* const path) {
+GLuint init_skybox_texture(const char* const path) {
 	SDL_Surface* const skybox_surface = init_surface(path);
 	SDL_UnlockSurface(skybox_surface);
 	const GLint cube_size = skybox_surface -> w >> 2;

@@ -1,6 +1,6 @@
 #include "../utils.c"
 #include "../camera.c"
-#include "../shaders.c"
+#include "../data/shaders.c"
 #include "../skybox.c"
 
 // http://www.humus.name/index.php?page=Textures

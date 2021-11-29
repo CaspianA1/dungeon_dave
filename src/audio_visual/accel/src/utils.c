@@ -1,8 +1,8 @@
 #ifndef UTILS_C
 #define UTILS_C
 
-#include "utils.h"
-#include "constants.h"
+#include "headers/utils.h"
+#include "headers/constants.h"
 
 Screen init_screen(const char* const title) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) fail("launch SDL", LaunchSDL);

@@ -1,12 +1,8 @@
 #ifndef CAMERA_C
 #define CAMERA_C
 
-typedef struct {
-	vec2 right_xz; // X and Z of right (Y is always 0)
-	vec3 pos, dir; // The camera never moves from the origin, but `pos` here is more practical
-	GLfloat fov, hori_angle, vert_angle, aspect_ratio;
-	mat4 view_projection, model_view_projection; // Used the least, so last in struct
-} Camera;
+#include "headers/camera.h"
+#include "headers/constants.h"
 
 void init_camera(Camera* const camera, const vec3 init_pos) {
 	memset(camera, 0, sizeof(Camera));

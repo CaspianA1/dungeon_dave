@@ -1,14 +1,7 @@
 #ifndef LIST_C
 #define LIST_C
 
-#include "utils.h"
-
-const float list_realloc_rate = 1.5f;
-
-typedef struct {
-	void* data;
-	size_t item_size, length, max_alloc;
-} List;
+#include "headers/list.h"
 
 #define deinit_list(list) free(list.data)
 

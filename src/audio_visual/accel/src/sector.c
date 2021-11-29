@@ -15,30 +15,14 @@ typedef struct {
 } StateMap;
 
 #include "../../../main/statemap.c"
+#include "headers/sector.h"
 #include "list.c"
-
-//////////
-
-const byte init_sector_alloc = 20;
-
-typedef struct {
-	const byte height, origin[2];
-	byte size[2]; // TODO: below member to index_type_t
-	struct {int32_t start, end;} ibo_range; // start and end indices in ibo that encompass sectors' faces
-} Sector;
-
-typedef struct {
-	List list;
-	GLuint vbo, ibo;
-	GLsizei num_vertices;
-} SectorList;
 
 //////////
 
 SectorList init_sector_list(void) {
 	return (SectorList) {
-		.list = init_list(init_sector_alloc, Sector),
-		.num_vertices = 0 // TODO: remove and isolate to demo 12
+		.list = init_list(init_sector_alloc, Sector)
 	};
 }
 
@@ -56,9 +40,9 @@ void print_sector_list(const SectorList* const s) {
 	puts("]");
 }
 
-void deinit_sector_list(const SectorList* const sector_list) {
-	glDeleteBuffers(1, &sector_list -> vbo);
-	deinit_list(sector_list -> list);
+void deinit_sector_list(const SectorList* const s) {
+	glDeleteBuffers(1, &s -> vbo);
+	deinit_list(s -> list);
 }
 
 //////////
@@ -116,7 +100,6 @@ SectorList generate_sectors_from_heightmap(const byte* const heightmap,
 			const byte height = *map_point((byte*) heightmap, x, y, map_width);
 			const Sector seed_area = {.height = height, .origin = {x, y}, .size = {0, 0}};
 			const Sector expanded_area = form_sector_area(seed_area, traversed_points, heightmap, map_width, map_height);
-			// push_to_sector_list(&sector_list, &expanded_area);
 			push_ptr_to_list(&sector_list.list, &expanded_area);
 		}
 	}

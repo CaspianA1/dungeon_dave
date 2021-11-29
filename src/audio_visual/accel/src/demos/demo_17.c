@@ -2,7 +2,32 @@
 #include "../sector.c"
 #include "../face.c"
 #include "../camera.c"
-#include "../maps.c"
+#include "../data/maps.c"
+#include "../culling.c"
+
+/*
+- Sectors contain their meshes
+- To begin with, don't clip sector heights based on adjacent heights
+- Sectors are rectangular
+
+- Not perfect, but sectors + their meshes for clipping and rendering, and texmaps + heightmaps for game logic
+- Ideal: BSPs, but not worth time
+- To start, one vbo + texture ptr per sector
+
+- Store texture byte index in a plane (max 10 textures per level)
+- NEXT: Frustum culling
+- NEXT 3: a draw_sectors function, which will allow for skybox + sector drawers together
+- A little seam between some textures + little dots popping around - find a way to share vertices, if possible - only happens/seen when it's dark?
+- Maybe no real-time lighting (only via lightmaps); excluding distance lighting
+- Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
+
+- Read sprite crop from spritesheet
+- Blit 2D sprite to whole screen
+- Blit color rect to screen
+- Flat weapon
+
+- In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
+*/
 
 static SectorList sl;
 static GLsizei num_indices;

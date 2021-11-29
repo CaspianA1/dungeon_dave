@@ -1,38 +1,7 @@
 #ifndef FACE_C
 #define FACE_C
 
-#include "utils.h"
-#include "sector.c"
-
-typedef GLubyte mesh_type_t;
-typedef GLuint index_type_t;
-
-#define MESH_TYPE_ENUM GL_UNSIGNED_BYTE
-#define INDEX_TYPE_ENUM GL_UNSIGNED_INT
-
-enum {
-	vars_per_vertex = 5,
-	vertices_per_face = 4,
-	indices_per_face = 6,
-
-	bytes_per_vertex = vars_per_vertex * sizeof(mesh_type_t),
-	vars_per_face = vars_per_vertex * vertices_per_face
-};
-
-/* NS - north-south, and EW = east-west.
-If a face is NS, its two ends lie on a vertical top-down axis;
-and if a face is EW, its two ends lie on a horizontal axis. */
-typedef enum {
-	Flat, Vert_NS, Vert_EW
-} FaceType;
-
-/* Faces don't store their height origin, since sectors store that.
-For vert faces, origin and size[0] are top-down, and size[1] is depth.
-For hori faces, origin and size are both top-down. */
-typedef struct {
-	const FaceType type;
-	byte origin[2], size[2];
-} Face;
+#include "headers/face.h"
 
 void print_face(const Face face, const char* const prefix_msg) {
 	const char* const type_string =
