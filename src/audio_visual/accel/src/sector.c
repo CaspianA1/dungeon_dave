@@ -41,8 +41,8 @@ void print_sector_list(const SectorList* const s) {
 }
 
 void deinit_sector_list(const SectorList* const s) {
-	glDeleteBuffers(1, &s -> vbo);
-	glDeleteBuffers(1, &s -> ibo);
+	GLuint buffers[2] = {s -> vbo, s -> ibo};
+	glDeleteBuffers(2, buffers);
 	deinit_list(s -> list);
 }
 
