@@ -22,6 +22,7 @@
 - Maybe no real-time lighting (only via lightmaps); excluding distance lighting
 - Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
 - Find out why demo 12 uses so much less gpu % than demo 17
+- Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
 
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
