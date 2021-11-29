@@ -35,10 +35,13 @@ void print_sector_list(const SectorList* const s) {
 }
 
 void deinit_sector_list(const SectorList* const s) {
-	GLuint buffers[2] = {s -> vbo, s -> ibo};
-	glDeleteBuffers(2, buffers);
 	deinit_list(s -> sectors);
 	deinit_list(s -> indices);
+
+	glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+
+	const GLuint buffers[2] = {s -> vbo, s -> ibo};
+	glDeleteBuffers(2, buffers);
 }
 
 //////////

@@ -1799,4 +1799,33 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 	// exit(0);
 	*/
 
+///// An attempt at chunk copying of unculled sectors:
+
+	/*
+	size_t sector_index = 0, base_index = 0;
+
+	while (sector_index < sectors.length) {
+		const Sector* sector = ((Sector*) sectors.data) + sector_index;
+
+		index_type_t start_ibo_index = sector -> ibo_range.start, range_ibo_index = 0;
+
+		while (sector_index < sectors.length && sector_in_view_frustum(*sector, frustum_planes)) {
+			range_ibo_index += sector -> ibo_range.length;
+			base_index += sector -> ibo_range.length;
+
+			sector_index++;
+			sector++;
+		}
+
+		printf("%d -> %d\n", start_ibo_index, range_ibo_index);
+		DEBUG(base_index, d);
+
+		if (range_ibo_index != 0) {
+			memcpy(ibo_ptr + base_index, indices + start_ibo_index,
+				range_ibo_index * sizeof(index_type_t));
+		}
+		else sector_index++;
+	}
+	*/
+
 /////

@@ -28,19 +28,21 @@ void draw_sectors_in_view_frustum(const SectorList* const sector_list, const Cam
 
 	const List sectors = sector_list -> sectors;
 
-	// ibo already bound
-	GLuint* const ibo_ptr = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY); // TODO: if possible, map once and store in sector list
-	(void) ibo_ptr;
+	const index_type_t* const indices = sector_list -> indices.data;
+	index_type_t* const ibo_ptr = sector_list -> ibo_ptr, num_visible_indices = 0;
 
 	for (size_t i = 0; i < sectors.length; i++) {
 		const Sector sector = ((Sector*) sectors.data)[i];
 		if (sector_in_view_frustum(sector, frustum_planes)) {
-			// Add to ibo buffer
-			// printf("%d -> %d\n", sector.ibo_range.start, sector.ibo_range.length);
-			// printf("Height %d visible\n", sector.height);
+			// printf("see from %d -> %d\n", sector.ibo_range.start, sector.ibo_range.length);
+
+			memcpy(ibo_ptr + num_visible_indices, indices + sector.ibo_range.start,
+				sector.ibo_range.length * sizeof(index_type_t));
+
+			num_visible_indices += sector.ibo_range.length;
 		}
 	}
-	glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+	glDrawElements(GL_TRIANGLES, num_visible_indices, INDEX_TYPE_ENUM, NULL);
 }
 
 #endif

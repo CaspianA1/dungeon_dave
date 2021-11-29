@@ -17,6 +17,7 @@ typedef struct {
 typedef struct {
 	List sectors, indices;
 	GLuint vbo, ibo;
+	index_type_t* ibo_ptr;
 } SectorList;
 
 // Excluded: form_sector_area

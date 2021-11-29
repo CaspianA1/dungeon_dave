@@ -217,7 +217,9 @@ void init_sector_list_vbo_and_ibo(SectorList* const sector_list, const List* con
 
 	sector_list -> ibo = buffers[1];
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sector_list -> ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_index_bytes, sector_list -> indices.data, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_index_bytes, NULL, GL_DYNAMIC_DRAW);
+
+	sector_list -> ibo_ptr = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 }
 
 void bind_sector_list_vbo_to_vao(const SectorList* const sector_list) {
