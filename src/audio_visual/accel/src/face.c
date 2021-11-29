@@ -43,7 +43,6 @@ void print_face(const Face face, const char* const prefix_msg) {
 		face.origin[1], face.size[0], face.size[1]);
 }
 
-
 // Returns if there is another face to get
 byte get_next_face(const Sector sector, const byte varying_axis,
 	const byte adjacent_side_val, const byte map_width,
