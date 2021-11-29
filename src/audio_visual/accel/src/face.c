@@ -12,7 +12,6 @@ typedef GLuint index_type_t;
 
 enum {
 	vars_per_vertex = 5,
-	triangles_per_face = 2,
 	vertices_per_face = 4,
 	indices_per_face = 6,
 
