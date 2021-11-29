@@ -16,7 +16,7 @@
 
 - Store texture byte index in a plane (max 10 textures per level)
 - NEXT: Frustum culling
-- NEXT 3: a draw_sectors function, which will allow for skybox + sector drawers together
+- NEXT 2: a draw_sectors function, which will allow for skybox + sector drawers together
 - A little seam between some textures + little dots popping around - find a way to share vertices, if possible - only happens/seen when it's dark?
 - Maybe no real-time lighting (only via lightmaps); excluding distance lighting
 - Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
@@ -86,7 +86,6 @@ void demo_17_drawer(const StateGL* const sgl) {
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
-	glDeleteBuffers(1, &sl.ibo); // This should be in deinit_sector_list, but demo 12 doesn't use an ibo
 	deinit_sector_list(&sl);
 	deinit_demo_vars(sgl);
 }
