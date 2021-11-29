@@ -26,15 +26,21 @@ void draw_sectors_in_view_frustum(const SectorList* const sector_list, const Cam
 	vec4 frustum_planes[6];
 	glm_frustum_planes((vec4*) camera -> model_view_projection, frustum_planes);
 
-	(void) sector_list;
-	const List underlying_sector_list = sector_list -> list;
+	const List sectors = sector_list -> sectors;
 
-	for (size_t i = 0; i < underlying_sector_list.length; i++) {
-		const Sector sector = ((Sector*) underlying_sector_list.data)[i];
+	// ibo already bound
+	GLuint* const ibo_ptr = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY); // TODO: if possible, map once and store in sector list
+	(void) ibo_ptr;
+
+	for (size_t i = 0; i < sectors.length; i++) {
+		const Sector sector = ((Sector*) sectors.data)[i];
 		if (sector_in_view_frustum(sector, frustum_planes)) {
-			puts("Visible");
+			// Add to ibo buffer
+			// printf("%d -> %d\n", sector.ibo_range.start, sector.ibo_range.length);
+			// printf("Height %d visible\n", sector.height);
 		}
 	}
+	glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 }
 
 #endif

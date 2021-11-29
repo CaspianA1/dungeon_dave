@@ -175,29 +175,34 @@ void add_face_mesh_to_list(const Face face, const byte sector_height,
 	push_ptr_to_list(index_list, index_set);
 }
 
-void init_face_and_sector_mesh_lists(List* const face_mesh_list, List* const index_list,
-	SectorList* const sector_list, const byte* const heightmap, const byte map_width, const byte map_height) {
+void init_face_mesh_and_sector_lists(SectorList* const sector_list,
+	List* const face_mesh_list, const byte* const heightmap,
+	const byte map_width, const byte map_height) {
 
-	*sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
+	List sectors = generate_sectors_from_heightmap(heightmap, map_width, map_height);
+	List index_list = init_list(sectors.length * 2.0f, index_type_t[indices_per_face]);
+	*face_mesh_list = init_list(sectors.length * 1.8f, mesh_type_t[vars_per_face]);
 
-	const List underlying_sector_list = sector_list -> list;
-	*face_mesh_list = init_list(underlying_sector_list.length * 1.8f, mesh_type_t[vars_per_face]);
-	*index_list = init_list(underlying_sector_list.length * 2.0f, index_type_t[indices_per_face]);
-
-	for (size_t i = 0; i < underlying_sector_list.length; i++) {
-		Sector* const sector_ref = ((Sector*) underlying_sector_list.data) + i;
-		sector_ref -> ibo_range.start = index_list -> length * indices_per_face;
+	for (size_t i = 0; i < sectors.length; i++) {
+		Sector* const sector_ref = ((Sector*) sectors.data) + i;
+		sector_ref -> ibo_range.start = index_list.length * indices_per_face;
 
 		const Sector sector = *sector_ref;
 		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
-		add_face_mesh_to_list(flat_face, sector.height, 0, face_mesh_list, index_list);
-		init_vert_faces(sector, face_mesh_list, index_list, heightmap, map_width, map_height);
+		add_face_mesh_to_list(flat_face, sector.height, 0, face_mesh_list, &index_list);
+		init_vert_faces(sector, face_mesh_list, &index_list, heightmap, map_width, map_height);
 
-		sector_ref -> ibo_range.end = index_list -> length * indices_per_face;
+		sector_ref -> ibo_range.length =
+			index_list.length * indices_per_face - sector_ref -> ibo_range.start;
 	}
+
+	*sector_list = (SectorList) {
+		.sectors = sectors,
+		.indices = index_list
+	};
 }
 
-void init_sector_list_vbo_and_ibo(const List* const face_list, const List* const index_list, SectorList* const sector_list) {
+void init_sector_list_vbo_and_ibo(SectorList* const sector_list, const List* const face_list) {
 	const size_t num_faces = face_list -> length;
 	const GLsizeiptr
 		total_vertex_bytes = num_faces * vars_per_face * sizeof(mesh_type_t),
@@ -212,7 +217,7 @@ void init_sector_list_vbo_and_ibo(const List* const face_list, const List* const
 
 	sector_list -> ibo = buffers[1];
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sector_list -> ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_index_bytes, index_list -> data, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_index_bytes, sector_list -> indices.data, GL_DYNAMIC_DRAW);
 }
 
 void bind_sector_list_vbo_to_vao(const SectorList* const sector_list) {

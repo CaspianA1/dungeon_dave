@@ -20,18 +20,12 @@ typedef struct {
 
 //////////
 
-SectorList init_sector_list(void) {
-	return (SectorList) {
-		.list = init_list(init_sector_alloc, Sector)
-	};
-}
-
 void print_sector_list(const SectorList* const s) {
-	const List list = s -> list;
+	const List sectors = s -> sectors;
 
 	puts("[");
-	for (size_t i = 0; i < list.length; i++) {
-		const Sector* const sector = ((Sector*) list.data) + i;
+	for (size_t i = 0; i < sectors.length; i++) {
+		const Sector* const sector = ((Sector*) sectors.data) + i;
 		// const Sector* const sector = &s -> sectors[i];
 		printf("\t{.height = %d, .origin = {%d, %d}, .size = {%d, %d}}\n",
 			sector -> height, sector -> origin[0], sector -> origin[1],
@@ -43,7 +37,8 @@ void print_sector_list(const SectorList* const s) {
 void deinit_sector_list(const SectorList* const s) {
 	GLuint buffers[2] = {s -> vbo, s -> ibo};
 	glDeleteBuffers(2, buffers);
-	deinit_list(s -> list);
+	deinit_list(s -> sectors);
+	deinit_list(s -> indices);
 }
 
 //////////
@@ -85,10 +80,10 @@ Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	return sector;
 }
 
-SectorList generate_sectors_from_heightmap(const byte* const heightmap,
+List generate_sectors_from_heightmap(const byte* const heightmap,
 	const byte map_width, const byte map_height) {
 
-	SectorList sector_list = init_sector_list();
+	List sectors = init_list(init_sector_alloc, Sector);
 
 	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used
 	and 2. for forming faces, will need original heightmap to be unmodified */
@@ -101,12 +96,12 @@ SectorList generate_sectors_from_heightmap(const byte* const heightmap,
 			const byte height = *map_point((byte*) heightmap, x, y, map_width);
 			const Sector seed_area = {.height = height, .origin = {x, y}, .size = {0, 0}};
 			const Sector expanded_area = form_sector_area(seed_area, traversed_points, heightmap, map_width, map_height);
-			push_ptr_to_list(&sector_list.list, &expanded_area);
+			push_ptr_to_list(&sectors, &expanded_area);
 		}
 	}
 
 	deinit_statemap(traversed_points);
-	return sector_list;
+	return sectors;
 }
 
 #endif

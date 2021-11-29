@@ -30,19 +30,16 @@
 */
 
 static SectorList sl;
-static GLsizei num_indices;
 
 StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
-	static List face_mesh_list, index_list;
-	init_face_and_sector_mesh_lists(&face_mesh_list, &index_list, &sl, (byte*) terrain_map, terrain_width, terrain_height);
+	static List face_mesh_list;
+	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) tiny_map, tiny_width, tiny_height);
 
-	init_sector_list_vbo_and_ibo(&face_mesh_list, &index_list, &sl);
+	init_sector_list_vbo_and_ibo(&sl, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sl);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sl.ibo);
-
-	num_indices = face_mesh_list.length * indices_per_face;
 
 	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 	glUseProgram(sgl.shader_program);
@@ -52,7 +49,8 @@ StateGL demo_17_init(void) {
 
 	enable_all_culling();
 	deinit_list(face_mesh_list);
-	deinit_list(index_list);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sl.ibo);
 
 	return sgl;
 }
@@ -63,7 +61,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	static byte first_call = 1;
 
 	if (first_call) {
-		init_camera(&camera, (vec3) {34.5f, 13.50f, 25.2f});
+		init_camera(&camera, (vec3) {1.0f, 1.0f, 1.0f}); // terrain: 34.5f, 13.50f, 25.2f
 		camera_pos_id = glGetUniformLocation(sgl -> shader_program, "camera_pos_world_space");
 		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
 		first_call = 0;
@@ -82,7 +80,9 @@ void demo_17_drawer(const StateGL* const sgl) {
 	terrain: 150620 vs 86588. */
 
 	// draw_triangles(num_indices * 2 / 3);
+	const GLsizei num_indices = sl.indices.length * indices_per_face;
 	glDrawElements(GL_TRIANGLES, num_indices, INDEX_TYPE_ENUM, NULL);
+	// draw_sectors_in_view_frustum(&sl, &camera);
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
