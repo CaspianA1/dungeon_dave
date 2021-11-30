@@ -43,23 +43,26 @@ void update_camera(Camera* const camera) {
 	camera -> right_xz[1] = cosf(hori_angle_minus_half_pi);
 
 	vec3 right = {camera -> right_xz[0], 0.0f, camera -> right_xz[1]};
-	if (keys[constants.movement_keys.forward]) glm_vec3_muladds(dir, actual_speed, camera -> pos);
-	if (keys[constants.movement_keys.backward]) glm_vec3_muladds(dir, -actual_speed, camera -> pos);
-	if (keys[constants.movement_keys.left]) glm_vec3_muladds(right, -actual_speed, camera -> pos);
-	if (keys[constants.movement_keys.right]) glm_vec3_muladds(right, actual_speed, camera -> pos);
+
+	vec3 pos;
+	memcpy(pos, camera -> pos, sizeof(vec3));
+
+	if (keys[constants.movement_keys.forward]) glm_vec3_muladds(dir, actual_speed, pos);
+	if (keys[constants.movement_keys.backward]) glm_vec3_muladds(dir, -actual_speed, pos);
+	if (keys[constants.movement_keys.left]) glm_vec3_muladds(right, -actual_speed, pos);
+	if (keys[constants.movement_keys.right]) glm_vec3_muladds(right, actual_speed, pos);
 
 	if (keys[KEY_PRINT_POSITION])
-		printf("%lf, %lf, %lf\n", (double) camera -> pos[0],
-		(double) camera -> pos[1], (double) camera -> pos[2]);
+		printf("%lf, %lf, %lf\n", (double) pos[0], (double) pos[1], (double) pos[2]);
 
 	//////////
 
 	vec3 rel_origin, up;
-	glm_vec3_add(camera -> pos, dir, rel_origin);
-	glm_vec3_cross(right, camera -> dir, up);
+	glm_vec3_add(pos, dir, rel_origin);
+	glm_vec3_cross(right, dir, up);
 
 	mat4 view, projection;
-	glm_lookat(camera -> pos, rel_origin, up, view);
+	glm_lookat(pos, rel_origin, up, view);
 
 	glm_perspective(camera -> fov, camera -> aspect_ratio,
 		constants.clip_dists.near, constants.clip_dists.far, projection);
@@ -67,6 +70,7 @@ void update_camera(Camera* const camera) {
 	glm_mul(projection, view, camera -> view_projection); // For billboard shader
 	glm_mul(camera -> view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, camera -> model_view_projection); // For sector shader
 
+	memcpy(camera -> pos, pos, sizeof(vec3));
 	last_time = SDL_GetTicks() / 1000.0f;
 }
 
