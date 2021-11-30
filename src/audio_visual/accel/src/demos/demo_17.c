@@ -15,9 +15,10 @@
 - To start, one vbo + texture ptr per sector
 
 - Store texture byte index in a plane (max 10 textures per level)
-- NEXT: different textures for a map + array textures
-- NEXT 2: a bounding volume hierarchy
-- NEXT 3: Composable drawers - can just call draw_sectors_in_view_frustum and draw_billboards in one call
+- NEXT: the quake water effect
+- NEXT 2: different textures for a map + array textures
+- NEXT 3: a bounding volume hierarchy, maybe
+- NEXT 4: Composable drawers - can just call draw_sectors_in_view_frustum and draw_billboards in one call
 - A little seam between some textures + little dots popping around - find a way to share vertices, if possible - only happens/seen when it's dark?
 - Maybe no real-time lighting (only via lightmaps); excluding distance lighting
 - Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps

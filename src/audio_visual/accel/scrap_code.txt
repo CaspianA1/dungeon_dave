@@ -1843,4 +1843,30 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 		}
 		*/
 
+///// Ptr increment copying - a bit too messy:
+
+	const Sector* sector = (Sector*) sectors.data;
+	const Sector* const final_sector = sector + sectors.length - 1;
+
+	while (sector != final_sector) {
+		index_type_t num_indices = 0;
+		const index_type_t start_index_index = sector -> ibo_range.start;
+
+		/*
+		while (sector != final_sector && sector_in_view_frustum(*sector, frustum_planes)) {
+			num_indices += sector++ -> ibo_range.length;
+		}
+		*/
+
+		while (sector_in_view_frustum(*sector, frustum_planes)) {
+			num_indices += sector -> ibo_range.length;
+			if (++sector == final_sector) goto bob;
+		}
+
+
+		if (num_indices != 0) {
+			memcpy(ibo_ptr + num_visible_indices, indices + start_index_index, num_indices * sizeof(index_type_t));
+			num_visible_indices += num_indices;
+		}
+
 /////
