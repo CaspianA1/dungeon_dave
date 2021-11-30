@@ -53,7 +53,7 @@ void update_camera(Camera* const camera) {
 	if (keys[constants.movement_keys.right]) glm_vec3_muladds(right, actual_speed, pos);
 
 	if (keys[KEY_PRINT_POSITION])
-		printf("%lf, %lf, %lf\n", (double) pos[0], (double) pos[1], (double) pos[2]);
+		printf("pos = {%lf, %lf, %lf}\n", (double) pos[0], (double) pos[1], (double) pos[2]);
 
 	//////////
 
