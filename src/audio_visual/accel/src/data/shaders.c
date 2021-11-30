@@ -134,15 +134,14 @@ const char* const sector_vertex_shader =
 
 *const water_vertex_shader =
 	"#version 330 core\n"
+	"#define sin_cycles 6.28f\n"
+	"#define speed 2.0f\n"
 
 	"layout(location = 0) in vec2 vertex_pos;\n"
 
 	"out vec2 UV, angles;\n"
 
 	"uniform float time;\n" // In seconds
-
-	"#define sin_cycles 6.28f\n"
-	"#define speed 2.0f\n"
 
 	"void main() {\n"
 		"gl_Position = vec4(vertex_pos, 0.0f, 1.0f);\n"
@@ -152,14 +151,13 @@ const char* const sector_vertex_shader =
 
 *const water_fragment_shader =
 	"#version 330 core\n"
+	"#define dist_mag 0.05f\n"
 
 	"in vec2 UV, angles;\n"
 
 	"out vec3 color;\n"
 
 	"uniform sampler2D texture_sampler;\n"
-
-	"#define dist_mag 0.05f\n"
 
 	"void main() {\n"
 		"vec2 wavy_UV = UV + sin(angles) * dist_mag;\n"
