@@ -1,8 +1,7 @@
 #include "../utils.c"
 #include "../data/shaders.c"
 
-// This demo aims to make a quake-like water effect
-// https://forum.unity.com/threads/quake-1-liquid-shader.873616/
+// This demo gives a quake-like water effect
 
 StateGL demo_18_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
@@ -24,17 +23,23 @@ StateGL demo_18_init(void) {
 	sgl.shader_program = init_shader_program(water_vertex_shader, water_fragment_shader);
 	glUseProgram(sgl.shader_program);
 
-	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/hieroglyph.bmp", tex_nonrepeating);
+	sgl.num_textures = 1; // ../../../assets/walls/sand.bmp, ../../../assets/walls/hieroglyph.bmp, assets/water.bmp
+	sgl.textures = init_textures(sgl.num_textures, "assets/lava.bmp", tex_repeating);
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	return sgl;
 }
 
 void demo_18_drawer(const StateGL* const sgl) {
-	// Pass in 2 angles
+	static GLint time_id;
+	static byte first_call = 1;
 
-	(void) sgl;
+	if (first_call) {
+		time_id = glGetUniformLocation(sgl -> shader_program, "time");
+		first_call = 0;
+	}
+
+	glUniform1f(time_id, SDL_GetTicks() / 1000.0f);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
