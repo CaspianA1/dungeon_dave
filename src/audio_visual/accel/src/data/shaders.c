@@ -130,6 +130,30 @@ const char* const sector_vertex_shader =
 
 	"void main() {\n"
 		"color = texture(cubemap_sampler, UV_3D);\n"
+	"}\n",
+
+*const water_vertex_shader =
+	"#version 330 core\n"
+
+	"layout(location = 0) in vec2 vertex_pos;\n"
+
+	"out vec2 UV;\n"
+
+	"void main() {\n"
+		"gl_Position = vec4(vertex_pos, 0.0f, 1.0f);\n"
+		"UV = vertex_pos * vec2(0.5f, -0.5f) + 0.5f;\n"
+	"}\n",
+
+*const water_fragment_shader =
+	"#version 330 core\n"
+
+	"in vec2 UV;\n"
+	"out vec3 color;\n"
+
+	"uniform sampler2D texture_sampler;\n"
+
+	"void main() {\n"
+		"color = texture(texture_sampler, UV).rgb;\n"
 	"}\n";
 
 #endif
