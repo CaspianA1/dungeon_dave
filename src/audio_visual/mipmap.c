@@ -106,7 +106,7 @@ SDL_Surface* load_mipmap(SDL_Surface* const image, byte* const depth_ref) {
 	while (dest.w != 0) {
 		if (depth >= 2) dest.y += image_size >> (depth - 1);
 
-		SDL_BlitScaled(mipmap, &last_dest, mipmap, &dest);
+		SDL_SoftStretchLinear(mipmap, &last_dest, mipmap, &dest);
 		last_dest = dest;
 
 		dest.x = image_size;
