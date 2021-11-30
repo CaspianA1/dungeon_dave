@@ -15,9 +15,9 @@
 - To start, one vbo + texture ptr per sector
 
 - Store texture byte index in a plane (max 10 textures per level)
-- NEXT: copy visible sectors in chunks
+- NEXT: different textures for a map + array textures
 - NEXT 2: a bounding volume hierarchy
-- NEXT 3: a draw_sectors function, which will allow for skybox + sector drawers together
+- NEXT 3: Composable drawers - can just call draw_sectors_in_view_frustum and draw_billboards in one call
 - A little seam between some textures + little dots popping around - find a way to share vertices, if possible - only happens/seen when it's dark?
 - Maybe no real-time lighting (only via lightmaps); excluding distance lighting
 - Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
@@ -38,6 +38,10 @@ StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
 	static List face_mesh_list;
+
+	// tiny_map, tiny_width, tiny_height
+	// palace_map, palace_width, palace_height
+	// terrain_map, terrain_width, terrain_height
 	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) terrain_map, terrain_width, terrain_height);
 
 	init_sector_list_vbo_and_ibo(&sl, &face_mesh_list);

@@ -32,16 +32,22 @@ void draw_sectors_in_view_frustum(const SectorList* const sector_list, const Cam
 	index_type_t* const ibo_ptr = sector_list -> ibo_ptr, num_visible_indices = 0;
 
 	for (size_t i = 0; i < sectors.length; i++) {
-		const Sector sector = ((Sector*) sectors.data)[i];
-		if (sector_in_view_frustum(sector, frustum_planes)) {
-			// printf("see from %d -> %d\n", sector.ibo_range.start, sector.ibo_range.length);
+		const Sector* sector = ((Sector*) sectors.data) + i;
 
-			memcpy(ibo_ptr + num_visible_indices, indices + sector.ibo_range.start,
-				sector.ibo_range.length * sizeof(index_type_t));
+		index_type_t num_indices = 0;
+		const index_type_t start_index_index = sector -> ibo_range.start;
 
-			num_visible_indices += sector.ibo_range.length;
+		while (i < sectors.length && sector_in_view_frustum(*sector, frustum_planes)) {
+			num_indices += sector++ -> ibo_range.length;
+			i++;
+		}
+
+		if (num_indices != 0) {
+			memcpy(ibo_ptr + num_visible_indices, indices + start_index_index, num_indices * sizeof(index_type_t));
+			num_visible_indices += num_indices;
 		}
 	}
+
 	glDrawElements(GL_TRIANGLES, num_visible_indices, INDEX_TYPE_ENUM, NULL);
 }
 

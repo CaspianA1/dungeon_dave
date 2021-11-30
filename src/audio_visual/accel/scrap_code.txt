@@ -1828,4 +1828,19 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 	}
 	*/
 
+///// Non-chunked copying:
+
+		/*
+		const Sector sector = ((Sector*) sectors.data)[i];
+		if (sector_in_view_frustum(sector, frustum_planes)) {
+			// printf("see from %d -> %d\n", sector.ibo_range.start, sector.ibo_range.length);
+			secs++;
+
+			memcpy(ibo_ptr + num_visible_indices, indices + sector.ibo_range.start,
+				sector.ibo_range.length * sizeof(index_type_t));
+
+			num_visible_indices += sector.ibo_range.length;
+		}
+		*/
+
 /////
