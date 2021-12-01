@@ -11,19 +11,19 @@ vert 2 masks: (0, 1), (1, 1)
 flat mask: (0, 1)
 
 expanded:
-	Correct for first vert_1 wall side:
+	Correct for first vert_1 wall side: (z, 1 - y)
 	"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.y);\n"
 
-	Correct for second vert_1 wall side:
+	Correct for second vert_1 wall side: (1 - z, 1 - y)
 	"UV = 1.0f - vertex_pos_model_space.zy;\n"
 
-	Correct for first vert_2 wall side:
+	Correct for first vert_2 wall side: (x, 1 - y)
 	"UV = vec2(vertex_pos_model_space.x, 1.0f - vertex_pos_model_space.y);\n"
 
-	Correct for second vert_2 wall side:
+	Correct for second vert_2 wall side: (1 - x, 1 - y)
 	"UV = 1.0f - vec2(vertex_pos_model_space.x, vertex_pos_model_space.y);\n"
 
-	Correct for floors:
+	Correct for floors: (z, 1 - x)
 	"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.x);\n"
 */
 
