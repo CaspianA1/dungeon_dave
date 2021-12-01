@@ -144,7 +144,7 @@ StateGL demo_11_init(void) {
 	free(cuboid_mesh);
 	bind_sector_mesh_to_vao();
 
-	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+	sgl.shader_program = init_shader_program(demo_4_vertex_shader, sector_fragment_shader);
 	glUseProgram(sgl.shader_program);
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp", tex_repeating);

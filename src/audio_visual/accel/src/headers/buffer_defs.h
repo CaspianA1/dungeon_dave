@@ -8,7 +8,7 @@ typedef GLuint index_type_t;
 #define INDEX_TYPE_ENUM GL_UNSIGNED_INT
 
 enum {
-	vars_per_vertex = 5,
+	vars_per_vertex = 4,
 	vertices_per_face = 4,
 	indices_per_face = 6,
 

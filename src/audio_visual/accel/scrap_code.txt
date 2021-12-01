@@ -1869,4 +1869,48 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 			num_visible_indices += num_indices;
 		}
 
+///// UV shit:
+
+		// "if (face_info_bits == 5u) UV = vec2(0.0f);\n"
+		// 4u -> nothing
+		// 3u -> nothing
+		// 2u -> bottom
+		// 6u -> top
+		// 1u -> right
+		// 5u -> left
+		// 0u -> flat
+
+		/* no 5u:
+		left rev, right good, top good, bottom rev
+		5u:
+		left good, right good, top good, bottom rev
+		6u:
+		// left rev, right _, top _, bottom _
+		*/
+
+		"if (face_info_bits == 5u || face_info_bits == 2u) {UV.x = 1.0f - UV.x;}\n"
+
+		// top good, bottom bad, right good, left bad - with no side logic
+		// `side` indicates top or left. current bad UVs: bottom and left.
+		// num for left: Vert_EW and side = 0b110 = 6. num for bottom: Vert_NS and !side = 0b001 = 1.
+		// Vert_NS == 1, and Vert_EW == 2.
+
+		// "bool side = bool(face_info_bits & 4u);\n" // side = left or top
+
+		// "if (side && ) UV = vec2(0.0f);\n"
+
+		// "if (side || (!side && face_type == )) {\n"
+			// "UV.x = 1.0f - UV.x;\n"
+			// "UV = vec2(0, 0);\n"
+		// "}\n"
+
+		// "UV = rev_pos.xz;\n" // Bueno for flat face ([0], [2])
+		// "UV = rev_pos.zy;\n" // Bueno for right vert NS face ([2], [1])
+		// "UV = vec2(1.0f - rev_pos.z, rev_pos.y);\n"// Bueno for left vert NS face (1 - [2], [1])
+		// "UV = rev_pos.xy;\n" // Bueno for top vert EW face ([0] [1])
+		// "UV = vec2(1.0f - pos_reversed.x, pos_reversed.y);\n" // Bueno for bottom vert EW face (1 - [0], [1])
+
+		// "UV = vec2(pos_reversed.x, pos_reversed.y);\n" // Bueno for bottom vert EW face (1 - [0], [1])
+		// "UV.x = 1.0f - UV.x;\n"
+
 /////

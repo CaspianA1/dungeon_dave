@@ -27,6 +27,21 @@ expanded:
 	"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.x);\n"
 */
 
+const char* const demo_4_vertex_shader =
+	"#version 330 core\n"
+
+	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
+	"layout(location = 1) in vec2 vertex_UV;\n"
+
+	"out vec2 UV;\n"
+
+	"uniform mat4 model_view_projection;\n"
+
+	"void main() {\n"
+		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
+		"UV = vertex_UV;\n"
+	"}\n";
+
 StateGL demo_4_init(void) {
 	StateGL sgl;
 
@@ -56,7 +71,7 @@ StateGL demo_4_init(void) {
 
 	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
 
-	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+	sgl.shader_program = init_shader_program(demo_4_vertex_shader, sector_fragment_shader);
 	glUseProgram(sgl.shader_program);
 
 	sgl.num_textures = 1;

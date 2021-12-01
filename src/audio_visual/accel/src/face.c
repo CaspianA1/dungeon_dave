@@ -90,7 +90,14 @@ void init_vert_faces(const Sector sector, List* const face_mesh_list, List* cons
 void add_face_mesh_to_list(const Face face, const byte sector_height,
 	const byte side, List* const face_mesh_list, List* const index_list) {
 
-	const byte near_x = face.origin[0], near_z = face.origin[1];
+	/* Face info bits, layout:
+		Bits 0-1 -> face type
+		Bit 2 -> face side (top or left side of top-down sector)
+		Bits 3-7 -> texture index (unused at the moment)
+
+	So, 00 -> flat, 01 -> vert NW, and 10 -> vert EW */
+
+	const byte face_info = (side << 2) | face.type, near_x = face.origin[0], near_z = face.origin[1];
 	const mesh_type_t* face_mesh;
 
 	switch (face.type) {
@@ -98,14 +105,11 @@ void add_face_mesh_to_list(const Face face, const byte sector_height,
 			const byte size_x = face.size[0], size_z = face.size[1];
 			const byte far_x = near_x + size_x, far_z = near_z + size_z;
 
-			face_mesh = (mesh_type_t[vars_per_face]) { // Top side - face 5, but UVs rotated
-				near_x, sector_height, far_z, size_x, 0,
-				far_x, sector_height, near_z, 0, size_z,
-				near_x, sector_height, near_z, size_x, size_z,
-
-				// near_x, sector_height, far_z, size_x, 0,
-				far_x, sector_height, far_z, 0, 0
-				// far_x, sector_height, near_z, 0, size_z
+			face_mesh = (mesh_type_t[vars_per_face]) {
+				near_x, sector_height, far_z, face_info,
+				far_x, sector_height, near_z, face_info,
+				near_x, sector_height, near_z, face_info,
+				far_x, sector_height, far_z, face_info
 			};
 			break;
 		}
@@ -114,23 +118,17 @@ void add_face_mesh_to_list(const Face face, const byte sector_height,
 			const byte far_z = near_z + size_z, bottom_y = sector_height - size_y;
 
 			face_mesh = side
-				? (mesh_type_t[vars_per_face]) { // Left side - face 1
-					near_x, bottom_y, near_z, 0, size_y,
-					near_x, sector_height, far_z, size_z, 0,
-					near_x, sector_height, near_z, 0, 0,
-
-					// near_x, bottom_y, near_z, 0, size_y,
-					near_x, bottom_y, far_z, size_z, size_y
-					// near_x, sector_height, far_z, size_z, 0
+				? (mesh_type_t[vars_per_face]) {
+					near_x, bottom_y, near_z, face_info,
+					near_x, sector_height, far_z, face_info,
+					near_x, sector_height, near_z, face_info,
+					near_x, bottom_y, far_z, face_info
 				}
-				: (mesh_type_t[vars_per_face]) { // Right side - face 2
-					near_x, sector_height, near_z, size_z, 0,
-					near_x, sector_height, far_z, 0, 0,
-					near_x, bottom_y, near_z, size_z, size_y,
-
-					// near_x, sector_height, far_z, 0, 0,
-					near_x, bottom_y, far_z, 0, size_y
-					// near_x, bottom_y, near_z, size_z, size_y
+				: (mesh_type_t[vars_per_face]) {
+					near_x, sector_height, near_z, face_info,
+					near_x, sector_height, far_z, face_info,
+					near_x, bottom_y, near_z, face_info,
+					near_x, bottom_y, far_z, face_info
 				};
 			break;
 		}
@@ -139,23 +137,17 @@ void add_face_mesh_to_list(const Face face, const byte sector_height,
 			const byte far_x = near_x + size_x, bottom_y = sector_height - size_y;
 
 			face_mesh = side
-				? (mesh_type_t[vars_per_face]) { // Bottom side - face 3
-					near_x, sector_height, near_z, size_x, 0,
-					far_x, sector_height, near_z, 0, 0,
-					near_x, bottom_y, near_z, size_x, size_y,
-
-					// far_x, sector_height, near_z, 0, 0,
-					far_x, bottom_y, near_z, 0, size_y
-					// near_x, bottom_y, near_z, size_x, size_y
+				? (mesh_type_t[vars_per_face]) {
+					near_x, sector_height, near_z, face_info,
+					far_x, sector_height, near_z, face_info,
+					near_x, bottom_y, near_z, face_info,
+					far_x, bottom_y, near_z, face_info
 				}
-				: (mesh_type_t[vars_per_face]) { // Top side - face 4
-					near_x, bottom_y, near_z, 0, size_y,
-					far_x, sector_height, near_z, size_x, 0,
-					near_x, sector_height, near_z, 0, 0,
-
-					// near_x, bottom_y, near_z, 0, size_y,
-					far_x, bottom_y, near_z, size_x, size_y
-					// far_x, sector_height, near_z, size_x, 0
+				: (mesh_type_t[vars_per_face]) {
+					near_x, bottom_y, near_z, face_info,
+					far_x, sector_height, near_z, face_info,
+					near_x, sector_height, near_z, face_info,
+					far_x, bottom_y, near_z, face_info
 				};
 			break;
 		}
@@ -228,7 +220,7 @@ void bind_sector_list_vbo_to_vao(const SectorList* const sector_list) {
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
+	glVertexAttribIPointer(1, 1, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
 }
 
 #endif

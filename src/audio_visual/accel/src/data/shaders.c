@@ -3,24 +3,29 @@
 
 const char* const sector_vertex_shader =
 	"#version 330 core\n"
+	"#define max_world_height 255.0f\n"
+	"#define sign_of_cond(cond) ((int(cond) << 1) - 1)\n" // 1 -> 1, and 0 -> -1
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
-	"layout(location = 1) in vec2 vertex_UV;\n"
+	"layout(location = 1) in int face_info;\n"
 
 	"out vec2 UV;\n"
 
 	"uniform mat4 model_view_projection;\n"
 
+	"const ivec2 pos_indices_for_UV[3] = ivec2[3](\n"
+		"ivec2(0, 2), ivec2(2, 1), ivec2(0, 1)\n" // Flat, NS, EW
+	");\n"
+
 	"void main() {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
-		"UV = vertex_UV;\n"
 
-		// "vec3 rev_pos = 255.0f - vertex_pos_world_space;\n"
-		// "UV = rev_pos.xy;\n" // Bueno for top vert EW face
-		// "UV = vec2(1.0f - rev_pos.x, rev_pos.y);\n" // Bueno for bottom vert EW face
-		// "UV = rev_pos.zy;\n" // Bueno for right vert EW face
-		// "UV = vec2(1.0f - rev_pos.z, rev_pos.y);\n"// Bueno for left vert EW face
-		// "UV = rev_pos.xz;\n" // Bueno for flat face
+
+		"ivec2 index_for_UV = pos_indices_for_UV[face_info & 3];\n" // Masking with 3 gets first 2 bits (face type)
+		"int UV_sign = -sign_of_cond(face_info == 2 || face_info == 5);\n" // Negative if face side is left or bottom
+
+		"vec3 pos_reversed = max_world_height - vertex_pos_world_space;\n"
+		"UV = vec2(pos_reversed[index_for_UV[0]] * UV_sign, pos_reversed[index_for_UV[1]]);\n"
 	"}\n",
 
 *const sector_fragment_shader =
@@ -84,7 +89,7 @@ const char* const sector_vertex_shader =
 	"const vec2 vertices_model_space[4] = vec2[4](\n"
 		"vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f),\n"
 		"vec2(-0.5f, 0.5f), vec2(0.5f, 0.5f)\n"
-	");"
+	");\n"
 
 	"const vec3 cam_up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
 

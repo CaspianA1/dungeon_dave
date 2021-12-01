@@ -16,7 +16,7 @@ StateGL demo_16_init(void) {
 
 	glEnableVertexAttribArray(0);
 
-	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+	sgl.shader_program = init_shader_program(demo_4_vertex_shader, sector_fragment_shader);
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp", tex_repeating);
 

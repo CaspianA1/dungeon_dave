@@ -128,7 +128,7 @@ StateGL demo_13_init(void) {
 		"../../../assets/walls/saqqara.bmp", tex_repeating);
 
 	sgl.shader_program = init_shader_program(billboard_vertex_shader, billboard_fragment_shader);
-	sector_shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+	sector_shader = init_shader_program(demo_4_vertex_shader, sector_fragment_shader);
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
