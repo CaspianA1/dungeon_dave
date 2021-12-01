@@ -14,14 +14,11 @@
 - Ideal: BSPs, but not worth time
 - To start, one vbo + texture ptr per sector
 
-- Store texture byte index in a plane (max 10 textures per level)
 - NEXT: different textures for a map + array textures
 - NEXT 2: a bounding volume hierarchy, maybe
 - NEXT 3: Composable drawers - can just call draw_sectors_in_view_frustum and draw_billboards in one call
-- A little seam between some textures + little dots popping around - find a way to share vertices, if possible - only happens/seen when it's dark?
-- Maybe no real-time lighting (only via lightmaps); excluding distance lighting
-- Only very simple lighting with ambient and diffuse (those should handle distance implicitly) + simple lightmaps
-- Find out why demo 12 uses so much less gpu % than demo 17
+- A little seam between some textures + little dots popping around - find a way to share vertices, if possible - only ens/seen when it's dark?
+- Only lighting with darker vert faces + (point light sources (maybe) - or simple lightmaps)
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
 
 - Read sprite crop from spritesheet
@@ -51,7 +48,7 @@ StateGL demo_17_init(void) {
 	// tiny_map, tiny_width, tiny_height
 	// palace_map, palace_width, palace_height
 	// terrain_map, terrain_width, terrain_height
-	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) palace_map, palace_width, palace_height);
+	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) terrain_map, terrain_width, terrain_height);
 
 	init_sector_list_vbo_and_ibo(&sl, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sl);
@@ -59,7 +56,7 @@ StateGL demo_17_init(void) {
 	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 	glUseProgram(sgl.shader_program);
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp", tex_repeating);
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/dirt.bmp", tex_repeating);
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	enable_all_culling();
