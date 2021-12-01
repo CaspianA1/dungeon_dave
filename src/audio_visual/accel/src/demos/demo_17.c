@@ -37,7 +37,16 @@ static SectorList sl;
 StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
-	static List face_mesh_list;
+	List face_mesh_list;
+
+	/*
+	for (byte y = 0; y < terrain_height; y++) {
+		for (byte x = 0; x < terrain_width; x++) {
+			*map_point((byte*) terrain_map, x, y, terrain_width) = fabsf((cosf(x / 5.0f) + sinf(y / 5.0f))) * 5.0f;
+			// *map_point((byte*) terrain_map, x, y, terrain_width) *= ((x + y) >> 1) / 50.0f;
+		}
+	}
+	*/
 
 	// tiny_map, tiny_width, tiny_height
 	// palace_map, palace_width, palace_height
