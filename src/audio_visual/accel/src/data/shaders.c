@@ -4,7 +4,7 @@
 const char* const sector_vertex_shader =
 	"#version 330 core\n"
 
-	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
+	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in vec2 vertex_UV;\n"
 
 	"out vec2 UV;\n"
@@ -12,7 +12,7 @@ const char* const sector_vertex_shader =
 	"uniform mat4 model_view_projection;\n"
 
 	"void main() {\n"
-		"gl_Position = model_view_projection * vec4(vertex_pos_model_space, 1);\n"
+		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
 		"UV = vertex_UV;\n"
 	"}\n",
 
@@ -84,7 +84,7 @@ const char* const sector_vertex_shader =
 	"void main() {\n"
 		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
 
-		"vec3 vertex_world_space = billboard_center_world_space \n"
+		"vec3 vertex_world_space = billboard_center_world_space\n"
 			"+ vec3(cam_right_xz_world_space, 0.0f).xzy * vertex_model_space.x * billboard_size_world_space.x\n"
 			"+ cam_up_world_space * vertex_model_space.y * billboard_size_world_space.y;\n"
 
@@ -108,15 +108,15 @@ const char* const sector_vertex_shader =
 *const skybox_vertex_shader =
 	"#version 330 core\n"
 
-	"layout(location = 0) in vec3 vertex_pos_model_space;\n"
+	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 
 	"out vec3 UV_3D;\n"
 
 	"uniform mat4 view_projection;\n"
 
 	"void main() {\n"
-		"gl_Position = (view_projection * vec4(vertex_pos_model_space, 1.0)).xyww;\n"
-		"UV_3D = vertex_pos_model_space;\n"
+		"gl_Position = (view_projection * vec4(vertex_pos_world_space, 1.0)).xyww;\n"
+		"UV_3D = vertex_pos_world_space;\n"
 	"}\n",
 
 *const skybox_fragment_shader =
