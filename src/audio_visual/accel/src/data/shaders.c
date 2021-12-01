@@ -14,6 +14,13 @@ const char* const sector_vertex_shader =
 	"void main() {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
 		"UV = vertex_UV;\n"
+
+		// "vec3 rev_pos = 255.0f - vertex_pos_world_space;\n"
+		// "UV = rev_pos.xy;\n" // Bueno for top vert EW face
+		// "UV = vec2(1.0f - rev_pos.x, rev_pos.y);\n" // Bueno for bottom vert EW face
+		// "UV = rev_pos.zy;\n" // Bueno for right vert EW face
+		// "UV = vec2(1.0f - rev_pos.z, rev_pos.y);\n"// Bueno for left vert EW face
+		// "UV = rev_pos.xz;\n" // Bueno for flat face
 	"}\n",
 
 *const sector_fragment_shader =

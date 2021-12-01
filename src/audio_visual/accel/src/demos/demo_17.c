@@ -51,7 +51,7 @@ StateGL demo_17_init(void) {
 	// tiny_map, tiny_width, tiny_height
 	// palace_map, palace_width, palace_height
 	// terrain_map, terrain_width, terrain_height
-	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) terrain_map, terrain_width, terrain_height);
+	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) palace_map, palace_width, palace_height);
 
 	init_sector_list_vbo_and_ibo(&sl, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sl);
@@ -59,7 +59,7 @@ StateGL demo_17_init(void) {
 	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 	glUseProgram(sgl.shader_program);
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/dirt.bmp", tex_repeating);
+	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp", tex_repeating);
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
 	enable_all_culling();
