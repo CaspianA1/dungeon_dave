@@ -3,6 +3,7 @@
 
 #include "utils.h"
 #include "camera.h"
+#include "../data/shaders.c"
 
 typedef struct {
 	GLuint vbo, shader, texture;

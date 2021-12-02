@@ -33,15 +33,26 @@ const char* const demo_4_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in vec2 vertex_UV;\n"
 
-	"out float light;\n"
 	"out vec2 UV;\n"
 
 	"uniform mat4 model_view_projection;\n"
 
 	"void main() {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
-		"light = 1.0f;\n"
 		"UV = vertex_UV;\n"
+	"}\n",
+
+*const demo_4_fragment_shader =
+    "#version 330 core\n"
+
+	"in vec2 UV;\n"
+
+	"out vec3 color;\n"
+
+	"uniform sampler2D texture_sampler;\n"
+
+	"void main() {\n"
+		"color = texture(texture_sampler, UV).rgb;\n"
 	"}\n";
 
 StateGL demo_4_init(void) {
@@ -73,7 +84,7 @@ StateGL demo_4_init(void) {
 
 	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, sector_fragment_shader);
+	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	glUseProgram(sgl.shader_program);
 
 	sgl.num_textures = 1;

@@ -133,7 +133,7 @@ StateGL demo_8_init(void) {
 	bind_interleaved_planes_to_vao();
 	free(plane_data);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, sector_fragment_shader);
+	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	glUseProgram(sgl.shader_program);
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/pyramid.bmp", tex_repeating);

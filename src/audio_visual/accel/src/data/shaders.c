@@ -41,12 +41,12 @@ const char* const sector_vertex_shader =
 	"in float light;\n"
 	"in vec2 UV;\n"
 
-	"out vec3 color;\n" // For textures with an alpha channel, enable 4 channels
+	"out vec3 color;\n"
 
-	"uniform sampler2D texture_sampler;\n"
+	"uniform sampler2DArray texture_sampler;\n"
 
 	"void main() {\n"
-		"color = texture(texture_sampler, UV).rgb * light;\n"
+		"color = texture(texture_sampler, vec3(UV, 0)).rgb * light;\n"
 	"}\n",
 
 *const sector_lighting_vertex_shader =

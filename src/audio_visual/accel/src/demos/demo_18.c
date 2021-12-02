@@ -27,8 +27,6 @@ StateGL demo_18_init(void) {
 	sgl.textures = init_textures(sgl.num_textures, "assets/lava.bmp", tex_repeating);
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
 
-	glEnable(GL_MULTISAMPLE);
-
 	return sgl;
 }
 

@@ -88,7 +88,7 @@ StateGL demo_9_init(void) {
 	free(v2);
 	free(v3);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, sector_fragment_shader);
+	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	glUseProgram(sgl.shader_program);
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/greece.bmp", tex_repeating);

@@ -4,6 +4,7 @@
 #include "../camera.c"
 #include "../data/maps.c"
 #include "../culling.c"
+#include "../texture_set.c"
 
 /*
 - Sectors contain their meshes
@@ -19,6 +20,7 @@
 - NEXT 3: Composable drawers - can just call draw_sectors_in_view_frustum and draw_billboards in one call
 - Point light sources, or simple lightmaps
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
+- More generic texture code across normal textures, skyboxes, and texture sets
 
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
@@ -52,11 +54,29 @@ StateGL demo_17_init(void) {
 	init_sector_list_vbo_and_ibo(&sl, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sl);
 
+	glEnable(GL_MULTISAMPLE);
+
 	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 	glUseProgram(sgl.shader_program);
+
+	//////////
+	GLuint ts = init_texture_set(64, 64, 3, tex_repeating,
+		"../../../assets/walls/dune.bmp",
+		"../../../assets/walls/dial.bmp",
+		"../../../assets/walls/hieroglyph.bmp");
+
+	sgl.num_textures = 0;
+	const GLuint shader_texture_sampler = glGetUniformLocation(sgl.shader_program, "texture_sampler");
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, ts); // Set the current bound texture
+	glUniform1i(shader_texture_sampler, 0); // Make the sampler read from texture unit 0
+	//////////
+
+	/*
 	sgl.num_textures = 1;
 	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/dirt.bmp", tex_repeating);
 	select_texture_for_use(sgl.textures[0], sgl.shader_program);
+	*/
 
 	enable_all_culling();
 	deinit_list(face_mesh_list);

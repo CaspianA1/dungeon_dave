@@ -216,7 +216,7 @@ void deinit_surface(SDL_Surface* const surface) {
 	SDL_FreeSurface(surface);
 }
 
-// Expects that num_textures > 0. Params: path, repeating texture.
+// Expects that num_textures > 0. Params: path, texture wrap mode
 GLuint* init_textures(const GLsizei num_textures, ...) {
 	va_list args;
 	va_start(args, num_textures);
@@ -226,15 +226,14 @@ GLuint* init_textures(const GLsizei num_textures, ...) {
 
 	for (int i = 0; i < num_textures; i++) {
 		const char* const surface_path = va_arg(args, char*);
-		const GLint texture_param = va_arg(args, GLint);
+		const GLint texture_wrap_mode = va_arg(args, GLint);
 
 		glBindTexture(GL_TEXTURE_2D, textures[i]);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OPENGL_TEX_MIN_FILTER);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_param);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_param);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_mode);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_mode);
 
 		#ifdef ENABLE_ANISOTROPIC_FILTERING
 		float aniso;
