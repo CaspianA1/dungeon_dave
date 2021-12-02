@@ -37,7 +37,7 @@ GLuint preinit_texture(const TextureType texture_type, const TextureWrapMode wra
 		#ifdef ENABLE_ANISOTROPIC_FILTERING
 		float aniso;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+		glTexParameterf(texture_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 		#endif
 	}
 	
