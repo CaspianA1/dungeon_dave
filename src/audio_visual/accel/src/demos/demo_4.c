@@ -33,12 +33,14 @@ const char* const demo_4_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in vec2 vertex_UV;\n"
 
+	"out float light;\n"
 	"out vec2 UV;\n"
 
 	"uniform mat4 model_view_projection;\n"
 
 	"void main() {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
+		"light = 1.0f;\n"
 		"UV = vertex_UV;\n"
 	"}\n";
 

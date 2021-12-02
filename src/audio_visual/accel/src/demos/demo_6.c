@@ -1,3 +1,5 @@
+// This demo will not work anymore unless the SDL_GL multisampling code is commented out.
+
 #include "demo_5.c"
 
 /*
@@ -118,6 +120,8 @@ const char* const demo_6_vertex_shader =
 	"#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
+
+	"out float light;\n"
 	"out vec2 UV;\n"
 
 	"uniform vec2 plane_sizes[4];\n"
@@ -130,10 +134,10 @@ const char* const demo_6_vertex_shader =
 
 	"void main() {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
-		"UV = vec2(0, 0);\n"
 
 		"int UV_index = gl_VertexID % 6, plane_index = gl_VertexID / 6;\n"
 		"UV = unscaled_plane_UV[UV_index] * plane_sizes[plane_index];\n"
+		"light = 1.0f;\n"
 	"}\n";
 
 //////////
@@ -163,6 +167,8 @@ StateGL demo_6_init(void) {
 	enum {size_hori = 8, size_vert = 5, num_planes = 4};
 	const ivec3 origin = {1, 1, 1};
 	enum {size_hori_2 = 2, size_vert_2 = 3, size_hori_3 = 5};
+
+	DEBUG(num_planes * 2, d);
 
 	const GLfloat plane_sizes[num_planes * 2] = {
 		size_hori_2, size_vert_2, size_hori, size_vert, size_hori, size_vert, size_hori_3, size_vert

@@ -17,8 +17,6 @@
 - NEXT: different textures for a map + array textures
 - NEXT 2: a bounding volume hierarchy, maybe
 - NEXT 3: Composable drawers - can just call draw_sectors_in_view_frustum and draw_billboards in one call
-- A little seam between some textures + little dots popping around - more with darker textures/scenes or bigger textures
-- Aliasing in the distance
 - Point light sources, or simple lightmaps
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
 
