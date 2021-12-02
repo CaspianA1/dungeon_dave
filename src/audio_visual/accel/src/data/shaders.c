@@ -4,11 +4,14 @@
 const char* const sector_vertex_shader =
 	"#version 330 core\n"
 	"#define max_world_height 255.0f\n"
+	"#define darkest_light 0.6f\n"
+	"#define light_step 0.2f\n" // From the darkest side, this is the step amount
 	"#define sign_of_cond(cond) ((int(cond) << 1) - 1)\n" // 1 -> 1, and 0 -> -1
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info;\n"
 
+	"out float light;\n"
 	"out vec2 UV;\n"
 
 	"uniform mat4 model_view_projection;\n"
@@ -20,24 +23,30 @@ const char* const sector_vertex_shader =
 	"void main() {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
 
-
-		"ivec2 index_for_UV = pos_indices_for_UV[face_info & 3];\n" // Masking with 3 gets first 2 bits (face type)
+		"int face_type = face_info & 3;"
+		"ivec2 index_for_UV = pos_indices_for_UV[face_type];\n" // Masking with 3 gets first 2 bits (face type)
 		"int UV_sign = -sign_of_cond(face_info == 2 || face_info == 5);\n" // Negative if face side is left or bottom
 
 		"vec3 pos_reversed = max_world_height - vertex_pos_world_space;\n"
 		"UV = vec2(pos_reversed[index_for_UV[0]] * UV_sign, pos_reversed[index_for_UV[1]]);\n"
+
+		// Top = 1.0f, top or left = 0.8f, bottom or right = 0.6f
+		"bool side = (face_info & 4) == 0, flat_face = face_info == 0;\n" // side means flat, top or left
+		"light = darkest_light + (float(side) * light_step) + (float(flat_face) * light_step);\n"
 	"}\n",
 
 *const sector_fragment_shader =
     "#version 330 core\n"
 
+	"in float light;\n"
 	"in vec2 UV;\n"
+
 	"out vec3 color;\n" // For textures with an alpha channel, enable 4 channels
 
 	"uniform sampler2D texture_sampler;\n"
 
 	"void main() {\n"
-		"color = texture(texture_sampler, UV).rgb;\n"
+		"color = texture(texture_sampler, UV).rgb * light;\n"
 	"}\n",
 
 *const sector_lighting_vertex_shader =
