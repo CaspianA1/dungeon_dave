@@ -3,6 +3,7 @@
 
 #include "utils.h"
 #include "camera.h"
+#include "texture.h"
 #include "../data/shaders.c"
 
 typedef struct {

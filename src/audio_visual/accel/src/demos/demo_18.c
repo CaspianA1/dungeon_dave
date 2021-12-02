@@ -1,4 +1,5 @@
 #include "../utils.c"
+#include "../texture.c"
 #include "../data/shaders.c"
 
 // This demo gives a quake-like water effect
@@ -24,8 +25,8 @@ StateGL demo_18_init(void) {
 	glUseProgram(sgl.shader_program);
 
 	sgl.num_textures = 1; // ../../../assets/walls/sand.bmp, ../../../assets/walls/hieroglyph.bmp, assets/water.bmp
-	sgl.textures = init_textures(sgl.num_textures, "assets/lava.bmp", tex_repeating);
-	select_texture_for_use(sgl.textures[0], sgl.shader_program);
+	sgl.textures = init_plain_textures(sgl.num_textures, "assets/lava.bmp", TexRepeating);
+	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
 
 	return sgl;
 }

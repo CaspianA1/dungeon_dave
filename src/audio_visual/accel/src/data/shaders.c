@@ -147,10 +147,10 @@ const char* const sector_vertex_shader =
 
 	"out vec4 color;\n"
 
-	"uniform samplerCube cubemap_sampler;\n"
+	"uniform samplerCube texture_sampler;\n"
 
 	"void main() {\n"
-		"color = texture(cubemap_sampler, UV_3D);\n"
+		"color = texture(texture_sampler, UV_3D);\n"
 	"}\n",
 
 *const water_vertex_shader =

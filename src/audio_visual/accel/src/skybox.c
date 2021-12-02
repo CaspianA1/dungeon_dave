@@ -2,6 +2,7 @@
 #define SKYBOX_C
 
 #include "headers/skybox.h"
+#include "texture.c"
 
 const GLbyte skybox_vertices[] = {
 	-1, 1, -1,
@@ -52,15 +53,7 @@ GLuint init_skybox_texture(const char* const path) {
 	SDL_UnlockSurface(skybox_surface);
 	const GLint cube_size = skybox_surface -> w >> 2;
 
-	GLuint skybox;
-	glGenTextures(1, &skybox);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, OPENGL_SKYBOX_TEX_MIN_FILTER);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, tex_nonrepeating);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, tex_nonrepeating);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, tex_nonrepeating);
+	const GLuint skybox = preinit_texture(TexSkybox, TexNonRepeating);
 
 	SDL_Surface* const face_surface = SDL_CreateRGBSurfaceWithFormat(0, cube_size, cube_size,
 		cube_size * sizeof(Uint32), SDL_PIXEL_FORMAT);
@@ -118,21 +111,18 @@ Skybox init_skybox(const char* const cubemap_path) {
 }
 
 void deinit_skybox(const Skybox s) {
-	glDeleteTextures(1, &s.texture);
+	deinit_texture(s.texture);
 	glDeleteProgram(s.shader);
 	glDeleteBuffers(1, &s.vbo);
 }
 
 void draw_skybox(const Skybox s, const Camera* const camera) {
 	glUseProgram(s.shader);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, s.texture);
+	use_texture(s.texture, s.shader, TexSkybox);
 
 	static byte first_call = 1;
 	static GLint view_projection_id;
 	if (first_call) {
-		glUniform1i(glGetUniformLocation(s.shader, "texture_sampler"), 0);
 		view_projection_id = glGetUniformLocation(s.shader, "view_projection");
 		first_call = 0;
 	}

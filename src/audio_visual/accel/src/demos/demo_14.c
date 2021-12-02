@@ -45,7 +45,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 	glUseProgram(sector_shader);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
-	select_texture_for_use(sgl -> textures[1], sector_shader);
+	use_texture(sgl -> textures[1], sector_shader, TexPlain);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	draw_triangles(triangles_per_mesh);
 
@@ -55,7 +55,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 	glUniform2f(cam_right_xz_id, camera.right_xz[0], camera.right_xz[1]);
 	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera.view_projection[0][0]);
 
-	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
+	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);
 
 	glEnable(GL_BLEND); // Blending on for billboard
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

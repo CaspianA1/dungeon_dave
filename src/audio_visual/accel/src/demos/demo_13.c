@@ -123,9 +123,9 @@ StateGL demo_13_init(void) {
 	//////////
 
 	sgl.num_textures = 2;
-	sgl.textures = init_textures(sgl.num_textures,
-		"../../../assets/objects/tomato.bmp", tex_nonrepeating,
-		"../../../assets/walls/saqqara.bmp", tex_repeating);
+	sgl.textures = init_plain_textures(sgl.num_textures,
+		"../../../assets/objects/tomato.bmp", TexNonRepeating,
+		"../../../assets/walls/saqqara.bmp", TexRepeating);
 
 	sgl.shader_program = init_shader_program(billboard_vertex_shader, billboard_fragment_shader);
 	sector_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
@@ -142,12 +142,12 @@ void demo_13_drawer(const StateGL* const sgl) {
 
 	// Drawing non-transparent objects first
 	glUseProgram(sector_shader);
-	select_texture_for_use(sgl -> textures[1], sector_shader);
+	use_texture(sgl -> textures[1], sector_shader, TexPlain);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	draw_triangles(triangles_per_mesh);
 
 	glUseProgram(sgl -> shader_program);
-	select_texture_for_use(sgl -> textures[0], sgl -> shader_program);
+	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);
 
 	glEnable(GL_BLEND); // Turning on alpha blending for drawing billboards
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

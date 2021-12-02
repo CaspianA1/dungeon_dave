@@ -2,6 +2,7 @@
 #define UTILS_C
 
 #include "headers/utils.h"
+#include "headers/texture.h"
 #include "headers/constants.h"
 
 Screen init_screen(const char* const title) {
@@ -95,8 +96,7 @@ void deinit_demo_vars(const StateGL* const sgl) {
 	}
 
 	if (sgl -> num_textures > 0) {
-		glDeleteTextures(sgl -> num_textures, sgl -> textures);
-		free(sgl -> textures);
+		deinit_textures(sgl -> num_textures, sgl -> textures);
 	}
 
 	glDeleteVertexArrays(1, &sgl -> vertex_array);
@@ -200,76 +200,10 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 	return program_id;
 }
 
-SDL_Surface* init_surface(const char* const path) {
-	SDL_Surface* const surface = SDL_LoadBMP(path);
-	if (surface == NULL) fail("open texture file", OpenImageFile);
-
-	SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
-	SDL_FreeSurface(surface);
-	SDL_LockSurface(converted_surface);
-
-	return converted_surface;
-}
-
-void deinit_surface(SDL_Surface* const surface) {
-	SDL_UnlockSurface(surface);
-	SDL_FreeSurface(surface);
-}
-
-// Expects that num_textures > 0. Params: path, texture wrap mode
-GLuint* init_textures(const GLsizei num_textures, ...) {
-	va_list args;
-	va_start(args, num_textures);
-
-	GLuint* const textures = malloc(num_textures * sizeof(GLuint));
-	glGenTextures(num_textures, textures);
-
-	for (int i = 0; i < num_textures; i++) {
-		const char* const surface_path = va_arg(args, char*);
-		const GLint texture_wrap_mode = va_arg(args, GLint);
-
-		glBindTexture(GL_TEXTURE_2D, textures[i]);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OPENGL_TEX_MIN_FILTER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_mode);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_mode);
-
-		#ifdef ENABLE_ANISOTROPIC_FILTERING
-		float aniso;
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-		#endif
-
-		SDL_Surface* const surface = init_surface(surface_path);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
-			surface -> w, surface -> h,
-			0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
-
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		deinit_surface(surface);
-	}
-
-	va_end(args);
-	return textures;
-}
-
-void select_texture_for_use(const GLuint texture, const GLuint shader_program) {
-	const GLuint shader_texture_sampler = glGetUniformLocation(shader_program, "texture_sampler");
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture); // Set the current bound texture
-	glUniform1i(shader_texture_sampler, 0); // Make the sampler read from texture unit 0
-}
-
 void enable_all_culling(void) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-
-	// #if defined(DEMO_1) || defined(DEMO_2) || defined(DEMO_3) || defined(DEMO_5)
 	glEnable(GL_CULL_FACE);
-	// #endif
 }
 
 void draw_triangles(const GLsizei num_triangles) {

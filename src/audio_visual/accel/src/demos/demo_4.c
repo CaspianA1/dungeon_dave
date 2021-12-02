@@ -1,5 +1,6 @@
 #include "demo_3.c"
 #include "../data/shaders.c"
+#include "../texture.c"
 
 /*
 vert_1: on zy (2, 1)
@@ -88,8 +89,8 @@ StateGL demo_4_init(void) {
 	glUseProgram(sgl.shader_program);
 
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/hieroglyph.bmp", tex_nonrepeating);
-	select_texture_for_use(sgl.textures[0], sgl.shader_program);
+	sgl.textures = init_plain_textures(sgl.num_textures, "../../../assets/walls/hieroglyph.bmp", TexNonRepeating);
+	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
 
 	// For textures with an alpha channel, enable this
 	/* glEnable(GL_BLEND);

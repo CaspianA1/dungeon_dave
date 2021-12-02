@@ -91,8 +91,11 @@ StateGL demo_9_init(void) {
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	glUseProgram(sgl.shader_program);
 	sgl.num_textures = 1;
-	sgl.textures = init_textures(sgl.num_textures, "../../../assets/walls/greece.bmp", tex_repeating);
-	select_texture_for_use(sgl.textures[0], sgl.shader_program);
+
+	sgl.num_textures = 1;
+	sgl.textures = init_plain_textures(sgl.num_textures, "../../../assets/walls/greece.bmp", TexRepeating);
+	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
+
 	enable_all_culling();
 
 	return sgl;
