@@ -31,7 +31,7 @@ const char* const sector_vertex_shader =
 		"UV = vec2(pos_reversed[index_for_UV[0]] * UV_sign, pos_reversed[index_for_UV[1]]);\n"
 
 		// Top = 1.0f, top or left = 0.8f, bottom or right = 0.6f
-		"bool side = (face_info & 4) == 0, flat_face = face_info == 0;\n" // side means flat, top or left
+		"bool side = (face_info & 4) == 0, flat_face = face_info == 0;\n" // `side` means flat, top or left
 		"light = darkest_light + (float(side) * light_step) + (float(flat_face) * light_step);\n"
 	"}\n",
 
