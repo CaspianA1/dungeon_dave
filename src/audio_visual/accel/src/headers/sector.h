@@ -8,7 +8,7 @@
 const byte init_sector_alloc = 20;
 
 typedef struct {
-	const byte height, origin[2];
+	const byte min_visible_height, height, origin[2];
 	byte size[2];
 	struct {index_type_t start, length;} ibo_range; // ibo domain that defines sector's faces
 } Sector;
