@@ -32,10 +32,6 @@
 static SectorList sl;
 
 StateGL demo_17_init(void) {
-	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
-
-	List face_mesh_list;
-
 	/*
 	for (byte y = 0; y < terrain_height; y++) {
 		for (byte x = 0; x < terrain_width; x++) {
@@ -48,12 +44,13 @@ StateGL demo_17_init(void) {
 	// tiny_map, tiny_width, tiny_height
 	// palace_map, palace_width, palace_height
 	// terrain_map, terrain_width, terrain_height
-	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) terrain_map, terrain_width, terrain_height);
 
+	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
+	List face_mesh_list;
+
+	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) terrain_map, terrain_width, terrain_height);
 	init_sector_list_vbo_and_ibo(&sl, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sl);
-
-	glEnable(GL_MULTISAMPLE);
 
 	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 	glUseProgram(sgl.shader_program);
@@ -68,6 +65,8 @@ StateGL demo_17_init(void) {
 	use_texture(ts, sgl.shader_program, TexSet);
 
 	enable_all_culling();
+	glEnable(GL_MULTISAMPLE);
+
 	deinit_list(face_mesh_list);
 
 	return sgl;
