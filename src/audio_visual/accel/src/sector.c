@@ -25,11 +25,11 @@ void print_sector_list(const SectorList* const s) {
 
 	puts("[");
 	for (size_t i = 0; i < sectors.length; i++) {
-		const Sector* const sector = ((Sector*) sectors.data) + i;
+		const Sector sector = ((Sector*) sectors.data)[i];
 		// const Sector* const sector = &s -> sectors[i];
 		printf("\t{.height = %d, .origin = {%d, %d}, .size = {%d, %d}}\n",
-			sector -> height, sector -> origin[0], sector -> origin[1],
-			sector -> size[0], sector -> size[1]);
+			sector.height, sector.origin[0], sector.origin[1],
+			sector.size[0], sector.size[1]);
 	}
 	puts("]");
 }
@@ -86,7 +86,9 @@ Sector form_sector_area(Sector sector, const StateMap traversed_points,
 List generate_sectors_from_heightmap(const byte* const heightmap,
 	const byte map_width, const byte map_height) {
 
-	List sectors = init_list(init_sector_alloc, Sector);
+	// >> 3 = / 8. Works pretty well for my maps.
+	const size_t sector_amount_guess = map_width * map_height >> 3;
+	List sectors = init_list(sector_amount_guess, Sector);
 
 	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used
 	and 2. for forming faces, will need original heightmap to be unmodified */

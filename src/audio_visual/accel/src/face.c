@@ -97,7 +97,10 @@ void add_face_mesh_to_list(const Face face, const byte sector_height,
 
 	So, 00 -> flat, 01 -> vert NW, and 10 -> vert EW */
 
-	const byte face_info = (side << 2) | face.type, near_x = face.origin[0], near_z = face.origin[1];
+	const byte
+		face_info = (side << 2) | face.type,
+		near_x = face.origin[0], near_z = face.origin[1];
+
 	const mesh_type_t* face_mesh;
 
 	switch (face.type) {
@@ -172,8 +175,12 @@ void init_face_mesh_and_sector_lists(SectorList* const sector_list,
 	const byte map_width, const byte map_height) {
 
 	List sectors = generate_sectors_from_heightmap(heightmap, map_width, map_height);
-	List index_list = init_list(sectors.length * 2.0f, index_type_t[indices_per_face]);
-	*face_mesh_list = init_list(sectors.length * 1.8f, mesh_type_t[vars_per_face]);
+
+	// This guess seems to work pretty well on my maps
+	const size_t index_list_length_guess = sectors.length * 3;
+	// Index list and face mesh list have the same amount of entries (in terms of elements, not bytes)
+	List index_list = init_list(index_list_length_guess, index_type_t[indices_per_face]);
+	*face_mesh_list = init_list(index_list_length_guess, mesh_type_t[vars_per_face]);
 
 	for (size_t i = 0; i < sectors.length; i++) {
 		Sector* const sector_ref = ((Sector*) sectors.data) + i;

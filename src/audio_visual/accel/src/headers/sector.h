@@ -5,8 +5,6 @@
 #include "buffer_defs.h"
 #include "list.h"
 
-const byte init_sector_alloc = 20;
-
 typedef struct {
 	const byte min_visible_height, height, origin[2];
 	byte size[2];

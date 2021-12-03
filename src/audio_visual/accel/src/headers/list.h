@@ -3,7 +3,7 @@
 
 #include "utils.h"
 
-const float list_realloc_rate = 1.5f;
+const float list_realloc_rate = 2.0f;
 
 typedef struct {
 	void* data;

@@ -29,7 +29,7 @@
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
 */
 
-static SectorList sl;
+static SectorList sl; // TODO: in any_data
 
 StateGL demo_17_init(void) {
 	/*
@@ -41,14 +41,17 @@ StateGL demo_17_init(void) {
 	}
 	*/
 
-	// tiny_map, tiny_width, tiny_height
-	// palace_map, palace_width, palace_height
-	// terrain_map, terrain_width, terrain_height
+	/*
+	tiny_map, tiny_width, tiny_height
+	palace_map, palace_width, palace_height
+	terrain_map, terrain_width, terrain_height
+	tpt_map, tpt_width, tpt_height
+	*/
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 	List face_mesh_list;
 
-	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) terrain_map, terrain_width, terrain_height);
+	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) tpt_map, tpt_width, tpt_height);
 	init_sector_list_vbo_and_ibo(&sl, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sl);
 
