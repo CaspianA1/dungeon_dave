@@ -1914,3 +1914,28 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 		// "UV.x = 1.0f - UV.x;\n"
 
 /////
+
+- Sectors contain their meshes
+- To begin with, don't clip sector heights based on adjacent heights
+- Sectors are rectangular
+
+- Not perfect, but sectors + their meshes for clipping and rendering, and texmaps + heightmaps for game logic
+- Ideal: BSPs, but not worth time
+- To start, one vbo + texture ptr per sector
+
+/////
+
+	/*
+	if (sector.height == 4)
+
+	printf("bottom_left = {%d, %d, %d}, top_right = {%d, %d, %d}\n",
+		(int) aabb_corners[0][0],
+		(int) aabb_corners[0][1],
+		(int) aabb_corners[0][2],
+		(int) aabb_corners[1][0],
+		(int) aabb_corners[1][1],
+		(int) aabb_corners[1][2]
+	);
+	*/
+
+/////

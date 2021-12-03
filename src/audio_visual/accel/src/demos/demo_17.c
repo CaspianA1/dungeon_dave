@@ -7,19 +7,13 @@
 #include "../texture.c"
 
 /*
-- Sectors contain their meshes
-- To begin with, don't clip sector heights based on adjacent heights
-- Sectors are rectangular
-
-- Not perfect, but sectors + their meshes for clipping and rendering, and texmaps + heightmaps for game logic
-- Ideal: BSPs, but not worth time
-- To start, one vbo + texture ptr per sector
-
 - NEXT: different textures for a map
 - NEXT 2: a bounding volume hierarchy, maybe
 - NEXT 3: Composable drawers - can just call draw_sectors_in_view_frustum and draw_billboards in one call
+
 - Point light sources, or simple lightmaps
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
+- A demo of a shared-vertex cube
 
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
@@ -51,7 +45,7 @@ StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 	List face_mesh_list;
 
-	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) tpt_map, tpt_width, tpt_height);
+	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) tiny_map, tiny_width, tiny_height);
 	init_sector_list_vbo_and_ibo(&sl, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sl);
 

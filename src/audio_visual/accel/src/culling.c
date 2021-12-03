@@ -11,20 +11,20 @@ And puts the indices of the visible ones into a batch
 to be rendered in one draw call via glDrawElements. */
 
 byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) {
-	// Bottom left and top right
-	vec3 aabb_corners[2] = {{sector.origin[0], 0.0f, sector.origin[1]}};
+	// Bottom left, size
+	vec3 aabb_corners[2] = {{sector.origin[0], sector.visible_heights.min, sector.origin[1]}};
 
 	glm_vec3_add(
 		aabb_corners[0],
-		(vec3) {sector.size[0], sector.height, sector.size[1]},
+		(vec3) {sector.size[0], sector.visible_heights.max - sector.visible_heights.min, sector.size[1]},
 		aabb_corners[1]);
-	
+
 	return glm_aabb_frustum(aabb_corners, frustum_planes);
 }
 
 void draw_sectors_in_view_frustum(const SectorList* const sector_list, const Camera* const camera) {
-	vec4 frustum_planes[6];
-	glm_frustum_planes((vec4*) camera -> model_view_projection, frustum_planes);
+	static vec4 frustum_planes[6];
+	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
 
 	const List sectors = sector_list -> sectors;
 

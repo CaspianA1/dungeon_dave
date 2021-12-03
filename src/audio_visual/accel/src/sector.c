@@ -23,13 +23,17 @@ typedef struct {
 void print_sector_list(const SectorList* const s) {
 	const List sectors = s -> sectors;
 
-	puts("[");
+	puts("sector_list = [");
 	for (size_t i = 0; i < sectors.length; i++) {
 		const Sector sector = ((Sector*) sectors.data)[i];
-		// const Sector* const sector = &s -> sectors[i];
-		printf("\t{.height = %d, .origin = {%d, %d}, .size = {%d, %d}}\n",
-			sector.height, sector.origin[0], sector.origin[1],
-			sector.size[0], sector.size[1]);
+		printf("\t{.origin = {%d, %d}, .size = {%d, %d}, .visible_heights = {.min = %d, .max = %d}, "
+			"ibo_range = {.start = %u, .range = %u}}%s\n",
+
+			sector.origin[0], sector.origin[1], sector.size[0], sector.size[1],
+			sector.visible_heights.min, sector.visible_heights.max,
+			sector.ibo_range.start, sector.ibo_range.length,
+			(i == sectors.length) ? "" : ", "
+		);
 	}
 	puts("]");
 }
@@ -57,7 +61,7 @@ Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	byte top_right_corner = sector.origin[0];
 
 	while (top_right_corner < map_width
-		&& *map_point((byte*) map, top_right_corner, sector.origin[1], map_width) == sector.height
+		&& *map_point((byte*) map, top_right_corner, sector.origin[1], map_width) == sector.visible_heights.max
 		&& !get_statemap_bit(traversed_points, top_right_corner, sector.origin[1])) {
 
 		sector.size[0]++;
@@ -68,7 +72,7 @@ Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	for (byte y = sector.origin[1]; y < map_height; y++, sector.size[1]++) {
 		for (byte x = sector.origin[0]; x < top_right_corner; x++) {
 			// If consecutive heights didn't continue
-			if (*map_point((byte*) map, x, y, map_width) != sector.height)
+			if (*map_point((byte*) map, x, y, map_width) != sector.visible_heights.max)
 				goto clear_map_area;
 		}
 	}
@@ -100,9 +104,10 @@ List generate_sectors_from_heightmap(const byte* const heightmap,
 
 			const byte height = *map_point((byte*) heightmap, x, y, map_width);
 
-			const Sector sector = form_sector_area(
-				(Sector) {.height = height, .origin = {x, y}, .size = {0, 0}},
-				traversed_points, heightmap, map_width, map_height);
+			const Sector sector = form_sector_area((Sector) {
+				.origin = {x, y}, .size = {0, 0},
+				.visible_heights = {.min = 0, .max = height}
+			}, traversed_points, heightmap, map_width, map_height);
 
 			push_ptr_to_list(&sectors, &sector);
 		}
