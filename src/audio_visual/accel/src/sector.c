@@ -98,11 +98,11 @@ List generate_sectors_from_heightmap(const byte* const heightmap,
 
 			const byte height = *map_point((byte*) heightmap, x, y, map_width);
 
-			const Sector seed_sector = {.height = height, .origin = {x, y}, .size = {0, 0}};
-			const Sector expanded_sector = form_sector_area(
-				seed_sector, traversed_points, heightmap, map_width, map_height);
+			const Sector sector = form_sector_area(
+				(Sector) {.height = height, .origin = {x, y}, .size = {0, 0}},
+				traversed_points, heightmap, map_width, map_height);
 
-			push_ptr_to_list(&sectors, &expanded_sector);
+			push_ptr_to_list(&sectors, &sector);
 		}
 	}
 
