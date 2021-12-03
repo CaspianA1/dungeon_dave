@@ -23,8 +23,6 @@
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
 */
 
-static SectorList sl; // TODO: in any_data
-
 StateGL demo_17_init(void) {
 	/*
 	for (byte y = 0; y < terrain_height; y++) {
@@ -44,10 +42,15 @@ StateGL demo_17_init(void) {
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 	List face_mesh_list;
+	SectorList sector_list;
 
-	init_face_mesh_and_sector_lists(&sl, &face_mesh_list, (byte*) tiny_map, tiny_width, tiny_height);
-	init_sector_list_vbo_and_ibo(&sl, &face_mesh_list);
-	bind_sector_list_vbo_to_vao(&sl);
+	init_face_mesh_and_sector_lists(&sector_list, &face_mesh_list, (byte*) tpt_map, tpt_width, tpt_height);
+	init_sector_list_vbo_and_ibo(&sector_list, &face_mesh_list);
+	bind_sector_list_vbo_to_vao(&sector_list);
+
+	SectorList* const sector_list_on_heap = malloc(sizeof(SectorList));
+	*sector_list_on_heap = sector_list;
+	sgl.any_data = sector_list_on_heap;
 
 	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 	glUseProgram(sgl.shader_program);
@@ -93,11 +96,15 @@ void demo_17_drawer(const StateGL* const sgl) {
 	pyramid: 816 vs 542. maze: 5796 vs 6114.
 	terrain: 150620 vs 86588. */
 
-	draw_sectors_in_view_frustum(&sl, &camera);
+	const SectorList* const sector_list = (SectorList*) sgl -> any_data;
+	draw_sectors_in_view_frustum(sector_list, &camera);
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
-	deinit_sector_list(&sl);
+	const SectorList* const sector_list = (SectorList*) sgl -> any_data;
+	deinit_sector_list(sector_list);
+	free(sgl -> any_data);
+
 	deinit_demo_vars(sgl);
 }
 
