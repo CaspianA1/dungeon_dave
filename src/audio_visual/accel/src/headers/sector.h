@@ -7,7 +7,7 @@
 
 typedef struct {
 	const byte min_visible_height, height, origin[2];
-	byte size[2];
+	byte size[2]; // Top-down (X and Z); same for origin
 	struct {index_type_t start, length;} ibo_range; // ibo domain that defines sector's faces
 } Sector;
 
