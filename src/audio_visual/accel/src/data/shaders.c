@@ -46,7 +46,7 @@ const char* const sector_vertex_shader =
 	"uniform sampler2DArray texture_sampler;\n"
 
 	"void main() {\n"
-		"color = texture(texture_sampler, vec3(UV, 0)).rgb * light;\n"
+		"color = texture(texture_sampler, vec3(UV, 0.0f)).rgb * light;\n"
 	"}\n",
 
 *const sector_lighting_vertex_shader =

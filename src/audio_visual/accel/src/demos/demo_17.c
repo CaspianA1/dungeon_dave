@@ -61,8 +61,8 @@ StateGL demo_17_init(void) {
 	//////////
 	sgl.num_textures = 0;
 	const GLuint ts = init_texture_set(TexRepeating, 64, 64, 3,
-		"../../../assets/walls/dial.bmp",
 		"../../../assets/walls/dune.bmp",
+		"../../../assets/walls/mesa.bmp",
 		"../../../assets/walls/hieroglyph.bmp");
 
 	use_texture(ts, sgl.shader_program, TexSet);
