@@ -7,9 +7,10 @@
 #include "../texture.c"
 
 /*
-- NEXT: different textures for a map
-- NEXT 2: a bounding volume hierarchy, maybe
-- NEXT 3: Composable drawers - can just call draw_sectors_in_view_frustum and draw_billboards in one call
+- NEXT: new_map
+- NEXT 2: different textures for a map
+- NEXT 3: a bounding volume hierarchy, maybe
+- NEXT 4: Composable drawers - can just call draw_sectors_in_view_frustum and draw_billboards in one call
 
 - Point light sources, or simple lightmaps
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
@@ -37,13 +38,14 @@ StateGL demo_17_init(void) {
 	palace_map, palace_width, palace_height
 	terrain_map, terrain_width, terrain_height
 	tpt_map, tpt_width, tpt_height
+	new_map, new_width, new_height
 	*/
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 	List face_mesh_list;
 	SectorList sector_list;
 
-	init_face_mesh_and_sector_lists(&sector_list, &face_mesh_list, (byte*) tpt_map, tpt_width, tpt_height);
+	init_face_mesh_and_sector_lists(&sector_list, &face_mesh_list, (byte*) new_map, new_width, new_height);
 	init_sector_list_vbo_and_ibo(&sector_list, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sector_list);
 
@@ -56,10 +58,10 @@ StateGL demo_17_init(void) {
 
 	//////////
 	sgl.num_textures = 0;
-	const GLuint ts = init_texture_set(TexRepeating, 64, 64, 3,
-		"../../../assets/walls/dune.bmp",
-		"../../../assets/walls/mesa.bmp",
-		"../../../assets/walls/hieroglyph.bmp");
+	const GLuint ts = init_texture_set(TexRepeating, 64, 64, 1,
+		"../../../assets/walls/dune.bmp");
+		// "../../../assets/walls/mesa.bmp",
+		// "../../../assets/walls/hieroglyph.bmp");
 
 	use_texture(ts, sgl.shader_program, TexSet);
 
@@ -76,8 +78,8 @@ void demo_17_drawer(const StateGL* const sgl) {
 	static GLint camera_pos_id, model_view_projection_id;
 	static byte first_call = 1;
 
-	if (first_call) {
-		init_camera(&camera, (vec3) {1.0f, 1.0f, 1.0f}); // terrain: 34.5f, 13.50f, 25.2f
+	if (first_call) { // start new map: 1.5f, 0.5f, 1.5f
+		init_camera(&camera, (vec3) {1.5f, 0.5f, 1.5f}); // terrain: 34.5f, 13.50f, 25.2f
 		camera_pos_id = glGetUniformLocation(sgl -> shader_program, "camera_pos_world_space");
 		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
 		first_call = 0;
