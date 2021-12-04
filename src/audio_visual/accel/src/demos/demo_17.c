@@ -79,7 +79,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	static byte first_call = 1;
 
 	if (first_call) { // start new map: 1.5f, 0.5f, 1.5f
-		init_camera(&camera, (vec3) {1.5f, 0.5f, 1.5f}); // terrain: 34.5f, 13.50f, 25.2f
+		init_camera(&camera, (vec3) {28.0f, 20.0f, 24.0f}); // terrain: 34.5f, 13.50f, 25.2f
 		camera_pos_id = glGetUniformLocation(sgl -> shader_program, "camera_pos_world_space");
 		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
 		first_call = 0;
