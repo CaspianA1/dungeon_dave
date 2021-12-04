@@ -14,9 +14,10 @@ const char* const demo_19_vertex_shader =
 	"uniform mat4 model_view_projection;\n"
 
 	"void main() {\n"
-		"gl_Position = model_view_projection * vec4(vertex_pos_world_space + spin, 1);\n"
+		"vec3 spin_pos = vertex_pos_world_space + spin;\n"
+		"gl_Position = model_view_projection * vec4(spin_pos, 1);\n"
 		"brightness = distance(spin, vertex_pos_world_space) / 3.0f;\n"
-		"UV = vertex_pos_world_space.xz + spin.xz;\n"
+		"UV = spin_pos.xz;\n"
 	"}\n",
 
 *const demo_19_fragment_shader =
