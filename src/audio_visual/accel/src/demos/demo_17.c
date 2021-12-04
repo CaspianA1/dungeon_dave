@@ -14,6 +14,7 @@
 
 - Point light sources, or simple lightmaps
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
+- A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
 
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
@@ -45,7 +46,7 @@ StateGL demo_17_init(void) {
 	List face_mesh_list;
 	SectorList sector_list;
 
-	init_face_mesh_and_sector_lists(&sector_list, &face_mesh_list, (byte*) new_map, new_width, new_height);
+	init_face_mesh_and_sector_lists(&sector_list, &face_mesh_list, (byte*) terrain_map, terrain_width, terrain_height);
 	init_sector_list_vbo_and_ibo(&sector_list, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sector_list);
 

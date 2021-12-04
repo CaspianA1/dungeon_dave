@@ -60,7 +60,7 @@ void make_application(void (*const drawer)(const StateGL* const),
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
 	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
 
-	const int max_delay = 1000 / constants.fps;
+	const int16_t max_delay = 1000.0f / constants.fps;
 	byte running = 1;
 	SDL_Event event;
 	const StateGL sgl = init();
@@ -78,8 +78,9 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
 		SDL_GL_SwapWindow(screen -> window);
 
-		const int wait = max_delay - (SDL_GetTicks() - before);
-		if (wait > 0) SDL_Delay(wait);
+		const Uint32 ms_elapsed = SDL_GetTicks() - before;
+		const int16_t wait_for_exact_fps = max_delay - ms_elapsed;
+		if (wait_for_exact_fps > 0) SDL_Delay(wait_for_exact_fps);
 	}
 
 	deinit(&sgl);
