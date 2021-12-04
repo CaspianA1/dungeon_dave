@@ -1938,4 +1938,60 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 	);
 	*/
 
+///// A shared-vertex cube didn't work
+
+	const GLbyte
+		near_x = origin[0], bottom_y = origin[1], near_z = origin[2],
+		size_x = size[0], size_y = size[1], size_z = size[2];
+
+	const GLbyte far_x = near_x + size_x, top_y = bottom_y + size_y, far_z = near_z + size_z;
+
+	// First face first
+
+	const GLbyte vertices[members] = {
+		near_x, bottom_y, near_z, // right of front face
+		far_x, bottom_y, near_z,
+		near_x, top_y, near_z,
+
+		far_x, bottom_y, far_z,
+
+		/*
+		near_x, bottom_y, near_z, // Front face
+		far_x, bottom_y, near_z,
+		near_x, top_y, near_z,
+		far_x, top_y, near_z,
+
+		near_x, top_y, far_z, // Top face
+		far_x, top_y, far_z,
+
+		near_x, bottom_y, far_z, // Back face
+		far_x, bottom_y, far_z,
+
+		near_x, bottom_y, near_z, // Bottom face
+		far_x, bottom_y, near_z,
+
+		far_x, top_y, far_z,
+		*/
+	};
+
+/////
+
+	GLbyte* const cuboid = malloc(members * sizeof(GLbyte));
+
+	const GLbyte top_x = top[0], top_y = top[1], top_z = top[2];
+	const GLbyte bottom_x = top_x - size, bottom_y = top_y - size, bottom_z = top_z - size;
+
+	const GLbyte vertices[members] = {
+		0, 0, 0,
+		1,1,1, -1,1,-1, 1,-1,-1,  -1,-1,1
+
+		/*
+		top_x, top_y, top_z,
+
+		top_x, bottom_y, bottom_z,
+		bottom_x, top_y, bottom_z,
+		bottom_x, bottom_y, top_z
+		*/
+	};
+
 /////

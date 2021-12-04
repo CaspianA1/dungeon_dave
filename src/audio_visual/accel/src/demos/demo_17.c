@@ -13,7 +13,6 @@
 
 - Point light sources, or simple lightmaps
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
-- A demo of a shared-vertex cube
 
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
