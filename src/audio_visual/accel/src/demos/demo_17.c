@@ -19,7 +19,8 @@
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
-- Flat weapon
+- Good physics
+- Then, flat weapon
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
 */
