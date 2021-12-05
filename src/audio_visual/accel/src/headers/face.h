@@ -23,7 +23,7 @@ typedef struct {
 
 void init_face_mesh_and_sector_lists(SectorList* const sector_list,
 	List* const face_mesh_list, const byte* const heightmap,
-	const byte map_width, const byte map_height);
+	const byte* const texture_id_map, const byte map_width, const byte map_height);
 
 void init_sector_list_vbo_and_ibo(SectorList* const sector_list,
 	const List* const face_list);

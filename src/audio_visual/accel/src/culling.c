@@ -48,6 +48,10 @@ void draw_sectors_in_view_frustum(const SectorList* const sector_list, const Cam
 		}
 	}
 
+	/* (triangle counts, 12 vs 17):
+	palace: 1466 vs 1114. tpt: 232 vs 146.
+	pyramid: 816 vs 542. maze: 5796 vs 6114.
+	terrain: 150620 vs 86588. */
 	glDrawElements(GL_TRIANGLES, num_visible_indices, INDEX_TYPE_ENUM, NULL);
 }
 

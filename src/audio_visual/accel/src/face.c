@@ -55,17 +55,17 @@ byte get_next_face(const Sector sector, const byte varying_axis,
 }
 
 void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
-	const byte side, List* const face_mesh_list, List* const index_list) {
+	const byte side, const byte texture_id, List* const face_mesh_list, List* const index_list) {
 
 	/* Face info bits, layout:
-		Bits 0-1 -> face type
-		Bit 2 -> face side (top or left side of top-down sector)
-		Bits 3-7 -> texture index (unused at the moment)
+		Bits 0-1, two bits -> face type
+		Bit 2, one bit -> face side (top or left side of top-down sector)
+		Bits 3-7, five bits -> texture id (unused at the moment)
 
 	So, 00 -> flat, 01 -> vert NW, and 10 -> vert EW */
 
 	const byte
-		face_info = (side << 2) | face.type,
+		face_info = (texture_id << 3) | (side << 2) | face.type,
 		near_x = face.origin[0], near_z = face.origin[1],
 		top_y = sector_max_visible_height;
 
@@ -165,7 +165,7 @@ void init_vert_faces(const Sector sector, List* const face_mesh_list, List* cons
 			}
 
 			while (get_next_face(sector, !unvarying_axis, adjacent_side_val, map_width, heightmap, &next_face)) {
-				add_face_mesh_to_list(next_face, sector.visible_heights.max, side, face_mesh_list, index_list);
+				add_face_mesh_to_list(next_face, sector.visible_heights.max, side, sector.texture_id, face_mesh_list, index_list);
 
 				const byte face_height = next_face.size[1];
 				if (face_height > *biggest_face_height) *biggest_face_height = face_height;
@@ -174,11 +174,11 @@ void init_vert_faces(const Sector sector, List* const face_mesh_list, List* cons
 	}
 }
 
-void init_face_mesh_and_sector_lists(SectorList* const sector_list,
-	List* const face_mesh_list, const byte* const heightmap,
-	const byte map_width, const byte map_height) {
+void init_face_mesh_and_sector_lists(
+	SectorList* const sector_list, List* const face_mesh_list, const byte* const heightmap,
+	const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
-	List sectors = generate_sectors_from_heightmap(heightmap, map_width, map_height);
+	List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
 
 	// This guess seems to work pretty well on my maps
 	const size_t index_list_length_guess = sectors.length * 3;
@@ -186,14 +186,13 @@ void init_face_mesh_and_sector_lists(SectorList* const sector_list,
 	List index_list = init_list(index_list_length_guess, index_type_t[indices_per_face]);
 	*face_mesh_list = init_list(index_list_length_guess, mesh_type_t[vars_per_face]);
 
-
 	for (size_t i = 0; i < sectors.length; i++) {
 		Sector* const sector_ref = ((Sector*) sectors.data) + i;
 		sector_ref -> ibo_range.start = index_list.length * indices_per_face;
 
 		const Sector sector = *sector_ref;
 		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
-		add_face_mesh_to_list(flat_face, sector.visible_heights.max, 0, face_mesh_list, &index_list);
+		add_face_mesh_to_list(flat_face, sector.visible_heights.max, 0, sector.texture_id, face_mesh_list, &index_list);
 
 		byte biggest_face_height = 0;
 

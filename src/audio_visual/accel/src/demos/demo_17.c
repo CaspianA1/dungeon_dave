@@ -8,13 +8,14 @@
 
 /*
 - NEXT: new_map
-- NEXT 2: different textures for a map
+- NEXT 2: grab texture maps from upper project to use here
 - NEXT 3: a bounding volume hierarchy, maybe
 - NEXT 4: Composable drawers - can just call draw_sectors_in_view_frustum and draw_billboards in one call
 
-- Point light sources, or simple lightmaps
+- Point light sources + simple lightmaps, or ambient occlusion with simple dynamic light sources
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
+- More effeciently set statemap bit ranges
 
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
@@ -37,7 +38,6 @@ StateGL demo_17_init(void) {
 
 	/*
 	tiny_map, tiny_width, tiny_height
-	palace_map, palace_width, palace_height
 	terrain_map, terrain_width, terrain_height
 	tpt_map, tpt_width, tpt_height
 	new_map, new_width, new_height
@@ -47,7 +47,20 @@ StateGL demo_17_init(void) {
 	List face_mesh_list;
 	SectorList sector_list;
 
-	init_face_mesh_and_sector_lists(&sector_list, &face_mesh_list, (byte*) terrain_map, terrain_width, terrain_height);
+	//////////
+	enum {map_width = palace_width, map_height = palace_height};
+	const byte* const heightmap = (byte*) palace_map;
+
+	static byte texture_id_map[map_height][map_width];
+	memset(texture_id_map, 0, sizeof(texture_id_map));
+	for (byte y = 0; y < 3; y++) {
+		for (byte x = 0; x < 5; x++) *map_point((byte*) texture_id_map, x, y, map_width) = y;
+	}
+
+	init_face_mesh_and_sector_lists(&sector_list, &face_mesh_list,
+		(byte*) heightmap, (byte*) texture_id_map, map_width, map_height);
+	//////////
+
 	init_sector_list_vbo_and_ibo(&sector_list, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sector_list);
 
@@ -60,10 +73,10 @@ StateGL demo_17_init(void) {
 
 	//////////
 	sgl.num_textures = 0;
-	const GLuint ts = init_texture_set(TexRepeating, 64, 64, 1,
+	const GLuint ts = init_texture_set(TexRepeating, 64, 64, 3,
+		"../../../assets/walls/hieroglyph.bmp",
+		"../../../assets/walls/mesa.bmp",
 		"../../../assets/walls/dune.bmp");
-		// "../../../assets/walls/mesa.bmp",
-		// "../../../assets/walls/hieroglyph.bmp");
 
 	use_texture(ts, sgl.shader_program, TexSet);
 
@@ -93,14 +106,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
 	glClearColor(0.89f, 0.355f, 0.288f, 0.0f); // Light tomato
-
-	/* (triangle counts, 12 vs 17)
-	palace: 1466 vs 1114. tpt: 232 vs 146.
-	pyramid: 816 vs 542. maze: 5796 vs 6114.
-	terrain: 150620 vs 86588. */
-
-	const SectorList* const sector_list = (SectorList*) sgl -> any_data;
-	draw_sectors_in_view_frustum(sector_list, &camera);
+	draw_sectors_in_view_frustum((SectorList*) sgl -> any_data, &camera);
 }
 
 void demo_17_deinit(const StateGL* const sgl) {

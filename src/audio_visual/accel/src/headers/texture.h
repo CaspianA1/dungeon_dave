@@ -22,6 +22,11 @@
 	free(ts);\
 } while (0)
 
+/* There's five bits to store a texture id in a face mesh's face info byte,
+And the biggest number possible with five bits is 31, so that gives you
+32 different possible texture ids. */
+#define MAX_NUM_TEXTURES 32
+
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,
 	TexBillboard = GL_TEXTURE_2D,
@@ -33,7 +38,6 @@ typedef enum {
 	TexRepeating = GL_REPEAT,
 	TexNonRepeating = GL_CLAMP_TO_EDGE
 } TextureWrapMode;
-
 
 SDL_Surface* init_surface(const char* const path);
 void deinit_surface(SDL_Surface* const surface);

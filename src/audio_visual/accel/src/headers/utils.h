@@ -45,7 +45,8 @@ typedef enum {
 	LaunchGLEW,
 	OpenImageFile,
 	MeshOutOfBounds,
-	TextureSetMismatchingImageSize
+	TextureSetMismatchingImageSize,
+	TextureIDIsTooLarge
 } FailureType;
 
 typedef struct {

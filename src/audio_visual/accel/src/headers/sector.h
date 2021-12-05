@@ -6,7 +6,7 @@
 #include "list.h"
 
 typedef struct {
-	const byte origin[2];
+	const byte texture_id, origin[2];
 	byte size[2]; // Top-down (X and Z); same for origin
 	struct {byte min; const byte max;} visible_heights;
 	struct {index_type_t start, length;} ibo_range; // ibo domain that defines sector's faces
@@ -20,11 +20,12 @@ typedef struct {
 
 // Excluded: form_sector_area
 
-void print_sector_list(const SectorList* const s);
-void deinit_sector_list(const SectorList* const s);
+void print_sector_list(const SectorList* const sector_list);
+void deinit_sector_list(const SectorList* const sector_list);
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width);
 
-List generate_sectors_from_heightmap(const byte* const heightmap,
+List generate_sectors_from_maps(
+	const byte* const heightmap, const byte* const texture_id_map,
 	const byte map_width, const byte map_height);
 
 #endif
