@@ -158,7 +158,7 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 }
 
 StateGL demo_12_palace_init(void) {
-	StateGL sgl = configurable_demo_12_init((byte*) palace_map, palace_width, palace_height);
+	StateGL sgl = configurable_demo_12_init((byte*) palace_heightmap, palace_width, palace_height);
 
 	sgl.num_textures = 1; // 14
 	sgl.textures = init_plain_textures(sgl.num_textures,
@@ -184,21 +184,21 @@ StateGL demo_12_palace_init(void) {
 }
 
 StateGL demo_12_tpt_init(void) {
-	StateGL sgl = configurable_demo_12_init((byte*) tpt_map, tpt_width, tpt_height);
+	StateGL sgl = configurable_demo_12_init((byte*) tpt_heightmap, tpt_width, tpt_height);
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../assets/walls/pyramid_bricks_2.bmp", TexRepeating);
 	return sgl;
 }
 
 StateGL demo_12_pyramid_init(void) {
-	StateGL sgl = configurable_demo_12_init((byte*) pyramid_map, pyramid_width, pyramid_height);
+	StateGL sgl = configurable_demo_12_init((byte*) pyramid_heightmap, pyramid_width, pyramid_height);
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../assets/walls/greece.bmp", TexRepeating);
 	return sgl;
 }
 
 StateGL demo_12_maze_init(void) {
-	StateGL sgl = configurable_demo_12_init((byte*) maze_map, maze_width, maze_height);
+	StateGL sgl = configurable_demo_12_init((byte*) maze_heightmap, maze_width, maze_height);
 	sgl.num_textures = 1; // ivy
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../assets/walls/ivy.bmp", TexRepeating);
 	return sgl;

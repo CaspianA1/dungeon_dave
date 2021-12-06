@@ -1,5 +1,9 @@
 #include "demo_1.c"
 
+static inline GLfloat to_radians(const GLfloat degrees) {
+	return degrees * (GLfloat) M_PI / 180.0f;
+}
+
 void demo_2_configurable_matrix_setup(const GLuint shader_program,
 	vec3 pos, vec3 rel_origin, vec3 up, mat4 view, mat4 view_times_projection, mat4 model_view_projection, const byte set_up_mvp) {
 

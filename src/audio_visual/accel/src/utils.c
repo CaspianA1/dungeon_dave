@@ -150,6 +150,27 @@ void bind_vbos_to_vao(const GLuint* const vbos, const GLsizei num_vbos, ...) {
 	va_end(args);
 }
 
+/*
+char* read_file(const char* const path) {
+	FILE* const file = fopen(path, "r");
+	if (file == NULL) {
+		fprintf(stderr, "%s\n", path);
+		FAIL(fail_open_file);
+	}
+
+	fseek(file, 0L, SEEK_END);
+	const long num_chars = ftell(file);
+	fseek(file, 0L, SEEK_SET);
+
+	char* const contents = malloc(num_chars + 1);
+	fread(contents, 1, num_chars, file);
+	contents[num_chars] = '\0';
+
+	fclose(file);
+	return contents;
+}
+*/
+
 static void fail_on_shader_creation_error(
 	const GLuint object_id, const ShaderCompilationStep compilation_step,
 	void (*const creation_action) (const GLuint),
@@ -209,10 +230,6 @@ void enable_all_culling(void) {
 
 void draw_triangles(const GLsizei num_triangles) {
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
-}
-
-static inline GLfloat to_radians(const GLfloat degrees) {
-	return degrees * (GLfloat) M_PI / 180.0f;
 }
 
 #endif

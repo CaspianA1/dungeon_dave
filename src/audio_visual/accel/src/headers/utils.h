@@ -82,6 +82,4 @@ GLuint init_shader_program(const char* const vertex_shader, const char* const fr
 void enable_all_culling(void);
 void draw_triangles(const GLsizei num_triangles);
 
-static inline GLfloat to_radians(const GLfloat degrees);
-
 #endif

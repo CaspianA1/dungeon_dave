@@ -10,7 +10,7 @@
 And puts the indices of the visible ones into a batch
 to be rendered in one draw call via glDrawElements. */
 
-byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) {
+static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) {
 	// Bottom left, size
 	vec3 aabb_corners[2] = {{sector.origin[0], sector.visible_heights.min, sector.origin[1]}};
 
