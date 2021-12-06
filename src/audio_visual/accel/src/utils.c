@@ -150,27 +150,6 @@ void bind_vbos_to_vao(const GLuint* const vbos, const GLsizei num_vbos, ...) {
 	va_end(args);
 }
 
-/*
-char* read_file(const char* const path) {
-	FILE* const file = fopen(path, "r");
-	if (file == NULL) {
-		fprintf(stderr, "%s\n", path);
-		FAIL(fail_open_file);
-	}
-
-	fseek(file, 0L, SEEK_END);
-	const long num_chars = ftell(file);
-	fseek(file, 0L, SEEK_SET);
-
-	char* const contents = malloc(num_chars + 1);
-	fread(contents, 1, num_chars, file);
-	contents[num_chars] = '\0';
-
-	fclose(file);
-	return contents;
-}
-*/
-
 static void fail_on_shader_creation_error(
 	const GLuint object_id, const ShaderCompilationStep compilation_step,
 	void (*const creation_action) (const GLuint),
@@ -194,7 +173,7 @@ static void fail_on_shader_creation_error(
 }
 
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader) {
-	const char* const shaders[2] = {vertex_shader, fragment_shader};
+	const GLchar* const shaders[2] = {vertex_shader, fragment_shader};
 	const GLenum gl_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
 	GLuint shader_ids[2], program_id = glCreateProgram();
 

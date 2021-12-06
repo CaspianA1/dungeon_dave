@@ -60,6 +60,8 @@ extern inline void fail(const char* const msg, const FailureType failure_type) {
 	exit(failure_type + 1);
 }
 
+// Excluded: fail_on_shader_creation_error
+
 Screen init_screen(const char* const title);
 void deinit_screen(const Screen* const screen);
 
