@@ -30,17 +30,16 @@ StateGL demo_17_init(void) {
 	/*
 	for (byte y = 0; y < terrain_height; y++) {
 		for (byte x = 0; x < terrain_width; x++) {
-			*map_point((byte*) terrain_map, x, y, terrain_width) = fabsf((cosf(x / 5.0f) + sinf(y / 5.0f))) * 5.0f;
-			// *map_point((byte*) terrain_map, x, y, terrain_width) *= ((x + y) >> 1) / 50.0f;
+			*map_point((byte*) terrain_heightmap, x, y, terrain_width) = fabsf((cosf(x / 5.0f) + sinf(y / 5.0f))) * 5.0f;
+			*map_point((byte*) terrain_heightmap, x, y, terrain_width) *= ((x + y) >> 1) / 50.0f;
 		}
 	}
 	*/
 
 	/*
-	tiny_map, tiny_width, tiny_height
-	terrain_map, terrain_width, terrain_height
-	tpt_map, tpt_width, tpt_height
-	new_map, new_width, new_height
+	(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height
+	(byte*) pyramid_heightmap, (byte*) pyramid_texture_id_map, pyramid_width, pyramid_height
+	(byte*) tpt_heightmap, (byte*) tpt_texture_id_map, tpt_width, tpt_height
 	*/
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
@@ -48,18 +47,10 @@ StateGL demo_17_init(void) {
 	SectorList sector_list;
 
 	//////////
-	enum {map_width = palace_width, map_height = palace_height};
-	const byte* const heightmap = (byte*) palace_map;
 
-	static byte texture_id_map[map_height][map_width];
-	memset(texture_id_map, 0, sizeof(texture_id_map));
-	for (byte y = 0; y < 3; y++) {
-		for (byte x = 0; x < 5; x++) *map_point((byte*) texture_id_map, x, y, map_width) = y;
-	}
-
+	// static byte texture_id_map[terrain_height][terrain_width];
 	init_face_mesh_and_sector_lists(&sector_list, &face_mesh_list,
-		(byte*) heightmap, (byte*) texture_id_map, map_width, map_height);
-	//////////
+		(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height);
 
 	init_sector_list_vbo_and_ibo(&sector_list, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sector_list);
@@ -73,10 +64,29 @@ StateGL demo_17_init(void) {
 
 	//////////
 	sgl.num_textures = 0;
-	const GLuint ts = init_texture_set(TexRepeating, 64, 64, 3,
+	const GLuint ts = init_texture_set(TexRepeating, 128, 128,
+		// Palace:
+		11,
+		"../../../assets/walls/sand.bmp",
+		"../../../assets/walls/pyramid_bricks_4.bmp",
+		"../../../assets/walls/marble.bmp",
 		"../../../assets/walls/hieroglyph.bmp",
+		"../../../assets/walls/window.bmp",
+		"../../../assets/walls/saqqara.bmp",
+		"../../../assets/walls/sandstone.bmp",
+		"../../../assets/walls/cobblestone_3.bmp",
+		"../../../assets/walls/horses.bmp",
 		"../../../assets/walls/mesa.bmp",
-		"../../../assets/walls/dune.bmp");
+		"../../../assets/walls/arthouse_bricks.bmp"
+
+		// Pyramid:
+		/*
+		3,
+		"../../../assets/walls/pyramid_bricks_4.bmp",
+		"../../../assets/walls/greece.bmp",
+		"../../../assets/walls/saqqara.bmp"
+		*/
+		);
 
 	use_texture(ts, sgl.shader_program, TexSet);
 
@@ -94,7 +104,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	static byte first_call = 1;
 
 	if (first_call) { // start new map: 1.5f, 0.5f, 1.5f
-		init_camera(&camera, (vec3) {28.0f, 20.0f, 24.0f}); // terrain: 34.5f, 13.50f, 25.2f
+		init_camera(&camera, (vec3) {5.0f, 5.0f, 5.0f}); // terrain: 34.5f, 13.50f, 25.2f
 		camera_pos_id = glGetUniformLocation(sgl -> shader_program, "camera_pos_world_space");
 		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
 		first_call = 0;

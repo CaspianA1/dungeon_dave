@@ -88,24 +88,35 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode,
 		subtex_width, subtex_height, num_textures,
 		0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
 	
+	SDL_Surface* const rescaled_surface = SDL_CreateRGBSurfaceWithFormat(0,
+		subtex_width, subtex_height, SDL_BITSPERPIXEL(SDL_PIXEL_FORMAT), SDL_PIXEL_FORMAT);
+	
 	va_list args;
 	va_start(args, num_textures);
 	for (GLsizei i = 0; i < num_textures; i++) {
 		const char* const path = va_arg(args, char*);
 		SDL_Surface* const surface = init_surface(path);
 
-		if (surface -> w != subtex_width || surface -> h != subtex_height) {
-			fprintf(stderr, "Expected image '%s' to have a size of {%d, %d}\n", path, subtex_width, subtex_height);
-			fail("make a texture set with a mismatching image size", TextureSetMismatchingImageSize);
-		}
+		const SDL_Surface* src_surface;
 
-		glTexSubImage3D(
-			GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, subtex_width, subtex_height, 1,
-			OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
-		
+		if (surface -> w != subtex_width || surface -> h != subtex_height) {
+			SDL_UnlockSurface(rescaled_surface);
+			SDL_UnlockSurface(surface);
+			SDL_SoftStretchLinear(surface, NULL, rescaled_surface, NULL);
+			SDL_LockSurface(surface);
+			SDL_LockSurface(rescaled_surface);
+
+			src_surface = rescaled_surface;
+		}
+		else src_surface = surface;
+
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, subtex_width, subtex_height, 1,
+			OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, src_surface -> pixels);
+
 		deinit_surface(surface);
 	}
 
+	deinit_surface(rescaled_surface);
 	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 	va_end(args);
 
