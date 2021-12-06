@@ -41,6 +41,7 @@ StateGL demo_17_init(void) {
 	(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height
 	(byte*) pyramid_heightmap, (byte*) pyramid_texture_id_map, pyramid_width, pyramid_height
 	(byte*) tpt_heightmap, (byte*) tpt_texture_id_map, tpt_width, tpt_height
+	(byte*) new_heightmap, (byte*) texture_id_map, new_width, new_height
 	*/
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
@@ -49,9 +50,9 @@ StateGL demo_17_init(void) {
 
 	//////////
 
-	// static byte texture_id_map[terrain_height][terrain_width];
+	static byte texture_id_map[new_height][new_width];
 	init_face_mesh_and_sector_lists(&sector_list, &face_mesh_list,
-		(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height);
+		(byte*) new_heightmap, (byte*) texture_id_map, new_width, new_height);
 
 	init_sector_list_vbo_and_ibo(&sector_list, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sector_list);
@@ -66,7 +67,12 @@ StateGL demo_17_init(void) {
 	//////////
 	sgl.num_textures = 0;
 	const GLuint ts = init_texture_set(TexRepeating, 128, 128,
+		// New:
+		1,
+		"../../../assets/walls/dune.bmp"
+
 		// Palace:
+		/*
 		11,
 		"../../../assets/walls/sand.bmp",
 		"../../../assets/walls/pyramid_bricks_4.bmp",
@@ -79,6 +85,7 @@ StateGL demo_17_init(void) {
 		"../../../assets/walls/horses.bmp",
 		"../../../assets/walls/mesa.bmp",
 		"../../../assets/walls/arthouse_bricks.bmp"
+		*/
 
 		// Pyramid:
 		/*
