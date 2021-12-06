@@ -20,6 +20,14 @@ void deinit_surface(SDL_Surface* const surface) {
 	SDL_FreeSurface(surface);
 }
 
+void use_texture(const GLuint texture, const GLuint shader_program, const TextureType texture_type) {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(texture_type, texture); // Set the current bound texture
+
+	const GLuint texture_sampler = glGetUniformLocation(shader_program, "texture_sampler");
+	glUniform1i(texture_sampler, 0); // Make the sampler read from texture unit 0
+}
+
 GLuint preinit_texture(const TextureType texture_type, const TextureWrapMode wrap_mode) {
 	GLuint t;
 	glGenTextures(1, &t);
@@ -44,12 +52,11 @@ GLuint preinit_texture(const TextureType texture_type, const TextureWrapMode wra
 	return t;
 }
 
-void use_texture(const GLuint texture, const GLuint shader_program, const TextureType texture_type) {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(texture_type, texture); // Set the current bound texture
-
-	const GLuint texture_sampler = glGetUniformLocation(shader_program, "texture_sampler");
-	glUniform1i(texture_sampler, 0); // Make the sampler read from texture unit 0
+// This function assumes that the surface is locked beforehand
+void write_surface_to_texture(const SDL_Surface* const surface, const GLenum opengl_texture_type) {
+	glTexImage2D(opengl_texture_type, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
+		surface -> w, surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
+		OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
 }
 
 GLuint* init_plain_textures(const GLsizei num_textures, ...) {
@@ -66,10 +73,7 @@ GLuint* init_plain_textures(const GLsizei num_textures, ...) {
 		textures[i] = preinit_texture(TexPlain, wrap_mode);
 		SDL_Surface* const surface = init_surface(surface_path);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
-			surface -> w, surface -> h,
-			0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
-
+		write_surface_to_texture(surface, GL_TEXTURE_2D);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		deinit_surface(surface);
 	}

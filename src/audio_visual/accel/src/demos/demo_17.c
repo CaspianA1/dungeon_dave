@@ -22,6 +22,7 @@
 - Blit color rect to screen
 - Good physics
 - Then, flat weapon
+- An InputTick struct
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
 */

@@ -45,8 +45,8 @@ void deinit_surface(SDL_Surface* const surface);
 GLuint preinit_texture(const TextureType texture_type, const TextureWrapMode wrap_mode);
 void use_texture(const GLuint texture, const GLuint shader_program, const TextureType texture_type);
 
+void write_surface_to_texture(const SDL_Surface* const surface, const GLenum opengl_texture_type);
 GLuint* init_plain_textures(const GLsizei num_textures, ...);
-
 GLuint init_texture_set(const TextureWrapMode wrap_mode,
 	const GLsizei subtex_width, const GLsizei subtex_height, const GLsizei num_textures, ...);
 

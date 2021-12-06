@@ -4,7 +4,7 @@
 #include "headers/skybox.h"
 #include "texture.c"
 
-const GLbyte skybox_vertices[] = {
+static const GLbyte skybox_vertices[] = {
 	-1, 1, -1,
 	-1, -1, -1,
 	1, -1, -1,
@@ -48,7 +48,7 @@ const GLbyte skybox_vertices[] = {
 	1, -1, 1
 };
 
-GLuint init_skybox_texture(const char* const path) {
+static GLuint init_skybox_texture(const char* const path) {
 	SDL_Surface* const skybox_surface = init_surface(path);
 	SDL_UnlockSurface(skybox_surface);
 	const GLint cube_size = skybox_surface -> w >> 2;
@@ -58,7 +58,6 @@ GLuint init_skybox_texture(const char* const path) {
 	SDL_Surface* const face_surface = SDL_CreateRGBSurfaceWithFormat(0, cube_size, cube_size,
 		cube_size * sizeof(Uint32), SDL_PIXEL_FORMAT);
 
-	void* const face_pixels = face_surface -> pixels;
 	SDL_Rect dest_rect = {0, 0, cube_size, cube_size};
 
 	const GLint twice_cube_size = cube_size << 1;
@@ -81,12 +80,7 @@ GLuint init_skybox_texture(const char* const path) {
 
 		SDL_LowerBlit(skybox_surface, &src_rect, face_surface, &dest_rect);
 		SDL_LockSurface(face_surface); // Locking for read access to face_pixels
-
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-			0, OPENGL_INTERNAL_PIXEL_FORMAT,
-			cube_size, cube_size, 0, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_COLOR_CHANNEL_TYPE, face_pixels);
-
+		write_surface_to_texture(face_surface, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
 		SDL_UnlockSurface(face_surface); // Unlocking for next call to SDL_LowerBlit
 	}
 

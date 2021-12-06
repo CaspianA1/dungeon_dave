@@ -18,9 +18,8 @@ typedef struct {
 	index_type_t* ibo_ptr;
 } SectorList;
 
-// Excluded: form_sector_area
+// Excluded: print_sector_list, form_sector_area
 
-void print_sector_list(const SectorList* const sector_list);
 void deinit_sector_list(const SectorList* const sector_list);
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width);
 

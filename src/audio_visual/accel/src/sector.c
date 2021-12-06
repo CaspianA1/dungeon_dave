@@ -16,11 +16,13 @@ typedef struct {
 
 #include "../../../main/statemap.c"
 #include "headers/sector.h"
+#include "headers/texture.h"
 #include "list.c"
 
 //////////
 
-void print_sector_list(const SectorList* const sector_list) {
+/*
+static void print_sector_list(const SectorList* const sector_list) {
 	const List sectors = sector_list -> sectors;
 
 	puts("sector_list = [");
@@ -37,6 +39,7 @@ void print_sector_list(const SectorList* const sector_list) {
 	}
 	puts("]");
 }
+*/
 
 void deinit_sector_list(const SectorList* const sector_list) {
 	deinit_list(sector_list -> sectors);
