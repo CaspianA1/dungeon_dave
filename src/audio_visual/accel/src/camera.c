@@ -4,6 +4,19 @@
 #include "headers/camera.h"
 #include "headers/constants.h"
 
+Event get_next_event(void) {
+	Event e = {
+		.movement_bits =
+			(keys[constants.movement_keys.right] << 3) |
+			(keys[constants.movement_keys.left] << 2) |
+			(keys[constants.movement_keys.backward] << 1) |
+			keys[constants.movement_keys.forward]
+	};
+
+	SDL_GetRelativeMouseState(&e.mouse_dx, &e.mouse_dy);
+	return e;
+}
+
 void init_camera(Camera* const camera, const vec3 init_pos) {
 	memset(camera, 0, sizeof(Camera));
 	memcpy(camera -> pos, init_pos, sizeof(vec3));
@@ -11,7 +24,7 @@ void init_camera(Camera* const camera, const vec3 init_pos) {
 	camera -> aspect_ratio = (GLfloat) SCR_W / SCR_H;
 }
 
-void update_camera(Camera* const camera) {
+static void update_camera(Camera* const camera, const Event event) {
 	static GLfloat last_time;
 	static byte first_call = 1;
 
@@ -21,12 +34,9 @@ void update_camera(Camera* const camera) {
 		return;
 	}
 
-	int mouse_dx, mouse_dy;
-	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
-
 	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time;
-	camera -> hori_angle += constants.speeds.look * delta_time * -mouse_dx;
-	camera -> vert_angle += constants.speeds.look * delta_time * -mouse_dy;
+	camera -> hori_angle += constants.speeds.look * delta_time * -event.mouse_dx;
+	camera -> vert_angle += constants.speeds.look * delta_time * -event.mouse_dy;
 
 	if (camera -> vert_angle > constants.max_vert_angle) camera -> vert_angle = constants.max_vert_angle;
 	else if (camera -> vert_angle < -constants.max_vert_angle) camera -> vert_angle = -constants.max_vert_angle;
@@ -47,10 +57,11 @@ void update_camera(Camera* const camera) {
 	vec3 pos;
 	memcpy(pos, camera -> pos, sizeof(vec3));
 
-	if (keys[constants.movement_keys.forward]) glm_vec3_muladds(dir, actual_speed, pos);
-	if (keys[constants.movement_keys.backward]) glm_vec3_muladds(dir, -actual_speed, pos);
-	if (keys[constants.movement_keys.left]) glm_vec3_muladds(right, -actual_speed, pos);
-	if (keys[constants.movement_keys.right]) glm_vec3_muladds(right, actual_speed, pos);
+	// Forward, backward, left, right
+	if (event.movement_bits & 1) glm_vec3_muladds(dir, actual_speed, pos);
+	if (event.movement_bits & 2) glm_vec3_muladds(dir, -actual_speed, pos);
+	if (event.movement_bits & 4) glm_vec3_muladds(right, -actual_speed, pos);
+	if (event.movement_bits & 8) glm_vec3_muladds(right, actual_speed, pos);
 
 	if (keys[KEY_PRINT_POSITION])
 		printf("pos = {%lf, %lf, %lf}\n", (double) pos[0], (double) pos[1], (double) pos[2]);

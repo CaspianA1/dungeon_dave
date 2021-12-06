@@ -108,7 +108,7 @@ void demo_19_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	update_camera(&camera);
+	update_camera(&camera, get_next_event());
 
 	static GLfloat spin[2], spin_input = 0.0f;
 	glUniform3f(spin_id, spin[0], spin[0] * spin[1], spin[1]);

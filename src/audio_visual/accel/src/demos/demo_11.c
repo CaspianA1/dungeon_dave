@@ -167,7 +167,7 @@ void demo_11_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	update_camera(&camera);
+	update_camera(&camera, get_next_event());
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	draw_triangles(triangles_per_mesh);

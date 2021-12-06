@@ -22,7 +22,6 @@
 - Blit color rect to screen
 - Good physics
 - Then, flat weapon
-- An InputTick struct
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
 */
@@ -118,7 +117,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	update_camera(&camera);
+	update_camera(&camera, get_next_event());
 
 	glUniform3f(camera_pos_id, camera.pos[0], camera.pos[1], camera.pos[2]);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
