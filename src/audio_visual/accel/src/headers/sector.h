@@ -14,7 +14,7 @@ typedef struct {
 
 typedef struct {
 	List sectors, indices;
-	GLuint vbo, ibo;
+	GLuint vbo, ibo, texture_set;
 	index_type_t* ibo_ptr;
 } SectorList;
 

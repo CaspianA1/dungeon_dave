@@ -2002,3 +2002,16 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 	DEBUG(sizeof(byte[2]) + sizeof(byte[2]) + sizeof(byte) + sizeof(byte) + 4 + 4, zu);
 
 /////
+
+	/*
+	static float s = 0.0f;
+	s += 0.05f;
+	if (s > (float) M_PI * 2.0f) s = 0.0f;
+
+	Event e = {
+		.movement_bits = 0,
+		cosf(s) * 50, sinf(s) * 30
+	};
+	*/
+
+/////

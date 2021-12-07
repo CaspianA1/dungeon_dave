@@ -5,6 +5,7 @@
 #include "../data/maps.c"
 #include "../culling.c"
 #include "../texture.c"
+#include "../skybox.c"
 
 /*
 - NEXT: new_map
@@ -56,6 +57,15 @@ StateGL demo_17_init(void) {
 	init_sector_list_vbo_and_ibo(&sector_list, &face_mesh_list);
 	bind_sector_list_vbo_to_vao(&sector_list);
 
+	// Skybox skybox = init_skybox("assets/hell.bmp");
+
+	/*
+	compartmentalized sector drawing:
+	- use shader
+	- use texture
+	- bind vbo to vao
+	*/
+
 	SectorList* const sector_list_on_heap = malloc(sizeof(SectorList));
 	*sector_list_on_heap = sector_list;
 	sgl.any_data = sector_list_on_heap;
@@ -65,7 +75,7 @@ StateGL demo_17_init(void) {
 
 	//////////
 	sgl.num_textures = 0;
-	const GLuint ts = init_texture_set(TexRepeating, 128, 128,
+	sector_list.texture_set = init_texture_set(TexRepeating, 128, 128,
 		// New:
 		1,
 		"../../../assets/walls/pyramid_bricks_4.bmp"
@@ -95,7 +105,7 @@ StateGL demo_17_init(void) {
 		*/
 		);
 
-	use_texture(ts, sgl.shader_program, TexSet);
+	use_texture(sector_list.texture_set, sgl.shader_program, TexSet);
 
 	enable_all_culling();
 	glEnable(GL_MULTISAMPLE);
@@ -107,30 +117,16 @@ StateGL demo_17_init(void) {
 
 void demo_17_drawer(const StateGL* const sgl) {
 	static Camera camera;
-	static GLint camera_pos_id, model_view_projection_id;
+	static GLint model_view_projection_id;
 	static byte first_call = 1;
 
 	if (first_call) { // start new map: 1.5f, 0.5f, 1.5f
 		init_camera(&camera, (vec3) {5.0f, 5.0f, 5.0f}); // terrain: 34.5f, 13.50f, 25.2f
-		camera_pos_id = glGetUniformLocation(sgl -> shader_program, "camera_pos_world_space");
 		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
 		first_call = 0;
 	}
 
-	/*
-	static float s = 0.0f;
-	s += 0.05f;
-	if (s > (float) M_PI * 2.0f) s = 0.0f;
-
-	Event e = {
-		.movement_bits = 0,
-		cosf(s) * 50, sinf(s) * 30
-	};
-	*/
-
 	update_camera(&camera, get_next_event());
-
-	glUniform3f(camera_pos_id, camera.pos[0], camera.pos[1], camera.pos[2]);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
 	glClearColor(0.89f, 0.355f, 0.288f, 0.0f); // Light tomato
