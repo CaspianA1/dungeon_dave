@@ -2014,4 +2014,16 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 	};
 	*/
 
+///// Even terrain generation for a heightmap:
+
+	/*
+	for (byte y = 0; y < terrain_height; y++) {
+		for (byte x = 0; x < terrain_width; x++) {
+			// *map_point((byte*) terrain_heightmap, x, y, terrain_width) = fabsf((cosf(x / 5.0f) + sinf(y / 5.0f))) * 5.0f;
+			*map_point((byte*) terrain_heightmap, x, y, terrain_width) *= ((x + y) >> 1) / 50.0f;
+		}
+	}
+	*/
+
+
 /////

@@ -46,6 +46,7 @@ void demo_16_drawer(const StateGL* const sgl) {
 	glUseProgram(sgl -> shader_program);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 
+	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
 	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
@@ -54,6 +55,7 @@ void demo_16_drawer(const StateGL* const sgl) {
 	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);
 
 	draw_triangles(triangles_per_mesh);
+	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 
 	draw_skybox(*(Skybox*) sgl -> any_data, &camera);

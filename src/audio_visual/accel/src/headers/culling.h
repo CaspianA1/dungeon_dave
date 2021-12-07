@@ -3,9 +3,10 @@
 
 #include "utils.h"
 #include "sector.h"
+#include "camera.h"
 
-// Excluded: sector_in_view_frustum
+// Excluded: sector_in_view_frustum, draw_sectors_in_view_frustum
 
-void draw_sectors_in_view_frustum(const SectorList* const sector_list, const Camera* const camera);
+void draw_sectors(const SectorList* const sector_list, const Camera* const camera, const GLuint sector_shader);
 
 #endif

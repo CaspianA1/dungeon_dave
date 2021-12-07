@@ -21,7 +21,12 @@ void deinit_surface(SDL_Surface* const surface) {
 }
 
 void use_texture(const GLuint texture, const GLuint shader_program, const TextureType texture_type) {
-	glActiveTexture(GL_TEXTURE0);
+	static byte first_call = 1;
+	if (first_call) {
+		glActiveTexture(GL_TEXTURE0);
+		first_call = 0;
+	}
+
 	glBindTexture(texture_type, texture); // Set the current bound texture
 
 	const GLuint texture_sampler = glGetUniformLocation(shader_program, "texture_sampler");

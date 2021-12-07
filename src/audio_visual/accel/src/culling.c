@@ -22,7 +22,7 @@ static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) 
 	return glm_aabb_frustum(aabb_corners, frustum_planes);
 }
 
-void draw_sectors_in_view_frustum(const SectorList* const sector_list, const Camera* const camera) {
+static void draw_sectors_in_view_frustum(const SectorList* const sector_list, const Camera* const camera) {
 	static vec4 frustum_planes[6];
 	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
 
@@ -53,6 +53,35 @@ void draw_sectors_in_view_frustum(const SectorList* const sector_list, const Cam
 	pyramid: 816 vs 542. maze: 5796 vs 6114.
 	terrain: 150620 vs 86588. */
 	glDrawElements(GL_TRIANGLES, num_visible_indices, INDEX_TYPE_ENUM, NULL);
+}
+
+void draw_sectors(const SectorList* const sector_list, const Camera* const camera, const GLuint sector_shader) {
+	glUseProgram(sector_shader);
+	use_texture(sector_list -> texture_set, sector_shader, TexSet);
+
+	static byte first_call = 1;
+	static GLint model_view_projection_id;
+
+	if (first_call) {
+		model_view_projection_id = glGetUniformLocation(sector_shader, "model_view_projection");
+		first_call = 0;
+	}
+
+	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
+	glVertexAttribIPointer(1, 1, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
+
+	// bind_sector_list_vbo_to_vao(sector_list);
+	draw_sectors_in_view_frustum(sector_list, camera);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 }
 
 #endif

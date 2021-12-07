@@ -133,6 +133,7 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &view_projection[0][0]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, s.vbo);
+	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_BYTE, GL_FALSE, 0, NULL);
 
 	glDepthFunc(GL_LEQUAL);
@@ -140,6 +141,8 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
+
+	glDisableVertexAttribArray(0);
 }
 
 #endif

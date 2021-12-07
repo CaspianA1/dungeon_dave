@@ -45,6 +45,8 @@ void deinit_sector_list(const SectorList* const sector_list) {
 	deinit_list(sector_list -> sectors);
 	deinit_list(sector_list -> indices);
 
+	deinit_texture(sector_list -> texture_set);
+
 	glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 
 	const GLuint buffers[2] = {sector_list -> vbo, sector_list -> ibo};
