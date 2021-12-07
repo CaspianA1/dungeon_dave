@@ -117,6 +117,17 @@ void demo_17_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
+	/*
+	static float s = 0.0f;
+	s += 0.05f;
+	if (s > (float) M_PI * 2.0f) s = 0.0f;
+
+	Event e = {
+		.movement_bits = 0,
+		cosf(s) * 50, sinf(s) * 30
+	};
+	*/
+
 	update_camera(&camera, get_next_event());
 
 	glUniform3f(camera_pos_id, camera.pos[0], camera.pos[1], camera.pos[2]);
