@@ -68,7 +68,7 @@ StateGL demo_17_init(void) {
 	const GLuint ts = init_texture_set(TexRepeating, 128, 128,
 		// New:
 		1,
-		"../../../assets/walls/dune.bmp"
+		"../../../assets/walls/pyramid_bricks_4.bmp"
 
 		// Palace:
 		/*
