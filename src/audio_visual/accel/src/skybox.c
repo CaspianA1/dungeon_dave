@@ -91,6 +91,12 @@ static GLuint init_skybox_texture(const char* const path) {
 }
 
 Skybox init_skybox(const char* const cubemap_path) {
+	static byte first_call = 1;
+	if (first_call) {
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		first_call = 0;
+	}
+
 	Skybox s;
 
 	glGenBuffers(1, &s.vbo);

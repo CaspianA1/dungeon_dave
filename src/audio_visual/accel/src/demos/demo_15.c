@@ -11,7 +11,7 @@ StateGL demo_15_init(void) {
 	sgl.num_vertex_buffers = 0;
 	sgl.num_textures = 0;
 
-	const Skybox skybox = init_skybox("assets/night.bmp");
+	const Skybox skybox = init_skybox("assets/wadi.bmp");
 	sgl.any_data = malloc(sizeof(Skybox));
 	memcpy(sgl.any_data, &skybox, sizeof(Skybox));
 

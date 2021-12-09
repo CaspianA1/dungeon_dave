@@ -21,7 +21,7 @@ const char* const sector_vertex_shader =
 	");\n"
 
 	"void main() {\n"
-		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
+		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
 
 		"texture_id = face_info >> 3;\n" // `>> 3` shifts upper 5 bits of texture id to the beginning
 		"int first_three_bits = face_info & 7, face_type = face_info & 3;\n" // `& 3` gets first 2 bits
@@ -63,7 +63,7 @@ const char* const sector_vertex_shader =
 	"uniform mat4 model_view_projection;\n"
 
 	"void main() {\n"
-		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
+		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
 		"UV = vertex_UV;\n"
 		"pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
 	"}\n",
@@ -137,8 +137,9 @@ const char* const sector_vertex_shader =
 	"uniform mat4 view_projection;\n"
 
 	"void main() {\n"
-		"gl_Position = (view_projection * vec4(vertex_pos_world_space, 1.0)).xyww;\n"
+		"gl_Position = (view_projection * vec4(vertex_pos_world_space, 1.0f)).xyww;\n"
 		"UV_3D = vertex_pos_world_space;\n"
+		"UV_3D.x = -UV_3D.x;\n" // Without this, the X component of the UV is reversed
 	"}\n",
 
 *const skybox_fragment_shader =
