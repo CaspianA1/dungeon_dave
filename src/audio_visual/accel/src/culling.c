@@ -56,7 +56,8 @@ static void draw_sectors_in_view_frustum(const DrawableSet* const sector_list, c
 	glDrawElements(GL_TRIANGLES, num_visible_indices, BUFFER_INDEX_TYPENAME, NULL);
 }
 
-void draw_sectors(const DrawableSet* const sector_list, const Camera* const camera, const GLuint sector_shader) {
+void draw_sectors(const DrawableSet* const sector_list, const Camera* const camera) {
+	const GLuint sector_shader = sector_list -> shader;
 	glUseProgram(sector_shader);
 	use_texture(sector_list -> texture_set, sector_shader, TexSet);
 

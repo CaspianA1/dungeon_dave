@@ -15,11 +15,18 @@ typedef struct {
 StateGL demo_20_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	List billboard_list = init_list(2, Billboard);
+	List billboards = init_list(2, Billboard);
 	const Billboard first = {{2.5f, 3.5f, 4.5f}, 0}, second = {{0.0f, 1.0f, 2.0f}, 1};
-	push_ptr_to_list(&billboard_list, &first);
-	push_ptr_to_list(&billboard_list, &second);
-	deinit_list(billboard_list);
+	push_ptr_to_list(&billboards, &first);
+	push_ptr_to_list(&billboards, &second);
+
+	/*
+	- In DrawableSet, put shader, texture set, a list of all billboards, and their indices
+	- TODO: different billboard shader that can handle many
+	- TODO: function init_billboard_list
+	*/
+
+	deinit_list(billboards);
 
 	return sgl;
 }

@@ -57,7 +57,7 @@ StateGL demo_17_init(void) {
 
 	init_sector_list_vbo_and_ibo(&scene_state.sector_list, &face_mesh_list);
 
-	sgl.shader_program = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+	scene_state.sector_list.shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 
 	//////////
 	sgl.num_textures = 0;
@@ -102,7 +102,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	glClearColor(0.89f, 0.355f, 0.288f, 0.0f); // Light tomato
 
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
-	draw_sectors(&scene_state -> sector_list, &camera, sgl -> shader_program);
+	draw_sectors(&scene_state -> sector_list, &camera);
 
 	draw_skybox(scene_state -> skybox, &camera);
 }

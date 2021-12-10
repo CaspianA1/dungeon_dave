@@ -23,6 +23,7 @@ void init_drawable_set_buffers(DrawableSet* const ds, const void* const vertex_d
 void deinit_drawable_set(const DrawableSet* const ds) {
 	deinit_list(ds -> objects);
 	deinit_list(ds -> object_indices);
+	glDeleteProgram(ds -> shader);
 	deinit_texture(ds -> texture_set);
 
 	glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
