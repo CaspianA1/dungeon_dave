@@ -11,7 +11,7 @@
 
 /*
 - NEXT: new_map
-- NEXT 2: grab texture maps from upper project to use here
+- NEXT 2: grab texture id maps from upper project to use here
 - NEXT 3: a bounding volume hierarchy, maybe
 - NEXT 4: composable billboard drawer, but before that, billboard batching + different billboard types
 

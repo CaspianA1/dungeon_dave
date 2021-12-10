@@ -10,7 +10,7 @@ typedef struct {
 	`object_indices`: a buffer of indices on the CPU, used for batching. If an object
 	is in view, the indices of a given object are copied over to the gpu ibo. */
 	List objects, object_indices; 
-	// TODO: init texture set from init_drawable; then, only one owner of texture_set.
+	// TODO: init texture set from init_drawable; then, only one owner of texture_set
 	GLuint vbo, ibo, shader, texture_set;
 	buffer_index_t* ibo_ptr;
 } DrawableSet;

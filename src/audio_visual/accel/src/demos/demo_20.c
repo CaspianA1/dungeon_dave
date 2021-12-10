@@ -22,7 +22,7 @@ StateGL demo_20_init(void) {
 
 	/*
 	- In DrawableSet, put shader, texture set, a list of all billboards, and their indices
-	- TODO: different billboard shader that can handle many
+	- TODO: different billboard shader that can handle many billboards as a stream
 	- TODO: function init_billboard_list
 	*/
 
