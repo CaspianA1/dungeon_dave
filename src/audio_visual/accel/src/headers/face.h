@@ -21,13 +21,10 @@ typedef struct {
 
 // Excluded: print_face, get_next_face, init_vert_faces, add_face_mesh_to_list
 
-void init_face_mesh_and_sector_lists(SectorList* const sector_list,
+void init_face_mesh_and_sector_lists(DrawableSet* const sector_list,
 	List* const face_mesh_list, const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height);
 
-void init_sector_list_vbo_and_ibo(SectorList* const sector_list,
-	const List* const face_list);
-
-void bind_sector_list_vbo_to_vao(const SectorList* const sector_list);
+void init_sector_list_vbo_and_ibo(DrawableSet* const sector_list, const List* const face_list);
 
 #endif

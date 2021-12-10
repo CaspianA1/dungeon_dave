@@ -177,7 +177,7 @@ static void init_vert_faces(const Sector sector, List* const face_mesh_list, Lis
 }
 
 void init_face_mesh_and_sector_lists(
-	SectorList* const sector_list, List* const face_mesh_list, const byte* const heightmap,
+	DrawableSet* const sector_list, List* const face_mesh_list, const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
 	List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
@@ -205,30 +205,20 @@ void init_face_mesh_and_sector_lists(
 		sector_ref -> ibo_range.length = index_list.length * indices_per_face - sector_ref -> ibo_range.start;
 	}
 
-	*sector_list = (SectorList) {
-		.sectors = sectors,
-		.indices = index_list
+	*sector_list = (DrawableSet) {
+		.objects = sectors,
+		.object_indices = index_list
 	};
 }
 
-void init_sector_list_vbo_and_ibo(SectorList* const sector_list, const List* const face_list) {
+void init_sector_list_vbo_and_ibo(DrawableSet* const sector_list, const List* const face_list) {
 	const size_t num_faces = face_list -> length;
+
 	const GLsizeiptr
 		total_vertex_bytes = num_faces * vars_per_face * sizeof(mesh_component_t),
 		total_index_bytes = num_faces * sizeof(buffer_index_t[indices_per_face]);
 
-	GLuint buffers[2];
-	glGenBuffers(2, buffers);
-
-	sector_list -> vbo = buffers[0];
-	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
-	glBufferData(GL_ARRAY_BUFFER, total_vertex_bytes, face_list -> data, GL_STATIC_DRAW);
-
-	sector_list -> ibo = buffers[1];
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sector_list -> ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_index_bytes, NULL, GL_DYNAMIC_DRAW);
-
-	sector_list -> ibo_ptr = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+	init_drawable_set_buffers(sector_list, face_list -> data, total_vertex_bytes, total_index_bytes);
 }
 
 #endif

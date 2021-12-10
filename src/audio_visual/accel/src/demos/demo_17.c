@@ -7,6 +7,8 @@
 #include "../texture.c"
 #include "../skybox.c"
 
+#include "../drawable_set.c"
+
 /*
 - NEXT: new_map
 - NEXT 2: grab texture maps from upper project to use here
@@ -28,7 +30,7 @@
 */
 
 typedef struct {
-	SectorList sector_list;
+	DrawableSet sector_list;
 	Skybox skybox;
 } SceneState;
 
@@ -101,12 +103,13 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 	draw_sectors(&scene_state -> sector_list, &camera, sgl -> shader_program);
+
 	draw_skybox(scene_state -> skybox, &camera);
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
-	deinit_sector_list(&scene_state -> sector_list);
+	deinit_drawable_set(&scene_state -> sector_list);
 	deinit_skybox(scene_state -> skybox);
 	free(sgl -> any_data);
 

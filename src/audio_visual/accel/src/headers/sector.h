@@ -3,6 +3,7 @@
 
 #include "constants.h"
 #include "buffer_defs.h"
+#include "drawable_set.h"
 #include "list.h"
 
 typedef struct {
@@ -12,15 +13,8 @@ typedef struct {
 	struct {buffer_index_t start, length;} ibo_range; // ibo domain that defines sector's faces
 } Sector;
 
-typedef struct {
-	List sectors, indices;
-	GLuint vbo, ibo, texture_set;
-	buffer_index_t* ibo_ptr;
-} SectorList;
-
 // Excluded: print_sector_list, form_sector_area
 
-void deinit_sector_list(const SectorList* const sector_list);
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width);
 
 List generate_sectors_from_maps(

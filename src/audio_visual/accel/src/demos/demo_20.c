@@ -2,6 +2,8 @@
 #include "../list.c"
 #include "../headers/buffer_defs.h"
 
+#include "../drawable_set.c"
+
 // Batched + culled billboard drawing
 
 typedef struct {
@@ -9,22 +11,6 @@ typedef struct {
 	const bb_texture_id_t texture_id; // Max is 65536
 	// 2 bytes of padding
 } Billboard;
-
-/*
-typedef struct {
-	List billboards, indices;
-	GLuint vbo, ibo, texture_set;
-	buffer_index_t* ibo_ptr;
-} BillboardList;
-*/
-
-/*
-typedef struct {
-	List drawable, indices; // `drawable` = sectors or billboards
-	GLuint vbo, ibo, texture_set;
-	buffer_index_t* ibo_ptr;
-} Drawable;
-*/
 
 StateGL demo_20_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};

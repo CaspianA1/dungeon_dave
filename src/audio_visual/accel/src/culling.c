@@ -2,6 +2,7 @@
 #define CULLING_C
 
 #include "headers/culling.h"
+#include "headers/texture.h"
 
 #include "sector.c"
 #include "camera.c"
@@ -22,13 +23,13 @@ static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) 
 	return glm_aabb_frustum(aabb_corners, frustum_planes);
 }
 
-static void draw_sectors_in_view_frustum(const SectorList* const sector_list, const Camera* const camera) {
+static void draw_sectors_in_view_frustum(const DrawableSet* const sector_list, const Camera* const camera) {
 	static vec4 frustum_planes[6];
 	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
 
-	const List sectors = sector_list -> sectors;
+	const List sectors = sector_list -> objects;
 
-	const buffer_index_t* const indices = sector_list -> indices.data;
+	const buffer_index_t* const indices = sector_list -> object_indices.data;
 	buffer_index_t* const ibo_ptr = sector_list -> ibo_ptr, num_visible_indices = 0;
 
 	for (size_t i = 0; i < sectors.length; i++) {
@@ -55,7 +56,7 @@ static void draw_sectors_in_view_frustum(const SectorList* const sector_list, co
 	glDrawElements(GL_TRIANGLES, num_visible_indices, BUFFER_INDEX_TYPENAME, NULL);
 }
 
-void draw_sectors(const SectorList* const sector_list, const Camera* const camera, const GLuint sector_shader) {
+void draw_sectors(const DrawableSet* const sector_list, const Camera* const camera, const GLuint sector_shader) {
 	glUseProgram(sector_shader);
 	use_texture(sector_list -> texture_set, sector_shader, TexSet);
 
