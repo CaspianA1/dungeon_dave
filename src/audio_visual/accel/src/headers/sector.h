@@ -9,13 +9,13 @@ typedef struct {
 	const byte texture_id, origin[2];
 	byte size[2]; // Top-down (X and Z); same for origin
 	struct {byte min; const byte max;} visible_heights;
-	struct {index_type_t start, length;} ibo_range; // ibo domain that defines sector's faces
+	struct {buffer_index_t start, length;} ibo_range; // ibo domain that defines sector's faces
 } Sector;
 
 typedef struct {
 	List sectors, indices;
 	GLuint vbo, ibo, texture_set;
-	index_type_t* ibo_ptr;
+	buffer_index_t* ibo_ptr;
 } SectorList;
 
 // Excluded: print_sector_list, form_sector_area

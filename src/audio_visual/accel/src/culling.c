@@ -28,14 +28,14 @@ static void draw_sectors_in_view_frustum(const SectorList* const sector_list, co
 
 	const List sectors = sector_list -> sectors;
 
-	const index_type_t* const indices = sector_list -> indices.data;
-	index_type_t* const ibo_ptr = sector_list -> ibo_ptr, num_visible_indices = 0;
+	const buffer_index_t* const indices = sector_list -> indices.data;
+	buffer_index_t* const ibo_ptr = sector_list -> ibo_ptr, num_visible_indices = 0;
 
 	for (size_t i = 0; i < sectors.length; i++) {
 		const Sector* sector = ((Sector*) sectors.data) + i;
 
-		index_type_t num_indices = 0;
-		const index_type_t start_index_index = sector -> ibo_range.start;
+		buffer_index_t num_indices = 0;
+		const buffer_index_t start_index_index = sector -> ibo_range.start;
 
 		while (i < sectors.length && sector_in_view_frustum(*sector, frustum_planes)) {
 			num_indices += sector++ -> ibo_range.length;
@@ -43,7 +43,7 @@ static void draw_sectors_in_view_frustum(const SectorList* const sector_list, co
 		}
 
 		if (num_indices != 0) {
-			memcpy(ibo_ptr + num_visible_indices, indices + start_index_index, num_indices * sizeof(index_type_t));
+			memcpy(ibo_ptr + num_visible_indices, indices + start_index_index, num_indices * sizeof(buffer_index_t));
 			num_visible_indices += num_indices;
 		}
 	}
@@ -75,7 +75,7 @@ void draw_sectors(const SectorList* const sector_list, const Camera* const camer
 	glEnableVertexAttribArray(1);
 
 	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribIPointer(1, 1, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
+	glVertexAttribIPointer(1, 1, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_component_t)));
 
 	// bind_sector_list_vbo_to_vao(sector_list);
 	draw_sectors_in_view_frustum(sector_list, camera);

@@ -71,14 +71,14 @@ static void add_face_mesh_to_list(const Face face, const byte sector_max_visible
 		near_x = face.origin[0], near_z = face.origin[1],
 		top_y = sector_max_visible_height;
 
-	const mesh_type_t* face_mesh;
+	const mesh_component_t* face_mesh;
 
 	switch (face.type) {
 		case Flat: {
 			const byte size_x = face.size[0], size_z = face.size[1];
 			const byte far_x = near_x + size_x, far_z = near_z + size_z;
 
-			face_mesh = (mesh_type_t[vars_per_face]) {
+			face_mesh = (mesh_component_t[vars_per_face]) {
 				near_x, top_y, far_z, face_info,
 				far_x, top_y, near_z, face_info,
 				near_x, top_y, near_z, face_info,
@@ -91,13 +91,13 @@ static void add_face_mesh_to_list(const Face face, const byte sector_max_visible
 			const byte far_z = near_z + size_z, bottom_y = top_y - size_y;
 
 			face_mesh = side
-				? (mesh_type_t[vars_per_face]) {
+				? (mesh_component_t[vars_per_face]) {
 					near_x, bottom_y, near_z, face_info,
 					near_x, top_y, far_z, face_info,
 					near_x, top_y, near_z, face_info,
 					near_x, bottom_y, far_z, face_info
 				}
-				: (mesh_type_t[vars_per_face]) {
+				: (mesh_component_t[vars_per_face]) {
 					near_x, top_y, near_z, face_info,
 					near_x, top_y, far_z, face_info,
 					near_x, bottom_y, near_z, face_info,
@@ -110,13 +110,13 @@ static void add_face_mesh_to_list(const Face face, const byte sector_max_visible
 			const byte far_x = near_x + size_x, bottom_y = top_y - size_y;
 
 			face_mesh = side
-				? (mesh_type_t[vars_per_face]) {
+				? (mesh_component_t[vars_per_face]) {
 					near_x, top_y, near_z, face_info,
 					far_x, top_y, near_z, face_info,
 					near_x, bottom_y, near_z, face_info,
 					far_x, bottom_y, near_z, face_info
 				}
-				: (mesh_type_t[vars_per_face]) {
+				: (mesh_component_t[vars_per_face]) {
 					near_x, bottom_y, near_z, face_info,
 					far_x, top_y, near_z, face_info,
 					near_x, top_y, near_z, face_info,
@@ -130,8 +130,8 @@ static void add_face_mesh_to_list(const Face face, const byte sector_max_visible
 
 	//////////
 
-	const index_type_t s = index_list -> length * vertices_per_face; // s = index set start
-	index_type_t index_set[indices_per_face] = {s, s + 1, s + 2, s, s + 3, s + 1};
+	const buffer_index_t s = index_list -> length * vertices_per_face; // s = index set start
+	buffer_index_t index_set[indices_per_face] = {s, s + 1, s + 2, s, s + 3, s + 1};
 
 	if ((face.type == Vert_NS && !side) || (face.type == Vert_EW && side)) {
 		index_set[3]++;
@@ -185,8 +185,8 @@ void init_face_mesh_and_sector_lists(
 	// This guess seems to work pretty well on my maps
 	const size_t index_list_length_guess = sectors.length * 3;
 	// Index list and face mesh list have the same amount of entries (in terms of elements, not bytes)
-	List index_list = init_list(index_list_length_guess, index_type_t[indices_per_face]);
-	*face_mesh_list = init_list(index_list_length_guess, mesh_type_t[vars_per_face]);
+	List index_list = init_list(index_list_length_guess, buffer_index_t[indices_per_face]);
+	*face_mesh_list = init_list(index_list_length_guess, mesh_component_t[vars_per_face]);
 
 	for (size_t i = 0; i < sectors.length; i++) {
 		Sector* const sector_ref = ((Sector*) sectors.data) + i;
@@ -214,8 +214,8 @@ void init_face_mesh_and_sector_lists(
 void init_sector_list_vbo_and_ibo(SectorList* const sector_list, const List* const face_list) {
 	const size_t num_faces = face_list -> length;
 	const GLsizeiptr
-		total_vertex_bytes = num_faces * vars_per_face * sizeof(mesh_type_t),
-		total_index_bytes = num_faces * sizeof(index_type_t[indices_per_face]);
+		total_vertex_bytes = num_faces * vars_per_face * sizeof(mesh_component_t),
+		total_index_bytes = num_faces * sizeof(buffer_index_t[indices_per_face]);
 
 	GLuint buffers[2];
 	glGenBuffers(2, buffers);
@@ -237,7 +237,7 @@ void bind_sector_list_vbo_to_vao(const SectorList* const sector_list) {
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribIPointer(1, 1, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
+	glVertexAttribIPointer(1, 1, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_component_t)));
 }
 
 #endif

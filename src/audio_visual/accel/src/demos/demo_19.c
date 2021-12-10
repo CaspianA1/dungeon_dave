@@ -2,6 +2,8 @@
 #include "../texture.c"
 #include "../camera.c"
 
+// A trippy pyramid flying around with lots of colors
+
 const char* const demo_19_vertex_shader =
 	"#version 330 core\n"
 
