@@ -1,27 +1,39 @@
 #include "../utils.c"
 #include "../list.c"
+#include "../headers/buffer_defs.h"
 
 // Batched + culled billboard drawing
 
-typedef GLfloat billboard_pos_component_t;
-
 typedef struct {
-	billboard_pos_component_t pos[3];
-	const byte texture_id; // Max is 255 here (includes spritesheet indices and such)
+	bb_pos_component_t pos[3];
+	const bb_texture_id_t texture_id; // Max is 65536
+	// 2 bytes of padding
 } Billboard;
+
+/*
+typedef struct {
+	List billboards, indices;
+	GLuint vbo, ibo, texture_set;
+	buffer_index_t* ibo_ptr;
+} BillboardList;
+*/
+
+/*
+typedef struct {
+	List drawable, indices; // `drawable` = sectors or billboards
+	GLuint vbo, ibo, texture_set;
+	buffer_index_t* ibo_ptr;
+} Drawable;
+*/
 
 StateGL demo_20_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
-	List billboards = init_list(2, Billboard);
-
-	const Billboard
-		first = {{2.5f, 3.5f, 4.5f}, 0},
-		second = {{0.0f, 1.0f, 2.0f}, 1};
-
-	push_ptr_to_list(&billboards, &first);
-	push_ptr_to_list(&billboards, &second);
-	deinit_list(billboards);
+	List billboard_list = init_list(2, Billboard);
+	const Billboard first = {{2.5f, 3.5f, 4.5f}, 0}, second = {{0.0f, 1.0f, 2.0f}, 1};
+	push_ptr_to_list(&billboard_list, &first);
+	push_ptr_to_list(&billboard_list, &second);
+	deinit_list(billboard_list);
 
 	return sgl;
 }

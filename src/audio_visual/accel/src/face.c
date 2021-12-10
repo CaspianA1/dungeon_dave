@@ -231,13 +231,4 @@ void init_sector_list_vbo_and_ibo(SectorList* const sector_list, const List* con
 	sector_list -> ibo_ptr = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 }
 
-void bind_sector_list_vbo_to_vao(const SectorList* const sector_list) {
-	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribIPointer(1, 1, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_component_t)));
-}
-
 #endif

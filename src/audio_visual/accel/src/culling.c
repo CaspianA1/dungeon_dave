@@ -52,7 +52,7 @@ static void draw_sectors_in_view_frustum(const SectorList* const sector_list, co
 	palace: 1466 vs 1130. tpt: 232 vs 150.
 	pyramid: 816 vs 542. maze: 5796 vs 6114.
 	terrain: 150620 vs 86588. */
-	glDrawElements(GL_TRIANGLES, num_visible_indices, INDEX_TYPE_ENUM, NULL);
+	glDrawElements(GL_TRIANGLES, num_visible_indices, BUFFER_INDEX_TYPENAME, NULL);
 }
 
 void draw_sectors(const SectorList* const sector_list, const Camera* const camera, const GLuint sector_shader) {
@@ -74,10 +74,9 @@ void draw_sectors(const SectorList* const sector_list, const Camera* const camer
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribIPointer(1, 1, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_component_t)));
+	glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_vertex, NULL);
+	glVertexAttribIPointer(1, 1, MESH_COMPONENT_TYPENAME, bytes_per_vertex, (void*) (3 * sizeof(mesh_component_t)));
 
-	// bind_sector_list_vbo_to_vao(sector_list);
 	draw_sectors_in_view_frustum(sector_list, camera);
 
 	glDisableVertexAttribArray(0);

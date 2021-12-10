@@ -4,8 +4,13 @@
 typedef GLubyte mesh_component_t;
 typedef GLuint buffer_index_t;
 
-#define MESH_TYPE_ENUM GL_UNSIGNED_BYTE
-#define INDEX_TYPE_ENUM GL_UNSIGNED_INT
+typedef GLfloat bb_pos_component_t; // bb = billboard
+typedef GLushort bb_texture_id_t; // Max = 65536
+/* There is no face_texture_id_t b/c the face texture id is packed into
+an info byte, and there's no type to represent five bits */
+
+#define MESH_COMPONENT_TYPENAME GL_UNSIGNED_BYTE
+#define BUFFER_INDEX_TYPENAME GL_UNSIGNED_INT
 
 enum {
 	vars_per_vertex = 4,
