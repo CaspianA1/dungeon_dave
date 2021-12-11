@@ -129,9 +129,8 @@ StateGL demo_13_init(void) {
 	sgl.shader_program = init_shader_program(billboard_vertex_shader, billboard_fragment_shader);
 	sector_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
 	enable_all_culling();
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	return sgl;
 }
 

@@ -3,12 +3,12 @@
 #include "../drawable_set.c"
 #include "../texture.c"
 #include "../camera.c"
+#include "../skybox.c"
 
 // Batched + culled billboard drawing
 
 /*
 - To begin with, just draw all in oen big unbatched buffer
-- Blending becomes odd between billboards
 - An expanded init_texture_set that takes spritesheets too
 - Do I really need batching for billboards, as there will be so many fewer of them?
 - Why is so much GPU time being used? Even happens when nothing rendered
@@ -16,6 +16,11 @@
 - SDL_GL_SwapWindow is the culprit
 - And demo 17 uses close to 88% of gpu power now
 - Updating MacOS is a good idea
+- Instancing render order may be a problem
+- Only using instancing for glVertexAttribDivisor
+- Border problems + distance jitter. Ideal: like with demo 13.
+- Perhaps set alpha in surface earlier to 0 when needed
+- Alpha is binary, but with linear interpolation, things become tricky (https://community.khronos.org/t/blending-and-alpha-black-border/18755/2)
 */
 
 const char* const batching_billboard_vertex_shader =
@@ -63,6 +68,7 @@ const char* const batching_billboard_vertex_shader =
 
 	"void main() {\n"
 		"color = texture(texture_sampler, vec3(UV, texture_id));\n"
+		"if (color.a < 0.3f) discard;\n"
 	"}\n";
 
 // This struct is perfectly aligned
@@ -71,10 +77,49 @@ typedef struct {
 	bb_pos_component_t size[2], pos[3];
 } Billboard;
 
-typedef struct {
-	bb_texture_id_t texture_id;
-	bb_pos_component_t size, pos;
-} Bob;
+void draw_billboards(const DrawableSet* const billboard_list, const Camera* const camera) {
+	const GLuint
+		vbo = billboard_list -> dbo,
+		batching_billboard_shader = billboard_list -> shader;
+
+	static byte first_call = 1;
+	static GLint cam_right_id, view_projection_id;
+
+	if (first_call) {
+		cam_right_id = glGetUniformLocation(batching_billboard_shader, "cam_right_xz_world_space");
+		view_projection_id = glGetUniformLocation(batching_billboard_shader, "view_projection");
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // This gives a bigger edge border
+		// glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // This one has more distance jitter
+		first_call = 0;
+	}
+
+	glUseProgram(batching_billboard_shader);
+	glUniform2f(cam_right_id, camera -> right_xz[0], camera -> right_xz[1]);
+	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera -> view_projection[0][0]);
+
+	//////////
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	for (byte i = 0; i < 3; i++) {
+		glEnableVertexAttribArray(i);
+		glVertexAttribDivisor(i, 1);
+	}
+
+	glVertexAttribIPointer(0, 1, BB_TEXTURE_ID_TYPENAME, sizeof(Billboard), NULL);
+	glVertexAttribPointer(1, 2, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, size));
+	glVertexAttribPointer(2, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, pos));
+
+	glUseProgram(billboard_list -> shader);
+	glEnable(GL_BLEND);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 5); // Each billboard 4 vertices, and 2 billboards
+	glDisable(GL_BLEND);
+
+	for (byte i = 0; i < 3; i++) {
+		glDisableVertexAttribArray(i);
+		glVertexAttribDivisor(i, 0);
+	}
+}
 
 // Billboards
 DrawableSet init_billboard_list(const size_t num_billboards, ...) {
@@ -100,19 +145,6 @@ DrawableSet init_billboard_list(const size_t num_billboards, ...) {
 
 	free(cpu_billboard_data);
 
-	///////////
-
-	for (byte i = 0; i < 3; i++) {
-		glEnableVertexAttribArray(i);
-		glVertexAttribDivisor(i, 1);
-	}
-
-	glVertexAttribIPointer(0, 1, BB_TEXTURE_ID_TYPENAME, sizeof(Billboard), NULL);
-	glVertexAttribPointer(1, 2, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, size));
-	glVertexAttribPointer(2, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, pos));
-
-	// Only using instancing for glVertexAttribDivisor
-
 	return billboard_list;
 }
 
@@ -122,64 +154,46 @@ StateGL demo_20_init(void) {
 	DrawableSet billboard_list = init_billboard_list(
 		// texture_set, 1, (Billboard) {0, {1.0f, 1.3658536585365855f}, {0.0f, 0.0f, 0.0f}}
 		5,
+		(Billboard) {2, {1.0f, 1.0f}, {0.0f, 1.0f, 2.0f}},
 		(Billboard) {0, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}},
 		(Billboard) {1, {1.0f, 1.0f}, {0.0f, 1.1f, 0.0f}},
-		(Billboard) {2, {1.0f, 1.0f}, {0.0f, 1.0f, 2.0f}},
 		(Billboard) {2, {1.0f, 1.0f}, {0.0f, 1.5f, 3.0f}},
 		(Billboard) {0, {1.0f, 1.0f}, {0.0f, 2.0f, 4.0f}}
 	);
 
-	glUseProgram(billboard_list.shader);
-
 	billboard_list.texture_set = init_texture_set(TexNonRepeating,
 		// 328, 448, 1, "../../../assets/objects/doomguy.bmp"
-		64, 64, 3, "../../../assets/objects/tomato.bmp",
+		64, 64, 3, "../../../assets/objects/doomguy.bmp",
 		"../../../assets/objects/teleporter.bmp",
 		"../../../assets/objects/robot.bmp"
 	);
 
 	// TODO: free billboard list somewhere
-
 	DrawableSet* const billboard_list_on_heap = malloc(sizeof(DrawableSet));
 	*billboard_list_on_heap = billboard_list;
 	sgl.any_data = billboard_list_on_heap;
 
 	enable_all_culling();
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
 	return sgl;
 }
 
 void demo_20_drawer(const StateGL* const sgl) {
 	const DrawableSet* const billboard_list = (DrawableSet*) sgl -> any_data;
-	const GLuint batching_billboard_shader = billboard_list -> shader;
 
 	static byte first_call = 1;
-	static GLint cam_right_id, view_projection_id;
 	static Camera camera;
+	static Skybox skybox;
 
-	glUseProgram(batching_billboard_shader);
 	if (first_call) {
-		cam_right_id = glGetUniformLocation(batching_billboard_shader, "cam_right_xz_world_space");
-		view_projection_id = glGetUniformLocation(batching_billboard_shader, "view_projection");
+		skybox = init_skybox("assets/oasis_upscaled.bmp"); // TODO: free skybox somewhere
 		init_camera(&camera, (vec3) {0.0f, 1.5f, -2.5f});
 		first_call = 0;
 	}
 
-	/*
-	DEBUG(cam_right_id, d);
-	DEBUG(view_projection_id, d);
-	GL_ERR_CHECK;
-	*/
-
 	update_camera(&camera, get_next_event());
-	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera.view_projection[0][0]);
-	glUniform2f(cam_right_id, camera.right_xz[0], camera.right_xz[1]);
-
-	glClearColor(0.29f, 0.555f, 0.588f, 0.0f); // Boring blue
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 5); // Each billboard 4 vertices, and 2 billboards
+	draw_billboards(billboard_list, &camera);
+	draw_skybox(skybox, &camera);
 }
 
 #ifdef DEMO_20

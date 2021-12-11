@@ -2122,3 +2122,17 @@ glClearColor(0.89f, 0.355f, 0.288f, 0.0f); // Light tomato
 		*/
 
 /////
+
+	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
+	// glBlendFunc(GL_ONE, GL_SRC_ALPHA);
+	// glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_ONE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	// Take only color of closest object
+
+/////
+
+// glClearColor(0.29f, 0.555f, 0.588f, 0.0f); // Boring blue
+
+/////

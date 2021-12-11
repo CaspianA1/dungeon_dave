@@ -138,6 +138,7 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &view_projection[0][0]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, s.vbo);
+
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_BYTE, GL_FALSE, 0, NULL);
 
