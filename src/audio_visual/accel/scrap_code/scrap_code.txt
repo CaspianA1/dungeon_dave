@@ -2079,3 +2079,7 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 	"}\n",
 
 /////
+
+// "struct Billboard {uint texture_id; vec2 billboard_size_world_space; vec3 billboard_center_world_space;};\n"
+
+/////

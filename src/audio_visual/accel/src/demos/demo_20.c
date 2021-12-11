@@ -2,26 +2,33 @@
 #include "../list.c"
 #include "../drawable_set.c"
 #include "../texture.c"
+#include "../camera.c"
 
 // Batched + culled billboard drawing
 
 /*
 - To begin with, just draw all in oen big unbatched buffer
-- See if can reduce number of inputs to vertex shader
-- Set vertex attribs correctly
+- Blending becomes odd between billboards
+- An expanded init_texture_set that takes spritesheets too
+- Do I really need batching for billboards, as there will be so many fewer of them?
+- Why is so much GPU time being used? Even happens when nothing rendered
+- And why does calling glUseProgram not each time result in nothing being rendered?
+- SDL_GL_SwapWindow is the culprit
+- And demo 17 uses close to 88% of gpu power now
+- Updating MacOS is a good idea
 */
 
-const char* const batched_billboard_vertex_shader =
+const char* const batching_billboard_vertex_shader =
 	"#version 330 core\n"
 
-	"layout(location = 0) in vec3 billboard_center_world_space;\n"
-	"layout(location = 1) in vec2 cam_right_xz_world_space;\n"
-	"layout(location = 2) in vec2 billboard_size_world_space;\n"
-	"layout(location = 3) in uint in_texture_id;\n"
+	"layout(location = 0) in uint in_texture_id;\n"
+	"layout(location = 1) in vec2 billboard_size_world_space;\n"
+	"layout(location = 2) in vec3 billboard_center_world_space;\n"
 
 	"out float texture_id;\n"
 	"out vec2 UV;\n"
 
+	"uniform vec2 cam_right_xz_world_space;\n"
 	"uniform mat4 view_projection;\n"
 
 	"const vec2 vertices_model_space[4] = vec2[4](\n"
@@ -44,7 +51,7 @@ const char* const batched_billboard_vertex_shader =
 		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
 	"}\n",
 
-*const batched_billboard_fragment_shader =
+*const batching_billboard_fragment_shader =
     "#version 330 core\n"
 
 	"in float texture_id;\n"
@@ -58,22 +65,26 @@ const char* const batched_billboard_vertex_shader =
 		"color = texture(texture_sampler, vec3(UV, texture_id));\n"
 	"}\n";
 
+// This struct is perfectly aligned
 typedef struct {
-	bb_pos_component_t pos[3];
 	bb_texture_id_t texture_id;
+	bb_pos_component_t size[2], pos[3];
 } Billboard;
 
+typedef struct {
+	bb_texture_id_t texture_id;
+	bb_pos_component_t size, pos;
+} Bob;
+
 // Billboards
-DrawableSet init_billboard_list(const GLuint texture_set, const size_t num_billboards, ...) {
+DrawableSet init_billboard_list(const size_t num_billboards, ...) {
 	DrawableSet billboard_list = {
 		.objects = init_list(num_billboards, Billboard),
 		.object_indices = init_list(num_billboards, buffer_index_t), // 1 index per billboard attribute set
-		.shader = init_shader_program(batched_billboard_vertex_shader, batched_billboard_fragment_shader),
-		.texture_set = texture_set
+		.shader = init_shader_program(batching_billboard_vertex_shader, batching_billboard_fragment_shader)
 	};
 
 	///////////
-
 	const size_t billboard_bytes = num_billboards * sizeof(Billboard);
 	Billboard* const cpu_billboard_data = malloc(billboard_bytes);
 	va_list args;
@@ -91,55 +102,84 @@ DrawableSet init_billboard_list(const GLuint texture_set, const size_t num_billb
 
 	///////////
 
-	for (byte i = 0; i < 4; i++) {
+	for (byte i = 0; i < 3; i++) {
 		glEnableVertexAttribArray(i);
 		glVertexAttribDivisor(i, 1);
 	}
 
-	// Next step: passing data
+	glVertexAttribIPointer(0, 1, BB_TEXTURE_ID_TYPENAME, sizeof(Billboard), NULL);
+	glVertexAttribPointer(1, 2, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, size));
+	glVertexAttribPointer(2, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, pos));
 
-	/*
-	glEnableVertexAttribArray(0);
-	glVertexAttribDivisor(0, 1);
-	glVertexAttribPointer(0, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), NULL);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribDivisor(1, 1);
-	glVertexAttribIPointer(1, 1, BB_TEXTURE_ID_TYPENAME, sizeof(Billboard), (void*) sizeof(bb_pos_component_t[3]));
-	*/
+	// Only using instancing for glVertexAttribDivisor
 
 	return billboard_list;
 }
 
 StateGL demo_20_init(void) {
-	const StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
+	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
-	const GLuint texture_set = init_texture_set(TexNonRepeating,
+	DrawableSet billboard_list = init_billboard_list(
+		// texture_set, 1, (Billboard) {0, {1.0f, 1.3658536585365855f}, {0.0f, 0.0f, 0.0f}}
+		5,
+		(Billboard) {0, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}},
+		(Billboard) {1, {1.0f, 1.0f}, {0.0f, 1.1f, 0.0f}},
+		(Billboard) {2, {1.0f, 1.0f}, {0.0f, 1.0f, 2.0f}},
+		(Billboard) {2, {1.0f, 1.0f}, {0.0f, 1.5f, 3.0f}},
+		(Billboard) {0, {1.0f, 1.0f}, {0.0f, 2.0f, 4.0f}}
+	);
+
+	glUseProgram(billboard_list.shader);
+
+	billboard_list.texture_set = init_texture_set(TexNonRepeating,
+		// 328, 448, 1, "../../../assets/objects/doomguy.bmp"
 		64, 64, 3, "../../../assets/objects/tomato.bmp",
 		"../../../assets/objects/teleporter.bmp",
 		"../../../assets/objects/robot.bmp"
 	);
 
-	const DrawableSet billboard_list = init_billboard_list(
-		texture_set, 5,
-		(Billboard) {{2.5f, 3.5f, 4.5f}, 0},
-		(Billboard) {{0.5f, 1.0f, 2.0f}, 1},
-		(Billboard) {{1.0f, 1.2f, 2.3f}, 2},
-		(Billboard) {{2.0f, 1.8f, 2.6f}, 2},
-		(Billboard) {{3.0f, 1.6f, 5.2f}, 0}
-	);
-
-	(void) billboard_list;
-
 	// TODO: free billboard list somewhere
+
+	DrawableSet* const billboard_list_on_heap = malloc(sizeof(DrawableSet));
+	*billboard_list_on_heap = billboard_list;
+	sgl.any_data = billboard_list_on_heap;
+
+	enable_all_culling();
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	return sgl;
 }
 
 void demo_20_drawer(const StateGL* const sgl) {
-	(void) sgl;
-	// Each billboard 4 vertices, and 5 billboards
-	// glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 5);
+	const DrawableSet* const billboard_list = (DrawableSet*) sgl -> any_data;
+	const GLuint batching_billboard_shader = billboard_list -> shader;
+
+	static byte first_call = 1;
+	static GLint cam_right_id, view_projection_id;
+	static Camera camera;
+
+	glUseProgram(batching_billboard_shader);
+	if (first_call) {
+		cam_right_id = glGetUniformLocation(batching_billboard_shader, "cam_right_xz_world_space");
+		view_projection_id = glGetUniformLocation(batching_billboard_shader, "view_projection");
+		init_camera(&camera, (vec3) {0.0f, 1.5f, -2.5f});
+		first_call = 0;
+	}
+
+	/*
+	DEBUG(cam_right_id, d);
+	DEBUG(view_projection_id, d);
+	GL_ERR_CHECK;
+	*/
+
+	update_camera(&camera, get_next_event());
+	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera.view_projection[0][0]);
+	glUniform2f(cam_right_id, camera.right_xz[0], camera.right_xz[1]);
+
+	glClearColor(0.29f, 0.555f, 0.588f, 0.0f); // Boring blue
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 5); // Each billboard 4 vertices, and 2 billboards
 }
 
 #ifdef DEMO_20
