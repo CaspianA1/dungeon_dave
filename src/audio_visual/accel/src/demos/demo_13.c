@@ -117,7 +117,6 @@ StateGL demo_13_init(void) {
 	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers[0]);
 	glBufferData(GL_ARRAY_BUFFER, bytes_per_mesh, cuboid_mesh, GL_STATIC_DRAW);
-	bind_sector_mesh_to_vao();
 
 	free(cuboid_mesh);
 	//////////
@@ -141,17 +140,23 @@ void demo_13_drawer(const StateGL* const sgl) {
 	demo_13_matrix_setup(sgl -> shader_program, center);
 
 	// Drawing non-transparent objects first
+
+	bind_sector_mesh_to_vao();
+
 	glUseProgram(sector_shader);
 	use_texture(sgl -> textures[1], sector_shader, TexPlain);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
+	glDisable(GL_BLEND);
 	draw_triangles(triangles_per_mesh);
+
+	unbind_sector_mesh_from_vao();
+
+	//////////
 
 	glUseProgram(sgl -> shader_program);
 	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);
-
 	glEnable(GL_BLEND); // Turning on alpha blending for drawing billboards
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glDisable(GL_BLEND);
 }
 
 void demo_13_deinit(const StateGL* const sgl) {

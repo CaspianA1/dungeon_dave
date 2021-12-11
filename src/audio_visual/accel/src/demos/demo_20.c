@@ -1,10 +1,13 @@
 #include "../utils.c"
 #include "../list.c"
-#include "../headers/buffer_defs.h"
-
 #include "../drawable_set.c"
 
 // Batched + culled billboard drawing
+
+/*
+Typical billboard: pos (3 floats) + 2 byte texture id
+GPU billboard: billboard corners (6 floats)
+*/
 
 typedef struct {
 	bb_pos_component_t pos[3];
@@ -14,7 +17,10 @@ typedef struct {
 
 // Num billboards, billboards
 DrawableSet init_billboard_list(const size_t num_billboards, ...) {
-	DrawableSet billboard_list = {0};
+	DrawableSet billboard_list = {
+		0
+		// .shader = init_shader_program()
+	};
 	// Def cpu and gpu buffer
 
 	va_list args;

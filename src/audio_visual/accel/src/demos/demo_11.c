@@ -131,6 +131,11 @@ void bind_sector_mesh_to_vao(void) {
 	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
 }
 
+void unbind_sector_mesh_from_vao(void) {
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+}
+
 StateGL demo_11_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
