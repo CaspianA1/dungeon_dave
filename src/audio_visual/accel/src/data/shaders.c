@@ -111,7 +111,6 @@ const char* const sector_vertex_shader =
 			"+ cam_up_world_space * vertex_model_space.y * billboard_size_world_space.y;\n"
 
 		"gl_Position = view_projection * vec4(vertex_world_space, 1.0f);\n"
-
 		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
 	"}\n",
 
@@ -119,6 +118,7 @@ const char* const sector_vertex_shader =
     "#version 330 core\n"
 
 	"in vec2 UV;\n"
+
 	"out vec4 color;\n"
 
 	"uniform sampler2D texture_sampler;\n"

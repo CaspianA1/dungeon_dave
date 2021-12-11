@@ -2027,3 +2027,55 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 
 
 /////
+
+
+	/*
+	const size_t billboard_bytes = num_billboards * sizeof(Billboard);
+	Billboard* const cpu_billboard_data = malloc(billboard_bytes);
+
+	va_list args;
+	va_start(args, num_billboards);
+	for (size_t i = 0; i < num_billboards; i++) cpu_billboard_data[i] = va_arg(args, Billboard);
+	va_end(args);
+
+	///////////
+
+	glGenBuffers(1, &billboard_list.dbo);
+	glBindBuffer(GL_UNIFORM_BUFFER, billboard_list.dbo);
+	glBufferData(GL_UNIFORM_BUFFER, billboard_bytes, cpu_billboard_data, GL_STATIC_DRAW);
+	free(cpu_billboard_data);
+
+	const GLuint block_index = glGetUniformBlockIndex(billboard_list.shader, "BillboardInfo");
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, billboard_list.dbo);
+
+	GL_ERR_CHECK;
+
+	return billboard_list;
+	*/
+
+/////
+
+*const batched_billboard_vertex_shader =
+	"#version 330 core\n"
+
+	// Share every 4
+
+	"uniform in BillboardInfo {\n"
+		"vec3 pos;\n"
+		"int texture_id;\n"
+	"} bb_info;\n"
+
+	"out vec2 UV;\n"
+
+	"const vec2 vertices_model_space[4] = vec2[4](\n"
+		"vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f),\n"
+		"vec2(-0.5f, 0.5f), vec2(0.5f, 0.5f)\n"
+	");\n"
+
+	"const vec3 cam_up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
+
+	"void main() {\n"
+		"UV = vec2(0.0f, 0.0f);\n"
+	"}\n",
+
+/////
