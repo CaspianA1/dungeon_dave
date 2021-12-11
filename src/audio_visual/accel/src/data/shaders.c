@@ -24,16 +24,16 @@ const char* const sector_vertex_shader =
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
 
 		"texture_id = face_info >> 3;\n" // `>> 3` shifts upper 5 bits of texture id to the beginning
-		"int first_three_bits = face_info & 7, face_type = face_info & 3;\n" // `& 3` gets first 2 bits
-		"ivec2 index_for_UV = pos_indices_for_UV[face_type];\n"
+		"int first_three_bits = face_info & 7;\n"
+
+		// `(x & 4) == 0` checks if the 3rd bit in `x` is set // 4 = 0b100, so if 3rd bit is cleared, face side is flat, top or left.
+		"light = darkest_light + (int((face_info & 4) == 0) + int(first_three_bits == 0)) * light_step;\n"
+
+		"ivec2 index_for_UV = pos_indices_for_UV[face_info & 3];\n"  // `& 3` gets first 2 bits
 		"int UV_sign = -sign_of_cond(first_three_bits == 2 || first_three_bits == 5);\n" // Negative if face side is left or bottom
 
 		"vec3 pos_reversed = max_world_height - vertex_pos_world_space;\n"
 		"UV = vec2(pos_reversed[index_for_UV[0]] * UV_sign, pos_reversed[index_for_UV[1]]);\n"
-
-		// Top = 1.0f, top or left = 0.8f, bottom or right = 0.6f. `& 4` gets 3rd bit.
-		"bool side = (face_info & 4) == 0, flat_face = first_three_bits == 0;\n" // `side` means flat, top or left
-		"light = darkest_light + (float(side) * light_step) + (float(flat_face) * light_step);\n"
 	"}\n",
 
 *const sector_fragment_shader =

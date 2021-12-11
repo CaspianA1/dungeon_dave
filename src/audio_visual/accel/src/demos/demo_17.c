@@ -1,5 +1,3 @@
-// #include "demo_4.c"
-
 #include "../utils.c"
 #include "../drawable_set.c"
 #include "../skybox.c"
@@ -15,7 +13,7 @@
 - NEXT 3: a bounding volume hierarchy, maybe
 - NEXT 4: composable billboard drawer, but before that, billboard batching + different billboard types
 
-- Point light sources + simple lightmaps, or ambient occlusion with simple dynamic light sources
+- Point light sources + simple lightmaps, or ambient occlusion with simple dynamic light sources and camera dot-product-based lighting
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
 - More effeciently set statemap bit ranges
@@ -99,7 +97,6 @@ void demo_17_drawer(const StateGL* const sgl) {
 	}
 
 	update_camera(&camera, get_next_event());
-	glClearColor(0.89f, 0.355f, 0.288f, 0.0f); // Light tomato
 
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 	draw_sectors(&scene_state -> sector_list, &camera);

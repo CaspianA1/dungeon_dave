@@ -2083,3 +2083,42 @@ void create_vert_ew_mesh(const mesh_type_t origin[2], const mesh_type_t size[2],
 // "struct Billboard {uint texture_id; vec2 billboard_size_world_space; vec3 billboard_center_world_space;};\n"
 
 /////
+
+glClearColor(0.89f, 0.355f, 0.288f, 0.0f); // Light tomato
+
+/////
+	
+"if (bool(equaling_check)) side = int((face_info & 4) == 0); else side = (face_info & 251) << 2;\n // side = face_info & 251;\n"
+
+/////
+
+
+		/*
+		(face_info & 4 == 0)
+		4 = 0b100 = 3rd bit set
+		bool side = (3rd bit not set)
+		251 = 0b11111011 = 3rd bit not set
+
+		get something where the result is 1 if 3rd bit zero
+		*/
+
+		// Top = 1.0f, top or left = 0.8f, bottom or right = 0.6f. `& 4` gets 3rd bit.
+		// "bool side = (face_info & 4) == 0, flat_face = first_three_bits == 0;\n" // `side` means flat, top or left
+
+		// For 251, all bits are set except for the third one. If the 3rd bit is 0 in `face_info`, `side` will be 
+		// "int side = face_info & 251, flat_face = int(first_three_bits == 0);\n"
+
+		// "int side = face_info & 251;\n"
+		// "int side = int((face_info & 4) == 0);\n"
+
+		// Do based on camera facing
+
+		/*
+		Need fn that gives 1 if 3rd bit is 0, and 0 if 3rd bit is 1
+
+		Fn for 1 if 3rd bit is 1, and 0 if 3rd bit is 0: (first_three_bits >> 2)
+
+		xor: if only 1 input is true
+		*/
+
+/////
