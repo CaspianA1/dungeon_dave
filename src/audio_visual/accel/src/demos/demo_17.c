@@ -1,13 +1,13 @@
-#include "demo_4.c"
-#include "../sector.c"
+// #include "demo_4.c"
+
+#include "../utils.c"
+#include "../drawable_set.c"
+#include "../skybox.c"
+#include "../data/maps.c"
+
 #include "../face.c"
 #include "../camera.c"
-#include "../data/maps.c"
 #include "../culling.c"
-#include "../texture.c"
-#include "../skybox.c"
-
-#include "../drawable_set.c"
 
 /*
 - NEXT: new_map
