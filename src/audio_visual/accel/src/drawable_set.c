@@ -9,8 +9,8 @@ void init_drawable_set_buffers(DrawableSet* const ds, const void* const vertex_d
 	GLuint vbo_and_ibo[2];
 	glGenBuffers(2, vbo_and_ibo);
 
-	ds -> vbo = vbo_and_ibo[0];
-	glBindBuffer(GL_ARRAY_BUFFER, ds -> vbo);
+	ds -> dbo = vbo_and_ibo[0];
+	glBindBuffer(GL_ARRAY_BUFFER, ds -> dbo);
 	glBufferData(GL_ARRAY_BUFFER, total_vertex_bytes, vertex_data, GL_STATIC_DRAW);
 
 	ds -> ibo = vbo_and_ibo[1];
@@ -28,7 +28,7 @@ void deinit_drawable_set(const DrawableSet* const ds) {
 
 	glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 
-	const GLuint buffers[2] = {ds -> vbo, ds -> ibo};
+	const GLuint buffers[2] = {ds -> dbo, ds -> ibo};
 	glDeleteBuffers(2, buffers);
 }
 

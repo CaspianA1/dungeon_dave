@@ -11,7 +11,10 @@ typedef struct {
 	is in view, the indices of a given object are copied over to the gpu ibo. */
 	List objects, object_indices; 
 	// TODO: init texture set from init_drawable; then, only one owner of texture_set
-	GLuint vbo, ibo, shader, texture_set;
+
+	/* dbo = data buffer object. Stores gpu-relevant data about each item in the drawable set.
+	For sectors, it's a vbo with face vertices, and for billboards, it's a ubo with billboard attributes. */
+	GLuint dbo, ibo, shader, texture_set;
 	buffer_index_t* ibo_ptr;
 } DrawableSet;
 

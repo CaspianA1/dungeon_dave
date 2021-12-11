@@ -5,7 +5,7 @@ typedef GLubyte mesh_component_t;
 typedef GLuint buffer_index_t;
 
 typedef GLfloat bb_pos_component_t; // bb = billboard
-typedef GLushort bb_texture_id_t; // Max = 65536
+typedef GLushort bb_texture_id_t; // Max = 65535
 /* There is no face_texture_id_t b/c the face texture id is packed into
 an info byte, and there's no type to represent five bits */
 

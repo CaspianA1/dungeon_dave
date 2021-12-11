@@ -71,7 +71,7 @@ void draw_sectors(const DrawableSet* const sector_list, const Camera* const came
 
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
-	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> dbo);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
