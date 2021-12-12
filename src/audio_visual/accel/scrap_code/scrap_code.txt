@@ -2173,3 +2173,32 @@ byte holding_key = 0;
 */
 
 /////
+
+static void clear_alpha_for_surface(SDL_Surface* const surface) {
+	return;
+
+	/*
+	const int w = surface -> w, h = surface -> h;
+	const int num_pixels = w * h;
+
+	SDL_SetColorKey(surface, SDL_TRUE, 255);
+	// const Uint32 red = SDL_MapRGBA(surface -> format, 255, 0, 0, 255);
+	Uint32* const pixels = surface -> pixels;
+
+	for (int i = 0; i < num_pixels; i++) {
+		// pixels[i] = red;
+		Uint32* const pixel_ref = pixels + i;
+		const Uint32 pixel = *pixel_ref;
+
+		if (pixel == 0) {
+			// *pixel_ref = SDL_MapRGBA(surface -> format, 255, 255, 255, 255);
+			*pixel_ref = 20;
+		}
+	}
+
+
+	SDL_SaveBMP(surface, "color.bmp");
+	*/
+}
+
+/////

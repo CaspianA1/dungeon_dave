@@ -17,9 +17,6 @@
 - And demo 17 uses close to 88% of gpu power now
 - Instancing render order may be a problem
 - Only using instancing for glVertexAttribDivisor
-- Border problems + distance jitter. Ideal: like with demo 13.
-- Perhaps set alpha in surface earlier to 0 when needed
-- Alpha is binary, but with linear interpolation, things become tricky (https://community.khronos.org/t/blending-and-alpha-black-border/18755/2)
 */
 
 const char* const batching_billboard_vertex_shader =
@@ -67,7 +64,7 @@ const char* const batching_billboard_vertex_shader =
 
 	"void main() {\n"
 		"color = texture(texture_sampler, vec3(UV, texture_id));\n"
-		"if (color.a < 0.3f) discard;\n"
+		"if (color.a < 0.28f) discard;\n" // 0.28f empirically tested for best discarding of alpha value
 	"}\n";
 
 // This struct is perfectly aligned
@@ -87,8 +84,7 @@ void draw_billboards(const DrawableSet* const billboard_list, const Camera* cons
 	if (first_call) {
 		cam_right_id = glGetUniformLocation(batching_billboard_shader, "cam_right_xz_world_space");
 		view_projection_id = glGetUniformLocation(batching_billboard_shader, "view_projection");
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // This gives a bigger edge border
-		// glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // This one has more distance jitter
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		first_call = 0;
 	}
 
@@ -111,7 +107,7 @@ void draw_billboards(const DrawableSet* const billboard_list, const Camera* cons
 
 	glUseProgram(billboard_list -> shader);
 	glEnable(GL_BLEND);
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 5); // Each billboard 4 vertices, and 2 billboards
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 5); // Each billboard 4 vertices, and 5 billboards
 	glDisable(GL_BLEND);
 
 	for (byte i = 0; i < 3; i++) {
@@ -191,8 +187,8 @@ void demo_20_drawer(const StateGL* const sgl) {
 	}
 
 	update_camera(&camera, get_next_event());
-	draw_billboards(billboard_list, &camera);
 	draw_skybox(skybox, &camera);
+	draw_billboards(billboard_list, &camera);
 }
 
 #ifdef DEMO_20

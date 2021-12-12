@@ -106,7 +106,7 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode,
 		const char* const path = va_arg(args, char*);
 		SDL_Surface* const surface = init_surface(path);
 
-		const SDL_Surface* src_surface;
+		SDL_Surface* src_surface;
 
 		if (surface -> w != subtex_width || surface -> h != subtex_height) {
 			SDL_UnlockSurface(rescaled_surface);
