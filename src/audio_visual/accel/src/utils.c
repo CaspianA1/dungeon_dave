@@ -64,7 +64,6 @@ static void resize_window_if_needed(SDL_Window* const window) {
 	const byte resize_attempt = keys[KEY_TOGGLE_FULLSCREEN_WINDOW];
 
 	if (!window_resized_last_tick && resize_attempt) {
-		puts("here");
 		window_is_fullscreen = !window_is_fullscreen;
 		window_resized_last_tick = 1;
 
