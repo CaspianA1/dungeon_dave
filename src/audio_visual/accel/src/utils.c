@@ -60,32 +60,39 @@ void make_application(void (*const drawer)(const StateGL* const),
 }
 
 static void resize_window_if_needed(SDL_Window* const window) {
-	static byte window_resized_last_tick = 0, window_is_fullscreen = 0;
+	static byte window_resized_last_tick = 0, window_is_fullscreen = 0, first_call = 1;
+	static int desktop_width, desktop_height;
+
+	if (first_call) {
+		SDL_DisplayMode display_mode;
+		SDL_GetDesktopDisplayMode(0, &display_mode);
+		desktop_width = display_mode.w;
+		desktop_height = display_mode.h;
+		first_call = 0;
+	}
+
 	const byte resize_attempt = keys[KEY_TOGGLE_FULLSCREEN_WINDOW];
 
 	if (!window_resized_last_tick && resize_attempt) {
 		window_is_fullscreen = !window_is_fullscreen;
 		window_resized_last_tick = 1;
 
-		int new_window_width, new_window_height;
-
+		/* There's a branch here because the order in which the resolution
+		and window mode is changed matters. If setting the window size and
+		the fullscreen mode is done in the wrong order, a half-framebuffer
+		may be shown on a window, which will look odd. */
 		if (window_is_fullscreen) {
-			SDL_DisplayMode display_mode;
-			SDL_GetDesktopDisplayMode(0, &display_mode);
-			new_window_width = display_mode.w;
-			new_window_height = display_mode.h;
+			SDL_SetWindowSize(window, desktop_width, desktop_height);
+			SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+			glViewport(0, 0, desktop_width, desktop_height);
 		}
 		else {
-			new_window_width = WINDOW_W;
-			new_window_height = WINDOW_H;
+			SDL_SetWindowFullscreen(window, 0);
+			SDL_SetWindowSize(window, WINDOW_W, WINDOW_H);
+			SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+			glViewport(0, 0, WINDOW_W, WINDOW_H);
 		}
 
-		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN * window_is_fullscreen);
-		SDL_SetWindowSize(window, new_window_width, new_window_height);
-		glViewport(0, 0, new_window_width, new_window_height);
-
-		if (!window_is_fullscreen)
-			SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	}
 	else if (!resize_attempt) window_resized_last_tick = 0;
 }
