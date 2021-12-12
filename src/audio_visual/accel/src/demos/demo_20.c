@@ -15,7 +15,6 @@
 - And why does calling glUseProgram not each time result in nothing being rendered?
 - SDL_GL_SwapWindow is the culprit
 - And demo 17 uses close to 88% of gpu power now
-- Updating MacOS is a good idea
 - Instancing render order may be a problem
 - Only using instancing for glVertexAttribDivisor
 - Border problems + distance jitter. Ideal: like with demo 13.

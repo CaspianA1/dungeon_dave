@@ -5,15 +5,20 @@
 #include "headers/constants.h"
 
 Event get_next_event(void) {
+	static GLint viewport_size[4];
+	glGetIntegerv(GL_VIEWPORT, viewport_size);
+
 	Event e = {
 		.movement_bits =
 			(keys[constants.movement_keys.right] << 3) |
 			(keys[constants.movement_keys.left] << 2) |
 			(keys[constants.movement_keys.backward] << 1) |
-			keys[constants.movement_keys.forward]
+			keys[constants.movement_keys.forward],
+		.screen_size = {viewport_size[2], viewport_size[3]}
 	};
 
 	SDL_GetRelativeMouseState(&e.mouse_dx, &e.mouse_dy);
+
 	return e;
 }
 
@@ -21,7 +26,6 @@ void init_camera(Camera* const camera, const vec3 init_pos) {
 	memset(camera, 0, sizeof(Camera));
 	memcpy(camera -> pos, init_pos, sizeof(vec3));
 	camera -> fov = constants.init_fov;
-	camera -> aspect_ratio = (GLfloat) SCR_W / SCR_H;
 }
 
 static void update_camera(Camera* const camera, const Event event) {
@@ -33,6 +37,8 @@ static void update_camera(Camera* const camera, const Event event) {
 		first_call = 0;
 		return;
 	}
+
+	camera -> aspect_ratio = (GLfloat) event.screen_size[0] / event.screen_size[1];
 
 	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time;
 	camera -> hori_angle += constants.speeds.look * delta_time * -event.mouse_dx;

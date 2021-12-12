@@ -13,19 +13,18 @@
 #define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
+// #define FORCE_SOFTWARE_RENDERER
 
-// 800 by 600
-#define SCR_W 1440
-#define SCR_H 900
+#define WINDOW_W 800
+#define WINDOW_H 600
 #define FOV 90.0f
 
+#define KEY_TOGGLE_FULLSCREEN_WINDOW SDL_SCANCODE_ESCAPE
 #define KEY_PRINT_POSITION SDL_SCANCODE_1
 #define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_2
 
 #define DEPTH_BUFFER_BITS 24
 #define MULTISAMPLE_SAMPLES 8
-
-const Uint8* keys;
 
 typedef uint_fast8_t byte;
 
@@ -54,13 +53,15 @@ typedef struct {
 	void* any_data; // If a demo need to pass in extra info to the drawer, it can do it through here
 } StateGL;
 
+const Uint8* keys;
+
 extern inline void fail(const char* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s; SDL error = '%s', OpenGL error = '%s'\n", msg,
 		SDL_GetError(), glewGetErrorString(glGetError()));
 	exit(failure_type + 1);
 }
 
-// Excluded: fail_on_shader_creation_error
+// Excluded: resize_window_if_needed, fail_on_shader_creation_error
 
 Screen init_screen(const char* const title);
 void deinit_screen(const Screen* const screen);

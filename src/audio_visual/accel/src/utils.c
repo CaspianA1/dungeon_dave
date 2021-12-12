@@ -20,16 +20,20 @@ Screen init_screen(const char* const title) {
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, MULTISAMPLE_SAMPLES);
 
+	#ifdef FORCE_SOFTWARE_RENDERER
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 0);
+	#endif
+
 	Screen screen = {
 		.window = SDL_CreateWindow(title,
 			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			SCR_W, SCR_H, SDL_WINDOW_OPENGL)
+			WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL)
 	};
 
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-	SDL_WarpMouseInWindow(screen.window, SCR_W >> 1, SCR_H >> 1);
+	SDL_WarpMouseInWindow(screen.window, WINDOW_W >> 1, WINDOW_H >> 1);
 
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK) fail("initialize glew", LaunchGLEW);
@@ -55,32 +59,63 @@ void make_application(void (*const drawer)(const StateGL* const),
 	deinit_screen(&screen);
 }
 
+static void resize_window_if_needed(SDL_Window* const window) {
+	static byte window_resized_last_tick = 0, window_is_fullscreen = 0;
+	const byte resize_attempt = keys[KEY_TOGGLE_FULLSCREEN_WINDOW];
+
+	if (!window_resized_last_tick && resize_attempt) {
+		puts("here");
+		window_is_fullscreen = !window_is_fullscreen;
+		window_resized_last_tick = 1;
+
+		int new_window_width, new_window_height;
+
+		if (window_is_fullscreen) {
+			SDL_DisplayMode display_mode;
+			SDL_GetDesktopDisplayMode(0, &display_mode);
+			new_window_width = display_mode.w;
+			new_window_height = display_mode.h;
+		}
+		else {
+			new_window_width = WINDOW_W;
+			new_window_height = WINDOW_H;
+		}
+
+		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN * window_is_fullscreen);
+		SDL_SetWindowSize(window, new_window_width, new_window_height);
+		glViewport(0, 0, new_window_width, new_window_height);
+
+		if (!window_is_fullscreen)
+			SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	}
+	else if (!resize_attempt) window_resized_last_tick = 0;
+}
+
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
 	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
 
-	// const int16_t max_delay = 1000.0f / constants.fps;
+	const int16_t max_delay = 1000.0f / constants.fps;
 	byte running = 1;
 	SDL_Event event;
 	const StateGL sgl = init();
 	keys = SDL_GetKeyboardState(NULL);
 
 	while (running) {
-		// const Uint32 before = SDL_GetTicks();
+		const Uint32 before = SDL_GetTicks();
 
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) running = 0;
 		}
 
+		resize_window_if_needed(screen -> window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		drawer(&sgl);
 		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
 		SDL_GL_SwapWindow(screen -> window);
 
-		/*
 		const Uint32 ms_elapsed = SDL_GetTicks() - before;
 		const int16_t wait_for_exact_fps = max_delay - ms_elapsed;
 		if (wait_for_exact_fps > 0) SDL_Delay(wait_for_exact_fps);
-		*/
 	}
 
 	deinit(&sgl);

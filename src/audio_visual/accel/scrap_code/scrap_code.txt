@@ -2136,3 +2136,40 @@ glClearColor(0.89f, 0.355f, 0.288f, 0.0f); // Light tomato
 // glClearColor(0.29f, 0.555f, 0.588f, 0.0f); // Boring blue
 
 /////
+
+	if (window_resized) {
+		int w, h;
+
+		// if ()
+	}
+
+	/*
+	static int last_w = 0, last_h = 0;
+	if (last_w == 0 && last_h == 0) {
+		*/
+
+		// puts("here");
+		/*
+		static SDL_DisplayMode display_mode;
+		SDL_GetDesktopDisplayMode(0, &display_mode);
+		last_w = display_mode.w;
+		last_h = display_mode.h;
+		*/
+
+	/*
+	static struct {int w, h;} last_win_size = {0, 0};
+	if (last_win_size.w == 0 && last_win_size.h == 0) {
+
+	}
+	*/
+
+/////
+
+/*
+static enum {
+	FullScreen, Windowed, TransitionBetween
+} window_state = Windowed;
+byte holding_key = 0;
+*/
+
+/////

@@ -12,7 +12,7 @@ typedef struct {
 
 typedef struct {
 	const byte movement_bits; // Right, left, backward, forward
-	int mouse_dx, mouse_dy; // Delta from last frame
+	int screen_size[2], mouse_dx, mouse_dy; // Delta from last frame
 } Event;
 
 // Excluded: update_camera

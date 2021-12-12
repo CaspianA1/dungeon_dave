@@ -45,7 +45,7 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 	glm_vec3_cross(right, direction, up);
 	//////////
 	mat4 projection, view, model_view_projection, view_times_model, model = GLM_MAT4_IDENTITY_INIT;
-	glm_perspective(to_radians(FOV), (GLfloat) SCR_W / SCR_H, constants.clip_dists.near, constants.clip_dists.far, projection);
+	glm_perspective(to_radians(FOV), (GLfloat) WINDOW_W / WINDOW_H, constants.clip_dists.near, constants.clip_dists.far, projection);
 	glm_lookat(pos, pos_plus_dir, up, view);
 	glm_mul(projection, view, view_times_projection); // For external usage
 
