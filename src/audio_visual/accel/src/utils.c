@@ -93,14 +93,14 @@ static void resize_window_if_needed(SDL_Window* const window) {
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
 	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
 
-	const int16_t max_delay = 1000.0f / constants.fps;
+	// const int16_t max_delay = 1000.0f / constants.fps;
 	byte running = 1;
 	SDL_Event event;
 	const StateGL sgl = init();
 	keys = SDL_GetKeyboardState(NULL);
 
 	while (running) {
-		const Uint32 before = SDL_GetTicks();
+		// const Uint32 before = SDL_GetTicks();
 
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) running = 0;
@@ -110,11 +110,12 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		drawer(&sgl);
 		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
+
 		SDL_GL_SwapWindow(screen -> window);
 
-		const Uint32 ms_elapsed = SDL_GetTicks() - before;
+		/* const Uint32 ms_elapsed = SDL_GetTicks() - before;
 		const int16_t wait_for_exact_fps = max_delay - ms_elapsed;
-		if (wait_for_exact_fps > 0) SDL_Delay(wait_for_exact_fps);
+		if (wait_for_exact_fps > 0) SDL_Delay(wait_for_exact_fps); */
 	}
 
 	deinit(&sgl);

@@ -49,9 +49,9 @@ StateGL demo_17_init(void) {
 	//////////
 	scene_state.skybox = init_skybox("assets/oasis_upscaled.bmp");
 
-	static byte texture_id_map[new_height][new_width];
+	static byte texture_id_map[terrain_height][terrain_width];
 	init_face_mesh_and_sector_lists(&scene_state.sector_list, &face_mesh_list,
-		(byte*) new_heightmap, (byte*) texture_id_map, new_width, new_height);
+		(byte*) terrain_heightmap, (byte*) texture_id_map, terrain_width, terrain_height);
 
 	init_sector_list_vbo_and_ibo(&scene_state.sector_list, &face_mesh_list);
 
@@ -100,7 +100,6 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 	draw_sectors(&scene_state -> sector_list, &camera);
-
 	draw_skybox(scene_state -> skybox, &camera);
 }
 
