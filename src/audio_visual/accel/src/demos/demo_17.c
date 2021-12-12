@@ -13,7 +13,7 @@
 - NEXT 3: a bounding volume hierarchy, maybe
 - NEXT 4: composable billboard drawer, but before that, billboard batching + different billboard types
 
-- Point light sources + simple lightmaps, or ambient occlusion with simple dynamic light sources and camera dot-product-based lighting
+- Lighting: ambient (base lighting per level), diffuse (dependent on side), and maybe ambient occlusion + simple dynamic lights
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
 - More effeciently set statemap bit ranges
