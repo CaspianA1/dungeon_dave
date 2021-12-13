@@ -11,7 +11,8 @@ const char* const sector_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info;\n"
 
-	"out float texture_id, light;\n"
+	"flat out int texture_id;"
+	"flat out float light;\n"
 	"out vec2 UV;\n"
 
 	"uniform mat4 model_view_projection;\n"
@@ -39,7 +40,8 @@ const char* const sector_vertex_shader =
 *const sector_fragment_shader =
     "#version 330 core\n"
 
-	"in float texture_id, light;\n"
+	"flat in int texture_id;"
+	"flat in float light;\n"
 	"in vec2 UV;\n"
 
 	"out vec3 color;\n"
