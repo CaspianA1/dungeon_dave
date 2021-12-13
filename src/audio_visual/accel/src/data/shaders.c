@@ -59,17 +59,17 @@ const char* const sector_vertex_shader =
 
 	"out vec3 color;\n"
 
-	"uniform float ambient;\n"
+	"uniform float ambient_strength, diffuse_strength;\n"
 	"uniform vec3 light_pos_world_space;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
 	"float diffuse(void) {\n"
 		"vec3 light_vector = normalize(light_pos_world_space - fragment_pos_world_space);\n"
-		"return dot(light_vector, face_normal);\n"
+		"return dot(light_vector, face_normal) * diffuse_strength;\n"
 	"}\n"
 
 	"void main() {\n"
-		"float light = min(diffuse() + ambient, 1.0f);\n"
+		"float light = min(ambient_strength + diffuse(), 1.0f);\n"
 		"color = texture(texture_sampler, vec3(UV, texture_id)).rgb * light;\n"
 	"}\n",
 
