@@ -2202,3 +2202,74 @@ static void clear_alpha_for_surface(SDL_Surface* const surface) {
 }
 
 /////
+
+	/*
+	float magnitude = sqrt(camera -> dir[0] * camera -> dir[0] + camera -> dir[1] * camera -> dir[1] + camera -> dir[2] * camera -> dir[2]);
+	DEBUG(magnitude, lf);
+	*/
+
+/////
+
+		bad:
+		flat = 0
+		vert ns, !side (bottom) = 1
+		vert ns, side (top) = 5
+		vert ew, !side (right) = 2
+		vert ew, side (left) = 6
+
+/////
+
+			/*
+			"case 1: return vec3(0.0f, 0.0f, 1.0f);\n"
+			"case 5: return vec3(0.0f, 0.0f, -1.0f);\n"
+			"case 2: return vec3(1.0f, 0.0f, 0.0f);\n"
+			"case 6: return vec3(-1.0f, 0.0f, 0.0f);\n"
+			"default: return vec3(0.0f, 0.0f, 0.0f);\n"
+			*/
+
+/////
+
+
+	/*
+	const byte face_combos[5] = {
+		Flat,
+		(0 << 2) | Vert_NS,
+		(1 << 2) | Vert_NS,
+		(0 << 2) | Vert_EW,
+		(1 << 2) | Vert_EW
+	};
+
+	for (byte i = 0; i < 5; i++) {
+		printf("%d ", face_combos[i]);
+	}
+	putchar('\n');
+	*/
+
+/////
+
+	/*
+	DEBUG(face_info & 7, d);
+	DEBUG((side << 2) | face.type, d);
+	puts("-");
+	*/
+
+/////
+
+		/*
+		good:
+		flat = 0
+		vert ns, !side (right) = 1
+		vert ns, side (left) = 5
+		vert ew, !side (bottom) = 2
+		vert ew, side (top) = 6
+
+		Side = top or left side
+		going down on 2D map increases Z, and going to the right increases X
+		*/
+
+///// The old face color determination from the face side and type, and if it's flat:
+
+	// `(x & 4) == 0` checks if the 3rd bit in `x` is set // 4 = 0b100, so if 3rd bit is cleared, face side is flat, top or left.
+	// "light = darkest_light + (int((face_info & 4) == 0) + int(first_three_bits == 0)) * light_step;\n"
+
+/////

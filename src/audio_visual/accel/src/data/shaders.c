@@ -11,9 +11,9 @@ const char* const sector_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info;\n"
 
-	"flat out int texture_id;"
-	"flat out float light;\n"
+	"flat out int texture_id;\n"
 	"out vec2 UV;\n"
+	"out vec3 fragment_pos_world_space, face_normal;\n"
 
 	"uniform mat4 model_view_projection;\n"
 
@@ -21,34 +21,55 @@ const char* const sector_vertex_shader =
 		"ivec2(0, 2), ivec2(2, 1), ivec2(0, 1)\n" // Flat, NS, EW
 	");\n"
 
+	"vec3 get_normal(int first_three_bits) {\n"
+		"switch (first_three_bits) {\n"
+			"case 0: return vec3(0.0f, 1.0f, 0.0f);\n"
+			"case 1: return vec3(1.0f, 0.0f, 0.0f);\n"
+			"case 5: return vec3(-1.0f, 0.0f, 0.0f);\n"
+			"case 2: return vec3(0.0f, 0.0f, 1.0f);\n"
+			"case 6: return vec3(0.0f, 0.0f, -1.0f);\n"
+			"default: return vec3(0.0f, 0.0f, 0.0f);\n"
+
+		"}\n"
+
+	"}\n"
+
 	"void main() {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
 
 		"texture_id = face_info >> 3;\n" // `>> 3` shifts upper 5 bits of texture id to the beginning
 		"int first_three_bits = face_info & 7;\n"
 
-		// `(x & 4) == 0` checks if the 3rd bit in `x` is set // 4 = 0b100, so if 3rd bit is cleared, face side is flat, top or left.
-		"light = darkest_light + (int((face_info & 4) == 0) + int(first_three_bits == 0)) * light_step;\n"
-
 		"ivec2 index_for_UV = pos_indices_for_UV[face_info & 3];\n"  // `& 3` gets first 2 bits
 		"int UV_sign = -sign_of_cond(first_three_bits == 2 || first_three_bits == 5);\n" // Negative if face side is left or bottom
 
 		"vec3 pos_reversed = max_world_height - vertex_pos_world_space;\n"
 		"UV = vec2(pos_reversed[index_for_UV[0]] * UV_sign, pos_reversed[index_for_UV[1]]);\n"
+
+		"fragment_pos_world_space = vertex_pos_world_space;\n"
+		"face_normal = get_normal(first_three_bits);\n"
 	"}\n",
 
 *const sector_fragment_shader =
     "#version 330 core\n"
 
 	"flat in int texture_id;"
-	"flat in float light;\n"
 	"in vec2 UV;\n"
+	"in vec3 fragment_pos_world_space, face_normal;\n"
 
 	"out vec3 color;\n"
 
+	"uniform float ambient;\n"
+	"uniform vec3 light_pos_world_space;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
+	"float diffuse(void) {\n"
+		"vec3 light_vector = normalize(light_pos_world_space - fragment_pos_world_space);\n"
+		"return dot(light_vector, face_normal);\n"
+	"}\n"
+
 	"void main() {\n"
+		"float light = min(diffuse() + ambient, 1.0f);\n"
 		"color = texture(texture_sampler, vec3(UV, texture_id)).rgb * light;\n"
 	"}\n",
 

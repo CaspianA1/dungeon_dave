@@ -62,13 +62,17 @@ void draw_sectors(const DrawableSet* const sector_list, const Camera* const came
 	use_texture(sector_list -> texture_set, sector_shader, TexSet);
 
 	static byte first_call = 1;
-	static GLint model_view_projection_id;
+	static GLint model_view_projection_id, ambient_id, light_pos_id;
 
 	if (first_call) {
 		model_view_projection_id = glGetUniformLocation(sector_shader, "model_view_projection");
+		ambient_id = glGetUniformLocation(sector_shader, "ambient");
+		light_pos_id = glGetUniformLocation(sector_shader, "light_pos_world_space");
 		first_call = 0;
 	}
 
+	glUniform1f(ambient_id, 0.4f);
+	glUniform3fv(light_pos_id, 1, camera -> pos);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> dbo);

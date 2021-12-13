@@ -13,10 +13,11 @@
 - NEXT 3: a bounding volume hierarchy, maybe
 - NEXT 4: composable billboard drawer, but before that, billboard batching + different billboard types
 
-- Lighting: ambient (base lighting per level), diffuse (dependent on side), and maybe ambient occlusion + simple dynamic lights
+- Figure out if diffuse should depend on where player is - or ambient occlusion + simple dynamic lights
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
 - More effeciently set statemap bit ranges
+- Face info data into first 3 bits, with numbers from 0 to 4
 
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
@@ -39,6 +40,7 @@ StateGL demo_17_init(void) {
 	(byte*) tpt_heightmap, (byte*) tpt_texture_id_map, tpt_width, tpt_height
 	(byte*) new_heightmap, (byte*) texture_id_map, new_width, new_height
 	(byte*) terrain_heightmap, (byte*) texture_id_map, terrain_width, terrain_height
+	(byte*) tiny_heightmap, (byte*) tiny_heightmap, tiny_width, tiny_height
 	*/
 
 	SceneState scene_state;
@@ -49,9 +51,9 @@ StateGL demo_17_init(void) {
 	//////////
 	scene_state.skybox = init_skybox("assets/mountain_2.bmp");
 
-	static byte texture_id_map[terrain_height][terrain_width];
+	// static byte texture_id_map[terrain_height][terrain_width];
 	init_face_mesh_and_sector_lists(&scene_state.sector_list, &face_mesh_list,
-		(byte*) terrain_heightmap, (byte*) texture_id_map, terrain_width, terrain_height);
+		(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height);
 
 	init_sector_list_vbo_and_ibo(&scene_state.sector_list, &face_mesh_list);
 
@@ -61,19 +63,22 @@ StateGL demo_17_init(void) {
 	sgl.num_textures = 0;
 	scene_state.sector_list.texture_set = init_texture_set(TexRepeating, 128, 128,
 		// New:
-		1, "../../../assets/walls/pyramid_bricks_4.bmp"
+		// 1, "../../../assets/walls/pyramid_bricks_4.bmp"
 
 		// Palace:
-		/* 11, "../../../assets/walls/sand.bmp", "../../../assets/walls/pyramid_bricks_4.bmp",
+		11, "../../../assets/walls/sand.bmp", "../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../assets/walls/marble.bmp", "../../../assets/walls/hieroglyph.bmp",
 		"../../../assets/walls/window.bmp", "../../../assets/walls/saqqara.bmp",
 		"../../../assets/walls/sandstone.bmp", "../../../assets/walls/cobblestone_3.bmp",
 		"../../../assets/walls/horses.bmp", "../../../assets/walls/mesa.bmp",
-		"../../../assets/walls/arthouse_bricks.bmp" */
+		"../../../assets/walls/arthouse_bricks.bmp"
 
 		// Pyramid:
 		/* 3, "../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../assets/walls/greece.bmp", "../../../assets/walls/saqqara.bmp" */
+
+		// Tiny:
+		// 2, "../../../assets/walls/mesa.bmp", "../../../assets/walls/hieroglyph.bmp"
 		);
 
 	enable_all_culling();
