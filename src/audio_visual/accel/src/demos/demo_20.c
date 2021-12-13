@@ -131,7 +131,6 @@ DrawableSet init_billboard_list(const size_t num_billboards, ...) {
 	va_start(args, num_billboards);
 	for (size_t i = 0; i < num_billboards; i++) cpu_billboard_data[i] = va_arg(args, Billboard);
 	va_end(args);
-
 	///////////
 
 	glGenBuffers(1, &billboard_list.dbo);

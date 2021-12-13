@@ -47,7 +47,7 @@ StateGL demo_17_init(void) {
 	List face_mesh_list;
 
 	//////////
-	scene_state.skybox = init_skybox("assets/oasis_upscaled.bmp");
+	scene_state.skybox = init_skybox("assets/mountain_2.bmp");
 
 	static byte texture_id_map[terrain_height][terrain_width];
 	init_face_mesh_and_sector_lists(&scene_state.sector_list, &face_mesh_list,

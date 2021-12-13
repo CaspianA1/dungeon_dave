@@ -13,7 +13,7 @@ typedef struct {
 	struct {buffer_index_t start, length;} ibo_range; // ibo domain that defines sector's faces
 } Sector;
 
-// Excluded: print_sector_list, form_sector_area
+// Excluded: print_sector_list, print_map, form_sector_area
 
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width);
 

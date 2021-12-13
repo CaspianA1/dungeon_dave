@@ -41,6 +41,28 @@ static void print_sector_list(const SectorList* const sector_list) {
 }
 */
 
+/*
+static void print_map(const char* const name, const byte* const map, const byte map_width, const byte map_height) {
+	printf("%s = {\n", name);
+
+	for (byte y = 0; y < map_height; y++) {
+		printf("\t{");
+		const byte* const row = map + y * map_width;
+		for (byte x = 0; x < map_width; x++) {
+
+			const char* end;
+
+			if (x == map_width - 1)
+				end = (y == map_height - 1) ? "}\n" : "},\n";
+			else end = ", ";
+
+			printf("%d%s", row[x], end);
+		}
+	}
+	puts("}");
+}
+*/
+
 //////////
 
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width) {
