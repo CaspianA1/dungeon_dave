@@ -17,7 +17,6 @@
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
 - More effeciently set statemap bit ranges
-- Face info data into first 3 bits, with numbers from 0 to 4
 
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen

@@ -4,16 +4,13 @@
 const char* const sector_vertex_shader =
 	"#version 330 core\n"
 	"#define max_world_height 255.0f\n"
-	"#define darkest_light 0.6f\n"
-	"#define light_step 0.2f\n" // From the darkest side, this is the step amount
-	"#define sign_of_cond(cond) ((int(cond) << 1) - 1)\n" // 1 -> 1, and 0 -> -1
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
-	"layout(location = 1) in int face_info;\n"
+	"layout(location = 1) in int face_info_bits;\n"
 
-	"flat out int texture_id;\n"
+	"flat out int texture_id = face_info_bits >> 3;\n" // shifts upper 5 bits of texture id to the beginning
 	"out vec2 UV;\n"
-	"out vec3 fragment_pos_world_space, face_normal;\n"
+	"out vec3 fragment_pos_world_space = vertex_pos_world_space, face_normal;\n"
 
 	"uniform mat4 model_view_projection;\n"
 
@@ -21,39 +18,42 @@ const char* const sector_vertex_shader =
 		"ivec2(0, 2), ivec2(2, 1), ivec2(0, 1)\n" // Flat, NS, EW
 	");\n"
 
-	"vec3 get_normal(int first_three_bits) {\n"
-		"switch (first_three_bits) {\n"
-			"case 0: return vec3(0.0f, 1.0f, 0.0f);\n"
-			"case 1: return vec3(1.0f, 0.0f, 0.0f);\n"
-			"case 5: return vec3(-1.0f, 0.0f, 0.0f);\n"
-			"case 2: return vec3(0.0f, 0.0f, 1.0f);\n"
-			"case 6: return vec3(0.0f, 0.0f, -1.0f);\n"
-			"default: return vec3(0.0f, 0.0f, 0.0f);\n"
+	"const vec3 face_normals[5] = vec3[5](\n"
+		"vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f),\n" // Flat, right, bottom, left, top
+		"vec3(0.0f, 0.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)\n"
+	");\n"
 
-		"}\n"
+	"vec2 get_UV_from_face_id(int face_id_bits) {\n"
+		"ivec2 index_for_UV = pos_indices_for_UV[face_id_bits & 3];\n"  // `& 3` extracts the first 2 bitss
+		"int face_is_left_or_bottom = int(face_id_bits == 2 || face_id_bits == 5);\n" // 1 = true, 0 = false
+		"int UV_sign_x = -((face_is_left_or_bottom << 1) - 1);\n" // -((x << 1) - 1) maps 1 to -1 and 0 to 1
+		"vec3 pos_reversed = max_world_height - vertex_pos_world_space;\n"
+		"return vec2(pos_reversed[index_for_UV[0]] * UV_sign_x, pos_reversed[index_for_UV[1]]);\n"
+	"}\n"
 
+	/* In order to map {0 1 2 5 6} to {0 1 2 3 4}, do this:
+		- If the bits equal 5 or 6, the 3rd bit will be set. By and-ing the bits
+		with 0b100 (which is 4), `X` will equal 4 if the bits equalled 5 or 6.
+		- Then, the normal ID will equal `face_id_bits - (X >> 1)`, because the right shift
+		will divide `X` by 2, and therefore map 5 and 6 to 3 and 4. 0 through 3 will stay the same. */
+
+	"vec3 get_normal_from_face_id(int face_id_bits) {\n"
+		"int normal_id_subtrahend = (face_id_bits & 4) >> 1;\n"
+		"return face_normals[face_id_bits - normal_id_subtrahend];\n"
 	"}\n"
 
 	"void main() {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
 
-		"texture_id = face_info >> 3;\n" // `>> 3` shifts upper 5 bits of texture id to the beginning
-		"int first_three_bits = face_info & 7;\n"
-
-		"ivec2 index_for_UV = pos_indices_for_UV[face_info & 3];\n"  // `& 3` gets first 2 bits
-		"int UV_sign = -sign_of_cond(first_three_bits == 2 || first_three_bits == 5);\n" // Negative if face side is left or bottom
-
-		"vec3 pos_reversed = max_world_height - vertex_pos_world_space;\n"
-		"UV = vec2(pos_reversed[index_for_UV[0]] * UV_sign, pos_reversed[index_for_UV[1]]);\n"
-
-		"fragment_pos_world_space = vertex_pos_world_space;\n"
-		"face_normal = get_normal(first_three_bits);\n"
+		"int face_id_bits = face_info_bits & 7;\n" // 0 = flat, 1 = right, 2 = bottom, 5 = left, 6 = top
+		"UV = get_UV_from_face_id(face_id_bits);\n"
+		"face_normal = get_normal_from_face_id(face_id_bits);\n"
 	"}\n",
 
 *const sector_fragment_shader =
     "#version 330 core\n"
 
-	"flat in int texture_id;"
+	"flat in int texture_id;\n"
 	"in vec2 UV;\n"
 	"in vec3 fragment_pos_world_space, face_normal;\n"
 

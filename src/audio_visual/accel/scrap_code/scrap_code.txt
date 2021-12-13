@@ -2273,3 +2273,75 @@ static void clear_alpha_for_surface(SDL_Surface* const surface) {
 	// "light = darkest_light + (int((face_info & 4) == 0) + int(first_three_bits == 0)) * light_step;\n"
 
 /////
+
+byte normal_hasher(const byte face_info) {
+	// return ceilf(face_info * 0.5f);
+	// return face_info * ~face_info;
+	/*
+	const byte first_three_mask = 7; // 0b111
+	return ~face_info & first_three_mask;
+	*/
+
+	// if (face_info >= 5) face_info -= 2;
+	return face_info - ((face_info >= 5) << 1);
+}
+
+/////
+
+	static byte first_call = 1;
+
+	if (first_call) {
+		DEBUG(normal_hasher(0), d);
+		DEBUG(normal_hasher(1), d);
+		DEBUG(normal_hasher(2), d);
+		DEBUG(normal_hasher(5), d);
+		DEBUG(normal_hasher(6), d);
+		first_call = 0;
+	}
+
+/////
+
+"return bool(branchy_normal) ? get_normal(face_id_bits) : face_normals[normal_id];\n"
+
+/////
+
+	/*
+	Mapping first 3 bits to face normal:
+
+	flat, 0, 0b000: [1] = 1
+	right, 1, 0b001: [0] = 1
+	left, 5, 0b101: [0] = -1
+	bottom, 2, 0b010: [2] = 1
+	top, 6, 0b110: [2] = -1
+	
+	ordered in bit size:
+		flat, 0, 0b000: [1] = 1
+		right, 1, 0b001: [0] = 1
+		bottom, 2, 0b010: [2] = 1
+		left, 5, 0b101: [0] = -1
+		top, 6, 0b110: [2] = -1
+
+	If 5 or 6, negative mask
+	- Find similarities betwen bit patterns and bits set
+	- Zeroth bit set:
+		Set 0th component to 1 if (last bit == 0), else -1
+	- No bits set:
+	*/
+
+	"vec3 get_normal(int first_three_bits) {\n"
+		"switch (first_three_bits) {\n"
+			"case 0: return vec3(0.0f, 1.0f, 0.0f);\n"
+			"case 1: return vec3(1.0f, 0.0f, 0.0f);\n"
+			"case 2: return vec3(0.0f, 0.0f, 1.0f);\n"
+			"case 5: return vec3(-1.0f, 0.0f, 0.0f);\n"
+			"case 6: return vec3(0.0f, 0.0f, -1.0f);\n"
+			"default: return vec3(0.0f, 0.0f, 0.0f);\n"
+		"}\n"
+	"}\n"
+
+/////
+
+	"#define darkest_light 0.6f\n"
+	"#define light_step 0.2f\n" // From the darkest side, this is the step amount
+
+/////
