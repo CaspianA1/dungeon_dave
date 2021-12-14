@@ -8,9 +8,7 @@ const char* const sector_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info_bits;\n"
 
-	"flat out int texture_id = face_info_bits >> 3;\n" // shifts upper 5 bits of texture id to the beginning
-	"out vec2 UV;\n"
-	"out vec3 fragment_pos_world_space = vertex_pos_world_space, face_normal;\n"
+	"out vec3 UV, fragment_pos_world_space = vertex_pos_world_space, face_normal;\n"
 
 	"uniform mat4 model_view_projection;\n"
 
@@ -23,12 +21,14 @@ const char* const sector_vertex_shader =
 		"vec3(0.0f, 0.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)\n"
 	");\n"
 
-	"vec2 get_UV_from_face_id(int face_id_bits) {\n"
-		"ivec2 index_for_UV = pos_indices_for_UV[face_id_bits & 3];\n"  // `& 3` extracts the first 2 bitss
+	"void set_UV_from_face_id(int face_id_bits) {\n"
+		"ivec2 pos_UV_indices = pos_indices_for_UV[face_id_bits & 3];\n"  // `& 3` extracts the first 2 bits
 		"int face_is_left_or_bottom = int(face_id_bits == 2 || face_id_bits == 5);\n" // 1 = true, 0 = false
 		"int UV_sign_x = -((face_is_left_or_bottom << 1) - 1);\n" // -((x << 1) - 1) maps 1 to -1 and 0 to 1
 		"vec3 pos_reversed = max_world_height - vertex_pos_world_space;\n"
-		"return vec2(pos_reversed[index_for_UV[0]] * UV_sign_x, pos_reversed[index_for_UV[1]]);\n"
+
+		"UV = vec3(pos_reversed[pos_UV_indices[0]] * UV_sign_x,\n"
+			"pos_reversed[pos_UV_indices[1]], face_info_bits >> 3);\n"
 	"}\n"
 
 	/* In order to map {0 1 2 5 6} to {0 1 2 3 4}, do this:
@@ -37,25 +37,23 @@ const char* const sector_vertex_shader =
 		- Then, the normal ID will equal `face_id_bits - (X >> 1)`, because the right shift
 		will divide `X` by 2, and therefore map 5 and 6 to 3 and 4. 0 through 3 will stay the same. */
 
-	"vec3 get_normal_from_face_id(int face_id_bits) {\n"
+	"void set_normal_from_face_id(int face_id_bits) {\n"
 		"int normal_id_subtrahend = (face_id_bits & 4) >> 1;\n"
-		"return face_normals[face_id_bits - normal_id_subtrahend];\n"
+		"face_normal = face_normals[face_id_bits - normal_id_subtrahend];\n"
 	"}\n"
 
 	"void main() {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
-
 		"int face_id_bits = face_info_bits & 7;\n" // 0 = flat, 1 = right, 2 = bottom, 5 = left, 6 = top
-		"UV = get_UV_from_face_id(face_id_bits);\n"
-		"face_normal = get_normal_from_face_id(face_id_bits);\n"
+
+		"set_UV_from_face_id(face_id_bits);\n"
+		"set_normal_from_face_id(face_id_bits);\n"
 	"}\n",
 
 *const sector_fragment_shader =
     "#version 330 core\n"
 
-	"flat in int texture_id;\n"
-	"in vec2 UV;\n"
-	"in vec3 fragment_pos_world_space, face_normal;\n"
+	"in vec3 UV, fragment_pos_world_space, face_normal;\n"
 
 	"out vec3 color;\n"
 
@@ -70,7 +68,7 @@ const char* const sector_vertex_shader =
 
 	"void main() {\n"
 		"float light = min(ambient_strength + diffuse(), 1.0f);\n"
-		"color = texture(texture_sampler, vec3(UV, texture_id)).rgb * light;\n"
+		"color = texture(texture_sampler, UV).rgb * light;\n"
 	"}\n",
 
 *const sector_lighting_vertex_shader =
