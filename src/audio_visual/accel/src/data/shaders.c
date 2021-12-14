@@ -27,8 +27,10 @@ const char* const sector_vertex_shader =
 		"int UV_sign_x = -((face_is_left_or_bottom << 1) - 1);\n" // -((x << 1) - 1) maps 1 to -1 and 0 to 1
 		"vec3 pos_reversed = max_world_height - vertex_pos_world_space;\n"
 
-		"UV = vec3(pos_reversed[pos_UV_indices[0]] * UV_sign_x,\n"
-			"pos_reversed[pos_UV_indices[1]], face_info_bits >> 3);\n"
+		"UV = vec3(\n"
+			"pos_reversed[pos_UV_indices[0]] * UV_sign_x,\n"
+			"pos_reversed[pos_UV_indices[1]],\n"
+			"face_info_bits >> 3);\n"
 	"}\n"
 
 	/* In order to map {0 1 2 5 6} to {0 1 2 3 4}, do this:
