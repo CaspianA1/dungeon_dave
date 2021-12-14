@@ -24,8 +24,8 @@ StateGL demo_18_init(void) {
 	sgl.shader_program = init_shader_program(water_vertex_shader, water_fragment_shader);
 	glUseProgram(sgl.shader_program);
 
-	sgl.num_textures = 1; // ../../../assets/walls/sand.bmp, ../../../assets/walls/hieroglyph.bmp, assets/water.bmp
-	sgl.textures = init_plain_textures(sgl.num_textures, "assets/lava.bmp", TexRepeating);
+	sgl.num_textures = 1; // ../../../../assets/walls/sand.bmp, ../../../../assets/walls/hieroglyph.bmp, ../assets/water.bmp
+	sgl.textures = init_plain_textures(sgl.num_textures, "../assets/lava.bmp", TexRepeating);
 	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
 
 	return sgl;

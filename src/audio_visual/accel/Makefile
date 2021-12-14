@@ -14,7 +14,7 @@ LDFLAGS = -lm -framework OpenGL -lglew -lSDL2
 
 all:
 	make build_any demo_id=$(DEMO)
-	./bin/accel_demo
+	cd bin && ./accel_demo
 
 # takes a named argument demo_id
 build_any:

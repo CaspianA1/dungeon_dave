@@ -49,7 +49,7 @@ StateGL demo_17_init(void) {
 	List face_mesh_list;
 
 	//////////
-	scene_state.skybox = init_skybox("assets/mountain_2.bmp");
+	scene_state.skybox = init_skybox("../assets/mountain_2.bmp");
 
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_face_mesh_and_sector_lists(&scene_state.sector_list, &face_mesh_list,
@@ -63,22 +63,22 @@ StateGL demo_17_init(void) {
 	sgl.num_textures = 0;
 	scene_state.sector_list.texture_set = init_texture_set(TexRepeating, 128, 128,
 		// New:
-		// 1, "../../../assets/walls/pyramid_bricks_4.bmp"
+		// 1, "../../../../assets/walls/pyramid_bricks_4.bmp"
 
 		// Palace:
-		11, "../../../assets/walls/sand.bmp", "../../../assets/walls/pyramid_bricks_4.bmp",
-		"../../../assets/walls/marble.bmp", "../../../assets/walls/hieroglyph.bmp",
-		"../../../assets/walls/window.bmp", "../../../assets/walls/saqqara.bmp",
-		"../../../assets/walls/sandstone.bmp", "../../../assets/walls/cobblestone_3.bmp",
-		"../../../assets/walls/horses.bmp", "../../../assets/walls/mesa.bmp",
-		"../../../assets/walls/arthouse_bricks.bmp"
+		11, "../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
+		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
+		"../../../../assets/walls/window.bmp", "../../../../assets/walls/saqqara.bmp",
+		"../../../../assets/walls/sandstone.bmp", "../../../../assets/walls/cobblestone_3.bmp",
+		"../../../../assets/walls/horses.bmp", "../../../../assets/walls/mesa.bmp",
+		"../../../../assets/walls/arthouse_bricks.bmp"
 
 		// Pyramid:
-		/* 3, "../../../assets/walls/pyramid_bricks_4.bmp",
-		"../../../assets/walls/greece.bmp", "../../../assets/walls/saqqara.bmp" */
+		/* 3, "../../../../assets/walls/pyramid_bricks_4.bmp",
+		"../../../../assets/walls/greece.bmp", "../../../../assets/walls/saqqara.bmp" */
 
 		// Tiny:
-		// 2, "../../../assets/walls/mesa.bmp", "../../../assets/walls/hieroglyph.bmp"
+		// 2, "../../../../assets/walls/mesa.bmp", "../../../../assets/walls/hieroglyph.bmp"
 		);
 
 	enable_all_culling();

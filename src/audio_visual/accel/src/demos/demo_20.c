@@ -157,10 +157,10 @@ StateGL demo_20_init(void) {
 	);
 
 	billboard_list.texture_set = init_texture_set(TexNonRepeating,
-		// 328, 448, 1, "../../../assets/objects/doomguy.bmp"
-		64, 64, 3, "../../../assets/objects/doomguy.bmp",
-		"../../../assets/objects/teleporter.bmp",
-		"../../../assets/objects/robot.bmp"
+		// 328, 448, 1, "../../../../assets/objects/doomguy.bmp"
+		64, 64, 3, "../../../../assets/objects/doomguy.bmp",
+		"../../../../assets/objects/teleporter.bmp",
+		"../../../../assets/objects/robot.bmp"
 	);
 
 	// TODO: free billboard list somewhere
@@ -181,7 +181,7 @@ void demo_20_drawer(const StateGL* const sgl) {
 	static Skybox skybox;
 
 	if (first_call) {
-		skybox = init_skybox("assets/oasis_upscaled.bmp"); // TODO: free skybox somewhere
+		skybox = init_skybox("../assets/oasis_upscaled.bmp"); // TODO: free skybox somewhere
 		init_camera(&camera, (vec3) {0.0f, 1.5f, -2.5f});
 		first_call = 0;
 	}

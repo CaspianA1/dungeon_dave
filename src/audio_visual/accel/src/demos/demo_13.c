@@ -123,8 +123,8 @@ StateGL demo_13_init(void) {
 
 	sgl.num_textures = 2;
 	sgl.textures = init_plain_textures(sgl.num_textures,
-		"../../../assets/objects/tomato.bmp", TexNonRepeating,
-		"../../../assets/walls/saqqara.bmp", TexRepeating);
+		"../../../../assets/objects/tomato.bmp", TexNonRepeating,
+		"../../../../assets/walls/saqqara.bmp", TexRepeating);
 
 	sgl.shader_program = init_shader_program(billboard_vertex_shader, billboard_fragment_shader);
 	sector_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);

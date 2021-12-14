@@ -90,7 +90,7 @@ StateGL demo_19_init(void) {
 	glUseProgram(sgl.shader_program);
 
 	sgl.num_textures = 1;
-	sgl.textures = init_plain_textures(sgl.num_textures, "../../../assets/walls/mesa.bmp", TexRepeating);
+	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/mesa.bmp", TexRepeating);
 	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
 
 	enable_all_culling();

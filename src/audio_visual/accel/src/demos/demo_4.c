@@ -89,7 +89,7 @@ StateGL demo_4_init(void) {
 	glUseProgram(sgl.shader_program);
 
 	sgl.num_textures = 1;
-	sgl.textures = init_plain_textures(sgl.num_textures, "../../../assets/walls/hieroglyph.bmp", TexNonRepeating);
+	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/hieroglyph.bmp", TexNonRepeating);
 	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
 
 	// For textures with an alpha channel, enable this
