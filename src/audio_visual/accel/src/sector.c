@@ -16,6 +16,7 @@ typedef struct {
 
 #include "../../../main/statemap.c"
 #include "headers/sector.h"
+#include "headers/texture.h"
 #include "drawable_set.c"
 #include "list.c"
 
