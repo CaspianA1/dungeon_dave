@@ -4,7 +4,7 @@
 
 void demo_14_drawer(const StateGL* const sgl) {
 	static Camera camera;
-	static GLint billboard_center_id, cam_right_xz_id, view_projection_id, model_view_projection_id;
+	static GLint billboard_center_id, right_id, view_projection_id, model_view_projection_id;
 	static byte first_call = 1;
 
 	const GLuint billboard_shader = sgl -> shader_program;
@@ -13,7 +13,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 		init_camera(&camera, (vec3) {7.0f, 5.0f, 10.0f});
 
 		billboard_center_id = glGetUniformLocation(billboard_shader, "billboard_center_world_space");
-		cam_right_xz_id = glGetUniformLocation(billboard_shader, "cam_right_xz_world_space");
+		right_id = glGetUniformLocation(billboard_shader, "right_xz_world_space");
 		view_projection_id = glGetUniformLocation(billboard_shader, "view_projection");
 		model_view_projection_id = glGetUniformLocation(sector_shader, "model_view_projection");
 
@@ -54,7 +54,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 	//////////
 	glUseProgram(billboard_shader);
 
-	glUniform2f(cam_right_xz_id, camera.right_xz[0], camera.right_xz[1]);
+	glUniform2f(right_id, camera.right_xz[0], camera.right_xz[1]);
 	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera.view_projection[0][0]);
 
 	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);

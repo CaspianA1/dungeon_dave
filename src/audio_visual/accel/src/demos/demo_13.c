@@ -73,13 +73,13 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 }
 
 void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) {
-	static GLint cam_right_id, view_projection_matrix_id;
+	static GLint right_id, view_projection_matrix_id;
 	static byte first_call = 1;
 
 	glUseProgram(shader_program); // Enable billboard shader
 
 	if (first_call) {
-		cam_right_id = glGetUniformLocation(shader_program, "cam_right_xz_world_space");
+		right_id = glGetUniformLocation(shader_program, "right_xz_world_space");
 		view_projection_matrix_id = glGetUniformLocation(shader_program, "view_projection");
 
 		const GLint
@@ -96,7 +96,7 @@ void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) 
 	mat4 view_times_projection;
 	demo_13_move(pos, right, view_times_projection, shader_program);
 
-	glUniform2f(cam_right_id, right[0], right[2]);
+	glUniform2f(right_id, right[0], right[2]);
 	glUniformMatrix4fv(view_projection_matrix_id, 1, GL_FALSE, &view_times_projection[0][0]);
 }
 

@@ -115,7 +115,7 @@ const char* const sector_vertex_shader =
 
 	"out vec2 UV;\n"
 
-	"uniform vec2 billboard_size_world_space, cam_right_xz_world_space;\n"
+	"uniform vec2 billboard_size_world_space, right_xz_world_space;\n"
 	"uniform vec3 billboard_center_world_space;\n"
 	"uniform mat4 view_projection;\n"
 
@@ -124,14 +124,15 @@ const char* const sector_vertex_shader =
 		"vec2(-0.5f, 0.5f), vec2(0.5f, 0.5f)\n"
 	");\n"
 
-	"const vec3 cam_up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
+	"const vec3 up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
 
 	"void main() {\n"
 		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
+		"vec2 corner_world_space = vertex_model_space * billboard_size_world_space;\n"
 
-		"vec3 vertex_world_space = billboard_center_world_space\n"
-			"+ vec3(cam_right_xz_world_space, 0.0f).xzy * vertex_model_space.x * billboard_size_world_space.x\n"
-			"+ cam_up_world_space * vertex_model_space.y * billboard_size_world_space.y;\n"
+		"vec3 vertex_world_space = billboard_center_world_space +\n"
+			"corner_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
+			"+ corner_world_space.y * up_world_space;\n"
 
 		"gl_Position = view_projection * vec4(vertex_world_space, 1.0f);\n"
 		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"

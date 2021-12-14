@@ -29,7 +29,7 @@ const char* const batching_billboard_vertex_shader =
 	"out float texture_id;\n"
 	"out vec2 UV;\n"
 
-	"uniform vec2 cam_right_xz_world_space;\n"
+	"uniform vec2 right_xz_world_space;\n"
 	"uniform mat4 view_projection;\n"
 
 	"const vec2 vertices_model_space[4] = vec2[4](\n"
@@ -37,14 +37,15 @@ const char* const batching_billboard_vertex_shader =
 		"vec2(-0.5f, 0.5f), vec2(0.5f, 0.5f)\n"
 	");\n"
 
-	"const vec3 cam_up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
+	"const vec3 up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
 
 	"void main() {\n"
 		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
+		"vec2 corner_world_space = vertex_model_space * billboard_size_world_space;\n"
 
-		"vec3 vertex_world_space = billboard_center_world_space\n"
-			"+ vec3(cam_right_xz_world_space, 0.0f).xzy * vertex_model_space.x * billboard_size_world_space.x\n"
-			"+ cam_up_world_space * vertex_model_space.y * billboard_size_world_space.y;\n"
+		"vec3 vertex_world_space = billboard_center_world_space +\n"
+			"corner_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
+			"+ corner_world_space.y * up_world_space;\n"
 
 		"gl_Position = view_projection * vec4(vertex_world_space, 1.0f);\n"
 
@@ -79,17 +80,17 @@ void draw_billboards(const DrawableSet* const billboard_list, const Camera* cons
 		batching_billboard_shader = billboard_list -> shader;
 
 	static byte first_call = 1;
-	static GLint cam_right_id, view_projection_id;
+	static GLint right_id, view_projection_id;
 
 	if (first_call) {
-		cam_right_id = glGetUniformLocation(batching_billboard_shader, "cam_right_xz_world_space");
+		right_id = glGetUniformLocation(batching_billboard_shader, "right_xz_world_space");
 		view_projection_id = glGetUniformLocation(batching_billboard_shader, "view_projection");
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		first_call = 0;
 	}
 
 	glUseProgram(batching_billboard_shader);
-	glUniform2f(cam_right_id, camera -> right_xz[0], camera -> right_xz[1]);
+	glUniform2f(right_id, camera -> right_xz[0], camera -> right_xz[1]);
 	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera -> view_projection[0][0]);
 
 	//////////
