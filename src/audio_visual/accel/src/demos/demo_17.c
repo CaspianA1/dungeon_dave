@@ -18,6 +18,7 @@
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
 - More effeciently set statemap bit ranges
 - For terrain, quite slow with 2/3 phong lighting + some objects popping out for half seconds
+- camera tilt
 
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
