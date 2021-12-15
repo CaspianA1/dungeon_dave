@@ -62,7 +62,7 @@ static void add_face_mesh_to_list(const Face face, const byte sector_max_visible
 	/* Face info bits, layout:
 		Bits 0-1, two bits -> face type
 		Bit 2, one bit -> face side (top or left side of top-down sector)
-		Bits 3-7, five bits -> texture id (unused at the moment)
+		Bits 3-7, five bits -> texture id
 
 	So, 00 -> flat, 01 -> vert NW, and 10 -> vert EW */
 
