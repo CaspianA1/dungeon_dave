@@ -14,7 +14,7 @@
 - NEXT 4: composable billboard drawer, but before that, billboard batching + different billboard types
 
 - Figure out if diffuse should depend on where player is - or ambient occlusion + simple dynamic lights
-- Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side
+- Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side; or store none at all
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
 - More effeciently set statemap bit ranges
 - For terrain, quite slow with 2/3 phong lighting + some objects popping out for half seconds
@@ -42,6 +42,7 @@ StateGL demo_17_init(void) {
 	(byte*) new_heightmap, (byte*) texture_id_map, new_width, new_height
 	(byte*) terrain_heightmap, (byte*) texture_id_map, terrain_width, terrain_height
 	(byte*) tiny_heightmap, (byte*) tiny_heightmap, tiny_width, tiny_height
+	(byte*) level_one_heightmap, (byte*) level_one_texture_id_map, level_one_width, level_one_height
 	*/
 
 	SceneState scene_state;
@@ -54,7 +55,7 @@ StateGL demo_17_init(void) {
 
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_face_mesh_and_sector_lists(&scene_state.sector_list, &face_mesh_list,
-		(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height);
+		(byte*) level_one_heightmap, (byte*) level_one_texture_id_map, level_one_width, level_one_height);
 
 	init_sector_list_vbo_and_ibo(&scene_state.sector_list, &face_mesh_list);
 
@@ -67,12 +68,12 @@ StateGL demo_17_init(void) {
 		// 1, "../../../../assets/walls/pyramid_bricks_4.bmp"
 
 		// Palace:
-		11, "../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
+		/* 11, "../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
 		"../../../../assets/walls/window.bmp", "../../../../assets/walls/saqqara.bmp",
 		"../../../../assets/walls/sandstone.bmp", "../../../../assets/walls/cobblestone_3.bmp",
 		"../../../../assets/walls/horses.bmp", "../../../../assets/walls/mesa.bmp",
-		"../../../../assets/walls/arthouse_bricks.bmp"
+		"../../../../assets/walls/arthouse_bricks.bmp" */
 
 		// Pyramid:
 		/* 3, "../../../../assets/walls/pyramid_bricks_4.bmp",
@@ -80,6 +81,17 @@ StateGL demo_17_init(void) {
 
 		// Tiny:
 		// 2, "../../../../assets/walls/mesa.bmp", "../../../../assets/walls/hieroglyph.bmp"
+
+		// Level 1:
+		8,
+		"../../../../assets/walls/sand.bmp",
+		"../../../../assets/walls/cobblestone_2.bmp",
+		"../../../../assets/walls/cobblestone_3.bmp",
+		"../../../../assets/walls/stone_2.bmp",
+		"../../../../assets/walls/pyramid_bricks_3.bmp",
+		"../../../../assets/walls/hieroglyphics.bmp",
+		"../../../../assets/walls/desert_snake.bmp",
+		"../../../../assets/wolf/colorstone.bmp"
 		);
 
 	enable_all_culling();
