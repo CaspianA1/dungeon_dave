@@ -9,6 +9,9 @@
 Plan:
 - On lower bar, show draw/erase mode, map size, texture/map edit mode, curr texture, and curr draw height
 - Also, show keybindings on bottom of screen
+- Read in map files
+- Show height from shading - darker = higher; and a max height as an input too
+- Some text that says 'Dungeon Maker' - or maybe none, since it's at the top of the screen
 
 - Drag and click to draw to a map - done
 - Right click while dragging to erase - done
@@ -17,9 +20,9 @@ Plan:
 - If number over 255, limit to that - done
 - Variables editing_height and editing_texture_id - done
 - Display point height over each texture in some good way - done
+- Selected block highlighted - done
 
 - Later on, line and rectangle functions (or maybe just a line function)
-- Selected block highlighted - done
 - Textures uneven if using SDL_RenderCopyF?
 - Sometimes, clicking for too long freezes my computer
 */
@@ -33,34 +36,30 @@ byte* map_point(const EditorState* const eds, const byte is_heightmap, const byt
 void update_editing_placement_values(EditorState* const eds, const SDL_Event* const event) {
 	// This reads in 3 numbers (or less) across function calls to use as a heightmap or texture id placement value
 
-	static SDL_Keycode num_input_keys[3] = {SDLK_UNKNOWN, SDLK_UNKNOWN, SDLK_UNKNOWN};
+	static SDL_Keycode num_input_keys[3];
 	static byte num_input_index = 0;
 	const SDL_Keycode key = event -> key.keysym.sym;
 
 	byte number_input_done = 0;
-	if (key == SDLK_RETURN) number_input_done = 1;
+	if (key == SDLK_RETURN && num_input_index != 0) number_input_done = 1;
 	else if (key >= SDLK_0 && key <= SDLK_9) {
 		num_input_keys[num_input_index] = key;
 		if (++num_input_index == 3) number_input_done = 1;
 	}
 
 	if (number_input_done) {
+
+		int16_t number = 0; // Max input = 999. 16-bit number handles that.
+		for (byte i = 0; i < num_input_index; i++) // Sets digits in `number` according to `char_digit`
+			number = number * 10 + (num_input_keys[i] - SDLK_0);
+
 		num_input_index = 0;
-
-		int16_t number = 0;
-		for (byte i = 0; i < 3; i++) {
-			const char char_digit = num_input_keys[i];
-			if (char_digit == SDLK_UNKNOWN) continue;
-
-			// This sets a base-10 digit in `number` to the numerical value of `char_digit`
-			number = number * 10 + (char_digit - SDLK_0);
-			num_input_keys[i] = SDLK_UNKNOWN;
-		}
-
-		number = (number > 255) ? 255 : number; // Avoiding overflow of byte
+		number = (number > 255) ? 255 : number; // Avoiding overflow of 255
 
 		const byte max_texture_id = eds -> num_textures - 1; // Avoiding too big of a texture id
 		if (eds -> in_texture_editing_mode) number = (number > max_texture_id) ? max_texture_id : number;
+
+		// DEBUG(number, d);
 
 		*(eds -> in_texture_editing_mode ? &eds -> editing_texture_id : &eds -> editing_height) = number;
 	}
@@ -107,14 +106,18 @@ void render_eds_map(const EditorState* const eds, SDL_Renderer* const renderer) 
 		scr_blocks_across = (float) EDITOR_W / map_width,
 		scr_blocks_down = (float) EDITOR_MAP_SECTION_H / map_height;
 
+	const int
+		ceil_src_blocks_across = ceilf(scr_blocks_across),
+		ceil_src_blocks_down = ceilf(scr_blocks_down);
+
 	for (byte map_y = 0; map_y < map_height; map_y++) {
 		for (byte map_x = 0; map_x < map_width; map_x++) {
 			const byte texture_id = *map_point(eds, 0, map_x, map_y);
 			SDL_Texture* const texture = eds -> textures[texture_id];
 
-			const SDL_FRect block_pos = {
+			const SDL_Rect block_pos = {
 				map_x * scr_blocks_across, map_y * scr_blocks_down,
-				scr_blocks_across, scr_blocks_down
+				ceil_src_blocks_across, ceil_src_blocks_down
 			};
 
 			const byte highlight_texture =
@@ -122,7 +125,7 @@ void render_eds_map(const EditorState* const eds, SDL_Renderer* const renderer) 
 				&& mouse_y >= block_pos.y && mouse_y < block_pos.y + block_pos.h;
 			
 			if (highlight_texture) SDL_SetTextureColorMod(texture, TEX_SHADED_BLOCK_COLOR_MOD);
-			SDL_RenderCopyF(renderer, texture, NULL, &block_pos);
+			SDL_RenderCopy(renderer, texture, NULL, &block_pos);
 			if (highlight_texture) SDL_SetTextureColorMod(texture, 255, 255, 255);
 		}
 	}
@@ -156,6 +159,7 @@ void editor_loop(EditorState* const eds, SDL_Renderer* const renderer) {
 		}
 
 		edit_eds_map(eds, mouse_state);
+		SDL_RenderClear(renderer);
 		render_eds_map(eds, renderer);
 		SDL_RenderPresent(renderer);
 

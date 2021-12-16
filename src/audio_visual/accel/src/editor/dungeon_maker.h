@@ -1,8 +1,8 @@
 #include <SDL2/SDL.h>
 
-#define EDITOR_W 1000
-#define EDITOR_H 700
-#define EDITOR_MAP_SECTION_H 650
+#define EDITOR_W 600
+#define EDITOR_H 600
+#define EDITOR_MAP_SECTION_H 550
 #define EDITOR_FPS 60
 #define TEX_SHADED_BLOCK_COLOR_MOD 127, 127, 127
 
