@@ -7,15 +7,16 @@
 - Press a number key to change the current tex
 
 Plan:
-- Input a series of numbers, and then hit return (stopping if more than 3 numbers), to select a height or texture id number
-- If number over 255, limit to that
-- Variables editing_height and editing_texture_id
-- Display point height over each texture in some good way
-- On lower bar, show draw/erase mode, map size, texture/map edi mode, curr texture, and curr draw height
+- On lower bar, show draw/erase mode, map size, texture/map edit mode, curr texture, and curr draw height
+- Also, show keybindings on bottom of screen
 
 - Drag and click to draw to a map - done
 - Right click while dragging to erase - done
 - Press 't' to toggle texture editing mode - done
+- Input a series of numbers, and then hit return (stopping if more than 3 numbers), to select a height or texture id number - done
+- If number over 255, limit to that - done
+- Variables editing_height and editing_texture_id - done
+- Display point height over each texture in some good way - done
 
 - Later on, line and rectangle functions (or maybe just a line function)
 - Selected block highlighted - done
@@ -28,11 +29,45 @@ byte* map_point(const EditorState* const eds, const byte is_heightmap, const byt
 	return map + (y * eds -> map_size[0] + x);
 }
 
-void edit_eds_map(EditorState* const eds, const MouseState mouse_state) {
-	static byte
-		prev_texture_edit_key = 0,
-		first_call = 1;
+// Updates editing_height and editing_texture_id
+void update_editing_placement_values(EditorState* const eds, const SDL_Event* const event) {
+	// This reads in 3 numbers (or less) across function calls to use as a heightmap or texture id placement value
 
+	static SDL_Keycode num_input_keys[3] = {SDLK_UNKNOWN, SDLK_UNKNOWN, SDLK_UNKNOWN};
+	static byte num_input_index = 0;
+	const SDL_Keycode key = event -> key.keysym.sym;
+
+	byte number_input_done = 0;
+	if (key == SDLK_RETURN) number_input_done = 1;
+	else if (key >= SDLK_0 && key <= SDLK_9) {
+		num_input_keys[num_input_index] = key;
+		if (++num_input_index == 3) number_input_done = 1;
+	}
+
+	if (number_input_done) {
+		num_input_index = 0;
+
+		int16_t number = 0;
+		for (byte i = 0; i < 3; i++) {
+			const char char_digit = num_input_keys[i];
+			if (char_digit == SDLK_UNKNOWN) continue;
+
+			// This sets a base-10 digit in `number` to the numerical value of `char_digit`
+			number = number * 10 + (char_digit - SDLK_0);
+			num_input_keys[i] = SDLK_UNKNOWN;
+		}
+
+		number = (number > 255) ? 255 : number; // Avoiding overflow of byte
+
+		const byte max_texture_id = eds -> num_textures - 1; // Avoiding too big of a texture id
+		if (eds -> in_texture_editing_mode) number = (number > max_texture_id) ? max_texture_id : number;
+
+		*(eds -> in_texture_editing_mode ? &eds -> editing_texture_id : &eds -> editing_height) = number;
+	}
+}
+
+void edit_eds_map(EditorState* const eds, const MouseState mouse_state) {
+	static byte prev_texture_edit_key = 0, first_call = 1;
 	static const Uint8* keys;
 
 	if (first_call) {
@@ -55,7 +90,12 @@ void edit_eds_map(EditorState* const eds, const MouseState mouse_state) {
 			map_x = (float) eds -> mouse_pos[0] / EDITOR_W * eds -> map_size[0],
 			map_y = (float) eds -> mouse_pos[1] / EDITOR_MAP_SECTION_H * eds -> map_size[1];
 
-		*map_point(eds, !eds -> in_texture_editing_mode, map_x, map_y) = (mouse_state == LeftClick);
+		byte output_val;
+
+		if (mouse_state == RightClick) output_val = 0;
+		else output_val = eds -> in_texture_editing_mode ? eds -> editing_texture_id : eds -> editing_height;
+
+		*map_point(eds, !eds -> in_texture_editing_mode, map_x, map_y) = output_val;
 	}
 }
 
@@ -108,6 +148,10 @@ void editor_loop(EditorState* const eds, SDL_Renderer* const renderer) {
 					break;
 				case SDL_MOUSEBUTTONUP:
 					mouse_state = NoClick;
+					break;
+				case SDL_KEYDOWN:
+					update_editing_placement_values(eds, &event);
+					break;
 			}
 		}
 
@@ -153,10 +197,12 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 	eds -> map_size[0] = map_width;
 	eds -> map_size[1] = map_height;
 	eds -> in_texture_editing_mode = 0;
+	eds -> editing_height = 1;
+	eds -> editing_texture_id = 1;
+
 	eds -> heightmap = malloc(map_bytes);
 	memcpy(eds -> heightmap, heightmap, map_bytes);
 	eds -> texture_id_map = malloc(map_bytes);
-	// memset(eds -> texture_id_map, 0, map_bytes);
 	memcpy(eds -> texture_id_map, texture_id_map, map_bytes);
 	eds -> textures = malloc(num_textures * sizeof(SDL_Texture*));
 

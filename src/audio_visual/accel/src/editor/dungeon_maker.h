@@ -37,6 +37,8 @@ typedef struct {
 	byte
 		num_textures, map_size[2],
 		in_texture_editing_mode,
+		// These indicate the height and texture id placed while editing
+		editing_height, editing_texture_id,
 		*heightmap, *texture_id_map;
 
 	int mouse_pos[2];
