@@ -10,11 +10,17 @@ OUT = accel_demo
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
 CFLAGS = -std=c99 -march=native $(WARNINGS)
-LDFLAGS = -lm -framework OpenGL -lglew -lSDL2
+
+NON_GL_LDFLAGS = -lm -lSDL2
+LDFLAGS = -framework OpenGL -lglew $(NON_GL_LDFLAGS)
 
 all:
 	make build_any demo_id=$(DEMO)
 	cd bin && ./accel_demo
+
+editor:
+	$(CC) $(CFLAGS) $(OPTIMIZE) $(NON_GL_LDFLAGS) -o bin/dungeon_maker src/editor/dungeon_maker.c
+	./bin/dungeon_maker
 
 # takes a named argument demo_id
 build_any:
