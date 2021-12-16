@@ -29,8 +29,6 @@ byte* map_point(const EditorState* const eds, const byte is_heightmap, const byt
 }
 
 void edit_eds_map(EditorState* const eds, const MouseState mouse_state) {
-	// puts("Edit shit. Press 't' to toggle texture editing mode.");
-
 	static byte
 		prev_texture_edit_key = 0,
 		first_call = 1;
@@ -50,7 +48,6 @@ void edit_eds_map(EditorState* const eds, const MouseState mouse_state) {
 	//////////
 
 	SDL_GetMouseState(eds -> mouse_pos, eds -> mouse_pos + 1);
-	*map_point(eds, eds -> in_texture_editing_mode, 0, 0) = keys[SDL_SCANCODE_C];
 
 	// Make click based on if mouse still down, not just down in one instance
 	if (mouse_state != NoClick) {
