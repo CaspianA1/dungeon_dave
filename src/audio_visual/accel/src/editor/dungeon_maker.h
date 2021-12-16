@@ -6,7 +6,8 @@
 #define EDITOR_FPS 60
 #define TEX_SHADED_BLOCK_COLOR_MOD 127, 127, 127
 
-#define KEY_
+#define KEY_TOGGLE_TEXTURE_EDIT_MODE SDL_SCANCODE_T
+#define KEY_CLICK_BLOCKS SDL_BUTTON_LEFT
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
@@ -26,10 +27,19 @@ typedef enum {
 	CreateTexture
 } FailureType;
 
+typedef enum {
+	LeftClick,
+	RightClick,
+	NoClick
+} MouseState;
+
 typedef struct {
 	byte
 		num_textures, map_size[2],
 		in_texture_editing_mode,
 		*heightmap, *texture_id_map;
+
+	int mouse_pos[2];
+
 	SDL_Texture** textures;
 } EditorState;

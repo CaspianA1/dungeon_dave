@@ -7,19 +7,20 @@
 - Press a number key to change the current tex
 
 Plan:
-- Press 't' to toggle texture editing mode
 - Input a series of numbers, and then hit return (stopping if more than 3 numbers), to select a height or texture id number
 - If number over 255, limit to that
-
 - Variables editing_height and editing_texture_id
-- Drag and click to draw to a map
+- Display point height over each texture in some good way
+- On lower bar, show draw/erase mode, map size, texture/map edi mode, curr texture, and curr draw height
 
-- Press 'e' to enter erase mode
-- Dragging and clicking will erase tiles from the current map, setting them to 0
+- Drag and click to draw to a map - done
+- Right click while dragging to erase - done
+- Press 't' to toggle texture editing mode - done
 
 - Later on, line and rectangle functions (or maybe just a line function)
-
 - Selected block highlighted - done
+- Textures uneven if using SDL_RenderCopyF?
+- Sometimes, clicking for too long freezes my computer
 */
 
 byte* map_point(const EditorState* const eds, const byte is_heightmap, const byte x, const byte y) {
@@ -27,11 +28,13 @@ byte* map_point(const EditorState* const eds, const byte is_heightmap, const byt
 	return map + (y * eds -> map_size[0] + x);
 }
 
-void edit_eds_map(const EditorState* const eds) {
+void edit_eds_map(EditorState* const eds, const MouseState mouse_state) {
 	// puts("Edit shit. Press 't' to toggle texture editing mode.");
-	(void) eds;
 
-	static byte first_call = 1;
+	static byte
+		prev_texture_edit_key = 0,
+		first_call = 1;
+
 	static const Uint8* keys;
 
 	if (first_call) {
@@ -39,18 +42,33 @@ void edit_eds_map(const EditorState* const eds) {
 		first_call = 0;
 	}
 
-	// DEBUG(keys[SDL_SCANCODE_C], d);
+	const byte texture_edit_key = keys[KEY_TOGGLE_TEXTURE_EDIT_MODE];
+	if (texture_edit_key)
+		if (!prev_texture_edit_key) eds -> in_texture_editing_mode = !eds -> in_texture_editing_mode;
+	prev_texture_edit_key = texture_edit_key;
+
+	//////////
+
+	SDL_GetMouseState(eds -> mouse_pos, eds -> mouse_pos + 1);
+	*map_point(eds, eds -> in_texture_editing_mode, 0, 0) = keys[SDL_SCANCODE_C];
+
+	// Make click based on if mouse still down, not just down in one instance
+	if (mouse_state != NoClick) {
+		const byte
+			map_x = (float) eds -> mouse_pos[0] / EDITOR_W * eds -> map_size[0],
+			map_y = (float) eds -> mouse_pos[1] / EDITOR_MAP_SECTION_H * eds -> map_size[1];
+
+		*map_point(eds, !eds -> in_texture_editing_mode, map_x, map_y) = (mouse_state == LeftClick);
+	}
 }
 
 void render_eds_map(const EditorState* const eds, SDL_Renderer* const renderer) {
 	const byte map_width = eds -> map_size[0], map_height = eds -> map_size[1];
+	const int mouse_x = eds -> mouse_pos[0], mouse_y = eds -> mouse_pos[1];
 
 	const float
 		scr_blocks_across = (float) EDITOR_W / map_width,
 		scr_blocks_down = (float) EDITOR_MAP_SECTION_H / map_height;
-
-	int mouse_x, mouse_y;
-	SDL_GetMouseState(&mouse_x, &mouse_y);
 
 	for (byte map_y = 0; map_y < map_height; map_y++) {
 		for (byte map_x = 0; map_x < map_width; map_x++) {
@@ -76,16 +94,27 @@ void render_eds_map(const EditorState* const eds, SDL_Renderer* const renderer) 
 void editor_loop(EditorState* const eds, SDL_Renderer* const renderer) {
 	const int16_t max_delay = 1000 / EDITOR_FPS;
 	byte editing = 1;
+	MouseState mouse_state = NoClick;
 
 	while (editing) {
 		const Uint32 before = SDL_GetTicks();
 		SDL_Event event;
 
 		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) editing = 0;
+			switch (event.type) {
+				case SDL_QUIT:
+					editing = 0;
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					mouse_state = (event.button.button == KEY_CLICK_BLOCKS)
+						? LeftClick : RightClick;
+					break;
+				case SDL_MOUSEBUTTONUP:
+					mouse_state = NoClick;
+			}
 		}
 
-		edit_eds_map(eds);
+		edit_eds_map(eds, mouse_state);
 		render_eds_map(eds, renderer);
 		SDL_RenderPresent(renderer);
 
@@ -121,12 +150,17 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 
 	//////////
 
+	const size_t map_bytes = map_width * map_height;
+
 	eds -> num_textures = num_textures;
 	eds -> map_size[0] = map_width;
 	eds -> map_size[1] = map_height;
 	eds -> in_texture_editing_mode = 0;
-	eds -> heightmap = heightmap;
-	eds -> texture_id_map = (byte*) texture_id_map;
+	eds -> heightmap = malloc(map_bytes);
+	memcpy(eds -> heightmap, heightmap, map_bytes);
+	eds -> texture_id_map = malloc(map_bytes);
+	// memset(eds -> texture_id_map, 0, map_bytes);
+	memcpy(eds -> texture_id_map, texture_id_map, map_bytes);
 	eds -> textures = malloc(num_textures * sizeof(SDL_Texture*));
 
 	for (byte i = 0; i < num_textures; i++) {
@@ -144,8 +178,12 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 }
 
 void deinit_editor_state(EditorState* const eds) {
+	free(eds -> heightmap);
+	free(eds -> texture_id_map);
+
 	for (byte i = 0; i < eds -> num_textures; i++)
 		SDL_DestroyTexture(eds -> textures[i]);
+	free(eds -> textures);
 }
 
 int main(void) {
