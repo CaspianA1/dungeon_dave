@@ -12,7 +12,7 @@
 #define SELECTED_TILE_COLOR_MOD 127, 127, 127
 
 #define FONT_PATH "../../../../assets/dnd.ttf"
-// #define FONT_PATH "mono_dnd.otf"
+// #define FONT_PATH "monodnd.ttf"
 
 #define KEY_TOGGLE_TEXTURE_EDIT_MODE SDL_SCANCODE_ESCAPE
 #define KEY_CLICK_TILE SDL_BUTTON_LEFT

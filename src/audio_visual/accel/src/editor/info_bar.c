@@ -17,6 +17,7 @@ fleckenstein | 4, 20 | tex 19 | erase
 - Get edit state from eds (move, draw, or erase) - done
 - A 'select texture' or 'select height' button
 - Remember to free the info bar, and only reallocate it when needed
+- Or maybe a completely new font, that's monospace from the beginning (only lowercase + numbers)
 */
 
 typedef struct {
