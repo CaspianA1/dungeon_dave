@@ -19,7 +19,6 @@
 - More effeciently set statemap bit ranges
 - For terrain, quite slow with 2/3 phong lighting + some objects popping out for half seconds
 - Camera tilt
-- The main project start button won't start
 - Light attenuation
 
 - Read sprite crop from spritesheet
