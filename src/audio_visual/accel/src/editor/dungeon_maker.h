@@ -11,7 +11,6 @@
 #define EDITOR_FPS 60
 #define SELECTED_TILE_COLOR_MOD 127, 127, 127
 
-// #define FONT_PATH "monospaci.py/Fontgoodexport-Mono.ttf"
 #define FONT_PATH "../../../../assets/dnd.ttf"
 // #define FONT_PATH "mono_dnd.otf"
 
