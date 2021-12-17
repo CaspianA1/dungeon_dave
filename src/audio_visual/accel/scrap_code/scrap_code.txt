@@ -2448,3 +2448,24 @@ byte get_padding_for_six_digits(int16_t n1, int16_t n2) {
 }
 
 /////
+
+	"float attenuation(vec3 pos_delta) {\n"
+		// 1.0/(c1 + c2*d + c3*d^2)
+
+		"float dist_squared = dot(pos_delta, pos_delta);\n"
+
+		"float c1 = 1.0f, c2 = 0.2f, c3 = 0.3f;\n"
+
+		"return 1.0f / (c1 + c2 * sqrt(dist_squared) + c3 * dist_squared);\n"
+	"}\n"
+
+	"void main() {\n"
+		"vec3 pos_delta = light_pos_world_space - fragment_pos_world_space;\n"
+		"float light = /* diffuse(pos_delta) + */ attenuation(pos_delta);\n"
+		"face_normal;\n"
+
+		// "light *= 10.0f / length(pos_delta);\n"
+
+		"color = texture(texture_sampler, UV).rgb * light;\n"
+
+/////
