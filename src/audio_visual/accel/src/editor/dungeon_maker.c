@@ -1,4 +1,5 @@
 #include "dungeon_maker.h"
+#include "info_bar.c"
 #include "../data/maps.c"
 
 /*
@@ -7,24 +8,25 @@
 - Press a number key to change the current tex
 
 Plan:
-- On lower bar, show draw/erase mode, map size, texture/map edit mode, curr texture, and curr draw height
-- Also, show keybindings on bottom of screen
+- An info bar
 - Read in map files
 - Show height from shading - darker = higher; and a max height as an input too
-- Some text that says 'Dungeon Maker' - or maybe none, since it's at the top of the screen
+- An 'undo previous action' feature (undoes to the action done before the mouse was clicked down and then released)
+
+- Later on, line and rectangle functions (or maybe just a line function)
+- Sometimes, clicking for too long freezes my computer
 
 - Drag and click to draw to a map - done
 - Right click while dragging to erase - done
-- Press 't' to toggle texture editing mode - done
+- Press <esc> to toggle texture editing mode - done
 - Input a series of numbers, and then hit return (stopping if more than 3 numbers), to select a height or texture id number - done
 - If number over 255, limit to that - done
 - Variables editing_height and editing_texture_id - done
 - Display point height over each texture in some good way - done
 - Selected block highlighted - done
+- Textures uneven if using SDL_RenderCopyF - done and fixed
 
-- Later on, line and rectangle functions (or maybe just a line function)
-- Textures uneven if using SDL_RenderCopyF?
-- Sometimes, clicking for too long freezes my computer
+- Perhaps make 4 textures, split into 4 screen segments - and then render each one into its box, and then no jitter (maybe)
 */
 
 byte* map_point(const EditorState* const eds, const byte is_heightmap, const byte x, const byte y) {
@@ -32,15 +34,14 @@ byte* map_point(const EditorState* const eds, const byte is_heightmap, const byt
 	return map + (y * eds -> map_size[0] + x);
 }
 
-// Updates editing_height and editing_texture_id
+// Updates editing_height and editing_texture_id. Reads in 3 nums across function calls to update one;
 void update_editing_placement_values(EditorState* const eds, const SDL_Event* const event) {
-	// This reads in 3 numbers (or less) across function calls to use as a heightmap or texture id placement value
-
 	static SDL_Keycode num_input_keys[3];
-	static byte num_input_index = 0;
 	const SDL_Keycode key = event -> key.keysym.sym;
 
+	static byte num_input_index = 0;
 	byte number_input_done = 0;
+
 	if (key == SDLK_RETURN && num_input_index != 0) number_input_done = 1;
 	else if (key >= SDLK_0 && key <= SDLK_9) {
 		num_input_keys[num_input_index] = key;
@@ -48,7 +49,6 @@ void update_editing_placement_values(EditorState* const eds, const SDL_Event* co
 	}
 
 	if (number_input_done) {
-
 		int16_t number = 0; // Max input = 999. 16-bit number handles that.
 		for (byte i = 0; i < num_input_index; i++) // Sets digits in `number` according to `char_digit`
 			number = number * 10 + (num_input_keys[i] - SDLK_0);
@@ -59,13 +59,11 @@ void update_editing_placement_values(EditorState* const eds, const SDL_Event* co
 		const byte max_texture_id = eds -> num_textures - 1; // Avoiding too big of a texture id
 		if (eds -> in_texture_editing_mode) number = (number > max_texture_id) ? max_texture_id : number;
 
-		// DEBUG(number, d);
-
 		*(eds -> in_texture_editing_mode ? &eds -> editing_texture_id : &eds -> editing_height) = number;
 	}
 }
 
-void edit_eds_map(EditorState* const eds, const MouseState mouse_state) {
+void edit_eds_map(EditorState* const eds) {
 	static byte prev_texture_edit_key = 0, first_call = 1;
 	static const Uint8* keys;
 
@@ -81,24 +79,19 @@ void edit_eds_map(EditorState* const eds, const MouseState mouse_state) {
 
 	//////////
 
-	SDL_GetMouseState(eds -> mouse_pos, eds -> mouse_pos + 1);
-
 	// Make click based on if mouse still down, not just down in one instance
-	if (mouse_state != NoClick) {
-		const byte
-			map_x = (float) eds -> mouse_pos[0] / EDITOR_W * eds -> map_size[0],
-			map_y = (float) eds -> mouse_pos[1] / EDITOR_MAP_SECTION_H * eds -> map_size[1];
-
+	if (eds -> mouse_state != NoClick && eds -> mouse_pos[1] < EDITOR_MAP_SECTION_H) {
 		byte output_val;
 
-		if (mouse_state == RightClick) output_val = 0;
+		if (eds -> mouse_state == RightClick) output_val = 0;
 		else output_val = eds -> in_texture_editing_mode ? eds -> editing_texture_id : eds -> editing_height;
 
-		*map_point(eds, !eds -> in_texture_editing_mode, map_x, map_y) = output_val;
+		*map_point(eds, !eds -> in_texture_editing_mode,
+			eds -> tile_pos[0], eds -> tile_pos[1]) = output_val;
 	}
 }
 
-void render_eds_map(const EditorState* const eds, SDL_Renderer* const renderer) {
+void render_eds_map(const EditorState* const eds) {
 	const byte map_width = eds -> map_size[0], map_height = eds -> map_size[1];
 	const int mouse_x = eds -> mouse_pos[0], mouse_y = eds -> mouse_pos[1];
 
@@ -124,17 +117,18 @@ void render_eds_map(const EditorState* const eds, SDL_Renderer* const renderer) 
 				mouse_x >= block_pos.x && mouse_x < block_pos.x + block_pos.w
 				&& mouse_y >= block_pos.y && mouse_y < block_pos.y + block_pos.h;
 			
-			if (highlight_texture) SDL_SetTextureColorMod(texture, TEX_SHADED_BLOCK_COLOR_MOD);
-			SDL_RenderCopy(renderer, texture, NULL, &block_pos);
+			if (highlight_texture) SDL_SetTextureColorMod(texture, SELECTED_TILE_COLOR_MOD);
+			SDL_RenderCopy(eds -> renderer, texture, NULL, &block_pos);
 			if (highlight_texture) SDL_SetTextureColorMod(texture, 255, 255, 255);
 		}
 	}
 }
 
-void editor_loop(EditorState* const eds, SDL_Renderer* const renderer) {
+void editor_loop(EditorState* const eds) {
 	const int16_t max_delay = 1000 / EDITOR_FPS;
 	byte editing = 1;
-	MouseState mouse_state = NoClick;
+
+	SDL_Renderer* const renderer = eds -> renderer;
 
 	while (editing) {
 		const Uint32 before = SDL_GetTicks();
@@ -146,11 +140,11 @@ void editor_loop(EditorState* const eds, SDL_Renderer* const renderer) {
 					editing = 0;
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					mouse_state = (event.button.button == KEY_CLICK_BLOCKS)
+					eds -> mouse_state = (event.button.button == KEY_CLICK_TILE)
 						? LeftClick : RightClick;
 					break;
 				case SDL_MOUSEBUTTONUP:
-					mouse_state = NoClick;
+					eds -> mouse_state = NoClick;
 					break;
 				case SDL_KEYDOWN:
 					update_editing_placement_values(eds, &event);
@@ -158,9 +152,15 @@ void editor_loop(EditorState* const eds, SDL_Renderer* const renderer) {
 			}
 		}
 
-		edit_eds_map(eds, mouse_state);
+		SDL_GetMouseState(eds -> mouse_pos, eds -> mouse_pos + 1);
+		eds -> tile_pos[0] = (float) eds -> mouse_pos[0] / EDITOR_W * eds -> map_size[0];
+		eds -> tile_pos[1] = (float) eds -> mouse_pos[1] / EDITOR_MAP_SECTION_H * eds -> map_size[1];
+		if (eds -> tile_pos[1] >= eds -> map_size[1]) eds -> tile_pos[1] = eds -> map_size[1] - 1;
+
+		edit_eds_map(eds);
 		SDL_RenderClear(renderer);
-		render_eds_map(eds, renderer);
+		render_eds_map(eds);
+		render_info_bar(eds);
 		SDL_RenderPresent(renderer);
 
 		const Uint32 ms_elapsed = SDL_GetTicks() - before;
@@ -200,15 +200,20 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 	eds -> num_textures = num_textures;
 	eds -> map_size[0] = map_width;
 	eds -> map_size[1] = map_height;
-	eds -> in_texture_editing_mode = 0;
-	eds -> editing_height = 1;
+	eds -> tile_pos[0] = 0;
+	eds -> tile_pos[1] = 0;
+	eds -> in_texture_editing_mode = 1;
 	eds -> editing_texture_id = 1;
+	eds -> editing_height = 1;
+	eds -> mouse_state = NoClick;
 
 	eds -> heightmap = malloc(map_bytes);
 	memcpy(eds -> heightmap, heightmap, map_bytes);
 	eds -> texture_id_map = malloc(map_bytes);
 	memcpy(eds -> texture_id_map, texture_id_map, map_bytes);
+
 	eds -> textures = malloc(num_textures * sizeof(SDL_Texture*));
+	eds -> renderer = renderer;
 
 	for (byte i = 0; i < num_textures; i++) {
 		const char* const path = texture_paths[i];
@@ -216,7 +221,7 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 		if (surface == NULL) FAIL(OpenFile, "Surface with path '%s' not found", path);
 
 		SDL_Texture* const texture = SDL_CreateTextureFromSurface(renderer, surface);
-		if (texture == NULL) FAIL(CreateTexture, "Could not create a texture from surface with path '%s'", path);
+		if (texture == NULL) FAIL(CreateTexture, "Could not create a wall texture: \"%s\"", SDL_GetError());
 
 		eds -> textures[i] = texture;
 
@@ -236,6 +241,9 @@ void deinit_editor_state(EditorState* const eds) {
 int main(void) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
 		FAIL(LaunchSDL, "SDL error: \"%s\".", SDL_GetError());
+
+	if (TTF_Init() == 1)
+		FAIL(LaunchSDL, "SDL_ttf error: \"%s\".", TTF_GetError());
 	
 	SDL_Window* window;
 	SDL_Renderer* renderer;
@@ -245,13 +253,15 @@ int main(void) {
 
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);	
 	SDL_SetWindowTitle(window, "Dungeon Maker");
-	
+
 	EditorState eds;
 	init_editor_state(&eds, renderer);
-	editor_loop(&eds, renderer);
+	editor_loop(&eds);
 	deinit_editor_state(&eds);
 
-	SDL_DestroyRenderer(renderer);
+	TTF_Quit();
+
+	SDL_DestroyRenderer(eds.renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }

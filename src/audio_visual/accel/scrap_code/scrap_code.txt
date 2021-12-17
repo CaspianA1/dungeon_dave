@@ -2370,3 +2370,81 @@ byte normal_hasher(const byte face_info) {
 		*/
 
 /////
+
+/*
+Show this on the info bar:
+- Map name (store in EditorState, or in some Map struct)
+- Editing height
+- Editing texture id
+- Editing mode (texture or height)
+- Idle, draw, or erase
+- The current tile pos index (maybe)
+
+- Map size, keybindings, and corresponding texture ids in map file
+
+- And some background texture
+- Keep track of state through a LastEditorState struct
+*/
+
+/////
+
+	// const char* const format_without_chars = " |  |,  | |";
+
+	/*
+	static char dest[50];
+	dest[49] = '\0';
+
+	const char* const format = "%s | %d, %d | %s %d | %s"
+	sprintf(dest, format,
+		map_name, )
+	*/
+
+/////
+
+	// %d, %d -> 255 lim each
+	// const char* const info_bar_format = "%s | %.3d, %.3d | %.6s %.3d | %.5s";
+
+	/*
+	printf("'%s | %d, %d | %s %d | %s'\n",
+		map_name,
+		12, 9,
+		"height", 25,
+		"e");
+	*/
+
+	/*
+	size_t needed = snprintf(NULL, 0, "%s: %s (%d)", msg, strerror(errno), errno) + 1;
+    char  *buffer = malloc(needed);
+    sprintf(buffer, "%s: %s (%d)", msg, strerror(errno), errno);
+    return buffer;
+	*/
+
+/////
+
+- Some background texture
+- Keep track of state through a LastEditorState struct, to determine if need to change ui
+
+Format of info bar: name | tile pos | editing mode + editing val | idle, draw, or erase
+
+Examples:
+palace | pos 3, 15 | height 8 | idle
+fleckenstein | 4, 20 | tex 19 | erase
+
+- name = constant throughout
+- tile pos = max 6 chars
+- edit mode = max 5 chars
+- edit mode val = max 3 chars
+- edit state = max 5 chars
+
+/////
+
+byte get_padding_for_six_digits(int16_t n1, int16_t n2) {
+	byte digits_set = 2;
+
+	while (n1 /= 10) digits_set++;
+	while (n2 /= 10) digits_set++;
+
+	return digits_set;
+}
+
+/////

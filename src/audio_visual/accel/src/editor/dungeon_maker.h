@@ -1,13 +1,22 @@
+#ifndef DUNGEON_MAKER_H
+#define DUNGEON_MAKER_H
+
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
-#define EDITOR_W 600
-#define EDITOR_H 600
-#define EDITOR_MAP_SECTION_H 550
+#define EDITOR_W 1200
+#define EDITOR_H 700
+#define EDITOR_MAP_SECTION_H 620
+
 #define EDITOR_FPS 60
-#define TEX_SHADED_BLOCK_COLOR_MOD 127, 127, 127
+#define SELECTED_TILE_COLOR_MOD 127, 127, 127
 
-#define KEY_TOGGLE_TEXTURE_EDIT_MODE SDL_SCANCODE_T
-#define KEY_CLICK_BLOCKS SDL_BUTTON_LEFT
+// #define FONT_PATH "monospaci.py/Fontgoodexport-Mono.ttf"
+#define FONT_PATH "../../../../assets/dnd.ttf"
+// #define FONT_PATH "mono_dnd.otf"
+
+#define KEY_TOGGLE_TEXTURE_EDIT_MODE SDL_SCANCODE_ESCAPE
+#define KEY_CLICK_TILE SDL_BUTTON_LEFT
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
@@ -24,7 +33,8 @@ typedef uint_fast8_t byte;
 typedef enum {
 	LaunchSDL,
 	OpenFile,
-	CreateTexture
+	CreateTexture,
+	CreateTextSurface
 } FailureType;
 
 typedef enum {
@@ -35,13 +45,17 @@ typedef enum {
 
 typedef struct {
 	byte
-		num_textures, map_size[2],
+		num_textures, map_size[2], tile_pos[2],
 		in_texture_editing_mode,
 		// These indicate the height and texture id placed while editing
-		editing_height, editing_texture_id,
+		editing_texture_id, editing_height,
 		*heightmap, *texture_id_map;
 
+	MouseState mouse_state;
 	int mouse_pos[2];
 
 	SDL_Texture** textures;
+	SDL_Renderer* renderer;
 } EditorState;
+
+#endif
