@@ -44,7 +44,35 @@ void deinit_menu(const Menu* const menu) {
 	wfree(textboxes);
 }
 
-InputStatus render_menu(const Menu* const menu) {
+InputStatus render_image_until_clicked(const char* const path) {
+	const Sprite image = init_sprite(path, D_Overlay);
+
+	byte done = 0;
+	InputStatus input_status = ProceedAsNormal;
+
+	while (!done) {
+		const Uint32 before = SDL_GetTicks();
+
+		while (SDL_PollEvent(&event)) {
+			switch (event.type) {
+				case SDL_MOUSEBUTTONUP:
+					done = 1;
+					break;
+				case SDL_QUIT:
+					done = 1;
+					input_status = Exit;
+			}
+		}
+		SDL_RenderClear(screen.renderer);
+		SDL_RenderCopy(screen.renderer, image.texture, NULL, NULL);
+		after_gui_event(before);
+	}
+
+	deinit_sprite(image);
+	return input_status;
+}
+
+InputStatus render_menu(const Menu* const menu, const byte mouse_released) {
 	const Color3 main_color = menu -> main_color, text_color = menu -> text_color;
 
 	/* This is done instead of a SDL_RenderClear call because there's an odd Metal bug
@@ -77,7 +105,7 @@ InputStatus render_menu(const Menu* const menu) {
 		if (mouse.x >= box.x && mouse.x <= box.x + box.w && mouse.y >= box.y && mouse.y <= box.y + box.h) {
 			draw_colored_rect(inverse_text_color, &box);
 
-			if (event.type == SDL_MOUSEBUTTONDOWN) {
+			if (mouse_released) {
 				play_short_sound(&gui_resources.sound_on_click);
 				const InputStatus click_response = textbox -> on_click_fn();
 				if (click_response != ProceedAsNormal) return click_response;
@@ -90,15 +118,16 @@ InputStatus render_menu(const Menu* const menu) {
 	return ProceedAsNormal;
 }
 
-InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_menu) {
+InputStatus menu_loop(const Menu* const menu) {
 	SDL_SetRelativeMouseMode(SDL_FALSE);
 	SDL_WarpMouseInWindow(screen.window, settings.half_screen_width, settings.half_screen_height);
 
 	InputStatus input = ProceedAsNormal;
-	byte done = 0, rendering_image_before = image_before_menu != NULL;
+	byte done = 0;
 
 	while (!done) {
 		const Uint32 before = SDL_GetTicks();
+		byte mouse_released = 0;
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -108,19 +137,15 @@ InputStatus menu_loop(const Menu* const menu, SDL_Texture* const image_before_me
 					break;
 
 				case SDL_MOUSEBUTTONUP:
-					if (rendering_image_before)
-						rendering_image_before = 0;
+					mouse_released = 1;
+					break;
 			}
 		}
 
-		if (rendering_image_before)
-			SDL_RenderCopy(screen.renderer, image_before_menu, NULL, NULL);
-		else {
-			const InputStatus menu_input = render_menu(menu);
-			if (menu_input == Exit || menu_input == NextScreen) {
-				if (menu_input == Exit) input = Exit;
-				done = 1;
-			}
+		const InputStatus menu_input = render_menu(menu, mouse_released);
+		if (menu_input == Exit || menu_input == NextScreen) {
+			if (menu_input == Exit) input = Exit;
+			done = 1;
 		}
 
 		after_gui_event(before);

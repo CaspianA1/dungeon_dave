@@ -23,14 +23,16 @@ InputStatus display_title_screen(void) {
 	const Sound title_track = init_sound("assets/audio/themes/title.wav", 0);
 	play_long_sound(&title_track);
 
-	const Sprite logo = init_sprite("assets/logo.bmp", D_Overlay);
+	if (render_image_until_clicked("assets/logo.bmp") == Exit) {
+		deinit_sound(&title_track);
+		return Exit;
+	}
 
 	const Menu start_screen = init_menu(menu_text_color_1, menu_main_color, menu_border_color, 1,
 		start_button_pos, start_button_on_click, "Start!");
 
-	const InputStatus input = menu_loop(&start_screen, logo.texture);
+	const InputStatus input = menu_loop(&start_screen);
 
-	deinit_sprite(logo);
 	deinit_menu(&start_screen);
 	deinit_sound(&title_track);
 
@@ -116,7 +118,7 @@ InputStatus max_fps_button_on_click(void) {
 }
 
 InputStatus display_options_menu(void) { // text color, main color, border color
-	const Menu start_screen = init_menu(menu_text_color_2, menu_main_color, menu_border_color, 6,
+	const Menu option_screen = init_menu(menu_text_color_2, menu_main_color, menu_border_color, 6,
 		return_to_game_button_pos, return_to_game_button_on_click,       "| Return To Game    |",
 		detail_level_button_pos, detail_level_button_on_click,           "| Detail Level      |",
 		mouse_sensitivity_button_pos, mouse_sensitivity_button_on_click, "| Mouse Sensitivity |",
@@ -124,7 +126,7 @@ InputStatus display_options_menu(void) { // text color, main color, border color
 		fov_button_pos, fov_button_on_click,                             "| Field of View     |",
 		max_fps_button_pos, max_fps_button_on_click,                     "| Max FPS           |");
 
-	const InputStatus input = menu_loop(&start_screen, NULL);
-	deinit_menu(&start_screen);
+	const InputStatus input = menu_loop(&option_screen);
+	deinit_menu(&option_screen);
 	return input;
 }
