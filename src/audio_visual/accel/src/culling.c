@@ -75,7 +75,7 @@ void draw_sectors(const DrawableSet* const sector_list, const Camera* const came
 	}
 
 	glUniform1f(ambient_strength_id, 0.3f);
-	glUniform1f(diffuse_strength_id, 0.7f);
+	glUniform1f(diffuse_strength_id, 0.8f);
 	glUniform3fv(light_pos_id, 1, camera -> pos);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 

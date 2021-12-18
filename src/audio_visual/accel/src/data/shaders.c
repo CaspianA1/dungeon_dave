@@ -8,8 +8,9 @@ const char* const sector_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info_bits;\n"
 
-	"out vec3 UV, fragment_pos_world_space = vertex_pos_world_space, face_normal;\n"
+	"out vec3 UV, face_normal, pos_delta_world_space;\n"
 
+	"uniform vec3 light_pos_world_space;\n"
 	"uniform mat4 model_view_projection;\n"
 
 	"const ivec2 pos_indices_for_UV[3] = ivec2[3](\n"
@@ -50,27 +51,33 @@ const char* const sector_vertex_shader =
 
 		"set_UV_from_face_id(face_id_bits);\n"
 		"set_normal_from_face_id(face_id_bits);\n"
+
+		"pos_delta_world_space = light_pos_world_space - vertex_pos_world_space;\n"
 	"}\n",
 
 *const sector_fragment_shader =
     "#version 330 core\n"
 
-	"in vec3 UV, fragment_pos_world_space, face_normal;\n"
+	"in vec3 UV, face_normal, pos_delta_world_space;\n"
 
 	"out vec3 color;\n"
 
 	"uniform float ambient_strength, diffuse_strength;\n"
-	"uniform vec3 light_pos_world_space;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
 	"float diffuse(void) {\n"
-		"vec3 light_vector = normalize(light_pos_world_space - fragment_pos_world_space);\n"
+		"vec3 light_vector = normalize(pos_delta_world_space);\n"
 		"return dot(light_vector, face_normal) * diffuse_strength;\n"
 	"}\n"
 
+	"float attenuation(void) {\n" // Distance-based lighting
+		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
+		"return clamp(100.0f / dist_squared, 0.4f, 1.0f);\n"
+	"}\n"
+
 	"void main() {\n"
-		"float light = min(ambient_strength + diffuse(), 1.0f);\n"
-		"color = texture(texture_sampler, UV).rgb * light;\n"
+		"float light = (ambient_strength + diffuse()) * attenuation();"
+		"color = texture(texture_sampler, UV).rgb * min(light, 1.0f);\n"
 	"}\n",
 
 *const sector_lighting_vertex_shader =

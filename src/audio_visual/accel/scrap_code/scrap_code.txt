@@ -2469,3 +2469,32 @@ byte get_padding_for_six_digits(int16_t n1, int16_t n2) {
 		"color = texture(texture_sampler, UV).rgb * light;\n"
 
 /////
+
+		// "return 1.0f / (d2 * 0.1f);"
+
+		// 1.0 / (1.0 + a*dist + b*dist*dist))
+		/*
+		"float a = 0.3f, b = 0.6f;\n"
+		"float atten = 1.0f / (1.0f + a * sqrt(frag_dist_squared) + b * frag_dist_squared);\n"
+		*/
+
+		/*
+		"float frag_dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
+		"float a = 0.3f, b = 0.6f;\n"
+		"float atten = 1.0f / (1.0f + a * sqrt(frag_dist_squared) + b * frag_dist_squared);\n"
+		*/
+
+		// "float atten = 1.0f / (sqrt(frag_dist_squared));\n"
+
+		/*
+		"float radius = 4;\n"
+		"float frag_dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
+		"float atten = clamp(1.0 -frag_dist_squared/(radius*radius), 0.2, 1.0);\n"
+		"return atten;\n"
+		*/
+
+/////
+
+- Figure out if diffuse should depend on where player is - or ambient occlusion + simple dynamic lights
+
+/////
