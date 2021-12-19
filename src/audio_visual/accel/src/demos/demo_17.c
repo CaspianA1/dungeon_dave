@@ -21,7 +21,7 @@
 - Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
-- Good physics
+- Good movement physics (additive, and time-independent)
 - Then, flat weapon
 - A dnd-styled font that's monospaced
 
