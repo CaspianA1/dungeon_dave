@@ -8,7 +8,7 @@
 #include "../culling.c"
 
 /*
-- NEXT: new_map
+- NEXT: new_map back part
 - NEXT 2: a bounding volume hierarchy, maybe
 - NEXT 3: billboard batching + different billboard types
 
@@ -23,6 +23,7 @@
 - Blit color rect to screen
 - Good physics
 - Then, flat weapon
+- A dnd-styled font that's monospaced
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
 */
