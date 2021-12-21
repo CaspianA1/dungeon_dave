@@ -14,7 +14,7 @@
 
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side; or store none at all
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
-- More effeciently set statemap bit ranges
+- More efficiently set statemap bit ranges
 - For terrain, quite slow with 2/3 phong lighting + some objects popping out for half seconds
 - Camera tilt
 
