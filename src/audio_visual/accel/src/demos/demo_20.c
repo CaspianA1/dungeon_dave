@@ -37,15 +37,13 @@ const char* const batching_billboard_vertex_shader =
 		"vec2(-0.5f, 0.5f), vec2(0.5f, 0.5f)\n"
 	");\n"
 
-	"const vec3 up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
-
-	"void main() {\n"
+	"void main(void) {\n"
 		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
 		"vec2 corner_world_space = vertex_model_space * billboard_size_world_space;\n"
 
-		"vec3 vertex_world_space = billboard_center_world_space +\n"
-			"corner_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
-			"+ corner_world_space.y * up_world_space;\n"
+		"vec3 vertex_world_space = billboard_center_world_space\n"
+			"+ corner_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
+			"+ vec3(0.0f, corner_world_space.y, 0.0f);\n"
 
 		"gl_Position = view_projection * vec4(vertex_world_space, 1.0f);\n"
 
