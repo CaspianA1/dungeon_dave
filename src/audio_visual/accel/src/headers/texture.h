@@ -39,7 +39,7 @@ typedef enum {
 	TexNonRepeating = GL_CLAMP_TO_EDGE
 } TextureWrapMode;
 
-typedef struct {
+typedef struct { // An animation FPS would be global
 	byte curr_frame;
 	const byte total_frames;
 	const GLuint texture;

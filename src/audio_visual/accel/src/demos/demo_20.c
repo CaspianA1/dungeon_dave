@@ -146,6 +146,9 @@ DrawableSet init_billboard_list(const size_t num_billboards, ...) {
 StateGL demo_20_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
+	/* How would I update indices for a texture index? Perhaps mod it by the current time in some way;
+	Or actually not b/c the texture index may also depend on an enemy state */
+
 	DrawableSet billboard_list = init_billboard_list(
 		// texture_set, 1, (Billboard) {0, {1.0f, 1.3658536585365855f}, {0.0f, 0.0f, 0.0f}}
 		5,
