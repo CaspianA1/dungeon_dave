@@ -4,7 +4,7 @@
 #include "headers/texture.h"
 #include "headers/utils.h"
 
-SDL_Surface* init_blank_surface(const int width, const int height) {
+static SDL_Surface* init_blank_surface(const int width, const int height) {
 	return SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(SDL_PIXEL_FORMAT), SDL_PIXEL_FORMAT);
 }
 
