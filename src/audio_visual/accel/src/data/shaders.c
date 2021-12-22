@@ -45,7 +45,7 @@ const char* const sector_vertex_shader =
 		"face_normal = face_normals[face_id_bits - normal_id_subtrahend];\n"
 	"}\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
 		"int face_id_bits = face_info_bits & 7;\n" // 0 = flat, 1 = right, 2 = bottom, 5 = left, 6 = top
 
@@ -75,7 +75,7 @@ const char* const sector_vertex_shader =
 		"return clamp(100.0f / dist_squared, 0.4f, 1.0f);\n"
 	"}\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"float light = (ambient_strength + diffuse()) * attenuation();"
 		"color = texture(texture_sampler, UV).rgb * min(light, 1.0f);\n"
 	"}\n",
@@ -92,7 +92,7 @@ const char* const sector_vertex_shader =
 	"uniform vec3 camera_pos_world_space;\n"
 	"uniform mat4 model_view_projection;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
 		"UV = vertex_UV;\n"
 		"pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
@@ -110,7 +110,7 @@ const char* const sector_vertex_shader =
 
 	"const float min_light = 0.1f, max_light = 1.0f, intensity_factor = 50.0f;\n"
 
-	"void main() {\n" // dist_squared is distance squared from fragment
+	"void main(void) {\n" // dist_squared is distance squared from fragment
 		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
 		"float light_intensity = clamp(intensity_factor / dist_squared, min_light, max_light);\n"
 
@@ -133,7 +133,7 @@ const char* const sector_vertex_shader =
 
 	"const vec3 up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
 		"vec2 corner_world_space = vertex_model_space * billboard_size_world_space;\n"
 
@@ -154,7 +154,7 @@ const char* const sector_vertex_shader =
 
 	"uniform sampler2D texture_sampler;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"color = texture(texture_sampler, UV);\n"
 	"}\n",
 
@@ -167,7 +167,7 @@ const char* const sector_vertex_shader =
 
 	"uniform mat4 view_projection;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"gl_Position = (view_projection * vec4(vertex_pos_world_space, 1.0f)).xyww;\n"
 		"UV_3D = vertex_pos_world_space;\n"
 		"UV_3D.x = -UV_3D.x;\n" // Without this, the X component of the UV is reversed
@@ -182,7 +182,7 @@ const char* const sector_vertex_shader =
 
 	"uniform samplerCube texture_sampler;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"color = texture(texture_sampler, UV_3D).rgb;\n"
 	"}\n",
 
@@ -197,7 +197,7 @@ const char* const sector_vertex_shader =
 
 	"uniform float time;\n" // In seconds
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"gl_Position = vec4(vertex_pos, 0.0f, 1.0f);\n"
 		"UV = vertex_pos * vec2(0.5f, -0.5f) + 0.5f;\n"
 		"angles = UV.yx * sin_cycles + time * speed;\n"
@@ -213,7 +213,7 @@ const char* const sector_vertex_shader =
 
 	"uniform sampler2D texture_sampler;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"vec2 wavy_UV = UV + sin(angles) * dist_mag;\n"
 		"color = texture(texture_sampler, wavy_UV).rgb;\n"
 	"}\n";
