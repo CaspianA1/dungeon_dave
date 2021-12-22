@@ -29,6 +29,7 @@ And the biggest number possible with five bits is 31, so that gives you
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,
 	TexBillboard = GL_TEXTURE_2D,
+	TexAnimation = GL_TEXTURE_2D_ARRAY,
 	TexSet = GL_TEXTURE_2D_ARRAY,
 	TexSkybox = GL_TEXTURE_CUBE_MAP,
 } TextureType;
@@ -38,6 +39,15 @@ typedef enum {
 	TexNonRepeating = GL_CLAMP_TO_EDGE
 } TextureWrapMode;
 
+typedef struct {
+	byte curr_frame;
+	const byte total_frames;
+	const GLuint texture;
+	float last_frame_time;
+} AnimationInstance;
+
+// Excluded: init_blank_surface
+
 SDL_Surface* init_surface(const char* const path);
 void deinit_surface(SDL_Surface* const surface);
 
@@ -46,6 +56,10 @@ void use_texture(const GLuint texture, const GLuint shader_program, const Textur
 
 void write_surface_to_texture(const SDL_Surface* const surface, const GLenum opengl_texture_type);
 GLuint* init_plain_textures(const GLsizei num_textures, ...);
+
+GLuint init_animation(const char* const path, const GLsizei frames_across,
+	const GLsizei frames_down, const GLsizei total_frames);
+
 GLuint init_texture_set(const TextureWrapMode wrap_mode,
 	const GLsizei subtex_width, const GLsizei subtex_height, const GLsizei num_textures, ...);
 

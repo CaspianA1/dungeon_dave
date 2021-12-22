@@ -4,6 +4,10 @@
 #include "headers/texture.h"
 #include "headers/utils.h"
 
+SDL_Surface* init_blank_surface(const int width, const int height) {
+	return SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(SDL_PIXEL_FORMAT), SDL_PIXEL_FORMAT);
+}
+
 SDL_Surface* init_surface(const char* const path) {
 	SDL_Surface* const surface = SDL_LoadBMP(path);
 	if (surface == NULL) fail("open texture file", OpenImageFile);
@@ -78,13 +82,56 @@ GLuint* init_plain_textures(const GLsizei num_textures, ...) {
 		textures[i] = preinit_texture(TexPlain, wrap_mode);
 		SDL_Surface* const surface = init_surface(surface_path);
 
-		write_surface_to_texture(surface, GL_TEXTURE_2D);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		write_surface_to_texture(surface, TexPlain);
+		glGenerateMipmap(TexPlain);
 		deinit_surface(surface);
 	}
 
 	va_end(args);
 	return textures;
+}
+
+// TODO: hybrid init_texture_set and init_animation
+GLuint init_animation(const char* const path, const GLsizei frames_across,
+	const GLsizei frames_down, const GLsizei total_frames) {
+
+	SDL_Surface* const spritesheet_surface = init_surface(path);
+	SDL_UnlockSurface(spritesheet_surface);
+	// If blending enabled, consecutive blits to `frame_surface` will mix with previous blits
+	SDL_SetSurfaceBlendMode(spritesheet_surface, SDL_BLENDMODE_NONE);
+
+	SDL_Rect spritesheet_copy_area = {.w = spritesheet_surface -> w / frames_across, .h = spritesheet_surface -> h / frames_down};
+	SDL_Rect frame_copy_area = {.x = 0, .y = 0, .w = spritesheet_copy_area.w, .h = spritesheet_copy_area.h};
+
+	/* Needed b/c glTexSubImage3D can't copy pixels from the main surface; otherwise, layout
+	of pixels in `spritesheet_surface` will result in other frames being partially copied */
+	SDL_Surface* const frame_surface = init_blank_surface(spritesheet_copy_area.w, spritesheet_copy_area.h);
+	const Uint32* const frame_pixels = frame_surface -> pixels;
+
+	const GLuint texture = preinit_texture(TexAnimation, TexNonRepeating);
+
+	glTexImage3D(TexAnimation, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
+		spritesheet_copy_area.w, spritesheet_copy_area.h, total_frames,
+		0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
+
+	for (GLsizei frame_index = 0; frame_index < total_frames; frame_index++) {
+		// Frame index x = frame_index % frames_across, and y = frame_index / frames_across
+		spritesheet_copy_area.x = (frame_index % frames_across) * spritesheet_copy_area.w;
+		spritesheet_copy_area.y = (frame_index / frames_across) * spritesheet_copy_area.h;
+
+		SDL_UnlockSurface(spritesheet_surface);
+		SDL_LowerBlit(spritesheet_surface, &spritesheet_copy_area, frame_surface, &frame_copy_area);
+		SDL_LockSurface(spritesheet_surface);
+
+		glTexSubImage3D(TexAnimation, 0, 0, 0, frame_index,
+			spritesheet_copy_area.w, spritesheet_copy_area.h,
+			1, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, frame_pixels);
+	}
+
+	deinit_surface(frame_surface);
+	deinit_surface(spritesheet_surface);
+	glGenerateMipmap(TexAnimation);
+	return texture;
 }
 
 // Param: Texture path
@@ -93,13 +140,12 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode,
 
 	const GLuint ts = preinit_texture(TexSet, wrap_mode);
 
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
+	glTexImage3D(TexSet, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
 		subtex_width, subtex_height, num_textures,
 		0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
 	
-	SDL_Surface* const rescaled_surface = SDL_CreateRGBSurfaceWithFormat(0,
-		subtex_width, subtex_height, SDL_BITSPERPIXEL(SDL_PIXEL_FORMAT), SDL_PIXEL_FORMAT);
-	
+	SDL_Surface* const rescaled_surface = init_blank_surface(subtex_width, subtex_height);
+
 	va_list args;
 	va_start(args, num_textures);
 	for (GLsizei i = 0; i < num_textures; i++) {
@@ -118,14 +164,14 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode,
 		}
 		else src_surface = surface;
 
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, subtex_width, subtex_height, 1,
+		glTexSubImage3D(TexSet, 0, 0, 0, i, subtex_width, subtex_height, 1,
 			OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, src_surface -> pixels);
 
 		deinit_surface(surface);
 	}
 
 	deinit_surface(rescaled_surface);
-	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+	glGenerateMipmap(TexSet);
 	va_end(args);
 
 	return ts;

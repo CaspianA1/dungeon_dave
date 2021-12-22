@@ -149,19 +149,28 @@ StateGL demo_20_init(void) {
 	DrawableSet billboard_list = init_billboard_list(
 		// texture_set, 1, (Billboard) {0, {1.0f, 1.3658536585365855f}, {0.0f, 0.0f, 0.0f}}
 		5,
+		(Billboard) {0, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
+		(Billboard) {1, {1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}},
 		(Billboard) {2, {1.0f, 1.0f}, {0.0f, 1.0f, 2.0f}},
-		(Billboard) {0, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}},
-		(Billboard) {1, {1.0f, 1.0f}, {0.0f, 1.1f, 0.0f}},
-		(Billboard) {2, {1.0f, 1.0f}, {0.0f, 1.5f, 3.0f}},
-		(Billboard) {0, {1.0f, 1.0f}, {0.0f, 2.0f, 4.0f}}
+		(Billboard) {3, {1.0f, 1.0f}, {0.0f, 1.0f, 3.0f}},
+		(Billboard) {4, {1.0f, 1.0f}, {0.0f, 1.0f, 4.0f}}
 	);
 
+	billboard_list.texture_set = init_animation(
+		"../../../../assets/spritesheets/fireball_explode.bmp", 8, 1, 8);
+		// "../../../../assets/spritesheets/metroid.bmp", 2, 2, 4);
+		// "../../../../assets/spritesheets/bogo.bmp", 2, 3, 6);
+		// "../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5);
+		// "../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46);
+
+	/*
 	billboard_list.texture_set = init_texture_set(TexNonRepeating,
 		// 328, 448, 1, "../../../../assets/objects/doomguy.bmp"
 		64, 64, 3, "../../../../assets/objects/doomguy.bmp",
 		"../../../../assets/objects/teleporter.bmp",
 		"../../../../assets/objects/robot.bmp"
 	);
+	*/
 
 	// TODO: free billboard list somewhere
 	DrawableSet* const billboard_list_on_heap = malloc(sizeof(DrawableSet));
