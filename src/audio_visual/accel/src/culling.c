@@ -26,6 +26,9 @@ static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) 
 // TODO: billboard_in_view_frustum
 
 static void draw_sectors_in_view_frustum(const DrawableSet* const sector_list, const Camera* const camera) {
+	/* Each vec4 plane is composed of a vec3 surface normal and
+	the closest distance to the origin, in the fourth component */
+
 	static vec4 frustum_planes[6];
 	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
 
