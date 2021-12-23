@@ -2497,4 +2497,206 @@ byte get_padding_for_six_digits(int16_t n1, int16_t n2) {
 
 - Figure out if diffuse should depend on where player is - or ambient occlusion + simple dynamic lights
 
+///// So much code:
+
+	// Since TexNonrepeating is necessary for billboards, billboards and walls will have to be stored in different places
+
+	billboard_list.texture_set = init_multi_textures(2, 2, 64, 64,
+		"../../../../assets/walls/cross_blue.bmp",
+		"../../../../assets/walls/desert_snake.bmp",
+
+		"../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46,
+		"../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 3
+		);
+
+	/*
+	billboard_list.texture_set = init_multi_textures(4, 64, 64,
+		"../../../../assets/spritesheets/flying_carpet.bmp", 1, 5, 10, 46,
+		"../../../../assets/walls/cross_blue.bmp", 0,
+		"../../../../assets/walls/desert_snake.bmp", 0,
+		"../../../../assets/spritesheets/torch_2.bmp", 1, 2, 3, 5
+	);
+
+
+static GLsizei get_num_subtextures_for_multi_texture(va_list args,
+	const GLsizei num_plain_subtextures, const GLsizei num_animated_subtextures) {
+
+	GLsizei total_num_subtextures = num_plain_subtextures;
+
+	va_list args_copy;
+	va_copy(args_copy, args);
+	for (GLsizei i = 0; i < num_plain_subtextures; i++, va_arg(args_copy, char*));
+
+	// From here, can get 
+	for (GLsizei i = 0; i < num_animated_subtextures; i++) {
+		va_arg(args_copy, char*); // Discard path, frames across, frames down
+		va_arg(args_copy, GLsizei);
+		va_arg(args_copy, GLsizei);
+		total_num_subtextures += va_arg(args_copy, GLsizei); // Adding arg total_frames
+	}
+
+	if (total_num_subtextures > GL_MAX_ARRAY_TEXTURE_LAYERS)
+		fail("put textures in a texture set because it exceeds the max array texture layers",
+			TextureSetIsTooLarge);
+
+	va_end(args_copy);
+
+	return total_num_subtextures;
+}
+
+// Path. If animated: frames across, frames down, total_frames
+GLuint init_multi_textures(const GLsizei num_plain_subtextures,
+	const GLsizei num_animated_sutextures, const GLsizei rescale_w, const GLsizei rescale_h, ...) {
+
+	va_list args;
+	va_start(args, rescale_h);
+
+	const GLuint total_num_subtextures = get_num_subtextures_for_multi_texture(args, num_plain_subtextures, num_animated_sutextures);
+	DEBUG(total_num_subtextures, d);
+
+	const GLuint texture = preinit_texture(TexSet, TexRepeating);
+
+	glTexImage3D(TexSet, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
+		rescale_w, rescale_h, num_subtextures_in_set, 0,
+		OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
+
+
+	va_end(args);
+
+	//////////
+
+	/*
+	va_list args;
+	va_start(args, rescale_h);
+
+	const GLsizei num_subtextures_in_set = get_num_subtextures_for_multi_texture(args, num_multi_textures);
+	const GLuint texture = preinit_texture(TexSet, TexNonRepeating);
+
+	glTexImage3D(TexSet, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
+		rescale_w, rescale_h, num_subtextures_in_set, 0,
+		OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
+
+	SDL_Surface* const rescaled_surface = init_blank_surface(rescale_w, rescale_h);
+	// If blending enabled, consecutive blits to `frame_surface` will mix with previous blits if alpha channel used
+	SDL_SetSurfaceBlendMode(rescaled_surface, SDL_BLENDMODE_NONE);
+
+	for (GLsizei frame_index = 0; frame_index < num_subtextures_in_set;) {
+		SDL_Surface* const surface = init_surface(va_arg(args, char*));
+		const byte is_animated = va_arg(args, unsigned);
+
+		// This is a lot of code, but bear through it
+
+		if (is_animated) { // TODO: animation part of init_multi_textures
+			const GLsizei
+				frames_across = va_arg(args, GLsizei),
+				frames_down = va_arg(args, GLsizei),
+				total_frames = va_arg(args, GLsizei);
+
+			init_animation_from_surface(surface, rescaled_surface,
+				frames_across, frames_down, frame_index, frame_index + total_frames);
+
+			frame_index += total_frames;
+		}
+		else {
+			SDL_Surface* cpu_src;
+
+			if (surface -> w != rescale_w || surface -> h != rescale_h) {
+				SDL_SoftStretchLinear(surface, NULL, rescaled_surface, NULL);
+				cpu_src = rescaled_surface;
+			}
+			else cpu_src = surface;
+
+			SDL_LockSurface(cpu_src);
+
+			glTexSubImage3D(TexSet, 0, 0, 0, frame_index,
+				rescale_w, rescale_h, 1, OPENGL_INPUT_PIXEL_FORMAT,
+				OPENGL_COLOR_CHANNEL_TYPE, cpu_src -> pixels);
+			
+			SDL_UnlockSurface(cpu_src);
+
+			frame_index++;
+		}
+
+		deinit_surface(surface);
+	}
+
+	glGenerateMipmap(TexSet);
+	deinit_surface(rescaled_surface);
+	va_end(args);
+
+	return texture;
+	*/
+}
+
+// TODO: inline
+static void init_animation_from_surface(SDL_Surface* const spritesheet_surface, SDL_Surface* const rescaled_surface,
+	const GLsizei frames_across, const GLsizei frames_down, const GLsizei start_index, const GLsizei end_index) {
+
+	SDL_Rect spritesheet_copy_area = {.w = spritesheet_surface -> w / frames_across, .h = spritesheet_surface -> h / frames_down};
+
+	for (GLsizei frame_index = start_index; frame_index < end_index; frame_index++) {
+		const GLsizei spritesheet_frame_index = frame_index - start_index;
+		// Frame index x = frame_index % frames_across, and y = frame_index / frames_across
+		spritesheet_copy_area.x = (spritesheet_frame_index % frames_across) * spritesheet_copy_area.w;
+		spritesheet_copy_area.y = (spritesheet_frame_index / frames_across) * spritesheet_copy_area.h;
+
+		// Copying to rescaled surface, b/c that's the only good copying way
+		SDL_SoftStretchLinear(spritesheet_surface, &spritesheet_copy_area, rescaled_surface, NULL);
+
+		SDL_LockSurface(rescaled_surface); // For pixel access
+
+		glTexSubImage3D(TexSet, 0, 0, 0, frame_index,
+			spritesheet_copy_area.w, spritesheet_copy_area.h,
+			1, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, rescaled_surface -> pixels);
+
+		SDL_UnlockSurface(rescaled_surface);
+	}
+}
+
+/////
+
+
+// TODO: remove
+GLuint init_animation(const char* const path, const GLsizei frames_across,
+	const GLsizei frames_down, const GLsizei total_frames) {
+
+	SDL_Surface* const spritesheet_surface = init_surface(path);
+	SDL_SetSurfaceBlendMode(spritesheet_surface, SDL_BLENDMODE_NONE); // If blending, future blits will mix w prev ones
+
+	SDL_Rect spritesheet_copy_area = {.w = spritesheet_surface -> w / frames_across, .h = spritesheet_surface -> h / frames_down};
+	SDL_Rect frame_copy_area = {.x = 0, .y = 0, .w = spritesheet_copy_area.w, .h = spritesheet_copy_area.h};
+
+	/* Needed b/c glTexSubImage3D can't copy pixels from the main surface; otherwise, layout
+	of pixels in `spritesheet_surface` will result in other frames being partially copied */
+	SDL_Surface* const frame_surface = init_blank_surface(spritesheet_copy_area.w, spritesheet_copy_area.h);
+	Uint32* const frame_pixels = frame_surface -> pixels;
+
+	const GLuint texture = preinit_texture(TexSet, TexNonRepeating);
+
+	glTexImage3D(TexSet, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
+		spritesheet_copy_area.w, spritesheet_copy_area.h, total_frames,
+		0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
+
+	for (GLsizei frame_index = 0; frame_index < total_frames; frame_index++) {
+		// Frame index x = frame_index % frames_across, and y = frame_index / frames_across
+		spritesheet_copy_area.x = (frame_index % frames_across) * spritesheet_copy_area.w;
+		spritesheet_copy_area.y = (frame_index / frames_across) * spritesheet_copy_area.h;
+
+		SDL_LowerBlit(spritesheet_surface, &spritesheet_copy_area, frame_surface, &frame_copy_area);
+
+		SDL_LockSurface(frame_surface);
+
+		glTexSubImage3D(TexSet, 0, 0, 0, frame_index,
+			spritesheet_copy_area.w, spritesheet_copy_area.h,
+			1, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, frame_pixels);
+
+		SDL_UnlockSurface(frame_surface);
+	}
+
+	deinit_surface(frame_surface);
+	deinit_surface(spritesheet_surface);
+	glGenerateMipmap(TexSet);
+	return texture;
+}
+
 /////

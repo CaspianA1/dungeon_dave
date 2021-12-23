@@ -121,6 +121,7 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		drawer(&sgl);
 		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
+		if (keys[KEY_PRINT_SDL_ERROR]) SDL_ERR_CHECK;
 
 		SDL_GL_SwapWindow(screen -> window);
 

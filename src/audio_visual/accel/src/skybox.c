@@ -50,7 +50,6 @@ static const GLbyte skybox_vertices[] = {
 
 static GLuint init_skybox_texture(const char* const path) {
 	SDL_Surface* const skybox_surface = init_surface(path);
-	SDL_UnlockSurface(skybox_surface);
 
 	const GLint cube_size = skybox_surface -> w >> 2;
 	const GLuint skybox = preinit_texture(TexSkybox, TexNonRepeating);

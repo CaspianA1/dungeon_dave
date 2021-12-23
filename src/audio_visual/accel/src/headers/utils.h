@@ -11,6 +11,7 @@
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
+#define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
 // #define FORCE_SOFTWARE_RENDERER
@@ -22,6 +23,7 @@
 #define KEY_TOGGLE_FULLSCREEN_WINDOW SDL_SCANCODE_ESCAPE
 #define KEY_PRINT_POSITION SDL_SCANCODE_1
 #define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_2
+#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_3
 
 #define DEPTH_BUFFER_BITS 24
 #define MULTISAMPLE_SAMPLES 8

@@ -106,7 +106,7 @@ void draw_billboards(const DrawableSet* const billboard_list, const Camera* cons
 
 	glUseProgram(billboard_list -> shader);
 	glEnable(GL_BLEND);
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 5); // Each billboard 4 vertices, and 5 billboards
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 10); // Each billboard 4 vertices, and 10 billboards
 	glDisable(GL_BLEND);
 
 	for (byte i = 0; i < 3; i++) {
@@ -149,29 +149,33 @@ StateGL demo_20_init(void) {
 
 	DrawableSet billboard_list = init_billboard_list(
 		// texture_set, 1, (Billboard) {0, {1.0f, 1.3658536585365855f}, {0.0f, 0.0f, 0.0f}}
-		5,
-		(Billboard) {0, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
+		10,
+		(Billboard) {0, {1.0f, 2.0f}, {0.0f, 1.0f, 0.0f}},
 		(Billboard) {1, {1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}},
 		(Billboard) {2, {1.0f, 1.0f}, {0.0f, 1.0f, 2.0f}},
 		(Billboard) {3, {1.0f, 1.0f}, {0.0f, 1.0f, 3.0f}},
-		(Billboard) {4, {1.0f, 1.0f}, {0.0f, 1.0f, 4.0f}}
+		(Billboard) {4, {1.0f, 1.0f}, {0.0f, 1.0f, 4.0f}},
+		(Billboard) {5, {1.0f, 1.0f}, {0.0f, 1.0f, 5.0f}},
+		(Billboard) {6, {1.0f, 1.0f}, {0.0f, 1.0f, 6.0f}},
+		(Billboard) {7, {1.0f, 1.0f}, {0.0f, 1.0f, 7.0f}},
+		(Billboard) {8, {1.0f, 1.0f}, {0.0f, 1.0f, 8.0f}},
+		(Billboard) {9, {1.0f, 1.0f}, {0.0f, 1.0f, 9.0f}}
 	);
 
-	/*
-	init_multi_textures(4, 64, 64,
-		"../../../../assets/spritesheets/flying_carpet.bmp", 1, 5, 10, 46,
-		"../../../../assets/walls/cross_blue.bmp", 0,
-		"../../../../assets/walls/desert_snake.bmp", 0,
-		"../../../../assets/spritesheets/torch_2.bmp", 1, 2, 3, 5
-	);
-	*/
 
-	billboard_list.texture_set = init_animation(
-		"../../../../assets/spritesheets/fireball_explode.bmp", 8, 1, 8);
-		// "../../../../assets/spritesheets/metroid.bmp", 2, 2, 4);
-		// "../../../../assets/spritesheets/bogo.bmp", 2, 3, 6);
-		// "../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5);
-		// "../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46);
+	/* Since TexNonrepeating is necessary for billboards, billboards and walls will have to be stored in different places.
+	Damn - will have to store otherwise static billboards in same spritesheet - those are not walls But get the animation set
+	thing working first. So don't worry about this: `First, arrange billboards in the beginning, and then non-billboards after`.
+	Also, since animation frame indices will already have to account for some offset calculation,
+	it should be okay with the textures at the beginning. */
+
+	billboard_list.texture_set = init_animation_set(2, 128, 128,
+		// "../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46
+		"../../../../assets/spritesheets/metroid.bmp", 2, 2, 4,
+		// "../../../../assets/spritesheets/fireball_explode.bmp", 8, 1, 8,
+		"../../../../assets/spritesheets/bogo.bmp", 2, 3, 6
+		// "../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5
+	);
 
 	/*
 	billboard_list.texture_set = init_texture_set(TexNonRepeating,
