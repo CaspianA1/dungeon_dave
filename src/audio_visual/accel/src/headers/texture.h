@@ -28,8 +28,7 @@ And the biggest number possible with five bits is 31, so that gives you
 
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,
-	TexBillboard = GL_TEXTURE_2D,
-	TexAnimation = GL_TEXTURE_2D_ARRAY,
+	TexBillboard = GL_TEXTURE_2D, // TODO: remove
 	TexSet = GL_TEXTURE_2D_ARRAY,
 	TexSkybox = GL_TEXTURE_CUBE_MAP,
 } TextureType;

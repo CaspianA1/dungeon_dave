@@ -157,6 +157,15 @@ StateGL demo_20_init(void) {
 		(Billboard) {4, {1.0f, 1.0f}, {0.0f, 1.0f, 4.0f}}
 	);
 
+	/*
+	init_multi_textures(4, 64, 64,
+		"../../../../assets/spritesheets/flying_carpet.bmp", 1, 5, 10, 46,
+		"../../../../assets/walls/cross_blue.bmp", 0,
+		"../../../../assets/walls/desert_snake.bmp", 0,
+		"../../../../assets/spritesheets/torch_2.bmp", 1, 2, 3, 5
+	);
+	*/
+
 	billboard_list.texture_set = init_animation(
 		"../../../../assets/spritesheets/fireball_explode.bmp", 8, 1, 8);
 		// "../../../../assets/spritesheets/metroid.bmp", 2, 2, 4);

@@ -91,6 +91,99 @@ GLuint* init_plain_textures(const GLsizei num_textures, ...) {
 	return textures;
 }
 
+static GLsizei get_num_subtextures_for_multi_texture(va_list args, const GLsizei num_multi_textures) {
+	va_list args_copy;
+	va_copy(args_copy, args);
+
+	GLsizei num_subtextures_in_set = 0;
+
+	for (GLsizei i = 0; i < num_multi_textures; i++) {
+		va_arg(args_copy, char*); // Discarding path
+
+		if (va_arg(args_copy, unsigned)) { // If animated
+			va_arg(args_copy, GLsizei); // Discarding frames across and down
+			va_arg(args_copy, GLsizei);
+			num_subtextures_in_set += va_arg(args_copy, GLsizei); // Adding total_frames
+		}
+		else num_subtextures_in_set++;
+	}
+
+	if (num_subtextures_in_set > GL_MAX_ARRAY_TEXTURE_LAYERS)
+		fail("put textures in a texture set because it exceeds the max array texture layers",
+			TextureSetIsTooLarge);
+
+	va_end(args_copy);
+
+	return num_subtextures_in_set;
+}
+
+// Path, is animated. If animated: frames across, frames down, total_frames
+GLuint init_multi_textures(const GLsizei num_multi_textures,
+	const GLsizei rescale_w, const GLsizei rescale_h, ...) {
+
+	va_list args;
+	va_start(args, rescale_h);
+
+	const GLsizei num_subtextures_in_set = get_num_subtextures_for_multi_texture(args, num_multi_textures);
+	const GLuint texture = preinit_texture(TexSet, TexNonRepeating);
+
+	glTexImage3D(TexSet, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
+		rescale_w, rescale_h, num_subtextures_in_set, 0,
+		OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
+
+	SDL_Surface* const rescaling_surface = init_blank_surface(rescale_w, rescale_h);
+
+	for (GLsizei i = 0, frame_index = 0; i < num_multi_textures; i++) {
+		const char* const path = va_arg(args, char*);
+		DEBUG(path, s);
+
+		SDL_Surface* const surface = init_surface(path);
+
+		const byte is_animated = va_arg(args, unsigned);
+
+		if (is_animated) { // TODO: animation part of init_multi_textures
+			const GLsizei
+				frames_across = va_arg(args, GLsizei),
+				frames_down = va_arg(args, GLsizei),
+				total_frames = va_arg(args, GLsizei);
+
+			DEBUG(frames_across, d);
+			DEBUG(frames_down, d);
+			DEBUG(total_frames, d);
+		}
+		else {
+			puts("A plain texture");
+			const SDL_Surface* cpu_src;
+
+			if (surface -> w != rescale_w || surface -> h != rescale_h) {
+				SDL_UnlockSurface(rescaling_surface);
+				SDL_UnlockSurface(surface);
+				SDL_SoftStretchLinear(surface, NULL, rescaling_surface, NULL);
+				SDL_LockSurface(surface);
+				SDL_LockSurface(rescaling_surface);
+				cpu_src = rescaling_surface;
+			}
+			else cpu_src = surface;
+
+			glTexSubImage3D(TexSet, 0, 0, 0, frame_index,
+				rescale_w, rescale_h, 1, OPENGL_INPUT_PIXEL_FORMAT,
+				OPENGL_COLOR_CHANNEL_TYPE, cpu_src -> pixels);
+
+			frame_index++;
+		}
+
+		puts("---");
+
+		deinit_surface(surface);
+	}
+
+	//////////
+
+	deinit_surface(rescaling_surface);
+	va_end(args);
+	return texture;
+}
+
 // TODO: hybrid init_texture_set and init_animation
 GLuint init_animation(const char* const path, const GLsizei frames_across,
 	const GLsizei frames_down, const GLsizei total_frames) {
@@ -108,9 +201,9 @@ GLuint init_animation(const char* const path, const GLsizei frames_across,
 	SDL_Surface* const frame_surface = init_blank_surface(spritesheet_copy_area.w, spritesheet_copy_area.h);
 	const Uint32* const frame_pixels = frame_surface -> pixels;
 
-	const GLuint texture = preinit_texture(TexAnimation, TexNonRepeating);
+	const GLuint texture = preinit_texture(TexSet, TexNonRepeating);
 
-	glTexImage3D(TexAnimation, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
+	glTexImage3D(TexSet, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
 		spritesheet_copy_area.w, spritesheet_copy_area.h, total_frames,
 		0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
 
@@ -123,14 +216,14 @@ GLuint init_animation(const char* const path, const GLsizei frames_across,
 		SDL_LowerBlit(spritesheet_surface, &spritesheet_copy_area, frame_surface, &frame_copy_area);
 		SDL_LockSurface(spritesheet_surface);
 
-		glTexSubImage3D(TexAnimation, 0, 0, 0, frame_index,
+		glTexSubImage3D(TexSet, 0, 0, 0, frame_index,
 			spritesheet_copy_area.w, spritesheet_copy_area.h,
 			1, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, frame_pixels);
 	}
 
 	deinit_surface(frame_surface);
 	deinit_surface(spritesheet_surface);
-	glGenerateMipmap(TexAnimation);
+	glGenerateMipmap(TexSet);
 	return texture;
 }
 
