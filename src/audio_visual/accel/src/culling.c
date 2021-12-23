@@ -36,7 +36,7 @@ static void draw_sectors_in_view_frustum(const DrawableSet* const sector_list, c
 		const Sector* sector = ((Sector*) sectors.data) + i;
 
 		buffer_index_t num_indices = 0;
-		const buffer_index_t start_index_index = sector -> ibo_range.start;
+		const buffer_index_t ibo_start_index = sector -> ibo_range.start;
 
 		while (i < sectors.length && sector_in_view_frustum(*sector, frustum_planes)) {
 			num_indices += sector++ -> ibo_range.length;
@@ -44,7 +44,7 @@ static void draw_sectors_in_view_frustum(const DrawableSet* const sector_list, c
 		}
 
 		if (num_indices != 0) {
-			memcpy(ibo_ptr + num_visible_indices, indices + start_index_index, num_indices * sizeof(buffer_index_t));
+			memcpy(ibo_ptr + num_visible_indices, indices + ibo_start_index, num_indices * sizeof(buffer_index_t));
 			num_visible_indices += num_indices;
 		}
 	}

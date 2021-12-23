@@ -52,7 +52,7 @@ StateGL demo_17_init(void) {
 	//////////
 	scene_state.skybox = init_skybox("../assets/desert.bmp");
 
-	static byte texture_id_map[terrain_height][terrain_width];
+	// static byte texture_id_map[terrain_height][terrain_width];
 	init_face_mesh_and_sector_lists(&scene_state.sector_list, &face_mesh_list,
 		(byte*) pyramid_heightmap, (byte*) pyramid_texture_id_map, pyramid_width, pyramid_height);
 
