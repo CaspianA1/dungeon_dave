@@ -23,6 +23,8 @@ static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) 
 	return glm_aabb_frustum(aabb_corners, frustum_planes);
 }
 
+// TODO: billboard_in_view_frustum
+
 static void draw_sectors_in_view_frustum(const DrawableSet* const sector_list, const Camera* const camera) {
 	static vec4 frustum_planes[6];
 	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
