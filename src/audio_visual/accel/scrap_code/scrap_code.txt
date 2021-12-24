@@ -2825,3 +2825,62 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode,
 	it should be okay with the textures at the beginning. */
 
 /////
+
+		/*
+		"vec3 reflection_dir = reflect(-light_dir, face_normal);\n"
+		// "float s = pow(max(dot(viewDir, reflectDir), 0.0), 32);\n"
+		"float s = dot(normalize(1/view_dir), reflection_dir);\n"
+		"s = max(s, 0.0f);\n"
+		"s = pow(s, 256);\n"
+		*/
+
+///// Old shading stuff:
+
+
+	"float specular(void) {\n" // Shininess
+		"return 0.0f;\n"
+
+		/*
+		"vec3 view_dir = normalize(pos_delta_world_space);\n"
+		"vec3 reflect_dir = reflect(-lightDir, norm);\b"
+		"return 0.0f;\n"
+		*/
+	"}\n"
+
+	"float attenuation(void) {\n" // Distance-based lighting
+		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
+		// "float dist = sqrt(dist_squared);\n"
+		"atten_vars;\n"
+		"return 1.0f / (0.9f + 0.005000f * dist_squared);\n"
+
+		// "float c1 = atten_vars[0], c2 = atten_vars[1], c3 = atten_vars[2];\n"
+		// "return 1.0f / (c1 + c3 * dist_squared);\n"
+
+		// "return 1.0f / (8.0f + 4.0f * dist_squared + 3.0f * sqrt(dist_squared));\n"
+		// "return 150.0f / dist_squared;\n"
+		// "return clamp(100.0f / dist_squared, 0.4f, 1.0f);\n"
+	"}\n"
+
+/////
+
+	static GLfloat c1 = 1.0f, c2 = 0.01f, c3 = 0.02f;
+	const GLfloat step = 0.001f;
+
+	// vals = {0.909001, 0.022000, 0.005000}
+
+	byte change = 0;
+
+	if (keys[SDL_SCANCODE_Z]) c1 += step, change = 1;
+	if (keys[SDL_SCANCODE_X]) c1 -= step, change = 1;
+	if (keys[SDL_SCANCODE_C]) c2 += step, change = 1;
+	if (keys[SDL_SCANCODE_V]) c2 -= step, change = 1;
+	if (keys[SDL_SCANCODE_B]) c3 += step, change = 1;
+	if (keys[SDL_SCANCODE_N]) c3 -= step, change = 1;
+
+	if (change) printf("vals = {%lf, %lf, %lf}\n", (double) c1, (double) c2, (double) c3);
+
+	// glUniform3f(atten_vars_id, c1, c2, c3);
+	// glUniform3f(atten_vars_id, 0.909001f, 0.022000f, 0.005000f);
+	// glUniform3f(atten_vars_id, 0.909001f, 0.022000f, 0.005000f);
+
+/////

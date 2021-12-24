@@ -31,7 +31,7 @@ const char* const sector_vertex_shader =
 		"UV = vec3(\n"
 			"pos_reversed[pos_UV_indices[0]] * UV_sign_x,\n"
 			"pos_reversed[pos_UV_indices[1]],\n"
-			"face_info_bits >> 3);\n"
+			"face_info_bits >> 3);\n" // `>> 3` puts texture id bits into start of number
 	"}\n"
 
 	/* In order to map {0 1 2 5 6} to {0 1 2 3 4}, do this:
@@ -65,18 +65,18 @@ const char* const sector_vertex_shader =
 	"uniform float ambient_strength, diffuse_strength;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
-	"float diffuse(void) {\n"
-		"vec3 light_vector = normalize(pos_delta_world_space);\n"
-		"return dot(light_vector, face_normal) * diffuse_strength;\n"
+	"float diffuse(void) {\n" // Faces get darker as the view angle from it gets steeper
+		"vec3 light_dir = normalize(pos_delta_world_space);\n"
+		"return dot(light_dir, face_normal) * diffuse_strength;\n"
 	"}\n"
 
 	"float attenuation(void) {\n" // Distance-based lighting
 		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
-		"return clamp(100.0f / dist_squared, 0.4f, 1.0f);\n"
+		"return 1.0f / (0.9f + 0.005f * dist_squared);\n"
 	"}\n"
 
 	"void main(void) {\n"
-		"float light = (ambient_strength + diffuse()) * attenuation();"
+		"float light = (ambient_strength + diffuse()) * attenuation();\n"
 		"color = texture(texture_sampler, UV).rgb * min(light, 1.0f);\n"
 	"}\n",
 
