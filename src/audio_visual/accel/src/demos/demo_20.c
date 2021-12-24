@@ -147,10 +147,10 @@ StateGL demo_20_init(void) {
 	/* How would I update indices for a texture index? Perhaps mod it by the current time in some way;
 	Or actually not b/c the texture index may also depend on an enemy state */
 
+	// TODO: free this somewhere
 	DrawableSet billboard_list = init_billboard_list(
-		// texture_set, 1, (Billboard) {0, {1.0f, 1.3658536585365855f}, {0.0f, 0.0f, 0.0f}}
 		10,
-		(Billboard) {0, {1.0f, 2.0f}, {0.0f, 1.0f, 0.0f}},
+		(Billboard) {0, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
 		(Billboard) {1, {1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}},
 		(Billboard) {2, {1.0f, 1.0f}, {0.0f, 1.0f, 2.0f}},
 		(Billboard) {3, {1.0f, 1.0f}, {0.0f, 1.0f, 3.0f}},
@@ -162,29 +162,14 @@ StateGL demo_20_init(void) {
 		(Billboard) {9, {1.0f, 1.0f}, {0.0f, 1.0f, 9.0f}}
 	);
 
-
-	/* Since TexNonrepeating is necessary for billboards, billboards and walls will have to be stored in different places.
-	Damn - will have to store otherwise static billboards in same spritesheet - those are not walls But get the animation set
-	thing working first. So don't worry about this: `First, arrange billboards in the beginning, and then non-billboards after`.
-	Also, since animation frame indices will already have to account for some offset calculation,
-	it should be okay with the textures at the beginning. */
-
-	billboard_list.texture_set = init_animation_set(2, 128, 128,
-		// "../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46
-		"../../../../assets/spritesheets/metroid.bmp", 2, 2, 4,
-		// "../../../../assets/spritesheets/fireball_explode.bmp", 8, 1, 8,
-		"../../../../assets/spritesheets/bogo.bmp", 2, 3, 6
-		// "../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5
-	);
-
-	/*
-	billboard_list.texture_set = init_texture_set(TexNonRepeating,
-		// 328, 448, 1, "../../../../assets/objects/doomguy.bmp"
-		64, 64, 3, "../../../../assets/objects/doomguy.bmp",
+	billboard_list.texture_set = init_texture_set(TexNonRepeating, 3, 2, 64, 64,
+		"../../../../assets/objects/hot_dog.bmp",
 		"../../../../assets/objects/teleporter.bmp",
-		"../../../../assets/objects/robot.bmp"
+		"../../../../assets/objects/robot.bmp",
+
+		"../../../../assets/spritesheets/metroid.bmp", 2, 2, 4,
+		"../../../../assets/spritesheets/bogo.bmp", 2, 3, 6
 	);
-	*/
 
 	// TODO: free billboard list somewhere
 	DrawableSet* const billboard_list_on_heap = malloc(sizeof(DrawableSet));

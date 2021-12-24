@@ -45,21 +45,18 @@ typedef struct { // An animation FPS would be global
 	float last_frame_time;
 } AnimationInstance;
 
-// Excluded: init_blank_surface
+// Excluded: init_blank_surface, init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 
 SDL_Surface* init_surface(const char* const path);
 void deinit_surface(SDL_Surface* const surface);
 
-GLuint preinit_texture(const TextureType texture_type, const TextureWrapMode wrap_mode);
 void use_texture(const GLuint texture, const GLuint shader_program, const TextureType texture_type);
+GLuint preinit_texture(const TextureType texture_type, const TextureWrapMode wrap_mode);
 
 void write_surface_to_texture(const SDL_Surface* const surface, const GLenum opengl_texture_type);
 GLuint* init_plain_textures(const GLsizei num_textures, ...);
 
-GLuint init_animation(const char* const path, const GLsizei frames_across,
-	const GLsizei frames_down, const GLsizei total_frames);
-
-GLuint init_texture_set(const TextureWrapMode wrap_mode,
-	const GLsizei subtex_width, const GLsizei subtex_height, const GLsizei num_textures, ...);
+GLuint init_texture_set(const TextureWrapMode wrap_mode, const GLsizei num_still_subtextures,
+	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h, ...);
 
 #endif

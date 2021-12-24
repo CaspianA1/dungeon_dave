@@ -10,7 +10,8 @@
 /*
 - NEXT: new_map back part
 - NEXT 2: a bounding volume hierarchy, maybe
-- NEXT 3: billboard batching + different billboard types
+- NEXT 3: billboard batching
+- NEXT 4: modifiable billboards (their texture id and position)
 
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side; or store none at all
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
@@ -18,11 +19,10 @@
 - For terrain, quite slow with 2/3 phong lighting + some objects popping out for half seconds
 - Camera tilt
 
-- Read sprite crop from spritesheet
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
 - Good movement physics (additive, and time-independent)
-- Then, flat weapon
+- Then, flat weapon (that comes after physics)
 - A dnd-styled font that's monospaced
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
@@ -54,35 +54,37 @@ StateGL demo_17_init(void) {
 
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_face_mesh_and_sector_lists(&scene_state.sector_list, &face_mesh_list,
-		(byte*) pyramid_heightmap, (byte*) pyramid_texture_id_map, pyramid_width, pyramid_height);
+		(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height);
 
 	init_sector_list_vbo_and_ibo(&scene_state.sector_list, &face_mesh_list);
 
 	scene_state.sector_list.shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 
 	//////////
+
 	sgl.num_textures = 0;
-	scene_state.sector_list.texture_set = init_texture_set(TexRepeating, 512, 512,
+	scene_state.sector_list.texture_set = init_texture_set(TexRepeating,
 		// New:
-		// 1, "../../../../assets/walls/pyramid_bricks_4.bmp"
+		// 1, 0, 128, 128, "../../../../assets/walls/pyramid_bricks_4.bmp"
 
 		// Palace:
-		/* 11, "../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
+		11, 0, 128, 128,
+		"../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
 		"../../../../assets/walls/window.bmp", "../../../../assets/walls/saqqara.bmp",
 		"../../../../assets/walls/sandstone.bmp", "../../../../assets/walls/cobblestone_3.bmp",
 		"../../../../assets/walls/horses.bmp", "../../../../assets/walls/mesa.bmp",
-		"../../../../assets/walls/arthouse_bricks.bmp" */
+		"../../../../assets/walls/arthouse_bricks.bmp"
 
 		// Pyramid:
-		3, "../../../../assets/walls/pyramid_bricks_4.bmp",
-		"../../../../assets/walls/greece.bmp", "../../../../assets/walls/saqqara.bmp"
+		/* 3, 0, 512, 512, "../../../../assets/walls/pyramid_bricks_4.bmp",
+		"../../../../assets/walls/greece.bmp", "../../../../assets/walls/saqqara.bmp" */
 
 		// Tiny:
-		// 2, "../../../../assets/walls/mesa.bmp", "../../../../assets/walls/hieroglyph.bmp"
+		// 2, 0, 64, 64, "../../../../assets/walls/mesa.bmp", "../../../../assets/walls/hieroglyph.bmp"
 
 		// Level 1:
-		/* 8, "../../../../assets/walls/sand.bmp",
+		/* 8, 0, 256, 256, "../../../../assets/walls/sand.bmp",
 		"../../../../assets/walls/cobblestone_2.bmp",
 		"../../../../assets/walls/cobblestone_3.bmp",
 		"../../../../assets/walls/stone_2.bmp",

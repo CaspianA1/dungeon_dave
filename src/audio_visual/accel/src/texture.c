@@ -59,13 +59,14 @@ GLuint preinit_texture(const TextureType texture_type, const TextureWrapMode wra
 	return t;
 }
 
-// This function assumes that the surface is locked beforehand
+// This function assumes that the surface is locked beforehand. This is legacy code and should be removed if possible
 void write_surface_to_texture(const SDL_Surface* const surface, const GLenum opengl_texture_type) {
 	glTexImage2D(opengl_texture_type, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
 		surface -> w, surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
 		OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
 }
 
+// This is legacy code and should be removed if possible
 GLuint* init_plain_textures(const GLsizei num_textures, ...) {
 	va_list args;
 	va_start(args, num_textures);
@@ -89,36 +90,35 @@ GLuint* init_plain_textures(const GLsizei num_textures, ...) {
 	return textures;
 }
 
-/* Path, frames across, frames down, total_frames. Animations are not stored in the same
-texture set as wall textures because wall textures need UV wrapping, but that's not the case for animations. */
-GLuint init_animation_set(const GLsizei num_animations, const GLsizei rescale_w, const GLsizei rescale_h, ...) {
-	va_list args, args_copy;
-	va_start(args, rescale_h);
-	va_copy(args_copy, args);
+static void init_still_subtextures_in_texture_set(
+	const GLsizei num_still_subtextures, SDL_Surface* const rescaled_surface, va_list args) {
 
-	////////// This part computes how many frames will be needed in the animation set
+	for (GLsizei i = 0; i < num_still_subtextures; i++) {
+		SDL_Surface* const surface = init_surface(va_arg(args, char*));
+		SDL_Surface* surface_copied_to_gpu;
 
-	GLsizei num_animation_frames = 0;
-	for (GLsizei i = 0; i < num_animations; i++) {
-		va_arg(args_copy, char*); // Discarding path, frames across, and frames down args
-		va_arg(args_copy, GLsizei);
-		va_arg(args_copy, GLsizei);
-		num_animation_frames += va_arg(args_copy, GLsizei); // Adding total_frames
+		if (surface -> w != rescaled_surface -> w || surface -> h != rescaled_surface -> h) {
+			SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
+			SDL_BlitScaled(surface, NULL, rescaled_surface, NULL);
+			surface_copied_to_gpu = rescaled_surface;
+		}
+		else surface_copied_to_gpu = surface;
+
+		SDL_LockSurface(surface_copied_to_gpu);
+		glTexSubImage3D(TexSet, 0, 0, 0, i,
+			surface_copied_to_gpu -> w, surface_copied_to_gpu -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
+			OPENGL_COLOR_CHANNEL_TYPE, surface_copied_to_gpu -> pixels);
+
+		SDL_UnlockSurface(surface_copied_to_gpu);
+		deinit_surface(surface);
 	}
+}
 
-	va_end(args_copy);
+static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_frames,
+	const GLsizei num_still_subtextures, SDL_Surface* const rescaled_surface, va_list args) {
 
-	////////// This part loads the frames of each animation into an OpenGL texture
-
-	SDL_Surface* const rescaling_surface = init_blank_surface(rescale_w, rescale_h);
-	Uint32* const rescaling_surface_pixels = rescaling_surface -> pixels;
-	const GLuint texture = preinit_texture(TexSet, TexNonRepeating);
-
-	glTexImage3D(TexSet, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
-		rescale_w, rescale_h, num_animation_frames,
-		0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
-
-	for (GLsizei set_frame_index = 0; set_frame_index < num_animation_frames;) {
+	/////////////////
+	for (GLsizei animation_frame_index = num_still_subtextures; animation_frame_index < num_animated_frames;) {
 		SDL_Surface* const spritesheet_surface = init_surface(va_arg(args, char*));
 		SDL_SetSurfaceBlendMode(spritesheet_surface, SDL_BLENDMODE_NONE);
 
@@ -132,69 +132,64 @@ GLuint init_animation_set(const GLsizei num_animations, const GLsizei rescale_w,
 			.h = spritesheet_surface -> h / frames_down
 		};
 
-		for (GLsizei frame_index = 0; frame_index < total_frames; frame_index++, set_frame_index++) {
+		for (GLsizei frame_index = 0; frame_index < total_frames; frame_index++, animation_frame_index++) {
 			spritesheet_frame_area.x = (frame_index % frames_across) * spritesheet_frame_area.w;
 			spritesheet_frame_area.y = (frame_index / frames_across) * spritesheet_frame_area.h;
 
-			SDL_BlitScaled(spritesheet_surface, &spritesheet_frame_area, rescaling_surface, NULL);
-			SDL_LockSurface(rescaling_surface); // For pixel access
+			SDL_BlitScaled(spritesheet_surface, &spritesheet_frame_area, rescaled_surface, NULL);
+			SDL_LockSurface(rescaled_surface);
 
-			glTexSubImage3D(TexSet, 0, 0, 0, set_frame_index,
-				rescale_w, rescale_h, 1, OPENGL_INPUT_PIXEL_FORMAT,
-				OPENGL_COLOR_CHANNEL_TYPE, rescaling_surface_pixels);
+			glTexSubImage3D(TexSet, 0, 0, 0, animation_frame_index,
+				rescaled_surface -> w, rescaled_surface -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
+				OPENGL_COLOR_CHANNEL_TYPE, rescaled_surface -> pixels);
 
-			SDL_UnlockSurface(rescaling_surface);
+			SDL_UnlockSurface(rescaled_surface);
 		}
 		deinit_surface(spritesheet_surface);
 	}
-
-	glGenerateMipmap(TexSet);
-	deinit_surface(rescaling_surface);
-	va_end(args);
-
-	return texture;
 }
 
-// Param: Texture path. TODO: remove this fn
-GLuint init_texture_set(const TextureWrapMode wrap_mode,
-	const GLsizei subtex_width, const GLsizei subtex_height, const GLsizei num_textures, ...) {
+GLuint init_texture_set(const TextureWrapMode wrap_mode, const GLsizei num_still_subtextures,
+	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h, ...) {
 
-	const GLuint ts = preinit_texture(TexSet, wrap_mode);
+	va_list args, args_copy;
+	va_start(args, rescale_h);
+	va_copy(args_copy, args);
 
-	glTexImage3D(TexSet, 0, OPENGL_INTERNAL_PIXEL_FORMAT,
-		subtex_width, subtex_height, num_textures,
-		0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
-	
-	SDL_Surface* const rescaled_surface = init_blank_surface(subtex_width, subtex_height);
+	////////// Getting number of animated frames for all animations
 
-	va_list args;
-	va_start(args, num_textures);
-	for (GLsizei i = 0; i < num_textures; i++) {
-		const char* const path = va_arg(args, char*);
-		SDL_Surface* const surface = init_surface(path);
-		SDL_Surface* src_surface;
+	GLsizei num_animated_frames = 0; // A frame is a subtexture
 
-		if (surface -> w != subtex_width || surface -> h != subtex_height) {
-			SDL_SoftStretchLinear(surface, NULL, rescaled_surface, NULL);
-			src_surface = rescaled_surface;
-		}
-		else src_surface = surface;
-
-		SDL_LockSurface(src_surface);
-
-		glTexSubImage3D(TexSet, 0, 0, 0, i, subtex_width, subtex_height, 1,
-			OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, src_surface -> pixels);
-
-		SDL_UnlockSurface(src_surface);
-
-		deinit_surface(surface);
+	for (GLsizei i = 0; i < num_still_subtextures; i++, va_arg(args_copy, char*)); // Discarding still subtexture args
+	for (GLsizei i = 0; i < num_animation_sets; i++) {
+		va_arg(args_copy, char*); // Discarding path, frames across, and frames down args
+		va_arg(args_copy, GLsizei);
+		va_arg(args_copy, GLsizei);
+		num_animated_frames += va_arg(args_copy, GLsizei); // Adding num frames for one animation set
 	}
 
-	deinit_surface(rescaled_surface);
-	glGenerateMipmap(TexSet);
-	va_end(args);
+	va_end(args_copy);
 
-	return ts;
+	////////// Defining texture and rescaled surface
+
+	const GLsizei total_num_subtextures = num_still_subtextures + num_animated_frames;
+	const GLuint texture = preinit_texture(TexSet, wrap_mode);
+
+	glTexImage3D(TexSet, 0, OPENGL_INTERNAL_PIXEL_FORMAT, rescale_w,
+		rescale_h, total_num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,
+		OPENGL_COLOR_CHANNEL_TYPE, NULL);
+
+	SDL_Surface* const rescaled_surface = init_blank_surface(rescale_w, rescale_h);
+
+	////////// Filling array texture with still and animated subtextures
+
+	init_still_subtextures_in_texture_set(num_still_subtextures, rescaled_surface, args);
+	init_animated_subtextures_in_texture_set(num_animated_frames, num_still_subtextures, rescaled_surface, args);
+
+	glGenerateMipmap(TexSet);
+	deinit_surface(rescaled_surface);
+	va_end(args);
+	return texture;
 }
 
 #endif
