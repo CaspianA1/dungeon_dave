@@ -12,6 +12,7 @@
 - NEXT 2: a bounding volume hierarchy, maybe
 - NEXT 3: billboard batching
 - NEXT 4: modifiable billboards (their texture id and position)
+- NEXT 5: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
 
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side; or store none at all
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
