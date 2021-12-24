@@ -8,7 +8,7 @@
 // Batched + culled billboard drawing
 
 /*
-- To begin with, just draw all in oen big unbatched buffer
+- To begin with, just draw all in one big unbatched buffer
 - An expanded init_texture_set that takes spritesheets too
 - Do I really need batching for billboards, as there will be so many fewer of them?
 - Why is so much GPU time being used? Even happens when nothing rendered
