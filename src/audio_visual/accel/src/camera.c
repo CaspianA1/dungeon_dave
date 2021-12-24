@@ -10,6 +10,8 @@ Event get_next_event(void) {
 
 	Event e = {
 		.movement_bits =
+			(keys[constants.movement_keys.tilt_left] << 5) |
+			(keys[constants.movement_keys.tilt_right] << 4) |
 			(keys[constants.movement_keys.right] << 3) |
 			(keys[constants.movement_keys.left] << 2) |
 			(keys[constants.movement_keys.backward] << 1) |
@@ -40,7 +42,7 @@ static void update_camera(Camera* const camera, const Event event) {
 
 	camera -> aspect_ratio = (GLfloat) event.screen_size[0] / event.screen_size[1];
 
-	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time;
+	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time, half_pi = (GLfloat) M_PI_2;
 	camera -> hori_angle += constants.speeds.look * delta_time * -event.mouse_dx;
 	camera -> vert_angle += constants.speeds.look * delta_time * -event.mouse_dy;
 
@@ -49,7 +51,7 @@ static void update_camera(Camera* const camera, const Event event) {
 
 	const GLfloat
 		cos_vert = cosf(camera -> vert_angle),
-		hori_angle_minus_half_pi = camera -> hori_angle - (GLfloat) M_PI_2,
+		hori_angle_minus_half_pi = camera -> hori_angle - half_pi,
 		actual_speed = delta_time * constants.speeds.move;
 
 	vec3 dir = {cos_vert * sinf(camera -> hori_angle), sinf(camera -> vert_angle), cos_vert * cosf(camera -> hori_angle)};
@@ -58,7 +60,21 @@ static void update_camera(Camera* const camera, const Event event) {
 	camera -> right_xz[0] = sinf(hori_angle_minus_half_pi);
 	camera -> right_xz[1] = cosf(hori_angle_minus_half_pi);
 
-	vec3 right = {camera -> right_xz[0], 0.0f, camera -> right_xz[1]};
+	//////////
+
+	GLfloat tilt = camera -> tilt_angle;
+	if (event.movement_bits & 32) { // Left
+		if ((tilt += constants.speeds.tilt * delta_time) > half_pi) tilt = half_pi - 0.01f;
+	}
+	if (event.movement_bits & 16) { // Right
+		if ((tilt -= constants.speeds.tilt * delta_time) < -half_pi) tilt = -half_pi + 0.01f;
+	}
+	camera -> tilt_angle = tilt;
+
+	vec3 right = {camera -> right_xz[0], tanf(tilt), camera -> right_xz[1]};
+	glm_vec3_normalize(right);
+
+	//////////
 
 	vec3 pos;
 	memcpy(pos, camera -> pos, sizeof(vec3));

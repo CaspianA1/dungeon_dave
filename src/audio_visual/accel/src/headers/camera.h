@@ -6,12 +6,12 @@
 typedef struct {
 	vec2 right_xz; // X and Z of right (Y is always 0)
 	vec3 pos, dir; // The camera never moves from the origin, but `pos` here is more practical
-	GLfloat fov, hori_angle, vert_angle, aspect_ratio;
+	GLfloat fov, hori_angle, vert_angle, tilt_angle, aspect_ratio;
 	mat4 view_projection, model_view_projection; // Used the least, so last in struct
 } Camera;
 
 typedef struct {
-	const byte movement_bits; // Right, left, backward, forward
+	const byte movement_bits; // Tilt right, tilt left, right, left, backward, forward
 	int screen_size[2], mouse_dx, mouse_dy; // Delta from last frame
 } Event;
 

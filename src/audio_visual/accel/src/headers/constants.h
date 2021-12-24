@@ -19,11 +19,11 @@ static const struct {
 	} clip_dists;
 
 	const struct {
-		const GLfloat move, look;
+		const GLfloat move, look, tilt;
 	} speeds;
 
 	const struct {
-		const SDL_Scancode forward, backward, left, right;
+		const SDL_Scancode forward, backward, left, right, tilt_left, tilt_right;
 	} movement_keys;
 
 } constants = {
@@ -31,8 +31,8 @@ static const struct {
 	.max_vert_angle = (GLfloat) M_PI_2,
 	.fps = 60,
 	.clip_dists = {0.1f, 441.6729559300637f},
-	.speeds = {5.0f, 0.08f},
-	.movement_keys = {SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D}
+	.speeds = {5.0f, 0.08f, 1.0f},
+	.movement_keys = {SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_T, SDL_SCANCODE_Y}
 };
 
 #endif
