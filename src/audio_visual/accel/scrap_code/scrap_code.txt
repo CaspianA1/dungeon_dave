@@ -3035,3 +3035,38 @@ void vec3_rot_z(vec3 v, const GLfloat angle) {
 }
 
 /////
+
+- Finding if planes are intersecting:
+
+Planes are infinite
+
+Equation: Ax + By + Cz + D = 0
+
+To define a plane, you need a point on the plane, and a surface normal
+
+Two vectors: PQ and PR
+PQ x PR = N = normal
+A = normal.x, B = normal.y, C = normal.z
+And can use P, Q, or R for the plane's point
+Use P, since it's the shared point
+
+With that, the equation is Ax + By + Cz + P (?)
+And A(X - P.x) + B(Y - P.y) + C(Z - P.z) = 0
+Then, plug in P values, and put something on the other side of the equation after that
+
+cglm, plane 1 with plane 2:
+
+p1 = plane 1, p2 = plane 2
+cglm does not extract planes for an aabb
+
+New idea:
+
+n1 = plane 1 normal, n2 = plane 2 normal
+Direction of line of intersection = n1 x n2
+
+line1dir = n1 × n3
+line2dir = n2 × n3
+Whatever, this is very complicated
+Bounding spheres!
+
+/////

@@ -9,14 +9,16 @@
 
 /*
 - To begin with, just draw all in one big unbatched buffer
-- An expanded init_texture_set that takes spritesheets too
-- Do I really need batching for billboards, as there will be so many fewer of them?
-- Why is so much GPU time being used? Even happens when nothing rendered
-- And why does calling glUseProgram not each time result in nothing being rendered?
-- SDL_GL_SwapWindow is the culprit
-- And demo 17 uses close to 88% of gpu power now
-- Instancing render order may be a problem
+- Batching after
 - Only using instancing for glVertexAttribDivisor
+
+Sphere intersection with plane:
+
+bool is_inside_plane(plane):
+	return plane.getSignedDistanceToPlane(self.center) > -self.radius;
+
+float getSignedDistanceToPlane(point):
+	return dot(self.normal, point) - self.distance;
 */
 
 const char* const batching_billboard_vertex_shader =
