@@ -8,7 +8,7 @@
 #include "../culling.c"
 
 /*
-- NEXT: new_map back part
+- NEXT: new_map back part + a texmap for it
 - NEXT 2: a bounding volume hierarchy, maybe
 - NEXT 3: billboard batching
 - NEXT 4: modifiable billboards (their texture id and position)
