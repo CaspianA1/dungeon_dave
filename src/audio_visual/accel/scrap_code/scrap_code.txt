@@ -2884,3 +2884,52 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode,
 	// glUniform3f(atten_vars_id, 0.909001f, 0.022000f, 0.005000f);
 
 /////
+
+	/*
+	static float a = 0.1f;
+	glm_rotate_zr
+	(view, a, view);
+	a += 0.01f;
+	*/
+
+	/*
+	for (byte y = 0; y < 4; y++) {
+		for (byte x = 0; x < 4; x++) {
+			printf("%lf ", (double) view[y][x]);
+		}
+		putchar('\n');
+	}
+	puts("---");
+	*/
+
+	/*
+	static float a = 0.0f;
+	a += 0.01f;
+	glm_rotate(view, a, (vec3) {1.0f, 0.0f, 0.0f});
+	*/
+
+/////
+
+	/*
+	mat4 roll_matrix = GLM_MAT4_IDENTITY_INIT;
+	glm_rotate(roll_matrix, tilt, dir);
+	*/
+
+	// vec3 looking_at = {dir[0] * cos(hori_angle_minus_half_pi)}
+	// lookAtVector = Normalize3dVector(viewDir * cos(angle) + UpVector * sin(angle));
+	// right[1] = 1.0f;
+
+/////
+
+	/*
+	// right[2] += tanf(tilt);
+	right[0] += tanf(tilt);
+	// right[1] = tanf(tilt);
+	print_vec(right);
+	glm_vec3_normalize(right);
+	*/
+
+	// vec3 roll = {0.0f, tilt, 0.0f};
+	// yaw = side to side, pitch = up and down
+
+/////

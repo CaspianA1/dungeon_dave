@@ -52,10 +52,13 @@ static void update_camera(Camera* const camera, const Event event) {
 	const GLfloat
 		cos_vert = cosf(camera -> vert_angle),
 		hori_angle_minus_half_pi = camera -> hori_angle - half_pi,
-		actual_speed = delta_time * constants.speeds.move;
+		move_speed = delta_time * constants.speeds.move,
+		tilt_speed = delta_time * constants.speeds.tilt;
 
 	vec3 dir = {cos_vert * sinf(camera -> hori_angle), sinf(camera -> vert_angle), cos_vert * cosf(camera -> hori_angle)};
 	memcpy(camera -> dir, dir, sizeof(vec3));
+
+	// #define print_vec(v) printf(#v " = {%lf, %lf, %lf}\n", (double) v[0], (double) v[1], (double) v[2])
 
 	camera -> right_xz[0] = sinf(hori_angle_minus_half_pi);
 	camera -> right_xz[1] = cosf(hori_angle_minus_half_pi);
@@ -64,26 +67,21 @@ static void update_camera(Camera* const camera, const Event event) {
 
 	GLfloat tilt = camera -> tilt_angle;
 	if (event.movement_bits & 32) { // Left
-		if ((tilt += constants.speeds.tilt * delta_time) > half_pi) tilt = half_pi - 0.01f;
+		if ((tilt += tilt_speed) > half_pi) tilt = half_pi - 0.01f;
 	}
 	if (event.movement_bits & 16) { // Right
-		if ((tilt -= constants.speeds.tilt * delta_time) < -half_pi) tilt = -half_pi + 0.01f;
+		if ((tilt -= tilt_speed) < -half_pi) tilt = -half_pi + 0.01f;
 	}
 	camera -> tilt_angle = tilt;
 
-	vec3 right = {camera -> right_xz[0], tanf(tilt), camera -> right_xz[1]};
-	glm_vec3_normalize(right);
-
-	//////////
-
-	vec3 pos;
+	vec3 right = {camera -> right_xz[0], 0.0f, camera -> right_xz[1]}, pos;
 	memcpy(pos, camera -> pos, sizeof(vec3));
 
 	// Forward, backward, left, right
-	if (event.movement_bits & 1) glm_vec3_muladds(dir, actual_speed, pos);
-	if (event.movement_bits & 2) glm_vec3_muladds(dir, -actual_speed, pos);
-	if (event.movement_bits & 4) glm_vec3_muladds(right, -actual_speed, pos);
-	if (event.movement_bits & 8) glm_vec3_muladds(right, actual_speed, pos);
+	if (event.movement_bits & 1) glm_vec3_muladds(dir, move_speed, pos);
+	if (event.movement_bits & 2) glm_vec3_muladds(dir, -move_speed, pos);
+	if (event.movement_bits & 4) glm_vec3_muladds(right, -move_speed, pos);
+	if (event.movement_bits & 8) glm_vec3_muladds(right, move_speed, pos);
 
 	if (keys[KEY_PRINT_POSITION])
 		printf("pos = {%lf, %lf, %lf}\n", (double) pos[0], (double) pos[1], (double) pos[2]);
