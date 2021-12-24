@@ -18,13 +18,13 @@
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
 - More efficiently set statemap bit ranges
 - For terrain, some objects popping out for half seconds
-- Camera tilt that doesn't affect movement + figure out why looking down evens out the tilt
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
 - Good movement physics (additive, and time-independent)
 - Then, flat weapon (that comes after physics)
 - A dnd-styled font that's monospaced
+- Use more of the cglm functions in `update_camera`, or make my own
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
 */

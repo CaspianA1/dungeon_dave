@@ -58,8 +58,6 @@ static void update_camera(Camera* const camera, const Event event) {
 	vec3 dir = {cos_vert * sinf(camera -> hori_angle), sinf(camera -> vert_angle), cos_vert * cosf(camera -> hori_angle)};
 	memcpy(camera -> dir, dir, sizeof(vec3));
 
-	// #define print_vec(v) printf(#v " = {%lf, %lf, %lf}\n", (double) v[0], (double) v[1], (double) v[2])
-
 	camera -> right_xz[0] = sinf(hori_angle_minus_half_pi);
 	camera -> right_xz[1] = cosf(hori_angle_minus_half_pi);
 
@@ -83,14 +81,17 @@ static void update_camera(Camera* const camera, const Event event) {
 	if (event.movement_bits & 4) glm_vec3_muladds(right, -move_speed, pos);
 	if (event.movement_bits & 8) glm_vec3_muladds(right, move_speed, pos);
 
+	memcpy(camera -> pos, pos, sizeof(vec3));
+
 	if (keys[KEY_PRINT_POSITION])
 		printf("pos = {%lf, %lf, %lf}\n", (double) pos[0], (double) pos[1], (double) pos[2]);
 
-	//////////
-
 	vec3 rel_origin, up;
+	glm_vec3_rotate(right, -tilt, dir); // Roll applied after input as to not interfere with the camera movement
 	glm_vec3_add(pos, dir, rel_origin);
 	glm_vec3_cross(right, dir, up);
+
+	//////////
 
 	mat4 view, projection;
 	glm_lookat(pos, rel_origin, up, view);
@@ -101,7 +102,7 @@ static void update_camera(Camera* const camera, const Event event) {
 	glm_mul(projection, view, camera -> view_projection); // For billboard shader
 	glm_mul(camera -> view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, camera -> model_view_projection); // For sector shader
 
-	memcpy(camera -> pos, pos, sizeof(vec3));
+
 	last_time = SDL_GetTicks() / 1000.0f;
 }
 

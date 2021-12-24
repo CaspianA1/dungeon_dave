@@ -10,6 +10,7 @@
 #pragma GCC diagnostic pop
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
+#define DEBUG_VEC(v) printf(#v " = {%lf, %lf, %lf}\n", (double) v[0], (double) v[1], (double) v[2])
 #define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
 #define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
 #define OPENGL_MAJOR_VERSION 3

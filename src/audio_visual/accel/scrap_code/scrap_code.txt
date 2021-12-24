@@ -2933,3 +2933,105 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode,
 	// yaw = side to side, pitch = up and down
 
 /////
+
+
+	// glm_mul(roll, view, view);
+
+	/*
+	static GLfloat a = 0.0f;
+	a += 0.01f;
+	mat4 rot;
+	glm_rotate_z((mat4) GLM_MAT4_IDENTITY_INIT, a, rot);
+	glm_add
+	*/
+
+	/*
+	static float d = 0.0f;
+	DEBUG((int) d, d);
+	DEBUG(d, lf);
+	d += keys[SDL_SCANCODE_C] * 0.01f;
+	if ((int) d == 16) d = 0;
+	((float*) view)[(int) d] = 3.9f;
+	*/
+
+	//
+	/*
+	for (byte y = 0; y < 4; y++) {
+		for (byte x = 0; x < 4; x++)
+			printf("%lf ", (double) view[x][y]);
+		putchar('\n');
+	}
+	puts("---");
+	*/
+	//
+
+/////
+
+	//////////
+	/*
+	mat4 roll = GLM_MAT4_IDENTITY_INIT;
+	glm_rotate(roll, tilt, dir);
+	*/
+
+	// lookDir = glm::normalize( vec3(sinf(yaw) * cos(tilt), sin(tilt), cosf(yaw) * cos(tilt)) );
+	// up *= mat3(roll);
+	// The wrong angle turns the view up
+
+	/*
+	for (byte y = 0; y < 4; y++) {
+		for (byte x = 0; x < 4; x++)
+			printf("%lf ", (double) roll[x][y]);
+		putchar('\n');
+	}
+	puts("---");
+	*/
+
+/////
+
+	/*
+	vec3 test = {0.0f, 1.0f, 0.0f};
+	const GLfloat angle = 90.0f;
+	const GLfloat rads = angle * (GLfloat) M_PI / 180.0f;
+
+	DEBUG(rads, lf);
+	print_vec(test);
+	vec3_rot_z(test, rads);
+	print_vec(test);
+	puts("---");
+	*/
+
+	/*
+	right[1] += tanf(tilt);
+	right[0] += sinf(tilt);
+	right[2] += sinf(tilt);
+
+	glm_vec3_normalize(right);
+	print_vec(right);
+	*/
+
+/////
+
+
+void vec3_rot_z(vec3 v, const GLfloat angle) {
+	const GLfloat cos_theta = cosf(angle), sin_theta = sinf(angle);
+
+	const GLfloat x_prime = v[0] * cos_theta - v[1] * sin_theta;
+	const GLfloat z_prime = v[0] * sin_theta + v[1] * cos_theta;
+
+	v[0] = x_prime;
+	v[1] = z_prime;
+
+	/* This was around y
+	const GLfloat cos_theta = cosf(angle), sin_theta = sinf(angle);
+
+	const GLfloat x_prime = v[0] * cos_theta + v[2] * sin_theta;
+	const GLfloat z_prime = -v[0] * sin_theta + v[2] * cos_theta;
+
+	DEBUG(x_prime, d);
+
+	v[0] = x_prime;
+	v[2] = z_prime;
+	*/
+}
+
+/////
