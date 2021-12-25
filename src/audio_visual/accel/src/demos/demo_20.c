@@ -66,31 +66,18 @@ typedef struct {
 	bb_pos_component_t size[2], pos[3];
 } Billboard;
 
-/*
-Sphere intersection with plane:
-
-bool is_inside_plane(plane):
-	return plane.getSignedDistanceToPlane(self.center) > -self.radius;
-
-float getSignedDistanceToPlane(point):
-	return dot(self.normal, point) - self.distance;
-*/
-
-typedef struct {
-	const float radius;
-	vec3 center;
-} Sphere;
-
-byte is_inside_plane(Sphere sphere, vec4 plane) {
-	return (glm_vec3_dot(plane, sphere.center) - plane[3]) > -sphere.radius;
+byte is_inside_plane(vec4 sphere, vec4 plane) {
+	return (glm_vec3_dot(plane, sphere) - plane[3]) < sphere[3];
 }
 
 byte billboard_in_view_frustum(const Billboard billboard, vec4 frustum_planes[6]) {
 	const float half_w = billboard.size[0] * 0.5f, half_h = billboard.size[1] * 0.5f;
 
-	Sphere sphere = {
-		.radius = sqrtf(half_w * half_w + half_h * half_h),
-		.center = {billboard.pos[0], billboard.pos[1], billboard.pos[2]}
+	// For a sphere, first 3 components are position, and last component is radius
+
+	vec4 sphere = {
+		billboard.pos[0], billboard.pos[1], billboard.pos[2],
+		sqrtf(half_w * half_w + half_h * half_h)
 	};
 
 	return
@@ -173,7 +160,7 @@ StateGL demo_20_init(void) {
 	// TODO: free this somewhere
 	DrawableSet billboard_list = init_billboard_list(
 		1,
-		(Billboard) {0, {10.0f, 10.0f}, {0.0f, 0.0f, 0.0f}}
+		(Billboard) {0, {2.0f, 2.0f}, {0.0f, 0.0f, 0.0f}}
 
 		/*
 		(Billboard) {1, {1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}},
@@ -189,8 +176,8 @@ StateGL demo_20_init(void) {
 	);
 
 	billboard_list.texture_set = init_texture_set(TexNonRepeating, 3, 2, 512, 512,
-		"../../../../assets/objects/hot_dog.bmp",
-		// "../../../../assets/walls/hieroglyphics.bmp",
+		// "../../../../assets/objects/hot_dog.bmp",
+		"../../../../assets/walls/hieroglyphics.bmp",
 
 		"../../../../assets/objects/teleporter.bmp",
 		"../../../../assets/objects/robot.bmp",

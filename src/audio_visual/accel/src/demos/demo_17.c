@@ -10,7 +10,7 @@
 /*
 - NEXT: new_map back part + a texmap for it
 - NEXT 2: a bounding volume hierarchy, maybe
-- NEXT 3: billboard batching + culling (make it work!)
+- NEXT 3: billboard batching
 - NEXT 4: modifiable billboards (their texture id and position)
 - NEXT 5: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
 
