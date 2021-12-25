@@ -1,7 +1,8 @@
 #include "demo_11.c"
+#include "../headers/constants.h"
 
 void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint shader_program) {
-	static GLfloat hori_angle = (GLfloat) M_PI, vert_angle = 0.0f, last_time;
+	static GLfloat hori_angle = PI, vert_angle = 0.0f, last_time;
 
 	static byte first_call = 1;
 	if (first_call) {
@@ -10,10 +11,7 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 		return;
 	}
 
-	const GLfloat
-		move_speed = 3.0f,
-		look_speed = 0.08f,
-		half_pi = (GLfloat) M_PI / 2.0f;
+	const GLfloat move_speed = 3.0f, look_speed = 0.08f;
 
 	int mouse_dx, mouse_dy;
 	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
@@ -22,13 +20,13 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 	hori_angle += look_speed * delta_time * -mouse_dx; // dx and dy are global from demo_5.c
 	vert_angle += look_speed * delta_time * -mouse_dy;
 
-	if (vert_angle > half_pi) vert_angle = half_pi;
-	else if (vert_angle < -half_pi) vert_angle = -half_pi;
+	if (vert_angle > HALF_PI) vert_angle = HALF_PI;
+	else if (vert_angle < -HALF_PI) vert_angle = -HALF_PI;
 
 	const GLfloat cos_vert = cosf(vert_angle);
 	vec3 direction = {cos_vert * sinf(hori_angle), sinf(vert_angle), cos_vert * cosf(hori_angle)};
 
-	const GLfloat hori_angle_minus_half_pi = hori_angle - half_pi, actual_speed = delta_time * move_speed;
+	const GLfloat hori_angle_minus_half_pi = hori_angle - HALF_PI, actual_speed = delta_time * move_speed;
 
 	vec3 _right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
 	memcpy(right, _right, sizeof(vec3));
@@ -45,7 +43,8 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 	glm_vec3_cross(right, direction, up);
 	//////////
 	mat4 projection, view, model_view_projection, view_times_model, model = GLM_MAT4_IDENTITY_INIT;
-	glm_perspective(to_radians(FOV), (GLfloat) WINDOW_W / WINDOW_H, constants.clip_dists.near, constants.clip_dists.far, projection);
+	glm_perspective(constants.camera.init.fov, (GLfloat) WINDOW_W / WINDOW_H,
+		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 	glm_lookat(pos, pos_plus_dir, up, view);
 	glm_mul(projection, view, view_times_projection); // For external usage
 

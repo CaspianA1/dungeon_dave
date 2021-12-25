@@ -18,6 +18,8 @@
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
 - More efficiently set statemap bit ranges
 - For terrain, some objects popping out for half seconds
+- Demo 12 pops a bit in the beginning, and demo 17 a bit less
+- Camera var names to yaw, pitch, and roll (maybe)
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen

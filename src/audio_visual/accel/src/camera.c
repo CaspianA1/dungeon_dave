@@ -25,38 +25,35 @@ Event get_next_event(void) {
 }
 
 void init_camera(Camera* const camera, const vec3 init_pos) {
-	memset(camera, 0, sizeof(Camera));
-	memcpy(camera -> pos, init_pos, sizeof(vec3));
-	camera -> fov = constants.init_fov;
+	*camera = (Camera) {
+		.fov = constants.camera.init.fov,
+		.hori_angle = constants.camera.init.hori,
+		.vert_angle = constants.camera.init.vert,
+		.tilt_angle = constants.camera.init.tilt,
+		.last_time = SDL_GetTicks() / 1000.0f,
+		.pos = {init_pos[0], init_pos[1], init_pos[2]}
+	};
 }
 
 static void update_camera(Camera* const camera, const Event event) {
-	static GLfloat last_time;
-	static byte first_call = 1;
+	const GLfloat curr_time = SDL_GetTicks() / 1000.0f;
+	const GLfloat delta_time = curr_time - camera -> last_time;
+	camera -> last_time = curr_time;
 
-	if (first_call) {
-		last_time = SDL_GetTicks() / 1000.0f;
-		first_call = 0;
-		return;
-	}
+	const GLfloat
+		look_speed = constants.speeds.look * delta_time,
+		move_speed = constants.speeds.move * delta_time,
+		tilt_speed = constants.speeds.tilt * delta_time;
 
-	camera -> aspect_ratio = (GLfloat) event.screen_size[0] / event.screen_size[1];
+	camera -> hori_angle += look_speed * -event.mouse_dx;
+	camera -> vert_angle += look_speed * -event.mouse_dy;
 
-	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time, half_pi = (GLfloat) M_PI_2;
-	camera -> hori_angle += constants.speeds.look * delta_time * -event.mouse_dx;
-	camera -> vert_angle += constants.speeds.look * delta_time * -event.mouse_dy;
-
-	if (camera -> vert_angle > constants.max_vert_angle) camera -> vert_angle = constants.max_vert_angle;
-	else if (camera -> vert_angle < -constants.max_vert_angle) camera -> vert_angle = -constants.max_vert_angle;
+	if (camera -> vert_angle > constants.camera.lims.vert) camera -> vert_angle = constants.camera.lims.vert;
+	else if (camera -> vert_angle < -constants.camera.lims.vert) camera -> vert_angle = -constants.camera.lims.vert;
 
 	const GLfloat
 		cos_vert = cosf(camera -> vert_angle),
-		hori_angle_minus_half_pi = camera -> hori_angle - half_pi,
-		move_speed = delta_time * constants.speeds.move,
-		tilt_speed = delta_time * constants.speeds.tilt;
-
-	vec3 dir = {cos_vert * sinf(camera -> hori_angle), sinf(camera -> vert_angle), cos_vert * cosf(camera -> hori_angle)};
-	memcpy(camera -> dir, dir, sizeof(vec3));
+		hori_angle_minus_half_pi = camera -> hori_angle - HALF_PI;
 
 	camera -> right_xz[0] = sinf(hori_angle_minus_half_pi);
 	camera -> right_xz[1] = cosf(hori_angle_minus_half_pi);
@@ -64,15 +61,21 @@ static void update_camera(Camera* const camera, const Event event) {
 	//////////
 
 	GLfloat tilt = camera -> tilt_angle;
-	if (event.movement_bits & 32) { // Left
-		if ((tilt += tilt_speed) > half_pi) tilt = half_pi - 0.01f;
-	}
-	if (event.movement_bits & 16) { // Right
-		if ((tilt -= tilt_speed) < -half_pi) tilt = -half_pi + 0.01f;
-	}
+
+	if ((event.movement_bits & 32) && ((tilt += tilt_speed) > constants.camera.lims.tilt)) // Left
+		tilt = constants.camera.lims.tilt - 0.01f;
+
+	if ((event.movement_bits & 16) && ((tilt -= tilt_speed) < -constants.camera.lims.tilt)) // Right
+		tilt = -constants.camera.lims.tilt + 0.01f;
+
 	camera -> tilt_angle = tilt;
 
-	vec3 right = {camera -> right_xz[0], 0.0f, camera -> right_xz[1]}, pos;
+	//////////
+
+	vec3 dir = {
+		cos_vert * sinf(camera -> hori_angle), sinf(camera -> vert_angle), cos_vert * cosf(camera -> hori_angle)
+	}, right = {camera -> right_xz[0], 0.0f, camera -> right_xz[1]}, pos;
+
 	memcpy(pos, camera -> pos, sizeof(vec3));
 
 	// Forward, backward, left, right
@@ -96,14 +99,11 @@ static void update_camera(Camera* const camera, const Event event) {
 	mat4 view, projection;
 	glm_lookat(pos, rel_origin, up, view);
 
-	glm_perspective(camera -> fov, camera -> aspect_ratio,
-		constants.clip_dists.near, constants.clip_dists.far, projection);
+	glm_perspective(camera -> fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
+		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 
 	glm_mul(projection, view, camera -> view_projection); // For billboard shader
 	glm_mul(camera -> view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, camera -> model_view_projection); // For sector shader
-
-
-	last_time = SDL_GetTicks() / 1000.0f;
 }
 
 #endif

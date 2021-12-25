@@ -4,9 +4,9 @@
 #include "utils.h"
 
 typedef struct {
+	GLfloat fov, hori_angle, vert_angle, tilt_angle, last_time; // Can fit 6 more GLfloats without padding overflow
 	vec2 right_xz; // X and Z of right (Y is always 0)
-	vec3 pos, dir; // The camera never moves from the origin, but `pos` here is more practical
-	GLfloat fov, hori_angle, vert_angle, tilt_angle, aspect_ratio;
+	vec3 pos;
 	mat4 view_projection, model_view_projection; // Used the least, so last in struct
 } Camera;
 

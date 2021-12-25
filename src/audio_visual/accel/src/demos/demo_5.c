@@ -8,7 +8,7 @@
 void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
 	mat4 view_times_projection, mat4 model_view_projection, const byte set_up_mvp) {
 
-	static GLfloat hori_angle = (GLfloat) M_PI, vert_angle = 0.0f, last_time;
+	static GLfloat hori_angle = PI, vert_angle = 0.0f, last_time;
 
 	static byte first_call = 1;
 	if (first_call) {
@@ -24,14 +24,13 @@ void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
 	hori_angle += constants.speeds.look * delta_time * -mouse_dx;
 	vert_angle += constants.speeds.look * delta_time * -mouse_dy;
 
-	const GLfloat half_pi = (GLfloat) M_PI_2;
-	if (vert_angle > half_pi) vert_angle = half_pi;
-	else if (vert_angle < -half_pi) vert_angle = -half_pi;
+	if (vert_angle > HALF_PI) vert_angle = HALF_PI;
+	else if (vert_angle < -HALF_PI) vert_angle = -HALF_PI;
 
 	const GLfloat cos_vert = cosf(vert_angle);
 	vec3 direction = {cos_vert * sinf(hori_angle), sinf(vert_angle), cos_vert * cosf(hori_angle)};
 
-	const GLfloat hori_angle_minus_half_pi = hori_angle - half_pi, actual_speed = delta_time * constants.speeds.move;
+	const GLfloat hori_angle_minus_half_pi = hori_angle - HALF_PI, actual_speed = delta_time * constants.speeds.move;
 
 	vec3 right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
 
