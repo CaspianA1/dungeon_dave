@@ -11,8 +11,7 @@ typedef struct {
 typedef struct {
 	BatchBufferPair object_buffers;
 	GLuint texture_set, shader;
-	buffer_index_t* gpu_buffer_ptr;
-	// TODO: bb dynamic loading into gpu buffer
+	void* gpu_buffer_ptr;
 } BatchDrawContext; // Used for billboards
 
 typedef struct { // In this, the gpu buffer ptr points to the index buffer

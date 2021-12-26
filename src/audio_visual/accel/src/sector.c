@@ -174,45 +174,9 @@ static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) 
 	return glm_aabb_frustum(aabb_corners, frustum_planes);
 }
 
-static void draw_sectors_in_view_frustum(const IndexedBatchDrawContext* const indexed_draw_context, const Camera* const camera) {
-	/* Each vec4 plane is composed of a vec3 surface normal and
-	the closest distance to the origin in the fourth component */
+static void draw_sectors(const IndexedBatchDrawContext* const indexed_draw_context,
+	const Camera* const camera, const buffer_index_t num_visible_indices) {
 
-	const BatchDrawContext* const draw_context = &indexed_draw_context -> c;
-
-	static vec4 frustum_planes[6];
-	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
-
-	const List sectors = draw_context -> object_buffers.cpu;
-
-	const buffer_index_t* const indices = indexed_draw_context -> index_buffers.cpu.data;
-	buffer_index_t* const ibo_ptr = draw_context -> gpu_buffer_ptr, num_visible_indices = 0;
-
-	for (size_t i = 0; i < sectors.length; i++) {
-		const Sector* sector = ((Sector*) sectors.data) + i;
-
-		buffer_index_t num_indices = 0;
-		const buffer_index_t ibo_start_index = sector -> ibo_range.start;
-
-		while (i < sectors.length && sector_in_view_frustum(*sector, frustum_planes)) {
-			num_indices += sector++ -> ibo_range.length;
-			i++;
-		}
-
-		if (num_indices != 0) {
-			memcpy(ibo_ptr + num_visible_indices, indices + ibo_start_index, num_indices * sizeof(buffer_index_t));
-			num_visible_indices += num_indices;
-		}
-	}
-
-	/* (triangle counts, 12 vs 17):
-	palace: 1466 vs 1130. tpt: 232 vs 150.
-	pyramid: 816 vs 542. maze: 5796 vs 6114.
-	terrain: 150620 vs 86588. */
-	glDrawElements(GL_TRIANGLES, num_visible_indices, BUFFER_INDEX_TYPENAME, NULL);
-}
-
-void draw_sectors(const IndexedBatchDrawContext* const indexed_draw_context, const Camera* const camera) {
 	const BatchDrawContext* const draw_context = &indexed_draw_context -> c;
 
 	const GLuint sector_shader = draw_context -> shader;
@@ -245,10 +209,50 @@ void draw_sectors(const IndexedBatchDrawContext* const indexed_draw_context, con
 	glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_vertex, NULL);
 	glVertexAttribIPointer(1, 1, MESH_COMPONENT_TYPENAME, bytes_per_vertex, (void*) (3 * sizeof(mesh_component_t)));
 
-	draw_sectors_in_view_frustum(indexed_draw_context, camera);
+	glDrawElements(GL_TRIANGLES, num_visible_indices, BUFFER_INDEX_TYPENAME, NULL);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
+}
+
+void draw_visible_sectors(const IndexedBatchDrawContext* const indexed_draw_context, const Camera* const camera) {
+	/* Each vec4 plane is composed of a vec3 surface normal and
+	the closest distance to the origin in the fourth component */
+
+	const BatchDrawContext* const draw_context = &indexed_draw_context -> c;
+	static vec4 frustum_planes[6];
+	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
+
+	const List sectors = draw_context -> object_buffers.cpu;
+
+	const buffer_index_t* const indices = indexed_draw_context -> index_buffers.cpu.data;
+	buffer_index_t* const ibo_ptr = draw_context -> gpu_buffer_ptr, num_visible_indices = 0;
+
+	for (size_t i = 0; i < sectors.length; i++) {
+		const Sector* sector = ((Sector*) sectors.data) + i;
+
+		buffer_index_t num_indices = 0;
+		const buffer_index_t ibo_start_index = sector -> ibo_range.start;
+
+		while (i < sectors.length && sector_in_view_frustum(*sector, frustum_planes)) {
+			num_indices += sector++ -> ibo_range.length;
+			i++;
+		}
+
+		if (num_indices != 0) {
+			memcpy(ibo_ptr + num_visible_indices, indices + ibo_start_index, num_indices * sizeof(buffer_index_t));
+			num_visible_indices += num_indices;
+		}
+	}
+
+	/* (triangle counts, 12 vs 17):
+	palace: 1466 vs 1130. tpt: 232 vs 150.
+	pyramid: 816 vs 542. maze: 5796 vs 6114.
+	terrain: 150620 vs 86588. */
+
+	// If looking out at the distance with no sectors, why call glDrawElements, or do any state switching, at all?
+	if (num_visible_indices != 0) draw_sectors(indexed_draw_context, camera, num_visible_indices);
+
 }
 
 #endif

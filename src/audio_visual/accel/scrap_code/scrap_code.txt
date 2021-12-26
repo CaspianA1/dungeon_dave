@@ -3120,3 +3120,14 @@ static void print_map(const char* const name, const byte* const map, const byte 
 		aabb_corners[1][0], aabb_corners[1][1], aabb_corners[1][2]);
 
 /////
+
+	//////////
+
+	/*
+	const Billboard hot_dog = ((Billboard*) (scene_state -> billboard_draw_context.object_buffers.cpu.data))[0];
+	vec4 frustum_planes[6];
+	glm_frustum_planes((vec4*) camera.view_projection, frustum_planes);
+	DEBUG(billboard_in_view_frustum(hot_dog, frustum_planes), d);
+	*/
+
+/////

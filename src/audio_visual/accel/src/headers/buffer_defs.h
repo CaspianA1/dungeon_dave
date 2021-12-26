@@ -6,8 +6,8 @@ typedef GLuint buffer_index_t;
 
 typedef GLfloat bb_pos_component_t; // bb = billboard
 typedef GLuint bb_texture_id_t; // Max = 4294967295
-/* There is no face_texture_id_t b/c the face texture id is packed into
-an info byte, and there's no type to represent five bits */
+/* There is no type face_texture_id_t b/c the face texture id is
+packed into an info byte, and there's no type to represent five bits */
 
 #define MESH_COMPONENT_TYPENAME GL_UNSIGNED_BYTE
 #define BUFFER_INDEX_TYPENAME GL_UNSIGNED_INT

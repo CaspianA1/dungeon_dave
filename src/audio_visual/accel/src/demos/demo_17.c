@@ -8,9 +8,8 @@
 /*
 - NEXT: new_map back part + a texmap for it
 - NEXT 2: a bounding volume hierarchy, maybe
-- NEXT 3: billboard batching
-- NEXT 4: modifiable billboards (their texture id and position)
-- NEXT 5: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
+- NEXT 3: looping animations for billboards
+- NEXT 4: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
 
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side; or store none at all
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
@@ -18,6 +17,7 @@
 - For terrain, some objects popping out for half seconds
 - Demo 12 pops a bit in the beginning, and demo 17 a bit less
 - Camera var names to yaw, pitch, and roll (maybe)
+- Don't copy indices for sector frustum culling if the average index bytes per sector exceeds the number of face bytes
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
@@ -112,7 +112,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	update_camera(&camera, get_next_event());
 
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
-	draw_sectors(&scene_state -> sector_draw_context, &camera);
+	draw_visible_sectors(&scene_state -> sector_draw_context, &camera);
 	draw_skybox(scene_state -> skybox, &camera);
 }
 
