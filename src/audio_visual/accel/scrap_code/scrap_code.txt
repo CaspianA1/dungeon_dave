@@ -3114,3 +3114,9 @@ static void print_map(const char* const name, const byte* const map, const byte 
 */
 
 /////
+
+	printf("aabb_corners = {{%lf, %lf, %lf}, {%lf, %lf, %lf}}\n",
+		aabb_corners[0][0], aabb_corners[0][1], aabb_corners[0][2],
+		aabb_corners[1][0], aabb_corners[1][1], aabb_corners[1][2]);
+
+/////

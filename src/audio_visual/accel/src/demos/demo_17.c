@@ -2,7 +2,6 @@
 #include "../skybox.c"
 #include "../data/maps.c"
 
-#include "../face.c"
 #include "../sector.c"
 #include "../camera.c"
 
@@ -32,6 +31,7 @@
 
 typedef struct {
 	IndexedBatchDrawContext sector_draw_context;
+	List sector_face_mesh_List;
 	Skybox skybox;
 } SceneState;
 
@@ -46,22 +46,15 @@ StateGL demo_17_init(void) {
 	(byte*) level_one_heightmap, (byte*) level_one_texture_id_map, level_one_width, level_one_height
 	*/
 
-	SceneState scene_state;
-
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
+	SceneState scene_state = {.skybox = init_skybox("../assets/desert.bmp")};
 	List face_mesh_list;
 
 	//////////
-	scene_state.skybox = init_skybox("../assets/desert.bmp");
-
 	// static byte texture_id_map[terrain_height][terrain_width];
-	init_face_mesh_list_and_sector_draw_context_cpu_buffers(&scene_state.sector_draw_context, &face_mesh_list,
+	init_face_mesh_list_and_sector_draw_context(&scene_state.sector_draw_context, &face_mesh_list,
 		(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height);
-
-	init_sector_draw_context_gpu_buffers(&scene_state.sector_draw_context, &face_mesh_list);
-
 	scene_state.sector_draw_context.c.shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
-
 	//////////
 
 	sgl.num_textures = 0;

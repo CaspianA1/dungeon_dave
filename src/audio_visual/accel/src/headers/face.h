@@ -28,10 +28,8 @@ void init_face_mesh_list_and_sector_draw_context(
 
 void init_sector_list_gpu_buffers(IndexedBatchDrawContext* const draw_context, const List* const face_list);
 
-void init_face_mesh_list_and_sector_draw_context_cpu_buffers(
+void init_face_mesh_list_and_sector_draw_context(
 	IndexedBatchDrawContext* const draw_context, List* const face_mesh_list, const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height);
-
-void init_sector_draw_context_gpu_buffers(IndexedBatchDrawContext* const draw_context, const List* const face_mesh_list);
 
 #endif

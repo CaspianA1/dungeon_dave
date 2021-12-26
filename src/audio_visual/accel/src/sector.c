@@ -17,6 +17,7 @@ typedef struct {
 #include "../../../main/statemap.c"
 #include "headers/sector.h"
 #include "headers/texture.h"
+#include "face.c"
 #include "batch_draw_context.c"
 #include "list.c"
 
@@ -109,14 +110,66 @@ List generate_sectors_from_maps(
 
 ////////// This next part concerns the drawing of sectors
 
+void init_face_mesh_list_and_sector_draw_context(
+	IndexedBatchDrawContext* const draw_context, List* const face_mesh_list, const byte* const heightmap,
+	const byte* const texture_id_map, const byte map_width, const byte map_height) {
+
+	List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
+
+	// This guess seems to work pretty well on my maps
+	const size_t index_list_length_guess = sectors.length * 3;
+	// Index list and face mesh list have the same amount of entries (in terms of elements, not bytes)
+	List index_list = init_list(index_list_length_guess, buffer_index_t[indices_per_face]);
+	*face_mesh_list = init_list(index_list_length_guess, mesh_component_t[vars_per_face]);
+
+	for (size_t i = 0; i < sectors.length; i++) {
+		Sector* const sector_ref = ((Sector*) sectors.data) + i;
+		sector_ref -> ibo_range.start = index_list.length * indices_per_face;
+
+		const Sector sector = *sector_ref;
+		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
+		add_face_mesh_to_list(flat_face, sector.visible_heights.max, 0, sector.texture_id, face_mesh_list, &index_list);
+
+		byte biggest_face_height = 0;
+
+		init_vert_faces(sector, face_mesh_list, &index_list,
+			heightmap, map_width, map_height, &biggest_face_height);
+
+		sector_ref -> visible_heights.min = sector.visible_heights.max - biggest_face_height;
+		sector_ref -> ibo_range.length = index_list.length * indices_per_face - sector_ref -> ibo_range.start;
+	}
+
+	////////// This part initializes gpu-side buffers
+
+	draw_context -> c.object_buffers.cpu = sectors;
+	draw_context -> index_buffers.cpu = index_list;
+
+	const size_t num_faces = face_mesh_list -> length;
+
+	const GLsizeiptr
+		total_vertex_bytes = num_faces * vars_per_face * sizeof(mesh_component_t),
+		total_index_bytes = num_faces * sizeof(buffer_index_t[indices_per_face]);
+
+	GLuint vbo_and_ibo[2];
+	glGenBuffers(2, vbo_and_ibo);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_and_ibo[0]);
+	glBufferData(GL_ARRAY_BUFFER, total_vertex_bytes, face_mesh_list -> data, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_and_ibo[1]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_index_bytes, NULL, GL_DYNAMIC_DRAW);
+
+	draw_context -> c.object_buffers.gpu = vbo_and_ibo[0];
+	draw_context -> index_buffers.gpu = vbo_and_ibo[1];
+	draw_context -> c.gpu_buffer_ptr = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+}
+
 static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) {
-	// Bottom left, size
+	// First corner is bottom left (if looking top-down, top left), and second is top right
 	vec3 aabb_corners[2] = {{sector.origin[0], sector.visible_heights.min, sector.origin[1]}};
 
-	glm_vec3_add(
-		aabb_corners[0],
-		(vec3) {sector.size[0], sector.visible_heights.max - sector.visible_heights.min, sector.size[1]},
-		aabb_corners[1]);
+	aabb_corners[1][0] = aabb_corners[0][0] + sector.size[0];
+	aabb_corners[1][1] = aabb_corners[0][1] + sector.visible_heights.max - sector.visible_heights.min;
+	aabb_corners[1][2] = aabb_corners[0][2] + sector.size[1];
 
 	return glm_aabb_frustum(aabb_corners, frustum_planes);
 }
