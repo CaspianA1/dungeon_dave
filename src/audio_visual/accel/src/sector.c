@@ -252,7 +252,6 @@ void draw_visible_sectors(const IndexedBatchDrawContext* const indexed_draw_cont
 
 	// If looking out at the distance with no sectors, why call glDrawElements, or do any state switching, at all?
 	if (num_visible_indices != 0) draw_sectors(indexed_draw_context, camera, num_visible_indices);
-
 }
 
 #endif
