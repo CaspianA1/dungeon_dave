@@ -3,8 +3,9 @@
 
 #include "constants.h"
 #include "buffer_defs.h"
-#include "drawable_set.h"
 #include "list.h"
+#include "camera.h"
+#include "batch_draw_context.h"
 
 typedef struct {
 	const byte texture_id, origin[2];
@@ -13,12 +14,14 @@ typedef struct {
 	struct {buffer_index_t start, length;} ibo_range; // ibo domain that defines sector's faces
 } Sector;
 
-// Excluded: print_sector_list, print_map, form_sector_area
+// Excluded: point_matches_sector_attributes, form_sector_area, sector_in_view_frustum, draw_sectors_in_view_frustum
 
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width);
 
 List generate_sectors_from_maps(
 	const byte* const heightmap, const byte* const texture_id_map,
 	const byte map_width, const byte map_height);
+
+void draw_sectors(const IndexedBatchDrawContext* const draw_context, const Camera* const camera);
 
 #endif

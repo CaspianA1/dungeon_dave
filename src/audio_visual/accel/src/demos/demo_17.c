@@ -1,11 +1,10 @@
 #include "../utils.c"
-#include "../drawable_set.c"
 #include "../skybox.c"
 #include "../data/maps.c"
 
 #include "../face.c"
+#include "../sector.c"
 #include "../camera.c"
-#include "../culling.c"
 
 /*
 - NEXT: new_map back part + a texmap for it
@@ -32,7 +31,7 @@
 */
 
 typedef struct {
-	DrawableSet sector_list;
+	IndexedBatchDrawContext sector_draw_context;
 	Skybox skybox;
 } SceneState;
 
@@ -56,17 +55,17 @@ StateGL demo_17_init(void) {
 	scene_state.skybox = init_skybox("../assets/desert.bmp");
 
 	// static byte texture_id_map[terrain_height][terrain_width];
-	init_face_mesh_and_sector_lists(&scene_state.sector_list, &face_mesh_list,
+	init_face_mesh_list_and_sector_draw_context_cpu_buffers(&scene_state.sector_draw_context, &face_mesh_list,
 		(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height);
 
-	init_sector_list_vbo_and_ibo(&scene_state.sector_list, &face_mesh_list);
+	init_sector_draw_context_gpu_buffers(&scene_state.sector_draw_context, &face_mesh_list);
 
-	scene_state.sector_list.shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+	scene_state.sector_draw_context.c.shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 
 	//////////
 
 	sgl.num_textures = 0;
-	scene_state.sector_list.texture_set = init_texture_set(TexRepeating,
+	scene_state.sector_draw_context.c.texture_set = init_texture_set(TexRepeating,
 		// New:
 		// 1, 0, 128, 128, "../../../../assets/walls/pyramid_bricks_4.bmp"
 
@@ -120,13 +119,13 @@ void demo_17_drawer(const StateGL* const sgl) {
 	update_camera(&camera, get_next_event());
 
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
-	draw_sectors(&scene_state -> sector_list, &camera);
+	draw_sectors(&scene_state -> sector_draw_context, &camera);
 	draw_skybox(scene_state -> skybox, &camera);
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
-	deinit_drawable_set(&scene_state -> sector_list);
+	deinit_indexed_batch_draw_context(&scene_state -> sector_draw_context);
 	deinit_skybox(scene_state -> skybox);
 	free(sgl -> any_data);
 

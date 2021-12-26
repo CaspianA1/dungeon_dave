@@ -1,6 +1,47 @@
 #include "demo_11.c"
 #include "../headers/constants.h"
 
+const char* const demo_13_billboard_vertex_shader =
+	"#version 330 core\n"
+
+	"out vec2 UV;\n"
+
+	"uniform vec2 billboard_size_world_space, right_xz_world_space;\n"
+	"uniform vec3 billboard_center_world_space;\n"
+	"uniform mat4 view_projection;\n"
+
+	"const vec2 vertices_model_space[4] = vec2[4](\n"
+		"vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f),\n"
+		"vec2(-0.5f, 0.5f), vec2(0.5f, 0.5f)\n"
+	");\n"
+
+	"const vec3 up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
+
+	"void main(void) {\n"
+		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
+		"vec2 corner_world_space = vertex_model_space * billboard_size_world_space;\n"
+
+		"vec3 vertex_world_space = billboard_center_world_space +\n"
+			"corner_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
+			"+ corner_world_space.y * up_world_space;\n"
+
+		"gl_Position = view_projection * vec4(vertex_world_space, 1.0f);\n"
+		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
+	"}\n",
+
+*const demo_13_billboard_fragment_shader =
+    "#version 330 core\n"
+
+	"in vec2 UV;\n"
+
+	"out vec4 color;\n"
+
+	"uniform sampler2D texture_sampler;\n"
+
+	"void main(void) {\n"
+		"color = texture(texture_sampler, UV);\n"
+	"}\n";
+
 void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint shader_program) {
 	static GLfloat hori_angle = PI, vert_angle = 0.0f, last_time;
 
@@ -125,7 +166,7 @@ StateGL demo_13_init(void) {
 		"../../../../assets/objects/tomato.bmp", TexNonRepeating,
 		"../../../../assets/walls/saqqara.bmp", TexRepeating);
 
-	sgl.shader_program = init_shader_program(billboard_vertex_shader, billboard_fragment_shader);
+	sgl.shader_program = init_shader_program(demo_13_billboard_vertex_shader, demo_13_billboard_fragment_shader);
 	sector_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 
 	enable_all_culling();

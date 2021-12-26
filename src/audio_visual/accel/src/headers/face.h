@@ -3,6 +3,7 @@
 
 #include "sector.h"
 #include "list.h"
+#include "batch_draw_context.h"
 
 /* NS - north-south, and EW = east-west.
 If a face is NS, its two ends lie on a vertical top-down axis;
@@ -21,10 +22,16 @@ typedef struct {
 
 // Excluded: print_face, get_next_face, init_vert_faces, add_face_mesh_to_list
 
-void init_face_mesh_and_sector_lists(DrawableSet* const sector_list,
-	List* const face_mesh_list, const byte* const heightmap,
+void init_face_mesh_list_and_sector_draw_context(
+	IndexedBatchDrawContext* const draw_context, List* const face_mesh_list, const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height);
 
-void init_sector_list_vbo_and_ibo(DrawableSet* const sector_list, const List* const face_list);
+void init_sector_list_gpu_buffers(IndexedBatchDrawContext* const draw_context, const List* const face_list);
+
+void init_face_mesh_list_and_sector_draw_context_cpu_buffers(
+	IndexedBatchDrawContext* const draw_context, List* const face_mesh_list, const byte* const heightmap,
+	const byte* const texture_id_map, const byte map_width, const byte map_height);
+
+void init_sector_draw_context_gpu_buffers(IndexedBatchDrawContext* const draw_context, const List* const face_mesh_list);
 
 #endif

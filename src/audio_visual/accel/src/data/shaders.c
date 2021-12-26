@@ -120,10 +120,14 @@ const char* const sector_vertex_shader =
 *const billboard_vertex_shader =
 	"#version 330 core\n"
 
+	"layout(location = 0) in uint in_texture_id;\n"
+	"layout(location = 1) in vec2 billboard_size_world_space;\n"
+	"layout(location = 2) in vec3 billboard_center_world_space;\n"
+
+	"out float texture_id;\n"
 	"out vec2 UV;\n"
 
-	"uniform vec2 billboard_size_world_space, right_xz_world_space;\n"
-	"uniform vec3 billboard_center_world_space;\n"
+	"uniform vec2 right_xz_world_space;\n"
 	"uniform mat4 view_projection;\n"
 
 	"const vec2 vertices_model_space[4] = vec2[4](\n"
@@ -131,31 +135,33 @@ const char* const sector_vertex_shader =
 		"vec2(-0.5f, 0.5f), vec2(0.5f, 0.5f)\n"
 	");\n"
 
-	"const vec3 up_world_space = vec3(0.0f, 1.0f, 0.0f);\n"
-
 	"void main(void) {\n"
 		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
 		"vec2 corner_world_space = vertex_model_space * billboard_size_world_space;\n"
 
-		"vec3 vertex_world_space = billboard_center_world_space +\n"
-			"corner_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
-			"+ corner_world_space.y * up_world_space;\n"
+		"vec3 vertex_world_space = billboard_center_world_space\n"
+			"+ corner_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
+			"+ vec3(0.0f, corner_world_space.y, 0.0f);\n"
 
 		"gl_Position = view_projection * vec4(vertex_world_space, 1.0f);\n"
+
+		"texture_id = in_texture_id;\n"
 		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
 	"}\n",
 
 *const billboard_fragment_shader =
     "#version 330 core\n"
 
+	"in float texture_id;\n"
 	"in vec2 UV;\n"
 
 	"out vec4 color;\n"
 
-	"uniform sampler2D texture_sampler;\n"
+	"uniform sampler2DArray texture_sampler;\n"
 
-	"void main(void) {\n"
-		"color = texture(texture_sampler, UV);\n"
+	"void main() {\n"
+		"color = texture(texture_sampler, vec3(UV, texture_id));\n"
+		"if (color.a < 0.28f) discard;\n" // 0.28f empirically tested for best discarding of alpha value
 	"}\n",
 
 *const skybox_vertex_shader =
