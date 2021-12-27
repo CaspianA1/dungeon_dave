@@ -22,6 +22,10 @@ List generate_sectors_from_maps(
 	const byte* const heightmap, const byte* const texture_id_map,
 	const byte map_width, const byte map_height);
 
+void init_sector_draw_context(
+	IndexedBatchDrawContext* const draw_context, const byte* const heightmap,
+	const byte* const texture_id_map, const byte map_width, const byte map_height);
+
 void draw_visible_sectors(const IndexedBatchDrawContext* const indexed_draw_context, const Camera* const camera);
 
 #endif

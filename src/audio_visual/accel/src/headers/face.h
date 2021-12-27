@@ -20,16 +20,12 @@ typedef struct {
 	byte origin[2], size[2];
 } Face;
 
-// Excluded: print_face, get_next_face, init_vert_faces, add_face_mesh_to_list
+// Excluded: print_face, get_next_face. init_vert_faces and add_face_mesh_to_list are only used by sector.c
 
-void init_face_mesh_list_and_sector_draw_context(
-	IndexedBatchDrawContext* const draw_context, List* const face_mesh_list, const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_width, const byte map_height);
+void init_vert_faces(const Sector sector, List* const face_mesh_list, List* const index_list,
+	const byte* const heightmap, const byte map_width, const byte map_height, byte* const biggest_face_height);
 
-void init_sector_list_gpu_buffers(IndexedBatchDrawContext* const draw_context, const List* const face_list);
-
-void init_face_mesh_list_and_sector_draw_context(
-	IndexedBatchDrawContext* const draw_context, List* const face_mesh_list, const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_width, const byte map_height);
+void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
+	const byte side, const byte texture_id, List* const face_mesh_list, List* const index_list);
 
 #endif

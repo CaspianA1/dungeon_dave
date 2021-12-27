@@ -59,7 +59,7 @@ static byte get_next_face(const Sector sector, const byte varying_axis,
 	return 1;
 }
 
-static void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
+void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
 	const byte side, const byte texture_id, List* const face_mesh_list, List* const index_list) {
 
 	/* Face info bits, layout:
@@ -144,7 +144,7 @@ static void add_face_mesh_to_list(const Face face, const byte sector_max_visible
 	push_ptr_to_list(index_list, index_set);
 }
 
-static void init_vert_faces(const Sector sector, List* const face_mesh_list, List* const index_list,
+void init_vert_faces(const Sector sector, List* const face_mesh_list, List* const index_list,
 	const byte* const heightmap, const byte map_width, const byte map_height, byte* const biggest_face_height) {
 
 	const byte dimensions[2] = {map_width, map_height};

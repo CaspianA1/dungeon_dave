@@ -51,11 +51,10 @@ StateGL demo_17_init(void) {
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 	SceneState scene_state = {.skybox = init_skybox("../assets/desert.bmp")};
-	List face_mesh_list;
 
 	//////////
 	// static byte texture_id_map[terrain_height][terrain_width];
-	init_face_mesh_list_and_sector_draw_context(&scene_state.sector_draw_context, &face_mesh_list,
+	init_sector_draw_context(&scene_state.sector_draw_context,
 		(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(
@@ -77,7 +76,6 @@ StateGL demo_17_init(void) {
 		"../../../../assets/spritesheets/trooper.bmp", 33, 1, 33
 	);
 
-	// scene_state.billboard_draw_context.shader = init_shader_program(billboard_vertex_shader, billboard_fragment_shader);
 	//////////
 
 	sgl.num_textures = 0;
@@ -114,7 +112,6 @@ StateGL demo_17_init(void) {
 
 	enable_all_culling();
 	glEnable(GL_MULTISAMPLE);
-	deinit_list(face_mesh_list);
 
 	SceneState* const scene_state_on_heap = malloc(sizeof(SceneState));
 	*scene_state_on_heap = scene_state;
