@@ -149,6 +149,7 @@ static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_
 	}
 }
 
+// Unanimated sprites should go first when passed in variadically
 GLuint init_texture_set(const TextureWrapMode wrap_mode, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h, ...) {
 

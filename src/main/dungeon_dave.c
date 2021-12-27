@@ -116,7 +116,7 @@ int main(void) {
 	Player* const player_ref = &player;
 	Weapon* const weapon_ref = &weapon;
 
-	load_all_defaults(load_pyramid, player_ref, weapon_ref);
+	load_all_defaults(load_palace, player_ref, weapon_ref);
 	if (display_title_screen() == Exit) deinit_all(player_ref, weapon_ref);
 
 	play_long_sound(&current_level.background_sound);

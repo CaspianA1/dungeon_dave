@@ -139,7 +139,8 @@ void init_face_mesh_list_and_sector_draw_context(
 		sector_ref -> ibo_range.length = index_list.length * indices_per_face - sector_ref -> ibo_range.start;
 	}
 
-	////////// This part initializes gpu-side buffers
+	////////// This part initializes the sector shader and gpu-side buffers
+	draw_context -> c.shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
 
 	draw_context -> c.object_buffers.cpu = sectors;
 	draw_context -> index_buffers.cpu = index_list;

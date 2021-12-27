@@ -5,6 +5,8 @@
 #include "../sector.c"
 #include "../camera.c"
 
+#include "../billboard.c"
+
 /*
 - NEXT: new_map back part + a texmap for it
 - NEXT 2: a bounding volume hierarchy, through metasector trees
@@ -18,6 +20,7 @@
 - Demo 12 pops a bit in the beginning, and demo 17 a bit less
 - Camera var names to yaw, pitch, and roll (maybe)
 - Don't copy indices for sector frustum culling if the average index bytes per sector exceeds the number of face bytes
+- Billboard lighting that matches the sector lighting
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
@@ -31,7 +34,7 @@
 
 typedef struct {
 	IndexedBatchDrawContext sector_draw_context;
-	List sector_face_mesh_List;
+	BatchDrawContext billboard_draw_context;
 	Skybox skybox;
 } SceneState;
 
@@ -54,7 +57,27 @@ StateGL demo_17_init(void) {
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_face_mesh_list_and_sector_draw_context(&scene_state.sector_draw_context, &face_mesh_list,
 		(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height);
-	scene_state.sector_draw_context.c.shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+
+	scene_state.billboard_draw_context = init_billboard_draw_context(
+		7,
+		(Billboard) {2, {1.0f, 1.0f}, {4.5f, 0.5f, 6.5f}},
+		(Billboard) {3, {1.0f, 1.0f}, {2.5f, 0.5f, 6.5f}},
+		(Billboard) {4, {1.0f, 1.0f}, {3.0f, 3.5f, 11.5f}},
+		(Billboard) {0, {1.0f, 1.0f}, {8.5f, 0.5f, 25.5f}},
+		(Billboard) {1, {1.0f, 1.0f}, {5.0f, 0.5f, 22.5f}},
+		(Billboard) {0, {1.0f, 1.0f}, {12.5f, 0.5f, 38.5f}},
+		(Billboard) {28, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}} // 40
+	);
+
+	scene_state.billboard_draw_context.texture_set = init_texture_set(
+		TexNonRepeating, 2, 2, 64, 64,
+		"../../../../assets/objects/teleporter.bmp",
+		"../../../../assets/objects/health_kit.bmp",
+		"../../../../assets/spritesheets/bogo.bmp", 2, 3, 6,
+		"../../../../assets/spritesheets/trooper.bmp", 33, 1, 33
+	);
+
+	// scene_state.billboard_draw_context.shader = init_shader_program(billboard_vertex_shader, billboard_fragment_shader);
 	//////////
 
 	sgl.num_textures = 0;
@@ -112,13 +135,16 @@ void demo_17_drawer(const StateGL* const sgl) {
 	update_camera(&camera, get_next_event());
 
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
-	draw_visible_sectors(&scene_state -> sector_draw_context, &camera);
 	draw_skybox(scene_state -> skybox, &camera);
+
+	draw_visible_sectors(&scene_state -> sector_draw_context, &camera);
+	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 	deinit_indexed_batch_draw_context(&scene_state -> sector_draw_context);
+	deinit_batch_draw_context(&scene_state -> billboard_draw_context, 0);
 	deinit_skybox(scene_state -> skybox);
 	free(sgl -> any_data);
 

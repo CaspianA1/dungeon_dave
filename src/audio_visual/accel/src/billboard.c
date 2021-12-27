@@ -57,6 +57,8 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	glVertexAttribPointer(1, 2, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, size));
 	glVertexAttribPointer(2, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, pos));
 
+	use_texture(draw_context -> texture_set, shader, TexSet);
+
 	glEnable(GL_BLEND);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, num_visible_billboards); // Each billboard has 4 corners
 	glDisable(GL_BLEND);

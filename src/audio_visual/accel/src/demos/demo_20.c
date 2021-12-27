@@ -73,9 +73,7 @@ void demo_20_drawer(const StateGL* const sgl) {
 	draw_skybox(scene_state -> skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
 
-	// TODO: find out why this makes the position go diagonally
 	// ((Billboard*) (scene_state -> billboard_draw_context.object_buffers.cpu.data))[1].pos[0] += 0.001f;
-
 	// ((Billboard*) (scene_state -> billboard_draw_context.object_buffers.cpu.data))[1].texture_id = keys[SDL_SCANCODE_C];
 }
 
