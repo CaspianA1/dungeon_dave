@@ -3,15 +3,17 @@
 #include "../data/maps.c"
 
 #include "../sector.c"
+#include "../billboard.c"
 #include "../camera.c"
 
-#include "../billboard.c"
+#include "../physics.c"
 
 /*
 - NEXT: new_map back part + a texmap for it
 - NEXT 2: a bounding volume hierarchy, through metasector trees
 - NEXT 3: looping animations for billboards
 - NEXT 4: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
+- NEXT 5: good movement physics (additive, and time-independent)
 
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side; or store none at all
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
@@ -24,7 +26,6 @@
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
-- Good movement physics (additive, and time-independent)
 - Then, flat weapon (that comes after physics)
 - A dnd-styled font that's monospaced
 - Use more of the cglm functions in `update_camera`, or make my own
