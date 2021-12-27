@@ -4,7 +4,6 @@
 #include "headers/face.h"
 #include "list.c"
 #include "sector.c"
-#include "batch_draw_context.c"
 
 /*
 void print_face(const Face face, const char* const prefix_msg) {
