@@ -45,7 +45,7 @@ typedef enum {
 	LaunchSDL,
 	LaunchGLEW,
 	OpenImageFile,
-	MeshOutOfBounds,
+	MeshOutOfBounds, // TODO: remove
 	TextureIDIsTooLarge,
 	TextureSetIsTooLarge
 } FailureType;

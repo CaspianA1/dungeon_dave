@@ -1,6 +1,8 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
+#include "utils.h"
+
 /* TODO: physics constants:
 flat_a (player x and z acceleration)
 g (gravity downward acceleration)
