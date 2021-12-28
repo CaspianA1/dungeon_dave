@@ -22,6 +22,7 @@
 - Don't copy indices for sector frustum culling if the average index bytes per sector exceeds the number of face bytes
 - Billboard lighting that matches the sector lighting
 - Base darkest distance of attenuated light on the world size
+- A stress test with a 255x255 checkerboard level
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
