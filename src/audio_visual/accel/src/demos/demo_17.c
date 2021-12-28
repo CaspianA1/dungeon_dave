@@ -122,7 +122,6 @@ StateGL demo_17_init(void) {
 
 void demo_17_drawer(const StateGL* const sgl) {
 	static Camera camera;
-	// static PhysicsEntity entity;
 	static PhysicsObject physics_obj;
 	static byte first_call = 1;
 
