@@ -7,9 +7,9 @@
 // TODO: proper setup of physics constants
 
 #define a_xz 0.15f
-#define yv 5.0f
+#define yv 4.5f
 #define xz_v_max 4.0f
-#define g 9.81f // Accel
+#define g 9.81f
 #define speed_decel 0.94f
 
 typedef struct {
