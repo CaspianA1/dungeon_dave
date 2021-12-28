@@ -35,14 +35,20 @@ void init_camera(Camera* const camera, const vec3 init_pos) {
 	};
 }
 
-static void update_camera(Camera* const camera, const Event event) {
+void update_camera_from_physics_entity(Camera* const camera, const PhysicsEntity entity) {
+	(void) camera;
+	(void) entity;
+	// TODO: implement this
+}
+
+void update_camera(Camera* const camera, const Event event) {
 	const GLfloat curr_time = SDL_GetTicks() / 1000.0f;
 	const GLfloat delta_time = curr_time - camera -> last_time;
 	camera -> last_time = curr_time;
 
 	const GLfloat
 		look_speed = constants.speeds.look * delta_time,
-		move_speed = constants.speeds.move * delta_time,
+		// move_speed = constants.speeds.move * delta_time,
 		tilt_speed = constants.speeds.tilt * delta_time;
 
 	camera -> hori_angle += look_speed * -event.mouse_dx;
@@ -79,12 +85,13 @@ static void update_camera(Camera* const camera, const Event event) {
 	memcpy(pos, camera -> pos, sizeof(vec3));
 
 	// Forward, backward, left, right
+	/* TODO: add back once a separate physics-connected camera fn has been made
 	if (event.movement_bits & 1) glm_vec3_muladds(dir, move_speed, pos);
 	if (event.movement_bits & 2) glm_vec3_muladds(dir, -move_speed, pos);
 	if (event.movement_bits & 4) glm_vec3_muladds(right, -move_speed, pos);
 	if (event.movement_bits & 8) glm_vec3_muladds(right, move_speed, pos);
-
 	memcpy(camera -> pos, pos, sizeof(vec3));
+	*/
 
 	if (keys[KEY_PRINT_POSITION])
 		printf("pos = {%lf, %lf, %lf}\n", (double) pos[0], (double) pos[1], (double) pos[2]);

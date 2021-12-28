@@ -15,10 +15,10 @@ typedef struct {
 	int screen_size[2], mouse_dx, mouse_dy; // Delta from last frame
 } Event;
 
-// Excluded: update_camera
-
 Event get_next_event(void);
 void init_camera(Camera* const camera, const vec3 init_pos);
-void update_camera_from_event(Camera* const camera, const Event event);
+void update_camera(Camera* const camera, const Event event);
+
+#include "physics.h" // Put after b/c Event has to be defined
 
 #endif
