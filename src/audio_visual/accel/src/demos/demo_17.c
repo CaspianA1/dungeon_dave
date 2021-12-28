@@ -133,9 +133,10 @@ void demo_17_drawer(const StateGL* const sgl) {
 	update_camera(&camera, get_next_event(), &physics_obj);
 
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
-	draw_skybox(scene_state -> skybox, &camera);
 
 	draw_visible_sectors(&scene_state -> sector_draw_context, &camera);
+	// After sectors b/c most skybox fragments would be unnecessarily drawn otherwise
+	draw_skybox(scene_state -> skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
 }
 
