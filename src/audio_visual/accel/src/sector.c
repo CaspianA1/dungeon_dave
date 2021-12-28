@@ -203,7 +203,7 @@ static void draw_sectors(const IndexedBatchDrawContext* const indexed_draw_conte
 	}
 
 	glUniform1f(ambient_strength_id, 0.4f);
-	glUniform1f(diffuse_strength_id, 0.6f);
+	glUniform1f(diffuse_strength_id, 0.5f);
 	glUniform3fv(light_pos_id, 1, camera -> pos);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
