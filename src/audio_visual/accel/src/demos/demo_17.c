@@ -8,7 +8,7 @@
 
 /*
 - NEXT: new_map back part + a texmap for it
-- NEXT 2: a bounding volume hierarchy, through metasector trees
+- NEXT 2: a bounding volume hierarchy, through metasector trees (alloc through node pool)
 - NEXT 3: looping animations for billboards
 - NEXT 4: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 5: good movement physics (additive, and time-independent)
