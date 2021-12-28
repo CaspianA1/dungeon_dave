@@ -42,7 +42,7 @@ static const struct {
 /*
 Max world size = 255 by 255 by 255 (with top left corner of block as origin).
 So, max look distance in world = sqrt(255 * 255 + 255 * 255 + 255 * 255),
-which equals 441.6729559300637
+which equals 441.6729559300637 (that is the clip distance)
 */
 
 #endif

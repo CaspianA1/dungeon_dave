@@ -6,8 +6,6 @@
 #include "../billboard.c"
 #include "../camera.c"
 
-#include "../physics.c"
-
 /*
 - NEXT: new_map back part + a texmap for it
 - NEXT 2: a bounding volume hierarchy, through metasector trees
@@ -23,6 +21,7 @@
 - Camera var names to yaw, pitch, and roll (maybe)
 - Don't copy indices for sector frustum culling if the average index bytes per sector exceeds the number of face bytes
 - Billboard lighting that matches the sector lighting
+- Base darkest distance of attenuated light on the world size
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
@@ -123,23 +122,16 @@ StateGL demo_17_init(void) {
 
 void demo_17_drawer(const StateGL* const sgl) {
 	static Camera camera;
-	static PhysicsEntity entity;
+	// static PhysicsEntity entity;
+	static PhysicsObject physics_obj;
 	static byte first_call = 1;
 
 	if (first_call) { // start new map: 1.5f, 0.5f, 1.5f
 		init_camera(&camera, (vec3) {5.0f, 0.5f, 5.0f});
-		memcpy(entity.pos, camera.pos, sizeof(entity.pos));
 		first_call = 0;
 	}
 
-	//////////
-	const Event e = get_next_event();
-	entity = update_physics_entity(entity, e, (byte*) palace_heightmap, palace_width, palace_height);
-	entity.view_angle = camera.hori_angle;
-	memcpy(camera.pos, entity.pos, sizeof(camera.pos));
-	camera.pos[1] += 0.5f;
-	update_camera(&camera, e);
-	//////////
+	update_camera(&camera, get_next_event(), &physics_obj);
 
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 	draw_skybox(scene_state -> skybox, &camera);
