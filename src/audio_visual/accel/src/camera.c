@@ -61,7 +61,7 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 static void update_pos_via_physics(const Event* const event,
 	PhysicsObject* const physics_obj, vec3 pos, vec3 dir, const GLfloat delta_time) {
 
-	/* - Manage height properly
+	/* - Looking up and down slows the player down
 	- Strafing
 	- Clipping before hitting walls head-on
 	- Tilt when turning (make a fn rotate_camera_as_needed for that)
@@ -77,10 +77,10 @@ static void update_pos_via_physics(const Event* const event,
 
 	if (moving_forward && ((speed_xz += delta_speed) > max_speed_xz)) speed_xz = max_speed_xz;
 	if (moving_backward && ((speed_xz -= delta_speed) < -max_speed_xz)) speed_xz = -max_speed_xz;
-
 	if (!moving_forward && !moving_backward) speed_xz *= speed_decel;
 
 	////////// X and Z collision detection + setting new positions
+	pos[1] -= constants.camera.eye_height; // Set y position to be at the bottom of the camera
 
 	const GLfloat new_x = pos[0] + speed_xz * dir[0];
 	byte height;
@@ -111,6 +111,8 @@ static void update_pos_via_physics(const Event* const event,
 		speed_y = 0.0f;
 		pos[1] = height;
 	}
+
+	pos[1] += constants.camera.eye_height;
 
 	physics_obj -> speed_xz = speed_xz;
 	physics_obj -> speed_y = speed_y;

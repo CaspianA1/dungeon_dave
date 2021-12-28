@@ -4,7 +4,7 @@
 #include "utils.h"
 
 // TODO: set these constants up properly
-#define a_xz 0.15f
+#define a_xz 0.2f
 #define yv 4.5f
 #define xz_v_max 4.0f
 #define g 9.81f

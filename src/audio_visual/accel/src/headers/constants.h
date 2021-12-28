@@ -13,6 +13,7 @@ static const struct {
 	const byte fps;
 
 	const struct { // All angles are in radians
+		const GLfloat eye_height;
 		const struct {const GLfloat fov, hori, vert, tilt;} init;
 		const struct {const GLfloat vert, tilt;} lims;
 		const struct {const GLfloat near, far;} clip_dists;
@@ -30,6 +31,7 @@ static const struct {
 	.fps = 60,
 
 	.camera = {
+		.eye_height = 0.5f,
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
 		.lims = {.vert = HALF_PI, .tilt = HALF_PI},
 		.clip_dists = {0.1f, 441.6729559300637f}
