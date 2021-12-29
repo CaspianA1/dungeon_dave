@@ -133,6 +133,30 @@ static void update_pos_via_physics(const Event* const event,
 	physics_obj -> speeds[2] = speed_strafe;
 }
 
+static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, const GLfloat delta_time) {
+	GLfloat bob_delta = 0.0f;
+	if (speeds[1] == 0.0f) {
+		const GLfloat
+			speed_forward_back = fabsf(speeds[0]),
+			speed_strafe = fabsf(speeds[2]);
+
+		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
+		const GLfloat speed_xz_percent = (largest_speed_xz * constants.fps) / xz_v_max;
+
+		// Found through messing around with desmos. With this, y will never go above the eye height.
+		bob_delta = speed_xz_percent
+			* sinf(3.75f * PI * (camera -> bob_input - 0.1333333333f))
+			* 0.1f + 0.1f * speed_xz_percent;
+
+		// pos[1] += bob_delta;
+		*pos_y += bob_delta;
+		camera -> bob_input += delta_time;
+	}
+	else camera -> bob_input = 0.0f;
+
+	camera -> last_bob_delta = bob_delta;
+}
+
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
 	const GLfloat curr_time = SDL_GetTicks() / 1000.0f;
 	const GLfloat delta_time = curr_time - camera -> last_time;
@@ -161,29 +185,8 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		if (event.movement_bits & 8) glm_vec3_muladds(right, move_speed, pos);
 	}
 	else {
-		update_pos_via_physics(&event, physics_obj, (vec2) {sin_hori, cos_hori},
-			pos, camera -> last_bob_delta);
-
-		GLfloat bob_delta = 0.0f;
-		if (physics_obj -> speeds[1] == 0.0f) {
-			const GLfloat
-				speed_forward_back = fabsf(physics_obj -> speeds[0]),
-				speed_strafe = fabsf(physics_obj -> speeds[2]);
-
-			const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
-			const GLfloat speed_xz_percent = (largest_speed_xz * constants.fps) / xz_v_max;
-
-			// Found through messing around with desmos. With this, y will never go above the eye height.
-			bob_delta = speed_xz_percent
-				* sinf(3.75f * PI * (camera -> bob_input - 0.1333333333f))
-				* 0.1f + 0.1f * speed_xz_percent;
-
-			pos[1] += bob_delta;
-			camera -> bob_input += delta_time;
-		}
-		else camera -> bob_input = 0.0f;
-
-		camera -> last_bob_delta = bob_delta;
+		update_pos_via_physics(&event, physics_obj, (vec2) {sin_hori, cos_hori}, pos, camera -> last_bob_delta);
+		update_bob(camera, pos + 1, physics_obj -> speeds, delta_time);
 	}
 
 	memcpy(camera -> pos, pos, sizeof(vec3));

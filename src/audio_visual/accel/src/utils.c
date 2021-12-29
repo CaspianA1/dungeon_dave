@@ -258,4 +258,8 @@ void draw_triangles(const GLsizei num_triangles) {
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 }
 
+byte* map_point(byte* const map, const byte x, const byte y, const byte map_width) {
+	return map + (y * map_width + x);
+}
+
 #endif

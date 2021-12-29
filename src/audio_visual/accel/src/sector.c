@@ -24,10 +24,6 @@ typedef struct {
 #include "batch_draw_context.c"
 #include "list.c"
 
-byte* map_point(byte* const map, const byte x, const byte y, const byte map_width) {
-	return map + (y * map_width + x);
-}
-
 // Attributes here = height and texture id
 static byte point_matches_sector_attributes(const Sector* const sector_ref,
 	const byte* const heightmap, const byte* const texture_id_map,
