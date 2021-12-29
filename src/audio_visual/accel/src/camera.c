@@ -148,7 +148,6 @@ static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, 
 			* sinf(3.75f * PI * (camera -> bob_input - 0.1333333333f))
 			* 0.1f + 0.1f * speed_xz_percent;
 
-		// pos[1] += bob_delta;
 		*pos_y += bob_delta;
 		camera -> bob_input += delta_time;
 	}
