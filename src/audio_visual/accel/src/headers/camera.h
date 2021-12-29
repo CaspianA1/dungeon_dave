@@ -4,7 +4,8 @@
 #include "utils.h"
 
 // TODO: set these constants up properly
-#define a_xz 0.2f
+#define a_forward_back 0.4f
+#define a_strafe 0.3f
 #define yv 4.5f
 #define xz_v_max 4.0f
 #define g 9.81f
@@ -28,7 +29,9 @@ typedef struct {
 } Event;
 
 typedef struct {
-	GLfloat speed_xz, speed_y;
+	byte* const heightmap;
+	const byte map_size[2];
+	vec3 speeds;
 } PhysicsObject;
 
 // Excluded: update_camera_angles, update_pos_via_physics

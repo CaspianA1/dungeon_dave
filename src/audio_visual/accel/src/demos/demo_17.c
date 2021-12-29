@@ -123,7 +123,7 @@ StateGL demo_17_init(void) {
 
 void demo_17_drawer(const StateGL* const sgl) {
 	static Camera camera;
-	static PhysicsObject physics_obj;
+	static PhysicsObject physics_obj = {.heightmap = (byte*) palace_heightmap, .map_size = {palace_width, palace_height}};
 	static byte first_call = 1;
 
 	if (first_call) { // start new map: 1.5f, 0.5f, 1.5f
