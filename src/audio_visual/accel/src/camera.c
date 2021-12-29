@@ -115,13 +115,15 @@ static void update_pos_via_physics(const Event* const event,
 
 	////////// Y collision detection + setting new positions
 
-	if (speed_jump == 0.0f && keys[constants.movement_keys.jump]) speed_jump = yv;
-	else speed_jump -= g * ms_per_tick;
+	if (speed_jump == 0.0f && keys[constants.movement_keys.jump]) {
+		speed_jump = yv;
+	}
+	speed_jump -= g * ms_per_tick;
 
 	const GLfloat new_y = foot_height + speed_jump * ms_per_tick; // Since g works w acceleration
 	const byte height = *map_point(heightmap, pos[0], pos[2], map_width);
 
-	if (new_y > height) foot_height = new_y;
+	if (new_y > height) foot_height = new_y + last_bob_delta;
 	else {
 		speed_jump = 0.0f;
 		foot_height = height;
@@ -145,7 +147,7 @@ static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, 
 
 		// Found through messing around with desmos. With this, y will never go above the eye height.
 		bob_delta = speed_xz_percent
-			* sinf(3.75f * PI * (camera -> bob_input - 0.1333333333f))
+			* sinf(3.75f * PI * (camera -> bob_input - 0.1333333333333333f))
 			* 0.1f + 0.1f * speed_xz_percent;
 
 		*pos_y += bob_delta;

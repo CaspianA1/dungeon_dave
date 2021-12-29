@@ -35,7 +35,7 @@ typedef struct {
 	vec3 speeds;
 } PhysicsObject;
 
-// Excluded: update_camera_angles, update_pos_via_physics
+// Excluded: update_camera_angles, update_pos_via_physics, update_bob
 
 Event get_next_event(void);
 void init_camera(Camera* const camera, const vec3 init_pos);
