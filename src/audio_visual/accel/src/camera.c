@@ -61,11 +61,11 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 static void update_pos_via_physics(const Event* const event, PhysicsObject* const physics_obj,
 	const GLfloat delta_time, const vec2 dir_xz, vec3 pos) {
 
-	/* - Looking up and down slows the player down
+	/* - Crouch
+	- Accelerate
 	- Clipping before hitting walls head-on
 	- Tilt when turning
-	- Make speed when pushing against wall depend on surface normal
-	- Integrate physics system with camera system */
+	- Make speed when pushing against wall depend on surface normal */
 
 	byte* const heightmap = physics_obj -> heightmap;
 

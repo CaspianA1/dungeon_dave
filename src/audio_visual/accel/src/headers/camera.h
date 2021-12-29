@@ -4,12 +4,12 @@
 #include "utils.h"
 
 // TODO: set these constants up properly
-#define a_forward_back 0.4f
-#define a_strafe 0.3f
-#define yv 4.5f
+#define a_forward_back 0.38f
+#define a_strafe 0.4f
+#define yv 5.5f
 #define xz_v_max 4.0f
-#define g 9.81f
-#define speed_decel 0.94f
+#define g 13.0f
+#define speed_decel 0.87f
 
 typedef struct {
 	struct {
