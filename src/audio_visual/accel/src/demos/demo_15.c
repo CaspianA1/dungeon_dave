@@ -34,7 +34,7 @@ void demo_15_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	update_camera(&camera, get_next_event());
+	update_camera(&camera, get_next_event(), NULL);
 	draw_skybox(*(Skybox*) sgl -> any_data, &camera);
 }
 

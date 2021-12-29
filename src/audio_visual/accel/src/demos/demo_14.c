@@ -37,7 +37,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 	glm_vec3_add(center, bb_center_offset, new_center);
 	glUniform3f(billboard_center_id, new_center[0], new_center[1], new_center[2]);
 
-	update_camera(&camera, get_next_event());
+	update_camera(&camera, get_next_event(), NULL);
 	glClearColor(0.1f, 0.9f, 0.9f, 0.0f);
 
 	//////////

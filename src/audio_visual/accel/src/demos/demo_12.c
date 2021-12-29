@@ -32,10 +32,6 @@ typedef struct {
 	byte size[2];
 } OldSector;
 
-byte* map_point(byte* const map, const byte x, const byte y, const byte map_width) {
-	return map + (y * map_width + x);
-}
-
 OldSectorList init_sector_list(void) {
 	return (OldSectorList) {
 		.list = init_list(20, OldSector),
@@ -216,7 +212,7 @@ void demo_12_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	update_camera(&camera, get_next_event());
+	update_camera(&camera, get_next_event(), NULL);
 
 	glUniform3f(camera_pos_id, camera.pos[0], camera.pos[1], camera.pos[2]);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);

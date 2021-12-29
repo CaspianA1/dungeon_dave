@@ -69,7 +69,7 @@ void demo_20_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	update_camera(&camera, get_next_event());
+	update_camera(&camera, get_next_event(), NULL);
 	draw_skybox(scene_state -> skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
 

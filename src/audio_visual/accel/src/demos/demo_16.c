@@ -41,7 +41,7 @@ void demo_16_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	update_camera(&camera, get_next_event());
+	update_camera(&camera, get_next_event(), NULL);
 
 	glUseProgram(sgl -> shader_program);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
