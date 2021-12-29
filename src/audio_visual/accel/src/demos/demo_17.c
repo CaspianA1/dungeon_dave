@@ -23,6 +23,7 @@
 - Billboard lighting that matches the sector lighting
 - Base darkest distance of attenuated light on the world size
 - A stress test with a 255x255 checkerboard level
+- Weird framerate dips in demo 17
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen

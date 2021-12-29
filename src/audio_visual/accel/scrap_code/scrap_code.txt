@@ -3131,3 +3131,73 @@ static void print_map(const char* const name, const byte* const map, const byte 
 	*/
 
 /////
+
+		/*
+		const GLfloat max_delay = 1000.0f / constants.fps;
+		DEBUG(max_delay, lf);
+		DEBUG(1.0f / (1000.0f / constants.fps), lf);
+		// DEBUG(delta_time, lf);
+		const GLfloat p = 1.0f / (1000.0f / constants.fps);
+		*/
+
+		/*
+		GLfloat a = log2f(xz_speed_heuristic * 2.0f + 1.0f);
+		// GLfloat a = xz_speed_heuristic / (xz_v_max * 0.0666666);
+		// if (a > 1.0f) a = 1.0f;
+		pos[1] += sinf(curr_time * THREE_PI) * 0.15f * a;
+		*/
+
+/////
+
+		/*
+		// const GLfloat avg_pos_xz = (pos[0] + pos[1]) * 0.5f;
+		GLfloat avg_speed_xz = (fabsf(physics_obj -> speeds[0]) + fabsf(physics_obj -> speeds[2])) * 0.5f;
+		DEBUG((double) sinf(avg_speed_xz), lf);
+		pos[1] += sinf(avg_speed_xz);
+		*/
+
+		/*
+		GLfloat avg_speed_xz = (fabsf(physics_obj -> speeds[0]) + fabsf(physics_obj -> speeds[2])) * 0.5f;
+		// if (avg_speed_xz > 1.5f) avg_speed_xz = 2.0f;
+		const GLfloat avg_speed_xz_per_sec = avg_speed_xz / delta_time;
+		DEBUG((double) avg_speed_xz_per_sec, lf);
+		*/
+
+		// const GLfloat a = fabsf(physics_obj -> speeds[0] / delta_time);
+
+		/*
+		const GLfloat max_bob_height = 0.2f;
+		static GLfloat x = 0.0f;
+		const GLfloat dy = max_bob_height * 0.5f * sinf(PI * (x - 0.5f)) + max_bob_height;
+		pos[1] += dy;
+
+		const GLfloat forward_backward_speed = fabsf(physics_obj -> speeds[0]), strafe_speed = fabsf(physics_obj -> speeds[2]);
+		const GLfloat greatest_speed = (forward_backward_speed > strafe_speed) ? forward_backward_speed : strafe_speed;
+		x += greatest_speed;
+		*/
+
+/////
+
+		/*
+		const GLfloat avg_speed = (fabsf(physics_obj -> speeds[0]) + fabsf(physics_obj -> speeds[2])) * 0.5f;
+		DEBUG(avg_speed, lf);
+		const GLfloat avg_speed_per_second = avg_speed / delta_time;
+		DEBUG(avg_speed_per_second, lf);
+		*/
+
+		/*
+		const GLfloat max_bob_height = 0.2f;
+		static GLfloat x = 0.0f;
+		const GLfloat dy = max_bob_height * 0.5f * sinf(PI * (x - 0.5f)) + max_bob_height;
+		pos[1] += dy;
+
+		const GLfloat forward_backward_speed = fabsf(physics_obj -> speeds[0]), strafe_speed = fabsf(physics_obj -> speeds[2]);
+		const GLfloat greatest_speed = (forward_backward_speed > strafe_speed) ? forward_backward_speed : strafe_speed;
+		x += greatest_speed;
+		*/
+
+/////
+
+	// bob_delta = speed_xz_percent * sinf(3.75f * PI * camera -> bob_bounce_input) * 0.1f + 0.1f * speed_xz_percent;
+
+/////

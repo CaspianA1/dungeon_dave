@@ -16,7 +16,8 @@ typedef struct {
 		GLfloat fov, hori, vert, tilt;
 	} angles;
 
-	GLfloat last_time;
+	// bob = bouncing up and down of camera when moving
+	GLfloat last_time, bob_input, last_bob_delta;
 
 	vec2 right_xz; // X and Z of right (Y is always 0)
 	vec3 pos;
