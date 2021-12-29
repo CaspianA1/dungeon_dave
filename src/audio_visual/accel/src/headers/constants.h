@@ -24,7 +24,7 @@ static const struct {
 	} speeds;
 
 	const struct {
-		const SDL_Scancode forward, backward, left, right, tilt_left, tilt_right;
+		const SDL_Scancode forward, backward, left, right, tilt_left, tilt_right, jump;
 	} movement_keys;
 
 } constants = {
@@ -38,7 +38,10 @@ static const struct {
 	},
 
 	.speeds = {5.0f, 0.08f, 1.0f},
-	.movement_keys = {SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_T, SDL_SCANCODE_Y}
+	.movement_keys = {
+		SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A,
+		SDL_SCANCODE_D, SDL_SCANCODE_T, SDL_SCANCODE_Y, SDL_SCANCODE_SPACE
+	}
 };
 
 /*

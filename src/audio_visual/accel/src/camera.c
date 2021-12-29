@@ -58,13 +58,12 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 	camera -> angles.tilt = tilt;
 }
 
-static void update_pos_via_physics(const Event* const event,
-	PhysicsObject* const physics_obj, vec3 pos, vec3 dir, const GLfloat delta_time) {
+static void update_pos_via_physics(const Event* const event, PhysicsObject* const physics_obj,
+	const GLfloat delta_time, const vec2 dir_xz, vec3 pos) {
 
-	/* - Looking up and down slows the player down
-	- Strafing
+	/* - Strafing
 	- Clipping before hitting walls head-on
-	- Tilt when turning (make a fn rotate_camera_as_needed for that)
+	- Tilt when turning
 	- Make speed when pushing against wall depend on surface normal
 	- Integrate physics system with camera system */
 
@@ -82,29 +81,25 @@ static void update_pos_via_physics(const Event* const event,
 	////////// X and Z collision detection + setting new positions
 	pos[1] -= constants.camera.eye_height; // Set y position to be at the bottom of the camera
 
-	const GLfloat new_x = pos[0] + speed_xz * dir[0];
-	byte height;
+	const GLfloat new_x = pos[0] + speed_xz * dir_xz[0], new_z = pos[2] + speed_xz * dir_xz[1];
 
 	if (new_x >= 0.0f && new_x <= map_width - 1.0f) {
-		height = *map_point(heightmap, new_x, pos[2], map_width);
-		if (height <= pos[1]) pos[0] = new_x;
+		if (*map_point(heightmap, new_x, pos[2], map_width) <= pos[1]) pos[0] = new_x;
 		// else entity.speed_xz /= 2.0f;
 	}
 
-	const GLfloat new_z = pos[2] + speed_xz * dir[2];
 	if (new_z >= 0.0f && new_z <= map_height - 1.0f) {
-		height = *map_point(heightmap, pos[0], new_z, map_width);
-		if (height <= pos[1]) pos[2] = new_z;
+		if (*map_point(heightmap, pos[0], new_z, map_width) <= pos[1]) pos[2] = new_z;
 		// else entity.speed_xz /= 2.0f;
 	}
 
 	////////// Y collision detection + setting new positions
 
-	if (speed_y == 0.0f && keys[SDL_SCANCODE_SPACE]) speed_y = yv;
+	if (speed_y == 0.0f && keys[constants.movement_keys.jump]) speed_y = yv;
 	else speed_y -= g * delta_time;
 
 	const GLfloat new_y = pos[1] + speed_y * delta_time; // Since g works w acceleration
-	height = *map_point(heightmap, pos[0], pos[2], map_width);
+	const byte height = *map_point(heightmap, pos[0], pos[2], map_width);
 
 	if (new_y > height) pos[1] = new_y;
 	else {
@@ -112,8 +107,7 @@ static void update_pos_via_physics(const Event* const event,
 		pos[1] = height;
 	}
 
-	pos[1] += constants.camera.eye_height;
-
+	pos[1] += constants.camera.eye_height; // Reset y position to what it was before
 	physics_obj -> speed_xz = speed_xz;
 	physics_obj -> speed_y = speed_y;
 }
@@ -146,7 +140,7 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		if (event.movement_bits & 4) glm_vec3_muladds(right, -move_speed, pos);
 		if (event.movement_bits & 8) glm_vec3_muladds(right, move_speed, pos);
 	}
-	else update_pos_via_physics(&event, physics_obj, pos, dir, delta_time);
+	else update_pos_via_physics(&event, physics_obj, delta_time, (vec2) {sin_hori, cos_hori}, pos);
 
 	memcpy(camera -> pos, pos, sizeof(vec3));
 
