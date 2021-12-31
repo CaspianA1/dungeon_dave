@@ -31,7 +31,7 @@ Screen init_screen(const char* const title) {
 	Screen screen = {
 		.window = SDL_CreateWindow(title,
 			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL)
+			WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN)
 	};
 
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);

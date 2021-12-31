@@ -3,7 +3,6 @@
 
 #include "headers/camera.h"
 #include "headers/constants.h"
-#include "data/maps.c" // TODO: remove
 
 Event get_next_event(void) {
 	static GLint viewport_size[4];
@@ -27,7 +26,7 @@ Event get_next_event(void) {
 
 void init_camera(Camera* const camera, const vec3 init_pos) {
 	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
-	camera -> last_time = SDL_GetTicks() / 1000.0f;
+	camera -> last_time = 0.0f;
 	camera -> bob_input = 0.0f;
 	memcpy(camera -> pos, init_pos, sizeof(vec3));
 }
@@ -58,10 +57,10 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 }
 
 static void update_pos_via_physics(const Event* const event,
-	PhysicsObject* const physics_obj, const vec2 dir_xz, vec3 pos, const GLfloat last_bob_delta) {
+	PhysicsObject* const physics_obj, const vec2 dir_xz, vec3 pos,
+	const GLfloat last_bob_delta, const GLfloat delta_time) {
 
 	// Delta time not used for this since movement will become stutter-y otherwise
-	const GLfloat ms_per_tick = 1.0f / constants.fps; // TODO: change?
 
 	/* - Crouch
 	- Accelerate
@@ -82,9 +81,9 @@ static void update_pos_via_physics(const Event* const event,
 		speed_strafe = physics_obj -> speeds[2];
 
 	const GLfloat
-		delta_speed_forward_back = a_forward_back * ms_per_tick,
-		delta_speed_strafe = a_strafe * ms_per_tick,
-		max_speed_xz = xz_v_max * ms_per_tick;
+		delta_speed_forward_back = a_forward_back * delta_time,
+		delta_speed_strafe = a_strafe * delta_time,
+		max_speed_xz = xz_v_max * delta_time;
 
 	// TODO: genericize this part
 	if (moving_forward && ((speed_forward_back += delta_speed_forward_back) > max_speed_xz)) speed_forward_back = max_speed_xz;
@@ -118,9 +117,9 @@ static void update_pos_via_physics(const Event* const event,
 	if (speed_jump == 0.0f && keys[constants.movement_keys.jump]) {
 		speed_jump = yv;
 	}
-	speed_jump -= g * ms_per_tick;
+	speed_jump -= g * delta_time;
 
-	const GLfloat new_y = foot_height + speed_jump * ms_per_tick; // Since g works w acceleration
+	const GLfloat new_y = foot_height + speed_jump * delta_time; // Since g works w acceleration
 	const byte height = *map_point(heightmap, pos[0], pos[2], map_width);
 
 	if (new_y > height) foot_height = new_y + last_bob_delta;
@@ -143,7 +142,7 @@ static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, 
 			speed_strafe = fabsf(speeds[2]);
 
 		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
-		const GLfloat speed_xz_percent = (largest_speed_xz * constants.fps) / xz_v_max;
+		const GLfloat speed_xz_percent = (largest_speed_xz / delta_time) / xz_v_max;
 
 		// Found through messing around with desmos. With this, y will never go above the eye height.
 		bob_delta = speed_xz_percent
@@ -186,7 +185,7 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		if (event.movement_bits & 8) glm_vec3_muladds(right, move_speed, pos);
 	}
 	else {
-		update_pos_via_physics(&event, physics_obj, (vec2) {sin_hori, cos_hori}, pos, camera -> last_bob_delta);
+		update_pos_via_physics(&event, physics_obj, (vec2) {sin_hori, cos_hori}, pos, camera -> last_bob_delta, delta_time);
 		update_bob(camera, pos + 1, physics_obj -> speeds, delta_time);
 	}
 

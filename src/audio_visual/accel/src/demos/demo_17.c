@@ -23,7 +23,7 @@
 - Billboard lighting that matches the sector lighting
 - Base darkest distance of attenuated light on the world size
 - A stress test with a 255x255 checkerboard level
-- Weird framerate dips in demo 17
+- Weird framerate dips in demo 17 (fix by doing gpu timing)
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
@@ -52,7 +52,7 @@ StateGL demo_17_init(void) {
 	*/
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
-	SceneState scene_state = {.skybox = init_skybox("../assets/desert.bmp")};
+	SceneState scene_state = {.skybox = init_skybox("../assets/mountain_2.bmp")};
 
 	//////////
 	// static byte texture_id_map[terrain_height][terrain_width];
