@@ -9,7 +9,7 @@
 #define OPENGL_COLOR_CHANNEL_TYPE GL_UNSIGNED_BYTE
 
 #define OPENGL_TEX_MAG_FILTER GL_LINEAR
-#define OPENGL_TEX_MIN_FILTER GL_LINEAR_MIPMAP_LINEAR
+#define OPENGL_TEX_MIN_FILTER GL_NEAREST_MIPMAP_LINEAR // At a distance, linear/nearest doesn't make a difference
 // Mip level should not change per skybox, so no trilinear needed
 #define OPENGL_SKYBOX_TEX_MIN_FILTER GL_LINEAR_MIPMAP_NEAREST
 #define ENABLE_ANISOTROPIC_FILTERING
