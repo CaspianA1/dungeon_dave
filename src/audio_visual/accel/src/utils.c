@@ -110,6 +110,8 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 	const StateGL sgl = init();
 	keys = SDL_GetKeyboardState(NULL);
 
+	const Uint64 performance_freq = SDL_GetPerformanceFrequency();
+
 	while (running) {
 		const Uint64 before = SDL_GetPerformanceCounter();
 
@@ -125,9 +127,7 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 
 		SDL_GL_SwapWindow(screen -> window);
 
-		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before)
-			/ SDL_GetPerformanceFrequency() * 1000.0f;
-
+		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) / performance_freq * 1000.0f;
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
 		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps);
 	}
