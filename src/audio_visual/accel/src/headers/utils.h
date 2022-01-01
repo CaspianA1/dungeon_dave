@@ -86,7 +86,6 @@ void bind_vbos_to_vao(const GLuint* const vbos, const GLsizei num_vbos, ...);
 GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader);
 
 void enable_all_culling(void);
-void draw_triangles(const GLsizei num_triangles);
 
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width);
 

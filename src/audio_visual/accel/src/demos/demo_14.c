@@ -48,7 +48,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 	use_texture(sgl -> textures[1], sector_shader, TexPlain);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	bind_sector_mesh_to_vao();
-	draw_triangles(triangles_per_mesh);
+	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
 	unbind_sector_mesh_from_vao();
 
 	//////////

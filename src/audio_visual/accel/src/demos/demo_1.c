@@ -45,7 +45,7 @@ StateGL demo_1_init(void) {
 
 void demo_1_drawer(const StateGL* const sgl) {
 	(void) sgl;
-	draw_triangles(1);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 #ifdef DEMO_1

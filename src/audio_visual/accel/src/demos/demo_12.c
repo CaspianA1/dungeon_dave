@@ -221,7 +221,7 @@ void demo_12_drawer(const StateGL* const sgl) {
 	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);
 
 	const OldSectorList* const sector_list = sgl -> any_data;
-	draw_triangles(sector_list -> num_vertices / 3);
+	glDrawArrays(GL_TRIANGLES, 0, sector_list -> num_vertices);
 }
 
 void demo_12_deinit(const StateGL* const sgl) {

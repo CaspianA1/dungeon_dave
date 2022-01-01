@@ -194,7 +194,8 @@ StateGL demo_6_init(void) {
 void demo_6_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	draw_triangles(8);
+	enum {num_triangles = 8};
+	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 }
 
 #ifdef DEMO_6

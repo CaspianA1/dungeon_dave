@@ -54,7 +54,7 @@ void demo_16_drawer(const StateGL* const sgl) {
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);
 
-	draw_triangles(triangles_per_mesh);
+	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 

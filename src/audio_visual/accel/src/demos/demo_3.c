@@ -180,7 +180,8 @@ StateGL demo_3_init(void) {
 void demo_3_drawer(const StateGL* const sgl) {
 	(void) sgl;
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	draw_triangles(12);
+	enum {num_triangles = 12};
+	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 }
 
 #ifdef DEMO_3

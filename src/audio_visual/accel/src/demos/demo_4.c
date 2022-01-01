@@ -103,7 +103,7 @@ StateGL demo_4_init(void) {
 
 void demo_4_core_drawer(const int num_triangles) {
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
-	draw_triangles(num_triangles);
+	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 }
 
 void demo_4_drawer(const StateGL* const sgl) {

@@ -152,7 +152,9 @@ void demo_10_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	enum {num_meshes = 1};
-	draw_triangles(num_meshes * planes_per_mesh * 2); // 2 = 2 triangles per plane
+
+	const GLsizei num_triangles = num_meshes * planes_per_mesh * 2; // 2 = 2 triangles per plane
+	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 }
 
 #ifdef DEMO_10
