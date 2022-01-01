@@ -19,9 +19,8 @@ static const struct {
 		const struct {const GLfloat near, far;} clip_dists;
 	} camera;
 
-	const struct {
-		const GLfloat move, look, tilt;
-	} speeds;
+	const struct {const GLfloat forward_back, strafe, xz_decel, g;} accel;
+	const struct {const GLfloat y_jump, xz_max, look, tilt;} speeds;
 
 	const struct {
 		const SDL_Scancode forward, backward, left, right, tilt_left, tilt_right, jump;
@@ -37,7 +36,8 @@ static const struct {
 		.clip_dists = {0.1f, 441.6729559300637f}
 	},
 
-	.speeds = {5.0f, 0.08f, 1.0f},
+	.accel = {.forward_back = 0.38f, .strafe = 0.4f, .xz_decel = 0.87f, .g = 13.0f},
+	.speeds = {.y_jump = 5.5f, .xz_max = 4.0f, .look = 0.08f, .tilt = 1.0f},
 
 	.movement_keys = {
 		SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A,
@@ -45,10 +45,8 @@ static const struct {
 	}
 };
 
-/*
-Max world size = 255 by 255 by 255 (with top left corner of block as origin).
+/* Max world size = 255 by 255 by 255 (with top left corner of block as origin).
 So, max look distance in world = sqrt(255 * 255 + 255 * 255 + 255 * 255),
-which equals 441.6729559300637 (that is the clip distance)
-*/
+which equals 441.6729559300637 (that is the clip distance) */
 
 #endif

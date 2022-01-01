@@ -81,18 +81,18 @@ static void update_pos_via_physics(const Event* const event,
 		speed_strafe = physics_obj -> speeds[2];
 
 	const GLfloat
-		delta_speed_forward_back = a_forward_back * delta_time,
-		delta_speed_strafe = a_strafe * delta_time,
-		max_speed_xz = xz_v_max * delta_time;
+		delta_speed_forward_back = constants.accel.forward_back * delta_time,
+		delta_speed_strafe = constants.accel.strafe * delta_time,
+		max_speed_xz = constants.speeds.xz_max * delta_time;
 
 	// TODO: genericize this part
 	if (moving_forward && ((speed_forward_back += delta_speed_forward_back) > max_speed_xz)) speed_forward_back = max_speed_xz;
 	if (moving_backward && ((speed_forward_back -= delta_speed_forward_back) < -max_speed_xz)) speed_forward_back = -max_speed_xz;
-	if (!moving_forward && !moving_backward) speed_forward_back *= speed_decel;
+	if (!moving_forward && !moving_backward) speed_forward_back *= constants.accel.xz_decel;
 
 	if (moving_left && ((speed_strafe += delta_speed_strafe) > max_speed_xz)) speed_strafe = max_speed_xz;
 	if (moving_right && ((speed_strafe -= delta_speed_strafe) < -max_speed_xz)) speed_strafe = -max_speed_xz;
-	if (!moving_left && !moving_right) speed_strafe *= speed_decel;
+	if (!moving_left && !moving_right) speed_strafe *= constants.accel.xz_decel;
 
 	////////// X and Z collision detection + setting new positions
 
@@ -114,10 +114,8 @@ static void update_pos_via_physics(const Event* const event,
 
 	////////// Y collision detection + setting new positions
 
-	if (speed_jump == 0.0f && keys[constants.movement_keys.jump]) {
-		speed_jump = yv;
-	}
-	speed_jump -= g * delta_time;
+	if (speed_jump == 0.0f && keys[constants.movement_keys.jump]) speed_jump = constants.speeds.y_jump;
+	speed_jump -= constants.accel.g * delta_time;
 
 	const GLfloat new_y = foot_height + speed_jump * delta_time; // Since g works w acceleration
 	const byte height = *map_point(heightmap, pos[0], pos[2], map_width);
@@ -136,13 +134,14 @@ static void update_pos_via_physics(const Event* const event,
 
 static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, const GLfloat delta_time) {
 	GLfloat bob_delta = 0.0f;
+
 	if (speeds[1] == 0.0f) {
 		const GLfloat
 			speed_forward_back = fabsf(speeds[0]),
 			speed_strafe = fabsf(speeds[2]);
 
 		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
-		const GLfloat speed_xz_percent = (largest_speed_xz / delta_time) / xz_v_max;
+		const GLfloat speed_xz_percent = (largest_speed_xz / delta_time) / constants.speeds.xz_max;
 
 		// Found through messing around with desmos. With this, y will never go above the eye height.
 		bob_delta = speed_xz_percent
@@ -178,11 +177,12 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 	memcpy(pos, camera -> pos, sizeof(vec3));
 
 	if (physics_obj == NULL) { // Forward, backward, left, right
-		const GLfloat move_speed = constants.speeds.move * delta_time;
-		if (event.movement_bits & 1) glm_vec3_muladds(dir, move_speed, pos);
-		if (event.movement_bits & 2) glm_vec3_muladds(dir, -move_speed, pos);
-		if (event.movement_bits & 4) glm_vec3_muladds(right, -move_speed, pos);
-		if (event.movement_bits & 8) glm_vec3_muladds(right, move_speed, pos);
+		const GLfloat speed = constants.speeds.xz_max * delta_time;
+
+		if (event.movement_bits & 1) glm_vec3_muladds(dir, speed, pos);
+		if (event.movement_bits & 2) glm_vec3_muladds(dir, -speed, pos);
+		if (event.movement_bits & 4) glm_vec3_muladds(right, -speed, pos);
+		if (event.movement_bits & 8) glm_vec3_muladds(right, speed, pos);
 	}
 	else {
 		update_pos_via_physics(&event, physics_obj, (vec2) {sin_hori, cos_hori}, pos, camera -> last_bob_delta, delta_time);
