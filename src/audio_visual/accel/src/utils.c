@@ -8,8 +8,6 @@
 Screen init_screen(const char* const title) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) fail("launch SDL", LaunchSDL);
 
-	SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1", SDL_HINT_OVERRIDE);
-
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, OPENGL_MAJOR_VERSION);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, OPENGL_MINOR_VERSION);
@@ -35,7 +33,9 @@ Screen init_screen(const char* const title) {
 	};
 
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);
+	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
 
+	SDL_GL_SetSwapInterval(0); // Disabling vsync
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_WarpMouseInWindow(screen.window, WINDOW_W >> 1, WINDOW_H >> 1);
 
@@ -104,14 +104,14 @@ static void resize_window_if_needed(SDL_Window* const window) {
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
 	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
 
-	// const int16_t max_delay = 1000.0f / constants.fps;
+	const GLfloat max_delay = 1000.0f / constants.fps;
 	byte running = 1;
 	SDL_Event event;
 	const StateGL sgl = init();
 	keys = SDL_GetKeyboardState(NULL);
 
 	while (running) {
-		// const Uint32 before = SDL_GetTicks();
+		const Uint64 before = SDL_GetPerformanceCounter();
 
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) running = 0;
@@ -125,9 +125,11 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 
 		SDL_GL_SwapWindow(screen -> window);
 
-		/* const Uint32 ms_elapsed = SDL_GetTicks() - before;
-		const int16_t wait_for_exact_fps = max_delay - ms_elapsed;
-		if (wait_for_exact_fps > 0) SDL_Delay(wait_for_exact_fps); */
+		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before)
+			/ SDL_GetPerformanceFrequency() * 1000.0f;
+
+		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
+		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps);
 	}
 
 	deinit(&sgl);
@@ -253,12 +255,6 @@ void enable_all_culling(void) {
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 }
-
-/*
-void draw_triangles(const GLsizei num_triangles) {
-	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
-}
-*/
 
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width) {
 	return map + (y * map_width + x);

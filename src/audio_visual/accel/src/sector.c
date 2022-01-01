@@ -88,7 +88,7 @@ List generate_sectors_from_maps(
 				height = *map_point((byte*) heightmap, x, y, map_width),
 				texture_id = *map_point((byte*) texture_id_map, x, y, map_width);
 
-			if (texture_id >= MAX_NUM_TEXTURES) {
+			if (texture_id >= MAX_NUM_SECTOR_TEXTURES) {
 				fprintf(stderr, "Sector creation failure at pos {%d, %d}; texture ID = %d.\n", x, y, texture_id);
 				fail("create a sector because the texture ID is too large", TextureIDIsTooLarge);
 			}
