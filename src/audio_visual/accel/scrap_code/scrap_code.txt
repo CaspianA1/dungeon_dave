@@ -3201,3 +3201,20 @@ static void print_map(const char* const name, const byte* const map, const byte 
 	// bob_delta = speed_xz_percent * sinf(3.75f * PI * camera -> bob_bounce_input) * 0.1f + 0.1f * speed_xz_percent;
 
 /////
+
+	/*
+	puts("{");
+	for (int y = 0; y < terrain_height; y++) {
+		printf("\t{");
+		for (int x = 0; x < terrain_width; x++) {
+			const int val = (x & 1) ^ (y & 1);
+			printf("%d", val);
+			if (x == terrain_width - 1) puts("},");
+			else printf(", ");
+			*map_point((byte*) texture_id_map, x, y, terrain_width) = val;
+		}
+	}
+	puts("}");
+	*/
+
+/////

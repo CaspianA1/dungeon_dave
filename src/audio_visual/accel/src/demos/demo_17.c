@@ -11,7 +11,7 @@
 - NEXT 2: a bounding volume hierarchy, through metasector trees (alloc through node pool)
 - NEXT 3: looping animations for billboards
 - NEXT 4: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
-- NEXT 5: Fix movement physics (one example: at FPS 10, can't jump over a block)
+- NEXT 5: Fix movement physics (one example: at FPS 10, can't jump over a block) (also, both bob and movement are stuttery - framerate spikes)
 
 - Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side; or store none at all
 - A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
@@ -49,6 +49,7 @@ StateGL demo_17_init(void) {
 	(byte*) terrain_heightmap, (byte*) texture_id_map, terrain_width, terrain_height
 	(byte*) tiny_heightmap, (byte*) tiny_heightmap, tiny_width, tiny_height
 	(byte*) level_one_heightmap, (byte*) level_one_texture_id_map, level_one_width, level_one_height
+	(byte*) checker_heightmap, (byte*) texture_id_map, checker_width, checker_height
 	*/
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
@@ -82,7 +83,7 @@ StateGL demo_17_init(void) {
 
 	sgl.num_textures = 0;
 	scene_state.sector_draw_context.c.texture_set = init_texture_set(TexRepeating,
-		// New:
+		// New + Checker:
 		// 1, 0, 128, 128, "../../../../assets/walls/pyramid_bricks_4.bmp"
 
 		// Palace:

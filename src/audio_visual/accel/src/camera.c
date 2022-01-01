@@ -149,7 +149,7 @@ static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, 
 			* 0.1f + 0.1f * speed_xz_percent;
 
 		*pos_y += bob_delta;
-		camera -> bob_input += delta_time;
+		camera -> bob_input += delta_time; // Comment this out to disable bobbing
 	}
 	else camera -> bob_input = 0.0f;
 
