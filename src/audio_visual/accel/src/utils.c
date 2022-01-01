@@ -129,7 +129,7 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 
 		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) / performance_freq * 1000.0f;
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
-		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps);
+		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps - 0.5f); // SDL_Delay tends to be late, so 0.5f accounts for that
 	}
 
 	deinit(&sgl);
