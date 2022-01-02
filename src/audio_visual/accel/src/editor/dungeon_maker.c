@@ -8,14 +8,15 @@
 - Press a number key to change the current tex
 
 Plan:
-- An info bar
-- Read in map files
-- Show height from shading - darker = higher; and a max height as an input too
-- An 'undo previous action' feature (undoes to the action done before the mouse was clicked down and then released)
 
+- A sample-map button
+- Read in map files
+- An 'undo previous action' feature (undoes to the action done before the mouse was clicked down and then released)
 - Later on, line and rectangle functions (or maybe just a line function)
 - Sometimes, clicking for too long freezes my computer
 
+- An info bar - done
+- Show height from shading - darker = higher; and a max height as an input too - done
 - Drag and click to draw to a map - done
 - Right click while dragging to erase - done
 - Press <esc> to toggle texture editing mode - done
@@ -103,42 +104,48 @@ void render_eds_map(const EditorState* const eds) {
 		ceil_src_blocks_across = ceilf(scr_blocks_across),
 		ceil_src_blocks_down = ceilf(scr_blocks_down);
 
+	byte highest_point = 0;
+	for (uint16_t i = 0; i < map_width * map_height; i++) {
+		const byte height = eds -> heightmap[i];
+		if (height > highest_point) highest_point = height;
+	}
+
+	const byte height_shade_range = BIGGEST_HEIGHT_SHADE - SMALLEST_HEIGHT_SHADE;
+
 	for (byte map_y = 0; map_y < map_height; map_y++) {
 		for (byte map_x = 0; map_x < map_width; map_x++) {
-			const byte texture_id = *map_point(eds, 0, map_x, map_y);
-			SDL_Texture* const texture = eds -> textures[texture_id];
+			SDL_Texture* const texture = eds -> textures[*map_point(eds, 0, map_x, map_y)];
 
 			const SDL_Rect block_pos = {
 				map_x * scr_blocks_across, map_y * scr_blocks_down,
 				ceil_src_blocks_across, ceil_src_blocks_down
 			};
 
-			const byte highlight_texture =
-				mouse_x >= block_pos.x && mouse_x < block_pos.x + block_pos.w
-				&& mouse_y >= block_pos.y && mouse_y < block_pos.y + block_pos.h;
-			
-			if (highlight_texture) SDL_SetTextureColorMod(texture, SELECTED_TILE_COLOR_MOD);
+			const float height_ratio = (float) *map_point(eds, 1, map_x, map_y) / highest_point;
+			byte height_shade = height_ratio * height_shade_range + SMALLEST_HEIGHT_SHADE;
+
+			height_shade >>= (mouse_x >= block_pos.x && mouse_x < block_pos.x + block_pos.w
+				&& mouse_y >= block_pos.y && mouse_y < block_pos.y + block_pos.h); // Selected block shaded more
+
+			SDL_SetTextureColorMod(texture, height_shade, height_shade, height_shade);
 			SDL_RenderCopy(eds -> renderer, texture, NULL, &block_pos);
-			if (highlight_texture) SDL_SetTextureColorMod(texture, 255, 255, 255);
 		}
 	}
 }
 
 void editor_loop(EditorState* const eds) {
 	const int16_t max_delay = 1000 / EDITOR_FPS;
-	byte editing = 1;
 
 	SDL_Renderer* const renderer = eds -> renderer;
 
-	while (editing) {
+	while (1) {
 		const Uint32 before = SDL_GetTicks();
 		SDL_Event event;
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_QUIT:
-					editing = 0;
-					break;
+					return;
 				case SDL_MOUSEBUTTONDOWN:
 					eds -> mouse_state = (event.button.button == KEY_CLICK_TILE)
 						? LeftClick : RightClick;

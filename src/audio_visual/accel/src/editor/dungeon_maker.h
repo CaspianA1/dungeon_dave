@@ -7,9 +7,10 @@
 #define EDITOR_W 1200
 #define EDITOR_H 700
 #define EDITOR_MAP_SECTION_H 620
-
 #define EDITOR_FPS 60
-#define SELECTED_TILE_COLOR_MOD 127, 127, 127
+
+#define SMALLEST_HEIGHT_SHADE 100
+#define BIGGEST_HEIGHT_SHADE 255
 
 #define FONT_PATH "../../../../assets/dnd.ttf"
 // #define FONT_PATH "monodnd.ttf"
