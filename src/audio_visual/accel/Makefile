@@ -19,7 +19,7 @@ all:
 	cd bin && ./accel_demo
 
 editor:
-	$(CC) $(CFLAGS) $(OPTIMIZE) $(NON_GL_LDFLAGS) -lSDL2_ttf -o bin/editor src/editor/editor.c
+	$(CC) $(CFLAGS) $(DEBUG) $(NON_GL_LDFLAGS) -lSDL2_ttf -o bin/editor src/editor/editor.c
 	./bin/editor
 
 # takes a named argument demo_id

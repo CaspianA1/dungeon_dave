@@ -26,7 +26,7 @@ typedef struct {
 	SDL_Texture* text_texture;
 } InfoBar;
 
-char* get_info_bar_string(const EditorState* const eds, const char* const map_name) {
+static char* get_info_bar_string(const EditorState* const eds, const char* const map_name) {
 	const char *edit_state, *edit_mode;
 	byte edit_mode_val;
 	const byte map_x = eds -> tile_pos[0], map_y = eds -> tile_pos[1];
@@ -78,7 +78,7 @@ void deinit_info_bar(const InfoBar* const info_bar) {
 	TTF_CloseFont(info_bar -> font);
 }
 
-void update_info_bar_text(const EditorState* const eds, InfoBar* const info_bar, const char* const map_name) {
+static void update_info_bar_text(const EditorState* const eds, InfoBar* const info_bar, const char* const map_name) {
 	char* const text = get_info_bar_string(eds, map_name);
 
 	SDL_Surface* const text_surface = TTF_RenderText_Solid(info_bar -> font, text, (SDL_Color) {255, 0, 0, 0});

@@ -3224,3 +3224,72 @@ static void print_map(const char* const name, const byte* const map, const byte 
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 
 /////
+
+
+
+	/*
+	char curr_char = 1;
+
+	do {
+		curr_char = *file_contents;
+
+		switch (curr_char) {
+			case COMMENT_START:
+				puts("Start of comment");
+				while (*file_contents != '\0' && *file_contents != '\n') file_contents++;
+				puts("Now at end of line");
+				break;
+			case SECTION_TAG_START:
+				puts("Start of section");
+				break;
+		}
+
+		file_contents++;
+	} while (curr_char != '\0');
+	*/
+
+	/*
+	char curr_char = *file_contents;
+
+	while (curr_char != '\0') { // While not reached a null terminator
+		// const char curr_char = *file_contents;
+		printf("curr_char = '%c'\n", curr_char);
+		switch (curr_char) {
+			case '\n': break;
+
+			case COMMENT_START:
+				puts("Start of comment");
+				while (*file_contents != '\0' && *file_contents != '\n') file_contents++;
+				puts("Now at end of line");
+				break;
+			case SECTION_TAG_START:
+				puts("Start of section");
+				break;
+		}
+
+		// curr_char = *++file_contents;
+		file_contents++;
+		curr_char = *file_contents;
+	}
+	*/
+
+/////
+
+	// if (num_bytes == 0l) FAIL(OpenFile, "attemped to read file with the path of '%s', but it was empty.", filename);
+
+/////
+
+	/*
+	for (long rel_char_index = *char_index + 1; rel_char_index < file_contents.num_bytes; rel_char_index++) {
+		// const char curr_char = file_contents.data[rel_char_index];
+		// DEBUG(curr_char, c);
+
+		for (byte i = 0; i < num_section_tag_types; i++) {
+			const SectionTag tag = section_tags[i];
+			const size_t tag_length = strlen(tag.name);
+			if (strncmp(tag.name, ))
+		}
+	}
+	*/
+
+/////

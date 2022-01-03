@@ -34,7 +34,8 @@ typedef enum {
 	LaunchSDL,
 	OpenFile,
 	CreateTexture,
-	CreateTextSurface
+	CreateTextSurface,
+	ParseLevelFile
 } FailureType;
 
 typedef enum {
