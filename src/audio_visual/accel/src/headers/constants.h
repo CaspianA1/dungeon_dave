@@ -1,8 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include <SDL2/SDL_scancode.h>
-#include <GL/glew.h> // For GLFloat
+#include "utils.h" // For byte, GLfloat, and scancodes
 
 /* These are defined because M_PI and M_PI_2 are not standard C. They are macros
 and not in the `constants` struct b/c other values in that struct depend on them. */
