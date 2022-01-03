@@ -38,6 +38,7 @@ typedef struct {
 	IndexedBatchDrawContext sector_draw_context;
 	BatchDrawContext billboard_draw_context;
 	Skybox skybox;
+	byte* heightmap, map_size[2];
 } SceneState;
 
 StateGL demo_17_init(void) {
@@ -53,12 +54,13 @@ StateGL demo_17_init(void) {
 	*/
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
-	SceneState scene_state = {.skybox = init_skybox("../assets/mountain_2.bmp")};
+	SceneState scene_state = {.skybox = init_skybox("../assets/wadi_upscaled.bmp"),
+		.heightmap = (byte*) palace_heightmap, .map_size = {palace_width, palace_height}};
 
 	//////////
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context,
-		(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height);
+		(byte*) scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(
 		7,
@@ -124,21 +126,23 @@ StateGL demo_17_init(void) {
 }
 
 void demo_17_drawer(const StateGL* const sgl) {
+	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
+
 	static Camera camera;
-	static PhysicsObject physics_obj = {.heightmap = (byte*) palace_heightmap, .map_size = {palace_width, palace_height}};
+	static PhysicsObject physics_obj;
 	static byte first_call = 1;
 
 	if (first_call) { // start new map: 1.5f, 0.5f, 1.5f
 		init_camera(&camera, (vec3) {5.0f, 0.5f, 5.0f});
+		physics_obj.heightmap = scene_state -> heightmap;
+		physics_obj.map_size[0] = scene_state -> map_size[0];
+		physics_obj.map_size[1] = scene_state -> map_size[1];
 		first_call = 0;
 	}
 
 	update_camera(&camera, get_next_event(), &physics_obj);
-
-	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
-
 	draw_visible_sectors(&scene_state -> sector_draw_context, &camera);
-	// After sectors b/c most skybox fragments would be unnecessarily drawn otherwise
+	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 	draw_skybox(scene_state -> skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
 }

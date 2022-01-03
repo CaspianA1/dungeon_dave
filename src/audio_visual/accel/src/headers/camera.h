@@ -22,8 +22,7 @@ typedef struct {
 } Event;
 
 typedef struct {
-	byte* const heightmap;
-	const byte map_size[2];
+	byte* heightmap, map_size[2];
 	vec3 speeds;
 } PhysicsObject;
 
