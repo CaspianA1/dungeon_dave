@@ -88,7 +88,7 @@ static void update_pos_via_physics(const Event* const event,
 	// TODO: genericize this part
 	if (moving_forward && ((speed_forward_back += delta_speed_forward_back) > max_speed_xz)) speed_forward_back = max_speed_xz;
 	if (moving_backward && ((speed_forward_back -= delta_speed_forward_back) < -max_speed_xz)) speed_forward_back = -max_speed_xz;
-	if (!moving_forward && !moving_backward) speed_forward_back *= constants.accel.xz_decel;
+	if (!moving_forward && !moving_backward) speed_forward_back *= constants.accel.xz_decel; // TODO: make delta-ized
 
 	if (moving_left && ((speed_strafe += delta_speed_strafe) > max_speed_xz)) speed_strafe = max_speed_xz;
 	if (moving_right && ((speed_strafe -= delta_speed_strafe) < -max_speed_xz)) speed_strafe = -max_speed_xz;
