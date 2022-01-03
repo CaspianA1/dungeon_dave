@@ -1,12 +1,12 @@
-#ifndef DUNGEON_MAKER_H
-#define DUNGEON_MAKER_H
+#ifndef EDITOR_H
+#define EDITOR_H
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#define EDITOR_W 1200
-#define EDITOR_H 700
-#define EDITOR_MAP_SECTION_H 620
+#define EDITOR_WIDTH 1200
+#define EDITOR_HEIGHT 700
+#define EDITOR_MAP_SECTION_HEIGHT 620
 #define EDITOR_FPS 60
 
 #define SMALLEST_HEIGHT_SHADE 100
@@ -50,6 +50,8 @@ typedef struct {
 		// These indicate the height and texture id placed while editing
 		editing_texture_id, editing_height,
 		*heightmap, *texture_id_map;
+	
+	const char* map_name;
 
 	MouseState mouse_state;
 	int mouse_pos[2];

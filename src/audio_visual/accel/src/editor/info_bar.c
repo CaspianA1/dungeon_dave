@@ -1,4 +1,4 @@
-#include "dungeon_maker.h"
+#include "editor.h"
 
 /*
 - Some background texture
@@ -63,44 +63,41 @@ char* get_info_bar_string(const EditorState* const eds, const char* const map_na
 }
 
 void init_info_bar(InfoBar* const info_bar) {
-	const int info_bar_height = EDITOR_H - EDITOR_MAP_SECTION_H;
-	info_bar -> area = (SDL_Rect) {0, EDITOR_MAP_SECTION_H, EDITOR_W, info_bar_height};
+	info_bar -> text_texture = NULL;
+
+	const int info_bar_height = EDITOR_HEIGHT - EDITOR_MAP_SECTION_HEIGHT;
+	info_bar -> area = (SDL_Rect) {0, EDITOR_MAP_SECTION_HEIGHT, EDITOR_WIDTH, info_bar_height};
 
 	info_bar -> font = TTF_OpenFont(FONT_PATH, info_bar_height);
 	if (info_bar -> font == NULL)
 		FAIL(OpenFile, "Could not open the UI font file: \"%s\".", TTF_GetError());
 }
 
-void update_info_bar_text(const EditorState* const eds, InfoBar* const info_bar) {
-	char* const text = get_info_bar_string(eds, "fleckenstein");
+void deinit_info_bar(const InfoBar* const info_bar) {
+	SDL_DestroyTexture(info_bar -> text_texture);
+	TTF_CloseFont(info_bar -> font);
+}
+
+void update_info_bar_text(const EditorState* const eds, InfoBar* const info_bar, const char* const map_name) {
+	char* const text = get_info_bar_string(eds, map_name);
 
 	SDL_Surface* const text_surface = TTF_RenderText_Solid(info_bar -> font, text, (SDL_Color) {255, 0, 0, 0});
 	if (text_surface == NULL)
 		FAIL(CreateTextSurface, "Could not create a text surface: \"%s\"\n", TTF_GetError());
-	
+
 	SDL_Texture* text_texture = info_bar -> text_texture;
 	if (text_texture != NULL) SDL_DestroyTexture(text_texture); // Destroying the last texture
-	
+
 	text_texture = SDL_CreateTextureFromSurface(eds -> renderer, text_surface);
 	if (text_texture == NULL)
 		FAIL(CreateTexture, "Could not create a text texture: \"%s\"", SDL_GetError());
-	
-	info_bar -> text_texture = text_texture;
-	
-	SDL_FreeSurface(text_surface);
 
+	info_bar -> text_texture = text_texture;
+	SDL_FreeSurface(text_surface);
 	free(text);
 }
 
-void render_info_bar(const EditorState* const eds) {
-	static InfoBar info_bar;
-	static byte first_call = 1;
-
-	if (first_call) {
-		init_info_bar(&info_bar);
-		first_call = 0;
-	}
-
-	update_info_bar_text(eds, &info_bar);
-	SDL_RenderCopy(eds -> renderer, info_bar.text_texture, NULL, &info_bar.area);
+void render_info_bar(InfoBar* const info_bar, const EditorState* const eds) {
+	update_info_bar_text(eds, info_bar, eds -> map_name);
+	SDL_RenderCopy(eds -> renderer, info_bar -> text_texture, NULL, &info_bar -> area);
 }

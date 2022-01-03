@@ -1,4 +1,4 @@
-#include "dungeon_maker.h"
+#include "editor.h"
 #include "info_bar.c"
 #include "../data/maps.c"
 
@@ -81,7 +81,7 @@ void edit_eds_map(EditorState* const eds) {
 	//////////
 
 	// Make click based on if mouse still down, not just down in one instance
-	if (eds -> mouse_state != NoClick && eds -> mouse_pos[1] < EDITOR_MAP_SECTION_H) {
+	if (eds -> mouse_state != NoClick && eds -> mouse_pos[1] < EDITOR_MAP_SECTION_HEIGHT) {
 		byte output_val;
 
 		if (eds -> mouse_state == RightClick) output_val = 0;
@@ -97,8 +97,8 @@ void render_eds_map(const EditorState* const eds) {
 	const int mouse_x = eds -> mouse_pos[0], mouse_y = eds -> mouse_pos[1];
 
 	const float
-		scr_blocks_across = (float) EDITOR_W / map_width,
-		scr_blocks_down = (float) EDITOR_MAP_SECTION_H / map_height;
+		scr_blocks_across = (float) EDITOR_WIDTH / map_width,
+		scr_blocks_down = (float) EDITOR_MAP_SECTION_HEIGHT / map_height;
 
 	const int
 		ceil_src_blocks_across = ceilf(scr_blocks_across),
@@ -137,6 +137,8 @@ void editor_loop(EditorState* const eds) {
 	const int16_t max_delay = 1000 / EDITOR_FPS;
 
 	SDL_Renderer* const renderer = eds -> renderer;
+	InfoBar info_bar;
+	init_info_bar(&info_bar);
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();
@@ -145,6 +147,7 @@ void editor_loop(EditorState* const eds) {
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_QUIT:
+					deinit_info_bar(&info_bar);
 					return;
 				case SDL_MOUSEBUTTONDOWN:
 					eds -> mouse_state = (event.button.button == KEY_CLICK_TILE)
@@ -160,14 +163,14 @@ void editor_loop(EditorState* const eds) {
 		}
 
 		SDL_GetMouseState(eds -> mouse_pos, eds -> mouse_pos + 1);
-		eds -> tile_pos[0] = (float) eds -> mouse_pos[0] / EDITOR_W * eds -> map_size[0];
-		eds -> tile_pos[1] = (float) eds -> mouse_pos[1] / EDITOR_MAP_SECTION_H * eds -> map_size[1];
+		eds -> tile_pos[0] = (float) eds -> mouse_pos[0] / EDITOR_WIDTH * eds -> map_size[0];
+		eds -> tile_pos[1] = (float) eds -> mouse_pos[1] / EDITOR_MAP_SECTION_HEIGHT * eds -> map_size[1];
 		if (eds -> tile_pos[1] >= eds -> map_size[1]) eds -> tile_pos[1] = eds -> map_size[1] - 1;
 
 		edit_eds_map(eds);
 		SDL_RenderClear(renderer);
 		render_eds_map(eds);
-		render_info_bar(eds);
+		render_info_bar(&info_bar, eds);
 		SDL_RenderPresent(renderer);
 
 		const Uint32 ms_elapsed = SDL_GetTicks() - before;
@@ -177,7 +180,7 @@ void editor_loop(EditorState* const eds) {
 }
 
 void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
-	// Hardcoded for now
+	// Hardcoded for now; TODO: change
 
 	enum {
 		num_textures = 11, map_width = palace_width, map_height = palace_height
@@ -219,6 +222,8 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 	eds -> texture_id_map = malloc(map_bytes);
 	memcpy(eds -> texture_id_map, texture_id_map, map_bytes);
 
+	eds -> map_name = "Palace";
+
 	eds -> textures = malloc(num_textures * sizeof(SDL_Texture*));
 	eds -> renderer = renderer;
 
@@ -255,7 +260,7 @@ int main(void) {
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 
-	if (SDL_CreateWindowAndRenderer(EDITOR_W, EDITOR_H, 0, &window, &renderer) == -1)
+	if (SDL_CreateWindowAndRenderer(EDITOR_WIDTH, EDITOR_HEIGHT, 0, &window, &renderer) == -1)
 		FAIL(LaunchSDL, "Window or renderer creation failure: \"%s\".", SDL_GetError());
 
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);	

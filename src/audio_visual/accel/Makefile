@@ -19,8 +19,8 @@ all:
 	cd bin && ./accel_demo
 
 editor:
-	$(CC) $(CFLAGS) $(OPTIMIZE) $(NON_GL_LDFLAGS) -lSDL2_ttf -o bin/dungeon_maker src/editor/dungeon_maker.c
-	./bin/dungeon_maker
+	$(CC) $(CFLAGS) $(OPTIMIZE) $(NON_GL_LDFLAGS) -lSDL2_ttf -o bin/editor src/editor/editor.c
+	./bin/editor
 
 # takes a named argument demo_id
 build_any:
