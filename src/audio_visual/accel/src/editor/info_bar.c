@@ -1,4 +1,4 @@
-#include "editor.h"
+#include "info_bar.h"
 
 /*
 - Some background texture
@@ -19,12 +19,6 @@ fleckenstein | 4, 20 | tex 19 | erase
 - Remember to free the info bar, and only reallocate it when needed
 - Or maybe a completely new font, that's monospace from the beginning (only lowercase + numbers)
 */
-
-typedef struct {
-	SDL_Rect area;
-	TTF_Font* font;
-	SDL_Texture* text_texture;
-} InfoBar;
 
 static char* get_info_bar_string(const EditorState* const eds, const char* const map_name) {
 	const char *edit_state, *edit_mode;
@@ -62,22 +56,6 @@ static char* get_info_bar_string(const EditorState* const eds, const char* const
 	return info_bar_string;
 }
 
-void init_info_bar(InfoBar* const info_bar) {
-	info_bar -> text_texture = NULL;
-
-	const int info_bar_height = EDITOR_HEIGHT - EDITOR_MAP_SECTION_HEIGHT;
-	info_bar -> area = (SDL_Rect) {0, EDITOR_MAP_SECTION_HEIGHT, EDITOR_WIDTH, info_bar_height};
-
-	info_bar -> font = TTF_OpenFont(FONT_PATH, info_bar_height);
-	if (info_bar -> font == NULL)
-		FAIL(OpenFile, "Could not open the UI font file: \"%s\".", TTF_GetError());
-}
-
-void deinit_info_bar(const InfoBar* const info_bar) {
-	SDL_DestroyTexture(info_bar -> text_texture);
-	TTF_CloseFont(info_bar -> font);
-}
-
 static void update_info_bar_text(const EditorState* const eds, InfoBar* const info_bar, const char* const map_name) {
 	char* const text = get_info_bar_string(eds, map_name);
 
@@ -95,6 +73,22 @@ static void update_info_bar_text(const EditorState* const eds, InfoBar* const in
 	info_bar -> text_texture = text_texture;
 	SDL_FreeSurface(text_surface);
 	free(text);
+}
+
+void init_info_bar(InfoBar* const info_bar) {
+	info_bar -> text_texture = NULL;
+
+	const int info_bar_height = EDITOR_HEIGHT - EDITOR_MAP_SECTION_HEIGHT;
+	info_bar -> area = (SDL_Rect) {0, EDITOR_MAP_SECTION_HEIGHT, EDITOR_WIDTH, info_bar_height};
+
+	info_bar -> font = TTF_OpenFont(FONT_PATH, info_bar_height);
+	if (info_bar -> font == NULL)
+		FAIL(OpenFile, "Could not open the UI font file: \"%s\".", TTF_GetError());
+}
+
+void deinit_info_bar(const InfoBar* const info_bar) {
+	SDL_DestroyTexture(info_bar -> text_texture);
+	TTF_CloseFont(info_bar -> font);
 }
 
 void render_info_bar(InfoBar* const info_bar, const EditorState* const eds) {

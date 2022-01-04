@@ -1,21 +1,4 @@
-#include "editor.h"
-
-#define COMMENT_START '-'
-#define SECTION_TAG_START '@'
-
-/* DDL = dungeon dave file
-Later, keep file handle to write to it later */
-
-typedef struct {
-	char* const data;
-	const char* const file_name;
-	const long num_bytes;
-} FileContents;
-
-typedef struct {
-	const byte is_one_line;
-	const char* const name;
-} SectionTag;
+#include "ddl_parser.h"
 
 // The pointer in the file contents returned by this function should be freed by the caller
 static FileContents read_file_contents(const char* const file_name) {
@@ -28,7 +11,6 @@ static FileContents read_file_contents(const char* const file_name) {
 
 	char* const data = malloc(num_bytes + 1l);
 	fread(data, num_bytes, 1, file); // Read file bytes
-	
 	data[num_bytes] = '\0';
 
 	fclose(file);
@@ -40,12 +22,6 @@ static void parse_section_tag(const long* const char_index, const FileContents f
 	Curr tag types: name, heightmap, texture_id_map, wall_textures 
 	Also, a variant of one-line tags
 	Goal is to get correct section tag out, by comparing the string up until a newline (do the multiline variant first) */
-
-	enum {num_section_tag_types = 4};
-	static const SectionTag section_tags[num_section_tag_types] = {
-		{1, "name"}, {0, "heightmap"},
-		{0, "texture_id_map"}, {0, "wall_textures"}
-	};
 
 	// No need to worry about overflow here since strncmp accounts for a possible null terminator
 	const char* const tag_start = file_contents.data + *char_index + 1;
