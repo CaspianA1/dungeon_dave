@@ -4,7 +4,7 @@ abc
 
 - And no billboards for now
 
-@name Test
+@name Sample
 
 @heightmap
 
@@ -39,6 +39,5 @@ abc
 ../../../../assets/walls/horses.bmp
 ../../../../assets/walls/mesa.bmp
 ../../../../assets/walls/arthouse_bricks.bmp
-
 
 - Last one

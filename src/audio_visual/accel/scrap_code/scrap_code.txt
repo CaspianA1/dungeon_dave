@@ -3293,3 +3293,32 @@ static void print_map(const char* const name, const byte* const map, const byte 
 	*/
 
 /////
+
+		// if (tag_ref -> flags & TAG_IS_ONE_LINE_BIT) puts("Check for space after tag name");
+
+			// Each tag needs a whitespace character, whether that be a space, a newline character, or something else
+
+			// const char after = *(tag_start + tag_length);
+			const char after = tag_start[tag_length];
+			// const byte needs_an_one_line_argument = tag_ref -> flags & (TAG_IS_ONE_LINE_BIT | TAG_HAS_ARGUMENT_BIT);
+			// DEBUG(needs_an_one_line_argument, d);
+
+			if (/* (needs_an_one_line_argument && after == '\0') */ isspace(after)) {
+				matching_tag = tag_ref;
+				break;
+			}
+			// printf("tag_name = '%s', and after = '%c', and is whitespace = %d\n", tag_name, after, isspace(after));
+
+			/*
+			if ((tag_ref -> flags & TAG_HAS_ARGUMENT_BIT)) {
+				DEBUG(*tag_start, c);
+				const char after = (*tag_start + tag_length + 1);
+				DEBUG(after, c);
+				if (!isspace(after)) puts("Need space after");
+			}
+
+			matching_tag = tag_ref;
+			break;
+			*/
+
+/////

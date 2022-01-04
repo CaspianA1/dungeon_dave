@@ -17,18 +17,28 @@ static FileContents read_file_contents(const char* const file_name) {
 	return (FileContents) {file_name, data, num_bytes};
 }
 
-// This discards whitespace after an index until a non-whitespace character is reached
-static void discard_whitespace_after_index(long* const char_index_ref, const FileContents* const file_contents) {
-	long char_index = *char_index_ref + 1;
-	while ((char_index < file_contents -> num_bytes) && isspace(file_contents -> data[char_index])) char_index++;
-	*char_index_ref = char_index;
+static void progress_char_index_to_tag_argument(long* const char_index_ref,
+	const SectionTag* const section_tag, const FileContents* const file_contents) {
+
+	long char_index = *char_index_ref + strlen(section_tag -> name) + 1;
+	const long orig_char_index = char_index;
+
+	const char* const data = file_contents -> data;
+
+	while ((char_index < file_contents -> num_bytes) && isspace(data[char_index])) char_index++;
+
+	if ((char_index == orig_char_index) || (data[char_index] == SECTION_TAG_START))
+		FAIL(ParseLevelFile, "a level tag in '%s' needs an argument.", file_contents -> file_name);
+
+	*char_index_ref = char_index - 1;
 }
 
 static const SectionTag* get_section_tag(const long char_index, const FileContents* const file_contents) {
 	/* While not reached space or newline, collect tag name
 	Curr tag types: name, heightmap, texture_id_map, wall_textures 
 	Also, a variant of one-line tags
-	Goal is to get correct section tag out, by comparing the string up until a newline (do the multiline variant first) */
+	Goal is to get correct section tag out, by comparing the string up until a newline (do the multiline variant first)
+	Need whitespace after a one-line tag */
 
 	// No need to worry about overflow here since strncmp accounts for a possible null terminator
 	const char* const tag_start = file_contents -> data + char_index + 1;
@@ -38,7 +48,10 @@ static const SectionTag* get_section_tag(const long char_index, const FileConten
 		const SectionTag* const tag_ref = section_tags + i;
 		const char* const tag_name = tag_ref -> name;
 
-		if (strncmp(tag_name, tag_start, strlen(tag_name)) == 0) {
+		const size_t tag_length = strlen(tag_name);
+
+		// If the tag matches, and there's a whitespace character after it
+		if (strncmp(tag_name, tag_start, tag_length) == 0 && isspace(tag_start[tag_length])) {
 			matching_tag = tag_ref;
 			break;
 		}
@@ -55,13 +68,6 @@ static void parse_section(const SectionTag* const tag, const EditorState* const 
 	(void) tag;
 	(void) editor_state;
 	(void) file_contents;
-
-	if (tag -> is_one_line) {
-		// Only expecting name for now; alloc map name for editor state, until any whitespace reached
-	}
-	else {
-
-	}
 }
 
 static void parse_ddl_file(EditorState* const editor_state, const FileContents* const file_contents) {
@@ -77,8 +83,7 @@ static void parse_ddl_file(EditorState* const editor_state, const FileContents* 
 				break;
 			case SECTION_TAG_START: {
 				const SectionTag* const section_tag = get_section_tag(i, file_contents);
-				i += strlen(section_tag -> name); // + 1l b/c starting at the character right after the tag
-				discard_whitespace_after_index(&i, file_contents);
+				progress_char_index_to_tag_argument(&i, section_tag, file_contents);
 				parse_section(section_tag, editor_state, file_contents);
 				break;
 			}

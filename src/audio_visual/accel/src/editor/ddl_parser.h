@@ -13,8 +13,7 @@ typedef struct {
 	const long num_bytes;
 } FileContents;
 
-typedef struct {
-	const byte is_one_line;
+typedef struct { // TODO: link up each section tag with a parser fn ptr
 	const char* const name;
 } SectionTag;
 
@@ -23,10 +22,13 @@ typedef struct {
 enum {num_section_tag_types = 4};
 
 static const SectionTag section_tags[num_section_tag_types] = {
-	{1, "name"}, {0, "heightmap"}, {0, "texture_id_map"}, {0, "wall_textures"}
+	{"name"},
+	{"heightmap"},
+	{"texture_id_map"},
+	{"wall_textures"}
 };
 
-////////// Excluded: read_file_contents, discard_whitespace_after_index, get_section_tag, parse_section, parse_ddl_file
+////////// Excluded: read_file_contents, progress_char_index_to_tag_argument, get_section_tag, parse_section
 
 void init_editor_state_from_ddl_file(EditorState* const editor_state, const char* const filename);
 
