@@ -77,6 +77,9 @@ static void parse_ddl_file(EditorState* const editor_state, const FileContents* 
 	for (long i = 0; i < num_bytes; i++) {
 
 		const char curr_char = data[i];
+		/* Right now, arbitrary characters can appear as non-arguments;
+		fail if a character doesn't match the first 2 cases */
+
 		switch (curr_char) {
 			case COMMENT_START: // This skips until a newline is reached
 				while (i < num_bytes && data[i] != '\n') i++;

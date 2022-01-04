@@ -1,4 +1,3 @@
-abc
 - DDL = Dungeon Dave level
 - A dash indicates a comment
 
