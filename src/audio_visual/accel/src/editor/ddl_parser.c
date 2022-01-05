@@ -18,9 +18,9 @@ static FileContents read_file_contents(const char* const file_name) {
 }
 
 static void progress_char_index_to_tag_argument(long* const char_index_ref,
-	const SectionTag* const section_tag, const FileContents* const file_contents) {
+	const SectionTag* const tag, const FileContents* const file_contents) {
 
-	long char_index = *char_index_ref + strlen(section_tag -> name) + 1;
+	long char_index = *char_index_ref + strlen(tag -> name) + 1;
 	const long orig_char_index = char_index;
 
 	const char* const data = file_contents -> data;
@@ -29,8 +29,6 @@ static void progress_char_index_to_tag_argument(long* const char_index_ref,
 
 	if ((char_index == orig_char_index) || (data[char_index] == SECTION_TAG_START))
 		FAIL(ParseLevelFile, "a level tag in '%s' needs an argument.", file_contents -> file_name);
-
-	// Start of argument is at data[char_index]
 
 	*char_index_ref = char_index - 1;
 }
@@ -62,53 +60,101 @@ static const SectionTag* get_section_tag(const long char_index, const FileConten
 	if (matching_tag == NULL)
 		FAIL(ParseLevelFile, "did not recognize a level tag for '%s'.", file_contents -> file_name);
 
-	else printf("Found a tag match: '%s'\n", matching_tag -> name);
+	// else printf("Found a tag match: '%s'\n", matching_tag -> name);
 	return matching_tag;
 }
 
-static void parse_section(const SectionTag* const tag, const EditorState* const editor_state, const FileContents* const file_contents) {
-	(void) tag;
-	(void) editor_state;
+SECTION_PARSER_DEF(name) {
+	(void) start_char_index;
+	(void) end_char_index;
 	(void) file_contents;
+	(void) eds;
+	puts("Name parser");
 
-	// Argument range is from current char index to next ampersand
+	// strtok?
+
+	/*
+	const size_t name_length = end_char_index - start_char_index + 1;
+	DEBUG(name_length, zu);
+	*/
+
+	/*
+	file_contents -> data[end_char_index + 1] = '\0';
+	printf("Name: '%s'\n", file_contents -> data + start_char_index);
+	*/
 }
 
-static void replace_comments_with_whitespace(FileContents* const file_contents) {
+SECTION_PARSER_DEF(heightmap) {
+	(void) start_char_index;
+	(void) end_char_index;
+	(void) file_contents;
+	(void) eds;
+	puts("Heightmap parser");
+}
+
+SECTION_PARSER_DEF(texture_id_map) {
+	(void) start_char_index;
+	(void) end_char_index;
+	(void) file_contents;
+	(void) eds;
+	puts("Texture id map parser");
+}
+
+SECTION_PARSER_DEF(wall_texture) {
+	(void) start_char_index;
+	(void) end_char_index;
+	(void) file_contents;
+	(void) eds;
+	puts("Wall texture parser");
+}
+
+// The beginning of a section is marked by an ampersand an an identifier, and then an argument
+static void parse_section(long* const char_index_ref, const FileContents* const file_contents,
+	const SectionTag* const tag, const EditorState* const eds) {
+
+	const char* const data = file_contents -> data;
+
+	long char_index = *char_index_ref + 1;
+	const long arg_start_index = char_index;
+
+	// Find start of next argument, at its ampersand; and after that, backtrack, ignoring all whitespace characters
+	while ((char_index < file_contents -> num_bytes) && (data[char_index] != SECTION_TAG_START)) char_index++;
+	while (isspace(data[--char_index]));
+
+	*char_index_ref = char_index; // Here, char_index equals arg_end_index
+	tag -> section_parser(arg_start_index, char_index, file_contents, eds);
+	
+	// printf("Start char is '%c', and end char is '%c'\n|\n", data[arg_start_index], data[char_index]);
+
+	/* data[char_index + 1] = '\0';
+	printf("Arg: '%s'\n", data + arg_start_index); */
+}
+
+static void parse_ddl_file(EditorState* const eds, FileContents* const file_contents) {
 	char* const data = file_contents -> data;
 	const long num_bytes = file_contents -> num_bytes;
 
+	// This erases all comments and replaces them with whitespace
 	for (long i = 0; i < num_bytes; i++) {
 		if (data[i] == COMMENT_START) {
 			while (i < num_bytes && data[i] != '\n') data[i++] = ' ';
 		}
 	}
-}
-
-static void parse_ddl_file(EditorState* const editor_state, FileContents* const file_contents) {
-	replace_comments_with_whitespace(file_contents);
-
-	const char* const data = file_contents -> data;
-	const long num_bytes = file_contents -> num_bytes;
 
 	for (long i = 0; i < num_bytes; i++) {
 		const char curr_char = data[i];
-		/* Right now, arbitrary characters can appear as non-arguments;
-		fail if a character doesn't match the first 2 cases */
-
 		if (curr_char == SECTION_TAG_START) {
-			const SectionTag* const section_tag = get_section_tag(i, file_contents);
-			progress_char_index_to_tag_argument(&i, section_tag, file_contents);
-			parse_section(section_tag, editor_state, file_contents);
+			const SectionTag* const tag = get_section_tag(i, file_contents);
+			progress_char_index_to_tag_argument(&i, tag, file_contents);
+			parse_section(&i, file_contents, tag, eds);
 		}
-		else {
-			// puts("Ladies and gentlemen, something should have parsed this character");
-		}
+		else if (!isspace(curr_char))
+			FAIL(ParseLevelFile, "Lone character '%c' for level '%s'.", curr_char, file_contents -> file_name);
 	}
 }
 
-void init_editor_state_from_ddl_file(EditorState* const editor_state, const char* const filename) {
+void init_editor_state_from_ddl_file(EditorState* const eds, const char* const filename) {
 	FileContents file_contents = read_file_contents(filename);
-	parse_ddl_file(editor_state, &file_contents);
+	parse_ddl_file(eds, &file_contents);
 	free(file_contents.data);
 }

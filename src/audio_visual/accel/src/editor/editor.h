@@ -12,11 +12,16 @@
 #define SMALLEST_HEIGHT_SHADE 100
 #define BIGGEST_HEIGHT_SHADE 255
 
+#define RIGHT_CLICK_MAP_PLACEMENT_VALUE 0
+#define INIT_EDITOR_TEXTURE_ID 1
+#define INIT_EDITOR_HEIGHT 1
+
 #define FONT_PATH "../../../../assets/dnd.ttf"
 // #define FONT_PATH "monodnd.ttf"
 
 #define KEY_TOGGLE_TEXTURE_EDIT_MODE SDL_SCANCODE_ESCAPE
 #define KEY_CLICK_TILE SDL_BUTTON_LEFT
+#define KEY_ERASE_TILE SDL_BUTTON_RIGHT
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
@@ -49,9 +54,9 @@ typedef struct {
 		num_textures, map_size[2], tile_pos[2],
 		in_texture_editing_mode,
 		// These indicate the height and texture id placed while editing
-		editing_texture_id, editing_height,
+		editor_texture_id, editor_height,
 		*heightmap, *texture_id_map;
-	
+
 	const char* map_name;
 
 	MouseState mouse_state;

@@ -7,6 +7,7 @@
 - 2 options: start new, and edit current. Begin with start new.
 - A bottom bar that gives the current texture and current height
 - Press a number key to change the current tex
+- A tag for music
 
 Plan:
 
@@ -23,7 +24,7 @@ Plan:
 - Press <esc> to toggle texture editing mode - done
 - Input a series of numbers, and then hit return (stopping if more than 3 numbers), to select a height or texture id number - done
 - If number over 255, limit to that - done
-- Variables editing_height and editing_texture_id - done
+- Variables editor_height and editor_texture_id - done
 - Display point height over each texture in some good way - done
 - Selected block highlighted - done
 - Textures uneven if using SDL_RenderCopyF - done and fixed
@@ -36,7 +37,7 @@ byte* map_point(const EditorState* const eds, const byte is_heightmap, const byt
 	return map + (y * eds -> map_size[0] + x);
 }
 
-// Updates editing_height and editing_texture_id. Reads in 3 nums across function calls to update one;
+// Updates editor_height and editor_texture_id. Reads in 3 nums across function calls to update one;
 void update_editing_placement_values(EditorState* const eds, const SDL_Event* const event) {
 	static SDL_Keycode num_input_keys[3];
 	const SDL_Keycode key = event -> key.keysym.sym;
@@ -61,7 +62,7 @@ void update_editing_placement_values(EditorState* const eds, const SDL_Event* co
 		const byte max_texture_id = eds -> num_textures - 1; // Avoiding too big of a texture id
 		if (eds -> in_texture_editing_mode) number = (number > max_texture_id) ? max_texture_id : number;
 
-		*(eds -> in_texture_editing_mode ? &eds -> editing_texture_id : &eds -> editing_height) = number;
+		*(eds -> in_texture_editing_mode ? &eds -> editor_texture_id : &eds -> editor_height) = number;
 	}
 }
 
@@ -83,13 +84,13 @@ void edit_eds_map(EditorState* const eds) {
 
 	// Make click based on if mouse still down, not just down in one instance
 	if (eds -> mouse_state != NoClick && eds -> mouse_pos[1] < EDITOR_MAP_SECTION_HEIGHT) {
-		byte output_val;
+		byte map_output_val;
 
-		if (eds -> mouse_state == RightClick) output_val = 0;
-		else output_val = eds -> in_texture_editing_mode ? eds -> editing_texture_id : eds -> editing_height;
+		if (eds -> mouse_state == RightClick) map_output_val = RIGHT_CLICK_MAP_PLACEMENT_VALUE;
+		else map_output_val = eds -> in_texture_editing_mode ? eds -> editor_texture_id : eds -> editor_height;
 
 		*map_point(eds, !eds -> in_texture_editing_mode,
-			eds -> tile_pos[0], eds -> tile_pos[1]) = output_val;
+			eds -> tile_pos[0], eds -> tile_pos[1]) = map_output_val;
 	}
 }
 
@@ -151,8 +152,8 @@ void editor_loop(EditorState* const eds) {
 					deinit_info_bar(&info_bar);
 					return;
 				case SDL_MOUSEBUTTONDOWN:
-					eds -> mouse_state = (event.button.button == KEY_CLICK_TILE)
-						? LeftClick : RightClick;
+					if (event.button.button == KEY_CLICK_TILE) eds -> mouse_state = LeftClick;
+					else if (event.button.button == KEY_ERASE_TILE) eds -> mouse_state = RightClick;
 					break;
 				case SDL_MOUSEBUTTONUP:
 					eds -> mouse_state = NoClick;
@@ -215,8 +216,8 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 	eds -> tile_pos[0] = 0;
 	eds -> tile_pos[1] = 0;
 	eds -> in_texture_editing_mode = 1;
-	eds -> editing_texture_id = 1;
-	eds -> editing_height = 1;
+	eds -> editor_texture_id = INIT_EDITOR_TEXTURE_ID;
+	eds -> editor_height = INIT_EDITOR_HEIGHT;
 	eds -> mouse_state = NoClick;
 
 	eds -> heightmap = malloc(map_bytes);

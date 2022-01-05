@@ -3,7 +3,7 @@
 
 - And no billboards for now
 
-@name foo - Bob sample
+@name fob - Bob sample
 
 @heightmap
 
@@ -13,7 +13,7 @@
 0 0 0 1 0  0 1  0
 0 0 0 0 1  0 1  0
 0 0 0 0 0  1 1  0
-0 0 0 0 0  0 1  0
+0 0 0 0 0  0 1  4
 
 @texture_id_map
 
@@ -21,9 +21,10 @@
 0 0 0 0 0 0 0 0
 0 0 0 0 1 1 0 0
 0 0 0 0 1 1 0 0
+- bob
 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 3
 
 @wall_textures
 

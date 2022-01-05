@@ -22,7 +22,7 @@ fleckenstein | 4, 20 | tex 19 | erase
 
 static char* get_info_bar_string(const EditorState* const eds, const char* const map_name) {
 	const char *edit_state, *edit_mode;
-	byte edit_mode_val;
+	byte editor_placement_val;
 	const byte map_x = eds -> tile_pos[0], map_y = eds -> tile_pos[1];
 
 	switch (eds -> mouse_state) {
@@ -33,25 +33,25 @@ static char* get_info_bar_string(const EditorState* const eds, const char* const
 
 	if (eds -> in_texture_editing_mode) {
 		edit_mode = "texture";
-		edit_mode_val = eds -> editing_texture_id;
+		editor_placement_val = eds -> editor_texture_id;
 	}
 	else {
 		edit_mode = "height";
-		edit_mode_val = eds -> editing_height;
+		editor_placement_val = eds -> editor_height;
 	}
 
 	//////////
 
-	/* Tile pos: max 3 chars b/c max = 255. Editing mode: max 7 chars b/c "texture" is 7 chars. Editing
-	mode value: max 2 chars b/c max texture id is 31. Editing state: max 5 chars b/c "erase" is 5 chars. */
+	/* Tile pos: max 3 chars b/c max = 255. Editing mode: max 7 chars b/c "texture" is 7 chars. Editor
+	placement value: max 2 chars b/c max texture id is 31. Editing state: max 5 chars b/c "erase" is 5 chars. */
 	const char* const info_bar_format = "| %s | x %-3d | y %-3d | %-7s #%-2d | %-5s |";
 
-	const size_t bytes = snprintf(NULL, 0, info_bar_format,
-		map_name, map_x, map_y, edit_mode, edit_mode_val, edit_state);
+	const size_t num_bytes = snprintf(NULL, 0, info_bar_format,
+		map_name, map_x, map_y, edit_mode, editor_placement_val, edit_state);
 
-	char* const info_bar_string = malloc(bytes + 1);
+	char* const info_bar_string = malloc(num_bytes + 1);
 	sprintf(info_bar_string, info_bar_format,
-		map_name, map_x, map_y, edit_mode, edit_mode_val, edit_state);
+		map_name, map_x, map_y, edit_mode, editor_placement_val, edit_state);
 	
 	return info_bar_string;
 }

@@ -3322,3 +3322,7 @@ static void print_map(const char* const name, const byte* const map, const byte 
 			*/
 
 /////
+
+			// printf("Ladies and gentlemen, something should have parsed this character: '%c'\n", curr_char);
+
+/////
