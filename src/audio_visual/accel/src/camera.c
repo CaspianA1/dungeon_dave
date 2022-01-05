@@ -159,6 +159,7 @@ static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, 
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
 	static byte first_call = 1;
 	static Uint64 performance_frequency;
+
 	if (first_call) {
 		performance_frequency = SDL_GetPerformanceFrequency();
 		first_call = 0;
