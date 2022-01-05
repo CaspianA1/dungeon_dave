@@ -157,8 +157,15 @@ static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, 
 }
 
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
-	const GLfloat curr_time = SDL_GetTicks() / 1000.0f;
-	const GLfloat delta_time = curr_time - camera -> last_time;
+	static byte first_call = 1;
+	static Uint64 performance_frequency;
+	if (first_call) {
+		performance_frequency = SDL_GetPerformanceFrequency();
+		first_call = 0;
+	}
+
+	const Uint64 curr_time = SDL_GetPerformanceCounter();
+	const GLfloat delta_time = (GLfloat) (curr_time - camera -> last_time) / performance_frequency;
 	camera -> last_time = curr_time;
 
 	update_camera_angles(camera, &event, delta_time);

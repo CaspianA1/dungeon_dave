@@ -9,7 +9,8 @@ typedef struct {
 	} angles;
 
 	// `bob` is the bouncing up and down of camera when moving
-	GLfloat last_time, bob_input, last_bob_delta;
+	GLfloat bob_input, last_bob_delta;
+	Uint64 last_time;
 
 	vec2 right_xz; // X and Z of right (Y is always 0)
 	vec3 pos;
