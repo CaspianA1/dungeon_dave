@@ -3,12 +3,13 @@
 
 - And no billboards for now
 
-@name fob - Bob sample
+@name fob
+@map_size 8x7 - This must appear before any of the map definitions
 
 @heightmap
 
-1 1 1 1 10 1 1  0
-0 1 9 1 0  0 1  0
+1 2 3 4 10 1 1  0
+5 1 9 1 0  0 1  0
 0 0 1 9 0  0 11 0
 0 0 0 1 0  0 1  0
 0 0 0 0 1  0 1  0
