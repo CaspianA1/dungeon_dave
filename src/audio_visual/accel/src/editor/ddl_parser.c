@@ -30,6 +30,8 @@ static void progress_char_index_to_tag_argument(long* const char_index_ref,
 	if ((char_index == orig_char_index) || (data[char_index] == SECTION_TAG_START))
 		FAIL(ParseLevelFile, "a level tag in '%s' needs an argument.", file_contents -> file_name);
 
+	// Start of argument is at data[char_index]
+
 	*char_index_ref = char_index - 1;
 }
 
@@ -68,34 +70,45 @@ static void parse_section(const SectionTag* const tag, const EditorState* const 
 	(void) tag;
 	(void) editor_state;
 	(void) file_contents;
+
+	// Argument range is from current char index to next ampersand
 }
 
-static void parse_ddl_file(EditorState* const editor_state, const FileContents* const file_contents) {
+static void replace_comments_with_whitespace(FileContents* const file_contents) {
+	char* const data = file_contents -> data;
+	const long num_bytes = file_contents -> num_bytes;
+
+	for (long i = 0; i < num_bytes; i++) {
+		if (data[i] == COMMENT_START) {
+			while (i < num_bytes && data[i] != '\n') data[i++] = ' ';
+		}
+	}
+}
+
+static void parse_ddl_file(EditorState* const editor_state, FileContents* const file_contents) {
+	replace_comments_with_whitespace(file_contents);
+
 	const char* const data = file_contents -> data;
 	const long num_bytes = file_contents -> num_bytes;
 
 	for (long i = 0; i < num_bytes; i++) {
-
 		const char curr_char = data[i];
 		/* Right now, arbitrary characters can appear as non-arguments;
 		fail if a character doesn't match the first 2 cases */
 
-		switch (curr_char) {
-			case COMMENT_START: // This skips until a newline is reached
-				while (i < num_bytes && data[i] != '\n') i++;
-				break;
-			case SECTION_TAG_START: {
-				const SectionTag* const section_tag = get_section_tag(i, file_contents);
-				progress_char_index_to_tag_argument(&i, section_tag, file_contents);
-				parse_section(section_tag, editor_state, file_contents);
-				break;
-			}
+		if (curr_char == SECTION_TAG_START) {
+			const SectionTag* const section_tag = get_section_tag(i, file_contents);
+			progress_char_index_to_tag_argument(&i, section_tag, file_contents);
+			parse_section(section_tag, editor_state, file_contents);
+		}
+		else {
+			// puts("Ladies and gentlemen, something should have parsed this character");
 		}
 	}
 }
 
 void init_editor_state_from_ddl_file(EditorState* const editor_state, const char* const filename) {
-	const FileContents file_contents = read_file_contents(filename);
+	FileContents file_contents = read_file_contents(filename);
 	parse_ddl_file(editor_state, &file_contents);
 	free(file_contents.data);
 }
