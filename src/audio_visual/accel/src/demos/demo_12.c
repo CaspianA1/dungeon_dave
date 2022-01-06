@@ -25,6 +25,45 @@ typedef struct {
 
 //////////
 
+*const sector_lighting_vertex_shader =
+    "#version 330 core\n"
+
+	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
+	"layout(location = 1) in vec2 vertex_UV;\n"
+
+	"out vec2 UV;\n"
+	"out vec3 pos_delta_world_space;\n"
+
+	"uniform vec3 camera_pos_world_space;\n"
+	"uniform mat4 model_view_projection;\n"
+
+	"void main(void) {\n"
+		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
+		"UV = vertex_UV;\n"
+		"pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
+	"}\n",
+
+*const sector_lighting_fragment_shader =
+    "#version 330 core\n"
+
+	"in vec2 UV;\n"
+	"in vec3 pos_delta_world_space;\n"
+
+	"out vec3 color;\n"
+
+	"uniform sampler2D texture_sampler;\n"
+
+	"const float min_light = 0.1f, max_light = 1.0f, intensity_factor = 50.0f;\n"
+
+	"void main(void) {\n" // dist_squared is distance squared from fragment
+		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
+		"float light_intensity = clamp(intensity_factor / dist_squared, min_light, max_light);\n"
+
+		"color = light_intensity * texture(texture_sampler, UV).rgb;\n"
+	"}\n";
+
+//////////
+
 typedef struct {
 	List list;
 	GLuint vbo, ibo;
