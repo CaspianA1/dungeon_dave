@@ -147,12 +147,18 @@ void init_sector_draw_context(
 	draw_context -> index_buffers.cpu = index_list;
 
 	const GLsizeiptr
-		total_vertex_bytes = face_mesh_list.length * vars_per_face * sizeof(mesh_component_t),
+		total_vertex_bytes = face_mesh_list.length * sizeof(mesh_component_t[vars_per_face]),
 		total_index_bytes = face_mesh_list.length * sizeof(buffer_index_t[indices_per_face]);
+
+	/* const GLsizeiptr no_ibo_vars_per_face = vars_per_vertex * 6;
+	DEBUG(total_vertex_bytes, ld);
+	DEBUG(total_index_bytes, ld);
+	DEBUG(face_mesh_list.length * sizeof(mesh_component_t[no_ibo_vars_per_face]), ld); // Same copy rate as with ibo */
 
 	GLuint vbo_and_ibo[2];
 	glGenBuffers(2, vbo_and_ibo);
 
+	// No more IBO! Yuck
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_and_ibo[0]);
 	glBufferData(GL_ARRAY_BUFFER, total_vertex_bytes, face_mesh_list.data, GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_and_ibo[1]);
