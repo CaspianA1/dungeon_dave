@@ -4,20 +4,28 @@
 #include "headers/batch_draw_context.h"
 #include "list.c"
 
-void deinit_batch_draw_context(const BatchDrawContext* const draw_context, const byte gpu_buffer_ptr_is_for_indices) {
-	deinit_list(draw_context -> object_buffers.cpu);
+// This does not initialize or fill the CPU buffer with data; that's the caller's responsibility
+void init_batch_draw_context_gpu_buffer(BatchDrawContext* const draw_context,
+	const buffer_size_t num_drawable_things, const buffer_size_t drawable_thing_size) {
 
-	glUnmapBuffer(gpu_buffer_ptr_is_for_indices ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER);
-	glDeleteBuffers(1, &draw_context -> object_buffers.gpu);
+	GLuint gpu_buffer;
+	glGenBuffers(1, &gpu_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, gpu_buffer);
+	glBufferData(GL_ARRAY_BUFFER, num_drawable_things * drawable_thing_size, NULL, GL_DYNAMIC_DRAW);
+
+	draw_context -> buffers.gpu = gpu_buffer;
+	draw_context -> buffers.ptr_gpu = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+}
+
+void deinit_batch_draw_context(const BatchDrawContext* const draw_context) {
+	deinit_list(draw_context -> buffers.cpu);
+
+	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glDeleteBuffers(1, &draw_context -> buffers.gpu);
 
 	deinit_texture(draw_context -> texture_set);
 	glDeleteProgram(draw_context -> shader);
-}
-
-void deinit_indexed_batch_draw_context(const IndexedBatchDrawContext* const draw_context) {
-	deinit_list(draw_context -> index_buffers.cpu);
-	deinit_batch_draw_context(&draw_context -> c, 1);
-	glDeleteBuffers(1, &draw_context -> index_buffers.gpu);
 }
 
 #endif

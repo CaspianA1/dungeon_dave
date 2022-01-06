@@ -1,4 +1,8 @@
 #include "demo_11.c"
+
+#define BUFFER_DEFS_H // Shitty hack - to avoid #including buffer_defs.h from list.h, which has different buffer defs than demo 11
+typedef uint32_t buffer_size_t;
+
 #include "../list.c"
 #include "../data/maps.c"
 

@@ -1,25 +1,22 @@
 #ifndef BATCH_DRAW_CONTEXT_H
 #define BATCH_DRAW_CONTEXT_H
 
+#include "utils.h"
 #include "list.h"
 
 typedef struct {
-	List cpu;
-	GLuint gpu;
-} BatchBufferPair;
+	struct {
+		List cpu;
+		GLuint gpu;
+		void* ptr_gpu;
+	} buffers;
 
-typedef struct {
-	BatchBufferPair object_buffers;
 	GLuint texture_set, shader;
-	void* gpu_buffer_ptr;
-} BatchDrawContext; // Used for billboards
+} BatchDrawContext;
 
-typedef struct { // In this, the gpu buffer ptr points to the index buffer
-	BatchDrawContext c;
-	BatchBufferPair index_buffers;
-} IndexedBatchDrawContext;
+void init_batch_draw_context_gpu_buffer(BatchDrawContext* const draw_context,
+	const buffer_size_t num_drawable_things, const buffer_size_t drawable_thing_size);
 
-void deinit_batch_draw_context(const BatchDrawContext* const draw_context, const byte gpu_buffer_ptr_is_for_indices);
-void deinit_indexed_batch_draw_context(const IndexedBatchDrawContext* const draw_context);
+void deinit_batch_draw_context(const BatchDrawContext* const draw_context);
 
 #endif

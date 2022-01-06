@@ -59,7 +59,7 @@ static byte get_next_face(const Sector sector, const byte varying_axis,
 }
 
 void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
-	const byte side, const byte texture_id, List* const face_mesh_list, List* const index_list) {
+	const byte side, const byte texture_id, List* const face_mesh_list) {
 
 	/* Face info bits, layout:
 		Bits 0-1, two bits -> face type
@@ -73,18 +73,20 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 		near_x = face.origin[0], near_z = face.origin[1],
 		top_y = sector_max_visible_height;
 
-	const mesh_component_t* face_mesh;
+	const face_mesh_component_t* face_mesh;
 
 	switch (face.type) {
 		case Flat: {
 			const byte size_x = face.size[0], size_z = face.size[1];
 			const byte far_x = near_x + size_x, far_z = near_z + size_z;
 
-			face_mesh = (mesh_component_t[vars_per_face]) {
+			face_mesh = (face_mesh_component_t[components_per_face]) {
 				near_x, top_y, far_z, face_info,
 				far_x, top_y, near_z, face_info,
 				near_x, top_y, near_z, face_info,
-				far_x, top_y, far_z, face_info
+				near_x, top_y, far_z, face_info,
+				far_x, top_y, far_z, face_info,
+				far_x, top_y, near_z, face_info
 			};
 			break;
 		}
@@ -93,17 +95,21 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 			const byte far_z = near_z + size_z, bottom_y = top_y - size_y;
 
 			face_mesh = side
-				? (mesh_component_t[vars_per_face]) {
+				? (face_mesh_component_t[components_per_face]) {
 					near_x, bottom_y, near_z, face_info,
 					near_x, top_y, far_z, face_info,
 					near_x, top_y, near_z, face_info,
-					near_x, bottom_y, far_z, face_info
+					near_x, bottom_y, near_z, face_info,
+					near_x, bottom_y, far_z, face_info,
+					near_x, top_y, far_z, face_info
 				}
-				: (mesh_component_t[vars_per_face]) {
+				: (face_mesh_component_t[components_per_face]) {
 					near_x, top_y, near_z, face_info,
 					near_x, top_y, far_z, face_info,
 					near_x, bottom_y, near_z, face_info,
-					near_x, bottom_y, far_z, face_info
+					near_x, top_y, far_z, face_info,
+					near_x, bottom_y, far_z, face_info,
+					near_x, bottom_y, near_z, face_info
 				};
 			break;
 		}
@@ -112,38 +118,30 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 			const byte far_x = near_x + size_x, bottom_y = top_y - size_y;
 
 			face_mesh = side
-				? (mesh_component_t[vars_per_face]) {
+				? (face_mesh_component_t[components_per_face]) {
 					near_x, top_y, near_z, face_info,
 					far_x, top_y, near_z, face_info,
 					near_x, bottom_y, near_z, face_info,
-					far_x, bottom_y, near_z, face_info
+					far_x, top_y, near_z, face_info,
+					far_x, bottom_y, near_z, face_info,
+					near_x, bottom_y, near_z, face_info
 				}
-				: (mesh_component_t[vars_per_face]) {
+				: (face_mesh_component_t[components_per_face]) {
 					near_x, bottom_y, near_z, face_info,
 					far_x, top_y, near_z, face_info,
 					near_x, top_y, near_z, face_info,
-					far_x, bottom_y, near_z, face_info
+					near_x, bottom_y, near_z, face_info,
+					far_x, bottom_y, near_z, face_info,
+					far_x, top_y, near_z, face_info
+
 				};
 			break;
 		}
 	}
-
 	push_ptr_to_list(face_mesh_list, face_mesh);
-
-	//////////
-
-	const buffer_index_t s = index_list -> length * vertices_per_face; // s = index set start
-	buffer_index_t index_set[indices_per_face] = {s, s + 1, s + 2, s, s + 3, s + 1};
-
-	if ((face.type == Vert_NS && !side) || (face.type == Vert_EW && side)) {
-		index_set[3]++;
-		index_set[5]++;
-	}
-
-	push_ptr_to_list(index_list, index_set);
 }
 
-void init_vert_faces(const Sector sector, List* const face_mesh_list, List* const index_list,
+void init_vert_faces(const Sector sector, List* const face_mesh_list,
 	const byte* const heightmap, const byte map_width, const byte map_height, byte* const biggest_face_height) {
 
 	const byte dimensions[2] = {map_width, map_height};
@@ -169,7 +167,7 @@ void init_vert_faces(const Sector sector, List* const face_mesh_list, List* cons
 			}
 
 			while (get_next_face(sector, !unvarying_axis, adjacent_side_val, map_width, heightmap, &next_face)) {
-				add_face_mesh_to_list(next_face, sector.visible_heights.max, side, sector.texture_id, face_mesh_list, index_list);
+				add_face_mesh_to_list(next_face, sector.visible_heights.max, side, sector.texture_id, face_mesh_list);
 
 				const byte face_height = next_face.size[1];
 				if (face_height > *biggest_face_height) *biggest_face_height = face_height;

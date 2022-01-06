@@ -13,6 +13,6 @@ typedef struct { // This struct is perfectly aligned
 // Excluded: is_inside_plane, billboard_in_view_frustum, draw_billboards
 
 void draw_visible_billboards(const BatchDrawContext* const draw_context, const Camera* const camera);
-BatchDrawContext init_billboard_draw_context(const size_t num_billboards, ...);
+BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, ...);
 
 #endif

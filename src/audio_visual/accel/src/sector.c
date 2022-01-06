@@ -73,7 +73,7 @@ List generate_sectors_from_maps(
 	const byte map_width, const byte map_height) {
 
 	// >> 3 = / 8. Works pretty well for my maps.
-	const size_t sector_amount_guess = map_width * map_height >> 3;
+	const buffer_size_t sector_amount_guess = map_width * map_height >> 3;
 	List sectors = init_list(sector_amount_guess, Sector);
 
 	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used
@@ -110,65 +110,34 @@ List generate_sectors_from_maps(
 ////////// This next part concerns the drawing of sectors
 
 void init_sector_draw_context(
-	IndexedBatchDrawContext* const draw_context, const byte* const heightmap,
+	BatchDrawContext* const draw_context, List* const sectors_ref, const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
-	// This is freed by demo_17_deinit; its ownership is moved to the draw context
 	List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
 
-	// This guess seems to work pretty well on my maps
-	const size_t index_list_length_guess = sectors.length * 3;
+	/* This contains the actual vertex data for faces. `sectors.length * 3` gives a good guess for the
+	face/sector ratio. Its ownership, after this function, goes to the draw context (which frees it). */
+	List face_meshes = init_list(sectors.length * 3, face_mesh_component_t[components_per_face]);
 
-	List // Index list and face mesh list have the same amount of entries (in terms of elements, not bytes)
-		index_list = init_list(index_list_length_guess, buffer_index_t[indices_per_face]), // Also freed in demo_17_deinit
-		face_mesh_list = init_list(index_list_length_guess, mesh_component_t[vars_per_face]); // Freed at the end of this function
-
-	for (size_t i = 0; i < sectors.length; i++) {
+	for (buffer_size_t i = 0; i < sectors.length; i++) {
 		Sector* const sector_ref = ((Sector*) sectors.data) + i;
-		sector_ref -> ibo_range.start = index_list.length * indices_per_face;
+		sector_ref -> face_range.start = face_meshes.length;
 
 		const Sector sector = *sector_ref;
 		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
-		add_face_mesh_to_list(flat_face, sector.visible_heights.max, 0, sector.texture_id, &face_mesh_list, &index_list);
+		add_face_mesh_to_list(flat_face, sector.visible_heights.max, 0, sector.texture_id, &face_meshes);
 
 		byte biggest_face_height = 0;
-
-		init_vert_faces(sector, &face_mesh_list, &index_list,
-			heightmap, map_width, map_height, &biggest_face_height);
+		init_vert_faces(sector, &face_meshes, heightmap, map_width, map_height, &biggest_face_height);
 
 		sector_ref -> visible_heights.min = sector.visible_heights.max - biggest_face_height;
-		sector_ref -> ibo_range.length = index_list.length * indices_per_face - sector_ref -> ibo_range.start;
+		sector_ref -> face_range.length = face_meshes.length - sector_ref -> face_range.start;
 	}
 
-	////////// This part initializes the sector shader and gpu-side buffers
-	draw_context -> c.shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
-
-	draw_context -> c.object_buffers.cpu = sectors;
-	draw_context -> index_buffers.cpu = index_list;
-
-	const GLsizeiptr
-		total_vertex_bytes = face_mesh_list.length * sizeof(mesh_component_t[vars_per_face]),
-		total_index_bytes = face_mesh_list.length * sizeof(buffer_index_t[indices_per_face]);
-
-	/* const GLsizeiptr no_ibo_vars_per_face = vars_per_vertex * 6;
-	DEBUG(total_vertex_bytes, ld);
-	DEBUG(total_index_bytes, ld);
-	DEBUG(face_mesh_list.length * sizeof(mesh_component_t[no_ibo_vars_per_face]), ld); // Same copy rate as with ibo */
-
-	GLuint vbo_and_ibo[2];
-	glGenBuffers(2, vbo_and_ibo);
-
-	// No more IBO! Yuck
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_and_ibo[0]);
-	glBufferData(GL_ARRAY_BUFFER, total_vertex_bytes, face_mesh_list.data, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_and_ibo[1]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_index_bytes, NULL, GL_DYNAMIC_DRAW);
-
-	draw_context -> c.object_buffers.gpu = vbo_and_ibo[0];
-	draw_context -> index_buffers.gpu = vbo_and_ibo[1];
-	draw_context -> c.gpu_buffer_ptr = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-
-	deinit_list(face_mesh_list);
+	draw_context -> buffers.cpu = face_meshes;
+	init_batch_draw_context_gpu_buffer(draw_context, face_meshes.length, bytes_per_face);
+	draw_context -> shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+	*sectors_ref = sectors;
 }
 
 static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) {
@@ -182,10 +151,8 @@ static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) 
 	return glm_aabb_frustum(aabb_corners, frustum_planes);
 }
 
-static void draw_sectors(const IndexedBatchDrawContext* const indexed_draw_context,
-	const Camera* const camera, const buffer_index_t num_visible_indices) {
-
-	const BatchDrawContext* const draw_context = &indexed_draw_context -> c;
+static void draw_sectors(const BatchDrawContext* const draw_context,
+	const Camera* const camera, const buffer_size_t num_visible_faces) {
 
 	const GLuint sector_shader = draw_context -> shader;
 	glUseProgram(sector_shader);
@@ -209,47 +176,47 @@ static void draw_sectors(const IndexedBatchDrawContext* const indexed_draw_conte
 	glUniform3fv(light_pos_id, 1, camera -> pos);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
-	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> object_buffers.gpu);
+	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribIPointer(1, 1, MESH_COMPONENT_TYPENAME, bytes_per_vertex, (void*) (3 * sizeof(mesh_component_t)));
+	glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_face_vertex, (void*) 0);
+	glVertexAttribIPointer(1, 1, MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, (void*) (3 * sizeof(face_mesh_component_t)));
 
-	glDrawElements(GL_TRIANGLES, num_visible_indices, BUFFER_INDEX_TYPENAME, NULL);
+	glDrawArrays(GL_TRIANGLES, 0, num_visible_faces * vertices_per_face);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 }
 
-void draw_visible_sectors(const IndexedBatchDrawContext* const indexed_draw_context, const Camera* const camera) {
+void draw_visible_sectors(const BatchDrawContext* const draw_context, const List* const sectors, const Camera* const camera) {
 	/* Each vec4 plane is composed of a vec3 surface normal and
 	the closest distance to the origin in the fourth component */
 
-	const BatchDrawContext* const draw_context = &indexed_draw_context -> c;
 	static vec4 frustum_planes[6];
 	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
 
-	const List sectors = draw_context -> object_buffers.cpu;
+	const Sector* const sector_data = sectors -> data;
+	const Sector* const out_of_bounds_sector = sector_data + sectors -> length;
 
-	const buffer_index_t* const indices = indexed_draw_context -> index_buffers.cpu.data;
-	buffer_index_t* const ibo_ptr = draw_context -> gpu_buffer_ptr, num_visible_indices = 0;
+	const face_mesh_component_t* const face_meshes_cpu = draw_context -> buffers.cpu.data;
+	face_mesh_component_t* const face_meshes_gpu = draw_context -> buffers.ptr_gpu;
+	buffer_size_t num_visible_faces = 0;
 
-	for (size_t i = 0; i < sectors.length; i++) {
-		const Sector* sector = ((Sector*) sectors.data) + i;
+	for (const Sector* sector = sector_data; sector < out_of_bounds_sector; sector++) {
+		buffer_size_t num_visible_faces_in_group = 0;
+		const buffer_size_t cpu_buffer_start_index = sector -> face_range.start * components_per_face;
 
-		buffer_index_t num_indices = 0;
-		const buffer_index_t ibo_start_index = sector -> ibo_range.start;
+		while (sector < out_of_bounds_sector && sector_in_view_frustum(*sector, frustum_planes))
+			num_visible_faces_in_group += sector++ -> face_range.length;
 
-		while (i < sectors.length && sector_in_view_frustum(*sector, frustum_planes)) {
-			num_indices += sector++ -> ibo_range.length;
-			i++;
-		}
+		if (num_visible_faces_in_group != 0) {
+			memcpy(face_meshes_gpu + num_visible_faces * components_per_face,
+				face_meshes_cpu + cpu_buffer_start_index,
+				num_visible_faces_in_group * bytes_per_face);
 
-		if (num_indices != 0) {
-			memcpy(ibo_ptr + num_visible_indices, indices + ibo_start_index, num_indices * sizeof(buffer_index_t));
-			num_visible_indices += num_indices;
+			num_visible_faces += num_visible_faces_in_group;
 		}
 	}
 
@@ -258,8 +225,8 @@ void draw_visible_sectors(const IndexedBatchDrawContext* const indexed_draw_cont
 	pyramid: 816 vs 542. maze: 5796 vs 6114.
 	terrain: 150620 vs 86588. */
 
-	// If looking out at the distance with no sectors, why call glDrawElements, or do any state switching, at all?
-	if (num_visible_indices != 0) draw_sectors(indexed_draw_context, camera, num_visible_indices);
+	// If looking out at the distance with no sectors, why call glDrawArrays, or do any state switching, at all?
+	if (num_visible_faces != 0) draw_sectors(draw_context, camera, num_visible_faces);
 }
 
 #endif

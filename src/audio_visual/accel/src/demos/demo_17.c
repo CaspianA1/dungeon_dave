@@ -13,17 +13,15 @@
 - NEXT 4: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 5: Fix movement physics (one example: at FPS 10, can't jump over a block) (also, both bob and movement are stuttery - framerate spikes)
 
-- Store the cpu index list in three-bit parts; bit 0 = vert or flat, bit 1 = ns or ew, and bit 2 = side; or store none at all
-- A map maker. An init file that specifies textures and dimensions, draw/erase modes, export, and choose heights and textures
+- A map maker. An init file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
 - More efficiently set statemap bit ranges
 - For terrain, some objects popping out for half seconds
 - Demo 12 pops a bit in the beginning, and demo 17 a bit less
 - Camera var names to yaw, pitch, and roll (maybe)
-- Don't copy indices for sector frustum culling if the average index bytes per sector exceeds the number of face bytes
 - Billboard lighting that matches the sector lighting
 - Base darkest distance of attenuated light on the world size
-- A stress test with a 255x255 checkerboard level
 - Weird framerate dips in demo 17 (fix by doing gpu timing)
+- Unmap gpu buffer ptr when needed?
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
@@ -35,8 +33,8 @@
 */
 
 typedef struct {
-	IndexedBatchDrawContext sector_draw_context;
-	BatchDrawContext billboard_draw_context;
+	List sectors;
+	BatchDrawContext sector_draw_context, billboard_draw_context;
 	Skybox skybox;
 	byte* heightmap, map_size[2];
 } SceneState;
@@ -53,13 +51,13 @@ StateGL demo_17_init(void) {
 	(byte*) checker_heightmap, (byte*) texture_id_map, checker_width, checker_height
 	*/
 
-	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
+	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 	SceneState scene_state = {.skybox = init_skybox("../assets/wadi_upscaled.bmp"),
 		.heightmap = (byte*) palace_heightmap, .map_size = {palace_width, palace_height}};
 
 	//////////
 	// static byte texture_id_map[terrain_height][terrain_width];
-	init_sector_draw_context(&scene_state.sector_draw_context,
+	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
 		(byte*) scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(
@@ -83,8 +81,7 @@ StateGL demo_17_init(void) {
 
 	//////////
 
-	sgl.num_textures = 0;
-	scene_state.sector_draw_context.c.texture_set = init_texture_set(TexRepeating,
+	scene_state.sector_draw_context.texture_set = init_texture_set(TexRepeating,
 		// New + Checker:
 		// 1, 0, 128, 128, "../../../../assets/walls/pyramid_bricks_4.bmp"
 
@@ -141,7 +138,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	}
 
 	update_camera(&camera, get_next_event(), &physics_obj);
-	draw_visible_sectors(&scene_state -> sector_draw_context, &camera);
+	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors, &camera);
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 	draw_skybox(scene_state -> skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
@@ -149,8 +146,11 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 void demo_17_deinit(const StateGL* const sgl) {
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
-	deinit_indexed_batch_draw_context(&scene_state -> sector_draw_context);
-	deinit_batch_draw_context(&scene_state -> billboard_draw_context, 0);
+
+	deinit_list(scene_state -> sectors);
+	deinit_batch_draw_context(&scene_state -> sector_draw_context);
+	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
+
 	deinit_skybox(scene_state -> skybox);
 	free(sgl -> any_data);
 

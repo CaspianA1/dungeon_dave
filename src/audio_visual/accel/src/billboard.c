@@ -26,7 +26,7 @@ static byte billboard_in_view_frustum(const Billboard billboard, vec4 frustum_pl
 }
 
 static void draw_billboards(const BatchDrawContext* const draw_context,
-	const Camera* const camera, const buffer_index_t num_visible_billboards) {
+	const Camera* const camera, const buffer_size_t num_visible_billboards) {
 
 	const GLuint shader = draw_context -> shader;
 
@@ -46,14 +46,14 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 
 	//////////
 
-	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> object_buffers.gpu);
+	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
 
 	for (byte i = 0; i < 3; i++) {
 		glEnableVertexAttribArray(i);
 		glVertexAttribDivisor(i, 1);
 	}
 
-	glVertexAttribIPointer(0, 1, BB_TEXTURE_ID_TYPENAME, sizeof(Billboard), NULL);
+	glVertexAttribIPointer(0, 1, BB_TEXTURE_ID_TYPENAME, sizeof(Billboard), (void*) 0);
 	glVertexAttribPointer(1, 2, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, size));
 	glVertexAttribPointer(2, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, pos));
 
@@ -73,15 +73,15 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 	static vec4 frustum_planes[6]; // TODO: share computed frustum planes between sector and billboard
 	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
 
-	const List cpu_billboards = draw_context -> object_buffers.cpu;
-	Billboard* const gpu_billboard_buffer_ptr = draw_context -> gpu_buffer_ptr;
+	const List cpu_billboards = draw_context -> buffers.cpu;
+	Billboard* const gpu_billboard_buffer_ptr = draw_context -> buffers.ptr_gpu;
 
-	buffer_index_t num_visible = 0;
+	buffer_size_t num_visible = 0;
 	const Billboard* const out_of_bounds_billboard = ((Billboard*) cpu_billboards.data) + cpu_billboards.length;
 
 	for (const Billboard* billboard = (Billboard*) cpu_billboards.data; billboard < out_of_bounds_billboard; billboard++) {
 
-		buffer_index_t num_visible_in_group = 0;
+		buffer_size_t num_visible_in_group = 0;
 		const Billboard* const initial_billboard = billboard;
 
 		while (billboard < out_of_bounds_billboard && billboard_in_view_frustum(*billboard, frustum_planes)) {
@@ -98,27 +98,21 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 	if (num_visible != 0) draw_billboards(draw_context, camera, num_visible);
 }
 
-BatchDrawContext init_billboard_draw_context(const size_t num_billboards, ...) {
+BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, ...) {
 	BatchDrawContext draw_context = {
-		.object_buffers.cpu = init_list(num_billboards, Billboard),
+		.buffers.cpu = init_list(num_billboards, Billboard),
 		.shader = init_shader_program(billboard_vertex_shader, billboard_fragment_shader)
 	};
 
-	draw_context.object_buffers.cpu.length = num_billboards;
+	draw_context.buffers.cpu.length = num_billboards;
 
-	///////////
 	va_list args;
 	va_start(args, num_billboards);
-	for (size_t i = 0; i < num_billboards; i++)
-		((Billboard*) (draw_context.object_buffers.cpu.data))[i] = va_arg(args, Billboard);
+	for (buffer_size_t i = 0; i < num_billboards; i++)
+		((Billboard*) (draw_context.buffers.cpu.data))[i] = va_arg(args, Billboard);
 	va_end(args);
-	///////////
 
-	glGenBuffers(1, &draw_context.object_buffers.gpu);
-	glBindBuffer(GL_ARRAY_BUFFER, draw_context.object_buffers.gpu);
-	glBufferData(GL_ARRAY_BUFFER, num_billboards * sizeof(Billboard), NULL, GL_DYNAMIC_DRAW);
-	
-	draw_context.gpu_buffer_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	init_batch_draw_context_gpu_buffer(&draw_context, num_billboards, sizeof(Billboard));
 
 	return draw_context;
 }

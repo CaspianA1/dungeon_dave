@@ -80,7 +80,7 @@ void demo_20_drawer(const StateGL* const sgl) {
 void demo_20_deinit(const StateGL* const sgl) {
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 	deinit_skybox(scene_state -> skybox);
-	deinit_batch_draw_context(&scene_state -> billboard_draw_context, 0);
+	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
 	free(sgl -> any_data);
 	deinit_demo_vars(sgl);
 }

@@ -3551,3 +3551,169 @@ void init_editor_state_from_ddl_file(EditorState* const eds, const char* const f
 	}
 
 /////
+
+void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
+	const byte side, const byte texture_id, List* const face_mesh_list) {
+
+	/* Face info bits, layout:
+		Bits 0-1, two bits -> face type
+		Bit 2, one bit -> face side (top or left side of top-down sector)
+		Bits 3-7, five bits -> texture id
+
+	So, 00 -> flat, 01 -> vert NW, and 10 -> vert EW */
+
+	const byte
+		face_info = (texture_id << 3) | (side << 2) | face.type,
+		near_x = face.origin[0], near_z = face.origin[1],
+		top_y = sector_max_visible_height;
+
+	const mesh_component_t* face_mesh;
+
+	/*
+	buffer_index_t index_set[indices_per_face] = {s, s + 1, s + 2, s, s + 3, s + 1};
+
+	if ((face.type == Vert_NS && !side) || (face.type == Vert_EW && side)) {
+		index_set[3]++;
+		index_set[5]++;
+	}
+	*/
+
+	// 0, 1, 2, 0, 3, 1; or 0, 1, 2, 1, 3, 2
+
+	switch (face.type) {
+		case Flat: {
+			const byte size_x = face.size[0], size_z = face.size[1];
+			const byte far_x = near_x + size_x, far_z = near_z + size_z;
+
+			face_mesh = (mesh_component_t[vars_per_face]) {
+				/*
+				near_x, top_y, far_z, face_info,
+				far_x, top_y, near_z, face_info,
+				near_x, top_y, near_z, face_info,
+				far_x, top_y, far_z, face_info
+				*/
+
+				near_x, top_y, far_z, face_info, // 0
+				far_x, top_y, near_z, face_info, // 1
+				near_x, top_y, near_z, face_info, // 2
+
+				near_x, top_y, far_z, face_info, // 0
+				far_x, top_y, far_z, face_info, // 3
+				far_x, top_y, near_z, face_info // 1
+			};
+			break;
+		}
+		case Vert_NS: {
+			const byte size_z = face.size[0], size_y = face.size[1];
+			const byte far_z = near_z + size_z, bottom_y = top_y - size_y;
+
+			face_mesh = side
+				? (mesh_component_t[vars_per_face]) {
+					/*
+					near_x, bottom_y, near_z, face_info,
+					near_x, top_y, far_z, face_info,
+					near_x, top_y, near_z, face_info,
+					near_x, bottom_y, far_z, face_info
+					*/
+
+					// Vert_NS && side -> 0, 1, 2, 0, 3, 1
+
+					near_x, bottom_y, near_z, face_info, // 0
+					near_x, top_y, far_z, face_info, // 1
+					near_x, top_y, near_z, face_info, // 2
+
+					near_x, bottom_y, near_z, face_info, // 0
+					near_x, bottom_y, far_z, face_info, // 3
+					near_x, top_y, far_z, face_info // 1
+				}
+				: (mesh_component_t[vars_per_face]) {
+					/*
+					near_x, top_y, near_z, face_info,
+					near_x, top_y, far_z, face_info,
+					near_x, bottom_y, near_z, face_info,
+					near_x, bottom_y, far_z, face_info
+					*/
+
+					// Vert_NS && !side -> 0, 1, 2, 1, 3, 2
+
+					near_x, top_y, near_z, face_info, // 0
+					near_x, top_y, far_z, face_info, // 1
+					near_x, bottom_y, near_z, face_info, // 2				
+
+					near_x, top_y, far_z, face_info, // 1
+					near_x, bottom_y, far_z, face_info, // 3
+					near_x, bottom_y, near_z, face_info // 2
+				};
+			break;
+		}
+		case Vert_EW: {
+			const byte size_x = face.size[0], size_y = face.size[1];
+			const byte far_x = near_x + size_x, bottom_y = top_y - size_y;
+
+			face_mesh = side
+				? (mesh_component_t[vars_per_face]) {
+					/*
+					near_x, top_y, near_z, face_info,
+					far_x, top_y, near_z, face_info,
+					near_x, bottom_y, near_z, face_info,
+					far_x, bottom_y, near_z, face_info
+					*/
+
+					// Vert_EW && side -> 0, 1, 2, 1, 3, 2
+
+					near_x, top_y, near_z, face_info, // 0
+					far_x, top_y, near_z, face_info, // 1
+					near_x, bottom_y, near_z, face_info, // 2
+
+					far_x, top_y, near_z, face_info, // 1
+					far_x, bottom_y, near_z, face_info, // 3
+					near_x, bottom_y, near_z, face_info // 2
+				}
+				: (mesh_component_t[vars_per_face]) {
+					/*
+					near_x, bottom_y, near_z, face_info,
+					far_x, top_y, near_z, face_info,
+					near_x, top_y, near_z, face_info,
+					far_x, bottom_y, near_z, face_info
+					*/
+
+					// Vert_EW && !side -> 0, 1, 2, 0, 3, 1
+
+					near_x, bottom_y, near_z, face_info, // 0
+					far_x, top_y, near_z, face_info, // 1
+					near_x, top_y, near_z, face_info, // 2
+
+					near_x, bottom_y, near_z, face_info, // 0
+					far_x, bottom_y, near_z, face_info, // 3
+					far_x, top_y, near_z, face_info // 1
+
+				};
+			break;
+		}
+	}
+
+	push_ptr_to_list(face_mesh_list, face_mesh);
+
+	//////////
+
+	/*
+	const buffer_index_t s = index_list -> length * vertices_per_face; // s = index set start
+	buffer_index_t index_set[indices_per_face] = {s, s + 1, s + 2, s, s + 3, s + 1};
+
+	if ((face.type == Vert_NS && !side) || (face.type == Vert_EW && side)) {
+		index_set[3]++;
+		index_set[5]++;
+	}
+
+	push_ptr_to_list(index_list, index_set);
+	*/
+}
+
+/////
+
+	// TODO: don't keep track of `i`
+	const size_t total_bytes = sector_face_meshes -> length * bytes_per_face;
+	memset(face_meshes_gpu, 0, total_bytes);
+	DEBUG(total_bytes, d);
+
+/////
