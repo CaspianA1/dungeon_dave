@@ -25,7 +25,7 @@ typedef struct {
 
 //////////
 
-*const sector_lighting_vertex_shader =
+const char *const sector_lighting_vertex_shader =
     "#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
@@ -245,6 +245,7 @@ StateGL demo_12_maze_init(void) {
 
 void demo_12_drawer(const StateGL* const sgl) {
 	static Camera camera;
+	static PhysicsObject physics_obj = {.heightmap = (byte*) pyramid_heightmap, .map_size = {pyramid_width, pyramid_height}};
 	static GLint camera_pos_id, model_view_projection_id;
 	static byte first_call = 1;
 
@@ -255,7 +256,7 @@ void demo_12_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	update_camera(&camera, get_next_event(), NULL);
+	update_camera(&camera, get_next_event(), &physics_obj);
 
 	glUniform3f(camera_pos_id, camera.pos[0], camera.pos[1], camera.pos[2]);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
