@@ -21,7 +21,8 @@
 - Billboard lighting that matches the sector lighting
 - Base darkest distance of attenuated light on the world size
 - Weird framerate dips in demo 17 (fix by doing gpu timing)
-- Unmap gpu buffer ptr when needed?
+- Generic drawing setup for batch draw contexts
+- Check the framerate via gpu timing (it's most likely much lower)
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen

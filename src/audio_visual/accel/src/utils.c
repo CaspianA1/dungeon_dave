@@ -31,7 +31,7 @@ Screen init_screen(const char* const title) {
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);
 	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
 
-	// SDL_GL_SetSwapInterval(0); // Disabling vsync
+	SDL_GL_SetSwapInterval(0); // Disabling vsync
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_WarpMouseInWindow(screen.window, WINDOW_W >> 1, WINDOW_H >> 1);
 
@@ -124,6 +124,15 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		SDL_GL_SwapWindow(screen -> window);
 
 		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) / performance_freq * 1000.0f;
+
+		/*
+		GLfloat f = 16.666666666666666666f;
+		// DEBUG(ms_elapsed, lf);
+		if (ms_elapsed > f) printf("Stutter by %lf\n", ms_elapsed - f);
+		else puts("None");
+		DEBUG(wait_for_exact_fps, lf);
+		*/
+
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
 		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps - 0.5f); // SDL_Delay tends to be late, so 0.5f accounts for that
 	}

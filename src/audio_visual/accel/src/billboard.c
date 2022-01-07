@@ -46,8 +46,6 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 
 	//////////
 
-	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
-
 	for (byte i = 0; i < 3; i++) {
 		glEnableVertexAttribArray(i);
 		glVertexAttribDivisor(i, 1);
@@ -73,8 +71,10 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 	static vec4 frustum_planes[6]; // TODO: share computed frustum planes between sector and billboard
 	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
 
+	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
+
 	const List cpu_billboards = draw_context -> buffers.cpu;
-	Billboard* const gpu_billboard_buffer_ptr = draw_context -> buffers.ptr_gpu;
+	Billboard* const gpu_billboard_buffer_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
 	buffer_size_t num_visible = 0;
 	const Billboard* const out_of_bounds_billboard = ((Billboard*) cpu_billboards.data) + cpu_billboards.length;
@@ -95,6 +95,7 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 		}
 	}
 
+	glUnmapBuffer(GL_ARRAY_BUFFER);
 	if (num_visible != 0) draw_billboards(draw_context, camera, num_visible);
 }
 

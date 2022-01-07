@@ -12,16 +12,13 @@ void init_batch_draw_context_gpu_buffer(BatchDrawContext* const draw_context,
 	glGenBuffers(1, &gpu_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, gpu_buffer);
 	glBufferData(GL_ARRAY_BUFFER, num_drawable_things * drawable_thing_size, NULL, GL_DYNAMIC_DRAW);
-
 	draw_context -> buffers.gpu = gpu_buffer;
-	draw_context -> buffers.ptr_gpu = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 }
 
 void deinit_batch_draw_context(const BatchDrawContext* const draw_context) {
 	deinit_list(draw_context -> buffers.cpu);
 
 	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
-	glUnmapBuffer(GL_ARRAY_BUFFER);
 	glDeleteBuffers(1, &draw_context -> buffers.gpu);
 
 	deinit_texture(draw_context -> texture_set);

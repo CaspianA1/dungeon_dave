@@ -8,7 +8,6 @@ typedef struct {
 	struct {
 		List cpu;
 		GLuint gpu;
-		void* ptr_gpu;
 	} buffers;
 
 	GLuint texture_set, shader;

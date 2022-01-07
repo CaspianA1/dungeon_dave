@@ -176,8 +176,6 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	glUniform3fv(light_pos_id, 1, camera -> pos);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
-	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
-
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
@@ -194,6 +192,8 @@ void draw_visible_sectors(const BatchDrawContext* const draw_context, const List
 	/* Each vec4 plane is composed of a vec3 surface normal and
 	the closest distance to the origin in the fourth component */
 
+	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
+
 	static vec4 frustum_planes[6];
 	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
 
@@ -201,7 +201,7 @@ void draw_visible_sectors(const BatchDrawContext* const draw_context, const List
 	const Sector* const out_of_bounds_sector = sector_data + sectors -> length;
 
 	const face_mesh_component_t* const face_meshes_cpu = draw_context -> buffers.cpu.data;
-	face_mesh_component_t* const face_meshes_gpu = draw_context -> buffers.ptr_gpu;
+	face_mesh_component_t* const face_meshes_gpu = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	buffer_size_t num_visible_faces = 0;
 
 	for (const Sector* sector = sector_data; sector < out_of_bounds_sector; sector++) {
@@ -225,7 +225,7 @@ void draw_visible_sectors(const BatchDrawContext* const draw_context, const List
 	pyramid: 816 vs 542. maze: 5796 vs 6114.
 	terrain: 150620 vs 86588. */
 
-	// If looking out at the distance with no sectors, why call glDrawArrays, or do any state switching, at all?
+	glUnmapBuffer(GL_ARRAY_BUFFER); // If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0) draw_sectors(draw_context, camera, num_visible_faces);
 }
 
