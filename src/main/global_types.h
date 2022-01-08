@@ -73,7 +73,8 @@ typedef struct {
 //////////
 
 typedef struct {
-	int chunk_dimensions[2], alloc_bytes;
+	unsigned chunk_dimensions[2];
+	size_t alloc_bytes;
 	byte* data;
 } StateMap;
 

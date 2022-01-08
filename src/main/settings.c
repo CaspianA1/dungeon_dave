@@ -108,7 +108,7 @@ Player load_player(const double jump_up_v0,
 
 void load_all_defaults(void (*load_first_level) (void), Player* const player, Weapon* const weapon) {
 	void init_screen(void);
-	StateMap init_statemap(const int, const int);
+	StateMap init_statemap(const unsigned, const unsigned);
 	void init_all_enemies(void);
 
 	void init_teleporter_resources(void);
