@@ -54,12 +54,12 @@ StateGL demo_17_init(void) {
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 	SceneState scene_state = {.skybox = init_skybox("../assets/wadi_upscaled.bmp"),
-		.heightmap = (byte*) new_heightmap, .map_size = {new_width, new_height}};
+		.heightmap = (byte*) palace_heightmap, .map_size = {palace_width, palace_height}};
 
 	//////////
-	static byte texture_id_map[terrain_height][terrain_width];
+	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		(byte*) scene_state.heightmap, (byte*) texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
+		(byte*) scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(
 		7,
@@ -84,16 +84,16 @@ StateGL demo_17_init(void) {
 
 	scene_state.sector_draw_context.texture_set = init_texture_set(TexRepeating,
 		// New + Checker:
-		1, 0, 128, 128, "../../../../assets/walls/pyramid_bricks_4.bmp"
+		// 1, 0, 128, 128, "../../../../assets/walls/pyramid_bricks_4.bmp"
 
 		// Palace:
-		/* 11, 0, 128, 128,
+		11, 0, 128, 128,
 		"../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
 		"../../../../assets/walls/window.bmp", "../../../../assets/walls/saqqara.bmp",
 		"../../../../assets/walls/sandstone.bmp", "../../../../assets/walls/cobblestone_3.bmp",
 		"../../../../assets/walls/horses.bmp", "../../../../assets/walls/mesa.bmp",
-		"../../../../assets/walls/arthouse_bricks.bmp" */
+		"../../../../assets/walls/arthouse_bricks.bmp"
 
 		// Pyramid:
 		/* 3, 0, 512, 512, "../../../../assets/walls/pyramid_bricks_4.bmp",
@@ -138,7 +138,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	update_camera(&camera, get_next_event(), &physics_obj);
+	update_camera(&camera, get_next_event(), keys[KEY_FLY] ? NULL : &physics_obj);
 	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors, &camera);
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 	draw_skybox(scene_state -> skybox, &camera);
