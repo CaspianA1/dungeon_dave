@@ -37,7 +37,7 @@ static const struct {
 	},
 
 	.accel = {.forward_back = 0.38f, .strafe = 0.4f, .xz_decel = 0.87f, .g = 13.0f},
-	.speeds = {.y_jump = 5.5f, .xz_max = 4.0f, .look = 0.08f, .tilt = 1.0f},
+	.speeds = {.y_jump = 5.5f, .xz_max = 4.0f, .look = 0.0015f, .tilt = 1.0f},
 
 	.movement_keys = {
 		SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A,

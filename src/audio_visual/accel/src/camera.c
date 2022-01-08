@@ -32,9 +32,7 @@ void init_camera(Camera* const camera, const vec3 init_pos) {
 }
 
 static void update_camera_angles(Camera* const camera, const Event* const event, const GLfloat delta_time) {
-	const GLfloat look_speed = constants.speeds.look * delta_time;
-
-	GLfloat vert_angle = camera -> angles.vert + look_speed * -event -> mouse_dy;
+	GLfloat vert_angle = camera -> angles.vert + constants.speeds.look * -event -> mouse_dy;
 	if (vert_angle > constants.camera.lims.vert) vert_angle = constants.camera.lims.vert;
 	else if (vert_angle < -constants.camera.lims.vert) vert_angle = -constants.camera.lims.vert;
 
@@ -51,7 +49,7 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 
 	//////////
 
-	camera -> angles.hori += look_speed * -event -> mouse_dx;
+	camera -> angles.hori += constants.speeds.look * -event -> mouse_dx;
 	camera -> angles.vert = vert_angle;
 	camera -> angles.tilt = tilt;
 }
@@ -59,8 +57,6 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 static void update_pos_via_physics(const Event* const event,
 	PhysicsObject* const physics_obj, const vec2 dir_xz, vec3 pos,
 	const GLfloat last_bob_delta, const GLfloat delta_time) {
-
-	// Delta time not used for this since movement will become stutter-y otherwise
 
 	/* - Crouch
 	- Accelerate

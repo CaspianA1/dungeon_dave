@@ -11,6 +11,7 @@ Screen init_screen(const char* const title) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, OPENGL_MAJOR_VERSION);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, OPENGL_MINOR_VERSION);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, DEPTH_BUFFER_BITS);
@@ -123,7 +124,6 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 
 		SDL_GL_SwapWindow(screen -> window);
 
-		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) / performance_freq * 1000.0f;
 
 		/*
 		GLfloat f = 16.666666666666666666f;
@@ -133,6 +133,7 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		DEBUG(wait_for_exact_fps, lf);
 		*/
 
+		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) / performance_freq * 1000.0f;
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
 		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps - 0.5f); // SDL_Delay tends to be late, so 0.5f accounts for that
 	}
