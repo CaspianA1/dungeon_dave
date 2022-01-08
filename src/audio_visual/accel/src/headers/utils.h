@@ -11,8 +11,17 @@
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define DEBUG_VEC(v) printf(#v " = {%lf, %lf, %lf}\n", (double) v[0], (double) v[1], (double) v[2])
+
+#define DEBUG_BITS(num) do {\
+	printf(#num " = ");\
+	for (int16_t i = (sizeof(num) << 3) - 1; i >= 0; i--)\
+		putchar(((num >> i) & 1) + '0');\
+	putchar('\n');\
+} while (0)
+
 #define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
 #define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
+
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
 // #define FORCE_SOFTWARE_RENDERER

@@ -3717,3 +3717,157 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 	DEBUG(total_bytes, d);
 
 /////
+
+	/*
+	DEBUG_BITS(last_chunk_upper_x_bits_set);
+	byte first_chunk = 0b10101010;
+	byte num_lower_bits_set_in_first_chunk = area_w % 8u;
+	DEBUG(num_lower_bits_set_in_first_chunk, d);
+
+	const byte a = (all_bits_set >> (area_x & area_w));
+	DEBUG_BITS(a);
+
+	const byte fully_set_chunks = (area_w >> 3u) - 1u;
+	DEBUG(fully_set_chunks, d);
+
+	const byte bits_for_lower_chunk = 
+	*/
+
+/////
+
+
+// A 'chunk' is a byte, or a group of 8 bits
+inlinable void set_statemap_area(const StateMap statemap, const SDL_Rect area) {
+	puts("Area setting time");
+	printf("Setting area {%d, %d, %d, %d}\n", area.x, area.y, area.w, area.h);
+
+	const byte all_bits_set = 255u;
+
+	const unsigned area_x = area.x, area_w = area.w;
+	const unsigned start_chunk_index = area_x >> 3u;
+	// const unsigned num_fully_settable_chunks = area_w >> 3u;
+
+	/*
+	const byte lower_cleared_bits_for_last_chunk = (area_w & 7u); // `x & 7 == x % 8`.
+	// In the last chunk, a certain number of upper bits are set. `255 >> x` = upper `x` bits are cleared.
+	const byte last_chunk = ~(all_bits_set >> lower_cleared_bits_for_last_chunk);
+	*/
+
+	//////////
+	// Setting middle and last chunks at the moment; set first chunk too
+	const byte num_fully_set_chunks = start_chunk_index - 1u;
+
+	// DEBUG(num_fully_set_chunks, d);
+
+	// const byte bits_for_first_chunk = 8 - (area_x & 7);
+	const byte bits_cleared_for_first_chunk_start = area_x & 7;
+	// DEBUG(bits_for_first_chunk, d);
+	// const byte first_chunk = ~(all_bits_set >> (8 - bits_cleared_for_first_chunk)) >> bits_cleared_for_first_chunk;
+	// DEBUG(bits_cleared_for_first_chunk, d);
+	const byte first_chunk = all_bits_set >> bits_cleared_for_first_chunk_start;
+
+	const byte bits_cleared_for_first_chunk_end = 3; // ???
+
+	DEBUG_BITS(first_chunk);
+
+	// first needs 6
+
+	// const unsigned bit_sum = bits_for_first_chunk + (8 - lower_cleared_bits_for_last_chunk) + num_fully_set_chunks * 8;
+	// DEBUG(bit_sum, d);
+
+	//////////
+
+	DEBUG(num_fully_set_chunks, d);
+	void print_statemap(const StateMap statemap);
+	puts("Before:");
+	print_statemap(statemap);
+
+	for (unsigned y = (unsigned) area.y; y < (unsigned) (area.y + area.h); y++) {
+		byte* const chunk_start = statemap_byte(statemap, start_chunk_index, y);
+
+		*chunk_start |= first_chunk;
+
+		// for (unsigned x = 1u; x < num_fully_settable_chunks; x++) chunk_start[x] = all_bits_set;
+
+		// memset(chunk_start + 1, all_bits_set, num_fully_set_chunks);
+		// chunk_start[num_fully_set_chunks] |= last_chunk;
+	}
+	puts("After:");
+	print_statemap(statemap);
+	puts("---");
+}
+
+///// God damn this is so hard
+
+inlinable byte bits_set_in_domain(const byte start, const byte end) {
+	const byte x_bits_set = ~(255u << (end - start));
+	return x_bits_set << start;
+}
+
+// A 'chunk' is a byte, or a group of 8 bits
+inlinable void set_statemap_area(const StateMap statemap, const SDL_Rect area) {
+	puts("Area setting time");
+	printf("Setting area {%d, %d, %d, %d}\nBefore:\n", area.x, area.y, area.w, area.h);
+
+	const byte test = bits_set_in_domain(2, 7);
+	DEBUG_BITS(test);
+
+	const unsigned area_x = area.x, area_w = area.w;
+
+	typedef struct {
+		byte left, right;
+	} BitRange;
+
+	BitRange start_chunk = {.left = 8u - (area_x & 7u)};
+	DEBUG(start_chunk.left, d);
+	start_chunk.right = (area.w >= start_chunk.left ? 0 : (8u - start_chunk.left));
+
+	// byte num_start_chunk_bits = 8u - (area_x & 7u);
+
+	// if (area_w <= 8) num_start_chunk_bits -= area_w;
+
+	// DEBUG(num_start_chunk_bits, d);
+
+	/*
+	const byte num_full_middle_chunks = area_w;
+	DEBUG(num_full_middle_chunks, d);
+
+	const byte num_end_chunk_bits = 8u - ((area_x + area_w) & 7u);
+	DEBUG(num_end_chunk_bits, d);
+	*/
+
+	void print_statemap(const StateMap statemap);
+	print_statemap(statemap);
+
+	/*
+	for (unsigned y = (unsigned) area.y; y < (unsigned) (area.y + area.h); y++) {
+		byte* const chunk_start = statemap_byte(statemap, start_chunk_index, y);
+
+		*chunk_start |= first_chunk;
+
+		// for (unsigned x = 1u; x < num_fully_settable_chunks; x++) chunk_start[x] = all_bits_set;
+
+		// memset(chunk_start + 1, all_bits_set, num_fully_set_chunks);
+		// chunk_start[num_fully_set_chunks] |= last_chunk;
+	}
+	*/
+	puts("After:");
+	print_statemap(statemap);
+	puts("---");
+}
+
+/////
+
+	/*
+	set_statemap_area(traversed_points,
+		(SDL_Rect) {sector.origin[0], origin_y, sector.size[0], sector.size[1]}
+		);
+	*/
+
+	static byte first = 1;
+	if (first) {
+		set_statemap_area(traversed_points, (SDL_Rect) {3, 2, 1, 4});
+		first = 0;
+	}
+
+/////

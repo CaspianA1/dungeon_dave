@@ -9,7 +9,7 @@
 #define set_bit(bits, mask) ((bits) |= (mask))
 
 typedef struct {
-	int chunk_dimensions[2];
+	unsigned chunk_dimensions[2];
 	size_t alloc_bytes;
 	byte* data;
 } StateMap;
