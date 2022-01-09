@@ -93,7 +93,7 @@ SECTION_PARSER_DEF(any_map) {
 				if (c < '0' || c > '9') FAIL(ParseLevelFile, "expected numerical token for %s map in '%s'.", map_type, file_name);
 			}
 
-			const int16_t map_value = atoi(curr_token);
+			const int16_t map_value = three_chars_to_int(curr_token, num_chars);
 			if (map_value > 255) FAIL(ParseLevelFile, "%s map value in '%s', '%d', "
 				"exceeds the maximum byte size.", map_type, file_name, map_value);
 

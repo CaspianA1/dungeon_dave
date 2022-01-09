@@ -50,7 +50,8 @@ SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer) 
 	return texture;
 }
 
-byte chars_to_byte(const char chars[3], const byte num_chars_to_convert) {
+// If the number exceeds 255, it's capped at that
+int16_t three_chars_to_int(const char chars[3], const byte num_chars_to_convert) {
 	int16_t number = 0;
 
 	for (byte i = 0; i < num_chars_to_convert; i++) {
@@ -58,10 +59,10 @@ byte chars_to_byte(const char chars[3], const byte num_chars_to_convert) {
 		number = number * 10 + (c - '0');
 	}
 
-	return (number > 255) ? 255 : number;
+	return number;
 }
 
-// Updates editor_height and editor_texture_id. Reads in 3 nums across function calls to update one;
+// Updates editor_height and editor_texture_id. Reads in 3 nums across function calls to update one
 static void update_editing_placement_values(EditorState* const eds, const SDL_Event* const event) {
 	static char number_input_chars[3];
 	const SDL_Keycode key = event -> key.keysym.sym;
@@ -77,7 +78,9 @@ static void update_editing_placement_values(EditorState* const eds, const SDL_Ev
 	else num_chars_inputted = 0;
 
 	if (number_input_done) {
-		byte number = chars_to_byte(number_input_chars, num_chars_inputted);
+		int16_t number = three_chars_to_int(number_input_chars, num_chars_inputted);
+		if (number > 255) number = 255;
+
 		num_chars_inputted = 0;
 
 		const byte max_texture_id = eds -> num_textures - 1; // Avoiding too big of a texture id
