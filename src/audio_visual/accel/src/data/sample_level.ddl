@@ -3,29 +3,10 @@
 
 - And no billboards for now
 
+- Required that map_size comes before maps and wall_textures comes before texture id map
+
 @name fob
 @map_size 8x7 - This must appear before any of the map definitions
-
-@heightmap
-
-1 2 3 4 10 1 1  0
-5 1 9 1 0  0 1  0
-0 0 1 9 0  0 11 0
-0 0 0 1 0  0 1  0
-0 0 0 0 1  0 1  0
-0 0 0 0 0  1 1  0
-0 0 0 0 0  0 1  4
-
-@texture_id_map
-
-9 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 1 1 0 0
-0 0 0 0 1 1 0 0
-- bob
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 3
 
 @wall_textures
 
@@ -40,5 +21,26 @@
 ../../../../assets/walls/horses.bmp
 ../../../../assets/walls/mesa.bmp
 ../../../../assets/walls/arthouse_bricks.bmp
+
+@map height
+
+1 2 3 4 10 1 1  0
+5 1 9 1 0  0 1  0
+0 0 1 9 0  0 11 0
+0 0 0 1 0  0 1  0
+0 0 0 0 1  0 1  0
+0 0 0 0 0  1 1  0
+0 0 0 0 0  0 1  255
+
+@map texture_id
+
+9 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 1 1 0 0
+0 0 0 0 1 1 0 0
+- bob
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 3
 
 - Last one

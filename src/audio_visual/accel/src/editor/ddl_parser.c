@@ -19,29 +19,63 @@ static FileContents read_file_contents(const char* const file_name) {
 
 SECTION_PARSER_DEF(name) {
 	(void) curr_token;
-	(void) file_name;
 	(void) delims;
+	(void) file_name;
 	(void) eds;
+
 	puts("Name parser");
+	*parse_status_bits |= BIT_PARSED_NAME;
 	return NEXT_PARSER_TOKEN();
 }
 
 SECTION_PARSER_DEF(map_size) {
 	(void) curr_token;
-	(void) file_name;
 	(void) delims;
+	(void) file_name;
 	(void) eds;
-	puts("Map size parser");
 
+	puts("Map size parser");
+	*parse_status_bits |= BIT_PARSED_MAP_SIZE;
 	return NEXT_PARSER_TOKEN();
 }
 
-SECTION_PARSER_DEF(heightmap) {
+SECTION_PARSER_DEF(wall_texture) {
 	(void) curr_token;
-	(void) file_name;
 	(void) delims;
+	(void) file_name;
 	(void) eds;
-	puts("Heightmap parser");
+
+	puts("Wall texture parser");
+
+	while (VARARG_SECTION_PARSER_HAS_TOKEN()) {
+		// DEBUG(curr_token, s);
+		curr_token = NEXT_PARSER_TOKEN();
+	}
+
+	*parse_status_bits |= BIT_PARSED_WALL_TEXTURES;
+	return curr_token;
+}
+
+// This parses heightmaps and texture id maps
+SECTION_PARSER_DEF(any_map) {
+	(void) parse_status_bits;
+	(void) eds;
+	puts("Any map parser");
+
+	const char* const map_type = curr_token;
+
+	const byte
+		is_heightmap = strcmp(heightmap_tag_name, map_type) == 0,
+		is_texture_id_map = strcmp(texture_id_map_tag_name, map_type) == 0;
+
+	if (!is_heightmap && !is_texture_id_map)
+		FAIL(ParseLevelFile, "unrecognized map type in '%s': %s.", file_name, map_type);
+	else if (!(*parse_status_bits & BIT_PARSED_MAP_SIZE))
+		FAIL(ParseLevelFile, "expected map size section to come before map section in '%s'.", file_name);
+	else if (is_texture_id_map && !(*parse_status_bits & BIT_PARSED_WALL_TEXTURES))
+		FAIL(ParseLevelFile, "expected texture section to come before texture id map section in '%s'.", file_name);
+
+	curr_token = NEXT_PARSER_TOKEN();
 
 	const byte expected_width = 8, expected_height = 7;
 	// byte* const map = malloc(expected_width * expected_height * sizeof(byte));
@@ -49,49 +83,27 @@ SECTION_PARSER_DEF(heightmap) {
 	for (byte y = 0; y < expected_height; y++) {
 		for (byte x = 0; x < expected_width; x++, curr_token = NEXT_PARSER_TOKEN()) {
 			if (!VARARG_SECTION_PARSER_HAS_TOKEN()) // May not be needed later on
-				FAIL(ParseLevelFile, "Ran out of tokens for heightmap in '%s'.", file_name);
+				FAIL(ParseLevelFile, "ran out of tokens for %s map in '%s'.", map_type, file_name);
 
 			const byte num_chars = strlen(curr_token);
-			if (num_chars > 3)
-				FAIL(ParseLevelFile, "Token is too long for heightmap in '%s'.", file_name);
+			if (num_chars > 3) FAIL(ParseLevelFile, "token is too long for %s map in '%s'.", map_type, file_name);
 
 			for (byte i = 0; i < num_chars; i++) {
 				const char c = curr_token[i];
-				// printf("c = '%c'\n", c);
-				if (c < '0' || c > '9')
-					FAIL(ParseLevelFile, "Expected numerical token for heightmap in '%s'.", file_name);
+				if (c < '0' || c > '9') FAIL(ParseLevelFile, "expected numerical token for %s map in '%s'.", map_type, file_name);
 			}
+
+			const int16_t map_value = atoi(curr_token);
+			if (map_value > 255) FAIL(ParseLevelFile, "%s map value in '%s', '%d', "
+				"exceeds the maximum byte size.", map_type, file_name, map_value);
+
+			// DEBUG(map_value, d);
+			/* If a texture id map, max is 32. Check that if texture id map, doesn't exceed max num textures;
+			but texture num validation should happen before texture id map section. */
 		}
 	}
 
-	return curr_token;
-}
-
-SECTION_PARSER_DEF(texture_id_map) {
-	(void) curr_token;
-	(void) file_name;
-	(void) delims;
-	(void) eds;
-	puts("Texture id map parser");
-
-	while (VARARG_SECTION_PARSER_HAS_TOKEN()) {
-		// DEBUG(curr_token, s);
-		curr_token = NEXT_PARSER_TOKEN();
-	}
-	return curr_token;
-}
-
-SECTION_PARSER_DEF(wall_texture) {
-	(void) curr_token;
-	(void) file_name;
-	(void) delims;
-	(void) eds;
-	puts("Wall texture parser");
-
-	while (VARARG_SECTION_PARSER_HAS_TOKEN()) {
-		// DEBUG(curr_token, s);
-		curr_token = NEXT_PARSER_TOKEN();
-	}
+	*parse_status_bits |= is_heightmap ? BIT_PARSED_HEIGHTMAP : BIT_PARSED_TEXTURE_ID_MAP;
 	return curr_token;
 }
 
@@ -112,6 +124,8 @@ static void parse_ddl_file(EditorState* const eds, FileContents* const file_cont
 		*const delims = " \n\t\v\f\r",
 		*const file_name = file_contents -> file_name,
 		*token = INITIAL_PARSER_TOKEN(data, delims);
+
+	byte parse_status_bits = 0;
 
 	while (token != NULL) {
 		if (token[0] == SECTION_TAG_START) {
@@ -134,14 +148,22 @@ static void parse_ddl_file(EditorState* const eds, FileContents* const file_cont
 			if ((first_arg == NULL) || (first_arg[0] == SECTION_TAG_START))
 				FAIL(ParseLevelFile, "the section tag '%s' in '%s' does not have any arguments.", tag_name, file_name);
 
-			token = matching_tag -> section_parser(first_arg, delims, file_name, eds);
+			token = matching_tag -> section_parser(&parse_status_bits, first_arg, delims, file_name, eds);
 		}
 		else FAIL(ParseLevelFile, "invalid token in '%s': '%s'.", file_name, token);
 	}
+
+	if (parse_status_bits != BITS_PARSED_ALL_MAP_SECTIONS)
+		FAIL(ParseLevelFile, "Did not include all 5 required sections in '%s'.", file_name);
 }
 
 void init_editor_state_from_ddl_file(EditorState* const eds, const char* const file_name) {
 	FileContents file_contents = read_file_contents(file_name);
-	parse_ddl_file(eds, &file_contents);
+	parse_ddl_file(eds, &file_contents); // Sets num_textures, map_size, heightmap, texture_id_map, map_name, textures
 	free(file_contents.data);
+
+	/* This should be freed:
+	heightmap, texture_id_map, and map_name, via free
+	textures, via SDL_DestroyTexture
+	renderer, via SDL_DestroyRenderer */
 }

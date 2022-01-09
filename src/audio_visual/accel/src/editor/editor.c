@@ -9,6 +9,7 @@ Plan:
 - A sample-map button
 - Read in level files
 - Verify that maps in level files are the right dimensions
+- Report repeat sections in input files
 - An 'undo previous action' feature (undoes to the action done before the mouse was clicked down and then released)
 - Later on, line and rectangle functions (or maybe just a line function)
 - Sometimes, clicking for too long freezes my computer
@@ -30,6 +31,7 @@ Plan:
 - Press a number key to change the current tex - done
 - Info bar background - done
 - Occasional info bar crashes - done
+- For the parser, a byte that tells which sections have been parsed (for detecting sections repeated, missing, and map_size after maps) - done
 */
 
 byte* map_point(const EditorState* const eds, const byte is_heightmap, const byte x, const byte y) {

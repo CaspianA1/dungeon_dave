@@ -53,8 +53,7 @@ typedef struct {
 	byte
 		num_textures, map_size[2], tile_pos[2],
 		in_texture_editing_mode,
-		// These indicate the height and texture id placed while editing
-		editor_texture_id, editor_height,
+		editor_texture_id, editor_height, // These indicate the height and texture id placed while editing
 		*heightmap, *texture_id_map;
 
 	const char* map_name;
@@ -74,7 +73,7 @@ byte* map_point(const EditorState* const eds, const byte is_heightmap, const byt
 SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer);
 byte chars_to_byte(const char chars[3], const byte num_chars_to_convert);
 
-void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer); // Expected to be used publically later
+void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer); // Expected to be used publicly later
 void deinit_editor_state(EditorState* const eds);
 
 #endif
