@@ -66,4 +66,13 @@ typedef struct {
 	SDL_Renderer* renderer;
 } EditorState;
 
+//////////
+
+// Excluded: update_editing_placement_values, edit_eds_map, render_eds_map, editor_loop
+
+byte* map_point(const EditorState* const eds, const byte is_heightmap, const byte x, const byte y);
+SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer);
+void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer); // Expected to be used publically later
+void deinit_editor_state(EditorState* const eds);
+
 #endif

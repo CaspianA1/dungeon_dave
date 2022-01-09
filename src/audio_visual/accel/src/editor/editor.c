@@ -37,8 +37,21 @@ byte* map_point(const EditorState* const eds, const byte is_heightmap, const byt
 	return map + (y * eds -> map_size[0] + x);
 }
 
+SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer) {
+	SDL_Surface* const surface = SDL_LoadBMP(path);
+	if (surface == NULL) FAIL(OpenFile, "Surface with path '%s' not found", path);
+
+	SDL_Texture* const texture = SDL_CreateTextureFromSurface(renderer, surface);
+	if (texture == NULL) FAIL(CreateTexture, "Could not create a wall texture: \"%s\"", SDL_GetError());
+
+	SDL_FreeSurface(surface);
+	return texture;
+}
+
+//////////
+
 // Updates editor_height and editor_texture_id. Reads in 3 nums across function calls to update one;
-void update_editing_placement_values(EditorState* const eds, const SDL_Event* const event) {
+static void update_editing_placement_values(EditorState* const eds, const SDL_Event* const event) {
 	static SDL_Keycode num_input_keys[3];
 	const SDL_Keycode key = event -> key.keysym.sym;
 
@@ -66,7 +79,7 @@ void update_editing_placement_values(EditorState* const eds, const SDL_Event* co
 	}
 }
 
-void edit_eds_map(EditorState* const eds) {
+static void edit_eds_map(EditorState* const eds) {
 	static byte prev_texture_edit_key = 0, first_call = 1;
 	static const Uint8* keys;
 
@@ -94,7 +107,7 @@ void edit_eds_map(EditorState* const eds) {
 	}
 }
 
-void render_eds_map(const EditorState* const eds) {
+static void render_eds_map(const EditorState* const eds) {
 	const byte map_width = eds -> map_size[0], map_height = eds -> map_size[1];
 	const int mouse_x = eds -> mouse_pos[0], mouse_y = eds -> mouse_pos[1];
 
@@ -126,8 +139,9 @@ void render_eds_map(const EditorState* const eds) {
 			const float height_ratio = (float) *map_point(eds, 1, map_x, map_y) / highest_point;
 			byte height_shade = height_ratio * height_shade_range + SMALLEST_HEIGHT_SHADE;
 
+			// Selected block shaded more. Condition will equal 1 or 0, and right shift by 1 divides by 2.
 			height_shade >>= (mouse_x >= block_pos.x && mouse_x < block_pos.x + block_pos.w
-				&& mouse_y >= block_pos.y && mouse_y < block_pos.y + block_pos.h); // Selected block shaded more
+				&& mouse_y >= block_pos.y && mouse_y < block_pos.y + block_pos.h);
 
 			SDL_SetTextureColorMod(texture, height_shade, height_shade, height_shade);
 			SDL_RenderCopy(eds -> renderer, texture, NULL, &block_pos);
@@ -135,7 +149,7 @@ void render_eds_map(const EditorState* const eds) {
 	}
 }
 
-void editor_loop(EditorState* const eds) {
+static void editor_loop(EditorState* const eds) {
 	const int16_t max_delay = 1000 / EDITOR_FPS;
 
 	SDL_Renderer* const renderer = eds -> renderer;
@@ -230,18 +244,8 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 	eds -> textures = malloc(num_textures * sizeof(SDL_Texture*));
 	eds -> renderer = renderer;
 
-	for (byte i = 0; i < num_textures; i++) {
-		const char* const path = texture_paths[i];
-		SDL_Surface* const surface = SDL_LoadBMP(path);
-		if (surface == NULL) FAIL(OpenFile, "Surface with path '%s' not found", path);
-
-		SDL_Texture* const texture = SDL_CreateTextureFromSurface(renderer, surface);
-		if (texture == NULL) FAIL(CreateTexture, "Could not create a wall texture: \"%s\"", SDL_GetError());
-
-		eds -> textures[i] = texture;
-
-		SDL_FreeSurface(surface);
-	}
+	for (byte i = 0; i < num_textures; i++)
+		eds -> textures[i] = init_texture(texture_paths[i], renderer);
 }
 
 void deinit_editor_state(EditorState* const eds) {
