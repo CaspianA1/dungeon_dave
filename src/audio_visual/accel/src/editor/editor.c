@@ -50,14 +50,11 @@ SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer) 
 	return texture;
 }
 
-// If the number exceeds 255, it's capped at that
 int16_t three_chars_to_int(const char chars[3], const byte num_chars_to_convert) {
 	int16_t number = 0;
 
-	for (byte i = 0; i < num_chars_to_convert; i++) {
-		const char c = chars[i];
-		number = number * 10 + (c - '0');
-	}
+	for (byte i = 0; i < num_chars_to_convert; i++)
+		number = number * 10 + (chars[i] - '0');
 
 	return number;
 }
