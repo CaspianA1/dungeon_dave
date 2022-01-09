@@ -5,11 +5,12 @@
 
 typedef struct {
 	SDL_Rect area;
+	char* text;
 	TTF_Font* font;
 	SDL_Texture* text_texture;
 } InfoBar;
 
-// Excluded: get_info_bar_string, update_info_bar_text
+// Excluded: update_info_bar_text, update_info_bar_texture
 
 void init_info_bar(InfoBar* const info_bar);
 void deinit_info_bar(const InfoBar* const info_bar);

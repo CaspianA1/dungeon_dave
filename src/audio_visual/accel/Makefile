@@ -2,7 +2,7 @@ CC = clang
 
 OPTIMIZE = -Ofast
 DEBUG = -fsanitize=address
-BUILD_TYPE = $(OPTIMIZE)
+BUILD_TYPE = $(DEBUG)
 
 DEMO = 17
 
@@ -19,7 +19,7 @@ all:
 	cd bin && ./accel_demo
 
 editor:
-	$(CC) $(CFLAGS) $(DEBUG) $(NON_GL_LDFLAGS) -lSDL2_ttf -o bin/editor src/editor/editor.c
+	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -lSDL2_ttf -o bin/editor src/editor/editor.c
 	./bin/editor
 
 # takes a named argument demo_id
