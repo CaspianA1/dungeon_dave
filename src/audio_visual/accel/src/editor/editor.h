@@ -72,6 +72,8 @@ typedef struct {
 
 byte* map_point(const EditorState* const eds, const byte is_heightmap, const byte x, const byte y);
 SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer);
+byte chars_to_byte(const char chars[3], const byte num_chars_to_convert);
+
 void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer); // Expected to be used publically later
 void deinit_editor_state(EditorState* const eds);
 

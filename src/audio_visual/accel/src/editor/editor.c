@@ -4,18 +4,16 @@
 #include "../data/maps.c"
 
 /*
-- 2 options: start new, and edit current. Begin with start new.
-- A bottom bar that gives the current texture and current height
-- Press a number key to change the current tex
-- A tag for music
-
 Plan:
 
 - A sample-map button
-- Read in map files
+- Read in level files
+- Verify that maps in level files are the right dimensions
 - An 'undo previous action' feature (undoes to the action done before the mouse was clicked down and then released)
 - Later on, line and rectangle functions (or maybe just a line function)
 - Sometimes, clicking for too long freezes my computer
+- 2 options: start new, and edit current. Begin with start new.
+- A tag for music
 
 - An info bar - done
 - Show height from shading - darker = higher; and a max height as an input too - done
@@ -28,8 +26,10 @@ Plan:
 - Display point height over each texture in some good way - done
 - Selected block highlighted - done
 - Textures uneven if using SDL_RenderCopyF - done and fixed
-
-- Perhaps make 4 textures, split into 4 screen segments - and then render each one into its box, and then no jitter (maybe)
+- A bottom bar that gives the current texture and current height - done
+- Press a number key to change the current tex - done
+- Info bar background - done
+- Occasional info bar crashes - done
 */
 
 byte* map_point(const EditorState* const eds, const byte is_heightmap, const byte x, const byte y) {
@@ -48,29 +48,35 @@ SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer) 
 	return texture;
 }
 
-//////////
+byte chars_to_byte(const char chars[3], const byte num_chars_to_convert) {
+	int16_t number = 0;
+
+	for (byte i = 0; i < num_chars_to_convert; i++) {
+		const char c = chars[i];
+		number = number * 10 + (c - '0');
+	}
+
+	return (number > 255) ? 255 : number;
+}
 
 // Updates editor_height and editor_texture_id. Reads in 3 nums across function calls to update one;
 static void update_editing_placement_values(EditorState* const eds, const SDL_Event* const event) {
-	static SDL_Keycode num_input_keys[3];
+	static char number_input_chars[3];
 	const SDL_Keycode key = event -> key.keysym.sym;
 
-	static byte num_input_index = 0;
+	static byte num_chars_inputted = 0;
 	byte number_input_done = 0;
 
-	if (key == SDLK_RETURN && num_input_index != 0) number_input_done = 1;
+	if (key == SDLK_RETURN && num_chars_inputted != 0) number_input_done = 1;
 	else if (key >= SDLK_0 && key <= SDLK_9) {
-		num_input_keys[num_input_index] = key;
-		if (++num_input_index == 3) number_input_done = 1;
+		number_input_chars[num_chars_inputted] = key;
+		if (++num_chars_inputted == 3) number_input_done = 1;
 	}
+	else num_chars_inputted = 0;
 
 	if (number_input_done) {
-		int16_t number = 0; // Max input = 999. 16-bit number handles that.
-		for (byte i = 0; i < num_input_index; i++) // Sets digits in `number` according to `char_digit`
-			number = number * 10 + (num_input_keys[i] - SDLK_0);
-
-		num_input_index = 0;
-		number = (number > 255) ? 255 : number; // Avoiding overflow of 255
+		byte number = chars_to_byte(number_input_chars, num_chars_inputted);
+		num_chars_inputted = 0;
 
 		const byte max_texture_id = eds -> num_textures - 1; // Avoiding too big of a texture id
 		if (eds -> in_texture_editing_mode) number = (number > max_texture_id) ? max_texture_id : number;
@@ -153,8 +159,9 @@ static void editor_loop(EditorState* const eds) {
 	const int16_t max_delay = 1000 / EDITOR_FPS;
 
 	SDL_Renderer* const renderer = eds -> renderer;
+
 	InfoBar info_bar;
-	init_info_bar(&info_bar);
+	init_info_bar(&info_bar, renderer);
 
 	while (1) {
 		const Uint32 before = SDL_GetTicks();

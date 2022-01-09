@@ -17,7 +17,7 @@ typedef struct {
 //////////
 
 #define SECTION_PARSER_NAME(type) parse_##type##_section
-#define SECTION_PARSER_ARGS (const char* curr_token, const char* const delims, const EditorState* const eds)
+#define SECTION_PARSER_ARGS (const char* curr_token, const char* const delims, const char* const file_name, const EditorState* const eds)
 #define SECTION_PARSER_RETURN_TYPE const char* // Each section parser returns the next token for the main loop to parse
 #define SECTION_PARSER_DEF(type) static SECTION_PARSER_RETURN_TYPE SECTION_PARSER_NAME(type) SECTION_PARSER_ARGS
 
