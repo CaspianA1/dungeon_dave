@@ -8,7 +8,7 @@
 
 /*
 - NEXT: new_map back part + a texmap for it
-- NEXT 2: a bounding volume hierarchy, through metasector trees (alloc through node pool)
+- NEXT 2: a bounding volume hierarchy, through metasector trees, also called binary r-trees (alloc through node pool)
 - NEXT 3: looping animations for billboards
 - NEXT 4: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 5: Fix movement physics (one example: at FPS 10, can't jump over a block) (also, both bob and movement are stuttery - framerate spikes)
@@ -23,6 +23,7 @@
 - Weird framerate dips in demo 17 (fix by doing gpu timing)
 - Generic drawing setup for batch draw contexts
 - Check the framerate via gpu timing (it's most likely much lower)
+- Can't use red cross for health since it's copyrighted
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
@@ -67,7 +68,7 @@ StateGL demo_17_init(void) {
 		(Billboard) {3, {1.0f, 1.0f}, {2.5f, 0.5f, 6.5f}},
 		(Billboard) {4, {1.0f, 1.0f}, {3.0f, 3.5f, 11.5f}},
 		(Billboard) {0, {1.0f, 1.0f}, {8.5f, 0.5f, 25.5f}},
-		(Billboard) {1, {1.0f, 1.0f}, {5.0f, 0.5f, 22.5f}},
+		(Billboard) {1, {1.0f, 1.0f}, {5.0f, 0.28f, 22.5f}},
 		(Billboard) {0, {1.0f, 1.0f}, {12.5f, 0.5f, 38.5f}},
 		(Billboard) {28, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}} // 40
 	);
