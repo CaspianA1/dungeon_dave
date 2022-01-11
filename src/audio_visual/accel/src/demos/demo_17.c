@@ -55,12 +55,12 @@ StateGL demo_17_init(void) {
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 	SceneState scene_state = {.skybox = init_skybox("../assets/mountain_2.bmp"),
-		.heightmap = (byte*) palace_heightmap, .map_size = {palace_width, palace_height}};
+		.heightmap = (byte*) terrain_heightmap, .map_size = {terrain_width, terrain_height}};
 
 	//////////
-	// static byte texture_id_map[terrain_height][terrain_width];
+	static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		(byte*) scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
+		(byte*) scene_state.heightmap, (byte*) texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(
 		7,

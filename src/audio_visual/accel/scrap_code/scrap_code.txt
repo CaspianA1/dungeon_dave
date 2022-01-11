@@ -3870,4 +3870,11 @@ inlinable void set_statemap_area(const StateMap statemap, const SDL_Rect area) {
 		first = 0;
 	}
 
+///// A bit of spike testing:
+
+		const Uint32 b4 = SDL_GetTicks();
+		SDL_GL_SwapWindow(screen -> window);
+		const Uint32 diff = SDL_GetTicks() - b4;
+		if (diff > 3) puts("Spike");
+
 /////

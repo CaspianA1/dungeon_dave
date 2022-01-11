@@ -118,20 +118,13 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 
 		resize_window_if_needed(screen -> window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		drawer(&sgl);
+
 		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
 		if (keys[KEY_PRINT_SDL_ERROR]) SDL_ERR_CHECK;
 
 		SDL_GL_SwapWindow(screen -> window);
-
-
-		/*
-		GLfloat f = 16.666666666666666666f;
-		// DEBUG(ms_elapsed, lf);
-		if (ms_elapsed > f) printf("Stutter by %lf\n", ms_elapsed - f);
-		else puts("None");
-		DEBUG(wait_for_exact_fps, lf);
-		*/
 
 		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) / performance_freq * 1000.0f;
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
