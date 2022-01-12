@@ -55,7 +55,7 @@ StateGL demo_17_init(void) {
 
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 	SceneState scene_state = {.skybox = init_skybox("../assets/mountain_2.bmp"),
-		.heightmap = (byte*) terrain_heightmap, .map_size = {terrain_width, terrain_height}};
+		.heightmap = (byte*) new_heightmap, .map_size = {new_width, new_height}};
 
 	//////////
 	static byte texture_id_map[terrain_height][terrain_width];
