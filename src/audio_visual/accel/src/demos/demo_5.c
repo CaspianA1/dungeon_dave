@@ -21,8 +21,8 @@ void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
 	SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
 
 	const GLfloat delta_time = (SDL_GetTicks() / 1000.0f) - last_time;
-	hori_angle += constants.speeds.look * delta_time * -mouse_dx;
-	vert_angle += constants.speeds.look * delta_time * -mouse_dy;
+	hori_angle += constants.speeds.look * -mouse_dx;
+	vert_angle += constants.speeds.look * -mouse_dy;
 
 	if (vert_angle > HALF_PI) vert_angle = HALF_PI;
 	else if (vert_angle < -HALF_PI) vert_angle = -HALF_PI;

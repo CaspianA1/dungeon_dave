@@ -37,13 +37,6 @@ typedef enum {
 	TexNonRepeating = GL_CLAMP_TO_EDGE
 } TextureWrapMode;
 
-typedef struct { // An animation FPS would be global
-	byte curr_frame;
-	const byte total_frames;
-	const GLuint texture;
-	float last_frame_time;
-} AnimationInstance;
-
 // Excluded: init_blank_surface, init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 
 SDL_Surface* init_surface(const char* const path);

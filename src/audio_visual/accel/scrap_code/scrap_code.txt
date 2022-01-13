@@ -3878,3 +3878,39 @@ inlinable void set_statemap_area(const StateMap statemap, const SDL_Rect area) {
 		if (diff > 3) puts("Spike");
 
 /////
+
+	/*
+	(byte*) palace_heightmap, (byte*) palace_texture_id_map, palace_width, palace_height
+	(byte*) pyramid_heightmap, (byte*) pyramid_texture_id_map, pyramid_width, pyramid_height
+	(byte*) tpt_heightmap, (byte*) tpt_texture_id_map, tpt_width, tpt_height
+	(byte*) new_heightmap, (byte*) texture_id_map, new_width, new_height
+	(byte*) terrain_heightmap, (byte*) texture_id_map, terrain_width, terrain_height
+	(byte*) tiny_heightmap, (byte*) tiny_heightmap, tiny_width, tiny_height
+	(byte*) level_one_heightmap, (byte*) level_one_texture_id_map, level_one_width, level_one_height
+	(byte*) checker_heightmap, (byte*) texture_id_map, checker_width, checker_height
+	*/
+
+/////
+
+		/*
+		7,
+		(Billboard) {2, {1.0f, 1.0f}, {4.5f, 0.5f, 6.5f}},
+		(Billboard) {2, {1.0f, 1.0f}, {2.5f, 0.5f, 6.5f}},
+		(Billboard) {2, {1.0f, 1.0f}, {3.0f, 3.5f, 11.5f}},
+		(Billboard) {0, {1.0f, 1.0f}, {8.5f, 0.5f, 25.5f}},
+		(Billboard) {1, {1.0f, 1.0f}, {5.0f, 0.5f, 22.5f}}, // 0.28f
+		(Billboard) {0, {1.0f, 1.0f}, {12.5f, 0.5f, 38.5f}},
+		(Billboard) {28, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}} // 40
+		*/
+
+/////
+
+		/*
+		TexNonRepeating, 2, 2, 64, 64,
+		"../../../../assets/objects/teleporter.bmp",
+		"../../../../assets/objects/health_kit.bmp",
+		"../../../../assets/spritesheets/bogo.bmp", 2, 3, 6,
+		"../../../../assets/spritesheets/trooper.bmp", 33, 1, 33
+		*/
+
+/////

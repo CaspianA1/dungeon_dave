@@ -5,14 +5,42 @@
 #include "list.c"
 #include "data/shaders.c"
 
+DEF_LIST_INITIALIZER(Animation, animation)
+DEF_LIST_INITIALIZER(AnimationInstance, animation_instance)
+
+void update_animation_instances(const List* const animation_instances,
+	const List* const animations, const List* const billboards) {
+
+	const GLfloat curr_time = SDL_GetTicks() / 1000.0f;
+
+	AnimationInstance* const animation_instance_data = animation_instances -> data;
+	const Animation* const animation_data = animations -> data;
+	Billboard* const billboard_data = billboards -> data;
+
+	for (buffer_size_t i = 0; i < animation_instances -> length; i++) {
+		AnimationInstance* const animation_instance = animation_instance_data + i;
+		const GLfloat time_delta = curr_time - animation_instance -> last_frame_time;
+		const Animation animation = animation_data[animation_instance -> ids.animation];
+
+		if (time_delta >= animation.secs_per_frame) {
+			buffer_size_t* const texture_id = &billboard_data[animation_instance -> ids.billboard].texture_id;
+
+			if ((*texture_id)++ >= animation.texture_id_range.end)
+				*texture_id = animation.texture_id_range.start;
+
+			animation_instance -> last_frame_time = curr_time;
+		}
+	}
+}
+
 // https://stackoverflow.com/questions/25572337/frustum-and-sphere-intersection
 static byte is_inside_plane(vec4 sphere, vec4 plane) {
-	const float dist_btwn_plane_and_sphere = glm_vec3_dot(sphere, plane) + plane[3];
+	const GLfloat dist_btwn_plane_and_sphere = glm_vec3_dot(sphere, plane) + plane[3];
 	return dist_btwn_plane_and_sphere > -sphere[3];
 }
 
 static byte billboard_in_view_frustum(const Billboard billboard, vec4 frustum_planes[6]) {
-	const float half_w = billboard.size[0] * 0.5f, half_h = billboard.size[1] * 0.5f;	
+	const GLfloat half_w = billboard.size[0] * 0.5f, half_h = billboard.size[1] * 0.5f;
 
 	vec4 sphere = { // For a sphere, first 3 components are position, and last component is radius
 		billboard.pos[0], billboard.pos[1], billboard.pos[2],
@@ -51,7 +79,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 		glVertexAttribDivisor(i, 1);
 	}
 
-	glVertexAttribIPointer(0, 1, BB_TEXTURE_ID_TYPENAME, sizeof(Billboard), (void*) 0);
+	glVertexAttribIPointer(0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), (void*) 0);
 	glVertexAttribPointer(1, 2, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, size));
 	glVertexAttribPointer(2, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, pos));
 
@@ -68,7 +96,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 }
 
 void draw_visible_billboards(const BatchDrawContext* const draw_context, const Camera* const camera) {
-	static vec4 frustum_planes[6]; // TODO: share computed frustum planes between sector and billboard
+	static vec4 frustum_planes[6]; // TODO: share computed frustum planes between sectors and billboards
 	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
 
 	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
