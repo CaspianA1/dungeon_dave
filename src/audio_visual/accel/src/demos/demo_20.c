@@ -38,7 +38,7 @@ StateGL demo_20_init(void) {
 		(Billboard) {9, {1.0f, 1.0f}, {9.0f, 1.0f, 9.0f}}
 	);
 
-	draw_context.texture_set = init_texture_set(TexNonRepeating, 3, 2, 512, 512,
+	draw_context.texture_set = init_texture_set(TexNonRepeating, 3, 2, 64, 64,
 		// "../../../../assets/objects/hot_dog.bmp",
 		"../../../../assets/walls/hieroglyphics.bmp",
 
