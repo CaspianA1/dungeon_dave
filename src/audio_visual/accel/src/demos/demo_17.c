@@ -9,10 +9,11 @@
 /*
 - NEXT: final touches on new_map + a texmap for it
 - NEXT 2: a sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
-- NEXT 3: Billboards invisible if looking down and behind at them
+- NEXT 3: billboards invisible if looking down and behind at them
 - NEXT 4: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 5: Fix movement physics (one example: at FPS 10, can't jump over a block) (also, both bob and movement are stuttery - framerate spikes)
 
+- Perlin noise-based lighting
 - A map maker. An init file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe
 - For terrain, some objects popping out for half seconds
@@ -20,7 +21,7 @@
 - Camera var names to yaw, pitch, and roll (maybe)
 - Billboard lighting that matches the sector lighting
 - Base darkest distance of attenuated light on the world size
-- Weird framerate dips in demo 17 (fix by checking gpu timing, and identifying the issue)
+- Weird framerate dips in demos 12 and 17 (fix by checking gpu timing, and identifying the issue)
 - Can't use red cross for health since it's copyrighted
 - Animation goes slower at 5 FPS
 

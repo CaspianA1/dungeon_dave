@@ -3,6 +3,7 @@
 
 #include "buffer_defs.h"
 #include "batch_draw_context.h"
+#include "texture.h"
 #include "camera.h"
 
 typedef struct { // This struct is perfectly aligned
