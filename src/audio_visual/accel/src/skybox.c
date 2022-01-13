@@ -143,7 +143,9 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_FALSE);
+
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
 
