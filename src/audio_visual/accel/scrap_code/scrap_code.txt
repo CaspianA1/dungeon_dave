@@ -3914,3 +3914,17 @@ inlinable void set_statemap_area(const StateMap statemap, const SDL_Rect area) {
 		*/
 
 /////
+
+		"vec3 v = pos_delta_world_space;\n"
+		"float noise = 0; // noise1(v.x) * noise1(fract(v.y)) / noise1(v.z);\n"
+		"noise = abs(noise);\n"
+		"if (noise > 1.0f) noise = 1.0f;\n"
+		"noise = 0;\n"
+		// "noise = abs(noise / 10.0f);\n"
+
+		"float light = (ambient_strength + diffuse() + noise) * attenuation();\n"
+		// "float n = abs(noise1(light));\n"
+		"color = texture(texture_sampler, UV).rgb * min(light, 1.0f);\n"
+	"}\n",
+
+/////
