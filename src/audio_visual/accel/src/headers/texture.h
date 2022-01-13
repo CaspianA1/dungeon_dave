@@ -47,7 +47,7 @@ typedef struct { // An animation FPS would be global
 // Excluded: init_blank_surface, init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 
 SDL_Surface* init_surface(const char* const path);
-void deinit_surface(SDL_Surface* const surface);
+#define deinit_surface SDL_FreeSurface
 
 void use_texture(const GLuint texture, const GLuint shader_program, const TextureType texture_type);
 GLuint preinit_texture(const TextureType texture_type, const TextureWrapMode wrap_mode);

@@ -18,10 +18,6 @@ SDL_Surface* init_surface(const char* const path) {
 	return converted_surface;
 }
 
-void deinit_surface(SDL_Surface* const surface) {
-	SDL_FreeSurface(surface);
-}
-
 void use_texture(const GLuint texture, const GLuint shader_program, const TextureType texture_type) {
 	static byte first_call = 1;
 	if (first_call) {
