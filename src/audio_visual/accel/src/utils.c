@@ -32,12 +32,13 @@ Screen init_screen(const char* const title) {
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);
 	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
 
-	SDL_GL_SetSwapInterval(0); // Disabling vsync
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_WarpMouseInWindow(screen.window, WINDOW_W >> 1, WINDOW_H >> 1);
 
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK) fail("initialize glew", LaunchGLEW);
+
+	SDL_GL_SetSwapInterval(1); // Enabling vsync
 
 	return screen;
 }
@@ -101,22 +102,23 @@ static void resize_window_if_needed(SDL_Window* const window) {
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
 	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
 
-	const GLfloat max_delay = 1000.0f / constants.fps;
+	// const GLfloat max_delay = 1000.0f / constants.fps;
 	byte running = 1;
 	SDL_Event event;
 	const StateGL sgl = init();
 	keys = SDL_GetKeyboardState(NULL);
 
-	const Uint64 performance_freq = SDL_GetPerformanceFrequency();
+	// const Uint64 performance_freq = SDL_GetPerformanceFrequency();
 
 	while (running) {
-		const Uint64 before = SDL_GetPerformanceCounter();
+		// const Uint64 before = SDL_GetPerformanceCounter();
 
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) running = 0;
 		}
 
 		resize_window_if_needed(screen -> window);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		drawer(&sgl);
@@ -126,9 +128,9 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 
 		SDL_GL_SwapWindow(screen -> window);
 
-		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) / performance_freq * 1000.0f;
+		/* const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) / performance_freq * 1000.0f;
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
-		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps - 0.5f); // SDL_Delay tends to be late, so 0.5f accounts for that
+		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps - 0.5f); // SDL_Delay tends to be late, so 0.5f accounts for that */
 	}
 
 	deinit(&sgl);

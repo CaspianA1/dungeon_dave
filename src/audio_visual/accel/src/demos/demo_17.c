@@ -12,6 +12,7 @@
 - NEXT 3: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 4: fix movement physics (one example: at FPS 10, can't jump over a block) (also, both bob and movement are stuttery - framerate spikes)
 - NEXT 5: up-and-down moving platforms that can also work as doors
+- NEXT 6: base fov on movement speed
 
 - Perlin noise-based lighting
 - A map maker. An init file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
