@@ -5,27 +5,13 @@
 // This demo gives a quake-like water effect
 
 StateGL demo_18_init(void) {
-	StateGL sgl = {.vertex_array = init_vao()};
-
-	// bl, br, tl -> br, tl, tr
-	const GLbyte full_screen_quad[] = {
-		-1, -1, // Bottom left
-		1, -1, // Bottom right
-		-1, 1, // Top left
-		1, 1 // Top right
-	};
-
-	sgl.num_vertex_buffers = 1;
-	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, full_screen_quad, sizeof(full_screen_quad));
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_BYTE, GL_FALSE, 0, NULL);
+	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
 	sgl.shader_program = init_shader_program(water_vertex_shader, water_fragment_shader);
 	glUseProgram(sgl.shader_program);
 
 	sgl.num_textures = 1; // ../../../../assets/walls/sand.bmp, ../../../../assets/walls/hieroglyph.bmp, ../assets/water.bmp
-	sgl.textures = init_plain_textures(sgl.num_textures, "../assets/lava.bmp", TexRepeating);
+	sgl.textures = init_plain_textures(sgl.num_textures,  "../assets/lava.bmp", TexRepeating);
 	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
 
 	return sgl;

@@ -3927,4 +3927,81 @@ inlinable void set_statemap_area(const StateMap statemap, const SDL_Rect area) {
 		"color = texture(texture_sampler, UV).rgb * min(light, 1.0f);\n"
 	"}\n",
 
+///// Old perlin stuff:
+
+*const perlin_fragment_shader =
+	"#version 330 core\n"
+
+	"out vec3 color;\n"
+
+	"uniform float scale, rand_factor;\n"
+	"uniform vec2 screen_size;\n"
+
+	/*
+	"float rand_2D(vec2 v) {\n"
+		"return fract(sin(dot(v, vec2(12.9898f, 78.233f))) * 43758.5453123f);\n"
+	"}\n"
+	*/
+
+	"float smooth_lerp(float a0, float a1, float w) {\n"
+		// "return (a1 - a0) * ((w * (w * 6.0 - 15.0) + 10.0) * w * w * w) + a0;\n"
+		"return (a1 - a0) * w + a0;\n"
+	"}\n"
+
+	// a and b to uvec2
+	"float gradient_at(int a, int b, vec2 pos) {\n"
+		"int w = 32;\n"
+		"int s = w / 2;\n"
+		"a *= 3284157443;\n"
+		"b ^= a << s | a >> w - s;\n"
+		"b *= 1911520717;\n"
+		"a ^= b << s | b >> w-s;\n"
+		"a *= 2048419325;\n"
+		"float rand = a * (3.14159265 / ~(~0 >> 1));\n"
+		"vec2 rand_gradient = vec2(sin(rand), cos(rand));\n"
+		"return dot(pos - rand_gradient, rand_gradient);\n"
+	"}\n"
+
+	//  // From 0.0f to 1.0f this time, or some non-integer scale (pos from 0 to 1, and then screen space)
+	"float smooth_noise_2D(vec2 pos) {\n"
+		"int x0 = int(pos.x), x1 = int(pos.x) + 1, y0 = int(pos.y), y1 = int(pos.y) + 1;\n"
+		"vec2 weights = fract(pos);\n"
+
+		"float ix0 = smooth_lerp(gradient_at(x0, y0, pos), gradient_at(x1, y0, pos), weights.x);\n"
+		"float ix1 = smooth_lerp(gradient_at(x0, y1, pos), gradient_at(x1, y1, pos), weights.x);\n"
+		"return smooth_lerp(ix0, ix1, weights.y);\n"
+	"}\n"
+
+	/*
+	"float noise_2D(vec2 v) {\n"
+		"vec2 top_left_pos = floor(v), delta = fract(v);\n"
+
+		"float\n" // These are random values for each corner
+			"top_left = rand_2D(top_left_pos),\n"
+			"top_right = rand_2D(top_left_pos + vec2(1.0f, 0.0f)),\n"
+			"bottom_left = rand_2D(top_left_pos + vec2(0.0f, 1.0f)),\n"
+			"bottom_right = rand_2D(top_left_pos + vec2(1.0f, 1.0f));\n"
+		
+		"vec2 weight = delta * delta * (3.0f - 2.0f * delta);\n" // Cubic hermite spline
+
+		"return\n"
+			"mix(top_left, top_right, weight.x) +\n"
+			"(bottom_left - top_left) * weight.y * (1.0f - weight.x) +\n"
+			"(bottom_right - top_right) * weight.x * weight.y;\n"
+	"}\n"
+	*/
+
+	"void main(void) {\n"
+		// "vec2 a = gl_FragCoord.xy * vec2(0.5f, -0.5f) + 0.5f;"
+		// "float noise = smooth_noise_2D(ivec2(a / screen_size));\n"
+		"float noise = smooth_noise_2D(vec2(3.2f, 1.4f));\n"
+		"color = vec3(noise);\n"
+
+		/*
+		"vec2 pixel_pos = gl_FragCoord.xy / screen_size;\n"
+		"float noise = noise_2D(pixel_pos * scale);\n"
+		"color = vec3(noise);\n"
+		*/
+	"}\n";
+
 /////

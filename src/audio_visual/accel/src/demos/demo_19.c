@@ -4,7 +4,7 @@
 
 // A trippy pyramid flying around with lots of colors
 
-const char* const demo_19_vertex_shader =
+const char *const demo_19_vertex_shader =
 	"#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"

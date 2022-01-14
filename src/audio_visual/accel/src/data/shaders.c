@@ -1,7 +1,7 @@
 #ifndef SHADERS_C
 #define SHADERS_C
 
-const char* const sector_vertex_shader =
+const char *const sector_vertex_shader =
 	"#version 330 core\n"
 	"#define max_world_height 255.0f\n"
 
@@ -160,13 +160,17 @@ const char* const sector_vertex_shader =
 	"#define sin_cycles 6.28f\n"
 	"#define speed 2.0f\n"
 
-	"layout(location = 0) in vec2 vertex_pos;\n"
-
 	"out vec2 UV, angles;\n"
 
 	"uniform float time;\n" // In seconds
 
+	// Bottom left, bottom right, top left, top right
+	"const vec2 corners[4] = vec2[4] (\n"
+		"vec2(-1, -1), vec2(1, -1), vec2(-1, 1), vec2(1, 1)\n"
+	");\n"
+
 	"void main(void) {\n"
+		"vec2 vertex_pos = corners[gl_VertexID];\n"
 		"gl_Position = vec4(vertex_pos, 0.0f, 1.0f);\n"
 		"UV = vertex_pos * vec2(0.5f, -0.5f) + 0.5f;\n"
 		"angles = UV.yx * sin_cycles + time * speed;\n"
