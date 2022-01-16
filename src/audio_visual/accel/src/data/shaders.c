@@ -10,7 +10,7 @@ const char *const sector_vertex_shader =
 
 	"out vec3 UV, face_normal, pos_delta_world_space;\n"
 
-	"uniform vec3 light_pos_world_space;\n"
+	"uniform vec3 camera_pos_world_space;\n"
 	"uniform mat4 model_view_projection;\n"
 
 	"const ivec2 pos_indices_for_UV[3] = ivec2[3](\n"
@@ -52,7 +52,7 @@ const char *const sector_vertex_shader =
 		"set_UV_from_face_id(face_id_bits);\n"
 		"set_normal_from_face_id(face_id_bits);\n"
 
-		"pos_delta_world_space = light_pos_world_space - vertex_pos_world_space;\n"
+		"pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
 	"}\n",
 
 *const sector_fragment_shader =

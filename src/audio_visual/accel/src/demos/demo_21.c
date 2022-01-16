@@ -21,38 +21,41 @@ const char *const perlin_vertex_shader =
 
 	"out vec3 color;\n"
 
-	"uniform float rand_factor;\n"
+	"uniform int choice, first_octave, octaves;\n"
+	"uniform float rand_factor, persistence;\n"
 	"uniform vec2 screen_size;\n"
-
-	"const int first_octave = 3, octaves = 8;\n"
-	"const float persistence = 0.6f;\n"
 
 	"float noise(int x, int y) {\n"
 		"return 2.0f * fract(sin(rand_factor * dot(vec2(x, y), vec2(12.9898f, 78.233f))) * 43758.5453f) - 1.0f;\n"
 	"}\n"
 
-	"float smooth_noise(int x, int y) {\n"
-		"return noise(x, y) / 4.0f\n"
-			"+ (noise(x + 1, y) + noise(x - 1, y) + noise(x, y + 1) + noise(x, y - 1)) / 8.0f\n"
-			"+ (noise(x + 1, y + 1) + noise(x + 1, y - 1) + noise(x - 1, y + 1) + noise(x - 1, y - 1)) / 16.0f;\n"
+	"float lerp(float x, float y, float weight) {\n"
+		"return mix(x, y, weight);\n"
 	"}\n"
 
-	"float cos_lerp(float x, float y, float n) {\n"
-		"float r = n * 3.1415926536f;\n"
-		"float f = (1.0f - cos(r)) * 0.5f;\n"
-		"return x * (1.0 - f) + y * f;\n"
+	// Divs to muls, and sum 3x3 mat?
+	"float noise_from_samples(int cy, int cx, mat4 samples) {\n" // Pass by reference?
+		"return samples[cx][cy] / 4.0f\n"
+			"+ (samples[cx - 1][cy] + samples[cx + 1][cy] + samples[cx][cy - 1] + samples[cx][cy + 1]) / 8.0f\n"
+			"+ (samples[cx - 1][cy - 1] + samples[cx - 1][cy + 1] + samples[cx + 1][cy - 1] + samples[cx + 1][cy + 1]) / 16.0f;\n"
 	"}\n"
 
 	"float lerp_noise(vec2 pos) {\n"
 		"int ix = int(pos.x), iy = int(pos.y);\n"
-
 		"vec2 fractions = fract(pos);\n"
 
-		"float\n"
-			"noise_top = cos_lerp(smooth_noise(ix, iy), smooth_noise(ix + 1, iy), fractions.x),\n"
-			"noise_bottom = cos_lerp(smooth_noise(ix, iy + 1), smooth_noise(ix + 1, iy + 1), fractions.x);\n"
+		"mat4 samples = mat4(\n" // Check that all samples are used
+			"noise(ix - 1, iy - 1), noise(ix, iy - 1), noise(ix + 1, iy - 1), noise(ix + 2, iy - 1),\n"
+			"noise(ix - 1, iy),     noise(ix, iy),     noise(ix + 1, iy),     noise(ix + 2, iy),\n"
+			"noise(ix - 1, iy + 1), noise(ix, iy + 1), noise(ix + 1, iy + 1), noise(ix + 2, iy + 1),\n"
+			"noise(ix - 1, iy + 2), noise(ix, iy + 2), noise(ix + 1, iy + 2), noise(ix + 2, iy + 2)\n"
+		");\n"
 
-		"return cos_lerp(noise_top, noise_bottom, fractions.y);\n"
+		"float\n"
+			"noise_top = lerp(noise_from_samples(1, 1, samples), noise_from_samples(2, 1, samples), fractions.x),\n"
+			"noise_bottom = lerp(noise_from_samples(1, 2, samples), noise_from_samples(2, 2, samples), fractions.x);\n"
+
+		"return lerp(noise_top, noise_bottom, fractions.y);\n"
 	"}\n"
 
 	"float perlin_noise_2D(vec2 pos) {\n"
@@ -80,12 +83,16 @@ StateGL demo_18_init(void) {
 }
 
 void demo_18_drawer(const StateGL* const sgl) {
-	static GLint rand_factor_id;
+	static GLint choice_id, first_octave_id, octaves_id, rand_factor_id, persistence_id;
 	static byte first_call = 1;
 
 	if (first_call) {
 		const GLuint shader = sgl -> shader_program;
+		choice_id = glGetUniformLocation(shader, "choice");
+		first_octave_id = glGetUniformLocation(shader, "first_octave");
+		octaves_id = glGetUniformLocation(shader, "octaves");
 		rand_factor_id = glGetUniformLocation(shader, "rand_factor");
+		persistence_id = glGetUniformLocation(shader, "persistence");
 		glUniform2f(glGetUniformLocation(shader, "screen_size"), WINDOW_W, WINDOW_H);
 		first_call = 0;
 	}
@@ -94,7 +101,12 @@ void demo_18_drawer(const StateGL* const sgl) {
 	const GLfloat step = 0.00001f;
 	if (keys[SDL_SCANCODE_T]) rand_factor += step;
 	if (keys[SDL_SCANCODE_Y]) rand_factor -= step;
+
+	glUniform1i(choice_id, keys[SDL_SCANCODE_C]);
+	glUniform1i(first_octave_id, 3);
+	glUniform1i(octaves_id, 8);
 	glUniform1f(rand_factor_id, rand_factor);
+	glUniform1f(persistence_id, 0.6f);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

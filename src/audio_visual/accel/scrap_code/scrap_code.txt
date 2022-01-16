@@ -4004,4 +4004,93 @@ inlinable void set_statemap_area(const StateMap statemap, const SDL_Rect area) {
 		*/
 	"}\n";
 
+///// The old perlin lerper:
+
+	"float cos_lerp(float a, float b, float weight) {\n"
+		"float r = weight * 3.1415926536f;\n"
+		"float f = (1.0f - cos(r)) * 0.5f;\n"
+		"return a * (1.0 - f) + b * f;\n"
+	"}\n"
+
+/////
+
+		/*
+		"float\n"
+			"center = noise(ix, iy), top_right = noise(ix + 1, iy),\n"
+			"bottom_left = noise(ix, iy + 1), bottom_right = noise(ix + 1, iy + 1);\n"
+		*/
+
+		/*
+		"float\n"
+			"a = noise(ix - 1, iy - 1), b = noise(ix, iy - 1), c = noise(ix, iy + 1),  d = noise(ix, iy + 2),\n"
+			"e = noise(ix - 1, iy),     f = noise(ix, iy),     g = noise(ix + 1, iy),  h = noise(ix + 1, iy),\n"
+			"i = noise(ix - 1, iy + 1), j = noise(ix, iy + 1), k = noise(ix + 1, iy + 1), l = noise(ix + 1, iy + 2);\n"
+		
+		"float tl = (a + b + d + e) / 4.0f, tr = (b + c + e + f) / 4.0f, bl = (d + e + g + h) / 4.0f, br = (e + f + h + i) / 4.0f;\n"
+
+		"float top = mix(tl, tr, fractions.x), bottom = mix(bl, br, fractions.x);\n"
+		"return mix(top, bottom, fractions.y);\n"
+		*/
+
+/////
+
+		/*
+		tl = smooth_noise(ix, iy)
+		tl = noise(ix, iy) / 4.0f
+			+ (noise(ix + 1, iy) + noise(ix - 1, iy) + noise(ix, iy + 1) + noise(ix, iy - 1)) / 8.0f
+			+ (noise(ix + 1, iy + 1) + noise(ix + 1, iy - 1) + noise(x - 1, iy + 1) + noise(ix - 1, iy - 1)) / 16.0f
+
+		tr = smooth_noise(ix + 1, iy)
+		tr = noise(ix + 1, iy) / 4.0f
+			+ (noise(ix + 1 + 1, iy) + noise(ix + 1 - 1, iy) + noise(ix + 1, iy + 1) + noise(ix + 1, iy - 1)) / 8.0f
+			+ (noise(ix + 1 + 1, iy + 1) + noise(ix + 1 + 1, iy - 1) + noise(ix - 1 + 1, iy + 1) + noise(ix - 1 + 1, iy + 1)) / 16.0f
+		*/
+
+/////
+
+		/*
+		also need
+
+		tr:
+		- noise(ix + 2, iy)
+		- noise(ix + 2, iy + 1)
+		- noise(ix + 2, iy - 1)
+
+		bl:
+		- noise(ix, iy + 2)
+		- noise(ix + 1, iy + 2)
+		- noise(ix - 1, iy + 2)
+
+		br:
+		- noise(ix + 2, iy + 1)
+		- noise(ix + 1, iy + 2)
+		- noise(ix + 2, iy + 2)
+		- noise(ix + 2, iy) (already)
+		- noise(ix, iy + 2)
+		*/
+
+/////
+
+		// Into some sort of matrix operation, perhaps
+
+		/*
+		"float\n"
+			"a = noise(ix - 1, iy - 1), b = noise(ix, iy - 1), c = noise(ix + 1, iy - 1), d = noise(ix + 2, iy - 1),\n"
+			"e = noise(ix - 1, iy),     f = noise(ix, iy),     g = noise(ix + 1, iy),     h = noise(ix + 2, iy),\n"
+			"i = noise(ix - 1, iy + 1), j = noise(ix, iy + 1), k = noise(ix + 1, iy + 1), l = noise(ix + 2, iy + 1),\n"
+			"m = noise(ix - 1, iy + 2), n = noise(ix, iy + 2), o = noise(ix + 1, iy + 2), p = noise(ix + 2, iy + 2);\n"
+		*/
+
+		// Take in a center
+
+		/*
+		"mat4 samples = mat4(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);\n"
+		*/
+
+/////
+
+		"float bl = noise(ix, iy + 1) / 4.0f\n" // smooth_noise(ix, iy + 1)
+			"+ (noise(ix + 1, iy + 1) + noise(ix - 1, iy + 1) + noise(ix, iy + 1 + 1) + noise(ix, iy - 1 + 1)) / 8.0f\n"
+			"+ (noise(ix + 1, iy + 1 + 1) + noise(ix + 1, iy - 1 + 1) + noise(ix - 1, iy + 1 + 1) + noise(ix - 1, iy - 1 + 1)) / 16.0f;\n"
+
 /////
