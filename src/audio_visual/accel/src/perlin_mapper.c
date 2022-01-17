@@ -1,7 +1,6 @@
 #include <SDL2/SDL.h>
 
-// #define PIXEL_FORMAT SDL_PIXELFORMAT_INDEX8
-#define PIXEL_FORMAT SDL_PIXELFORMAT_ARGB8888
+#define PIXEL_FORMAT SDL_PIXELFORMAT_INDEX8
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
 typedef float vec2[2];
@@ -12,8 +11,8 @@ typedef float mat4[4][4];
 const int first_octave = 3, octaves = 50;
 
 const float
-	inner_rand_multiplier = 1.32f, outer_rand_multiplier = 2.0f, rand_subtrahend = 1.0f,
-	persistence = 0.6f, scale = 1.0f, result_addend = 0.2f;
+	inner_rand_multiplier = 1.43f, outer_rand_multiplier = 2.0f, rand_subtrahend = 1.0f,
+	persistence = 0.65f, scale = 1.0f, result_addend = 0.4f;
 
 //////////
 
@@ -43,6 +42,7 @@ float noise_from_samples(const int cx, const int cy, const mat4 samples) {
 
 float lerp_noise(const vec2 pos) {
 	const int ix = pos[0], iy = pos[1];
+
 	const mat4 samples = {
 		{noise(ix - 1, iy - 1), noise(ix, iy - 1), noise(ix + 1, iy - 1), noise(ix + 2, iy - 1)},
 		{noise(ix - 1, iy),     noise(ix, iy),     noise(ix + 1, iy),     noise(ix + 2, iy)},
@@ -66,32 +66,33 @@ float perlin_2D(const vec2 pos) {
 	// Fractal brownian motion
 	for (int i = first_octave; i < octaves + first_octave; i++, frequency <<= 1, amplitude *= persistence)
 		noise += lerp_noise((vec2) {pos[0] * frequency, pos[1] * frequency}) * amplitude;
-
-	if (noise < 0.0f) return 0.0f;
-	else if (noise > 1.0f) return 1.0f;
-	return noise;
+	if (noise > 1.0f) return 1.0f;
+	return (noise < 0.0f) ? 0.0f : noise;
 }
 
 //////////
-
-Uint32* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y, const int bpp) {
-	return (Uint32*) (((Uint8*) surface -> pixels) + y * surface -> pitch + x * bpp); // TODO: make simpler
-}
 
 SDL_Surface* make_perlin_map(const int size[2]) {
 	SDL_Surface* const perlin_map = SDL_CreateRGBSurfaceWithFormat(0,
 		size[0], size[1], SDL_BITSPERPIXEL(PIXEL_FORMAT), PIXEL_FORMAT);
 
-	const SDL_PixelFormat* const format = perlin_map -> format;
-	const Uint8 bpp = format -> BytesPerPixel;
+	SDL_LockSurface(perlin_map);
+	// Uint8* palette_index = perlin_map -> pixels;
+
+	enum {num_colors = 256};
+	SDL_Color palette[num_colors];
+	for (int i = 0; i < num_colors; i++) palette[i] = (SDL_Color) {i, i, i, 255};
+	SDL_SetPaletteColors(perlin_map -> format -> palette, palette, 0, num_colors);
+
 	const vec2 downscale_vals = {1.0f / size[0] * scale, 1.0f / size[1] * scale};
 
-	for (int y = 0; y < size[1]; y++) {
+	const int bytes_per_row = perlin_map -> pitch;
+	Uint8* index_row = perlin_map -> pixels;
+
+	for (int y = 0; y < size[1]; y++, index_row += bytes_per_row) {
 		const float downscaled_y = y * downscale_vals[1];
-		for (int x = 0; x < size[0]; x++) {
-			const Uint8 color = perlin_2D((vec2) {x * downscale_vals[0], downscaled_y}) * 255;
-			*read_surface_pixel(perlin_map, x, y, bpp) = SDL_MapRGB(format, color, color, color);
-		}
+		for (int x = 0; x < size[0]; x++)
+			index_row[x] = perlin_2D((vec2) {x * downscale_vals[0], downscaled_y}) * num_colors;
 	}
 
 	SDL_UnlockSurface(perlin_map);
@@ -99,7 +100,6 @@ SDL_Surface* make_perlin_map(const int size[2]) {
 }
 
 /*
-- Get an 8-bit pixel format
 - This should take command line arguments later
 - 2D first, 3D later
 - Compile this with the map code once done

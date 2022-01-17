@@ -4110,3 +4110,24 @@ inlinable void set_statemap_area(const StateMap statemap, const SDL_Rect area) {
 			const Uint8 color = val * 255;
 
 /////
+
+	SDL_Color palette[256];
+	for (Uint8 i = 0; i < 255; i++) palette[i] = (SDL_Color) {i, i, i, 255};
+	int a = SDL_SetPaletteColors(perlin_map -> format -> palette, palette, 0, 256);
+	DEBUG(a, d);
+
+	const int index = ((Uint8*) perlin_map -> pixels)[2];
+	const SDL_Color c = perlin_map -> format -> palette -> colors[index];
+	printf("c = {%d, %d, %d, %d}\n", c.r, c.g, c.b, c.a);
+
+/////
+
+/*
+- Get an 8-bit pixel format - done
+- This should take command line arguments later
+- 2D first, 3D later
+- Compile this with the map code once done
+- Map widths 1, 2, 3, 5, 6, 7, ... get weird artifacts - done
+*/
+
+/////
