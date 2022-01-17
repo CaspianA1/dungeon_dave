@@ -77,7 +77,6 @@ SDL_Surface* make_perlin_map(const int size[2]) {
 		size[0], size[1], SDL_BITSPERPIXEL(PIXEL_FORMAT), PIXEL_FORMAT);
 
 	SDL_LockSurface(perlin_map);
-	// Uint8* palette_index = perlin_map -> pixels;
 
 	enum {num_colors = 256};
 	SDL_Color palette[num_colors];
