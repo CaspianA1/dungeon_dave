@@ -66,6 +66,7 @@ float perlin_2D(const vec2 pos) {
 	// Fractal brownian motion
 	for (int i = first_octave; i < octaves + first_octave; i++, frequency <<= 1, amplitude *= persistence)
 		noise += lerp_noise((vec2) {pos[0] * frequency, pos[1] * frequency}) * amplitude;
+
 	if (noise > 1.0f) return 1.0f;
 	return (noise < 0.0f) ? 0.0f : noise;
 }
