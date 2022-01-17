@@ -4094,3 +4094,19 @@ inlinable void set_statemap_area(const StateMap statemap, const SDL_Rect area) {
 			"+ (noise(ix + 1, iy + 1 + 1) + noise(ix + 1, iy - 1 + 1) + noise(ix - 1, iy + 1 + 1) + noise(ix - 1, iy - 1 + 1)) / 16.0f;\n"
 
 /////
+
+
+	for (int y = 0; y < size[1]; y++) {
+		float ry = -((y * rescale_vals[1]) - 0.5f);
+		// DEBUG(ry, lf);
+		for (int x = 0; x < size[0]; x++) {
+
+			float rx = 0.5f - (x * rescale_vals[0]);
+
+			float val = perlin_2D((vec2) {rx, ry});
+			// float val = perlin_2D((vec2) {x * rescale_vals[0] + 0.5f, y * rescale_vals[1] - 0.5f});
+			// if (val < 0.0f) printf("Bad");
+			// const float val = perlin_2D(x * rescale_vals[0], y * ) + result_addend;
+			const Uint8 color = val * 255;
+
+/////

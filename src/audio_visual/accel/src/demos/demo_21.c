@@ -29,22 +29,18 @@ const char *const perlin_vertex_shader =
 		"return 2.0f * fract(sin(rand_factor * dot(vec2(x, y), vec2(12.9898f, 78.233f))) * 43758.5453f) - 1.0f;\n"
 	"}\n"
 
-	"float lerp(float x, float y, float weight) {\n"
-		"return mix(x, y, weight);\n"
-	"}\n"
-
 	// Divs to muls, and sum 3x3 mat?
-	"float noise_from_samples(int cy, int cx, mat4 samples) {\n" // Pass by reference?
-		"return samples[cx][cy] / 4.0f\n"
-			"+ (samples[cx - 1][cy] + samples[cx + 1][cy] + samples[cx][cy - 1] + samples[cx][cy + 1]) / 8.0f\n"
-			"+ (samples[cx - 1][cy - 1] + samples[cx - 1][cy + 1] + samples[cx + 1][cy - 1] + samples[cx + 1][cy + 1]) / 16.0f;\n"
+	"float noise_from_samples(int cx, int cy, mat4 samples) {\n" // Pass by reference?
+		"return samples[cy][cx] / 4.0f\n"
+			"+ (samples[cy - 1][cx] + samples[cy + 1][cx] + samples[cy][cx - 1] + samples[cy][cx + 1]) / 8.0f\n"
+			"+ (samples[cy - 1][cx - 1] + samples[cy - 1][cx + 1] + samples[cy + 1][cx - 1] + samples[cy + 1][cx + 1]) / 16.0f;\n"
 	"}\n"
 
 	"float lerp_noise(vec2 pos) {\n"
 		"int ix = int(pos.x), iy = int(pos.y);\n"
 		"vec2 fractions = fract(pos);\n"
 
-		"mat4 samples = mat4(\n" // Check that all samples are used
+		"mat4 samples = mat4(\n" // This is in row-major order
 			"noise(ix - 1, iy - 1), noise(ix, iy - 1), noise(ix + 1, iy - 1), noise(ix + 2, iy - 1),\n"
 			"noise(ix - 1, iy),     noise(ix, iy),     noise(ix + 1, iy),     noise(ix + 2, iy),\n"
 			"noise(ix - 1, iy + 1), noise(ix, iy + 1), noise(ix + 1, iy + 1), noise(ix + 2, iy + 1),\n"
@@ -52,19 +48,17 @@ const char *const perlin_vertex_shader =
 		");\n"
 
 		"float\n"
-			"noise_top = lerp(noise_from_samples(1, 1, samples), noise_from_samples(2, 1, samples), fractions.x),\n"
-			"noise_bottom = lerp(noise_from_samples(1, 2, samples), noise_from_samples(2, 2, samples), fractions.x);\n"
+			"noise_top = mix(noise_from_samples(1, 1, samples), noise_from_samples(2, 1, samples), fractions.x),\n"
+			"noise_bottom = mix(noise_from_samples(1, 2, samples), noise_from_samples(2, 2, samples), fractions.x);\n"
 
-		"return lerp(noise_top, noise_bottom, fractions.y);\n"
+		"return mix(noise_top, noise_bottom, fractions.y);\n"
 	"}\n"
 
 	"float perlin_noise_2D(vec2 pos) {\n"
-		"float sum = 0.0f;\n"
-		"for (int i = first_octave; i < octaves + first_octave; i++) {\n"
-			"int frequency = 2 << (i - 1);\n"
-			"float amplitude = pow(persistence, i);\n"
+		"float sum = 0.0f, amplitude = pow(persistence, first_octave);\n"
+		"int frequency = 2 << (first_octave - 1);\n"
+		"for (int i = first_octave; i < octaves + first_octave; i++, frequency <<= 1, amplitude *= persistence)\n"
 			"sum += lerp_noise(pos * frequency) * amplitude;\n"
-		"}\n"
 		"return sum;\n"
 	"}\n"
 

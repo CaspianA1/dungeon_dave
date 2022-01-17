@@ -22,6 +22,10 @@ editor:
 	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -lSDL2_ttf -o bin/editor src/editor/editor.c
 	./bin/editor
 
+perlin_mapper:
+	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -o bin/perlin_mapper src/perlin_mapper.c
+	./bin/perlin_mapper
+
 # takes a named argument demo_id
 build_any:
 	$(CC) $(CFLAGS) $(BUILD_TYPE) $(LDFLAGS) -D DEMO_$(demo_id) -o bin/$(OUT) src/demos/demo_$(demo_id).c
