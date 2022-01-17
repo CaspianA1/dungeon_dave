@@ -101,6 +101,7 @@ SDL_Surface* make_perlin_map(const int size[2]) {
 - Get an 8-bit pixel format
 - This should take command line arguments later
 - 2D first, 3D later
+- Compile this with the map code once done
 */
 
 int main(void) {
