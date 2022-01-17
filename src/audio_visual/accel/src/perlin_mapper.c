@@ -9,11 +9,11 @@ typedef float mat4[4][4];
 
 //////////
 
-const int first_octave = 3, octaves = 8;
+const int first_octave = 3, octaves = 50;
 
 const float
-	inner_rand_multiplier = 1.21f, outer_rand_multiplier = 2.0f, rand_subtrahend = 1.0f,
-	persistence = 0.6f, scale = 1.0f, result_addend = 0.3f;
+	inner_rand_multiplier = 1.32f, outer_rand_multiplier = 2.0f, rand_subtrahend = 1.0f,
+	persistence = 0.6f, scale = 1.0f, result_addend = 0.2f;
 
 //////////
 
@@ -60,15 +60,16 @@ float lerp_noise(const vec2 pos) {
 }
 
 float perlin_2D(const vec2 pos) {
-	float sum = result_addend, amplitude = powf(persistence, first_octave);
+	float noise = result_addend, amplitude = powf(persistence, first_octave);
 	int frequency = 2 << (first_octave - 1);
 
+	// Fractal brownian motion
 	for (int i = first_octave; i < octaves + first_octave; i++, frequency <<= 1, amplitude *= persistence)
-		sum += lerp_noise((vec2) {pos[0] * frequency, pos[1] * frequency}) * amplitude;
+		noise += lerp_noise((vec2) {pos[0] * frequency, pos[1] * frequency}) * amplitude;
 
-	if (sum < 0.0f) return 0.0f;
-	else if (sum > 1.0f) return 1.0f;
-	return sum;
+	if (noise < 0.0f) return 0.0f;
+	else if (noise > 1.0f) return 1.0f;
+	return noise;
 }
 
 //////////
