@@ -6,9 +6,9 @@
 #include "sector.c"
 
 /*
-void print_face(const Face face, const char* const prefix_msg) {
-	const char* const type_string =
-		(char*[]) {"Flat", "Vert_NS", "Vert_EW"}[face.type];
+void print_face(const Face face, const GLchar* const prefix_msg) {
+	const GLchar* const type_string =
+		(GLchar*[]) {"Flat", "Vert_NS", "Vert_EW"}[face.type];
 
 	printf("%s{.type = %s, .origin = {%d, %d}, .size = {%d, %d}}\n",
 		prefix_msg, type_string, face.origin[0],

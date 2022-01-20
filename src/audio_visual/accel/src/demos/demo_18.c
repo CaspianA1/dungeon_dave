@@ -5,14 +5,15 @@
 // This demo gives a quake-like water effect
 
 StateGL demo_18_init(void) {
-	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
+	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 1};
 
 	sgl.shader_program = init_shader_program(water_vertex_shader, water_fragment_shader);
 	glUseProgram(sgl.shader_program);
 
 	sgl.num_textures = 1; // ../../../../assets/walls/sand.bmp, ../../../../assets/walls/hieroglyph.bmp, ../assets/water.bmp
-	sgl.textures = init_plain_textures(sgl.num_textures,  "../assets/lava.bmp", TexRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
+	sgl.textures = malloc(sizeof(GLuint));
+	*sgl.textures = init_plain_texture("../assets/lava.bmp", TexPlain, TexRepeating, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
+	use_texture(*sgl.textures, sgl.shader_program, "texture_sampler", TexPlain, 0);
 
 	return sgl;
 }
@@ -22,7 +23,7 @@ void demo_18_drawer(const StateGL* const sgl) {
 	static byte first_call = 1;
 
 	if (first_call) {
-		time_id = glGetUniformLocation(sgl -> shader_program, "time");
+		INIT_UNIFORM(time, sgl -> shader_program);
 		first_call = 0;
 	}
 

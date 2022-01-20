@@ -20,7 +20,7 @@ StateGL demo_1_init(void) {
 	demo_1_init_vertex_data(&sgl);
 	sgl.num_textures = 0;
 
-	const char* const vertex_shader =
+	const GLchar* const vertex_shader =
 		"#version 330 core\n" // 140 -> OpenGL 3.1 (but that shader wouldn't compile)
 
 		"layout(location = 0) in vec3 vertex_pos_world_space;\n"

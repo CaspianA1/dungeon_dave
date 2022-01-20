@@ -4,7 +4,8 @@ OPTIMIZE = -Ofast
 DEBUG = -fsanitize=address
 BUILD_TYPE = $(OPTIMIZE)
 
-DEMO = 21
+DEMO = 12
+TEST_RANGE = 15..21
 
 OUT = accel_demo
 
@@ -30,9 +31,9 @@ perlin_mapper:
 build_any:
 	$(CC) $(CFLAGS) $(BUILD_TYPE) $(LDFLAGS) -D DEMO_$(demo_id) -o bin/$(OUT) src/demos/demo_$(demo_id).c
 
-# tests demos from 1 to DEMO, stopping if one fails to build
-test_all:
-	for i in {$(DEMO)..1}; do \
+# tests demos in the test range, stopping if one fails to build
+test:
+	for i in {$(TEST_RANGE)}; do \
 		if !(make build_any demo_id=$$i) then break; \
 		else ./bin/accel_demo & \
 		fi \

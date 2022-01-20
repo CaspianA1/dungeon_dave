@@ -2,6 +2,29 @@
 #include "../data/shaders.c"
 #include "../texture.c"
 
+// This is legacy code that used to be in texture.c
+GLuint* init_plain_textures(const GLsizei num_textures, ...) {
+	va_list args;
+	va_start(args, num_textures);
+
+	GLuint* const textures = malloc(num_textures * sizeof(GLuint));
+	glGenTextures(num_textures, textures);
+
+	for (int i = 0; i < num_textures; i++) {
+		const GLchar* const surface_path = va_arg(args, GLchar*);
+		const TextureWrapMode wrap_mode = va_arg(args, TextureWrapMode);
+
+		textures[i] = preinit_texture(TexPlain, wrap_mode);
+		SDL_Surface* const surface = init_surface(surface_path);
+		write_surface_to_texture(surface, TexPlain, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
+		glGenerateMipmap(TexPlain);
+		deinit_surface(surface);
+	}
+
+	va_end(args);
+	return textures;
+}
+
 /*
 vert_1: on zy (2, 1)
 vert_2: on xy (0, 1)
@@ -28,7 +51,7 @@ expanded:
 	"UV = vec2(vertex_pos_model_space.z, 1.0f - vertex_pos_model_space.x);\n"
 */
 
-const char* const demo_4_vertex_shader =
+const GLchar* const demo_4_vertex_shader =
 	"#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
@@ -90,7 +113,8 @@ StateGL demo_4_init(void) {
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/hieroglyph.bmp", TexNonRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
+
+	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
 
 	// For textures with an alpha channel, enable this
 	/* glEnable(GL_BLEND);

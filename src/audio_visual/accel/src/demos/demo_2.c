@@ -17,15 +17,15 @@ void demo_2_configurable_matrix_setup(const GLuint shader_program,
 	glm_mul(projection, view_times_model, model_view_projection);
 
 	if (set_up_mvp) {
-		static GLuint matrix_id;
+		static GLint model_view_projection_id;
 		static byte first_call = 1;
 
 		if (first_call) {
-			matrix_id = glGetUniformLocation(shader_program, "model_view_projection");
+			INIT_UNIFORM(model_view_projection, shader_program);
 			first_call = 0;
 		}
 
-		glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &model_view_projection[0][0]);
+		glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &model_view_projection[0][0]);
 	}
 }
 
@@ -40,7 +40,7 @@ StateGL demo_2_init(void) {
 	demo_1_init_vertex_data(&sgl);
 	sgl.num_textures = 0;
 
-	const char* const vertex_shader =
+	const GLchar* const vertex_shader =
 		"#version 330 core\n"
 
 		"layout(location = 0) in vec3 vertex_pos_world_space;\n"

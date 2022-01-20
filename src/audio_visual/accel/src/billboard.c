@@ -57,19 +57,21 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	const Camera* const camera, const buffer_size_t num_visible_billboards) {
 
 	const GLuint shader = draw_context -> shader;
+	glUseProgram(shader);
 
 	static byte first_call = 1;
-	static GLint right_id, view_projection_id;
+	static GLint right_xz_world_space_id, view_projection_id;
 
 	if (first_call) {
-		right_id = glGetUniformLocation(shader, "right_xz_world_space");
-		view_projection_id = glGetUniformLocation(shader, "view_projection");
+		INIT_UNIFORM(right_xz_world_space, shader);
+		INIT_UNIFORM(view_projection, shader);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		first_call = 0;
+
+		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, BILLBOARD_TEXTURE_UNIT);
 	}
 
-	glUseProgram(shader);
-	glUniform2f(right_id, camera -> right_xz[0], camera -> right_xz[1]);
+	glUniform2f(right_xz_world_space_id, camera -> right_xz[0], camera -> right_xz[1]);
 	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera -> view_projection[0][0]);
 
 	//////////
@@ -82,8 +84,6 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	glVertexAttribIPointer(0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), (void*) 0);
 	glVertexAttribPointer(1, 2, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, size));
 	glVertexAttribPointer(2, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, pos));
-
-	use_texture(draw_context -> texture_set, shader, TexSet);
 
 	glEnable(GL_BLEND);
 	glDisable(GL_CULL_FACE);

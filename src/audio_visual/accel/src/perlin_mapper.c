@@ -11,11 +11,11 @@ typedef floating_t mat4[4][4];
 
 //////////
 
-const integer_t first_octave = 1ul, octaves = 60ull;
+const integer_t first_octave = 3ul, octaves = 60ull;
 
 const floating_t
-	inner_rand_multiplier = 1.51, outer_rand_multiplier = 2.0, rand_subtrahend = 1.0,
-	persistence = 0.7, scale = 1.0, result_addend = 0.4;
+	inner_rand_multiplier = 1.64, outer_rand_multiplier = 2.0, rand_subtrahend = 1.0,
+	persistence = 0.6, scale = 1.0, result_addend = 0.3;
 
 //////////
 
@@ -114,7 +114,7 @@ int main(void) {
 		return 1;
 	}
 
-	SDL_Surface* const perlin_map = make_perlin_map((integer_t[2]) {1024ull, 1024ull});
+	SDL_Surface* const perlin_map = make_perlin_map((integer_t[2]) {256ull, 256ull});
 	SDL_SaveBMP(perlin_map, "out.bmp");
 	SDL_FreeSurface(perlin_map);
 

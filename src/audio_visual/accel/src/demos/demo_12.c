@@ -25,7 +25,7 @@ typedef struct {
 
 //////////
 
-const char *const sector_lighting_vertex_shader =
+const GLchar *const sector_lighting_vertex_shader =
     "#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
@@ -179,6 +179,8 @@ void init_sector_list_vbo(OldSectorList* const sector_list) {
 }
 
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
+	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone; calling this early mitigates the problem of initial flickering
+
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
 	OldSectorList sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
@@ -246,23 +248,25 @@ StateGL demo_12_maze_init(void) {
 void demo_12_drawer(const StateGL* const sgl) {
 	static Camera camera;
 	static PhysicsObject physics_obj = {.heightmap = (byte*) pyramid_heightmap, .map_size = {pyramid_width, pyramid_height}};
-	static GLint camera_pos_id, model_view_projection_id;
+	static GLint camera_pos_world_space_id, model_view_projection_id;
 	static byte first_call = 1;
+
+	const GLuint shader = sgl -> shader_program;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {1.5f, 1.0f, 1.5f});
-		camera_pos_id = glGetUniformLocation(sgl -> shader_program, "camera_pos_world_space");
-		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
+		INIT_UNIFORM(camera_pos_world_space, shader);
+		INIT_UNIFORM(model_view_projection, shader);
 		first_call = 0;
 	}
 
 	update_camera(&camera, get_next_event(), &physics_obj);
 
-	glUniform3f(camera_pos_id, camera.pos[0], camera.pos[1], camera.pos[2]);
+	glUniform3f(camera_pos_world_space_id, camera.pos[0], camera.pos[1], camera.pos[2]);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
 	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
-	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);
+	use_texture(sgl -> textures[0], shader, "texture_sampler", TexPlain, 0);
 
 	const OldSectorList* const sector_list = sgl -> any_data;
 	glDrawArrays(GL_TRIANGLES, 0, sector_list -> num_vertices);

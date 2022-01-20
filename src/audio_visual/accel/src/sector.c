@@ -88,7 +88,7 @@ List generate_sectors_from_maps(
 				height = *map_point((byte*) heightmap, x, y, map_width),
 				texture_id = *map_point((byte*) texture_id_map, x, y, map_width);
 
-			if (texture_id >= MAX_NUM_SECTOR_TEXTURES) {
+			if (texture_id >= MAX_NUM_SECTOR_SUBTEXTURES) {
 				fprintf(stderr, "Sector creation failure at pos {%d, %d}; texture ID = %d.\n", x, y, texture_id);
 				fail("create a sector because the texture ID is too large", TextureIDIsTooLarge);
 			}
@@ -152,28 +152,31 @@ static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) 
 }
 
 static void draw_sectors(const BatchDrawContext* const draw_context,
-	const Camera* const camera, const buffer_size_t num_visible_faces) {
+	const Camera* const camera, const buffer_size_t num_visible_faces, const GLuint perlin_texture) {
 
 	const GLuint sector_shader = draw_context -> shader;
 	glUseProgram(sector_shader);
-	use_texture(draw_context -> texture_set, sector_shader, TexSet);
 
 	static byte first_call = 1;
 	static GLint
 		model_view_projection_id, ambient_strength_id,
-		diffuse_strength_id, camera_pos_id;
+		diffuse_strength_id, camera_pos_world_space_id;
 
 	if (first_call) {
-		model_view_projection_id = glGetUniformLocation(sector_shader, "model_view_projection");
-		ambient_strength_id = glGetUniformLocation(sector_shader, "ambient_strength");
-		diffuse_strength_id = glGetUniformLocation(sector_shader, "diffuse_strength");
-		camera_pos_id = glGetUniformLocation(sector_shader, "camera_pos_world_space");
+		INIT_UNIFORM(model_view_projection, sector_shader);
+		INIT_UNIFORM(ambient_strength, sector_shader);
+		INIT_UNIFORM(diffuse_strength, sector_shader);
+		INIT_UNIFORM(camera_pos_world_space, sector_shader);
+
+		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
+		use_texture(perlin_texture, sector_shader, "perlin_sampler", TexPlain, PERLIN_TEXTURE_UNIT);
+
 		first_call = 0;
 	}
 
-	glUniform1f(ambient_strength_id, 0.4f);
-	glUniform1f(diffuse_strength_id, 0.5f);
-	glUniform3fv(camera_pos_id, 1, camera -> pos);
+	glUniform1f(ambient_strength_id, 0.2f);
+	glUniform1f(diffuse_strength_id, 0.4f);
+	glUniform3fv(camera_pos_world_space_id, 1, camera -> pos);
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
 	glEnableVertexAttribArray(0);
@@ -188,7 +191,8 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	glDisableVertexAttribArray(1);
 }
 
-void draw_visible_sectors(const BatchDrawContext* const draw_context, const List* const sectors, const Camera* const camera) {
+void draw_visible_sectors(const BatchDrawContext* const draw_context, const List* const sectors,
+	const Camera* const camera, const GLuint perlin_texture) {
 	/* Each vec4 plane is composed of a vec3 surface normal and
 	the closest distance to the origin in the fourth component */
 
@@ -226,7 +230,7 @@ void draw_visible_sectors(const BatchDrawContext* const draw_context, const List
 	terrain: 150620 vs 86588. */
 
 	glUnmapBuffer(GL_ARRAY_BUFFER); // If looking out at the distance with no sectors, why do any state switching at all?
-	if (num_visible_faces != 0) draw_sectors(draw_context, camera, num_visible_faces);
+	if (num_visible_faces != 0) draw_sectors(draw_context, camera, num_visible_faces, perlin_texture);
 }
 
 #endif

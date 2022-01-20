@@ -20,6 +20,8 @@ StateGL demo_16_init(void) {
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/mesa.bmp", TexRepeating);
+	glUseProgram(sgl.shader_program);
+	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, SECTOR_TEXTURE_UNIT);
 
 	const Skybox skybox = init_skybox("../assets/sky_2.bmp");
 	sgl.any_data = malloc(sizeof(Skybox));
@@ -37,7 +39,7 @@ void demo_16_drawer(const StateGL* const sgl) {
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
-		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
+		INIT_UNIFORM(model_view_projection, sgl -> shader_program);
 		first_call = 0;
 	}
 
@@ -52,7 +54,6 @@ void demo_16_drawer(const StateGL* const sgl) {
 	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
 
 	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
-	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);
 
 	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
 	glDisableVertexAttribArray(0);

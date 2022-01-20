@@ -48,14 +48,13 @@ static const GLbyte skybox_vertices[] = {
 	1, -1, 1
 };
 
-static GLuint init_skybox_texture(const char* const path) {
+static GLuint init_skybox_texture(const GLchar* const path) {
 	SDL_Surface* const skybox_surface = init_surface(path);
 
-	const GLint cube_size = skybox_surface -> w >> 2;
+	const GLsizei cube_size = skybox_surface -> w >> 2;
 	const GLuint skybox = preinit_texture(TexSkybox, TexNonRepeating);
 
-	SDL_Surface* const face_surface = SDL_CreateRGBSurfaceWithFormat(0, cube_size, cube_size,
-		cube_size * sizeof(Uint32), SDL_PIXEL_FORMAT);
+	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size);
 
 	SDL_Rect dest_rect = {0, 0, cube_size, cube_size};
 	const GLint twice_cube_size = cube_size << 1;
@@ -77,9 +76,7 @@ static GLuint init_skybox_texture(const char* const path) {
 		SDL_Rect src_rect = {src_origin.x, src_origin.y, cube_size, cube_size};
 
 		SDL_LowerBlit(skybox_surface, &src_rect, face_surface, &dest_rect);
-		SDL_LockSurface(face_surface); // Locking for read access to face_pixels
-		write_surface_to_texture(face_surface, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
-		SDL_UnlockSurface(face_surface); // Unlocking for next call to SDL_LowerBlit
+		write_surface_to_texture(face_surface, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 	}
 
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
@@ -89,7 +86,7 @@ static GLuint init_skybox_texture(const char* const path) {
 	return skybox;
 }
 
-Skybox init_skybox(const char* const cubemap_path) {
+Skybox init_skybox(const GLchar* const cubemap_path) {
 	static byte first_call = 1;
 	if (first_call) {
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -116,12 +113,12 @@ void deinit_skybox(const Skybox s) {
 
 void draw_skybox(const Skybox s, const Camera* const camera) {
 	glUseProgram(s.shader);
-	use_texture(s.texture, s.shader, TexSkybox);
 
 	static byte first_call = 1;
 	static GLint view_projection_id;
 	if (first_call) {
-		view_projection_id = glGetUniformLocation(s.shader, "view_projection");
+		INIT_UNIFORM(view_projection, s.shader);
+		use_texture(s.texture, s.shader, "texture_sampler", TexSkybox, SKYBOX_TEXTURE_UNIT);
 		first_call = 0;
 	}
 

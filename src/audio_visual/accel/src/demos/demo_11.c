@@ -154,7 +154,7 @@ StateGL demo_11_init(void) {
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/mesa.bmp", TexRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
+	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 
@@ -168,7 +168,7 @@ void demo_11_drawer(const StateGL* const sgl) {
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
-		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
+		INIT_UNIFORM(model_view_projection, sgl -> shader_program);
 		first_call = 0;
 	}
 

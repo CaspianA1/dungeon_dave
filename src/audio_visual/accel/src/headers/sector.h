@@ -24,6 +24,7 @@ void init_sector_draw_context(
 	BatchDrawContext* const draw_context, List* const face_meshes_ref, const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height);
 
-void draw_visible_sectors(const BatchDrawContext* const draw_context, const List* const sector_face_meshes, const Camera* const camera);
+void draw_visible_sectors(const BatchDrawContext* const draw_context, const List* const sector_face_meshes,
+	const Camera* const camera, const GLuint perlin_texture);
 
 #endif

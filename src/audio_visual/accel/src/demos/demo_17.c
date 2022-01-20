@@ -13,12 +13,13 @@
 - NEXT 4: fix movement physics (one example: at FPS 10, can't jump over a block) (also, both bob and movement are stuttery - framerate spikes)
 - NEXT 5: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - NEXT 6: base fov on movement speed
+- NEXT 7: deprecate most of StateGL's members and rely solely on vertex_array and any_data
+- NEXT 8: pass in world size to sector shader
 
 - Perlin noise-based lighting
 - A map maker. An init file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe
 - For terrain, some objects popping out for half seconds
-- Demo 12 pops a bit in the beginning, and demo 17 a bit less
 - Camera var names to yaw, pitch, and roll (maybe)
 - Billboard lighting that matches the sector lighting
 - Base darkest distance of attenuated light on the world size
@@ -36,6 +37,8 @@
 */
 
 typedef struct {
+	const GLuint perlin_texture;
+
 	List sectors;
 	BatchDrawContext sector_draw_context;
 
@@ -51,6 +54,9 @@ StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	SceneState scene_state = {
+		.perlin_texture = init_plain_texture("../assets/palace_perlin.bmp",
+			TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
+
 		.animations = LIST_INITIALIZER(animation) (4,
 			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
 			(Animation) {.texture_id_range = {48, 52}, .secs_per_frame = 0.15f}, // Torch
@@ -172,8 +178,9 @@ void demo_17_drawer(const StateGL* const sgl) {
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
 	update_camera(&camera, get_next_event(), keys[KEY_FLY] ? NULL : &physics_obj);
-	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors, &camera);
+	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors, &camera, scene_state -> perlin_texture);
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
+
 	draw_skybox(scene_state -> skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
 }
@@ -188,6 +195,7 @@ void demo_17_deinit(const StateGL* const sgl) {
 	deinit_list(scene_state -> animation_instances);
 	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
 
+	deinit_texture(scene_state -> perlin_texture);
 	deinit_skybox(scene_state -> skybox);
 	free(sgl -> any_data);
 

@@ -94,7 +94,7 @@ StateGL demo_9_init(void) {
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/greece.bmp", TexRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
+	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 

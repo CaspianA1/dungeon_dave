@@ -3,7 +3,7 @@
 
 // Perlin noise!
 
-const char *const perlin_vertex_shader =
+const GLchar *const perlin_vertex_shader =
 	"#version 330 core\n"
 
 	// Bottom left, bottom right, top left, top right
@@ -82,12 +82,13 @@ void demo_18_drawer(const StateGL* const sgl) {
 
 	if (first_call) {
 		const GLuint shader = sgl -> shader_program;
-		choice_id = glGetUniformLocation(shader, "choice");
-		first_octave_id = glGetUniformLocation(shader, "first_octave");
-		octaves_id = glGetUniformLocation(shader, "octaves");
-		rand_factor_id = glGetUniformLocation(shader, "rand_factor");
-		persistence_id = glGetUniformLocation(shader, "persistence");
-		glUniform2f(glGetUniformLocation(shader, "screen_size"), WINDOW_W, WINDOW_H);
+
+		INIT_UNIFORM(choice, shader);
+		INIT_UNIFORM(first_octave, shader);
+		INIT_UNIFORM(octaves, shader);
+		INIT_UNIFORM(rand_factor, shader);
+		INIT_UNIFORM(persistence, shader);
+		INIT_UNIFORM_VALUE(screen_size, shader, 2f, WINDOW_W, WINDOW_H);
 		first_call = 0;
 	}
 

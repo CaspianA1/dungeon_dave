@@ -5,7 +5,7 @@
 #include "headers/texture.h"
 #include "headers/constants.h"
 
-Screen init_screen(const char* const title) {
+Screen init_screen(const GLchar* const title) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) fail("launch SDL", LaunchSDL);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -222,7 +222,7 @@ static void fail_on_shader_creation_error(
 	}
 }
 
-GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader) {
+GLuint init_shader_program(const GLchar* const vertex_shader, const GLchar* const fragment_shader) {
 	const GLchar* const shaders[2] = {vertex_shader, fragment_shader};
 	const GLenum gl_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
 	GLuint shader_ids[2], program_id = glCreateProgram();

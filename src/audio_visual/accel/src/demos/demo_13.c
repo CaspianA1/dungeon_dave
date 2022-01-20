@@ -1,7 +1,7 @@
 #include "demo_11.c"
 #include "../headers/constants.h"
 
-const char* const demo_13_billboard_vertex_shader =
+const GLchar* const demo_13_billboard_vertex_shader =
 	"#version 330 core\n"
 
 	"out vec2 UV;\n"
@@ -99,35 +99,35 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 	extern GLuint sector_shader;
 	glUseProgram(sector_shader); // Binding sector_shader
 
-	static GLint matrix_id;
+	static GLint model_view_projection_id;
 	static byte second_call = 1; // Not first_call b/c that is defined above
 	if (second_call) {
-		matrix_id = glGetUniformLocation(sector_shader, "model_view_projection"); // model_view_projection found in sector shader
+		INIT_UNIFORM(model_view_projection, sector_shader);
 		second_call = 0;
 	}
 
-	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &model_view_projection[0][0]);
+	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &model_view_projection[0][0]);
 	glUseProgram(shader_program); // Binding billboard shader back
 
 	last_time = SDL_GetTicks() / 1000.0f;
 }
 
 void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) {
-	static GLint right_id, view_projection_matrix_id;
+	static GLint right_xz_world_space_id, view_projection_id;
 	static byte first_call = 1;
 
 	glUseProgram(shader_program); // Enable billboard shader
 
 	if (first_call) {
-		right_id = glGetUniformLocation(shader_program, "right_xz_world_space");
-		view_projection_matrix_id = glGetUniformLocation(shader_program, "view_projection");
+		INIT_UNIFORM(right_xz_world_space, shader_program);
+		INIT_UNIFORM(view_projection, shader_program);
 
 		const GLint
-			billboard_size_id = glGetUniformLocation(shader_program, "billboard_size_world_space"),
-			billboard_center_id = glGetUniformLocation(shader_program, "billboard_center_world_space");
+			INIT_UNIFORM(billboard_size_world_space, shader_program),
+			INIT_UNIFORM(billboard_center_world_space, shader_program);
 
-		glUniform3f(billboard_center_id, center[0], center[1], center[2]);
-		glUniform2f(billboard_size_id, 1.0f, 1.0f);
+		glUniform2f(billboard_size_world_space_id, 1.0f, 1.0f);
+		glUniform3f(billboard_center_world_space_id, center[0], center[1], center[2]);
 
 		first_call = 0;
 	}
@@ -136,8 +136,8 @@ void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) 
 	mat4 view_times_projection;
 	demo_13_move(pos, right, view_times_projection, shader_program);
 
-	glUniform2f(right_id, right[0], right[2]);
-	glUniformMatrix4fv(view_projection_matrix_id, 1, GL_FALSE, &view_times_projection[0][0]);
+	glUniform2f(right_xz_world_space_id, right[0], right[2]);
+	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &view_times_projection[0][0]);
 }
 
 GLuint sector_shader;
@@ -167,7 +167,12 @@ StateGL demo_13_init(void) {
 		"../../../../assets/walls/saqqara.bmp", TexRepeating);
 
 	sgl.shader_program = init_shader_program(demo_13_billboard_vertex_shader, demo_13_billboard_fragment_shader);
+	glUseProgram(sgl.shader_program);
+	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, BILLBOARD_TEXTURE_UNIT);
+
 	sector_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	glUseProgram(sector_shader);
+	use_texture(sgl.textures[1], sector_shader, "texture_sampler", TexPlain, SECTOR_TEXTURE_UNIT);
 
 	enable_all_culling();
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -183,7 +188,6 @@ void demo_13_drawer(const StateGL* const sgl) {
 	bind_sector_mesh_to_vao();
 
 	glUseProgram(sector_shader);
-	use_texture(sgl -> textures[1], sector_shader, TexPlain);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	glDisable(GL_BLEND);
 	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
@@ -193,7 +197,6 @@ void demo_13_drawer(const StateGL* const sgl) {
 	//////////
 
 	glUseProgram(sgl -> shader_program);
-	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);
 	glEnable(GL_BLEND); // Turning on alpha blending for drawing billboards
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

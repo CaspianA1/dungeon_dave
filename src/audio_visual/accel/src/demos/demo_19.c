@@ -4,7 +4,7 @@
 
 // A trippy pyramid flying around with lots of colors
 
-const char *const demo_19_vertex_shader =
+const GLchar *const demo_19_vertex_shader =
 	"#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
@@ -90,8 +90,12 @@ StateGL demo_19_init(void) {
 	glUseProgram(sgl.shader_program);
 
 	sgl.num_textures = 1;
-	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/mesa.bmp", TexRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, TexPlain);
+	sgl.textures = malloc(sizeof(GLuint));
+
+	*sgl.textures = init_plain_texture("../../../../assets/walls/mesa.bmp", TexPlain,
+		TexRepeating, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
+
+	use_texture(*sgl.textures, sgl.shader_program, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 
@@ -105,8 +109,10 @@ void demo_19_drawer(const StateGL* const sgl) {
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, -1.5f});
-		spin_id = glGetUniformLocation(sgl -> shader_program, "spin");
-		model_view_projection_id = glGetUniformLocation(sgl -> shader_program, "model_view_projection");
+
+		const GLuint shader = sgl -> shader_program;
+		INIT_UNIFORM(spin, shader);
+		INIT_UNIFORM(model_view_projection, shader);
 		first_call = 0;
 	}
 

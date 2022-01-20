@@ -116,7 +116,7 @@ GLfloat* create_plane_mesh(const int num_planes, ...) {
 
 //////////
 
-const char* const demo_6_vertex_shader =
+const GLchar* const demo_6_vertex_shader =
 	"#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
@@ -146,14 +146,14 @@ void demo_6_core_init_shader_and_textures_and_culling(StateGL* const sgl) {
 
 	sgl -> num_textures = 1;
 	sgl -> textures = init_plain_textures(sgl -> num_textures, "../../../../assets/walls/dune.bmp", TexRepeating);
-	use_texture(sgl -> textures[0], sgl -> shader_program, TexPlain);
+	use_texture(sgl -> textures[0], sgl -> shader_program, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 }
 
 void demo_6_init_shader_and_textures_and_culling(StateGL* const sgl, const int num_planes, const GLfloat* const plane_sizes) {
 	demo_6_core_init_shader_and_textures_and_culling(sgl);
-	const GLuint plane_sizes_id = glGetUniformLocation(sgl -> shader_program, "plane_sizes");
+	const GLint INIT_UNIFORM(plane_sizes, sgl -> shader_program);
 	glUniform2fv(plane_sizes_id, num_planes, plane_sizes);
 }
 

@@ -38,6 +38,8 @@
 #define DEPTH_BUFFER_BITS 24
 #define MULTISAMPLE_SAMPLES 8
 
+//////////
+
 typedef uint_fast8_t byte;
 
 typedef struct {
@@ -66,17 +68,27 @@ typedef struct {
 	void* any_data; // If a demo need to pass in extra info to the drawer, it can do it through here
 } StateGL;
 
+//////////
+
 const Uint8* keys;
 
-extern inline void fail(const char* const msg, const FailureType failure_type) {
+//////////
+
+extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s; SDL error = '%s', OpenGL error = '%s'\n", msg,
 		SDL_GetError(), glewGetErrorString(glGetError()));
 	exit(failure_type + 1);
 }
 
+#define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
+#define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
+	glUniform##type_prefix(glGetUniformLocation(shader, #name), __VA_ARGS__)
+
+//////////
+
 // Excluded: resize_window_if_needed, fail_on_shader_creation_error
 
-Screen init_screen(const char* const title);
+Screen init_screen(const GLchar* const title);
 void deinit_screen(const Screen* const screen);
 
 void make_application(void (*const drawer)(const StateGL* const),
@@ -93,7 +105,7 @@ GLuint init_vao(void);
 GLuint* init_vbos(const GLsizei num_buffers, ...);
 void bind_vbos_to_vao(const GLuint* const vbos, const GLsizei num_vbos, ...);
 
-GLuint init_shader_program(const char* const vertex_shader, const char* const fragment_shader);
+GLuint init_shader_program(const GLchar* const vertex_shader, const GLchar* const fragment_shader);
 
 void enable_all_culling(void);
 
