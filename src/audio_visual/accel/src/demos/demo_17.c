@@ -16,7 +16,7 @@
 - NEXT 7: deprecate most of StateGL's members and rely solely on vertex_array and any_data
 - NEXT 8: pass in world size to sector shader
 
-- Perlin noise-based lighting
+- Perlin noise-based lighting in 3D
 - A map maker. An init file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe
 - For terrain, some objects popping out for half seconds
