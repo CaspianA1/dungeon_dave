@@ -10,9 +10,10 @@ const GLchar *const sector_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info_bits;\n"
 
-	"out vec2 pos_xz;\n"
+	"out vec2 lightmap_UV;\n"
 	"out vec3 UV, face_normal, pos_delta_world_space;\n"
 
+	"uniform ivec2 map_size;\n"
 	"uniform vec3 camera_pos_world_space;\n"
 	"uniform mat4 model_view_projection;\n"
 
@@ -55,20 +56,21 @@ const GLchar *const sector_vertex_shader =
 		"set_UV_from_face_id(face_id_bits);\n"
 		"set_normal_from_face_id(face_id_bits);\n"
 
-		"pos_xz = vertex_pos_world_space.xz;\n"
+		"lightmap_UV = vertex_pos_world_space.xz / map_size;\n"
+
 		"pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
 	"}\n",
 
 *const sector_fragment_shader =
     "#version 330 core\n"
 
-	"in vec2 pos_xz;\n"
+	"in vec2 lightmap_UV;\n"
 	"in vec3 UV, face_normal, pos_delta_world_space;\n"
 
 	"out vec3 color;\n"
 
 	"uniform float ambient_strength, diffuse_strength;\n"
-	"uniform sampler2D perlin_sampler;\n"
+	"uniform sampler2D lightmap_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
 	"float diffuse(void) {\n" // Faces get darker as the view angle from it gets steeper
@@ -82,9 +84,8 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"void main(void) {\n"
-		"ivec2 world_size = ivec2(40, 40);\n"
-		"float perlin = texture(perlin_sampler, pos_xz / world_size).r;\n"
-		"float light = (ambient_strength + diffuse() + perlin) * attenuation();\n"
+		"float lightmap_ambient = texture(lightmap_sampler, lightmap_UV).r;\n"
+		"float light = ((lightmap_ambient + ambient_strength + diffuse())) * attenuation();\n"
 		"color = texture(texture_sampler, UV).rgb * min(light, 1.0f);\n"
 	"}\n",
 

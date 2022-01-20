@@ -68,9 +68,10 @@ static Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	return sector;
 }
 
-List generate_sectors_from_maps(
-	const byte* const heightmap, const byte* const texture_id_map,
-	const byte map_width, const byte map_height) {
+List generate_sectors_from_maps(const byte* const heightmap,
+	const byte* const texture_id_map, const byte map_size[2]) {
+
+	const byte map_width = map_size[0], map_height = map_size[1];
 
 	// >> 3 = / 8. Works pretty well for my maps.
 	const buffer_size_t sector_amount_guess = map_width * map_height >> 3;
@@ -109,11 +110,11 @@ List generate_sectors_from_maps(
 
 ////////// This next part concerns the drawing of sectors
 
-void init_sector_draw_context(
-	BatchDrawContext* const draw_context, List* const sectors_ref, const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_width, const byte map_height) {
+void init_sector_draw_context(BatchDrawContext* const draw_context,
+	List* const sectors_ref, const byte* const heightmap,
+	const byte* const texture_id_map, const byte map_size[2]) {
 
-	List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
+	List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_size);
 
 	/* This contains the actual vertex data for faces. `sectors.length * 3` gives a good guess for the
 	face/sector ratio. Its ownership, after this function, goes to the draw context (which frees it). */
@@ -128,7 +129,7 @@ void init_sector_draw_context(
 		add_face_mesh_to_list(flat_face, sector.visible_heights.max, 0, sector.texture_id, &face_meshes);
 
 		byte biggest_face_height = 0;
-		init_vert_faces(sector, &face_meshes, heightmap, map_width, map_height, &biggest_face_height);
+		init_vert_faces(sector, &face_meshes, heightmap, map_size[0], map_size[1], &biggest_face_height);
 
 		sector_ref -> visible_heights.min = sector.visible_heights.max - biggest_face_height;
 		sector_ref -> face_range.length = face_meshes.length - sector_ref -> face_range.start;
@@ -151,8 +152,8 @@ static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) 
 	return glm_aabb_frustum(aabb_corners, frustum_planes);
 }
 
-static void draw_sectors(const BatchDrawContext* const draw_context,
-	const Camera* const camera, const buffer_size_t num_visible_faces, const GLuint perlin_texture) {
+static void draw_sectors(const BatchDrawContext* const draw_context, const Camera* const camera,
+	const buffer_size_t num_visible_faces, const GLuint lightmap_texture, const byte map_size[2]) {
 
 	const GLuint sector_shader = draw_context -> shader;
 	glUseProgram(sector_shader);
@@ -167,15 +168,16 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(ambient_strength, sector_shader);
 		INIT_UNIFORM(diffuse_strength, sector_shader);
 		INIT_UNIFORM(camera_pos_world_space, sector_shader);
+		INIT_UNIFORM_VALUE(map_size, sector_shader, 2i, map_size[0], map_size[1]);
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
-		use_texture(perlin_texture, sector_shader, "perlin_sampler", TexPlain, PERLIN_TEXTURE_UNIT);
+		use_texture(lightmap_texture, sector_shader, "lightmap_sampler", TexPlain, LIGHTMAP_TEXTURE_UNIT);
 
 		first_call = 0;
 	}
 
-	UPDATE_UNIFORM(ambient_strength, 1f, 0.2f);
-	UPDATE_UNIFORM(diffuse_strength, 1f, 0.4f);
+	UPDATE_UNIFORM(ambient_strength, 1f, 0.15f);
+	UPDATE_UNIFORM(diffuse_strength, 1f, 0.3f);
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE,  &camera -> model_view_projection[0][0]);
 
@@ -192,7 +194,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 }
 
 void draw_visible_sectors(const BatchDrawContext* const draw_context, const List* const sectors,
-	const Camera* const camera, const GLuint perlin_texture) {
+	const Camera* const camera, const GLuint lightmap_texture, const byte map_size[2]) {
 	/* Each vec4 plane is composed of a vec3 surface normal and
 	the closest distance to the origin in the fourth component */
 
@@ -230,7 +232,7 @@ void draw_visible_sectors(const BatchDrawContext* const draw_context, const List
 	terrain: 150620 vs 86588. */
 
 	glUnmapBuffer(GL_ARRAY_BUFFER); // If looking out at the distance with no sectors, why do any state switching at all?
-	if (num_visible_faces != 0) draw_sectors(draw_context, camera, num_visible_faces, perlin_texture);
+	if (num_visible_faces != 0) draw_sectors(draw_context, camera, num_visible_faces, lightmap_texture, map_size);
 }
 
 #endif

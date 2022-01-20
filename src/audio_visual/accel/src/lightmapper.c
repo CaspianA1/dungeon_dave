@@ -11,11 +11,26 @@ typedef floating_t mat4[4][4];
 
 //////////
 
+enum {num_grayscale_colors = 256};
+
 const integer_t first_octave = 3ul, octaves = 60ull;
 
 const floating_t
 	inner_rand_multiplier = 1.64, outer_rand_multiplier = 2.0, rand_subtrahend = 1.0,
-	persistence = 0.6, scale = 1.0, result_addend = 0.3;
+	persistence = 0.63, scale = 1.0, result_addend = 0.4;
+
+//////////
+
+SDL_Surface* init_grayscale_surface(const integer_t size[2]) {
+	SDL_Surface* const grayscale = SDL_CreateRGBSurfaceWithFormat(0,
+		size[0], size[1], SDL_BITSPERPIXEL(PIXEL_FORMAT), PIXEL_FORMAT);
+
+	SDL_Color palette[num_grayscale_colors];
+	for (integer_t i = 0; i < num_grayscale_colors; i++) palette[i] = (SDL_Color) {i, i, i, 255};
+	SDL_SetPaletteColors(grayscale -> format -> palette, palette, 0, num_grayscale_colors);	
+
+	return grayscale;
+}
 
 //////////
 
@@ -77,15 +92,8 @@ floating_t perlin_2D(const vec2 pos) {
 //////////
 
 SDL_Surface* make_perlin_map(const integer_t size[2]) {
-	SDL_Surface* const perlin_map = SDL_CreateRGBSurfaceWithFormat(0,
-		size[0], size[1], SDL_BITSPERPIXEL(PIXEL_FORMAT), PIXEL_FORMAT);
-
+	SDL_Surface* const perlin_map = init_grayscale_surface(size);
 	SDL_LockSurface(perlin_map);
-
-	enum {num_colors = 256};
-	SDL_Color palette[num_colors];
-	for (integer_t i = 0; i < num_colors; i++) palette[i] = (SDL_Color) {i, i, i, 255};
-	SDL_SetPaletteColors(perlin_map -> format -> palette, palette, 0, num_colors);
 
 	const vec2 downscale_vals = {1.0 / size[0] * scale, 1.0 / size[1] * scale};
 
@@ -95,7 +103,7 @@ SDL_Surface* make_perlin_map(const integer_t size[2]) {
 	for (integer_t y = 0ull; y < size[1]; y++, index_row += bytes_per_row) {
 		const floating_t downscaled_y = y * downscale_vals[1];
 		for (integer_t x = 0ull; x < size[0]; x++)
-			index_row[x] = perlin_2D((vec2) {x * downscale_vals[0], downscaled_y}) * num_colors;
+			index_row[x] = perlin_2D((vec2) {x * downscale_vals[0], downscaled_y}) * num_grayscale_colors;
 	}
 
 	SDL_UnlockSurface(perlin_map);
@@ -108,14 +116,29 @@ SDL_Surface* make_perlin_map(const integer_t size[2]) {
 - Compile this with the map code once done
 */
 
+//////////
+SDL_Surface* make_grayscale_surface_from(const char* const path) {
+	SDL_Surface* const src = SDL_LoadBMP(path);
+	SDL_Surface* const grayscale = init_grayscale_surface((integer_t[2]) {src -> w, src -> h});
+	SDL_BlitSurface(src, NULL, grayscale, NULL);
+	SDL_FreeSurface(src);
+	return grayscale;
+}
+
+//////////
+
 int main(void) {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Could not launch SDL: '%s'\n", SDL_GetError());
 		return 1;
 	}
 
+	SDL_Surface* const grayscale = make_grayscale_surface_from("../assets/water.bmp");
+	SDL_SaveBMP(grayscale, "grayscale.bmp");
+	SDL_FreeSurface(grayscale);
+
 	SDL_Surface* const perlin_map = make_perlin_map((integer_t[2]) {256ull, 256ull});
-	SDL_SaveBMP(perlin_map, "out.bmp");
+	SDL_SaveBMP(perlin_map, "perlin.bmp");
 	SDL_FreeSurface(perlin_map);
 
 	SDL_Quit();

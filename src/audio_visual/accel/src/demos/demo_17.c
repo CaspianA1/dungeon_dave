@@ -37,7 +37,7 @@
 */
 
 typedef struct {
-	const GLuint perlin_texture;
+	const GLuint lightmap_texture; // This is grayscale
 
 	List sectors;
 	BatchDrawContext sector_draw_context;
@@ -54,8 +54,8 @@ StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	SceneState scene_state = {
-		.perlin_texture = init_plain_texture("../assets/palace_perlin.bmp",
-			TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
+		// "../assets/palace_perlin.bmp", "../assets/water_grayscale.bmp"
+		.lightmap_texture = init_plain_texture("../assets/palace_perlin.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
 
 		.animations = LIST_INITIALIZER(animation) (4,
 			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
@@ -83,7 +83,7 @@ StateGL demo_17_init(void) {
 	//////////
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		(byte*) scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
+		(byte*) scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(
 		10,
@@ -178,7 +178,9 @@ void demo_17_drawer(const StateGL* const sgl) {
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
 	update_camera(&camera, get_next_event(), keys[KEY_FLY] ? NULL : &physics_obj);
-	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors, &camera, scene_state -> perlin_texture);
+
+	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors,
+		&camera, scene_state -> lightmap_texture, scene_state -> map_size);
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 
 	draw_skybox(scene_state -> skybox, &camera);
@@ -195,7 +197,7 @@ void demo_17_deinit(const StateGL* const sgl) {
 	deinit_list(scene_state -> animation_instances);
 	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
 
-	deinit_texture(scene_state -> perlin_texture);
+	deinit_texture(scene_state -> lightmap_texture);
 	deinit_skybox(scene_state -> skybox);
 	free(sgl -> any_data);
 

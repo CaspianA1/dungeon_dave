@@ -16,15 +16,14 @@ typedef struct {
 
 // Excluded: point_matches_sector_attributes, form_sector_area, sector_in_view_frustum, draw_sectors
 
-List generate_sectors_from_maps(
-	const byte* const heightmap, const byte* const texture_id_map,
-	const byte map_width, const byte map_height);
+List generate_sectors_from_maps(const byte* const heightmap,
+	const byte* const texture_id_map, const byte map_size[2]);
 
-void init_sector_draw_context(
-	BatchDrawContext* const draw_context, List* const face_meshes_ref, const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_width, const byte map_height);
+void init_sector_draw_context(BatchDrawContext* const draw_context,
+	List* const sectors_ref, const byte* const heightmap,
+	const byte* const texture_id_map, const byte map_size[2]);
 
 void draw_visible_sectors(const BatchDrawContext* const draw_context, const List* const sector_face_meshes,
-	const Camera* const camera, const GLuint perlin_texture);
+	const Camera* const camera, const GLuint lightmap_texture, const byte map_size[2]);
 
 #endif

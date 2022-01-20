@@ -26,7 +26,7 @@ And the biggest number possible with five bits is 31, so that gives you
 
 #define SECTOR_TEXTURE_UNIT 0
 #define BILLBOARD_TEXTURE_UNIT 1
-#define PERLIN_TEXTURE_UNIT 2
+#define LIGHTMAP_TEXTURE_UNIT 2
 #define SKYBOX_TEXTURE_UNIT 3
 
 typedef enum {

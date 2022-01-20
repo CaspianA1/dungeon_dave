@@ -23,9 +23,9 @@ editor:
 	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -lSDL2_ttf -o bin/editor src/editor/editor.c
 	./bin/editor
 
-perlin_mapper:
-	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -o bin/perlin_mapper src/perlin_mapper.c
-	./bin/perlin_mapper
+lightmapper:
+	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -o bin/lightmapper src/lightmapper.c
+	./bin/lightmapper
 
 # takes a named argument demo_id
 build_any:
