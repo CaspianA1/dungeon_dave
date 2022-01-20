@@ -154,7 +154,7 @@ void demo_6_core_init_shader_and_textures_and_culling(StateGL* const sgl) {
 void demo_6_init_shader_and_textures_and_culling(StateGL* const sgl, const int num_planes, const GLfloat* const plane_sizes) {
 	demo_6_core_init_shader_and_textures_and_culling(sgl);
 	const GLint INIT_UNIFORM(plane_sizes, sgl -> shader_program);
-	glUniform2fv(plane_sizes_id, num_planes, plane_sizes);
+	UPDATE_UNIFORM(plane_sizes, 2fv, num_planes, plane_sizes);
 }
 
 StateGL demo_6_init(void) {

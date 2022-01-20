@@ -26,7 +26,7 @@ void use_texture(const GLuint texture, const GLuint shader_program,
 
 	glActiveTexture(GL_TEXTURE0 + texture_unit);
 	glBindTexture(type, texture);
-	glUniform1i(glGetUniformLocation(shader_program, sampler_name), texture_unit);
+	INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(sampler_name, shader_program, 1i, texture_unit);
 }
 
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode) {

@@ -106,7 +106,7 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 		second_call = 0;
 	}
 
-	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &model_view_projection[0][0]);
+	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 	glUseProgram(shader_program); // Binding billboard shader back
 
 	last_time = SDL_GetTicks() / 1000.0f;
@@ -121,14 +121,8 @@ void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) 
 	if (first_call) {
 		INIT_UNIFORM(right_xz_world_space, shader_program);
 		INIT_UNIFORM(view_projection, shader_program);
-
-		const GLint
-			INIT_UNIFORM(billboard_size_world_space, shader_program),
-			INIT_UNIFORM(billboard_center_world_space, shader_program);
-
-		glUniform2f(billboard_size_world_space_id, 1.0f, 1.0f);
-		glUniform3f(billboard_center_world_space_id, center[0], center[1], center[2]);
-
+		INIT_UNIFORM_VALUE(billboard_size_world_space, shader_program, 2f, 1.0f, 1.0f);
+		INIT_UNIFORM_VALUE(billboard_center_world_space, shader_program, 3fv, 1, center);
 		first_call = 0;
 	}
 
@@ -136,8 +130,8 @@ void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) 
 	mat4 view_times_projection;
 	demo_13_move(pos, right, view_times_projection, shader_program);
 
-	glUniform2f(right_xz_world_space_id, right[0], right[2]);
-	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &view_times_projection[0][0]);
+	UPDATE_UNIFORM(right_xz_world_space, 2f, right[0], right[2]);
+	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &view_times_projection[0][0]);
 }
 
 GLuint sector_shader;
@@ -176,6 +170,7 @@ StateGL demo_13_init(void) {
 
 	enable_all_culling();
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
 	return sgl;
 }
 
@@ -190,6 +185,7 @@ void demo_13_drawer(const StateGL* const sgl) {
 	glUseProgram(sector_shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	glDisable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
 	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
 
 	unbind_sector_mesh_from_vao();
@@ -198,6 +194,7 @@ void demo_13_drawer(const StateGL* const sgl) {
 
 	glUseProgram(sgl -> shader_program);
 	glEnable(GL_BLEND); // Turning on alpha blending for drawing billboards
+	glDisable(GL_CULL_FACE);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 

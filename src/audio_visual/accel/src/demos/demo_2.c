@@ -25,7 +25,7 @@ void demo_2_configurable_matrix_setup(const GLuint shader_program,
 			first_call = 0;
 		}
 
-		glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &model_view_projection[0][0]);
+		UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 	}
 }
 

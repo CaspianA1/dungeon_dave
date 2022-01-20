@@ -119,8 +119,9 @@ void demo_19_drawer(const StateGL* const sgl) {
 	update_camera(&camera, get_next_event(), NULL);
 
 	static GLfloat spin[2], spin_input = 0.0f;
-	glUniform3f(spin_id, spin[0], spin[0] * spin[1], spin[1]);
-	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+
+	UPDATE_UNIFORM(spin, 3f, spin[0], spin[0] * spin[1], spin[1]);
+	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
 	glClearColor(fmodf(spin[0] / 2.0f, 1.0f), fmodf(spin[1] / 2.0f, 1.0f), fmodf(spin_input, 1.0f), 0.0f);
 	glDrawArrays(GL_TRIANGLES, 0, vertices);

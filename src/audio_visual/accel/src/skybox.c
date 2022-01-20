@@ -131,7 +131,7 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 	view_projection[3][1] = 0.0f;
 	view_projection[3][3] = 0.0f;
 
-	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &view_projection[0][0]);
+	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &view_projection[0][0]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, s.vbo);
 

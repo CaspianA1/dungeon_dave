@@ -174,10 +174,10 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		first_call = 0;
 	}
 
-	glUniform1f(ambient_strength_id, 0.2f);
-	glUniform1f(diffuse_strength_id, 0.4f);
-	glUniform3fv(camera_pos_world_space_id, 1, camera -> pos);
-	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
+	UPDATE_UNIFORM(ambient_strength, 1f, 0.2f);
+	UPDATE_UNIFORM(diffuse_strength, 1f, 0.4f);
+	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
+	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE,  &camera -> model_view_projection[0][0]);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);

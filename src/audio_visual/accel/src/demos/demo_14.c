@@ -37,7 +37,8 @@ void demo_14_drawer(const StateGL* const sgl) {
 
 	vec3 new_center;
 	glm_vec3_add(center, bb_center_offset, new_center);
-	glUniform3f(billboard_center_world_space_id, new_center[0], new_center[1], new_center[2]);
+
+	UPDATE_UNIFORM(billboard_center_world_space, 3fv, 1, new_center);
 
 	update_camera(&camera, get_next_event(), NULL);
 	glClearColor(0.1f, 0.9f, 0.9f, 0.0f);
@@ -45,7 +46,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 	//////////
 
 	glUseProgram(sector_shader);
-	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	bind_sector_mesh_to_vao();
@@ -55,12 +56,14 @@ void demo_14_drawer(const StateGL* const sgl) {
 	//////////
 	glUseProgram(billboard_shader);
 
-	glUniform2f(right_xz_world_space_id, camera.right_xz[0], camera.right_xz[1]);
-	glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &camera.view_projection[0][0]);
+	UPDATE_UNIFORM(right_xz_world_space, 2f, camera.right_xz[0], camera.right_xz[1]);
+	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &camera.view_projection[0][0]);
 
 	glEnable(GL_BLEND); // Blending on for billboard
+	glDisable(GL_CULL_FACE);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glDisable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
 }
 
 #ifdef DEMO_14

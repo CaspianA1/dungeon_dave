@@ -97,11 +97,11 @@ void demo_18_drawer(const StateGL* const sgl) {
 	if (keys[SDL_SCANCODE_T]) rand_factor += step;
 	if (keys[SDL_SCANCODE_Y]) rand_factor -= step;
 
-	glUniform1i(choice_id, keys[SDL_SCANCODE_C]);
-	glUniform1i(first_octave_id, 3);
-	glUniform1i(octaves_id, 8);
-	glUniform1f(rand_factor_id, rand_factor);
-	glUniform1f(persistence_id, 0.6f);
+	UPDATE_UNIFORM(choice, 1i, keys[SDL_SCANCODE_C]);
+	UPDATE_UNIFORM(first_octave, 1i, 3);
+	UPDATE_UNIFORM(octaves, 1i, 8);
+	UPDATE_UNIFORM(rand_factor, 1f, rand_factor);
+	UPDATE_UNIFORM(persistence, 1f, 0.6f);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

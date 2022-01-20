@@ -27,7 +27,7 @@ void demo_18_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	glUniform1f(time_id, SDL_GetTicks() / 1000.0f);
+	UPDATE_UNIFORM(time, 1f, SDL_GetTicks() / 1000.0f);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 

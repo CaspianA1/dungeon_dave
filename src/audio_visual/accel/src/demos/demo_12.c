@@ -262,8 +262,8 @@ void demo_12_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), &physics_obj);
 
-	glUniform3f(camera_pos_world_space_id, camera.pos[0], camera.pos[1], camera.pos[2]);
-	glUniformMatrix4fv(model_view_projection_id, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera.pos);
+	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
 	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 	use_texture(sgl -> textures[0], shader, "texture_sampler", TexPlain, 0);
