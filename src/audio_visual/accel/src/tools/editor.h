@@ -2,6 +2,7 @@
 #define EDITOR_H
 
 #include <SDL2/SDL.h>
+#include "../headers/buffer_defs.h"
 
 #define EDITOR_WIDTH 1440
 #define EDITOR_HEIGHT 720
@@ -28,8 +29,6 @@
 } while (0)
 
 //////////
-
-typedef uint_fast8_t byte;
 
 typedef enum {
 	LaunchSDL,

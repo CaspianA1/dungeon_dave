@@ -1,4 +1,5 @@
 #include "level_parser.h"
+#include "../list.c"
 
 static FileContents read_file_contents(const char* const file_name) {
 	FILE* const file = fopen(file_name, "r");
@@ -16,11 +17,20 @@ static FileContents read_file_contents(const char* const file_name) {
 	return (FileContents) {file_name, data};
 }
 
+static void lex_json_file(void) {
+
+}
+
 // Sets num_textures, map_size, heightmap, texture_id_map, map_name, renderer, and textures
-void parse_json_file(EditorState* const eds, FileContents* const file_contents) {
+static void parse_json_file(EditorState* const eds, FileContents* const file_contents) {
 	puts("About to parse json file");
 	(void) eds;
 	(void) file_contents;
+
+	/*
+	1. Tokenize
+	2. Parse into tree
+	*/
 }
 
 void init_editor_state_from_json_file(EditorState* const eds, const char* const file_name) {

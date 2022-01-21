@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "utils.h"
+#include "buffer_defs.h"
 
 typedef struct {
 	struct {

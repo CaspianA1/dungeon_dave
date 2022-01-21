@@ -1,7 +1,7 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include "utils.h"
+#include <stdio.h> // For reporting errors from push_ptr_to_list
 #include "buffer_defs.h"
 
 const GLfloat list_realloc_rate = 2.0f;

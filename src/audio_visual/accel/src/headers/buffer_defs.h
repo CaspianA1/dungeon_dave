@@ -1,6 +1,10 @@
 #ifndef BUFFER_DEFS_H
 #define BUFFER_DEFS_H
 
+#include <GL/glew.h>
+
+typedef uint_fast8_t byte;
+
 typedef GLubyte face_mesh_component_t;
 typedef GLuint buffer_size_t; // Max = 4294967295
 

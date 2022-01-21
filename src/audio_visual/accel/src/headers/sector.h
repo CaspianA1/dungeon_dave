@@ -1,11 +1,11 @@
 #ifndef SECTOR_H
 #define SECTOR_H
 
-#include "constants.h"
 #include "buffer_defs.h"
 #include "list.h"
 #include "camera.h"
 #include "batch_draw_context.h"
+#include "texture.h"
 
 typedef struct {
 	const byte texture_id, origin[2];

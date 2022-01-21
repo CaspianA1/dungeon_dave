@@ -1,7 +1,7 @@
 #ifndef BATCH_DRAW_CONTEXT_H
 #define BATCH_DRAW_CONTEXT_H
 
-#include "utils.h"
+#include <GL/glew.h>
 #include "list.h"
 
 typedef struct {

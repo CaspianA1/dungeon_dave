@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
+#include "buffer_defs.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdouble-promotion"
@@ -39,8 +40,6 @@
 #define MULTISAMPLE_SAMPLES 8
 
 //////////
-
-typedef uint_fast8_t byte;
 
 typedef struct {
 	SDL_Window* const window;

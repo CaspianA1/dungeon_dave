@@ -2,7 +2,6 @@
 #define TEXTURE_C
 
 #include "headers/texture.h"
-#include "headers/utils.h"
 
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height) {
 	return SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(SDL_PIXEL_FORMAT), SDL_PIXEL_FORMAT);

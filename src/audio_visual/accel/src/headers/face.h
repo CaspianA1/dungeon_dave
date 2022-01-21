@@ -3,7 +3,6 @@
 
 #include "sector.h"
 #include "list.h"
-#include "batch_draw_context.h"
 
 /* NS - north-south, and EW = east-west.
 If a face is NS, its two ends lie on a vertical top-down axis;
@@ -22,8 +21,10 @@ typedef struct {
 
 // Excluded: print_face, get_next_face. init_vert_faces and add_face_mesh_to_list are only used by sector.c
 
-void init_vert_faces(const Sector sector, List* const face_mesh_list,
-	const byte* const heightmap, const byte map_width, const byte map_height, byte* const biggest_face_height);
+void init_vert_faces(
+	const Sector sector, List* const face_mesh_list,
+	const byte* const heightmap, const byte map_width,
+	const byte map_height, byte* const biggest_face_height);
 
 void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
 	const byte side, const byte texture_id, List* const face_mesh_list);

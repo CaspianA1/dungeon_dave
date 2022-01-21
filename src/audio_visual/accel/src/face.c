@@ -5,7 +5,6 @@
 #include "list.c"
 #include "sector.c"
 
-/*
 void print_face(const Face face, const GLchar* const prefix_msg) {
 	const GLchar* const type_string =
 		(GLchar*[]) {"Flat", "Vert_NS", "Vert_EW"}[face.type];
@@ -14,7 +13,6 @@ void print_face(const Face face, const GLchar* const prefix_msg) {
 		prefix_msg, type_string, face.origin[0],
 		face.origin[1], face.size[0], face.size[1]);
 }
-*/
 
 // Returns if there is another face to get
 static byte get_next_face(const Sector sector, const byte varying_axis,
@@ -141,8 +139,10 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 	push_ptr_to_list(face_mesh_list, face_mesh);
 }
 
-void init_vert_faces(const Sector sector, List* const face_mesh_list,
-	const byte* const heightmap, const byte map_width, const byte map_height, byte* const biggest_face_height) {
+void init_vert_faces(
+	const Sector sector, List* const face_mesh_list,
+	const byte* const heightmap, const byte map_width,
+	const byte map_height, byte* const biggest_face_height) {
 
 	const byte dimensions[2] = {map_width, map_height};
 
