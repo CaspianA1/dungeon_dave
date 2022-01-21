@@ -39,7 +39,9 @@ byte* map_point(const EditorState* const eds, const byte is_heightmap, const byt
 	return map + (y * eds -> map_size[0] + x);
 }
 
-SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer) {
+SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer, const byte linear_filtering) {
+	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, linear_filtering ? "1" : "0", SDL_HINT_OVERRIDE);
+
 	SDL_Surface* const surface = SDL_LoadBMP(path);
 	if (surface == NULL) FAIL(OpenFile, "Surface with path '%s' not found", path);
 
@@ -248,13 +250,13 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 	eds -> texture_id_map = malloc(map_bytes);
 	memcpy(eds -> texture_id_map, texture_id_map, map_bytes);
 
-	eds -> map_name = "Palace";
+	eds -> map_name = "palace";
 
 	eds -> textures = malloc(num_textures * sizeof(SDL_Texture*));
 	eds -> renderer = renderer;
 
 	for (byte i = 0; i < num_textures; i++)
-		eds -> textures[i] = init_texture(texture_paths[i], renderer);
+		eds -> textures[i] = init_texture(texture_paths[i], renderer, 1);
 }
 
 void deinit_editor_state(EditorState* const eds) {
@@ -269,9 +271,6 @@ void deinit_editor_state(EditorState* const eds) {
 int main(void) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
 		FAIL(LaunchSDL, "SDL error: \"%s\".", SDL_GetError());
-
-	if (TTF_Init() == 1)
-		FAIL(LaunchSDL, "SDL_ttf error: \"%s\".", TTF_GetError());
 	
 	SDL_Window* window;
 	SDL_Renderer* renderer;
@@ -279,15 +278,12 @@ int main(void) {
 	if (SDL_CreateWindowAndRenderer(EDITOR_WIDTH, EDITOR_HEIGHT, 0, &window, &renderer) == -1)
 		FAIL(LaunchSDL, "Window or renderer creation failure: \"%s\".", SDL_GetError());
 
-	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1", SDL_HINT_OVERRIDE);	
 	SDL_SetWindowTitle(window, "Dungeon Maker");
 
 	EditorState eds;
 	init_editor_state(&eds, renderer);
 	editor_loop(&eds);
 	deinit_editor_state(&eds);
-
-	TTF_Quit();
 
 	SDL_DestroyRenderer(eds.renderer);
 	SDL_DestroyWindow(window);

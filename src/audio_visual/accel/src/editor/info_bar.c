@@ -33,7 +33,8 @@ static void update_info_bar_text(const EditorState* const eds,
 	static const char
 		*const edit_state_strings[3] = {"draw", "erase", "move"},
 		*const edit_mode_strings[2] = {"height", "texture"},
-		*const info_bar_format = "| %s | x %-3d | y %-3d | %-7s #%-3d | %-5s |";
+		*const info_bar_format = "|%s|x %-3d|y %-3d|%7s %-3d|%-5s|";
+
 		/* Tile pos: max 3 chars b/c max = 255. Editing mode: max 7 chars b/c "texture" is 7 chars. Editor
 		placement value: max 3 chars b/c for the two possible value types, texture and height, the max height val
 		is 255. Editing state: max 5 chars b/c "erase" is 5 chars. */
@@ -59,50 +60,48 @@ static void update_info_bar_text(const EditorState* const eds,
 	*text_buffer_ref = text_buffer;
 }
 
-static void update_info_bar_texture(const EditorState* const eds, InfoBar* const info_bar, const char* const map_name) {
-	update_info_bar_text(eds, &info_bar -> text, map_name);
-
-	SDL_Surface* const text_surface = TTF_RenderText_Solid(info_bar -> font, info_bar -> text, (SDL_Color) {INFO_BAR_COLOR});
-
-	if (text_surface == NULL)
-		FAIL(CreateTextSurface, "Could not create a text surface: \"%s\"\n", TTF_GetError());
-
-	SDL_Texture* text_texture = info_bar -> text_texture;
-	if (text_texture != NULL) SDL_DestroyTexture(text_texture); // Destroying the last texture
-
-	text_texture = SDL_CreateTextureFromSurface(eds -> renderer, text_surface);
-	if (text_texture == NULL)
-		FAIL(CreateTexture, "Could not create a text texture: \"%s\"", SDL_GetError());
-
-	info_bar -> text_texture = text_texture;
-	SDL_FreeSurface(text_surface);
-}
-
 void init_info_bar(InfoBar* const info_bar, SDL_Renderer* const renderer) {
-	const int info_bar_height = EDITOR_HEIGHT - EDITOR_MAP_SECTION_HEIGHT;
-	info_bar -> area = (SDL_Rect) {0, EDITOR_MAP_SECTION_HEIGHT, EDITOR_WIDTH, info_bar_height};
-
-	info_bar -> font = TTF_OpenFont(FONT_PATH, info_bar_height);
-	if (info_bar -> font == NULL)
-		FAIL(OpenFile, "Could not open the UI font file: \"%s\".", TTF_GetError());
-
 	info_bar -> text = NULL;
-	info_bar -> text_texture = NULL;
-	info_bar -> background_texture = init_texture(INFO_BAR_TEXTURE_PATH, renderer);
+	info_bar -> font_texture = init_texture(FONT_PATH, renderer, 0);
+	info_bar -> background_texture = init_texture(INFO_BAR_TEXTURE_PATH, renderer, 1);
+
+	SDL_QueryTexture(info_bar -> font_texture, NULL, NULL,
+		info_bar -> font_texture_size, info_bar -> font_texture_size + 1);
 }
 
 void deinit_info_bar(const InfoBar* const info_bar) {
 	free(info_bar -> text);
-	SDL_DestroyTexture(info_bar -> text_texture);
-	SDL_DestroyTexture(info_bar -> background_texture);
-	TTF_CloseFont(info_bar -> font);
+	SDL_DestroyTexture(info_bar -> font_texture);
 }
 
 void render_info_bar(InfoBar* const info_bar, const EditorState* const eds) {
 	SDL_Renderer* const renderer = eds -> renderer;
-	const SDL_Rect* const area = &info_bar -> area;
+	const SDL_Rect info_bar_area = {0, EDITOR_MAP_SECTION_HEIGHT, EDITOR_WIDTH, EDITOR_HEIGHT - EDITOR_MAP_SECTION_HEIGHT};
+	SDL_RenderCopy(renderer, info_bar -> background_texture, NULL, &info_bar_area);
 
-	SDL_RenderCopy(renderer, info_bar -> background_texture, NULL, area);
-	update_info_bar_texture(eds, info_bar, eds -> map_name);
-	SDL_RenderCopy(renderer, info_bar -> text_texture, NULL, area);
+	//////////
+
+	update_info_bar_text(eds, &info_bar -> text, eds -> map_name);
+
+	const int num_glyphs = 37;
+	const int
+		glyph_src_width = info_bar -> font_texture_size[0] / num_glyphs,
+		glyph_src_height = info_bar -> font_texture_size[1],
+		glyph_dest_width = info_bar_area.w / strlen(info_bar -> text);
+
+	for (const char* c_ref = info_bar -> text; *c_ref != '\0'; c_ref++) {
+		const char c = *c_ref;
+
+		char letter_index;
+		if (c >= 'a' && c <= 'z') letter_index = c - 'a';
+		else if (c >= '0' && c <= '9') letter_index = c - '0' + 26;
+		else if (c == '|') letter_index = 36;
+		else continue;
+
+		const SDL_Rect
+			src_crop = {letter_index * glyph_src_width, 0, glyph_src_width, glyph_src_height},
+			dest_crop = {(c_ref - info_bar -> text) * glyph_dest_width, EDITOR_MAP_SECTION_HEIGHT, glyph_dest_width, info_bar_area.h};
+
+		SDL_RenderCopy(renderer, info_bar -> font_texture, &src_crop, &dest_crop);
+	}
 }

@@ -30,7 +30,6 @@
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
 - Then, flat weapon (that comes after physics)
-- A dnd-styled font that's monospaced
 - Use more of the cglm functions in `update_camera`, or make my own
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements

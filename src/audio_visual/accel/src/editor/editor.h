@@ -2,10 +2,9 @@
 #define EDITOR_H
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
 
-#define EDITOR_WIDTH 1000
-#define EDITOR_HEIGHT 750
+#define EDITOR_WIDTH 1440
+#define EDITOR_HEIGHT 720
 #define EDITOR_MAP_SECTION_HEIGHT 650
 #define EDITOR_FPS 60
 
@@ -15,9 +14,6 @@
 #define RIGHT_CLICK_MAP_PLACEMENT_VALUE 0
 #define INIT_EDITOR_TEXTURE_ID 1
 #define INIT_EDITOR_HEIGHT 1
-
-#define FONT_PATH "../../../../assets/dnd.ttf"
-// #define FONT_PATH "monodnd.ttf"
 
 #define KEY_TOGGLE_TEXTURE_EDIT_MODE SDL_SCANCODE_ESCAPE
 #define KEY_CLICK_TILE SDL_BUTTON_LEFT
@@ -70,7 +66,7 @@ typedef struct {
 // Excluded: update_editing_placement_values, edit_eds_map, render_eds_map, editor_loop
 
 byte* map_point(const EditorState* const eds, const byte is_heightmap, const byte x, const byte y);
-SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer);
+SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer, const byte linear_filtering);
 int16_t three_chars_to_int(const char chars[3], const byte num_chars_to_convert);
 
 void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer); // Expected to be used publicly later
