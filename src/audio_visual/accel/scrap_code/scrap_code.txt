@@ -4334,3 +4334,51 @@ int main(void) {
 
 	SDL_Quit();
 }
+
+/////
+
+	/*
+	if (!is_delim(*buffer, delims)) {
+		puts("Not a delim");
+		const char* const start = buffer;
+		while (!is_delim(*buffer, delims)) buffer++;
+		*buffer = '\0';
+		buffer++;
+
+		printf("start = '%s'\n", start);
+		return start;
+	}
+	else {
+		puts("A delim");
+
+		while (is_delim(*buffer, delims)) {
+			*buffer = '\0';
+			buffer++;
+		}
+		return buffer;
+	}
+	*/
+
+/////
+
+	/*
+	for (long i = 0; i < file_contents.num_bytes; i++) {
+		const char c = file_contents.data[i];
+		if (isspace(c)) continue;
+
+		else if (c == token_defs.string_single_quote || c == token_defs.string_double_quote) {
+			const long i_start = i + 1;
+			while (file_contents.data[++i] != c) {
+				if (i == file_contents.num_bytes || file_contents.data[i] == token_defs.newline)
+					PARSE_FAIL(file_contents, "unterminated string", i_start - 1, i);
+			}
+			printf("A string: '%.*s'\n", (int) (i - i_start), file_contents.data + i_start);
+		}
+	}
+	*/
+
+/////
+
+tokenize
+
+/////
