@@ -26,7 +26,7 @@ Event get_next_event(void) {
 
 void init_camera(Camera* const camera, const vec3 init_pos) {
 	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
-	camera -> last_time = 0.0f;
+	camera -> last_time = SDL_GetPerformanceCounter();
 	camera -> bob_input = 0.0f;
 	memcpy(camera -> pos, init_pos, sizeof(vec3));
 }
@@ -139,7 +139,7 @@ static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, 
 		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
 		const GLfloat speed_xz_percent = (largest_speed_xz / delta_time) / constants.speeds.xz_max;
 
-		// Found through messing around with desmos. With this, y will never go above the eye height.
+		// Found through messing around with Desmos. With this, y will never go above the eye height.
 		bob_delta = speed_xz_percent
 			* sinf(3.75f * PI * (camera -> bob_input - 0.1333333333333333f))
 			* 0.1f + 0.1f * speed_xz_percent;
