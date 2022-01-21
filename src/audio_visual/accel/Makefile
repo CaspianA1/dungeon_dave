@@ -20,7 +20,7 @@ all:
 	cd bin && ./accel_demo
 
 editor:
-	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -lSDL2_ttf -o bin/editor src/editor/editor.c
+	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -o bin/editor src/editor/editor.c
 	./bin/editor
 
 lightmapper:

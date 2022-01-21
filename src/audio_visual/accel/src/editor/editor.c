@@ -1,6 +1,6 @@
 #include "editor.h"
 #include "info_bar.c"
-#include "ddl_parser.c"
+#include "level_parser.c"
 #include "../data/maps.c"
 
 /*
@@ -207,8 +207,7 @@ static void editor_loop(EditorState* const eds) {
 }
 
 void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
-	// Hardcoded for now; TODO: change
-	init_editor_state_from_ddl_file(eds, "src/data/sample_level.ddl");
+	init_editor_state_from_json_file(eds, "src/data/sample_level.json");
 
 	enum {
 		num_textures = 11, map_width = palace_width, map_height = palace_height
@@ -252,8 +251,8 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 
 	eds -> map_name = "palace";
 
-	eds -> textures = malloc(num_textures * sizeof(SDL_Texture*));
 	eds -> renderer = renderer;
+	eds -> textures = malloc(num_textures * sizeof(SDL_Texture*));
 
 	for (byte i = 0; i < num_textures; i++)
 		eds -> textures[i] = init_texture(texture_paths[i], renderer, 1);

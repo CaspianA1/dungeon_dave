@@ -17,7 +17,7 @@
 - NEXT 8: pass in world size to sector shader
 
 - Perlin noise-based lighting in 3D
-- A map maker. An init file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
+- A map maker. An init json file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe
 - For terrain, some objects popping out for half seconds
 - Camera var names to yaw, pitch, and roll (maybe)

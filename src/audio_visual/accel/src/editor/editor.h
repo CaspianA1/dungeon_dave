@@ -45,6 +45,10 @@ typedef enum {
 	NoClick
 } MouseState;
 
+/* This should be freed from EditorState:
+	- heightmap, texture_id_map, and map_name, via free
+	- textures, via SDL_DestroyTexture
+	- renderer, via SDL_DestroyRenderer */
 typedef struct {
 	byte
 		num_textures, map_size[2], tile_pos[2],
@@ -57,8 +61,8 @@ typedef struct {
 	MouseState mouse_state;
 	int mouse_pos[2];
 
-	SDL_Texture** textures;
 	SDL_Renderer* renderer;
+	SDL_Texture** textures;
 } EditorState;
 
 //////////
