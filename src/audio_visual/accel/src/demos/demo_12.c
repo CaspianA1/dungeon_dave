@@ -148,7 +148,7 @@ void init_sector_list_vbo(OldSectorList* const sector_list) {
 
 	for (size_t i = 0; i < list.length; i++) {
 		const byte height = ((OldSector*) list.data)[i].height;
-		total_bytes += (height == 0) ? bytes_per_face : bytes_per_mesh;
+		total_bytes += (height == 0) ? bytes_per_face_11 : bytes_per_mesh;
 	}
 
 	mesh_type_t* const vertices = malloc(total_bytes);
