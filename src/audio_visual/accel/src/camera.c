@@ -71,15 +71,12 @@ static float apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloat 
 
 static void update_pos_via_physics(const Event* const event,
 	PhysicsObject* const physics_obj, const vec2 dir_xz, vec3 pos,
-	const GLfloat bob_delta, const GLfloat delta_time) {
+	const GLfloat pace, const GLfloat delta_time) {
 
 	/* - Crouch
 	- Accelerate through pressing a key
 	- Clipping before hitting walls head-on
 	- Tilt when turning */
-
-	byte* const heightmap = physics_obj -> heightmap;
-	const byte map_width = physics_obj -> map_size[0], map_height = physics_obj -> map_size[1];
 
 	GLfloat
 		speed_forward_back = physics_obj -> speeds[0],
@@ -97,13 +94,15 @@ static void update_pos_via_physics(const Event* const event,
 		event -> movement_bits & 4, event -> movement_bits & 8);
 
 	////////// X and Z collision detection + setting new positions
-
-	GLfloat foot_height = pos[1] - constants.camera.eye_height - bob_delta;
+	GLfloat foot_height = pos[1] - constants.camera.eye_height - pace;
 	if (foot_height < 0.0f) foot_height = 0.0f;
 
 	const GLfloat
 		new_x = pos[0] + speed_forward_back * dir_xz[0] - speed_strafe * -dir_xz[1],
 		new_z = pos[2] + speed_forward_back * dir_xz[1] - speed_strafe * dir_xz[0];
+
+	byte* const heightmap = physics_obj -> heightmap;
+	const byte map_width = physics_obj -> map_size[0], map_height = physics_obj -> map_size[1];
 
 	if (new_x >= 0.0f && new_x <= map_width) {
 		if (*map_point(heightmap, new_x, pos[2], map_width) <= foot_height) pos[0] = new_x;
@@ -123,7 +122,7 @@ static void update_pos_via_physics(const Event* const event,
 	const GLfloat new_y = foot_height + speed_jump * delta_time; // Since g works w acceleration
 	const byte height = *map_point(heightmap, pos[0], pos[2], map_width);
 
-	if (new_y > height) foot_height = new_y + bob_delta;
+	if (new_y > height) foot_height = new_y + pace;
 	else {
 		speed_jump = 0.0f;
 		foot_height = height;
@@ -135,18 +134,23 @@ static void update_pos_via_physics(const Event* const event,
 	physics_obj -> speeds[2] = speed_strafe;
 }
 
-static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, const GLfloat delta_time) {
+// TODO: add to excluded
+static void make_pace_function(void) {
+	// This function models how a player's pace should behave given a time input
+}
+
+static void update_pace(Camera* const camera, GLfloat* const pos_y, vec3 speeds, const GLfloat delta_time) {
 	const GLfloat speed_forward_back = fabsf(speeds[0]), speed_strafe = fabsf(speeds[2]);
 	const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
 	const GLfloat speed_xz_percent = (largest_speed_xz / delta_time) / constants.speeds.xz_max;
 
-	// Going in the red area results in a lot of slowdown, but only with bob
+	// Going in the red area results in a lot of slowdown, but only with pace
 
 	if (speeds[1] == 0.0f) {
 		const GLfloat x = camera -> time_since_last_jump;
 		const GLfloat pace_curve_val = (sinf(4.0f * PI * (x + 0.375f)) + 1.0f) / 16.0f;
-		camera -> bob_delta = pace_curve_val * speed_xz_percent;
-		*pos_y += camera -> bob_delta;
+		camera -> pace = pace_curve_val * speed_xz_percent;
+		*pos_y += camera -> pace;
 		camera -> time_since_last_jump += delta_time;
 	}
 	else camera -> time_since_last_jump = 0.0f;
@@ -188,8 +192,8 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		if (event.movement_bits & 8) glm_vec3_muladds(right, speed, pos);
 	}
 	else {
-		update_pos_via_physics(&event, physics_obj, (vec2) {sin_hori, cos_hori}, pos, camera -> bob_delta, delta_time);
-		update_bob(camera, pos + 1, physics_obj -> speeds, delta_time);
+		update_pos_via_physics(&event, physics_obj, (vec2) {sin_hori, cos_hori}, pos, camera -> pace, delta_time);
+		update_pace(camera, pos + 1, physics_obj -> speeds, delta_time);
 	}
 
 	memcpy(camera -> pos, pos, sizeof(vec3));
