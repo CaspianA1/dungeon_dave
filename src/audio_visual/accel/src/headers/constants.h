@@ -6,6 +6,8 @@
 
 /* These are defined because M_PI and M_PI_2 are not standard C. They are macros
 and not in the `constants` struct b/c other values in that struct depend on them. */
+#define TWO_PI 6.28318530717958647692528676655900576f
+#define THREE_HALVES_PI 4.71238898038468985769396507491925432f
 #define PI 3.14159265358979323846264338327950288f
 #define HALF_PI 1.57079632679489661923132169163975144f
 #define FOURTH_PI 0.785398163397448309615660845819875721f
@@ -37,7 +39,7 @@ static const struct {
 		.clip_dists = {0.1f, 441.6729559300637f}
 	},
 
-	.accel = {.forward_back = 0.38f, .strafe = 0.4f, .xz_decel = 0.87f, .g = 13.0f},
+	.accel = {.forward_back = 0.3f, .strafe = 0.35f, .xz_decel = 0.87f, .g = 13.0f},
 	.speeds = {.y_jump = 5.5f, .xz_max = 4.0f, .look = 0.0015f, .tilt = 1.0f},
 
 	.movement_keys = {

@@ -19,13 +19,15 @@
 - Perlin noise-based lighting in 3D
 - A map maker. An init json file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe
-- For terrain, some objects popping out for half seconds
 - Camera var names to yaw, pitch, and roll (maybe)
 - Billboard lighting that matches the sector lighting
 - Base darkest distance of attenuated light on the world size
+
+- For terrain, some objects popping out for half seconds
 - Weird framerate dips in demos 12 and 17 (fix by checking gpu timing, and identifying the issue)
 - Can't use red cross for health since it's copyrighted
 - Animation goes slower at 5 FPS
+- Sometimes, the x position (probably z too) stays the same across ticks in the red area
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen

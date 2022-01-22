@@ -4444,3 +4444,14 @@ physics_obj -> dv = sqrtf(speed_forward_back * speed_forward_back + speed_strafe
 
 
 /////
+
+	static GLfloat last_x = 0.0f;
+	if (camera -> pos[0] == last_x) puts("Bad");
+	else puts("Good");
+	last_x = camera -> pos[0];
+
+/////
+
+	// 0.38f and 0.4f for xz acceleration before
+
+/////

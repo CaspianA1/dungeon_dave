@@ -27,7 +27,7 @@ Event get_next_event(void) {
 void init_camera(Camera* const camera, const vec3 init_pos) {
 	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
 	camera -> last_time = SDL_GetPerformanceCounter();
-	camera -> time_since_last_jump = 0.0f;
+	camera -> time_accum_not_jumping = 0.0f;
 	memcpy(camera -> pos, init_pos, sizeof(vec3));
 }
 
@@ -120,12 +120,12 @@ static void update_pos_via_physics(const Event* const event,
 	speed_jump -= constants.accel.g * delta_time;
 
 	const GLfloat new_y = foot_height + speed_jump * delta_time; // Since g works w acceleration
-	const byte height = *map_point(heightmap, pos[0], pos[2], map_width);
+	const byte base_height = *map_point(heightmap, pos[0], pos[2], map_width);
 
-	if (new_y > height) foot_height = new_y + pace;
+	if (new_y > base_height) foot_height = new_y + pace;
 	else {
 		speed_jump = 0.0f;
-		foot_height = height;
+		foot_height = base_height;
 	}
 
 	pos[1] = foot_height + constants.camera.eye_height;
@@ -135,8 +135,10 @@ static void update_pos_via_physics(const Event* const event,
 }
 
 // TODO: add to excluded
-static void make_pace_function(void) {
-	// This function models how a player's pace should behave given a time input
+static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const GLfloat amplitude) {
+	/* This function models how a player's pace should behave given a time input. At time = 0, the pace is 0.
+	The function output is always above 0. Period = width of one up-down pulsation, and amplitude = max height. */
+	return 0.5f * amplitude * (sinf(x * (TWO_PI / period) + THREE_HALVES_PI) + 1.0f);
 }
 
 static void update_pace(Camera* const camera, GLfloat* const pos_y, vec3 speeds, const GLfloat delta_time) {
@@ -147,13 +149,11 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, vec3 speeds,
 	// Going in the red area results in a lot of slowdown, but only with pace
 
 	if (speeds[1] == 0.0f) {
-		const GLfloat x = camera -> time_since_last_jump;
-		const GLfloat pace_curve_val = (sinf(4.0f * PI * (x + 0.375f)) + 1.0f) / 16.0f;
+		const GLfloat pace_curve_val = make_pace_function(camera -> time_accum_not_jumping, 0.8f, 0.2f);
 		camera -> pace = pace_curve_val * speed_xz_percent;
 		*pos_y += camera -> pace;
-		camera -> time_since_last_jump += delta_time;
+		camera -> time_accum_not_jumping += delta_time;
 	}
-	else camera -> time_since_last_jump = 0.0f;
 }
 
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
