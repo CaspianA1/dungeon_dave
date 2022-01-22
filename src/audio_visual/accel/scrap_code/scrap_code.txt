@@ -4382,3 +4382,65 @@ int main(void) {
 tokenize
 
 /////
+
+static void update_bob(Camera* const camera, GLfloat* const pos_y, vec3 speeds, const Uint64 curr_time, const GLfloat delta_time) {
+	GLfloat bob_delta = 0.0f;
+
+	// Remember to init the new var
+
+	if (speeds[1] == 0.0f) {
+
+		/*
+		const GLfloat
+			speed_forward_back = fabsf(speeds[0]),
+			speed_strafe = fabsf(speeds[2]);
+
+		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
+		const GLfloat speed_xz_percent = (largest_speed_xz / delta_time) / constants.speeds.xz_max;
+
+		const GLfloat dt = (GLfloat) (curr_time - camera -> last_jump_time) / SDL_GetPerformanceFrequency();
+
+		// Found through messing around with Desmos. With this, y will never go above the eye height.
+		bob_delta = speed_xz_percent
+			* sinf(3.75f * PI * (dt - 0.1333333333333333f))
+			* 0.1f + 0.1f * speed_xz_percent;
+		*/
+
+		// *pos_y += bob_delta;
+	}
+	else camera -> last_jump_time = curr_time;
+	// else camera -> bob_input = 0.0f;
+
+	camera -> last_bob_delta = bob_delta; // TODO: set to bob delta, if possible
+}
+
+/////
+
+physics_obj -> dv = sqrtf(speed_forward_back * speed_forward_back + speed_strafe * speed_strafe);
+
+/////
+
+	static vec3 last_pos;
+
+	if (last_pos[0] == camera -> pos[0] && last_pos[1] == camera -> pos[1] && last_pos[2] == camera -> pos[2]) {
+		puts("No change");
+	}
+	else puts("A change");
+
+	memcpy(last_pos, camera -> pos, sizeof(vec3));
+
+/////
+
+		// const GLfloat delta = (sinf(4.0f * x) + 1.0f) / 8.0f; // Amplitude of 2
+
+		// const GLfloat delta = (sinf(PI * x) + 1.0f) / 2.0f;
+
+		// const GLfloat delta = (sinf(PI * (x - 1.0f)) / 4.0f) + 0.25f;
+
+/////
+
+	const GLfloat d = sqrtf(speed_forward_back * speed_forward_back + speed_strafe * speed_strafe);
+	DEBUG(d / delta_time / constants.speeds.xz_max, lf);
+
+
+/////

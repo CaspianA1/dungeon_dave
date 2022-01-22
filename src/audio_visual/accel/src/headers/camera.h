@@ -9,8 +9,7 @@ typedef struct {
 		GLfloat fov, hori, vert, tilt;
 	} angles;
 
-	// `bob` is the bouncing up and down of camera when moving
-	GLfloat bob_input, last_bob_delta;
+	GLfloat bob_delta, time_since_last_jump; // `bob` is the bouncing up and down of camera when moving
 	Uint64 last_time;
 
 	vec2 right_xz; // X and Z of right (Y is always 0)
@@ -28,7 +27,7 @@ typedef struct {
 	vec3 speeds;
 } PhysicsObject;
 
-// Excluded: update_camera_angles, update_pos_via_physics, update_bob
+// Excluded: update_camera_angles, apply_movement_in_xz_direction, update_pos_via_physics, update_bob
 
 Event get_next_event(void);
 void init_camera(Camera* const camera, const vec3 init_pos);
