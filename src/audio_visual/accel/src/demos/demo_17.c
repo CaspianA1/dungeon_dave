@@ -179,7 +179,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 		&scene_state -> animations,
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
-	update_camera(&camera, get_next_event(), keys[KEY_FLY] ? NULL : &physics_obj);
+	update_camera(&camera, get_next_event(), &physics_obj);
 
 	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors,
 		&camera, scene_state -> lightmap_texture, scene_state -> map_size);

@@ -162,7 +162,9 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, vec3 speeds,
 	}
 }
 
-void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
+void update_camera(Camera* const camera, const Event event, PhysicsObject* physics_obj) {
+	if (keys[KEY_FLY]) physics_obj = NULL;
+
 	static GLfloat one_over_performance_frequency;
 	static byte first_call = 1;
 
