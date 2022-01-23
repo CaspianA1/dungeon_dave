@@ -22,12 +22,13 @@
 - Camera var names to yaw, pitch, and roll (maybe)
 - Billboard lighting that matches the sector lighting
 - Base darkest distance of attenuated light on the world size
+- Can't use red cross for health since it's copyrighted
 
 - For terrain, some objects popping out for half seconds
 - Weird framerate dips in demos 12 and 17 (fix by checking gpu timing, and identifying the issue)
-- Can't use red cross for health since it's copyrighted
 - Animation goes slower at 5 FPS
-- Sometimes, the x position (probably z too) stays the same across ticks in the red area
+- Sometimes, the x position (probably z too) stays the same across ticks in the red area (with vsync)
+- Jumping and landing on a higher surface is jerky again
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen

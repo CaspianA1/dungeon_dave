@@ -4455,3 +4455,20 @@ physics_obj -> dv = sqrtf(speed_forward_back * speed_forward_back + speed_strafe
 	// 0.38f and 0.4f for xz acceleration before
 
 /////
+
+
+	// memset(face_meshes_gpu, 0, _ * bytes_per_face);
+	size_t all_bytes = 0;
+	for (long i = 0; i < sectors -> length; i++) {
+		all_bytes += ((Sector*) sector_data) -> face_range.length * bytes_per_face;
+	}
+	memset(face_meshes_gpu, 0, all_bytes);
+
+/////
+
+	static GLfloat last_x;
+	if (last_x == new_x) puts("No movement");
+	else puts("Something happened");
+	last_x = new_x;
+
+/////

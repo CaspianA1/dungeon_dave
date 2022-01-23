@@ -4,6 +4,15 @@
 #include "utils.h"
 #include "buffer_defs.h"
 
+#define BIT_MOVE_FORWARD 1
+#define BIT_MOVE_BACKWARD 2
+#define BIT_STRAFE_LEFT 4
+#define BIT_STRAFE_RIGHT 8
+#define BIT_TILT_LEFT 16
+#define BIT_TILT_RIGHT 32
+
+//////////
+
 typedef struct {
 	struct {
 		GLfloat fov, hori, vert, tilt;

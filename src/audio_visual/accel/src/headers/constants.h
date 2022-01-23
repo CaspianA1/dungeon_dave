@@ -39,7 +39,7 @@ static const struct {
 		.clip_dists = {0.1f, 441.6729559300637f}
 	},
 
-	.accel = {.forward_back = 0.3f, .strafe = 0.35f, .xz_decel = 0.87f, .g = 13.0f},
+	.accel = {.forward_back = 0.15f, .strafe = 0.2f, .xz_decel = 0.87f, .g = 13.0f},
 	.speeds = {.y_jump = 5.5f, .xz_max = 4.0f, .look = 0.0015f, .tilt = 1.0f},
 
 	.movement_keys = {
