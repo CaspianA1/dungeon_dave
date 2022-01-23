@@ -178,9 +178,9 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 	camera -> right_xz[0] = -cos_hori;
 	camera -> right_xz[1] = sin_hori;
 
-	vec3 dir = {
-		cos_vert * sin_hori, sin_vert, cos_vert * cos_hori
-	}, right = {camera -> right_xz[0], 0.0f, camera -> right_xz[1]}, pos;
+	vec3
+		dir = {cos_vert * sin_hori, sin_vert, cos_vert * cos_hori},
+		right = {camera -> right_xz[0], 0.0f, camera -> right_xz[1]}, pos;
 
 	memcpy(pos, camera -> pos, sizeof(vec3));
 
