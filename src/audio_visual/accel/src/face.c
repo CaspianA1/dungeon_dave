@@ -71,29 +71,29 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 		near_x = face.origin[0], near_z = face.origin[1],
 		top_y = sector_max_visible_height;
 
-	const face_mesh_component_t* face_mesh;
-
 	switch (face.type) {
 		case Flat: {
 			const byte size_x = face.size[0], size_z = face.size[1];
 			const byte far_x = near_x + size_x, far_z = near_z + size_z;
 
-			face_mesh = (face_mesh_component_t[components_per_face]) {
-				near_x, top_y, far_z, face_info,
-				far_x, top_y, near_z, face_info,
-				near_x, top_y, near_z, face_info,
-				near_x, top_y, far_z, face_info,
-				far_x, top_y, far_z, face_info,
-				far_x, top_y, near_z, face_info
-			};
+			push_ptr_to_list(face_mesh_list,
+				((face_mesh_component_t[components_per_face]) {
+					near_x, top_y, far_z, face_info,
+					far_x, top_y, near_z, face_info,
+					near_x, top_y, near_z, face_info,
+					near_x, top_y, far_z, face_info,
+					far_x, top_y, far_z, face_info,
+					far_x, top_y, near_z, face_info
+				}));
+
 			break;
 		}
 		case Vert_NS: {
 			const byte size_z = face.size[0], size_y = face.size[1];
 			const byte far_z = near_z + size_z, bottom_y = top_y - size_y;
 
-			face_mesh = side
-				? (face_mesh_component_t[components_per_face]) {
+			push_ptr_to_list(face_mesh_list,
+				(side ? (face_mesh_component_t[components_per_face]) {
 					near_x, bottom_y, near_z, face_info,
 					near_x, top_y, far_z, face_info,
 					near_x, top_y, near_z, face_info,
@@ -108,21 +108,23 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 					near_x, top_y, far_z, face_info,
 					near_x, bottom_y, far_z, face_info,
 					near_x, bottom_y, near_z, face_info
-				};
+				}));
+
 			break;
 		}
 		case Vert_EW: {
 			const byte size_x = face.size[0], size_y = face.size[1];
 			const byte far_x = near_x + size_x, bottom_y = top_y - size_y;
 
-			face_mesh = side
-				? (face_mesh_component_t[components_per_face]) {
+			push_ptr_to_list(face_mesh_list,
+				(side ? (face_mesh_component_t[components_per_face]) {
 					near_x, top_y, near_z, face_info,
 					far_x, top_y, near_z, face_info,
 					near_x, bottom_y, near_z, face_info,
 					far_x, top_y, near_z, face_info,
 					far_x, bottom_y, near_z, face_info,
 					near_x, bottom_y, near_z, face_info
+
 				}
 				: (face_mesh_component_t[components_per_face]) {
 					near_x, bottom_y, near_z, face_info,
@@ -131,12 +133,11 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 					near_x, bottom_y, near_z, face_info,
 					far_x, bottom_y, near_z, face_info,
 					far_x, top_y, near_z, face_info
+				}));
 
-				};
 			break;
 		}
 	}
-	push_ptr_to_list(face_mesh_list, face_mesh);
 }
 
 void init_vert_faces(

@@ -3,12 +3,13 @@
 
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
-#include "buffer_defs.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdouble-promotion"
 #include <cglm/cglm.h>
 #pragma GCC diagnostic pop
+
+#include "buffer_defs.h"
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define DEBUG_VEC(v) printf(#v " = {%lf, %lf, %lf}\n", (double) v[0], (double) v[1], (double) v[2])
@@ -28,7 +29,7 @@
 
 #define WINDOW_W 800
 #define WINDOW_H 600
-// #define USE_VSYNC
+#define USE_VSYNC
 // #define FORCE_SOFTWARE_RENDERER
 
 #define KEY_TOGGLE_FULLSCREEN_WINDOW SDL_SCANCODE_ESCAPE
