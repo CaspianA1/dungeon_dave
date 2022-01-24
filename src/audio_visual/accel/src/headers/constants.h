@@ -31,7 +31,7 @@ static const struct {
 	const struct {const GLfloat xz_max, jump, look_hori, look_vert;} speeds;
 
 	const struct {
-		const SDL_Scancode forward, backward, left, right, tilt_left, tilt_right, jump;
+		const SDL_Scancode forward, backward, left, right, jump;
 	} movement_keys;
 
 } constants = {
@@ -48,10 +48,7 @@ static const struct {
 
 	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look_hori = TWO_THIRDS_PI, .look_vert = HALF_PI},
 
-	.movement_keys = {
-		SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A,
-		SDL_SCANCODE_D, SDL_SCANCODE_T, SDL_SCANCODE_Y, SDL_SCANCODE_SPACE
-	}
+	.movement_keys = {SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE}
 };
 
 /* Max world size = 255 by 255 by 255 (with top left corner of block as origin).

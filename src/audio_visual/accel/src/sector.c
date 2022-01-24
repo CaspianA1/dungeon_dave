@@ -158,10 +158,11 @@ static void draw_sectors(const BatchDrawContext* const draw_context, const Camer
 	const GLuint sector_shader = draw_context -> shader;
 	glUseProgram(sector_shader);
 
-	static byte first_call = 1;
 	static GLint
 		model_view_projection_id, ambient_strength_id,
 		diffuse_strength_id, camera_pos_world_space_id;
+
+	static byte first_call = 1;
 
 	if (first_call) {
 		INIT_UNIFORM(model_view_projection, sector_shader);
