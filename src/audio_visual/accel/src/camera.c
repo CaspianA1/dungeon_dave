@@ -42,11 +42,12 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 
 	GLfloat tilt = camera -> angles.tilt;
 	const GLfloat tilt_speed = constants.speeds.tilt * delta_time;
+	const byte movement_bits = event -> movement_bits;
 
-	if ((event -> movement_bits & BIT_TILT_LEFT) && ((tilt += tilt_speed) > constants.camera.lims.tilt)) // Left
+	if ((movement_bits & BIT_TILT_LEFT) && ((tilt += tilt_speed) > constants.camera.lims.tilt)) // Left
 		tilt = constants.camera.lims.tilt - 0.01f;
 
-	if ((event -> movement_bits & BIT_TILT_RIGHT) && ((tilt -= tilt_speed) < -constants.camera.lims.tilt)) // Right
+	if ((movement_bits & BIT_TILT_RIGHT) && ((tilt -= tilt_speed) < -constants.camera.lims.tilt)) // Right
 		tilt = -constants.camera.lims.tilt + 0.01f;
 
 	//////////
@@ -56,11 +57,11 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 	camera -> angles.tilt = tilt;
 }
 
-static float apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloat delta_move,
-	const GLfloat max_v, const byte moving_in_dir, const byte moving_in_opposite_dir) {
+static GLfloat apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloat delta_move,
+	const GLfloat max_v, const byte bit_moving_in_dir, const byte bit_moving_in_opposite_dir) {
 
-	float v = curr_v + delta_move * moving_in_dir - delta_move * moving_in_opposite_dir;
-	if (!moving_in_dir && !moving_in_opposite_dir) v *= constants.accel.xz_decel;
+	GLfloat v = curr_v + delta_move * !!bit_moving_in_dir - delta_move * !!bit_moving_in_opposite_dir;
+	if (!bit_moving_in_dir && !bit_moving_in_opposite_dir) v *= constants.accel.xz_decel;
 
 	if (v > max_v) return max_v;
 	else if (v < -max_v) return -max_v;
@@ -85,11 +86,16 @@ static void update_pos_via_physics(const Event* const event,
 		speed_forward_back = physics_obj -> speeds[0] * delta_time,
 		speed_strafe = physics_obj -> speeds[2] * delta_time;
 
+	byte* const heightmap = physics_obj -> heightmap;
+	const byte
+		movement_bits = event -> movement_bits,
+		map_width = physics_obj -> map_size[0], map_height = physics_obj -> map_size[1];
+
 	speed_forward_back = apply_movement_in_xz_direction(speed_forward_back,	accel_forward_back, max_speed_xz,
-		!!(event -> movement_bits & BIT_MOVE_FORWARD), !!(event -> movement_bits & BIT_MOVE_BACKWARD));
+		movement_bits & BIT_MOVE_FORWARD, movement_bits & BIT_MOVE_BACKWARD);
 
 	speed_strafe = apply_movement_in_xz_direction(speed_strafe, accel_strafe, max_speed_xz,
-		!!(event -> movement_bits & BIT_STRAFE_LEFT), !!(event -> movement_bits & BIT_STRAFE_RIGHT));
+		movement_bits & BIT_STRAFE_LEFT, movement_bits & BIT_STRAFE_RIGHT);
 
 	////////// X and Z collision detection + setting new positions
 
@@ -99,9 +105,6 @@ static void update_pos_via_physics(const Event* const event,
 	const GLfloat
 		new_x = pos[0] + speed_forward_back * dir_xz[0] - speed_strafe * -dir_xz[1],
 		new_z = pos[2] + speed_forward_back * dir_xz[1] - speed_strafe * dir_xz[0];
-
-	byte* const heightmap = physics_obj -> heightmap;
-	const byte map_width = physics_obj -> map_size[0], map_height = physics_obj -> map_size[1];
 
 	if (new_x >= 0.0f && new_x <= map_width) {
 		if (*map_point(heightmap, new_x, pos[2], map_width) <= foot_height) pos[0] = new_x;
@@ -114,7 +117,7 @@ static void update_pos_via_physics(const Event* const event,
 	////////// Y collision detection
 
 	GLfloat speed_jump_per_sec = physics_obj -> speeds[1];
-	if (speed_jump_per_sec == 0.0f && (event -> movement_bits & BIT_JUMP))
+	if (speed_jump_per_sec == 0.0f && (movement_bits & BIT_JUMP))
 		speed_jump_per_sec = constants.speeds.jump;
 	else speed_jump_per_sec -= constants.accel.g * delta_time;
 
@@ -129,9 +132,11 @@ static void update_pos_via_physics(const Event* const event,
 	////////// Setting new y position and speeds
 
 	pos[1] = foot_height + constants.camera.eye_height;
-	physics_obj -> speeds[0] = speed_forward_back / delta_time;
+
+	const vec2 speeds_xz_per_sec = {speed_forward_back / delta_time, speed_strafe / delta_time};
+	physics_obj -> speeds[0] = speeds_xz_per_sec[0];
 	physics_obj -> speeds[1] = speed_jump_per_sec;
-	physics_obj -> speeds[2] = speed_strafe / delta_time;
+	physics_obj -> speeds[2] = speeds_xz_per_sec[1];
 }
 
 static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const GLfloat amplitude) {
