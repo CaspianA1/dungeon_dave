@@ -128,7 +128,7 @@ static void update_pos_via_physics(const Event* const event,
 		heightmap, map_size, 1, old_pos_xz, foot_height,
 		pos[2] + speed_forward_back * dir_xz[1] - speed_strafe * dir_xz[0]);
 
-	////////// Y collision detection + setting new y position
+	////////// Y collision detection + setting new y position and speed
 
 	GLfloat speed_jump_per_sec = physics_obj -> speeds[1];
 	if (speed_jump_per_sec == 0.0f && (movement_bits & BIT_JUMP))
