@@ -76,7 +76,7 @@ static void update_pos_via_physics(const Event* const event,
 	- Clipping before hitting walls head-on
 	- Tilt when turning */
 
-	const GLfloat
+	const GLfloat // The `* delta_time` exprs get a per-tic version of each multiplicand
 		max_speed_xz = constants.speeds.xz_max * delta_time,
 		accel_forward_back = constants.accel.forward_back * delta_time,
 		accel_strafe = constants.accel.strafe * delta_time;
