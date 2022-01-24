@@ -146,7 +146,7 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, vec3 speeds,
 	if (speeds[1] == 0.0f) {
 		const GLfloat speed_forward_back = fabsf(speeds[0]), speed_strafe = fabsf(speeds[2]);
 		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
-		const GLfloat smooth_speed_xz_percent = log2f((largest_speed_xz / constants.speeds.xz_max) + 1.0f);
+		const GLfloat smooth_speed_xz_percent = log2f(largest_speed_xz / constants.speeds.xz_max + 1.0f);
 
 		camera -> pace = make_pace_function(camera -> time_accum_not_jumping,
 			0.6f, 0.3f * smooth_speed_xz_percent) * smooth_speed_xz_percent;
