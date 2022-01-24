@@ -1,6 +1,8 @@
 #ifndef MAPS_C
 #define MAPS_C
 
+#include "../headers/buffer_defs.h"
+
 enum {
 	level_one_width = 25, level_one_height = 15,
 	new_width = 50, new_height = 50,
