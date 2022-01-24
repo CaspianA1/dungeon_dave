@@ -8,22 +8,20 @@ Event get_next_event(void) {
 	static GLint viewport_size[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_size);
 
-	Event e = {
+	Event event = {
 		.movement_bits =
 			keys[constants.movement_keys.forward] |
 			(keys[constants.movement_keys.backward] << 1) |
 			(keys[constants.movement_keys.left] << 2) |
 			(keys[constants.movement_keys.right] << 3) |
-			(keys[constants.movement_keys.tilt_left] << 4) |
-			(keys[constants.movement_keys.tilt_right] << 5) |
-			(keys[constants.movement_keys.jump] << 6),
+			(keys[constants.movement_keys.jump] << 4),
 
 		.screen_size = {viewport_size[2], viewport_size[3]}
 	};
 
-	SDL_GetRelativeMouseState(&e.mouse_dx, &e.mouse_dy);
+	SDL_GetRelativeMouseState(event.mouse_movement, event.mouse_movement + 1);
 
-	return e;
+	return event;
 }
 
 void init_camera(Camera* const camera, const vec3 init_pos) {
@@ -33,28 +31,23 @@ void init_camera(Camera* const camera, const vec3 init_pos) {
 	memcpy(camera -> pos, init_pos, sizeof(vec3));
 }
 
-static void update_camera_angles(Camera* const camera, const Event* const event, const GLfloat delta_time) {
-	GLfloat vert_angle = camera -> angles.vert + constants.speeds.look * -event -> mouse_dy;
-	if (vert_angle > constants.camera.lims.vert) vert_angle = constants.camera.lims.vert;
-	else if (vert_angle < -constants.camera.lims.vert) vert_angle = -constants.camera.lims.vert;
+static GLfloat limit_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
+	if (val > limit) return limit;
+	else if (val < -limit) return -limit;
+	else return val;
+}
 
-	//////////
+static void update_camera_angles(Camera* const camera, const Event* const event) {
+	const int *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
 
-	GLfloat tilt = camera -> angles.tilt;
-	const GLfloat tilt_speed = constants.speeds.tilt * delta_time;
-	const byte movement_bits = event -> movement_bits;
+	const GLfloat delta_vert = (GLfloat) -mouse_movement[1] / screen_size[1] * constants.speeds.look_vert;
+	camera -> angles.vert = limit_to_pos_neg_domain(camera -> angles.vert + delta_vert, constants.camera.lims.vert);
 
-	if ((movement_bits & BIT_TILT_LEFT) && ((tilt += tilt_speed) > constants.camera.lims.tilt)) // Left
-		tilt = constants.camera.lims.tilt - 0.01f;
+	const GLfloat delta_turn = (GLfloat) -mouse_movement[0] / screen_size[0] * constants.speeds.look_hori;
+	camera -> angles.hori += delta_turn;
 
-	if ((movement_bits & BIT_TILT_RIGHT) && ((tilt -= tilt_speed) < -constants.camera.lims.tilt)) // Right
-		tilt = -constants.camera.lims.tilt + 0.01f;
-
-	//////////
-
-	camera -> angles.hori += constants.speeds.look * -event -> mouse_dx;
-	camera -> angles.vert = vert_angle;
-	camera -> angles.tilt = tilt;
+	const GLfloat not_limited_tilt = delta_turn / constants.camera.delta_turn_to_tilt_ratio;
+	camera -> angles.tilt = limit_to_pos_neg_domain(not_limited_tilt, constants.camera.lims.tilt);
 }
 
 static GLfloat apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloat delta_move,
@@ -63,9 +56,7 @@ static GLfloat apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloa
 	GLfloat v = curr_v + delta_move * !!bit_moving_in_dir - delta_move * !!bit_moving_in_opposite_dir;
 	if (!bit_moving_in_dir && !bit_moving_in_opposite_dir) v *= constants.accel.xz_decel;
 
-	if (v > max_v) return max_v;
-	else if (v < -max_v) return -max_v;
-	else return v;
+	return limit_to_pos_neg_domain(v, max_v);
 }
 
 static GLfloat apply_collision_on_xz_axis(
@@ -154,7 +145,7 @@ static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const G
 	return 0.5f * amplitude * (sinf(x * (TWO_PI / period) + THREE_HALVES_PI) + 1.0f);
 }
 
-static void update_pace(Camera* const camera, GLfloat* const pos_y, vec3 speeds, const GLfloat delta_time) {
+static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 speeds, const GLfloat delta_time) {
 	// Going in the red area results in a lot of slowdown, but only with pace
 
 	if (speeds[1] == 0.0f) {
@@ -183,7 +174,7 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 	const GLfloat delta_time = (GLfloat) (curr_time - camera -> last_time) * one_over_performance_freq;
 	camera -> last_time = curr_time;
 
-	update_camera_angles(camera, &event, delta_time);
+	update_camera_angles(camera, &event);
 
 	const GLfloat
 		cos_hori = cosf(camera -> angles.hori), cos_vert = cosf(camera -> angles.vert),

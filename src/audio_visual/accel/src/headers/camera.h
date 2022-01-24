@@ -8,9 +8,7 @@
 #define BIT_MOVE_BACKWARD 2
 #define BIT_STRAFE_LEFT 4
 #define BIT_STRAFE_RIGHT 8
-#define BIT_TILT_LEFT 16
-#define BIT_TILT_RIGHT 32
-#define BIT_JUMP 64
+#define BIT_JUMP 16
 
 //////////
 
@@ -29,7 +27,7 @@ typedef struct {
 
 typedef struct {
 	const byte movement_bits; // Tilt right, tilt left, right, left, backward, forward
-	int screen_size[2], mouse_dx, mouse_dy; // Delta from last frame
+	int screen_size[2], mouse_movement[2];
 } Event;
 
 typedef struct {
@@ -37,7 +35,7 @@ typedef struct {
 	vec3 speeds;
 } PhysicsObject;
 
-/* Excluded: update_camera_angles, apply_movement_in_xz_direction,
+/* Excluded: limit_to_pos_neg_domain, update_camera_angles, apply_movement_in_xz_direction,
 apply_collision_on_xz_axis, update_pos_via_physics, make_pace_function, update_pace */
 
 Event get_next_event(void);

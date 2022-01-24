@@ -4,7 +4,7 @@ OPTIMIZE = -Ofast
 DEBUG = -fsanitize=address
 BUILD_TYPE = $(OPTIMIZE)
 
-DEMO = 21
+DEMO = 16
 TEST_RANGE = 1..21
 
 OUT = accel_demo
@@ -24,9 +24,8 @@ build_demo: # Takes named arguments `demo_id` and `binary_name`
 
 test_demos: # Tests demos in the test range, stopping if one fails to build
 	for i in {$(TEST_RANGE)}; do \
-		if !(make build_demo demo_id=$$i binary_name=$(OUT)_$$i &) then exit; \
-		fi \
-	done; \
+		make build_demo demo_id=$$i binary_name=$(OUT)_$$i & \
+	done
 
 %: # This builds any app from 'tools/', which may be `editor` or `lightmapper`
 	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -o bin/$@ src/tools/$@.c
