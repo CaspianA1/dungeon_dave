@@ -105,12 +105,10 @@ static void update_pos_via_physics(const Event* const event,
 
 	if (new_x >= 0.0f && new_x <= map_width) {
 		if (*map_point(heightmap, new_x, pos[2], map_width) <= foot_height) pos[0] = new_x;
-		// else entity.speed_xz /= 2.0f;
 	}
 
 	if (new_z >= 0.0f && new_z <= map_height) {
 		if (*map_point(heightmap, pos[0], new_z, map_width) <= foot_height) pos[2] = new_z;
-		// else entity.speed_xz /= 2.0f;
 	}
 
 	////////// Y collision detection
