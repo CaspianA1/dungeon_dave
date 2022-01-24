@@ -118,14 +118,15 @@ static void update_pos_via_physics(const Event* const event,
 	physics_obj -> speeds[2] = speed_strafe / delta_time;
 
 	////////// X and Z collision detection + setting new xz positions
+	const vec2 old_pos_xz = {pos[0], pos[2]};
 
-	pos[0] = apply_collision_on_xz_axis(heightmap,
-		map_size, 0, (vec2) {pos[0], pos[2]}, foot_height,
-			pos[0] + speed_forward_back * dir_xz[0] - speed_strafe * -dir_xz[1]);
+	pos[0] = apply_collision_on_xz_axis(
+		heightmap, map_size, 0, old_pos_xz, foot_height,
+		pos[0] + speed_forward_back * dir_xz[0] - speed_strafe * -dir_xz[1]);
 
-	pos[2] = apply_collision_on_xz_axis(heightmap,
-		map_size, 1, (vec2) {pos[0], pos[2]}, foot_height,
-			pos[2] + speed_forward_back * dir_xz[1] - speed_strafe * dir_xz[0]);
+	pos[2] = apply_collision_on_xz_axis(
+		heightmap, map_size, 1, old_pos_xz, foot_height,
+		pos[2] + speed_forward_back * dir_xz[1] - speed_strafe * dir_xz[0]);
 
 	////////// Y collision detection + setting new y position
 
