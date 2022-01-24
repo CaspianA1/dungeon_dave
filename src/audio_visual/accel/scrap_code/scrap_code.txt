@@ -4511,4 +4511,39 @@ physics_obj -> dv = sqrtf(speed_forward_back * speed_forward_back + speed_strafe
 	else puts("---");
 	ly = pos[1];
 
+///// Vectorized XZ physics:
+
+// TODO: to excluded
+static void update_pos_xz_via_physics(const byte movement_bits,
+	const byte map_size[2], const byte* const heightmap,
+	PhysicsObject* const physics_obj, const GLfloat delta_time,
+	const GLfloat foot_height, const vec2 dir_xz, vec2 pos_xz) {
+
+	const GLfloat max_speed_xz = constants.speeds.xz_max * delta_time; // `* delta_time` gives a per-tick value
+
+	vec2 speeds_xz = {physics_obj -> speeds[0] * delta_time, physics_obj -> speeds[2] * delta_time};
+	const vec2 accel_xz = {constants.accel.forward_back * delta_time, constants.accel.strafe * delta_time};
+
+	speeds_xz[0] = apply_movement_in_xz_direction(speeds_xz[0], accel_xz[0],
+		max_speed_xz, movement_bits & BIT_MOVE_FORWARD, movement_bits & BIT_MOVE_BACKWARD);
+
+	speeds_xz[1] = apply_movement_in_xz_direction(speeds_xz[1], accel_xz[1],
+		max_speed_xz, movement_bits & BIT_STRAFE_LEFT, movement_bits & BIT_STRAFE_RIGHT);
+
+	const byte
+		*const map_size = physics_obj -> map_size,
+		*const heightmap = physics_obj -> heightmap;
+
+	pos_xz[0] = apply_collision_on_xz_axis(
+		heightmap, map_size, 0, pos_xz, foot_height,
+		pos_xz[0] + speeds_xz[0] * dir_xz[0] - speeds_xz[1] * -dir_xz[1]);
+	
+	pos_xz[1] = apply_collision_on_xz_axis(
+		heightmap, map_size, 1, pos_xz, foot_height,
+		pos_xz[2] + speeds_xz[0] * dir_xz[1] - speeds_xz[1] * dir_xz[0]);
+	
+	physics_obj -> speeds[0] /= delta_time;
+	physics_obj -> speeds[1] /= delta_time;
+}
+
 /////

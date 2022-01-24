@@ -68,14 +68,26 @@ static GLfloat apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloa
 	else return v;
 }
 
+static GLfloat apply_collision_on_xz_axis(
+	const byte* const heightmap, const byte map_size[2], const byte varying_axis,
+	const vec2 old_pos, const GLfloat foot_height, const GLfloat new_pos_component) {
+
+	if (new_pos_component >= 0.0f && new_pos_component <= map_size[varying_axis]) {
+		vec2 params;
+		params[varying_axis] = new_pos_component;
+		params[!varying_axis] = old_pos[!varying_axis];
+
+		if (*map_point((byte*) heightmap, params[0], params[1], map_size[0]) <= foot_height)
+			return new_pos_component;
+	}
+	return old_pos[varying_axis];
+}
+
 static void update_pos_via_physics(const Event* const event,
 	PhysicsObject* const physics_obj, const vec2 dir_xz, vec3 pos,
 	const GLfloat pace, const GLfloat delta_time) {
 
-	/* - Crouch
-	- Accelerate through pressing a key
-	- Clipping before hitting walls head-on
-	- Tilt when turning */
+	////////// Declaring a lot of shared vars
 
 	const GLfloat // The `* delta_time` exprs get a per-tick version of each multiplicand
 		max_speed_xz = constants.speeds.xz_max * delta_time,
@@ -84,37 +96,38 @@ static void update_pos_via_physics(const Event* const event,
 
 	GLfloat
 		speed_forward_back = physics_obj -> speeds[0] * delta_time,
-		speed_strafe = physics_obj -> speeds[2] * delta_time;
+		speed_strafe = physics_obj -> speeds[2] * delta_time,
+		foot_height = pos[1] - constants.camera.eye_height - pace;
 
-	byte* const heightmap = physics_obj -> heightmap;
-	const byte
-		movement_bits = event -> movement_bits,
-		map_width = physics_obj -> map_size[0], map_height = physics_obj -> map_size[1];
-
-	speed_forward_back = apply_movement_in_xz_direction(speed_forward_back,	accel_forward_back, max_speed_xz,
-		movement_bits & BIT_MOVE_FORWARD, movement_bits & BIT_MOVE_BACKWARD);
-
-	speed_strafe = apply_movement_in_xz_direction(speed_strafe, accel_strafe, max_speed_xz,
-		movement_bits & BIT_STRAFE_LEFT, movement_bits & BIT_STRAFE_RIGHT);
-
-	////////// X and Z collision detection + setting new positions
-
-	GLfloat foot_height = pos[1] - constants.camera.eye_height - pace;
 	if (foot_height < 0.0f) foot_height = 0.0f;
 
-	const GLfloat
-		new_x = pos[0] + speed_forward_back * dir_xz[0] - speed_strafe * -dir_xz[1],
-		new_z = pos[2] + speed_forward_back * dir_xz[1] - speed_strafe * dir_xz[0];
+	const byte
+		movement_bits = event -> movement_bits,
+		*const map_size = physics_obj -> map_size,
+		*const heightmap = physics_obj -> heightmap;
 
-	if (new_x >= 0.0f && new_x <= map_width) {
-		if (*map_point(heightmap, new_x, pos[2], map_width) <= foot_height) pos[0] = new_x;
-	}
+	////////// Updating speed
 
-	if (new_z >= 0.0f && new_z <= map_height) {
-		if (*map_point(heightmap, pos[0], new_z, map_width) <= foot_height) pos[2] = new_z;
-	}
+	speed_forward_back = apply_movement_in_xz_direction(speed_forward_back,	accel_forward_back,
+		max_speed_xz, movement_bits & BIT_MOVE_FORWARD, movement_bits & BIT_MOVE_BACKWARD);
 
-	////////// Y collision detection
+	speed_strafe = apply_movement_in_xz_direction(speed_strafe, accel_strafe,
+		max_speed_xz, movement_bits & BIT_STRAFE_LEFT, movement_bits & BIT_STRAFE_RIGHT);
+
+	physics_obj -> speeds[0] = speed_forward_back / delta_time;
+	physics_obj -> speeds[2] = speed_strafe / delta_time;
+
+	////////// X and Z collision detection + setting new xz positions
+
+	pos[0] = apply_collision_on_xz_axis(heightmap,
+		map_size, 0, (vec2) {pos[0], pos[2]}, foot_height,
+			pos[0] + speed_forward_back * dir_xz[0] - speed_strafe * -dir_xz[1]);
+
+	pos[2] = apply_collision_on_xz_axis(heightmap,
+		map_size, 1, (vec2) {pos[0], pos[2]}, foot_height,
+			pos[2] + speed_forward_back * dir_xz[1] - speed_strafe * dir_xz[0]);
+
+	////////// Y collision detection + setting new y position
 
 	GLfloat speed_jump_per_sec = physics_obj -> speeds[1];
 	if (speed_jump_per_sec == 0.0f && (movement_bits & BIT_JUMP))
@@ -122,21 +135,16 @@ static void update_pos_via_physics(const Event* const event,
 	else speed_jump_per_sec -= constants.accel.g * delta_time;
 
 	const GLfloat new_y = foot_height + speed_jump_per_sec * delta_time;
-	const byte base_height = *map_point(heightmap, pos[0], pos[2], map_width);
+	const byte base_height = *map_point((byte*) heightmap, pos[0], pos[2], map_size[0]);
 
 	if (new_y > base_height) foot_height = new_y + pace;
 	else {
 		speed_jump_per_sec = 0.0f;
 		foot_height = base_height;
 	}
-	////////// Setting new y position and speeds
 
 	pos[1] = foot_height + constants.camera.eye_height;
-
-	const vec2 speeds_xz_per_sec = {speed_forward_back / delta_time, speed_strafe / delta_time};
-	physics_obj -> speeds[0] = speeds_xz_per_sec[0];
 	physics_obj -> speeds[1] = speed_jump_per_sec;
-	physics_obj -> speeds[2] = speeds_xz_per_sec[1];
 }
 
 static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const GLfloat amplitude) {
