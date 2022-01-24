@@ -109,8 +109,9 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
 
 	#ifndef USE_VSYNC
-	const GLfloat max_delay = 1000.0f / constants.fps;
-	const Uint64 performance_freq = SDL_GetPerformanceFrequency();
+	const GLfloat
+		max_delay = 1000.0f / constants.fps,
+		one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
 	#endif
 
 	byte running = 1;
@@ -139,7 +140,7 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		SDL_GL_SwapWindow(screen -> window);
 
 		#ifndef USE_VSYNC
-		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) / performance_freq * 1000.0f;
+		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) * one_over_performance_freq * 1000.0f;
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
 		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps - 0.5f); // SDL_Delay tends to be late, so 0.5f accounts for that
 		#endif

@@ -4472,3 +4472,43 @@ physics_obj -> dv = sqrtf(speed_forward_back * speed_forward_back + speed_strafe
 	last_x = new_x;
 
 /////
+
+	SDL_DisplayMode display_mode;
+	SDL_GetDisplayMode(0, 0, &display_mode);
+	*((int16_t*) &constants.fps) = display_mode.refresh_rate; // Evil cast! But has to be done.
+
+
+/////
+
+		// camera -> time_accum_not_jumping = SDL_GetTicks() / 1000.0f;
+		// camera -> time_accum_not_jumping = 5;
+
+/////
+
+	/* Make it so that a certain height has to be reached
+
+	y = y0 + v0t + 0.5at^2
+
+	g = (2*jumpHeight)/(timeToApex^2)
+	initJumpVelocity = math.sqrt(2*g*jumpHeight)
+	timeToApex = initJumpVelocity/g */
+
+/////
+
+
+	/*
+	const GLfloat l = pos[1];
+	pos[1] = foot_height + constants.camera.eye_height;
+	if (l > pos[1]) printf("Decr from %lf\n", (double) l);
+	else puts("---");
+	*/
+
+/////
+
+	static GLfloat ly;
+	pos[1] = foot_height + constants.camera.eye_height;
+	if (ly > pos[1]) printf("Decr: %lf\n", (double) new_y);
+	else puts("---");
+	ly = pos[1];
+
+/////

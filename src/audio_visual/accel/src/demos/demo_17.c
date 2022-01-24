@@ -9,7 +9,7 @@
 /*
 - NEXT: final touches on new_map + a texmap for it
 - NEXT 2: a sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
-- NEXT 3: billboards that don't turn to face the player (just static ones); defined by center, size, and normal
+- NEXT 3: entities that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 4: fix movement physics (one example: at FPS 10, can't jump over a block) (also, both pace and movement are stuttery - framerate spikes)
 - NEXT 5: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - NEXT 6: base fov on movement speed
@@ -24,11 +24,11 @@
 - Base darkest distance of attenuated light on the world size
 - Can't use red cross for health since it's copyrighted
 
-- For terrain, some objects popping out for half seconds
-- Weird framerate dips in demos 12 and 17 (fix by checking gpu timing, and identifying the issue)
-- Animation goes slower at 5 FPS
-- Sometimes, the x position (probably z too) stays the same across ticks in the red area (with vsync)
-- Jumping and landing on a higher surface is jerky again
+- Make deceleration framerate-independent
+- Sometimes, jumping and landing on a higher surface is a bit jerky
+- 
+- Animations go slower at 5 FPS
+- And the red area is still slow
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen

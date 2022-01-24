@@ -10,6 +10,7 @@
 #define BIT_STRAFE_RIGHT 8
 #define BIT_TILT_LEFT 16
 #define BIT_TILT_RIGHT 32
+#define BIT_JUMP 64
 
 //////////
 

@@ -15,7 +15,8 @@ Event get_next_event(void) {
 			(keys[constants.movement_keys.left] << 2) |
 			(keys[constants.movement_keys.right] << 3) |
 			(keys[constants.movement_keys.tilt_left] << 4) |
-			(keys[constants.movement_keys.tilt_right] << 5),
+			(keys[constants.movement_keys.tilt_right] << 5) |
+			(keys[constants.movement_keys.jump] << 6),
 
 		.screen_size = {viewport_size[2], viewport_size[3]}
 	};
@@ -58,11 +59,7 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 static float apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloat delta_move,
 	const GLfloat max_v, const byte moving_in_dir, const byte moving_in_opposite_dir) {
 
-	float v = curr_v;
-
-	v += delta_move * moving_in_dir;
-	v -= delta_move * moving_in_opposite_dir;
-
+	float v = curr_v + delta_move * moving_in_dir - delta_move * moving_in_opposite_dir;
 	if (!moving_in_dir && !moving_in_opposite_dir) v *= constants.accel.xz_decel;
 
 	if (v > max_v) return max_v;
@@ -79,22 +76,23 @@ static void update_pos_via_physics(const Event* const event,
 	- Clipping before hitting walls head-on
 	- Tilt when turning */
 
+	const GLfloat
+		max_speed_xz = constants.speeds.xz_max * delta_time,
+		accel_forward_back = constants.accel.forward_back * delta_time,
+		accel_strafe = constants.accel.strafe * delta_time;
+
 	GLfloat
-		speed_forward_back = physics_obj -> speeds[0],
-		speed_jump = physics_obj -> speeds[1],
-		speed_strafe = physics_obj -> speeds[2];
+		speed_forward_back = physics_obj -> speeds[0] * delta_time,
+		speed_strafe = physics_obj -> speeds[2] * delta_time;
 
-	const GLfloat max_speed_xz = constants.speeds.xz_max * delta_time;
+	speed_forward_back = apply_movement_in_xz_direction(speed_forward_back,	accel_forward_back, max_speed_xz,
+		!!(event -> movement_bits & BIT_MOVE_FORWARD), !!(event -> movement_bits & BIT_MOVE_BACKWARD));
 
-	speed_forward_back = apply_movement_in_xz_direction(
-		speed_forward_back,	constants.accel.forward_back * delta_time, max_speed_xz,
-		event -> movement_bits & BIT_MOVE_FORWARD, event -> movement_bits & BIT_MOVE_BACKWARD);
-
-	speed_strafe = apply_movement_in_xz_direction(
-		speed_strafe, constants.accel.strafe * delta_time, max_speed_xz,
-		event -> movement_bits & BIT_STRAFE_LEFT, event -> movement_bits & BIT_STRAFE_RIGHT);
+	speed_strafe = apply_movement_in_xz_direction(speed_strafe, accel_strafe, max_speed_xz,
+		!!(event -> movement_bits & BIT_STRAFE_LEFT), !!(event -> movement_bits & BIT_STRAFE_RIGHT));
 
 	////////// X and Z collision detection + setting new positions
+
 	GLfloat foot_height = pos[1] - constants.camera.eye_height - pace;
 	if (foot_height < 0.0f) foot_height = 0.0f;
 
@@ -115,27 +113,29 @@ static void update_pos_via_physics(const Event* const event,
 		// else entity.speed_xz /= 2.0f;
 	}
 
-	////////// Y collision detection + setting new positions
+	////////// Y collision detection
 
-	if (speed_jump == 0.0f && keys[constants.movement_keys.jump]) speed_jump = constants.speeds.y_jump;
-	speed_jump -= constants.accel.g * delta_time;
+	GLfloat speed_jump_per_sec = physics_obj -> speeds[1];
+	if (speed_jump_per_sec == 0.0f && (event -> movement_bits & BIT_JUMP))
+		speed_jump_per_sec = constants.speeds.jump;
+	else speed_jump_per_sec -= constants.accel.g * delta_time;
 
-	const GLfloat new_y = foot_height + speed_jump * delta_time; // Since g works w acceleration
+	const GLfloat new_y = foot_height + speed_jump_per_sec * delta_time;
 	const byte base_height = *map_point(heightmap, pos[0], pos[2], map_width);
 
 	if (new_y > base_height) foot_height = new_y + pace;
 	else {
-		speed_jump = 0.0f;
+		speed_jump_per_sec = 0.0f;
 		foot_height = base_height;
 	}
+	////////// Setting new y position and speeds
 
 	pos[1] = foot_height + constants.camera.eye_height;
-	physics_obj -> speeds[0] = speed_forward_back;
-	physics_obj -> speeds[1] = speed_jump;
-	physics_obj -> speeds[2] = speed_strafe;
+	physics_obj -> speeds[0] = speed_forward_back / delta_time;
+	physics_obj -> speeds[1] = speed_jump_per_sec;
+	physics_obj -> speeds[2] = speed_strafe / delta_time;
 }
 
-// TODO: add to excluded
 static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const GLfloat amplitude) {
 	/* This function models how a player's pace should behave given a time input. At time = 0, the pace is 0.
 	The function output is always above 0. Period = width of one up-down pulsation, and amplitude = max height. */
@@ -143,38 +143,33 @@ static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const G
 }
 
 static void update_pace(Camera* const camera, GLfloat* const pos_y, vec3 speeds, const GLfloat delta_time) {
-
 	// Going in the red area results in a lot of slowdown, but only with pace
 
 	if (speeds[1] == 0.0f) {
 		const GLfloat speed_forward_back = fabsf(speeds[0]), speed_strafe = fabsf(speeds[2]);
 		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
-
-		const GLfloat speed_xz_percent = (largest_speed_xz / delta_time) / constants.speeds.xz_max;
+		const GLfloat speed_xz_percent = largest_speed_xz / constants.speeds.xz_max;
 		const GLfloat smooth_speed_xz_percent = log2f(speed_xz_percent + 1.0f);
 
-		const GLfloat pace_curve_val = make_pace_function(
-			camera -> time_accum_not_jumping, 0.75f, 0.3f * smooth_speed_xz_percent);
+		camera -> pace = make_pace_function(camera -> time_accum_not_jumping,
+			0.6f, 0.3f * smooth_speed_xz_percent) * smooth_speed_xz_percent;
 
-		camera -> pace = pace_curve_val * smooth_speed_xz_percent;
 		*pos_y += camera -> pace;
 		camera -> time_accum_not_jumping += delta_time;
 	}
 }
 
-void update_camera(Camera* const camera, const Event event, PhysicsObject* physics_obj) {
-	if (keys[KEY_FLY]) physics_obj = NULL;
-
-	static GLfloat one_over_performance_frequency;
+void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
+	static GLfloat one_over_performance_freq;
 	static byte first_call = 1;
 
 	if (first_call) {
-		one_over_performance_frequency = 1.0f / SDL_GetPerformanceFrequency();
+		one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
 		first_call = 0;
 	}
 
 	const Uint64 curr_time = SDL_GetPerformanceCounter();
-	const GLfloat delta_time = (GLfloat) (curr_time - camera -> last_time) * one_over_performance_frequency;
+	const GLfloat delta_time = (GLfloat) (curr_time - camera -> last_time) * one_over_performance_freq;
 	camera -> last_time = curr_time;
 
 	update_camera_angles(camera, &event, delta_time);
@@ -192,7 +187,7 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* physi
 
 	memcpy(pos, camera -> pos, sizeof(vec3));
 
-	if (physics_obj == NULL) { // Forward, backward, left, right
+	if (physics_obj == NULL || keys[KEY_FLY]) { // Forward, backward, left, right
 		const GLfloat speed = constants.speeds.xz_max * delta_time;
 		if (event.movement_bits & BIT_MOVE_FORWARD) glm_vec3_muladds(dir, speed, pos);
 		if (event.movement_bits & BIT_MOVE_BACKWARD) glm_vec3_muladds(dir, -speed, pos);

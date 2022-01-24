@@ -23,7 +23,7 @@ static const struct {
 	} camera;
 
 	const struct {const GLfloat forward_back, strafe, xz_decel, g;} accel;
-	const struct {const GLfloat y_jump, xz_max, look, tilt;} speeds;
+	const struct {const GLfloat xz_max, jump, look, tilt;} speeds;
 
 	const struct {
 		const SDL_Scancode forward, backward, left, right, tilt_left, tilt_right, jump;
@@ -39,8 +39,8 @@ static const struct {
 		.clip_dists = {0.1f, 441.6729559300637f}
 	},
 
-	.accel = {.forward_back = 0.15f, .strafe = 0.2f, .xz_decel = 0.87f, .g = 13.0f},
-	.speeds = {.y_jump = 5.5f, .xz_max = 4.0f, .look = 0.0015f, .tilt = 1.0f},
+	.accel = {.forward_back = 0.25f, .strafe = 0.4f, .xz_decel = 0.87f, .g = 13.0f},
+	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look = 0.0015f, .tilt = 1.0f},
 
 	.movement_keys = {
 		SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A,
