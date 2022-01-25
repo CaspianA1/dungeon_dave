@@ -83,9 +83,8 @@ void render_info_bar(InfoBar* const info_bar, const EditorState* const eds) {
 
 	update_info_bar_text(eds, &info_bar -> text, eds -> map_name);
 
-	const int num_glyphs = 37;
 	const int
-		glyph_src_width = info_bar -> font_texture_size[0] / num_glyphs,
+		glyph_src_width = info_bar -> font_texture_size[0] / FONT_GLYPH_COUNT,
 		glyph_src_height = info_bar -> font_texture_size[1],
 		glyph_dest_width = info_bar_area.w / strlen(info_bar -> text);
 

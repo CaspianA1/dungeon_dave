@@ -109,6 +109,7 @@ static void update_pos_via_physics(const Event* const event,
 	physics_obj -> speeds[2] = speed_strafe / delta_time;
 
 	////////// X and Z collision detection + setting new xz positions
+
 	const vec2 old_pos_xz = {pos[0], pos[2]};
 
 	pos[0] = apply_collision_on_xz_axis(
