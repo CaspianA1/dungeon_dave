@@ -217,7 +217,7 @@ static void fail_on_shader_creation_error(
 	const GLuint object_id, const ShaderCompilationStep compilation_step,
 	void (*const creation_action) (const GLuint),
 	void (*const log_length_getter) (const GLuint, const GLenum, GLint* const),
-	void (*const log_getter)(const GLuint, const GLsizei, GLsizei* const, GLchar* const)) {
+	void (*const log_getter) (const GLuint, const GLsizei, GLsizei* const, GLchar* const)) {
 
 	creation_action(object_id);
 
