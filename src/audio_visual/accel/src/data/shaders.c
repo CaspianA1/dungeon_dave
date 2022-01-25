@@ -83,10 +83,14 @@ const GLchar *const sector_vertex_shader =
 		"return 1.0f / (0.9f + 0.005f * dist_squared);\n"
 	"}\n"
 
-	"void main(void) {\n"
+	"float calculate_light(void) {\n"
 		"float lightmap_ambient = texture(lightmap_sampler, lightmap_UV).r;\n"
 		"float light = ((lightmap_ambient + ambient_strength + diffuse())) * attenuation();\n"
-		"color = texture(texture_sampler, UV).rgb * min(light, 1.0f);\n"
+		"return min(light, 1.0f);\n"
+	"}\n"
+
+	"void main(void) {\n"
+		"color = texture(texture_sampler, UV).rgb * calculate_light();\n"
 	"}\n",
 
 *const billboard_vertex_shader =
