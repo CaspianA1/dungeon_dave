@@ -207,7 +207,7 @@ static void editor_loop(EditorState* const eds) {
 }
 
 void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
-	init_editor_state_from_json_file(eds, "src/data/sample_level.json");
+	init_editor_state_from_json_file(eds, "src/data/simple.json");
 
 	enum {
 		num_textures = 11, map_width = palace_width, map_height = palace_height
@@ -277,7 +277,7 @@ int main(void) {
 	if (SDL_CreateWindowAndRenderer(EDITOR_WIDTH, EDITOR_HEIGHT, 0, &window, &renderer) == -1)
 		FAIL(LaunchSDL, "Window or renderer creation failure: \"%s\".", SDL_GetError());
 
-	SDL_SetWindowTitle(window, "Dungeon Maker");
+	SDL_SetWindowTitle(window, APP_NAME);
 
 	EditorState eds;
 	init_editor_state(&eds, renderer);

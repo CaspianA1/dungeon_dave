@@ -4561,3 +4561,44 @@ static void update_pos_xz_via_physics(const byte movement_bits,
 	DEBUG(num_kilobytes, lf);
 
 /////
+
+		/*
+		else if (c == token_defs.string_single_quote || c == token_defs.string_double_quote) {
+			printf("Tokenizing string, starting with char '%c'\n", c);
+			for (char c = *buffer; c != '\0' && c != first; c = *(buffer++));
+			break;
+		}
+		*/
+
+		else if (char_in_set(c, "{}[]:,")) {
+			puts("Stop early");
+			break;
+		}
+
+/////
+
+	/*
+	if (first == token_defs.string_single_quote || first == token_defs.string_double_quote) {
+		puts("Capture the whole string");
+		for (char c = *buffer; c != '\0' && c != first; c = *(buffer++));
+		*(buffer++) = '\0';
+		return start;
+	}
+	*/
+
+	/*
+	else if (char_in_set(first, "{}[]:,")) {
+		printf("Special char: '%c'\n", first);
+
+		// 1 is lost probably
+
+		// char after = *(++buffer);
+		// DEBUG(after, c);
+
+		*(++buffer) = '\0';
+		buffer++;
+		return start;
+	}
+	*/
+
+/////

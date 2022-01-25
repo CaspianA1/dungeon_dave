@@ -21,4 +21,6 @@ void render_info_bar(InfoBar* const info_bar, const EditorState* const eds);
 #define INFO_BAR_TEXTURE_PATH "../../../assets/skyboxes/palace_city.bmp"
 #define INFO_BAR_COLOR 0, 255, 127, 255
 
+#define APP_NAME "Dungeon Maker"
+
 #endif

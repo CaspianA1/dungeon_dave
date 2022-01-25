@@ -17,25 +17,38 @@ static FileContents read_file_contents(const char* const file_name) {
 	return (FileContents) {file_name, data, num_bytes};
 }
 
-static byte is_delim(const char curr_char, const char* delims) {
-	while (*delims != '\0') {
-		if (curr_char == *delims) return 1;
-		delims++;
+/*
+static byte char_in_set(const char curr_char, const char* set) {
+	while (*set!= '\0') {
+		if (curr_char == *set) return 1;
+		set++;
 	}
 	return 0;
 }
+*/
 
-static const char* tokenize(char* const to_tokenize, const char* const delims) {
+static const char* tokenize(char* const to_tokenize) {
 	static char* buffer;
 	if (to_tokenize != NULL) buffer = to_tokenize;
 
-	while (is_delim(*buffer, delims)) *(buffer++) = '\0';
+	// While the buffer has whitespace, progress its ptr
+	while (isspace(*buffer)) buffer++;
 
-	const char* const start = buffer;
-	if (*start == '\0') return NULL; // Whitespace followed by end of file
+	const char* const start = buffer, first = *buffer;
+	if (first == '\0') return NULL; // Whitespace followed by end of file
 
-	while (!is_delim(*buffer, delims)) {
-		if (*buffer == '\0') return start;
+	// If the beginning of a string is detected, read until the end of the string and return that token
+	else if (first == token_defs.string_single_quote || first == token_defs.string_double_quote) {
+		for (char c = *(++buffer); c != '\0' && c != first; c = *(buffer++));
+
+		if (*buffer != '\0') *(buffer++) = '\0';
+		return start;
+	}
+
+	while (!isspace(*buffer)) {
+		const char c = *buffer;
+		if (c == '\0') return start;
+
 		buffer++;
 	}
 
@@ -50,22 +63,25 @@ static List lex_json_file(const FileContents file_contents) {
 	/*
 	- Split on {}[]:,'" while still keeping them
 	- Treat everything inside a string as 1 token
+
+	- Preprocess the file contents like this:
+
+	Padding character: one space
+	Pad the {}[]:, characters on the left and the right
+	Pad the left side of string openings, and the right side of string closings
 	*/
 
-	const char* const delims = " \n\t\v\f\r";
-	const char* token = tokenize(file_contents.data, delims);
+	const char* token = tokenize(file_contents.data);
 
 	while (token != NULL) {
 		push_ptr_to_list(&tokens, &token);
-		token = tokenize(NULL, delims);
+		token = tokenize(NULL);
 	}
 
-	/*
 	for (buffer_size_t i = 0; i < tokens.length; i++) {
 		const char* const token = ((char**) (tokens.data))[i];
 		printf("token = '%s'\n", token);
 	}
-	*/
 
 	return tokens;
 }
