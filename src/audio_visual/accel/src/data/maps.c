@@ -5,7 +5,7 @@
 
 enum {
 	level_one_width = 25, level_one_height = 15,
-	new_width = 50, new_height = 50,
+	fortress_width = 50, fortress_height = 50,
 	palace_width = 40, palace_height = 40,
 	tpt_width = 10, tpt_height = 20,
 	pyramid_width = 30, pyramid_height = 40,
@@ -52,7 +52,7 @@ level_one_texture_id_map[level_one_height][level_one_width] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 },
 
-new_heightmap[new_height][new_width] = {
+fortress_heightmap[fortress_height][fortress_width] = {
 	{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12},
 	{3, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 18,8, 9, 8, 7, 6, 6, 6, 6, 6, 6, 12},
 	{3, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 18,8, 9, 8, 7, 6, 6, 6, 6, 6, 6, 12},

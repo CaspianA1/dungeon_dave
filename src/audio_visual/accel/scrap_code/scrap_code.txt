@@ -4555,3 +4555,9 @@ static void update_pos_xz_via_physics(const byte movement_bits,
 		tilt = -constants.camera.lims.tilt + 0.01f;
 
 /////
+
+	const size_t num_bytes = num_visible_faces * bytes_per_face;
+	const double num_kilobytes = num_bytes / 1024.0;
+	DEBUG(num_kilobytes, lf);
+
+/////

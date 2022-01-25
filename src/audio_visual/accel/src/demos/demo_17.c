@@ -81,14 +81,14 @@ StateGL demo_17_init(void) {
 		),
 
 		.skybox = init_skybox("../assets/mountain_2.bmp"),
-		.heightmap = (byte*) palace_heightmap,
-		.map_size = {palace_width, palace_height}
+		.heightmap = (byte*) fortress_heightmap,
+		.map_size = {fortress_width, fortress_height}
 	};
 
 	//////////
-	// static byte texture_id_map[terrain_height][terrain_width];
+	static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		(byte*) scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size);
+		(byte*) scene_state.heightmap, (byte*) texture_id_map, scene_state.map_size);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(
 		10,
@@ -124,16 +124,16 @@ StateGL demo_17_init(void) {
 
 	scene_state.sector_draw_context.texture_set = init_texture_set(TexRepeating,
 		// New + Checker:
-		// 1, 0, 128, 128, "../../../../assets/walls/pyramid_bricks_4.bmp"
+		1, 0, 512, 512, "../../../../assets/walls/viney_bricks_2.bmp"
 
 		// Palace:
-		11, 0, 128, 128,
+		/* 11, 0, 128, 128,
 		"../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
 		"../../../../assets/walls/window.bmp", "../../../../assets/walls/saqqara.bmp",
 		"../../../../assets/walls/sandstone.bmp", "../../../../assets/walls/cobblestone_3.bmp",
 		"../../../../assets/walls/horses.bmp", "../../../../assets/walls/mesa.bmp",
-		"../../../../assets/walls/arthouse_bricks.bmp"
+		"../../../../assets/walls/arthouse_bricks.bmp" */
 
 		// Pyramid:
 		/* 3, 0, 512, 512, "../../../../assets/walls/pyramid_bricks_4.bmp",
