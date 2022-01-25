@@ -38,7 +38,7 @@ static const struct {
 	.fps = 60,
 
 	.camera = {
-		.eye_height = 0.5f, .delta_turn_to_tilt_ratio = 2.8f,
+		.eye_height = 0.5f, .delta_turn_to_tilt_ratio = 2.6f,
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
 		.lims = {.vert = HALF_PI, .tilt = 0.2f},
 		.clip_dists = {0.1f, 441.6729559300637f}
