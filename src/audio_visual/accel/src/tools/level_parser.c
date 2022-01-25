@@ -78,10 +78,12 @@ static List lex_json_file(const FileContents file_contents) {
 		token = tokenize(NULL);
 	}
 
+	/*
 	for (buffer_size_t i = 0; i < tokens.length; i++) {
 		const char* const token = ((char**) (tokens.data))[i];
 		printf("token = '%s'\n", token);
 	}
+	*/
 
 	return tokens;
 }
