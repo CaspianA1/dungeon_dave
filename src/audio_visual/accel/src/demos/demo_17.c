@@ -37,6 +37,7 @@
 - Blit color rect to screen
 - Then, flat weapon (that comes after physics)
 - Use more of the cglm functions in `update_camera`, or make my own
+- A startup setting of magnification filter
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
 */
