@@ -190,9 +190,12 @@ static void editor_loop(EditorState* const eds) {
 		}
 
 		SDL_GetMouseState(eds -> mouse_pos, eds -> mouse_pos + 1);
+
 		eds -> tile_pos[0] = (float) eds -> mouse_pos[0] / EDITOR_WIDTH * eds -> map_size[0];
-		eds -> tile_pos[1] = (float) eds -> mouse_pos[1] / EDITOR_MAP_SECTION_HEIGHT * eds -> map_size[1];
-		if (eds -> tile_pos[1] >= eds -> map_size[1]) eds -> tile_pos[1] = eds -> map_size[1] - 1;
+
+		int16_t tile_pos_y = (float) eds -> mouse_pos[1] / EDITOR_MAP_SECTION_HEIGHT * eds -> map_size[1];
+		if (tile_pos_y >= eds -> map_size[1]) tile_pos_y = eds -> map_size[1] - 1;
+		eds -> tile_pos[1] = tile_pos_y;
 
 		edit_eds_map(eds);
 		SDL_RenderClear(renderer);
