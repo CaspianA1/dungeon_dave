@@ -24,7 +24,7 @@
 - Base darkest distance of attenuated light on the world size
 - Can't use red cross for health since it's copyrighted
 
- - Crouch
+- Crouch
 - Accelerate through pressing a key
 - Clipping before hitting walls head-on
 
@@ -32,6 +32,7 @@
 - Sometimes, jumping and landing on a higher surface is a bit jerky
 - Animations go slower at 5 FPS
 - And the red area is still slow
+- Having an idle window with vsync on leads to high CPU and GPU usage
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
