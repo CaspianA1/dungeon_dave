@@ -69,6 +69,8 @@ static List lex_json_file(const FileContents file_contents) {
 	Padding character: one space
 	Pad the {}[]:, characters on the left and the right
 	Pad the left side of string openings, and the right side of string closings
+
+	- Later on, after a token has been extracted, categorize it into a token type (that will make token comparison faster)
 	*/
 
 	const char* token = tokenize(file_contents.data);
