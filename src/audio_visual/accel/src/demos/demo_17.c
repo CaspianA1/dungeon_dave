@@ -82,15 +82,15 @@ StateGL demo_17_init(void) {
 			(AnimationInstance) {.ids = {.billboard = 9, .animation = 3}, .last_frame_time = 0.0f}
 		),
 
-		.skybox = init_skybox("../assets/mountain_2.bmp"),
+		.skybox = init_skybox("../assets/night.bmp"),
 		.heightmap = (byte*) fortress_heightmap,
 		.map_size = {fortress_width, fortress_height}
 	};
 
 	//////////
-	static byte texture_id_map[terrain_height][terrain_width];
+	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		(byte*) scene_state.heightmap, (byte*) texture_id_map, scene_state.map_size);
+		(byte*) scene_state.heightmap, (byte*) fortress_texture_id_map, scene_state.map_size);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(
 		10,
@@ -126,7 +126,11 @@ StateGL demo_17_init(void) {
 
 	scene_state.sector_draw_context.texture_set = init_texture_set(TexRepeating,
 		// New + Checker:
-		1, 0, 512, 512, "../../../../assets/walls/viney_bricks_2.bmp"
+		4, 0, 256, 256,
+		"../../../../assets/walls/viney_bricks.bmp",
+		"../../../../assets/walls/marble.bmp",
+		"../../../../assets/walls/vines.bmp",
+		"../../../../assets/walls/stone_2.bmp"
 
 		// Palace:
 		/* 11, 0, 128, 128,
@@ -172,7 +176,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	static byte first_call = 1;
 
 	if (first_call) { // start new map: 1.5f, 0.5f, 1.5f
-		init_camera(&camera, (vec3) {3.9f, 0.5f, 6.0f}); // 5.0f. 0.5f, 5.0f
+		init_camera(&camera, (vec3) {12.5f, 3.5f, 22.5f}); // 3.9f, 0.5f, 6.0f
 		physics_obj.heightmap = scene_state -> heightmap;
 		physics_obj.map_size[0] = scene_state -> map_size[0];
 		physics_obj.map_size[1] = scene_state -> map_size[1];
