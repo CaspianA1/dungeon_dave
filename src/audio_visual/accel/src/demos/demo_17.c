@@ -29,7 +29,6 @@
 - Clipping before hitting walls head-on
 
 - Make deceleration framerate-independent
-- Sometimes, jumping and landing on a higher surface is a bit jerky
 - Animations go slower at 5 FPS
 - And the red area is still slow
 - Having an idle window with vsync on leads to high CPU and GPU usage

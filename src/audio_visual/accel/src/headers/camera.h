@@ -17,7 +17,7 @@ typedef struct {
 		GLfloat fov, hori, vert, tilt;
 	} angles;
 
-	GLfloat pace, time_accum_not_jumping; // Pace is the amount of head bob that happens when moving
+	GLfloat pace, time_since_jump; // Pace is the amount of head bob that happens when moving
 	Uint64 last_time;
 
 	vec2 right_xz; // X and Z of right (Y is always 0)

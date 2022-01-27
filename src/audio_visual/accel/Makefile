@@ -1,7 +1,7 @@
 CC = clang
 
 OPTIMIZE = -Ofast
-DEBUG = -fsanitize=address
+DEBUG = -fsanitize=address,undefined
 BUILD_TYPE = $(OPTIMIZE)
 
 DEMO = 17

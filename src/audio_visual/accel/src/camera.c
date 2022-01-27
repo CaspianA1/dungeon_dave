@@ -27,7 +27,7 @@ Event get_next_event(void) {
 void init_camera(Camera* const camera, const vec3 init_pos) {
 	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
 	camera -> last_time = SDL_GetPerformanceCounter();
-	camera -> time_accum_not_jumping = 0.0f;
+	camera -> time_since_jump = 0.0f;
 	memcpy(camera -> pos, init_pos, sizeof(vec3));
 }
 
@@ -154,11 +154,15 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 s
 		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
 		const GLfloat smooth_speed_xz_percent = log2f(largest_speed_xz / constants.speeds.xz_max + 1.0f);
 
-		camera -> pace = make_pace_function(camera -> time_accum_not_jumping,
+		camera -> pace = make_pace_function(camera -> time_since_jump,
 			0.6f, 0.3f * smooth_speed_xz_percent) * smooth_speed_xz_percent;
 
 		*pos_y += camera -> pace;
-		camera -> time_accum_not_jumping += delta_time;
+		camera -> time_since_jump += delta_time;
+	}
+	else {
+		camera -> pace = 0.0f;
+		camera -> time_since_jump = 0.0f;
 	}
 }
 
