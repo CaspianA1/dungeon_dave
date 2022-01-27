@@ -7,13 +7,13 @@ BUILD_TYPE = $(OPTIMIZE)
 DEMO = 17
 TEST_RANGE = 1..21
 
-OUT = accel_demo
-
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
 CFLAGS = -std=c99 -march=native $(WARNINGS)
 
 NON_GL_LDFLAGS = -lm -lSDL2
 LDFLAGS = -framework OpenGL -lglew $(NON_GL_LDFLAGS)
+
+OUT = accel_demo
 
 all:
 	make build_demo demo_id=$(DEMO) binary_name=$(OUT)
