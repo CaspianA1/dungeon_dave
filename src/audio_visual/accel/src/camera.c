@@ -146,12 +146,13 @@ static void update_pos_via_physics(const Event* const event,
 
 /* This function models how a player's pace should behave given a time input. At time = 0, the pace is 0.
 The function output is always above 0. Period = width of one up-down pulsation, and amplitude = max height. */
-static GLfloat make_pace_function(const GLfloat time, const GLfloat period, const GLfloat amplitude) {
-	return 0.5f * amplitude * (sinf(time * (TWO_PI / period) + THREE_HALVES_PI) + 1.0f);
+static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const GLfloat amplitude) {
+	return 0.5f * amplitude * (sinf(x * (TWO_PI / period) + THREE_HALVES_PI) + 1.0f);
 }
 
-// Maps a value between 0 and 1 to a smooth output between 0 and 1
-static GLfloat hermite_lerp(const GLfloat x) {
+/* Maps a value between 0 and 1 to a smooth output
+between 0 and 1, via a cubic Hermite spline. */
+static GLfloat smooth_hermite(const GLfloat x) {
 	const GLfloat x_squared = x * x;
 	return 3.0f * x_squared - 2.0f * x_squared * x;
 }
@@ -160,7 +161,7 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 s
 	if (speeds[1] == 0.0f) { // Going in the red area results in a lot of slowdown, but only with pace
 		const GLfloat speed_forward_back = fabsf(speeds[0]), speed_strafe = fabsf(speeds[2]);
 		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
-		const GLfloat speed_xz_percent = hermite_lerp(largest_speed_xz / constants.speeds.xz_max);
+		const GLfloat speed_xz_percent = smooth_hermite(largest_speed_xz / constants.speeds.xz_max);
 
 		camera -> pace = make_pace_function(
 			camera -> time_since_jump, constants.camera.pace.period,

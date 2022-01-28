@@ -36,7 +36,7 @@ typedef struct {
 } PhysicsObject;
 
 /* Excluded: limit_to_pos_neg_domain, update_camera_angles, apply_movement_in_xz_direction,
-apply_collision_on_xz_axis, update_pos_via_physics, make_pace_function, hermite_lerp, update_pace */
+apply_collision_on_xz_axis, update_pos_via_physics, make_pace_function, smooth_hermite, update_pace */
 
 Event get_next_event(void);
 void init_camera(Camera* const camera, const vec3 init_pos);
