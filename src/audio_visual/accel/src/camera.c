@@ -57,7 +57,6 @@ static GLfloat apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloa
 
 	// If 0 or 2 directions are being moved in; `^` maps to 1 if only 1 input is true
 	if (!(moving_in_dir ^ moving_in_opposite_dir)) v *= constants.accel.xz_decel;
-
 	return limit_to_pos_neg_domain(v, max_v);
 }
 
