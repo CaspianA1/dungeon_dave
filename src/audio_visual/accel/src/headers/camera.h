@@ -9,6 +9,7 @@
 #define BIT_STRAFE_LEFT 4
 #define BIT_STRAFE_RIGHT 8
 #define BIT_JUMP 16
+#define BIT_ACCELERATE 32
 
 //////////
 
@@ -17,7 +18,10 @@ typedef struct {
 		GLfloat fov, hori, vert, tilt;
 	} angles;
 
-	GLfloat pace, time_since_jump; // Pace is the amount of head bob that happens when moving
+	/* Pace is the amount of head bob that happens when moving.
+	The speed xz percent is not the true speed percent; rather,
+	the percentage is smoothed out by a Hermite curve. */
+	GLfloat pace, time_since_jump, time_accum_for_full_fov;
 	Uint64 last_time;
 
 	vec2 right_xz; // X and Z of right (Y is always 0)
@@ -35,8 +39,9 @@ typedef struct {
 	vec3 speeds;
 } PhysicsObject;
 
-/* Excluded: limit_to_pos_neg_domain, update_camera_angles, apply_movement_in_xz_direction,
-apply_collision_on_xz_axis, update_pos_via_physics, make_pace_function, smooth_hermite, update_pace */
+/* Excluded: limit_to_pos_neg_domain, update_camera_angles, smooth_hermite,
+update_fov, apply_movement_in_xz_direction, apply_collision_on_xz_axis,
+update_pos_via_physics, make_pace_function, update_pace */
 
 Event get_next_event(void);
 void init_camera(Camera* const camera, const vec3 init_pos);

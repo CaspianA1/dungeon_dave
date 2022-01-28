@@ -8,13 +8,18 @@ Event get_next_event(void) {
 	static GLint viewport_size[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_size);
 
+	const byte
+		attempting_acceleration = keys[constants.movement_keys.accelerate_1] || keys[constants.movement_keys.accelerate_2],
+		moving_forward = keys[constants.movement_keys.forward], moving_backward = keys[constants.movement_keys.backward];
+
 	Event event = {
 		.movement_bits =
-			keys[constants.movement_keys.forward] |
-			(keys[constants.movement_keys.backward] << 1) |
+			moving_forward |
+			(moving_backward << 1) |
 			(keys[constants.movement_keys.left] << 2) |
 			(keys[constants.movement_keys.right] << 3) |
-			(keys[constants.movement_keys.jump] << 4),
+			(keys[constants.movement_keys.jump] << 4) |
+			((attempting_acceleration && (moving_forward || moving_backward)) << 5),
 
 		.screen_size = {viewport_size[2], viewport_size[3]}
 	};
@@ -27,7 +32,9 @@ Event get_next_event(void) {
 void init_camera(Camera* const camera, const vec3 init_pos) {
 	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
 	camera -> last_time = SDL_GetPerformanceCounter();
+	camera -> pace = 0.0f;
 	camera -> time_since_jump = 0.0f;
+	camera -> time_accum_for_full_fov = 0.0f;
 	memcpy(camera -> pos, init_pos, sizeof(vec3));
 }
 
@@ -37,6 +44,7 @@ static GLfloat limit_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
 	else return val;
 }
 
+// This does not include FOV, since FOV depends on a tick's speed, and speed is updated after this function is called
 static void update_camera_angles(Camera* const camera, const Event* const event) {
 	const int *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
 
@@ -48,6 +56,30 @@ static void update_camera_angles(Camera* const camera, const Event* const event)
 
 	const GLfloat not_limited_tilt = delta_turn / constants.camera.delta_turn_to_tilt_ratio;
 	camera -> angles.tilt = limit_to_pos_neg_domain(not_limited_tilt, constants.camera.lims.tilt);
+}
+
+/* Maps a value between 0 and 1 to a smooth output
+between 0 and 1, via a cubic Hermite spline. */
+static GLfloat smooth_hermite(const GLfloat x) {
+	const GLfloat x_squared = x * x;
+	return 3.0f * x_squared - 2.0f * x_squared * x;
+}
+
+static void update_fov(Camera* const camera, const byte movement_bits, const GLfloat delta_time) {
+	/* The time to reach the full FOV equals the time to reach the max X speed.
+	Since `v = v0 + at`, and `v0 = 0`, `v = at`, and `t = v / a`. The division
+	by the FPS converts the time from being in terms of ticks to seconds. */
+	const GLfloat time_for_full_fov = constants.speeds.xz_max / constants.accel.forward_back / constants.fps;
+	GLfloat t = camera -> time_accum_for_full_fov;
+
+	if (movement_bits & BIT_ACCELERATE) {
+		if ((t += delta_time) > time_for_full_fov) t = time_for_full_fov;
+	}
+	else if ((t -= delta_time) < 0.0f) t = 0.0f;
+
+	const GLfloat fov_percent = smooth_hermite(t / time_for_full_fov);
+	camera -> angles.fov = constants.camera.init.fov + constants.camera.lims.fov * fov_percent;
+	camera -> time_accum_for_full_fov = t;
 }
 
 static GLfloat apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloat delta_move,
@@ -80,16 +112,20 @@ static GLfloat apply_collision_on_xz_axis(
 	return old_pos[varying_axis];
 }
 
-static void update_pos_via_physics(const Event* const event,
+static void update_pos_via_physics(const byte movement_bits,
 	PhysicsObject* const physics_obj, const vec2 dir_xz, vec3 pos,
 	const GLfloat pace, const GLfloat delta_time) {
 
 	////////// Declaring a lot of shared vars
 
+	GLfloat accel_forward_back_per_sec = constants.accel.forward_back;
+	if (movement_bits & BIT_ACCELERATE)
+		accel_forward_back_per_sec += constants.accel.additional_forward_back;
+
 	const GLfloat // The `* delta_time` exprs get a per-tick version of each multiplicand
-		max_speed_xz = constants.speeds.xz_max * delta_time,
-		accel_forward_back = constants.accel.forward_back * delta_time,
-		accel_strafe = constants.accel.strafe * delta_time;
+		accel_forward_back = accel_forward_back_per_sec * delta_time,
+		accel_strafe = constants.accel.strafe * delta_time,
+		max_speed_xz = constants.speeds.xz_max * delta_time;
 
 	GLfloat
 		speed_forward_back = physics_obj -> speeds[0] * delta_time,
@@ -97,7 +133,6 @@ static void update_pos_via_physics(const Event* const event,
 		foot_height = pos[1] - constants.camera.eye_height - pace;
 
 	const byte
-		movement_bits = event -> movement_bits,
 		*const map_size = physics_obj -> map_size,
 		*const heightmap = physics_obj -> heightmap;
 
@@ -149,13 +184,6 @@ static void update_pos_via_physics(const Event* const event,
 The function output is always above 0. Period = width of one up-down pulsation, and amplitude = max height. */
 static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const GLfloat amplitude) {
 	return 0.5f * amplitude * (sinf(x * (TWO_PI / period) + THREE_HALVES_PI) + 1.0f);
-}
-
-/* Maps a value between 0 and 1 to a smooth output
-between 0 and 1, via a cubic Hermite spline. */
-static GLfloat smooth_hermite(const GLfloat x) {
-	const GLfloat x_squared = x * x;
-	return 3.0f * x_squared - 2.0f * x_squared * x;
 }
 
 static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 speeds, const GLfloat delta_time) {
@@ -213,8 +241,9 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		if (event.movement_bits & BIT_STRAFE_RIGHT) glm_vec3_muladds(right, speed, pos);
 	}
 	else {
-		update_pos_via_physics(&event, physics_obj, (vec2) {sin_hori, cos_hori}, pos, camera -> pace, delta_time);
+		update_pos_via_physics(event.movement_bits, physics_obj, (vec2) {sin_hori, cos_hori}, pos, camera -> pace, delta_time);
 		update_pace(camera, pos + 1, physics_obj -> speeds, delta_time);
+		update_fov(camera, event.movement_bits, delta_time);
 	}
 
 	memcpy(camera -> pos, pos, sizeof(vec3));

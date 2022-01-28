@@ -4619,3 +4619,98 @@ static byte point_exists_at(const GLfloat foot_height, const vec2 pos, const byt
 }
 
 /////
+
+	if (event -> movement_bits & BIT_SPEED_UP) {
+		const GLfloat time_for_full_speedup = 0.8f;
+		GLfloat time_ratio = camera -> time_spent_speeding_up / time_for_full_speedup;
+		if (time_ratio > 1.0f) time_ratio = 1.0f;
+
+		DEBUG((double) time_ratio, lf);
+		camera -> time_spent_speeding_up += delta_time;
+
+		camera -> angles.fov = constants.camera.init.fov + fov_addition;
+
+		/*
+		const GLfloat time_for_full_speedup = 0.8f;
+		GLfloat time_ratio = camera -> time_spent_speeding_up / time_for_full_speedup;
+		if (time_ratio > 1.0f) time_ratio = 1.0f;
+		DEBUG((double) time_ratio, lf);
+
+		const GLfloat fov_addition = 0.15f * camera -> speed_xz_percent * time_ratio;
+		camera -> angles.fov = constants.camera.init.fov + fov_addition;
+
+		camera -> time_spent_speeding_up += delta_time;
+		*/
+	}
+	else camera -> time_spent_speeding_up = 0.0f;
+
+	/*
+	const GLfloat speed_xz_percent = camera -> speed_xz_percent;
+	const GLfloat fov_addition = 0.15f * speed_xz_percent;
+	DEBUG(fov_addition, lf);
+	camera -> angles.fov = constants.camera.init.fov + fov_addition;
+	*/
+
+/////
+
+	// printf("speeds_xz = {%lf, %lf}\n", (double) speeds_xz[0], (double) speeds_xz[1]);
+	// vec3 normalized;
+	// glm_vec3_normalize_to(speeds, normalized);
+	// printf("normalized = {%lf, %lf, %lf}\n", (double) normalized[0], (double) normalized[1], (double) normalized[2]);
+
+	/*
+	const GLfloat length = glm_vec2_norm(speeds_xz);
+	DEBUG((double) length, lf);
+	*/
+
+	// DEBUG((double) speed_x, lf);
+	//////////
+	// Left or right shift
+
+	// const GLfloat forward_backward_speed_percent =
+	
+	// camera -> speed_xz_percent;
+	// camera -> angles.fov = constants.camera.init.fov + 0.1f * fastness;
+
+	/*
+	if (event -> movement_bits & BIT_SPEED_UP) {
+		camera -> i += delta_time;
+	}
+	else camera -> i -= delta_time;
+
+	DEBUG((double) camera -> i, lf);
+	*/
+
+	/*
+	const GLfloat speed_xz_percent = camera -> speed_xz_percent;
+	const GLfloat fov_addition = 0.15f * speed_xz_percent;
+	DEBUG(fov_addition, lf);
+	camera -> angles.fov = constants.camera.init.fov + fov_addition;
+	*/
+
+/////
+
+	/*
+	Solve for time for max speed
+
+	x = x0 + v0t + 0.5at^2
+
+	dx = v0t + 0.5at^2
+
+	- A is known
+	v0 = 0
+
+	dx = 0.5at^2
+
+	dx / 0.5a = t^2
+	t = sqrt(dx / 0.5a)
+
+	dx = max_v * 0.5f * t
+
+	_____
+	v = v0 + at
+	v = at
+	v / a = t
+	*/
+
+/////

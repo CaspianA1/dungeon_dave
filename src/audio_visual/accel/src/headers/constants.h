@@ -14,25 +14,26 @@ and not in the `constants` struct b/c other values in that struct depend on them
 #define FOURTH_PI 0.785398163397448309615660845819875721f
 
 static const struct {
-	/* This does not necessarily have to match the vsync refresh rate, since
-	the physics code only depends on delta time and doesn't use this constant */
+	// This should match the vsync refresh rate, since some of the physics code depends on it
 	const byte fps;
 
 	const struct { // All angles are in radians
 		const GLfloat eye_height, delta_turn_to_tilt_ratio;
 		const struct {const GLfloat fov, hori, vert, tilt;} init;
+		// const struct {const GLfloat time_for_full, max;} fov;
 		const struct {const GLfloat period, max_amplitude;} pace;
-		const struct {const GLfloat vert, tilt;} lims;
+		const struct {const GLfloat vert, tilt, fov;} lims;
 		const struct {const GLfloat near, far;} clip_dists;
 	} camera;
 
-	const struct {const GLfloat forward_back, strafe, xz_decel, g;} accel;
+	const struct {const GLfloat forward_back, additional_forward_back, strafe, xz_decel, g;} accel;
 
-	// `look` indicates the angle that shall be turned by for a full mouse cycle across a screen axis
+	/* The `look_*` constants indicate the angle that shall be
+	turned by for a full mouse cycle across a screen axis */
 	const struct {const GLfloat xz_max, jump, look_hori, look_vert;} speeds;
 
 	const struct {
-		const SDL_Scancode forward, backward, left, right, jump;
+		const SDL_Scancode forward, backward, left, right, jump, accelerate_1, accelerate_2;
 	} movement_keys;
 
 } constants = {
@@ -42,13 +43,22 @@ static const struct {
 		.eye_height = 0.5f, .delta_turn_to_tilt_ratio = 2.4f,
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
 		.pace = {.period = 0.6f, .max_amplitude = 0.3f},
-		.lims = {.vert = HALF_PI, .tilt = 0.25f},
-		.clip_dists = {0.1f, 441.6729559300637f}
+		.lims = {.vert = HALF_PI, .tilt = 0.25f, .fov = PI / 18.0f}, // Max FOV equals 10 degrees
+		.clip_dists = {.near = 0.1f, .far = 441.6729559300637f}
 	},
 
-	.accel = {.forward_back = 0.2f, .strafe = 0.3f, .xz_decel = 0.87f, .g = 13.0f},
+	.accel = {
+		.forward_back = 0.2f, .additional_forward_back = 0.2f, .strafe = 0.3f,
+		.xz_decel = 0.87f, .g = 13.0f
+	},
+
 	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look_hori = TWO_THIRDS_PI, .look_vert = HALF_PI},
-	.movement_keys = {SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE}
+
+	.movement_keys = {
+		.forward = SDL_SCANCODE_W, .backward = SDL_SCANCODE_S, .left = SDL_SCANCODE_A,
+		.right = SDL_SCANCODE_D, .jump = SDL_SCANCODE_SPACE, .accelerate_1 = SDL_SCANCODE_LSHIFT,
+		.accelerate_2 = SDL_SCANCODE_RSHIFT
+	}
 };
 
 /* Max world size = 255 by 255 by 255 (with top left corner of block as origin).

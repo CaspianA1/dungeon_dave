@@ -11,7 +11,6 @@
 - NEXT 2: a sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
 - NEXT 3: entities that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 4: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
-- NEXT 5: base fov on movement speed
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
 - NEXT 7: cubemap environment mapping
 
@@ -34,6 +33,7 @@
 - The checker heightmap has faster pacing sometimes
 - Collide with walls before clipping into them
 - Hitting wall corners just right teleports you up
+- Pressing left + forward and backward doesn't stop moving on the X axis
 
 - Blit 2D sprite to whole screen
 - Flat weapon
