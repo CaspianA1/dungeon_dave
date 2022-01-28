@@ -64,11 +64,11 @@ static GLfloat apply_collision_on_xz_axis(
 	const vec2 old_pos, const GLfloat foot_height, const GLfloat new_pos_component) {
 
 	if (new_pos_component >= 0.0f && new_pos_component <= map_size[varying_axis]) {
-		vec2 params;
-		params[varying_axis] = new_pos_component;
-		params[!varying_axis] = old_pos[!varying_axis];
+		vec2 new_pos_w_old; // This is top left
+		new_pos_w_old[varying_axis] = new_pos_component;
+		new_pos_w_old[!varying_axis] = old_pos[!varying_axis];
 
-		const byte height_value = *map_point((byte*) heightmap, params[0], params[1], map_size[0]);
+		const byte height_value = *map_point((byte*) heightmap, new_pos_w_old[0], new_pos_w_old[1], map_size[0]);
 
 		/* `foot_height - height_value > -0.001f` is done instead of `foot_height >= height_value`
 		because the foot height may be slightly under the height value (like 2.999999 compared to 3.0,

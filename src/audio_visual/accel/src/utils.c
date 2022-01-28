@@ -105,6 +105,19 @@ static void resize_window_if_needed(SDL_Window* const window) {
 	else if (!resize_attempt) window_resized_last_tick = 0;
 }
 
+static void set_triangle_fill_mode(void) {
+	static byte in_triangle_fill_mode = 1, changed_mode_last_tick = 0;
+
+	if (keys[KEY_TOGGLE_WIREFRAME_MODE]) {
+		if (!changed_mode_last_tick) {
+			in_triangle_fill_mode = !in_triangle_fill_mode;
+			changed_mode_last_tick = 1;
+			glPolygonMode(GL_FRONT_AND_BACK, in_triangle_fill_mode ? GL_FILL : GL_LINE);
+		}
+	}
+	else changed_mode_last_tick = 0;
+}
+
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
 	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
 
@@ -129,6 +142,7 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		}
 
 		resize_window_if_needed(screen -> window);
+		set_triangle_fill_mode();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -270,6 +284,7 @@ void enable_all_culling(void) {
 	glEnable(GL_CULL_FACE);
 }
 
+// X and Y are top-down
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width) {
 	return map + (y * map_width + x);
 }

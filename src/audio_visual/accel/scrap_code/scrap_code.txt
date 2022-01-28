@@ -4602,3 +4602,20 @@ static void update_pos_xz_via_physics(const byte movement_bits,
 	*/
 
 /////
+
+		// glm_aabb_aabb;
+
+		// if (!point_exists_at(foot_height, params, heightmap, map_size[0])) return new_pos_component;
+
+		// params[varying_axis] -= 0.4f;
+		// if (!point_exists_at(foot_height, params, heightmap, map_size[0])) return new_pos_component;
+
+/////
+
+// TODO: to excluded
+static byte point_exists_at(const GLfloat foot_height, const vec2 pos, const byte* const heightmap, const byte map_width) {
+	const byte height_value = *map_point((byte*) heightmap, pos[0], pos[1], map_width);
+	return !(foot_height - height_value > -0.001f);
+}
+
+/////

@@ -37,9 +37,10 @@
 
 // These are for debugging
 #define KEY_FLY SDL_SCANCODE_1
-#define KEY_PRINT_POSITION SDL_SCANCODE_2
-#define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_3
-#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_4
+#define KEY_TOGGLE_WIREFRAME_MODE SDL_SCANCODE_2
+#define KEY_PRINT_POSITION SDL_SCANCODE_3
+#define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_4
+#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_5
 
 #define DEPTH_BUFFER_BITS 24
 #define MULTISAMPLE_SAMPLES 8
@@ -96,7 +97,7 @@ extern inline void fail(const GLchar* const msg, const FailureType failure_type)
 
 //////////
 
-// Excluded: resize_window_if_needed, fail_on_shader_creation_error
+// Excluded: resize_window_if_needed, set_triangle_fill_mode, fail_on_shader_creation_error
 
 Screen init_screen(const GLchar* const title);
 void deinit_screen(const Screen* const screen);
@@ -119,6 +120,7 @@ GLuint init_shader_program(const GLchar* const vertex_shader, const GLchar* cons
 
 void enable_all_culling(void);
 
+// The X and Y here are a top-down X and Y (so they're technically X and Z)
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width);
 
 #endif
