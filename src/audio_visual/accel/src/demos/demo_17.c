@@ -33,6 +33,7 @@
 - Make tilting not depend on framerate (mouse deltas will always be smaller with a higher FPS)
 - Pressing keys in opposite directions doesn't make the camera stop
 - The checker heightmap has faster pacing sometimes
+- Collide with walls before clipping into them
 
 - Blit 2D sprite to whole screen
 - Flat weapon
