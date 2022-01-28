@@ -13,6 +13,7 @@
 - NEXT 4: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - NEXT 5: base fov on movement speed
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
+- NEXT 7: cubemap environment mapping
 
 - Perlin noise-based lighting in 3D
 - A map maker. An init json file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
@@ -33,8 +34,7 @@
 - Pressing keys in opposite directions doesn't make the camera stop
 
 - Blit 2D sprite to whole screen
-- Blit color rect to screen
-- Then, flat weapon (that comes after physics)
+- Flat weapon
 - Use more of the cglm functions in `update_camera`, or make my own
 - A startup setting of magnification filter
 
