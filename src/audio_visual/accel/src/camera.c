@@ -51,10 +51,12 @@ static void update_camera_angles(Camera* const camera, const Event* const event)
 }
 
 static GLfloat apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloat delta_move,
-	const GLfloat max_v, const byte bit_moving_in_dir, const byte bit_moving_in_opposite_dir) {
+	const GLfloat max_v, const byte moving_in_dir, const byte moving_in_opposite_dir) {
 
-	GLfloat v = curr_v + delta_move * !!bit_moving_in_dir - delta_move * !!bit_moving_in_opposite_dir;
-	if (!bit_moving_in_dir && !bit_moving_in_opposite_dir) v *= constants.accel.xz_decel;
+	GLfloat v = curr_v + delta_move * moving_in_dir - delta_move * moving_in_opposite_dir;
+
+	// If 0 or 2 directions are being moved in; `^` maps to 1 if only 1 input is true
+	if (!(moving_in_dir ^ moving_in_opposite_dir)) v *= constants.accel.xz_decel;
 
 	return limit_to_pos_neg_domain(v, max_v);
 }
@@ -103,10 +105,10 @@ static void update_pos_via_physics(const Event* const event,
 	////////// Updating speed
 
 	speed_forward_back = apply_movement_in_xz_direction(speed_forward_back,	accel_forward_back,
-		max_speed_xz, movement_bits & BIT_MOVE_FORWARD, movement_bits & BIT_MOVE_BACKWARD);
+		max_speed_xz, !!(movement_bits & BIT_MOVE_FORWARD), !!(movement_bits & BIT_MOVE_BACKWARD));
 
 	speed_strafe = apply_movement_in_xz_direction(speed_strafe, accel_strafe,
-		max_speed_xz, movement_bits & BIT_STRAFE_LEFT, movement_bits & BIT_STRAFE_RIGHT);
+		max_speed_xz, !!(movement_bits & BIT_STRAFE_LEFT), !!(movement_bits & BIT_STRAFE_RIGHT));
 
 	physics_obj -> speeds[0] = speed_forward_back / delta_time;
 	physics_obj -> speeds[2] = speed_strafe / delta_time;

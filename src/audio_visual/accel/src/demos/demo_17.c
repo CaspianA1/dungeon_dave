@@ -31,7 +31,6 @@
 - Animations go slower at 5 FPS
 - Having an idle window with vsync on leads to high CPU and GPU usage
 - Make tilting not depend on framerate (mouse deltas will always be smaller with a higher FPS)
-- Pressing keys in opposite directions doesn't make the camera stop
 - The checker heightmap has faster pacing sometimes
 - Collide with walls before clipping into them
 - Hitting wall corners just right teleports you up
