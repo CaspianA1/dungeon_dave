@@ -73,8 +73,8 @@ List generate_sectors_from_maps(const byte* const heightmap,
 
 	const byte map_width = map_size[0], map_height = map_size[1];
 
-	// >> 3 = / 8. Works pretty well for my maps.
-	const buffer_size_t sector_amount_guess = map_width * map_height >> 3;
+	// `>> 3` = `/ 8`. Works pretty well for my maps.
+	const buffer_size_t sector_amount_guess = (map_width * map_height) >> 3;
 	List sectors = init_list(sector_amount_guess, Sector);
 
 	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used

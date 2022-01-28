@@ -10,11 +10,9 @@
 - NEXT: final touches on new_map + a texmap for it
 - NEXT 2: a sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
 - NEXT 3: entities that don't turn to face the player (just static ones); defined by center, size, and normal
-- NEXT 4: fix movement physics (one example: at FPS 10, can't jump over a block) (also, both pace and movement are stuttery - framerate spikes)
-- NEXT 5: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
-- NEXT 6: base fov on movement speed
-- NEXT 7: deprecate most of StateGL's members and rely solely on vertex_array and any_data
-- NEXT 8: pass in world size to sector shader
+- NEXT 4: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
+- NEXT 5: base fov on movement speed
+- NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
 
 - Perlin noise-based lighting in 3D
 - A map maker. An init json file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
@@ -31,6 +29,7 @@
 - Make deceleration framerate-independent
 - Animations go slower at 5 FPS
 - Having an idle window with vsync on leads to high CPU and GPU usage
+- Make tilting not depend on framerate (mouse deltas will always be smaller with a higher FPS)
 
 - Blit 2D sprite to whole screen
 - Blit color rect to screen
