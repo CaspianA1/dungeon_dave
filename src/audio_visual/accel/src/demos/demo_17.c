@@ -34,6 +34,7 @@
 - Pressing keys in opposite directions doesn't make the camera stop
 - The checker heightmap has faster pacing sometimes
 - Collide with walls before clipping into them
+- Hitting wall corners just right teleports you up
 
 - Blit 2D sprite to whole screen
 - Flat weapon
