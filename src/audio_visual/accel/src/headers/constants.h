@@ -21,6 +21,7 @@ static const struct {
 	const struct { // All angles are in radians
 		const GLfloat eye_height, delta_turn_to_tilt_ratio;
 		const struct {const GLfloat fov, hori, vert, tilt;} init;
+		const struct {const GLfloat period, max_amplitude;} pace;
 		const struct {const GLfloat vert, tilt;} lims;
 		const struct {const GLfloat near, far;} clip_dists;
 	} camera;
@@ -40,14 +41,13 @@ static const struct {
 	.camera = {
 		.eye_height = 0.5f, .delta_turn_to_tilt_ratio = 2.4f,
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
+		.pace = {.period = 0.6f, .max_amplitude = 0.3f},
 		.lims = {.vert = HALF_PI, .tilt = 0.25f},
 		.clip_dists = {0.1f, 441.6729559300637f}
 	},
 
-	.accel = {.forward_back = 0.25f, .strafe = 0.4f, .xz_decel = 0.87f, .g = 13.0f},
-
+	.accel = {.forward_back = 0.2f, .strafe = 0.3f, .xz_decel = 0.87f, .g = 13.0f},
 	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look_hori = TWO_THIRDS_PI, .look_vert = HALF_PI},
-
 	.movement_keys = {SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_SPACE}
 };
 

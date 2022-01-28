@@ -30,7 +30,6 @@
 
 - Make deceleration framerate-independent
 - Animations go slower at 5 FPS
-- And the red area is still slow
 - Having an idle window with vsync on leads to high CPU and GPU usage
 
 - Blit 2D sprite to whole screen
