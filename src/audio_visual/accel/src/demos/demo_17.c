@@ -23,8 +23,6 @@
 - Can't use red cross for health since it's copyrighted
 
 - Crouch
-- Clipping before hitting walls head-on
-
 - Make deceleration framerate-independent
 - Animations go slower at 5 FPS
 - Having an idle window with vsync on leads to high CPU and GPU usage
@@ -33,6 +31,7 @@
 - Collide with walls before clipping into them
 - Hitting wall corners just right teleports you up
 - Pressing left + forward and backward doesn't stop moving on the X axis
+
 - Shadow volumes + one global light source
 
 - Blit 2D sprite to whole screen
