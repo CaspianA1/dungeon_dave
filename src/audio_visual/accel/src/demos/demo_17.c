@@ -14,8 +14,10 @@
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
 - NEXT 7: cubemap environment mapping
 
-- Perlin noise-based lighting in 3D
-- A map maker. An init json file that specifies textures and dimensions; draw/erase modes, export, and choose heights and textures
+- Perlin noise-based lighting in 3D (maybe)
+- Shadow volumes + one global light source
+- A map maker. An init json file that specifies textures and dimensions;
+	draw/erase modes, line mode, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe
 - Camera var names to yaw, pitch, and roll (maybe)
 - Billboard lighting that matches the sector lighting
@@ -31,8 +33,6 @@
 - Collide with walls before clipping into them
 - Hitting wall corners just right teleports you up
 - Pressing left + forward and backward doesn't stop moving on the X axis
-
-- Shadow volumes + one global light source
 
 - Blit 2D sprite to whole screen
 - Flat weapon
