@@ -80,8 +80,7 @@ const Uint8* keys;
 //////////
 
 extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
-	fprintf(stderr, "Could not %s; SDL error = '%s', OpenGL error = '%s'\n", msg,
-		SDL_GetError(), glewGetErrorString(glGetError()));
+	fprintf(stderr, "Could not %s. SDL error: '%s'\n", msg, SDL_GetError());
 	exit(failure_type + 1);
 }
 

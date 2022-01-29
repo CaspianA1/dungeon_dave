@@ -34,6 +34,7 @@
 - Collide with walls before clipping into them
 - Hitting wall corners just right teleports you up
 - Pressing left + forward and backward doesn't stop moving on the X axis
+- Shadow volumes + one global light source
 
 - Blit 2D sprite to whole screen
 - Flat weapon
@@ -125,7 +126,7 @@ StateGL demo_17_init(void) {
 	//////////
 
 	scene_state.sector_draw_context.texture_set = init_texture_set(TexRepeating,
-		// New + Checker:
+		// Fortress:
 		/* 4, 0, 256, 256,
 		"../../../../assets/walls/viney_bricks.bmp",
 		"../../../../assets/walls/marble.bmp",
