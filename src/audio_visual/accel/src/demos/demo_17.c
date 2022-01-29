@@ -23,7 +23,6 @@
 - Can't use red cross for health since it's copyrighted
 
 - Crouch
-- Accelerate through pressing a key
 - Clipping before hitting walls head-on
 
 - Make deceleration framerate-independent
