@@ -221,7 +221,7 @@ void bind_vbos_to_vao(const GLuint* const vbos, const GLsizei num_vbos, ...) {
 		glVertexAttribPointer(
 			i, num_components, GL_FLOAT, // Attribute index i, component size, type
 			GL_FALSE, 0, // Not normalized, stride
-			NULL // Array buffer offset
+			(void*) 0 // Array buffer offset
 		);
 	}
 	va_end(args);

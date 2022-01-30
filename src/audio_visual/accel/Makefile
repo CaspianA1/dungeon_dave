@@ -2,9 +2,9 @@ CC = clang
 
 OPTIMIZE = -Ofast
 DEBUG = -fsanitize=address,undefined
-BUILD_TYPE = $(OPTIMIZE)
+BUILD_TYPE = $(DEBUG)
 
-DEMO = 17
+DEMO = 22
 TEST_RANGE = 1..21
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat

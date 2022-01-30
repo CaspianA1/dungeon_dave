@@ -4714,3 +4714,52 @@ static byte point_exists_at(const GLfloat foot_height, const vec2 pos, const byt
 	*/
 
 /////
+
+Definitions;
+- shadow-casting object = an object that casts a shadow, so a face
+
+Constructing one shadow volume for a face:
+1. Connect light source to vertex in the shadow-casting object
+2. That volume shows everything which will be lit
+3. Light source is point light
+
+Constructing one shadow volume:
+1. Project a ray from light source through each vertex (corner) in the shadow-casting object
+2. Those rays together form a shadow volume
+3. Anything inside the volume is a shadow, and everything else is lit
+3.5. Perhaps generate a joined volume per sector; many joined face volumes
+
+project a ray from the light source through each vertex in the shadow
+casting object to some point (generally at infinity).
+These projections will together form a volume;
+any point inside that volume is in shadow, everything outside is lit by the light.
+
+/////
+
+- Telling if pixel is inside shadow volume?
+
+- For one fragment: num back - num front
+- If behind object shadow, can't see it (on other side of sector, on the light source side)
+- For first pass, if depth fails, shadow behind object
+- Fir second pass, if depth passes, decr
+- If in front of object shadow,
+
+- Number counts the number of shadows in front of object
+
+/////
+
+		/*
+		Ray from light to vertex
+		Pos and dir
+
+		Pos is light
+		Dir is _
+		Not normalized
+		*/
+
+		/*
+		vec3 direction;
+		glm_vec3_sub((GLfloat*) light_source_pos, (GLfloat*) vertex_pos, direction);
+		*/
+
+/////
