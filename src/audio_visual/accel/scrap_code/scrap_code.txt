@@ -4763,3 +4763,186 @@ any point inside that volume is in shadow, everything outside is lit by the ligh
 		*/
 
 /////
+
+
+		/*
+		GLfloat v;
+		byte found_v = 0;
+		for (byte i = 0; i < 3; i++) {
+			// if (i == 0) i = 2;
+			// else if (i == 2) i = 0;
+			v = (20 - vertex_pos[i]) / direction[i];
+			if (v < 0.0f) {
+				printf("Found %c solution\n", 'x' + i);
+				found_v = 1;
+				break;
+			}
+		}
+
+		if (!found_v) {
+			for (byte i = 0; i < 3; i++) {
+				v = -vertex_pos[i] / direction[i];
+				if (v < 0.0f) {
+					found_v = 1;
+					break;
+				}
+			}
+		}
+		*/
+
+/////
+
+	DEBUG_VEC3(vertex_pos);
+
+		vec3 direction;
+		glm_vec3_sub((GLfloat*) vertex_pos, (GLfloat*) light_source_pos, direction);
+		// glm_vec3_normalize(direction);
+
+		DEBUG_VEC3(direction);
+
+		/*
+		- Intersecting plane will be flat
+		- And for this plane, y = 0
+
+		Ray:
+		p = p0 + dir * v
+		Solve for v when p.y == 0
+
+		p.xyz = p0.xyz + dir.xyz * v
+
+		p.y = p0.y + dir.y * v
+		0 = p0.y + dir.y * v
+		-p0.y = dir.y * v
+		-p0.y / dir.y = v
+
+		p.x = p0.x + dir.x * v
+		20 = p0.x + dir.x * v
+		20 - p0.x = dir.x * v
+		(20 - p0.x) / dir.x) = v
+
+		p.z = p0.z + dir.z * v
+		*/
+
+		/*
+		if (direction[0] < 0.0f) {
+			puts("X is negative dir");
+		}
+		else {
+			puts("X is positive dir");
+		}
+		*/
+
+		GLfloat v_for_plane_solutions[3];
+		for (byte i = 0; i < 3; i++) {
+			GLfloat dividend = vertex_pos[i];
+			// if (i >= 3) dividend += 10.0f;
+			if (direction[i] > 0.0f) dividend += 10.0f;
+			v_for_plane_solutions[i] = dividend / direction[i];
+
+			DEBUG((double) v_for_plane_solutions[i], lf);
+		}
+
+		GLfloat smallest = min(v_for_plane_solutions, 3);
+		DEBUG(smallest, lf);
+
+		vec3 plane_endpoint;
+		glm_vec3_copy((GLfloat*) vertex_pos, plane_endpoint);
+		glm_vec3_muladds(direction, -smallest, plane_endpoint);
+
+		/*
+		for (byte i = 0; i < 3; i++) {
+			const GLfloat component = plane_endpoint[i];
+			if (component < 0.0f) plane_endpoint[i] = 0.0f;
+			else if (component > 20.0f) plane_endpoint[i] = 20.0f;
+		}
+		*/
+
+		// If v > 0, light source extends to infinity
+		DEBUG_VEC3(plane_endpoint);
+		puts("---");
+
+/////
+
+
+			GLfloat pos_y = vertex_pos[i] + dir_y * v[i];
+			DEBUG(pos_y, lf);
+
+			vec3 plane_endpoint;
+			glm_vec3_copy((GLfloat*) vertex_pos, plane_endpoint);
+			glm_vec3_muladd(direction, v, plane_endpoint);
+			const GLfloat dist_to_endpoint = glm_vec3_norm(plane_endpoint);
+			DEBUG((double) dist_to_endpoint, lf);
+
+			// Find the most optimal result for each 
+
+			// What is I for then?
+
+			/*
+			GLfloat result = 0.5f;
+			for (byte axis = 0; axis < 3; axis++) {
+				GLfloat dividend = -vertex_pos[axis];
+				const GLfloat dir_component = direction[axis];
+				if (dir_component > 0.0f) dividend += flat_plane_size;
+				const GLfloat v_component = dividend / dir_component;
+
+				vec3 plane_endpoint;
+				glm_vec3_copy((GLfloat*) vertex_pos, plane_endpoint);
+				glm_vec3_muladd(direction, v, plane_endpoint);
+				const GLfloat dist_to_endpoint = glm_vec3_norm(plane_endpoint);
+
+				DEBUG((double) dist_to_endpoint, lf);
+				DEBUG(axis, d);
+				puts("---");
+			}
+			v[i] = result;
+			*/
+
+/////
+
+			GLfloat dividend = -vertex_pos[1];
+			const GLfloat dir_y = direction[1];
+			if (dir_y > 0.0f) dividend += 10.0f;
+			v[i] = dividend / dir_y;
+
+			GLfloat pos_y = vertex_pos[i] + dir_y * v[i];
+			DEBUG(pos_y, lf);
+
+			vec3 plane_endpoint;
+			glm_vec3_copy((GLfloat*) vertex_pos, plane_endpoint);
+			glm_vec3_muladd(direction, v, plane_endpoint);
+			const GLfloat dist_to_endpoint = glm_vec3_norm(plane_endpoint);
+			DEBUG((double) dist_to_endpoint, lf);
+
+/////
+
+		{2.262186, 3.362316, 7.743492});
+		*/
+
+		/*
+		GLfloat v_for_plane_solutions[6];
+		for (byte i = 0; i < 3; i++) {
+			GLfloat dividend = vertex_pos[i];
+			// if (direction[half_i] > 0.0f) dividend += 10.0f;
+			// if (i >= 3) dividend += 10.0f;
+			v_for_plane_solutions[i] = dividend / direction[i];
+
+			DEBUG((double) v_for_plane_solutions[i], lf);
+		}
+
+		const GLfloat smallest_neg_v = min(v_for_plane_solutions, 6);
+		DEBUG(smallest_neg_v, lf);
+		*/
+
+/////
+
+GLfloat min(const GLfloat* const array, const byte length) {
+	GLfloat smallest = FLT_MAX;
+	for (byte i = 0; i < length; i++) {
+		const GLfloat val = array[i];
+		if (val > 0.0f) continue;
+		else if (fabsf(val) < fabsf(smallest)) smallest = val;
+	}
+	return smallest;
+}
+
+/////
