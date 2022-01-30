@@ -152,6 +152,7 @@ GLuint init_shadow_volume_buffer(GLsizeiptr* const num_volume_vertices, const GL
 
 		- Find closest plane intersection for all 3 vertices; smallest resulting distance for component
 		- And for non-intersecting planes, detect if any intersection happens at all
+		- Note: for the X plane test, the current triangle failed b/c it could never intersect with an X plane
 		*/
 
 		vec3 v;
