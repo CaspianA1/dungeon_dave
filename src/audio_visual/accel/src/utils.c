@@ -46,6 +46,8 @@ Screen init_screen(const GLchar* const title) {
 		#endif
 	);
 
+	keys = SDL_GetKeyboardState(NULL);
+
 	return screen;
 }
 
@@ -130,7 +132,6 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 	byte running = 1;
 	SDL_Event event;
 	const StateGL sgl = init();
-	keys = SDL_GetKeyboardState(NULL);
 
 	while (running) {
 		#ifndef USE_VSYNC

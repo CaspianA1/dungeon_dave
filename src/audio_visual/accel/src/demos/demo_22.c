@@ -109,12 +109,42 @@ const GLchar *const demo_22_obj_vertex_shader =
 
 const GLint num_components_per_vertex = 6, num_components_per_position = 3, num_components_per_color = 3;
 
+// p = p0 + dir * v
+GLfloat get_v_for_ray_to_plane(const byte axis, const GLfloat flat_plane_size, const vec3 vertex_pos, const vec3 ray_dir) {
+	GLfloat dividend = -vertex_pos[axis];
+	const GLfloat dir_component = ray_dir[axis];
+	if (dir_component > 0.0f) dividend += flat_plane_size;
+
+	return dividend / dir_component;
+}
+
+void get_plane_hit_for_axis(const byte axis, const GLfloat flat_plane_size,
+	const vec3 vertex_pos, const vec3 ray_dir, vec3 plane_hit) {
+
+	vec3 ray_v;
+
+	const GLfloat v = get_v_for_ray_to_plane(axis, flat_plane_size, vertex_pos, ray_dir);
+
+	for (byte v_axis = 0; v_axis < 3; v_axis++)
+		ray_v[v_axis] = v;
+
+	glm_vec3_copy((GLfloat*) vertex_pos, plane_hit);
+	glm_vec3_muladd((GLfloat*) ray_dir, ray_v, plane_hit);
+}
+
+byte plane_hit_out_of_bounds(const GLfloat flat_plane_size, const vec3 plane_hit) {
+	for (byte hit_axis = 0; hit_axis < 3; hit_axis++) {
+		const GLfloat hit_component = plane_hit[hit_axis];
+		if (hit_component < 0.0f || hit_component > flat_plane_size)
+			return 1;
+
+	}
+	return 0;
+}
+
 GLuint init_shadow_volume_buffer(GLsizeiptr* const num_volume_vertices, const GLfloat flat_plane_size,
 	const vec3 light_source_pos, const buffer_size_t num_components_per_whole_vertex,
 	const buffer_size_t num_vertices_per_mesh, const GLfloat* const vertex_start) {
-
-	List cone_vertices = init_list(1, vec3);
-	push_ptr_to_list(&cone_vertices, light_source_pos);
 
 	/* To begin with, form a cone between the camera and the vertices
 
@@ -126,50 +156,39 @@ GLuint init_shadow_volume_buffer(GLsizeiptr* const num_volume_vertices, const GL
 
 	And at some point, discard forward-facing vertices
 
-	All vertices must actually not share the same plane; they can, but it's optional */
+	All vertices must actually not share the same plane; they can, but it's optional
+
+	The axis result may actually work in most cases now!
+	If that's the case, I now just need to occupy the rest of the scene with another volume,
+	and use primitive restart to make another triangle fan
+	But test this rigorously to see that that's true
+	*/
 
 	const buffer_size_t total_num_components = num_components_per_whole_vertex * num_vertices_per_mesh;
+
+	List cone_vertices = init_list(num_vertices_per_mesh + 1, vec3);
+	push_ptr_to_list(&cone_vertices, light_source_pos);
+
 	for (buffer_size_t i = 0; i < total_num_components; i += num_components_per_whole_vertex) {
 		const GLfloat* const vertex_pos = vertex_start + i;
 
-		vec3 direction;
-		glm_vec3_sub((GLfloat*) vertex_pos, (GLfloat*) light_source_pos, direction);
-		glm_vec3_normalize(direction);
+		vec3 ray_dir;
+		glm_vec3_sub((GLfloat*) vertex_pos, (GLfloat*) light_source_pos, ray_dir);
+		glm_vec3_normalize(ray_dir);
 
-		/* - Intersecting plane will be flat
-		- And for this plane, y = 0
+		vec3 plane_hit;
 
-		Ray:
-		p = p0 + dir * v
-		Solve for v when p.y == 0
-
-		p.xyz = p0.xyz + dir.xyz * v
-
-		p.y = p0.y + dir.y * v
-		0 = p0.y + dir.y * v
-		-p0.y = dir.y * v
-		-p0.y / dir.y = v
-
-		- Find closest plane intersection for all 3 vertices; smallest resulting distance for component
-		- And for non-intersecting planes, detect if any intersection happens at all
-		- Note: for the X plane test, the current triangle failed b/c it could never intersect with an X plane
-		*/
-
-		vec3 v;
-
-		for (byte i = 0; i < 3; i++) {
-			GLfloat dividend = -vertex_pos[1];
-			const GLfloat dir_y = direction[1];
-			if (dir_y > 0.0f) dividend += flat_plane_size;
-			v[i] = dividend / dir_y;
-			// Find the shortest distance to a plane with this direction, given a vertes
+		char axis_result = -1;
+		for (char i = 0; i < 3; i++) {
+			get_plane_hit_for_axis(i, flat_plane_size, vertex_pos, ray_dir, plane_hit);
+			if (!plane_hit_out_of_bounds(flat_plane_size, plane_hit)) {
+				axis_result = i;
+				break;
+			}
 		}
+		if (axis_result == -1) puts("Problemo!");
 
-		vec3 plane_endpoint;
-		glm_vec3_copy((GLfloat*) vertex_pos, plane_endpoint);
-		glm_vec3_muladd(direction, v, plane_endpoint);
-
-		push_ptr_to_list(&cone_vertices, plane_endpoint);
+		push_ptr_to_list(&cone_vertices, plane_hit);
 	}
 
 	*num_volume_vertices = cone_vertices.length;
@@ -295,7 +314,8 @@ ShadowVolumeContext init_shadow_volume_context(const vec3 light_source_pos) {
 StateGL demo_22_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
-	ShadowVolumeContext context = init_shadow_volume_context((vec3) {2.3f, 0.486f, 2.6f});
+	//  {2.33f, 2.13f, 5.03f} goes on 1 axis; {2.3f, 0.486f, 2.6f} is more problematic
+	ShadowVolumeContext context = init_shadow_volume_context((vec3) {2.425301, 0.111759, 2.026766});
 	sgl.any_data = malloc(sizeof(ShadowVolumeContext));
 	memcpy(sgl.any_data, &context, sizeof(ShadowVolumeContext));
 
@@ -307,7 +327,20 @@ StateGL demo_22_init(void) {
 }
 
 void demo_22_drawer(const StateGL* const sgl) {
-	const ShadowVolumeContext context = *((ShadowVolumeContext*) sgl -> any_data);
+	ShadowVolumeContext context = *((ShadowVolumeContext*) sgl -> any_data);
+
+	/*
+	static vec3 light_pos = {2.3f, 0.486f, 2.6f};
+	const GLfloat step = 0.05f;
+	if (keys[SDL_SCANCODE_I] && light_pos[0] < 5.0f) light_pos[0] += step;
+	if (keys[SDL_SCANCODE_K] && light_pos[0] > 0.0f) light_pos[0] -= step;
+	if (keys[SDL_SCANCODE_SEMICOLON] && light_pos[1] < 5.0f) light_pos[1] += step;
+	if (keys[SDL_SCANCODE_APOSTROPHE] && light_pos[1] > 0.0f) light_pos[1] -= step;
+	if (keys[SDL_SCANCODE_J] && light_pos[2] < 5.0f) light_pos[2] += step;
+	if (keys[SDL_SCANCODE_L] && light_pos[2] > 0.0f) light_pos[2] -= step;
+	// DEBUG_VEC3(light_pos);
+	context = init_shadow_volume_context(light_pos);
+	*/
 
 	static Camera camera;
 	static byte first_call = 1;
@@ -316,6 +349,7 @@ void demo_22_drawer(const StateGL* const sgl) {
 		init_camera(&camera, (vec3) {1.0f, 1.0f, 1.0f});
 		first_call = 0;
 	}
+	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 
 	update_camera(&camera, get_next_event(), NULL);
 	draw_shadow_volume_context(context, camera.model_view_projection);

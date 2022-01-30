@@ -4945,4 +4945,160 @@ GLfloat min(const GLfloat* const array, const byte length) {
 	return smallest;
 }
 
+///// Good to know:
+
+		/* - Intersecting plane will be flat
+		- And for this plane, y = 0
+
+		Ray:
+		p = p0 + dir * v
+		Solve for v when p._ == 0 or 20
+
+		p = p0 + dir * v (all vectors except for v)
+
+		p.y = p0.y + dir.y * v
+		0 = p0.y + dir.y * v
+		-p0.y = dir.y * v
+		-p0.y / dir.y = v
+
+		20 = p0.y + dir.y * v
+		20 - p0.y = dir.y * v
+		(20 - p0.y) / dir.y = v
+
+		- Find closest plane intersection for all 3 vertices; smallest resulting distance for component
+		- And for non-intersecting planes, detect if any intersection happens at all
+		- Note: for the X plane test, the current triangle failed b/c it could never intersect with an X plane
+		*/
+
+/////
+
+			/*
+			typedef struct {
+				char axis;
+				GLfloat dist_to_plane, plane_endpoint_component;
+			} RayFromVertex;
+
+			RayFromVertex ray_plane_collisions[3]; // Collisions on different plane axes
+			
+			// Finding the closest axis
+			for (byte testing_axis = 0; testing_axis < 3; testing_axis++) {
+				GLfloat dividend = -vertex_pos[testing_axis];
+				const GLfloat ray_direction_component = ray_direction[testing_axis];
+				if (ray_direction_component > 0.0f) dividend += flat_plane_size;
+
+				const GLfloat v = dividend / ray_direction_component;
+
+				const GLfloat ray_length = ray_direction_component * v;
+				GLfloat plane_endpoint_component = vertex_pos[testing_axis] + ray_length;
+				ray_plane_collisions[testing_axis] = (RayFromVertex) {'x' + testing_axis, ray_length, plane_endpoint_component};
+			}
+
+			printf("ray_plane_collisions = ");
+
+			RayFromVertex closest_ray = {'a', FLT_MAX, -1.0f};
+			for (byte axis = 0; axis < 3; axis++) {
+				const RayFromVertex ray = ray_plane_collisions[axis];
+				printf("{%c, %lf, %lf} ", ray.axis, (double) ray.dist_to_plane, (double) ray.plane_endpoint_component);
+				if (ray.dist_to_plane < closest_ray.dist_to_plane)
+					closest_ray = ray;
+			}
+
+			printf("\nclosest_ray = {.dist_to_plane = %lf, .plane_endpoint_component = %lf}\n",
+				(double) closest_ray.dist_to_plane, (double) closest_ray.plane_endpoint_component);
+
+			ray_params[component_index] = closest_ray.plane_endpoint_component;
+			puts("---");
+		}
+		*/
+
+/////
+
+
+			/*
+			for (byte test_axis = 0; test_axis < 3; test_axis++) {
+				GLfloat dividend = -vertex_pos[1];
+				const GLfloat dir_component = ray_dir[1];
+				if (dir_component > 0.0f) dividend += flat_plane_size;
+				ray_v[test_axis] = dividend / dir_component;
+			}
+			*/
+
+/////
+
+		vec3 plane_endpoint;
+		plane_endpoint[0] = vertex_pos[0] + ray_dir[0] * ray_v_for_closest_intersection[0];
+		plane_endpoint[1] = vertex_pos[1] + ray_dir[1] * ray_v_for_closest_intersection[1];
+		plane_endpoint[2] = vertex_pos[2] + ray_dir[2] * ray_v_for_closest_intersection[2];
+
+/////
+
+	/*
+		vec3 ray_v;
+
+		for (byte v_component_ind = 0; v_component_ind < 3; v_component_ind++) {
+			// printf("For ray to plane, testing ray component %c\n", 'x' + component_ind);
+
+			// For each ray component, find the shortest optimal intersecting axis
+
+			GLfloat dividend_x = -vertex_pos[0];
+			const GLfloat dir_x = ray_dir[0];
+			if (dir_x > 0.0f) dividend_x += flat_plane_size;
+			const GLfloat ray_v_for_x_intersection = dividend_x / dir_x;
+
+			GLfloat dividend_y = -vertex_pos[1];
+			const GLfloat dir_y = ray_dir[1];
+			if (dir_y > 0.0f) dividend_y += flat_plane_size;
+			const GLfloat ray_v_for_y_intersection = dividend_y / dir_y;
+
+			GLfloat dividend_z = -vertex_pos[2];
+			const GLfloat dir_z = ray_dir[2];
+			if (dir_z > 0.0f) dividend_z += flat_plane_size;
+			const GLfloat ray_v_for_z_intersection = dividend_z / dir_z;
+
+			for (byte _ = 0; _ < 3; _++) ray_v[_] = ray_v_for_y_intersection;
+
+			vec3 plane_endpoint;
+			glm_vec3_copy((GLfloat*) vertex_pos, plane_endpoint);
+			glm_vec3_muladd(ray_dir, ray_v, plane_endpoint);
+			push_ptr_to_list(&cone_vertices, plane_endpoint);
+
+			if (i == 0) printf("solution = {%lf, %lf, %lf}\n", (double) ray_v[0], (double) ray_v[1], (double) ray_v[2]);
+
+			// Find the shortest distance to a plane with this direction, given a vertes
+		}
+		*/
+
+/////
+
+		// Can only get an intersection after all components have been gathered
+		// Every intersection, at some level, will technically be the same; it's just that they ___
+		// If the volume is out of bounds, perhaps change V for continual axes until a refined volume is reached
+
+		// DEBUG(ray_dir[1], lf);
+
+		/*
+		const byte axis = keys[SDL_SCANCODE_C] + keys[SDL_SCANCODE_V];
+		const GLfloat v = get_v_for_ray_to_plane(axis, flat_plane_size, vertex_pos, ray_dir);
+		// const GLfloat v = 50.0f;
+
+		for (byte v_axis = 0; v_axis < 3; v_axis++)
+			ray_v_for_closest_intersection[v_axis] = v;
+
+		vec3 plane_hit;
+		glm_vec3_copy((GLfloat*) vertex_pos, plane_hit);
+		glm_vec3_muladd(ray_dir, ray_v_for_closest_intersection, plane_hit);
+
+		for (byte hit_axis = 0; hit_axis < 3; hit_axis++) {
+			const GLfloat hit_component = plane_hit[hit_axis];
+			// if (hit_component < 0.0f || hit_component > 5.0f)
+				// printf("Problemo: {%.15lf, %.15lf, %.15lf}\n", plane_hit[0], plane_hit[1], plane_hit[2]);
+			if (hit_component < 0.0f) {
+				printf("Clip %c on the bottom side: %lf\n", 'x' + hit_axis, (double) hit_component);
+				plane_hit[hit_axis] = 0.0f;
+			}
+			// if (hit_component > 5.0f) plane_hit[hit_axis] = 5.0f;
+		}
+		puts("---");
+		*/
+
 /////
