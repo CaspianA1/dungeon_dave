@@ -29,7 +29,7 @@ void check_for_mesh_out_of_bounds(const mesh_type_t origin[3], const mesh_type_t
 
 		if (start < 0 || start > 255 || end < 0 || end > 255) {
 			fprintf(stderr, "Mesh out of bounds on %c axis\n", 'x' + i);
-			fail("create mesh: mesh out of bounds", MeshOutOfBounds);
+			fail("create mesh: mesh out of bounds", CreateMesh);
 		}
 	}
 }

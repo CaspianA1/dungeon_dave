@@ -62,7 +62,7 @@ typedef enum {
 	LaunchSDL,
 	LaunchGLEW,
 	OpenImageFile,
-	MeshOutOfBounds, // TODO: remove
+	CreateMesh,
 	TextureIDIsTooLarge,
 	TextureSetIsTooLarge
 } FailureType;
@@ -80,7 +80,7 @@ const Uint8* keys;
 //////////
 
 extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
-	fprintf(stderr, "Could not %s. SDL error: '%s'\n", msg, SDL_GetError());
+	fprintf(stderr, "Could not %s.\n", msg);
 	exit(failure_type + 1);
 }
 

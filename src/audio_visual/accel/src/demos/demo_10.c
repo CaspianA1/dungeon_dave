@@ -87,7 +87,7 @@ void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type
 
 		if (start < 0.0f || start > 255.0f || end < 0.0f || end > 255.0f) {
 			fprintf(stderr, "Mesh out of bounds on %c axis\n", 'x' + i);
-			fail("create mesh: mesh out of bounds", MeshOutOfBounds);
+			fail("create mesh: mesh out of bounds", CreateMesh);
 		}
 	}
 }

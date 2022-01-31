@@ -5102,3 +5102,53 @@ GLfloat min(const GLfloat* const array, const byte length) {
 		*/
 
 /////
+
+	/* To begin with, form a cone between the camera and the vertices
+
+	For each vertex, form a connection
+	Store those in a list
+	Then, build triangles out of the connections
+
+	Later on, reverse it
+
+	And at some point, discard forward-facing vertices
+
+	All vertices must actually not share the same plane; they can, but it's optional
+
+	The axis result may actually work in most cases now!
+	If that's the case, I now just need to occupy the rest of the scene with another volume,
+	and use primitive restart to make another triangle fan
+	But test this rigorously to see that that's true
+	*/
+
+/////
+
+byte value_in_list(List* const list, const void* const value, byte (*const values_eq) (const void*, const void*)) {
+
+	for (buffer_size_t i = 0; i < list -> length; i++) {
+		if (values_eq(value, list -> data + i)) {
+			
+		}
+	}
+}
+
+///// Some vbo and ibo printing:
+
+	/*
+	puts("");
+	for (buffer_size_t i = 0; i < volume_vertices.length; i++) {
+		const GLfloat* const vertex = ((GLfloat*) volume_vertices.data) + i * 3;
+		DEBUG_VEC3(vertex);
+	}
+	puts("---");
+
+	// Also print indices
+	for (buffer_size_t i = 0; i < volume_indices.length; i++) {
+		const buffer_size_t index = ((buffer_size_t*) volume_indices.data)[i];
+		DEBUG(index, d);
+	}
+	*/
+
+
+/////
+
