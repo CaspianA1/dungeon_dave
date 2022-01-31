@@ -106,7 +106,7 @@ static GLfloat apply_collision_on_xz_axis(
 		/* `foot_height - height_value > -0.001f` is done instead of `foot_height >= height_value`
 		because the foot height may be slightly under the height value (like 2.999999 compared to 3.0,
 		due to floating-point precision errors). If `>=` is used, the new position is sometimes not returned. */
-		if (foot_height - height_value > -0.001f)
+		if (foot_height - height_value > -constants.almost_zero)
 			return new_pos_component;
 	}
 	return old_pos[varying_axis];

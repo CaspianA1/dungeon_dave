@@ -16,6 +16,7 @@ and not in the `constants` struct b/c other values in that struct depend on them
 static const struct {
 	// This should match the vsync refresh rate, since some of the physics code depends on it
 	const byte fps;
+	const GLfloat almost_zero;
 
 	const struct { // All angles are in radians
 		const GLfloat eye_height, delta_turn_to_tilt_ratio;
@@ -38,6 +39,8 @@ static const struct {
 
 } constants = {
 	.fps = 60,
+
+	.almost_zero = 0.001f,
 
 	.camera = {
 		.eye_height = 0.5f, .delta_turn_to_tilt_ratio = 2.4f,
