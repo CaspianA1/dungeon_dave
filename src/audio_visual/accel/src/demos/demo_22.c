@@ -46,6 +46,11 @@ Depth fail:
 
 Optimization:
 - Only think about it if shadow volumes are a performance problem
+
+Other notes:
+- Volume edges should maybe be at infinity
+- And point light should perhaps solely be directional, not positional
+- Is there a necessary reason for the volume taking up infinite space?
 */
 
 #include "../utils.c"
