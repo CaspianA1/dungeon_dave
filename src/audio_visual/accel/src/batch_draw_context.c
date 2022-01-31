@@ -18,9 +18,7 @@ void init_batch_draw_context_gpu_buffer(BatchDrawContext* const draw_context,
 void deinit_batch_draw_context(const BatchDrawContext* const draw_context) {
 	deinit_list(draw_context -> buffers.cpu);
 
-	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
 	glDeleteBuffers(1, &draw_context -> buffers.gpu);
-
 	deinit_texture(draw_context -> texture_set);
 	glDeleteProgram(draw_context -> shader);
 }
