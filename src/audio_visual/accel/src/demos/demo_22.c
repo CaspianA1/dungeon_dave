@@ -218,8 +218,6 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 		first_call = 0;
 	}
 
-	glEnableVertexAttribArray(0);
-
 	//////////
 
 	glUseProgram(context.obj_shader);
@@ -239,19 +237,16 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 
 	//////////
 
-	glEnable(GL_BLEND);
-
 	glUseProgram(context.shadow_volume_shader);
 	UPDATE_UNIFORM(shadow_volume_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 	glBindBuffer(GL_ARRAY_BUFFER, context.shadow_volume_buffer);
 	glVertexAttribPointer(0, num_components_per_position, GL_FLOAT, GL_FALSE, 0, (void*) 0);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, context.num_volume_vertices);
 
+	glEnable(GL_BLEND);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, context.num_volume_vertices);
 	glDisable(GL_BLEND);
 
 	//////////
-
-	glDisableVertexAttribArray(0);
 }
 
 ShadowVolumeContext init_shadow_volume_context(const vec3 light_source_pos) {
@@ -328,6 +323,8 @@ StateGL demo_22_init(void) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnableVertexAttribArray(0);
 
 	return sgl;
 }
