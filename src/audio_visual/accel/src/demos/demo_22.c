@@ -56,6 +56,10 @@ Other notes:
 
 - Note: an occluder mesh with more than just 1 triangle does not work yet
 - Also, find size for this and below (below size is probably num_vertices_per_mesh + 1)
+
+- For building an ending bounding cap:
+	- Construct a new vector, with the working axes in the right component indices
+	- For each failed collision axis, put the minimum or maximum value for that axis in its index
 */
 
 #include "../utils.c"
@@ -187,7 +191,7 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context, const GLfloa
 
 		vec3 ray_dir, plane_hit;
 		glm_vec3_sub((GLfloat*) origin_vertex, (GLfloat*) light_source_pos, ray_dir);
-		glm_vec3_normalize(ray_dir); // Needed?
+		// glm_vec3_normalize(ray_dir); // Needed?
 
 		////////// This part finds the intersection between the silhouette ray and the closest plane within bounds
 
