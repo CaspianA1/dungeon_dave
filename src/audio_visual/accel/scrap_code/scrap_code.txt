@@ -5152,3 +5152,77 @@ byte value_in_list(List* const list, const void* const value, byte (*const value
 
 /////
 
+Or better way:
+	- Get vertices to make all other shapes touch the map edge
+	- For each such vertex v,
+		new direction d
+		colliding axis's direction set for that vertex
+		other 
+
+	For origin that should collide with a face,
+
+	- Get another verte
+
+Or no no
+- For each vertex that hit a plane,
+	m = the one that extended the farthest
+
+Or,
+
+/////
+
+- For building an ending bounding cap:
+	- Construct a new vector, with the working axes in the right component indices
+	- For each failed collision axis, put the minimum or maximum value for that axis in its index
+
+/////
+
+/*
+Generating shadow volumes
+- On a per-sector basis
+- For each face in sector, find if facing towards or away from light
+- Take away-facing faces
+- The vertices that connect the forward-facing to away-facing faces form a silhouette
+- Take those vertices, and form a volume outline
+- Light source -> outline is not part of the shadow volume
+- Shadow volume starts at silhouette vertices
+
+- Forming a cone
+For each vertex in the silhouette,
+	- Get the vector between the light and the vertex
+	- Extend that vector until it reaches a map boundary (or to another sector cube?)
+
+- Make two caps on each end, as some triangles
+- Make a shadow volume as triangles for the volume sides as well
+
+Rendering shadow volumes
+
+Depth pass:
+- Disable writes to the depth and color buffers
+
+- Set the stencil operation to increment on depth pass (only count shadows in front of the object/sector)
+- Use backface culling, and render the shadow volumes (only front faces rendered, and only objs in front counted)
+
+- Set the stencil operation to decrement on depth pass
+- Use front face culling, and render the shadow volumes (only back faces rendered, and only objects behind counted)
+
+- After this is accomplished, all lit surfaces will correspond to a 0 in the stencil buffer,
+	where the numbers of front and back surfaces of all shadow volumes between the eye and that surface are equal.
+
+- After this, all lit surfaces will have a 0 value in the stencil buffer,
+	where the number of front and back surfaces of shadow volumes between eye and surface are equal
+- 0 values in stencil buffer are lit then, and >= 1 values are darkened
+
+- If stencil buf val is postiive, in shadow (more front facing than back facing)
+- Zero, no shadow (since if you look through a shadow and just see another shadow through it, no shadow seen,
+	since shadows are only defined by the objects that they hit)
+
+Depth fail:
+- Disable writes to the depth and color buffers
+- Frontface culling, incr on depth fail (count shadows behind obj), and render
+- Backface culling, decr on depth fail (decr for shadows in front of obj (i.e., visible)), and render (front faces rendered)
+- Then, stencil buffer vals that equal 0 are lit
+
+Optimiz
+
+/////

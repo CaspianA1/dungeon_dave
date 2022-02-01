@@ -1,51 +1,16 @@
-/*
-Generating shadow volumes
+/* Generating shadow volumes
 - On a per-sector basis
 - For each face in sector, find if facing towards or away from light
 - Take away-facing faces
 - The vertices that connect the forward-facing to away-facing faces form a silhouette
 - Take those vertices, and form a volume outline
-- Light source -> outline is not part of the shadow volume
 - Shadow volume starts at silhouette vertices
 
-- Forming a cone
-For each vertex in the silhouette,
-	- Get the vector between the light and the vertex
-	- Extend that vector until it reaches a map boundary (or to another sector cube?)
-
-- Make two caps on each end, as some triangles
-- Make a shadow volume as triangles for the volume sides as well
-
-Rendering shadow volumes
-
-Depth pass:
-- Disable writes to the depth and color buffers
-
-- Set the stencil operation to increment on depth pass (only count shadows in front of the object/sector)
-- Use backface culling, and render the shadow volumes (only front faces rendered, and only objs in front counted)
-
-- Set the stencil operation to decrement on depth pass
-- Use front face culling, and render the shadow volumes (only back faces rendered, and only objects behind counted)
-
-- After this is accomplished, all lit surfaces will correspond to a 0 in the stencil buffer,
-	where the numbers of front and back surfaces of all shadow volumes between the eye and that surface are equal.
-
-- After this, all lit surfaces will have a 0 value in the stencil buffer,
-	where the number of front and back surfaces of shadow volumes between eye and surface are equal
-- 0 values in stencil buffer are lit then, and >= 1 values are darkened
-
-- If stencil buf val is postiive, in shadow (more front facing than back facing)
-- Zero, no shadow (since if you look through a shadow and just see another shadow through it, no shadow seen,
-	since shadows are only defined by the objects that they hit)
-
-Depth fail:
+Rendering via depth fail:
 - Disable writes to the depth and color buffers
 - Frontface culling, incr on depth fail (count shadows behind obj), and render
 - Backface culling, decr on depth fail (decr for shadows in front of obj (i.e., visible)), and render (front faces rendered)
 - Then, stencil buffer vals that equal 0 are lit
-
-Optimization:
-- Only think about it if shadow volumes are a performance problem
 
 Other notes:
 - Volume edges should maybe be at infinity
@@ -57,10 +22,13 @@ Other notes:
 - Note: an occluder mesh with more than just 1 triangle does not work yet
 - Also, find size for this and below (below size is probably num_vertices_per_mesh + 1)
 
-- For building an ending bounding cap:
-	- Construct a new vector, with the working axes in the right component indices
-	- For each failed collision axis, put the minimum or maximum value for that axis in its index
-*/
+For each vertex v that hit a plane,
+	e = endpoint
+	get collision point of plane to e
+	that will be out of bounds
+	so, define e'
+	e'.(colliding axis of v) = v.dir
+	preserve the other axis values */
 
 #include "../utils.c"
 #include "../camera.c"
@@ -77,6 +45,10 @@ typedef struct {
 		buffer_size_t num_indices;
 	} shadow_volume;
 } ShadowVolumeContext;
+
+typedef enum {
+	X, Y, Z, NoAxis
+} Axis;
 
 const GLchar *const demo_22_obj_vertex_shader =
 	"#version 330 core\n"
@@ -131,7 +103,7 @@ const GLchar *const demo_22_obj_vertex_shader =
 const GLint num_components_per_vertex = 6, num_components_per_position = 3, num_components_per_color = 3;
 
 // (p = p0 + dir * v) => (p - p0 = dir * v) => ((p - p0) / dir = v)
-GLfloat get_v_for_ray_to_plane(const byte axis, const GLfloat flat_plane_size, const vec3 origin_vertex, const vec3 ray_dir) {
+GLfloat get_v_for_ray_to_plane(const Axis axis, const GLfloat flat_plane_size, const vec3 origin_vertex, const vec3 ray_dir) {
 	GLfloat dividend = -origin_vertex[axis];
 	const GLfloat dir_component = ray_dir[axis];
 	if (dir_component > 0.0f) dividend += flat_plane_size;
@@ -144,33 +116,30 @@ GLfloat floats_eq(const GLfloat a, const GLfloat b) {
 
 GLfloat vec3_eq(const vec3 a, const vec3 b) {
 	// return floats_eq(a[0], b[0]) && floats_eq(a[1], b[1]) && floats_eq(a[2], b[2]);
-	return a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
+	return a[X] == b[X] && a[Y] == b[Y] && a[Z] == b[Z];
 }
 
-// If the plane hit failed, returns the failing axis; otherwise, returns -1
-signed_byte get_plane_hit_for_axis(const byte axis, const GLfloat flat_plane_size,
+// If the plane hit failed, returns the failing axis; otherwise, returns -1. Modifies plane_hit.
+Axis get_plane_hit_for_axis(const Axis axis, const GLfloat flat_plane_size,
 	const vec3 origin_vertex, const vec3 ray_dir, vec3 plane_hit) {
 
 	const GLfloat v = get_v_for_ray_to_plane(axis, flat_plane_size, origin_vertex, ray_dir);
-	const vec3 ray_v = {v, v, v};
 
 	glm_vec3_copy((GLfloat*) origin_vertex, plane_hit);
-	glm_vec3_muladd((GLfloat*) ray_dir, (GLfloat*) ray_v, plane_hit);
+	glm_vec3_muladds((GLfloat*) ray_dir, v, plane_hit);
 
-	for (signed_byte hit_axis = 0; hit_axis < 3; hit_axis++) {
+	for (Axis hit_axis = X; hit_axis <= Z; hit_axis++) {
 		GLfloat hit_component = plane_hit[hit_axis];
 
 		/* Sometimes, due to precision errors, values can be slightly less than 0, leading
 		to a component being incorrectly recognized as out of bounds; so this adjusts that */
 		if (floats_eq(hit_component, 0.0f)) hit_component = 0.0f;
 		else if (floats_eq(hit_component, flat_plane_size)) hit_component = flat_plane_size;
-
-		if (hit_component < 0.0f || hit_component > flat_plane_size)
-			return hit_axis;
+		else if (hit_component < 0.0f || hit_component > flat_plane_size) return hit_axis;
 
 		plane_hit[hit_axis] = hit_component;
 	}
-	return -1;
+	return NoAxis;
 }
 
 void init_shadow_volume_buffers(ShadowVolumeContext* const context, const GLfloat flat_plane_size,
@@ -191,24 +160,24 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context, const GLfloa
 
 		vec3 ray_dir, plane_hit;
 		glm_vec3_sub((GLfloat*) origin_vertex, (GLfloat*) light_source_pos, ray_dir);
-		// glm_vec3_normalize(ray_dir); // Needed?
 
 		////////// This part finds the intersection between the silhouette ray and the closest plane within bounds
 
-		signed_byte colliding_axis = -1;
-		for (signed_byte test_axis = 0; test_axis < 3; test_axis++) {
-			const signed_byte failing_axis = get_plane_hit_for_axis(test_axis, flat_plane_size, origin_vertex, ray_dir, plane_hit);
-			if (failing_axis == -1) {
+		Axis colliding_axis = NoAxis;
+		for (Axis test_axis = X; test_axis <= Z; test_axis++) {
+			const Axis failing_axis = get_plane_hit_for_axis(test_axis, flat_plane_size, origin_vertex, ray_dir, plane_hit);
+			if (failing_axis == NoAxis) {
 				colliding_axis = test_axis;
 				break;
 			}
 		}
 
-		if (colliding_axis == -1) fail("Unable to clip shadow volume mesh inside bounding area", CreateMesh);
+		if (colliding_axis == NoAxis) // This should never happen
+			fail("create mesh: unable to clip shadow volume mesh inside bounding area", CreateMesh);
 
 		////////// This part finds if the colliding vertex was a repeat; and if so, adds the old index to the index buffer
 
-		byte repeated_colliding_vertex = 0;
+		byte repeated_colliding_vertex = 0; // If the vertex was already present in the vertex list
 		for (buffer_size_t prev_colliding_index = 0; prev_colliding_index < volume_vertices.length; prev_colliding_index++) {
 			const GLfloat* const prev_colliding_vertex = (GLfloat*) volume_vertices.data + prev_colliding_index * 3;
 			if (vec3_eq(prev_colliding_vertex, plane_hit)) {
@@ -231,11 +200,11 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context, const GLfloa
 
 	glGenBuffers(1, &context -> shadow_volume.vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, context -> shadow_volume.vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, volume_vertices.length * sizeof(vec3), volume_vertices.data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3[volume_vertices.length]), volume_vertices.data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &context -> shadow_volume.index_buffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context -> shadow_volume.index_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, volume_indices.length * sizeof(buffer_size_t), volume_indices.data, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(buffer_size_t[volume_indices.length]), volume_indices.data, GL_STATIC_DRAW);
 
 	deinit_list(volume_indices);
 	deinit_list(volume_vertices);
@@ -260,11 +229,11 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 	glEnableVertexAttribArray(1);
 
 	glVertexAttribPointer(0, num_components_per_position,
-		GL_FLOAT, GL_FALSE, num_components_per_vertex * sizeof(GLfloat), (void*) 0);
+		GL_FLOAT, GL_FALSE, sizeof(GLfloat[num_components_per_vertex]), (void*) 0);
 
 	glVertexAttribPointer(1, num_components_per_color, GL_FLOAT,
-		GL_FALSE, num_components_per_vertex * sizeof(GLfloat),
-		(void*) (num_components_per_position * sizeof(GLfloat)));
+		GL_FALSE, sizeof(GLfloat[num_components_per_vertex]),
+		(void*) sizeof(GLfloat[num_components_per_position]));
 
 	glDrawArrays(GL_TRIANGLES, 0, context.obj.num_vertices);
 	glDisableVertexAttribArray(1);
@@ -355,7 +324,7 @@ StateGL demo_22_init(void) {
 	{5.0f, 3.05f, 0.0f}) is on two planes
 	*/
 
-	const ShadowVolumeContext context = init_shadow_volume_context((vec3) {5.0f, 3.05f, 0.0f});
+	const ShadowVolumeContext context = init_shadow_volume_context((vec3) {4.0f, 3.05f, 0.0f});
 	sgl.any_data = malloc(sizeof(ShadowVolumeContext));
 	memcpy(sgl.any_data, &context, sizeof(ShadowVolumeContext));
 
@@ -372,7 +341,7 @@ void demo_22_drawer(const StateGL* const sgl) {
 	const ShadowVolumeContext context = *((ShadowVolumeContext*) sgl -> any_data);
 
 	/*
-	static vec3 light_pos = {5.0f, 0.486f, 0.0f};
+	static vec3 light_pos = {4.0f, 3.05f, 0.0f};
 	const GLfloat step = 0.05f;
 	if (keys[SDL_SCANCODE_I]) light_pos[0] += step;
 	if (keys[SDL_SCANCODE_K]) light_pos[0] -= step;
@@ -407,9 +376,14 @@ void demo_22_drawer(const StateGL* const sgl) {
 
 void demo_22_deinit(const StateGL* const sgl) {
 	const ShadowVolumeContext context = *((ShadowVolumeContext*) sgl -> any_data);
-	glDeleteBuffers(1, &context.obj.vertex_buffer);
-	glDeleteBuffers(1, &context.shadow_volume.vertex_buffer);
-	glDeleteBuffers(1, &context.shadow_volume.index_buffer);
+
+	const GLuint buffers[3] = {
+		context.obj.vertex_buffer,
+		context.shadow_volume.vertex_buffer,
+		context.shadow_volume.index_buffer
+	};
+
+	glDeleteBuffers(3, buffers);
 
 	glDeleteProgram(context.obj.shader);
 	glDeleteProgram(context.shadow_volume.shader);

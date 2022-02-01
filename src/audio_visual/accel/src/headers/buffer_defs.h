@@ -4,7 +4,6 @@
 #include <GL/glew.h>
 
 typedef uint8_t byte;
-typedef int8_t signed_byte;
 
 typedef GLubyte face_mesh_component_t;
 typedef GLuint buffer_size_t; // Max = 4294967295
