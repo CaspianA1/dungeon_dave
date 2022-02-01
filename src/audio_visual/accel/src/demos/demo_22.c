@@ -278,7 +278,7 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 	glVertexAttribPointer(0, num_components_per_position, GL_FLOAT, GL_FALSE, 0, (void*) 0);
 
 	glEnable(GL_BLEND);
-	glDrawElements(GL_TRIANGLE_FAN, 5, BUFFER_SIZE_TYPENAME, (void*) 0);
+	glDrawElements(GL_TRIANGLE_FAN, context.shadow_volume.num_indices, BUFFER_SIZE_TYPENAME, (void*) 0);
 	glDisable(GL_BLEND);
 }
 
@@ -312,7 +312,7 @@ ShadowVolumeContext init_shadow_volume_context(const vec3 light_source_pos) {
 		PYRAMID_OFFSET(0.5f, 0.0f, -0.5f), occluder_color[0], occluder_color[1] - 0.3f, occluder_color[2],
 		PYRAMID_OFFSET(0.0f, 1.0f, 0.0f), occluder_color[0], occluder_color[1], occluder_color[2],
 
-		PYRAMID_OFFSET(-0.5f, 0.0f, -0.5f), occluder_color[0], occluder_color[1], occluder_color[2],
+		PYRAMID_OFFSET(-0.5f, 0.0f, -0.5f), occluder_color[0], occluder_color[1], occluder_color[2]
 
 		/*
 		PYRAMID_OFFSET(-0.5f, 0.0f, -0.5f), occluder_color[0] + 0.3f, occluder_color[1], occluder_color[2],
@@ -339,7 +339,7 @@ ShadowVolumeContext init_shadow_volume_context(const vec3 light_source_pos) {
 
 	init_shadow_volume_buffers(&context,
 		flat_plane_size, light_source_pos, num_components_per_vertex,
-		12, &vertices[num_components_per_vertex * 6] // For num_vertices_per_mesh, 12 at most
+		4, &vertices[num_components_per_vertex * 6] // For num_vertices_per_mesh, 12 at most
 	);
 
 	return context;
@@ -348,8 +348,14 @@ ShadowVolumeContext init_shadow_volume_context(const vec3 light_source_pos) {
 StateGL demo_22_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
-	//  {2.33f, 2.13f, 5.03f} goes on 1 axis; {2.3f, 0.486f, 2.6f} is more problematic. Normal start: {2.425301, 0.111759, 2.026766}
-	ShadowVolumeContext context = init_shadow_volume_context((vec3) {5.0f, 0.486f, 0.0f});
+	/*
+	Positions:
+	{5.0f, 0.486f, 0.0f} and {2.5f, 2.5f, 5.0f} are on one one plane
+	{2.3f, 0.486f, 2.6f} and {2.425301f, 0.111759f, 2.026766f} are on three planes
+	{5.0f, 3.05f, 0.0f}) is on two planes
+	*/
+
+	const ShadowVolumeContext context = init_shadow_volume_context((vec3) {5.0f, 3.05f, 0.0f});
 	sgl.any_data = malloc(sizeof(ShadowVolumeContext));
 	memcpy(sgl.any_data, &context, sizeof(ShadowVolumeContext));
 
