@@ -15,9 +15,9 @@ NON_GL_LDFLAGS = $$(pkg-config --cflags --libs sdl2) -lm
 GL_LDFLAGS = -lGLEW
 
 ifeq ($(shell uname), Darwin)
-GL_LDFLAGS += -framework OpenGL
+	GL_LDFLAGS += -framework OpenGL
 else
-GL_LDFLAGS += -lGL
+	GL_LDFLAGS += -lGL
 endif
 
 all:
