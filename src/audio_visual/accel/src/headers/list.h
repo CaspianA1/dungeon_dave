@@ -18,7 +18,7 @@ typedef struct {
 
 List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size);
 void _push_ptr_to_list(List* const list, const void* const item_ptr);
-void* ptr_to_list_index(List* const list, const buffer_size_t index);
+void* ptr_to_list_index(const List* const list, const buffer_size_t index);
 
 //////////
 
