@@ -12,7 +12,6 @@
 - NEXT 3: entities that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 4: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
-- NEXT 7: cubemap environment mapping
 
 - Perlin noise-based lighting in 3D (maybe)
 - Shadow volumes + one global light source
@@ -33,6 +32,16 @@
 - Collide with walls before clipping into them
 - Hitting wall corners just right teleports you up
 - Pressing left + forward and backward doesn't stop moving on the X axis
+
+Chromebook + Ubuntu:
+- Windowed, very slow
+- Memory leak at the end of demo 17
+- OpenGL unknown error at the beginning
+- In debug mode, the lightmapper and map editor will fail because of an initial memory leak
+- Cannot exit window
+- Other demos untested
+- Outer project does not even want to start
+- Demo test range does not work
 
 - Blit 2D sprite to whole screen
 - Flat weapon

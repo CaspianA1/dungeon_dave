@@ -1,26 +1,34 @@
 CC = clang
 
+OUT = accel_demo
+
+#####
+
 OPTIMIZE = -Ofast
 DEBUG = -fsanitize=address,undefined
 BUILD_TYPE = $(DEBUG)
 
-DEMO = 22
+DEMO = 17
 TEST_RANGE = 1..21
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
 CFLAGS = -std=c99 -march=native $(WARNINGS)
 
-NON_GL_LDFLAGS = -lm -lSDL2
-LDFLAGS = -framework OpenGL -lglew $(NON_GL_LDFLAGS)
+NON_GL_LDFLAGS = $$(pkg-config --cflags --libs sdl2) -lm
+GL_LDFLAGS = -lGLEW
 
-OUT = accel_demo
+ifeq (uname, Darwin)
+GL_LDFLAGS += -framework OpenGL
+else
+GL_LDFLAGS += -lGL
+endif
 
 all:
 	make build_demo demo_id=$(DEMO) binary_name=$(OUT)
 
 build_demo: # Takes named arguments `demo_id` and `binary_name`
-	$(CC) $(CFLAGS) $(BUILD_TYPE) $(LDFLAGS) -D DEMO_$(demo_id) -o bin/$(binary_name) src/demos/demo_$(demo_id).c
-	./bin/$(binary_name)
+	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) $(GL_LDFLAGS) -D DEMO_$(demo_id) -o bin/$(binary_name) src/demos/demo_$(demo_id).c
+	cd bin && ./$(binary_name)
 
 test_demos: # Tests demos in the test range, stopping if one fails to build
 	for i in {$(TEST_RANGE)}; do \
@@ -29,7 +37,7 @@ test_demos: # Tests demos in the test range, stopping if one fails to build
 
 %: # This builds any app from 'tools/', which may be `editor` or `lightmapper`
 	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -o bin/$@ src/tools/$@.c
-	./bin/$@
+	cd bin && ./$@
 
 clean:
 	rm -r bin/*
