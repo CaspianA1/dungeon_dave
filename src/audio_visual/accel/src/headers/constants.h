@@ -16,6 +16,7 @@ and not in the `constants` struct b/c other values in that struct depend on them
 static const struct {
 	// This should match the vsync refresh rate, since some of the physics code depends on it
 	const byte fps;
+	const buffer_size_t max_buffer_index;
 	const GLfloat almost_zero;
 
 	const struct { // All angles are in radians
@@ -39,6 +40,8 @@ static const struct {
 
 } constants = {
 	.fps = 60,
+
+	.max_buffer_index =  ~((buffer_size_t) 0u), // `~` sets all bits in 0 here
 
 	.almost_zero = 0.001f,
 

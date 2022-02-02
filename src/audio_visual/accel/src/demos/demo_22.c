@@ -354,6 +354,9 @@ StateGL demo_22_init(void) {
 	glDepthFunc(GL_LESS);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	glEnable(GL_PRIMITIVE_RESTART);
+	glPrimitiveRestartIndex(constants.max_buffer_index);
+
 	glEnableVertexAttribArray(0);
 
 	return sgl;
