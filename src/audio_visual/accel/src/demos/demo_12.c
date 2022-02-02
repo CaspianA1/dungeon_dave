@@ -142,19 +142,19 @@ OldSectorList generate_sectors_from_heightmap(const byte* const heightmap,
 }
 
 void init_sector_list_vbo(OldSectorList* const sector_list) {
-	const List list = sector_list -> list;
+	List* const list = &sector_list -> list;
 
 	size_t total_bytes = 0, total_components = 0;
 
-	for (size_t i = 0; i < list.length; i++) {
-		const byte height = ((OldSector*) list.data)[i].height;
+	for (size_t i = 0; i < list -> length; i++) {
+		const byte height = ((OldSector*) ptr_to_list_index(list, i)) -> height;
 		total_bytes += (height == 0) ? bytes_per_face_11 : bytes_per_mesh;
 	}
 
 	mesh_type_t* const vertices = malloc(total_bytes);
 
-	for (size_t i = 0; i < list.length; i++) {
-		const OldSector sector = ((OldSector*) list.data)[i];
+	for (size_t i = 0; i < list -> length; i++) {
+		const OldSector sector = value_at_list_index(list, i, OldSector);
 		const mesh_type_t origin[3] = {sector.origin[0], sector.height, sector.origin[1]};
 
 		if (sector.height == 0) { // Flat sector

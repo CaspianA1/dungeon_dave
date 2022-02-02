@@ -31,4 +31,8 @@ void _push_ptr_to_list(List* const list, const void* const item_ptr) {
 	memcpy(dest_begin, item_ptr, item_size);
 }
 
+void* ptr_to_list_index(List* const list, const buffer_size_t index) {
+	return ((byte*) list -> data) + index * list -> item_size;
+}
+
 #endif

@@ -142,6 +142,26 @@ Axis get_plane_hit_for_axis(const Axis axis, const GLfloat flat_plane_size,
 	return NoAxis;
 }
 
+void init_shadow_volume_buffer_end_cap(const GLfloat flat_plane_size,
+	List* const volume_vertices, List* const volume_indices) {
+
+	for (buffer_size_t i = 0; i < volume_indices -> length; i++) {
+
+		const buffer_size_t volume_index = value_at_list_index(volume_indices, i, buffer_size_t);
+		const GLfloat* const volume_vertex = ptr_to_list_index(volume_vertices, volume_index);
+
+		DEBUG(volume_index, d);
+		DEBUG_VEC3(volume_vertex);
+		puts("---");
+	}
+
+	puts("Forming shadow volume buffer end cap");
+
+	(void) flat_plane_size;
+	(void) volume_vertices;
+	(void) volume_indices;
+}
+
 void init_shadow_volume_buffers(ShadowVolumeContext* const context, const GLfloat flat_plane_size,
 	const vec3 light_source_pos, const buffer_size_t num_components_per_whole_vertex,
 	const buffer_size_t num_vertices_per_occluder_mesh, const GLfloat* const vertex_start) {
@@ -195,6 +215,8 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context, const GLfloa
 			push_ptr_to_list(&volume_indices, &incr_vertex_index);
 		}
 	}
+
+	init_shadow_volume_buffer_end_cap(flat_plane_size, &volume_vertices, &volume_indices);
 
 	context -> shadow_volume.num_indices = volume_indices.length;
 

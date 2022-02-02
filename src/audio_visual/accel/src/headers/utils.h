@@ -27,8 +27,8 @@
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
 
-#define WINDOW_W 800
-#define WINDOW_H 600
+#define WINDOW_W 400
+#define WINDOW_H 300
 
 #define USE_VSYNC
 // #define FORCE_SOFTWARE_RENDERER
