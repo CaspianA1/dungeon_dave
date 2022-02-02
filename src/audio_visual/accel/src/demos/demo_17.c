@@ -43,7 +43,7 @@ Chromebook + Ubuntu:
 - Outer project does not even want to start
 - Demo test range does not work
 
-- glEnable(GL_DEBUG_OUTPUT) fails, and glewGetErrorString only gives 'unknown error'
+- glEnable(GL_DEBUG_OUTPUT) fails
 
 - Blit 2D sprite to whole screen
 - Flat weapon

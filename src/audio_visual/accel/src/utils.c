@@ -290,4 +290,21 @@ byte* map_point(byte* const map, const byte x, const byte y, const byte map_widt
 	return map + (y * map_width + x);
 }
 
+const char* get_gl_error(void) {
+	#define ERROR_CASE(error) case error: return #error;
+
+	switch (glGetError()) {
+		ERROR_CASE(GL_NO_ERROR);
+		ERROR_CASE(GL_INVALID_ENUM);
+		ERROR_CASE(GL_INVALID_VALUE);
+		ERROR_CASE(GL_INVALID_OPERATION);
+		ERROR_CASE(GL_INVALID_FRAMEBUFFER_OPERATION);
+		ERROR_CASE(GL_STACK_UNDERFLOW);
+		ERROR_CASE(GL_STACK_OVERFLOW);
+		default: return "Unknown error";
+	}
+
+	#undef ERROR_CASE
+}
+
 #endif

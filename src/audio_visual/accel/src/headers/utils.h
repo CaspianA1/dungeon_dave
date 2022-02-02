@@ -21,7 +21,7 @@
 	putchar('\n');\
 } while (0)
 
-#define GL_ERR_CHECK printf("GL error check: '%s'\n", glewGetErrorString(glGetError()))
+#define GL_ERR_CHECK printf("GL error check: %s\n", get_gl_error());
 #define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
 
 #define OPENGL_MAJOR_VERSION 3
@@ -121,5 +121,7 @@ void enable_all_culling(void);
 
 // The X and Y here are a top-down X and Y (so they're technically X and Z)
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width);
+
+const char* get_gl_error(void);
 
 #endif
