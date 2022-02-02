@@ -393,8 +393,8 @@ void demo_22_drawer(const StateGL* const sgl) {
 		init_camera(&camera, (vec3) {1.0f, 1.0f, 1.0f});
 		first_call = 0;
 	}
-	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 
+	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 	update_camera(&camera, get_next_event(), NULL);
 	draw_shadow_volume_context(context, camera.model_view_projection);
 }
