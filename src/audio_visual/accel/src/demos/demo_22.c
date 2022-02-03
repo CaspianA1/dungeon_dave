@@ -102,6 +102,9 @@ const GLchar *const demo_22_obj_vertex_shader =
 
 const GLint num_components_per_vertex = 6, num_components_per_position = 3, num_components_per_color = 3;
 
+// `~` sets all bits in 0 here, making it the max number for a buffer_size_t
+const buffer_size_t shadow_volume_prim_restart_index = ~((buffer_size_t) 0u);
+
 // (p = p0 + dir * v) => (p - p0 = dir * v) => ((p - p0) / dir = v)
 GLfloat get_v_for_ray_to_plane(const Axis axis, const GLfloat flat_plane_size, const vec3 origin_vertex, const vec3 ray_dir) {
 	GLfloat dividend = -origin_vertex[axis];
@@ -355,7 +358,7 @@ StateGL demo_22_init(void) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_PRIMITIVE_RESTART);
-	glPrimitiveRestartIndex(constants.max_buffer_index);
+	glPrimitiveRestartIndex(shadow_volume_prim_restart_index);
 
 	glEnableVertexAttribArray(0);
 
