@@ -22,6 +22,7 @@
 - Billboard lighting that matches the sector lighting
 - Base darkest distance of attenuated light on the world size
 - Can't use red cross for health since it's copyrighted
+- Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/
 
 - Crouch
 - Make deceleration framerate-independent
