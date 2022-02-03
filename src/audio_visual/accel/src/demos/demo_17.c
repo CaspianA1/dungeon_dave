@@ -42,8 +42,6 @@
 - Demo test range doesn't work
 - Using mouse -> keyboard, mouse control doesn't work
 
-- glEnable(GL_DEBUG_OUTPUT) fails
-
 - Blit 2D sprite to whole screen
 - Flat weapon
 - Use more of the cglm functions in `update_camera`, or make my own

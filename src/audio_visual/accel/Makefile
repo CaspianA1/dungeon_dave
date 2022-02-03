@@ -4,7 +4,7 @@ OPTIMIZE = -Ofast
 DEBUG = -fsanitize=address,undefined
 BUILD_TYPE = $(DEBUG)
 
-DEMO = 20
+DEMO = 22
 TEST_RANGE = 1..22
 OUT = accel_demo
 
