@@ -18,7 +18,7 @@ void render_info_bar(InfoBar* const info_bar, const EditorState* const eds);
 #define FONT_PATH "../assets/dungeon_font.bmp"
 #define FONT_GLYPH_COUNT 37
 
-#define INFO_BAR_TEXTURE_PATH "../../../assets/skyboxes/palace_city.bmp"
+#define INFO_BAR_TEXTURE_PATH "../../../../assets/skyboxes/palace_city.bmp"
 #define INFO_BAR_COLOR 0, 255, 127, 255
 
 #define APP_NAME "Dungeon Maker"

@@ -33,15 +33,13 @@
 - Hitting wall corners just right teleports you up
 - Pressing left + forward and backward doesn't stop moving on the X axis
 
-Chromebook + Ubuntu:
-- Windowed, very slow
 - Memory leak at the end of demo 17
-- OpenGL unknown error at the beginning
-- In debug mode, the lightmapper and map editor will fail because of an initial memory leak
+- Memory leak with debug mode at the end of demos 17 and 22 (rest probably too), the lightmapper, and the map editor
 - Cannot exit window
 - Other demos untested
 - Outer project does not even want to start
-- Demo test range does not work
+- Demo test range doesn't work
+- Using mouse -> keyboard, mouse control doesn't work
 
 - glEnable(GL_DEBUG_OUTPUT) fails
 
