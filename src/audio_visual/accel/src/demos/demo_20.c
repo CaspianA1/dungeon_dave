@@ -5,13 +5,7 @@
 #include "../camera.c"
 #include "../batch_draw_context.c"
 
-// Batched + culled billboard drawing
-
-/*
-- To begin with, just draw all in one big unbatched buffer
-- Batching after
-- Only using instancing for glVertexAttribDivisor
-*/
+// Batched + culled billboard drawing. Only using instancing for glVertexAttribDivisor.
 
 typedef struct {
 	BatchDrawContext billboard_draw_context;

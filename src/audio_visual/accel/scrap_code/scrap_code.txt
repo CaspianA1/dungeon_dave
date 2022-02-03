@@ -5226,3 +5226,12 @@ Depth fail:
 Optimiz
 
 /////
+
+
+/*
+- To begin with, just draw all in one big unbatched buffer
+- Batching after
+- Only using instancing for glVertexAttribDivisor
+*/
+
+/////
