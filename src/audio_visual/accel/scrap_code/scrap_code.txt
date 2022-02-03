@@ -5235,3 +5235,75 @@ Optimiz
 */
 
 /////
+
+	// buffer_size_t index = 5;
+
+	/*
+	const buffer_size_t num_unique_vertices_before = volume_vertices -> length;
+	DEBUG(num_unique_vertices_before, d);
+
+	push_ptr_to_list(volume_indices, &shadow_volume_prim_restart_index);
+
+	buffer_size_t index = 5;
+	push_ptr_to_list(volume_indices, &index);
+	index++;
+
+	push_ptr_to_list(volume_vertices, ((vec3) {0.0f, 0.0f, 5.0f}));
+	push_ptr_to_list(volume_vertices, ((vec3) {0.334837f, 0.0f, 5.0f}));
+	push_ptr_to_list(volume_vertices, ((vec3) {1.186644f, 0.0f, 5.0f}));
+	push_ptr_to_list(volume_vertices, ((vec3) {0.892137f, 0.861584f, 5.0f}));
+
+	push_ptr_to_list(volume_indices, &index);
+	index++;
+	push_ptr_to_list(volume_indices, &index);
+	index++;
+	push_ptr_to_list(volume_indices, &index);
+	*/
+
+/////
+
+void init_shadow_volume_buffer_end_cap(const GLfloat flat_plane_size,
+	List* const volume_vertices, List* const volume_indices) {
+	
+	/*
+	push_ptr_to_list(volume_indices, &shadow_volume_prim_restart_index);
+
+	buffer_size_t index = volume_vertices -> length;
+
+	push_ptr_to_list(volume_vertices, ((vec3) {0.063558, 0.0f, 4.041692}));
+	push_ptr_to_list(volume_indices, &index);
+	index++;
+
+	push_ptr_to_list(volume_vertices, ((vec3) {0.990571f, 0.070705f, 3.021517f}));
+	push_ptr_to_list(volume_indices, &index);
+	index++;
+
+	push_ptr_to_list(volume_vertices, ((vec3) {2.387257f, 0.098781f, 3.123181f}));
+	push_ptr_to_list(volume_indices, &index);
+	index++;
+	*/
+
+	/*
+	for (buffer_size_t i = 0; i < volume_indices -> length; i++) {
+		const buffer_size_t volume_index = value_at_list_index(volume_indices, i, buffer_size_t);
+		const GLfloat* const volume_vertex = ptr_to_list_index(volume_vertices, volume_index);
+
+		DEBUG(volume_index, d);
+		DEBUG_VEC3(volume_vertex);
+		puts("---");
+	}
+	*/
+
+	// Start by making bottom plane of end cap
+
+	puts("Forming shadow volume buffer end cap");
+
+	(void) flat_plane_size;
+	(void) volume_vertices;
+	(void) volume_indices;
+}
+
+/////
+
+	init_shadow_volume_buffer_end_cap(flat_plane_size, &volume_vertices, &volume_indices);
+/////

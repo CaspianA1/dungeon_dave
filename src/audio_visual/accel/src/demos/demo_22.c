@@ -28,7 +28,12 @@ For each vertex v that hit a plane,
 	that will be out of bounds
 	so, define e'
 	e'.(colliding axis of v) = v.dir
-	preserve the other axis values */
+	preserve the other axis values
+
+- Building a bounded end cap may double the number of vertices
+- For that, extend the v to get all of the planes outside
+- Or perhaps infinity, if the precision troubles work out
+*/
 
 #include "../utils.c"
 #include "../camera.c"
@@ -145,33 +150,11 @@ Axis get_plane_hit_for_axis(const Axis axis, const GLfloat flat_plane_size,
 	return NoAxis;
 }
 
-void init_shadow_volume_buffer_end_cap(const GLfloat flat_plane_size,
-	List* const volume_vertices, List* const volume_indices) {
-
-	for (buffer_size_t i = 0; i < volume_indices -> length; i++) {
-
-		const buffer_size_t volume_index = value_at_list_index(volume_indices, i, buffer_size_t);
-		const GLfloat* const volume_vertex = ptr_to_list_index(volume_vertices, volume_index);
-
-		DEBUG(volume_index, d);
-		DEBUG_VEC3(volume_vertex);
-		puts("---");
-	}
-
-	puts("Forming shadow volume buffer end cap");
-
-	(void) flat_plane_size;
-	(void) volume_vertices;
-	(void) volume_indices;
-}
-
 void init_shadow_volume_buffers(ShadowVolumeContext* const context, const GLfloat flat_plane_size,
 	const vec3 light_source_pos, const buffer_size_t num_components_per_whole_vertex,
 	const buffer_size_t num_vertices_per_occluder_mesh, const GLfloat* const vertex_start) {
 
-	List
-		volume_vertices = init_list(1, vec3),
-		volume_indices = init_list(1, buffer_size_t);
+	List volume_vertices = init_list(1, vec3), volume_indices = init_list(1, buffer_size_t);
 
 	push_ptr_to_list(&volume_vertices, light_source_pos);
 
@@ -218,8 +201,6 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context, const GLfloa
 			push_ptr_to_list(&volume_indices, &incr_vertex_index);
 		}
 	}
-
-	init_shadow_volume_buffer_end_cap(flat_plane_size, &volume_vertices, &volume_indices);
 
 	context -> shadow_volume.num_indices = volume_indices.length;
 
