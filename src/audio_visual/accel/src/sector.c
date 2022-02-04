@@ -22,6 +22,7 @@ typedef struct {
 #include "data/shaders.c"
 #include "face.c"
 #include "batch_draw_context.c"
+#include "texture.c"
 #include "list.c"
 
 // Attributes here = height and texture id

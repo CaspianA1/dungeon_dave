@@ -4,8 +4,8 @@ OPTIMIZE = -Ofast
 DEBUG = -fsanitize=address,undefined
 BUILD_TYPE = $(DEBUG)
 
-DEMO = 22
-TEST_RANGE = 1..22
+DEMO = 23
+TEST_RANGE = 1..23
 OUT = accel_demo
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat

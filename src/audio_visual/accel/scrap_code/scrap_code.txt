@@ -5573,3 +5573,21 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context, const GLfloa
 
 
 /////
+
+/*
+byte face_is_facing_light_source(const Face face, const byte height_origin, const vec3 light_pos) {
+	switch (face.type) {
+		case Flat: // Top face
+			return light_pos[1] >= height_origin;
+		case Vert_NS:
+			if (face.
+
+			break;
+		case Vert_EW:
+			break;
+	}
+	return 0;
+}
+*/
+
+/////
