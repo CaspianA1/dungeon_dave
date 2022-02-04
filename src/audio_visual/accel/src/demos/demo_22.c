@@ -17,6 +17,8 @@ Rendering via depth fail:
 - Or perhaps infinity, if the precision troubles work out
 
 - One shadow volume per sector or per face?
+	Per face may be necessary for more accuracy, so start with per face
+	(note: per sector overall face, not small faces used to make meshes)
 
 For later:
 - See if I can optimize the mesh with GL_TRIANGLE_STRIP/GL_TRIANGLE_FAN with primitive restart
