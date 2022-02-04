@@ -5307,3 +5307,269 @@ void init_shadow_volume_buffer_end_cap(const GLfloat flat_plane_size,
 
 	init_shadow_volume_buffer_end_cap(flat_plane_size, &volume_vertices, &volume_indices);
 /////
+
+	// GL_TRIANGLE_FAN is not the best idea
+
+	/*
+	Middle:
+
+	src = 1, 2, 3
+
+	
+	*/
+
+///// Older important code:
+
+// (p = p0 + dir * v) => (p - p0 = dir * v) => ((p - p0) / dir = v)
+GLfloat get_v_for_ray_to_plane(const Axis axis, const GLfloat flat_plane_size, const vec3 origin_vertex, const vec3 ray_dir) {
+	GLfloat dividend = -origin_vertex[axis];
+	const GLfloat dir_component = ray_dir[axis];
+	if (dir_component > 0.0f) dividend += flat_plane_size;
+	return dividend / dir_component;
+}
+
+GLfloat floats_eq(const GLfloat a, const GLfloat b) {
+	return fabsf(b - a) < constants.almost_zero;
+}
+
+GLfloat vec3_eq(const vec3 a, const vec3 b) {
+	// return floats_eq(a[0], b[0]) && floats_eq(a[1], b[1]) && floats_eq(a[2], b[2]);
+	return a[X] == b[X] && a[Y] == b[Y] && a[Z] == b[Z];
+}
+
+// If the plane hit failed, returns the failing axis; otherwise, returns -1. Modifies plane_hit.
+Axis get_plane_hit_for_axis(const Axis axis, const GLfloat flat_plane_size,
+	const vec3 origin_vertex, const vec3 ray_dir, vec3 plane_hit) {
+
+	const GLfloat v = get_v_for_ray_to_plane(axis, flat_plane_size, origin_vertex, ray_dir);
+
+	glm_vec3_copy((GLfloat*) origin_vertex, plane_hit);
+	glm_vec3_muladds((GLfloat*) ray_dir, v, plane_hit);
+
+	for (Axis hit_axis = X; hit_axis <= Z; hit_axis++) {
+		GLfloat hit_component = plane_hit[hit_axis];
+
+		/* Sometimes, due to precision errors, values can be slightly less than 0, leading
+		to a component being incorrectly recognized as out of bounds; so this adjusts that */
+		if (floats_eq(hit_component, 0.0f)) hit_component = 0.0f;
+		else if (floats_eq(hit_component, flat_plane_size)) hit_component = flat_plane_size;
+		else if (hit_component < 0.0f || hit_component > flat_plane_size) return hit_axis;
+
+		plane_hit[hit_axis] = hit_component;
+	}
+	return NoAxis;
+}
+
+/////
+
+	// DEBUG(volume_indices.length, d);
+	// const 
+
+	for (buffer_size_t i = 0; i < volume_vertices.length; i++) {
+		const GLfloat* const front_cap_vertex = ptr_to_list_index(&volume_vertices, i);
+
+		vec3 ray_dir;
+		glm_vec3_sub((GLfloat*) front_cap_vertex, (GLfloat*) light_source_pos, ray_dir);
+
+		buffer_size_t index = volume_indices.length + i;
+		push_ptr_to_list(&volume_indices, &index);
+		index++;
+		push_ptr_to_list(&volume_indices, &index);
+
+		// 2 indices per edge
+		index = 200;
+		push_ptr_to_list(&volume_indices, 200);
+
+		DEBUG_VEC3(ray_dir);
+
+		/*
+		Extending ray to infinity:
+		equation for point on ray is `p = p0 + dir * v`
+		Since `p` should be at infinity, this is how I solve for `v`:
+		`(p - p0) = dir * v`, so `(p - p0) / dir` = v`, where `p` equals infinity
+		*/
+	}
+
+/////
+
+	/*
+	DEBUG(volume_vertices.length, d);
+	const buffer_size_t end_index = volume_indices.length;
+	push_ptr_to_list(&volume_vertices, ((vec3) {1.460835, 2.720556, 5.499548}));
+
+	for (buffer_size_t corner_index = 0; corner_index < num_vertices_per_occluder_mesh; corner_index++) {
+		const buffer_size_t neighbor_corner_index = (corner_index + 1) % num_vertices_per_occluder_mesh;
+
+		push_ptr_to_list(&volume_indices, &corner_index);
+		push_ptr_to_list(&volume_indices, &neighbor_corner_index);
+
+		push_ptr_to_list(&volume_indices, &end_index);
+
+		DEBUG(neighbor_corner_index, d);
+	}
+	*/
+
+
+/////
+
+
+	/*
+	Positions:
+	{5.0f, 0.486f, 0.0f} and {2.5f, 2.5f, 5.0f} are on one one plane
+	{2.3f, 0.486f, 2.6f} and {2.425301f, 0.111759f, 2.026766f} are on three planes
+	{5.0f, 3.05f, 0.0f}) is on two planes
+	*/
+
+/////
+
+
+Other notes:
+- Volume edges should maybe be at infinity
+- And point light should perhaps solely be directional, not positional
+- Is there a necessary reason for the volume taking up infinite space?
+- Also, for constructing another shadow volume, primitive restart will be needed, which also requires indexing
+- Construct other meshes within the same vbo for the shadow volume; one for the start cap, and one for the end
+
+- Note: an occluder mesh with more than just 1 triangle does not work yet
+- Also, find size for this and below (below size is probably num_vertices_per_mesh + 1)
+
+For each vertex v that hit a plane,
+	e = endpoint
+	get collision point of plane to e
+	that will be out of bounds
+	so, define e'
+	e'.(colliding axis of v) = v.dir
+	preserve the other axis values
+
+/////
+
+/*
+void init_shadow_volume_buffers(ShadowVolumeContext* const context, const GLfloat flat_plane_size,
+	const vec3 light_source_pos, const buffer_size_t num_components_per_whole_vertex,
+	const buffer_size_t num_vertices_per_occluder_mesh, const GLfloat* const vertex_start) {
+
+	List volume_vertices = init_list(1, vec3), volume_indices = init_list(1, buffer_size_t);
+
+	push_ptr_to_list(&volume_vertices, light_source_pos);
+
+	const buffer_size_t zero = 0;
+	push_ptr_to_list(&volume_indices, &zero); // Pushing index of start of triangle fan
+
+	for (buffer_size_t vertex_index = 0; vertex_index < num_vertices_per_occluder_mesh; vertex_index++) {
+		const GLfloat* const origin_vertex = vertex_start + vertex_index * num_components_per_whole_vertex;
+
+		vec3 ray_dir, plane_hit;
+		glm_vec3_sub((GLfloat*) origin_vertex, (GLfloat*) light_source_pos, ray_dir);
+
+		////////// This part finds the intersection between the silhouette ray and the closest plane within bounds
+
+		Axis colliding_axis = NoAxis;
+		for (Axis test_axis = X; test_axis <= Z; test_axis++) {
+			const Axis failing_axis = get_plane_hit_for_axis(test_axis, flat_plane_size, origin_vertex, ray_dir, plane_hit);
+			if (failing_axis == NoAxis) {
+				colliding_axis = test_axis;
+				break;
+			}
+		}
+
+		if (colliding_axis == NoAxis) // This should never happen
+			fail("create mesh: unable to clip shadow volume mesh inside bounding area", CreateMesh);
+
+		////////// This part finds if the colliding vertex was a repeat; and if so, adds the old index to the index buffer
+
+		byte repeated_colliding_vertex = 0; // If the vertex was already present in the vertex list
+		for (buffer_size_t prev_colliding_index = 0; prev_colliding_index < volume_vertices.length; prev_colliding_index++) {
+			const GLfloat* const prev_colliding_vertex = (GLfloat*) volume_vertices.data + prev_colliding_index * 3;
+			if (vec3_eq(prev_colliding_vertex, plane_hit)) {
+				push_ptr_to_list(&volume_indices, &prev_colliding_index);
+				repeated_colliding_vertex = 1;
+				break;
+			}
+		}
+
+		//////////
+
+		if (!repeated_colliding_vertex) {
+			push_ptr_to_list(&volume_vertices, plane_hit);
+			const buffer_size_t incr_vertex_index = vertex_index + 1; // b/c first index value is the light position
+			push_ptr_to_list(&volume_indices, &incr_vertex_index);
+		}
+	}
+
+	context -> shadow_volume.num_indices = volume_indices.length;
+
+	glGenBuffers(1, &context -> shadow_volume.vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, context -> shadow_volume.vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3[volume_vertices.length]), volume_vertices.data, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &context -> shadow_volume.index_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context -> shadow_volume.index_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(buffer_size_t[volume_indices.length]), volume_indices.data, GL_STATIC_DRAW);
+
+	deinit_list(volume_indices);
+	deinit_list(volume_vertices);
+}
+*/
+
+/////
+
+	/*
+	front cap: 0, 1, 2
+	end cap: 3, 4, 5
+
+	side 1:
+	0, 3, 4; 0, 1, 4
+
+	i, i + 3, i + 4, i, i + 1, i + 4
+	*/
+
+/////
+
+	for (buffer_size_t i = 0; i < volume_indices.length; i++) {
+		const buffer_size_t index = value_at_list_index(&volume_indices, i, buffer_size_t);
+		DEBUG(index, u);
+	}
+
+/////
+
+	/*
+	for (buffer_size_t i = 0; i < volume_vertices.length; i++) {
+		buffer_size_t tris[6] = {i, i + 3, i + 4, i, i + 1, i + 4};
+		for (byte i = 0; i < 6; i++) {
+			tris[i] = tris[i] % 6;
+		}
+
+
+		printf("pushing vals = {%u, %u, %u, %u, %u, %u}\n", tris[0], tris[1], tris[2], tris[3], tris[4], tris[5]);
+		push_array_to_list(&volume_indices, tris, 6);
+		// break;
+	}
+	*/
+
+/////
+
+// `~` sets all bits in 0 here, making it the max number for a buffer_size_t
+// const buffer_size_t shadow_volume_prim_restart_index = ~((buffer_size_t) 0u);
+
+/////
+
+	// push_ptr_to_list(&volume_indices, &shadow_volume_prim_restart_index); // For edges after that; for later
+
+/////
+
+	/*
+	glEnable(GL_PRIMITIVE_RESTART);
+	glPrimitiveRestartIndex(shadow_volume_prim_restart_index);
+	*/
+
+/////
+
+	////////// Debugging
+
+	for (buffer_size_t i = 0; i < volume_vertices.length; i++) {
+		const GLfloat* const vertex = ptr_to_list_index(&volume_vertices, i);
+		DEBUG_VEC3(vertex);
+	}
+
+
+/////
