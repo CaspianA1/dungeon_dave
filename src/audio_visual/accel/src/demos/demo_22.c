@@ -123,7 +123,7 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context,
 
 	const buffer_size_t projected_end_index_start = volume_indices.length;
 
-	const GLfloat ray_length = 1.0f;
+	const GLfloat ray_length = 5.0f;
 
 	for (buffer_size_t vertex_index = 0; vertex_index < num_vertices_per_occluder_mesh; vertex_index++) {
 		const GLfloat* const front_cap_vertex = ptr_to_list_index(&volume_vertices, vertex_index);
