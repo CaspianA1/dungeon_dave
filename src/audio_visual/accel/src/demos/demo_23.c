@@ -19,10 +19,8 @@ void sector_shadow_visibility(const Sector* const sector, const vec3 light_pos) 
 
 	/*
 	Face ids:
-	0 = flat, 1 = left vert ns, 2 = top vert ew,
-	3 = right vert ns, 4 = bottom vert ew.
-
-	in the bits below, if a bit is set at index i, the face i is in the light.
+	0 = flat, 1 = left vert ns, 2 = top vert ew, 3 = right vert ns, 4 = bottom vert ew.
+	In the bits below, if a bit is set at index i, the face i is in the light.
 	*/
 
 	const byte light_visiblity_bits =
@@ -35,8 +33,9 @@ void sector_shadow_visibility(const Sector* const sector, const vec3 light_pos) 
 	(void) light_visiblity_bits;
 
 	/*
-	- The next step is to take all invisible faces, and find the ones that are adjacent to visible faces
-	- In other words, find shadowed faces that are next to unshadowed faces, and then collect those shared vertices
+	- The next step is to take all invisible faces, and find the ones that are adjacent to visible faces.
+	- In other words, find shadowed faces that are next to unshadowed faces, and then collect those shared vertices.
+	- And in other words too, all instances where a 0 bit is followed by a 1 bit, or the opposite.
 	*/
 }
 
