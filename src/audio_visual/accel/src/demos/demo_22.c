@@ -20,6 +20,9 @@ For later:
 - See if I can optimize the mesh with GL_TRIANGLE_STRIP/GL_TRIANGLE_FAN with primitive restart
 Currently:
 - For a cuboidal mesh, find its silhouette (border between forward-facing and back-facing faces?)
+- Silhouette finding: dimension data -> simplified cube,
+	and then test the 4 vert faces + top flat face (light from under possible)
+	from that (test from side on axis-aligned plane)
 - From that silhouette, build a 4-sided start cap
 - Make an infinitely far away end-cap
 - Build the 4 sides of the mesh
