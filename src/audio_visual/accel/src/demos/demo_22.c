@@ -16,6 +16,8 @@ Rendering via depth fail:
 - For that, extend the v to get all of the planes outside
 - Or perhaps infinity, if the precision troubles work out
 
+- One shadow volume per sector or per face?
+
 For later:
 - See if I can optimize the mesh with GL_TRIANGLE_STRIP/GL_TRIANGLE_FAN with primitive restart
 Currently:
