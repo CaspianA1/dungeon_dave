@@ -5591,3 +5591,36 @@ byte face_is_facing_light_source(const Face face, const byte height_origin, cons
 */
 
 /////
+
+
+	/*
+	struct {
+		byte flat, left_vert_ns, top_vert_eq, right_vert_ns, bottom_vert_ew;
+	} visible = {
+		.flat = 
+	}
+
+	DEBUG(sizeof(visible), zu);
+	*/
+
+	/*
+	if (light_pos[1] > sector -> visible_heights.max) {
+		puts("Flat face visible");
+	}
+
+	if (light_pos[0] < start_x) {
+		puts("Left vert NS face visible");
+	}
+	else if (light_pos[0] > end_x) {
+		puts("Right vert NS face visible");
+	}
+
+	if (light_pos[2] < start_y) {
+		puts("Top vert EW face visible");
+	}
+	else if (light_pos[2] > end_y) {
+		puts("Bottom vert EW face visible");
+	}
+	*/
+
+/////

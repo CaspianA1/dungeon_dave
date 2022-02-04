@@ -15,26 +15,29 @@ void sector_shadow_visibility(const Sector* const sector, const vec3 light_pos) 
 	// These are top-down values
 	const byte start_x = origin[0], start_y = origin[1];
 	const byte end_x = start_x + size[0], end_y = start_y + size[1];
+	const GLfloat light_pos_x_top_down = light_pos[0], light_pos_y_top_down = light_pos[2];
 
-	if (light_pos[1] > sector -> visible_heights.max) {
-		puts("Flat face visible");
-	}
+	/*
+	Face ids:
+	0 = flat, 1 = left vert ns, 2 = top vert ew,
+	3 = right vert ns, 4 = bottom vert ew.
 
-	if (light_pos[0] < start_x) {
-		puts("Left vert NS face visible");
-	}
-	else if (light_pos[0] > end_x) {
-		puts("Right vert NS face visible");
-	}
+	in the bits below, if a bit is set at index i, the face i is in the light.
+	*/
 
-	if (light_pos[2] < start_y) {
-		puts("Top vert EW face visible");
-	}
-	else if (light_pos[2] > end_y) {
-		puts("Bottom vert EW face visible");
-	}
+	const byte light_visiblity_bits =
+		(light_pos[1] > sector -> visible_heights.max) | // Flat
+		((light_pos_x_top_down < start_x) << 1) | // Left vert NS
+		((light_pos_y_top_down < start_y) << 2) | // Top vert EW
+		((light_pos_x_top_down > end_x) << 3) | // Right vert NS
+		((light_pos_y_top_down > end_y) << 4); // Bottom vert EW
 
-	// The next step is to take all invisible faces, and find the ones that are adjacent to visible faces
+	(void) light_visiblity_bits;
+
+	/*
+	- The next step is to take all invisible faces, and find the ones that are adjacent to visible faces
+	- In other words, find shadowed faces that are next to unshadowed faces, and then collect those shared vertices
+	*/
 }
 
 #ifdef DEMO_23

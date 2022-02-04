@@ -24,6 +24,7 @@
 #define GL_ERR_CHECK printf("GL error check: %s\n", get_gl_error());
 #define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
 
+
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
 
@@ -78,6 +79,9 @@ typedef struct {
 const Uint8* keys;
 
 //////////
+
+#define bit_is_set(bits, mask) ((bits) & (mask))
+#define set_bit(bits, mask) ((bits) |= (mask))
 
 extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s.\n", msg);

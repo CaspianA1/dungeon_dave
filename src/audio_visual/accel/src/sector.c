@@ -5,9 +5,6 @@
 #define wmalloc malloc
 #define wfree free
 
-#define bit_is_set(bits, mask) ((bits) & (mask))
-#define set_bit(bits, mask) ((bits) |= (mask))
-
 typedef struct {
 	unsigned chunk_dimensions[2];
 	size_t alloc_bytes;
