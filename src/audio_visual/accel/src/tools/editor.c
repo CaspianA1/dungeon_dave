@@ -6,14 +6,13 @@
 /*
 Plan:
 
-- A sample-map button
+- UI features: line, rectangle, cut/copy/paste, sample, undo, export
+
 - Read in level files
 - Verify that maps in level files are the right dimensions
 - Report repeat sections in input files
-- An 'undo previous action' feature (undoes to the action done before the mouse was clicked down and then released)
-- Later on, line and rectangle functions (or maybe just a line function)
 - Sometimes, clicking for too long freezes my computer
-- 2 options: start new, and edit current. Begin with start new.
+- Note: editing will always be based around editing a current one
 - A tag for music
 
 - An info bar - done
