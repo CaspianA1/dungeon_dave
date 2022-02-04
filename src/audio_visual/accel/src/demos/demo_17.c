@@ -23,6 +23,7 @@
 - Base darkest distance of attenuated light on the world size
 - Can't use red cross for health since it's copyrighted
 - Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/ (or perhaps not, since alpha just 0 or 1)
+- A demo 23, with sector-based shadow volumes
 
 - Crouch
 - Make deceleration framerate-independent
@@ -34,7 +35,6 @@
 - Hitting wall corners just right teleports you up
 - Pressing left + forward and backward doesn't stop moving on the X axis
 
-- Memory leak at the end of demo 17
 - Memory leak with debug mode at the end of demos 17 and 22 (rest probably too), the lightmapper, and the map editor
 - Cannot exit window
 - Other demos untested
