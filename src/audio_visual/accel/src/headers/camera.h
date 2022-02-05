@@ -36,7 +36,7 @@ typedef struct {
 
 typedef struct {
 	byte* heightmap, map_size[2];
-	vec3 speeds;
+	vec3 velocities;
 } PhysicsObject;
 
 /* Excluded: limit_to_pos_neg_domain, update_camera_angles, smooth_hermite,
