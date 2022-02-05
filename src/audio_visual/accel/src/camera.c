@@ -92,23 +92,29 @@ static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v, const GLfloa
 	return limit_to_pos_neg_domain(v, max_v);
 }
 
-static GLfloat apply_collision_on_xz_axis(
-	const byte* const heightmap, const byte map_size[2], const byte varying_axis,
-	const vec2 old_pos, const GLfloat foot_height, const GLfloat new_pos_component) {
+static GLfloat apply_collision_on_xz_axis(const byte* const heightmap,
+	const byte map_size[2], const byte varying_axis, const vec2 old_pos,
+	const GLfloat foot_height, const GLfloat new_pos_component) {
 
-	if (new_pos_component >= 0.0f && new_pos_component < map_size[varying_axis]) {
-		vec2 new_pos_w_old; // This is top left
-		new_pos_w_old[varying_axis] = new_pos_component;
-		new_pos_w_old[!varying_axis] = old_pos[!varying_axis];
+	const GLfloat border_size = 0.25f;
+	const int8_t sign_of_dir = ((new_pos_component - old_pos[varying_axis]) > 0.0f) ? 1 : -1;
+	const GLfloat new_pos_w_border = new_pos_component + border_size * sign_of_dir;
 
-		const byte height_value = *map_point((byte*) heightmap, new_pos_w_old[0], new_pos_w_old[1], map_size[0]);
+	if (new_pos_w_border < 0.0f || new_pos_w_border >= map_size[varying_axis])
+		return old_pos[varying_axis];
 
-		/* `foot_height - height_value > -0.001f` is done instead of `foot_height >= height_value`
-		because the foot height may be slightly under the height value (like 2.999999 compared to 3.0,
-		due to floating-point precision errors). If `>=` is used, the new position is sometimes not returned. */
-		if (foot_height - height_value > -constants.almost_zero)
-			return new_pos_component;
-	}
+
+	//////////
+
+	vec2 new_pos_w_old;
+	new_pos_w_old[varying_axis] = new_pos_w_border;
+	new_pos_w_old[!varying_axis] = old_pos[!varying_axis];
+
+	const byte height_value = *map_point((byte*) heightmap, new_pos_w_old[0], new_pos_w_old[1], map_size[0]);
+	/* `foot_height - height_value > -0.001f` is done instead of `foot_height >= height_value`
+	because the foot height may be slightly under the height value (like 2.999999 compared to 3.0,
+	due to floating-point precision errors). If `>=` is used, the new position is sometimes not returned. */
+	if (foot_height - height_value > -constants.almost_zero) return new_pos_component;
 	return old_pos[varying_axis];
 }
 
@@ -138,7 +144,7 @@ static void update_pos_via_physics(const byte movement_bits,
 
 	////////// Updating velocity
 
-	velocity_forward_back = apply_velocity_in_xz_direction(velocity_forward_back,	accel_forward_back,
+	velocity_forward_back = apply_velocity_in_xz_direction(velocity_forward_back, accel_forward_back,
 		max_speed_xz, !!(movement_bits & BIT_MOVE_FORWARD), !!(movement_bits & BIT_MOVE_BACKWARD));
 
 	velocity_strafe = apply_velocity_in_xz_direction(velocity_strafe, accel_strafe,
@@ -151,12 +157,10 @@ static void update_pos_via_physics(const byte movement_bits,
 
 	const vec2 old_pos_xz = {pos[0], pos[2]};
 
-	pos[0] = apply_collision_on_xz_axis(
-		heightmap, map_size, 0, old_pos_xz, foot_height,
+	pos[0] = apply_collision_on_xz_axis(heightmap, map_size, 0, old_pos_xz, foot_height,
 		pos[0] + velocity_forward_back * dir_xz[0] - velocity_strafe * -dir_xz[1]);
 
-	pos[2] = apply_collision_on_xz_axis(
-		heightmap, map_size, 1, old_pos_xz, foot_height,
+	pos[2] = apply_collision_on_xz_axis(heightmap, map_size, 1, old_pos_xz, foot_height,
 		pos[2] + velocity_forward_back * dir_xz[1] - velocity_strafe * dir_xz[0]);
 
 	////////// Y collision detection + setting new y position and speed

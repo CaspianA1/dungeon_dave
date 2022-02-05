@@ -12,6 +12,8 @@
 #include "buffer_defs.h"
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
+#define DEBUG_FLOAT(var) printf(#var " = %lf\n", (double) (var))
+#define DEBUG_VEC2(v) printf(#v " = {%lf, %lf}\n", (double) v[0], (double) v[1])
 #define DEBUG_VEC3(v) printf(#v " = {%lf, %lf, %lf}\n", (double) v[0], (double) v[1], (double) v[2])
 
 #define DEBUG_BITS(num) do {\

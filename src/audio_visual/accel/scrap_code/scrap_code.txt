@@ -5624,3 +5624,70 @@ byte face_is_facing_light_source(const Face face, const byte height_origin, cons
 	*/
 
 /////
+
+		/*
+		const vec2 map_tile_center = {(byte) new_pos_w_old[0] + 0.5f, (byte) new_pos_w_old[0] + 0.5f};
+		DEBUG_VEC2(map_tile_center);
+		*/
+
+/////
+
+// TODO: to excluded
+static byte point_inside_box(const vec3 point, const vec3 box_origin) {
+
+	/*
+	// [0] is x pos, [1] is 
+	return
+		point[0] >= box_origin[0] && point[0] <= (box_origin[0] + 1.0f)
+		&&
+		point[1] >= 	
+		&&
+		point[2] >= box_origin[2] && point[2] <= (box_origin[2] + 1.0f);
+	*/
+}
+
+/////
+
+	/*
+	(void) heightmap;
+	(void) map_size;
+	(void) varying_axis;
+	(void) old_pos;
+	(void) foot_height;
+	(void) new_pos_component;
+
+	vec2 new_pos_w_old;
+	new_pos_w_old[varying_axis] = new_pos_component;
+	new_pos_w_old[!varying_axis] = old_pos[!varying_axis];
+
+	const GLfloat border_size = 0.2f;
+	const int8_t sign_of_dir = ((new_pos_component - old_pos[varying_axis]) > 0.0f) ? 1 : -1;
+	new_pos_w_old[varying_axis] += border_size * sign_of_dir;
+
+	// const GLfloat border_size = 0.2f;
+
+	const byte floor_height = *map_point((byte*) heightmap, new_pos_w_old[0], new_pos_w_old[1], map_size[0]);
+
+	if (floor_height > )
+
+	DEBUG(floor_height, d);
+
+	const vec2 map_point_box[2] = { // [0] is top left, and [1] is bottom right
+		{(byte) new_pos_w_old[0] - border_size, (byte) new_pos_w_old[1] - border_size},
+		{(byte) new_pos_w_old[0] + 1 + border_size, (byte) new_pos_w_old[1] + 1 + border_size}
+	};
+
+	printf("map box point goes from {%lf, %lf} to {%lf, %lf}\n",
+		(double) map_point_box[0][0], (double) map_point_box[0][1],
+		(double) map_point_box[1][0], (double) map_point_box[1][1]);
+
+	if (new_pos_w_old[0] >= map_point_box[0][0] || new_pos_w_old[1] >= map_point_box[0][1] ||
+		new_pos_w_old[0] <= map_point_box[1][0] || new_pos_w_old[1] <= map_point_box[1][1]) {
+
+		if (foot_height - floor_height > -constants.almost_zero) return new_pos_component;
+	}
+
+	return new_pos_component;
+	*/
+
+/////
