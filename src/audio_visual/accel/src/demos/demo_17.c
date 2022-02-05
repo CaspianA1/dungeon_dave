@@ -41,6 +41,7 @@
 - Outer project does not even want to start
 - Demo test range doesn't work
 - Using mouse -> keyboard, mouse control doesn't work
+- Some buffer overflows while at the edge of the map in certain parts of demo 17
 
 - Blit 2D sprite to whole screen
 - Flat weapon
