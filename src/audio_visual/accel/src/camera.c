@@ -82,7 +82,7 @@ static void update_fov(Camera* const camera, const byte movement_bits, const GLf
 	camera -> time_accum_for_full_fov = t;
 }
 
-static GLfloat apply_movement_in_xz_direction(const GLfloat curr_v, const GLfloat delta_move,
+static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v, const GLfloat delta_move,
 	const GLfloat max_v, const byte moving_in_dir, const byte moving_in_opposite_dir) {
 
 	GLfloat v = curr_v + delta_move * moving_in_dir - delta_move * moving_in_opposite_dir;
@@ -96,7 +96,7 @@ static GLfloat apply_collision_on_xz_axis(
 	const byte* const heightmap, const byte map_size[2], const byte varying_axis,
 	const vec2 old_pos, const GLfloat foot_height, const GLfloat new_pos_component) {
 
-	if (new_pos_component >= 0.0f && new_pos_component <= map_size[varying_axis]) {
+	if (new_pos_component >= 0.0f && new_pos_component < map_size[varying_axis]) {
 		vec2 new_pos_w_old; // This is top left
 		new_pos_w_old[varying_axis] = new_pos_component;
 		new_pos_w_old[!varying_axis] = old_pos[!varying_axis];
@@ -136,12 +136,12 @@ static void update_pos_via_physics(const byte movement_bits,
 		*const map_size = physics_obj -> map_size,
 		*const heightmap = physics_obj -> heightmap;
 
-	////////// Updating speed
+	////////// Updating velocity
 
-	speed_forward_back = apply_movement_in_xz_direction(speed_forward_back,	accel_forward_back,
+	speed_forward_back = apply_velocity_in_xz_direction(speed_forward_back,	accel_forward_back,
 		max_speed_xz, !!(movement_bits & BIT_MOVE_FORWARD), !!(movement_bits & BIT_MOVE_BACKWARD));
 
-	speed_strafe = apply_movement_in_xz_direction(speed_strafe, accel_strafe,
+	speed_strafe = apply_velocity_in_xz_direction(speed_strafe, accel_strafe,
 		max_speed_xz, !!(movement_bits & BIT_STRAFE_LEFT), !!(movement_bits & BIT_STRAFE_RIGHT));
 
 	physics_obj -> speeds[0] = speed_forward_back / delta_time;
