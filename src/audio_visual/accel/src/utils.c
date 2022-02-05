@@ -139,7 +139,10 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		#endif
 
 		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) running = 0;
+			if (event.type == SDL_QUIT) {
+				running = 0;
+				break;
+			}
 		}
 
 		resize_window_if_needed(screen -> window);
