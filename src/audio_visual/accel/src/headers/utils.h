@@ -125,7 +125,7 @@ GLuint init_shader_program(const GLchar* const vertex_shader, const GLchar* cons
 
 void enable_all_culling(void);
 
-// The X and Y here are a top-down X and Y (so they're technically X and Z)
+// Note: `x` and `y` are top-down here (making them technically `x` and `z`).
 byte* map_point(byte* const map, const byte x, const byte y, const byte map_width);
 
 const char* get_gl_error(void);

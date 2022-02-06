@@ -92,30 +92,26 @@ static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v, const GLfloa
 	return limit_to_pos_neg_domain(v, max_v);
 }
 
-static GLfloat apply_collision_on_xz_axis(const byte* const heightmap,
-	const byte map_size[2], const byte varying_axis, const vec2 old_pos,
-	const GLfloat foot_height, const GLfloat new_pos_component) {
+// Note: `x` and `y` are top-down here.
+static byte tile_exists_at_pos(const GLfloat x, const GLfloat y, const GLfloat foot_height,
+	const byte* const heightmap, const byte map_width, const byte map_height) {
 
-	const GLfloat border_size = 0.25f;
-	const int8_t sign_of_dir = ((new_pos_component - old_pos[varying_axis]) > 0.0f) ? 1 : -1;
-	const GLfloat new_pos_w_border = new_pos_component + border_size * sign_of_dir;
+	if (x < 0.0f || y < 0.0f || x >= map_width || y >= map_height) return 1;
 
-	if (new_pos_w_border < 0.0f || new_pos_w_border >= map_size[varying_axis])
-		return old_pos[varying_axis];
+	const byte floor_height = *map_point((byte*) heightmap, x, y, map_width);
+	return (foot_height - floor_height) < -constants.almost_zero;
+}
 
+static byte pos_collides_with_heightmap(const GLfloat foot_height,
+	const vec2 pos_xz, const byte* const heightmap, const byte map_size[2]) {
 
-	//////////
+	const byte map_width = map_size[0], map_height = map_size[1];
+	const GLfloat half_border = constants.camera.aabb_collision_box_size * 0.5f;
 
-	vec2 new_pos_w_old;
-	new_pos_w_old[varying_axis] = new_pos_w_border;
-	new_pos_w_old[!varying_axis] = old_pos[!varying_axis];
-
-	const byte height_value = *map_point((byte*) heightmap, new_pos_w_old[0], new_pos_w_old[1], map_size[0]);
-	/* `foot_height - height_value > -0.001f` is done instead of `foot_height >= height_value`
-	because the foot height may be slightly under the height value (like 2.999999 compared to 3.0,
-	due to floating-point precision errors). If `>=` is used, the new position is sometimes not returned. */
-	if (foot_height - height_value > -constants.almost_zero) return new_pos_component;
-	return old_pos[varying_axis];
+	return tile_exists_at_pos(pos_xz[0] - half_border, pos_xz[1] - half_border, foot_height, heightmap, map_width, map_height)
+		|| tile_exists_at_pos(pos_xz[0] + half_border, pos_xz[1] + half_border, foot_height, heightmap, map_width, map_height)
+		|| tile_exists_at_pos(pos_xz[0] - half_border, pos_xz[1] + half_border, foot_height, heightmap, map_width, map_height)
+		|| tile_exists_at_pos(pos_xz[0] + half_border, pos_xz[1] - half_border, foot_height, heightmap, map_width, map_height);
 }
 
 static void update_pos_via_physics(const byte movement_bits,
@@ -155,13 +151,16 @@ static void update_pos_via_physics(const byte movement_bits,
 
 	////////// X and Z collision detection + setting new xz positions
 
-	const vec2 old_pos_xz = {pos[0], pos[2]};
+	vec2 pos_xz = {pos[0], pos[2]};
 
-	pos[0] = apply_collision_on_xz_axis(heightmap, map_size, 0, old_pos_xz, foot_height,
-		pos[0] + velocity_forward_back * dir_xz[0] - velocity_strafe * -dir_xz[1]);
+	pos_xz[0] = pos[0] + velocity_forward_back * dir_xz[0] - velocity_strafe * -dir_xz[1];
+	if (pos_collides_with_heightmap(foot_height, pos_xz, heightmap, map_size)) pos_xz[0] = pos[0];
 
-	pos[2] = apply_collision_on_xz_axis(heightmap, map_size, 1, old_pos_xz, foot_height,
-		pos[2] + velocity_forward_back * dir_xz[1] - velocity_strafe * dir_xz[0]);
+	pos_xz[1] = pos[2] + velocity_forward_back * dir_xz[1] - velocity_strafe * dir_xz[0];
+	if (pos_collides_with_heightmap(foot_height, pos_xz, heightmap, map_size)) pos_xz[1] = pos[2];
+
+	pos[0] = pos_xz[0];
+	pos[2] = pos_xz[1];
 
 	////////// Y collision detection + setting new y position and speed
 

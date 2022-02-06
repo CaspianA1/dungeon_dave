@@ -31,9 +31,8 @@
 - Having an idle window with vsync on leads to high CPU and GPU usage
 - Make tilting not depend on framerate (mouse deltas will always be smaller with a higher FPS)
 - The checker heightmap has faster pacing sometimes
-- Collide with walls before clipping into them
-- Hitting wall corners just right teleports you up
 - Pressing left + forward and backward doesn't stop moving on the X axis
+- A half-stutter when pressing towards a wall and then letting go of a movement key
 
 - Memory leak with debug mode at the end of demos 17 and 22 (rest probably too), the lightmapper, and the map editor
 - Cannot exit window

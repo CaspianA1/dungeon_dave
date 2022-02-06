@@ -5691,3 +5691,106 @@ static byte point_inside_box(const vec3 point, const vec3 box_origin) {
 	*/
 
 /////
+
+byte aabbs_are_colliding(const aabb box_1, const aabb box_2) {
+	return
+		(box_1.top_left[0] <= box_2.bottom_right[0] && box_1.bottom_right[0] >= box_2.bottom_right[0]) &&
+		(box_1.top_left[1] <= box_2.bottom_right[1] && box_1.bottom_right[1] >= box_2.bottom_right[1]);
+}
+
+/////
+
+
+	/*
+	if (up ^ down) {
+	}
+	*/
+
+	/*
+	if (keys[SDL_SCANCODE_LEFT]) pos[0] -= step;
+	if (keys[SDL_SCANCODE_RIGHT]) pos[0] += step;
+	if (keys[SDL_SCANCODE_UP]) pos[1] -= step;
+	if (keys[SDL_SCANCODE_DOWN]) pos[1] += step;
+
+	if (pos[0] < 0.0f) pos[0] = 0.0f;
+	else if (pos[0] >= map_width) pos[0] = map_width - almost_zero;
+	if (pos[1] < 0.0f) pos[1] = 0.0f;
+	else if (pos[1] >= map_height) pos[1] = map_height - almost_zero;
+
+	const vec2 half_border = {border_size[0] * 0.5f, border_size[1] * 0.5f};
+
+	// Check after each pos move
+
+	const byte
+		from_tl = has_point_at(pos[0] - half_border[0], pos[1] - half_border[1]),
+		from_br = has_point_at(pos[0] + half_border[0], pos[1] + half_border[1]);
+
+	printf("from_tl = %d, from_br = %d\n", from_tl, from_br);
+	*/
+
+	/*
+	const byte floor_height = heightmap[(byte) pos[1]][(byte) pos[0]];
+	if (floor_height == 0) return;
+
+	const aabb pos_box = {
+		.top_left = {pos[0] - border_size[0] * 0.5f, pos[1] - border_size[1] * 0.5f},
+		.bottom_right = {border_size[0], border_size[1]}
+	},
+	tile_box = {
+		.top_left = {(byte) pos[0], (byte) pos[1]},
+		.bottom_right = {(byte) pos[0] + 1.0f, (byte) pos[1] + 1.0f}
+	};
+
+	if (aabbs_are_colliding(pos_box, tile_box)) {
+		puts("Collision");
+	}
+	else {
+		puts("No collision");
+	}
+	*/
+
+/////
+
+	const byte
+		a = point_exists_at(pos_xz[0] - half_border[0], pos_xz[1] - half_border[1], heightmap, map_size),
+		b = point_exists_at(pos_xz[0] + half_border[0], pos_xz[1] + half_border[1], heightmap, map_size),
+		c = point_exists_at(pos_xz[0] - half_border[0], pos_xz[1] + half_border[1], heightmap, map_size),
+		d = point_exists_at(pos_xz[0] + half_border[0], pos_xz[1] - half_border[1], heightmap, map_size);
+	
+	DEBUG(a, d);
+	DEBUG(b, d);
+	DEBUG(c, d);
+	DEBUG(d, d);
+	
+	return a || b || c || d;
+
+/////
+
+// TODO: from excluded
+static GLfloat apply_collision_on_xz_axis(const byte* const heightmap,
+	const byte map_size[2], const byte varying_axis, const vec2 old_pos,
+	const GLfloat foot_height, const GLfloat new_pos_component) {
+
+	const GLfloat border_size = 0.25f;
+	const int8_t sign_of_dir = ((new_pos_component - old_pos[varying_axis]) > 0.0f) ? 1 : -1;
+	const GLfloat new_pos_w_border = new_pos_component + border_size * sign_of_dir;
+
+	if (new_pos_w_border < 0.0f || new_pos_w_border >= map_size[varying_axis])
+		return old_pos[varying_axis];
+
+
+	//////////
+
+	vec2 new_pos_w_old;
+	new_pos_w_old[varying_axis] = new_pos_w_border;
+	new_pos_w_old[!varying_axis] = old_pos[!varying_axis];
+
+	const byte height_value = *map_point((byte*) heightmap, new_pos_w_old[0], new_pos_w_old[1], map_size[0]);
+	/* `foot_height - height_value > -0.001f` is done instead of `foot_height >= height_value`
+	because the foot height may be slightly under the height value (like 2.999999 compared to 3.0,
+	due to floating-point precision errors). If `>=` is used, the new position is sometimes not returned. */
+	if (foot_height - height_value > -constants.almost_zero) return new_pos_component;
+	return old_pos[varying_axis];
+}
+
+/////
