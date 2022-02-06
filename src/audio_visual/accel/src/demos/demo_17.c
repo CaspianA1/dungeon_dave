@@ -35,7 +35,7 @@
 - A half-stutter when pressing towards a wall and then letting go of a movement key
 - Can get a tiny bit stuck in a wall when jumping downwards close to a wall (so will have to be able to stand a tiny bit off the wall)
 
-- Memory leak with debug mode at the end of demos 17 and 22 (rest probably too), the lightmapper, and the map editor
+- Memory leak with debug mode at the end of demos 17 and 22 (rest probably too), the lightmapper, the map editor, and the collision demo
 - Cannot exit window
 - Other demos untested
 - Outer project does not even want to start
