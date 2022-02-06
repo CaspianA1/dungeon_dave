@@ -33,7 +33,7 @@
 - The checker heightmap has faster pacing sometimes
 - Pressing left + forward and backward doesn't stop moving on the X axis
 - A half-stutter when pressing towards a wall and then letting go of a movement key
-- Can get a tiny bit stuck in a wall when jumping downwards close to a wall
+- Can get a tiny bit stuck in a wall when jumping downwards close to a wall (so will have to be able to stand a tiny bit off the wall)
 
 - Memory leak with debug mode at the end of demos 17 and 22 (rest probably too), the lightmapper, and the map editor
 - Cannot exit window
