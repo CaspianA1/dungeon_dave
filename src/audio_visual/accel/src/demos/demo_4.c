@@ -61,7 +61,7 @@ const GLchar* const demo_4_vertex_shader =
 
 	"uniform mat4 model_view_projection;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
 		"UV = vertex_UV;\n"
 	"}\n",
@@ -75,7 +75,7 @@ const GLchar* const demo_4_vertex_shader =
 
 	"uniform sampler2D texture_sampler;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"color = texture(texture_sampler, UV).rgb;\n"
 	"}\n";
 

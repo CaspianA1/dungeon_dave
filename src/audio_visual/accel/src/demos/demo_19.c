@@ -15,7 +15,7 @@ const GLchar *const demo_19_vertex_shader =
 	"uniform vec3 spin;\n"
 	"uniform mat4 model_view_projection;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"vec3 spin_pos = vertex_pos_world_space + spin;\n"
 		"gl_Position = model_view_projection * vec4(spin_pos, 1);\n"
 		"brightness = distance(spin, vertex_pos_world_space) / 3.0f;\n"
@@ -32,7 +32,7 @@ const GLchar *const demo_19_vertex_shader =
 
 	"uniform sampler2D texture_sampler;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"color = texture(texture_sampler, UV).rgb * brightness;\n"
 	"}\n";
 

@@ -131,7 +131,7 @@ const GLchar* const demo_6_vertex_shader =
 		"vec2(0.0f, 1.0f), vec2(1.0f, 1.0f), vec2(1.0f, 0.0f)\n"
 	");\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1);\n"
 
 		"int UV_index = gl_VertexID % 6, plane_index = gl_VertexID / 6;\n"

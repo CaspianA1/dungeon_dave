@@ -151,7 +151,7 @@ StateGL demo_3_init(void) {
 		"out vec3 fragment_color;\n"
 
 		"uniform mat4 model_view_projection;\n"
-		"void main() {\n"
+		"void main(void) {\n"
 			"gl_Position = model_view_projection * vec4(vertex_pos_model_space, 1);"
 			"fragment_color = vertex_color;\n"
 		"}\n",
@@ -162,7 +162,7 @@ StateGL demo_3_init(void) {
 		"in vec3 fragment_color;\n"
 		"out vec3 color;\n"
 
-		"void main() {\n"
+		"void main(void) {\n"
 			"color = fragment_color;\n"
 		"}\n";
 

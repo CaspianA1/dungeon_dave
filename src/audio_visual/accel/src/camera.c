@@ -258,8 +258,7 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 
 	memcpy(camera -> pos, pos, sizeof(vec3));
 
-	if (keys[KEY_PRINT_POSITION])
-		printf("pos = {%lf, %lf, %lf}\n", (double) pos[0], (double) pos[1], (double) pos[2]);
+	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(pos);
 
 	glm_vec3_rotate(right, -camera -> angles.tilt, dir); // Tilt applied after input as to not interfere with the camera movement
 

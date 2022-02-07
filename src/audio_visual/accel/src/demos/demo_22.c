@@ -63,7 +63,7 @@ const GLchar *const demo_22_obj_vertex_shader =
 
 	"uniform mat4 obj_model_view_projection;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"fragment_color = vertex_color;\n"
 		"gl_Position = obj_model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
 	"}\n",
@@ -74,7 +74,7 @@ const GLchar *const demo_22_obj_vertex_shader =
 	"in vec3 fragment_color;\n"
 	"out vec3 color;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"color = fragment_color;\n"
 	"}\n",
 
@@ -87,7 +87,7 @@ const GLchar *const demo_22_obj_vertex_shader =
 
 	"uniform mat4 shadow_volume_model_view_projection;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"fragment_pos_world_space = vertex_pos_world_space;\n"
 		"gl_Position = shadow_volume_model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
 	"}\n",
@@ -99,7 +99,7 @@ const GLchar *const demo_22_obj_vertex_shader =
 
 	"out vec4 color;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"color = vec4(fragment_pos_world_space / 5.0f, 0.5f);\n"
 	"}\n";
 

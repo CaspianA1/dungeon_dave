@@ -24,7 +24,7 @@ StateGL demo_1_init(void) {
 		"#version 330 core\n" // 140 -> OpenGL 3.1 (but that shader wouldn't compile)
 
 		"layout(location = 0) in vec3 vertex_pos_world_space;\n"
-		"void main() {\n"
+		"void main(void) {\n"
 			"gl_Position.xyz = vertex_pos_world_space;\n"
 			"gl_Position.w = 1.0;\n"
 		"}\n",
@@ -33,7 +33,7 @@ StateGL demo_1_init(void) {
 		"#version 330 core\n"
 
 		"out vec3 color;\n"
-		"void main() {\n"
+		"void main(void) {\n"
 			"color = vec3(1, 0, 0);\n" // Red
 		"}\n";
 

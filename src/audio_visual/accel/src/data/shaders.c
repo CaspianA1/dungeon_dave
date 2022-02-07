@@ -135,7 +135,7 @@ const GLchar *const sector_vertex_shader =
 
 	"uniform sampler2DArray texture_sampler;\n"
 
-	"void main() {\n"
+	"void main(void) {\n"
 		"color = texture(texture_sampler, vec3(UV, texture_id));\n"
 		"if (color.a < 0.28f) discard;\n" // 0.28f empirically tested for best discarding of alpha value
 	"}\n",
