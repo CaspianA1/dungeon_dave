@@ -5,17 +5,64 @@
 */
 
 #include "../utils.c"
+#include "../texture.c"
+
+typedef struct {
+	GLuint depth_map_framebuffer, depth_map_texture;
+	buffer_size_t shadow_size[2];
+} SceneState;
 
 StateGL demo_23_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
+
+	SceneState scene_state = {.shadow_size = {1024, 1024}};
+	glGenFramebuffers(1, &scene_state.depth_map_framebuffer);
+	scene_state.depth_map_texture = preinit_texture(TexPlain, TexNonRepeating);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+		scene_state.shadow_size[0], scene_state.shadow_size[1], 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, scene_state.depth_map_framebuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, TexPlain, scene_state.depth_map_texture, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//////////
+
+	sgl.any_data = malloc(sizeof(SceneState));
+	memcpy(sgl.any_data, &scene_state, sizeof(SceneState));
+
 	return sgl;
 }
 
 void demo_23_drawer(const StateGL* const sgl) {
-	(void) sgl;
+	const SceneState scene_state = *((SceneState*) sgl -> any_data);
+
+	// Rendering to depth map
+	glViewport(0, 0, scene_state.shadow_size[0], scene_state.shadow_size[1]);
+	glBindFramebuffer(GL_FRAMEBUFFER, scene_state.depth_map_framebuffer);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	// Render scene here
+
+	// Rendering as scene with shadow mapping, using depth map
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, WINDOW_W, WINDOW_H);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glBindTexture(TexPlain, scene_state.depth_map_texture);
+
+	// Render scene here
 }
 
 void demo_23_deinit(const StateGL* const sgl) {
+	SceneState* const scene_state = sgl -> any_data;
+
+	glDeleteFramebuffers(1, &scene_state -> depth_map_framebuffer);
+	glDeleteTextures(1, &scene_state -> depth_map_texture);
+	free(scene_state);
+
 	deinit_demo_vars(sgl);
 }
 
