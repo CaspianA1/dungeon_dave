@@ -2,6 +2,7 @@
 - Shadow maps for this demo - no shadow volumes, after some thinking.
 - Start with making a plain shadow map: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
 - After that, move onto an omnidirectional shadow map: https://learnopengl.com/Advanced-Lighting/Shadows/Point-Shadows
+- First, get depth buffer rendering working, and then make shadows.
 */
 
 #include "../utils.c"
@@ -9,52 +10,51 @@
 #include "../camera.c"
 
 typedef struct { // `obj` here just means the objects in the scene
-	const GLuint obj_shader, shadow_shader, depth_map_texture;
+	const GLuint obj_shader, depth_map_shader, depth_map_texture;
 	GLuint obj_vbo, depth_map_framebuffer;
 
 	buffer_size_t num_obj_vertices;
 	const buffer_size_t shadow_size[2];
 } SceneState;
 
-const char *const demo_22_obj_vertex_shader =
+const char *const demo_23_obj_vertex_shader =
 	"#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 
-	"out vec3 fragment_color;\n"
-
 	"uniform mat4 obj_model_view_projection;\n"
 
 	"void main(void) {\n"
-		"fragment_color = vertex_pos_world_space / 8.0f;\n"
 		"gl_Position = obj_model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
 	"}\n",
 
-*const demo_22_obj_fragment_shader =
+*const demo_23_obj_fragment_shader =
 	"#version 330 core\n"
 
-	"in vec3 fragment_color;\n"
 	"out vec3 color;\n"
 
+	"uniform sampler2D depth_map_sampler;\n"
+
 	"void main(void) {\n"
-		"color = fragment_color;\n"
+		"float depth_value = texture(depth_map_sampler, vec2(0.2f, 0.2f)).r;\n"
+		"color = vec3(depth_value + 0.5f);\n"
 	"}\n",
 
-*const demo_22_depth_map_vertex_shader =
+*const demo_23_depth_map_vertex_shader =
 	"#version 330 core\n"
+
+	"layout(location = 0) in vec3 obj_vertex_pos_world_space;\n"
 
 	"uniform mat4 obj_model, light_view_projection;\n"
 
 	"void main(void) {\n"
-
+		"gl_Position = light_view_projection * obj_model * vec4(obj_vertex_pos_world_space, 1.0f);\n"
 	"}\n",
 
-*const demo_22_depth_map_fragment_shader =
+*const demo_23_depth_map_fragment_shader =
 	"#version 330 core\n"
 
-	"void main(void) {\n"
-
-	"}\n";
+	"void main(void) {}\n";
 
 GLuint init_demo_23_obj_vbo(buffer_size_t* const num_obj_vertices) {
 	const GLint num_components_per_vertex = 3;
@@ -64,8 +64,8 @@ GLuint init_demo_23_obj_vbo(buffer_size_t* const num_obj_vertices) {
 
 	const GLfloat vertices[] = {
 		// Bottom left of flat plane
-		0.0f, 0.0f, 0.0f,
 		plane_size[0], 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f,
 		plane_size[0], 0.0f, plane_size[1],
 
 		// Top right of flat plane
@@ -73,6 +73,7 @@ GLuint init_demo_23_obj_vbo(buffer_size_t* const num_obj_vertices) {
 		0.0f, 0.0f, plane_size[1],
 		plane_size[0], 0.0f, plane_size[1],
 
+		// Triangle object
 		OBJ_OFFSET(-1, -1, 0),
 		OBJ_OFFSET(0, 0, 0),
 		OBJ_OFFSET(1, -1, 0)
@@ -97,8 +98,8 @@ StateGL demo_23_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	SceneState scene_state = {
-		.obj_shader = init_shader_program(demo_22_obj_vertex_shader, demo_22_obj_fragment_shader),
-		.shadow_shader = init_shader_program(demo_22_depth_map_vertex_shader, demo_22_depth_map_fragment_shader),
+		.obj_shader = init_shader_program(demo_23_obj_vertex_shader, demo_23_obj_fragment_shader),
+		.depth_map_shader = init_shader_program(demo_23_depth_map_vertex_shader, demo_23_depth_map_fragment_shader),
 		.depth_map_texture = preinit_texture(TexPlain, TexNonRepeating),
 		.shadow_size = {1024, 1024}
 	};
@@ -109,7 +110,7 @@ StateGL demo_23_init(void) {
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
 		scene_state.shadow_size[0], scene_state.shadow_size[1],
-		0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+		0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
 	//////////
 
@@ -125,6 +126,9 @@ StateGL demo_23_init(void) {
 	sgl.any_data = malloc(sizeof(SceneState));
 	memcpy(sgl.any_data, &scene_state, sizeof(SceneState));
 
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	return sgl;
 }
 
@@ -132,21 +136,23 @@ void demo_23_drawer(const StateGL* const sgl) {
 	const SceneState scene_state = *((SceneState*) sgl -> any_data);
 
 	static Camera camera;
-	static GLint obj_model_view_projection_id;
+	static GLint obj_model_view_projection_id, obj_model_id, light_view_projection_id;
 	static byte first_call = 1;
 
 	if (first_call) {
 		INIT_UNIFORM(obj_model_view_projection, scene_state.obj_shader);
+		INIT_UNIFORM(obj_model, scene_state.depth_map_shader);
+		INIT_UNIFORM(light_view_projection, scene_state.depth_map_shader);
 		init_camera(&camera, (vec3) {0.0f, 1.0f, 0.0f});
 		first_call = 0;
 	}
 
-	update_camera(&camera, get_next_event(), NULL);
-	UPDATE_UNIFORM(obj_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
-
 	////////// Math
 
-	mat4 light_view, light_projection, light_view_projection; // TODO: set these up properly in Camera later
+	const Event event = get_next_event();
+	update_camera(&camera, event, NULL);
+
+	mat4 light_view, light_projection, light_view_projection; // TODO: set these up properly in camera.c later
 
 	get_view_matrix(
 		(vec3) {7.137089f, 2.295277f, 2.930087f},
@@ -160,22 +166,23 @@ void demo_23_drawer(const StateGL* const sgl) {
 
 	////////// Rendering to depth map from light position
 
+	glUseProgram(scene_state.depth_map_shader);
+	UPDATE_UNIFORM(obj_model, Matrix4fv, 1, GL_FALSE, (GLfloat*) ((mat4) GLM_MAT4_IDENTITY_INIT)); // TODO: find out if this is correct
+	UPDATE_UNIFORM(light_view_projection, Matrix4fv, 1, GL_FALSE, &light_projection[0][0]);
+
 	glViewport(0, 0, scene_state.shadow_size[0], scene_state.shadow_size[1]);
-	glBindFramebuffer(GL_FRAMEBUFFER, scene_state.depth_map_framebuffer);
-	// Depth and color buffer cleared at this point
-
-	//////////
-
-	// Rendering as scene with shadow mapping, using depth map
+	glBindFramebuffer(GL_FRAMEBUFFER, scene_state.depth_map_framebuffer); // No need to clear color + depth buffer
+	glDrawArrays(GL_TRIANGLES, 0, scene_state.num_obj_vertices); // This line renders the scene
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, WINDOW_W, WINDOW_H);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glBindTexture(TexPlain, scene_state.depth_map_texture);
-
-	// Rendering scene here
+	////////// Rendering the scene as normal
 
 	glUseProgram(scene_state.obj_shader);
+	UPDATE_UNIFORM(obj_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+	use_texture(scene_state.depth_map_texture, scene_state.obj_shader, "depth_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
+
+	glViewport(0, 0, event.screen_size[0], event.screen_size[1]);
+	glClear(GL_DEPTH_BUFFER_BIT);
 	glDrawArrays(GL_TRIANGLES, 0, scene_state.num_obj_vertices);
 }
 
@@ -183,7 +190,7 @@ void demo_23_deinit(const StateGL* const sgl) {
 	const SceneState scene_state = *((SceneState*) sgl -> any_data);
 
 	glDeleteProgram(scene_state.obj_shader);
-	glDeleteProgram(scene_state.shadow_shader);
+	glDeleteProgram(scene_state.depth_map_shader);
 	glDeleteBuffers(1, &scene_state.obj_vbo);
 	glDeleteFramebuffers(1, &scene_state.depth_map_framebuffer);
 	glDeleteTextures(1, &scene_state.depth_map_texture);

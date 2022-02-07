@@ -26,8 +26,9 @@ And the biggest number possible with five bits is 31, so that gives you
 
 #define SECTOR_TEXTURE_UNIT 0
 #define BILLBOARD_TEXTURE_UNIT 1
-#define LIGHTMAP_TEXTURE_UNIT 2
-#define SKYBOX_TEXTURE_UNIT 3
+#define SKYBOX_TEXTURE_UNIT 2
+#define LIGHTMAP_TEXTURE_UNIT 3
+#define SHADOW_MAP_TEXTURE_UNIT 4
 
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,

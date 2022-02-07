@@ -14,7 +14,7 @@
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
 
 - Perlin noise-based lighting in 3D (maybe)
-- Shadow volumes + one global light source
+- Shadows + one global light source
 - A map maker. An init json file that specifies textures and dimensions;
 	draw/erase modes, line mode, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe
@@ -23,7 +23,6 @@
 - Base darkest distance of attenuated light on the world size
 - Can't use red cross for health since it's copyrighted
 - Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/ (or perhaps not, since alpha just 0 or 1)
-- A demo 23, with sector-based shadow volumes
 
 - Crouch
 - Make deceleration framerate-independent
