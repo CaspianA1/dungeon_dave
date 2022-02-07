@@ -6,9 +6,9 @@ const GLchar* const demo_13_billboard_vertex_shader =
 
 	"out vec2 UV;\n"
 
-	"uniform vec2 billboard_size_world_space, right_xz_world_space;\n"
+	"uniform vec2 billboard_size_world_space, billboard_right_xz_world_space;\n"
 	"uniform vec3 billboard_center_world_space;\n"
-	"uniform mat4 view_projection;\n"
+	"uniform mat4 billboard_model_view_projection;\n"
 
 	"const vec2 vertices_model_space[4] = vec2[4](\n"
 		"vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f),\n"
@@ -22,10 +22,10 @@ const GLchar* const demo_13_billboard_vertex_shader =
 		"vec2 corner_world_space = vertex_model_space * billboard_size_world_space;\n"
 
 		"vec3 vertex_world_space = billboard_center_world_space +\n"
-			"corner_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
+			"corner_world_space.x * vec3(billboard_right_xz_world_space, 0.0f).xzy\n"
 			"+ corner_world_space.y * up_world_space;\n"
 
-		"gl_Position = view_projection * vec4(vertex_world_space, 1.0f);\n"
+		"gl_Position = billboard_model_view_projection * vec4(vertex_world_space, 1.0f);\n"
 		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
 	"}\n",
 
@@ -42,7 +42,7 @@ const GLchar* const demo_13_billboard_vertex_shader =
 		"color = texture(texture_sampler, UV);\n"
 	"}\n";
 
-void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint shader_program) {
+void demo_13_move(vec3 pos, vec3 right, mat4 model_view_projection, const GLuint shader_program) {
 	static GLfloat hori_angle = PI, vert_angle = 0.0f, last_time;
 
 	static byte first_call = 1;
@@ -83,11 +83,10 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 	glm_vec3_add(pos, direction, pos_plus_dir);
 	glm_vec3_cross(right, direction, up);
 	//////////
-	mat4 projection, view, model_view_projection, view_times_model, model = GLM_MAT4_IDENTITY_INIT;
+	mat4 projection, view, view_times_model, model = GLM_MAT4_IDENTITY_INIT;
 	glm_perspective(constants.camera.init.fov, (GLfloat) WINDOW_W / WINDOW_H,
 		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 	glm_lookat(pos, pos_plus_dir, up, view);
-	glm_mul(projection, view, view_times_projection); // For external usage
 
 	glm_mul(view, model, view_times_model);
 	glm_mul(projection, view_times_model, model_view_projection);
@@ -113,25 +112,25 @@ void demo_13_move(vec3 pos, vec3 right, mat4 view_times_projection, const GLuint
 }
 
 void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) {
-	static GLint right_xz_world_space_id, view_projection_id;
+	static GLint billboard_right_xz_world_space_id, billboard_model_view_projection_id;
 	static byte first_call = 1;
 
 	glUseProgram(shader_program); // Enable billboard shader
 
 	if (first_call) {
-		INIT_UNIFORM(right_xz_world_space, shader_program);
-		INIT_UNIFORM(view_projection, shader_program);
+		INIT_UNIFORM(billboard_right_xz_world_space, shader_program);
+		INIT_UNIFORM(billboard_model_view_projection, shader_program);
 		INIT_UNIFORM_VALUE(billboard_size_world_space, shader_program, 2f, 1.0f, 1.0f);
 		INIT_UNIFORM_VALUE(billboard_center_world_space, shader_program, 3fv, 1, center);
 		first_call = 0;
 	}
 
 	static vec3 pos = {2.0f, 4.5f, 2.0f}, right;
-	mat4 view_times_projection;
-	demo_13_move(pos, right, view_times_projection, shader_program);
+	mat4 model_view_projection;
+	demo_13_move(pos, right, model_view_projection, shader_program);
 
-	UPDATE_UNIFORM(right_xz_world_space, 2f, right[0], right[2]);
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &view_times_projection[0][0]);
+	UPDATE_UNIFORM(billboard_right_xz_world_space, 2f, right[0], right[2]);
+	UPDATE_UNIFORM(billboard_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 }
 
 GLuint sector_shader;

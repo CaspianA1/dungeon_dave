@@ -104,7 +104,7 @@ const GLchar *const sector_vertex_shader =
 	"out vec2 UV;\n"
 
 	"uniform vec2 right_xz_world_space;\n"
-	"uniform mat4 view_projection;\n"
+	"uniform mat4 model_view_projection;\n"
 
 	"const vec2 vertices_model_space[4] = vec2[4](\n"
 		"vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f),\n"
@@ -119,7 +119,7 @@ const GLchar *const sector_vertex_shader =
 			"+ corner_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
 			"+ vec3(0.0f, corner_world_space.y, 0.0f);\n"
 
-		"gl_Position = view_projection * vec4(vertex_world_space, 1.0f);\n"
+		"gl_Position = model_view_projection * vec4(vertex_world_space, 1.0f);\n"
 
 		"texture_id = in_texture_id;\n"
 		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
@@ -147,10 +147,10 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec3 UV_3D;\n"
 
-	"uniform mat4 view_projection;\n"
+	"uniform mat4 model_view_projection;\n"
 
 	"void main(void) {\n"
-		"gl_Position = (view_projection * vec4(vertex_pos_world_space, 1.0f)).xyww;\n"
+		"gl_Position = (model_view_projection * vec4(vertex_pos_world_space, 1.0f)).xyww;\n"
 		"UV_3D = vertex_pos_world_space;\n"
 		"UV_3D.x = -UV_3D.x;\n" // Without this, the X component of the UV is reversed
 	"}\n",

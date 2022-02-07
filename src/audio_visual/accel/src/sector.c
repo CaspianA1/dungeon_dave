@@ -139,7 +139,7 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 	*sectors_ref = sectors;
 }
 
-static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) {
+static byte sector_in_view_frustum(const Sector sector, const vec4 frustum_planes[6]) {
 	// First corner is bottom left (if looking top-down, top left), and second is top right
 	vec3 aabb_corners[2] = {{sector.origin[0], sector.visible_heights.min, sector.origin[1]}};
 
@@ -147,7 +147,7 @@ static byte sector_in_view_frustum(const Sector sector, vec4 frustum_planes[6]) 
 	aabb_corners[1][1] = aabb_corners[0][1] + sector.visible_heights.max - sector.visible_heights.min;
 	aabb_corners[1][2] = aabb_corners[0][2] + sector.size[1];
 
-	return glm_aabb_frustum(aabb_corners, frustum_planes);
+	return glm_aabb_frustum(aabb_corners, (vec4*) frustum_planes);
 }
 
 static void draw_sectors(const BatchDrawContext* const draw_context, const Camera* const camera,
@@ -199,11 +199,9 @@ void draw_visible_sectors(const BatchDrawContext* const draw_context, const List
 
 	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
 
-	static vec4 frustum_planes[6];
-	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
-
 	const Sector* const sector_data = sectors -> data;
 	const Sector* const out_of_bounds_sector = sector_data + sectors -> length;
+	const vec4* const frustum_planes = camera -> frustum_planes;
 
 	const face_mesh_component_t* const face_meshes_cpu = draw_context -> buffers.cpu.data;
 	face_mesh_component_t* const face_meshes_gpu = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);

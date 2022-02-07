@@ -116,23 +116,23 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 	glUseProgram(s.shader);
 
 	static byte first_call = 1;
-	static GLint view_projection_id;
+	static GLint model_view_projection_id;
 	if (first_call) {
-		INIT_UNIFORM(view_projection, s.shader);
+		INIT_UNIFORM(model_view_projection, s.shader);
 		use_texture(s.texture, s.shader, "texture_sampler", TexSkybox, SKYBOX_TEXTURE_UNIT);
 		first_call = 0;
 	}
 
-	mat4 view_projection;
-	memcpy(view_projection, camera -> view_projection, sizeof(mat4));
+	mat4 model_view_projection;
+	memcpy(model_view_projection, camera -> model_view_projection, sizeof(mat4));
 
 	/* This clears X, Y, and W. Z (depth) not cleared
 	b/c it's always set to 1 in the vertex shader. */
-	view_projection[3][0] = 0.0f;
-	view_projection[3][1] = 0.0f;
-	view_projection[3][3] = 0.0f;
+	model_view_projection[3][0] = 0.0f;
+	model_view_projection[3][1] = 0.0f;
+	model_view_projection[3][3] = 0.0f;
 
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &view_projection[0][0]);
+	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, s.vbo);
 

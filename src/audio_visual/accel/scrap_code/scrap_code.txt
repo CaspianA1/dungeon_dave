@@ -5798,3 +5798,71 @@ static GLfloat apply_collision_on_xz_axis(const byte* const heightmap,
 	glm_ortho(fov, aspect_ratio, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 
 /////
+
+	/*
+	DEBUG(
+		sizeof(GLfloat) * 4
+		+
+		sizeof(GLfloat) * 3
+		+
+		// sizeof(Uint64)
+		// +
+		sizeof(vec2)
+		+
+		sizeof(vec3)
+		+
+		sizeof(mat4),
+		zu
+	);
+	*/
+
+	DEBUG(sizeof(Test), zu);
+	DEBUG(sizeof(Camera), zu);
+	DEBUG(sizeof(mat4), zu);
+	// 48 + 64 = 112 (all without )
+
+	/*
+	all without Uint64 and mat4 = 48
+	sizeof(mat4) = 64
+	with mat4 = ideally 112
+	but actually, 128
+	so 16 bytes padding
+	*/
+
+/////
+
+	// DEBUG(sizeof(Test), zu);
+	DEBUG(sizeof(Camera), zu);
+	// DEBUG(sizeof(mat4), zu);
+
+	DEBUG(
+		sizeof(GLfloat) * 4
+		+
+		sizeof(GLfloat) * 3
+		+
+		// sizeof(Uint64)
+		// +
+		sizeof(vec2)
+		+
+		sizeof(vec3)
+		+
+		sizeof(vec4[6])
+		+
+		sizeof(mat4),
+		zu
+	);
+
+	/*
+	all without Uint64 and mat4 = 48
+	sizeof(mat4) = 64
+	with mat4 = ideally 112
+	but actually, 128
+	so 16 bytes padding
+	*/
+		// DEBUG(sizeof(vec4[6]), zu);
+
+/////
+
+#define PRINT_VEC4(v) printf("{%lf, %lf, %lf, %lf}\n", v[0], v[1], v[2], v[3])
+
+/////

@@ -21,7 +21,9 @@ StateGL demo_15_init(void) {
 }
 
 void demo_15_deinit(const StateGL* const sgl) {
-	deinit_skybox(*(Skybox*) sgl -> any_data);
+	Skybox* const skybox = sgl -> any_data;
+	deinit_skybox(*skybox);
+	free(skybox);
 	deinit_demo_vars(sgl);
 }
 

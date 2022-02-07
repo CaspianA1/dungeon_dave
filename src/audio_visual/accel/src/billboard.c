@@ -34,15 +34,15 @@ void update_animation_instances(const List* const animation_instances,
 }
 
 // https://stackoverflow.com/questions/25572337/frustum-and-sphere-intersection
-static byte is_inside_plane(vec4 sphere, vec4 plane) {
-	const GLfloat dist_btwn_plane_and_sphere = glm_vec3_dot(sphere, plane) + plane[3];
+static byte is_inside_plane(const vec4 sphere, const vec4 plane) {
+	const GLfloat dist_btwn_plane_and_sphere = glm_vec3_dot((GLfloat*) sphere, (GLfloat*) plane) + plane[3];
 	return dist_btwn_plane_and_sphere > -sphere[3];
 }
 
-static byte billboard_in_view_frustum(const Billboard billboard, vec4 frustum_planes[6]) {
+static byte billboard_in_view_frustum(const Billboard billboard, const vec4 frustum_planes[6]) {
 	const GLfloat half_w = billboard.size[0] * 0.5f, half_h = billboard.size[1] * 0.5f;
 
-	vec4 sphere = { // For a sphere, first 3 components are position, and last component is radius
+	const vec4 sphere = { // For a sphere, first 3 components are position, and last component is radius
 		billboard.pos[0], billboard.pos[1], billboard.pos[2],
 		sqrtf(half_w * half_w + half_h * half_h)
 	};
@@ -60,11 +60,11 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	glUseProgram(shader);
 
 	static byte first_call = 1;
-	static GLint right_xz_world_space_id, view_projection_id;
+	static GLint right_xz_world_space_id, model_view_projection_id;
 
 	if (first_call) {
 		INIT_UNIFORM(right_xz_world_space, shader);
-		INIT_UNIFORM(view_projection, shader);
+		INIT_UNIFORM(model_view_projection, shader);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		first_call = 0;
 
@@ -72,7 +72,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	}
 
 	UPDATE_UNIFORM(right_xz_world_space, 2fv, 1, camera -> right_xz);
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &camera -> view_projection[0][0]);
+	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
 	//////////
 
@@ -98,12 +98,10 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 }
 
 void draw_visible_billboards(const BatchDrawContext* const draw_context, const Camera* const camera) {
-	static vec4 frustum_planes[6]; // TODO: share computed frustum planes between sectors and billboards
-	glm_frustum_planes((vec4*) camera -> view_projection, frustum_planes);
-
 	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
 
 	const List cpu_billboards = draw_context -> buffers.cpu;
+	const vec4* const frustum_planes = camera -> frustum_planes;
 	Billboard* const gpu_billboard_buffer_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
 	buffer_size_t num_visible = 0;

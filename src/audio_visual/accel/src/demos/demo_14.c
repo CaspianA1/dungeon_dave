@@ -6,8 +6,8 @@ void demo_14_drawer(const StateGL* const sgl) {
 	static Camera camera;
 
 	static GLint
-		billboard_center_world_space_id, right_xz_world_space_id,
-		view_projection_id, model_view_projection_id;
+		billboard_center_world_space_id, billboard_right_xz_world_space_id,
+		billboard_model_view_projection_id, model_view_projection_id; // Not called sector_model_view_projection_id for compatibility reasons
 
 	const GLuint billboard_shader = sgl -> shader_program;
 	glUseProgram(billboard_shader);
@@ -18,8 +18,8 @@ void demo_14_drawer(const StateGL* const sgl) {
 		init_camera(&camera, (vec3) {7.0f, 5.0f, 10.0f});
 
 		INIT_UNIFORM(billboard_center_world_space, billboard_shader);
-		INIT_UNIFORM(right_xz_world_space, billboard_shader);
-		INIT_UNIFORM(view_projection, billboard_shader);
+		INIT_UNIFORM(billboard_right_xz_world_space, billboard_shader);
+		INIT_UNIFORM(billboard_model_view_projection, billboard_shader);
 		INIT_UNIFORM(model_view_projection, sector_shader);
 		INIT_UNIFORM_VALUE(billboard_size_world_space, billboard_shader, 2f, 1.0f, 1.0f);
 
@@ -54,10 +54,11 @@ void demo_14_drawer(const StateGL* const sgl) {
 	unbind_sector_mesh_from_vao();
 
 	//////////
+
 	glUseProgram(billboard_shader);
 
-	UPDATE_UNIFORM(right_xz_world_space, 2f, camera.right_xz[0], camera.right_xz[1]);
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &camera.view_projection[0][0]);
+	UPDATE_UNIFORM(billboard_right_xz_world_space, 2f, camera.right_xz[0], camera.right_xz[1]);
+	UPDATE_UNIFORM(billboard_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
 	glEnable(GL_BLEND); // Blending on for billboard
 	glDisable(GL_CULL_FACE);

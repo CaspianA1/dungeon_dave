@@ -208,19 +208,11 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 v
 	}
 }
 
-static void get_projection_matrices(const vec3 pos, const vec3 dir, const vec3 right,
-	const GLfloat fov, const GLfloat aspect_ratio, mat4 view_projection, mat4 model_view_projection) {
-
+static void get_view_matrix(const vec3 pos, const vec3 dir, const vec3 right, mat4 view) {
 	vec3 rel_origin, up;
 	glm_vec3_add((GLfloat*) pos, (GLfloat*) dir, rel_origin);
 	glm_vec3_cross((GLfloat*) right, (GLfloat*) dir, up);
-
-	mat4 view, projection;
 	glm_lookat((GLfloat*) pos, rel_origin, up, view);
-	glm_perspective(fov, aspect_ratio, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
-
-	glm_mul(projection, view, view_projection);
-	glm_mul(view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, model_view_projection);
 }
 
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
@@ -271,9 +263,16 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 
 	glm_vec3_rotate(right, -camera -> angles.tilt, dir); // Tilt applied after input as to not interfere with the camera movement
 
-	get_projection_matrices(pos, dir, right,
-		camera -> angles.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
-		camera -> view_projection, camera -> model_view_projection);
+	mat4 view, projection, view_projection;
+	get_view_matrix(pos, dir, right, view);
+
+	glm_perspective(camera -> angles.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
+		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
+
+	glm_mul(projection, view, view_projection);
+	glm_mul(view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, camera -> model_view_projection);
+
+	glm_frustum_planes((vec4*) camera -> model_view_projection, camera -> frustum_planes);
 }
 
 #endif

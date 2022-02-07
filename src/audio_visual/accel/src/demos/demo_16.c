@@ -37,15 +37,17 @@ void demo_16_drawer(const StateGL* const sgl) {
 	static GLint model_view_projection_id;
 	static byte first_call = 1;
 
+	const GLuint shader = sgl -> shader_program;
+
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
-		INIT_UNIFORM(model_view_projection, sgl -> shader_program);
+		INIT_UNIFORM(model_view_projection, shader);
 		first_call = 0;
 	}
 
 	update_camera(&camera, get_next_event(), NULL);
 
-	glUseProgram(sgl -> shader_program);
+	glUseProgram(shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 
 	glEnableVertexAttribArray(0);
@@ -59,7 +61,7 @@ void demo_16_drawer(const StateGL* const sgl) {
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 
-	draw_skybox(*(Skybox*) sgl -> any_data, &camera);
+	draw_skybox(*((Skybox*) sgl -> any_data), &camera);
 }
 
 #ifdef DEMO_16

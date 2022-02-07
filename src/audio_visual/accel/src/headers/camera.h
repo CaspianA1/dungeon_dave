@@ -14,6 +14,8 @@
 //////////
 
 typedef struct {
+	Uint64 last_time;
+
 	struct {
 		GLfloat fov, hori, vert, tilt;
 	} angles;
@@ -22,11 +24,13 @@ typedef struct {
 	The speed xz percent is not the true speed percent; rather,
 	the percentage is smoothed out by a Hermite curve. */
 	GLfloat pace, time_since_jump, time_accum_for_full_fov;
-	Uint64 last_time;
 
 	vec2 right_xz; // X and Z of right (Y is always 0)
 	vec3 pos;
-	mat4 view_projection, model_view_projection; // Used the least, so last in struct
+
+	mat4 model_view_projection; // Used the least, so last in struct
+	vec4 frustum_planes[6];
+
 } Camera;
 
 typedef struct {
@@ -42,7 +46,7 @@ typedef struct {
 /* Excluded: limit_to_pos_neg_domain, update_camera_angles,
 smooth_hermite, update_fov, apply_velocity_in_xz_direction,
 tile_exists_at_pos, pos_collides_with_heightmap, update_pos_via_physics,
-make_pace_function, update_pace, get_projection_matrices */
+make_pace_function, update_pace, get_view_matrix */
 
 Event get_next_event(void);
 void init_camera(Camera* const camera, const vec3 init_pos);
