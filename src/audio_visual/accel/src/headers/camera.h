@@ -42,7 +42,7 @@ typedef struct {
 /* Excluded: limit_to_pos_neg_domain, update_camera_angles,
 smooth_hermite, update_fov, apply_velocity_in_xz_direction,
 tile_exists_at_pos, pos_collides_with_heightmap, update_pos_via_physics,
-make_pace_function, update_pace */
+make_pace_function, update_pace, get_projection_matrices */
 
 Event get_next_event(void);
 void init_camera(Camera* const camera, const vec3 init_pos);

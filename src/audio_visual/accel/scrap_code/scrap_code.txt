@@ -5794,3 +5794,7 @@ static GLfloat apply_collision_on_xz_axis(const byte* const heightmap,
 }
 
 /////
+
+	glm_ortho(fov, aspect_ratio, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
+
+/////
