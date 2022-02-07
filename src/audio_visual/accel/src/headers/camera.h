@@ -30,7 +30,6 @@ typedef struct {
 
 	mat4 model_view_projection; // Used the least, so last in struct
 	vec4 frustum_planes[6];
-
 } Camera;
 
 typedef struct {
