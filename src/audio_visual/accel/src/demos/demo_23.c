@@ -6,9 +6,13 @@
 
 #include "../utils.c"
 #include "../texture.c"
+#include "../camera.c"
 
 typedef struct {
-	GLuint depth_map_framebuffer, depth_map_texture;
+	GLuint
+		depth_map_framebuffer, depth_map_texture,
+		scene_vbo;
+
 	buffer_size_t shadow_size[2];
 } SceneState;
 
@@ -20,13 +24,19 @@ StateGL demo_23_init(void) {
 	scene_state.depth_map_texture = preinit_texture(TexPlain, TexNonRepeating);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-		scene_state.shadow_size[0], scene_state.shadow_size[1], 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+		scene_state.shadow_size[0], scene_state.shadow_size[1],
+		0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, scene_state.depth_map_framebuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, TexPlain, scene_state.depth_map_texture, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//////////
+
+	glGenBuffers(1, &scene_state.scene_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, scene_state.scene_vbo);
 
 	//////////
 
@@ -37,6 +47,15 @@ StateGL demo_23_init(void) {
 }
 
 void demo_23_drawer(const StateGL* const sgl) {
+	static Camera camera;
+	static byte first_call = 1;
+
+	if (first_call) {
+		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
+		first_call = 0;
+	}
+	update_camera(&camera, get_next_event(), NULL);
+
 	const SceneState scene_state = *((SceneState*) sgl -> any_data);
 
 	// Rendering to depth map
@@ -44,7 +63,7 @@ void demo_23_drawer(const StateGL* const sgl) {
 	glBindFramebuffer(GL_FRAMEBUFFER, scene_state.depth_map_framebuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	// Render scene here
+	// Render scene from light position
 
 	// Rendering as scene with shadow mapping, using depth map
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -59,6 +78,7 @@ void demo_23_drawer(const StateGL* const sgl) {
 void demo_23_deinit(const StateGL* const sgl) {
 	SceneState* const scene_state = sgl -> any_data;
 
+	glDeleteBuffers(1, &scene_state -> scene_vbo);
 	glDeleteFramebuffers(1, &scene_state -> depth_map_framebuffer);
 	glDeleteTextures(1, &scene_state -> depth_map_texture);
 	free(scene_state);
