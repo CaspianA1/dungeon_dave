@@ -269,7 +269,7 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 
 	glm_mul(projection, view, view_projection);
-	glm_mul(view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, camera -> model_view_projection);
+	glm_mul(view_projection, GLM_MAT4_IDENTITY, camera -> model_view_projection);
 
 	glm_frustum_planes((vec4*) camera -> model_view_projection, camera -> frustum_planes);
 }

@@ -194,7 +194,7 @@ void demo_23_drawer(const StateGL* const sgl) {
 		constants.camera.clip_dists.near, constants.camera.clip_dists.far, light_projection);
 
 	glm_mul(light_projection, light_view, light_view_projection);
-	glm_mul(light_view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, light_model_view_projection);
+	glm_mul(light_view_projection, GLM_MAT4_IDENTITY, light_model_view_projection);
 
 	const mat4 bias_matrix = {
 		{0.5f, 0.0f, 0.0f, 0.0f},
