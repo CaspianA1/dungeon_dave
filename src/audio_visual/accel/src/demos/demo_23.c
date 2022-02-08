@@ -20,7 +20,8 @@ typedef struct { // `obj` here just means the objects in the scene
 	const buffer_size_t shadow_size[2];
 } SceneState;
 
-const char *const demo_23_obj_vertex_shader =
+// TODO: make a shadows.c later, and put these shaders in shaders.c
+const GLchar *const demo_23_obj_vertex_shader =
 	"#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"

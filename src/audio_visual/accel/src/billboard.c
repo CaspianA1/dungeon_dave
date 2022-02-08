@@ -65,10 +65,11 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	if (first_call) {
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		first_call = 0;
 
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, BILLBOARD_TEXTURE_UNIT);
+
+		first_call = 0;
 	}
 
 	UPDATE_UNIFORM(right_xz_world_space, 2fv, 1, camera -> right_xz);

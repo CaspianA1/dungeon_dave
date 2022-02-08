@@ -15,7 +15,7 @@ SDL_Surface* init_surface(const GLchar* const path) {
 		return surface;
 	else {
 		SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
-		SDL_FreeSurface(surface);
+		deinit_surface(surface);
 		return converted_surface;
 	}
 }

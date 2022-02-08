@@ -6,6 +6,8 @@
 #include "../billboard.c"
 #include "../camera.c"
 
+#include "../overlay.c"
+
 /*
 - NEXT: final touches on new_map + a texmap for it
 - NEXT 2: a sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
