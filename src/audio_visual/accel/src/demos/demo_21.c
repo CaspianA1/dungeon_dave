@@ -89,6 +89,7 @@ void demo_18_drawer(const StateGL* const sgl) {
 		INIT_UNIFORM(rand_factor, shader);
 		INIT_UNIFORM(persistence, shader);
 		INIT_UNIFORM_VALUE(screen_size, shader, 2f, WINDOW_W, WINDOW_H);
+
 		first_call = 0;
 	}
 
