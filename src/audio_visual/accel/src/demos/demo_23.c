@@ -2,7 +2,10 @@
 - Shadow maps for this demo - no shadow volumes, after some thinking.
 - Start with making a plain shadow map: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
 - After that, move onto an omnidirectional shadow map: https://learnopengl.com/Advanced-Lighting/Shadows/Point-Shadows
-- First, get depth buffer rendering working, and then make shadows.
+- First, get depth buffer rendering working, and then make shadows. Done.
+- Next, test more elaborate objects to be shadowed.
+- Next, use sampler shadows with GL_TEXTURE_COMPARE_MODE for no branch in the fragment shader.
+- Next, add point lights.
 */
 
 #include "../utils.c"
@@ -22,22 +25,34 @@ const char *const demo_23_obj_vertex_shader =
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 
-	"uniform mat4 obj_model_view_projection;\n"
+	"out vec4 shadow_coord;\n"
+
+	"uniform mat4 light_bias_model_view_projection, obj_model_view_projection;\n"
 
 	"void main(void) {\n"
-		"gl_Position = obj_model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
+		"vec4 vertex_pos_world_space_4D = vec4(vertex_pos_world_space, 1.0f);\n"
+		"gl_Position = obj_model_view_projection * vertex_pos_world_space_4D;\n"
+		"shadow_coord = light_bias_model_view_projection * vertex_pos_world_space_4D;\n"
 	"}\n",
 
 *const demo_23_obj_fragment_shader =
 	"#version 330 core\n"
 
+	"in vec4 shadow_coord;\n"
+
 	"out vec3 color;\n"
 
 	"uniform sampler2D depth_map_sampler;\n"
 
+	"const float bias = 0.005f;\n"
+
 	"void main(void) {\n"
-		"float depth_value = texture(depth_map_sampler, vec2(0.2f, 0.2f)).r;\n"
-		"color = vec3(depth_value + 0.5f);\n"
+		"float visibility = 1.0f;\n"
+
+		"if (textureProj(depth_map_sampler, shadow_coord.xyw).z < bias / shadow_coord.w)\n"
+			"visibility = 0.5f;\n"
+
+		"color = visibility * vec3(0.2f, 0.5f, 0.7f);\n"
 	"}\n",
 
 *const demo_23_depth_map_vertex_shader =
@@ -45,10 +60,10 @@ const char *const demo_23_obj_vertex_shader =
 
 	"layout(location = 0) in vec3 obj_vertex_pos_world_space;\n"
 
-	"uniform mat4 obj_model, light_view_projection;\n"
+	"uniform mat4 light_model_view_projection;\n"
 
 	"void main(void) {\n"
-		"gl_Position = light_view_projection * obj_model * vec4(obj_vertex_pos_world_space, 1.0f);\n"
+		"gl_Position = light_model_view_projection * vec4(obj_vertex_pos_world_space, 1.0f);\n"
 	"}\n",
 
 *const demo_23_depth_map_fragment_shader =
@@ -58,7 +73,7 @@ const char *const demo_23_obj_vertex_shader =
 
 GLuint init_demo_23_obj_vbo(buffer_size_t* const num_obj_vertices) {
 	const GLint num_components_per_vertex = 3;
-	const GLfloat plane_size[2] = {10.0f, 8.0f}; // X and Z
+	const GLfloat plane_size[2] = {8.0f, 10.0f}; // X and Z
 
 	#define OBJ_OFFSET(x, y, z) (x) + plane_size[0] * 0.5f, (y) + 2.0f, (z) + plane_size[1] * 0.5f
 
@@ -76,7 +91,11 @@ GLuint init_demo_23_obj_vbo(buffer_size_t* const num_obj_vertices) {
 		// Triangle object
 		OBJ_OFFSET(-1, -1, 0),
 		OBJ_OFFSET(0, 0, 0),
-		OBJ_OFFSET(1, -1, 0)
+		OBJ_OFFSET(1, -1, 0),
+
+		0.0f, 0.0f, plane_size[1] * 0.1f,
+		plane_size[0], 0.0f, plane_size[1],
+		plane_size[0] * 0.5f, 4.0f, plane_size[1]
 	};
 
 	#undef OBJ_OFFSET
@@ -101,7 +120,7 @@ StateGL demo_23_init(void) {
 		.obj_shader = init_shader_program(demo_23_obj_vertex_shader, demo_23_obj_fragment_shader),
 		.depth_map_shader = init_shader_program(demo_23_depth_map_vertex_shader, demo_23_depth_map_fragment_shader),
 		.depth_map_texture = preinit_texture(TexPlain, TexNonRepeating),
-		.shadow_size = {1024, 1024}
+		.shadow_size = {128, 128}
 	};
 
 	scene_state.obj_vbo = init_demo_23_obj_vbo(&scene_state.num_obj_vertices);
@@ -133,16 +152,21 @@ StateGL demo_23_init(void) {
 }
 
 void demo_23_drawer(const StateGL* const sgl) {
+	glClearColor(0.5f, 0.0f, 0.0f, 0.0f);
+
 	const SceneState scene_state = *((SceneState*) sgl -> any_data);
 
 	static Camera camera;
-	static GLint obj_model_view_projection_id, obj_model_id, light_view_projection_id;
+
+	static GLint
+		obj_model_view_projection_id, light_bias_model_view_projection_id, light_model_view_projection_id;
+
 	static byte first_call = 1;
 
 	if (first_call) {
 		INIT_UNIFORM(obj_model_view_projection, scene_state.obj_shader);
-		INIT_UNIFORM(obj_model, scene_state.depth_map_shader);
-		INIT_UNIFORM(light_view_projection, scene_state.depth_map_shader);
+		INIT_UNIFORM(light_bias_model_view_projection, scene_state.obj_shader);
+		INIT_UNIFORM(light_model_view_projection, scene_state.depth_map_shader);
 		init_camera(&camera, (vec3) {0.0f, 1.0f, 0.0f});
 		first_call = 0;
 	}
@@ -152,23 +176,36 @@ void demo_23_drawer(const StateGL* const sgl) {
 	const Event event = get_next_event();
 	update_camera(&camera, event, NULL);
 
-	mat4 light_view, light_projection, light_view_projection; // TODO: set these up properly in camera.c later
+	// TODO: set these up properly in camera.c later
+	mat4 light_view, light_projection, light_view_projection, light_model_view_projection;
 
 	get_view_matrix(
-		(vec3) {7.137089f, 2.295277f, 2.930087f},
-		(vec3) {-0.529456f, -0.786935, 0.316875f},
-		(vec3) {-0.513544f, 0.0f, -0.858063f},
+		(vec3) {1.460225f, -1.647446f, 1.147844f},
+		(vec3) {0.853554f, -0.382683f, 0.353553f},
+		(vec3) {-0.382683f, 0.0f, 0.923880f},
 		light_view
 	);
 
-	glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, constants.camera.clip_dists.near, constants.camera.clip_dists.far, light_projection);
+	glm_perspective(constants.camera.init.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
+		constants.camera.clip_dists.near, constants.camera.clip_dists.far, light_projection);
+
 	glm_mul(light_projection, light_view, light_view_projection);
+	glm_mul(light_view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, light_model_view_projection);
+
+	const mat4 bias_matrix = {
+		{0.5f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 0.5f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.5f, 0.0f},
+		{0.5f, 0.5f, 0.5f, 1.0f}
+	};
+
+	mat4 light_bias_model_view_projection;
+	glm_mul((vec4*) light_model_view_projection, (vec4*) bias_matrix, light_bias_model_view_projection);
 
 	////////// Rendering to depth map from light position
 
 	glUseProgram(scene_state.depth_map_shader);
-	UPDATE_UNIFORM(obj_model, Matrix4fv, 1, GL_FALSE, (GLfloat*) ((mat4) GLM_MAT4_IDENTITY_INIT)); // TODO: find out if this is correct
-	UPDATE_UNIFORM(light_view_projection, Matrix4fv, 1, GL_FALSE, &light_projection[0][0]);
+	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE, &light_model_view_projection[0][0]);
 
 	glViewport(0, 0, scene_state.shadow_size[0], scene_state.shadow_size[1]);
 	glBindFramebuffer(GL_FRAMEBUFFER, scene_state.depth_map_framebuffer); // No need to clear color + depth buffer
@@ -179,6 +216,8 @@ void demo_23_drawer(const StateGL* const sgl) {
 
 	glUseProgram(scene_state.obj_shader);
 	UPDATE_UNIFORM(obj_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+	UPDATE_UNIFORM(light_bias_model_view_projection, Matrix4fv, 1, GL_FALSE, &light_bias_model_view_projection[0][0]);
+
 	use_texture(scene_state.depth_map_texture, scene_state.obj_shader, "depth_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 
 	glViewport(0, 0, event.screen_size[0], event.screen_size[1]);

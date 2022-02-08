@@ -5894,3 +5894,11 @@ static GLfloat apply_collision_on_xz_axis(const byte* const heightmap,
 	// glReadPixels(0, 0, 800, 600, GL_DEPTH_COMPONENT, GL_FLOAT, )
 
 /////
+
+	/*
+	glm_ortho(-20.0f, 2.0f, -20.0f, 20.0f, constants.camera.clip_dists.near, constants.camera.clip_dists.far, light_projection);
+	glm_mul(light_projection, light_view, light_view_projection);
+	glm_mul(light_view_projection, (mat4) GLM_MAT4_IDENTITY_INIT, light_model_view_projection);
+	*/
+
+/////
