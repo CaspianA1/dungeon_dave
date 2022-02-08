@@ -54,11 +54,12 @@
 typedef struct {
 	const GLuint lightmap_texture; // This is grayscale
 
-	List sectors;
-	BatchDrawContext sector_draw_context;
+	const Weapon weapon;
 
+	BatchDrawContext sector_draw_context, billboard_draw_context;
+
+	List sectors; // This is not in the sector draw context b/c the cpu list for that context consists of vertices
 	const List animations, animation_instances;
-	BatchDrawContext billboard_draw_context;
 
 	const Skybox skybox;
 	byte* const heightmap;
@@ -71,6 +72,8 @@ StateGL demo_17_init(void) {
 	SceneState scene_state = {
 		// "../assets/palace_perlin.bmp", "../assets/water_grayscale.bmp"
 		.lightmap_texture = init_plain_texture("../assets/palace_perlin.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
+
+		.weapon = init_weapon("../../../../assets/spritesheets/weapons/desecrator.bmp", 8, 1, 8),
 
 		.animations = LIST_INITIALIZER(animation) (4,
 			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
@@ -209,15 +212,18 @@ void demo_17_drawer(const StateGL* const sgl) {
 void demo_17_deinit(const StateGL* const sgl) {
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 
-	deinit_list(scene_state -> sectors);
-	deinit_batch_draw_context(&scene_state -> sector_draw_context);
+	deinit_texture(scene_state -> lightmap_texture);
+	deinit_weapon(scene_state -> weapon);
 
-	deinit_list(scene_state -> animations);
-	deinit_list(scene_state -> animation_instances);
+	deinit_batch_draw_context(&scene_state -> sector_draw_context);
 	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
 
-	deinit_texture(scene_state -> lightmap_texture);
+	deinit_list(scene_state -> sectors);
+	deinit_list(scene_state -> animations);
+	deinit_list(scene_state -> animation_instances);
+
 	deinit_skybox(scene_state -> skybox);
+
 	free(sgl -> any_data);
 
 	deinit_demo_vars(sgl);
