@@ -73,7 +73,7 @@ const char *const demo_23_obj_vertex_shader =
 
 GLuint init_demo_23_obj_vbo(buffer_size_t* const num_obj_vertices) {
 	const GLint num_components_per_vertex = 3;
-	const GLfloat plane_size[2] = {8.0f, 10.0f}; // X and Z
+	const GLfloat plane_size[2] = {12.0f, 15.0f}; // X and Z
 
 	#define OBJ_OFFSET(x, y, z) (x) + plane_size[0] * 0.5f, (y) + 2.0f, (z) + plane_size[1] * 0.5f
 
@@ -88,10 +88,14 @@ GLuint init_demo_23_obj_vbo(buffer_size_t* const num_obj_vertices) {
 		0.0f, 0.0f, plane_size[1],
 		plane_size[0], 0.0f, plane_size[1],
 
-		// Triangle object
-		OBJ_OFFSET(-1, -1, 0),
-		OBJ_OFFSET(0, 0, 0),
-		OBJ_OFFSET(1, -1, 0),
+		// Triangle object,
+		OBJ_OFFSET(-1.0f, -1.0f, 0.0f),
+		OBJ_OFFSET(0.0f, 0.0f, 0.0f),
+		OBJ_OFFSET(1.0f, -1.0f, 0.0f),
+
+		OBJ_OFFSET(1.0f, 1.0f, 0.0f),
+		OBJ_OFFSET(0.0f, 0.0f, 0.0f),
+		OBJ_OFFSET(-1.0f, 1.0f, 0.0f),
 
 		0.0f, 0.0f, plane_size[1] * 0.1f,
 		plane_size[0], 0.0f, plane_size[1],
@@ -180,7 +184,7 @@ void demo_23_drawer(const StateGL* const sgl) {
 	mat4 light_view, light_projection, light_view_projection, light_model_view_projection;
 
 	get_view_matrix(
-		(vec3) {1.460225f, -1.647446f, 1.147844f},
+		(vec3) {4.460225f, 1.647446f, 2.147844f},
 		(vec3) {0.853554f, -0.382683f, 0.353553f},
 		(vec3) {-0.382683f, 0.0f, 0.923880f},
 		light_view

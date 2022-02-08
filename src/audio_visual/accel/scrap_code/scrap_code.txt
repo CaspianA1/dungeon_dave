@@ -5902,3 +5902,23 @@ static GLfloat apply_collision_on_xz_axis(const byte* const heightmap,
 	*/
 
 /////
+
+		/*
+		OBJ_OFFSET(-2.0f, -2.0f, 0.0f),
+		OBJ_OFFSET(0.0f, 0.0f, 0.0f),
+		OBJ_OFFSET(1.0f, -1.0f, 0.0f),
+		*/
+
+		/*
+		OBJ_OFFSET(1, -1, 0),
+		OBJ_OFFSET(0, 0, 0),
+		OBJ_OFFSET(1, 1, 0)
+		*/
+
+		/*
+		0.0f, 0.0f, plane_size[1] * 0.1f,
+		plane_size[0], 0.0f, plane_size[1],
+		plane_size[0] * 0.5f, 4.0f, plane_size[1]
+		*/
+
+/////
