@@ -8,7 +8,7 @@ const GLchar *const perlin_vertex_shader =
 
 	// Bottom left, bottom right, top left, top right
 	"const vec2 corners[4] = vec2[4] (\n"
-		"vec2(-1, -1), vec2(1, -1), vec2(-1, 1), vec2(1, 1)\n"
+		"vec2(-1.0f, -1.0f), vec2(1.0f, -1.0f), vec2(-1.0f, 1.0f), vec2(1.0f, 1.0f)\n"
 	");\n"
 
 	"void main(void) {\n"
