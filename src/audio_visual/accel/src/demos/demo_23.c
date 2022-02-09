@@ -3,7 +3,7 @@
 - Start with making a plain shadow map: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
 - After that, move onto an omnidirectional shadow map: https://learnopengl.com/Advanced-Lighting/Shadows/Point-Shadows
 - First, get depth buffer rendering working, and then make shadows. Done.
-- Next, test more elaborate objects to be shadowed.
+- Next, test more elaborate objects to be shadowed. Done.
 - Next, use sampler shadows with GL_TEXTURE_COMPARE_MODE for no branch in the fragment shader.
 - Next, add point lights.
 */
@@ -89,14 +89,22 @@ GLuint init_demo_23_obj_vbo(buffer_size_t* const num_obj_vertices) {
 		0.0f, 0.0f, plane_size[1],
 		plane_size[0], 0.0f, plane_size[1],
 
-		// Triangle object,
-		OBJ_OFFSET(-1.0f, -1.0f, 0.0f),
-		OBJ_OFFSET(0.0f, 0.0f, 0.0f),
-		OBJ_OFFSET(1.0f, -1.0f, 0.0f),
+		// Little pyramid
+		OBJ_OFFSET(-0.5f, 0.0f, -0.5f),
+		OBJ_OFFSET(0.5f, 0.0f, -0.5f),
+		OBJ_OFFSET(0.0f, 1.0f, 0.0f),
 
-		OBJ_OFFSET(1.0f, 1.0f, 0.0f),
-		OBJ_OFFSET(0.0f, 0.0f, 0.0f),
-		OBJ_OFFSET(-1.0f, 1.0f, 0.0f),
+		OBJ_OFFSET(-0.5f, 0.0f, -0.5f),
+		OBJ_OFFSET(-0.5f, 0.0f, 0.5f),
+		OBJ_OFFSET(0.0f, 1.0f, 0.0f),
+
+		OBJ_OFFSET(0.5f, 0.0f, 0.5f),
+		OBJ_OFFSET(-0.5f, 0.0f, 0.5f),
+		OBJ_OFFSET(0.0f, 1.0f, 0.0f),
+
+		OBJ_OFFSET(0.5f, 0.0f, 0.5f),
+		OBJ_OFFSET(0.5f, 0.0f, -0.5f),
+		OBJ_OFFSET(0.0f, 1.0f, 0.0f),
 
 		0.0f, 0.0f, plane_size[1] * 0.1f,
 		plane_size[0], 0.0f, plane_size[1],
