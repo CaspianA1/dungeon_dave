@@ -27,7 +27,7 @@
 - Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/ (or perhaps not, since alpha just 0 or 1)
 
 - Crouch
-- Make deceleration framerate-independent
+- Make deceleration and tilt decrease framerate-independent
 - Animations go slower at 5 FPS
 - Having an idle window with vsync on leads to high CPU and GPU usage
 - Make tilting not depend on framerate (mouse deltas will always be smaller with a higher FPS)
@@ -73,7 +73,7 @@ StateGL demo_17_init(void) {
 		// "../assets/palace_perlin.bmp", "../assets/water_grayscale.bmp"
 		.lightmap_texture = init_plain_texture("../assets/palace_perlin.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
 
-		.weapon = init_weapon("../../../../assets/spritesheets/weapons/desecrator.bmp", 8, 1, 8),
+		.weapon = init_weapon("../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
 
 		.animations = LIST_INITIALIZER(animation) (4,
 			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
@@ -180,7 +180,7 @@ StateGL demo_17_init(void) {
 }
 
 void demo_17_drawer(const StateGL* const sgl) {
-	SceneState* const scene_state = (SceneState*) sgl -> any_data;
+	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 
 	static Camera camera;
 	static PhysicsObject physics_obj;
@@ -200,6 +200,8 @@ void demo_17_drawer(const StateGL* const sgl) {
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
 	update_camera(&camera, get_next_event(), &physics_obj);
+
+	draw_weapon(scene_state -> weapon, &camera);
 
 	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors,
 		&camera, scene_state -> lightmap_texture, scene_state -> map_size);

@@ -54,8 +54,8 @@ static void update_camera_angles(Camera* const camera, const Event* const event)
 	const GLfloat delta_turn = (GLfloat) -mouse_movement[0] / screen_size[0] * constants.speeds.look_hori;
 	camera -> angles.hori += delta_turn;
 
-	const GLfloat not_limited_tilt = delta_turn / constants.camera.delta_turn_to_tilt_ratio;
-	camera -> angles.tilt = limit_to_pos_neg_domain(not_limited_tilt, constants.camera.lims.tilt);
+	const GLfloat tilt = (camera -> angles.tilt + delta_turn * delta_turn) * constants.camera.tilt_decel_rate;
+	camera -> angles.tilt = limit_to_pos_neg_domain(tilt, constants.camera.lims.tilt);
 }
 
 /* Maps a value between 0 and 1 to a smooth output
@@ -193,7 +193,7 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 v
 	if (velocities[1] == 0.0f) { // Going in the red area results in a lot of slowdown, but only with pace
 		const GLfloat speed_forward_back = fabsf(velocities[0]), speed_strafe = fabsf(velocities[2]);
 		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
-		const GLfloat speed_xz_percent = smooth_hermite(largest_speed_xz / constants.speeds.xz_max);
+		const GLfloat speed_xz_percent = largest_speed_xz / constants.speeds.xz_max;
 
 		camera -> pace = make_pace_function(
 			camera -> time_since_jump, constants.camera.pace.period,
@@ -271,7 +271,7 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 	glm_mul(projection, view, view_projection);
 	glm_mul(view_projection, GLM_MAT4_IDENTITY, camera -> model_view_projection);
 
-	glm_frustum_planes((vec4*) camera -> model_view_projection, camera -> frustum_planes);
+	glm_frustum_planes(camera -> model_view_projection, camera -> frustum_planes);
 }
 
 #endif

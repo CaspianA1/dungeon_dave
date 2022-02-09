@@ -5922,3 +5922,112 @@ static GLfloat apply_collision_on_xz_axis(const byte* const heightmap,
 		*/
 
 /////
+
+// TODO: to excluded
+static void init_unscaled_spritesheet_for_texture_set(const GLchar* const path,
+	const GLsizei frames_across, const GLsizei frames_down, const GLsizei total_frames) {
+	
+	SDL_Surface* const spritesheet = init_surface(path);
+	SDL_SetSurfaceBlendMode(spritesheet, SDL_BLENDMODE_NONE);
+
+	SDL_Rect spritesheet_frame_area = {.w = spritesheet -> w / frames_across, .h = spritesheet -> h / frames_down};
+
+	const GLuint texture = preinit_texture(TexSet, TexNonRepeating);
+
+	glTexImage3D(TexSet, 0, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT,
+		spritesheet_frame_area.w, spritesheet_frame_area.h, total_frames,
+		0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
+}
+
+/////
+
+		/*
+		.texture = init_texture_set(
+			TexNonRepeating, 0, 1, 64, 64, "../../../../assets/spritesheets/numbers.bmp",
+			3, 3, 7
+		),
+		*/
+
+/////
+
+// TODO: to included
+void update_animation_instance(AnimationInstance* const animation_instance,
+	buffer_size_t* const texture_id, const Animation animation, const GLfloat curr_time) {
+
+	const GLfloat time_delta = curr_time - animation_instance -> last_frame_time;
+
+	if (time_delta >= animation.secs_per_frame) {
+		if ((*texture_id)++ >= animation.texture_id_range.end)
+			*texture_id = animation.texture_id_range.start;
+
+		animation_instance -> last_frame_time = curr_time;
+		}
+}
+
+
+/////
+
+		.weapon = init_weapon("../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
+		// .weapon = init_weapon("../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5),
+
+/////
+
+	/*
+	const GLfloat pace_across = (pace_percent - 0.5f) * pace_strength; // Normalized from -0.5f to 0.5f
+	DEBUG(pace_across, lf);
+
+	DEBUG_FLOAT(pace_across);
+
+	const GLfloat pace_down = -pace_percent * pace_strength;
+	*/
+
+/////
+
+	/*
+	GLfloat across, down;
+
+	across = (pace_percent - 0.5f) * 0.5f;
+	down = -fabsf(across) * 0.4f;
+
+	across += 0.25f;
+	DEBUG((double) across, lf);
+	*/
+
+/////
+
+	/*
+	const GLfloat x = pace_percent * 2.0f - 1.0f; // Ranges from -1.0f to 1.0f
+	GLfloat across = x * camera -> speed_xz_percent; // Ranges from -0.5f to 0.5f
+	*/
+
+	/*
+	GLfloat across = (pace_percent - 0.5f) * camera -> speed_xz_percent * strength;
+	DEBUG(across, lf);
+
+	DEBUG((double) across, lf);
+	*/
+
+/////
+
+
+	// This one is good
+	// const GLfloat down = -fabsf(pace_percent) * strength; // Ranges from 0.0f to -strength
+	// const GLfloat down = -fabsf(pace_percent - 0.5f) * strength;
+	// const GLfloat down = -pace_percent * 0.5f;
+
+	//////////
+
+	// const GLfloat x = sinf(SDL_GetTicks() / 200.0f) / 2.0f; // pace_percent * strength;
+	// GLfloat x = sinf(pace_percent);
+	
+	// pace_percent * 2.0f - 1.0f;
+	// DEBUG_FLOAT(x);
+
+/////
+
+	/*
+	curr across: rests at 0, and pulsates between 0 and 1
+	needed: rests at 0, and pulsates between -0.5 and 0.5
+	*/
+
+/////

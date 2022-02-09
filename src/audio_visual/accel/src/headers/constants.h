@@ -19,7 +19,7 @@ static const struct {
 	const GLfloat almost_zero;
 
 	const struct { // All angles are in radians
-		const GLfloat eye_height, aabb_collision_box_size, delta_turn_to_tilt_ratio;
+		const GLfloat eye_height, aabb_collision_box_size, tilt_decel_rate;
 		const struct {const GLfloat fov, hori, vert, tilt;} init;
 		// const struct {const GLfloat time_for_full, max;} fov;
 		const struct {const GLfloat period, max_amplitude;} pace;
@@ -43,16 +43,16 @@ static const struct {
 	.almost_zero = 0.001f,
 
 	.camera = {
-		.eye_height = 0.5f, .aabb_collision_box_size = 0.2f, .delta_turn_to_tilt_ratio = 2.4f,
+		.eye_height = 0.5f, .aabb_collision_box_size = 0.2f, .tilt_decel_rate = 0.9f,
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
-		.pace = {.period = 0.6f, .max_amplitude = 0.3f},
-		.lims = {.vert = HALF_PI, .tilt = 0.25f, .fov = PI / 18.0f}, // Max FOV equals 10 degrees
+		.pace = {.period = 0.7f, .max_amplitude = 0.2f},
+		.lims = {.vert = HALF_PI, .tilt = 0.15f, .fov = PI / 18.0f}, // Max FOV equals 10 degrees
 		.clip_dists = {.near = 0.01f, .far = 441.6729559300637f}
 	},
 
 	.accel = {
-		.forward_back = 0.2f, .additional_forward_back = 0.2f, .strafe = 0.3f,
-		.xz_decel = 0.87f, .g = 13.0f
+		.forward_back = 0.2f, .additional_forward_back = 0.2f,
+		.strafe = 0.3f, .xz_decel = 0.87f, .g = 13.0f
 	},
 
 	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look_hori = TWO_THIRDS_PI, .look_vert = HALF_PI},
