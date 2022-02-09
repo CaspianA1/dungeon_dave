@@ -105,8 +105,8 @@ void draw_weapon(const Weapon weapon, const Camera* const camera) {
 	// TODO: put this in constants.c
 	const GLfloat magnitude = 0.4f, pace_percent = camera -> pace / constants.camera.pace.max_amplitude;
 
-	const GLfloat across = ((pace_percent * 1) * 2.0f - 1.0f) * magnitude; // From -magnitude to magnitude
-	const GLfloat down = fabsf(across) - magnitude; // From 0 to -magnitude
+	const GLfloat across = (pace_percent * 2.0f - 1.0f) * magnitude; // From -magnitude to magnitude
+	const GLfloat down = fabsf(across) - magnitude; // From 0.0f to -magnitude
 
 	UPDATE_UNIFORM(pace, 2f, across, down);
 	UPDATE_UNIFORM(frame_index, 1ui, keys[SDL_SCANCODE_C] + keys[SDL_SCANCODE_V]);
