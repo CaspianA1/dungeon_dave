@@ -226,8 +226,10 @@ void demo_23_drawer(const StateGL* const sgl) {
 	// TODO: set these up properly in camera.c later
 	mat4 light_view, light_projection, light_view_projection, light_model_view_projection;
 
+	static vec3 pos = {4.460225f, 1.647446f, 2.147844f};
+	pos[0] = sinf(SDL_GetTicks() / 200.0f) + 4.0f;
 	get_view_matrix(
-		(vec3) {4.460225f, 1.647446f, 2.147844f},
+		pos,
 		(vec3) {0.853554f, -0.382683f, 0.353553f},
 		(vec3) {-0.382683f, 0.0f, 0.923880f},
 		light_view
