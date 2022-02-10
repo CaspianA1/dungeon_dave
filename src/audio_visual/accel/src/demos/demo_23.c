@@ -6,7 +6,7 @@
 - Next, test more elaborate objects to be shadowed. Done.
 - Next, use sampler shadows with GL_TEXTURE_COMPARE_MODE for no branch in the fragment shader.
 - Next, add point lights.
-- Find out why not calling capture_depth_buffer still works.
+- Find out why not calling capture_depth_buffer still works (test this on Linux to see if it's specific to MacOS).
 */
 
 #include "../utils.c"
