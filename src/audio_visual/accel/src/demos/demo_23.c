@@ -86,10 +86,9 @@ DepthBufferCapture init_depth_buffer_capture(const GLint texture_width, const GL
 		.texture = preinit_texture(TexPlain, TexNonRepeating)
 	};
 
-	INIT_UNIFORM(depth_capture.light_model_view_projection, depth_capture.shader);
+	glTexImage2D(TexPlain, 0, GL_DEPTH_COMPONENT, texture_width, texture_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-		texture_width, texture_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	INIT_UNIFORM(depth_capture.light_model_view_projection, depth_capture.shader);
 
 	glGenFramebuffers(1, &depth_capture.framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, depth_capture.framebuffer);
@@ -97,6 +96,9 @@ DepthBufferCapture init_depth_buffer_capture(const GLint texture_width, const GL
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		puts("Framebuffer not complete");
 
 	return depth_capture;
 }
@@ -123,7 +125,7 @@ void capture_depth_buffer(const DepthBufferCapture depth_capture, void (*const d
 
 GLuint init_demo_23_obj_vbo(GLsizei* const num_obj_vertices) {
 	const GLint num_components_per_vertex = 3;
-	const GLfloat plane_size[2] = {12.0f, 15.0f}; // X and Z
+	const GLfloat plane_size[2] = {22.0f, 25.0f}; // X and Z
 
 	#define OBJ_OFFSET(x, y, z) (x) + plane_size[0] * 0.5f, (y) + 2.0f, (z) + plane_size[1] * 0.5f
 
@@ -226,7 +228,7 @@ void demo_23_drawer(const StateGL* const sgl) {
 	// TODO: set these up properly in camera.c later
 	mat4 light_view, light_projection, light_view_projection, light_model_view_projection;
 
-	static vec3 pos = {4.460225f, 1.647446f, 2.147844f};
+	static vec3 pos = {8.460225f, 1.647446f, 10.147844f};
 	pos[0] = sinf(SDL_GetTicks() / 200.0f) + 4.0f;
 	get_view_matrix(
 		pos,
