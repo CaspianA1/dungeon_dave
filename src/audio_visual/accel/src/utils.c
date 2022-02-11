@@ -81,7 +81,7 @@ static void resize_window_if_needed(SDL_Window* const window) {
 		first_call = 0;
 	}
 
-	const byte resize_attempt = keys[KEY_TOGGLE_FULLSCREEN_WINDOW];
+	const byte resize_attempt = keys[constants.keys.toggle_fullscreen_window];
 
 	if (!window_resized_last_tick && resize_attempt) {
 		window_is_fullscreen = !window_is_fullscreen;
@@ -120,6 +120,20 @@ static void set_triangle_fill_mode(void) {
 	else changed_mode_last_tick = 0;
 }
 
+static byte application_should_exit(void) {
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		if (event.type == SDL_QUIT)
+			return 1;
+	}
+
+	const byte // On Ubuntu, SDL_QUIT is not caught by SDL_PollEvent, so this circumvents that
+		ctrl_key = keys[constants.keys.ctrl[0]] || keys[constants.keys.ctrl[1]],
+		activate_exit_key = keys[constants.keys.activate_exit[0]] || keys[constants.keys.activate_exit[1]];
+
+	return ctrl_key && activate_exit_key;
+}
+
 void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
 	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
 
@@ -130,7 +144,6 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 	#endif
 
 	byte running = 1;
-	SDL_Event event;
 	const StateGL sgl = init();
 
 	while (running) {
@@ -138,29 +151,7 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		const Uint64 before = SDL_GetPerformanceCounter();
 		#endif
 
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-				case SDL_QUIT:
-					running = 0;
-					break;
-				case SDL_KEYDOWN: {
-					puts("A key down");
-					const SDL_Scancode key = event.key.keysym.scancode;
-					if (key == SDL_SCANCODE_LCTRL || key == SDL_SCANCODE_RCTRL) {
-						puts("Ctrl key");
-					}
-
-					/*
-					const SDL_KeyCode key = event.key.keysym.sym;
-					char* name = SDL_GetKeyName(key);
-					DEBUG(name, s);
-					*/
-				}
-					break;
-			}
-		}
-
-		if (keys[SDL_SCANCODE_T]) running = 0;
+		running = !application_should_exit();
 
 		resize_window_if_needed(screen -> window);
 		set_triangle_fill_mode();

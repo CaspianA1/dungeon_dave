@@ -9,16 +9,16 @@ Event get_next_event(void) {
 	glGetIntegerv(GL_VIEWPORT, viewport_size);
 
 	const byte
-		attempting_acceleration = keys[constants.movement_keys.accelerate_1] || keys[constants.movement_keys.accelerate_2],
-		moving_forward = keys[constants.movement_keys.forward], moving_backward = keys[constants.movement_keys.backward];
+		attempting_acceleration = keys[constants.keys.accelerate[0]] || keys[constants.keys.accelerate[1]],
+		moving_forward = keys[constants.keys.forward], moving_backward = keys[constants.keys.backward];
 
 	Event event = {
 		.movement_bits =
 			moving_forward |
 			(moving_backward << 1) |
-			(keys[constants.movement_keys.left] << 2) |
-			(keys[constants.movement_keys.right] << 3) |
-			(keys[constants.movement_keys.jump] << 4) |
+			(keys[constants.keys.left] << 2) |
+			(keys[constants.keys.right] << 3) |
+			(keys[constants.keys.jump] << 4) |
 			((attempting_acceleration && (moving_forward || moving_backward)) << 5),
 
 		.screen_size = {viewport_size[2], viewport_size[3]}

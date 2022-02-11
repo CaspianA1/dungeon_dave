@@ -36,7 +36,11 @@
 #define USE_VSYNC
 // #define FORCE_SOFTWARE_RENDERER
 
-#define KEY_TOGGLE_FULLSCREEN_WINDOW SDL_SCANCODE_ESCAPE
+/* On some platforms, the only way to activate the SDL_QUIT event type
+is by pressing the window exit button (not through pressing ctrl-w or ctrl-q!).
+That isn't possible for this application, since the mouse is locked in the window.
+After checking for a SDL_QUIT event in utils.c, a ctrl key followed by an exit
+activation key leads to the window being exited, as a workaround for this problem. */
 
 // These are for debugging
 #define KEY_FLY SDL_SCANCODE_1
@@ -102,7 +106,7 @@ extern inline void fail(const GLchar* const msg, const FailureType failure_type)
 
 //////////
 
-// Excluded: resize_window_if_needed, set_triangle_fill_mode, fail_on_shader_creation_error
+// Excluded: resize_window_if_needed, set_triangle_fill_mode, query_for_application_exit, fail_on_shader_creation_error
 
 Screen init_screen(const GLchar* const title);
 void deinit_screen(const Screen* const screen);

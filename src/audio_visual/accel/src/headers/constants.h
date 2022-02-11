@@ -34,8 +34,11 @@ static const struct {
 	const struct {const GLfloat xz_max, jump, look_hori, look_vert;} speeds;
 
 	const struct {
-		const SDL_Scancode forward, backward, left, right, jump, accelerate_1, accelerate_2;
-	} movement_keys;
+		const SDL_Scancode
+			forward, backward, left, right,
+			jump, accelerate[2], toggle_fullscreen_window,
+			ctrl[2], activate_exit[2];
+	} keys;
 
 } constants = {
 	.fps = 60,
@@ -57,10 +60,12 @@ static const struct {
 
 	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look_hori = TWO_THIRDS_PI, .look_vert = HALF_PI},
 
-	.movement_keys = {
+	.keys = {
 		.forward = SDL_SCANCODE_W, .backward = SDL_SCANCODE_S, .left = SDL_SCANCODE_A,
-		.right = SDL_SCANCODE_D, .jump = SDL_SCANCODE_SPACE, .accelerate_1 = SDL_SCANCODE_LSHIFT,
-		.accelerate_2 = SDL_SCANCODE_RSHIFT
+		.right = SDL_SCANCODE_D, .jump = SDL_SCANCODE_SPACE, .accelerate = {SDL_SCANCODE_LSHIFT, SDL_SCANCODE_RSHIFT},
+		.toggle_fullscreen_window = SDL_SCANCODE_ESCAPE,
+		.ctrl = {SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL},
+		.activate_exit = {SDL_SCANCODE_W, SDL_SCANCODE_Q}
 	}
 };
 
