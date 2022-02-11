@@ -151,6 +151,8 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 			}
 		}
 
+		if (keys[SDL_SCANCODE_T]) running = 0;
+
 		resize_window_if_needed(screen -> window);
 		set_triangle_fill_mode();
 
