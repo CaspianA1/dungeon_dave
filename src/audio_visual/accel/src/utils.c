@@ -141,13 +141,22 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_QUIT:
-					puts("Quit");
 					running = 0;
 					break;
-				case SDL_WINDOWEVENT:
-					if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
-						puts("Close");
+				case SDL_KEYDOWN: {
+					puts("A key down");
+					const SDL_Scancode key = event.key.keysym.scancode;
+					if (key == SDL_SCANCODE_LCTRL || key == SDL_SCANCODE_RCTRL) {
+						puts("Ctrl key");
 					}
+
+					/*
+					const SDL_KeyCode key = event.key.keysym.sym;
+					char* name = SDL_GetKeyName(key);
+					DEBUG(name, s);
+					*/
+				}
+					break;
 			}
 		}
 
