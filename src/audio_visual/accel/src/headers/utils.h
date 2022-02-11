@@ -26,7 +26,6 @@
 #define GL_ERR_CHECK printf("GL error check: %s\n", get_gl_error());
 #define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
 
-
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
 
