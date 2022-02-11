@@ -139,9 +139,10 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		#endif
 
 		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) {
-				running = 0;
-				break;
+			switch (event.type) {
+				case SDL_QUIT:
+					running = 0;
+					break;
 			}
 		}
 
