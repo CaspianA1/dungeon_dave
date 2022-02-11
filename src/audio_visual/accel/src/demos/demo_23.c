@@ -9,6 +9,7 @@
 - Find out why not calling capture_depth_buffer still works (test this on Linux to see if it's specific to MacOS).
 - Also, making the matrix to a perspective projection one doesn't make the light a spotlight
 - Integrate some of this code into demo 17, perhaps, to see what happens
+- It also seems like areas behind the light are lit up, which they shouldn't be
 */
 
 #include "../utils.c"
@@ -230,10 +231,10 @@ void demo_23_drawer(const StateGL* const sgl) {
 	// TODO: set these up properly in camera.c later
 	mat4 light_view, light_projection, light_view_projection, light_model_view_projection;
 
-	static vec3 pos = {8.460225f, 1.647446f, 10.147844f};
-	pos[0] = sinf(SDL_GetTicks() / 200.0f) + 4.0f;
+	static vec3 light_pos = {[1] = 1.647446f, [2] = 10.147844f};
+	light_pos[0] = sinf(SDL_GetTicks() / 200.0f) - 0.0f;
 	get_view_matrix(
-		pos,
+		light_pos,
 		(vec3) {0.853554f, -0.382683f, 0.353553f},
 		(vec3) {-0.382683f, 0.0f, 0.923880f},
 		light_view
