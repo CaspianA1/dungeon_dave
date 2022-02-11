@@ -141,8 +141,13 @@ void loop_application(const Screen* const screen, void (*const drawer)(const Sta
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_QUIT:
+					puts("Quit");
 					running = 0;
 					break;
+				case SDL_WINDOWEVENT:
+					if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+						puts("Close");
+					}
 			}
 		}
 
