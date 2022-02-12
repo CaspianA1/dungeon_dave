@@ -11,6 +11,17 @@
 
 #include "buffer_defs.h"
 
+////////// These macros pertain to debugging
+
+#define GL_ERR_CHECK printf("GL error check: %s\n", get_gl_error());
+#define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
+
+#define KEY_FLY SDL_SCANCODE_1
+#define KEY_TOGGLE_WIREFRAME_MODE SDL_SCANCODE_2
+#define KEY_PRINT_POSITION SDL_SCANCODE_3
+#define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_4
+#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_5
+
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define DEBUG_FLOAT(var) printf(#var " = %lf\n", (double) (var))
 #define DEBUG_VEC2(v) printf(#v " = {%lf, %lf}\n", (double) (v)[0], (double) (v)[1])
@@ -23,33 +34,20 @@
 	putchar('\n');\
 } while (0)
 
-#define GL_ERR_CHECK printf("GL error check: %s\n", get_gl_error());
-#define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
-
-#define OPENGL_MAJOR_VERSION 3
-#define OPENGL_MINOR_VERSION 3
+////////// These macros pertain to window defaults
 
 #define WINDOW_W 800
 #define WINDOW_H 600
 
-#define USE_VSYNC
-// #define FORCE_SOFTWARE_RENDERER
-
-/* On some platforms, the only way to activate the SDL_QUIT event type
-is by pressing the window exit button (not through pressing ctrl-w or ctrl-q!).
-That isn't possible for this application, since the mouse is locked in the window.
-After checking for a SDL_QUIT event in utils.c, a ctrl key followed by an exit
-activation key leads to the window being exited, as a workaround for this problem. */
-
-// These are for debugging
-#define KEY_FLY SDL_SCANCODE_1
-#define KEY_TOGGLE_WIREFRAME_MODE SDL_SCANCODE_2
-#define KEY_PRINT_POSITION SDL_SCANCODE_3
-#define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_4
-#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_5
+#define OPENGL_MAJOR_VERSION 3
+#define OPENGL_MINOR_VERSION 3
 
 #define DEPTH_BUFFER_BITS 24
 #define MULTISAMPLE_SAMPLES 8
+
+#define USE_VSYNC
+#define USE_GAMMA_CORRECTION
+// #define FORCE_SOFTWARE_RENDERER
 
 //////////
 

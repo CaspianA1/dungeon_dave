@@ -13,6 +13,10 @@ Screen init_screen(const GLchar* const title) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, OPENGL_MINOR_VERSION);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 
+	#ifdef USE_GAMMA_CORRECTION
+	SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
+	#endif
+
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, DEPTH_BUFFER_BITS);
 
@@ -45,6 +49,10 @@ Screen init_screen(const GLchar* const title) {
 		0
 		#endif
 	);
+
+	#ifdef USE_GAMMA_CORRECTION
+	glEnable(GL_FRAMEBUFFER_SRGB);
+	#endif
 
 	keys = SDL_GetKeyboardState(NULL);
 
@@ -126,6 +134,12 @@ static byte application_should_exit(void) {
 		if (event.type == SDL_QUIT)
 			return 1;
 	}
+
+	/* On Ubuntu, the only way to activate the SDL_QUIT event type
+	is by pressing the window exit button (not through pressing ctrl-w or ctrl-q!).
+	That isn't possible for this application, since the mouse is locked in the window.
+	Since exiting doesn't work normally, a ctrl key followed by an exit activation key
+	serves as a manual workaround to this problem. */
 
 	const byte // On Ubuntu, SDL_QUIT is not caught by SDL_PollEvent, so this circumvents that
 		ctrl_key = keys[constants.keys.ctrl[0]] || keys[constants.keys.ctrl[1]],

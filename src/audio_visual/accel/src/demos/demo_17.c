@@ -201,7 +201,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), &physics_obj);
 
-	draw_weapon(scene_state -> weapon, &camera);
+	// draw_weapon(scene_state -> weapon, &camera);
 
 	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors,
 		&camera, scene_state -> lightmap_texture, scene_state -> map_size);
