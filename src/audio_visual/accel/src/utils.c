@@ -30,8 +30,10 @@ Screen init_screen(const GLchar* const title) {
 	Screen screen = {
 		.window = SDL_CreateWindow(title,
 			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN)
+			WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL)
 	};
+
+	if (screen.window == NULL) fail("launch SDL", LaunchSDL);
 
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);
 	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
