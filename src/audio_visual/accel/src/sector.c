@@ -154,20 +154,19 @@ static void draw_sectors(const BatchDrawContext* const draw_context, const Camer
 	const buffer_size_t num_visible_faces, const GLuint lightmap_texture, const byte map_size[2]) {
 
 	const GLuint sector_shader = draw_context -> shader;
-	glUseProgram(sector_shader);
-
-	static GLint
-		model_view_projection_id, ambient_strength_id,
-		diffuse_strength_id, camera_pos_world_space_id;
-
+	static GLint camera_pos_world_space_id, model_view_projection_id;
 	static byte first_call = 1;
 
+	glUseProgram(sector_shader);
+
 	if (first_call) {
-		INIT_UNIFORM(model_view_projection, sector_shader);
-		INIT_UNIFORM(ambient_strength, sector_shader);
-		INIT_UNIFORM(diffuse_strength, sector_shader);
 		INIT_UNIFORM(camera_pos_world_space, sector_shader);
+		INIT_UNIFORM(model_view_projection, sector_shader);
+
 		INIT_UNIFORM_VALUE(map_size, sector_shader, 2i, map_size[0], map_size[1]);
+		INIT_UNIFORM_VALUE(ambient_strength, sector_shader, 1f, 0.15f);
+		INIT_UNIFORM_VALUE(diffuse_strength, sector_shader, 1f, 0.4f);
+		INIT_UNIFORM_VALUE(attenuation_factor, sector_shader, 1f, 0.02f);
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
 		use_texture(lightmap_texture, sector_shader, "lightmap_sampler", TexPlain, LIGHTMAP_TEXTURE_UNIT);
@@ -175,8 +174,6 @@ static void draw_sectors(const BatchDrawContext* const draw_context, const Camer
 		first_call = 0;
 	}
 
-	UPDATE_UNIFORM(ambient_strength, 1f, 0.15f);
-	UPDATE_UNIFORM(diffuse_strength, 1f, 0.3f);
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE,  &camera -> model_view_projection[0][0]);
 

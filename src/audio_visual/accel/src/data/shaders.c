@@ -69,7 +69,7 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec3 color;\n"
 
-	"uniform float ambient_strength, diffuse_strength;\n"
+	"uniform float ambient_strength, diffuse_strength, attenuation_factor;\n"
 	"uniform sampler2D lightmap_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
@@ -80,7 +80,7 @@ const GLchar *const sector_vertex_shader =
 
 	"float attenuation(void) {\n" // Distance-based lighting
 		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
-		"return 1.0f / (0.9f + 0.005f * dist_squared);\n"
+		"return 1.0f / (1.0f + attenuation_factor * dist_squared);\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
