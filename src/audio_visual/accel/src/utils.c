@@ -148,8 +148,8 @@ static byte application_should_exit(void) {
 	return ctrl_key && activate_exit_key;
 }
 
-void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
-	StateGL (*const init)(void), void (*const deinit)(const StateGL* const)) {
+void loop_application(const Screen* const screen, void (*const drawer) (const StateGL* const),
+	StateGL (*const init) (void), void (*const deinit) (const StateGL* const)) {
 
 	#ifndef USE_VSYNC
 	const GLfloat
