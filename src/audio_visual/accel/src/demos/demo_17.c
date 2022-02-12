@@ -40,7 +40,8 @@
 - Other demos untested
 - Outer project does not even want to start
 - Demo test range doesn't work
-- Using mouse -> keyboard, mouse control doesn't work
+- Sometimes, mouse control does not work when using the keyboard
+- Framerate drop when using the big monitor + optimized + full screen
 
 - Blit 2D sprite to whole screen
 - Flat weapon
