@@ -21,7 +21,7 @@
 	draw/erase modes, line mode, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe
 - Camera var names to yaw, pitch, and roll (maybe)
-- Billboard lighting that matches the sector lighting
+- Billboard lighting that matches the sector lighting (share uniforms via a uniform buffer object)
 - Base darkest distance of attenuated light on the world size
 - Can't use red cross for health since it's copyrighted
 - Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/ (or perhaps not, since alpha just 0 or 1)
