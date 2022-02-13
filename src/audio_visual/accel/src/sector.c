@@ -1,20 +1,6 @@
 #ifndef SECTOR_C
 #define SECTOR_C
 
-#define inlinable static inline
-#define wmalloc malloc
-#define wfree free
-
-typedef struct {
-	unsigned chunk_dimensions[2];
-	size_t alloc_bytes;
-	byte* data;
-} StateMap;
-
-#include "../../../main/statemap.c"
-
-//////////
-
 #include "headers/sector.h"
 #include "data/shaders.c"
 #include "face.c"
@@ -22,14 +8,30 @@ typedef struct {
 #include "texture.c"
 #include "list.c"
 
+//////////
+
+#define inlinable static inline
+#define wmalloc malloc
+#define wfree free
+
+typedef struct {
+	unsigned chunk_dimensions[2];
+	buffer_size_t alloc_bytes;
+	byte* data;
+} StateMap;
+
+#include "../../../main/statemap.c"
+
+//////////
+
 // Attributes here = height and texture id
-static byte point_matches_sector_attributes(const Sector* const sector_ref,
+static byte point_matches_sector_attributes(const Sector* const sector,
 	const byte* const heightmap, const byte* const texture_id_map,
 	const byte x, const byte y, const byte map_width) {
 
 	return
-		*map_point((byte*) heightmap, x, y, map_width) == sector_ref -> visible_heights.max
-		&& *map_point((byte*) texture_id_map, x, y, map_width) == sector_ref -> texture_id;
+		*map_point((byte*) heightmap, x, y, map_width) == sector -> visible_heights.max
+		&& *map_point((byte*) texture_id_map, x, y, map_width) == sector -> texture_id;
 }
 
 // Gets length across, and then adds to area size y until out of map or length across not eq
