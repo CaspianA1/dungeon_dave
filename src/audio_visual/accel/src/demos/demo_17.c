@@ -46,7 +46,7 @@
 - Blit 2D sprite to whole screen
 - Flat weapon
 - Use more of the cglm functions in `update_camera`, or make my own
-- A startup setting of magnification filter
+- A startup setting of magnification filter (and setting other constants like that as well; call that config_constants)
 - Avoid glew altogether and just use SDL_GL_GetProcAddress?
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
