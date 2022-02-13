@@ -190,14 +190,15 @@ static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const G
 }
 
 static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 velocities, const GLfloat delta_time) {
-	if (velocities[1] == 0.0f) { // Going in the red area results in a lot of slowdown, but only with pace
-		const GLfloat speed_forward_back = fabsf(velocities[0]), speed_strafe = fabsf(velocities[2]);
-		const GLfloat largest_speed_xz = (speed_forward_back > speed_strafe) ? speed_forward_back : speed_strafe;
-		const GLfloat speed_xz_percent = largest_speed_xz / constants.speeds.xz_max;
+	const GLfloat combined_speed_xz_amount = fminf(constants.speeds.xz_max,
+		sqrtf(velocities[0] * velocities[0] + velocities[2] * velocities[2]));
 
+	camera -> speed_xz_percent = combined_speed_xz_amount / constants.speeds.xz_max;
+
+	if (velocities[1] == 0.0f) { // Going in the red area results in a lot of slowdown, but only with pace
 		camera -> pace = make_pace_function(
 			camera -> time_since_jump, constants.camera.pace.period,
-			constants.camera.pace.max_amplitude * speed_xz_percent);
+			constants.camera.pace.max_amplitude * camera -> speed_xz_percent);
 
 		*pos_y += camera -> pace;
 		camera -> time_since_jump += delta_time;

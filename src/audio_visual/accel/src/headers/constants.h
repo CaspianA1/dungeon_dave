@@ -54,8 +54,8 @@ static const struct {
 	},
 
 	.accel = {
-		.forward_back = 0.2f, .additional_forward_back = 0.2f,
-		.strafe = 0.3f, .xz_decel = 0.87f, .g = 13.0f
+		.forward_back = 0.15f, .additional_forward_back = 0.05f,
+		.strafe = 0.2f, .xz_decel = 0.87f, .g = 13.0f
 	},
 
 	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look_hori = TWO_THIRDS_PI, .look_vert = HALF_PI},

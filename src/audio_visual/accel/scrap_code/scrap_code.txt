@@ -6031,3 +6031,7 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 	*/
 
 /////
+
+	const GLfloat down = speed_percent * magnitude * across - magnitude;
+
+/////

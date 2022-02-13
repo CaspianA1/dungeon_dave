@@ -66,7 +66,6 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
 
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, BILLBOARD_TEXTURE_UNIT);
 
 		first_call = 0;
@@ -86,10 +85,13 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	glVertexAttribPointer(1, 2, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, size));
 	glVertexAttribPointer(2, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, pos));
 
-	glEnable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, num_visible_billboards); // Each billboard has 4 corners
 	glDisable(GL_BLEND);
+
 	glEnable(GL_CULL_FACE);
 
 	for (byte i = 0; i < 3; i++) {

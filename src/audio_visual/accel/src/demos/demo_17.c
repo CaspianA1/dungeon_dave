@@ -202,14 +202,13 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), &physics_obj);
 
-	// draw_weapon(scene_state -> weapon, &camera);
-
 	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors,
 		&camera, scene_state -> lightmap_texture, scene_state -> map_size);
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 
 	draw_skybox(scene_state -> skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
+	draw_weapon(scene_state -> weapon, &camera);
 }
 
 void demo_17_deinit(const StateGL* const sgl) {

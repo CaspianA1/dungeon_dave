@@ -23,7 +23,7 @@ typedef struct {
 	/* Pace is the amount of head bob that happens when moving.
 	The speed xz percent is not the true speed percent; rather,
 	the percentage is smoothed out by a Hermite curve. */
-	GLfloat pace, time_since_jump, time_accum_for_full_fov;
+	GLfloat pace, speed_xz_percent, time_since_jump, time_accum_for_full_fov;
 
 	vec2 right_xz; // X and Z of right (Y is always 0)
 	vec3 pos;

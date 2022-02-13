@@ -13,6 +13,7 @@ Weapon TODO:
 */
 
 #include "headers/overlay.h"
+#include "headers/constants.h"
 #include "texture.c"
 #include "utils.c"
 
@@ -54,7 +55,6 @@ const GLchar *const weapon_vertex_shader =
 
 	"void main(void) {\n"
 		"color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
-		"if (color.a == 0.0f) {discard;}\n"
 	"}\n";
 
 Weapon init_weapon(const GLchar* const spritesheet_path, const GLsizei frames_across,
@@ -89,9 +89,12 @@ void draw_weapon(const Weapon weapon, const Camera* const camera) {
 	static byte first_call = 1;
 	static GLint weapon_size_screen_space_id, frame_index_id, pace_id;
 
+	// TODO: put these in constants.c
+	const GLfloat weapon_size = 0.45f, weapon_movement_magitude = 0.3f, time_for_half_weapon_movement_cycle = 1.2f;
+
 	if (first_call) {
 		INIT_UNIFORM_VALUE(frame_width_over_height, weapon.shader, 1f, weapon.frame_width_over_height);
-		INIT_UNIFORM_VALUE(weapon_size_screen_space, weapon.shader, 1f, 0.55f);
+		INIT_UNIFORM_VALUE(weapon_size_screen_space, weapon.shader, 1f, weapon_size);
 
 		INIT_UNIFORM(weapon_size_screen_space, weapon.shader);
 		INIT_UNIFORM(frame_index, weapon.shader);
@@ -102,16 +105,22 @@ void draw_weapon(const Weapon weapon, const Camera* const camera) {
 		first_call = 0;
 	}
 
-	// TODO: put this in constants.c
-	const GLfloat magnitude = 0.4f, pace_percent = camera -> pace / constants.camera.pace.max_amplitude;
+	const GLfloat curr_time = SDL_GetTicks() / 1000.0f;
 
-	const GLfloat across = (pace_percent * 2.0f - 1.0f) * magnitude; // From -magnitude to magnitude
-	const GLfloat down = fabsf(across) - magnitude; // From 0.0f to -magnitude
+	const GLfloat
+		time_pace = sinf(curr_time * PI / time_for_half_weapon_movement_cycle),
+		smooth_speed_xz_percent = log2f(camera -> speed_xz_percent + 1.0f);
+
+	const GLfloat across = time_pace * smooth_speed_xz_percent * weapon_movement_magitude; // From -magnitude to magnitude
+	const GLfloat down = (fabsf(across) - weapon_movement_magitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
 
 	UPDATE_UNIFORM(pace, 2f, across, down);
-	UPDATE_UNIFORM(frame_index, 1ui, keys[SDL_SCANCODE_C] + keys[SDL_SCANCODE_V]);
+	UPDATE_UNIFORM(frame_index, 1ui, keys[SDL_SCANCODE_T] + keys[SDL_SCANCODE_Y]);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDisable(GL_BLEND);
 }
 
 void deinit_weapon(const Weapon weapon) {
