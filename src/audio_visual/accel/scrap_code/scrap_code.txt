@@ -6035,3 +6035,23 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 	const GLfloat down = speed_percent * magnitude * across - magnitude;
 
 /////
+
+	/* Goal: a smooth mapping from 0 to 1
+	And the y-value of a circle from x = 0 to 1, when its center equals (1, 0), achieves just that
+
+	Circle equation: x^2 + y^2 = 1
+	Shifted 1 unit to the right: (x - 1)^2 + y^2 = 1
+	y^2 = 1 - (x - 1)^2
+	y = sqrt(1 - (x - 1)^2)
+
+	(x - 1)^2 = (x - 1) * (x - 1) = x^2 - 2x + 1
+
+	1 - (x^2 - 2x + 1) = 1 - x^2 + 2x - 1 = -x^2 + 2x = 2x - x^2
+
+	So, y = sqrt(2x - x^2) */
+
+	// old: 2 subtractions, 1 multiplication, and 1 sqrt
+	// New; 1 subtraction, 2 multiplications, and 1 sqrt
+	// new = sqrt(2 * x - x * x)
+
+/////

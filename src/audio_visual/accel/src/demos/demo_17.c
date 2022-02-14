@@ -55,7 +55,7 @@
 typedef struct {
 	const GLuint lightmap_texture; // This is grayscale
 
-	const Weapon weapon;
+	const WeaponSprite weapon_sprite;
 
 	BatchDrawContext sector_draw_context, billboard_draw_context;
 
@@ -74,8 +74,8 @@ StateGL demo_17_init(void) {
 		// "../assets/palace_perlin.bmp", "../assets/water_grayscale.bmp"
 		.lightmap_texture = init_plain_texture("../assets/palace_perlin.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
 
-		// .weapon = init_weapon(0.5f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
-		.weapon = init_weapon(0.65f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
+		// .weapon_sprite = init_weapon_sprite(0.5f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
+		.weapon_sprite = init_weapon_sprite(0.65f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
 
 		.animations = LIST_INITIALIZER(animation) (4,
 			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
@@ -209,14 +209,14 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 	draw_skybox(scene_state -> skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
-	draw_weapon(scene_state -> weapon, &camera);
+	draw_weapon_sprite(scene_state -> weapon_sprite, &camera);
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 
 	deinit_texture(scene_state -> lightmap_texture);
-	deinit_weapon(scene_state -> weapon);
+	deinit_weapon_sprite(scene_state -> weapon_sprite);
 
 	deinit_batch_draw_context(&scene_state -> sector_draw_context);
 	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
