@@ -64,10 +64,7 @@ Weapon init_weapon(const GLchar* const spritesheet_path, const GLsizei frames_ac
 	and here, but this makes the code much more readable */
 
 	SDL_Surface* const peek_surface = init_surface(spritesheet_path);
-
-	const GLsizei size[2] = {peek_surface -> w, peek_surface -> h};
-	const GLsizei frame_size[2] = {size[0] / frames_across, size[1] / frames_down};
-
+	const GLsizei frame_size[2] = {peek_surface -> w / frames_across, peek_surface -> h / frames_down};
 	deinit_surface(peek_surface);
 
 	const Weapon weapon = {
@@ -90,7 +87,7 @@ void draw_weapon(const Weapon weapon, const Camera* const camera) {
 	static GLint weapon_size_screen_space_id, frame_index_id, pace_id;
 
 	// TODO: put these in constants.c
-	const GLfloat weapon_size = 0.45f, weapon_movement_magitude = 0.3f, time_for_half_weapon_movement_cycle = 1.2f;
+	const GLfloat weapon_size = 0.45f, weapon_movement_magitude = 0.2f, time_for_half_weapon_movement_cycle = 0.8f;
 
 	if (first_call) {
 		INIT_UNIFORM_VALUE(frame_width_over_height, weapon.shader, 1f, weapon.frame_width_over_height);
