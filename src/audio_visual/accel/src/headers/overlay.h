@@ -13,4 +13,4 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLchar* const spritesh
 	const GLsizei frames_across, const GLsizei frames_down, const GLsizei total_frames);
 
 void deinit_weapon_sprite(const WeaponSprite weapon);
-void draw_weapon_sprite(const WeaponSprite weapon, const Camera* const camera);
+void draw_weapon_sprite(const WeaponSprite weapon, const Camera* const camera, const Event* const event);

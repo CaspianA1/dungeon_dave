@@ -90,7 +90,7 @@ static GLfloat circular_mapping_from_zero_to_one(const GLfloat x) {
 	return sqrtf(1.0f - x_minus_one * x_minus_one);
 }
 
-void draw_weapon_sprite(const WeaponSprite ws, const Camera* const camera) {
+void draw_weapon_sprite(const WeaponSprite ws, const Camera* const camera, const Event* const event) {
 	glUseProgram(ws.shader);
 
 	static byte first_call = 1;
@@ -110,6 +110,9 @@ void draw_weapon_sprite(const WeaponSprite ws, const Camera* const camera) {
 		use_texture(ws.texture, ws.shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
 
 		first_call = 0;
+	}
+
+	if (event -> movement_bits & BIT_CLICK_LEFT) {
 	}
 
 	const GLfloat

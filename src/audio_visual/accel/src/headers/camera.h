@@ -10,6 +10,7 @@
 #define BIT_STRAFE_RIGHT 8
 #define BIT_JUMP 16
 #define BIT_ACCELERATE 32
+#define BIT_CLICK_LEFT 64
 
 //////////
 
@@ -34,7 +35,7 @@ typedef struct {
 
 typedef struct {
 	const byte movement_bits; // Tilt right, tilt left, right, left, backward, forward
-	int screen_size[2], mouse_movement[2];
+	const int screen_size[2], mouse_movement[2];
 } Event;
 
 typedef struct {
