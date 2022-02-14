@@ -97,7 +97,7 @@ void draw_weapon_sprite(const WeaponSprite ws, const Camera* const camera) {
 	static GLint weapon_size_screen_space_id, frame_index_id, pace_id;
 
 	// TODO: put these in constants.c
-	const GLfloat max_weapon_movement_magitude = 0.2f, time_for_half_weapon_movement_cycle = 0.8f;
+	const GLfloat max_movement_magitude = 0.2f, time_for_half_movement_cycle = 0.8f;
 
 	if (first_call) {
 		INIT_UNIFORM_VALUE(frame_width_over_height, ws.shader, 1f, ws.frame_width_over_height);
@@ -117,8 +117,8 @@ void draw_weapon_sprite(const WeaponSprite ws, const Camera* const camera) {
 		smooth_speed_xz_percent = circular_mapping_from_zero_to_one(camera -> speed_xz_percent);
 
 	const GLfloat
-		time_pace = sinf(curr_time * PI / time_for_half_weapon_movement_cycle),
-		weapon_movement_magnitude = max_weapon_movement_magitude * smooth_speed_xz_percent;
+		time_pace = sinf(curr_time * PI / time_for_half_movement_cycle),
+		weapon_movement_magnitude = max_movement_magitude * smooth_speed_xz_percent;
 
 	const GLfloat across = time_pace * weapon_movement_magnitude * smooth_speed_xz_percent; // From -magnitude to magnitude
 	const GLfloat down = (fabsf(across) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude

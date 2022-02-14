@@ -6055,3 +6055,7 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 	// new = sqrt(2 * x - x * x)
 
 /////
+
+	const struct {const GLfloat zero, full;} time_for_movement_cycle_at_speed = {0.8f, 0.65f};
+
+/////
