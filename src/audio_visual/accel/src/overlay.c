@@ -5,11 +5,8 @@ Weapon TODO:
 - Put weapon shaders in shaders.c
 - Configure mag and min filter as a variable
 - Structure weapon as an animation
-- Blending
 - Draw weapon as actual 3D object - it should jut outwards
-- Make pace while jumping smoother
-- Make weapon pacing less violent
-- Center weapon pace at center of screen
+- Rescale the weapon to make it not warped by the screen resolution
 */
 
 #include "headers/overlay.h"
@@ -57,8 +54,8 @@ const GLchar *const weapon_vertex_shader =
 		"color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
 	"}\n";
 
-Weapon init_weapon(const GLchar* const spritesheet_path, const GLsizei frames_across,
-	const GLsizei frames_down, const GLsizei total_frames) {
+Weapon init_weapon(const GLfloat size, const GLchar* const spritesheet_path,
+	const GLsizei frames_across, const GLsizei frames_down, const GLsizei total_frames) {
 
 	/* It's a bit wasteful to load the surface in init_texture_set
 	and here, but this makes the code much more readable */
@@ -74,10 +71,17 @@ Weapon init_weapon(const GLchar* const spritesheet_path, const GLsizei frames_ac
 
 		.shader = init_shader_program(weapon_vertex_shader, weapon_fragment_shader),
 		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
+		.size = size,
 		.curr_frame = 0
 	};
 
 	return weapon;
+}
+
+// Given an input between 0 and 1, this returns the y-value of the top left side of a circle (bowed to the left).
+static GLfloat circular_mapping_from_zero_to_one(const GLfloat x) {
+	const GLfloat x_minus_one = x - 1.0f;
+	return sqrtf(1.0f - x_minus_one * x_minus_one);
 }
 
 void draw_weapon(const Weapon weapon, const Camera* const camera) {
@@ -87,11 +91,11 @@ void draw_weapon(const Weapon weapon, const Camera* const camera) {
 	static GLint weapon_size_screen_space_id, frame_index_id, pace_id;
 
 	// TODO: put these in constants.c
-	const GLfloat weapon_size = 0.45f, weapon_movement_magitude = 0.2f, time_for_half_weapon_movement_cycle = 0.8f;
+	const GLfloat max_weapon_movement_magitude = 0.2f, time_for_half_weapon_movement_cycle = 0.8f;
 
 	if (first_call) {
 		INIT_UNIFORM_VALUE(frame_width_over_height, weapon.shader, 1f, weapon.frame_width_over_height);
-		INIT_UNIFORM_VALUE(weapon_size_screen_space, weapon.shader, 1f, weapon_size);
+		INIT_UNIFORM_VALUE(weapon_size_screen_space, weapon.shader, 1f, weapon.size);
 
 		INIT_UNIFORM(weapon_size_screen_space, weapon.shader);
 		INIT_UNIFORM(frame_index, weapon.shader);
@@ -102,17 +106,19 @@ void draw_weapon(const Weapon weapon, const Camera* const camera) {
 		first_call = 0;
 	}
 
-	const GLfloat curr_time = SDL_GetTicks() / 1000.0f;
+	const GLfloat
+		curr_time = SDL_GetTicks() / 1000.0f,
+		smooth_speed_xz_percent = circular_mapping_from_zero_to_one(camera -> speed_xz_percent);
 
 	const GLfloat
 		time_pace = sinf(curr_time * PI / time_for_half_weapon_movement_cycle),
-		smooth_speed_xz_percent = log2f(camera -> speed_xz_percent + 1.0f);
+		weapon_movement_magnitude = max_weapon_movement_magitude * smooth_speed_xz_percent;
 
-	const GLfloat across = time_pace * smooth_speed_xz_percent * weapon_movement_magitude; // From -magnitude to magnitude
-	const GLfloat down = (fabsf(across) - weapon_movement_magitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
+	const GLfloat across = time_pace * smooth_speed_xz_percent * weapon_movement_magnitude; // From -magnitude to magnitude
+	const GLfloat down = (fabsf(across) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
 
 	UPDATE_UNIFORM(pace, 2f, across, down);
-	UPDATE_UNIFORM(frame_index, 1ui, keys[SDL_SCANCODE_T] + keys[SDL_SCANCODE_Y]);
+	UPDATE_UNIFORM(frame_index, 1ui, (keys[SDL_SCANCODE_T] + keys[SDL_SCANCODE_Y] + keys[SDL_SCANCODE_U] * 2) * 3);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
