@@ -36,7 +36,7 @@ const GLchar *const weapon_sprite_vertex_shader =
 
 		"on_screen_corner += pace;\n"
 
-		"gl_Position = vec4(on_screen_corner, 0.2f, 1.0f);\n"
+		"gl_Position = vec4(on_screen_corner, 0.0f, 1.0f);\n"
 		"fragment_UV = vec2(corner.x, -corner.y) * 0.5f + 0.5f;\n"
 	"}\n",
 
