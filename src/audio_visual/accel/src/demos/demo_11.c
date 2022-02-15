@@ -1,5 +1,6 @@
 #include "demo_4.c"
 #include "../camera.c"
+#include "../event.c"
 
 // Demo 10, but just with triangles in correct winding order, utilizing sector_mesh.c
 

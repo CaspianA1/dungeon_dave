@@ -3,6 +3,7 @@
 #include "../texture.c"
 #include "../skybox.c"
 #include "../camera.c"
+#include "../event.c"
 #include "../batch_draw_context.c"
 
 // Batched + culled billboard drawing. Only using instancing for glVertexAttribDivisor.

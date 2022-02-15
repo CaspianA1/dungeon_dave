@@ -1,3 +1,6 @@
+#ifndef OVERLAY_C
+#define OVERLAY_C
+
 /*
 - Overlay = weapon, HUD, and things like that
 
@@ -158,3 +161,5 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glDisable(GL_BLEND);
 }
+
+#endif

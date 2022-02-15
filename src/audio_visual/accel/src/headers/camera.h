@@ -3,6 +3,7 @@
 
 #include "utils.h"
 #include "buffer_defs.h"
+#include "event.h"
 
 //////////
 
@@ -26,11 +27,6 @@ typedef struct {
 } Camera;
 
 typedef struct {
-	const byte movement_bits; // Tilt right, tilt left, right, left, backward, forward
-	const int screen_size[2], mouse_movement[2];
-} Event;
-
-typedef struct {
 	byte* heightmap, map_size[2];
 	vec3 velocities;
 } PhysicsObject;
@@ -40,7 +36,6 @@ smooth_hermite, update_fov, apply_velocity_in_xz_direction,
 tile_exists_at_pos, pos_collides_with_heightmap, update_pos_via_physics,
 make_pace_function, update_pace, get_view_matrix */
 
-Event get_next_event(void);
 void init_camera(Camera* const camera, const vec3 init_pos);
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj);
 

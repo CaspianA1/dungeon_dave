@@ -15,6 +15,7 @@
 #include "../utils.c"
 #include "../texture.c"
 #include "../camera.c"
+#include "../event.c"
 
 typedef struct {
 	const GLint texture_size[2];

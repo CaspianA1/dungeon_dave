@@ -1,3 +1,6 @@
+#ifndef OVERLAY_H
+#define OVERLAY_H
+
 #include "buffer_defs.h"
 #include "billboard.h"
 
@@ -17,3 +20,5 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat secs_per_frame
 
 void deinit_weapon_sprite(const WeaponSprite* const ws);
 void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera, const Event* const event);
+
+#endif

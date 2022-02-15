@@ -5,6 +5,7 @@
 #include "../sector.c"
 #include "../billboard.c"
 #include "../camera.c"
+#include "../event.c"
 
 #include "../overlay.c"
 
@@ -25,7 +26,6 @@
 - Base darkest distance of attenuated light on the world size
 - Can't use red cross for health since it's copyrighted
 - Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/ (or perhaps not, since alpha just 0 or 1)
-- event.c and event.h files, to separate events from the camera
 - animation.c and animation.h as well
 
 - Crouch

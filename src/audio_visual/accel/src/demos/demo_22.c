@@ -35,6 +35,7 @@ Currently:
 
 #include "../utils.c"
 #include "../camera.c"
+#include "../event.c"
 #include "../list.c"
 
 typedef struct {

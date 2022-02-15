@@ -1,6 +1,7 @@
 #include "../utils.c"
 #include "../texture.c"
 #include "../camera.c"
+#include "../event.c"
 
 // A trippy pyramid flying around with lots of colors
 
