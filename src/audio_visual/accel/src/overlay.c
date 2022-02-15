@@ -124,7 +124,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	static GLint weapon_size_screen_space_id, frame_index_id, pace_id;
 
 	// TODO: put these in constants.c
-	const GLfloat max_movement_magitude = 0.2f, time_for_half_movement_cycle = 0.8f;
+	const GLfloat max_movement_magitude = 0.2f, time_for_half_movement_cycle = 0.5f;
 
 	if (first_call) {
 		INIT_UNIFORM_VALUE(frame_width_over_height, ws.shader, 1f, ws.frame_width_over_height);

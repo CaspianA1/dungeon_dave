@@ -76,8 +76,8 @@ StateGL demo_17_init(void) {
 		// "../assets/palace_perlin.bmp", "../assets/water_grayscale.bmp"
 		.lightmap_texture = init_plain_texture("../assets/palace_perlin.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
 
-		.weapon_sprite = init_weapon_sprite(0.5f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
-		// .weapon_sprite = init_weapon_sprite(0.65f, 0.018f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
+		// .weapon_sprite = init_weapon_sprite(0.5f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
+		.weapon_sprite = init_weapon_sprite(0.65f, 0.016f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
 
 		.billboard_animations = LIST_INITIALIZER(animation) (4,
 			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
