@@ -104,14 +104,11 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 
 	for (const Billboard* billboard = (Billboard*) cpu_billboards.data; billboard < out_of_bounds_billboard; billboard++) {
 
-		buffer_size_t num_visible_in_group = 0;
 		const Billboard* const initial_billboard = billboard;
-
-		while (billboard < out_of_bounds_billboard && billboard_in_view_frustum(*billboard, frustum_planes)) {
+		while (billboard < out_of_bounds_billboard && billboard_in_view_frustum(*billboard, frustum_planes))
 			billboard++;
-			num_visible_in_group++;
-		}
 
+		const buffer_size_t num_visible_in_group = billboard - initial_billboard;
 		if (num_visible_in_group != 0) {
 			memcpy(gpu_billboard_buffer_ptr + num_visible, initial_billboard, num_visible_in_group * sizeof(Billboard));
 			num_visible += num_visible_in_group;
