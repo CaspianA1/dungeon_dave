@@ -29,9 +29,9 @@ void use_texture(const GLuint texture, const GLuint shader_program,
 }
 
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode) {
-	GLuint t;
-	glGenTextures(1, &t);
-	glBindTexture(type, t);
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(type, texture);
 
 	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER,
@@ -49,7 +49,7 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode) 
 		#endif
 	}
 	
-	return t;
+	return texture;
 }
 
 // This function assumes that the surface is locked beforehand. This is legacy code and should be removed if possible
