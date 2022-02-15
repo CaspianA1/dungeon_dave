@@ -83,8 +83,7 @@ static void init_still_subtextures_in_texture_set(
 	const GLsizei num_still_subtextures, SDL_Surface* const rescaled_surface, va_list args) {
 
 	for (GLsizei i = 0; i < num_still_subtextures; i++) {
-		SDL_Surface* const surface = init_surface(va_arg(args, GLchar*));
-		SDL_Surface* surface_copied_to_gpu;
+		SDL_Surface *const surface = init_surface(va_arg(args, GLchar*)), *surface_copied_to_gpu;
 
 		if (surface -> w != rescaled_surface -> w || surface -> h != rescaled_surface -> h) {
 			SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
