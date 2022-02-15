@@ -1,5 +1,4 @@
 #include "buffer_defs.h"
-#include "camera.h"
 #include "billboard.h"
 
 typedef struct {
