@@ -6059,3 +6059,7 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 	const struct {const GLfloat zero, full;} time_for_movement_cycle_at_speed = {0.8f, 0.65f};
 
 /////
+
+ // (keys[SDL_SCANCODE_T] + keys[SDL_SCANCODE_Y] + keys[SDL_SCANCODE_U] * 2) * 3);
+
+/////

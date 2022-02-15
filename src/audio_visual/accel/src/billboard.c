@@ -6,30 +6,35 @@
 #include "data/shaders.c"
 
 DEF_LIST_INITIALIZER(Animation, animation)
-DEF_LIST_INITIALIZER(AnimationInstance, animation_instance)
+DEF_LIST_INITIALIZER(BillboardAnimationInstance, billboard_animation_instance)
 
-void update_animation_instances(const List* const animation_instances,
-	const List* const animations, const List* const billboards) {
+void update_animation_information(GLfloat* const last_frame_time,
+	buffer_size_t* const texture_id, const Animation animation, const GLfloat curr_time) {
+
+	const GLfloat time_delta = curr_time - *last_frame_time;
+
+	if (time_delta >= animation.secs_per_frame) {
+		if ((*texture_id)++ >= animation.texture_id_range.end)
+			*texture_id = animation.texture_id_range.start;
+
+		*last_frame_time = curr_time;
+	}
+}
+
+void update_billboard_animation_instances(const List* const billboard_animation_instances,
+	const List* const billboard_animations, const List* const billboards) {
 
 	const GLfloat curr_time = SDL_GetTicks() / 1000.0f;
 
-	AnimationInstance* const animation_instance_data = animation_instances -> data;
-	const Animation* const animation_data = animations -> data;
+	BillboardAnimationInstance* const billboard_animation_instance_data = billboard_animation_instances -> data;
+	const Animation* const animation_data = billboard_animations -> data;
 	Billboard* const billboard_data = billboards -> data;
 
-	for (buffer_size_t i = 0; i < animation_instances -> length; i++) {
-		AnimationInstance* const animation_instance = animation_instance_data + i;
-		const GLfloat time_delta = curr_time - animation_instance -> last_frame_time;
-		const Animation animation = animation_data[animation_instance -> ids.animation];
-
-		if (time_delta >= animation.secs_per_frame) {
-			buffer_size_t* const texture_id = &billboard_data[animation_instance -> ids.billboard].texture_id;
-
-			if ((*texture_id)++ >= animation.texture_id_range.end)
-				*texture_id = animation.texture_id_range.start;
-
-			animation_instance -> last_frame_time = curr_time;
-		}
+	for (buffer_size_t i = 0; i < billboard_animation_instances -> length; i++) {
+		BillboardAnimationInstance* const billboard_animation_instance = billboard_animation_instance_data + i;
+		update_animation_information(&billboard_animation_instance -> last_frame_time,
+			&billboard_data[billboard_animation_instance -> ids.billboard].texture_id,
+			 animation_data[billboard_animation_instance -> ids.animation], curr_time);
 	}
 }
 

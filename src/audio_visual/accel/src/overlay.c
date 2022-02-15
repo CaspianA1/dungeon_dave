@@ -4,15 +4,14 @@
 Weapon sprite TODO:
 - Put weapon shaders in shaders.c
 - Configure mag and min filter as a variable
-- Structure weapon as an animation
-- Draw weapon as actual 3D object - it should jut outwards
 - Rescale the weapon to make it not warped by the screen resolution
 */
 
 #include "headers/overlay.h"
 #include "headers/constants.h"
-#include "texture.c"
 #include "utils.c"
+#include "texture.c"
+#include "billboard.c"
 
 const GLchar *const weapon_sprite_vertex_shader =
 	"#version 330 core\n"
@@ -54,8 +53,9 @@ const GLchar *const weapon_sprite_vertex_shader =
 		"color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
 	"}\n";
 
-WeaponSprite init_weapon_sprite(const GLfloat size, const GLchar* const spritesheet_path,
-	const GLsizei frames_across, const GLsizei frames_down, const GLsizei total_frames) {
+WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat secs_per_frame,
+	const GLchar* const spritesheet_path, const GLsizei frames_across,
+	const GLsizei frames_down, const GLsizei total_frames) {
 
 	/* It's a bit wasteful to load the surface in init_texture_set
 	and here, but this makes the code much more readable */
@@ -69,10 +69,18 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLchar* const spritesh
 			frame_size[1], spritesheet_path, frames_across, frames_down, total_frames),
 
 		.shader = init_shader_program(weapon_sprite_vertex_shader, weapon_sprite_fragment_shader),
-		.curr_frame = 0,
+
+		.animation = {.texture_id_range = {.start = 0, .end = total_frames}, .secs_per_frame = secs_per_frame},
+		.curr_frame = 0, .last_frame_time = SDL_GetTicks() / 1000.0f,
+
 		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
 		.size = size
 	};
+}
+
+void deinit_weapon_sprite(const WeaponSprite* const ws) {
+	deinit_texture(ws -> texture);
+	glDeleteProgram(ws -> shader);
 }
 
 // Given an input between 0 and 1, this returns the y-value of the top left side of a circle
@@ -90,7 +98,26 @@ static GLfloat circular_mapping_from_zero_to_one(const GLfloat x) {
 	return sqrtf(1.0f - x_minus_one * x_minus_one);
 }
 
-void draw_weapon_sprite(const WeaponSprite ws, const Camera* const camera, const Event* const event) {
+static void update_weapon_sprite(WeaponSprite* const ws, const Event* const event) {
+	buffer_size_t curr_frame = ws -> curr_frame;
+
+	if (curr_frame == 0) {
+		if ((event -> movement_bits & BIT_CLICK_LEFT) != 0) curr_frame++;
+	}
+	else {
+		update_animation_information(
+			&ws -> last_frame_time, &curr_frame,
+			ws -> animation, SDL_GetTicks() / 1000.0f);
+	}
+
+	ws -> curr_frame = curr_frame;
+}
+
+void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera, const Event* const event) {
+	update_weapon_sprite(ws_ref, event);
+
+	const WeaponSprite ws = *ws_ref;
+
 	glUseProgram(ws.shader);
 
 	static byte first_call = 1;
@@ -112,9 +139,6 @@ void draw_weapon_sprite(const WeaponSprite ws, const Camera* const camera, const
 		first_call = 0;
 	}
 
-	if (event -> movement_bits & BIT_CLICK_LEFT) {
-	}
-
 	const GLfloat
 		curr_time = SDL_GetTicks() / 1000.0f,
 		smooth_speed_xz_percent = circular_mapping_from_zero_to_one(camera -> speed_xz_percent);
@@ -127,15 +151,10 @@ void draw_weapon_sprite(const WeaponSprite ws, const Camera* const camera, const
 	const GLfloat down = (fabsf(across) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
 
 	UPDATE_UNIFORM(pace, 2f, across, down);
-	UPDATE_UNIFORM(frame_index, 1ui, (keys[SDL_SCANCODE_T] + keys[SDL_SCANCODE_Y] + keys[SDL_SCANCODE_U] * 2) * 3);
+	UPDATE_UNIFORM(frame_index, 1ui, ws.curr_frame);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glDisable(GL_BLEND);
-}
-
-void deinit_weapon_sprite(const WeaponSprite ws) {
-	deinit_texture(ws.texture);
-	glDeleteProgram(ws.shader);
 }

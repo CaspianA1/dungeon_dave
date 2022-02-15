@@ -55,12 +55,12 @@
 typedef struct {
 	const GLuint lightmap_texture; // This is grayscale
 
-	const WeaponSprite weapon_sprite;
+	WeaponSprite weapon_sprite;
 
 	BatchDrawContext sector_draw_context, billboard_draw_context;
 
 	List sectors; // This is not in the sector draw context b/c the cpu list for that context consists of vertices
-	const List animations, animation_instances;
+	const List billboard_animations, billboard_animation_instances;
 
 	const Skybox skybox;
 	byte* const heightmap;
@@ -74,25 +74,25 @@ StateGL demo_17_init(void) {
 		// "../assets/palace_perlin.bmp", "../assets/water_grayscale.bmp"
 		.lightmap_texture = init_plain_texture("../assets/palace_perlin.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
 
-		// .weapon_sprite = init_weapon_sprite(0.5f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
-		.weapon_sprite = init_weapon_sprite(0.65f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
+		.weapon_sprite = init_weapon_sprite(0.5f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
+		// .weapon_sprite = init_weapon_sprite(0.65f, 0.018f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
 
-		.animations = LIST_INITIALIZER(animation) (4,
+		.billboard_animations = LIST_INITIALIZER(animation) (4,
 			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
 			(Animation) {.texture_id_range = {48, 52}, .secs_per_frame = 0.15f}, // Torch
 			(Animation) {.texture_id_range = {61, 63}, .secs_per_frame = 0.08f}, // Eddie, attacking
 			(Animation) {.texture_id_range = {76, 79}, .secs_per_frame = 0.07f} // Trooper, idle
 		),
 
-		.animation_instances = LIST_INITIALIZER(animation_instance) (6,
-			(AnimationInstance) {.ids = {.billboard = 4, .animation = 0}, .last_frame_time = 0.0f}, // Flying carpet
-			(AnimationInstance) {.ids = {.billboard = 5, .animation = 1}, .last_frame_time = 0.0f}, // Torch
+		.billboard_animation_instances = LIST_INITIALIZER(billboard_animation_instance) (6,
+			(BillboardAnimationInstance) {.ids = {.billboard = 4, .animation = 0}, .last_frame_time = 0.0f}, // Flying carpet
+			(BillboardAnimationInstance) {.ids = {.billboard = 5, .animation = 1}, .last_frame_time = 0.0f}, // Torch
 
-			(AnimationInstance) {.ids = {.billboard = 6, .animation = 2}, .last_frame_time = 0.0f}, // Eddies
-			(AnimationInstance) {.ids = {.billboard = 7, .animation = 2}, .last_frame_time = 0.0f},
+			(BillboardAnimationInstance) {.ids = {.billboard = 6, .animation = 2}, .last_frame_time = 0.0f}, // Eddies
+			(BillboardAnimationInstance) {.ids = {.billboard = 7, .animation = 2}, .last_frame_time = 0.0f},
 
-			(AnimationInstance) {.ids = {.billboard = 8, .animation = 3}, .last_frame_time = 0.0f}, // Troopers
-			(AnimationInstance) {.ids = {.billboard = 9, .animation = 3}, .last_frame_time = 0.0f}
+			(BillboardAnimationInstance) {.ids = {.billboard = 8, .animation = 3}, .last_frame_time = 0.0f}, // Troopers
+			(BillboardAnimationInstance) {.ids = {.billboard = 9, .animation = 3}, .last_frame_time = 0.0f}
 		),
 
 		.skybox = init_skybox("../assets/night.bmp"),
@@ -182,7 +182,7 @@ StateGL demo_17_init(void) {
 }
 
 void demo_17_drawer(const StateGL* const sgl) {
-	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
+	SceneState* const scene_state = (SceneState*) sgl -> any_data;
 
 	static Camera camera;
 	static PhysicsObject physics_obj;
@@ -198,34 +198,34 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 	const Event event = get_next_event();
 
-	update_animation_instances(
-		&scene_state -> animation_instances,
-		&scene_state -> animations,
+	update_billboard_animation_instances(
+		&scene_state -> billboard_animation_instances,
+		&scene_state -> billboard_animations,
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
 	update_camera(&camera, event, &physics_obj);
 
+	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors,
 		&camera, scene_state -> lightmap_texture, scene_state -> map_size);
-	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 
 	draw_skybox(scene_state -> skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
-	draw_weapon_sprite(scene_state -> weapon_sprite, &camera, &event);
+	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, &camera, &event);
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 
 	deinit_texture(scene_state -> lightmap_texture);
-	deinit_weapon_sprite(scene_state -> weapon_sprite);
+	deinit_weapon_sprite(&scene_state -> weapon_sprite);
 
 	deinit_batch_draw_context(&scene_state -> sector_draw_context);
 	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
 
 	deinit_list(scene_state -> sectors);
-	deinit_list(scene_state -> animations);
-	deinit_list(scene_state -> animation_instances);
+	deinit_list(scene_state -> billboard_animations);
+	deinit_list(scene_state -> billboard_animation_instances);
 
 	deinit_skybox(scene_state -> skybox);
 
