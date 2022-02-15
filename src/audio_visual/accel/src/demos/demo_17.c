@@ -17,7 +17,7 @@
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
 
 - Perlin noise-based lighting in 3D (maybe)
-- Shadows + one global light source
+- Shadows + one global light source, or screen-space ambient occlusion
 - A map maker. An init json file that specifies textures and dimensions;
 	draw/erase modes, line mode, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe
