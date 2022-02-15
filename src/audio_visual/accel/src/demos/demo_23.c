@@ -61,8 +61,14 @@ const GLchar *const demo_23_obj_vertex_shader =
 	"void main(void) {\n"
 		"float visibility = 1.0f;\n"
 
-		"if (textureProj(depth_map_sampler, shadow_coord.xyw).z < bias / shadow_coord.w)\n"
-			"visibility = 0.5f;\n"
+		"float z = textureProj(depth_map_sampler, shadow_coord.xyw).z;\n"
+		"if (z < bias / shadow_coord.w) visibility = 0.5f;\n"
+
+		/*
+		"float z = texture(depth_map_sampler, shadow_coord.xy).r;\n"
+		"float near = 0.01f, far = 441.6729559300637f;\n"
+		"float visibility = (z -(-near)) / (-far - (-near));"
+		*/
 
 		"color = visibility * vec3(0.2f, 0.5f, 0.7f);\n"
 	"}\n";
