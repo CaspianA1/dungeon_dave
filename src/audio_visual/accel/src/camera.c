@@ -5,9 +5,10 @@
 #include "headers/constants.h"
 
 void init_camera(Camera* const camera, const vec3 init_pos) {
-	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
 	camera -> last_time = SDL_GetPerformanceCounter();
+	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
 	camera -> pace = 0.0f;
+	camera -> speed_xz_percent = 0.0f;
 	camera -> time_since_jump = 0.0f;
 	camera -> time_accum_for_full_fov = 0.0f;
 	memcpy(camera -> pos, init_pos, sizeof(vec3));
@@ -194,6 +195,9 @@ static void get_view_matrix(const vec3 pos, const vec3 dir, const vec3 right, ma
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
 	static GLfloat one_over_performance_freq;
 	static byte first_call = 1;
+
+	/* Using the SDL performance counter and frequency functions instead
+	of SDL_GetTicks because the physics timing has to be very exact */
 
 	if (first_call) {
 		one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
