@@ -4,14 +4,6 @@
 #include "utils.h"
 #include "buffer_defs.h"
 
-#define BIT_MOVE_FORWARD 1
-#define BIT_MOVE_BACKWARD 2
-#define BIT_STRAFE_LEFT 4
-#define BIT_STRAFE_RIGHT 8
-#define BIT_JUMP 16
-#define BIT_ACCELERATE 32
-#define BIT_CLICK_LEFT 64
-
 //////////
 
 typedef struct {

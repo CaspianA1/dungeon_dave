@@ -13,6 +13,16 @@ and not in the `constants` struct b/c other values in that struct depend on them
 #define HALF_PI 1.57079632679489661923132169163975144f
 #define FOURTH_PI 0.785398163397448309615660845819875721f
 
+#define BIT_MOVE_FORWARD 1
+#define BIT_MOVE_BACKWARD 2
+#define BIT_STRAFE_LEFT 4
+#define BIT_STRAFE_RIGHT 8
+#define BIT_JUMP 16
+#define BIT_ACCELERATE 32
+
+#define BIT_CLICK_LEFT 64
+#define BIT_USE_WEAPON BIT_CLICK_LEFT
+
 static const struct {
 	// This should match the vsync refresh rate, since some of the physics code depends on it
 	const byte fps;
@@ -62,7 +72,8 @@ static const struct {
 
 	.keys = {
 		.forward = SDL_SCANCODE_W, .backward = SDL_SCANCODE_S, .left = SDL_SCANCODE_A,
-		.right = SDL_SCANCODE_D, .jump = SDL_SCANCODE_SPACE, .accelerate = {SDL_SCANCODE_LSHIFT, SDL_SCANCODE_RSHIFT},
+		.right = SDL_SCANCODE_D, .jump = SDL_SCANCODE_SPACE,
+		.accelerate = {SDL_SCANCODE_LSHIFT, SDL_SCANCODE_RSHIFT},
 		.toggle_fullscreen_window = SDL_SCANCODE_ESCAPE,
 		.ctrl = {SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL},
 		.activate_exit = {SDL_SCANCODE_W, SDL_SCANCODE_Q}
