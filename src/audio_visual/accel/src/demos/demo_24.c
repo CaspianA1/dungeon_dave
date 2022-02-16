@@ -29,7 +29,7 @@ StateGL demo_24_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	SceneState scene_state = {
-		.lightmap_texture = init_plain_texture("../assets/water_grayscale.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
+		.lightmap_texture = init_plain_texture("../assets/water.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
 		.heightmap = (byte*) palace_heightmap,
 		.map_size = {palace_width, palace_height},
 	};
