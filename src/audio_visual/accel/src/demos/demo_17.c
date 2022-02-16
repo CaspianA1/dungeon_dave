@@ -106,7 +106,7 @@ StateGL demo_17_init(void) {
 	//////////
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		(byte*) scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size);
+		scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(
 		10,
