@@ -6193,3 +6193,8 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 	");\n"
 
 /////
+
+- Perlin noise-based lighting in 3D (maybe)
+- Shadows + one global light source, or screen-space ambient occlusion
+
+/////

@@ -16,8 +16,7 @@
 - NEXT 4: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
 
-- Perlin noise-based lighting in 3D (maybe)
-- Shadows + one global light source, or screen-space ambient occlusion
+- Ambient occlusion
 - A map maker. An init json file that specifies textures and dimensions;
 	draw/erase modes, line mode, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe
