@@ -6063,3 +6063,31 @@ void update_animation_instance(AnimationInstance* const animation_instance,
  // (keys[SDL_SCANCODE_T] + keys[SDL_SCANCODE_Y] + keys[SDL_SCANCODE_U] * 2) * 3);
 
 /////
+
+	//////////
+
+	/*
+	GLuint depth_render_buffer;
+
+	glGenRenderbuffers(1, &depth_render_buffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, g_buffer_width, g_buffer_height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		fail("initialize render buffer for screen-space ambient occlusion", LaunchGL);
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//////////
+
+	GLuint ssao_raw_output_framebuffer, ssao_blur_output_framebuffer, ssao_color_buffer, ssao_
+
+	glGenBuffers(1, &ssao_blur_output_framebuffer);
+	glGenFramebuffers(1, &ssao_raw_output_framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, ssao_raw_output_framebuffer);
+	*/
+
+	//////////
+
+/////
