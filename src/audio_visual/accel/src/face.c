@@ -60,14 +60,19 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 	const byte side, const byte texture_id, List* const face_mesh_list) {
 
 	/* Face info bits, layout:
-		Bits 0-1, two bits -> face type
-		Bit 2, one bit -> face side (top or left side of top-down sector)
-		Bits 3-7, five bits -> texture id
+	Bits 0-2, three bits -> face id.
+		0 = flat,
+		1 = right vert NS,
+		2 = bottom vert EW,
+		3 = left vert NS,
+		4 = top vert EW.
+	Bits 3-7, five bits -> texture id. */
 
-	So, 00 -> flat, 01 -> vert NW, and 10 -> vert EW */
+	byte face_id = (side << 2) | face.type;
+	if (face_id == 5 || face_id == 6) face_id -= 2;
 
 	const byte
-		face_info = (texture_id << 3) | (side << 2) | face.type,
+		face_info = (texture_id << 3) | face_id,
 		near_x = face.origin[0], near_z = face.origin[1],
 		top_y = sector_max_visible_height;
 

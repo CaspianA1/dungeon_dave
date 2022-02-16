@@ -17,47 +17,33 @@ const GLchar *const sector_vertex_shader =
 	"uniform vec3 camera_pos_world_space;\n"
 	"uniform mat4 model_view_projection;\n"
 
-	"const ivec2 pos_indices_for_UV[3] = ivec2[3](\n"
-		"ivec2(0, 2), ivec2(2, 1), ivec2(0, 1)\n" // Flat, NS, EW
-	");\n"
-
 	"const vec3 face_normals[5] = vec3[5](\n"
 		"vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f),\n" // Flat, right, bottom, left, top
 		"vec3(0.0f, 0.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)\n"
 	");\n"
 
-	"void set_UV_from_face_id(int face_id_bits) {\n"
-		"ivec2 pos_UV_indices = pos_indices_for_UV[face_id_bits & 3];\n"  // `& 3` extracts the first 2 bits
-		"int face_is_left_or_bottom = int(face_id_bits == 2 || face_id_bits == 5);\n" // 1 = true, 0 = false
-		"int UV_sign_x = -((face_is_left_or_bottom << 1) - 1);\n" // -((x << 1) - 1) maps 1 to -1 and 0 to 1
-		"vec3 pos_reversed = max_world_height - vertex_pos_world_space;\n"
+	"const ivec2 uv_indices[5] = ivec2[5](\n"
+		"ivec2(0, 2), ivec2(2, 1), ivec2(0, 1), ivec2(2, 1), ivec2(0, 1)\n"
+	"),\n"
 
-		"UV = vec3(\n"
-			"pos_reversed[pos_UV_indices[0]] * UV_sign_x,\n"
-			"pos_reversed[pos_UV_indices[1]],\n"
-			"face_info_bits >> 3);\n" // `>> 3` puts texture id bits into start of number
-	"}\n"
+	"uv_signs[5] = ivec2[5](\n"
+		"ivec2(1, 1), ivec2(-1, -1), ivec2(1, -1), ivec2(1, -1), ivec2(-1, -1)\n"
+	");\n"
 
-	/* In order to map {0 1 2 5 6} to {0 1 2 3 4}, do this:
-		- If the bits equal 5 or 6, the 3rd bit will be set. By and-ing the bits
-		with 0b100 (which is 4), `X` will equal 4 if the bits equalled 5 or 6.
-		- Then, the normal ID will equal `face_id_bits - (X >> 1)`, because the right shift
-		will divide `X` by 2, and therefore map 5 and 6 to 3 and 4. 0 through 3 will stay the same. */
+	"void set_normal_and_UV_from_face_id(int face_id_bits) {\n"
+		"face_normal = face_normals[face_id_bits];\n"
 
-	"void set_normal_from_face_id(int face_id_bits) {\n"
-		"int normal_id_subtrahend = (face_id_bits & 4) >> 1;\n"
-		"face_normal = face_normals[face_id_bits - normal_id_subtrahend];\n"
+		"ivec2 uv_index = uv_indices[face_id_bits];\n"
+		"vec2 UV_xy = uv_signs[face_id_bits] * vec2(vertex_pos_world_space[uv_index.x], vertex_pos_world_space[uv_index.y]);\n"
+
+		"UV = vec3(UV_xy, face_info_bits >> 3);\n"
+
 	"}\n"
 
 	"void main(void) {\n"
 		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
-		"int face_id_bits = face_info_bits & 7;\n" // 0 = flat, 1 = right, 2 = bottom, 5 = left, 6 = top
-
-		"set_UV_from_face_id(face_id_bits);\n"
-		"set_normal_from_face_id(face_id_bits);\n"
-
+		"set_normal_and_UV_from_face_id(face_info_bits & 7);\n"
 		"lightmap_UV = vertex_pos_world_space.xz / map_size;\n"
-
 		"pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
 	"}\n",
 

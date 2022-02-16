@@ -167,7 +167,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context, const Camer
 
 		INIT_UNIFORM_VALUE(map_size, sector_shader, 2i, map_size[0], map_size[1]);
 		INIT_UNIFORM_VALUE(ambient_strength, sector_shader, 1f, 0.15f);
-		INIT_UNIFORM_VALUE(diffuse_strength, sector_shader, 1f, 0.4f);
+		INIT_UNIFORM_VALUE(diffuse_strength, sector_shader, 1f, 0.5f);
 		INIT_UNIFORM_VALUE(attenuation_factor, sector_shader, 1f, 0.02f);
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
