@@ -26,6 +26,7 @@
 - Base darkest distance of attenuated light on the world size
 - Can't use red cross for health since it's copyrighted
 - Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/ (or perhaps not, since alpha just 0 or 1)
+- Abstract shaders that map use_shader to glUseProgram and delete_shader to glDeleteShaders
 
 - Crouch
 - Make deceleration and tilt decrease framerate-independent
