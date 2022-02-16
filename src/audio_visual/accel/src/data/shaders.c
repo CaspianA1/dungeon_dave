@@ -5,7 +5,6 @@
 
 const GLchar *const sector_vertex_shader =
 	"#version 330 core\n"
-	"#define max_world_height 255.0f\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info_bits;\n"
