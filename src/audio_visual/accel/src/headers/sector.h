@@ -14,7 +14,8 @@ typedef struct {
 	struct {buffer_size_t start, length;} face_range; // face domain that defines sector's faces; used for batching
 } Sector;
 
-// Excluded: point_matches_sector_attributes, form_sector_area, sector_in_view_frustum, draw_sectors
+/* Excluded: point_matches_sector_attributes, form_sector_area,
+sector_in_view_frustum, draw_sectors, fill_sector_vbo_with_visible_faces */
 
 List generate_sectors_from_maps(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_size[2]);

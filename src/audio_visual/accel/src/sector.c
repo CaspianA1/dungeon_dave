@@ -191,15 +191,18 @@ static void draw_sectors(const BatchDrawContext* const draw_context, const Camer
 	glDisableVertexAttribArray(1);
 }
 
-void draw_visible_sectors(const BatchDrawContext* const draw_context, const List* const sectors,
-	const Camera* const camera, const GLuint lightmap_texture, const byte map_size[2]) {
-	/* Each vec4 plane is composed of a vec3 surface normal and
-	the closest distance to the origin in the fourth component */
+// Returns the number of visible faces
+static buffer_size_t fill_sector_vbo_with_visible_faces(
+	const BatchDrawContext* const draw_context,
+	const List* const sectors, const Camera* const camera) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
 
 	const Sector* const sector_data = sectors -> data;
 	const Sector* const out_of_bounds_sector = sector_data + sectors -> length;
+
+	/* Each vec4 plane in `frustum_planes` is composed of a vec3 surface
+	normal and the closest distance to the origin in the fourth component */
 	const vec4* const frustum_planes = camera -> frustum_planes;
 
 	const face_mesh_component_t* const face_meshes_cpu = draw_context -> buffers.cpu.data;
@@ -228,6 +231,15 @@ void draw_visible_sectors(const BatchDrawContext* const draw_context, const List
 	terrain: 150620 vs 86588. */
 
 	glUnmapBuffer(GL_ARRAY_BUFFER); // If looking out at the distance with no sectors, why do any state switching at all?
+
+	return num_visible_faces;
+}
+
+// This is just a utility function
+void draw_visible_sectors(const BatchDrawContext* const draw_context, const List* const sectors,
+	const Camera* const camera, const GLuint lightmap_texture, const byte map_size[2]) {
+
+	const buffer_size_t num_visible_faces = fill_sector_vbo_with_visible_faces(draw_context, sectors, camera);
 	if (num_visible_faces != 0) draw_sectors(draw_context, camera, num_visible_faces, lightmap_texture, map_size);
 }
 
