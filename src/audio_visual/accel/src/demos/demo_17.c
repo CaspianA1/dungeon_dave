@@ -15,6 +15,7 @@
 - NEXT 3: entities that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 4: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
+- NEXT 7: a castle level that's crazy high in the sky, where you can look down really far
 
 - Ambient occlusion through an occlusion map
 - A map maker. An init json file that specifies textures and dimensions;
