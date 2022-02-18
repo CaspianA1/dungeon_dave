@@ -1,18 +1,13 @@
 #ifndef OVERLAY_C
 #define OVERLAY_C
 
-/*
-- Overlay = weapon, HUD, and things like that
-
-Weapon sprite TODO:
-- Put weapon shaders in shaders.c
-- Configure mag and min filter as a variable
-- Rescale the weapon to make it not warped by the screen resolution
-*/
+// Overlay = weapon, HUD, and things like that
 
 #include "headers/overlay.h"
 #include "headers/constants.h"
 #include "utils.c"
+#include "camera.c"
+#include "event.c"
 #include "texture.c"
 #include "animation.c"
 

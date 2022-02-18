@@ -1,4 +1,4 @@
-/*
+Some TODOs for a recent next time:
 - NEXT: final touches on new_map + a texmap for it
 - NEXT 2: a sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
 - NEXT 3: entities that don't turn to face the player (just static ones); defined by center, size, and normal
@@ -6,6 +6,7 @@
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
 - NEXT 7: a castle level that's crazy high in the sky, where you can look down really far
 
+Other random ideas:
 - Ambient occlusion through an occlusion map
 - A map maker. An init json file that specifies textures and dimensions;
 	draw/erase modes, line mode, export, and choose heights and textures
@@ -18,6 +19,7 @@
 - Abstract shaders that map use_shader to glUseProgram and delete_shader to glDeleteShaders
 - For some reason, mouse usage gives choppy look movement (with the Mac)
 
+Physics:
 - Crouch
 - Make deceleration and tilt decrease framerate-independent
 - Animations go slower at 5 FPS
@@ -28,6 +30,7 @@
 - A half-stutter when pressing towards a wall and then letting go of a movement key
 - Can get a tiny bit stuck in a wall when jumping downwards close to a wall (so will have to be able to stand a tiny bit off the wall)
 
+Chromebook bugs:
 - Memory leak with debug mode at the end of demos 17 and 22 (rest probably too), the lightmapper, the map editor, and the collision demo
 - Other demos untested
 - Outer project does not even want to start
@@ -35,6 +38,12 @@
 - Sometimes, mouse control does not work when using the keyboard
 - Framerate drop when using the big monitor + optimized + full screen
 
+Weapon sprite:
+- Put weapon shaders in shaders.c
+- Configure mag and min filter as a variable
+- Rescale the weapon to make it not warped by the screen resolution
+
+General future components:
 - Blit 2D sprite to whole screen
 - Flat weapon
 - Use more of the cglm functions in `update_camera`, or make my own

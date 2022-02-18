@@ -3,6 +3,8 @@
 
 #include "buffer_defs.h"
 #include "animation.h"
+#include "camera.h"
+#include "event.h"
 
 typedef struct {
 	const GLuint texture, shader;
