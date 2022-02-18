@@ -167,9 +167,53 @@ GLuint init_demo_23_obj_vbo(GLsizei* const num_obj_vertices) {
 		OBJ_OFFSET(0.5f, 0.0f, -0.5f),
 		OBJ_OFFSET(0.0f, 1.0f, 0.0f),
 
+		// A slanted plane
 		0.0f, 0.0f, plane_size[1] * 0.1f,
 		plane_size[0], 0.0f, plane_size[1],
-		plane_size[0] * 0.5f, 4.0f, plane_size[1]
+		plane_size[0] * 0.5f, 4.0f, plane_size[1],
+
+		// A big cube
+		-3.0f, 3.0f, -3.0f,
+		-3.0f, -3.0f, -3.0f,
+		3.0f, -3.0f, -3.0f,
+		3.0f, -3.0f, -3.0f,
+		3.0f, 3.0f, -3.0f,
+		-3.0f, 3.0f, -3.0f,
+
+		-3.0f, -3.0f, 3.0f,
+		-3.0f, -3.0f, -3.0f,
+		-3.0f, 3.0f, -3.0f,
+		-3.0f, 3.0f, -3.0f,
+		-3.0f, 3.0f, 3.0f,
+		-3.0f, -3.0f, 3.0f,
+
+		3.0f, -3.0f, -3.0f,
+		3.0f, -3.0f, 3.0f,
+		3.0f, 3.0f, 3.0f,
+		3.0f, 3.0f, 3.0f,
+		3.0f, 3.0f, -3.0f,
+		3.0f, -3.0f, -3.0f,
+
+		-3.0f, -3.0f, 3.0f,
+		-3.0f, 3.0f, 3.0f,
+		3.0f, 3.0f, 3.0f,
+		3.0f, 3.0f, 3.0f,
+		3.0f, -3.0f, 3.0f,
+		-3.0f, -3.0f, 3.0f,
+
+		-3.0f, 3.0f, -3.0f,
+		3.0f, 3.0f, -3.0f,
+		3.0f, 3.0f, 3.0f,
+		3.0f, 3.0f, 3.0f,
+		-3.0f, 3.0f, 3.0f,
+		-3.0f, 3.0f, -3.0f,
+
+		-3.0f, -3.0f, -3.0f,
+		-3.0f, -3.0f, 3.0f,
+		3.0f, -3.0f, -3.0f,
+		3.0f, -3.0f, -3.0f,
+		-3.0f, -3.0f, 3.0f,
+		3.0f, -3.0f, 3.0f
 	};
 
 	#undef OBJ_OFFSET
@@ -246,17 +290,19 @@ void demo_23_drawer(const StateGL* const sgl) {
 	// TODO: set these up properly in camera.c later
 	mat4 light_view, light_projection, light_view_projection, light_model_view_projection;
 
+	/*
 	static vec3 light_pos = {[1] = 1.647446f, [2] = 10.147844f};
 	light_pos[0] = sinf(SDL_GetTicks() / 200.0f) - 0.0f;
+	*/
 
 	get_view_matrix(
-		light_pos,
-		(vec3) {0.853554f, -0.382683f, 0.353553f},
-		(vec3) {-0.382683f, 0.0f, 0.923880f},
+		(vec3) {9.156998f, 7.132970f, 9.181099f},
+		(vec3) {-0.559009f, -0.504528f, -0.657997f},
+		(vec3) {0.762104f, 0.000000f, -0.647454f},
 		light_view
 	);
 
-	glm_perspective(constants.camera.init.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
+	glm_perspective(constants.camera.init.fov, (GLfloat) depth_capture.texture_size[0] / depth_capture.texture_size[1],
 		constants.camera.clip_dists.near, constants.camera.clip_dists.far, light_projection);
 
 	glm_mul(light_projection, light_view, light_view_projection);
