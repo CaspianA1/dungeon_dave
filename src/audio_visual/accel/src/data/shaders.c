@@ -98,11 +98,11 @@ const GLchar *const sector_vertex_shader =
 
 	"void main(void) {\n"
 		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
-		"vec2 corner_world_space = vertex_model_space * billboard_size_world_space;\n"
+		"vec2 upscaled_vertex_world_space = vertex_model_space * billboard_size_world_space;\n"
 
 		"vec3 vertex_world_space = billboard_center_world_space\n"
-			"+ corner_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
-			"+ vec3(0.0f, corner_world_space.y, 0.0f);\n"
+			"+ upscaled_vertex_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
+			"+ vec3(0.0f, upscaled_vertex_world_space.y, 0.0f);\n"
 
 		"gl_Position = model_view_projection * vec4(vertex_world_space, 1.0f);\n"
 

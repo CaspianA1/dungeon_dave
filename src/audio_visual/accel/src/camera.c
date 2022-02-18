@@ -185,13 +185,6 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 v
 	}
 }
 
-static void get_view_matrix(const vec3 pos, const vec3 dir, const vec3 right, mat4 view) {
-	vec3 rel_origin, up;
-	glm_vec3_add((GLfloat*) pos, (GLfloat*) dir, rel_origin);
-	glm_vec3_cross((GLfloat*) right, (GLfloat*) dir, up);
-	glm_lookat((GLfloat*) pos, rel_origin, up, view);
-}
-
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
 	static GLfloat one_over_performance_freq;
 	static byte first_call = 1;
@@ -214,12 +207,14 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		cos_hori = cosf(camera -> angles.hori), cos_vert = cosf(camera -> angles.vert),
 		sin_hori = sinf(camera -> angles.hori), sin_vert = sinf(camera -> angles.vert);
 
+	/*
 	camera -> right_xz[0] = -cos_hori;
 	camera -> right_xz[1] = sin_hori;
+	*/
 
 	vec3
 		dir = {cos_vert * sin_hori, sin_vert, cos_vert * cos_hori},
-		right = {camera -> right_xz[0], 0.0f, camera -> right_xz[1]}, pos;
+		right = {-cos_hori, 0.0f, sin_hori}, pos;
 
 	memcpy(pos, camera -> pos, sizeof(vec3));
 
@@ -236,14 +231,16 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		update_fov(camera, event.movement_bits, delta_time);
 	}
 
-	memcpy(camera -> pos, pos, sizeof(vec3));
-
 	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(pos);
 
 	glm_vec3_rotate(right, -camera -> angles.tilt, dir); // Tilt applied after input as to not interfere with the camera movement
 
+	vec3 rel_origin, up;
 	mat4 view, projection, view_projection;
-	get_view_matrix(pos, dir, right, view);
+
+	glm_vec3_add((GLfloat*) pos, (GLfloat*) dir, rel_origin);
+	glm_vec3_cross((GLfloat*) right, (GLfloat*) dir, up);
+	glm_lookat((GLfloat*) pos, rel_origin, up, view);
 
 	glm_perspective(camera -> angles.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
 		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
@@ -252,6 +249,11 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 	glm_mul(view_projection, GLM_MAT4_IDENTITY, camera -> model_view_projection);
 
 	glm_frustum_planes(camera -> model_view_projection, camera -> frustum_planes);
+
+	memcpy(camera -> pos, pos, sizeof(vec3));
+	memcpy(camera -> dir, dir, sizeof(vec3));
+	memcpy(camera -> right, right, sizeof(vec3));
+	memcpy(camera -> up, up, sizeof(vec3));
 }
 
 #endif

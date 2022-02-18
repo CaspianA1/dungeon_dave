@@ -63,7 +63,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 		first_call = 0;
 	}
 
-	UPDATE_UNIFORM(right_xz_world_space, 2fv, 1, camera -> right_xz);
+	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right[0], camera -> right[2]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
 	//////////

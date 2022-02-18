@@ -213,6 +213,14 @@ void demo_23_draw_call(const void* const param) {
 	glDrawArrays(GL_TRIANGLES, 0, num_obj_vertices);
 }
 
+
+void get_view_matrix(const vec3 pos, const vec3 dir, const vec3 right, mat4 view) {
+	vec3 rel_origin, up;
+	glm_vec3_add((GLfloat*) pos, (GLfloat*) dir, rel_origin);
+	glm_vec3_cross((GLfloat*) right, (GLfloat*) dir, up);
+	glm_lookat((GLfloat*) pos, rel_origin, up, view);
+}
+
 void demo_23_drawer(const StateGL* const sgl) {
 	glClearColor(0.5f, 0.0f, 0.0f, 0.0f);
 
@@ -240,6 +248,7 @@ void demo_23_drawer(const StateGL* const sgl) {
 
 	static vec3 light_pos = {[1] = 1.647446f, [2] = 10.147844f};
 	light_pos[0] = sinf(SDL_GetTicks() / 200.0f) - 0.0f;
+
 	get_view_matrix(
 		light_pos,
 		(vec3) {0.853554f, -0.382683f, 0.353553f},

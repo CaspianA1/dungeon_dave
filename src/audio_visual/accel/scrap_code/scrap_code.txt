@@ -6198,3 +6198,103 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 - Shadows + one global light source, or screen-space ambient occlusion
 
 /////
+
+		// "vec3 reflection_vector = vec3(gl_FragCoord.xy, 1.0f) * -camera_dir;\n"
+		// "vec3 reflection_vector = normalize(vec3(gl_FragCoord.xy, 1.0f) * camera_dir);\n"
+
+		/*
+		"vec3 incidence_vector = normalize(camera_dir / vec3(gl_FragCoord.xy, 1.0f));\n"
+		"vec3 reflection_vector = reflect(incidence_vector, -camera_dir);\n"
+		*/
+
+		// "vec3 reflection_vector = reflect(-rcamera_dir, gl_FragCoord.xyz);\n"
+
+/////
+
+		"vec3 surface_normal = vec3(1.0f, 1.0f, 1.0f);\n"
+		"vec3 incidence_vector = normalize(camera_dir / vec3(gl_FragCoord.xy, 1.0f));\n"
+		"vec3 reflection_vector = reflect(incidence_vector, surface_normal);\n"
+
+/////
+
+		/*
+		incidence vector = camera dir according to the screen-space position
+		incidence vector dependent on camera dir
+		skew camera dir to left or right, and top or bottom
+
+		need 4 reflection dirs
+
+		for each corner, what is the dir?
+
+		center is (0, 0)
+		deltas are available in `corners`
+		can lerp between them from vertex-shader-provided values
+		*/
+
+		/*
+		"vec3 incidence_vector = camera_dir;\n"
+		"vec3 reflection_vector = reflect(incidence_vector, -camera_dir);\n"
+		*/
+
+		"vec3 reflection_vector = normalize(camera_dir * vec3(gl_FragCoord.xy * 0.5 + 0.5, 0.0f));\n"
+		// "vec3 reflection_vector = vec3(gl_FragCoord.xy * 0.5f + 0.5f, 0.0f);\n"
+
+		"vec3 skybox_color = texture(skybox_sampler, reflection_vector).rgb;\n"
+		"vec4 weapon_color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
+
+		"color = vec4(mix(weapon_color.rgb, skybox_color, 1.0f), weapon_color.a);\n"
+
+/////
+
+		/*
+		incidence vector = camera dir according to the screen-space position
+		incidence vector dependent on camera dir
+		skew camera dir to left or right, and top or bottom
+
+		need 4 reflection dirs
+
+		for each corner, what is the dir?
+
+		center is (0, 0)
+		deltas are available in `corners`
+		can lerp between them from vertex-shader-provided values
+		*/
+
+		/*
+		"vec3 incidence_vector = camera_dir;\n"
+		"vec3 reflection_vector = reflect(incidence_vector, -camera_dir);\n"
+		*/
+
+		"vec3 reflection_vector = normalize(camera_dir * vec3(gl_FragCoord.xy * 0.5 + 0.5, 0.0f));\n"
+		// "vec3 reflection_vector = vec3(gl_FragCoord.xy * 0.5f + 0.5f, 0.0f);\n"
+
+		"vec3 skybox_color = texture(skybox_sampler, reflection_vector).rgb;\n"
+		"vec4 weapon_color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
+
+		"color = vec4(mix(weapon_color.rgb, skybox_color, 1.0f), weapon_color.a);\n"
+
+/////
+
+		/*
+		incidence vector = camera dir according to the screen-space position
+		incidence vector dependent on camera dir
+		skew camera dir to left or right, and top or bottom
+
+		input: clip space
+		output: bob space
+		*/
+
+		// "vec3 reflection_vector = normalize(camera_dir * 1.0f - vec3(gl_FragCoord.xy * 0.5 + 0.5, 0.0f));\n"
+		// "vec3 reflection_vector = vec3(gl_FragCoord.xy * 0.5f + 0.5f, 0.0f);\n"
+		// angle of incidence will also depend on how the weapon sways
+		// "reflection_vector.x = reflection_vector.x * cos(glFragCoord.x) - reflection_vector.y "
+
+		"vec3 incidence = normalize(vec3(gl_FragCoord.xy * 0.5 + 0.5, 1.0f));\n"
+		"vec3 reflection = reflect(incidence, -camera_dir);\n"
+
+		"vec3 skybox_color = texture(skybox_sampler, reflection).rgb;\n"
+		"vec4 weapon_color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
+
+		"color = vec4(mix(weapon_color.rgb, skybox_color, 1.0f), weapon_color.a);\n"
+
+/////

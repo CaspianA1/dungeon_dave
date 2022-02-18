@@ -19,8 +19,7 @@ typedef struct {
 	the percentage is smoothed out by a Hermite curve. */
 	GLfloat pace, speed_xz_percent, time_since_jump, time_accum_for_full_fov;
 
-	vec2 right_xz; // X and Z of right (Y is always 0)
-	vec3 pos;
+	vec3 pos, dir, right, up;
 
 	mat4 model_view_projection; // Used the least, so last in struct
 	vec4 frustum_planes[6];
@@ -34,7 +33,7 @@ typedef struct {
 /* Excluded: limit_to_pos_neg_domain, update_camera_angles,
 smooth_hermite, update_fov, apply_velocity_in_xz_direction,
 tile_exists_at_pos, pos_collides_with_heightmap, update_pos_via_physics,
-make_pace_function, update_pace, get_view_matrix */
+make_pace_function, update_pace */
 
 void init_camera(Camera* const camera, const vec3 init_pos);
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj);

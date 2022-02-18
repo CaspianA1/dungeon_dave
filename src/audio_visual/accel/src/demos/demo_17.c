@@ -212,9 +212,10 @@ void demo_17_drawer(const StateGL* const sgl) {
 	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors,
 		&camera, scene_state -> lightmap_texture, scene_state -> map_size);
 
-	draw_skybox(scene_state -> skybox, &camera);
+	const Skybox* const skybox = &scene_state -> skybox;
+	draw_skybox(*skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
-	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, &camera, &event);
+	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, &camera, &event, skybox);
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
