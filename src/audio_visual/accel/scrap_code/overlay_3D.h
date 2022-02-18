@@ -2,7 +2,8 @@
 #define OVERLAY_H
 
 #include "buffer_defs.h"
-#include "animation.h"
+#include "billboard.h"
+#include "skybox.h"
 
 typedef struct {
 	const GLuint texture, shader;
@@ -19,6 +20,8 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat secs_per_frame
 	const GLsizei frames_down, const GLsizei total_frames);
 
 void deinit_weapon_sprite(const WeaponSprite* const ws);
-void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera, const Event* const event);
+
+void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera,
+	const Event* const event, const Skybox* const skybox);
 
 #endif

@@ -251,9 +251,7 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 	glm_frustum_planes(camera -> model_view_projection, camera -> frustum_planes);
 
 	memcpy(camera -> pos, pos, sizeof(vec3));
-	memcpy(camera -> dir, dir, sizeof(vec3));
 	memcpy(camera -> right, right, sizeof(vec3));
-	memcpy(camera -> up, up, sizeof(vec3));
 }
 
 #endif

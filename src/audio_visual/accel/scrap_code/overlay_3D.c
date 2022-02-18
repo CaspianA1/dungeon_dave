@@ -7,7 +7,10 @@
 Weapon sprite TODO:
 - Put weapon shaders in shaders.c
 - Configure mag and min filter as a variable
-- Rescale the weapon to make it not warped by the screen resolution
+
+- Stop the weapon from clipping with walls and things
+- Align the bottom of the weapon with the bottom of the screen
+- Angle it when looking up and down
 */
 
 #include "headers/overlay.h"
@@ -15,44 +18,65 @@ Weapon sprite TODO:
 #include "utils.c"
 #include "texture.c"
 #include "animation.c"
+#include "skybox.c"
 
 const GLchar *const weapon_sprite_vertex_shader =
 	"#version 330 core\n"
 
-	"uniform float frame_width_over_height, weapon_size_screen_space;\n"
-	"uniform vec2 pace;\n"
-
 	"out vec2 fragment_UV;\n"
+	"out vec3 vertex_world_space;\n"
 
-	"const vec2 screen_corners[4] = vec2[4] (\n"
-		"vec2(-1.0f, -1.0f), vec2(1.0f, -1.0f),\n"
-		"vec2(-1.0f, 1.0f), vec2(1.0f, 1.0f)\n"
+	"uniform float size, frame_width_over_height;\n"
+	"uniform vec2 pace;\n"
+	"uniform vec3 camera_pos, camera_dir, camera_right, camera_up;\n"
+	"uniform mat4 model_view_projection;\n"
+
+	"const float dist_from_camera = 0.4f;\n"
+
+	"const vec2 corners_model_space[4] = vec2[4] (\n"
+		"vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f),\n"
+		"vec2(-0.5f, 0.5f), vec2(0.5f, 0.5f)\n"
 	");\n"
 
 	"void main(void) {\n"
-		"vec2 screen_corner = screen_corners[gl_VertexID];\n"
+		"vec2 vertex_model_space = corners_model_space[gl_VertexID];\n"
+		"vec3 center_world_space = camera_pos + camera_dir * dist_from_camera;\n"
 
-		"vec2 weapon_corner = screen_corner * weapon_size_screen_space;\n"
-		"weapon_corner.x *= frame_width_over_height;\n"
-		"weapon_corner.y += weapon_size_screen_space - 1.0f;\n" // Makes weapon touch bottom of screen
-		"weapon_corner += pace;\n"
+		// "if (gl_VertexID <= 1) center_world_space.xz -= camera_dir.xz * 0.3f;\n"
 
-		"gl_Position = vec4(weapon_corner, 0.0f, 1.0f);\n"
-		"fragment_UV = vec2(screen_corner.x, -screen_corner.y) * 0.5f + 0.5f;\n"
+		"vertex_world_space = center_world_space\n"
+			"+ vertex_model_space.x * camera_right * size"
+			"+ vertex_model_space.y * camera_up * size;\n"
+
+		"gl_Position = model_view_projection * vec4(vertex_world_space, 1.0f);\n"
+		"gl_Position.x *= frame_width_over_height;\n"
+		"gl_Position.xy += pace;\n"
+
+		"fragment_UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
 	"}\n",
 
 *const weapon_sprite_fragment_shader =
 	"#version 330 core\n"
 
 	"in vec2 fragment_UV;\n"
+	"in vec3 vertex_world_space;\n"
 
 	"out vec4 color;\n"
 
 	"uniform uint frame_index;\n"
+	"uniform vec3 camera_pos, camera_dir;\n"
 	"uniform sampler2DArray frame_sampler;\n"
+	"uniform samplerCube skybox_sampler;\n"
+
+	"const float skybox_reflection_weight = 0.1f;"
 
 	"void main(void) {\n"
-		"color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
+		"vec3 incidence = normalize(vertex_world_space - camera_pos);\n"
+		"vec3 reflection = reflect(incidence, -camera_dir);\n"
+
+		"vec3 skybox_color = texture(skybox_sampler, reflection).rgb;\n"
+		"vec4 weapon_color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
+		"color = vec4(mix(weapon_color.rgb, skybox_color, skybox_reflection_weight), weapon_color.a);\n"
 	"}\n";
 
 WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat secs_per_frame,
@@ -115,27 +139,39 @@ static void update_weapon_sprite(WeaponSprite* const ws, const Event* const even
 	ws -> curr_frame = curr_frame;
 }
 
-void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera, const Event* const event) {
-	update_weapon_sprite(ws_ref, event);
+void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera,
+	const Event* const event, const Skybox* const skybox) {
 
+	update_weapon_sprite(ws_ref, event);
 	const WeaponSprite ws = *ws_ref;
 
 	glUseProgram(ws.shader);
 
 	static byte first_call = 1;
-	static GLint pace_id, frame_index_id;
+
+	static GLint pace_id, size_id,
+		frame_index_id, camera_pos_id,
+		camera_dir_id, camera_right_id,
+		camera_up_id, model_view_projection_id;
 
 	// TODO: put these in constants.c
 	const GLfloat max_movement_magitude = 0.2f, time_for_half_movement_cycle = 0.5f;
 
 	if (first_call) {
+		INIT_UNIFORM_VALUE(size, ws.shader, 1f, ws.size);
 		INIT_UNIFORM_VALUE(frame_width_over_height, ws.shader, 1f, ws.frame_width_over_height);
-		INIT_UNIFORM_VALUE(weapon_size_screen_space, ws.shader, 1f, ws.size);
 
 		INIT_UNIFORM(pace, ws.shader);
+		INIT_UNIFORM(size, ws.shader);
 		INIT_UNIFORM(frame_index, ws.shader);
+		INIT_UNIFORM(camera_pos, ws.shader);
+		INIT_UNIFORM(camera_dir, ws.shader);
+		INIT_UNIFORM(camera_right, ws.shader);
+		INIT_UNIFORM(camera_up, ws.shader);
+		INIT_UNIFORM(model_view_projection, ws.shader);
 
 		use_texture(ws.texture, ws.shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
+		use_texture(skybox -> texture, ws.shader, "skybox_sampler", TexSkybox, SKYBOX_TEXTURE_UNIT);
 
 		first_call = 0;
 	}
@@ -154,10 +190,21 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	UPDATE_UNIFORM(pace, 2f, across, down);
 	UPDATE_UNIFORM(frame_index, 1ui, ws.curr_frame);
 
+	UPDATE_UNIFORM(camera_pos, 3fv, 1, camera -> pos);
+	UPDATE_UNIFORM(camera_dir, 3fv, 1, camera -> dir);
+	UPDATE_UNIFORM(camera_right, 3fv, 1, camera -> right);
+	UPDATE_UNIFORM(camera_up, 3fv, 1, camera -> up);
+
+	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
+
+	// glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
 	glDisable(GL_BLEND);
+	// glEnable(GL_DEPTH_TEST);
 }
 
 #endif
