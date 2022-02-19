@@ -57,7 +57,6 @@ static GLuint init_skybox_texture(const GLchar* const path) {
 
 	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size);
 
-	SDL_Rect dest_rect = {0, 0, cube_size, cube_size};
 	const GLint twice_cube_size = cube_size << 1;
 
 	typedef struct {const GLint x, y;} ivec2;
@@ -76,7 +75,7 @@ static GLuint init_skybox_texture(const GLchar* const path) {
 		const ivec2 src_origin = src_origins[i];
 		SDL_Rect src_rect = {src_origin.x, src_origin.y, cube_size, cube_size};
 
-		SDL_LowerBlit(skybox_surface, &src_rect, face_surface, &dest_rect);
+		SDL_BlitSurface(skybox_surface, &src_rect, face_surface, NULL);
 		write_surface_to_texture(face_surface, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 	}
 
