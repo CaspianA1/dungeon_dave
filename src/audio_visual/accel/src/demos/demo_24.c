@@ -63,8 +63,6 @@ void demo_24_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), NULL);
 
-	glClearColor(0.4f, 0.4f, 0.4f, 0.0f); // Light gray
-
 	//////////
 
 	const BatchDrawContext* const draw_context = &scene_state -> sector_draw_context;
@@ -72,6 +70,9 @@ void demo_24_drawer(const StateGL* const sgl) {
 
 	// TODO: find some way to use these private functions in a reasonable way
 	const buffer_size_t num_visible_faces = fill_sector_vbo_with_visible_faces(draw_context, sectors, &camera);
+
+	glClearColor(0.4f, 0.4f, 0.4f, 0.0f); // Light gray
+
 	if (num_visible_faces != 0) {
 		draw_sectors(draw_context, &camera, num_visible_faces,
 			scene_state -> lightmap_texture, scene_state -> map_size);
