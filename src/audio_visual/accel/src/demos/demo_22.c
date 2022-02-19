@@ -30,8 +30,7 @@ Currently:
 	from that (test from side on axis-aligned plane)
 - From that silhouette, build a 4-sided start cap
 - Make an infinitely far away end-cap
-- Build the 4 sides of the mesh
-*/
+- Build the 4 sides of the mesh */
 
 #include "../utils.c"
 #include "../camera.c"
