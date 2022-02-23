@@ -6512,3 +6512,13 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 		.lightmap_texture = init_plain_texture("../assets/palace_perlin.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
 
 /////
+
+	/*
+	glm_ortho(
+		-25.0f, 25.0f,
+		-25.0f, 25.0f,
+		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection
+		);
+	*/
+
+/////

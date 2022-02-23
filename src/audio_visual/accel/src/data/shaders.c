@@ -59,7 +59,7 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec3 color;\n"
 
-	"uniform float base_ambient, min_attenuation, attenuation_factor, shadow_umbra_strength;\n"
+	"uniform float min_attenuation, attenuation_factor, shadow_umbra_strength;\n"
 	"uniform vec3 light_pos;\n"
 	"uniform sampler2DShadow shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
@@ -76,12 +76,12 @@ const GLchar *const sector_vertex_shader =
 
 		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
 
-		"bool in_shadow = !bool(texture(shadow_map_sampler, proj_coords));\n"
-		"return in_shadow ? shadow_umbra_strength : diffuse_amount;\n"
+		"bool not_in_shadow = bool(texture(shadow_map_sampler, proj_coords));\n"
+		"return not_in_shadow ? diffuse_amount : shadow_umbra_strength;\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
-		"float light = base_ambient + diffuse_and_shadow() * attenuation();\n"
+		"float light = diffuse_and_shadow() * attenuation();\n"
 		"return min(light, 1.0f);\n"
 	"}\n"
 

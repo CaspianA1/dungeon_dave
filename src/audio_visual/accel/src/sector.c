@@ -171,10 +171,9 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(light_pos_world_space, sector_shader);
 		INIT_UNIFORM(light_model_view_projection, sector_shader);
 
-		INIT_UNIFORM_VALUE(base_ambient, sector_shader, 1f, 0.15f);
-		INIT_UNIFORM_VALUE(min_attenuation, sector_shader, 1f, 0.4f); // 0.003f
+		INIT_UNIFORM_VALUE(min_attenuation, sector_shader, 1f, 0.7f);
 		INIT_UNIFORM_VALUE(attenuation_factor, sector_shader, 1f, 0.005f); // 0.003f
-		INIT_UNIFORM_VALUE(shadow_umbra_strength, sector_shader, 1f, 0.1f);
+		INIT_UNIFORM_VALUE(shadow_umbra_strength, sector_shader, 1f, 0.2f);
 		INIT_UNIFORM_VALUE(shadow_bias, sector_shader, 1f, 0.000019f);
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
