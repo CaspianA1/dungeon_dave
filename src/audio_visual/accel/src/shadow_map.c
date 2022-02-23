@@ -103,12 +103,10 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 		(GLfloat*) shadow_map_context.light_context.dir,
 		(GLfloat*) shadow_map_context.light_context.up, view);
 
-	/*
 	glm_perspective(constants.camera.init.fov, (GLfloat) shadow_width / shadow_height,
 		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
-	*/
 
-	glm_ortho(-50.0f, 50.0f, -50.0f, 50.0f, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
+	// glm_ortho(-50.0f, 50.0f, -50.0f, 50.0f, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 
 	glm_mul(projection, view, shadow_map_context.light_context.model_view_projection);
 
