@@ -6536,3 +6536,16 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 	"}\n";
 
 /////
+
+		"float depth = texture(shadow_map_sampler, proj_coords.xy).r, compare = 0.3f;\n"
+		"vec2 moments = vec2(depth, depth * depth + 0.01f);\n"
+
+		"float p = step(compare, moments.x);\n"
+		"float variance = max(moments.y - moments.x * moments.x, 0.00002f);\n"
+
+		"float d = compare - moments.x;\n"
+		"float p_max = variance / (variance + d * d);\n"
+
+		"return min(max(p, p_max), 1.0f);\n"
+
+/////
