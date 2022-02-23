@@ -173,8 +173,6 @@ void init_sector_list_vbo(OldSectorList* const sector_list) {
 }
 
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
-	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone; calling this early mitigates the problem of initial flickering
-
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
 	OldSectorList sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
@@ -188,6 +186,7 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 	sgl.shader_program = init_shader_program(sector_lighting_vertex_shader, sector_lighting_fragment_shader);
 	glUseProgram(sgl.shader_program);
 	enable_all_culling();
+	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 
 	return sgl;	
 }
@@ -259,7 +258,6 @@ void demo_12_drawer(const StateGL* const sgl) {
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera.pos);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
-	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 	use_texture(sgl -> textures[0], shader, "texture_sampler", TexPlain, 0);
 
 	const OldSectorList* const sector_list = sgl -> any_data;

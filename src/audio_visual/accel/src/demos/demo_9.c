@@ -97,13 +97,13 @@ StateGL demo_9_init(void) {
 	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
+	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
 
 	return sgl;
 }
 
 void demo_9_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
-	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
 	const int num_planes = 2;
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
 }

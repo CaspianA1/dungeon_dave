@@ -268,7 +268,7 @@ static void fail_on_shader_creation_error(
 		GLchar* const error_message = malloc(log_length + 1);
 		log_getter(object_id, log_length, NULL, error_message);
 
-		const byte compilation_step_id = compilation_step + 1;
+		const byte compilation_step_id = compilation_step + 1;  // `fail` not used for this since the error message must be freed
 		fprintf(stderr, "Shader creation step #%d - %s", compilation_step_id, error_message);
 		free(error_message);
 		exit(compilation_step_id);

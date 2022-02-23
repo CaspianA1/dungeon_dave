@@ -13,11 +13,10 @@ Final lighting model:
 - Diffuse from that light source
 - A shadow map also based on that light source, with not-too-strong, penumbra-heavy shadows
 	(precomputed, since the big texels wouldn't look good with billboards; ignore dynamic sectors for now)
-- Ambient occlusion
+- Ambient occlusion through an occlusion map
 - No perlin map - done
 
 Other random ideas:
-- Ambient occlusion through an occlusion map
 - A map maker. An init json file that specifies textures and dimensions;
 	draw/erase modes, line mode, export, and choose heights and textures
 - More efficiently set statemap bit ranges, maybe

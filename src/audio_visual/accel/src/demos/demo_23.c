@@ -66,7 +66,7 @@ const GLchar *const demo_23_obj_vertex_shader =
 		/*
 		"float z = texture(depth_map_sampler, shadow_coord.xy).r;\n"
 		"float near = 0.01f, far = 441.6729559300637f;\n"
-		"float visibility = (z -(-near)) / (-far - (-near));"
+		"visibility = (z -(-near)) / (-far - (-near));\n"
 		*/
 
 		"color = visibility * vec3(0.2f, 0.5f, 0.7f);\n"
@@ -247,6 +247,7 @@ StateGL demo_23_init(void) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	glClearColor(0.5f, 0.0f, 0.0f, 0.0f);
 
 	return sgl;
 }
@@ -264,8 +265,6 @@ void get_view_matrix(const vec3 pos, const vec3 dir, const vec3 right, mat4 view
 }
 
 void demo_23_drawer(const StateGL* const sgl) {
-	glClearColor(0.5f, 0.0f, 0.0f, 0.0f);
-
 	const SceneState scene_state = *((SceneState*) sgl -> any_data);
 	const DepthBufferCapture depth_capture = scene_state.depth_capture;
 
@@ -318,7 +317,7 @@ void demo_23_drawer(const StateGL* const sgl) {
 	// Rendering to depth map from light position
 	capture_depth_buffer(depth_capture, demo_23_draw_call, &scene_state.num_obj_vertices, light_model_view_projection);
 
-	// Rendering the scene as normal
+	// Rendering the scene as usual
 
 	glUseProgram(scene_state.obj_shader);
 	UPDATE_UNIFORM(obj_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);

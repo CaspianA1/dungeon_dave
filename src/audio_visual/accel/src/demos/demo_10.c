@@ -144,13 +144,13 @@ StateGL demo_10_init(void) {
 	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 
 	return sgl;
 }
 
 void demo_10_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	enum {num_meshes = 1};
 
 	const GLsizei num_triangles = num_meshes * planes_per_mesh * 2; // 2 = 2 triangles per plane

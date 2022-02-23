@@ -76,7 +76,7 @@ const GLchar *const sector_vertex_shader =
 
 		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
 
-		"bool in_shadow = texture(shadow_map_sampler, proj_coords) != 1.0f;\n"
+		"bool in_shadow = !bool(texture(shadow_map_sampler, proj_coords));\n"
 		"return in_shadow ? shadow_umbra_strength : diffuse_amount;\n"
 	"}\n"
 

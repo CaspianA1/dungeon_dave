@@ -47,13 +47,13 @@ StateGL demo_7_init(void) {
 	free(plane_vertices);
 
 	demo_6_init_shader_and_textures_and_culling(&sgl, num_planes, plane_sizes);
+	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
 
 	return sgl;
 }
 
 void demo_7_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
-	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 

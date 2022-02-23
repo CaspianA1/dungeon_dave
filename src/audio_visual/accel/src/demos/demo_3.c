@@ -173,13 +173,13 @@ StateGL demo_3_init(void) {
 
 	vec3 camera_pos = {4.0f, 3.0f, -3.0f};
 	demo_2_matrix_setup(sgl.shader_program, camera_pos);
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 
 	return sgl;
 }
 
 void demo_3_drawer(const StateGL* const sgl) {
 	(void) sgl;
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	enum {num_triangles = 12};
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 }

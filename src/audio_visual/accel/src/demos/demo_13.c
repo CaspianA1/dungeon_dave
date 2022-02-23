@@ -169,12 +169,12 @@ StateGL demo_13_init(void) {
 
 	enable_all_culling();
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glClearColor(0.2f, 0.8f, 0.5f, 0.0f); // Barf green
 
 	return sgl;
 }
 
 void demo_13_drawer(const StateGL* const sgl) {
-	glClearColor(0.2f, 0.8f, 0.5f, 0.0f); // Barf green
 	demo_13_matrix_setup(sgl -> shader_program, center);
 
 	// Drawing non-transparent objects first

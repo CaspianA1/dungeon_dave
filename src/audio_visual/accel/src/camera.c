@@ -207,11 +207,6 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		cos_hori = cosf(camera -> angles.hori), cos_vert = cosf(camera -> angles.vert),
 		sin_hori = sinf(camera -> angles.hori), sin_vert = sinf(camera -> angles.vert);
 
-	/*
-	camera -> right_xz[0] = -cos_hori;
-	camera -> right_xz[1] = sin_hori;
-	*/
-
 	vec3
 		dir = {cos_vert * sin_hori, sin_vert, cos_vert * cos_hori},
 		right = {-cos_hori, 0.0f, sin_hori}, pos;

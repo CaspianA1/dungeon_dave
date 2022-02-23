@@ -158,6 +158,7 @@ StateGL demo_11_init(void) {
 	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 
 	return sgl;
 }
@@ -175,7 +176,6 @@ void demo_11_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), NULL);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
 }
 

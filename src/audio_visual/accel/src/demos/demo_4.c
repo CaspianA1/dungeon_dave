@@ -121,12 +121,12 @@ StateGL demo_4_init(void) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); */
 
 	enable_all_culling();
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 
 	return sgl;
 }
 
 void demo_4_core_drawer(const int num_triangles) {
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 }
 

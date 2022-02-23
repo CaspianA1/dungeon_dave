@@ -18,7 +18,6 @@ typedef struct {
 		vec3 pos, dir, up;
 		mat4 model_view_projection;
 	} light_context;
-
 } ShadowMapContext;
 
 // Excluded: enable_rendering_to_shadow_map, disable_rendering_to_shadow_map

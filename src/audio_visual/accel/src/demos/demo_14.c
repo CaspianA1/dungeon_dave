@@ -41,7 +41,6 @@ void demo_14_drawer(const StateGL* const sgl) {
 	UPDATE_UNIFORM(billboard_center_world_space, 3fv, 1, new_center);
 
 	update_camera(&camera, get_next_event(), NULL);
-	glClearColor(0.1f, 0.9f, 0.9f, 0.0f);
 
 	//////////
 

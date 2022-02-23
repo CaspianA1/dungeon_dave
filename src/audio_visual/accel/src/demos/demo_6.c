@@ -187,13 +187,13 @@ StateGL demo_6_init(void) {
 	free(plane_vertices);
 
 	demo_6_init_shader_and_textures_and_culling(&sgl, num_planes, plane_sizes);
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 
 	return sgl;
 }
 
 void demo_6_drawer(const StateGL* const sgl) {
 	move(sgl -> shader_program);
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 	enum {num_triangles = 8};
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 }

@@ -280,6 +280,7 @@ StateGL demo_22_init(void) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnableVertexAttribArray(0);
+	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 
 	return sgl;
 }
@@ -320,7 +321,6 @@ void demo_22_drawer(const StateGL* const sgl) {
 		first_call = 0;
 	}
 
-	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 	update_camera(&camera, get_next_event(), NULL);
 	draw_shadow_volume_context(context, camera.model_view_projection);
 }
