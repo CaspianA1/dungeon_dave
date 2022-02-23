@@ -48,6 +48,7 @@ Chromebook bugs:
 - Demo test range doesn't work
 - Sometimes, mouse control does not work when using the keyboard
 - Framerate drop when using the big monitor + optimized + full screen
+- Weird fragmented (like broken glass?) shadows behind the light source
 
 Weapon sprite:
 - Put weapon shaders in shaders.c
