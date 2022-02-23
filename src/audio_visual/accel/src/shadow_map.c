@@ -31,7 +31,9 @@ const GLchar *const depth_vertex_shader =
 *const depth_fragment_shader =
 	"#version 330 core\n"
 
-	"void main(void) {}\n";
+	"void main(void) {\n"
+
+	"}\n";
 
 ShadowMapContext init_shadow_map_context(
 	const GLsizei shadow_width, const GLsizei shadow_height,
@@ -44,12 +46,12 @@ ShadowMapContext init_shadow_map_context(
 	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+	glTexParameteri(TexPlain, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+	glTexParameteri(TexPlain, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
 	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameterfv(TexPlain, GL_TEXTURE_BORDER_COLOR, (GLfloat[4]) {1.0f, 1.0f, 1.0f, 1.0f});  
-
-	glTexParameteri(TexPlain, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-	glTexParameteri(TexPlain, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
 	glTexImage2D(TexPlain, 0, GL_DEPTH_COMPONENT, shadow_width, shadow_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
@@ -101,8 +103,12 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 		(GLfloat*) shadow_map_context.light_context.dir,
 		(GLfloat*) shadow_map_context.light_context.up, view);
 
+	/*
 	glm_perspective(constants.camera.init.fov, (GLfloat) shadow_width / shadow_height,
 		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
+	*/
+
+	glm_ortho(-50.0f, 50.0f, -50.0f, 50.0f, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 
 	glm_mul(projection, view, shadow_map_context.light_context.model_view_projection);
 
@@ -115,7 +121,7 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 
 	glViewport(0, 0, shadow_width, shadow_height);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_context.depth_map.framebuffer);
-	glClear(GL_DEPTH_BUFFER_BIT); // Clear framebuffer
+	glClear(GL_DEPTH_BUFFER_BIT); // Clear depth map
 	glCullFace(GL_FRONT);
 
 	memcpy(shadow_map_context_ref -> light_context.model_view_projection,

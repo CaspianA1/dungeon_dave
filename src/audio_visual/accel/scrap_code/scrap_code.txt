@@ -6522,3 +6522,17 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 	*/
 
 /////
+
+*const depth_fragment_shader =
+	"#version 330 core\n"
+
+	// "out float depth_and_depth_squared;\n"
+
+	"void main(void) {\n"
+		/*
+		"float depth = gl_FragCoord.z;\n"
+		"depth_and_depth_squared = vec4(depth, depth * depth, 0.0f, 0.0f);\n"
+		*/
+	"}\n";
+
+/////
