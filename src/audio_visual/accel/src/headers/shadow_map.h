@@ -1,7 +1,9 @@
 #ifndef SHADOW_MAP_H
 #define SHADOW_MAP_H
 
+#include "utils.h"
 #include "buffer_defs.h"
+#include "batch_draw_context.h"
 
 typedef struct {
 	const struct {

@@ -14,7 +14,7 @@ typedef GLfloat bb_pos_component_t; // bb = billboard
 #define BB_POS_COMPONENT_TYPENAME GL_FLOAT
 #define BUFFER_SIZE_TYPENAME GL_UNSIGNED_INT
 
-enum {
+enum { // `enum` is used to make these values compile-time constants
 	components_per_face_vertex = 4,
 	vertices_per_face = 6,
 	components_per_face = components_per_face_vertex * vertices_per_face,

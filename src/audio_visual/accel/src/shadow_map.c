@@ -13,6 +13,8 @@
 */
 
 #include "headers/shadow_map.h"
+#include "headers/constants.h"
+#include "headers/texture.h"
 
 // TODO: to shaders.c
 const GLchar *const depth_vertex_shader =
