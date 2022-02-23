@@ -152,32 +152,43 @@ static byte sector_in_view_frustum(const Sector sector, const vec4 frustum_plane
 	return glm_aabb_frustum(aabb_corners, (vec4*) frustum_planes);
 }
 
-static void draw_sectors(const BatchDrawContext* const draw_context, const Camera* const camera,
-	const buffer_size_t num_visible_faces, const GLuint lightmap_texture, const byte map_size[2]) {
+static void draw_sectors(const BatchDrawContext* const draw_context,
+	const ShadowMapContext* const shadow_map_context, const Camera* const camera,
+	const buffer_size_t num_visible_faces) {
 
 	const GLuint sector_shader = draw_context -> shader;
-	static GLint camera_pos_world_space_id, model_view_projection_id;
-	static byte first_call = 1;
-
 	glUseProgram(sector_shader);
+
+	static GLint
+		camera_pos_world_space_id, model_view_projection_id,
+		light_pos_world_space_id, light_model_view_projection_id;
+
+	static byte first_call = 1;
 
 	if (first_call) {
 		INIT_UNIFORM(camera_pos_world_space, sector_shader);
 		INIT_UNIFORM(model_view_projection, sector_shader);
+		INIT_UNIFORM(light_pos_world_space, sector_shader);
+		INIT_UNIFORM(light_model_view_projection, sector_shader);
 
-		INIT_UNIFORM_VALUE(map_size, sector_shader, 2i, map_size[0], map_size[1]);
-		INIT_UNIFORM_VALUE(ambient_strength, sector_shader, 1f, 0.15f);
-		INIT_UNIFORM_VALUE(diffuse_strength, sector_shader, 1f, 0.5f);
-		INIT_UNIFORM_VALUE(attenuation_factor, sector_shader, 1f, 0.02f);
+		INIT_UNIFORM_VALUE(base_ambient, sector_shader, 1f, 0.15f);
+		INIT_UNIFORM_VALUE(min_attenuation, sector_shader, 1f, 0.4f); // 0.003f
+		INIT_UNIFORM_VALUE(attenuation_factor, sector_shader, 1f, 0.005f); // 0.003f
+		INIT_UNIFORM_VALUE(shadow_umbra_strength, sector_shader, 1f, 0.1f);
+		INIT_UNIFORM_VALUE(shadow_bias, sector_shader, 1f, 0.000019f);
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
-		use_texture(lightmap_texture, sector_shader, "lightmap_sampler", TexPlain, LIGHTMAP_TEXTURE_UNIT);
+		use_texture(shadow_map_context -> depth_map.texture, sector_shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 
 		first_call = 0;
 	}
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
-	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE,  &camera -> model_view_projection[0][0]);
+	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
+
+	UPDATE_UNIFORM(light_pos_world_space, 3fv, 1, shadow_map_context -> light_context.pos);
+	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE,
+		&shadow_map_context -> light_context.model_view_projection[0][0]);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -236,11 +247,12 @@ static buffer_size_t fill_sector_vbo_with_visible_faces(
 }
 
 // This is just a utility function
-void draw_visible_sectors(const BatchDrawContext* const draw_context, const List* const sectors,
-	const Camera* const camera, const GLuint lightmap_texture, const byte map_size[2]) {
+void draw_visible_sectors(const BatchDrawContext* const draw_context,
+	const ShadowMapContext* const shadow_map_context, const List* const sectors,
+	const Camera* const camera) {
 
 	const buffer_size_t num_visible_faces = fill_sector_vbo_with_visible_faces(draw_context, sectors, camera);
-	if (num_visible_faces != 0) draw_sectors(draw_context, camera, num_visible_faces, lightmap_texture, map_size);
+	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_map_context, camera, num_visible_faces);
 }
 
 #endif

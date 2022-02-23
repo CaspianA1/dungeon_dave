@@ -9,12 +9,13 @@
 
 #include "../overlay.c"
 
-typedef struct {
-	const GLuint lightmap_texture; // This is grayscale
+#include "../shadow_map.c"
 
+typedef struct {
 	WeaponSprite weapon_sprite;
 
 	BatchDrawContext sector_draw_context, billboard_draw_context;
+	ShadowMapContext shadow_map_context;
 
 	List sectors; // This is not in the sector draw context b/c the cpu list for that context consists of vertices
 	const List billboard_animations, billboard_animation_instances;
@@ -27,9 +28,13 @@ typedef struct {
 StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
+	// 2 << 13 is the biggest size
 	SceneState scene_state = {
-		// "../assets/palace_perlin.bmp", "../assets/water.bmp"
-		.lightmap_texture = init_plain_texture("../assets/palace_perlin.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
+		.shadow_map_context = init_shadow_map_context(4096, 4096,
+			(vec3) {3.141779f, 5.575195f, 12.794771f},
+			(vec3) {0.495601f, -0.360811f, -0.790060f},
+			(vec3) {0.0f, 1.0f, 0.0f}
+		),
 
 		// .weapon_sprite = init_weapon_sprite(0.5f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
 		.weapon_sprite = init_weapon_sprite(0.65f, 0.016f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
@@ -140,6 +145,8 @@ StateGL demo_17_init(void) {
 
 void demo_17_drawer(const StateGL* const sgl) {
 	SceneState* const scene_state = (SceneState*) sgl -> any_data;
+	const BatchDrawContext* const sector_draw_context = &scene_state -> sector_draw_context;
+	ShadowMapContext* const shadow_map_context = &scene_state -> shadow_map_context;
 
 	static Camera camera;
 	static PhysicsObject physics_obj;
@@ -162,9 +169,15 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, event, &physics_obj);
 
+	if (keys[SDL_SCANCODE_C]) {
+		memcpy(shadow_map_context -> light_context.pos, camera.pos, sizeof(vec3));
+		memcpy(shadow_map_context -> light_context.dir, camera.dir, sizeof(vec3));
+		memcpy(shadow_map_context -> light_context.up, camera.up, sizeof(vec3));
+		render_all_sectors_to_shadow_map(shadow_map_context, sector_draw_context, event.screen_size);
+	}
+
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
-	draw_visible_sectors(&scene_state -> sector_draw_context, &scene_state -> sectors,
-		&camera, scene_state -> lightmap_texture, scene_state -> map_size);
+	draw_visible_sectors(sector_draw_context, shadow_map_context, &scene_state -> sectors, &camera);
 
 	const Skybox* const skybox = &scene_state -> skybox;
 	draw_skybox(*skybox, &camera);
@@ -175,11 +188,12 @@ void demo_17_drawer(const StateGL* const sgl) {
 void demo_17_deinit(const StateGL* const sgl) {
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 
-	deinit_texture(scene_state -> lightmap_texture);
 	deinit_weapon_sprite(&scene_state -> weapon_sprite);
 
 	deinit_batch_draw_context(&scene_state -> sector_draw_context);
 	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
+
+	deinit_shadow_map_context(&scene_state -> shadow_map_context);
 
 	deinit_list(scene_state -> sectors);
 	deinit_list(scene_state -> billboard_animations);

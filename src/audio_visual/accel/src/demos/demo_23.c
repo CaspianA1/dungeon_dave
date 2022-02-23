@@ -31,7 +31,6 @@ typedef struct { // `obj` here just means the objects in the scene
 	DepthBufferCapture depth_capture;
 } SceneState;
 
-// TODO: make a shadows.c later, and put these shaders in shaders.c
 const GLchar *const demo_23_obj_vertex_shader =
 	"#version 330 core\n"
 
@@ -259,10 +258,9 @@ void demo_23_draw_call(const void* const param) {
 
 
 void get_view_matrix(const vec3 pos, const vec3 dir, const vec3 right, mat4 view) {
-	vec3 rel_origin, up;
-	glm_vec3_add((GLfloat*) pos, (GLfloat*) dir, rel_origin);
+	vec3 up;
 	glm_vec3_cross((GLfloat*) right, (GLfloat*) dir, up);
-	glm_lookat((GLfloat*) pos, rel_origin, up, view);
+	glm_look((GLfloat*) pos, (GLfloat*) dir, up, view);
 }
 
 void demo_23_drawer(const StateGL* const sgl) {
@@ -287,7 +285,6 @@ void demo_23_drawer(const StateGL* const sgl) {
 	const Event event = get_next_event();
 	update_camera(&camera, event, NULL);
 
-	// TODO: set these up properly in camera.c later
 	mat4 light_view, light_projection, light_view_projection, light_model_view_projection;
 
 	/*

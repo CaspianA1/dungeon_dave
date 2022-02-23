@@ -18,9 +18,10 @@
 
 #define KEY_FLY SDL_SCANCODE_1
 #define KEY_TOGGLE_WIREFRAME_MODE SDL_SCANCODE_2
-#define KEY_PRINT_POSITION SDL_SCANCODE_3
-#define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_4
-#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_5
+#define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_3
+#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_4
+#define KEY_PRINT_POSITION SDL_SCANCODE_5
+#define KEY_PRINT_DIRECTION SDL_SCANCODE_6
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 #define DEBUG_FLOAT(var) printf(#var " = %lf\n", (double) (var))
@@ -68,7 +69,8 @@ typedef enum {
 	OpenImageFile,
 	CreateMesh,
 	TextureIDIsTooLarge,
-	TextureSetIsTooLarge
+	TextureSetIsTooLarge,
+	CreateFramebuffer
 } FailureType;
 
 typedef struct {

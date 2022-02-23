@@ -19,9 +19,9 @@ typedef struct {
 	the percentage is smoothed out by a Hermite curve. */
 	GLfloat pace, speed_xz_percent, time_since_jump, time_accum_for_full_fov;
 
-	vec3 pos, right;
+	vec3 pos, dir, right, up;
 
-	mat4 model_view_projection; // Used the least, so last in struct
+	mat4 model_view_projection;
 	vec4 frustum_planes[6];
 } Camera;
 

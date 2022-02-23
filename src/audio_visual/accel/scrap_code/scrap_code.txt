@@ -6298,3 +6298,217 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 		"color = vec4(mix(weapon_color.rgb, skybox_color, 1.0f), weapon_color.a);\n"
 
 /////
+
+		"float min_bias = 0.072801, max_bias = 0.08f;\n"
+
+/////
+
+		// 0.072801 good min
+		const GLfloat step = 0.0001f, init_min_bias = 0.01f;
+		static GLfloat min_bias = init_min_bias;
+		if (keys[SDL_SCANCODE_I]) min_bias += step;
+		if (keys[SDL_SCANCODE_K]) min_bias -= step;
+		if (keys[SDL_SCANCODE_L]) min_bias = init_min_bias;
+		if (min_bias < 0.0f) min_bias = 0.0f;
+		DEBUG_FLOAT(min_bias);
+
+		INIT_UNIFORM_VALUE(max_bias, scene_shader, 1f, min_bias);
+
+/////
+
+		// 0.072801 good min
+		const GLfloat step = 0.0001f, init_min_bias = 0.01f;
+		static GLfloat min_bias = init_min_bias;
+		if (keys[SDL_SCANCODE_I]) min_bias += step;
+		if (keys[SDL_SCANCODE_K]) min_bias -= step;
+		if (keys[SDL_SCANCODE_L]) min_bias = init_min_bias;
+		if (min_bias < 0.0f) min_bias = 0.0f;
+		DEBUG_FLOAT(min_bias);
+
+		INIT_UNIFORM_VALUE(max_bias, scene_shader, 1f, min_bias);
+
+/////
+
+		"vec4 four_texels = textureGather(shadow_map_sampler, proj_coords.xy);\n"
+		"shadow_map_texels = sum(four_texels) / 4.0f;\n"
+
+/////
+
+		// "float bias = 1.0f / 2048.0f;\n"
+
+/////
+
+		// 0.072801 good min
+
+/////
+
+		// Works:
+		// "vec4 shadow_coord = fragment_pos_light_space;\n"
+		// "if ( textureProj( shadow_map_sampler, shadow_coord.xyw ).z  <  (0.05f)/shadow_coord.w ) return 0.3f;\n"
+		// "return 0.0f;\n"
+
+		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
+		"float result = texture(shadow_map_sampler, proj_coords, bias);\n"
+		// "float result = textureProj(shadow_map_sampler, fragment_pos_light_space * 0.5f + 0.5f);\n"
+		// "return 1.0f - result;"
+		"return result;\n"
+
+		/*
+		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
+		"float shadow_map_texel = texture(shadow_map_sampler, proj_coords.xyz).r;\n"
+
+		"bool in_shadow = linearize_depth(shadow_map_texel) - bias >= linearize_depth(proj_coords.z);\n"
+		"return in_shadow ? 0.3f : 1.0f;\n"
+		*/
+
+		/*
+		"float bias = max(max_bias * (1.0f - dot(normalize(face_normal), normalize(light_dir))), min_bias);\n"
+
+		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
+		"float shadow_map_texel = texture(shadow_map_sampler, proj_coords.xy).r;\n"
+
+		"bool in_shadow = linearize_depth(shadow_map_texel) - bias >= linearize_depth(proj_coords.z);\n"
+		"return in_shadow ? 0.3f : 1.0f;\n"
+		*/
+
+/////
+
+	const mat4 bias = {
+		{0.5, 0.0, 0.0, 0.0},
+	  	{0.0, 0.5, 0.0, 0.0},
+	  	{0.0, 0.0, 0.5, 0.0},
+	  	{0.5, 0.5, 0.5, 1.0}
+	};
+
+	mat4 r;
+	glm_mul(projection, view, r);
+	glm_mul(bias, r, model_view_projection);
+
+/////
+
+
+	"float linearize_depth(float depth) {\n" // TODO: near and far to uniforms
+		"float near = 0.01f, far = 441.6729559300637f, z = depth * 2.0f - 1.0f;\n"
+    	"return (2.0f * near * far) / (far + near - z * (far - near));\n"
+	"}\n"
+
+/////
+
+		const GLfloat step = 0.0001f, init_min_bias = 0.0513f, init_max_bias = 0.080301f;
+		static GLfloat min_bias = init_min_bias, max_bias = init_max_bias;
+
+		if (keys[SDL_SCANCODE_I]) min_bias += step;
+		if (keys[SDL_SCANCODE_K]) min_bias -= step;
+		if (min_bias < 0.0f) min_bias = 0.0f;
+
+		if (keys[SDL_SCANCODE_O]) max_bias += step;
+		if (keys[SDL_SCANCODE_L]) max_bias -= step;
+		if (max_bias < 0.0f) max_bias = 0.0f;
+
+		printf("min = %lf, max = %lf\n", (double) min_bias, (double) max_bias);
+
+		INIT_UNIFORM_VALUE(min_bias, scene_shader, 1f, min_bias);
+		INIT_UNIFORM_VALUE(max_bias, scene_shader, 1f, min_bias);
+
+/////
+
+		/*
+		enable_rendering_to_shadow_map(shadow_map_context);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_face_vertex, (void*) 0);
+		glDrawArrays(GL_TRIANGLES, 0, num_visible_faces * vertices_per_face);
+		glDisableVertexAttribArray(0);
+		disable_rendering_to_shadow_map(event.screen_size);
+		*/
+
+/////
+
+		/*
+		- Later on, neaten this up
+		- One step towards doing that is to only initialize uniforms once
+		*/
+
+		//////////
+
+		// DEBUG(draw_context -> num_drawable_things, d);
+		// See if popping still happens when all sectors are drawn
+
+		/*
+		- hm - with `draw_context -> num_drawable_things * vertices_per_face`, I will be reading outside of the GPU buffer
+		- perhaps store a full copy of the sectors on the gpu, remove the cpu copy, and then copy from one
+		gpu buffer to another when doing the culling process
+		- the sector culling problem:
+			- when dynamically culling sectors, their values may not contribute to the depth buffer, so
+
+		- make overlapping shadows darker
+		*/
+
+/////
+
+	/*
+	const buffer_size_t total_num_faces = sector_draw_context -> num_drawable_things;
+	// DEBUG(total_num_faces, d); // 1475
+	const buffer_size_t bytes_for_vertices = total_num_faces * bytes_per_face;
+	const buffer_size_t total_num_vertices = total_num_faces * vertices_per_face;
+	*/
+
+	/*
+	total_num_faces = 1475
+	bytes_for_vertices = 35400
+	total_num_vertices = 8850
+	b = 35400
+	num_vertices = 8850
+	*/
+
+	/*
+	DEBUG(num_vertices, d);
+	DEBUG(total_num_faces, d);
+	DEBUG(bytes_for_vertices, d);
+	DEBUG(total_num_vertices, d);
+	*/
+
+	// 35400 is the original num bytes; and original total num faces is 1475. Original num vertices is 8850.
+
+/////
+
+	/*
+	glUseProgram
+			const GLfloat step = 0.000001f, init_bias = 0.000019f;
+		static GLfloat bias = init_bias;
+		if (keys[SDL_SCANCODE_I]) bias += step;
+		if (keys[SDL_SCANCODE_K]) bias -= step;
+		if (bias < 0.0f) bias = 0.0f;
+
+		UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE,
+			&shadow_map_context -> light_context.model_view_projection[0][0]);
+
+		UPDATE_UNIFORM(light_dir, 3fv, 1, camera.dir);
+		UPDATE_UNIFORM(shadow_bias, 1f, bias);
+	*/
+
+/////
+
+		INIT_UNIFORM_VALUE(diffuse_strength, sector_shader, 1f, 0.5f);
+
+/////
+
+
+	"float diffuse(void) {\n" // Faces get darker as the light angle from it gets steeper
+		"float result = dot(normalize(light_pos_delta_world_space), normalize(face_normal));\n"
+		"return (result < 0.0f) ? 1.0f : result;\n"
+		/* If the result < 0.0f, the fragment is facing away from the light source, which means that it's in shadow.
+		If that's the case, shadow umbra can dictate fully the amount of light in the shadow. */
+	"}\n"
+
+
+	"float shadow(void) {\n" // Shadows generated from a shadow map
+		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
+		"return (texture(shadow_map_sampler, proj_coords) == 1.0f) ? 1.0f : shadow_umbra_strength;\n"
+	"}\n"
+
+/////
+
+		// "../assets/palace_perlin.bmp", "../assets/water.bmp"
+		.lightmap_texture = init_plain_texture("../assets/palace_perlin.bmp", TexPlain, TexNonRepeating, OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT),
+
+/////

@@ -16,7 +16,7 @@ Event get_next_event(void) {
 		moving_forward = keys[constants.keys.forward], moving_backward = keys[constants.keys.backward],
 		clicking_left = (SDL_GetRelativeMouseState(mouse_movement, mouse_movement + 1) & SDL_BUTTON_LMASK) != 0;
 
-	Event event = {
+	return (Event) {
 		.movement_bits =
 			moving_forward |
 			(moving_backward << 1) |
@@ -26,10 +26,9 @@ Event get_next_event(void) {
 			((attempting_acceleration && (moving_forward || moving_backward)) << 5) |
 			clicking_left << 6,
 
-		.screen_size = {viewport_size[2], viewport_size[3]}, .mouse_movement = {mouse_movement[0], mouse_movement[1]}
+		.screen_size = {viewport_size[2], viewport_size[3]},
+		.mouse_movement = {mouse_movement[0], mouse_movement[1]}
 	};
-
-	return event;
 }
 
 void foo(void);

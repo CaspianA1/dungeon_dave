@@ -232,26 +232,28 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 	}
 
 	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(pos);
+	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);
 
 	glm_vec3_rotate(right, -camera -> angles.tilt, dir); // Tilt applied after input as to not interfere with the camera movement
 
-	vec3 rel_origin, up;
-	mat4 view, projection, view_projection;
+	vec3 up;
+	mat4 view, projection;
 
-	glm_vec3_add((GLfloat*) pos, (GLfloat*) dir, rel_origin);
 	glm_vec3_cross((GLfloat*) right, (GLfloat*) dir, up);
-	glm_lookat((GLfloat*) pos, rel_origin, up, view);
+	glm_look((GLfloat*) pos, (GLfloat*) dir, up, view);
 
 	glm_perspective(camera -> angles.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
 		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 
-	glm_mul(projection, view, view_projection);
-	glm_mul(view_projection, GLM_MAT4_IDENTITY, camera -> model_view_projection);
+	// The model matrix is implicit in this, since it equals the identity matrix
+	glm_mul(projection, view, camera -> model_view_projection);
 
 	glm_frustum_planes(camera -> model_view_projection, camera -> frustum_planes);
 
 	memcpy(camera -> pos, pos, sizeof(vec3));
+	memcpy(camera -> dir, dir, sizeof(vec3));
 	memcpy(camera -> right, right, sizeof(vec3));
+	memcpy(camera -> up, up, sizeof(vec3));
 }
 
 #endif

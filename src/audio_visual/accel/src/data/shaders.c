@@ -9,68 +9,79 @@ const GLchar *const sector_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info_bits;\n"
 
-	"out vec2 lightmap_UV;\n"
-	"out vec3 UV, face_normal, pos_delta_world_space;\n"
+	"out vec3 UV, face_normal, light_pos_delta_world_space;\n"
+	"out vec4 fragment_pos_light_space;\n"
 
-	"uniform ivec2 map_size;\n"
-	"uniform vec3 camera_pos_world_space;\n"
-	"uniform mat4 model_view_projection;\n"
+	"uniform float shadow_bias;\n"
+	"uniform vec3 camera_pos_world_space, light_pos_world_space;\n"
+	"uniform mat4 model_view_projection, light_model_view_projection;\n"
 
-	"const vec3 face_normals[5] = vec3[5](\n"
-		"vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f),\n" // Flat, right, bottom, left, top
-		"vec3(0.0f, 0.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)\n"
-	");\n"
-
-	"const ivec2 uv_indices[5] = ivec2[5](\n"
-		"ivec2(0, 2), ivec2(2, 1), ivec2(0, 1), ivec2(2, 1), ivec2(0, 1)\n"
-	"),\n"
-
-	"uv_signs[5] = ivec2[5](\n"
-		"ivec2(1, 1), ivec2(-1, -1), ivec2(1, -1), ivec2(1, -1), ivec2(-1, -1)\n"
+	"const struct FaceAttribute {\n"
+		"vec3 face_normal;\n"
+		"ivec2 uv_indices, uv_signs;\n"
+	"} face_attributes[5] = FaceAttribute[5](\n" // Flat, right, bottom, left, top
+		"FaceAttribute(vec3(0.0f, 1.0f, 0.0f),  ivec2(0, 2), ivec2(1, 1)),\n"
+		"FaceAttribute(vec3(1.0f, 0.0f, 0.0f),  ivec2(2, 1), ivec2(-1, -1)),\n"
+		"FaceAttribute(vec3(0.0f, 0.0f, 1.0f),  ivec2(0, 1), ivec2(1, -1)),\n"
+		"FaceAttribute(vec3(-1.0f, 0.0f, 0.0f), ivec2(2, 1), ivec2(1, -1)),\n"
+		"FaceAttribute(vec3(0.0f, 0.0f, -1.0f), ivec2(0, 1), ivec2(-1, -1))\n"
 	");\n"
 
 	"void set_normal_and_UV_from_face_id(int face_id_bits) {\n"
-		"face_normal = face_normals[face_id_bits];\n"
+		"FaceAttribute face_attribute = face_attributes[face_id_bits];\n"
 
-		"ivec2 uv_index = uv_indices[face_id_bits];\n"
-		"vec2 UV_xy = uv_signs[face_id_bits] * vec2(vertex_pos_world_space[uv_index.x], vertex_pos_world_space[uv_index.y]);\n"
+		"face_normal = face_attribute.face_normal;\n"
+
+		"vec2 UV_xy = face_attribute.uv_signs * vec2(\n"
+			"vertex_pos_world_space[face_attribute.uv_indices.x],\n"
+			"vertex_pos_world_space[face_attribute.uv_indices.y]\n"
+		");\n"
 
 		"UV = vec3(UV_xy, face_info_bits >> 3);\n"
-
 	"}\n"
 
 	"void main(void) {\n"
-		"gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
+		"vec4 vertex_pos_world_space_4D = vec4(vertex_pos_world_space, 1.0f);\n"
+
+		"gl_Position = model_view_projection * vertex_pos_world_space_4D;\n"
 		"set_normal_and_UV_from_face_id(face_info_bits & 7);\n"
-		"lightmap_UV = vertex_pos_world_space.xz / map_size;\n"
-		"pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
+		"light_pos_delta_world_space = light_pos_world_space - vertex_pos_world_space;\n"
+
+		"fragment_pos_light_space = light_model_view_projection * vertex_pos_world_space_4D;\n"
+		"fragment_pos_light_space.z += shadow_bias;\n"
 	"}\n",
 
 *const sector_fragment_shader =
     "#version 330 core\n"
 
-	"in vec2 lightmap_UV;\n"
-	"in vec3 UV, face_normal, pos_delta_world_space;\n"
+	"in vec3 UV, face_normal, light_pos_delta_world_space;\n"
+	"in vec4 fragment_pos_light_space;\n"
 
 	"out vec3 color;\n"
 
-	"uniform float ambient_strength, diffuse_strength, attenuation_factor;\n"
-	"uniform sampler2D lightmap_sampler;\n"
+	"uniform float base_ambient, min_attenuation, attenuation_factor, shadow_umbra_strength;\n"
+	"uniform vec3 light_pos;\n"
+	"uniform sampler2DShadow shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
-	"float diffuse(void) {\n" // Faces get darker as the view angle from it gets steeper
-		"vec3 light_dir = normalize(pos_delta_world_space);\n"
-		"return dot(light_dir, face_normal) * diffuse_strength;\n"
+	"float attenuation(void) {\n" // Distance-based lighting
+		"float dist_squared = dot(light_pos_delta_world_space, light_pos_delta_world_space);\n"
+		"float attenuation_percent = 1.0f / (1.0f + attenuation_factor * dist_squared);\n"
+		"return clamp(attenuation_percent, min_attenuation, 1.0f);\n"
 	"}\n"
 
-	"float attenuation(void) {\n" // Distance-based lighting
-		"float dist_squared = dot(pos_delta_world_space, pos_delta_world_space);\n"
-		"return 1.0f / (1.0f + attenuation_factor * dist_squared);\n"
+	"float diffuse_and_shadow(void) {\n"
+		"float diffuse_amount = dot(normalize(light_pos_delta_world_space), face_normal);\n"
+		"diffuse_amount = clamp(diffuse_amount, shadow_umbra_strength, 1.0f);\n"
+
+		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
+
+		"bool in_shadow = texture(shadow_map_sampler, proj_coords) != 1.0f;\n"
+		"return in_shadow ? shadow_umbra_strength : diffuse_amount;\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
-		"float lightmap_ambient = texture(lightmap_sampler, lightmap_UV).r;\n"
-		"float light = ((lightmap_ambient + ambient_strength + diffuse())) * attenuation();\n"
+		"float light = base_ambient + diffuse_and_shadow() * attenuation();\n"
 		"return min(light, 1.0f);\n"
 	"}\n"
 

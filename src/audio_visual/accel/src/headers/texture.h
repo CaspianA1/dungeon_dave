@@ -34,8 +34,7 @@ And the biggest number possible with five bits is 31, so that gives you
 #define BILLBOARD_TEXTURE_UNIT 1
 #define SKYBOX_TEXTURE_UNIT 2
 #define WEAPON_TEXTURE_UNIT 3
-#define LIGHTMAP_TEXTURE_UNIT 4
-#define SHADOW_MAP_TEXTURE_UNIT 5
+#define SHADOW_MAP_TEXTURE_UNIT 4
 
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,
@@ -50,16 +49,17 @@ typedef enum {
 
 // Excluded: init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 
-#define deinit_texture(t) glDeleteTextures(1, &t)
+#define deinit_texture(t) glDeleteTextures(1, &(t))
 
 #define deinit_textures(length, ts) do {\
-	glDeleteTextures(length, ts);\
-	free(ts);\
+	glDeleteTextures((length), (ts));\
+	free((ts));\
 } while (0)
+
+#define deinit_surface SDL_FreeSurface
 
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);
 SDL_Surface* init_surface(const GLchar* const path);
-#define deinit_surface SDL_FreeSurface
 
 void use_texture(const GLuint texture, const GLuint shader_program,
 	const GLchar* const sampler_name, const TextureType type, const byte texture_unit);
