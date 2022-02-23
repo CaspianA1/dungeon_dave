@@ -8,6 +8,8 @@
 - Get smooth shadows through variance shadow mapping
 - A light source for the shadow map context that isn't based on the camera
 - Shadows for billboards and the weapon
+- Some values to the side are lit up when they shouldn't; perhaps try an orthographic matrix
+- If not, make the light FOV an input to init_shadow_map_context
 */
 
 #include "headers/shadow_map.h"
