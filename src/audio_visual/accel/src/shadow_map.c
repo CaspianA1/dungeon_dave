@@ -10,6 +10,7 @@
 - Shadows for billboards and the weapon
 - Some values to the side are lit up when they shouldn't; perhaps try an orthographic matrix
 - If not, make the light FOV an input to init_shadow_map_context
+- Limit view frustum size for shadow map (especially when using projection) to map size
 */
 
 #include "headers/shadow_map.h"
