@@ -29,6 +29,7 @@ Other random ideas:
 - For some reason, mouse usage gives choppy look movement (with the Mac)
 - Note: pre-scene flicker comes from glClearColor being called after glClear; so call it just in the init function
 - A problem where wireframe rendering -> capture depth buffer -> normal rendering leads to the wireframe depth buffer values to persist
+- Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 
 Physics:
 - Crouch
