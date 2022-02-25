@@ -7,14 +7,16 @@ Some TODOs for a recent next time:
 - NEXT 7: a castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji
 
 Final lighting model:
-- Ambient overall light
-- Attenuation from the player, not from a sun
+- Ambient overall light - done
+- Attenuation - done
+- Specular lighting - done
 - One global light source, like a sun
-- Diffuse from that light source
-- A shadow map also based on that light source, with not-too-strong, penumbra-heavy shadows
-	(precomputed, since the big texels wouldn't look good with billboards; ignore dynamic sectors for now)
-- Ambient occlusion through an occlusion map
+- Diffuse from that light source - done
+- A shadow map also based on that light source - done
 - No perlin map - done
+- Ambient occlusion through an occlusion map
+- Not-too-strong, penumbra-heavy shadows (precomputed, since the big texels
+	wouldn't look good with billboards; ignore dynamic sectors for now)
 
 Other random ideas:
 - A map maker. An init json file that specifies textures and dimensions;
@@ -30,6 +32,8 @@ Other random ideas:
 - Note: pre-scene flicker comes from glClearColor being called after glClear; so call it just in the init function
 - A problem where wireframe rendering -> capture depth buffer -> normal rendering leads to the wireframe depth buffer values to persist
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
+- Perhaps store texture id map as a texture for a shader to read, instead of embedding 5 bytes for vertices
+	(perhaps use those bytes for a specular exponent) (or, use texture id to index into a specular map (or a list of floats) as well)
 
 Physics:
 - Crouch

@@ -9,7 +9,7 @@ const GLchar *const sector_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info_bits;\n"
 
-	"out vec3 UV, face_normal, light_pos_delta_world_space;\n"
+	"out vec3 UV, face_normal, camera_pos_delta_world_space, light_pos_delta_world_space;\n"
 	"out vec4 fragment_pos_light_space;\n"
 
 	"uniform float shadow_bias;\n"
@@ -45,6 +45,8 @@ const GLchar *const sector_vertex_shader =
 
 		"gl_Position = model_view_projection * vertex_pos_world_space_4D;\n"
 		"set_normal_and_UV_from_face_id(face_info_bits & 7);\n"
+
+		"camera_pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
 		"light_pos_delta_world_space = light_pos_world_space - vertex_pos_world_space;\n"
 
 		"fragment_pos_light_space = light_model_view_projection * vertex_pos_world_space_4D;\n"
@@ -54,13 +56,12 @@ const GLchar *const sector_vertex_shader =
 *const sector_fragment_shader =
     "#version 330 core\n"
 
-	"in vec3 UV, face_normal, light_pos_delta_world_space;\n"
+	"in vec3 UV, face_normal, camera_pos_delta_world_space, light_pos_delta_world_space;\n"
 	"in vec4 fragment_pos_light_space;\n"
 
 	"out vec3 color;\n"
 
-	"uniform float min_attenuation, attenuation_factor, shadow_umbra_strength;\n"
-	"uniform vec3 light_pos;\n"
+	"uniform float ambient, shininess, specular_strength, min_attenuation, attenuation_factor;\n"
 	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
@@ -70,19 +71,31 @@ const GLchar *const sector_vertex_shader =
 		"return clamp(attenuation_percent, min_attenuation, 1.0f);\n"
 	"}\n"
 
-	"float diffuse_and_shadow(void) {\n"
-		"float diffuse_amount = dot(normalize(light_pos_delta_world_space), face_normal);\n"
-		"diffuse_amount = clamp(diffuse_amount, shadow_umbra_strength, 1.0f);\n"
+	"float diffuse(vec3 light_dir) {\n"
+		"float diffuse_amount = dot(light_dir, face_normal);\n"
+		"return max(diffuse_amount, 0.0f);\n"
+	"}\n"
 
+	"float specular(vec3 light_dir) {\n" // Uses Blinn-Phong specular, rather than Phong specular
+		"vec3 halfway_dir = normalize(light_dir + normalize(camera_pos_delta_world_space));\n"
+		"return specular_strength * pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
+	"}\n"
+
+	"bool in_shadow(void) {\n"
 		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
-
-		"bool in_shadow = texture(shadow_map_sampler, proj_coords.xy).r < proj_coords.z;\n"
-		"return in_shadow ? shadow_umbra_strength : diffuse_amount;\n"
+		"return (texture(shadow_map_sampler, proj_coords.xy).r) < proj_coords.z;\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
-		"float light = diffuse_and_shadow() * attenuation();\n"
-		"return min(light, 1.0f);\n"
+		"vec3 light_dir = normalize(light_pos_delta_world_space);\n"
+
+		"float non_ambient = diffuse(light_dir);\n"
+
+		 // Done so that away-facing surfaces don't get any specular highlights
+		"non_ambient += specular(light_dir) * float(non_ambient != 0.0f);\n"
+		"float light = ambient + non_ambient * float(!in_shadow());\n"
+
+		"return min(light * attenuation(), 1.0f);\n"
 	"}\n"
 
 	"void main(void) {\n"

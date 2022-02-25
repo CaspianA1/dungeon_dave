@@ -160,20 +160,22 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	glUseProgram(sector_shader);
 
 	static GLint
-		camera_pos_world_space_id, model_view_projection_id,
-		light_pos_world_space_id, light_model_view_projection_id;
+		camera_pos_world_space_id, light_pos_world_space_id,
+		model_view_projection_id, light_model_view_projection_id;
 
 	static byte first_call = 1;
 
 	if (first_call) {
 		INIT_UNIFORM(camera_pos_world_space, sector_shader);
-		INIT_UNIFORM(model_view_projection, sector_shader);
 		INIT_UNIFORM(light_pos_world_space, sector_shader);
+		INIT_UNIFORM(model_view_projection, sector_shader);
 		INIT_UNIFORM(light_model_view_projection, sector_shader);
 
+		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.3f);
+		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 4.0f);
+		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.2f);
 		INIT_UNIFORM_VALUE(min_attenuation, sector_shader, 1f, 0.7f);
 		INIT_UNIFORM_VALUE(attenuation_factor, sector_shader, 1f, 0.005f); // 0.003f
-		INIT_UNIFORM_VALUE(shadow_umbra_strength, sector_shader, 1f, 0.2f);
 		INIT_UNIFORM_VALUE(shadow_bias, sector_shader, 1f, 0.000019f);
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
@@ -183,9 +185,10 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	}
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
+	UPDATE_UNIFORM(light_pos_world_space, 3fv, 1, shadow_map_context -> light_context.pos);
+
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
-	UPDATE_UNIFORM(light_pos_world_space, 3fv, 1, shadow_map_context -> light_context.pos);
 	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE,
 		&shadow_map_context -> light_context.model_view_projection[0][0]);
 
