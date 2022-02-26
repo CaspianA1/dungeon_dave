@@ -56,7 +56,6 @@ ShadowMapContext init_shadow_map_context(
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, TexPlain, texture, 0);
 	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
