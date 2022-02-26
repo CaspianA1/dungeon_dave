@@ -81,19 +81,20 @@ const GLchar *const sector_vertex_shader =
 		"return specular_strength * pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
 	"}\n"
 
-	"bool in_shadow(void) {\n"
+	"float shadow(void) {\n" // Gives the percent of area in shadow
 		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
-		"return (texture(shadow_map_sampler, proj_coords.xy).r) < proj_coords.z;\n"
+		"bool in_lit_region = (texture(shadow_map_sampler, proj_coords.xy).r) > proj_coords.z;\n"
+		"return float(in_lit_region);\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
 		"vec3 light_dir = normalize(light_pos_delta_world_space);\n"
 
 		"float non_ambient = diffuse(light_dir);\n"
-
 		 // Done so that away-facing surfaces don't get any specular highlights
 		"non_ambient += specular(light_dir) * float(non_ambient != 0.0f);\n"
-		"float light = ambient + non_ambient * float(!in_shadow());\n"
+
+		"float light = ambient + non_ambient * shadow();\n"
 
 		"return min(light * attenuation(), 1.0f);\n"
 	"}\n"

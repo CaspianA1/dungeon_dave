@@ -6549,3 +6549,57 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 		"return min(max(p, p_max), 1.0f);\n"
 
 /////
+
+	/*
+	"float random(vec2 v) {\n"
+		"return fract(sin(dot(v, vec2(12.9898f, 78.233f))) * 43758.5453123f);\n"
+	"}\n"
+	*/
+
+	"float random(float x) {\n"
+		"return fract(sin(x) * 20.0f);"
+	"}\n"
+
+	"float sample_shadow_map(void) {\n"
+		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
+		"vec2 texel_size = 1.0f / textureSize(shadow_map_sampler, 0);\n"
+
+		/*
+
+		"vec2 center = proj_coords.xy;\n"
+		"vec2 rand_vals = vec2(random(center.x), random(center.y));\n"
+		"vec2 UV = center + rand_vals * texel_size;\n"
+
+		"float shadow_map_depth = texture(shadow_map_sampler, UV).r;\n"
+		"return float(proj_coords.z > shadow_map_depth);\n"
+		*/
+		// "#define KERNEL_SAMPLE_SIZE 100\n"
+
+		"float shadow = 0.0f;\n"
+		"int half_kernel_size = kernel_sample_size >> 1, texels_per_kernel = kernel_sample_size << 1;\n"
+
+		"for (int y = -half_kernel_size; y <= half_kernel_size; y++) {\n"
+			"for (int x = -half_kernel_size; x <= half_kernel_size; x++) {\n"
+				"vec2 offset = vec2(x, y) * texel_size * random(proj_coords.x);\n"
+
+				"float shadow_map_depth = texture(shadow_map_sampler, proj_coords.xy + offset).r;\n"
+
+				"shadow += float(proj_coords.z > shadow_map_depth);\n"
+			"}\n"
+		"}\n"
+
+		"return shadow / texels_per_kernel;\n"
+	"}\n"
+
+/////
+
+	static GLfloat kernel_sample_size = 9.0f;
+	const GLfloat step = 0.05f;
+	if (keys[SDL_SCANCODE_J]) kernel_sample_size -= step;
+	if (keys[SDL_SCANCODE_K]) kernel_sample_size += step;
+	if (kernel_sample_size < 0.0f) kernel_sample_size = 0.0f;
+	DEBUG_FLOAT(kernel_sample_size);
+	INIT_UNIFORM_VALUE(kernel_sample_size, sector_shader, 1i, roundf(kernel_sample_size));
+	INIT_UNIFORM_VALUE(branch, sector_shader, 1i, keys[SDL_SCANCODE_G]);
+
+/////
