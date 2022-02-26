@@ -173,7 +173,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.3f);
 		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 4.0f);
-		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.2f);
+		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.5f);
 		INIT_UNIFORM_VALUE(min_attenuation, sector_shader, 1f, 0.7f);
 		INIT_UNIFORM_VALUE(attenuation_factor, sector_shader, 1f, 0.005f); // 0.003f
 		INIT_UNIFORM_VALUE(shadow_bias, sector_shader, 1f, 0.000019f);
