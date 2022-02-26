@@ -9,6 +9,7 @@
 - Some values to the side are lit up when they shouldn't; perhaps try an orthographic matrix
 - If not, make the light FOV an input to init_shadow_map_context
 - Limit view frustum size for shadow map (especially when using projection) to map size (maybe not, if it doesn't affect precision)
+- If soft shadows involve a precomputed approach (per each time that the scene or light pos updates), I'm fine with that
 */
 
 #include "headers/shadow_map.h"
