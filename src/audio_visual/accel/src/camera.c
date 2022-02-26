@@ -226,9 +226,6 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		update_fov(camera, event.movement_bits, delta_time);
 	}
 
-	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(pos);
-	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);
-
 	glm_vec3_rotate(right, -camera -> angles.tilt, dir); // Tilt applied after input as to not interfere with the camera movement
 
 	vec3 up;
@@ -249,6 +246,10 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 	memcpy(camera -> dir, dir, sizeof(vec3));
 	memcpy(camera -> right, right, sizeof(vec3));
 	memcpy(camera -> up, up, sizeof(vec3));
+
+	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(pos);
+	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);
+	if (keys[KEY_PRINT_UP]) DEBUG_VEC3(up);
 }
 
 #endif

@@ -22,11 +22,12 @@
 #define KEY_PRINT_SDL_ERROR SDL_SCANCODE_4
 #define KEY_PRINT_POSITION SDL_SCANCODE_5
 #define KEY_PRINT_DIRECTION SDL_SCANCODE_6
+#define KEY_PRINT_UP SDL_SCANCODE_7
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
-#define DEBUG_FLOAT(var) printf(#var " = %lf\n", (double) (var))
-#define DEBUG_VEC2(v) printf(#v " = {%lf, %lf}\n", (double) (v)[0], (double) (v)[1])
-#define DEBUG_VEC3(v) printf(#v " = {%lf, %lf, %lf}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2])
+#define DEBUG_FLOAT(var) printf(#var " = %lff\n", (double) (var))
+#define DEBUG_VEC2(v) printf(#v " = {%lff, %lff}\n", (double) (v)[0], (double) (v)[1])
+#define DEBUG_VEC3(v) printf(#v " = {%lff, %lff, %lff}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2])
 
 #define DEBUG_BITS(num) do {\
 	printf(#num " = ");\
@@ -110,10 +111,11 @@ extern inline void fail(const GLchar* const msg, const FailureType failure_type)
 Screen init_screen(const GLchar* const title);
 void deinit_screen(const Screen* const screen);
 
-void make_application(void (*const drawer)(const StateGL* const),
-	StateGL (*const init)(void), void (*const deinit)(const StateGL* const));
-void loop_application(const Screen* const screen, void (*const drawer)(const StateGL* const),
-	StateGL (*const init)(void), void (*const deinit)(const StateGL* const));
+void make_application(void (*const drawer) (const StateGL* const),
+	StateGL (*const init) (void), void (*const deinit) (const StateGL* const));
+
+void loop_application(const Screen* const screen, void (*const drawer) (const StateGL* const),
+	StateGL (*const init) (void), void (*const deinit) (const StateGL* const));
 
 // Deinitializes shader, unbinds vbos from vao, deletes vbos, textures, and vao
 void deinit_demo_vars(const StateGL* const sgl);

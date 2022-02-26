@@ -31,9 +31,9 @@ StateGL demo_17_init(void) {
 	// 2 << 13 is the biggest size
 	SceneState scene_state = {
 		.shadow_map_context = init_shadow_map_context(2048, 2048,
-			(vec3) {3.141779f, 5.575195f, 12.794771f},
-			(vec3) {0.495601f, -0.360811f, -0.790060f},
-			(vec3) {0.0f, 1.0f, 0.0f}
+			(vec3) {6.746617f, 22.450884f, 7.409637f},
+			(vec3) {0.222725f, -0.970506f, 0.092256f},
+			(vec3) {0.896631f, 0.241075f, 0.371397f}
 		),
 
 		// .weapon_sprite = init_weapon_sprite(0.5f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
@@ -162,12 +162,12 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 	const Event event = get_next_event();
 
+	update_camera(&camera, event, &physics_obj);
+
 	update_billboard_animation_instances(
 		&scene_state -> billboard_animation_instances,
 		&scene_state -> billboard_animations,
 		&scene_state -> billboard_draw_context.buffers.cpu);
-
-	update_camera(&camera, event, &physics_obj);
 
 	if (keys[SDL_SCANCODE_C]) {
 		memcpy(shadow_map_context -> light_context.pos, camera.pos, sizeof(vec3));
