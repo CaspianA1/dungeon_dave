@@ -2,15 +2,13 @@
 #define SHADOW_MAP_C
 
 /*
-- Overlapping shadows
-- Popping lights on re-rendering (it seems to come from some lag in updating shadows)
 - Some peter panning and shadow acne
 - Get smooth shadows through variance shadow mapping
 - A light source for the shadow map context that isn't based on the camera
 - Shadows for billboards and the weapon
 - Some values to the side are lit up when they shouldn't; perhaps try an orthographic matrix
 - If not, make the light FOV an input to init_shadow_map_context
-- Limit view frustum size for shadow map (especially when using projection) to map size
+- Limit view frustum size for shadow map (especially when using projection) to map size (maybe not, if it doesn't affect precision)
 */
 
 #include "headers/shadow_map.h"
