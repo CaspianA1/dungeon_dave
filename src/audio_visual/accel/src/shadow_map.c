@@ -39,7 +39,13 @@ ShadowMapContext init_shadow_map_context(
 	const GLsizei shadow_width, const GLsizei shadow_height,
 	const vec3 light_pos, const vec3 light_dir, vec3 light_up) {
 	
-	GLuint texture, framebuffer;
+	GLuint framebuffer, texture;
+
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glDrawBuffer(GL_NONE);
+
+	//////////
 
 	glGenTextures(1, &texture);
 	glBindTexture(TexPlain, texture);
@@ -51,21 +57,22 @@ ShadowMapContext init_shadow_map_context(
 	glTexParameterfv(TexPlain, GL_TEXTURE_BORDER_COLOR, (GLfloat[4]) {1.0f, 1.0f, 1.0f, 1.0f});  
 
 	glTexImage2D(TexPlain, 0, GL_DEPTH_COMPONENT, shadow_width, shadow_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture, 0);
 
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, TexPlain, texture, 0);
-	glDrawBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//////////
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		fail("make a framebuffer; framebuffer not complete", CreateFramebuffer);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//////////
 
 	const GLuint shader = init_shader_program(depth_vertex_shader, depth_fragment_shader);
 
 	return (ShadowMapContext) {
 		.shader_context = {shader, .INIT_UNIFORM(light_model_view_projection, shader)},
-		.depth_map = {texture, framebuffer},
+		.depth_map = {framebuffer, texture},
 		.shadow_size = {shadow_width, shadow_height},
 
 		.light_context = {

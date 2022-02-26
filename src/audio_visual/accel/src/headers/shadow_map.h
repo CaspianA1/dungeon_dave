@@ -10,7 +10,7 @@ typedef struct {
 		const GLuint depth_shader, light_model_view_projection_id;
 	} shader_context;
 
-	const struct {const GLuint texture, framebuffer;} depth_map;
+	const struct {const GLuint framebuffer, texture;} depth_map;
 
 	const GLsizei shadow_size[2];
 
