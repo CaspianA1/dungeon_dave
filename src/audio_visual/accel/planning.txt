@@ -29,6 +29,7 @@ Other random ideas:
 - Perhaps store texture id map as a texture for a shader to read, instead of embedding 5 bytes for vertices
 	(perhaps use those bytes for a specular exponent) (or, use texture id to index into a specular map (or a list of floats) as well)
 - Maybe a 25th demo, that tests rendering to texture for later variance shadow maps
+- Bug: when tilting enough, billboards become flat across
 
 A better shading model:
 - use_shader instead of glUseProgram, and delete_shader instead of glDeleteProgram

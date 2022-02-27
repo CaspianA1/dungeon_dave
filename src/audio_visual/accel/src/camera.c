@@ -203,15 +203,23 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 
 	update_camera_angles(camera, &event);
 
-	const GLfloat
-		cos_hori = cosf(camera -> angles.hori), cos_vert = cosf(camera -> angles.vert),
-		sin_hori = sinf(camera -> angles.hori), sin_vert = sinf(camera -> angles.vert);
+	////////// Defining vectors
+
+	const GLfloat hori_angle = camera -> angles.hori, vert_angle = camera -> angles.vert;
+	const GLfloat cos_vert = cosf(vert_angle);
+
+	vec2 dir_xz = {sinf(hori_angle), cosf(hori_angle)};
 
 	vec3
-		dir = {cos_vert * sin_hori, sin_vert, cos_vert * cos_hori},
-		right = {-cos_hori, 0.0f, sin_hori}, pos;
+		dir = {cos_vert * dir_xz[0], sinf(vert_angle), cos_vert * dir_xz[1]},
+		right = {-dir_xz[1], 0.0f, dir_xz[0]},
+		pos, up;
 
-	memcpy(pos, camera -> pos, sizeof(vec3));
+	glm_vec3_rotate(right, -camera -> angles.tilt, dir); // Outputs a rotated right vector
+	glm_vec3_cross(right, dir, up); // Generates an up vector from the direction + right vector
+	memcpy(pos, camera -> pos, sizeof(vec3)); // Copying the camera's position vector into a local variable
+
+	////////// Moving according to those vectors
 
 	if (physics_obj == NULL || keys[KEY_FLY]) { // Forward, backward, left, right
 		const GLfloat speed = constants.speeds.xz_max * delta_time;
@@ -221,26 +229,24 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		if (event.movement_bits & BIT_STRAFE_RIGHT) glm_vec3_muladds(right, speed, pos);
 	}
 	else {
-		update_pos_via_physics(event.movement_bits, physics_obj, (vec2) {sin_hori, cos_hori}, pos, camera -> pace, delta_time);
+		update_pos_via_physics(event.movement_bits, physics_obj, dir_xz, pos, camera -> pace, delta_time);
 		update_pace(camera, pos + 1, physics_obj -> velocities, delta_time);
 		update_fov(camera, event.movement_bits, delta_time);
 	}
 
-	glm_vec3_rotate(right, -camera -> angles.tilt, dir); // Tilt applied after input as to not interfere with the camera movement
+	////////// Making some matrices and frustum planes from the new position and the vectors from before
 
-	vec3 up;
 	mat4 view, projection;
 
-	glm_vec3_cross((GLfloat*) right, (GLfloat*) dir, up);
-	glm_look((GLfloat*) pos, (GLfloat*) dir, up, view);
-
+	glm_look(pos, dir, up, view);
 	glm_perspective(camera -> angles.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
 		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 
 	// The model matrix is implicit in this, since it equals the identity matrix
 	glm_mul(projection, view, camera -> model_view_projection);
-
 	glm_frustum_planes(camera -> model_view_projection, camera -> frustum_planes);
+
+	////////// Copying the local vectors to the camera, and printing important vectors if needed
 
 	memcpy(camera -> pos, pos, sizeof(vec3));
 	memcpy(camera -> dir, dir, sizeof(vec3));
