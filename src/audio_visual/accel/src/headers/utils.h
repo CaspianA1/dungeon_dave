@@ -36,6 +36,26 @@
 	putchar('\n');\
 } while (0)
 
+////////// These are some general-purpose macros used in all demos
+
+#define bit_is_set(bits, mask) ((bits) & (mask))
+#define set_bit(bits, mask) ((bits) |= (mask))
+
+extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
+	fprintf(stderr, "Could not %s.\n", msg);
+	exit(failure_type + 1);
+}
+
+#define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
+
+#define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
+	glUniform##type_prefix(glGetUniformLocation(shader, #name), __VA_ARGS__)
+
+#define INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(name, shader, type_prefix, ...)\
+	glUniform##type_prefix(glGetUniformLocation(shader, name), __VA_ARGS__)
+
+#define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
+
 ////////// These macros pertain to window defaults
 
 #define WINDOW_W 800
@@ -83,26 +103,6 @@ typedef struct {
 //////////
 
 const Uint8* keys;
-
-//////////
-
-#define bit_is_set(bits, mask) ((bits) & (mask))
-#define set_bit(bits, mask) ((bits) |= (mask))
-
-extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
-	fprintf(stderr, "Could not %s.\n", msg);
-	exit(failure_type + 1);
-}
-
-#define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
-
-#define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
-	glUniform##type_prefix(glGetUniformLocation(shader, #name), __VA_ARGS__)
-
-#define INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(name, shader, type_prefix, ...)\
-	glUniform##type_prefix(glGetUniformLocation(shader, name), __VA_ARGS__)
-
-#define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
 
 //////////
 
