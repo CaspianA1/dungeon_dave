@@ -174,12 +174,12 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.3f);
 		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 4.0f);
 		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.5f);
+		INIT_UNIFORM_VALUE(min_shadow_variance, sector_shader, 1f, 0.000785f);
 		INIT_UNIFORM_VALUE(min_attenuation, sector_shader, 1f, 0.7f);
 		INIT_UNIFORM_VALUE(attenuation_factor, sector_shader, 1f, 0.005f); // 0.003f
-		INIT_UNIFORM_VALUE(shadow_bias, sector_shader, 1f, 0.000019f);
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
-		use_texture(shadow_map_context -> depth_map.texture, sector_shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
+		use_texture(shadow_map_context -> depth_map.moment_texture, sector_shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 
 		first_call = 0;
 	}

@@ -9,10 +9,8 @@ const GLchar *const sector_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info_bits;\n"
 
-	"out vec3 UV, face_normal, camera_pos_delta_world_space, light_pos_delta_world_space;\n"
-	"out vec4 fragment_pos_light_space;\n"
+	"out vec3 UV, face_normal, fragment_pos_light_space, camera_pos_delta_world_space, light_pos_delta_world_space;\n"
 
-	"uniform float shadow_bias;\n"
 	"uniform vec3 camera_pos_world_space, light_pos_world_space;\n"
 	"uniform mat4 model_view_projection, light_model_view_projection;\n"
 
@@ -49,19 +47,18 @@ const GLchar *const sector_vertex_shader =
 		"camera_pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
 		"light_pos_delta_world_space = light_pos_world_space - vertex_pos_world_space;\n"
 
-		"fragment_pos_light_space = light_model_view_projection * vertex_pos_world_space_4D;\n"
-		"fragment_pos_light_space.z += shadow_bias;\n"
+		"fragment_pos_light_space = vec3(light_model_view_projection * vertex_pos_world_space_4D);\n"
 	"}\n",
 
 *const sector_fragment_shader =
     "#version 330 core\n"
 
-	"in vec3 UV, face_normal, camera_pos_delta_world_space, light_pos_delta_world_space;\n"
-	"in vec4 fragment_pos_light_space;\n"
+	"in vec3 UV, face_normal, fragment_pos_light_space, camera_pos_delta_world_space, light_pos_delta_world_space;\n"
 
 	"out vec3 color;\n"
 
-	"uniform float ambient, shininess, specular_strength, min_attenuation, attenuation_factor;\n"
+	"uniform float ambient, shininess, specular_strength, min_shadow_variance, min_attenuation, attenuation_factor;\n"
+
 	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
@@ -81,10 +78,18 @@ const GLchar *const sector_vertex_shader =
 		"return specular_strength * pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
 	"}\n"
 
-	"float shadow(void) {\n" // Gives the percent of area in shadow
-		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
-		"bool in_lit_region = (texture(shadow_map_sampler, proj_coords.xy).r) > proj_coords.z;\n"
-		"return float(in_lit_region);\n"
+	"float shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
+		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
+		"float distance = proj_coords.z;\n"
+
+		"vec2 moments = texture(shadow_map_sampler, proj_coords.xy).rg;\n"
+		"float variance = max(moments.y - moments.x * moments.x, min_shadow_variance);\n"
+
+		"float d = distance - moments.x;\n"
+		"float p_max = variance / (variance + d * d);\n"
+
+		"float p = float(distance <= moments.x);\n"
+		"return max(p, p_max);\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
@@ -94,7 +99,7 @@ const GLchar *const sector_vertex_shader =
 		 // Done so that away-facing surfaces don't get any specular highlights
 		"non_ambient += specular(light_dir) * float(non_ambient != 0.0f);\n"
 
-		"float light = ambient + non_ambient * shadow();\n"
+		"float light = ambient + non_ambient * (1.0f - shadow_percent());\n"
 
 		"return min(light * attenuation(), 1.0f);\n"
 	"}\n"
