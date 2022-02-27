@@ -159,24 +159,20 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	const GLuint sector_shader = draw_context -> shader;
 	glUseProgram(sector_shader);
 
-	static GLint
-		camera_pos_world_space_id, light_pos_world_space_id,
-		model_view_projection_id, light_model_view_projection_id;
-
+	static GLint camera_pos_world_space_id, inv_light_dir_id, model_view_projection_id, light_model_view_projection_id;
 	static byte first_call = 1;
 
 	if (first_call) {
 		INIT_UNIFORM(camera_pos_world_space, sector_shader);
-		INIT_UNIFORM(light_pos_world_space, sector_shader);
+		INIT_UNIFORM(inv_light_dir, sector_shader);
 		INIT_UNIFORM(model_view_projection, sector_shader);
 		INIT_UNIFORM(light_model_view_projection, sector_shader);
 
+		INIT_UNIFORM_VALUE(overall_light_strength, sector_shader, 1f, 1.0f);
 		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.3f);
-		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 4.0f);
+		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 32.0f);
 		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.5f);
 		INIT_UNIFORM_VALUE(min_shadow_variance, sector_shader, 1f, 0.000785f);
-		INIT_UNIFORM_VALUE(min_attenuation, sector_shader, 1f, 0.7f);
-		INIT_UNIFORM_VALUE(attenuation_factor, sector_shader, 1f, 0.005f); // 0.003f
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
 		use_texture(shadow_map_context -> depth_map.moment_texture, sector_shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
@@ -185,10 +181,10 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	}
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
-	UPDATE_UNIFORM(light_pos_world_space, 3fv, 1, shadow_map_context -> light_context.pos);
+	const GLfloat* const light_dir = shadow_map_context -> light_context.dir;
+	INIT_UNIFORM_VALUE(inv_light_dir, sector_shader, 3f, -light_dir[0], -light_dir[1], -light_dir[2]);
 
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
-
 	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE,
 		&shadow_map_context -> light_context.model_view_projection[0][0]);
 

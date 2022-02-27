@@ -6638,4 +6638,15 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 	INIT_UNIFORM_VALUE(light_bleed_reduction_amount, sector_shader, 1f, light_bleed_reduction_amount);
 	INIT_UNIFORM_VALUE(branch, sector_shader, 1i, keys[SDL_SCANCODE_V]);
 
+///// Rest in peace, attenuation
+
+	INIT_UNIFORM_VALUE(min_attenuation, sector_shader, 1f, 0.7f);
+	INIT_UNIFORM_VALUE(attenuation_factor, sector_shader, 1f, 0.005f); // 0.003f
+
+	"float attenuation(void) {\n" // Distance-based lighting
+		"float dist_squared = dot(light_pos_delta_world_space, light_pos_delta_world_space);\n"
+		"float attenuation_percent = 1.0f / (1.0f + attenuation_factor * dist_squared);\n"
+		"return clamp(attenuation_percent, min_attenuation, 1.0f);\n"
+	"}\n"
+
 /////

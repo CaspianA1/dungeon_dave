@@ -31,9 +31,9 @@ StateGL demo_17_init(void) {
 	// 2 << 13 is the biggest size
 	SceneState scene_state = {
 		.shadow_map_context = init_shadow_map_context(2048, 2048,
-			(vec3) {6.746617f, 22.450884f, 7.409637f},
-			(vec3) {0.222725f, -0.970506f, 0.092256f},
-			(vec3) {0.896631f, 0.241075f, 0.371397f}
+			(vec3) {26.563328f, 31.701447f, 12.387274f},
+			(vec3) {-0.229919f, -0.911403f, 0.341294f},
+			(vec3) {-0.509214f, 0.411515f, 0.755882f}
 		),
 
 		// .weapon_sprite = init_weapon_sprite(0.5f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
@@ -57,7 +57,7 @@ StateGL demo_17_init(void) {
 			(BillboardAnimationInstance) {.ids = {.billboard = 9, .animation = 3}, .last_frame_time = 0.0f}
 		),
 
-		.skybox = init_skybox("../assets/night.bmp"),
+		.skybox = init_skybox("../assets/desert.bmp"),
 		.heightmap = (byte*) palace_heightmap,
 		.map_size = {palace_width, palace_height}
 	};

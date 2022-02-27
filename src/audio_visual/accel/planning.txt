@@ -7,7 +7,7 @@ Some TODOs for a recent next time:
 - NEXT 7: a castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji
 
 Final lighting model:
-- Attenuation, ambient overall light, diffuse, specular - done
+- Ambient overall light, diffuse, specular - done
 - No perlin map - done
 - A shadow map also based on that light source - done
 - Not-too-strong, penumbra-heavy shadows
