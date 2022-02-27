@@ -10,6 +10,7 @@
 - Limit orthographic matrix size for shadow map to map size (maybe not, if it doesn't affect anything)
 - Gaussian blur (that will make the shadows smooth)
 - Get mipmaps + aniso working too
+- Can perhaps store penumbra size in 3rd component of moment texture
 */
 
 #include "headers/shadow_map.h"
@@ -39,9 +40,8 @@ const GLchar *const depth_vertex_shader =
 		"moments.y = moments.x * moments.x + 0.25f * dot(partial_derivatives, partial_derivatives);\n"
 	"}\n";
 
-ShadowMapContext init_shadow_map_context(
-	const GLsizei shadow_map_width, const GLsizei shadow_map_height,
-	const vec3 light_pos, const vec3 light_dir, vec3 light_up) {
+ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
+	const GLsizei shadow_map_height, const vec3 light_pos, const vec3 light_dir) {
 
 	// Texture is for storing moments, and render buffer serves as a depth buffer
 	GLuint framebuffer, moment_texture, depth_render_buffer;
@@ -56,11 +56,12 @@ ShadowMapContext init_shadow_map_context(
 
 	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
 	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameterfv(TexPlain, GL_TEXTURE_BORDER_COLOR, (GLfloat[4]) {1.0f, 1.0f, 1.0f, 1.0f});  
 
-	glTexImage2D(TexPlain, 0, GL_RG32F, shadow_map_width, shadow_map_height, 0, GL_RG, GL_FLOAT, NULL);
+	glTexImage2D(TexPlain, 0, GL_RG, shadow_map_width, shadow_map_height, 0, GL_RG, GL_FLOAT, NULL);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, moment_texture, 0);
 
 	//////////
@@ -83,54 +84,48 @@ ShadowMapContext init_shadow_map_context(
 
 	return (ShadowMapContext) {
 		.shader_context = {shader, .INIT_UNIFORM(light_model_view_projection, shader)},
-		.depth_map = {framebuffer, moment_texture, depth_render_buffer},
-		.size = {shadow_map_width, shadow_map_height},
+
+		.buffer_context = {
+			framebuffer, moment_texture, depth_render_buffer,
+			{shadow_map_width, shadow_map_height}
+		},
 
 		.light_context = {
 			{light_pos[0], light_pos[1], light_pos[2]},
 			{light_dir[0], light_dir[1], light_dir[2]},
-			{light_up[0], light_up[1], light_up[2]},
 			.model_view_projection = {0}
 		}
 	};
 }
 
 void deinit_shadow_map_context(const ShadowMapContext* const shadow_map_context) {
-	deinit_texture(shadow_map_context -> depth_map.moment_texture);
-	glDeleteRenderbuffers(1, &shadow_map_context -> depth_map.depth_render_buffer);
-	glDeleteFramebuffers(1, &shadow_map_context -> depth_map.framebuffer);
+	deinit_texture(shadow_map_context -> buffer_context.moment_texture);
+	glDeleteRenderbuffers(1, &shadow_map_context -> buffer_context.depth_render_buffer);
+	glDeleteFramebuffers(1, &shadow_map_context -> buffer_context.framebuffer);
 	glDeleteProgram(shadow_map_context -> shader_context.depth_shader);
 }
 
 static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_context_ref) {
 	ShadowMapContext shadow_map_context = *shadow_map_context_ref;
 
-	const GLsizei
-		shadow_map_width = shadow_map_context.size[0],
-		shadow_map_height = shadow_map_context.size[1];
-	
-	//////////
+	////////// These matrices are relative to the light
 
-	// These matrices are relative to the light
 	mat4 view, projection;
 
-	glm_look((GLfloat*) shadow_map_context.light_context.pos,
-		(GLfloat*) shadow_map_context.light_context.dir,
-		(GLfloat*) shadow_map_context.light_context.up, view);
-
+	glm_look_anyup(shadow_map_context.light_context.pos, shadow_map_context.light_context.dir, view);
 	glm_ortho(-50.0f, 50.0f, -50.0f, 50.0f, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 
 	glm_mul(projection, view, shadow_map_context.light_context.model_view_projection);
 
-	//////////
+	////////// Activate shader, update light mvp, bind framebuffer, resize viewport, clear framebuffer, cull front faces
 
 	glUseProgram(shadow_map_context.shader_context.depth_shader);
 
 	UPDATE_UNIFORM(shadow_map_context.shader_context.light_model_view_projection,
 		Matrix4fv, 1, GL_FALSE, (GLfloat*) shadow_map_context.light_context.model_view_projection);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_context.depth_map.framebuffer);
-	glViewport(0, 0, shadow_map_width, shadow_map_height);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_context.buffer_context.framebuffer);
+	glViewport(0, 0, shadow_map_context.buffer_context.size[0], shadow_map_context.buffer_context.size[1]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear depth map
 	glCullFace(GL_FRONT);
 

@@ -5,26 +5,28 @@
 #include "buffer_defs.h"
 #include "batch_draw_context.h"
 
+// Shadow maps use variance shadow mapping in this implementation
+
 typedef struct {
 	const struct {
 		const GLuint depth_shader, light_model_view_projection_id;
 	} shader_context;
 
-	const struct {const GLuint framebuffer, moment_texture, depth_render_buffer;} depth_map;
-
-	const GLsizei size[2];
+	const struct {
+		const GLuint framebuffer, moment_texture, depth_render_buffer;
+		const GLsizei size[2];
+	} buffer_context;
 
 	struct {
-		vec3 pos, dir, up;
+		vec3 pos, dir;
 		mat4 model_view_projection;
 	} light_context;
 } ShadowMapContext;
 
 // Excluded: enable_rendering_to_shadow_map, disable_rendering_to_shadow_map
 
-ShadowMapContext init_shadow_map_context(
-	const GLsizei shadow_map_width, const GLsizei shadow_map_height,
-	const vec3 light_pos, const vec3 light_dir, vec3 light_up);
+ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
+	const GLsizei shadow_map_height, const vec3 light_pos, const vec3 light_dir);
 
 void deinit_shadow_map_context(const ShadowMapContext* const shadow_map_context);
 
