@@ -41,11 +41,6 @@
 #define bit_is_set(bits, mask) ((bits) & (mask))
 #define set_bit(bits, mask) ((bits) |= (mask))
 
-extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
-	fprintf(stderr, "Could not %s.\n", msg);
-	exit(failure_type + 1);
-}
-
 #define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
 
 #define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
@@ -105,6 +100,11 @@ typedef struct {
 const Uint8* keys;
 
 //////////
+
+extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
+	fprintf(stderr, "Could not %s.\n", msg);
+	exit(failure_type + 1);
+}
 
 // Excluded: resize_window_if_needed, set_triangle_fill_mode, query_for_application_exit, fail_on_shader_creation_error
 
