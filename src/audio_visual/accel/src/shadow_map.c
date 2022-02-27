@@ -2,20 +2,17 @@
 #define SHADOW_MAP_C
 
 /*
-- Some odd results at very steep angles (aniso should fix that)
 - Some tops of objects are shadowed when they shouldn't be
-- Being close to an object blends the shadowed part with the unshadowed parj
-- A light source for the shadow map context that isn't based on the camera
+- Being close to an object blends the shadowed part with the unshadowed part
 - Shadows for billboards and the weapon (they should read from the shadow map, not affect it)
 - Limit orthographic matrix size for shadow map to map size (maybe not, if it doesn't affect anything)
 - Gaussian blur (that will make the shadows smooth)
-- Get mipmaps + aniso working too
 - Can perhaps store penumbra size in 3rd component of moment texture
 */
 
 #include "headers/shadow_map.h"
 #include "headers/constants.h"
-#include "headers/texture.h"
+#include "texture.c"
 #include "camera.c"
 
 // TODO: to shaders.c
@@ -45,35 +42,25 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	const GLsizei shadow_map_height, const vec3 light_pos,
 	const GLfloat hori_angle, const GLfloat vert_angle) {
 
-	// Texture is for storing moments, and render buffer serves as a depth buffer
-	GLuint framebuffer, moment_texture, depth_render_buffer;
+	////////// Generating a texture to hold the two moments
 
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-	//////////
-
-	glGenTextures(1, &moment_texture);
-	glBindTexture(TexPlain, moment_texture);
-
-	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexParameterfv(TexPlain, GL_TEXTURE_BORDER_COLOR, (GLfloat[4]) {1.0f, 1.0f, 1.0f, 1.0f});  
-
+	const GLuint moment_texture = preinit_texture(TexPlain, TexNonRepeating);
 	glTexImage2D(TexPlain, 0, GL_RG, shadow_map_width, shadow_map_height, 0, GL_RG, GL_FLOAT, NULL);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, moment_texture, 0);
 
-	//////////
+	////////// Generating a render buffer to act as a z-buffer
 
+	GLuint depth_render_buffer;
 	glGenRenderbuffers(1, &depth_render_buffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, shadow_map_width, shadow_map_height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
 
-	//////////
+	////////// Defining a framebuffer, and attaching moment texture + depth render buffer to it
+
+	GLuint framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, moment_texture, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		fail("make a framebuffer; framebuffer not complete", CreateFramebuffer);
@@ -122,7 +109,7 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 
 	glm_mul(projection, view, shadow_map_context.light_context.model_view_projection);
 
-	////////// Activate shader, update light mvp, bind framebuffer, resize viewport, clear framebuffer, cull front faces
+	////////// Activate shader, update light mvp, bind framebuffer, resize viewport, clear buffers, and cull front faces
 
 	glUseProgram(shadow_map_context.shader_context.depth_shader);
 
@@ -131,14 +118,19 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 
 	glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_context.buffer_context.framebuffer);
 	glViewport(0, 0, shadow_map_context.buffer_context.size[0], shadow_map_context.buffer_context.size[1]);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear depth map
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
 	memcpy(shadow_map_context_ref -> light_context.model_view_projection,
 		shadow_map_context.light_context.model_view_projection, sizeof(mat4));
 }
 
-static void disable_rendering_to_shadow_map(const int screen_size[2]) {
+static void disable_rendering_to_shadow_map(const int screen_size[2], const GLuint moment_texture) {
+	// This generates mipmaps for the moment texture after it's been rendered
+	glBindTexture(TexPlain, moment_texture);
+	glGenerateMipmap(TexPlain);
+
+	// Unbinding the framebuffer, resetting the viewport size, and turning on backface culling again
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, screen_size[0], screen_size[1]);
 	glCullFace(GL_BACK);
@@ -162,7 +154,7 @@ void render_all_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context
 	glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);
 	glDisableVertexAttribArray(0);
 
-	disable_rendering_to_shadow_map(screen_size);
+	disable_rendering_to_shadow_map(screen_size, shadow_map_context -> buffer_context.moment_texture);
 }
 
 #endif

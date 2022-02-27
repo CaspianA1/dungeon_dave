@@ -6649,4 +6649,10 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 		"return clamp(attenuation_percent, min_attenuation, 1.0f);\n"
 	"}\n"
 
+///// Old shadow border clamping:
+
+	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(TexPlain, GL_TEXTURE_BORDER_COLOR, (GLfloat[4]) {1.0f, 1.0f, 1.0f, 1.0f});
+
 /////

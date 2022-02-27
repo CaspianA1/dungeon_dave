@@ -33,6 +33,7 @@ Other random ideas:
 
 A better shading model:
 - use_shader instead of glUseProgram, and delete_shader instead of glDeleteProgram
+- Macros for generation of objects, like GL_INIT(Buffer) for example
 - Share code between shaders
 - Read in shaders from files
 - Share shader uniforms via uniform buffer objects
