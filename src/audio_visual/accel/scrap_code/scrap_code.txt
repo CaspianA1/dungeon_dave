@@ -6603,3 +6603,39 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 	INIT_UNIFORM_VALUE(branch, sector_shader, 1i, keys[SDL_SCANCODE_G]);
 
 /////
+
+	glm_perspective(constants.camera.init.fov, (GLfloat) shadow_map_width / shadow_map_height,
+		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
+
+/////
+
+	"float linstep(float low, float high, float value) {\n"
+		"return clamp((value - low) / (high - low), 0.0f, 1.0f);\n"
+	"}\n"
+
+/////
+
+		/*
+		"vec3 proj_coords = (fragment_pos_light_space.xyz / fragment_pos_light_space.w) * 0.5f + 0.5f;\n"
+		"float shadow_map_depth = texture(shadow_map_sampler, proj_coords.xy).r;\n"
+		"bool in_lit_region = shadow_map_depth > proj_coords.z;\n"
+		"return float(in_lit_region);\n"
+		*/
+
+/////
+
+
+	static GLfloat light_bleed_reduction_amount = 0.0f;
+	const GLfloat step = 0.004f;
+	if (keys[SDL_SCANCODE_G]) light_bleed_reduction_amount += step;
+	if (keys[SDL_SCANCODE_H]) light_bleed_reduction_amount -= step;
+	if (keys[SDL_SCANCODE_J]) light_bleed_reduction_amount = 0.0f;
+	if (light_bleed_reduction_amount < 0.0f) light_bleed_reduction_amount = 0.0f;
+	else if (light_bleed_reduction_amount > 1.0f) light_bleed_reduction_amount = 1.0f;
+
+	DEBUG_FLOAT(light_bleed_reduction_amount);
+
+	INIT_UNIFORM_VALUE(light_bleed_reduction_amount, sector_shader, 1f, light_bleed_reduction_amount);
+	INIT_UNIFORM_VALUE(branch, sector_shader, 1i, keys[SDL_SCANCODE_V]);
+
+/////

@@ -137,6 +137,9 @@ StateGL demo_17_init(void) {
 	enable_all_culling();
 	glEnable(GL_MULTISAMPLE);
 
+	render_all_sectors_to_shadow_map(&scene_state.shadow_map_context,
+		&scene_state.sector_draw_context, get_next_event().screen_size);
+
 	sgl.any_data = malloc(sizeof(SceneState));
 	memcpy(sgl.any_data, &scene_state, sizeof(SceneState));
 

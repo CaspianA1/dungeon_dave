@@ -2,14 +2,14 @@
 #define SHADOW_MAP_C
 
 /*
-- Some peter panning and shadow acne
-- Get smooth shadows through variance shadow mapping
+- Some odd results at very steep angles (aniso should fix that)
+- Some tops of objects are shadowed when they shouldn't be
+- Being close to an object blends the shadowed part with the unshadowed parj
 - A light source for the shadow map context that isn't based on the camera
-- Shadows for billboards and the weapon
-- Some values to the side are lit up when they shouldn't; perhaps try an orthographic matrix
-- If not, make the light FOV an input to init_shadow_map_context
-- Limit view frustum size for shadow map (especially when using projection) to map size (maybe not, if it doesn't affect precision)
-- If soft shadows involve a precomputed approach (per each time that the scene or light pos updates), I'm fine with that
+- Shadows for billboards and the weapon (they should read from the shadow map, not affect it)
+- Limit orthographic matrix size for shadow map to map size (maybe not, if it doesn't affect anything)
+- Gaussian blur (that will make the shadows smooth)
+- Get mipmaps + aniso working too
 */
 
 #include "headers/shadow_map.h"
@@ -20,7 +20,7 @@
 const GLchar *const depth_vertex_shader =
 	"#version 330 core\n"
 
-	"layout (location = 0) in vec3 vertex_pos_world_space;\n"
+	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 
 	"uniform mat4 light_model_view_projection;\n"
 
@@ -31,42 +31,60 @@ const GLchar *const depth_vertex_shader =
 *const depth_fragment_shader =
 	"#version 330 core\n"
 
-	"void main(void) {\n"
+	"out vec2 moments;\n"
 
+	"void main(void) {\n"
+		"moments.x = gl_FragCoord.z;\n"
+		"vec2 partial_derivatives = vec2(dFdx(moments.x), dFdy(moments.x));\n"
+		"moments.y = moments.x * moments.x + 0.25f * dot(partial_derivatives, partial_derivatives);\n"
 	"}\n";
 
 ShadowMapContext init_shadow_map_context(
-	const GLsizei shadow_width, const GLsizei shadow_height,
+	const GLsizei shadow_map_width, const GLsizei shadow_map_height,
 	const vec3 light_pos, const vec3 light_dir, vec3 light_up) {
-	
-	GLuint texture, framebuffer;
 
-	glGenTextures(1, &texture);
-	glBindTexture(TexPlain, texture);
-	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	// Texture is for storing moments, and render buffer serves as a depth buffer
+	GLuint framebuffer, moment_texture, depth_render_buffer;
 
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+	//////////
+
+	glGenTextures(1, &moment_texture);
+	glBindTexture(TexPlain, moment_texture);
+
+	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameterfv(TexPlain, GL_TEXTURE_BORDER_COLOR, (GLfloat[4]) {1.0f, 1.0f, 1.0f, 1.0f});  
 
-	glTexImage2D(TexPlain, 0, GL_DEPTH_COMPONENT, shadow_width, shadow_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(TexPlain, 0, GL_RG32F, shadow_map_width, shadow_map_height, 0, GL_RG, GL_FLOAT, NULL);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, moment_texture, 0);
 
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, TexPlain, texture, 0);
-	glDrawBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//////////
+
+	glGenRenderbuffers(1, &depth_render_buffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, shadow_map_width, shadow_map_height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
+
+	//////////
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		fail("make a framebuffer; framebuffer not complete", CreateFramebuffer);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//////////
 
 	const GLuint shader = init_shader_program(depth_vertex_shader, depth_fragment_shader);
 
 	return (ShadowMapContext) {
 		.shader_context = {shader, .INIT_UNIFORM(light_model_view_projection, shader)},
-		.depth_map = {texture, framebuffer},
-		.shadow_size = {shadow_width, shadow_height},
+		.depth_map = {framebuffer, moment_texture, depth_render_buffer},
+		.size = {shadow_map_width, shadow_map_height},
 
 		.light_context = {
 			{light_pos[0], light_pos[1], light_pos[2]},
@@ -78,7 +96,8 @@ ShadowMapContext init_shadow_map_context(
 }
 
 void deinit_shadow_map_context(const ShadowMapContext* const shadow_map_context) {
-	deinit_texture(shadow_map_context -> depth_map.texture);
+	deinit_texture(shadow_map_context -> depth_map.moment_texture);
+	glDeleteRenderbuffers(1, &shadow_map_context -> depth_map.depth_render_buffer);
 	glDeleteFramebuffers(1, &shadow_map_context -> depth_map.framebuffer);
 	glDeleteProgram(shadow_map_context -> shader_context.depth_shader);
 }
@@ -87,8 +106,8 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 	ShadowMapContext shadow_map_context = *shadow_map_context_ref;
 
 	const GLsizei
-		shadow_width = shadow_map_context.shadow_size[0],
-		shadow_height = shadow_map_context.shadow_size[1];
+		shadow_map_width = shadow_map_context.size[0],
+		shadow_map_height = shadow_map_context.size[1];
 	
 	//////////
 
@@ -99,10 +118,7 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 		(GLfloat*) shadow_map_context.light_context.dir,
 		(GLfloat*) shadow_map_context.light_context.up, view);
 
-	glm_perspective(constants.camera.init.fov, (GLfloat) shadow_width / shadow_height,
-		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
-
-	// glm_ortho(-50.0f, 50.0f, -50.0f, 50.0f, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
+	glm_ortho(-50.0f, 50.0f, -50.0f, 50.0f, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 
 	glm_mul(projection, view, shadow_map_context.light_context.model_view_projection);
 
@@ -113,9 +129,9 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 	UPDATE_UNIFORM(shadow_map_context.shader_context.light_model_view_projection,
 		Matrix4fv, 1, GL_FALSE, (GLfloat*) shadow_map_context.light_context.model_view_projection);
 
-	glViewport(0, 0, shadow_width, shadow_height);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_context.depth_map.framebuffer);
-	glClear(GL_DEPTH_BUFFER_BIT); // Clear depth map
+	glViewport(0, 0, shadow_map_width, shadow_map_height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear depth map
 	glCullFace(GL_FRONT);
 
 	memcpy(shadow_map_context_ref -> light_context.model_view_projection,
