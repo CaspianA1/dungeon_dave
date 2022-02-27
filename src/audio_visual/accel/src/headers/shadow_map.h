@@ -26,7 +26,8 @@ typedef struct {
 // Excluded: enable_rendering_to_shadow_map, disable_rendering_to_shadow_map
 
 ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
-	const GLsizei shadow_map_height, const vec3 light_pos, const vec3 light_dir);
+	const GLsizei shadow_map_height, const vec3 light_pos,
+	const GLfloat hori_angle, const GLfloat vert_angle);
 
 void deinit_shadow_map_context(const ShadowMapContext* const shadow_map_context);
 

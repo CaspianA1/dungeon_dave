@@ -185,6 +185,13 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 v
 	}
 }
 
+void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, vec2 dir_xz, vec3 dir) {
+	const GLfloat cos_vert = cosf(vert_angle);
+
+	memcpy(dir_xz, (vec2) {sinf(hori_angle), cosf(hori_angle)}, sizeof(vec2));
+	memcpy(dir, (vec3) {cos_vert * dir_xz[0], sinf(vert_angle), cos_vert * dir_xz[1]}, sizeof(vec3));
+}
+
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
 	static GLfloat one_over_performance_freq;
 	static byte first_call = 1;
@@ -205,18 +212,15 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 
 	////////// Defining vectors
 
-	const GLfloat hori_angle = camera -> angles.hori, vert_angle = camera -> angles.vert;
-	const GLfloat cos_vert = cosf(vert_angle);
+	vec2 dir_xz;
+	vec3 dir;
 
-	vec2 dir_xz = {sinf(hori_angle), cosf(hori_angle)};
+	get_dir_in_2D_and_3D(camera -> angles.hori, camera -> angles.vert, dir_xz, dir); // Outputs dir_xz and dir
 
-	vec3
-		dir = {cos_vert * dir_xz[0], sinf(vert_angle), cos_vert * dir_xz[1]},
-		right = {-dir_xz[1], 0.0f, dir_xz[0]},
-		pos, up;
+	vec3 right = {-dir_xz[1], 0.0f, dir_xz[0]}, up, pos;
 
 	glm_vec3_rotate(right, -camera -> angles.tilt, dir); // Outputs a rotated right vector
-	glm_vec3_cross(right, dir, up); // Generates an up vector from the direction + right vector
+	glm_vec3_cross(right, dir, up); // Outputs an up vector from the direction and right vectors
 	memcpy(pos, camera -> pos, sizeof(vec3)); // Copying the camera's position vector into a local variable
 
 	////////// Moving according to those vectors

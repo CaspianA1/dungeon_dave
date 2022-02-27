@@ -16,6 +16,7 @@
 #include "headers/shadow_map.h"
 #include "headers/constants.h"
 #include "headers/texture.h"
+#include "camera.c"
 
 // TODO: to shaders.c
 const GLchar *const depth_vertex_shader =
@@ -41,7 +42,8 @@ const GLchar *const depth_vertex_shader =
 	"}\n";
 
 ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
-	const GLsizei shadow_map_height, const vec3 light_pos, const vec3 light_dir) {
+	const GLsizei shadow_map_height, const vec3 light_pos,
+	const GLfloat hori_angle, const GLfloat vert_angle) {
 
 	// Texture is for storing moments, and render buffer serves as a depth buffer
 	GLuint framebuffer, moment_texture, depth_render_buffer;
@@ -82,6 +84,9 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 
 	const GLuint shader = init_shader_program(depth_vertex_shader, depth_fragment_shader);
 
+	vec3 light_dir;
+	get_dir_in_2D_and_3D(hori_angle, vert_angle, (vec2) {0.0f, 0.0f}, light_dir);
+
 	return (ShadowMapContext) {
 		.shader_context = {shader, .INIT_UNIFORM(light_model_view_projection, shader)},
 
@@ -93,7 +98,7 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 		.light_context = {
 			{light_pos[0], light_pos[1], light_pos[2]},
 			{light_dir[0], light_dir[1], light_dir[2]},
-			.model_view_projection = {0}
+			{0}
 		}
 	};
 }

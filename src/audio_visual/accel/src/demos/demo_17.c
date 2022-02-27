@@ -32,7 +32,7 @@ StateGL demo_17_init(void) {
 	SceneState scene_state = {
 		.shadow_map_context = init_shadow_map_context(2048, 2048,
 			(vec3) {26.563328f, 31.701447f, 12.387274f},
-			(vec3) {-0.229919f, -0.911403f, 0.341294f}
+			0.518362f, -1.225221f
 		),
 
 		// .weapon_sprite = init_weapon_sprite(0.5f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
