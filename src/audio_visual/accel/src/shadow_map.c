@@ -8,6 +8,16 @@
 - Limit orthographic matrix size for shadow map to map size (maybe not, if it doesn't affect anything)
 - Gaussian blur (that will make the shadows smooth)
 - Can perhaps store penumbra size in 3rd component of moment texture
+
+View frustum calculation:
+- Need to capture whole scene
+- May want an angle to the light as well
+
+- So, can calculate position from those constraints
+- Meaning that eventually, no position passed in
+- So, given two angles, create a big plane
+- Check that that plane is tight with the world's edge
+- Then, make a cuboid extending from that plane to capture the whole world
 */
 
 #include "headers/shadow_map.h"
