@@ -2,7 +2,7 @@
 #define SHADOW_MAP_C
 
 /*
-- Some tops of objects are shadowed when they shouldn't be
+- Some front faces are shadowed when they shouldn't be
 - Being close to an object blends the shadowed part with the unshadowed part
 - Shadows for billboards and the weapon (they should read from the shadow map, not affect it)
 - Limit orthographic matrix size for shadow map to map size (maybe not, if it doesn't affect anything)

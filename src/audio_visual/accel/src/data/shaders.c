@@ -55,7 +55,7 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec3 color;\n"
 
-	"uniform float overall_light_strength, ambient, shininess, specular_strength, min_shadow_variance;\n"
+	"uniform float overall_light_strength, ambient, shininess, specular_strength, min_shadow_variance, light_bleed_reduction_factor;\n"
 	"uniform vec3 inv_light_dir;\n"
 
 	"uniform sampler2D shadow_map_sampler;\n"
@@ -71,6 +71,10 @@ const GLchar *const sector_vertex_shader =
 		"return specular_strength * pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
 	"}\n"
 
+	"float linstep(float low, float high, float v) {\n"
+		"return clamp((v - low) / (high - low), 0.0f, 1.0f);\n"
+	"}\n"
+
 	"float shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
 		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
 		"float depth = proj_coords.z;\n"
@@ -81,9 +85,9 @@ const GLchar *const sector_vertex_shader =
 
 		"float d = depth - moments.x;\n"
 		"float p_max = variance / (variance + d * d);\n"
+		"p_max = linstep(light_bleed_reduction_factor, 1.0f, p_max);\n" // Using linstep to reduce light bleeding
 
-		"float p = float(depth <= moments.x);\n"
-		"return max(p, p_max);\n"
+		"return (depth <= moments.x) ? 1.0f : p_max;\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
