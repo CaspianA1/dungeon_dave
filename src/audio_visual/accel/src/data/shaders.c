@@ -73,15 +73,16 @@ const GLchar *const sector_vertex_shader =
 
 	"float shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
 		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
-		"float distance = proj_coords.z;\n"
+		"float depth = proj_coords.z;\n"
 
 		"vec2 moments = texture(shadow_map_sampler, proj_coords.xy).rg;\n"
+
 		"float variance = max(moments.y - moments.x * moments.x, min_shadow_variance);\n"
 
-		"float d = distance - moments.x;\n"
+		"float d = depth - moments.x;\n"
 		"float p_max = variance / (variance + d * d);\n"
 
-		"float p = float(distance <= moments.x);\n"
+		"float p = float(depth <= moments.x);\n"
 		"return max(p, p_max);\n"
 	"}\n"
 
