@@ -52,12 +52,11 @@ static const GLbyte skybox_vertices[] = {
 static GLuint init_skybox_texture(const GLchar* const path) {
 	SDL_Surface* const skybox_surface = init_surface(path);
 
-	const GLsizei cube_size = skybox_surface -> w >> 2;
+	const GLint skybox_w = skybox_surface -> w;
+	const GLint cube_size = skybox_w >> 2, twice_cube_size = skybox_w >> 1;
 	const GLuint skybox = preinit_texture(TexSkybox, TexNonRepeating);
 
 	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size);
-
-	const GLint twice_cube_size = cube_size << 1;
 
 	typedef struct {const GLint x, y;} ivec2;
 
