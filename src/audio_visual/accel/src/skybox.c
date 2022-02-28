@@ -79,6 +79,7 @@ static GLuint init_skybox_texture(const GLchar* const path) {
 	}
 
 	glGenerateMipmap(TexSkybox);
+
 	deinit_surface(face_surface);
 	deinit_surface(skybox_surface);
 
