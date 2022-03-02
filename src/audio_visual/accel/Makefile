@@ -5,7 +5,7 @@ DEBUG = -ggdb3 -fsanitize=address,undefined
 BUILD_TYPE = $(DEBUG)
 
 DEMO = 17
-TEST_RANGE = 1..24
+TEST_RANGE = 1..23
 OUT = accel_demo
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
