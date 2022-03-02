@@ -55,6 +55,13 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	////////// Generating a texture to hold the two moments
 
 	const GLuint moment_texture = preinit_texture(TexPlain, TexNonRepeating);
+
+	/*
+	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(TexPlain, GL_TEXTURE_BORDER_COLOR, (GLfloat[4]) {1.0f, 1.0f, 1.0f, 1.0f});
+	*/
+
 	glTexImage2D(TexPlain, 0, GL_RG, shadow_map_width, shadow_map_height, 0, GL_RG, GL_FLOAT, NULL);
 
 	////////// Generating a render buffer to act as a z-buffer
@@ -107,17 +114,42 @@ void deinit_shadow_map_context(const ShadowMapContext* const shadow_map_context)
 	glDeleteProgram(shadow_map_context -> shader_context.depth_shader);
 }
 
-static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_context_ref) {
+static void get_model_view_projection_matrix_for_shadow_map(
+	const ShadowMapContext* const shadow_map_context,
+	const byte map_size[2], mat4 model_view_projection) {
+
+	//////////
+
+	/*
+	Or, think like this:
+	- Light must always cover whole scene
+	- Only direction should vary
+	- So, given a direction, find a position that encompasses the whole scene
+	- This, in a way, reduces to the view frustum related problem from the internet
+
+	- Simplified version (?)
+	- Direction -> OBB that covers the whole scene
+	- Only consider position that is out of scene to begin with
+	- Perhaps consider a point on a sphere, looking at the origin
+	- Adjuating where the point is on the sphere then changes the direction
+	*/
+
+	(void) map_size;
+
+	mat4 view, projection;
+	const GLfloat far_clip_dist = 70.0f, l = 40.0f;
+	glm_look_anyup((GLfloat*) shadow_map_context -> light_context.pos, (GLfloat*) shadow_map_context -> light_context.dir, view);
+	glm_ortho(-l, l, l, -l, constants.camera.clip_dists.near, far_clip_dist, projection);
+	glm_mul(projection, view, model_view_projection);
+}
+
+static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_context_ref, const byte map_size[2]) {
 	ShadowMapContext shadow_map_context = *shadow_map_context_ref;
 
 	////////// These matrices are relative to the light
 
-	mat4 view, projection;
-
-	glm_look_anyup(shadow_map_context.light_context.pos, shadow_map_context.light_context.dir, view);
-	glm_ortho(-50.0f, 50.0f, -50.0f, 50.0f, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
-
-	glm_mul(projection, view, shadow_map_context.light_context.model_view_projection);
+	get_model_view_projection_matrix_for_shadow_map(shadow_map_context_ref,
+		map_size, shadow_map_context.light_context.model_view_projection);
 
 	////////// Activate shader, update light mvp, bind framebuffer, resize viewport, clear buffers, and cull front faces
 
@@ -146,8 +178,10 @@ static void disable_rendering_to_shadow_map(const int screen_size[2], const GLui
 	glCullFace(GL_BACK);
 }
 
-void render_all_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context,
-	const BatchDrawContext* const sector_draw_context, const int screen_size[2]) {
+void render_all_sectors_to_shadow_map(
+	ShadowMapContext* const shadow_map_context,
+	const BatchDrawContext* const sector_draw_context,
+	const int screen_size[2], const byte map_size[2]) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, sector_draw_context -> buffers.gpu);
 
@@ -157,7 +191,7 @@ void render_all_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_for_vertices, sector_draw_context -> buffers.cpu.data);
 
-	enable_rendering_to_shadow_map(shadow_map_context);
+	enable_rendering_to_shadow_map(shadow_map_context, map_size);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_face_vertex, (void*) 0);

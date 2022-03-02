@@ -137,7 +137,7 @@ StateGL demo_17_init(void) {
 	glEnable(GL_MULTISAMPLE);
 
 	render_all_sectors_to_shadow_map(&scene_state.shadow_map_context,
-		&scene_state.sector_draw_context, get_next_event().screen_size);
+		&scene_state.sector_draw_context, get_next_event().screen_size, scene_state.map_size);
 
 	sgl.any_data = malloc(sizeof(SceneState));
 	memcpy(sgl.any_data, &scene_state, sizeof(SceneState));
@@ -174,7 +174,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	if (keys[SDL_SCANCODE_C]) {
 		memcpy(shadow_map_context -> light_context.pos, camera.pos, sizeof(vec3));
 		memcpy(shadow_map_context -> light_context.dir, camera.dir, sizeof(vec3));
-		render_all_sectors_to_shadow_map(shadow_map_context, sector_draw_context, event.screen_size);
+		render_all_sectors_to_shadow_map(shadow_map_context, sector_draw_context, event.screen_size, physics_obj.map_size);
 	}
 
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise

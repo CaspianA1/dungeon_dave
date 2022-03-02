@@ -6656,3 +6656,217 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 	glTexParameterfv(TexPlain, GL_TEXTURE_BORDER_COLOR, (GLfloat[4]) {1.0f, 1.0f, 1.0f, 1.0f});
 
 /////
+
+	// glm_ortho_aabb((vec3[2]) {{-20.0f, light_height, -20.0f}, {20.0f, 0.01f, 20.0f}}, projection);
+
+/////
+
+	/*
+	glm_ortho(-half_map_width, half_map_width, half_map_height, -half_map_height,
+		constants.camera.clip_dists.near, light_height, projection);
+	
+	const GLsizei* const shadow_map_size = shadow_map_context -> buffer_context.size;
+	// glm_ortho(-shadow_map_size[0] / 2, shadow_map_size[0] / 2, shadow_map_size[1] / 2, - shadow_map_size[1] / 2, constants.camera.clip_dists.near, light_height, projection);
+	*/
+
+/////
+
+	// TODO: find the highest map point
+	/*
+	glm_look_anyup((vec3) {half_map_width, light_height, half_map_height},
+		(GLfloat*) shadow_map_context -> light_context.dir, view);
+
+	static GLfloat s = 20.0f;
+
+	DEBUG(palace_width, d);
+
+	const GLfloat step = 0.05f;
+	if (keys[SDL_SCANCODE_T]) s += step;
+	if (keys[SDL_SCANCODE_Y]) s -= step;
+	DEBUG_FLOAT(s);
+	puts("---");
+
+	// World to view space?
+	const GLsizei* const size = shadow_map_context -> buffer_context.size;
+	// glm_ortho(-size[0]/2, size[0]/2, size[1]/2, -size[1]/2, constants.camera.clip_dists.near, light_height, projection);
+	glm_ortho(-1, 1, 1, -1, constants.camera.clip_dists.near, light_height, projection);
+	// glm_ortho(-s, s, -s, s, constants.camera.clip_dists.near, light_height, projection);
+	*/
+
+/////
+
+	// const byte map_width = map_size[0], map_height = map_size[1], far_clip_dist = 100;
+
+	/*
+	mat4 view, projection;
+
+	// glm_look_anyup((vec3) {center_xz[0], 30.0f, center_xz[1]}, shadow_map_context.light_context.dir, view);
+	// glm_ortho(0.0f, map_size[0], )
+
+	glm_look_anyup(shadow_map_context.light_context.pos, shadow_map_context.light_context.dir, view);
+	glm_ortho(-50.0f, 50.0f, -50.0f, 50.0f, constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
+
+	glm_mul(projection, view, shadow_map_context.light_context.model_view_projection);
+	*/
+
+/////
+
+	// Far clip dist should be to map corner
+	// const GLfloat far_clip_dist = sqrt(map_width * map_width + map_height * map_height + light_height * light_height);
+
+	 // The original way:
+	// glm_look_anyup(shadow_map_context -> light_context.pos, shadow_map_context -> light_context.dir, view);
+	// glm_ortho(-50.0f, 50.0f, -50.0f, 50.0f, constants.camera.clip_dists.near, f, projection);
+
+/////
+
+// glm_ortho(-50.0f, 50.0f, 50.0f, -50.0f, constants.camera.clip_dists.near, far_clip_dist, projection);
+	// glm_ortho(-50.0f, 50.0f, -50.0f, 50.0f, constants.camera.clip_dists.near, far_clip_dist, projection);
+	// glm_ortho(0, 40, 40, 0, constants.camera.clip_dists.near, far_clip_dist, projection);
+	// glm_ortho(-1.0f, 1.0f, 1.0f, -1.0f, constants.camera.clip_dists.near, far_clip_dist, projection);
+
+/////
+
+	/*
+	TWEAK_REALTIME_VALUE(offset, 2.0f, 0.15f, SDL_SCANCODE_T, SDL_SCANCODE_Y, SDL_SCANCODE_U);
+	const GLfloat light_height = 30.0f + offset; // TODO: substitute with the highest map point
+	DEBUG_FLOAT(light_height);
+	puts("---");
+	*/
+
+	// Sometimes, parts of the scene fall out of the view frustum
+	// Where to place the sun?
+
+	////////// Defining matrices
+
+	const GLfloat light_height = 30.0f;
+	vec3 light_pos = {map_size[0] >> 1, light_height, map_size[1] >> 1};
+	const GLfloat far_clip_dist = glm_vec3_norm(light_pos); // No, must be farthest clip dist (not always farthest); if not in center
+	memcpy(shadow_map_context -> light_context.pos, light_pos, sizeof(vec3));
+
+	glm_ortho(-light_pos[0], light_pos[0], light_pos[2], -light_pos[2], constants.camera.clip_dists.near, far_clip_dist, projection);
+	glm_look_anyup(shadow_map_context -> light_context.pos, (GLfloat*) shadow_map_context -> light_context.dir, view);
+	glm_mul(projection, view, model_view_projection);
+
+	// const GLfloat far_clip_dist = 60.0f;
+
+	// Maybe light source rotated around scene?
+
+	/*
+	const GLfloat far_clip_dist = 100.0f;
+	glm_look_anyup(shadow_map_context -> light_context.pos, (GLfloat*) shadow_map_context -> light_context.dir, view);
+	const GLfloat l = 20.0f;
+	glm_ortho(-l, l, l, -l, constants.camera.clip_dists.near, far_clip_dist, projection);
+	// glm_ortho(-light_pos[0], light_pos[0], light_pos[2], -light_pos[2], constants.camera.clip_dists.near, far_clip_dist, projection);
+	glm_mul(projection, view, model_view_projection);
+	*/
+
+/////
+
+	// Sometimes, parts of the scene fall out of the view frustum
+	// Where to place the sun?
+
+/////
+
+	/*
+	const GLfloat light_height = 30.0f;
+	vec3 light_pos = {map_size[0] >> 1, light_height, map_size[1] >> 1};
+	const GLfloat far_clip_dist = glm_vec3_norm(light_pos); // No, must be farthest clip dist (not always farthest); if not in center
+	memcpy(shadow_map_context -> light_context.pos, light_pos, sizeof(vec3));
+
+	glm_ortho(-light_pos[0], light_pos[0], light_pos[2], -light_pos[2], constants.camera.clip_dists.near, far_clip_dist, projection);
+	glm_look_anyup(shadow_map_context -> light_context.pos, (GLfloat*) shadow_map_context -> light_context.dir, view);
+	glm_mul(projection, view, model_view_projection);
+	*/
+
+/////
+
+	typedef enum {Top, Bottom, Left, Right} Side;
+
+	/*
+	- The light should not be in the center of the scene.
+	- In that case, a part of the scene will always be excluded from being in shadow.
+	- Specify a side for the sun to be on, and then the code can figure out the bounding box size
+	*/
+
+	const Side sun_side = Right;
+
+	/////
+
+	byte sun_pos_xz[2];
+
+	switch (sun_side) {
+		case Top:
+			sun_pos_xz[0] = half_map_size[0];
+			sun_pos_xz[1] = 0;
+			break;
+		case Bottom:
+			sun_pos_xz[0] = half_map_size[0];
+			sun_pos_xz[1] = map_size[1];
+			break;
+		case Left:
+			sun_pos_xz[0] = 0;
+			sun_pos_xz[1] = half_map_size[1];
+			break;
+		case Right:
+			sun_pos_xz[0] = map_size[0];
+			sun_pos_xz[1] = half_map_size[1];
+	}
+
+	printf("sun_pos_xz = {%d, %d}\n", sun_pos_xz[0], sun_pos_xz[1]);
+
+/////
+
+	const GLfloat light_height = 30.0f;
+	vec3 light_pos = {map_size[0] >> 1, light_height, map_size[1] >> 1};
+	const GLfloat far_clip_dist = glm_vec3_norm(light_pos); // No, must be farthest clip dist (not always farthest); if not in center
+	memcpy(shadow_map_context -> light_context.pos, light_pos, sizeof(vec3));
+
+	glm_ortho(-light_pos[0], light_pos[0], light_pos[2], -light_pos[2], constants.camera.clip_dists.near, far_clip_dist, projection);
+	glm_look_anyup(shadow_map_context -> light_context.pos, (GLfloat*) shadow_map_context -> light_context.dir, view);
+	glm_mul(projection, view, model_view_projection);
+
+	const GLfloat far_clip_dist = 80.0f;
+	glm_look_anyup(shadow_map_context -> light_context.pos, (GLfloat*) shadow_map_context -> light_context.dir, view);
+	const GLfloat l = 40.0f;
+	glm_ortho(-l, l, l, -l, constants.camera.clip_dists.near, far_clip_dist, projection);
+	// glm_ortho(-light_pos[0], light_pos[0], light_pos[2], -light_pos[2], constants.camera.clip_dists.near, far_clip_dist, projection);
+	glm_mul(projection, view, model_view_projection);
+
+/////
+
+	const GLfloat
+		*const light_pos = shadow_map_context -> light_context.pos,
+		*const light_dir = shadow_map_context -> light_context.dir;
+
+	// DEBUG_VEC3(light_pos);
+	const GLfloat
+		across_span[2] = {light_pos[0], map_size[0] - light_pos[0]},
+		down_span[2] = {light_pos[2], map_size[1] - light_pos[2]};
+	
+	//////////
+	const GLfloat l = -across_span[0], r = across_span[1];
+	//////////
+
+	glm_aabb_merge;
+
+	// glm_aabb_merge;
+	TWEAK_REALTIME_VALUE(o, 0.0f, 0.1f, T, Y, U);
+
+	const GLfloat far_clip_dist = 50.0f; mat4 view, projection;
+	glm_look_anyup((GLfloat*) light_pos, (GLfloat*) light_dir, view);
+	glm_ortho(-across_span[0], across_span[1], down_span[1], -down_span[0], constants.camera.clip_dists.near, far_clip_dist, projection);
+	glm_mul(projection, view, model_view_projection);
+
+/////
+
+	// Depending on the x and z view directions, stretch the ortho box
+
+/////
+
+	if (keys[SDL_SCANCODE_V]) glm_ortho(-20, 20, -20, 20, 0.01f, 50.0f, projection);
+
+	else glm_perspective(camera -> angles.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
+		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
+
+/////

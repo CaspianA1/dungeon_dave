@@ -75,7 +75,7 @@ const GLchar *const sector_vertex_shader =
 		"return clamp((v - low) / (high - low), 0.0f, 1.0f);\n"
 	"}\n"
 
-	"float shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
+	"float one_minus_shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
 		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
 		"float depth = proj_coords.z;\n"
 
@@ -87,7 +87,7 @@ const GLchar *const sector_vertex_shader =
 		"float p_max = variance / (variance + d * d);\n"
 		"p_max = linstep(light_bleed_reduction_factor, 1.0f, p_max);\n" // Using linstep to reduce light bleeding
 
-		"return (depth <= moments.x) ? 1.0f : p_max;\n"
+		"return (depth <= moments.x) ? 1.0f : clamp(p_max, 0.0f, 1.0f);\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
@@ -95,7 +95,7 @@ const GLchar *const sector_vertex_shader =
 		 // Done so that away-facing surfaces don't get any specular highlights
 		"non_ambient += specular() * float(non_ambient != 0.0f);\n"
 
-		"float light = ambient + non_ambient * (1.0f - shadow_percent());\n"
+		"float light = ambient + non_ambient * (one_minus_shadow_percent());\n"
 		"return min(light * overall_light_strength, 1.0f);\n"
 	"}\n"
 
