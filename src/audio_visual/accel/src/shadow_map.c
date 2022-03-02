@@ -130,8 +130,10 @@ static void get_model_view_projection_matrix_for_shadow_map(
 	- Simplified version (?)
 	- Direction -> OBB that covers the whole scene
 	- Only consider position that is out of scene to begin with
-	- Perhaps consider a point on a sphere, looking at the origin
-	- Adjuating where the point is on the sphere then changes the direction
+	- Perhaps consider a point on a sphere, looking at the map center
+	- Adjusting where the point is on the sphere then changes the direction
+
+	https://stackoverflow.com/questions/969798/plotting-a-point-on-the-edge-of-a-sphere
 	*/
 
 	(void) map_size;
