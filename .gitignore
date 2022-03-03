@@ -1,3 +1,7 @@
 .DS_Store
-bin/
+
 .vscode/
+bin/
+other/
+scrap_code/
+blender/
