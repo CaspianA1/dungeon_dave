@@ -81,7 +81,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, num_visible_billboards); // Each billboard has 4 corners
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_billboard, num_visible_billboards);
 	glDisable(GL_BLEND);
 
 	glEnable(GL_CULL_FACE);

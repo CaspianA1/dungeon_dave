@@ -19,7 +19,8 @@ enum { // `enum` is used to make these values compile-time constants
 	vertices_per_face = 6,
 	components_per_face = components_per_face_vertex * vertices_per_face,
 	bytes_per_face_vertex = sizeof(face_mesh_component_t[components_per_face_vertex]),
-	bytes_per_face = sizeof(face_mesh_component_t[components_per_face])
+	bytes_per_face = sizeof(face_mesh_component_t[components_per_face]),
+	corners_per_billboard = 4
 };
 
 #endif
