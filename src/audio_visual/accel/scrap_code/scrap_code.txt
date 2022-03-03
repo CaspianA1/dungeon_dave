@@ -6870,3 +6870,13 @@ void update_animation_instance(AnimationInstance* const animation_instance,
 		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
 
 /////
+
+	"bool in_range(float val) {\n"
+		"return val >= 0.0f && val <= 1.0f;\n"
+	"}\n"
+
+	"bool vec_in_range(vec3 vec) {\n"
+		"return in_range(vec.x) && in_range(vec.y) && in_range(vec.z);\n"
+	"}\n"
+
+/////

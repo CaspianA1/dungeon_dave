@@ -71,12 +71,13 @@ const GLchar *const sector_vertex_shader =
 		"return specular_strength * pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
 	"}\n"
 
-	"float linstep(float low, float high, float v) {\n"
+	"float linstep(float v, float low, float high) {\n"
 		"return clamp((v - low) / (high - low), 0.0f, 1.0f);\n"
 	"}\n"
 
 	"float one_minus_shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
 		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
+
 		"float depth = proj_coords.z;\n"
 
 		"vec2 moments = texture(shadow_map_sampler, proj_coords.xy).rg;\n"
@@ -84,8 +85,8 @@ const GLchar *const sector_vertex_shader =
 		"float variance = max(moments.y - moments.x * moments.x, min_shadow_variance);\n"
 
 		"float d = depth - moments.x;\n"
-		"float p_max = variance / (variance + d * d);\n"
-		"p_max = linstep(light_bleed_reduction_factor, 1.0f, p_max);\n" // Using linstep to reduce light bleeding
+		"float p_max = variance / (variance + (d * d));\n"
+		"p_max = linstep(p_max, light_bleed_reduction_factor, 1.0f);\n" // Using linstep to reduce light bleeding
 
 		"return (depth <= moments.x) ? 1.0f : clamp(p_max, 0.0f, 1.0f);\n"
 	"}\n"
@@ -95,7 +96,7 @@ const GLchar *const sector_vertex_shader =
 		 // Done so that away-facing surfaces don't get any specular highlights
 		"non_ambient += specular() * float(non_ambient != 0.0f);\n"
 
-		"float light = ambient + non_ambient * (one_minus_shadow_percent());\n"
+		"float light = ambient + non_ambient * one_minus_shadow_percent();\n"
 		"return min(light * overall_light_strength, 1.0f);\n"
 	"}\n"
 

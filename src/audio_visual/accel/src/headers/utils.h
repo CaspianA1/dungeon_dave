@@ -36,12 +36,16 @@
 	putchar('\n');\
 } while (0)
 
-#define TWEAK_REALTIME_VALUE(value_name, init_value, step, key_decr, key_incr, key_reset)\
+#define TWEAK_REALTIME_VALUE(value_name, init_value, min_value, max_value, step, key_decr, key_incr, key_reset)\
 	static GLfloat value_name = init_value;\
 	do {\
 		const byte incr = keys[SDL_SCANCODE_##key_incr],\
 			decr = keys[SDL_SCANCODE_##key_decr], reset = keys[SDL_SCANCODE_##key_reset];\
+		\
 		value_name = reset ? init_value : (value_name + step * incr - step * decr);\
+		\
+		if (value_name < min_value) value_name = min_value;\
+		else if (value_name > max_value) value_name = max_value;\
 		if (incr || decr || reset) DEBUG_FLOAT(value_name);\
 	} while (0)
 
