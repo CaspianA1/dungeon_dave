@@ -2,16 +2,16 @@
 #define SHADOW_MAP_C
 
 /*
-- Some front faces are shadowed when they shouldn't be
-- Being close to an object blends the shadowed part with the unshadowed part
+- Some object corners are blended (that may be light bleeding)
+- Bigger distance deltas results in a darker shadow
 - Shadows for billboards and the weapon (they should read from the shadow map, not affect it)
-- Limit orthographic matrix size for shadow map to map size (maybe not, if it doesn't affect anything)
+- Limit orthographic matrix size for shadow map to map size
 - Gaussian blur (that will make the shadows smooth)
 - Can perhaps store penumbra size in 3rd component of moment texture
 
 View frustum calculation:
 - Need to capture whole scene
-- May want an angle to the light as well
+- Want an angle to the light as well
 
 - So, can calculate position from those constraints
 - Meaning that eventually, no position passed in
