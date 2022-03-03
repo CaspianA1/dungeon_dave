@@ -2,8 +2,6 @@
 #define SHADOW_MAP_C
 
 /*
-- Some object corners are blended (that may be light bleeding)
-- Bigger distance deltas results in a darker shadow
 - Shadows for billboards and the weapon (they should read from the shadow map, not affect it)
 - Limit orthographic matrix size for shadow map to map size
 - Gaussian blur (that will make the shadows smooth)
