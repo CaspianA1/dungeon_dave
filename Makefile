@@ -14,7 +14,7 @@ ifeq ($(CC),gcc-10)
 endif
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
-CFLAGS = -std=c99 -march=native $(WARNINGS)
+CFLAGS = -std=c99 $(WARNINGS)
 LIBS = -lm -framework OpenGL -lglew -lSDL2 -lSDL2_ttf -lSDL2_mixer
 LDFLAGS = $(LIBS) -o bin/$(OUT) src/main/$(MAIN).c
 
