@@ -9,7 +9,7 @@ TEST_RANGE = 1..23
 OUT = accel_demo
 
 WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
-CFLAGS = -std=c99 -march=native $(WARNINGS)
+CFLAGS = -std=c99 $(WARNINGS)
 
 NON_GL_LDFLAGS = $$(pkg-config --cflags --libs sdl2) -lm
 GL_LDFLAGS = -lGLEW
