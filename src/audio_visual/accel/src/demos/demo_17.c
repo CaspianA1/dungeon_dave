@@ -36,7 +36,8 @@ StateGL demo_17_init(void) {
 		),
 
 		// .weapon_sprite = init_weapon_sprite(0.5f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
-		.weapon_sprite = init_weapon_sprite(0.65f, 0.016f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
+		// .weapon_sprite = init_weapon_sprite(0.65f, 0.016f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
+		.weapon_sprite = init_weapon_sprite(0.65f, 0.035f, "../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59),
 
 		.billboard_animations = LIST_INITIALIZER(animation) (4,
 			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
