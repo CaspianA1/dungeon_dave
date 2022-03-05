@@ -14,6 +14,7 @@ Final lighting model:
 	(just for sectors, and only recompute for dynamic sectors when they're in view or moving)
 - Ambient occlusion through an occlusion map
 - One global light source, like a sun (that involves everything above)
+- For a sun bounding box, imagine a rotated OBB encompassing an AABB that represents the world (make a demo out of that)
 
 Other random ideas:
 - A map maker. An init json file that specifies textures and dimensions;
