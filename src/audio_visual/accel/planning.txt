@@ -36,6 +36,7 @@ Other random ideas:
 - Maybe a 25th demo, that tests rendering to texture for later variance shadow maps
 - Bug: when tilting enough, billboards become flat across
 - Sliding across the floor (with the head tilted up)
+- All boolean bytes to bools wherever possible
 
 A better shading model:
 - use_shader_program instead of glUseProgram, and deinit_shader_program instead of glDeleteProgram (or no `program` suffix)
