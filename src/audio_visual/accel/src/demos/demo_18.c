@@ -20,11 +20,11 @@ StateGL demo_18_init(void) {
 
 void demo_18_drawer(const StateGL* const sgl) {
 	static GLint time_id;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		INIT_UNIFORM(time, sgl -> shader_program);
-		first_call = 0;
+		first_call = false;
 	}
 
 	UPDATE_UNIFORM(time, 1f, SDL_GetTicks() / 1000.0f);

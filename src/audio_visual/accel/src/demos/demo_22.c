@@ -168,12 +168,12 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context,
 
 void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_view_projection) {
 	static GLint obj_model_view_projection_id, shadow_volume_model_view_projection_id;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		INIT_UNIFORM(obj_model_view_projection, context.obj.shader);
 		INIT_UNIFORM(shadow_volume_model_view_projection, context.shadow_volume.shader);
-		first_call = 0;
+		first_call = false;
 	}
 
 	//////////
@@ -314,11 +314,11 @@ void demo_22_drawer(const StateGL* const sgl) {
 	*/
 
 	static Camera camera;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {4.0f, 3.05f, 0.0f});
-		first_call = 0;
+		first_call = false;
 	}
 
 	update_camera(&camera, get_next_event(), NULL);

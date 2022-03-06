@@ -19,8 +19,8 @@ const size_t plane_vertex_bytes = plane_vertex_floats * sizeof(GLfloat);
 
 #define PLANE_CREATOR_NAME(type) create_##type##_plane
 
-#define PLANE_CREATOR_SIGNATURE const ivec3 top_left_corner, const int size_hori,\
-	const int size_vert, GLfloat* const vertex_dest
+#define PLANE_CREATOR_SIGNATURE const ivec3 top_left_corner, const GLint size_hori,\
+	const GLint size_vert, GLfloat* const vertex_dest
 
 #define PLANE_CREATOR_FUNCTION(type) void PLANE_CREATOR_NAME(type)(PLANE_CREATOR_SIGNATURE)
 
@@ -84,16 +84,16 @@ typedef enum {
 typedef struct {
 	const PlaneType type;
 	const ivec3 top_left_corner;
-	const int size_hori, size_vert;
+	const GLint size_hori, size_vert;
 } PlaneDef;
 
 // Plane type, top left corner (an ivec3), size hori, size vert
-GLfloat* create_plane_mesh(const int num_planes, ...) {
+GLfloat* create_plane_mesh(const GLint num_planes, ...) {
 	va_list args;
 	va_start(args, num_planes);
 	GLfloat* const all_vertex_data = malloc(plane_vertex_bytes * num_planes);
 
-	for (int i = 0; i < num_planes; i++) {
+	for (GLint i = 0; i < num_planes; i++) {
 		const PlaneDef plane_def = va_arg(args, PlaneDef);
 
 		void (*plane_creator)(PLANE_CREATOR_SIGNATURE);
@@ -151,7 +151,7 @@ void demo_6_core_init_shader_and_textures_and_culling(StateGL* const sgl) {
 	enable_all_culling();
 }
 
-void demo_6_init_shader_and_textures_and_culling(StateGL* const sgl, const int num_planes, const GLfloat* const plane_sizes) {
+void demo_6_init_shader_and_textures_and_culling(StateGL* const sgl, const GLint num_planes, const GLfloat* const plane_sizes) {
 	demo_6_core_init_shader_and_textures_and_culling(sgl);
 	const GLint INIT_UNIFORM(plane_sizes, sgl -> shader_program);
 	UPDATE_UNIFORM(plane_sizes, 2fv, num_planes, plane_sizes);

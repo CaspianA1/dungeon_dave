@@ -12,7 +12,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 	const GLuint billboard_shader = sgl -> shader_program;
 	glUseProgram(billboard_shader);
 
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {7.0f, 5.0f, 10.0f});
@@ -23,7 +23,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 		INIT_UNIFORM(model_view_projection, sector_shader);
 		INIT_UNIFORM_VALUE(billboard_size_world_space, billboard_shader, 2f, 1.0f, 1.0f);
 
-		first_call = 0;
+		first_call = false;
 	}
 
 	const GLfloat bb_offset_step = 0.01f;

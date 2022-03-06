@@ -242,7 +242,7 @@ void demo_12_drawer(const StateGL* const sgl) {
 	static Camera camera;
 	static PhysicsObject physics_obj = {.heightmap = (byte*) pyramid_heightmap, .map_size = {pyramid_width, pyramid_height}};
 	static GLint camera_pos_world_space_id, model_view_projection_id;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	const GLuint shader = sgl -> shader_program;
 
@@ -250,7 +250,7 @@ void demo_12_drawer(const StateGL* const sgl) {
 		init_camera(&camera, (vec3) {1.5f, 1.0f, 1.5f});
 		INIT_UNIFORM(camera_pos_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
-		first_call = 0;
+		first_call = false;
 	}
 
 	update_camera(&camera, get_next_event(), &physics_obj);

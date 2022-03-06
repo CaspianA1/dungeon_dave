@@ -106,7 +106,7 @@ StateGL demo_19_init(void) {
 void demo_19_drawer(const StateGL* const sgl) {
 	static Camera camera;
 	static GLint spin_id, model_view_projection_id;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, -1.5f});
@@ -114,7 +114,8 @@ void demo_19_drawer(const StateGL* const sgl) {
 		const GLuint shader = sgl -> shader_program;
 		INIT_UNIFORM(spin, shader);
 		INIT_UNIFORM(model_view_projection, shader);
-		first_call = 0;
+
+		first_call = false;
 	}
 
 	update_camera(&camera, get_next_event(), NULL);

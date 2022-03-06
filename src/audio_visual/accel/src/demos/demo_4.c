@@ -10,7 +10,7 @@ GLuint* init_plain_textures(const GLsizei num_textures, ...) {
 	GLuint* const textures = malloc(num_textures * sizeof(GLuint));
 	glGenTextures(num_textures, textures);
 
-	for (int i = 0; i < num_textures; i++) {
+	for (GLint i = 0; i < num_textures; i++) {
 		const GLchar* const surface_path = va_arg(args, GLchar*);
 		const TextureWrapMode wrap_mode = va_arg(args, TextureWrapMode);
 

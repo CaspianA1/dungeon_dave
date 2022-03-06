@@ -56,12 +56,12 @@ StateGL demo_20_init(void) {
 void demo_20_drawer(const StateGL* const sgl) {
 	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
 
-	static byte first_call = 1;
+	static bool first_call = true;
 	static Camera camera;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, -1.0f}); // 0.0f, 1.5, -2.5f
-		first_call = 0;
+		first_call = false;
 	}
 
 	update_camera(&camera, get_next_event(), NULL);

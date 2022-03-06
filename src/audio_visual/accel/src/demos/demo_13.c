@@ -45,10 +45,10 @@ const GLchar* const demo_13_billboard_vertex_shader =
 void demo_13_move(vec3 pos, vec3 right, mat4 model_view_projection, const GLuint shader_program) {
 	static GLfloat hori_angle = PI, vert_angle = 0.0f, last_time;
 
-	static byte first_call = 1;
+	static bool first_call = true;
 	if (first_call) {
 		last_time = SDL_GetTicks() / 1000.0f;
-		first_call = 0;
+		first_call = false;
 		return;
 	}
 
@@ -99,10 +99,10 @@ void demo_13_move(vec3 pos, vec3 right, mat4 model_view_projection, const GLuint
 	glUseProgram(sector_shader); // Binding sector_shader
 
 	static GLint model_view_projection_id;
-	static byte second_call = 1; // Not first_call b/c that is defined above
+	static bool second_call = true; // Not first_call b/c that is defined above
 	if (second_call) {
 		INIT_UNIFORM(model_view_projection, sector_shader);
-		second_call = 0;
+		second_call = false;
 	}
 
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
@@ -113,7 +113,7 @@ void demo_13_move(vec3 pos, vec3 right, mat4 model_view_projection, const GLuint
 
 void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) {
 	static GLint billboard_right_xz_world_space_id, billboard_model_view_projection_id;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	glUseProgram(shader_program); // Enable billboard shader
 
@@ -122,7 +122,7 @@ void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) 
 		INIT_UNIFORM(billboard_model_view_projection, shader_program);
 		INIT_UNIFORM_VALUE(billboard_size_world_space, shader_program, 2f, 1.0f, 1.0f);
 		INIT_UNIFORM_VALUE(billboard_center_world_space, shader_program, 3fv, 1, center);
-		first_call = 0;
+		first_call = false;
 	}
 
 	static vec3 pos = {2.0f, 4.5f, 2.0f}, right;

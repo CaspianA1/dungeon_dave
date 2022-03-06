@@ -78,7 +78,7 @@ StateGL demo_18_init(void) {
 
 void demo_18_drawer(const StateGL* const sgl) {
 	static GLint choice_id, first_octave_id, octaves_id, rand_factor_id, persistence_id;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		const GLuint shader = sgl -> shader_program;
@@ -90,7 +90,7 @@ void demo_18_drawer(const StateGL* const sgl) {
 		INIT_UNIFORM(persistence, shader);
 		INIT_UNIFORM_VALUE(screen_size, shader, 2f, WINDOW_W, WINDOW_H);
 
-		first_call = 0;
+		first_call = false;
 	}
 
 	static GLfloat rand_factor = 1.0f;

@@ -153,14 +153,14 @@ void demo_17_drawer(const StateGL* const sgl) {
 
 	static Camera camera;
 	static PhysicsObject physics_obj;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {1.5f, 0.5f, 1.5f}); // {3.9f, 0.5f, 6.0f}, {12.5f, 3.5f, 22.5f}
 		physics_obj.heightmap = scene_state -> heightmap;
 		physics_obj.map_size[0] = scene_state -> map_size[0];
 		physics_obj.map_size[1] = scene_state -> map_size[1];
-		first_call = 0;
+		first_call = false;
 	}
 
 	const Event event = get_next_event();

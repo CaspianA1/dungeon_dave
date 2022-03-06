@@ -2,6 +2,7 @@
 #define BUFFER_DEFS_H
 
 #include <GL/glew.h>
+#include <stdbool.h>
 
 typedef uint8_t byte;
 

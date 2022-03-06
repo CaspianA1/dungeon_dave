@@ -30,11 +30,11 @@ void demo_15_deinit(const StateGL* const sgl) {
 
 void demo_15_drawer(const StateGL* const sgl) {
 	static Camera camera;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
-		first_call = 0;
+		first_call = false;
 	}
 
 	update_camera(&camera, get_next_event(), NULL);

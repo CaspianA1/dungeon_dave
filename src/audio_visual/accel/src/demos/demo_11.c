@@ -166,12 +166,12 @@ StateGL demo_11_init(void) {
 void demo_11_drawer(const StateGL* const sgl) {
 	static Camera camera;
 	static GLint model_view_projection_id;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
 		INIT_UNIFORM(model_view_projection, sgl -> shader_program);
-		first_call = 0;
+		first_call = false;
 	}
 
 	update_camera(&camera, get_next_event(), NULL);

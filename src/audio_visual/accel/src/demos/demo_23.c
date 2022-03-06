@@ -270,13 +270,13 @@ void demo_23_drawer(const StateGL* const sgl) {
 
 	static Camera camera;
 	static GLint obj_model_view_projection_id, light_bias_model_view_projection_id;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		INIT_UNIFORM(obj_model_view_projection, scene_state.obj_shader);
 		INIT_UNIFORM(light_bias_model_view_projection, scene_state.obj_shader);
 		init_camera(&camera, (vec3) {0.0f, 1.0f, 0.0f});
-		first_call = 0;
+		first_call = false;
 	}
 
 	////////// Math

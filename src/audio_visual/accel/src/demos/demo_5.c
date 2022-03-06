@@ -6,14 +6,14 @@
 */
 
 void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
-	mat4 view_times_projection, mat4 model_view_projection, const byte set_up_mvp) {
+	mat4 view_times_projection, mat4 model_view_projection, const bool set_up_mvp) {
 
 	static GLfloat hori_angle = PI, vert_angle = 0.0f, last_time;
 
-	static byte first_call = 1;
+	static bool first_call = true;
 	if (first_call) {
 		last_time = SDL_GetTicks() / 1000.0f;
-		first_call = 0;
+		first_call = false;
 		return;
 	}
 
@@ -57,7 +57,7 @@ void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
 void move(const GLuint shader_program) {
 	static vec3 pos = {1.5f, 1.5f, 3.5f};
 	mat4 view, view_times_projection, model_view_projection;
-	configurable_move(shader_program, pos, view, view_times_projection, model_view_projection, 1);
+	configurable_move(shader_program, pos, view, view_times_projection, model_view_projection, true);
 }
 
 void demo_5_drawer(const StateGL* const sgl) {
