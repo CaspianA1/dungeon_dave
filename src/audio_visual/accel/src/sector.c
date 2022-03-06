@@ -160,7 +160,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	glUseProgram(sector_shader);
 
 	static GLint camera_pos_world_space_id, inv_light_dir_id, model_view_projection_id, light_model_view_projection_id;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		INIT_UNIFORM(camera_pos_world_space, sector_shader);
@@ -179,7 +179,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		use_texture(shadow_map_context -> buffer_context.moment_texture,
 			sector_shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 
-		first_call = 0;
+		first_call = false;
 	}
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);

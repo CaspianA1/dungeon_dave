@@ -117,11 +117,10 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	glUseProgram(ws.shader);
 
-	static byte first_call = 1;
 	static GLint pace_id, frame_index_id;
+	const GLfloat max_movement_magitude = 0.2f, time_for_half_movement_cycle = 0.5f; // TODO: put these in constants.c
 
-	// TODO: put these in constants.c
-	const GLfloat max_movement_magitude = 0.2f, time_for_half_movement_cycle = 0.5f;
+	static bool first_call = true;
 
 	if (first_call) {
 		INIT_UNIFORM_VALUE(frame_width_over_height, ws.shader, 1f, ws.frame_width_over_height);
@@ -132,7 +131,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 		use_texture(ws.texture, ws.shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
 
-		first_call = 0;
+		first_call = false;
 	}
 
 	const GLfloat

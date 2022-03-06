@@ -10,6 +10,7 @@ typedef struct {
 	const GLuint texture, shader;
 	const Animation animation;
 	buffer_size_t curr_frame;
+
 	GLfloat last_frame_time;
 	const GLfloat frame_width_over_height, size;
 } WeaponSprite;

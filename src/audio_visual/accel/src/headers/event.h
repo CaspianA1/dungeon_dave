@@ -4,7 +4,7 @@
 #include "buffer_defs.h"
 
 typedef struct {
-	const byte movement_bits; // Tilt right, tilt left, right, left, backward, forward
+	const byte movement_bits; // Forward, backward, left, right, jump, accelerate, click left
 	const int screen_size[2], mouse_movement[2];
 } Event;
 

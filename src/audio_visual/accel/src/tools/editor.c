@@ -33,12 +33,12 @@ Plan:
 - For the parser, a byte that tells which sections have been parsed (for detecting sections repeated, missing, and map_size after maps) - done
 */
 
-byte* map_point(const EditorState* const eds, const byte is_heightmap, const byte x, const byte y) {
+byte* map_point(const EditorState* const eds, const bool is_heightmap, const byte x, const byte y) {
 	byte* const map = is_heightmap ? eds -> heightmap : eds -> texture_id_map;
 	return map + (y * eds -> map_size[0] + x);
 }
 
-SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer, const byte linear_filtering) {
+SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer, const bool linear_filtering) {
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, linear_filtering ? "1" : "0", SDL_HINT_OVERRIDE);
 
 	SDL_Surface* const surface = SDL_LoadBMP(path);
@@ -66,12 +66,12 @@ static void update_editing_placement_values(EditorState* const eds, const SDL_Ev
 	const SDL_Keycode key = event -> key.keysym.sym;
 
 	static byte num_chars_inputted = 0;
-	byte number_input_done = 0;
+	bool number_input_done = false;
 
-	if (key == SDLK_RETURN && num_chars_inputted != 0) number_input_done = 1;
+	if (key == SDLK_RETURN && num_chars_inputted != 0) number_input_done = true;
 	else if (key >= SDLK_0 && key <= SDLK_9) {
 		number_input_chars[num_chars_inputted] = key;
-		if (++num_chars_inputted == 3) number_input_done = 1;
+		if (++num_chars_inputted == 3) number_input_done = true;
 	}
 	else num_chars_inputted = 0;
 
@@ -89,15 +89,15 @@ static void update_editing_placement_values(EditorState* const eds, const SDL_Ev
 }
 
 static void edit_eds_map(EditorState* const eds) {
-	static byte prev_texture_edit_key = 0, first_call = 1;
+	static bool prev_texture_edit_key = false, first_call = true;
 	static const Uint8* keys;
 
 	if (first_call) {
 		keys = SDL_GetKeyboardState(NULL);
-		first_call = 0;
+		first_call = false;
 	}
 
-	const byte texture_edit_key = keys[KEY_TOGGLE_TEXTURE_EDIT_MODE];
+	const bool texture_edit_key = keys[KEY_TOGGLE_TEXTURE_EDIT_MODE];
 	if (texture_edit_key)
 		if (!prev_texture_edit_key) eds -> in_texture_editing_mode = !eds -> in_texture_editing_mode;
 	prev_texture_edit_key = texture_edit_key;
@@ -241,7 +241,6 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 	eds -> map_size[1] = map_height;
 	eds -> tile_pos[0] = 0;
 	eds -> tile_pos[1] = 0;
-	eds -> in_texture_editing_mode = 1;
 	eds -> editor_texture_id = INIT_EDITOR_TEXTURE_ID;
 	eds -> editor_height = INIT_EDITOR_HEIGHT;
 	eds -> mouse_state = NoClick;
@@ -250,6 +249,8 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 	memcpy(eds -> heightmap, heightmap, map_bytes);
 	eds -> texture_id_map = malloc(map_bytes);
 	memcpy(eds -> texture_id_map, texture_id_map, map_bytes);
+
+	eds -> in_texture_editing_mode = 1;
 
 	eds -> map_name = "palace";
 

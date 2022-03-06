@@ -4,11 +4,6 @@
 #include "headers/list.h"
 
 List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size) {
-	if (init_alloc == 0) {
-		fprintf(stderr, "Initial list size must be above zero\n");
-		exit(0);
-	}
-
 	return (List) {
 		malloc(init_alloc * item_size),
 		item_size,
@@ -25,7 +20,7 @@ static void copy_to_list_end(List* const list, const void* const data,
 	memcpy(dest_begin, data, num_bytes);
 }
 
-void _push_ptr_to_list(List* const list, const void* const item_ptr) {
+static void _push_ptr_to_list(List* const list, const void* const item_ptr) {
 	const buffer_size_t item_size = list -> item_size;
 
 	if (list -> length == list -> max_alloc) {

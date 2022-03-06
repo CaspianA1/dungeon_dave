@@ -56,7 +56,7 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode) 
 void write_surface_to_texture(SDL_Surface* const surface,
 	const TextureType type, const GLenum internal_format) {
 
-	const byte must_lock = SDL_MUSTLOCK(surface);
+	const bool must_lock = SDL_MUSTLOCK(surface);
 	if (must_lock) SDL_LockSurface(surface);
 
 	glTexImage2D(type, 0, internal_format,

@@ -11,7 +11,7 @@ Event get_next_event(void) {
 
 	int mouse_movement[2];
 
-	const byte
+	const bool
 		attempting_acceleration = keys[constants.keys.accelerate[0]] || keys[constants.keys.accelerate[1]],
 		moving_forward = keys[constants.keys.forward], moving_backward = keys[constants.keys.backward],
 		clicking_left = (SDL_GetRelativeMouseState(mouse_movement, mouse_movement + 1) & SDL_BUTTON_LMASK) != 0;

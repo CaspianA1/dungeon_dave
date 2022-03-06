@@ -80,7 +80,7 @@ void make_application(void (*const drawer)(const StateGL* const),
 }
 
 static void resize_window_if_needed(SDL_Window* const window) {
-	static byte window_resized_last_tick = 0, window_is_fullscreen = 0, first_call = 1;
+	static bool window_resized_last_tick = false, window_is_fullscreen = false, first_call = true;
 	static int desktop_width, desktop_height;
 
 	if (first_call) {
@@ -88,14 +88,14 @@ static void resize_window_if_needed(SDL_Window* const window) {
 		SDL_GetDesktopDisplayMode(0, &display_mode);
 		desktop_width = display_mode.w;
 		desktop_height = display_mode.h;
-		first_call = 0;
+		first_call = false;
 	}
 
-	const byte resize_attempt = keys[constants.keys.toggle_fullscreen_window];
+	const bool resize_attempt = keys[constants.keys.toggle_fullscreen_window];
 
 	if (!window_resized_last_tick && resize_attempt) {
 		window_is_fullscreen = !window_is_fullscreen;
-		window_resized_last_tick = 1;
+		window_resized_last_tick = true;
 
 		/* There's a branch here because the order in which the resolution
 		and window mode is changed matters. If setting the window size and
@@ -114,27 +114,26 @@ static void resize_window_if_needed(SDL_Window* const window) {
 		}
 
 	}
-	else if (!resize_attempt) window_resized_last_tick = 0;
+	else if (!resize_attempt) window_resized_last_tick = false;
 }
 
 static void set_triangle_fill_mode(void) {
-	static byte in_triangle_fill_mode = 1, changed_mode_last_tick = 0;
+	static bool in_triangle_fill_mode = true, changed_mode_last_tick = false;
 
 	if (keys[KEY_TOGGLE_WIREFRAME_MODE]) {
 		if (!changed_mode_last_tick) {
 			in_triangle_fill_mode = !in_triangle_fill_mode;
-			changed_mode_last_tick = 1;
+			changed_mode_last_tick = true;
 			glPolygonMode(GL_FRONT_AND_BACK, in_triangle_fill_mode ? GL_FILL : GL_LINE);
 		}
 	}
-	else changed_mode_last_tick = 0;
+	else changed_mode_last_tick = false;
 }
 
-static byte application_should_exit(void) {
+static bool application_should_exit(void) {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
-		if (event.type == SDL_QUIT)
-			return 1;
+		if (event.type == SDL_QUIT) return true;
 	}
 
 	/* On Ubuntu, the only way to activate the SDL_QUIT event type
@@ -143,7 +142,7 @@ static byte application_should_exit(void) {
 	Since exiting doesn't work normally, a ctrl key followed by an exit activation key
 	serves as a manual workaround to this problem. */
 
-	const byte // On Ubuntu, SDL_QUIT is not caught by SDL_PollEvent, so this circumvents that
+	const bool // On Ubuntu, SDL_QUIT is not caught by SDL_PollEvent, so this circumvents that
 		ctrl_key = keys[constants.keys.ctrl[0]] || keys[constants.keys.ctrl[1]],
 		activate_exit_key = keys[constants.keys.activate_exit[0]] || keys[constants.keys.activate_exit[1]];
 
@@ -159,15 +158,12 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 		one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
 	#endif
 
-	byte running = 1;
 	const StateGL sgl = init();
 
-	while (running) {
+	while (!application_should_exit()) {
 		#ifndef USE_VSYNC
 		const Uint64 before = SDL_GetPerformanceCounter();
 		#endif
-
-		running = !application_should_exit();
 
 		resize_window_if_needed(screen -> window);
 		set_triangle_fill_mode();

@@ -87,22 +87,23 @@ static GLuint init_skybox_texture(const GLchar* const path) {
 }
 
 Skybox init_skybox(const GLchar* const cubemap_path) {
-	static byte first_call = 1;
+	static bool first_call = true;
+
 	if (first_call) {
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		first_call = 0;
+		first_call = false;
 	}
 
-	Skybox s;
-
-	glGenBuffers(1, &s.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, s.vbo);
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
 
-	s.shader = init_shader_program(skybox_vertex_shader, skybox_fragment_shader);
-	s.texture = init_skybox_texture(cubemap_path);
-
-	return s;
+	return (Skybox) {
+		.vbo = vbo,
+		.shader = init_shader_program(skybox_vertex_shader, skybox_fragment_shader),
+		.texture = init_skybox_texture(cubemap_path)
+	};
 }
 
 void deinit_skybox(const Skybox s) {
@@ -114,12 +115,13 @@ void deinit_skybox(const Skybox s) {
 void draw_skybox(const Skybox s, const Camera* const camera) {
 	glUseProgram(s.shader);
 
-	static byte first_call = 1;
 	static GLint model_view_projection_id;
+	static bool first_call = true;
+
 	if (first_call) {
 		INIT_UNIFORM(model_view_projection, s.shader);
 		use_texture(s.texture, s.shader, "texture_sampler", TexSkybox, SKYBOX_TEXTURE_UNIT);
-		first_call = 0;
+		first_call = false;
 	}
 
 	mat4 model_view_projection;

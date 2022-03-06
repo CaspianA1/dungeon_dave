@@ -26,12 +26,12 @@ void update_billboard_animation_instances(const List* const billboard_animation_
 }
 
 // https://stackoverflow.com/questions/25572337/frustum-and-sphere-intersection
-static byte is_inside_plane(const vec4 sphere, const vec4 plane) {
+static bool is_inside_plane(const vec4 sphere, const vec4 plane) {
 	const GLfloat dist_btwn_plane_and_sphere = glm_vec3_dot((GLfloat*) sphere, (GLfloat*) plane) + plane[3];
 	return dist_btwn_plane_and_sphere > -sphere[3];
 }
 
-static byte billboard_in_view_frustum(const Billboard billboard, const vec4 frustum_planes[6]) {
+static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frustum_planes[6]) {
 	const GLfloat half_w = billboard.size[0] * 0.5f, half_h = billboard.size[1] * 0.5f;
 
 	const vec4 sphere = { // For a sphere, first 3 components are position, and last component is radius
@@ -51,8 +51,8 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	const GLuint shader = draw_context -> shader;
 	glUseProgram(shader);
 
-	static byte first_call = 1;
 	static GLint right_xz_world_space_id, model_view_projection_id;
+	static bool first_call = true;
 
 	if (first_call) {
 		INIT_UNIFORM(right_xz_world_space, shader);
@@ -60,7 +60,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, BILLBOARD_TEXTURE_UNIT);
 
-		first_call = 0;
+		first_call = false;
 	}
 
 	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right[0], camera -> right[2]);

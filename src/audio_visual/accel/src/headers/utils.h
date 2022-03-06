@@ -39,7 +39,7 @@
 #define TWEAK_REALTIME_VALUE(value_name, init_value, min_value, max_value, step, key_decr, key_incr, key_reset)\
 	static GLfloat value_name = init_value;\
 	do {\
-		const byte incr = keys[SDL_SCANCODE_##key_incr],\
+		const bool incr = keys[SDL_SCANCODE_##key_incr],\
 			decr = keys[SDL_SCANCODE_##key_decr], reset = keys[SDL_SCANCODE_##key_reset];\
 		\
 		value_name = reset ? init_value : (value_name + step * incr - step * decr);\
@@ -99,7 +99,8 @@ typedef enum {
 	CreateMesh,
 	TextureIDIsTooLarge,
 	TextureSetIsTooLarge,
-	CreateFramebuffer
+	CreateFramebuffer,
+	InitializeList
 } FailureType;
 
 typedef struct {

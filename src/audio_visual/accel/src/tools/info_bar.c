@@ -24,10 +24,8 @@ fleckenstein | 4, 20 | tex 19 | erase
 static void update_info_bar_text(const EditorState* const eds,
 	char** const text_buffer_ref, const char* const map_name) {
 
-	const byte
-		map_x = eds -> tile_pos[0], map_y = eds -> tile_pos[1],
-		editing_texture = eds -> in_texture_editing_mode;
-
+	const bool editing_texture = eds -> in_texture_editing_mode;
+	const byte map_x = eds -> tile_pos[0], map_y = eds -> tile_pos[1];
 	const byte editor_placement_val = editing_texture ? eds -> editor_texture_id : eds -> editor_height;
 
 	static const char

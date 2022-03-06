@@ -51,9 +51,10 @@ typedef enum {
 typedef struct {
 	byte
 		num_textures, map_size[2], tile_pos[2],
-		in_texture_editing_mode,
 		editor_texture_id, editor_height, // These indicate the height and texture id placed while editing
 		*heightmap, *texture_id_map;
+
+	bool in_texture_editing_mode;
 
 	const char* map_name;
 
@@ -68,8 +69,8 @@ typedef struct {
 
 // Excluded: update_editing_placement_values, edit_eds_map, render_eds_map, editor_loop
 
-byte* map_point(const EditorState* const eds, const byte is_heightmap, const byte x, const byte y);
-SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer, const byte linear_filtering);
+byte* map_point(const EditorState* const eds, const bool is_heightmap, const byte x, const byte y);
+SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer, const bool linear_filtering);
 int16_t three_chars_to_int(const char chars[3], const byte num_chars_to_convert);
 
 void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer); // Expected to be used publicly later

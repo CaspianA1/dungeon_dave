@@ -59,7 +59,7 @@ static void update_fov(Camera* const camera, const byte movement_bits, const GLf
 }
 
 static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v, const GLfloat delta_move,
-	const GLfloat max_v, const byte moving_in_dir, const byte moving_in_opposite_dir) {
+	const GLfloat max_v, const bool moving_in_dir, const bool moving_in_opposite_dir) {
 
 	GLfloat v = curr_v + delta_move * moving_in_dir - delta_move * moving_in_opposite_dir;
 
@@ -69,7 +69,7 @@ static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v, const GLfloa
 }
 
 // Note: `x` and `y` are top-down here.
-static byte tile_exists_at_pos(const GLfloat x, const GLfloat y, const GLfloat foot_height,
+static bool tile_exists_at_pos(const GLfloat x, const GLfloat y, const GLfloat foot_height,
 	const byte* const heightmap, const byte map_width, const byte map_height) {
 
 	if (x < 0.0f || y < 0.0f || x >= map_width || y >= map_height) return 1;
@@ -78,7 +78,7 @@ static byte tile_exists_at_pos(const GLfloat x, const GLfloat y, const GLfloat f
 	return (foot_height - floor_height) < -constants.almost_zero;
 }
 
-static byte pos_collides_with_heightmap(const GLfloat foot_height,
+static bool pos_collides_with_heightmap(const GLfloat foot_height,
 	const vec2 pos_xz, const byte* const heightmap, const byte map_size[2]) {
 
 	const byte map_width = map_size[0], map_height = map_size[1];
@@ -194,14 +194,14 @@ void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, ve
 
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
 	static GLfloat one_over_performance_freq;
-	static byte first_call = 1;
+	static bool first_call = true;
 
 	/* Using the SDL performance counter and frequency functions instead
 	of SDL_GetTicks because the physics timing has to be very exact */
 
 	if (first_call) {
 		one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
-		first_call = 0;
+		first_call = false;
 	}
 
 	const Uint64 curr_time = SDL_GetPerformanceCounter();
