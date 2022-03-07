@@ -54,7 +54,7 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode) 
 
 // This function assumes that the surface is locked beforehand. This is legacy code and should be removed if possible
 void write_surface_to_texture(SDL_Surface* const surface,
-	const TextureType type, const GLenum internal_format) {
+	const TextureType type, const GLint internal_format) {
 
 	const bool must_lock = SDL_MUSTLOCK(surface);
 	if (must_lock) SDL_LockSurface(surface);
@@ -67,7 +67,7 @@ void write_surface_to_texture(SDL_Surface* const surface,
 }
 
 GLuint init_plain_texture(const GLchar* const path, const TextureType type,
-	const TextureWrapMode wrap_mode, const GLenum internal_format) {
+	const TextureWrapMode wrap_mode, const GLint internal_format) {
 
 	const GLuint texture = preinit_texture(type, wrap_mode);
 	SDL_Surface* const surface = init_surface(path);

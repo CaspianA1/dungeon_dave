@@ -37,6 +37,7 @@ Other random ideas:
 - Bug: when tilting enough, billboards become flat across
 - Sliding across the floor (with the head tilted up)
 - Make 255 a shared constant
+- Catch more warnings with -Weverything
 
 A better shading model:
 - use_shader_program instead of glUseProgram, and deinit_shader_program instead of glDeleteProgram (or no `program` suffix)

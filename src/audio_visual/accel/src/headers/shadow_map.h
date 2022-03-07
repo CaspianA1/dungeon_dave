@@ -9,7 +9,8 @@
 
 typedef struct {
 	const struct {
-		const GLuint depth_shader, light_model_view_projection_id;
+		const GLuint depth_shader;
+		const GLint light_model_view_projection_id;
 	} shader_context;
 
 	const struct {

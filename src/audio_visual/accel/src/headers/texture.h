@@ -67,10 +67,10 @@ void use_texture(const GLuint texture, const GLuint shader_program,
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode);
 
 void write_surface_to_texture(SDL_Surface* const surface,
-	const TextureType type, const GLenum internal_format);
+	const TextureType type, const GLint internal_format);
 
 GLuint init_plain_texture(const GLchar* const path, const TextureType type,
-	const TextureWrapMode wrap_mode, const GLenum internal_format);
+	const TextureWrapMode wrap_mode, const GLint internal_format);
 
 GLuint init_texture_set(const TextureWrapMode wrap_mode, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h, ...);
