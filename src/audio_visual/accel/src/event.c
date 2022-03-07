@@ -23,7 +23,7 @@ Event get_next_event(void) {
 			(keys[constants.keys.left] << 2) |
 			(keys[constants.keys.right] << 3) |
 			(keys[constants.keys.jump] << 4) |
-			((attempting_acceleration && (moving_forward || moving_backward)) << 5) |
+			((attempting_acceleration && (moving_forward ^ moving_backward)) << 5) |
 			clicking_left << 6,
 
 		.screen_size = {viewport_size[2], viewport_size[3]},
