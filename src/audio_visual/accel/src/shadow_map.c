@@ -16,6 +16,8 @@ View frustum calculation:
 - So, given two angles, create a big plane
 - Check that that plane is tight with the world's edge
 - Then, make a cuboid extending from that plane to capture the whole world
+
+- A problem: a lot of stray pixels contributing to noise
 */
 
 #include "headers/shadow_map.h"
