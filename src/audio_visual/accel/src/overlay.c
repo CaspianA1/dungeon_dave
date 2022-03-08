@@ -11,6 +11,7 @@
 #include "texture.c"
 #include "animation.c"
 
+// TODO: to shaders.c
 const GLchar *const weapon_sprite_vertex_shader =
 	"#version 330 core\n"
 
