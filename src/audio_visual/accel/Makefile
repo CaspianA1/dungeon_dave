@@ -5,10 +5,11 @@ DEBUG = -ggdb3 -fsanitize=address,undefined
 BUILD_TYPE = $(DEBUG)
 
 DEMO = 17
-TEST_RANGE = 1..23
+TEST_RANGE = 20..23
 OUT = accel_demo
 
-WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat
+CONVERSION_WARNINGS = -Wfloat-conversion -Wdouble-promotion -Wsign-conversion -Wimplicit-int-conversion -Wshorten-64-to-32
+WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat $(CONVERSION_WARNINGS)
 CFLAGS = -std=c99 $(WARNINGS)
 
 NON_GL_LDFLAGS = $$(pkg-config --cflags --libs sdl2) -lm

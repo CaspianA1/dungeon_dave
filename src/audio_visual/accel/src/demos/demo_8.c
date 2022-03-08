@@ -76,12 +76,12 @@ typedef struct {
 } PlaneDefInterleaved;
 
 // Plane type, top left corner, size hori, size vert
-PLANE_TYPE* create_plane_mesh_interleaved(const int num_planes, ...) {
+PLANE_TYPE* create_plane_mesh_interleaved(const GLuint num_planes, ...) {
 	va_list args;
 	va_start(args, num_planes);
 	PLANE_TYPE* const all_vertex_data = malloc(num_planes * interleaved_plane_bytes);
 
-	for (int i = 0; i < num_planes; i++) {
+	for (GLuint i = 0; i < num_planes; i++) {
 		const PlaneDefInterleaved plane_def = va_arg(args, PlaneDefInterleaved);
 
 		void (*plane_creator)(const PLANE_TYPE* const,

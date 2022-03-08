@@ -141,16 +141,16 @@ OldSectorList generate_sectors_from_heightmap(const byte* const heightmap,
 void init_sector_list_vbo(OldSectorList* const sector_list) {
 	List* const list = &sector_list -> list;
 
-	size_t total_bytes = 0, total_components = 0;
+	buffer_size_t total_bytes = 0, total_components = 0;
 
-	for (size_t i = 0; i < list -> length; i++) {
+	for (buffer_size_t i = 0; i < list -> length; i++) {
 		const byte height = ((OldSector*) ptr_to_list_index(list, i)) -> height;
 		total_bytes += (height == 0) ? bytes_per_face_11 : bytes_per_mesh;
 	}
 
 	mesh_type_t* const vertices = malloc(total_bytes);
 
-	for (size_t i = 0; i < list -> length; i++) {
+	for (buffer_size_t i = 0; i < list -> length; i++) {
 		const OldSector sector = value_at_list_index(list, i, OldSector);
 		const mesh_type_t origin[3] = {sector.origin[0], sector.height, sector.origin[1]};
 
@@ -169,7 +169,7 @@ void init_sector_list_vbo(OldSectorList* const sector_list) {
 
 	glGenBuffers(1, &sector_list -> vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
-	glBufferData(GL_ARRAY_BUFFER, total_bytes, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) total_bytes, vertices, GL_STATIC_DRAW);
 }
 
 StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {

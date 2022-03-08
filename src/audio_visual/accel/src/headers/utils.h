@@ -111,13 +111,13 @@ typedef struct {
 
 //////////
 
-const Uint8* keys;
+static const Uint8* keys;
 
 //////////
 
 extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s.\n", msg);
-	exit(failure_type + 1);
+	exit((int) failure_type + 1);
 }
 
 // Excluded: resize_window_if_needed, set_triangle_fill_mode, query_for_application_exit, fail_on_shader_creation_error
@@ -138,7 +138,7 @@ void deinit_demo_vars(const StateGL* const sgl);
 
 GLuint init_vao(void);
 GLuint* init_vbos(const GLsizei num_buffers, ...);
-void bind_vbos_to_vao(const GLuint* const vbos, const GLsizei num_vbos, ...);
+void bind_vbos_to_vao(const GLuint* const vbos, const GLuint num_vbos, ...);
 
 GLuint init_shader_program(const GLchar* const vertex_shader, const GLchar* const fragment_shader);
 

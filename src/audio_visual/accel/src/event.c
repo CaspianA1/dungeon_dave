@@ -16,15 +16,18 @@ Event get_next_event(void) {
 		moving_forward = keys[constants.keys.forward], moving_backward = keys[constants.keys.backward],
 		clicking_left = (SDL_GetRelativeMouseState(mouse_movement, mouse_movement + 1) & SDL_BUTTON_LMASK) != 0;
 
+	const bool accelerating = attempting_acceleration && (moving_forward ^ moving_backward);
+
 	return (Event) {
-		.movement_bits =
+		.movement_bits = (byte) (
 			moving_forward |
 			(moving_backward << 1) |
 			(keys[constants.keys.left] << 2) |
 			(keys[constants.keys.right] << 3) |
 			(keys[constants.keys.jump] << 4) |
-			((attempting_acceleration && (moving_forward ^ moving_backward)) << 5) |
-			clicking_left << 6,
+			(accelerating << 5) |
+			(clicking_left << 6)
+		),
 
 		.screen_size = {viewport_size[2], viewport_size[3]},
 		.mouse_movement = {mouse_movement[0], mouse_movement[1]}

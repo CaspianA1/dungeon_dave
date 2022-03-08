@@ -67,7 +67,11 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat secs_per_frame
 
 		.shader = init_shader_program(weapon_sprite_vertex_shader, weapon_sprite_fragment_shader),
 
-		.animation = {.texture_id_range = {.start = 0, .end = total_frames}, .secs_per_frame = secs_per_frame},
+		.animation = {
+			.texture_id_range = {.start = 0, .end = (buffer_size_t) total_frames},
+			.secs_per_frame = secs_per_frame
+		},
+
 		.curr_frame = 0, .last_frame_time = SDL_GetTicks() / 1000.0f,
 
 		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],

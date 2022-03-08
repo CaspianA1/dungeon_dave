@@ -42,7 +42,7 @@ StateGL demo_7_init(void) {
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
 		plane_vertices, num_planes * opt_plane_vertex_bytes);
 
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
+	bind_vbos_to_vao(sgl.vertex_buffers, (GLuint) sgl.num_vertex_buffers, 3);
 
 	free(plane_vertices);
 

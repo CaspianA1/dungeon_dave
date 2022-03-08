@@ -7,7 +7,7 @@ GLuint* init_plain_textures(const GLsizei num_textures, ...) {
 	va_list args;
 	va_start(args, num_textures);
 
-	GLuint* const textures = malloc(num_textures * sizeof(GLuint));
+	GLuint* const textures = malloc((size_t) num_textures * sizeof(GLuint));
 	glGenTextures(num_textures, textures);
 
 	for (GLint i = 0; i < num_textures; i++) {
@@ -106,7 +106,7 @@ StateGL demo_4_init(void) {
 		demo_3_vertex_data, sizeof(demo_3_vertex_data),
 		uv_data, sizeof(uv_data));
 
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 2);
+	bind_vbos_to_vao(sgl.vertex_buffers, (GLuint) sgl.num_vertex_buffers, 3, 2);
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	glUseProgram(sgl.shader_program);

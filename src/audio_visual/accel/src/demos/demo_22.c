@@ -154,11 +154,11 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context,
 
 	glGenBuffers(1, &context -> shadow_volume.vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, context -> shadow_volume.vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3[volume_vertices.length]), volume_vertices.data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) sizeof(vec3[volume_vertices.length]), volume_vertices.data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &context -> shadow_volume.index_buffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context -> shadow_volume.index_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(buffer_size_t[volume_indices.length]), volume_indices.data, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr) sizeof(buffer_size_t[volume_indices.length]), volume_indices.data, GL_STATIC_DRAW);
 
 	////////// Deinitializing shadow volume cpu buffers
 
@@ -185,13 +185,13 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 	glEnableVertexAttribArray(1);
 
 	glVertexAttribPointer(0, num_components_per_position,
-		GL_FLOAT, GL_FALSE, sizeof(GLfloat[num_components_per_vertex]), (void*) 0);
+		GL_FLOAT, GL_FALSE, (GLsizei) sizeof(GLfloat[num_components_per_vertex]), (void*) 0);
 
 	glVertexAttribPointer(1, num_components_per_color, GL_FLOAT,
-		GL_FALSE, sizeof(GLfloat[num_components_per_vertex]),
+		GL_FALSE, (GLsizei) sizeof(GLfloat[num_components_per_vertex]),
 		(void*) sizeof(GLfloat[num_components_per_position]));
 
-	if (!keys[SDL_SCANCODE_C]) glDrawArrays(GL_TRIANGLES, 0, context.obj.num_vertices);
+	if (!keys[SDL_SCANCODE_C]) glDrawArrays(GL_TRIANGLES, 0, (GLsizei) context.obj.num_vertices);
 	glDisableVertexAttribArray(1);
 
 	//////////
@@ -203,7 +203,7 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 	glVertexAttribPointer(0, num_components_per_position, GL_FLOAT, GL_FALSE, 0, (void*) 0);
 
 	glEnable(GL_BLEND);
-	glDrawElements(GL_TRIANGLES, context.shadow_volume.num_indices, BUFFER_SIZE_TYPENAME, (void*) 0);
+	glDrawElements(GL_TRIANGLES, (GLsizei) context.shadow_volume.num_indices, BUFFER_SIZE_TYPENAME, (void*) 0);
 	glDisable(GL_BLEND);
 }
 

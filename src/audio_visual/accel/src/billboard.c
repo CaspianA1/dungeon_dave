@@ -81,7 +81,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_billboard, num_visible_billboards);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_billboard, (GLsizei) num_visible_billboards);
 	glDisable(GL_BLEND);
 
 	glEnable(GL_CULL_FACE);
@@ -108,7 +108,7 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 		while (billboard < out_of_bounds_billboard && billboard_in_view_frustum(*billboard, frustum_planes))
 			billboard++;
 
-		const buffer_size_t num_visible_in_group = billboard - initial_billboard;
+		const buffer_size_t num_visible_in_group = (buffer_size_t) (billboard - initial_billboard);
 		if (num_visible_in_group != 0) {
 			memcpy(gpu_billboard_buffer_ptr + num_visible, initial_billboard, num_visible_in_group * sizeof(Billboard));
 			num_visible += num_visible_in_group;

@@ -190,7 +190,7 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 void deinit_demo_vars(const StateGL* const sgl) {
 	glDeleteProgram(sgl -> shader_program);
 
-	for (GLsizei i = 0; i < sgl -> num_vertex_buffers; i++) glDisableVertexAttribArray(i);
+	for (GLuint i = 0; i < (GLuint) sgl -> num_vertex_buffers; i++) glDisableVertexAttribArray(i);
 
 	if (sgl -> num_vertex_buffers > 0) {
 		glDeleteBuffers(sgl -> num_vertex_buffers, sgl -> vertex_buffers);
@@ -214,7 +214,7 @@ GLuint* init_vbos(const GLsizei num_buffers, ...) {
 	va_list args;
 	va_start(args, num_buffers);
 
-	GLuint* const vbos = malloc(num_buffers * sizeof(GLuint));
+	GLuint* const vbos = malloc((size_t) num_buffers * sizeof(GLuint));
 	glGenBuffers(num_buffers, vbos);
 
 	for (GLsizei i = 0; i < num_buffers; i++) {
@@ -230,11 +230,11 @@ GLuint* init_vbos(const GLsizei num_buffers, ...) {
 }
 
 // Num components for vbo
-void bind_vbos_to_vao(const GLuint* const vbos, const GLsizei num_vbos, ...) {
+void bind_vbos_to_vao(const GLuint* const vbos, const GLuint num_vbos, ...) {
 	va_list args;
 	va_start(args, num_vbos);
 
-	for (GLsizei i = 0; i < num_vbos; i++) {
+	for (GLuint i = 0; i < num_vbos; i++) {
 		glEnableVertexAttribArray(i);
 		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
 
@@ -261,10 +261,10 @@ static void fail_on_shader_creation_error(
 	log_length_getter(object_id, GL_INFO_LOG_LENGTH, &log_length);
 
 	if (log_length > 0) {
-		GLchar* const error_message = malloc(log_length + 1);
+		GLchar* const error_message = malloc((size_t) log_length + 1);
 		log_getter(object_id, log_length, NULL, error_message);
 
-		const byte compilation_step_id = compilation_step + 1;  // `fail` not used for this since the error message must be freed
+		const byte compilation_step_id = (byte) compilation_step + 1;  // `fail` not used for this since the error message must be freed
 		fprintf(stderr, "Shader creation step #%d - %s", compilation_step_id, error_message);
 		free(error_message);
 		exit(compilation_step_id);

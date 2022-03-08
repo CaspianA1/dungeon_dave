@@ -137,7 +137,7 @@ StateGL demo_3_init(void) {
 		demo_3_vertex_data, sizeof(demo_3_vertex_data),
 		color_data, sizeof(color_data));
 
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3, 3);
+	bind_vbos_to_vao(sgl.vertex_buffers, (GLuint) sgl.num_vertex_buffers, 3, 3);
 
 	sgl.num_textures = 0;
 

@@ -145,7 +145,7 @@ StateGL demo_13_init(void) {
 
 	//////////
 	sgl.num_vertex_buffers = 1;
-	sgl.vertex_buffers = malloc(sgl.num_vertex_buffers * sizeof(GLuint));
+	sgl.vertex_buffers = malloc((size_t) sgl.num_vertex_buffers * sizeof(GLuint));
 
 	glGenBuffers(sgl.num_vertex_buffers, sgl.vertex_buffers);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl.vertex_buffers[0]);

@@ -37,10 +37,11 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode) 
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER,
 		(type == TexSkybox) ? OPENGL_SKYBOX_TEX_MIN_FILTER : OPENGL_TEX_MIN_FILTER);
 
-	glTexParameteri(type, GL_TEXTURE_WRAP_S, wrap_mode);
-	glTexParameteri(type, GL_TEXTURE_WRAP_T, wrap_mode);
+	const GLint cast_wrap_mode = (GLint) wrap_mode;
+	glTexParameteri(type, GL_TEXTURE_WRAP_S, cast_wrap_mode);
+	glTexParameteri(type, GL_TEXTURE_WRAP_T, cast_wrap_mode);
 
-	if (type == TexSkybox) glTexParameteri(type, GL_TEXTURE_WRAP_R, wrap_mode);
+	if (type == TexSkybox) glTexParameteri(type, GL_TEXTURE_WRAP_R, cast_wrap_mode);
 	else {
 		#if defined(ENABLE_ANISOTROPIC_FILTERING) && defined(GL_TEXTURE_MAX_ANISOTROPY_EXT)
 		float aniso_filtering_level;

@@ -12,7 +12,7 @@ void demo_1_init_vertex_data(StateGL* const sgl) {
 	sgl -> vertex_array = init_vao();
 	sgl -> num_vertex_buffers = 1;
 	sgl -> vertex_buffers = init_vbos(sgl -> num_vertex_buffers, triangle_data, sizeof(triangle_data));
-	bind_vbos_to_vao(sgl -> vertex_buffers, sgl -> num_vertex_buffers, 3);
+	bind_vbos_to_vao(sgl -> vertex_buffers, (GLuint) sgl -> num_vertex_buffers, 3);
 }
 
 StateGL demo_1_init(void) {

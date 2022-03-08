@@ -91,7 +91,7 @@ typedef struct {
 GLfloat* create_plane_mesh(const GLint num_planes, ...) {
 	va_list args;
 	va_start(args, num_planes);
-	GLfloat* const all_vertex_data = malloc(plane_vertex_bytes * num_planes);
+	GLfloat* const all_vertex_data = malloc((size_t) plane_vertex_bytes * (size_t) num_planes);
 
 	for (GLint i = 0; i < num_planes; i++) {
 		const PlaneDef plane_def = va_arg(args, PlaneDef);
@@ -182,7 +182,7 @@ StateGL demo_6_init(void) {
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers,
 		plane_vertices, num_planes * plane_vertex_bytes);
 
-	bind_vbos_to_vao(sgl.vertex_buffers, sgl.num_vertex_buffers, 3);
+	bind_vbos_to_vao(sgl.vertex_buffers, (GLuint) sgl.num_vertex_buffers, 3);
 
 	free(plane_vertices);
 

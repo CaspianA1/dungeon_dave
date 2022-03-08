@@ -5,7 +5,7 @@ a bitmat because that sounds too much like bitmap. */
 #define deinit_statemap(s) wfree(s.data);
 
 StateMap init_statemap(const unsigned bits_across, const unsigned bits_down) {
-	const unsigned across = ceil(bits_across / 8.0);
+	const unsigned across = (unsigned) ceil(bits_across / 8.0);
 
 	StateMap statemap = {
 		{across, bits_down},
@@ -33,7 +33,7 @@ inlinable byte get_n_for_bits_x(const unsigned bits_x) {
 // Returns if a bit was previously set + sets a bit all in one
 inlinable byte set_statemap_bit_with_status(const StateMap statemap, const unsigned bits_x, const unsigned bits_y) {
 	byte* const bits = statemap_byte(statemap, bits_x >> 3u, bits_y); // shr 3 = div 8
-	const byte n_mask = 1u << get_n_for_bits_x(bits_x);
+	const byte n_mask = (byte) (1u << get_n_for_bits_x(bits_x));
 	const byte was_set = bit_is_set(*bits, n_mask);
 	set_bit(*bits, n_mask);
 	return was_set;

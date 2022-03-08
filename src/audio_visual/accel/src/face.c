@@ -19,10 +19,9 @@ static byte get_next_face(const Sector sector, const byte varying_axis,
 	const byte adjacent_side_val, const byte map_width,
 	const byte* const heightmap, Face* const face) {
 	
-	int16_t face_height_diff = 0;
 	const byte end_edge_val = sector.origin[varying_axis] + sector.size[varying_axis];
 
-	byte start_val = face -> origin[varying_axis] + face -> size[0], map_point_params[2];
+	byte face_height_diff = 0, start_val = face -> origin[varying_axis] + face -> size[0], map_point_params[2];
 	map_point_params[!varying_axis] = adjacent_side_val;
 
 	while (start_val < end_edge_val) {
@@ -31,7 +30,7 @@ static byte get_next_face(const Sector sector, const byte varying_axis,
 			map_point_params[0], map_point_params[1], map_width);
 
 		if (height_diff > 0) {
-			face_height_diff = height_diff;
+			face_height_diff = (byte) height_diff;
 			break;
 		}
 		start_val++;
@@ -68,11 +67,11 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 		4 = top vert EW.
 	Bits 3-7, five bits -> texture id. */
 
-	byte face_id = (side << 2) | face.type;
+	byte face_id = (byte) (side << 2) | (byte) face.type;
 	if (face_id == 5 || face_id == 6) face_id -= 2;
 
 	const byte
-		face_info = (texture_id << 3) | face_id,
+		face_info = (byte) (texture_id << 3) | face_id,
 		near_x = face.origin[0], near_z = face.origin[1],
 		top_y = sector_max_visible_height;
 

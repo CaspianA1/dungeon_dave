@@ -74,7 +74,7 @@ static bool tile_exists_at_pos(const GLfloat x, const GLfloat y, const GLfloat f
 
 	if (x < 0.0f || y < 0.0f || x >= map_width || y >= map_height) return 1;
 
-	const byte floor_height = *map_point((byte*) heightmap, x, y, map_width);
+	const byte floor_height = *map_point((byte*) heightmap, (byte) x, (byte) y, map_width);
 	return (foot_height - floor_height) < -constants.almost_zero;
 }
 
@@ -146,7 +146,7 @@ static void update_pos_via_physics(const byte movement_bits,
 	else speed_jump_per_sec -= constants.accel.g * delta_time;
 
 	foot_height += speed_jump_per_sec * delta_time;
-	const byte base_height = *map_point((byte*) heightmap, pos[0], pos[2], map_size[0]);
+	const byte base_height = *map_point((byte*) heightmap, (byte) pos[0], (byte) pos[2], map_size[0]);
 
 	if (foot_height > base_height)
 		pos[1] = foot_height + pace;

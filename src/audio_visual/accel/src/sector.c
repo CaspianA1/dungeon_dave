@@ -196,7 +196,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_face_vertex, (void*) 0);
 	glVertexAttribIPointer(1, 1, MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, (void*) (3 * sizeof(face_mesh_component_t)));
 
-	glDrawArrays(GL_TRIANGLES, 0, num_visible_faces * vertices_per_face);
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
