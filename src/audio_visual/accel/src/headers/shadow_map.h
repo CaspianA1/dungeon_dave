@@ -5,18 +5,20 @@
 #include "buffer_defs.h"
 #include "batch_draw_context.h"
 
-// Shadow maps use variance shadow mapping in this implementation
+// Shadow maps use variance shadow mapping + gaussian blur in this implementation
 
 typedef struct {
 	const struct {
-		const GLuint depth_shader;
+		const GLsizei buffer_size[2];
+		const GLuint framebuffer, moment_texture, depth_render_buffer, depth_shader;
 		const GLint light_model_view_projection_id;
-	} shader_context;
+	} shadow_pass; // A `pass` equals a stage in the shadow map generation process
 
-	const struct {
-		const GLuint framebuffer, moment_texture, depth_render_buffer;
-		const GLsizei size[2];
-	} buffer_context;
+	/*
+	const struct { // TODO: reduce memory usage by perhaps using less textures or fbos
+		const GLuint ping_pong_fbos[2], ping_ping_textures[2], blur_shader;
+	} blur_pass;
+	*/
 
 	struct {
 		vec3 pos, dir;

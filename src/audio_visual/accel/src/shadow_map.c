@@ -92,11 +92,14 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	get_dir_in_2D_and_3D(hori_angle, vert_angle, (vec2) {0.0f, 0.0f}, light_dir);
 
 	return (ShadowMapContext) {
-		.shader_context = {shader, .INIT_UNIFORM(light_model_view_projection, shader)},
+		.shadow_pass = {
+			.buffer_size = {shadow_map_width, shadow_map_height},
+			.framebuffer = framebuffer,
+			.moment_texture = moment_texture,
+			.depth_render_buffer = depth_render_buffer,
 
-		.buffer_context = {
-			framebuffer, moment_texture, depth_render_buffer,
-			{shadow_map_width, shadow_map_height}
+			.depth_shader = shader,
+			.INIT_UNIFORM(light_model_view_projection, shader),
 		},
 
 		.light_context = {
@@ -108,10 +111,10 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 }
 
 void deinit_shadow_map_context(const ShadowMapContext* const shadow_map_context) {
-	deinit_texture(shadow_map_context -> buffer_context.moment_texture);
-	glDeleteRenderbuffers(1, &shadow_map_context -> buffer_context.depth_render_buffer);
-	glDeleteFramebuffers(1, &shadow_map_context -> buffer_context.framebuffer);
-	glDeleteProgram(shadow_map_context -> shader_context.depth_shader);
+	deinit_texture(shadow_map_context -> shadow_pass.moment_texture);
+	glDeleteRenderbuffers(1, &shadow_map_context -> shadow_pass.depth_render_buffer);
+	glDeleteFramebuffers(1, &shadow_map_context -> shadow_pass.framebuffer);
+	glDeleteProgram(shadow_map_context -> shadow_pass.depth_shader);
 }
 
 static void get_model_view_projection_matrix_for_shadow_map(
@@ -156,13 +159,13 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 
 	////////// Activate shader, update light mvp, bind framebuffer, resize viewport, clear buffers, and cull front faces
 
-	glUseProgram(shadow_map_context.shader_context.depth_shader);
+	glUseProgram(shadow_map_context.shadow_pass.depth_shader);
 
-	UPDATE_UNIFORM(shadow_map_context.shader_context.light_model_view_projection,
+	UPDATE_UNIFORM(shadow_map_context.shadow_pass.light_model_view_projection,
 		Matrix4fv, 1, GL_FALSE, (GLfloat*) shadow_map_context.light_context.model_view_projection);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_context.buffer_context.framebuffer);
-	glViewport(0, 0, shadow_map_context.buffer_context.size[0], shadow_map_context.buffer_context.size[1]);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_context.shadow_pass.framebuffer);
+	glViewport(0, 0, shadow_map_context.shadow_pass.buffer_size[0], shadow_map_context.shadow_pass.buffer_size[1]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
@@ -201,7 +204,7 @@ void render_all_sectors_to_shadow_map(
 	glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);
 	glDisableVertexAttribArray(0);
 
-	disable_rendering_to_shadow_map(screen_size, shadow_map_context -> buffer_context.moment_texture);
+	disable_rendering_to_shadow_map(screen_size, shadow_map_context -> shadow_pass.moment_texture);
 }
 
 #endif

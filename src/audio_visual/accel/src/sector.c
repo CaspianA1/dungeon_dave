@@ -176,7 +176,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.65f); // 0.2f
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
-		use_texture(shadow_map_context -> buffer_context.moment_texture,
+		use_texture(shadow_map_context -> shadow_pass.moment_texture,
 			sector_shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 
 		first_call = false;
