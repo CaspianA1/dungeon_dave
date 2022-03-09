@@ -3,6 +3,8 @@
 
 #include "headers/texture.h"
 
+////////// Surface initialization
+
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height) {
 	return SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(SDL_PIXEL_FORMAT), SDL_PIXEL_FORMAT);
 }
@@ -20,18 +22,30 @@ SDL_Surface* init_surface(const GLchar* const path) {
 	}
 }
 
+////////// Texture state setting
+
+void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader_program, const byte texture_unit) {
+	INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(sampler_name, shader_program, 1i, texture_unit); // Sets texture unit for shader
+}
+
+void set_current_texture_unit(const byte texture_unit) {
+	glActiveTexture(GL_TEXTURE0 + texture_unit);
+}
+
 void use_texture(const GLuint texture, const GLuint shader_program,
 	const GLchar* const sampler_name, const TextureType type, const byte texture_unit) {
 
-	glActiveTexture(GL_TEXTURE0 + texture_unit);
-	glBindTexture(type, texture);
-	INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(sampler_name, shader_program, 1i, texture_unit);
+	set_sampler_texture_unit_for_shader(sampler_name, shader_program, texture_unit);
+	set_current_texture_unit(texture_unit);
+	set_current_texture(type, texture); // Associates the input texture with the right texture unit
 }
+
+//////////
 
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode) {
 	GLuint texture;
 	glGenTextures(1, &texture);
-	glBindTexture(type, texture);
+	set_current_texture(type, texture);
 
 	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER,
