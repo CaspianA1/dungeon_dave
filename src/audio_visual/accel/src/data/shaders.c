@@ -176,42 +176,6 @@ const GLchar *const sector_vertex_shader =
 
 	"void main(void) {\n"
 		"color = texture(texture_sampler, UV_3D).rgb;\n"
-	"}\n",
-
-*const water_vertex_shader =
-	"#version 330 core\n"
-	"#define sin_cycles 6.28f\n"
-	"#define speed 2.0f\n"
-
-	"out vec2 UV, angles;\n"
-
-	"uniform float time;\n" // In seconds
-
-	// Bottom left, bottom right, top left, top right
-	"const vec2 corners[4] = vec2[4] (\n"
-		"vec2(-1, -1), vec2(1, -1), vec2(-1, 1), vec2(1, 1)\n"
-	");\n"
-
-	"void main(void) {\n"
-		"vec2 vertex_pos = corners[gl_VertexID];\n"
-		"gl_Position = vec4(vertex_pos, 0.0f, 1.0f);\n"
-		"UV = vertex_pos * vec2(0.5f, -0.5f) + 0.5f;\n"
-		"angles = UV.yx * sin_cycles + time * speed;\n"
-	"}\n",
-
-*const water_fragment_shader =
-	"#version 330 core\n"
-	"#define dist_mag 0.05f\n"
-
-	"in vec2 UV, angles;\n"
-
-	"out vec3 color;\n"
-
-	"uniform sampler2D texture_sampler;\n"
-
-	"void main(void) {\n"
-		"vec2 wavy_UV = UV + sin(angles) * dist_mag;\n"
-		"color = texture(texture_sampler, wavy_UV).rgb;\n"
 	"}\n";
 
 #endif

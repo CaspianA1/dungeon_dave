@@ -4,8 +4,6 @@
 /*
 - Shadows for billboards and the weapon (they should read from the shadow map, not affect it)
 - Limit orthographic matrix size for shadow map to map size
-- Gaussian blur (that will make the shadows smooth)
-- Can perhaps store penumbra size in 3rd component of moment texture
 
 View frustum calculation:
 - Need to capture whole scene
@@ -17,11 +15,26 @@ View frustum calculation:
 - Check that that plane is tight with the world's edge
 - Then, make a cuboid extending from that plane to capture the whole world
 
-- A problem: a lot of stray pixels contributing to noise
+- Later, depending on the size of the frustum, change the size of the light texture
+- Lots of light bleeding right now
+- The gaussian blur process is pretty slow
+
+_____
+
+For only two textures with pingponging:
+- First, both ping pongs with the same fbo
+- Then, one of the ping pongs or the moment texture gone
+
+Unoptimized ping-pong, with 3 textures: moment -> pp1, pp1 -> pp2, pp2 -> pp1
+Optimized idea, with 2 textures: moment -> pp1, pp1 -> moment
+
+- Ideally, just 1 total framebuffer with 2 textures in it
+- So first, 1 framebuffer specific to the blur pass, and then 1 framebuffer in total after
 */
 
 #include "headers/shadow_map.h"
 #include "headers/constants.h"
+#include "headers/buffer_defs.h"
 #include "texture.c"
 #include "camera.c"
 
@@ -46,23 +59,96 @@ const GLchar *const depth_vertex_shader =
 		"moments.x = gl_FragCoord.z;\n"
 		"vec2 partial_derivatives = vec2(dFdx(moments.x), dFdy(moments.x));\n"
 		"moments.y = moments.x * moments.x + 0.25f * dot(partial_derivatives, partial_derivatives);\n"
+	"}\n",
+
+*const blur_vertex_shader =
+	"#version 330 core\n"
+
+	"out vec2 fragment_UV;\n"
+
+	// Bottom left, bottom right, top left, top right
+	"const vec2 screen_corners[4] = vec2[4](\n"
+		"vec2(-1.0f, -1.0f), vec2(1.0f, -1.0f),\n"
+		"vec2(-1.0f, 1.0f), vec2(1.0f, 1.0f)\n"
+	");\n"
+
+	"void main(void) {\n"
+		"gl_Position = vec4(screen_corners[gl_VertexID], 0.0f, 1.0f);\n"
+		"fragment_UV = gl_Position.xy * 0.5f + 0.5f;\n"
+	"}\n",
+
+*const blur_fragment_shader =
+	"#version 330 core\n"
+
+	"in vec2 fragment_UV;\n"
+
+	"out vec2 blurred_moments;\n"
+
+	"uniform bool blurring_horizontally;\n"
+	"uniform vec2 texel_size;\n"
+	"uniform sampler2D image_sampler;\n"
+
+	"#define KERNEL_SIZE 5\n"
+
+	"const float weights[KERNEL_SIZE] = float[5](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);\n"
+
+	"void main(void) {\n"
+		"blurred_moments = texture(image_sampler, fragment_UV).rg * weights[0];\n"
+
+		"for (int i = 1; i < KERNEL_SIZE; i++) {\n"
+			"vec2 UV_offset;\n"
+
+			"int index_from_state = int(blurring_horizontally);\n"
+			"UV_offset[int(blurring_horizontally)] = 0.0f;\n"
+
+			"int index_from_opp_state = int(!blurring_horizontally);\n"
+			"UV_offset[index_from_opp_state] = i * texel_size[index_from_opp_state];\n"
+
+			"blurred_moments += weights[i] * (\n"
+				"texture(image_sampler, fragment_UV + UV_offset).rg\n"
+				"+ texture(image_sampler, fragment_UV - UV_offset).rg);\n"
+		"}\n"
 	"}\n";
+
+static GLuint init_framebuffer(const GLuint attached_color_texture, const GLuint* const attached_depth_render_buffer) {
+	GLuint framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	use_framebuffer(framebuffer);
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, attached_color_texture, 0);
+
+	if (attached_depth_render_buffer != NULL)
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *attached_depth_render_buffer);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		fail("make a framebuffer; framebuffer not complete", CreateFramebuffer);
+
+	return framebuffer;
+}
 
 ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	const GLsizei shadow_map_height, const vec3 light_pos,
 	const GLfloat hori_angle, const GLfloat vert_angle) {
 
+	////////// Defining shaders
+
+	const GLuint
+		depth_shader = init_shader_program(depth_vertex_shader, depth_fragment_shader),
+		blur_shader = init_shader_program(blur_vertex_shader, blur_fragment_shader);
+
 	////////// Generating a texture to hold the two moments
 
-	const GLuint moment_texture = preinit_texture(TexPlain, TexNonRepeating);
+	// Nearest would work if this texture were alone, but ideally, it should be a part of the ping-ponging process
+	GLuint moment_texture;
+	glGenTextures(1, &moment_texture);
+	set_current_texture(TexPlain, moment_texture);
+	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	/*
-	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexParameterfv(TexPlain, GL_TEXTURE_BORDER_COLOR, (GLfloat[4]) {1.0f, 1.0f, 1.0f, 1.0f});
-	*/
-
-	glTexImage2D(TexPlain, 0, GL_RG, shadow_map_width, shadow_map_height, 0, GL_RG, GL_FLOAT, NULL);
+	glTexImage2D(TexPlain, 0, MOMENT_TEXTURE_SIZED_FORMAT, shadow_map_width,
+		shadow_map_height, 0, MOMENT_TEXTURE_FORMAT, GL_FLOAT, NULL);
 
 	////////// Generating a render buffer to act as a z-buffer
 
@@ -73,71 +159,81 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 
 	////////// Defining a framebuffer, and attaching moment texture + depth render buffer to it
 
-	GLuint framebuffer;
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, moment_texture, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
+	const GLuint framebuffer = init_framebuffer(moment_texture, &depth_render_buffer);
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		fail("make a framebuffer; framebuffer not complete", CreateFramebuffer);
+	////////// Initializing what's needed for a gaussian blur pass on the generated variance shadow map
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	GLuint ping_pong_framebuffers[2], ping_pong_textures[2];
+	glGenTextures(2, ping_pong_textures);
+
+	for (byte i = 0; i < 2; i++) {
+		const GLuint ping_pong_texture = ping_pong_textures[i];
+
+		set_current_texture(TexPlain, ping_pong_texture);
+
+		const bool texture_should_be_mipmapped = i == SHADOW_MAP_BLUR_OUTPUT_TEXTURE_INDEX;
+
+		glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, texture_should_be_mipmapped ? OPENGL_TEX_MIN_FILTER : GL_LINEAR);
+		glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glTexImage2D(TexPlain, 0, MOMENT_TEXTURE_SIZED_FORMAT, shadow_map_width,
+			shadow_map_height, 0, MOMENT_TEXTURE_FORMAT, GL_FLOAT, NULL);
+
+		if (texture_should_be_mipmapped) glGenerateMipmap(TexPlain);
+
+		ping_pong_framebuffers[i] = init_framebuffer(ping_pong_texture, NULL);
+	}
+
+	disable_current_framebuffer();
 
 	//////////
-
-	const GLuint shader = init_shader_program(depth_vertex_shader, depth_fragment_shader);
 
 	vec3 light_dir;
 	get_dir_in_2D_and_3D(hori_angle, vert_angle, (vec2) {0.0f, 0.0f}, light_dir);
 
 	return (ShadowMapContext) {
+		.light_context = {
+			.pos = {light_pos[0], light_pos[1], light_pos[2]},
+			.dir = {light_dir[0], light_dir[1], light_dir[2]}
+			// `model_view_projection` unset
+		},
+
 		.shadow_pass = {
 			.buffer_size = {shadow_map_width, shadow_map_height},
 			.framebuffer = framebuffer,
 			.moment_texture = moment_texture,
 			.depth_render_buffer = depth_render_buffer,
 
-			.depth_shader = shader,
-			.INIT_UNIFORM(light_model_view_projection, shader),
+			.depth_shader = depth_shader,
+			.INIT_UNIFORM(light_model_view_projection, depth_shader),
 		},
 
-		.light_context = {
-			{light_pos[0], light_pos[1], light_pos[2]},
-			{light_dir[0], light_dir[1], light_dir[2]},
-			{0}
+		.blur_pass = {
+			.ping_pong_framebuffers = {ping_pong_framebuffers[0], ping_pong_framebuffers[1]},
+			.ping_pong_textures = {ping_pong_textures[0], ping_pong_textures[1]},
+
+			.blur_shader = blur_shader,
+			.INIT_UNIFORM(blurring_horizontally, blur_shader)
 		}
 	};
 }
 
-void deinit_shadow_map_context(const ShadowMapContext* const shadow_map_context) {
+void deinit_shadow_map_context(ShadowMapContext* const shadow_map_context) {
 	deinit_texture(shadow_map_context -> shadow_pass.moment_texture);
 	glDeleteRenderbuffers(1, &shadow_map_context -> shadow_pass.depth_render_buffer);
-	glDeleteFramebuffers(1, &shadow_map_context -> shadow_pass.framebuffer);
+	deinit_framebuffer(shadow_map_context -> shadow_pass.framebuffer);
 	glDeleteProgram(shadow_map_context -> shadow_pass.depth_shader);
+
+	deinit_textures(2, shadow_map_context -> blur_pass.ping_pong_textures);
+	deinit_framebuffers(2, shadow_map_context -> blur_pass.ping_pong_framebuffers);
+	glDeleteProgram(shadow_map_context -> blur_pass.blur_shader);
 }
 
 static void get_model_view_projection_matrix_for_shadow_map(
 	const ShadowMapContext* const shadow_map_context,
 	const byte map_size[2], mat4 model_view_projection) {
-
-	//////////
-
-	/*
-	Or, think like this:
-	- Light must always cover whole scene
-	- Only direction should vary
-	- So, given a direction, find a position that encompasses the whole scene
-	- This, in a way, reduces to the view frustum related problem from the internet
-
-	- Simplified version (?)
-	- Direction -> OBB that covers the whole scene
-	- Only consider position that is out of scene to begin with
-	- Perhaps consider a point on a sphere, looking at the map center
-	- Adjusting where the point is on the sphere then changes the direction
-
-	https://stackoverflow.com/questions/969798/plotting-a-point-on-the-edge-of-a-sphere
-	*/
 
 	(void) map_size;
 
@@ -149,7 +245,55 @@ static void get_model_view_projection_matrix_for_shadow_map(
 	glm_mul(projection, view, model_view_projection);
 }
 
+static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
+	////////// Setting up some local variables
+
+	const GLint blurring_horizontally_id = shadow_map_context -> blur_pass.blurring_horizontally_id;
+
+	const GLuint
+		orig_moment_texture = shadow_map_context -> shadow_pass.moment_texture,
+		blur_shader = shadow_map_context -> blur_pass.blur_shader,
+
+		*const ping_pong_textures = shadow_map_context -> blur_pass.ping_pong_textures,
+		*const ping_pong_framebuffers = shadow_map_context -> blur_pass.ping_pong_framebuffers;
+
+	glUseProgram(blur_shader);
+
+	//////////
+
+	static bool first_call = 1;
+
+	if (first_call) {
+		const GLsizei* const shadow_map_size = shadow_map_context -> shadow_pass.buffer_size;
+		INIT_UNIFORM_VALUE(texel_size, blur_shader, 2f, 1.0f / shadow_map_size[0], 1.0f / shadow_map_size[1]);
+		set_sampler_texture_unit_for_shader("image_sampler", blur_shader, SHADOW_MAP_GENERATION_TEXTURE_UNIT);
+		first_call = 0;
+	}
+
+	set_current_texture_unit(SHADOW_MAP_GENERATION_TEXTURE_UNIT);
+
+	//////////
+
+	for (byte i = 0; i < constants.num_shadow_map_blur_passes * 2; i++) {
+		const byte src_texture_index = i & 1;
+		const byte dest_framebuffer_index = !src_texture_index;
+
+		use_framebuffer(ping_pong_framebuffers[dest_framebuffer_index]); // Setting the current framebuffer
+
+		// The shader reads from `src_texture`, while the other texture is meanwhile written to.
+		const GLuint src_texture = (i == 0) ? orig_moment_texture : ping_pong_textures[src_texture_index];
+		set_current_texture(TexPlain, src_texture);
+
+		UPDATE_UNIFORM(blurring_horizontally, 1i, dest_framebuffer_index); // Setting the current horizontal/vertical blur state
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
+	}
+
+	glGenerateMipmap(TexPlain); // At this point, the current bound texture will be the output texture
+	disable_current_framebuffer();
+}
+
 static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_context_ref, const byte map_size[2]) {
+	// TODO: copy only variables needed for the shadow pass + the MVP matrix
 	ShadowMapContext shadow_map_context = *shadow_map_context_ref;
 
 	////////// These matrices are relative to the light
@@ -164,7 +308,7 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 	UPDATE_UNIFORM(shadow_map_context.shadow_pass.light_model_view_projection,
 		Matrix4fv, 1, GL_FALSE, (GLfloat*) shadow_map_context.light_context.model_view_projection);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, shadow_map_context.shadow_pass.framebuffer);
+	use_framebuffer(shadow_map_context.shadow_pass.framebuffer);
 	glViewport(0, 0, shadow_map_context.shadow_pass.buffer_size[0], shadow_map_context.shadow_pass.buffer_size[1]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
@@ -173,15 +317,12 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 		shadow_map_context.light_context.model_view_projection, sizeof(mat4));
 }
 
-static void disable_rendering_to_shadow_map(const int screen_size[2], const GLuint moment_texture) {
-	// This generates mipmaps for the moment texture after it's been rendered
-	glBindTexture(TexPlain, moment_texture);
-	glGenerateMipmap(TexPlain);
-
-	// Unbinding the framebuffer, resetting the viewport size, and turning on backface culling again
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+static void disable_rendering_to_shadow_map(const int screen_size[2], ShadowMapContext* const shadow_map_context) {
+	// Unbinding the moment framebuffer, turning on backface culling, blurring the shadow map, and resetting the viewport size
+	disable_current_framebuffer();
+	glCullFace(GL_BACK); // This goes before `blur_shadow_map` because otherwise, it interferes with the blurring process
+	blur_shadow_map(shadow_map_context);
 	glViewport(0, 0, screen_size[0], screen_size[1]);
-	glCullFace(GL_BACK);
 }
 
 void render_all_sectors_to_shadow_map(
@@ -204,7 +345,7 @@ void render_all_sectors_to_shadow_map(
 	glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);
 	glDisableVertexAttribArray(0);
 
-	disable_rendering_to_shadow_map(screen_size, shadow_map_context -> shadow_pass.moment_texture);
+	disable_rendering_to_shadow_map(screen_size, shadow_map_context);
 }
 
 #endif

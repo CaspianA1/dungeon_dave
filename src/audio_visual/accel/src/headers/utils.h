@@ -111,7 +111,7 @@ typedef struct {
 
 //////////
 
-static const Uint8* keys;
+const Uint8* keys;
 
 //////////
 

@@ -188,7 +188,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
-	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
+	SceneState* const scene_state = (SceneState*) sgl -> any_data;
 
 	deinit_weapon_sprite(&scene_state -> weapon_sprite);
 
@@ -203,7 +203,7 @@ void demo_17_deinit(const StateGL* const sgl) {
 
 	deinit_skybox(scene_state -> skybox);
 
-	free(sgl -> any_data);
+	free(scene_state);
 
 	deinit_demo_vars(sgl);
 }

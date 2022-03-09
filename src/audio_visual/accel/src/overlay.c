@@ -11,6 +11,7 @@
 #include "texture.c"
 #include "animation.c"
 
+// TODO: to shaders.c
 const GLchar *const weapon_sprite_vertex_shader =
 	"#version 330 core\n"
 
@@ -154,7 +155,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
 	glDisable(GL_BLEND);
 }
 

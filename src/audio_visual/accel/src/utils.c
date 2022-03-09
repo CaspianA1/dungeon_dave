@@ -197,7 +197,11 @@ void deinit_demo_vars(const StateGL* const sgl) {
 		free(sgl -> vertex_buffers);
 	}
 
-	if (sgl -> num_textures > 0) deinit_textures(sgl -> num_textures, sgl -> textures);
+	if (sgl -> num_textures > 0) {
+		GLuint* const textures = sgl -> textures;
+		deinit_textures(sgl -> num_textures, textures);
+		free(textures);
+	}
 
 	glDeleteVertexArrays(1, &sgl -> vertex_array);
 }

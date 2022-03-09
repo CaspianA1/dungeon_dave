@@ -170,14 +170,16 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 		INIT_UNIFORM_VALUE(overall_light_strength, sector_shader, 1f, 1.0f);
 		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.18f); // This also equals the amount of light in shadows
-		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 16.0f);
-		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.6f);
-		INIT_UNIFORM_VALUE(min_shadow_variance, sector_shader, 1f, 0.000005f); // 0.000785f
-		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.65f); // 0.2f
+		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 32.0f);
+		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.5f);
+		INIT_UNIFORM_VALUE(min_shadow_variance, sector_shader, 1f, 0.000053f); // 0.000785f, 0.000005f
+		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.415f); // 0.2f, 0.65f
+
+		const GLuint blurred_moment_texture = shadow_map_context
+			-> blur_pass.ping_pong_textures[SHADOW_MAP_BLUR_OUTPUT_TEXTURE_INDEX];
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
-		use_texture(shadow_map_context -> shadow_pass.moment_texture,
-			sector_shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
+		use_texture(blurred_moment_texture, sector_shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 
 		first_call = false;
 	}

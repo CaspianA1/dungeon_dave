@@ -24,7 +24,8 @@ and not in the `constants` struct b/c other values in that struct depend on them
 #define BIT_USE_WEAPON BIT_CLICK_LEFT
 
 static const struct {
-	const byte fps;	// This should match the vsync refresh rate, since some of the physics code depends on it
+	// The FPS match the vsync refresh rate, since some of the physics code depends on it.
+	const byte num_shadow_map_blur_passes, fps;
 	const GLfloat almost_zero;
 
 	const struct { // All angles are in radians
@@ -50,8 +51,8 @@ static const struct {
 	} keys;
 
 } constants = {
+	.num_shadow_map_blur_passes = 3,
 	.fps = 60,
-
 	.almost_zero = 0.001f,
 
 	.camera = {

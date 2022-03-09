@@ -81,7 +81,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_billboard, (GLsizei) num_visible_billboards);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
 	glDisable(GL_BLEND);
 
 	glEnable(GL_CULL_FACE);
