@@ -72,7 +72,6 @@
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
 
-#define DEPTH_BUFFER_BITS 24
 #define MULTISAMPLE_SAMPLES 4
 
 #define USE_VSYNC
@@ -111,7 +110,7 @@ typedef struct {
 
 //////////
 
-static const Uint8* keys;
+const Uint8* keys;
 
 //////////
 

@@ -18,7 +18,6 @@ Screen init_screen(const GLchar* const title) {
 	#endif
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, DEPTH_BUFFER_BITS);
 
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, MULTISAMPLE_SAMPLES);
@@ -197,7 +196,11 @@ void deinit_demo_vars(const StateGL* const sgl) {
 		free(sgl -> vertex_buffers);
 	}
 
-	if (sgl -> num_textures > 0) deinit_textures(sgl -> num_textures, sgl -> textures);
+	if (sgl -> num_textures > 0) {
+		GLuint* const textures = sgl -> textures;
+		deinit_textures(sgl -> num_textures, textures);
+		free(textures);
+	}
 
 	glDeleteVertexArrays(1, &sgl -> vertex_array);
 }
