@@ -38,9 +38,9 @@ Other random ideas:
 - Sliding across the floor (with the head tilted up)
 - Make 255 a shared constant
 - Catch more warnings with -Weverything
+- Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit)
 
 A better shading model:
-- use_shader_program instead of glUseProgram, and deinit_shader_program instead of glDeleteProgram (or no `program` suffix)
 - Macros for generation of objects, like GL_INIT(Buffer) for example
 - Share code between shaders
 - Read in shaders from files
@@ -76,6 +76,6 @@ General future components:
 - Flat weapon
 - Use more of the cglm functions in `update_camera`, or make my own
 - A startup setting of magnification filter (and setting other constants like that as well; call that config_constants)
-- Avoid glew altogether and just use SDL_GL_GetProcAddress?
+- Avoid glew altogether and just use SDL_GL_GetProcAddress? (A custom loader)
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
