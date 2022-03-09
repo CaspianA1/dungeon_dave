@@ -1,4 +1,5 @@
 #include "../utils.c"
+#include "../headers/buffer_defs.h"
 #include "../data/shaders.c"
 
 // Perlin noise!
@@ -104,7 +105,7 @@ void demo_18_drawer(const StateGL* const sgl) {
 	UPDATE_UNIFORM(rand_factor, 1f, rand_factor);
 	UPDATE_UNIFORM(persistence, 1f, 0.6f);
 
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
 }
 
 #ifdef DEMO_21

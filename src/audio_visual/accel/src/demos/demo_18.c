@@ -1,5 +1,6 @@
 #include "../utils.c"
 #include "../texture.c"
+#include "../headers/buffer_defs.h"
 #include "../data/shaders.c"
 
 // This demo gives a quake-like water effect
@@ -64,7 +65,7 @@ void demo_18_drawer(const StateGL* const sgl) {
 	}
 
 	UPDATE_UNIFORM(time, 1f, SDL_GetTicks() / 1000.0f);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
 }
 
 #ifdef DEMO_18
