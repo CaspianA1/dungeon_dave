@@ -155,7 +155,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_billboard);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
 	glDisable(GL_BLEND);
 }
 
