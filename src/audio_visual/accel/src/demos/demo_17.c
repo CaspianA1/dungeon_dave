@@ -30,7 +30,7 @@ StateGL demo_17_init(void) {
 
 	// 2 << 13 is the biggest size
 	SceneState scene_state = {
-		.shadow_map_context = init_shadow_map_context(2048, 2048,
+		.shadow_map_context = init_shadow_map_context(4096, 4096,
 			(vec3) {26.563328f, 31.701447f, 12.387274f},
 			0.518362f, -1.225221f
 		),
@@ -188,7 +188,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 }
 
 void demo_17_deinit(const StateGL* const sgl) {
-	const SceneState* const scene_state = (SceneState*) sgl -> any_data;
+	SceneState* const scene_state = (SceneState*) sgl -> any_data;
 
 	deinit_weapon_sprite(&scene_state -> weapon_sprite);
 
@@ -203,7 +203,7 @@ void demo_17_deinit(const StateGL* const sgl) {
 
 	deinit_skybox(scene_state -> skybox);
 
-	free(sgl -> any_data);
+	free(scene_state);
 
 	deinit_demo_vars(sgl);
 }
