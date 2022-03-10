@@ -16,7 +16,7 @@ View frustum calculation:
 - Then, make a cuboid extending from that plane to capture the whole world
 
 - Later, depending on the size of the frustum, change the size of the light texture
-- Lots of light bleeding right now
+- Lots of light bleeding right now (fix through exponential shadow maps)
 - The gaussian blur process is pretty slow
 
 _____
