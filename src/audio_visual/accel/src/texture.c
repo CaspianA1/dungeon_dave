@@ -63,7 +63,7 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode) 
 		glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso_filtering_level);
 		#endif
 	}
-	
+
 	return texture;
 }
 
