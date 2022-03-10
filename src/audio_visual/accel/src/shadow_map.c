@@ -205,14 +205,15 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 			// `model_view_projection` unset
 		},
 
+		.buffer_size = {shadow_map_width, shadow_map_height},
+
 		.shadow_pass = {
-			.buffer_size = {shadow_map_width, shadow_map_height},
 			.framebuffer = framebuffer,
 			.moment_texture = moment_texture,
 			.depth_render_buffer = depth_render_buffer,
 
 			.depth_shader = depth_shader,
-			.INIT_UNIFORM(light_model_view_projection, depth_shader),
+			.INIT_UNIFORM(light_model_view_projection, depth_shader)
 		},
 
 		.blur_pass = {
@@ -268,7 +269,7 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	static bool first_call = 1;
 
 	if (first_call) {
-		const GLsizei* const shadow_map_size = shadow_map_context -> shadow_pass.buffer_size;
+		const GLsizei* const shadow_map_size = shadow_map_context -> buffer_size;
 		INIT_UNIFORM_VALUE(texel_size, blur_shader, 2f, 1.0f / shadow_map_size[0], 1.0f / shadow_map_size[1]);
 		set_sampler_texture_unit_for_shader("image_sampler", blur_shader, SHADOW_MAP_GENERATION_TEXTURE_UNIT);
 		first_call = 0;
@@ -313,7 +314,7 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 		Matrix4fv, 1, GL_FALSE, (GLfloat*) shadow_map_context.light_context.model_view_projection);
 
 	use_framebuffer(shadow_map_context.shadow_pass.framebuffer);
-	glViewport(0, 0, shadow_map_context.shadow_pass.buffer_size[0], shadow_map_context.shadow_pass.buffer_size[1]);
+	glViewport(0, 0, shadow_map_context.buffer_size[0], shadow_map_context.buffer_size[1]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
