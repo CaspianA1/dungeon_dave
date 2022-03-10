@@ -18,8 +18,9 @@ typedef struct {
 		mat4 model_view_projection;
 	} light_context;
 
+	const GLsizei buffer_size[2];
+
 	const struct {
-		const GLsizei buffer_size[2];
 		const GLuint framebuffer, moment_texture, depth_render_buffer, depth_shader;
 		const GLint light_model_view_projection_id;
 	} shadow_pass; // A `pass` equals a stage in the shadow map generation process
