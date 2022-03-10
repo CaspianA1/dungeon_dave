@@ -18,7 +18,6 @@ View frustum calculation:
 - Later, depending on the size of the frustum, change the size of the light texture
 - Lots of light bleeding right now (fix through exponential shadow maps)
 - The gaussian blur process is pretty slow
-
 _____
 
 For only two textures with pingponging:
@@ -26,10 +25,11 @@ For only two textures with pingponging:
 - Then, one of the ping pongs or the moment texture gone
 
 Unoptimized ping-pong, with 3 textures: moment -> pp1, pp1 -> pp2, pp2 -> pp1
+Doing the thing above right now, but pp1 and pp2 share a fbo
 Optimized idea, with 2 textures: moment -> pp1, pp1 -> moment
 
 - Ideally, just 1 total framebuffer with 2 textures in it
-- So first, 1 framebuffer specific to the blur pass, and then 1 framebuffer in total after
+- So first, 1 framebuffer specific to the blur pass, and then 1 framebuffer in total after (which is done)
 */
 
 #include "headers/shadow_map.h"
@@ -110,12 +110,17 @@ const GLchar *const depth_vertex_shader =
 		"}\n"
 	"}\n";
 
-static GLuint init_framebuffer(const GLuint attached_color_texture, const GLuint* const attached_depth_render_buffer) {
+static GLuint init_framebuffer(
+	const byte num_attached_color_textures,
+	const GLuint* const attached_color_textures,
+	const GLuint* const attached_depth_render_buffer) {
+
 	GLuint framebuffer;
 	glGenFramebuffers(1, &framebuffer);
 	use_framebuffer(framebuffer);
 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, attached_color_texture, 0);
+	for (byte i = 0; i < num_attached_color_textures; i++)
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, attached_color_textures[i], 0);
 
 	if (attached_depth_render_buffer != NULL)
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *attached_depth_render_buffer);
@@ -159,11 +164,11 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 
 	////////// Defining a framebuffer, and attaching moment texture + depth render buffer to it
 
-	const GLuint framebuffer = init_framebuffer(moment_texture, &depth_render_buffer);
+	const GLuint framebuffer = init_framebuffer(1, &moment_texture, &depth_render_buffer);
 
 	////////// Initializing what's needed for a gaussian blur pass on the generated variance shadow map
 
-	GLuint ping_pong_framebuffers[2], ping_pong_textures[2];
+	GLuint ping_pong_textures[2];
 	glGenTextures(2, ping_pong_textures);
 
 	for (byte i = 0; i < 2; i++) {
@@ -182,9 +187,9 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 			shadow_map_height, 0, MOMENT_TEXTURE_FORMAT, GL_FLOAT, NULL);
 
 		if (texture_should_be_mipmapped) glGenerateMipmap(TexPlain);
-
-		ping_pong_framebuffers[i] = init_framebuffer(ping_pong_texture, NULL);
 	}
+
+	const GLuint ping_pong_framebuffer = init_framebuffer(2, ping_pong_textures, NULL);
 
 	disable_current_framebuffer();
 
@@ -211,7 +216,7 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 		},
 
 		.blur_pass = {
-			.ping_pong_framebuffers = {ping_pong_framebuffers[0], ping_pong_framebuffers[1]},
+			.ping_pong_framebuffer = ping_pong_framebuffer,
 			.ping_pong_textures = {ping_pong_textures[0], ping_pong_textures[1]},
 
 			.blur_shader = blur_shader,
@@ -227,7 +232,7 @@ void deinit_shadow_map_context(ShadowMapContext* const shadow_map_context) {
 	glDeleteProgram(shadow_map_context -> shadow_pass.depth_shader);
 
 	deinit_textures(2, shadow_map_context -> blur_pass.ping_pong_textures);
-	deinit_framebuffers(2, shadow_map_context -> blur_pass.ping_pong_framebuffers);
+	deinit_framebuffer(shadow_map_context -> blur_pass.ping_pong_framebuffer);
 	glDeleteProgram(shadow_map_context -> blur_pass.blur_shader);
 }
 
@@ -253,9 +258,8 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	const GLuint
 		orig_moment_texture = shadow_map_context -> shadow_pass.moment_texture,
 		blur_shader = shadow_map_context -> blur_pass.blur_shader,
-
-		*const ping_pong_textures = shadow_map_context -> blur_pass.ping_pong_textures,
-		*const ping_pong_framebuffers = shadow_map_context -> blur_pass.ping_pong_framebuffers;
+		ping_pong_framebuffer =  shadow_map_context -> blur_pass.ping_pong_framebuffer,
+		*const ping_pong_textures = shadow_map_context -> blur_pass.ping_pong_textures;
 
 	glUseProgram(blur_shader);
 
@@ -271,20 +275,20 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	}
 
 	set_current_texture_unit(SHADOW_MAP_GENERATION_TEXTURE_UNIT);
-
-	//////////
+	use_framebuffer(ping_pong_framebuffer);
 
 	for (byte i = 0; i < constants.num_shadow_map_blur_passes * 2; i++) {
 		const byte src_texture_index = i & 1;
-		const byte dest_framebuffer_index = !src_texture_index;
+		const byte blurring_horizontally = !src_texture_index;
 
-		use_framebuffer(ping_pong_framebuffers[dest_framebuffer_index]); // Setting the current framebuffer
+		// For a pass's first horizontal blur step, you write to the second texture; otherwise, the first
+		glDrawBuffer(GL_COLOR_ATTACHMENT0 + blurring_horizontally);
 
 		// The shader reads from `src_texture`, while the other texture is meanwhile written to.
 		const GLuint src_texture = (i == 0) ? orig_moment_texture : ping_pong_textures[src_texture_index];
 		set_current_texture(TexPlain, src_texture);
 
-		UPDATE_UNIFORM(blurring_horizontally, 1i, dest_framebuffer_index); // Setting the current horizontal/vertical blur state
+		UPDATE_UNIFORM(blurring_horizontally, 1i, blurring_horizontally); // Setting the current horizontal/vertical blur state
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
 	}
 

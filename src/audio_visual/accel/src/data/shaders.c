@@ -72,7 +72,8 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"float linstep(float v, float low, float high) {\n"
-		"return clamp((v - low) / (high - low), 0.0f, 1.0f);\n"
+		"float lerped = (v - low) / (high - low);\n"
+		"return clamp(lerped, 0.0f, 1.0f);\n"
 	"}\n"
 
 	"float one_minus_shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
@@ -83,11 +84,11 @@ const GLchar *const sector_vertex_shader =
 			"depth = proj_coords.z,\n"
 			"variance = max(moments.y - moments.x * moments.x, min_shadow_variance);\n"
 
-		"float d = depth - moments.x;\n"
+		"float d = depth - moments.x;\n" // `d` equals the distance between the receiver (depth) and the occluder (moments.x)
 		"float p_max = variance / (variance + (d * d));\n"
 		"p_max = linstep(p_max, light_bleed_reduction_factor, 1.0f);\n" // Using linstep to reduce light bleeding
 
-		"return (depth <= moments.x) ? 1.0f : clamp(p_max, 0.0f, 1.0f);\n"
+		"return (depth <= moments.x) ? 1.0f : p_max;\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
