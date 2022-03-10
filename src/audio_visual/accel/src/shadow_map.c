@@ -95,18 +95,19 @@ const GLchar *const depth_vertex_shader =
 	"void main(void) {\n"
 		"blurred_moments = texture(image_sampler, fragment_UV).rg * weights[0];\n"
 
+		"int index_from_opp_state = int(!blurring_horizontally);\n"
+		"float texel_size_on_blurring_axis = texel_size[index_from_opp_state];\n"
+
+		"vec2 UV_offset = vec2(0.0f);\n"
+		"UV_offset[index_from_opp_state] = texel_size_on_blurring_axis;\n"
+
 		"for (int i = 1; i < KERNEL_SIZE; i++) {\n"
-			"vec2 UV_offset;\n"
-
-			"int index_from_state = int(blurring_horizontally);\n"
-			"UV_offset[int(blurring_horizontally)] = 0.0f;\n"
-
-			"int index_from_opp_state = int(!blurring_horizontally);\n"
-			"UV_offset[index_from_opp_state] = i * texel_size[index_from_opp_state];\n"
-
 			"blurred_moments += weights[i] * (\n"
-				"texture(image_sampler, fragment_UV + UV_offset).rg\n"
-				"+ texture(image_sampler, fragment_UV - UV_offset).rg);\n"
+				"texture(image_sampler, fragment_UV + UV_offset).rg +\n"
+				"texture(image_sampler, fragment_UV - UV_offset).rg\n"
+			");\n"
+
+			"UV_offset[index_from_opp_state] += texel_size_on_blurring_axis;\n"
 		"}\n"
 	"}\n";
 
