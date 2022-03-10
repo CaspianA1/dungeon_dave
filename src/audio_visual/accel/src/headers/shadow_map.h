@@ -25,7 +25,7 @@ typedef struct {
 	} shadow_pass; // A `pass` equals a stage in the shadow map generation process
 
 	const struct { // TODO: reduce memory usage by perhaps using less textures and fbos
-		const GLuint ping_pong_framebuffers[2], ping_pong_textures[2], blur_shader;
+		const GLuint ping_pong_framebuffer, ping_pong_textures[2], blur_shader;
 		const GLint blurring_horizontally_id;
 	} blur_pass;
 } ShadowMapContext;
