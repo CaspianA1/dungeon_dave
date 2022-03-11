@@ -294,7 +294,9 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 		Matrix4fv, 1, GL_FALSE, (GLfloat*) shadow_map_context.light_context.model_view_projection);
 
 	use_framebuffer(shadow_map_context.buffer_context.framebuffer);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0); // Initial rendering of scene moments is written to the first color attachment
+
+	// TODO: needed?
+	glDrawBuffer(GL_COLOR_ATTACHMENT0); // Initial rendering of scene moments is written to the first texture
 
 	glViewport(0, 0, shadow_map_context.buffer_context.size[0], shadow_map_context.buffer_context.size[1]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
