@@ -18,6 +18,7 @@ View frustum calculation:
 - Later, depending on the size of the frustum, change the size of the light texture
 - Lots of light bleeding right now (fix through exponential shadow maps)
 - The gaussian blur process is pretty slow
+- And there should be a smoother transition between the umbra and the penumbra
 _____
 
 For only two textures with pingponging:
@@ -279,7 +280,7 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	set_current_texture_unit(SHADOW_MAP_GENERATION_TEXTURE_UNIT);
 	use_framebuffer(ping_pong_framebuffer);
 
-	for (byte i = 0; i < constants.num_shadow_map_blur_passes * 2; i++) {
+	for (byte i = 0; i < constants.num_shadow_map_blur_passes << 1; i++) {
 		const byte src_texture_index = i & 1;
 		const byte blurring_horizontally = !src_texture_index;
 
