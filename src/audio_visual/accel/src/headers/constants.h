@@ -51,7 +51,7 @@ static const struct {
 	} keys;
 
 } constants = {
-	.num_shadow_map_blur_passes = 3,
+	.num_shadow_map_blur_passes = 2,
 	.fps = 60,
 	.almost_zero = 0.001f,
 

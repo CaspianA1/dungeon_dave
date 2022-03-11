@@ -18,6 +18,7 @@ View frustum calculation:
 - Later, depending on the size of the frustum, change the size of the light texture
 - Lots of light bleeding right now (fix through exponential shadow maps)
 - The gaussian blur process is pretty slow
+- And there should be a smoother transition between the umbra and the penumbra
 _____
 
 For only two textures with pingponging:
@@ -95,18 +96,19 @@ const GLchar *const depth_vertex_shader =
 	"void main(void) {\n"
 		"blurred_moments = texture(image_sampler, fragment_UV).rg * weights[0];\n"
 
+		"int index_from_opp_state = int(!blurring_horizontally);\n"
+		"float texel_size_on_blurring_axis = texel_size[index_from_opp_state];\n"
+
+		"vec2 UV_offset = vec2(0.0f);\n"
+		"UV_offset[index_from_opp_state] = texel_size_on_blurring_axis;\n"
+
 		"for (int i = 1; i < KERNEL_SIZE; i++) {\n"
-			"vec2 UV_offset;\n"
-
-			"int index_from_state = int(blurring_horizontally);\n"
-			"UV_offset[int(blurring_horizontally)] = 0.0f;\n"
-
-			"int index_from_opp_state = int(!blurring_horizontally);\n"
-			"UV_offset[index_from_opp_state] = i * texel_size[index_from_opp_state];\n"
-
 			"blurred_moments += weights[i] * (\n"
-				"texture(image_sampler, fragment_UV + UV_offset).rg\n"
-				"+ texture(image_sampler, fragment_UV - UV_offset).rg);\n"
+				"texture(image_sampler, fragment_UV + UV_offset).rg +\n"
+				"texture(image_sampler, fragment_UV - UV_offset).rg\n"
+			");\n"
+
+			"UV_offset[index_from_opp_state] += texel_size_on_blurring_axis;\n"
 		"}\n"
 	"}\n";
 
@@ -134,12 +136,6 @@ static GLuint init_framebuffer(
 ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	const GLsizei shadow_map_height, const vec3 light_pos,
 	const GLfloat hori_angle, const GLfloat vert_angle) {
-
-	////////// Defining shaders
-
-	const GLuint
-		depth_shader = init_shader_program(depth_vertex_shader, depth_fragment_shader),
-		blur_shader = init_shader_program(blur_vertex_shader, blur_fragment_shader);
 
 	////////// Generating a texture to hold the two moments
 
@@ -193,10 +189,16 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 
 	disable_current_framebuffer();
 
-	//////////
+	////////// Defining shaders, and getting the light direction
+
+	const GLuint
+		depth_shader = init_shader_program(depth_vertex_shader, depth_fragment_shader),
+		blur_shader = init_shader_program(blur_vertex_shader, blur_fragment_shader);
 
 	vec3 light_dir;
 	get_dir_in_2D_and_3D(hori_angle, vert_angle, (vec2) {0.0f, 0.0f}, light_dir);
+
+	//////////
 
 	return (ShadowMapContext) {
 		.light_context = {
@@ -278,7 +280,7 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	set_current_texture_unit(SHADOW_MAP_GENERATION_TEXTURE_UNIT);
 	use_framebuffer(ping_pong_framebuffer);
 
-	for (byte i = 0; i < constants.num_shadow_map_blur_passes * 2; i++) {
+	for (byte i = 0; i < constants.num_shadow_map_blur_passes << 1; i++) {
 		const byte src_texture_index = i & 1;
 		const byte blurring_horizontally = !src_texture_index;
 
@@ -337,11 +339,15 @@ void render_all_sectors_to_shadow_map(
 
 	glBindBuffer(GL_ARRAY_BUFFER, sector_draw_context -> buffers.gpu);
 
+	////////// Filling the sector gpu buffer with all of the sector vertices
+
 	GLint bytes_for_vertices;
 	glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bytes_for_vertices);
 	const GLsizei total_num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_for_vertices, sector_draw_context -> buffers.cpu.data);
+
+	//////////
 
 	enable_rendering_to_shadow_map(shadow_map_context, map_size);
 
