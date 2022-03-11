@@ -32,10 +32,7 @@ Current framebuffer ping pong process:
 
 - Apply this blur process as much as needed.
 
-So,
-	render scene -> t0
-	blur t0 -> t1
-	blur t1 -> t0
+So: render scene -> t0, blur t0 -> t1, blur t1 -> t0
 */
 
 #include "headers/shadow_map.h"
