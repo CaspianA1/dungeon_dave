@@ -339,11 +339,15 @@ void render_all_sectors_to_shadow_map(
 
 	glBindBuffer(GL_ARRAY_BUFFER, sector_draw_context -> buffers.gpu);
 
+	////////// Filling the sector gpu buffer with all of the sector vertices
+
 	GLint bytes_for_vertices;
 	glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bytes_for_vertices);
 	const GLsizei total_num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_for_vertices, sector_draw_context -> buffers.cpu.data);
+
+	//////////
 
 	enable_rendering_to_shadow_map(shadow_map_context, map_size);
 
