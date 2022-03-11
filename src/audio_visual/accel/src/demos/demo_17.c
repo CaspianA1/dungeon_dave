@@ -6,9 +6,7 @@
 #include "../billboard.c"
 #include "../camera.c"
 #include "../event.c"
-
 #include "../overlay.c"
-
 #include "../shadow_map.c"
 
 typedef struct {
@@ -142,6 +140,8 @@ StateGL demo_17_init(void) {
 
 	sgl.any_data = malloc(sizeof(SceneState));
 	memcpy(sgl.any_data, &scene_state, sizeof(SceneState));
+
+	UNWRAP("foo", "bar", "baz");
 
 	return sgl;
 }
