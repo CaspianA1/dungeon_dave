@@ -137,12 +137,6 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	const GLsizei shadow_map_height, const vec3 light_pos,
 	const GLfloat hori_angle, const GLfloat vert_angle) {
 
-	////////// Defining shaders
-
-	const GLuint
-		depth_shader = init_shader_program(depth_vertex_shader, depth_fragment_shader),
-		blur_shader = init_shader_program(blur_vertex_shader, blur_fragment_shader);
-
 	////////// Generating a texture to hold the two moments
 
 	// Nearest would work if this texture were alone, but ideally, it should be a part of the ping-ponging process
@@ -195,10 +189,16 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 
 	disable_current_framebuffer();
 
-	//////////
+	////////// Defining shaders, and getting the light direction
+
+	const GLuint
+		depth_shader = init_shader_program(depth_vertex_shader, depth_fragment_shader),
+		blur_shader = init_shader_program(blur_vertex_shader, blur_fragment_shader);
 
 	vec3 light_dir;
 	get_dir_in_2D_and_3D(hori_angle, vert_angle, (vec2) {0.0f, 0.0f}, light_dir);
+
+	//////////
 
 	return (ShadowMapContext) {
 		.light_context = {
