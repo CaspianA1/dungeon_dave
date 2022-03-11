@@ -19,18 +19,23 @@ View frustum calculation:
 - Lots of light bleeding right now (fix through exponential shadow maps)
 - The gaussian blur process is pretty slow
 - And there should be a smoother transition between the umbra and the penumbra
+- It seems like you can render into any output texture, which doesn't make any sense (perhaps both are rendered to?)
+- Doing just one gaussian blur step does nothing
 _____
 
-For only two textures with pingponging:
-- First, both ping pongs with the same fbo
-- Then, one of the ping pongs or the moment texture gone
+Current framebuffer ping pong process:
+1. Render scene, capturing depth moments in the first of the ping-pong textures.
 
-Unoptimized ping-pong, with 3 textures: moment -> pp1, pp1 -> pp2, pp2 -> pp1
-Doing the thing above right now, but pp1 and pp2 share a fbo
-Optimized idea, with 2 textures: moment -> pp1, pp1 -> moment
+2. Then, a gaussian blur process:
+	- First read from the first texture, and blur that horizontally, writing the output to the second texture.
+	- Then read from the second texture, and blur that vertically to the first texture.
 
-- Ideally, just 1 total framebuffer with 2 textures in it
-- So first, 1 framebuffer specific to the blur pass, and then 1 framebuffer in total after (which is done)
+- Apply this blur process as much as needed.
+
+So,
+	render scene -> t0
+	blur t0 -> t1
+	blur t1 -> t0
 */
 
 #include "headers/shadow_map.h"
@@ -137,20 +142,6 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	const GLsizei shadow_map_height, const vec3 light_pos,
 	const GLfloat hori_angle, const GLfloat vert_angle) {
 
-	////////// Generating a texture to hold the two moments
-
-	// Nearest would work if this texture were alone, but ideally, it should be a part of the ping-ponging process
-	GLuint moment_texture;
-	glGenTextures(1, &moment_texture);
-	set_current_texture(TexPlain, moment_texture);
-	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glTexImage2D(TexPlain, 0, MOMENT_TEXTURE_SIZED_FORMAT, shadow_map_width,
-		shadow_map_height, 0, MOMENT_TEXTURE_FORMAT, GL_FLOAT, NULL);
-
 	////////// Generating a render buffer to act as a z-buffer
 
 	GLuint depth_render_buffer;
@@ -158,21 +149,15 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, shadow_map_width, shadow_map_height);
 
-	////////// Defining a framebuffer, and attaching moment texture + depth render buffer to it
-
-	const GLuint framebuffer = init_framebuffer(1, &moment_texture, &depth_render_buffer);
-
-	////////// Initializing what's needed for a gaussian blur pass on the generated variance shadow map
+	////////// Initializing a pair of textures to hold the outputted moment texture, for a 2-texture pingpong blur process
 
 	GLuint ping_pong_textures[2];
 	glGenTextures(2, ping_pong_textures);
 
 	for (byte i = 0; i < 2; i++) {
-		const GLuint ping_pong_texture = ping_pong_textures[i];
+		set_current_texture(TexPlain, ping_pong_textures[i]);
 
-		set_current_texture(TexPlain, ping_pong_texture);
-
-		const bool texture_should_be_mipmapped = i == SHADOW_MAP_BLUR_OUTPUT_TEXTURE_INDEX;
+		const bool texture_should_be_mipmapped = (i == SHADOW_MAP_OUTPUT_TEXTURE_INDEX);
 
 		glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, texture_should_be_mipmapped ? OPENGL_TEX_MIN_FILTER : GL_LINEAR);
@@ -185,8 +170,7 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 		if (texture_should_be_mipmapped) glGenerateMipmap(TexPlain);
 	}
 
-	const GLuint ping_pong_framebuffer = init_framebuffer(2, ping_pong_textures, NULL);
-
+	const GLuint framebuffer = init_framebuffer(2, ping_pong_textures, &depth_render_buffer);
 	disable_current_framebuffer();
 
 	////////// Defining shaders, and getting the light direction
@@ -207,21 +191,19 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 			// `model_view_projection` unset
 		},
 
-		.buffer_size = {shadow_map_width, shadow_map_height},
+		.buffer_context = {
+			.size = {shadow_map_width, shadow_map_height},
+			.framebuffer = framebuffer,
+			.ping_pong_textures = {ping_pong_textures[0], ping_pong_textures[1]}
+		},
 
 		.shadow_pass = {
-			.framebuffer = framebuffer,
-			.moment_texture = moment_texture,
 			.depth_render_buffer = depth_render_buffer,
-
 			.depth_shader = depth_shader,
 			.INIT_UNIFORM(light_model_view_projection, depth_shader)
 		},
 
 		.blur_pass = {
-			.ping_pong_framebuffer = ping_pong_framebuffer,
-			.ping_pong_textures = {ping_pong_textures[0], ping_pong_textures[1]},
-
 			.blur_shader = blur_shader,
 			.INIT_UNIFORM(blurring_horizontally, blur_shader)
 		}
@@ -229,14 +211,13 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 }
 
 void deinit_shadow_map_context(ShadowMapContext* const shadow_map_context) {
-	deinit_texture(shadow_map_context -> shadow_pass.moment_texture);
+	deinit_textures(2, shadow_map_context -> buffer_context.ping_pong_textures);
 	glDeleteRenderbuffers(1, &shadow_map_context -> shadow_pass.depth_render_buffer);
-	deinit_framebuffer(shadow_map_context -> shadow_pass.framebuffer);
-	glDeleteProgram(shadow_map_context -> shadow_pass.depth_shader);
 
-	deinit_textures(2, shadow_map_context -> blur_pass.ping_pong_textures);
-	deinit_framebuffer(shadow_map_context -> blur_pass.ping_pong_framebuffer);
+	glDeleteProgram(shadow_map_context -> shadow_pass.depth_shader);
 	glDeleteProgram(shadow_map_context -> blur_pass.blur_shader);
+
+	deinit_framebuffer(shadow_map_context -> buffer_context.framebuffer);
 }
 
 static void get_model_view_projection_matrix_for_shadow_map(
@@ -259,10 +240,8 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	const GLint blurring_horizontally_id = shadow_map_context -> blur_pass.blurring_horizontally_id;
 
 	const GLuint
-		orig_moment_texture = shadow_map_context -> shadow_pass.moment_texture,
 		blur_shader = shadow_map_context -> blur_pass.blur_shader,
-		ping_pong_framebuffer =  shadow_map_context -> blur_pass.ping_pong_framebuffer,
-		*const ping_pong_textures = shadow_map_context -> blur_pass.ping_pong_textures;
+		*const ping_pong_textures = shadow_map_context -> buffer_context.ping_pong_textures;
 
 	glUseProgram(blur_shader);
 
@@ -271,32 +250,31 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	static bool first_call = 1;
 
 	if (first_call) {
-		const GLsizei* const shadow_map_size = shadow_map_context -> buffer_size;
+		const GLsizei* const shadow_map_size = shadow_map_context -> buffer_context.size;
 		INIT_UNIFORM_VALUE(texel_size, blur_shader, 2f, 1.0f / shadow_map_size[0], 1.0f / shadow_map_size[1]);
-		set_sampler_texture_unit_for_shader("image_sampler", blur_shader, SHADOW_MAP_GENERATION_TEXTURE_UNIT);
+		set_sampler_texture_unit_for_shader("image_sampler", blur_shader, SHADOW_MAP_TEXTURE_UNIT);
 		first_call = 0;
 	}
 
-	set_current_texture_unit(SHADOW_MAP_GENERATION_TEXTURE_UNIT);
-	use_framebuffer(ping_pong_framebuffer);
+	set_current_texture_unit(SHADOW_MAP_TEXTURE_UNIT);
+	glDisable(GL_DEPTH_TEST); // Testing depths from the depth render buffer is not needed
 
 	for (byte i = 0; i < constants.num_shadow_map_blur_passes << 1; i++) {
 		const byte src_texture_index = i & 1;
-		const byte blurring_horizontally = !src_texture_index;
-
-		// For a pass's first horizontal blur step, you write to the second texture; otherwise, the first
-		glDrawBuffer(GL_COLOR_ATTACHMENT0 + blurring_horizontally);
+		const byte dest_texture_index = !src_texture_index;
 
 		// The shader reads from `src_texture`, while the other texture is meanwhile written to.
-		const GLuint src_texture = (i == 0) ? orig_moment_texture : ping_pong_textures[src_texture_index];
-		set_current_texture(TexPlain, src_texture);
+		set_current_texture(TexPlain, ping_pong_textures[src_texture_index]);
 
-		UPDATE_UNIFORM(blurring_horizontally, 1i, blurring_horizontally); // Setting the current horizontal/vertical blur state
+		// For a pass's first horizontal blur step, you write to the second texture; otherwise, the first
+		glDrawBuffer(GL_COLOR_ATTACHMENT0 + dest_texture_index);
+
+		UPDATE_UNIFORM(blurring_horizontally, 1i, dest_texture_index); // Setting the current horizontal/vertical blur state
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
 	}
 
+	glEnable(GL_DEPTH_TEST);
 	glGenerateMipmap(TexPlain); // At this point, the current bound texture will be the output texture
-	disable_current_framebuffer();
 }
 
 static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_context_ref, const byte map_size[2]) {
@@ -315,8 +293,10 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 	UPDATE_UNIFORM(shadow_map_context.shadow_pass.light_model_view_projection,
 		Matrix4fv, 1, GL_FALSE, (GLfloat*) shadow_map_context.light_context.model_view_projection);
 
-	use_framebuffer(shadow_map_context.shadow_pass.framebuffer);
-	glViewport(0, 0, shadow_map_context.buffer_size[0], shadow_map_context.buffer_size[1]);
+	use_framebuffer(shadow_map_context.buffer_context.framebuffer);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0); // Initial rendering of scene moments is written to the first color attachment
+
+	glViewport(0, 0, shadow_map_context.buffer_context.size[0], shadow_map_context.buffer_context.size[1]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
@@ -325,11 +305,11 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 }
 
 static void disable_rendering_to_shadow_map(const int screen_size[2], ShadowMapContext* const shadow_map_context) {
-	// Unbinding the moment framebuffer, turning on backface culling, blurring the shadow map, and resetting the viewport size
-	disable_current_framebuffer();
+	// Turning on backface culling, blurring the shadow map, resetting the viewport size, and unbinding the framebuffer
 	glCullFace(GL_BACK); // This goes before `blur_shadow_map` because otherwise, it interferes with the blurring process
 	blur_shadow_map(shadow_map_context);
 	glViewport(0, 0, screen_size[0], screen_size[1]);
+	disable_current_framebuffer();
 }
 
 void render_all_sectors_to_shadow_map(

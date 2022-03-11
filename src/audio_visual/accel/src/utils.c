@@ -180,7 +180,7 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 		#ifndef USE_VSYNC
 		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) * one_over_performance_freq * 1000.0f;
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
-		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps - 0.5f); // SDL_Delay tends to be late, so 0.5f accounts for that
+		if (wait_for_exact_fps > 12.0f) SDL_Delay((Uint32) (wait_for_exact_fps - 0.5f)); // SDL_Delay tends to be late, so 0.5f accounts for that
 		#endif
 	}
 
