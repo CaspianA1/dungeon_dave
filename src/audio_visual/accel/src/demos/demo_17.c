@@ -141,8 +141,6 @@ StateGL demo_17_init(void) {
 	sgl.any_data = malloc(sizeof(SceneState));
 	memcpy(sgl.any_data, &scene_state, sizeof(SceneState));
 
-	UNWRAP("foo", "bar", "baz");
-
 	return sgl;
 }
 
