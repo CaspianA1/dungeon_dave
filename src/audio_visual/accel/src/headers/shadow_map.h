@@ -8,9 +8,10 @@
 #define MOMENT_TEXTURE_FORMAT GL_RG
 #define MOMENT_TEXTURE_SIZED_FORMAT GL_RG // GL_RG32F
 
-#define SHADOW_MAP_BLUR_OUTPUT_TEXTURE_INDEX 1
+#define SHADOW_MAP_OUTPUT_TEXTURE_INDEX 0
 
-// Shadow maps use variance shadow mapping + gaussian blur in this implementation
+/* Shadow maps use variance shadow mapping + gaussian blur in this implementation.
+Note: a `pass` equals a stage in the shadow map generation process. */
 
 typedef struct {
 	struct {
@@ -18,15 +19,18 @@ typedef struct {
 		mat4 model_view_projection;
 	} light_context;
 
-	const GLsizei buffer_size[2];
+	const struct {
+		const GLsizei size[2];
+		const GLuint framebuffer, ping_pong_textures[2];
+	} buffer_context;
+
+	const struct { // `depth_render_buffer` not in `buffer_context` b/c it's specific to the shadow pass
+		const GLuint depth_render_buffer, depth_shader;
+		const GLint light_model_view_projection_id;
+	} shadow_pass;
 
 	const struct {
-		const GLuint framebuffer, moment_texture, depth_render_buffer, depth_shader;
-		const GLint light_model_view_projection_id;
-	} shadow_pass; // A `pass` equals a stage in the shadow map generation process
-
-	const struct { // TODO: reduce memory usage by perhaps using less textures and fbos
-		const GLuint ping_pong_framebuffer, ping_pong_textures[2], blur_shader;
+		const GLuint blur_shader;
 		const GLint blurring_horizontally_id;
 	} blur_pass;
 } ShadowMapContext;

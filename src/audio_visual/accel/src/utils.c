@@ -4,6 +4,7 @@
 #include "headers/utils.h"
 #include "headers/texture.h"
 #include "headers/constants.h"
+#include "glad/glad.c"
 
 Screen init_screen(const GLchar* const title) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) fail("launch SDL", LaunchSDL);
@@ -41,9 +42,6 @@ Screen init_screen(const GLchar* const title) {
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_WarpMouseInWindow(screen.window, WINDOW_W >> 1, WINDOW_H >> 1);
 
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) fail("initialize glew", LaunchGLEW);
-
 	SDL_GL_SetSwapInterval(
 		#ifdef USE_VSYNC
 		1
@@ -51,6 +49,8 @@ Screen init_screen(const GLchar* const title) {
 		0
 		#endif
 	);
+
+	if (!gladLoadGL()) fail("launch GLAD", LaunchGLAD);
 
 	#ifdef USE_GAMMA_CORRECTION
 	glEnable(GL_FRAMEBUFFER_SRGB);
@@ -180,7 +180,7 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 		#ifndef USE_VSYNC
 		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) * one_over_performance_freq * 1000.0f;
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
-		if (wait_for_exact_fps > 12.0f) SDL_Delay(wait_for_exact_fps - 0.5f); // SDL_Delay tends to be late, so 0.5f accounts for that
+		if (wait_for_exact_fps > 12.0f) SDL_Delay((Uint32) (wait_for_exact_fps - 0.5f)); // SDL_Delay tends to be late, so 0.5f accounts for that
 		#endif
 	}
 
@@ -316,16 +316,15 @@ byte* map_point(byte* const map, const byte x, const byte y, const byte map_widt
 }
 
 const char* get_gl_error(void) {
-	#define ERROR_CASE(error) case error: return #error;
+	#define ERROR_CASE(error) case GL_##error: return #error;
 
 	switch (glGetError()) {
-		ERROR_CASE(GL_NO_ERROR);
-		ERROR_CASE(GL_INVALID_ENUM);
-		ERROR_CASE(GL_INVALID_VALUE);
-		ERROR_CASE(GL_INVALID_OPERATION);
-		ERROR_CASE(GL_INVALID_FRAMEBUFFER_OPERATION);
-		ERROR_CASE(GL_STACK_UNDERFLOW);
-		ERROR_CASE(GL_STACK_OVERFLOW);
+		ERROR_CASE(NO_ERROR);
+		ERROR_CASE(INVALID_ENUM);
+		ERROR_CASE(INVALID_VALUE);
+		ERROR_CASE(INVALID_OPERATION);
+		ERROR_CASE(OUT_OF_MEMORY);
+		ERROR_CASE(INVALID_FRAMEBUFFER_OPERATION);
 		default: return "Unknown error";
 	}
 

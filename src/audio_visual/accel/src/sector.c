@@ -175,11 +175,9 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(min_shadow_variance, sector_shader, 1f, 0.000053f); // 0.000785f, 0.000005f
 		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.415f); // 0.2f, 0.65f
 
-		const GLuint blurred_moment_texture = shadow_map_context
-			-> blur_pass.ping_pong_textures[SHADOW_MAP_BLUR_OUTPUT_TEXTURE_INDEX];
-
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
-		use_texture(blurred_moment_texture, sector_shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
+		// `use_texture` not called since the shadow map output has already been bound to the texture unit in shadow_map.c
+		set_sampler_texture_unit_for_shader("shadow_map_sampler", sector_shader, SHADOW_MAP_TEXTURE_UNIT);
 
 		first_call = false;
 	}

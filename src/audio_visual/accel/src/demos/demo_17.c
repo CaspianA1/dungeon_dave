@@ -6,9 +6,7 @@
 #include "../billboard.c"
 #include "../camera.c"
 #include "../event.c"
-
 #include "../overlay.c"
-
 #include "../shadow_map.c"
 
 typedef struct {

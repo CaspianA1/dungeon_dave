@@ -1,6 +1,6 @@
 #include "../utils.c"
 
-// SDL2, SDL2_ttf, SDL2_mixer, OpenGL, glew, cglm
+// SDL2, SDL2_ttf, SDL2_mixer, OpenGL, glad, cglm
 
 void demo_1_init_vertex_data(StateGL* const sgl) {
 	const GLfloat triangle_data[9] = {
