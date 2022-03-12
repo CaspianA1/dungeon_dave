@@ -16,7 +16,7 @@ View frustum calculation:
 - Then, make a cuboid extending from that plane to capture the whole world
 
 - Later, depending on the size of the frustum, change the size of the light texture
-- Lots of light bleeding right now (fix through exponential shadow maps)
+- Lots of light bleeding right now (EVSM should work as a robust solution - it seems to be the best statistical method)
 - The gaussian blur process is pretty slow
 - And there should be a smoother transition between the umbra and the penumbra
 - It seems like you can render into any output texture, which doesn't make any sense (perhaps both are rendered to?)
@@ -33,6 +33,15 @@ Current framebuffer ping pong process:
 - Apply this blur process as much as needed.
 
 So: render scene -> t0, blur t0 -> t1, blur t1 -> t0
+
+_____
+
+A collection of resources connected to VSM and EVSM:
+https://stackoverflow.com/questions/36811775/opengl-exponential-shadow-mapping-esm-artifact
+
+ESM paper: https://jankautz.com/publications/esm_gi08.pdf
+EVSM paper: https://uwspace.uwaterloo.ca/bitstream/handle/10012/3640/andrew_lauritzen_mmath_thesis.pdf;jsessionid=CFB10C588B5C21D0437C4E74136E02BB?sequence=1
+A shadow technique presentation: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
 */
 
 #include "headers/shadow_map.h"
@@ -92,8 +101,7 @@ const GLchar *const depth_vertex_shader =
 	"uniform sampler2D image_sampler;\n"
 
 	"#define KERNEL_SIZE 5\n"
-
-	"const float weights[KERNEL_SIZE] = float[5](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);\n"
+	"const float weights[KERNEL_SIZE] = float[KERNEL_SIZE](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);\n"
 
 	"void main(void) {\n"
 		"blurred_moments = texture(image_sampler, fragment_UV).rg * weights[0];\n"

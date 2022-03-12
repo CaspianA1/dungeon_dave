@@ -71,8 +71,8 @@ const GLchar *const sector_vertex_shader =
 		"return specular_strength * pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
 	"}\n"
 
-	"float linstep(float v, float low, float high) {\n"
-		"float lerped = (v - low) / (high - low);\n"
+	"float linstep(float v, float min, float max) {\n"
+		"float lerped = (v - min) / (max - min);\n"
 		"return clamp(lerped, 0.0f, 1.0f);\n"
 	"}\n"
 
@@ -81,14 +81,14 @@ const GLchar *const sector_vertex_shader =
 		"vec2 moments = texture(shadow_map_sampler, proj_coords.xy).rg;\n"
 
 		"float\n"
-			"depth = proj_coords.z,\n"
+			"d = proj_coords.z - moments.x,\n" // `d` equals the distance between the receiver (depth) and the occluder (moments.x)
 			"variance = max(moments.y - moments.x * moments.x, min_shadow_variance);\n"
+			// "variance = moments.y - moments.x * moments.x;\n"
 
-		"float d = depth - moments.x;\n" // `d` equals the distance between the receiver (depth) and the occluder (moments.x)
-		"float p_max = variance / (variance + (d * d));\n"
-		"p_max = linstep(p_max, light_bleed_reduction_factor, 1.0f);\n" // Using linstep to reduce light bleeding
+		// "float p_max = variance / (variance + (d * d));\n"
+		"float p_max = linstep(variance / (variance + (d * d)), light_bleed_reduction_factor, 1.0f);\n" // Using linstep to reduce light bleeding
 
-		"return (depth <= moments.x) ? 1.0f : p_max;\n"
+		"return (d < 0.0f) ? 1.0f : p_max;\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
