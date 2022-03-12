@@ -22,7 +22,7 @@ SDL_Surface* init_surface(const GLchar* const path) {
 	}
 }
 
-////////// Texture state setting
+////////// Texture state setting utilities
 
 void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader_program, const byte texture_unit) {
 	INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(sampler_name, shader_program, 1i, texture_unit); // Sets texture unit for shader
