@@ -34,6 +34,7 @@ Current framebuffer ping pong process:
 
 So: render scene -> t0, blur t0 -> t1, blur t1 -> t0
 
+Or, do ping-ponging differently? https://www.khronos.org/opengl/wiki/Memory_Model#Framebuffer_objects
 _____
 
 A collection of resources connected to VSM and EVSM:
@@ -277,9 +278,8 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 		UPDATE_UNIFORM(blurring_horizontally, 1i, dest_texture_index); // Setting the current horizontal/vertical blur state
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
 	}
-
-	glEnable(GL_DEPTH_TEST);
 	glGenerateMipmap(TexPlain); // At this point, the current bound texture will be the output texture
+	glEnable(GL_DEPTH_TEST);
 }
 
 static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_context_ref, const byte map_size[2]) {
