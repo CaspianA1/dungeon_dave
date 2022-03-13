@@ -41,6 +41,7 @@ Other random ideas:
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit)
 - File paths may not work on Windows
 - Handle the possible failure of getting the anisotropic filtering extension differently, now that I'm using glad
+- Parallax mapping (?)
 
 A better shading model:
 - Macros for generation of objects, like GL_INIT(Buffer) for example
