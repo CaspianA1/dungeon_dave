@@ -33,7 +33,6 @@ Other random ideas:
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 - Perhaps store texture id map as a texture for a shader to read, instead of embedding 5 bytes for vertices
 	(perhaps use those bytes for a specular exponent) (or, use texture id to index into a specular map (or a list of floats) as well)
-- Maybe a 25th demo, that tests rendering to texture for later variance shadow maps
 - Bug: when tilting enough, billboards become flat across
 - Sliding across the floor (with the head tilted up)
 - Make 255 a shared constant
@@ -41,6 +40,7 @@ Other random ideas:
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit)
 - File paths may not work on Windows
 - Handle the possible failure of getting the anisotropic filtering extension differently, now that I'm using glad
+- Parallax mapping or bump mapping (?)
 
 A better shading model:
 - Macros for generation of objects, like GL_INIT(Buffer) for example

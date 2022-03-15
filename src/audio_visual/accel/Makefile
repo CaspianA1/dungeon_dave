@@ -9,7 +9,7 @@ TEST_RANGE = 20..23
 OUT = accel_demo
 
 CONVERSION_WARNINGS = -Wfloat-conversion -Wdouble-promotion -Wsign-conversion -Wimplicit-int-conversion -Wshorten-64-to-32
-WARNINGS = -Wall -Wextra -Wdouble-promotion -Wpedantic -Wformat $(CONVERSION_WARNINGS)
+WARNINGS = -Wall -Wextra -Wpedantic -Wformat $(CONVERSION_WARNINGS)
 CFLAGS = -std=c99 $(WARNINGS)
 
 NON_GL_LDFLAGS = $$(pkg-config --cflags --libs sdl2) -lm
