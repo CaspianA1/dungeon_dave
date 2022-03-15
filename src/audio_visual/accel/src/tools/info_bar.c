@@ -46,10 +46,10 @@ static void update_info_bar_text(const EditorState* const eds,
 	char* text_buffer = *text_buffer_ref;
 
 	if (text_buffer == NULL) {
-		const size_t num_bytes = snprintf(NULL, 0, info_bar_format,
+		const int num_bytes = snprintf(NULL, 0, info_bar_format,
 			map_name, map_x, map_y, edit_mode, editor_placement_val, edit_state);
 
-		text_buffer = malloc(num_bytes + 1);
+		text_buffer = malloc((size_t) (num_bytes + 1));
 	}
 
 	sprintf(text_buffer, info_bar_format,
@@ -84,7 +84,7 @@ void render_info_bar(InfoBar* const info_bar, const EditorState* const eds) {
 	const int
 		glyph_src_width = info_bar -> font_texture_size[0] / FONT_GLYPH_COUNT,
 		glyph_src_height = info_bar -> font_texture_size[1],
-		glyph_dest_width = info_bar_area.w / strlen(info_bar -> text);
+		glyph_dest_width = info_bar_area.w / (int) strlen(info_bar -> text);
 
 	for (const char* c_ref = info_bar -> text; *c_ref != '\0'; c_ref++) {
 		const char c = *c_ref;
@@ -96,8 +96,14 @@ void render_info_bar(InfoBar* const info_bar, const EditorState* const eds) {
 		else continue;
 
 		const SDL_Rect
-			src_crop = {letter_index * glyph_src_width, 0, glyph_src_width, glyph_src_height},
-			dest_crop = {(c_ref - info_bar -> text) * glyph_dest_width, EDITOR_MAP_SECTION_HEIGHT, glyph_dest_width, info_bar_area.h};
+			src_crop = {
+				letter_index * glyph_src_width, 0,
+				glyph_src_width, glyph_src_height
+			},
+			dest_crop = {
+				(int) (c_ref - info_bar -> text) * glyph_dest_width, EDITOR_MAP_SECTION_HEIGHT,
+				glyph_dest_width, info_bar_area.h
+			};
 
 		SDL_RenderCopy(renderer, info_bar -> font_texture, &src_crop, &dest_crop);
 	}

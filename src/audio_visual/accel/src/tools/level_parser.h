@@ -21,7 +21,7 @@ const struct {
 typedef struct {
 	const char* const name;
 	char* const data;
-	const long num_bytes;
+	const size_t num_bytes;
 } FileContents;
 
 //////////

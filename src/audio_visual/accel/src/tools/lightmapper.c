@@ -3,6 +3,7 @@
 #define PIXEL_FORMAT SDL_PIXELFORMAT_INDEX8
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
+typedef uint8_t byte;
 typedef uint64_t integer_t;
 typedef double floating_t;
 
@@ -23,10 +24,10 @@ const floating_t
 
 SDL_Surface* init_grayscale_surface(const integer_t size[2]) {
 	SDL_Surface* const grayscale = SDL_CreateRGBSurfaceWithFormat(0,
-		size[0], size[1], SDL_BITSPERPIXEL(PIXEL_FORMAT), PIXEL_FORMAT);
+		(int) size[0], (int) size[1], SDL_BITSPERPIXEL(PIXEL_FORMAT), PIXEL_FORMAT);
 
 	SDL_Color palette[num_grayscale_colors];
-	for (integer_t i = 0; i < num_grayscale_colors; i++) palette[i] = (SDL_Color) {i, i, i, 255};
+	for (integer_t i = 0; i < num_grayscale_colors; i++) palette[i] = (SDL_Color) {(byte) i, (byte) i, (byte) i, 255};
 	SDL_SetPaletteColors(grayscale -> format -> palette, palette, 0, num_grayscale_colors);	
 
 	return grayscale;
@@ -59,7 +60,7 @@ floating_t noise_from_samples(const integer_t cx, const integer_t cy, const mat4
 }
 
 floating_t lerp_noise(const vec2 pos) {
-	const integer_t ix = pos[0], iy = pos[1];
+	const integer_t ix = (integer_t) pos[0], iy = (integer_t) pos[1];
 
 	const mat4 samples = {
 		{noise(ix - 1ull, iy - 1ull), noise(ix, iy - 1ull), noise(ix + 1ull, iy - 1ull), noise(ix + 2ull, iy - 1ull)},
@@ -102,8 +103,10 @@ SDL_Surface* make_perlin_map(const integer_t size[2]) {
 
 	for (integer_t y = 0ull; y < size[1]; y++, index_row += bytes_per_row) {
 		const floating_t downscaled_y = y * downscale_vals[1];
-		for (integer_t x = 0ull; x < size[0]; x++)
-			index_row[x] = perlin_2D((vec2) {x * downscale_vals[0], downscaled_y}) * num_grayscale_colors;
+		for (integer_t x = 0ull; x < size[0]; x++) {
+			const floating_t perlin_value = perlin_2D((vec2) {x * downscale_vals[0], downscaled_y});
+			index_row[x] = (byte) (perlin_value * num_grayscale_colors);
+		}
 	}
 
 	SDL_UnlockSurface(perlin_map);
@@ -119,7 +122,7 @@ SDL_Surface* make_perlin_map(const integer_t size[2]) {
 //////////
 SDL_Surface* make_grayscale_surface_from(const char* const path) {
 	SDL_Surface* const src = SDL_LoadBMP(path);
-	SDL_Surface* const grayscale = init_grayscale_surface((integer_t[2]) {src -> w, src -> h});
+	SDL_Surface* const grayscale = init_grayscale_surface((integer_t[2]) {(integer_t) src -> w, (integer_t) src -> h});
 	SDL_BlitSurface(src, NULL, grayscale, NULL);
 	SDL_FreeSurface(src);
 	return grayscale;

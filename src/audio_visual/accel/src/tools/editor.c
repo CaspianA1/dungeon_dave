@@ -70,7 +70,7 @@ static void update_editing_placement_values(EditorState* const eds, const SDL_Ev
 
 	if (key == SDLK_RETURN && num_chars_inputted != 0) number_input_done = true;
 	else if (key >= SDLK_0 && key <= SDLK_9) {
-		number_input_chars[num_chars_inputted] = key;
+		number_input_chars[num_chars_inputted] = (char) key;
 		if (++num_chars_inputted == 3) number_input_done = true;
 	}
 	else num_chars_inputted = 0;
@@ -84,7 +84,7 @@ static void update_editing_placement_values(EditorState* const eds, const SDL_Ev
 		const byte max_texture_id = eds -> num_textures - 1; // Avoiding too big of a texture id
 		if (eds -> in_texture_editing_mode) number = (number > max_texture_id) ? max_texture_id : number;
 
-		*(eds -> in_texture_editing_mode ? &eds -> editor_texture_id : &eds -> editor_height) = number;
+		*(eds -> in_texture_editing_mode ? &eds -> editor_texture_id : &eds -> editor_height) = (byte) number;
 	}
 }
 
@@ -125,8 +125,8 @@ static void render_eds_map(const EditorState* const eds) {
 		scr_blocks_down = (float) EDITOR_MAP_SECTION_HEIGHT / map_height;
 
 	const int
-		ceil_src_blocks_across = ceilf(scr_blocks_across),
-		ceil_src_blocks_down = ceilf(scr_blocks_down);
+		ceil_src_blocks_across = (int) ceilf(scr_blocks_across),
+		ceil_src_blocks_down = (int) ceilf(scr_blocks_down);
 
 	byte highest_point = 0;
 	for (uint16_t i = 0; i < map_width * map_height; i++) {
@@ -141,12 +141,12 @@ static void render_eds_map(const EditorState* const eds) {
 			SDL_Texture* const texture = eds -> textures[*map_point(eds, 0, map_x, map_y)];
 
 			const SDL_Rect block_pos = {
-				map_x * scr_blocks_across, map_y * scr_blocks_down,
+				(int) (map_x * scr_blocks_across), (int) (map_y * scr_blocks_down),
 				ceil_src_blocks_across, ceil_src_blocks_down
 			};
 
 			const float height_ratio = (float) *map_point(eds, 1, map_x, map_y) / highest_point;
-			byte height_shade = height_ratio * height_shade_range + SMALLEST_HEIGHT_SHADE;
+			byte height_shade = (byte) (height_ratio * height_shade_range + SMALLEST_HEIGHT_SHADE);
 
 			// Selected block shaded more. Condition will equal 1 or 0, and right shift by 1 divides by 2.
 			height_shade >>= (mouse_x >= block_pos.x && mouse_x < block_pos.x + block_pos.w
@@ -190,11 +190,11 @@ static void editor_loop(EditorState* const eds) {
 
 		SDL_GetMouseState(eds -> mouse_pos, eds -> mouse_pos + 1);
 
-		eds -> tile_pos[0] = (float) eds -> mouse_pos[0] / EDITOR_WIDTH * eds -> map_size[0];
+		eds -> tile_pos[0] = (byte) ((float) eds -> mouse_pos[0] / EDITOR_WIDTH * eds -> map_size[0]);
 
-		int16_t tile_pos_y = (float) eds -> mouse_pos[1] / EDITOR_MAP_SECTION_HEIGHT * eds -> map_size[1];
+		int16_t tile_pos_y = (int16_t) ((float) eds -> mouse_pos[1] / EDITOR_MAP_SECTION_HEIGHT * eds -> map_size[1]);
 		if (tile_pos_y >= eds -> map_size[1]) tile_pos_y = eds -> map_size[1] - 1;
-		eds -> tile_pos[1] = tile_pos_y;
+		eds -> tile_pos[1] = (byte) tile_pos_y;
 
 		edit_eds_map(eds);
 		SDL_RenderClear(renderer);
@@ -202,9 +202,9 @@ static void editor_loop(EditorState* const eds) {
 		render_info_bar(&info_bar, eds);
 		SDL_RenderPresent(renderer);
 
-		const Uint32 ms_elapsed = SDL_GetTicks() - before;
+		const int16_t ms_elapsed = (int16_t) (SDL_GetTicks() - before);
 		const int16_t wait_for_exact_fps = max_delay - ms_elapsed;
-		if (wait_for_exact_fps > 0) SDL_Delay(wait_for_exact_fps);
+		if (wait_for_exact_fps > 0) SDL_Delay((Uint32) wait_for_exact_fps);
 	}
 }
 
