@@ -61,6 +61,7 @@ StateGL demo_17_init(void) {
 	};
 
 	//////////
+
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
 		scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size);
@@ -130,7 +131,7 @@ StateGL demo_17_init(void) {
 		"../../../../assets/walls/hieroglyphics.bmp",
 		"../../../../assets/walls/desert_snake.bmp",
 		"../../../../assets/wolf/colorstone.bmp" */
-		);
+	);
 
 	enable_all_culling();
 	glEnable(GL_MULTISAMPLE);
