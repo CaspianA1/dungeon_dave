@@ -49,7 +49,9 @@ StateGL demo_18_init(void) {
 
 	sgl.num_textures = 1; // ../../../../assets/walls/sand.bmp, ../../../../assets/walls/hieroglyph.bmp, ../assets/water.bmp
 	sgl.textures = malloc(sizeof(GLuint));
-	*sgl.textures = init_plain_texture("../assets/lava.bmp", TexPlain, TexRepeating, TexLinear, TexBilinear, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
+	*sgl.textures = init_plain_texture("../assets/lava.bmp", TexPlain, TexRepeating,
+		TexLinear, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
+
 	use_texture(*sgl.textures, sgl.shader_program, "texture_sampler", TexPlain, 0);
 
 	return sgl;

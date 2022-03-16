@@ -21,13 +21,13 @@
 //////////
 
 #define OPENGL_HUD_MAG_FILTER TexLinear
-#define OPENGL_HUD_MIN_FILTER TexBilinear
+#define OPENGL_HUD_MIN_FILTER TexLinearMipmapped
 
 #define OPENGL_SCENE_MAG_FILTER TexLinear
 #define OPENGL_SCENE_MIN_FILTER TexTrilinear
 
 // Mip level should not change per skybox, so no trilinear needed
-#define OPENGL_SKYBOX_MIN_FILTER TexBilinear
+#define OPENGL_SKYBOX_MIN_FILTER TexLinearMipmapped
 
 #define OPENGL_SHADOW_MAP_MAG_FILTER TexLinear
 #define OPENGL_SHADOW_MAP_MIN_FILTER TexTrilinear
@@ -62,7 +62,7 @@ typedef enum {
 typedef enum {
 	TexNearest = GL_NEAREST,
 	TexLinear = GL_LINEAR,
-	TexBilinear = GL_LINEAR_MIPMAP_NEAREST,
+	TexLinearMipmapped = GL_LINEAR_MIPMAP_NEAREST,
 	TexTrilinear = GL_LINEAR_MIPMAP_LINEAR
 } TextureFilterMode;
 
