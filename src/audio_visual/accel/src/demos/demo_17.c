@@ -108,7 +108,7 @@ StateGL demo_17_init(void) {
 		"../../../../assets/walls/stone_2.bmp" */
 
 		// Palace:
-		11, 0, 128, 128,
+		11, 0, 256, 256,
 		"../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
 		"../../../../assets/walls/window.bmp", "../../../../assets/walls/saqqara.bmp",
