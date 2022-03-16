@@ -63,8 +63,8 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat secs_per_frame
 	deinit_surface(peek_surface);
 
 	return (WeaponSprite) {
-		.texture = init_texture_set(TexNonRepeating, 0, 1, frame_size[0],
-			frame_size[1], spritesheet_path, frames_across, frames_down, total_frames),
+		.texture = init_texture_set(TexNonRepeating, OPENGL_HUD_MAG_FILTER, OPENGL_HUD_MIN_FILTER,
+			0, 1, frame_size[0], frame_size[1], spritesheet_path, frames_across, frames_down, total_frames),
 
 		.shader = init_shader_program(weapon_sprite_vertex_shader, weapon_sprite_fragment_shader),
 

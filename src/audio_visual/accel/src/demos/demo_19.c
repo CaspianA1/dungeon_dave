@@ -94,7 +94,7 @@ StateGL demo_19_init(void) {
 	sgl.textures = malloc(sizeof(GLuint));
 
 	*sgl.textures = init_plain_texture("../../../../assets/walls/mesa.bmp", TexPlain,
-		TexRepeating, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
+		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
 	use_texture(*sgl.textures, sgl.shader_program, "texture_sampler", TexPlain, 0);
 

@@ -42,14 +42,15 @@ void use_texture(const GLuint texture, const GLuint shader_program,
 
 //////////
 
-GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode) {
+GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
+	const TextureFilterMode mag_filter, const TextureFilterMode min_filter) {
+
 	GLuint texture;
 	glGenTextures(1, &texture);
 	set_current_texture(type, texture);
 
-	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, OPENGL_TEX_MAG_FILTER);
-	glTexParameteri(type, GL_TEXTURE_MIN_FILTER,
-		(type == TexSkybox) ? OPENGL_SKYBOX_TEX_MIN_FILTER : OPENGL_TEX_MIN_FILTER);
+	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, (GLint) mag_filter);
+	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, (GLint) min_filter);
 
 	const GLint cast_wrap_mode = (GLint) wrap_mode;
 	glTexParameteri(type, GL_TEXTURE_WRAP_S, cast_wrap_mode);
@@ -76,15 +77,16 @@ void write_surface_to_texture(SDL_Surface* const surface,
 
 	glTexImage2D(type, 0, internal_format,
 		surface -> w, surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
-		GL_UNSIGNED_BYTE, surface -> pixels);
+		OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
 
 	if (must_lock) SDL_UnlockSurface(surface);
 }
 
 GLuint init_plain_texture(const GLchar* const path, const TextureType type,
-	const TextureWrapMode wrap_mode, const GLint internal_format) {
+	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
+	const TextureFilterMode min_filter, const GLint internal_format) {
 
-	const GLuint texture = preinit_texture(type, wrap_mode);
+	const GLuint texture = preinit_texture(type, wrap_mode, mag_filter, min_filter);
 	SDL_Surface* const surface = init_surface(path);
 
 	write_surface_to_texture(surface, TexPlain, internal_format);
@@ -153,7 +155,8 @@ static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_
 }
 
 // Unanimated sprites should go first when passed in variadically
-GLuint init_texture_set(const TextureWrapMode wrap_mode, const GLsizei num_still_subtextures,
+GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
+	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h, ...) {
 
 	if (num_still_subtextures > MAX_NUM_SECTOR_SUBTEXTURES)
@@ -180,7 +183,7 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const GLsizei num_still
 	////////// Defining texture and rescaled surface
 
 	const GLsizei total_num_subtextures = num_still_subtextures + num_animated_frames;
-	const GLuint texture = preinit_texture(TexSet, wrap_mode);
+	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter);
 
 	glTexImage3D(TexSet, 0, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, rescale_w,
 		rescale_h, total_num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,

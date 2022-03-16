@@ -92,7 +92,7 @@ DepthBufferCapture init_depth_buffer_capture(const GLint texture_width, const GL
 	DepthBufferCapture depth_capture = {
 		.texture_size = {texture_width, texture_height},
 		.shader = init_shader_program(depth_map_vertex_shader, depth_map_fragment_shader),
-		.texture = preinit_texture(TexPlain, TexNonRepeating)
+		.texture = preinit_texture(TexPlain, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER)
 	};
 
 	glTexImage2D(TexPlain, 0, GL_DEPTH_COMPONENT, texture_width, texture_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);

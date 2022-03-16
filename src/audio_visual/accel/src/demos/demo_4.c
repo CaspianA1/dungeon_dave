@@ -14,7 +14,7 @@ GLuint* init_plain_textures(const GLsizei num_textures, ...) {
 		const GLchar* const surface_path = va_arg(args, GLchar*);
 		const TextureWrapMode wrap_mode = va_arg(args, TextureWrapMode);
 
-		textures[i] = preinit_texture(TexPlain, wrap_mode);
+		textures[i] = preinit_texture(TexPlain, wrap_mode, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER);
 		SDL_Surface* const surface = init_surface(surface_path);
 		write_surface_to_texture(surface, TexPlain, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 		glGenerateMipmap(TexPlain);

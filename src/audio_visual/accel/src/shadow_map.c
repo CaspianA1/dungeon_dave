@@ -158,22 +158,18 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	////////// Initializing a pair of textures to hold the outputted moment texture, for a 2-texture pingpong blur process
 
 	GLuint ping_pong_textures[2];
-	glGenTextures(2, ping_pong_textures);
 
 	for (byte i = 0; i < 2; i++) {
-		set_current_texture(TexPlain, ping_pong_textures[i]);
+		const bool make_mipmap = (i == SHADOW_MAP_OUTPUT_TEXTURE_INDEX);
 
-		const bool texture_should_be_mipmapped = (i == SHADOW_MAP_OUTPUT_TEXTURE_INDEX);
-
-		glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, texture_should_be_mipmapped ? OPENGL_TEX_MIN_FILTER : GL_LINEAR);
-		glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		ping_pong_textures[i] = preinit_texture(
+			TexPlain, TexNonRepeating, OPENGL_SHADOW_MAP_MAG_FILTER,
+			make_mipmap ? OPENGL_SHADOW_MAP_MIN_FILTER : OPENGL_SHADOW_MAP_MAG_FILTER);
 
 		glTexImage2D(TexPlain, 0, MOMENT_TEXTURE_SIZED_FORMAT, shadow_map_width,
 			shadow_map_height, 0, MOMENT_TEXTURE_FORMAT, GL_FLOAT, NULL);
 
-		if (texture_should_be_mipmapped) glGenerateMipmap(TexPlain);
+		if (make_mipmap) glGenerateMipmap(TexPlain);
 	}
 
 	const GLuint framebuffer = init_framebuffer(2, ping_pong_textures, &depth_render_buffer);

@@ -20,11 +20,20 @@
 
 //////////
 
-#define OPENGL_TEX_MAG_FILTER GL_LINEAR
+#define OPENGL_HUD_MAG_FILTER TexLinear
+#define OPENGL_HUD_MIN_FILTER TexBilinear
 
-#define OPENGL_TEX_MIN_FILTER GL_LINEAR_MIPMAP_LINEAR
+#define OPENGL_SCENE_MAG_FILTER TexLinear
+#define OPENGL_SCENE_MIN_FILTER TexTrilinear
+
 // Mip level should not change per skybox, so no trilinear needed
-#define OPENGL_SKYBOX_TEX_MIN_FILTER GL_LINEAR_MIPMAP_NEAREST
+#define OPENGL_SKYBOX_MIN_FILTER TexBilinear
+
+#define OPENGL_SHADOW_MAP_MAG_FILTER TexLinear
+#define OPENGL_SHADOW_MAP_MIN_FILTER TexTrilinear
+
+//////////
+
 #define ENABLE_ANISOTROPIC_FILTERING
 
 /* There's five bits to store a texture id in a face mesh's face info byte,
@@ -50,6 +59,13 @@ typedef enum {
 	TexNonRepeating = GL_CLAMP_TO_EDGE
 } TextureWrapMode;
 
+typedef enum {
+	TexNearest = GL_NEAREST,
+	TexLinear = GL_LINEAR,
+	TexBilinear = GL_LINEAR_MIPMAP_NEAREST,
+	TexTrilinear = GL_LINEAR_MIPMAP_LINEAR
+} TextureFilterMode;
+
 // Excluded: init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 
 #define deinit_texture(t) glDeleteTextures(1, &(t))
@@ -67,15 +83,18 @@ void set_current_texture_unit(const byte texture_unit);
 void use_texture(const GLuint texture, const GLuint shader_program,
 	const GLchar* const sampler_name, const TextureType type, const byte texture_unit);
 
-GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode);
+GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
+	const TextureFilterMode mag_filter, const TextureFilterMode min_filter);
 
 void write_surface_to_texture(SDL_Surface* const surface,
 	const TextureType type, const GLint internal_format);
 
 GLuint init_plain_texture(const GLchar* const path, const TextureType type,
-	const TextureWrapMode wrap_mode, const GLint internal_format);
+	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
+	const TextureFilterMode min_filter, const GLint internal_format);
 
-GLuint init_texture_set(const TextureWrapMode wrap_mode, const GLsizei num_still_subtextures,
+GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
+	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h, ...);
 
 #endif
