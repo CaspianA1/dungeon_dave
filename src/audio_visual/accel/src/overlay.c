@@ -51,9 +51,9 @@ const GLchar *const weapon_sprite_vertex_shader =
 		"color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
 	"}\n";
 
-WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat secs_per_frame,
-	const GLchar* const spritesheet_path, const GLsizei frames_across,
-	const GLsizei frames_down, const GLsizei total_frames) {
+WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
+	const GLfloat secs_per_frame, const GLchar* const spritesheet_path,
+	const GLsizei frames_across, const GLsizei frames_down, const GLsizei total_frames) {
 
 	/* It's a bit wasteful to load the surface in init_texture_set
 	and here, but this makes the code much more readable */
@@ -63,8 +63,11 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat secs_per_frame
 	deinit_surface(peek_surface);
 
 	return (WeaponSprite) {
-		.texture = init_texture_set(TexNonRepeating, OPENGL_HUD_MAG_FILTER, OPENGL_HUD_MIN_FILTER,
-			0, 1, frame_size[0], frame_size[1], spritesheet_path, frames_across, frames_down, total_frames),
+		.texture = init_texture_set(TexNonRepeating,
+			OPENGL_HUD_MAG_FILTER, OPENGL_HUD_MIN_FILTER, 0, 1,
+			(GLsizei) (frame_size[0] * texture_rescale_factor),
+			(GLsizei) (frame_size[1] * texture_rescale_factor),
+			spritesheet_path, frames_across, frames_down, total_frames),
 
 		.shader = init_shader_program(weapon_sprite_vertex_shader, weapon_sprite_fragment_shader),
 

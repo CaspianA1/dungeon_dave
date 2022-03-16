@@ -17,9 +17,9 @@ typedef struct {
 
 // Excluded: circular_mapping_from_zero_to_one, update_weapon_sprite
 
-WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat secs_per_frame,
-	const GLchar* const spritesheet_path, const GLsizei frames_across,
-	const GLsizei frames_down, const GLsizei total_frames);
+WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
+	const GLfloat secs_per_frame, const GLchar* const spritesheet_path,
+	const GLsizei frames_across, const GLsizei frames_down, const GLsizei total_frames);
 
 void deinit_weapon_sprite(const WeaponSprite* const ws);
 void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera, const Event* const event);

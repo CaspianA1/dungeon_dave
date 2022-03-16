@@ -33,9 +33,9 @@ StateGL demo_17_init(void) {
 			0.518362f, -1.225221f
 		),
 
-		.weapon_sprite = init_weapon_sprite(0.5f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
-		// .weapon_sprite = init_weapon_sprite(0.65f, 0.016f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
-		// .weapon_sprite = init_weapon_sprite(0.65f, 0.035f, "../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59),
+		.weapon_sprite = init_weapon_sprite(0.5f, 2.0f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
+		// .weapon_sprite = init_weapon_sprite(0.65f, 2.0f, 0.016f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
+		// .weapon_sprite = init_weapon_sprite(0.65f, 2.0f, 0.035f, "../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59),
 
 		.billboard_animations = LIST_INITIALIZER(animation) (4,
 			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
@@ -85,7 +85,7 @@ StateGL demo_17_init(void) {
 	);
 
 	scene_state.billboard_draw_context.texture_set = init_texture_set(
-		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, 2, 4, 128, 128,
+		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, 2, 4, 256, 256,
 
 		"../../../../assets/objects/health_kit.bmp",
 		"../../../../assets/objects/teleporter.bmp",
