@@ -42,7 +42,6 @@ Other random ideas:
 - Handle the possible failure of getting the anisotropic filtering extension differently, now that I'm using glad
 - Parallax mapping or bump mapping (?)
 - Some steeply angled shadows exhibit aliasing
-- Perhaps a better linear filter for pixel art
 
 A better shading model:
 - Macros for generation of objects, like GL_INIT(Buffer) for example
