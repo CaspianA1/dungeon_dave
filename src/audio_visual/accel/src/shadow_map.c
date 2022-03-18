@@ -269,12 +269,13 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 		// The shader reads from `src_texture`, while the other texture is meanwhile written to.
 		set_current_texture(TexPlain, ping_pong_textures[src_texture_index]);
 
-		// For a pass's first horizontal blur step, you write to the second texture; otherwise, the first
+		// For a pass's first horizontal blur step, you write to the second texture; otherwise, the first.
 		glDrawBuffer(GL_COLOR_ATTACHMENT0 + dest_texture_index);
 
 		UPDATE_UNIFORM(blurring_horizontally, 1i, dest_texture_index); // Setting the current horizontal/vertical blur state
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
 	}
+
 	glGenerateMipmap(TexPlain); // At this point, the current bound texture will be the output texture
 	glEnable(GL_DEPTH_TEST);
 }
