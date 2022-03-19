@@ -76,12 +76,9 @@ const GLchar *const sector_vertex_shader =
 		"return clamp(lerped, 0.0f, 1.0f);\n"
 	"}\n"
 
-	"float one_minus_shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
-		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
-		"vec2 moments = texture(shadow_map_sampler, proj_coords.xy).rg;\n"
-
+	"float chebyshev(float depth, vec2 moments) {\n"
 		"float\n"
-			"d = proj_coords.z - moments.x,\n" // `d` equals the distance between the receiver (depth) and the occluder (moments.x)
+			"d = depth - moments.x,\n" // `d` = distance between receiver (depth) and occluder (moments.x)
 			"variance = max(moments.y - moments.x * moments.x, min_shadow_variance);\n"
 			// "variance = moments.y - moments.x * moments.x;\n"
 
@@ -89,6 +86,13 @@ const GLchar *const sector_vertex_shader =
 		"float p_max = linstep(variance / (variance + (d * d)), light_bleed_reduction_factor, 1.0f);\n" // Using linstep to reduce light bleeding
 
 		"return (d < 0.0f) ? 1.0f : p_max;\n"
+	"}\n"
+
+	"float one_minus_shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
+		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
+		"vec2 moments = texture(shadow_map_sampler, proj_coords.xy).rg;\n"
+
+		"return chebyshev(proj_coords.z, moments);\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
