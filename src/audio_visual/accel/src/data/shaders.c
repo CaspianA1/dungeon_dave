@@ -25,9 +25,10 @@ const GLchar *const sector_vertex_shader =
 		"FaceAttribute(vec3(0.0f, 0.0f, -1.0f), ivec2(0, 1), ivec2(-1, -1))\n"
 	");\n"
 
-	"void set_normal_and_UV_from_face_id(int face_id_bits) {\n"
-		"FaceAttribute face_attribute = face_attributes[face_id_bits];\n"
+	"void main(void) {\n"
+		////////// Setting face_normal and UV
 
+		"FaceAttribute face_attribute = face_attributes[face_info_bits & 7];\n"
 		"face_normal = face_attribute.face_normal;\n"
 
 		"vec2 UV_xy = face_attribute.uv_signs * vec2(\n"
@@ -36,16 +37,15 @@ const GLchar *const sector_vertex_shader =
 		");\n"
 
 		"UV = vec3(UV_xy, face_info_bits >> 3);\n"
-	"}\n"
 
-	"void main(void) {\n"
+		////////// Setting camera_pos_delta_world_space, fragment_pos_light_space, and gl_Position
+
 		"vec4 vertex_pos_world_space_4D = vec4(vertex_pos_world_space, 1.0f);\n"
-
-		"gl_Position = model_view_projection * vertex_pos_world_space_4D;\n"
-		"set_normal_and_UV_from_face_id(face_info_bits & 7);\n"
 
 		"camera_pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
 		"fragment_pos_light_space = vec3(light_model_view_projection * vertex_pos_world_space_4D);\n"
+
+		"gl_Position = model_view_projection * vertex_pos_world_space_4D;\n"
 	"}\n",
 
 *const sector_fragment_shader =
