@@ -14,7 +14,7 @@ CFLAGS = -std=c99 $(WARNINGS)
 
 NON_GL_LDFLAGS = $$(pkg-config --cflags --libs sdl2) -lm
 
-ifeq ($(shell uname), Darwin)
+ifeq ($(shell uname), Darwin) # If on MacOS
 	GL_LDFLAGS = -framework OpenGL
 else
 	GL_LDFLAGS = -lGL
