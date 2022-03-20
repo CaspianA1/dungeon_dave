@@ -49,13 +49,14 @@ const GLchar *const sector_vertex_shader =
 	"}\n",
 
 *const sector_fragment_shader =
-    "#version 330 core\n"
+	"#version 330 core\n"
 
 	"in vec3 UV, face_normal, fragment_pos_light_space, camera_pos_delta_world_space;\n"
 
 	"out vec3 color;\n"
 
-	"uniform float overall_light_strength, ambient, shininess, specular_strength, min_shadow_variance, light_bleed_reduction_factor;\n"
+	"uniform float overall_light_strength, ambient, shininess, specular_strength;\n"
+	"uniform vec2 warp_exps;\n"
 	"uniform vec3 inv_light_dir;\n"
 
 	"uniform sampler2D shadow_map_sampler;\n"
@@ -71,28 +72,38 @@ const GLchar *const sector_vertex_shader =
 		"return specular_strength * pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
 	"}\n"
 
-	"float linstep(float v, float min, float max) {\n"
-		"float lerped = (v - min) / (max - min);\n"
-		"return clamp(lerped, 0.0f, 1.0f);\n"
+	"vec2 warp_depth(float depth) {\n"
+		"return vec2(exp(warp_exps.x * depth), -exp(-warp_exps.y * depth));\n"
 	"}\n"
 
-	"float chebyshev(float depth, vec2 moments) {\n"
+	"float chebyshev(float min_variance, float depth, vec2 moments) {\n"
 		"float\n"
 			"d = depth - moments.x,\n" // `d` = distance between receiver (depth) and occluder (moments.x)
-			"variance = max(moments.y - moments.x * moments.x, min_shadow_variance);\n"
-			// "variance = moments.y - moments.x * moments.x;\n"
+			"variance = max(moments.y - moments.x * moments.x, min_variance);\n"
 
-		// "float p_max = variance / (variance + (d * d));\n"
-		"float p_max = linstep(variance / (variance + (d * d)), light_bleed_reduction_factor, 1.0f);\n" // Using linstep to reduce light bleeding
+		// TODO: see if clamping variance on the lower bound actually makes a difference
 
+		"float p_max = variance / (variance + (d * d));\n"
 		"return (d < 0.0f) ? 1.0f : p_max;\n"
 	"}\n"
 
 	"float one_minus_shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
 		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
-		"vec2 moments = texture(shadow_map_sampler, proj_coords.xy).rg;\n"
+		"vec4 moments = texture(shadow_map_sampler, proj_coords.xy);\n"
 
-		"return chebyshev(proj_coords.z, moments);\n"
+		"vec2\n"
+			"w_depth = warp_depth(proj_coords.z),\n"
+			"pos_moments = moments.xz, neg_moments = moments.yw;\n"
+
+		// TODO: figure out what 0.0001f signifies, and make it a constant
+		"vec2 depth_scale = 0.0001f * warp_exps * w_depth;\n"
+		"vec2 min_variance = depth_scale * depth_scale;\n"
+
+		"float\n"
+			"pos_result = chebyshev(min_variance.x, w_depth.x, pos_moments),\n"
+			"neg_result = chebyshev(min_variance.y, w_depth.y, neg_moments);\n"
+
+		"return min(pos_result, neg_result);\n"
 	"}\n"
 
 	"float calculate_light(void) {\n"
@@ -141,7 +152,7 @@ const GLchar *const sector_vertex_shader =
 	"}\n",
 
 *const billboard_fragment_shader =
-    "#version 330 core\n"
+	"#version 330 core\n"
 
 	"in float texture_id;\n"
 	"in vec2 UV;\n"
@@ -171,7 +182,7 @@ const GLchar *const sector_vertex_shader =
 	"}\n",
 
 *const skybox_fragment_shader =
-    "#version 330 core\n"
+	"#version 330 core\n"
 
 	"in vec3 UV_3D;\n"
 

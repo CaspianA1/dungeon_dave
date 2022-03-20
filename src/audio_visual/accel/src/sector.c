@@ -169,11 +169,11 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(light_model_view_projection, sector_shader);
 
 		INIT_UNIFORM_VALUE(overall_light_strength, sector_shader, 1f, 1.0f);
-		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.18f); // This also equals the amount of light in shadows
+		// INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.18f); // This also equals the amount of light in shadows
+		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.15f); // This also equals the amount of light in shadows
 		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 32.0f);
 		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.5f);
-		INIT_UNIFORM_VALUE(min_shadow_variance, sector_shader, 1f, 0.000053f); // 0.000785f, 0.000005f
-		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.415f); // 0.2f, 0.65f
+		INIT_UNIFORM_VALUE(warp_exps, sector_shader, 2fv, 1, constants.shadow_mapping.warp_exps);
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
 		// `use_texture` not called since the shadow map output has already been bound to the texture unit in shadow_map.c

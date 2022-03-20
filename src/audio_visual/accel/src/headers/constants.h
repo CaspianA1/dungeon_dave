@@ -24,9 +24,14 @@ and not in the `constants` struct b/c other values in that struct depend on them
 #define BIT_USE_WEAPON BIT_CLICK_LEFT
 
 static const struct {
-	// The FPS match the vsync refresh rate, since some of the physics code depends on it.
-	const byte num_shadow_map_blur_passes, fps;
+	// The FPS should match the vsync refresh rate, since some of the physics code depends on it.
 	const GLfloat almost_zero;
+	const byte fps;
+
+	const struct {
+		const byte num_blur_passes;
+		const vec2 warp_exps;
+	} shadow_mapping;
 
 	const struct { // All angles are in radians
 		const GLfloat eye_height, aabb_collision_box_size, tilt_decel_rate;
@@ -51,9 +56,13 @@ static const struct {
 	} keys;
 
 } constants = {
-	.num_shadow_map_blur_passes = 2,
 	.fps = 60,
 	.almost_zero = 0.001f,
+
+	.shadow_mapping = {
+		.num_blur_passes = 2,
+		.warp_exps = {40.0f, 5.0f} // TODO: test different exponents
+	},
 
 	.camera = {
 		.eye_height = 0.5f, .aabb_collision_box_size = 0.2f, .tilt_decel_rate = 0.9f,
@@ -68,7 +77,7 @@ static const struct {
 		.strafe = 0.2f, .xz_decel = 0.87f, .g = 13.0f
 	},
 
-	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look_hori = TWO_THIRDS_PI, .look_vert = HALF_PI},
+	.speeds = {.xz_max = 16.0f, .jump = 5.5f, .look_hori = TWO_THIRDS_PI, .look_vert = HALF_PI},
 
 	.keys = {
 		.forward = SDL_SCANCODE_W, .backward = SDL_SCANCODE_S, .left = SDL_SCANCODE_A,

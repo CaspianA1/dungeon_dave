@@ -125,6 +125,7 @@ static void set_triangle_fill_mode(void) {
 			in_triangle_fill_mode = !in_triangle_fill_mode;
 			changed_mode_last_tick = true;
 			glPolygonMode(GL_FRONT_AND_BACK, in_triangle_fill_mode ? GL_FILL : GL_LINE);
+			glEnable(GL_LINE_SMOOTH);
 		}
 	}
 	else changed_mode_last_tick = false;

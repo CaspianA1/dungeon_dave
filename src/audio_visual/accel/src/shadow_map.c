@@ -16,11 +16,12 @@ View frustum calculation:
 - Then, make a cuboid extending from that plane to capture the whole world
 
 - Later, depending on the size of the frustum, change the size of the light texture
-- Lots of light bleeding right now (EVSM should work as a robust solution - it seems to be the best statistical method)
 - The gaussian blur process is pretty slow
-- And there should be a smoother transition between the umbra and the penumbra
 - It seems like you can render into any output texture, which doesn't make any sense (perhaps both are rendered to?)
 - Doing just one gaussian blur step does nothing
+- Map edges cast odd shadows
+- Contact hardening?
+- Compute only one exponent for less space usage?
 _____
 
 Current framebuffer ping pong process:
@@ -35,14 +36,6 @@ Current framebuffer ping pong process:
 So: render scene -> t0, blur t0 -> t1, blur t1 -> t0
 
 Or, do ping-ponging differently? https://www.khronos.org/opengl/wiki/Memory_Model#Framebuffer_objects
-_____
-
-A collection of resources connected to VSM and EVSM:
-https://stackoverflow.com/questions/36811775/opengl-exponential-shadow-mapping-esm-artifact
-
-ESM paper: https://jankautz.com/publications/esm_gi08.pdf
-EVSM paper: https://uwspace.uwaterloo.ca/bitstream/handle/10012/3640/andrew_lauritzen_mmath_thesis.pdf;jsessionid=CFB10C588B5C21D0437C4E74136E02BB?sequence=1
-A shadow technique presentation: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
 */
 
 #include "headers/shadow_map.h"
@@ -66,12 +59,21 @@ const GLchar *const depth_vertex_shader =
 *const depth_fragment_shader =
 	"#version 330 core\n"
 
-	"out vec2 moments;\n"
+	"out vec4 moments;\n"
+
+	"uniform vec2 warp_exps;\n"
+
+	"vec2 warp_depth(float depth) {\n"
+		"return vec2(exp(warp_exps.x * depth), -exp(-warp_exps.y * depth));\n"
+	"}\n"
 
 	"void main(void) {\n"
-		"moments.x = gl_FragCoord.z;\n"
-		"vec2 partial_derivatives = vec2(dFdx(moments.x), dFdy(moments.x));\n"
-		"moments.y = moments.x * moments.x + 0.25f * dot(partial_derivatives, partial_derivatives);\n"
+		"vec2 warped_depth = warp_depth(gl_FragCoord.z);\n"
+
+		"vec2 dx = dFdx(warped_depth), dy = dFdy(warped_depth);\n"
+		"vec2 warped_depth_biased_and_squared = warped_depth * warped_depth + 0.25f * (dx * dx + dy * dy);\n"
+
+		"moments = vec4(warped_depth, warped_depth_biased_and_squared);\n"
 	"}\n",
 
 *const blur_vertex_shader =
@@ -95,28 +97,28 @@ const GLchar *const depth_vertex_shader =
 
 	"in vec2 fragment_UV;\n"
 
-	"out vec2 blurred_moments;\n"
+	"out vec4 blurred_moments;\n"
 
 	"uniform bool blurring_horizontally;\n"
 	"uniform vec2 texel_size;\n"
 	"uniform sampler2D image_sampler;\n"
 
-	"#define KERNEL_SIZE 5\n"
-	"const float weights[KERNEL_SIZE] = float[KERNEL_SIZE](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);\n"
+	"#define KERNEL_SIZE 4\n" // Derived from https://observablehq.com/@jobleonard/gaussian-kernel-calculater
+	"const float weights[KERNEL_SIZE] = float[KERNEL_SIZE](0.214606428562373, 0.1898792328888381, 0.13151412084312236, 0.07130343198685299);\n"
 
 	"void main(void) {\n"
-		"blurred_moments = texture(image_sampler, fragment_UV).rg * weights[0];\n"
-
 		"int index_from_opp_state = int(!blurring_horizontally);\n"
 		"float texel_size_on_blurring_axis = texel_size[index_from_opp_state];\n"
 
 		"vec2 UV_offset = vec2(0.0f);\n"
 		"UV_offset[index_from_opp_state] = texel_size_on_blurring_axis;\n"
 
+		"blurred_moments = texture(image_sampler, fragment_UV) * weights[0];\n"
+
 		"for (int i = 1; i < KERNEL_SIZE; i++) {\n"
 			"blurred_moments += weights[i] * (\n"
-				"texture(image_sampler, fragment_UV + UV_offset).rg +\n"
-				"texture(image_sampler, fragment_UV - UV_offset).rg\n"
+				"texture(image_sampler, fragment_UV + UV_offset) +\n"
+				"texture(image_sampler, fragment_UV - UV_offset)\n"
 			");\n"
 
 			"UV_offset[index_from_opp_state] += texel_size_on_blurring_axis;\n"
@@ -262,7 +264,7 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	set_current_texture_unit(SHADOW_MAP_TEXTURE_UNIT);
 	glDisable(GL_DEPTH_TEST); // Testing depths from the depth render buffer is not needed
 
-	for (byte i = 0; i < constants.num_shadow_map_blur_passes << 1; i++) {
+	for (byte i = 0; i < constants.shadow_mapping.num_blur_passes << 1; i++) {
 		const byte src_texture_index = i & 1;
 		const byte dest_texture_index = !src_texture_index;
 
@@ -291,7 +293,15 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 
 	////////// Activate shader, update light mvp, bind framebuffer, resize viewport, clear buffers, and cull front faces
 
-	glUseProgram(shadow_map_context.shadow_pass.depth_shader);
+	const GLuint depth_shader = shadow_map_context.shadow_pass.depth_shader;
+	glUseProgram(depth_shader);
+
+	static bool first_call = 1;
+
+	if (first_call) {
+		INIT_UNIFORM_VALUE(warp_exps, depth_shader, 2fv, 1, constants.shadow_mapping.warp_exps);
+		first_call = 0;
+	}
 
 	UPDATE_UNIFORM(shadow_map_context.shadow_pass.light_model_view_projection,
 		Matrix4fv, 1, GL_FALSE, (GLfloat*) shadow_map_context.light_context.model_view_projection);

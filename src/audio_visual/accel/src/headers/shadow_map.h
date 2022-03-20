@@ -5,12 +5,12 @@
 #include "buffer_defs.h"
 #include "batch_draw_context.h"
 
-#define MOMENT_TEXTURE_FORMAT GL_RG
-#define MOMENT_TEXTURE_SIZED_FORMAT GL_RG // GL_RG32F
+#define MOMENT_TEXTURE_FORMAT GL_RGBA
+#define MOMENT_TEXTURE_SIZED_FORMAT GL_RGBA32F
 
 #define SHADOW_MAP_OUTPUT_TEXTURE_INDEX 0
 
-/* Shadow maps use variance shadow mapping + gaussian blur in this implementation.
+/* Shadow maps use exponential variance shadow mapping + gaussian blur.
 Note: a `pass` equals a stage in the shadow map generation process. */
 
 typedef struct {

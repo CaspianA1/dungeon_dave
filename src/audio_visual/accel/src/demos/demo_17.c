@@ -26,9 +26,13 @@ typedef struct {
 StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
-	// 2 << 13 is the biggest size
-	SceneState scene_state = {
-		.shadow_map_context = init_shadow_map_context(2048, 4048,
+	/* For a 2048x2048 shadow map:
+	- One texture = 2048 * 2048 * 16 = 67,108,864 bytes
+	- One texture is mipmapped, so one takes up 89,478,486 bytes
+	- Total is 156,587,350 bytes */
+
+	SceneState scene_state = { // 2 << 13 is the biggest size
+		.shadow_map_context = init_shadow_map_context(2048, 2048,
 			(vec3) {26.563328f, 31.701447f, 12.387274f},
 			0.518362f, -1.225221f
 		),
