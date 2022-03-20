@@ -77,7 +77,7 @@ static void update_editing_placement_values(EditorState* const eds, const SDL_Ev
 
 	if (number_input_done) {
 		int16_t number = three_chars_to_int(number_input_chars, num_chars_inputted);
-		if (number > 255) number = 255;
+		if (number > MAX_BYTE_VALUE) number = MAX_BYTE_VALUE;
 
 		num_chars_inputted = 0;
 
