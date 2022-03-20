@@ -104,7 +104,7 @@ const GLchar *const depth_vertex_shader =
 	"uniform sampler2D image_sampler;\n"
 
 	"#define KERNEL_SIZE 4\n" // Derived from https://observablehq.com/@jobleonard/gaussian-kernel-calculater
-	"const float weights[KERNEL_SIZE] = float[KERNEL_SIZE](0.214606428562373, 0.1898792328888381, 0.13151412084312236, 0.07130343198685299);\n"
+	"const float weights[KERNEL_SIZE] = float[KERNEL_SIZE](0.214606428562373f, 0.1898792328888381f, 0.13151412084312236f, 0.07130343198685299f);\n"
 
 	"void main(void) {\n"
 		"int index_from_opp_state = int(!blurring_horizontally);\n"
