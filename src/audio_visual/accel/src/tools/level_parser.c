@@ -110,4 +110,3 @@ void init_editor_state_from_json_file(EditorState* const eds, const char* const 
 	parse_json_file(eds, &file_contents);
 	free(file_contents.data);
 }
-
