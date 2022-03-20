@@ -55,7 +55,7 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec3 color;\n"
 
-	"uniform float overall_light_strength, ambient, shininess, specular_strength;\n"
+	"uniform float overall_light_strength, ambient, shininess, specular_strength, umbra_strength_factor;\n"
 	"uniform vec2 warp_exps;\n"
 	"uniform vec3 inv_light_dir;\n"
 
@@ -95,8 +95,7 @@ const GLchar *const sector_vertex_shader =
 			"w_depth = warp_depth(proj_coords.z),\n"
 			"pos_moments = moments.xz, neg_moments = moments.yw;\n"
 
-		// TODO: figure out what 0.0001f signifies, and make it a constant
-		"vec2 depth_scale = 0.0001f * warp_exps * w_depth;\n"
+		"vec2 depth_scale = umbra_strength_factor * warp_exps * w_depth;\n"
 		"vec2 min_variance = depth_scale * depth_scale;\n"
 
 		"float\n"
