@@ -87,7 +87,7 @@ const GLchar *const sector_vertex_shader =
 		"return (d < 0.0f) ? 1.0f : p_max;\n"
 	"}\n"
 
-	"float one_minus_shadow_percent(void) {\n" // Gives the percent of area in shadow via variance shadow mapping
+	"float one_minus_shadow_percent(void) {\n" // Gives the percent of area in shadow via EVSM
 		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
 		"vec4 moments = texture(shadow_map_sampler, proj_coords.xy);\n"
 
