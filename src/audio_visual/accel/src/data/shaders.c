@@ -106,9 +106,10 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"float calculate_light(void) {\n"
-		"float non_ambient = diffuse();\n"
-		 // Done so that away-facing surfaces don't get any specular highlights
-		"non_ambient += specular() * float(non_ambient != 0.0f);\n"
+		"float diffuse_amount = diffuse();\n"
+
+		 // Modulating specular by how much the face is facing the light source
+		"float non_ambient = diffuse_amount + specular() * diffuse_amount;\n"
 
 		"float light = ambient + non_ambient * one_minus_shadow_percent();\n"
 		"return min(light * overall_light_strength, 1.0f);\n"
