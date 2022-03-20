@@ -55,7 +55,7 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec3 color;\n"
 
-	"uniform float overall_light_strength, ambient, shininess, specular_strength, umbra_strength_factor;\n"
+	"uniform float overall_light_strength, ambient, shininess, umbra_strength_factor;\n"
 	"uniform vec2 warp_exps;\n"
 	"uniform vec3 inv_light_dir;\n"
 
@@ -69,7 +69,7 @@ const GLchar *const sector_vertex_shader =
 
 	"float specular(void) {\n" // Uses Blinn-Phong specular, rather than Phong specular
 		"vec3 halfway_dir = normalize(inv_light_dir + normalize(camera_pos_delta_world_space));\n"
-		"return specular_strength * pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
+		"return pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
 	"}\n"
 
 	"vec2 warp_depth(float depth) {\n"

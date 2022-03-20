@@ -171,7 +171,6 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(overall_light_strength, sector_shader, 1f, 1.0f);
 		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.12f); // This also equals the amount of light in shadows
 		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 32.0f);
-		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 1.0f);
 		INIT_UNIFORM_VALUE(umbra_strength_factor, sector_shader, 1f, 0.000001f);
 		INIT_UNIFORM_VALUE(warp_exps, sector_shader, 2fv, 1, constants.shadow_mapping.warp_exps);
 
