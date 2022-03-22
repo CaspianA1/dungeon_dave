@@ -172,6 +172,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.12f); // This also equals the amount of light in shadows
 		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 32.0f);
 		INIT_UNIFORM_VALUE(umbra_strength_factor, sector_shader, 1f, 0.000001f);
+		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.0f);
 		INIT_UNIFORM_VALUE(warp_exps, sector_shader, 2fv, 1, constants.shadow_mapping.warp_exps);
 
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
@@ -183,7 +184,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
 	const GLfloat* const light_dir = shadow_map_context -> light_context.dir;
-	INIT_UNIFORM_VALUE(inv_light_dir, sector_shader, 3f, -light_dir[0], -light_dir[1], -light_dir[2]);
+	UPDATE_UNIFORM(inv_light_dir, 3f, -light_dir[0], -light_dir[1], -light_dir[2]);
 
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE,

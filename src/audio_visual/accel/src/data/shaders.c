@@ -55,9 +55,11 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec3 color;\n"
 
-	"uniform float overall_light_strength, ambient, shininess, umbra_strength_factor;\n"
+	"uniform float overall_light_strength, ambient, shininess, umbra_strength_factor, light_bleed_reduction_factor;\n"
 	"uniform vec2 warp_exps;\n"
 	"uniform vec3 inv_light_dir;\n"
+
+	"uniform bool branch;\n"
 
 	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
@@ -76,6 +78,10 @@ const GLchar *const sector_vertex_shader =
 		"return vec2(exp(warp_exps.x * depth), -exp(-warp_exps.y * depth));\n"
 	"}\n"
 
+	"float linstep(float low, float high, float v) {\n"
+		"return clamp((v - low) / (high - low), 0.0f, 1.0f);\n"
+	"}\n"
+
 	"float chebyshev(float min_variance, float depth, vec2 moments) {\n"
 		"float\n"
 			"d = depth - moments.x,\n" // `d` = distance between receiver (depth) and occluder (moments.x)
@@ -84,6 +90,8 @@ const GLchar *const sector_vertex_shader =
 		// TODO: see if clamping variance on the lower bound actually makes a difference
 
 		"float p_max = variance / (variance + (d * d));\n"
+		"p_max = linstep(light_bleed_reduction_factor, 1.0f, p_max);\n"
+
 		"return (d < 0.0f) ? 1.0f : p_max;\n"
 	"}\n"
 
