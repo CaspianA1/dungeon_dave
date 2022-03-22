@@ -57,7 +57,7 @@ const GLchar *const sector_vertex_shader =
 
 	"uniform float overall_light_strength, ambient, shininess, umbra_strength_factor, light_bleed_reduction_factor;\n"
 	"uniform vec2 warp_exps;\n"
-	"uniform vec3 inv_light_dir;\n"
+	"uniform vec3 inv_light_dir, metallic_color;\n"
 
 	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
@@ -67,9 +67,14 @@ const GLchar *const sector_vertex_shader =
 		"return max(diffuse_amount, 0.0f);\n"
 	"}\n"
 
-	"float specular(void) {\n" // Uses Blinn-Phong specular, rather than Phong specular
+	"float specular(vec3 texture_color) {\n" // Uses Blinn-Phong specular, rather than Phong specular
+		/* This equals how close the texture color is to the color of metal.
+		Since metal is very specular, this gives a stronger specular value
+		for more metal-like colors on the texture. */
+		"float percent_metallic = 1.0f - length(texture_color - metallic_color);\n"
+
 		"vec3 halfway_dir = normalize(inv_light_dir + normalize(camera_pos_delta_world_space));\n"
-		"return pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
+		"return percent_metallic * pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
 	"}\n"
 
 	"vec2 warp_depth(float depth) {\n"
@@ -111,18 +116,19 @@ const GLchar *const sector_vertex_shader =
 		"return min(pos_result, neg_result);\n"
 	"}\n"
 
-	"float calculate_light(void) {\n"
+	"float calculate_light(vec3 texture_color) {\n"
 		"float diffuse_amount = diffuse();\n"
 
 		 // Modulating specular by how much the face is facing the light source
-		"float non_ambient = diffuse_amount + specular() * diffuse_amount;\n"
+		"float non_ambient = diffuse_amount + specular(texture_color) * diffuse_amount;\n"
 
 		"float light = ambient + non_ambient * one_minus_shadow_percent();\n"
 		"return min(light * overall_light_strength, 1.0f);\n"
 	"}\n"
 
 	"void main(void) {\n"
-		"color = texture(texture_sampler, UV).rgb * calculate_light();\n"
+		"vec3 texture_color = texture(texture_sampler, UV).rgb;\n"
+		"color = texture_color * calculate_light(texture_color);\n"
 	"}\n",
 
 *const billboard_vertex_shader =
