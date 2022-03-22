@@ -55,9 +55,9 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec3 color;\n"
 
-	"uniform float overall_light_strength, ambient, shininess, umbra_strength_factor, light_bleed_reduction_factor;\n"
+	"uniform float ambient, shininess, tint_strength, umbra_strength_factor, light_bleed_reduction_factor;\n"
 	"uniform vec2 warp_exps;\n"
-	"uniform vec3 inv_light_dir, metallic_color;\n"
+	"uniform vec3 inv_light_dir, metallic_color, tint;\n"
 
 	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
@@ -116,19 +116,20 @@ const GLchar *const sector_vertex_shader =
 		"return min(pos_result, neg_result);\n"
 	"}\n"
 
-	"float calculate_light(vec3 texture_color) {\n"
+	"vec3 calculate_light(vec3 texture_color) {\n"
 		"float diffuse_amount = diffuse();\n"
 
 		 // Modulating specular by how much the face is facing the light source
 		"float non_ambient = diffuse_amount + specular(texture_color) * diffuse_amount;\n"
+		"float shadowed_non_ambient = non_ambient * one_minus_shadow_percent();\n"
+		"float light = min(ambient + shadowed_non_ambient, 1.0f);\n"
 
-		"float light = ambient + non_ambient * one_minus_shadow_percent();\n"
-		"return min(light * overall_light_strength, 1.0f);\n"
+		"return mix(texture_color * light, tint, tint_strength);\n"
 	"}\n"
 
 	"void main(void) {\n"
 		"vec3 texture_color = texture(texture_sampler, UV).rgb;\n"
-		"color = texture_color * calculate_light(texture_color);\n"
+		"color = calculate_light(texture_color);\n"
 	"}\n",
 
 *const billboard_vertex_shader =
