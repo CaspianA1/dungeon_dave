@@ -101,8 +101,8 @@ GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 	return texture;
 }
 
-static void init_still_subtextures_in_texture_set(
-	const GLsizei num_still_subtextures, SDL_Surface* const rescaled_surface, va_list args) {
+static void init_still_subtextures_in_texture_set(const GLsizei num_still_subtextures,
+	SDL_Surface* const rescaled_surface, va_list args) {
 
 	for (GLsizei i = 0; i < num_still_subtextures; i++) {
 		SDL_Surface *const surface = init_surface(va_arg(args, GLchar*)), *surface_copied_to_gpu;

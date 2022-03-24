@@ -19,6 +19,9 @@ typedef struct {
 	const List billboard_animations, billboard_animation_instances;
 
 	const Skybox skybox;
+
+	const GLuint normal_map;
+
 	byte* const heightmap;
 	const byte map_size[2];
 } SceneState;
@@ -60,6 +63,9 @@ StateGL demo_17_init(void) {
 		),
 
 		.skybox = init_skybox("../assets/desert.bmp"),
+		.normal_map = init_plain_texture("../../../../assets/normal_maps/face.bmp",
+			TexPlain, TexRepeating, TexLinear, TexTrilinear, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT),
+
 		.heightmap = (byte*) palace_heightmap,
 		.map_size = {palace_width, palace_height}
 	};
@@ -206,6 +212,7 @@ void demo_17_deinit(const StateGL* const sgl) {
 	deinit_list(scene_state -> billboard_animation_instances);
 
 	deinit_skybox(scene_state -> skybox);
+	deinit_texture(scene_state -> normal_map);
 
 	free(scene_state);
 
