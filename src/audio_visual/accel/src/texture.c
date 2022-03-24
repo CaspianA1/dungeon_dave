@@ -57,13 +57,18 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	glTexParameteri(type, GL_TEXTURE_WRAP_T, cast_wrap_mode);
 
 	if (type == TexSkybox) glTexParameteri(type, GL_TEXTURE_WRAP_R, cast_wrap_mode);
-	else {
-		#if defined(ENABLE_ANISOTROPIC_FILTERING) && defined(GL_TEXTURE_MAX_ANISOTROPY_EXT)
+
+	#ifdef ENABLE_ANISOROPIC_FILTERING
+
+	/* Checking if the extension is available at runtime. Also, skyboxes get no anisotropic
+	filtering, because they are usually magnified and are not viewed at very steep angles. */
+	else if (GLAD_GL_EXT_texture_filter_anisotropic) {
 		float aniso_filtering_level;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso_filtering_level);
 		glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso_filtering_level);
-		#endif
 	}
+
+	#endif
 
 	return texture;
 }
