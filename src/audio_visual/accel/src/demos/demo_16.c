@@ -21,7 +21,7 @@ StateGL demo_16_init(void) {
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/mesa.bmp", TexRepeating);
 	glUseProgram(sgl.shader_program);
-	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, SECTOR_TEXTURE_UNIT);
+	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, SECTOR_FACE_TEXTURE_UNIT);
 
 	const Skybox skybox = init_skybox("../assets/sky_2.bmp");
 	sgl.any_data = malloc(sizeof(Skybox));

@@ -42,11 +42,12 @@ And the biggest number possible with five bits is 31, so that gives you
 #define MAX_NUM_SECTOR_SUBTEXTURES 32
 
 // TODO: make this to an enum
-#define SECTOR_TEXTURE_UNIT 0
-#define BILLBOARD_TEXTURE_UNIT 1
-#define SKYBOX_TEXTURE_UNIT 2
-#define WEAPON_TEXTURE_UNIT 3
-#define SHADOW_MAP_TEXTURE_UNIT 4
+#define SECTOR_FACE_TEXTURE_UNIT 0
+#define SECTOR_NORMAL_MAP_TEXTURE_UNIT 1
+#define BILLBOARD_TEXTURE_UNIT 2
+#define SKYBOX_TEXTURE_UNIT 3
+#define WEAPON_TEXTURE_UNIT 4
+#define SHADOW_MAP_TEXTURE_UNIT 5
 
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,

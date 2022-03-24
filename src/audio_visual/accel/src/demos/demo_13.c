@@ -165,7 +165,7 @@ StateGL demo_13_init(void) {
 
 	sector_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
 	glUseProgram(sector_shader);
-	use_texture(sgl.textures[1], sector_shader, "texture_sampler", TexPlain, SECTOR_TEXTURE_UNIT);
+	use_texture(sgl.textures[1], sector_shader, "texture_sampler", TexPlain, SECTOR_FACE_TEXTURE_UNIT);
 
 	enable_all_culling();
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);

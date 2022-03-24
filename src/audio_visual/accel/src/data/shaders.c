@@ -59,7 +59,7 @@ const GLchar *const sector_vertex_shader =
 	"uniform vec2 warp_exps;\n"
 	"uniform vec3 inv_light_dir, metallic_color, tint;\n"
 
-	"uniform sampler2D shadow_map_sampler;\n"
+	"uniform sampler2D shadow_map_sampler, normal_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
 	"float diffuse(void) {\n"

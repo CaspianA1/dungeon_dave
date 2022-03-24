@@ -189,7 +189,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	}
 
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
-	draw_visible_sectors(sector_draw_context, shadow_map_context, &scene_state -> sectors, &camera);
+	draw_visible_sectors(sector_draw_context, shadow_map_context, &scene_state -> sectors, &camera, scene_state -> normal_map);
 
 	const Skybox* const skybox = &scene_state -> skybox;
 	draw_skybox(*skybox, &camera);
