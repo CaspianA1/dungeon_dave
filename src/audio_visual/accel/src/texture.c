@@ -122,7 +122,6 @@ static void init_still_subtextures_in_texture_set(
 static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_frames,
 	const GLsizei num_still_subtextures, SDL_Surface* const rescaled_surface, va_list args) {
 
-	/////////////////
 	for (GLsizei animation_frame_index = num_still_subtextures; animation_frame_index < num_animated_frames;) {
 		SDL_Surface* const spritesheet_surface = init_surface(va_arg(args, GLchar*));
 		SDL_SetSurfaceBlendMode(spritesheet_surface, SDL_BLENDMODE_NONE);
@@ -171,6 +170,7 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 	GLsizei num_animated_frames = 0; // A frame is a subtexture
 
 	for (GLsizei i = 0; i < num_still_subtextures; i++, va_arg(args_copy, GLchar*)); // Discarding still subtexture args
+
 	for (GLsizei i = 0; i < num_animation_sets; i++) {
 		va_arg(args_copy, GLchar*); // Discarding path, frames across, and frames down args
 		va_arg(args_copy, GLsizei);
