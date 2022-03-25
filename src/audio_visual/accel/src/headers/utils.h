@@ -64,7 +64,7 @@
 
 #define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
 
-////////// These macros pertain to window + game defaults
+////////// These macros pertain to window + rendering defaults
 
 #define WINDOW_W 800
 #define WINDOW_H 600
