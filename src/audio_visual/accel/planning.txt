@@ -39,6 +39,7 @@ Other random ideas:
 - Normal mapping
 - Some steeply angled shadows exhibit aliasing
 - Pass in texture parameters through a bitmask
+- Normal map details disappear at steep angles and lower mip levels
 
 A better shading model:
 - Macros for generation of objects, like GL_INIT(Buffer) for example
