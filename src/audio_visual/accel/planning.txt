@@ -36,10 +36,14 @@ Other random ideas:
 - Catch more warnings with -Weverything
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit)
 - File paths may not work on Windows
-- Normal mapping
 - Some steeply angled shadows exhibit aliasing
 - Pass in texture parameters through a bitmask
+
+Normal mapping:
+- Some shimmering
 - Normal map details disappear at steep angles and lower mip levels
+- Improper EVSM light coverage leads to some in-shadow areas having bumps on them
+- Unshadowed areas have no bumps (or is that okay?)
 
 A better shading model:
 - Macros for generation of objects, like GL_INIT(Buffer) for example
