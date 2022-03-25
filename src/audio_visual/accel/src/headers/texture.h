@@ -71,6 +71,13 @@ typedef enum {
 #define deinit_textures(length, ts) glDeleteTextures((length), (ts))
 #define deinit_surface SDL_FreeSurface
 
+#define WITH_SURFACE_PIXEL_ACCESS(surface, code) do {\
+	const bool must_lock = SDL_MUSTLOCK((surface));\
+	if (must_lock) SDL_LockSurface((surface));\
+	code\
+	if (must_lock) SDL_UnlockSurface((surface));\
+} while (0)
+
 #define set_current_texture glBindTexture
 
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);

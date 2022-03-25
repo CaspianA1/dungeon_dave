@@ -77,14 +77,11 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 void write_surface_to_texture(SDL_Surface* const surface,
 	const TextureType type, const GLint internal_format) {
 
-	const bool must_lock = SDL_MUSTLOCK(surface);
-	if (must_lock) SDL_LockSurface(surface);
-
-	glTexImage2D(type, 0, internal_format,
-		surface -> w, surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
-		OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
-
-	if (must_lock) SDL_UnlockSurface(surface);
+	WITH_SURFACE_PIXEL_ACCESS(surface,
+		glTexImage2D(type, 0, internal_format, surface -> w,
+			surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
+			OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
+	);
 }
 
 GLuint init_plain_texture(const GLchar* const path, const TextureType type,
@@ -114,12 +111,12 @@ static void init_still_subtextures_in_texture_set(const GLsizei num_still_subtex
 		}
 		else surface_copied_to_gpu = surface;
 
-		SDL_LockSurface(surface_copied_to_gpu);
-		glTexSubImage3D(TexSet, 0, 0, 0, i,
-			surface_copied_to_gpu -> w, surface_copied_to_gpu -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_COLOR_CHANNEL_TYPE, surface_copied_to_gpu -> pixels);
+		WITH_SURFACE_PIXEL_ACCESS(surface_copied_to_gpu,
+			glTexSubImage3D(TexSet, 0, 0, 0, i, surface_copied_to_gpu -> w,
+				surface_copied_to_gpu -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
+				OPENGL_COLOR_CHANNEL_TYPE, surface_copied_to_gpu -> pixels);
+		);
 
-		SDL_UnlockSurface(surface_copied_to_gpu);
 		deinit_surface(surface);
 	}
 }
@@ -146,13 +143,12 @@ static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_
 			spritesheet_frame_area.y = (frame_index / frames_across) * spritesheet_frame_area.h;
 
 			SDL_BlitScaled(spritesheet_surface, &spritesheet_frame_area, rescaled_surface, NULL);
-			SDL_LockSurface(rescaled_surface);
 
-			glTexSubImage3D(TexSet, 0, 0, 0, animation_frame_index,
-				rescaled_surface -> w, rescaled_surface -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
-				OPENGL_COLOR_CHANNEL_TYPE, rescaled_surface -> pixels);
-
-			SDL_UnlockSurface(rescaled_surface);
+			WITH_SURFACE_PIXEL_ACCESS(rescaled_surface,
+				glTexSubImage3D(TexSet, 0, 0, 0, animation_frame_index,
+					rescaled_surface -> w, rescaled_surface -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
+					OPENGL_COLOR_CHANNEL_TYPE, rescaled_surface -> pixels);
+			);
 		}
 		deinit_surface(spritesheet_surface);
 	}
