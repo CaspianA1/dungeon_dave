@@ -24,7 +24,7 @@
 #define KEY_PRINT_DIRECTION SDL_SCANCODE_6
 #define KEY_PRINT_UP SDL_SCANCODE_7
 
-#define DEBUG(var, format) printf(#var " = %" #format "\n", var)
+#define DEBUG(var, format) printf(#var " = %" #format "\n", (var))
 #define DEBUG_FLOAT(var) printf(#var " = %lff\n", (double) (var))
 #define DEBUG_VEC2(v) printf(#v " = {%lff, %lff}\n", (double) (v)[0], (double) (v)[1])
 #define DEBUG_VEC3(v) printf(#v " = {%lff, %lff, %lff}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2])
@@ -32,15 +32,17 @@
 #define DEBUG_BITS(num) do {\
 	printf(#num " = ");\
 	for (int16_t i = (sizeof(num) << 3) - 1; i >= 0; i--)\
-		putchar(((num >> i) & 1) + '0');\
+		putchar((((num) >> i) & 1) + '0');\
 	putchar('\n');\
 } while (0)
 
 #define TWEAK_REALTIME_VALUE(value_name, init_value, min_value, max_value, step, key_decr, key_incr, key_reset)\
 	static GLfloat value_name = init_value;\
 	do {\
-		const bool incr = keys[SDL_SCANCODE_##key_incr],\
-			decr = keys[SDL_SCANCODE_##key_decr], reset = keys[SDL_SCANCODE_##key_reset];\
+		const bool\
+			incr = keys[SDL_SCANCODE_##key_incr],\
+			decr = keys[SDL_SCANCODE_##key_decr],\
+			reset = keys[SDL_SCANCODE_##key_reset];\
 		\
 		value_name = reset ? init_value : (value_name + step * incr - step * decr);\
 		\
@@ -48,6 +50,8 @@
 		else if (value_name > max_value) value_name = max_value;\
 		if (incr || decr || reset) DEBUG_FLOAT(value_name);\
 	} while (0)
+
+#define MAKE_SHADER_BRANCH(shader, key) INIT_UNIFORM_VALUE(branch, (shader), 1i, keys[SDL_SCANCODE_##key]);
 
 ////////// These are some general-purpose macros used in all demos
 
