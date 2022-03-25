@@ -1,6 +1,7 @@
 #ifndef SECTOR_C
 #define SECTOR_C
 
+#include "headers/utils.h"
 #include "headers/sector.h"
 #include "data/shaders.c"
 #include "face.c"
@@ -10,7 +11,6 @@
 
 //////////
 
-#define inlinable static inline
 #define wmalloc malloc
 #define wfree free
 

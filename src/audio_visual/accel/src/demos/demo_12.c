@@ -5,7 +5,6 @@
 
 //////////
 
-#define inlinable static inline
 #define wmalloc malloc
 #define wfree free
 

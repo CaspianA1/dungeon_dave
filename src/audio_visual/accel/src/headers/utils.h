@@ -55,6 +55,8 @@
 
 ////////// These are some general-purpose macros used in all demos
 
+#define inlinable static inline
+
 #define bit_is_set(bits, mask) ((bits) & (mask))
 #define set_bit(bits, mask) ((bits) |= (mask))
 
@@ -120,7 +122,7 @@ const Uint8* keys;
 
 //////////
 
-extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
+inlinable void fail(const GLchar* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s.\n", msg);
 	exit((int) failure_type + 1);
 }
