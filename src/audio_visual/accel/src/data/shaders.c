@@ -9,27 +9,28 @@ const GLchar *const sector_vertex_shader =
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
 	"layout(location = 1) in int face_info_bits;\n"
 
-	"out vec3 UV, face_normal, fragment_pos_light_space, camera_pos_delta_world_space;\n"
+	"flat out int face_id;\n"
+
+	"out vec3 UV, fragment_pos_light_space, camera_pos_delta_world_space;\n"
 
 	"uniform vec3 camera_pos_world_space;\n"
 	"uniform mat4 model_view_projection, light_model_view_projection;\n"
 
 	"const struct FaceAttribute {\n"
-		"vec3 face_normal;\n"
 		"ivec2 uv_indices, uv_signs;\n"
 	"} face_attributes[5] = FaceAttribute[5](\n" // Flat, right, bottom, left, top
-		"FaceAttribute(vec3(0.0f, 1.0f, 0.0f),  ivec2(0, 2), ivec2(1, 1)),\n"
-		"FaceAttribute(vec3(1.0f, 0.0f, 0.0f),  ivec2(2, 1), ivec2(-1, -1)),\n"
-		"FaceAttribute(vec3(0.0f, 0.0f, 1.0f),  ivec2(0, 1), ivec2(1, -1)),\n"
-		"FaceAttribute(vec3(-1.0f, 0.0f, 0.0f), ivec2(2, 1), ivec2(1, -1)),\n"
-		"FaceAttribute(vec3(0.0f, 0.0f, -1.0f), ivec2(0, 1), ivec2(-1, -1))\n"
+		"FaceAttribute(ivec2(0, 2), ivec2(1, 1)),\n"
+		"FaceAttribute(ivec2(2, 1), ivec2(-1, -1)),\n"
+		"FaceAttribute(ivec2(0, 1), ivec2(1, -1)),\n"
+		"FaceAttribute(ivec2(2, 1), ivec2(1, -1)),\n"
+		"FaceAttribute(ivec2(0, 1), ivec2(-1, -1))\n"
 	");\n"
 
 	"void main(void) {\n"
 		////////// Setting face_normal and UV
 
-		"FaceAttribute face_attribute = face_attributes[face_info_bits & 7];\n"
-		"face_normal = face_attribute.face_normal;\n"
+		"face_id = face_info_bits & 7;\n"
+		"FaceAttribute face_attribute = face_attributes[face_id];\n"
 
 		"vec2 UV_xy = face_attribute.uv_signs * vec2(\n"
 			"vertex_pos_world_space[face_attribute.uv_indices.x],\n"
@@ -51,7 +52,8 @@ const GLchar *const sector_vertex_shader =
 *const sector_fragment_shader =
 	"#version 330 core\n"
 
-	"in vec3 UV, face_normal, fragment_pos_light_space, camera_pos_delta_world_space;\n"
+	"in vec3 UV, fragment_pos_light_space, camera_pos_delta_world_space;\n"
+	"flat in int face_id;\n"
 
 	"out vec3 color;\n"
 
@@ -62,19 +64,21 @@ const GLchar *const sector_vertex_shader =
 	"uniform sampler2D shadow_map_sampler, normal_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
-	"float diffuse(void) {\n"
-		"float diffuse_amount = dot(inv_light_dir, face_normal);\n"
+	"float diffuse(vec3 fragment_normal) {\n"
+		"float diffuse_amount = dot(inv_light_dir, fragment_normal);\n"
 		"return max(diffuse_amount, 0.0f);\n"
 	"}\n"
 
-	"float specular(vec3 texture_color) {\n" // Uses Blinn-Phong specular, rather than Phong specular
+	"float specular(vec3 texture_color, vec3 fragment_normal) {\n"
 		/* This equals how close the texture color is to the color of metal.
 		Since metal is very specular, this gives a stronger specular value
-		for more metal-like colors on the texture. */
+		for more metal-like colors on the texture.
+
+		Also, the specular calculation uses Blinn-Phong, rather than just Phong. */
 		"float percent_metallic = 1.0f - length(texture_color - metallic_color);\n"
 
 		"vec3 halfway_dir = normalize(inv_light_dir + normalize(camera_pos_delta_world_space));\n"
-		"return percent_metallic * pow(max(dot(face_normal, halfway_dir), 0.0f), shininess);\n"
+		"return percent_metallic * pow(max(dot(fragment_normal, halfway_dir), 0.0f), shininess);\n"
 	"}\n"
 
 	"vec2 warp_depth(float depth) {\n"
@@ -116,20 +120,48 @@ const GLchar *const sector_vertex_shader =
 		"return min(pos_result, neg_result);\n"
 	"}\n"
 
-	"vec3 calculate_light(vec3 texture_color) {\n"
-		"float diffuse_amount = diffuse();\n"
+	"vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {\n"
+		"float diffuse_amount = diffuse(fragment_normal);\n"
 
 		 // Modulating specular by how much the face is facing the light source
-		"float non_ambient = diffuse_amount + specular(texture_color) * diffuse_amount;\n"
+		"float non_ambient = diffuse_amount + specular(texture_color, fragment_normal) * diffuse_amount;\n"
 		"float shadowed_non_ambient = non_ambient * one_minus_shadow_percent();\n"
 		"float light = min(ambient + shadowed_non_ambient, 1.0f);\n"
 
 		"return mix(texture_color * light, tint, tint_strength);\n"
 	"}\n"
 
+	"vec3 get_fragment_normal(void) {\n"
+		"vec3 rgb_normal = texture(normal_map_sampler, UV.xy).rgb;\n"
+		"vec3 tangent_space_normal = normalize(rgb_normal * 2.0f - 1.0f);\n"
+
+		// TODO: move this set of calculations to the vertex shader, in some way
+		"switch (face_id) {\n"
+			"case 0:\n" // Flat
+				"tangent_space_normal.yz = tangent_space_normal.zy;\n"
+				"tangent_space_normal.z = -tangent_space_normal.z;\n"
+				"break;\n"
+			"case 1:\n" // Right
+				"tangent_space_normal.xz = tangent_space_normal.zx;\n"
+				"tangent_space_normal.z = -tangent_space_normal.z;\n"
+				"break;\n"
+			"case 3:\n" // Left
+				"tangent_space_normal.xz = tangent_space_normal.zx;\n"
+				"tangent_space_normal.x = -tangent_space_normal.x;\n"
+				"break;\n"
+			"case 4:\n" // Top (opposite of tangent space; x and z are reversed)
+				"tangent_space_normal.xz = -tangent_space_normal.xz;\n"
+				"break;\n"
+		"}\n"
+
+		"return tangent_space_normal;\n"
+	"}\n"
+
 	"void main(void) {\n"
-		"vec3 texture_color = texture(texture_sampler, UV).rgb;\n"
-		"color = calculate_light(texture_color);\n"
+		"color = calculate_light(\n"
+			"texture(texture_sampler, UV).rgb,\n"
+			"get_fragment_normal()\n"
+		");\n"
 	"}\n",
 
 *const billboard_vertex_shader =

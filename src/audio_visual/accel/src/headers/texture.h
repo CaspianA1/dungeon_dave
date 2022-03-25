@@ -9,6 +9,8 @@
 #define SDL_PIXEL_FORMAT SDL_PIXELFORMAT_BGRA32
 
 #define OPENGL_INPUT_PIXEL_FORMAT GL_BGRA
+
+#define OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT GL_RGBA
 #define OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT GL_RED
 #define OPENGL_COLOR_CHANNEL_TYPE GL_UNSIGNED_BYTE
 
@@ -31,10 +33,6 @@
 
 #define OPENGL_SHADOW_MAP_MAG_FILTER TexLinear
 #define OPENGL_SHADOW_MAP_MIN_FILTER TexTrilinear
-
-//////////
-
-#define ENABLE_ANISOTROPIC_FILTERING
 
 /* There's five bits to store a texture id in a face mesh's face info byte,
 And the biggest number possible with five bits is 31, so that gives you

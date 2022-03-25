@@ -63,8 +63,9 @@ StateGL demo_17_init(void) {
 		),
 
 		.skybox = init_skybox("../assets/desert.bmp"),
-		.normal_map = init_plain_texture("../../../../assets/normal_maps/face.bmp",
-			TexPlain, TexRepeating, TexLinear, TexTrilinear, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT),
+
+		.normal_map = init_plain_texture("../../../../assets/normal_maps/sand.bmp",
+			TexPlain, TexRepeating, TexLinear, TexTrilinear, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT),
 
 		.heightmap = (byte*) palace_heightmap,
 		.map_size = {palace_width, palace_height}
