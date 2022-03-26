@@ -38,6 +38,7 @@ Other random ideas:
 - File paths may not work on Windows
 - Some steeply angled shadows exhibit aliasing
 - Pass in texture parameters through a bitmask
+- Compile modules separarely, and then link them all together with a given demo
 
 Normal mapping:
 - Normal map details disappear at steep angles and lower mip levels
