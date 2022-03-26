@@ -40,10 +40,12 @@ Other random ideas:
 - Pass in texture parameters through a bitmask
 
 Normal mapping:
-- Some shimmering
 - Normal map details disappear at steep angles and lower mip levels
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
 - Unshadowed areas have no bumps (or is that okay?)
+- Apply a gaussian blur to each normal map to scrub out the high frequencies that are causing shimmering
+- And, generating normal maps is slow
+- After the gaussian blur, generate a texture set of normal maps that are paired with the face normal maps
 
 A better shading model:
 - Macros for generation of objects, like GL_INIT(Buffer) for example
