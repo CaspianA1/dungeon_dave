@@ -13,8 +13,8 @@ SDL_Surface* init_surface(const GLchar* const path) {
 	SDL_Surface* const surface = SDL_LoadBMP(path);
 	if (surface == NULL) fail("open texture file", OpenImageFile);
 
-	if (surface -> format -> format == SDL_PIXEL_FORMAT) // Format is already correct
-		return surface;
+	if (surface -> format -> format == SDL_PIXEL_FORMAT)
+		return surface; // Format is already correct
 	else {
 		SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
 		deinit_surface(surface);
