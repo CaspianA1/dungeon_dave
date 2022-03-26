@@ -27,6 +27,12 @@ typedef struct {
 } SceneState;
 
 StateGL demo_17_init(void) {
+	/*
+	const Uint32 before = SDL_GetTicks();
+	test_normal_map_generation();
+	DEBUG(SDL_GetTicks() - before, u);
+	*/
+
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	/* For a 2048x2048 shadow map:
