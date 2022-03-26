@@ -73,7 +73,7 @@ SDL_Surface* generate_normal_map(SDL_Surface* const src, const float intensity) 
 					vec3 normal = {gx, gy, one_over_intensity};
 					glm_vec3_normalize(normal);
 
-					// Converting normal from (-1, 1) range to (0, 1 range), and then to (0, 255 range)
+					// Converting normal from range of (-1, 1) to (0, 1), and then to (0, 255)
 					for (byte i = 0; i < 3; i++) normal[i] = (normal[i] * 0.5f + 0.5f) * 255.0f;
 
 					const Uint32 normal_vector_in_rgb_format = SDL_MapRGB(
