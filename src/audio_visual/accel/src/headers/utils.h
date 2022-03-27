@@ -2,7 +2,6 @@
 #define UTILS_H
 
 #include <SDL2/SDL.h>
-#include "../glad/glad.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdouble-promotion"

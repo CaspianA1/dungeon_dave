@@ -4,7 +4,7 @@
 #include "headers/utils.h"
 #include "headers/texture.h"
 #include "headers/constants.h"
-#include "glad/glad.c"
+#include "../include/glad/glad.c"
 
 Screen init_screen(const GLchar* const title) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) fail("launch SDL", LaunchSDL);
