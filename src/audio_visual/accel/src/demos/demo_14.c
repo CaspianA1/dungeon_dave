@@ -42,8 +42,6 @@ void demo_14_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), NULL);
 
-	//////////
-
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, MESH_TYPE_ENUM, bytes_per_vertex, 0,
 		WITH_VERTEX_ATTRIBUTE(false, 1, 2, MESH_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(mesh_type_t),
 			use_shader(sector_shader);
@@ -53,15 +51,11 @@ void demo_14_drawer(const StateGL* const sgl) {
 		);
 	);
 
-	//////////
-
-	use_shader(billboard_shader);
-
-	UPDATE_UNIFORM(billboard_right_xz_world_space, 2f, camera.right[0], camera.right[2]);
-	UPDATE_UNIFORM(billboard_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
-
 	WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending on for billboard
 		WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+			use_shader(billboard_shader);
+			UPDATE_UNIFORM(billboard_right_xz_world_space, 2f, camera.right[0], camera.right[2]);
+			UPDATE_UNIFORM(billboard_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		);
 	);
