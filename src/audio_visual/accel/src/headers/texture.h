@@ -67,6 +67,8 @@ typedef enum {
 
 // Excluded: init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 
+#define set_current_texture glBindTexture
+
 #define deinit_texture(t) glDeleteTextures(1, &(t))
 #define deinit_textures(length, ts) glDeleteTextures((length), (ts))
 #define deinit_surface SDL_FreeSurface
@@ -77,8 +79,6 @@ typedef enum {
 	__VA_ARGS__\
 	if (must_lock) SDL_UnlockSurface((surface));\
 } while (0)
-
-#define set_current_texture glBindTexture
 
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);
 SDL_Surface* init_surface(const GLchar* const path);
