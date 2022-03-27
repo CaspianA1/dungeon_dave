@@ -103,16 +103,6 @@ PLANE_TYPE* create_plane_mesh_interleaved(const GLuint num_planes, ...) {
 	return all_vertex_data;
 }
 
-void bind_interleaved_planes_to_vao(void) {
-	enum {interleaved_vertex_bytes = 5 * sizeof(PLANE_TYPE)};
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, interleaved_vertex_bytes, NULL);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, PLANE_TYPE_ENUM, GL_FALSE, interleaved_vertex_bytes, (void*) (3 * sizeof(PLANE_TYPE)));
-}
-
 StateGL demo_8_init(void) {
 	StateGL sgl;
 	sgl.vertex_array = init_vao();
@@ -130,7 +120,6 @@ StateGL demo_8_init(void) {
 
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, plane_data, interleaved_plane_bytes * num_planes);
-	bind_interleaved_planes_to_vao();
 	free(plane_data);
 
 	sgl.shader = init_shader(demo_4_vertex_shader, demo_4_fragment_shader);
@@ -148,8 +137,13 @@ StateGL demo_8_init(void) {
 
 void demo_8_drawer(const StateGL* const sgl) {
 	move(sgl -> shader);
-	const int num_planes = 4;
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
+	enum {interleaved_vertex_bytes = 5 * sizeof(PLANE_TYPE), num_planes = 4};
+
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, PLANE_TYPE_ENUM, interleaved_vertex_bytes, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, PLANE_TYPE_ENUM, interleaved_vertex_bytes, 3 * sizeof(PLANE_TYPE),
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
+		);
+	);
 }
 
 #ifdef DEMO_8

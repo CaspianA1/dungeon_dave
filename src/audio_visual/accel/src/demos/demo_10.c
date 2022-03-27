@@ -114,16 +114,6 @@ plane_type_t* generate_sector_mesh(plane_type_t origin[3], const plane_type_t si
 	return sector_mesh;
 }
 
-void bind_interleaved_planes_to_vao(void) {
-	enum {bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(plane_type_t)));
-}
-
 StateGL demo_10_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
@@ -132,7 +122,6 @@ StateGL demo_10_init(void) {
 
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, sector_mesh, bytes_per_sector_mesh);
-	bind_interleaved_planes_to_vao();
 
 	free(sector_mesh);
 	
@@ -151,10 +140,14 @@ StateGL demo_10_init(void) {
 
 void demo_10_drawer(const StateGL* const sgl) {
 	move(sgl -> shader);
-	enum {num_meshes = 1};
+	enum {num_meshes = 1, bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
 
-	const GLsizei num_triangles = num_meshes * planes_per_mesh * 2; // 2 = 2 triangles per plane
-	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, PLANE_TYPE_ENUM, bytes_per_vertex, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, PLANE_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(plane_type_t),
+			const GLsizei num_triangles = num_meshes * planes_per_mesh * 2; // 2 = 2 triangles per plane
+			glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+		);
+	);
 }
 
 #ifdef DEMO_10

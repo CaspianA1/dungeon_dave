@@ -195,16 +195,12 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE,
 		&shadow_map_context -> light_context.model_view_projection[0][0]);
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_face_vertex, (void*) 0);
-	glVertexAttribIPointer(1, 1, MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, (void*) (3 * sizeof(face_mesh_component_t)));
-
-	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
+		glEnableVertexAttribArray(1);
+		glVertexAttribIPointer(1, 1, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, (void*) (3 * sizeof(face_mesh_component_t)));
+		glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
+		glDisableVertexAttribArray(1);
+	);
 }
 
 // Returns the number of visible faces

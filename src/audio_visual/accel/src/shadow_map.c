@@ -346,10 +346,9 @@ void render_all_sectors_to_shadow_map(
 
 	enable_rendering_to_shadow_map(shadow_map_context, map_size);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_face_vertex, (void*) 0);
-	glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);
-	glDisableVertexAttribArray(0);
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
+		glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);	
+	);
 
 	disable_rendering_to_shadow_map(screen_size, shadow_map_context);
 }

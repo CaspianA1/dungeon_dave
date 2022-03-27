@@ -44,13 +44,15 @@ void demo_14_drawer(const StateGL* const sgl) {
 
 	//////////
 
-	use_shader(sector_shader);
-	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
-	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
-	bind_sector_mesh_to_vao();
-	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
-	unbind_sector_mesh_from_vao();
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, MESH_TYPE_ENUM, bytes_per_vertex, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, MESH_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(mesh_type_t),
+			use_shader(sector_shader);
+			glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
+			UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+			glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
+		);
+	);
 
 	//////////
 

@@ -68,28 +68,26 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 
 	//////////
 
-	for (byte i = 0; i < 3; i++) {
-		glEnableVertexAttribArray(i);
-		glVertexAttribDivisor(i, 1);
-	}
-
+	glEnableVertexAttribArray(0);
+	glVertexAttribDivisor(0, 1);
 	glVertexAttribIPointer(0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), (void*) 0);
-	glVertexAttribPointer(1, 2, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, size));
-	glVertexAttribPointer(2, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, pos));
 
-	glDisable(GL_CULL_FACE);
+	WITH_VERTEX_ATTRIBUTE(true, 1, 2, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, size),
+		WITH_VERTEX_ATTRIBUTE(true, 2, 3, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, pos),
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
-	glDisable(GL_BLEND);
+			glDisable(GL_CULL_FACE);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	glEnable(GL_CULL_FACE);
+			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
 
-	for (byte i = 0; i < 3; i++) {
-		glVertexAttribDivisor(i, 0);
-		glDisableVertexAttribArray(i);
-	}
+			glDisable(GL_BLEND);
+			glEnable(GL_CULL_FACE);
+
+			glVertexAttribDivisor(0, 0);
+			glDisableVertexAttribArray(0);
+		);
+	);
 }
 
 void draw_visible_billboards(const BatchDrawContext* const draw_context, const Camera* const camera) {

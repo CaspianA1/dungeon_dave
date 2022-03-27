@@ -178,33 +178,32 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 
 	//////////
 
-	use_shader(context.obj.shader);
-	UPDATE_UNIFORM(obj_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
-	glBindBuffer(GL_ARRAY_BUFFER, context.obj.vertex_buffer);
+	if (!keys[SDL_SCANCODE_C]) {
+		glBindBuffer(GL_ARRAY_BUFFER, context.obj.vertex_buffer);
+		use_shader(context.obj.shader);
+		UPDATE_UNIFORM(obj_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 
-	glEnableVertexAttribArray(1);
+		WITH_VERTEX_ATTRIBUTE(false, 0, num_components_per_position, GL_FLOAT,
+			(GLsizei) sizeof(GLfloat[num_components_per_vertex]), 0,
 
-	glVertexAttribPointer(0, num_components_per_position,
-		GL_FLOAT, GL_FALSE, (GLsizei) sizeof(GLfloat[num_components_per_vertex]), (void*) 0);
+			WITH_VERTEX_ATTRIBUTE(false, 1, num_components_per_color, GL_FLOAT,
+				(GLsizei) sizeof(GLfloat[num_components_per_vertex]),
+				sizeof(GLfloat[num_components_per_position]),
 
-	glVertexAttribPointer(1, num_components_per_color, GL_FLOAT,
-		GL_FALSE, (GLsizei) sizeof(GLfloat[num_components_per_vertex]),
-		(void*) sizeof(GLfloat[num_components_per_position]));
+				glDrawArrays(GL_TRIANGLES, 0, (GLsizei) context.obj.num_vertices);
+			);
+		);
+	}
 
-	if (!keys[SDL_SCANCODE_C]) glDrawArrays(GL_TRIANGLES, 0, (GLsizei) context.obj.num_vertices);
-	glDisableVertexAttribArray(1);
-
-	//////////
-
+	glBindBuffer(GL_ARRAY_BUFFER, context.shadow_volume.vertex_buffer);
 	use_shader(context.shadow_volume.shader);
 	UPDATE_UNIFORM(shadow_volume_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
-	glBindBuffer(GL_ARRAY_BUFFER, context.shadow_volume.vertex_buffer);
 
-	glVertexAttribPointer(0, num_components_per_position, GL_FLOAT, GL_FALSE, 0, (void*) 0);
-
-	glEnable(GL_BLEND);
-	glDrawElements(GL_TRIANGLES, (GLsizei) context.shadow_volume.num_indices, BUFFER_SIZE_TYPENAME, (void*) 0);
-	glDisable(GL_BLEND);
+	WITH_VERTEX_ATTRIBUTE(false, 0, num_components_per_position, GL_FLOAT, 0, 0,
+		glEnable(GL_BLEND);
+		glDrawElements(GL_TRIANGLES, (GLsizei) context.shadow_volume.num_indices, BUFFER_SIZE_TYPENAME, (void*) 0);
+		glDisable(GL_BLEND);
+	);
 }
 
 ShadowVolumeContext init_shadow_volume_context(const vec3 light_source_pos) {
@@ -279,7 +278,6 @@ StateGL demo_22_init(void) {
 	glDepthFunc(GL_LESS);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glEnableVertexAttribArray(0);
 	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 
 	return sgl;

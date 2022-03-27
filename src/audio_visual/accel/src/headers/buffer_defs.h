@@ -9,10 +9,10 @@ typedef uint8_t byte;
 typedef GLubyte face_mesh_component_t;
 typedef GLuint buffer_size_t; // Max = 4294967295
 
-typedef GLfloat bb_pos_component_t; // bb = billboard
+typedef GLfloat billboard_var_component_t;
 
-#define MESH_COMPONENT_TYPENAME GL_UNSIGNED_BYTE
-#define BB_POS_COMPONENT_TYPENAME GL_FLOAT
+#define FACE_MESH_COMPONENT_TYPENAME GL_UNSIGNED_BYTE
+#define BILLBOARD_VAR_COMPONENT_TYPENAME GL_FLOAT
 #define BUFFER_SIZE_TYPENAME GL_UNSIGNED_INT
 
 enum { // `enum` is used to make these values compile-time constants

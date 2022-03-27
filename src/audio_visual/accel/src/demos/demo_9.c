@@ -82,7 +82,6 @@ StateGL demo_9_init(void) {
 
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, v3, joined_2_bytes);
-	bind_interleaved_planes_to_vao();
 
 	free(v1);
 	free(v2);
@@ -104,8 +103,14 @@ StateGL demo_9_init(void) {
 
 void demo_9_drawer(const StateGL* const sgl) {
 	move(sgl -> shader);
-	const int num_planes = 2;
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
+
+	enum {interleaved_vertex_bytes = 5 * sizeof(PLANE_TYPE), num_planes = 2};
+
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, PLANE_TYPE_ENUM, interleaved_vertex_bytes, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, PLANE_TYPE_ENUM, interleaved_vertex_bytes, 3 * sizeof(PLANE_TYPE),
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
+		);
+	);
 }
 
 #ifdef DEMO_9

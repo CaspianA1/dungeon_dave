@@ -119,24 +119,6 @@ void create_sector_mesh(const mesh_type_t origin[3], const mesh_type_t size[3], 
 	memcpy(dest, vertices, bytes_per_mesh);
 }
 
-void bind_sector_mesh_to_vao(void) {
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-
-	/*
-	glVertexAttribIPointer(0, 3, MESH_TYPE_ENUM, bytes_per_vertex, NULL);
-	glVertexAttribIPointer(1, 2, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
-	*/
-
-	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
-}
-
-void unbind_sector_mesh_from_vao(void) {
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-}
-
 StateGL demo_11_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
@@ -148,7 +130,6 @@ StateGL demo_11_init(void) {
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, cuboid_mesh, bytes_per_mesh);
 	free(cuboid_mesh);
-	bind_sector_mesh_to_vao();
 
 	sgl.shader = init_shader(demo_4_vertex_shader, demo_4_fragment_shader);
 	use_shader(sgl.shader);
@@ -176,7 +157,12 @@ void demo_11_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), NULL);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
-	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
+
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, MESH_TYPE_ENUM, bytes_per_vertex, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, MESH_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(mesh_type_t),
+			glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
+		);
+	);
 }
 
 #ifdef DEMO_11

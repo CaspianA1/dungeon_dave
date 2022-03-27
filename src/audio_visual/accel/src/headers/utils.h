@@ -62,17 +62,26 @@
 #define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
 
 #define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
-	glUniform##type_prefix(glGetUniformLocation(shader, #name), __VA_ARGS__)
+	glUniform##type_prefix(glGetUniformLocation((shader), #name), __VA_ARGS__)
 
 #define INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(name, shader, type_prefix, ...)\
-	glUniform##type_prefix(glGetUniformLocation(shader, name), __VA_ARGS__)
+	glUniform##type_prefix(glGetUniformLocation((shader), (name)), __VA_ARGS__)
 
 #define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
 
-////////// These macros are for snake-case names of OpenGL functions
+////////// These macros are for handy abstractions over OpenGL functions
 
 #define use_shader glUseProgram
 #define deinit_shader glDeleteProgram
+
+#define WITH_VERTEX_ATTRIBUTE(is_instanced, index, num_components, typename, stride, base_offset, ...) do {\
+	glEnableVertexAttribArray((index));\
+	glVertexAttribDivisor((index), is_instanced); /* If instanced, the divisor will be 1 */ \
+	glVertexAttribPointer((index), (num_components), (typename), GL_FALSE, (stride), (void*) (base_offset));\
+	__VA_ARGS__\
+	glVertexAttribDivisor((index), 0);\
+	glDisableVertexAttribArray((index));\
+} while (0)
 
 ////////// These macros pertain to window + rendering defaults
 

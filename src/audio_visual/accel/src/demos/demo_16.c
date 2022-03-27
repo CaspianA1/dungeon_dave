@@ -50,16 +50,12 @@ void demo_16_drawer(const StateGL* const sgl) {
 	use_shader(shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
-
-	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
-
-	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, MESH_TYPE_ENUM, bytes_per_vertex, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, MESH_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(mesh_type_t),
+			UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+			glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
+		);
+	);
 
 	draw_skybox(*((Skybox*) sgl -> any_data), &camera);
 }

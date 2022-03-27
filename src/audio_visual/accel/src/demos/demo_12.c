@@ -176,7 +176,6 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 
 	OldSectorList sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
 	init_sector_list_vbo(&sector_list);
-	bind_sector_mesh_to_vao();
 
 	OldSectorList* const sector_list_on_heap = malloc(sizeof(OldSectorList));
 	*sector_list_on_heap = sector_list;
@@ -260,7 +259,12 @@ void demo_12_drawer(const StateGL* const sgl) {
 	use_texture(sgl -> textures[0], shader, "texture_sampler", TexPlain, 0);
 
 	const OldSectorList* const sector_list = sgl -> any_data;
-	glDrawArrays(GL_TRIANGLES, 0, sector_list -> num_vertices);
+
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, MESH_TYPE_ENUM, bytes_per_vertex, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, MESH_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(mesh_type_t),
+			glDrawArrays(GL_TRIANGLES, 0, sector_list -> num_vertices);
+		);
+	);
 }
 
 void demo_12_deinit(const StateGL* const sgl) {
