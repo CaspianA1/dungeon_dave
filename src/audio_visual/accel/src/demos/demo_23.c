@@ -91,7 +91,7 @@ DepthBufferCapture init_depth_buffer_capture(const GLint texture_width, const GL
 
 	DepthBufferCapture depth_capture = {
 		.texture_size = {texture_width, texture_height},
-		.shader = init_shader_program(depth_map_vertex_shader, depth_map_fragment_shader),
+		.shader = init_shader(depth_map_vertex_shader, depth_map_fragment_shader),
 		.texture = preinit_texture(TexPlain, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER)
 	};
 
@@ -113,7 +113,7 @@ DepthBufferCapture init_depth_buffer_capture(const GLint texture_width, const GL
 }
 
 void deinit_depth_buffer_capture(const DepthBufferCapture depth_capture) {
-	deinit_shader_program(depth_capture.shader);
+	deinit_shader(depth_capture.shader);
 	deinit_texture(depth_capture.texture);
 	glDeleteFramebuffers(1, &depth_capture.framebuffer);
 }
@@ -121,7 +121,7 @@ void deinit_depth_buffer_capture(const DepthBufferCapture depth_capture) {
 void capture_depth_buffer(const DepthBufferCapture depth_capture, void (*const drawer) (const void* const),
 	const void* const drawer_param, const mat4 light_model_view_projection) {
 
-	use_shader_program(depth_capture.shader);
+	use_shader(depth_capture.shader);
 	UPDATE_UNIFORM(depth_capture.light_model_view_projection, Matrix4fv, 1, GL_FALSE, &light_model_view_projection[0][0]);
 
 	glViewport(0, 0, depth_capture.texture_size[0], depth_capture.texture_size[1]);
@@ -234,7 +234,7 @@ StateGL demo_23_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	SceneState scene_state = {
-		.obj_shader = init_shader_program(demo_23_obj_vertex_shader, demo_23_obj_fragment_shader),
+		.obj_shader = init_shader(demo_23_obj_vertex_shader, demo_23_obj_fragment_shader),
 		.depth_capture = init_depth_buffer_capture(128, 128)
 	};
 
@@ -319,7 +319,7 @@ void demo_23_drawer(const StateGL* const sgl) {
 
 	// Rendering the scene as usual
 
-	use_shader_program(scene_state.obj_shader);
+	use_shader(scene_state.obj_shader);
 	UPDATE_UNIFORM(obj_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 	UPDATE_UNIFORM(light_bias_model_view_projection, Matrix4fv, 1, GL_FALSE, &light_bias_model_view_projection[0][0]);
 
@@ -333,7 +333,7 @@ void demo_23_drawer(const StateGL* const sgl) {
 void demo_23_deinit(const StateGL* const sgl) {
 	SceneState* const scene_state = ((SceneState*) sgl -> any_data);
 
-	deinit_shader_program(scene_state -> obj_shader);
+	deinit_shader(scene_state -> obj_shader);
 	glDeleteBuffers(1, &scene_state -> obj_vbo);
 	deinit_depth_buffer_capture(scene_state -> depth_capture);
 

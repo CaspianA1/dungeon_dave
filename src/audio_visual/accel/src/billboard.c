@@ -49,7 +49,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	const Camera* const camera, const buffer_size_t num_visible_billboards) {
 
 	const GLuint shader = draw_context -> shader;
-	use_shader_program(shader);
+	use_shader(shader);
 
 	static GLint right_xz_world_space_id, model_view_projection_id;
 	static bool first_call = true;
@@ -122,7 +122,7 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, ...) {
 	BatchDrawContext draw_context = {
 		.buffers.cpu = init_list(num_billboards, Billboard),
-		.shader = init_shader_program(billboard_vertex_shader, billboard_fragment_shader)
+		.shader = init_shader(billboard_vertex_shader, billboard_fragment_shader)
 	};
 
 	draw_context.buffers.cpu.length = num_billboards;

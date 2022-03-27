@@ -83,10 +83,10 @@ typedef enum {
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);
 SDL_Surface* init_surface(const GLchar* const path);
 
-void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader_program, const byte texture_unit);
+void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader, const byte texture_unit);
 void set_current_texture_unit(const byte texture_unit);
 
-void use_texture(const GLuint texture, const GLuint shader_program,
+void use_texture(const GLuint texture, const GLuint shader,
 	const GLchar* const sampler_name, const TextureType type, const byte texture_unit);
 
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,

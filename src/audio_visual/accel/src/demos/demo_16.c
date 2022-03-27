@@ -16,12 +16,12 @@ StateGL demo_16_init(void) {
 
 	glEnableVertexAttribArray(0);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
+	sgl.shader = init_shader(demo_4_vertex_shader, demo_4_fragment_shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/mesa.bmp", TexRepeating);
-	use_shader_program(sgl.shader_program);
-	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, SECTOR_FACE_TEXTURE_UNIT);
+	use_shader(sgl.shader);
+	use_texture(sgl.textures[0], sgl.shader, "texture_sampler", TexPlain, SECTOR_FACE_TEXTURE_UNIT);
 
 	const Skybox skybox = init_skybox("../assets/sky_2.bmp");
 	sgl.any_data = malloc(sizeof(Skybox));
@@ -37,7 +37,7 @@ void demo_16_drawer(const StateGL* const sgl) {
 	static GLint model_view_projection_id;
 	static bool first_call = true;
 
-	const GLuint shader = sgl -> shader_program;
+	const GLuint shader = sgl -> shader;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
@@ -47,7 +47,7 @@ void demo_16_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), NULL);
 
-	use_shader_program(shader);
+	use_shader(shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 
 	glEnableVertexAttribArray(0);

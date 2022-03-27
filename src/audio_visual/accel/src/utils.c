@@ -189,7 +189,7 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 }
 
 void deinit_demo_vars(const StateGL* const sgl) {
-	deinit_shader_program(sgl -> shader_program);
+	deinit_shader(sgl -> shader);
 
 	for (GLuint i = 0; i < (GLuint) sgl -> num_vertex_buffers; i++) glDisableVertexAttribArray(i);
 
@@ -276,7 +276,7 @@ static void fail_on_shader_creation_error(
 	}
 }
 
-GLuint init_shader_program(const GLchar* const vertex_shader, const GLchar* const fragment_shader) {
+GLuint init_shader(const GLchar* const vertex_shader, const GLchar* const fragment_shader) {
 	// In this, a sub-shader is a part of the big shader, like a vertex or fragment shader.
 
 	const GLchar* const sub_shader_code[2] = {vertex_shader, fragment_shader};

@@ -71,8 +71,8 @@
 
 ////////// These macros are for snake-case names of OpenGL functions
 
-#define use_shader_program glUseProgram
-#define deinit_shader_program glDeleteProgram
+#define use_shader glUseProgram
+#define deinit_shader glDeleteProgram
 
 ////////// These macros pertain to window + rendering defaults
 
@@ -115,7 +115,7 @@ typedef enum {
 } FailureType;
 
 typedef struct {
-	GLuint shader_program, vertex_array, *vertex_buffers, *textures;
+	GLuint shader, vertex_array, *vertex_buffers, *textures;
 	GLsizei num_vertex_buffers, num_textures;
 	void* any_data; // If a demo need to pass in extra info to the drawer, it can do it through here
 } StateGL;
@@ -151,7 +151,7 @@ GLuint init_vao(void);
 GLuint* init_vbos(const GLsizei num_buffers, ...);
 void bind_vbos_to_vao(const GLuint* const vbos, const GLuint num_vbos, ...);
 
-GLuint init_shader_program(const GLchar* const vertex_shader, const GLchar* const fragment_shader);
+GLuint init_shader(const GLchar* const vertex_shader, const GLchar* const fragment_shader);
 
 void enable_all_culling(void);
 

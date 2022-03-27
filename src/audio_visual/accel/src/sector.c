@@ -137,7 +137,7 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 
 	draw_context -> buffers.cpu = face_meshes;
 	init_batch_draw_context_gpu_buffer(draw_context, face_meshes.length, bytes_per_face);
-	draw_context -> shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+	draw_context -> shader = init_shader(sector_vertex_shader, sector_fragment_shader);
 	*sectors_ref = sectors;
 }
 
@@ -157,7 +157,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	const buffer_size_t num_visible_faces, const GLuint normal_map) {
 
 	const GLuint sector_shader = draw_context -> shader;
-	use_shader_program(sector_shader);
+	use_shader(sector_shader);
 
 	static GLint camera_pos_world_space_id, inv_light_dir_id, model_view_projection_id, light_model_view_projection_id;
 	static bool first_call = true;

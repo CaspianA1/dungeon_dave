@@ -101,19 +101,19 @@ Skybox init_skybox(const GLchar* const cubemap_path) {
 
 	return (Skybox) {
 		.vbo = vbo,
-		.shader = init_shader_program(skybox_vertex_shader, skybox_fragment_shader),
+		.shader = init_shader(skybox_vertex_shader, skybox_fragment_shader),
 		.texture = init_skybox_texture(cubemap_path)
 	};
 }
 
 void deinit_skybox(const Skybox s) {
 	deinit_texture(s.texture);
-	deinit_shader_program(s.shader);
+	deinit_shader(s.shader);
 	glDeleteBuffers(1, &s.vbo);
 }
 
 void draw_skybox(const Skybox s, const Camera* const camera) {
-	use_shader_program(s.shader);
+	use_shader(s.shader);
 
 	static GLint model_view_projection_id;
 	static bool first_call = true;

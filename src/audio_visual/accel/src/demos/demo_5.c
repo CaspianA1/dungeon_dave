@@ -5,7 +5,7 @@
 - wrap textures around taller and wider rectangles
 */
 
-void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
+void configurable_move(const GLuint shader, vec3 pos, mat4 view,
 	mat4 view_times_projection, mat4 model_view_projection, const bool set_up_mvp) {
 
 	static GLfloat hori_angle = PI, vert_angle = 0.0f, last_time;
@@ -45,7 +45,7 @@ void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
 	glm_vec3_add(pos, direction, pos_plus_dir);
 	glm_vec3_cross(right, direction, up);
 
-	demo_2_configurable_matrix_setup(shader_program, pos, pos_plus_dir, up, view,
+	demo_2_configurable_matrix_setup(shader, pos, pos_plus_dir, up, view,
 		view_times_projection, model_view_projection, set_up_mvp);
 
 	if (keys[KEY_PRINT_POSITION])
@@ -54,14 +54,14 @@ void configurable_move(const GLuint shader_program, vec3 pos, mat4 view,
 	last_time = SDL_GetTicks() / 1000.0f;
 }
 
-void move(const GLuint shader_program) {
+void move(const GLuint shader) {
 	static vec3 pos = {1.5f, 1.5f, 3.5f};
 	mat4 view, view_times_projection, model_view_projection;
-	configurable_move(shader_program, pos, view, view_times_projection, model_view_projection, true);
+	configurable_move(shader, pos, view, view_times_projection, model_view_projection, true);
 }
 
 void demo_5_drawer(const StateGL* const sgl) {
-	move(sgl -> shader_program);
+	move(sgl -> shader);
 	demo_4_core_drawer(12);
 }
 

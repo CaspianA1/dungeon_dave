@@ -150,12 +150,12 @@ StateGL demo_11_init(void) {
 	free(cuboid_mesh);
 	bind_sector_mesh_to_vao();
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	use_shader_program(sgl.shader_program);
+	sgl.shader = init_shader(demo_4_vertex_shader, demo_4_fragment_shader);
+	use_shader(sgl.shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/mesa.bmp", TexRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
+	use_texture(sgl.textures[0], sgl.shader, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
@@ -170,7 +170,7 @@ void demo_11_drawer(const StateGL* const sgl) {
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
-		INIT_UNIFORM(model_view_projection, sgl -> shader_program);
+		INIT_UNIFORM(model_view_projection, sgl -> shader);
 		first_call = false;
 	}
 

@@ -53,7 +53,7 @@ StateGL demo_7_init(void) {
 }
 
 void demo_7_drawer(const StateGL* const sgl) {
-	move(sgl -> shader_program);
+	move(sgl -> shader);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 

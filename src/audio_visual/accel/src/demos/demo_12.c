@@ -182,8 +182,8 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 	*sector_list_on_heap = sector_list;
 	sgl.any_data = sector_list_on_heap; // any_data stores sector meshes, and freed in demo_12_deinit
 
-	sgl.shader_program = init_shader_program(sector_lighting_vertex_shader, sector_lighting_fragment_shader);
-	use_shader_program(sgl.shader_program);
+	sgl.shader = init_shader(sector_lighting_vertex_shader, sector_lighting_fragment_shader);
+	use_shader(sgl.shader);
 	enable_all_culling();
 	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 
@@ -243,7 +243,7 @@ void demo_12_drawer(const StateGL* const sgl) {
 	static GLint camera_pos_world_space_id, model_view_projection_id;
 	static bool first_call = true;
 
-	const GLuint shader = sgl -> shader_program;
+	const GLuint shader = sgl -> shader;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {1.5f, 1.0f, 1.5f});

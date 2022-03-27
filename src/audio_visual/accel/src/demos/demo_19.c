@@ -87,8 +87,8 @@ StateGL demo_19_init(void) {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_BYTE, GL_FALSE, 0, NULL);
 
-	sgl.shader_program = init_shader_program(demo_19_vertex_shader, demo_19_fragment_shader);
-	use_shader_program(sgl.shader_program);
+	sgl.shader = init_shader(demo_19_vertex_shader, demo_19_fragment_shader);
+	use_shader(sgl.shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = malloc(sizeof(GLuint));
@@ -96,7 +96,7 @@ StateGL demo_19_init(void) {
 	*sgl.textures = init_plain_texture("../../../../assets/walls/mesa.bmp", TexPlain,
 		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
-	use_texture(*sgl.textures, sgl.shader_program, "texture_sampler", TexPlain, 0);
+	use_texture(*sgl.textures, sgl.shader, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 
@@ -111,7 +111,7 @@ void demo_19_drawer(const StateGL* const sgl) {
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, -1.5f});
 
-		const GLuint shader = sgl -> shader_program;
+		const GLuint shader = sgl -> shader;
 		INIT_UNIFORM(spin, shader);
 		INIT_UNIFORM(model_view_projection, shader);
 

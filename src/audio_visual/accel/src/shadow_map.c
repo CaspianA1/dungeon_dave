@@ -180,8 +180,8 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	////////// Defining shaders, and getting the light direction
 
 	const GLuint
-		depth_shader = init_shader_program(depth_vertex_shader, depth_fragment_shader),
-		blur_shader = init_shader_program(blur_vertex_shader, blur_fragment_shader);
+		depth_shader = init_shader(depth_vertex_shader, depth_fragment_shader),
+		blur_shader = init_shader(blur_vertex_shader, blur_fragment_shader);
 
 	vec3 light_dir;
 	get_dir_in_2D_and_3D(hori_angle, vert_angle, (vec2) {0.0f, 0.0f}, light_dir);
@@ -218,8 +218,8 @@ void deinit_shadow_map_context(ShadowMapContext* const shadow_map_context) {
 	deinit_textures(2, shadow_map_context -> buffer_context.ping_pong_textures);
 	glDeleteRenderbuffers(1, &shadow_map_context -> shadow_pass.depth_render_buffer);
 
-	deinit_shader_program(shadow_map_context -> shadow_pass.depth_shader);
-	deinit_shader_program(shadow_map_context -> blur_pass.blur_shader);
+	deinit_shader(shadow_map_context -> shadow_pass.depth_shader);
+	deinit_shader(shadow_map_context -> blur_pass.blur_shader);
 
 	deinit_framebuffer(shadow_map_context -> buffer_context.framebuffer);
 }
@@ -248,7 +248,7 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 		blur_shader = shadow_map_context -> blur_pass.blur_shader,
 		*const ping_pong_textures = shadow_map_context -> buffer_context.ping_pong_textures;
 
-	use_shader_program(blur_shader);
+	use_shader(blur_shader);
 
 	//////////
 
@@ -294,7 +294,7 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 	////////// Activate shader, update light mvp, bind framebuffer, resize viewport, clear buffers, and cull front faces
 
 	const GLuint depth_shader = shadow_map_context.shadow_pass.depth_shader;
-	use_shader_program(depth_shader);
+	use_shader(depth_shader);
 
 	static bool first_call = 1;
 

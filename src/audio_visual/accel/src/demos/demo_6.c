@@ -141,19 +141,19 @@ const GLchar* const demo_6_vertex_shader =
 //////////
 
 void demo_6_core_init_shader_and_textures_and_culling(StateGL* const sgl) {
-	sgl -> shader_program = init_shader_program(demo_6_vertex_shader, demo_4_fragment_shader);
-	use_shader_program(sgl -> shader_program);
+	sgl -> shader = init_shader(demo_6_vertex_shader, demo_4_fragment_shader);
+	use_shader(sgl -> shader);
 
 	sgl -> num_textures = 1;
 	sgl -> textures = init_plain_textures(sgl -> num_textures, "../../../../assets/walls/dune.bmp", TexRepeating);
-	use_texture(sgl -> textures[0], sgl -> shader_program, "texture_sampler", TexPlain, 0);
+	use_texture(sgl -> textures[0], sgl -> shader, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 }
 
 void demo_6_init_shader_and_textures_and_culling(StateGL* const sgl, const GLint num_planes, const GLfloat* const plane_sizes) {
 	demo_6_core_init_shader_and_textures_and_culling(sgl);
-	const GLint INIT_UNIFORM(plane_sizes, sgl -> shader_program);
+	const GLint INIT_UNIFORM(plane_sizes, sgl -> shader);
 	UPDATE_UNIFORM(plane_sizes, 2fv, num_planes, plane_sizes);
 }
 
@@ -193,7 +193,7 @@ StateGL demo_6_init(void) {
 }
 
 void demo_6_drawer(const StateGL* const sgl) {
-	move(sgl -> shader_program);
+	move(sgl -> shader);
 	enum {num_triangles = 8};
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 }

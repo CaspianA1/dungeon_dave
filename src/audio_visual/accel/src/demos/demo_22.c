@@ -178,7 +178,7 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 
 	//////////
 
-	use_shader_program(context.obj.shader);
+	use_shader(context.obj.shader);
 	UPDATE_UNIFORM(obj_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 	glBindBuffer(GL_ARRAY_BUFFER, context.obj.vertex_buffer);
 
@@ -196,7 +196,7 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 
 	//////////
 
-	use_shader_program(context.shadow_volume.shader);
+	use_shader(context.shadow_volume.shader);
 	UPDATE_UNIFORM(shadow_volume_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 	glBindBuffer(GL_ARRAY_BUFFER, context.shadow_volume.vertex_buffer);
 
@@ -209,8 +209,8 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 
 ShadowVolumeContext init_shadow_volume_context(const vec3 light_source_pos) {
 	ShadowVolumeContext context = {
-		.obj.shader = init_shader_program(demo_22_obj_vertex_shader, demo_22_obj_fragment_shader),
-		.shadow_volume.shader = init_shader_program(demo_22_shadow_volume_vertex_shader, demo_22_shadow_volume_fragment_shader)
+		.obj.shader = init_shader(demo_22_obj_vertex_shader, demo_22_obj_fragment_shader),
+		.shadow_volume.shader = init_shader(demo_22_shadow_volume_vertex_shader, demo_22_shadow_volume_fragment_shader)
 	};
 
 	const GLfloat
@@ -336,8 +336,8 @@ void demo_22_deinit(const StateGL* const sgl) {
 
 	glDeleteBuffers(3, buffers);
 
-	deinit_shader_program(context.obj.shader);
-	deinit_shader_program(context.shadow_volume.shader);
+	deinit_shader(context.obj.shader);
+	deinit_shader(context.shadow_volume.shader);
 
 	free(sgl -> any_data);
 	deinit_demo_vars(sgl);

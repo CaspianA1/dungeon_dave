@@ -133,12 +133,12 @@ StateGL demo_8_init(void) {
 	bind_interleaved_planes_to_vao();
 	free(plane_data);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	use_shader_program(sgl.shader_program);
+	sgl.shader = init_shader(demo_4_vertex_shader, demo_4_fragment_shader);
+	use_shader(sgl.shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/pyramid.bmp", TexRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
+	use_texture(sgl.textures[0], sgl.shader, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
@@ -147,7 +147,7 @@ StateGL demo_8_init(void) {
 }
 
 void demo_8_drawer(const StateGL* const sgl) {
-	move(sgl -> shader_program);
+	move(sgl -> shader);
 	const int num_planes = 4;
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
 }
