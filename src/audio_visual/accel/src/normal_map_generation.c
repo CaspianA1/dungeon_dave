@@ -5,8 +5,13 @@
 #include "headers/constants.h"
 #include "texture.c"
 
+static void* read_surface_pixel(const SDL_Surface* const surface, const SDL_PixelFormat* const format, const int x, const int y) {
+	Uint8* const row = (Uint8*) surface -> pixels + y * surface -> pitch;
+	return row + x * format -> BytesPerPixel;
+}
+
 // If a coordinate (x or y) is out of bounds, it is converted to the closest possible edge value.
-static void* read_surface_pixel(const SDL_Surface* const surface, const SDL_PixelFormat* const format, int x, int y) {
+static void* edge_checked_read_surface_pixel(const SDL_Surface* const surface, const SDL_PixelFormat* const format, int x, int y) {
 	const int w = surface -> w, h = surface -> h;
 
 	if (x < 0) x = 0;
@@ -15,14 +20,13 @@ static void* read_surface_pixel(const SDL_Surface* const surface, const SDL_Pixe
 	if (y < 0) y = 0;
 	else if (y >= h) y = h - 1;
 
-	Uint8* const row = (Uint8*) surface -> pixels + y * surface -> pitch;
-	return row + x * format -> BytesPerPixel;
+	return read_surface_pixel(surface, format, x, y);
 }
 
 static float sobel_sample(SDL_Surface* const surface,
 	const SDL_PixelFormat* const format, const int x, const int y) {
 
-	const Uint32 pixel = *(Uint32*) read_surface_pixel(surface, format, x, y);
+	const Uint32 pixel = *(Uint32*) edge_checked_read_surface_pixel(surface, format, x, y);
 
 	Uint8 r, g, b;
 	SDL_GetRGB(pixel, format, &r, &g, &b);
@@ -89,7 +93,7 @@ SDL_Surface* generate_normal_map(SDL_Surface* const src, const float intensity) 
 	return normal_map;
 }
 
-////////// This code concerns Gaussian blur (the normal map is blurred to cut out high frequencies from the Sobel operator).
+////////// This code concerns Gaussian blur (the normal map input is blurred to cut out high frequencies from the Sobel operator).
 
 static float* compute_1D_gaussian_kernel(const int radius, const float sigma) {
 	const int kernel_length = radius * 2 + 1;
@@ -130,7 +134,7 @@ static void do_separable_gaussian_blur_pass(const SDL_Surface* const src,
 				int filter_pos[2] = {x, y};
 				filter_pos[blur_is_vertical] += i; // If blur is vertical, `blur_is_vertical` equals 1; otherwise, 0
 
-				const Uint32 pixel = *(Uint32*) read_surface_pixel(src, src_format, filter_pos[0], filter_pos[1]);
+				const Uint32 pixel = *(Uint32*) edge_checked_read_surface_pixel(src, src_format, filter_pos[0], filter_pos[1]);
 
 				Uint8 r, g, b;
 				SDL_GetRGB(pixel, src_format, &r, &g, &b);
