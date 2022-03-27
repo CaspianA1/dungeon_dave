@@ -277,32 +277,34 @@ static void fail_on_shader_creation_error(
 }
 
 GLuint init_shader_program(const GLchar* const vertex_shader, const GLchar* const fragment_shader) {
-	const GLchar* const shaders[2] = {vertex_shader, fragment_shader};
-	const GLenum gl_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
-	GLuint shader_ids[2], program_id = glCreateProgram();
+	// In this, a sub-shader is a part of the big shader, like a vertex or fragment shader.
+
+	const GLchar* const sub_shader_code[2] = {vertex_shader, fragment_shader};
+	const GLenum sub_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
+	GLuint sub_shaders[2], shader = glCreateProgram();
 
 	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
-		shader_ids[step] = glCreateShader(gl_shader_types[step]);
+		const GLuint sub_shader = glCreateShader(sub_shader_types[step]);
+		glShaderSource(sub_shader, 1, sub_shader_code + step, NULL);
 
-		const GLuint shader_id = shader_ids[step];
-		glShaderSource(shader_id, 1, shaders + step, NULL);
-
-		fail_on_shader_creation_error(shader_id, step,
+		fail_on_shader_creation_error(sub_shader, step,
 			glCompileShader, glGetShaderiv, glGetShaderInfoLog);
 
-		glAttachShader(program_id, shader_id);
+		glAttachShader(shader, sub_shader);
+
+		sub_shaders[step] = sub_shader;
 	}
 
-	fail_on_shader_creation_error(program_id, LinkShaders,
+	fail_on_shader_creation_error(shader, LinkShaders,
 		glLinkProgram, glGetProgramiv, glGetProgramInfoLog);
 
 	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
-		const GLuint shader_id = shader_ids[step];
-		glDetachShader(program_id, shader_id);
-		glDeleteShader(shader_id);
+		const GLuint sub_shader = sub_shaders[step];
+		glDetachShader(shader, sub_shader);
+		glDeleteShader(sub_shader);
 	}
 
-	return program_id;
+	return shader;
 }
 
 void enable_all_culling(void) {
