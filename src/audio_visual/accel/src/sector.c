@@ -157,7 +157,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	const buffer_size_t num_visible_faces, const GLuint normal_map) {
 
 	const GLuint sector_shader = draw_context -> shader;
-	glUseProgram(sector_shader);
+	use_shader_program(sector_shader);
 
 	static GLint camera_pos_world_space_id, inv_light_dir_id, model_view_projection_id, light_model_view_projection_id;
 	static bool first_call = true;

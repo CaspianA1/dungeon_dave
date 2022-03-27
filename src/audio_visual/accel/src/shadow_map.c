@@ -218,8 +218,8 @@ void deinit_shadow_map_context(ShadowMapContext* const shadow_map_context) {
 	deinit_textures(2, shadow_map_context -> buffer_context.ping_pong_textures);
 	glDeleteRenderbuffers(1, &shadow_map_context -> shadow_pass.depth_render_buffer);
 
-	glDeleteProgram(shadow_map_context -> shadow_pass.depth_shader);
-	glDeleteProgram(shadow_map_context -> blur_pass.blur_shader);
+	deinit_shader_program(shadow_map_context -> shadow_pass.depth_shader);
+	deinit_shader_program(shadow_map_context -> blur_pass.blur_shader);
 
 	deinit_framebuffer(shadow_map_context -> buffer_context.framebuffer);
 }
@@ -248,7 +248,7 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 		blur_shader = shadow_map_context -> blur_pass.blur_shader,
 		*const ping_pong_textures = shadow_map_context -> buffer_context.ping_pong_textures;
 
-	glUseProgram(blur_shader);
+	use_shader_program(blur_shader);
 
 	//////////
 
@@ -294,7 +294,7 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 	////////// Activate shader, update light mvp, bind framebuffer, resize viewport, clear buffers, and cull front faces
 
 	const GLuint depth_shader = shadow_map_context.shadow_pass.depth_shader;
-	glUseProgram(depth_shader);
+	use_shader_program(depth_shader);
 
 	static bool first_call = 1;
 

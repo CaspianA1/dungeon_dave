@@ -108,12 +108,12 @@ Skybox init_skybox(const GLchar* const cubemap_path) {
 
 void deinit_skybox(const Skybox s) {
 	deinit_texture(s.texture);
-	glDeleteProgram(s.shader);
+	deinit_shader_program(s.shader);
 	glDeleteBuffers(1, &s.vbo);
 }
 
 void draw_skybox(const Skybox s, const Camera* const camera) {
-	glUseProgram(s.shader);
+	use_shader_program(s.shader);
 
 	static GLint model_view_projection_id;
 	static bool first_call = true;

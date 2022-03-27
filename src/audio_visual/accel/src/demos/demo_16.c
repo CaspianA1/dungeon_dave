@@ -20,7 +20,7 @@ StateGL demo_16_init(void) {
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/mesa.bmp", TexRepeating);
-	glUseProgram(sgl.shader_program);
+	use_shader_program(sgl.shader_program);
 	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, SECTOR_FACE_TEXTURE_UNIT);
 
 	const Skybox skybox = init_skybox("../assets/sky_2.bmp");
@@ -47,7 +47,7 @@ void demo_16_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), NULL);
 
-	glUseProgram(shader);
+	use_shader_program(shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 
 	glEnableVertexAttribArray(0);

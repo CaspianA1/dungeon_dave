@@ -88,7 +88,7 @@ StateGL demo_19_init(void) {
 	glVertexAttribPointer(0, 3, GL_BYTE, GL_FALSE, 0, NULL);
 
 	sgl.shader_program = init_shader_program(demo_19_vertex_shader, demo_19_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	use_shader_program(sgl.shader_program);
 
 	sgl.num_textures = 1;
 	sgl.textures = malloc(sizeof(GLuint));

@@ -72,7 +72,7 @@ StateGL demo_18_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	sgl.shader_program = init_shader_program(perlin_vertex_shader, perlin_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	use_shader_program(sgl.shader_program);
 
 	return sgl;
 }

@@ -49,7 +49,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	const Camera* const camera, const buffer_size_t num_visible_billboards) {
 
 	const GLuint shader = draw_context -> shader;
-	glUseProgram(shader);
+	use_shader_program(shader);
 
 	static GLint right_xz_world_space_id, model_view_projection_id;
 	static bool first_call = true;

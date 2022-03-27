@@ -57,7 +57,7 @@ StateGL demo_2_init(void) {
 		"}\n";
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
-	glUseProgram(sgl.shader_program);
+	use_shader_program(sgl.shader_program);
 
 	vec3 camera_pos = {4.0f, 3.0f, 3.0f};
 	demo_2_matrix_setup(sgl.shader_program, camera_pos);

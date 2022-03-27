@@ -183,7 +183,7 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 	sgl.any_data = sector_list_on_heap; // any_data stores sector meshes, and freed in demo_12_deinit
 
 	sgl.shader_program = init_shader_program(sector_lighting_vertex_shader, sector_lighting_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	use_shader_program(sgl.shader_program);
 	enable_all_culling();
 	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 

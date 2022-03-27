@@ -189,7 +189,7 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 }
 
 void deinit_demo_vars(const StateGL* const sgl) {
-	glDeleteProgram(sgl -> shader_program);
+	deinit_shader_program(sgl -> shader_program);
 
 	for (GLuint i = 0; i < (GLuint) sgl -> num_vertex_buffers; i++) glDisableVertexAttribArray(i);
 

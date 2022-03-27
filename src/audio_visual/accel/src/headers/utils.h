@@ -69,6 +69,11 @@
 
 #define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
 
+////////// These macros are for snake-case names of OpenGL functions
+
+#define use_shader_program glUseProgram
+#define deinit_shader_program glDeleteProgram
+
 ////////// These macros pertain to window + rendering defaults
 
 #define WINDOW_W 800

@@ -10,7 +10,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 		billboard_model_view_projection_id, model_view_projection_id; // Not called sector_model_view_projection_id for compatibility reasons
 
 	const GLuint billboard_shader = sgl -> shader_program;
-	glUseProgram(billboard_shader);
+	use_shader_program(billboard_shader);
 
 	static bool first_call = true;
 
@@ -44,7 +44,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 
 	//////////
 
-	glUseProgram(sector_shader);
+	use_shader_program(sector_shader);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
@@ -54,7 +54,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 
 	//////////
 
-	glUseProgram(billboard_shader);
+	use_shader_program(billboard_shader);
 
 	UPDATE_UNIFORM(billboard_right_xz_world_space, 2f, camera.right[0], camera.right[2]);
 	UPDATE_UNIFORM(billboard_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);

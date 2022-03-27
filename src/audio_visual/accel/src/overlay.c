@@ -85,7 +85,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 
 void deinit_weapon_sprite(const WeaponSprite* const ws) {
 	deinit_texture(ws -> texture);
-	glDeleteProgram(ws -> shader);
+	deinit_shader_program(ws -> shader);
 }
 
 // Given an input between 0 and 1, this returns the y-value of the top left side of a circle
@@ -123,7 +123,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	const WeaponSprite ws = *ws_ref;
 
-	glUseProgram(ws.shader);
+	use_shader_program(ws.shader);
 
 	static GLint pace_id, frame_index_id;
 	const GLfloat max_movement_magitude = 0.2f, time_for_half_movement_cycle = 0.5f; // TODO: put these in constants.c

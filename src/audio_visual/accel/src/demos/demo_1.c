@@ -38,7 +38,7 @@ StateGL demo_1_init(void) {
 		"}\n";
 
 	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
-	glUseProgram(sgl.shader_program);
+	use_shader_program(sgl.shader_program);
 
 	return sgl;
 }

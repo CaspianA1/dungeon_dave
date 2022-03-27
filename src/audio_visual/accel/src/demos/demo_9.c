@@ -89,7 +89,7 @@ StateGL demo_9_init(void) {
 	free(v3);
 
 	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	use_shader_program(sgl.shader_program);
 	sgl.num_textures = 1;
 
 	sgl.num_textures = 1;

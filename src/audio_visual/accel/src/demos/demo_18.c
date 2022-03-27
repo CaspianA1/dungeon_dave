@@ -45,7 +45,7 @@ StateGL demo_18_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 1};
 
 	sgl.shader_program = init_shader_program(water_vertex_shader, water_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	use_shader_program(sgl.shader_program);
 
 	sgl.num_textures = 1; // ../../../../assets/walls/sand.bmp, ../../../../assets/walls/hieroglyph.bmp, ../assets/water.bmp
 	sgl.textures = malloc(sizeof(GLuint));

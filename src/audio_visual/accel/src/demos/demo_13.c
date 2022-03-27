@@ -96,7 +96,7 @@ void demo_13_move(vec3 pos, vec3 right, mat4 model_view_projection, const GLuint
 		printf("pos = {%lf, %lf, %lf}\n", (double) pos[0], (double) pos[1], (double) pos[2]);
 
 	extern GLuint sector_shader;
-	glUseProgram(sector_shader); // Binding sector_shader
+	use_shader_program(sector_shader); // Binding sector_shader
 
 	static GLint model_view_projection_id;
 	static bool second_call = true; // Not first_call b/c that is defined above
@@ -106,7 +106,7 @@ void demo_13_move(vec3 pos, vec3 right, mat4 model_view_projection, const GLuint
 	}
 
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
-	glUseProgram(shader_program); // Binding billboard shader back
+	use_shader_program(shader_program); // Binding billboard shader back
 
 	last_time = SDL_GetTicks() / 1000.0f;
 }
@@ -115,7 +115,7 @@ void demo_13_matrix_setup(const GLuint shader_program, const GLfloat center[3]) 
 	static GLint billboard_right_xz_world_space_id, billboard_model_view_projection_id;
 	static bool first_call = true;
 
-	glUseProgram(shader_program); // Enable billboard shader
+	use_shader_program(shader_program); // Enable billboard shader
 
 	if (first_call) {
 		INIT_UNIFORM(billboard_right_xz_world_space, shader_program);
@@ -160,11 +160,11 @@ StateGL demo_13_init(void) {
 		"../../../../assets/walls/saqqara.bmp", TexRepeating);
 
 	sgl.shader_program = init_shader_program(demo_13_billboard_vertex_shader, demo_13_billboard_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	use_shader_program(sgl.shader_program);
 	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, BILLBOARD_TEXTURE_UNIT);
 
 	sector_shader = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	glUseProgram(sector_shader);
+	use_shader_program(sector_shader);
 	use_texture(sgl.textures[1], sector_shader, "texture_sampler", TexPlain, SECTOR_FACE_TEXTURE_UNIT);
 
 	enable_all_culling();
@@ -181,7 +181,7 @@ void demo_13_drawer(const StateGL* const sgl) {
 
 	bind_sector_mesh_to_vao();
 
-	glUseProgram(sector_shader);
+	use_shader_program(sector_shader);
 	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
 	glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
@@ -191,14 +191,14 @@ void demo_13_drawer(const StateGL* const sgl) {
 
 	//////////
 
-	glUseProgram(sgl -> shader_program);
+	use_shader_program(sgl -> shader_program);
 	glEnable(GL_BLEND); // Turning on alpha blending for drawing billboards
 	glDisable(GL_CULL_FACE);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void demo_13_deinit(const StateGL* const sgl) {
-	glDeleteProgram(sector_shader);
+	deinit_shader_program(sector_shader);
 	deinit_demo_vars(sgl);
 }
 
