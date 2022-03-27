@@ -138,13 +138,11 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 	glBindBuffer(GL_ARRAY_BUFFER, s.vbo);
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, GL_BYTE, 0, 0,
-		glDepthFunc(GL_LEQUAL);
-		glDepthMask(GL_FALSE);
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);	
+		WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS,
+			WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+			);
+		);
 	);
 }
 

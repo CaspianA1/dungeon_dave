@@ -181,20 +181,25 @@ void demo_13_drawer(const StateGL* const sgl) {
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, MESH_TYPE_ENUM, bytes_per_vertex, 0,
 		WITH_VERTEX_ATTRIBUTE(false, 1, 2, MESH_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(mesh_type_t),
-			use_shader(sector_shader);
-			glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
-			glDisable(GL_BLEND);
-			glEnable(GL_CULL_FACE);
-			glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
+			WITHOUT_BINARY_RENDER_STATE(GL_BLEND,
+				WITH_BINARY_RENDER_STATE(GL_CULL_FACE,
+					use_shader(sector_shader);
+					glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
+					glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
+				);
+			);
 		);
 	);
 
 	//////////
 
 	use_shader(sgl -> shader);
-	glEnable(GL_BLEND); // Turning on alpha blending for drawing billboards
-	glDisable(GL_CULL_FACE);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	WITH_BINARY_RENDER_STATE(GL_BLEND, // Turning on alpha blending for drawing billboards
+		WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		);
+	);
 }
 
 void demo_13_deinit(const StateGL* const sgl) {

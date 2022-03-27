@@ -262,24 +262,24 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	}
 
 	set_current_texture_unit(SHADOW_MAP_TEXTURE_UNIT);
-	glDisable(GL_DEPTH_TEST); // Testing depths from the depth render buffer is not needed
 
-	for (byte i = 0; i < constants.shadow_mapping.num_blur_passes << 1; i++) {
-		const byte src_texture_index = i & 1;
-		const byte dest_texture_index = !src_texture_index;
+	WITHOUT_BINARY_RENDER_STATE(GL_DEPTH_TEST, // Testing depths from the depth render buffer is not needed
 
-		// The shader reads from `src_texture`, while the other texture is meanwhile written to.
-		set_current_texture(TexPlain, ping_pong_textures[src_texture_index]);
+		for (byte i = 0; i < constants.shadow_mapping.num_blur_passes << 1; i++) {
+			const byte src_texture_index = i & 1;
+			const byte dest_texture_index = !src_texture_index;
 
-		// For a pass's first horizontal blur step, you write to the second texture; otherwise, the first.
-		glDrawBuffer(GL_COLOR_ATTACHMENT0 + dest_texture_index);
+			// The shader reads from `src_texture`, while the other texture is meanwhile written to.
+			set_current_texture(TexPlain, ping_pong_textures[src_texture_index]);
 
-		UPDATE_UNIFORM(blurring_horizontally, 1i, dest_texture_index); // Setting the current horizontal/vertical blur state
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
-	}
+			// For a pass's first horizontal blur step, you write to the second texture; otherwise, the first.
+			glDrawBuffer(GL_COLOR_ATTACHMENT0 + dest_texture_index);
 
-	glGenerateMipmap(TexPlain); // At this point, the current bound texture will be the output texture
-	glEnable(GL_DEPTH_TEST);
+			UPDATE_UNIFORM(blurring_horizontally, 1i, dest_texture_index); // Setting the current horizontal/vertical blur state
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
+		}
+		glGenerateMipmap(TexPlain); // At this point, the current bound texture will be the output texture
+	);
 }
 
 static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_context_ref, const byte map_size[2]) {
@@ -347,7 +347,7 @@ void render_all_sectors_to_shadow_map(
 	enable_rendering_to_shadow_map(shadow_map_context, map_size);
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
-		glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);	
+		glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);
 	);
 
 	disable_rendering_to_shadow_map(screen_size, shadow_map_context);

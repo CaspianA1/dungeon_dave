@@ -156,10 +156,10 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	UPDATE_UNIFORM(pace, 2f, across, down);
 	UPDATE_UNIFORM(frame_index, 1ui, ws.curr_frame);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
-	glDisable(GL_BLEND);
+	WITH_BINARY_RENDER_STATE(GL_BLEND,
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
+	);
 }
 
 #endif

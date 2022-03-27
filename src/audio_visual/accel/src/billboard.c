@@ -75,14 +75,13 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	WITH_VERTEX_ATTRIBUTE(true, 1, 2, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, size),
 		WITH_VERTEX_ATTRIBUTE(true, 2, 3, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, pos),
 
-			glDisable(GL_CULL_FACE);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+				WITH_BINARY_RENDER_STATE(GL_BLEND,
 
-			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
-
-			glDisable(GL_BLEND);
-			glEnable(GL_CULL_FACE);
+					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+					glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
+				);
+			);
 
 			glVertexAttribDivisor(0, 0);
 			glDisableVertexAttribArray(0);
