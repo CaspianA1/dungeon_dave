@@ -180,8 +180,8 @@ ShadowMapContext init_shadow_map_context(const GLsizei shadow_map_width,
 	////////// Defining shaders, and getting the light direction
 
 	const GLuint
-		depth_shader = init_shader_program(depth_vertex_shader, depth_fragment_shader),
-		blur_shader = init_shader_program(blur_vertex_shader, blur_fragment_shader);
+		depth_shader = init_shader(depth_vertex_shader, depth_fragment_shader),
+		blur_shader = init_shader(blur_vertex_shader, blur_fragment_shader);
 
 	vec3 light_dir;
 	get_dir_in_2D_and_3D(hori_angle, vert_angle, (vec2) {0.0f, 0.0f}, light_dir);
@@ -218,8 +218,8 @@ void deinit_shadow_map_context(ShadowMapContext* const shadow_map_context) {
 	deinit_textures(2, shadow_map_context -> buffer_context.ping_pong_textures);
 	glDeleteRenderbuffers(1, &shadow_map_context -> shadow_pass.depth_render_buffer);
 
-	glDeleteProgram(shadow_map_context -> shadow_pass.depth_shader);
-	glDeleteProgram(shadow_map_context -> blur_pass.blur_shader);
+	deinit_shader(shadow_map_context -> shadow_pass.depth_shader);
+	deinit_shader(shadow_map_context -> blur_pass.blur_shader);
 
 	deinit_framebuffer(shadow_map_context -> buffer_context.framebuffer);
 }
@@ -231,11 +231,11 @@ static void get_model_view_projection_matrix_for_shadow_map(
 	(void) map_size;
 
 	mat4 view, projection;
-	// const GLfloat far_clip_dist = 70.0f, l = sqrtf(50.0f * 50.0f + 50.0f * 50.0f + 18.0f * 18.0f); // 25.0f;
-	const GLfloat far_clip_dist = 57.45f, l = sqrtf(40.0f * 40.0f + 40.0f * 40.0f + 10.0f * 10.0f);
-	// const GLfloat far_clip_dist = 20.0f, l = 30.0f;
+
+	const GLfloat s = 40.0f, h = 20.0f;
+	const GLfloat fcd = sqrtf(s * s + s * s + h * h); // Far clip dist
 	glm_look_anyup((GLfloat*) shadow_map_context -> light_context.pos, (GLfloat*) shadow_map_context -> light_context.dir, view);
-	glm_ortho(-l, l, l, -l, constants.camera.clip_dists.near, far_clip_dist, projection);
+	glm_ortho(-fcd, fcd, fcd, -fcd, constants.camera.clip_dists.near, fcd, projection);
 	glm_mul(projection, view, model_view_projection);
 }
 
@@ -248,7 +248,7 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 		blur_shader = shadow_map_context -> blur_pass.blur_shader,
 		*const ping_pong_textures = shadow_map_context -> buffer_context.ping_pong_textures;
 
-	glUseProgram(blur_shader);
+	use_shader(blur_shader);
 
 	//////////
 
@@ -262,24 +262,24 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	}
 
 	set_current_texture_unit(SHADOW_MAP_TEXTURE_UNIT);
-	glDisable(GL_DEPTH_TEST); // Testing depths from the depth render buffer is not needed
 
-	for (byte i = 0; i < constants.shadow_mapping.num_blur_passes << 1; i++) {
-		const byte src_texture_index = i & 1;
-		const byte dest_texture_index = !src_texture_index;
+	WITHOUT_BINARY_RENDER_STATE(GL_DEPTH_TEST, // Testing depths from the depth render buffer is not needed
 
-		// The shader reads from `src_texture`, while the other texture is meanwhile written to.
-		set_current_texture(TexPlain, ping_pong_textures[src_texture_index]);
+		for (byte i = 0; i < constants.shadow_mapping.num_blur_passes << 1; i++) {
+			const byte src_texture_index = i & 1;
+			const byte dest_texture_index = !src_texture_index;
 
-		// For a pass's first horizontal blur step, you write to the second texture; otherwise, the first.
-		glDrawBuffer(GL_COLOR_ATTACHMENT0 + dest_texture_index);
+			// The shader reads from `src_texture`, while the other texture is meanwhile written to.
+			set_current_texture(TexPlain, ping_pong_textures[src_texture_index]);
 
-		UPDATE_UNIFORM(blurring_horizontally, 1i, dest_texture_index); // Setting the current horizontal/vertical blur state
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
-	}
+			// For a pass's first horizontal blur step, you write to the second texture; otherwise, the first.
+			glDrawBuffer(GL_COLOR_ATTACHMENT0 + dest_texture_index);
 
-	glGenerateMipmap(TexPlain); // At this point, the current bound texture will be the output texture
-	glEnable(GL_DEPTH_TEST);
+			UPDATE_UNIFORM(blurring_horizontally, 1i, dest_texture_index); // Setting the current horizontal/vertical blur state
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
+		}
+		glGenerateMipmap(TexPlain); // At this point, the current bound texture will be the output texture
+	);
 }
 
 static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_context_ref, const byte map_size[2]) {
@@ -294,7 +294,7 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 	////////// Activate shader, update light mvp, bind framebuffer, resize viewport, clear buffers, and cull front faces
 
 	const GLuint depth_shader = shadow_map_context.shadow_pass.depth_shader;
-	glUseProgram(depth_shader);
+	use_shader(depth_shader);
 
 	static bool first_call = 1;
 
@@ -346,10 +346,9 @@ void render_all_sectors_to_shadow_map(
 
 	enable_rendering_to_shadow_map(shadow_map_context, map_size);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_face_vertex, (void*) 0);
-	glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);
-	glDisableVertexAttribArray(0);
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
+		glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);
+	);
 
 	disable_rendering_to_shadow_map(screen_size, shadow_map_context);
 }

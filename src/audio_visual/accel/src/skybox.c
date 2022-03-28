@@ -94,26 +94,25 @@ Skybox init_skybox(const GLchar* const cubemap_path) {
 		first_call = false;
 	}
 
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
+	const GLuint vbo = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
 
 	return (Skybox) {
 		.vbo = vbo,
-		.shader = init_shader_program(skybox_vertex_shader, skybox_fragment_shader),
+		.shader = init_shader(skybox_vertex_shader, skybox_fragment_shader),
 		.texture = init_skybox_texture(cubemap_path)
 	};
 }
 
 void deinit_skybox(const Skybox s) {
 	deinit_texture(s.texture);
-	glDeleteProgram(s.shader);
+	deinit_shader(s.shader);
 	glDeleteBuffers(1, &s.vbo);
 }
 
 void draw_skybox(const Skybox s, const Camera* const camera) {
-	glUseProgram(s.shader);
+	use_shader(s.shader);
 
 	static GLint model_view_projection_id;
 	static bool first_call = true;
@@ -137,18 +136,13 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, s.vbo);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_BYTE, GL_FALSE, 0, (void*) 0);
-
-	glDepthFunc(GL_LEQUAL);
-	glDepthMask(GL_FALSE);
-
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	glDepthMask(GL_TRUE);
-	glDepthFunc(GL_LESS);
-
-	glDisableVertexAttribArray(0);
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, GL_BYTE, 0, 0,
+		WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS,
+			WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+			);
+		);
+	);
 }
 
 #endif

@@ -37,8 +37,8 @@ StateGL demo_1_init(void) {
 			"color = vec3(1, 0, 0);\n" // Red
 		"}\n";
 
-	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(vertex_shader, fragment_shader);
+	use_shader(sgl.shader);
 
 	return sgl;
 }

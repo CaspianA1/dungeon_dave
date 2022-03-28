@@ -82,19 +82,18 @@ StateGL demo_9_init(void) {
 
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, v3, joined_2_bytes);
-	bind_interleaved_planes_to_vao();
 
 	free(v1);
 	free(v2);
 	free(v3);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(demo_4_vertex_shader, demo_4_fragment_shader);
+	use_shader(sgl.shader);
 	sgl.num_textures = 1;
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/greece.bmp", TexRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
+	use_texture(sgl.textures[0], sgl.shader, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
@@ -103,9 +102,15 @@ StateGL demo_9_init(void) {
 }
 
 void demo_9_drawer(const StateGL* const sgl) {
-	move(sgl -> shader_program);
-	const int num_planes = 2;
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
+	move(sgl -> shader);
+
+	enum {interleaved_vertex_bytes = 5 * sizeof(PLANE_TYPE), num_planes = 2};
+
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, PLANE_TYPE_ENUM, interleaved_vertex_bytes, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, PLANE_TYPE_ENUM, interleaved_vertex_bytes, 3 * sizeof(PLANE_TYPE),
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
+		);
+	);
 }
 
 #ifdef DEMO_9

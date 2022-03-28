@@ -69,7 +69,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 			(GLsizei) (frame_size[1] * texture_rescale_factor),
 			spritesheet_path, frames_across, frames_down, total_frames),
 
-		.shader = init_shader_program(weapon_sprite_vertex_shader, weapon_sprite_fragment_shader),
+		.shader = init_shader(weapon_sprite_vertex_shader, weapon_sprite_fragment_shader),
 
 		.animation = {
 			.texture_id_range = {.start = 0, .end = (buffer_size_t) total_frames},
@@ -85,7 +85,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 
 void deinit_weapon_sprite(const WeaponSprite* const ws) {
 	deinit_texture(ws -> texture);
-	glDeleteProgram(ws -> shader);
+	deinit_shader(ws -> shader);
 }
 
 // Given an input between 0 and 1, this returns the y-value of the top left side of a circle
@@ -123,7 +123,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	const WeaponSprite ws = *ws_ref;
 
-	glUseProgram(ws.shader);
+	use_shader(ws.shader);
 
 	static GLint pace_id, frame_index_id;
 	const GLfloat max_movement_magitude = 0.2f, time_for_half_movement_cycle = 0.5f; // TODO: put these in constants.c
@@ -156,10 +156,10 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	UPDATE_UNIFORM(pace, 2f, across, down);
 	UPDATE_UNIFORM(frame_index, 1ui, ws.curr_frame);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
-	glDisable(GL_BLEND);
+	WITH_BINARY_RENDER_STATE(GL_BLEND,
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
+	);
 }
 
 #endif

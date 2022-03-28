@@ -9,6 +9,8 @@
 #define SDL_PIXEL_FORMAT SDL_PIXELFORMAT_BGRA32
 
 #define OPENGL_INPUT_PIXEL_FORMAT GL_BGRA
+
+#define OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT GL_RGBA
 #define OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT GL_RED
 #define OPENGL_COLOR_CHANNEL_TYPE GL_UNSIGNED_BYTE
 
@@ -32,21 +34,18 @@
 #define OPENGL_SHADOW_MAP_MAG_FILTER TexLinear
 #define OPENGL_SHADOW_MAP_MIN_FILTER TexTrilinear
 
-//////////
-
-#define ENABLE_ANISOTROPIC_FILTERING
-
 /* There's five bits to store a texture id in a face mesh's face info byte,
 And the biggest number possible with five bits is 31, so that gives you
 32 different possible texture ids. Also, this is just for wall textures. */
 #define MAX_NUM_SECTOR_SUBTEXTURES 32
 
 // TODO: make this to an enum
-#define SECTOR_TEXTURE_UNIT 0
-#define BILLBOARD_TEXTURE_UNIT 1
-#define SKYBOX_TEXTURE_UNIT 2
-#define WEAPON_TEXTURE_UNIT 3
-#define SHADOW_MAP_TEXTURE_UNIT 4
+#define SECTOR_FACE_TEXTURE_UNIT 0
+#define SECTOR_NORMAL_MAP_TEXTURE_UNIT 1
+#define BILLBOARD_TEXTURE_UNIT 2
+#define SKYBOX_TEXTURE_UNIT 3
+#define WEAPON_TEXTURE_UNIT 4
+#define SHADOW_MAP_TEXTURE_UNIT 5
 
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,
@@ -68,19 +67,26 @@ typedef enum {
 
 // Excluded: init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 
+#define set_current_texture glBindTexture
+
 #define deinit_texture(t) glDeleteTextures(1, &(t))
 #define deinit_textures(length, ts) glDeleteTextures((length), (ts))
 #define deinit_surface SDL_FreeSurface
 
-#define set_current_texture glBindTexture
+#define WITH_SURFACE_PIXEL_ACCESS(surface, ...) do {\
+	const bool must_lock = SDL_MUSTLOCK((surface));\
+	if (must_lock) SDL_LockSurface((surface));\
+	__VA_ARGS__\
+	if (must_lock) SDL_UnlockSurface((surface));\
+} while (0)
 
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);
 SDL_Surface* init_surface(const GLchar* const path);
 
-void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader_program, const byte texture_unit);
+void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader, const byte texture_unit);
 void set_current_texture_unit(const byte texture_unit);
 
-void use_texture(const GLuint texture, const GLuint shader_program,
+void use_texture(const GLuint texture, const GLuint shader,
 	const GLchar* const sampler_name, const TextureType type, const byte texture_unit);
 
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,

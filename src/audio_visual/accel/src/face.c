@@ -5,7 +5,8 @@
 #include "list.c"
 #include "sector.c"
 
-void print_face(const Face face, const GLchar* const prefix_msg) {
+/*
+static void print_face(const Face face, const GLchar* const prefix_msg) {
 	const GLchar* const type_string =
 		(GLchar*[]) {"Flat", "Vert_NS", "Vert_EW"}[face.type];
 
@@ -13,6 +14,7 @@ void print_face(const Face face, const GLchar* const prefix_msg) {
 		prefix_msg, type_string, face.origin[0],
 		face.origin[1], face.size[0], face.size[1]);
 }
+*/
 
 // Returns if there is another face to get
 static byte get_next_face(const Sector sector, const byte varying_axis,

@@ -1,7 +1,7 @@
 #ifndef BATCH_DRAW_CONTEXT_H
 #define BATCH_DRAW_CONTEXT_H
 
-#include "../glad/glad.h"
+#include "../../include/glad/glad.h"
 #include "list.h"
 
 typedef struct {

@@ -16,16 +16,7 @@ StateGL demo_15_init(void) {
 	sgl.any_data = malloc(sizeof(Skybox));
 	memcpy(sgl.any_data, &skybox, sizeof(Skybox));
 
-	glEnableVertexAttribArray(0);
-
 	return sgl;
-}
-
-void demo_15_deinit(const StateGL* const sgl) {
-	Skybox* const skybox = sgl -> any_data;
-	deinit_skybox(*skybox);
-	free(skybox);
-	deinit_demo_vars(sgl);
 }
 
 void demo_15_drawer(const StateGL* const sgl) {
@@ -39,6 +30,13 @@ void demo_15_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), NULL);
 	draw_skybox(*(Skybox*) sgl -> any_data, &camera);
+}
+
+void demo_15_deinit(const StateGL* const sgl) {
+	Skybox* const skybox = sgl -> any_data;
+	deinit_skybox(*skybox);
+	free(skybox);
+	deinit_demo_vars(sgl);
 }
 
 #ifdef DEMO_15

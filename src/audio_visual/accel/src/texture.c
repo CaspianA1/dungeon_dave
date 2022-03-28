@@ -13,8 +13,8 @@ SDL_Surface* init_surface(const GLchar* const path) {
 	SDL_Surface* const surface = SDL_LoadBMP(path);
 	if (surface == NULL) fail("open texture file", OpenImageFile);
 
-	if (surface -> format -> format == SDL_PIXEL_FORMAT) // Format is already correct
-		return surface;
+	if (surface -> format -> format == SDL_PIXEL_FORMAT)
+		return surface; // Format is already correct
 	else {
 		SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
 		deinit_surface(surface);
@@ -24,18 +24,18 @@ SDL_Surface* init_surface(const GLchar* const path) {
 
 ////////// Texture state setting utilities
 
-void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader_program, const byte texture_unit) {
-	INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(sampler_name, shader_program, 1i, texture_unit); // Sets texture unit for shader
+void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader, const byte texture_unit) {
+	INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(sampler_name, shader, 1i, texture_unit); // Sets texture unit for shader
 }
 
 void set_current_texture_unit(const byte texture_unit) {
 	glActiveTexture(GL_TEXTURE0 + texture_unit);
 }
 
-void use_texture(const GLuint texture, const GLuint shader_program,
+void use_texture(const GLuint texture, const GLuint shader,
 	const GLchar* const sampler_name, const TextureType type, const byte texture_unit) {
 
-	set_sampler_texture_unit_for_shader(sampler_name, shader_program, texture_unit);
+	set_sampler_texture_unit_for_shader(sampler_name, shader, texture_unit);
 	set_current_texture_unit(texture_unit);
 	set_current_texture(type, texture); // Associates the input texture with the right texture unit
 }
@@ -57,13 +57,18 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	glTexParameteri(type, GL_TEXTURE_WRAP_T, cast_wrap_mode);
 
 	if (type == TexSkybox) glTexParameteri(type, GL_TEXTURE_WRAP_R, cast_wrap_mode);
-	else {
-		#if defined(ENABLE_ANISOTROPIC_FILTERING) && defined(GL_TEXTURE_MAX_ANISOTROPY_EXT)
+
+	#ifdef ENABLE_ANISOTROPIC_FILTERING
+
+	/* Checking if the extension is available at runtime. Also, skyboxes get no anisotropic
+	filtering, because they are usually magnified and are not viewed at very steep angles. */
+	else if (GLAD_GL_EXT_texture_filter_anisotropic) {
 		float aniso_filtering_level;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso_filtering_level);
 		glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso_filtering_level);
-		#endif
 	}
+
+	#endif
 
 	return texture;
 }
@@ -72,14 +77,11 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 void write_surface_to_texture(SDL_Surface* const surface,
 	const TextureType type, const GLint internal_format) {
 
-	const bool must_lock = SDL_MUSTLOCK(surface);
-	if (must_lock) SDL_LockSurface(surface);
-
-	glTexImage2D(type, 0, internal_format,
-		surface -> w, surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
-		OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
-
-	if (must_lock) SDL_UnlockSurface(surface);
+	WITH_SURFACE_PIXEL_ACCESS(surface,
+		glTexImage2D(type, 0, internal_format, surface -> w,
+			surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
+			OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
+	);
 }
 
 GLuint init_plain_texture(const GLchar* const path, const TextureType type,
@@ -96,8 +98,8 @@ GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 	return texture;
 }
 
-static void init_still_subtextures_in_texture_set(
-	const GLsizei num_still_subtextures, SDL_Surface* const rescaled_surface, va_list args) {
+static void init_still_subtextures_in_texture_set(const GLsizei num_still_subtextures,
+	SDL_Surface* const rescaled_surface, va_list args) {
 
 	for (GLsizei i = 0; i < num_still_subtextures; i++) {
 		SDL_Surface *const surface = init_surface(va_arg(args, GLchar*)), *surface_copied_to_gpu;
@@ -109,12 +111,12 @@ static void init_still_subtextures_in_texture_set(
 		}
 		else surface_copied_to_gpu = surface;
 
-		SDL_LockSurface(surface_copied_to_gpu);
-		glTexSubImage3D(TexSet, 0, 0, 0, i,
-			surface_copied_to_gpu -> w, surface_copied_to_gpu -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_COLOR_CHANNEL_TYPE, surface_copied_to_gpu -> pixels);
+		WITH_SURFACE_PIXEL_ACCESS(surface_copied_to_gpu,
+			glTexSubImage3D(TexSet, 0, 0, 0, i, surface_copied_to_gpu -> w,
+				surface_copied_to_gpu -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
+				OPENGL_COLOR_CHANNEL_TYPE, surface_copied_to_gpu -> pixels);
+		);
 
-		SDL_UnlockSurface(surface_copied_to_gpu);
 		deinit_surface(surface);
 	}
 }
@@ -122,7 +124,6 @@ static void init_still_subtextures_in_texture_set(
 static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_frames,
 	const GLsizei num_still_subtextures, SDL_Surface* const rescaled_surface, va_list args) {
 
-	/////////////////
 	for (GLsizei animation_frame_index = num_still_subtextures; animation_frame_index < num_animated_frames;) {
 		SDL_Surface* const spritesheet_surface = init_surface(va_arg(args, GLchar*));
 		SDL_SetSurfaceBlendMode(spritesheet_surface, SDL_BLENDMODE_NONE);
@@ -142,13 +143,12 @@ static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_
 			spritesheet_frame_area.y = (frame_index / frames_across) * spritesheet_frame_area.h;
 
 			SDL_BlitScaled(spritesheet_surface, &spritesheet_frame_area, rescaled_surface, NULL);
-			SDL_LockSurface(rescaled_surface);
 
-			glTexSubImage3D(TexSet, 0, 0, 0, animation_frame_index,
-				rescaled_surface -> w, rescaled_surface -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
-				OPENGL_COLOR_CHANNEL_TYPE, rescaled_surface -> pixels);
-
-			SDL_UnlockSurface(rescaled_surface);
+			WITH_SURFACE_PIXEL_ACCESS(rescaled_surface,
+				glTexSubImage3D(TexSet, 0, 0, 0, animation_frame_index,
+					rescaled_surface -> w, rescaled_surface -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
+					OPENGL_COLOR_CHANNEL_TYPE, rescaled_surface -> pixels);
+			);
 		}
 		deinit_surface(spritesheet_surface);
 	}
@@ -171,6 +171,7 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 	GLsizei num_animated_frames = 0; // A frame is a subtexture
 
 	for (GLsizei i = 0; i < num_still_subtextures; i++, va_arg(args_copy, GLchar*)); // Discarding still subtexture args
+
 	for (GLsizei i = 0; i < num_animation_sets; i++) {
 		va_arg(args_copy, GLchar*); // Discarding path, frames across, and frames down args
 		va_arg(args_copy, GLsizei);

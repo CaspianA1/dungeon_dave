@@ -84,11 +84,8 @@ StateGL demo_19_init(void) {
 
 	free(shape);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_BYTE, GL_FALSE, 0, NULL);
-
-	sgl.shader_program = init_shader_program(demo_19_vertex_shader, demo_19_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(demo_19_vertex_shader, demo_19_fragment_shader);
+	use_shader(sgl.shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = malloc(sizeof(GLuint));
@@ -96,7 +93,7 @@ StateGL demo_19_init(void) {
 	*sgl.textures = init_plain_texture("../../../../assets/walls/mesa.bmp", TexPlain,
 		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
-	use_texture(*sgl.textures, sgl.shader_program, "texture_sampler", TexPlain, 0);
+	use_texture(*sgl.textures, sgl.shader, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 
@@ -111,7 +108,7 @@ void demo_19_drawer(const StateGL* const sgl) {
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, -1.5f});
 
-		const GLuint shader = sgl -> shader_program;
+		const GLuint shader = sgl -> shader;
 		INIT_UNIFORM(spin, shader);
 		INIT_UNIFORM(model_view_projection, shader);
 
@@ -125,8 +122,10 @@ void demo_19_drawer(const StateGL* const sgl) {
 	UPDATE_UNIFORM(spin, 3f, spin[0], spin[0] * spin[1], spin[1]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
-	glClearColor(fmodf(spin[0] / 2.0f, 1.0f), fmodf(spin[1] / 2.0f, 1.0f), fmodf(spin_input, 1.0f), 0.0f);
-	glDrawArrays(GL_TRIANGLES, 0, vertices);
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, GL_BYTE, 0, 0,
+		glClearColor(fmodf(spin[0] / 2.0f, 1.0f), fmodf(spin[1] / 2.0f, 1.0f), fmodf(spin_input, 1.0f), 0.0f);
+		glDrawArrays(GL_TRIANGLES, 0, vertices);
+	);
 
 	spin[0] = cosf(spin_input);
 	spin[1] = sinf(spin_input);

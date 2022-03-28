@@ -9,8 +9,8 @@ void demo_14_drawer(const StateGL* const sgl) {
 		billboard_center_world_space_id, billboard_right_xz_world_space_id,
 		billboard_model_view_projection_id, model_view_projection_id; // Not called sector_model_view_projection_id for compatibility reasons
 
-	const GLuint billboard_shader = sgl -> shader_program;
-	glUseProgram(billboard_shader);
+	const GLuint billboard_shader = sgl -> shader;
+	use_shader(billboard_shader);
 
 	static bool first_call = true;
 
@@ -42,28 +42,23 @@ void demo_14_drawer(const StateGL* const sgl) {
 
 	update_camera(&camera, get_next_event(), NULL);
 
-	//////////
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, MESH_TYPE_ENUM, bytes_per_vertex, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, MESH_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(mesh_type_t),
+			use_shader(sector_shader);
+			glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
+			UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+			glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
+		);
+	);
 
-	glUseProgram(sector_shader);
-	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
-
-	glBindBuffer(GL_ARRAY_BUFFER, sgl -> vertex_buffers[0]);
-	bind_sector_mesh_to_vao();
-	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
-	unbind_sector_mesh_from_vao();
-
-	//////////
-
-	glUseProgram(billboard_shader);
-
-	UPDATE_UNIFORM(billboard_right_xz_world_space, 2f, camera.right[0], camera.right[2]);
-	UPDATE_UNIFORM(billboard_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
-
-	glEnable(GL_BLEND); // Blending on for billboard
-	glDisable(GL_CULL_FACE);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glDisable(GL_BLEND);
-	glEnable(GL_CULL_FACE);
+	WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending on for billboard
+		WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+			use_shader(billboard_shader);
+			UPDATE_UNIFORM(billboard_right_xz_world_space, 2f, camera.right[0], camera.right[2]);
+			UPDATE_UNIFORM(billboard_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		);
+	);
 }
 
 #ifdef DEMO_14

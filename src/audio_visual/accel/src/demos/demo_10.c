@@ -114,16 +114,6 @@ plane_type_t* generate_sector_mesh(plane_type_t origin[3], const plane_type_t si
 	return sector_mesh;
 }
 
-void bind_interleaved_planes_to_vao(void) {
-	enum {bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, PLANE_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(plane_type_t)));
-}
-
 StateGL demo_10_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
@@ -132,16 +122,15 @@ StateGL demo_10_init(void) {
 
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, sector_mesh, bytes_per_sector_mesh);
-	bind_interleaved_planes_to_vao();
 
 	free(sector_mesh);
 	
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(demo_4_vertex_shader, demo_4_fragment_shader);
+	use_shader(sgl.shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/mesa.bmp", TexRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
+	use_texture(sgl.textures[0], sgl.shader, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
@@ -150,11 +139,15 @@ StateGL demo_10_init(void) {
 }
 
 void demo_10_drawer(const StateGL* const sgl) {
-	move(sgl -> shader_program);
-	enum {num_meshes = 1};
+	move(sgl -> shader);
+	enum {num_meshes = 1, bytes_per_vertex = vars_per_vertex * sizeof(plane_type_t)};
 
-	const GLsizei num_triangles = num_meshes * planes_per_mesh * 2; // 2 = 2 triangles per plane
-	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, PLANE_TYPE_ENUM, bytes_per_vertex, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, PLANE_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(plane_type_t),
+			const GLsizei num_triangles = num_meshes * planes_per_mesh * 2; // 2 = 2 triangles per plane
+			glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+		);
+	);
 }
 
 #ifdef DEMO_10

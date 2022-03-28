@@ -119,24 +119,6 @@ void create_sector_mesh(const mesh_type_t origin[3], const mesh_type_t size[3], 
 	memcpy(dest, vertices, bytes_per_mesh);
 }
 
-void bind_sector_mesh_to_vao(void) {
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-
-	/*
-	glVertexAttribIPointer(0, 3, MESH_TYPE_ENUM, bytes_per_vertex, NULL);
-	glVertexAttribIPointer(1, 2, MESH_TYPE_ENUM, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
-	*/
-
-	glVertexAttribPointer(0, 3, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, NULL);
-	glVertexAttribPointer(1, 2, MESH_TYPE_ENUM, GL_FALSE, bytes_per_vertex, (void*) (3 * sizeof(mesh_type_t)));
-}
-
-void unbind_sector_mesh_from_vao(void) {
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-}
-
 StateGL demo_11_init(void) {
 	StateGL sgl = {.vertex_array = init_vao()};
 
@@ -148,14 +130,13 @@ StateGL demo_11_init(void) {
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, cuboid_mesh, bytes_per_mesh);
 	free(cuboid_mesh);
-	bind_sector_mesh_to_vao();
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(demo_4_vertex_shader, demo_4_fragment_shader);
+	use_shader(sgl.shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/mesa.bmp", TexRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
+	use_texture(sgl.textures[0], sgl.shader, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
@@ -170,13 +151,18 @@ void demo_11_drawer(const StateGL* const sgl) {
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {0.0f, 0.0f, 0.0f});
-		INIT_UNIFORM(model_view_projection, sgl -> shader_program);
+		INIT_UNIFORM(model_view_projection, sgl -> shader);
 		first_call = false;
 	}
 
 	update_camera(&camera, get_next_event(), NULL);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
-	glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
+
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, MESH_TYPE_ENUM, bytes_per_vertex, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, MESH_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(mesh_type_t),
+			glDrawArrays(GL_TRIANGLES, 0, triangles_per_mesh * 3);
+		);
+	);
 }
 
 #ifdef DEMO_11

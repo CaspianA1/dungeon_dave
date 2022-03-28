@@ -1,6 +1,7 @@
 #ifndef SECTOR_C
 #define SECTOR_C
 
+#include "headers/utils.h"
 #include "headers/sector.h"
 #include "data/shaders.c"
 #include "face.c"
@@ -10,7 +11,6 @@
 
 //////////
 
-#define inlinable static inline
 #define wmalloc malloc
 #define wfree free
 
@@ -137,7 +137,7 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 
 	draw_context -> buffers.cpu = face_meshes;
 	init_batch_draw_context_gpu_buffer(draw_context, face_meshes.length, bytes_per_face);
-	draw_context -> shader = init_shader_program(sector_vertex_shader, sector_fragment_shader);
+	draw_context -> shader = init_shader(sector_vertex_shader, sector_fragment_shader);
 	*sectors_ref = sectors;
 }
 
@@ -154,10 +154,10 @@ static byte sector_in_view_frustum(const Sector sector, const vec4 frustum_plane
 
 static void draw_sectors(const BatchDrawContext* const draw_context,
 	const ShadowMapContext* const shadow_map_context, const Camera* const camera,
-	const buffer_size_t num_visible_faces) {
+	const buffer_size_t num_visible_faces, const GLuint normal_map) {
 
 	const GLuint sector_shader = draw_context -> shader;
-	glUseProgram(sector_shader);
+	use_shader(sector_shader);
 
 	static GLint camera_pos_world_space_id, inv_light_dir_id, model_view_projection_id, light_model_view_projection_id;
 	static bool first_call = true;
@@ -178,9 +178,11 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(metallic_color, sector_shader, 3fv, 1, (vec3) {170.0f / 255.0f, 169.0f / 255.0f, 173.0f / 255.0f});
 		INIT_UNIFORM_VALUE(tint, sector_shader, 3fv, 1, (vec3) {253.0f / 255.0f, 217.0f / 255.0f, 181.0f / 255.0f});
 
-		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_TEXTURE_UNIT);
 		// `use_texture` not called since the shadow map output has already been bound to the texture unit in shadow_map.c
 		set_sampler_texture_unit_for_shader("shadow_map_sampler", sector_shader, SHADOW_MAP_TEXTURE_UNIT);
+
+		use_texture(normal_map, sector_shader, "normal_map_sampler", TexPlain, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
+		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
 
 		first_call = false;
 	}
@@ -193,16 +195,13 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE,
 		&shadow_map_context -> light_context.model_view_projection[0][0]);
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
+		WITH_INTEGER_VERTEX_ATTRIBUTE(false, 1, 1, FACE_MESH_COMPONENT_TYPENAME,
+			bytes_per_face_vertex, sizeof(face_mesh_component_t[3]),
 
-	glVertexAttribPointer(0, 3, MESH_COMPONENT_TYPENAME, GL_FALSE, bytes_per_face_vertex, (void*) 0);
-	glVertexAttribIPointer(1, 1, MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, (void*) (3 * sizeof(face_mesh_component_t)));
-
-	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
+			glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
+		);
+	);
 }
 
 // Returns the number of visible faces
@@ -252,10 +251,10 @@ static buffer_size_t fill_sector_vbo_with_visible_faces(
 // This is just a utility function
 void draw_visible_sectors(const BatchDrawContext* const draw_context,
 	const ShadowMapContext* const shadow_map_context, const List* const sectors,
-	const Camera* const camera) {
+	const Camera* const camera, const GLuint normal_map) {
 
 	const buffer_size_t num_visible_faces = fill_sector_vbo_with_visible_faces(draw_context, sectors, camera);
-	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_map_context, camera, num_visible_faces);
+	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_map_context, camera, num_visible_faces, normal_map);
 }
 
 #endif

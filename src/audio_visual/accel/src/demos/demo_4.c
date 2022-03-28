@@ -108,13 +108,13 @@ StateGL demo_4_init(void) {
 
 	bind_vbos_to_vao(sgl.vertex_buffers, (GLuint) sgl.num_vertex_buffers, 3, 2);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(demo_4_vertex_shader, demo_4_fragment_shader);
+	use_shader(sgl.shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/hieroglyph.bmp", TexNonRepeating);
 
-	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
+	use_texture(sgl.textures[0], sgl.shader, "texture_sampler", TexPlain, 0);
 
 	// For textures with an alpha channel, enable this
 	/* glEnable(GL_BLEND);
@@ -140,7 +140,7 @@ void demo_4_drawer(const StateGL* const sgl) {
 	if (keys[SDL_SCANCODE_A]) camera_pos[2] += step;
 	if (keys[SDL_SCANCODE_D]) camera_pos[2] -= step;
 
-	demo_2_matrix_setup(sgl -> shader_program, camera_pos);
+	demo_2_matrix_setup(sgl -> shader, camera_pos);
 	demo_4_core_drawer(12);
 }
 

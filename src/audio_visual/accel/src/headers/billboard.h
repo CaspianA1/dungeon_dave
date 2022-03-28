@@ -9,7 +9,7 @@
 
 typedef struct { // This struct is perfectly aligned
 	buffer_size_t texture_id;
-	bb_pos_component_t size[2], pos[3];
+	billboard_var_component_t size[2], pos[3];
 } Billboard;
 
 typedef struct {

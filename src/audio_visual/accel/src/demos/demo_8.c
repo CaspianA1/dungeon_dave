@@ -103,16 +103,6 @@ PLANE_TYPE* create_plane_mesh_interleaved(const GLuint num_planes, ...) {
 	return all_vertex_data;
 }
 
-void bind_interleaved_planes_to_vao(void) {
-	enum {interleaved_vertex_bytes = 5 * sizeof(PLANE_TYPE)};
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, PLANE_TYPE_ENUM, GL_FALSE, interleaved_vertex_bytes, NULL);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, PLANE_TYPE_ENUM, GL_FALSE, interleaved_vertex_bytes, (void*) (3 * sizeof(PLANE_TYPE)));
-}
-
 StateGL demo_8_init(void) {
 	StateGL sgl;
 	sgl.vertex_array = init_vao();
@@ -130,15 +120,14 @@ StateGL demo_8_init(void) {
 
 	sgl.num_vertex_buffers = 1;
 	sgl.vertex_buffers = init_vbos(sgl.num_vertex_buffers, plane_data, interleaved_plane_bytes * num_planes);
-	bind_interleaved_planes_to_vao();
 	free(plane_data);
 
-	sgl.shader_program = init_shader_program(demo_4_vertex_shader, demo_4_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(demo_4_vertex_shader, demo_4_fragment_shader);
+	use_shader(sgl.shader);
 
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/pyramid.bmp", TexRepeating);
-	use_texture(sgl.textures[0], sgl.shader_program, "texture_sampler", TexPlain, 0);
+	use_texture(sgl.textures[0], sgl.shader, "texture_sampler", TexPlain, 0);
 
 	enable_all_culling();
 	glClearColor(0.4f, 0.0f, 0.0f, 0.0f); // Dark blue
@@ -147,9 +136,14 @@ StateGL demo_8_init(void) {
 }
 
 void demo_8_drawer(const StateGL* const sgl) {
-	move(sgl -> shader_program);
-	const int num_planes = 4;
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
+	move(sgl -> shader);
+	enum {interleaved_vertex_bytes = 5 * sizeof(PLANE_TYPE), num_planes = 4};
+
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, PLANE_TYPE_ENUM, interleaved_vertex_bytes, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, PLANE_TYPE_ENUM, interleaved_vertex_bytes, 3 * sizeof(PLANE_TYPE),
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
+		);
+	);
 }
 
 #ifdef DEMO_8

@@ -152,11 +152,11 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context,
 
 	context -> shadow_volume.num_indices = volume_indices.length;
 
-	glGenBuffers(1, &context -> shadow_volume.vertex_buffer);
+	context -> shadow_volume.vertex_buffer = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, context -> shadow_volume.vertex_buffer);
 	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) sizeof(vec3[volume_vertices.length]), volume_vertices.data, GL_STATIC_DRAW);
 
-	glGenBuffers(1, &context -> shadow_volume.index_buffer);
+	context -> shadow_volume.index_buffer = init_gpu_buffer();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context -> shadow_volume.index_buffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr) sizeof(buffer_size_t[volume_indices.length]), volume_indices.data, GL_STATIC_DRAW);
 
@@ -178,39 +178,38 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 
 	//////////
 
-	glUseProgram(context.obj.shader);
-	UPDATE_UNIFORM(obj_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
-	glBindBuffer(GL_ARRAY_BUFFER, context.obj.vertex_buffer);
+	if (!keys[SDL_SCANCODE_C]) {
+		glBindBuffer(GL_ARRAY_BUFFER, context.obj.vertex_buffer);
+		use_shader(context.obj.shader);
+		UPDATE_UNIFORM(obj_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 
-	glEnableVertexAttribArray(1);
+		WITH_VERTEX_ATTRIBUTE(false, 0, num_components_per_position, GL_FLOAT,
+			(GLsizei) sizeof(GLfloat[num_components_per_vertex]), 0,
 
-	glVertexAttribPointer(0, num_components_per_position,
-		GL_FLOAT, GL_FALSE, (GLsizei) sizeof(GLfloat[num_components_per_vertex]), (void*) 0);
+			WITH_VERTEX_ATTRIBUTE(false, 1, num_components_per_color, GL_FLOAT,
+				(GLsizei) sizeof(GLfloat[num_components_per_vertex]),
+				sizeof(GLfloat[num_components_per_position]),
 
-	glVertexAttribPointer(1, num_components_per_color, GL_FLOAT,
-		GL_FALSE, (GLsizei) sizeof(GLfloat[num_components_per_vertex]),
-		(void*) sizeof(GLfloat[num_components_per_position]));
+				glDrawArrays(GL_TRIANGLES, 0, (GLsizei) context.obj.num_vertices);
+			);
+		);
+	}
 
-	if (!keys[SDL_SCANCODE_C]) glDrawArrays(GL_TRIANGLES, 0, (GLsizei) context.obj.num_vertices);
-	glDisableVertexAttribArray(1);
-
-	//////////
-
-	glUseProgram(context.shadow_volume.shader);
-	UPDATE_UNIFORM(shadow_volume_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 	glBindBuffer(GL_ARRAY_BUFFER, context.shadow_volume.vertex_buffer);
+	use_shader(context.shadow_volume.shader);
+	UPDATE_UNIFORM(shadow_volume_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 
-	glVertexAttribPointer(0, num_components_per_position, GL_FLOAT, GL_FALSE, 0, (void*) 0);
-
-	glEnable(GL_BLEND);
-	glDrawElements(GL_TRIANGLES, (GLsizei) context.shadow_volume.num_indices, BUFFER_SIZE_TYPENAME, (void*) 0);
-	glDisable(GL_BLEND);
+	WITH_VERTEX_ATTRIBUTE(false, 0, num_components_per_position, GL_FLOAT, 0, 0,
+		WITH_BINARY_RENDER_STATE(GL_BLEND,
+			glDrawElements(GL_TRIANGLES, (GLsizei) context.shadow_volume.num_indices, BUFFER_SIZE_TYPENAME, (void*) 0);
+		);
+	);
 }
 
 ShadowVolumeContext init_shadow_volume_context(const vec3 light_source_pos) {
 	ShadowVolumeContext context = {
-		.obj.shader = init_shader_program(demo_22_obj_vertex_shader, demo_22_obj_fragment_shader),
-		.shadow_volume.shader = init_shader_program(demo_22_shadow_volume_vertex_shader, demo_22_shadow_volume_fragment_shader)
+		.obj.shader = init_shader(demo_22_obj_vertex_shader, demo_22_obj_fragment_shader),
+		.shadow_volume.shader = init_shader(demo_22_shadow_volume_vertex_shader, demo_22_shadow_volume_fragment_shader)
 	};
 
 	const GLfloat
@@ -256,7 +255,7 @@ ShadowVolumeContext init_shadow_volume_context(const vec3 light_source_pos) {
 
 	context.obj.num_vertices = sizeof(vertices) / sizeof(vertices[0]) / num_components_per_vertex;
 
-	glGenBuffers(1, &context.obj.vertex_buffer);
+	context.obj.vertex_buffer = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, context.obj.vertex_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
@@ -279,7 +278,6 @@ StateGL demo_22_init(void) {
 	glDepthFunc(GL_LESS);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glEnableVertexAttribArray(0);
 	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 
 	return sgl;
@@ -336,8 +334,8 @@ void demo_22_deinit(const StateGL* const sgl) {
 
 	glDeleteBuffers(3, buffers);
 
-	glDeleteProgram(context.obj.shader);
-	glDeleteProgram(context.shadow_volume.shader);
+	deinit_shader(context.obj.shader);
+	deinit_shader(context.shadow_volume.shader);
 
 	free(sgl -> any_data);
 	deinit_demo_vars(sgl);

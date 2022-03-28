@@ -49,7 +49,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	const Camera* const camera, const buffer_size_t num_visible_billboards) {
 
 	const GLuint shader = draw_context -> shader;
-	glUseProgram(shader);
+	use_shader(shader);
 
 	static GLint right_xz_world_space_id, model_view_projection_id;
 	static bool first_call = true;
@@ -66,30 +66,20 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right[0], camera -> right[2]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
-	//////////
+	WITH_INTEGER_VERTEX_ATTRIBUTE(true, 0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), 0,
+		WITH_VERTEX_ATTRIBUTE(true, 1, 2, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, size),
+			WITH_VERTEX_ATTRIBUTE(true, 2, 3, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, pos),
 
-	for (byte i = 0; i < 3; i++) {
-		glEnableVertexAttribArray(i);
-		glVertexAttribDivisor(i, 1);
-	}
+				WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+					WITH_BINARY_RENDER_STATE(GL_BLEND,
 
-	glVertexAttribIPointer(0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), (void*) 0);
-	glVertexAttribPointer(1, 2, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, size));
-	glVertexAttribPointer(2, 3, BB_POS_COMPONENT_TYPENAME, GL_FALSE, sizeof(Billboard), (void*) offsetof(Billboard, pos));
-
-	glDisable(GL_CULL_FACE);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
-	glDisable(GL_BLEND);
-
-	glEnable(GL_CULL_FACE);
-
-	for (byte i = 0; i < 3; i++) {
-		glVertexAttribDivisor(i, 0);
-		glDisableVertexAttribArray(i);
-	}
+						glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+						glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
+					);
+				);
+			);
+		);
+	);
 }
 
 void draw_visible_billboards(const BatchDrawContext* const draw_context, const Camera* const camera) {
@@ -122,7 +112,7 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, ...) {
 	BatchDrawContext draw_context = {
 		.buffers.cpu = init_list(num_billboards, Billboard),
-		.shader = init_shader_program(billboard_vertex_shader, billboard_fragment_shader)
+		.shader = init_shader(billboard_vertex_shader, billboard_fragment_shader)
 	};
 
 	draw_context.buffers.cpu.length = num_billboards;

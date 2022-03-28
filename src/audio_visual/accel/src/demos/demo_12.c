@@ -5,7 +5,6 @@
 
 //////////
 
-#define inlinable static inline
 #define wmalloc malloc
 #define wfree free
 
@@ -167,7 +166,7 @@ void init_sector_list_vbo(OldSectorList* const sector_list) {
 		}
 	}
 
-	glGenBuffers(1, &sector_list -> vbo);
+	sector_list -> vbo = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
 	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) total_bytes, vertices, GL_STATIC_DRAW);
 }
@@ -177,14 +176,13 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 
 	OldSectorList sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
 	init_sector_list_vbo(&sector_list);
-	bind_sector_mesh_to_vao();
 
 	OldSectorList* const sector_list_on_heap = malloc(sizeof(OldSectorList));
 	*sector_list_on_heap = sector_list;
 	sgl.any_data = sector_list_on_heap; // any_data stores sector meshes, and freed in demo_12_deinit
 
-	sgl.shader_program = init_shader_program(sector_lighting_vertex_shader, sector_lighting_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(sector_lighting_vertex_shader, sector_lighting_fragment_shader);
+	use_shader(sgl.shader);
 	enable_all_culling();
 	glClearColor(0.89f, 0.855f, 0.788f, 0.0f); // Bone
 
@@ -244,7 +242,7 @@ void demo_12_drawer(const StateGL* const sgl) {
 	static GLint camera_pos_world_space_id, model_view_projection_id;
 	static bool first_call = true;
 
-	const GLuint shader = sgl -> shader_program;
+	const GLuint shader = sgl -> shader;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {1.5f, 1.0f, 1.5f});
@@ -261,7 +259,12 @@ void demo_12_drawer(const StateGL* const sgl) {
 	use_texture(sgl -> textures[0], shader, "texture_sampler", TexPlain, 0);
 
 	const OldSectorList* const sector_list = sgl -> any_data;
-	glDrawArrays(GL_TRIANGLES, 0, sector_list -> num_vertices);
+
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, MESH_TYPE_ENUM, bytes_per_vertex, 0,
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, MESH_TYPE_ENUM, bytes_per_vertex, 3 * sizeof(mesh_type_t),
+			glDrawArrays(GL_TRIANGLES, 0, sector_list -> num_vertices);
+		);
+	);
 }
 
 void demo_12_deinit(const StateGL* const sgl) {

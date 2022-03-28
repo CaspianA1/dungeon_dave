@@ -36,9 +36,19 @@ Other random ideas:
 - Catch more warnings with -Weverything
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit)
 - File paths may not work on Windows
-- Handle the possible failure of getting the anisotropic filtering extension differently, now that I'm using glad
-- Normal mapping
 - Some steeply angled shadows exhibit aliasing
+- Pass in texture parameters through a bitmask
+- Compile modules separarely, and then link them all together with a given demo
+- Manage shadow map resolution better for bigger scenes
+
+Normal mapping:
+- Normal map details disappear at steep angles and lower mip levels
+- Improper EVSM light coverage leads to some in-shadow areas having bumps on them
+- Unshadowed areas have no bumps (or is that okay?)
+- Some aliasing
+- Generating normal maps is slow
+- After the gaussian blur, generate a texture set of normal maps that are paired with the face normal maps
+- Pack those normal maps in the same texture set as the face texture set (after them, but perhaps interleaved later)
 
 A better shading model:
 - Macros for generation of objects, like GL_INIT(Buffer) for example

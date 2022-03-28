@@ -166,13 +166,13 @@ StateGL demo_3_init(void) {
 			"color = fragment_color;\n"
 		"}\n";
 
-	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(vertex_shader, fragment_shader);
+	use_shader(sgl.shader);
 
 	enable_all_culling();
 
 	vec3 camera_pos = {4.0f, 3.0f, -3.0f};
-	demo_2_matrix_setup(sgl.shader_program, camera_pos);
+	demo_2_matrix_setup(sgl.shader, camera_pos);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue
 
 	return sgl;

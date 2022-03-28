@@ -19,11 +19,20 @@ typedef struct {
 	const List billboard_animations, billboard_animation_instances;
 
 	const Skybox skybox;
+
+	const GLuint normal_map;
+
 	byte* const heightmap;
 	const byte map_size[2];
 } SceneState;
 
 StateGL demo_17_init(void) {
+	/*
+	const Uint32 before = SDL_GetTicks();
+	test_normal_map_generation();
+	DEBUG(SDL_GetTicks() - before, u);
+	*/
+
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	/* For a 2048x2048 shadow map:
@@ -60,6 +69,10 @@ StateGL demo_17_init(void) {
 		),
 
 		.skybox = init_skybox("../assets/desert.bmp"),
+
+		.normal_map = init_plain_texture("../../../../assets/normal_maps/pyramid_bricks_4.bmp",
+			TexPlain, TexRepeating, TexLinear, TexTrilinear, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT),
+
 		.heightmap = (byte*) palace_heightmap,
 		.map_size = {palace_width, palace_height}
 	};
@@ -183,7 +196,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	}
 
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
-	draw_visible_sectors(sector_draw_context, shadow_map_context, &scene_state -> sectors, &camera);
+	draw_visible_sectors(sector_draw_context, shadow_map_context, &scene_state -> sectors, &camera, scene_state -> normal_map);
 
 	const Skybox* const skybox = &scene_state -> skybox;
 	draw_skybox(*skybox, &camera);
@@ -206,6 +219,7 @@ void demo_17_deinit(const StateGL* const sgl) {
 	deinit_list(scene_state -> billboard_animation_instances);
 
 	deinit_skybox(scene_state -> skybox);
+	deinit_texture(scene_state -> normal_map);
 
 	free(scene_state);
 

@@ -2,7 +2,6 @@
 #define UTILS_H
 
 #include <SDL2/SDL.h>
-#include "../glad/glad.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdouble-promotion"
@@ -24,23 +23,25 @@
 #define KEY_PRINT_DIRECTION SDL_SCANCODE_6
 #define KEY_PRINT_UP SDL_SCANCODE_7
 
-#define DEBUG(var, format) printf(#var " = %" #format "\n", var)
-#define DEBUG_FLOAT(var) printf(#var " = %lff\n", (double) (var))
-#define DEBUG_VEC2(v) printf(#v " = {%lff, %lff}\n", (double) (v)[0], (double) (v)[1])
-#define DEBUG_VEC3(v) printf(#v " = {%lff, %lff, %lff}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2])
+#define DEBUG(var, format) printf(#var " = %" #format "\n", (var))
+#define DEBUG_FLOAT(var) printf(#var " = %ff\n", (double) (var))
+#define DEBUG_VEC2(v) printf(#v " = {%ff, %ff}\n", (double) (v)[0], (double) (v)[1])
+#define DEBUG_VEC3(v) printf(#v " = {%ff, %ff, %ff}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2])
 
 #define DEBUG_BITS(num) do {\
 	printf(#num " = ");\
 	for (int16_t i = (sizeof(num) << 3) - 1; i >= 0; i--)\
-		putchar(((num >> i) & 1) + '0');\
+		putchar((((num) >> i) & 1) + '0');\
 	putchar('\n');\
 } while (0)
 
 #define TWEAK_REALTIME_VALUE(value_name, init_value, min_value, max_value, step, key_decr, key_incr, key_reset)\
 	static GLfloat value_name = init_value;\
 	do {\
-		const bool incr = keys[SDL_SCANCODE_##key_incr],\
-			decr = keys[SDL_SCANCODE_##key_decr], reset = keys[SDL_SCANCODE_##key_reset];\
+		const bool\
+			incr = keys[SDL_SCANCODE_##key_incr],\
+			decr = keys[SDL_SCANCODE_##key_decr],\
+			reset = keys[SDL_SCANCODE_##key_reset];\
 		\
 		value_name = reset ? init_value : (value_name + step * incr - step * decr);\
 		\
@@ -49,7 +50,11 @@
 		if (incr || decr || reset) DEBUG_FLOAT(value_name);\
 	} while (0)
 
+#define MAKE_SHADER_BRANCH(shader, key) INIT_UNIFORM_VALUE(branch, (shader), 1i, keys[SDL_SCANCODE_##key]);
+
 ////////// These are some general-purpose macros used in all demos
+
+#define inlinable static inline
 
 #define bit_is_set(bits, mask) ((bits) & (mask))
 #define set_bit(bits, mask) ((bits) |= (mask))
@@ -57,14 +62,54 @@
 #define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
 
 #define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
-	glUniform##type_prefix(glGetUniformLocation(shader, #name), __VA_ARGS__)
+	glUniform##type_prefix(glGetUniformLocation((shader), #name), __VA_ARGS__)
 
 #define INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(name, shader, type_prefix, ...)\
-	glUniform##type_prefix(glGetUniformLocation(shader, name), __VA_ARGS__)
+	glUniform##type_prefix(glGetUniformLocation((shader), (name)), __VA_ARGS__)
 
 #define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
 
-////////// These macros pertain to window defaults
+////////// These macros are for handy abstractions over OpenGL functions
+
+#define use_shader glUseProgram
+#define deinit_shader glDeleteProgram
+
+#define INNER_WITH_VERTEX_ATTRIBUTE(is_instanced, index, I, function_params, ...)\
+	glEnableVertexAttribArray((index));\
+	if ((is_instanced)) glVertexAttribDivisor((index), 1); /* If instanced, the divisor will be 1 */ \
+	glVertexAttrib##I##Pointer function_params;\
+	__VA_ARGS__\
+	if ((is_instanced)) glVertexAttribDivisor((index), 0);\
+	glDisableVertexAttribArray((index));\
+} while (0)
+
+#define WITH_INTEGER_VERTEX_ATTRIBUTE(is_instanced, index, num_components, typename, stride, base_offset, ...) do {\
+	INNER_WITH_VERTEX_ATTRIBUTE((is_instanced), (index), I,\
+		((index), (num_components), (typename), (stride), (void*) (base_offset)),\
+		__VA_ARGS__\
+	);\
+while (0)
+
+#define WITH_VERTEX_ATTRIBUTE(is_instanced, index, num_components, typename, stride, base_offset, ...) do {\
+	INNER_WITH_VERTEX_ATTRIBUTE((is_instanced), (index), ,\
+		((index), (num_components), (typename), GL_FALSE, (stride), (void*) (base_offset)),\
+		__VA_ARGS__\
+	);\
+while (0)
+
+#define WITH_BINARY_RENDER_STATE(state, ...) do {\
+	glEnable((state)); __VA_ARGS__ glDisable((state));\
+} while (0)
+
+#define WITHOUT_BINARY_RENDER_STATE(state, ...) do {\
+	glDisable((state)); __VA_ARGS__ glEnable((state));\
+} while (0)
+
+#define WITH_RENDER_STATE(setter, state, inverse_state, ...) do {\
+	setter((state)); __VA_ARGS__ setter((inverse_state));\
+} while (0)
+
+////////// These macros pertain to window + rendering defaults
 
 #define WINDOW_W 800
 #define WINDOW_H 600
@@ -76,6 +121,7 @@
 #define MULTISAMPLE_SAMPLES 4
 
 #define USE_VSYNC
+#define ENABLE_ANISOTROPIC_FILTERING
 #define USE_GAMMA_CORRECTION
 // #define FORCE_SOFTWARE_RENDERER
 
@@ -104,7 +150,7 @@ typedef enum {
 } FailureType;
 
 typedef struct {
-	GLuint shader_program, vertex_array, *vertex_buffers, *textures;
+	GLuint shader, vertex_array, *vertex_buffers, *textures;
 	GLsizei num_vertex_buffers, num_textures;
 	void* any_data; // If a demo need to pass in extra info to the drawer, it can do it through here
 } StateGL;
@@ -115,7 +161,7 @@ const Uint8* keys;
 
 //////////
 
-extern inline void fail(const GLchar* const msg, const FailureType failure_type) {
+inlinable void fail(const GLchar* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s.\n", msg);
 	exit((int) failure_type + 1);
 }
@@ -137,10 +183,11 @@ void deinit_demo_vars(const StateGL* const sgl);
 //////////
 
 GLuint init_vao(void);
+GLuint init_gpu_buffer(void);
 GLuint* init_vbos(const GLsizei num_buffers, ...);
 void bind_vbos_to_vao(const GLuint* const vbos, const GLuint num_vbos, ...);
 
-GLuint init_shader_program(const GLchar* const vertex_shader, const GLchar* const fragment_shader);
+GLuint init_shader(const GLchar* const vertex_shader, const GLchar* const fragment_shader);
 
 void enable_all_culling(void);
 

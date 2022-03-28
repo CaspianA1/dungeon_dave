@@ -71,8 +71,8 @@ const GLchar *const perlin_vertex_shader =
 StateGL demo_18_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
-	sgl.shader_program = init_shader_program(perlin_vertex_shader, perlin_fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(perlin_vertex_shader, perlin_fragment_shader);
+	use_shader(sgl.shader);
 
 	return sgl;
 }
@@ -82,7 +82,7 @@ void demo_18_drawer(const StateGL* const sgl) {
 	static bool first_call = true;
 
 	if (first_call) {
-		const GLuint shader = sgl -> shader_program;
+		const GLuint shader = sgl -> shader;
 
 		INIT_UNIFORM(choice, shader);
 		INIT_UNIFORM(first_octave, shader);

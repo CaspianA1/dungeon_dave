@@ -1,7 +1,7 @@
 #include "demo_1.c"
 #include "../headers/constants.h"
 
-void demo_2_configurable_matrix_setup(const GLuint shader_program,
+void demo_2_configurable_matrix_setup(const GLuint shader,
 	vec3 pos, vec3 rel_origin, vec3 up, mat4 view, mat4 view_times_projection, mat4 model_view_projection, const bool set_up_mvp) {
 
 	mat4 projection, model = GLM_MAT4_IDENTITY_INIT, view_times_model;
@@ -21,7 +21,7 @@ void demo_2_configurable_matrix_setup(const GLuint shader_program,
 		static bool first_call = true;
 
 		if (first_call) {
-			INIT_UNIFORM(model_view_projection, shader_program);
+			INIT_UNIFORM(model_view_projection, shader);
 			first_call = false;
 		}
 
@@ -29,10 +29,10 @@ void demo_2_configurable_matrix_setup(const GLuint shader_program,
 	}
 }
 
-void demo_2_matrix_setup(const GLuint shader_program, vec3 camera_pos) {
+void demo_2_matrix_setup(const GLuint shader, vec3 camera_pos) {
 	vec3 origin = {0.0f, 0.0f, 0.0f}, up = {0.0f, 1.0f, 0.0f};
 	mat4 view, view_times_model, model_view_projection;
-	demo_2_configurable_matrix_setup(shader_program, camera_pos, origin, up, view, view_times_model, model_view_projection, true);
+	demo_2_configurable_matrix_setup(shader, camera_pos, origin, up, view, view_times_model, model_view_projection, true);
 }
 
 StateGL demo_2_init(void) {
@@ -56,11 +56,11 @@ StateGL demo_2_init(void) {
 			"color = vec3(0, 0, 1);\n" // Blue
 		"}\n";
 
-	sgl.shader_program = init_shader_program(vertex_shader, fragment_shader);
-	glUseProgram(sgl.shader_program);
+	sgl.shader = init_shader(vertex_shader, fragment_shader);
+	use_shader(sgl.shader);
 
 	vec3 camera_pos = {4.0f, 3.0f, 3.0f};
-	demo_2_matrix_setup(sgl.shader_program, camera_pos);
+	demo_2_matrix_setup(sgl.shader, camera_pos);
 
 	return sgl;
 }
