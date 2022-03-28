@@ -224,9 +224,6 @@ GLuint init_demo_23_obj_vbo(GLsizei* const num_obj_vertices) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, num_components_per_vertex, GL_FLOAT, GL_FALSE, 0, (void*) 0);
-
 	return vbo;
 }
 
@@ -254,9 +251,11 @@ StateGL demo_23_init(void) {
 
 void demo_23_draw_call(const void* const param) {
 	const GLsizei num_obj_vertices = *((GLsizei*) param);
-	glDrawArrays(GL_TRIANGLES, 0, num_obj_vertices);
-}
 
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, GL_FLOAT, 0, 0,
+		glDrawArrays(GL_TRIANGLES, 0, num_obj_vertices);
+	);
+}
 
 void get_view_matrix(const vec3 pos, const vec3 dir, const vec3 right, mat4 view) {
 	vec3 up;

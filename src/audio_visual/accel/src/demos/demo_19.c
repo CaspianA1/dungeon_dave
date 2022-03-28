@@ -84,9 +84,6 @@ StateGL demo_19_init(void) {
 
 	free(shape);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_BYTE, GL_FALSE, 0, NULL);
-
 	sgl.shader = init_shader(demo_19_vertex_shader, demo_19_fragment_shader);
 	use_shader(sgl.shader);
 
@@ -125,8 +122,10 @@ void demo_19_drawer(const StateGL* const sgl) {
 	UPDATE_UNIFORM(spin, 3f, spin[0], spin[0] * spin[1], spin[1]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 
-	glClearColor(fmodf(spin[0] / 2.0f, 1.0f), fmodf(spin[1] / 2.0f, 1.0f), fmodf(spin_input, 1.0f), 0.0f);
-	glDrawArrays(GL_TRIANGLES, 0, vertices);
+	WITH_VERTEX_ATTRIBUTE(false, 0, 3, GL_BYTE, 0, 0,
+		glClearColor(fmodf(spin[0] / 2.0f, 1.0f), fmodf(spin[1] / 2.0f, 1.0f), fmodf(spin_input, 1.0f), 0.0f);
+		glDrawArrays(GL_TRIANGLES, 0, vertices);
+	);
 
 	spin[0] = cosf(spin_input);
 	spin[1] = sinf(spin_input);
