@@ -200,9 +200,9 @@ void draw_shadow_volume_context(const ShadowVolumeContext context, mat4 model_vi
 	UPDATE_UNIFORM(shadow_volume_model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, num_components_per_position, GL_FLOAT, 0, 0,
-		glEnable(GL_BLEND);
-		glDrawElements(GL_TRIANGLES, (GLsizei) context.shadow_volume.num_indices, BUFFER_SIZE_TYPENAME, (void*) 0);
-		glDisable(GL_BLEND);
+		WITH_BINARY_RENDER_STATE(GL_BLEND,
+			glDrawElements(GL_TRIANGLES, (GLsizei) context.shadow_volume.num_indices, BUFFER_SIZE_TYPENAME, (void*) 0);
+		);
 	);
 }
 
