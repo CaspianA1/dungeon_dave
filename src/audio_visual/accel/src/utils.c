@@ -214,6 +214,12 @@ GLuint init_vao(void) {
 	return vertex_array;
 }
 
+GLuint init_gpu_buffer(void) {
+	GLuint buffer;
+	glGenBuffers(1, &buffer);
+	return buffer;
+}
+
 // Buffer data ptr, size of buffer
 GLuint* init_vbos(const GLsizei num_buffers, ...) {
 	va_list args;

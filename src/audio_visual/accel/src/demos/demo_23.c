@@ -219,8 +219,7 @@ GLuint init_demo_23_obj_vbo(GLsizei* const num_obj_vertices) {
 
 	*num_obj_vertices = sizeof(vertices) / sizeof(vertices[0]) / num_components_per_vertex;
 
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
+	const GLuint vbo = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 

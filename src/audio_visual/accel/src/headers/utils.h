@@ -183,6 +183,7 @@ void deinit_demo_vars(const StateGL* const sgl);
 //////////
 
 GLuint init_vao(void);
+GLuint init_gpu_buffer(void);
 GLuint* init_vbos(const GLsizei num_buffers, ...);
 void bind_vbos_to_vao(const GLuint* const vbos, const GLuint num_vbos, ...);
 

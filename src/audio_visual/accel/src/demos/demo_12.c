@@ -166,7 +166,7 @@ void init_sector_list_vbo(OldSectorList* const sector_list) {
 		}
 	}
 
-	glGenBuffers(1, &sector_list -> vbo);
+	sector_list -> vbo = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, sector_list -> vbo);
 	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) total_bytes, vertices, GL_STATIC_DRAW);
 }

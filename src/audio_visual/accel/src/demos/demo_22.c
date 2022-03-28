@@ -152,11 +152,11 @@ void init_shadow_volume_buffers(ShadowVolumeContext* const context,
 
 	context -> shadow_volume.num_indices = volume_indices.length;
 
-	glGenBuffers(1, &context -> shadow_volume.vertex_buffer);
+	context -> shadow_volume.vertex_buffer = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, context -> shadow_volume.vertex_buffer);
 	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) sizeof(vec3[volume_vertices.length]), volume_vertices.data, GL_STATIC_DRAW);
 
-	glGenBuffers(1, &context -> shadow_volume.index_buffer);
+	context -> shadow_volume.index_buffer = init_gpu_buffer();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context -> shadow_volume.index_buffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr) sizeof(buffer_size_t[volume_indices.length]), volume_indices.data, GL_STATIC_DRAW);
 
@@ -255,7 +255,7 @@ ShadowVolumeContext init_shadow_volume_context(const vec3 light_source_pos) {
 
 	context.obj.num_vertices = sizeof(vertices) / sizeof(vertices[0]) / num_components_per_vertex;
 
-	glGenBuffers(1, &context.obj.vertex_buffer);
+	context.obj.vertex_buffer = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, context.obj.vertex_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 

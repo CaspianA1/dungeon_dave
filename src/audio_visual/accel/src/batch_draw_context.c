@@ -3,14 +3,14 @@
 
 #include "headers/batch_draw_context.h"
 #include "headers/texture.h"
+#include "utils.c"
 #include "list.c"
 
 // This does not initialize or fill the CPU buffer with data; that's the caller's responsibility
 void init_batch_draw_context_gpu_buffer(BatchDrawContext* const draw_context,
 	const buffer_size_t num_drawable_things, const buffer_size_t drawable_thing_size) {
 
-	GLuint gpu_buffer;
-	glGenBuffers(1, &gpu_buffer);
+	const GLuint gpu_buffer = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, gpu_buffer);
 	glBufferData(GL_ARRAY_BUFFER, num_drawable_things * drawable_thing_size, NULL, GL_DYNAMIC_DRAW);
 	draw_context -> buffers.gpu = gpu_buffer;

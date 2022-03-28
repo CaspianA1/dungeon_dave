@@ -94,8 +94,7 @@ Skybox init_skybox(const GLchar* const cubemap_path) {
 		first_call = false;
 	}
 
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
+	const GLuint vbo = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
 
