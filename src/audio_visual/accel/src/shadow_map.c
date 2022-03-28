@@ -231,11 +231,11 @@ static void get_model_view_projection_matrix_for_shadow_map(
 	(void) map_size;
 
 	mat4 view, projection;
-	// const GLfloat far_clip_dist = 70.0f, l = sqrtf(50.0f * 50.0f + 50.0f * 50.0f + 18.0f * 18.0f); // 25.0f;
-	const GLfloat far_clip_dist = 57.45f, l = sqrtf(40.0f * 40.0f + 40.0f * 40.0f + 10.0f * 10.0f);
-	// const GLfloat far_clip_dist = 20.0f, l = 30.0f;
+
+	const GLfloat s = 40.0f, h = 20.0f;
+	const GLfloat fcd = sqrtf(s * s + s * s + h * h); // Far clip dist
 	glm_look_anyup((GLfloat*) shadow_map_context -> light_context.pos, (GLfloat*) shadow_map_context -> light_context.dir, view);
-	glm_ortho(-l, l, l, -l, constants.camera.clip_dists.near, far_clip_dist, projection);
+	glm_ortho(-fcd, fcd, fcd, -fcd, constants.camera.clip_dists.near, fcd, projection);
 	glm_mul(projection, view, model_view_projection);
 }
 
