@@ -196,10 +196,11 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		&shadow_map_context -> light_context.model_view_projection[0][0]);
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
-		glEnableVertexAttribArray(1);
-		glVertexAttribIPointer(1, 1, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, (void*) (3 * sizeof(face_mesh_component_t)));
-		glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
-		glDisableVertexAttribArray(1);
+		WITH_INTEGER_VERTEX_ATTRIBUTE(false, 1, 1, FACE_MESH_COMPONENT_TYPENAME,
+			bytes_per_face_vertex, sizeof(face_mesh_component_t[3]),
+
+			glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
+		);
 	);
 }
 

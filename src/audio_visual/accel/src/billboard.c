@@ -66,25 +66,18 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right[0], camera -> right[2]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
-	//////////
+	WITH_INTEGER_VERTEX_ATTRIBUTE(true, 0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), 0,
+		WITH_VERTEX_ATTRIBUTE(true, 1, 2, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, size),
+			WITH_VERTEX_ATTRIBUTE(true, 2, 3, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, pos),
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribDivisor(0, 1);
-	glVertexAttribIPointer(0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), (void*) 0);
+				WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+					WITH_BINARY_RENDER_STATE(GL_BLEND,
 
-	WITH_VERTEX_ATTRIBUTE(true, 1, 2, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, size),
-		WITH_VERTEX_ATTRIBUTE(true, 2, 3, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, pos),
-
-			WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
-				WITH_BINARY_RENDER_STATE(GL_BLEND,
-
-					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-					glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
+						glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+						glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
+					);
 				);
 			);
-
-			glVertexAttribDivisor(0, 0);
-			glDisableVertexAttribArray(0);
 		);
 	);
 }

@@ -74,31 +74,39 @@
 #define use_shader glUseProgram
 #define deinit_shader glDeleteProgram
 
-#define WITH_VERTEX_ATTRIBUTE(is_instanced, index, num_components, typename, stride, base_offset, ...) do {\
+#define INNER_WITH_VERTEX_ATTRIBUTE(is_instanced, index, I, function_params, ...)\
 	glEnableVertexAttribArray((index));\
 	if ((is_instanced)) glVertexAttribDivisor((index), 1); /* If instanced, the divisor will be 1 */ \
-	glVertexAttribPointer((index), (num_components), (typename), GL_FALSE, (stride), (void*) (base_offset));\
+	glVertexAttrib##I##Pointer function_params;\
 	__VA_ARGS__\
 	if ((is_instanced)) glVertexAttribDivisor((index), 0);\
 	glDisableVertexAttribArray((index));\
 } while (0)
 
+#define WITH_INTEGER_VERTEX_ATTRIBUTE(is_instanced, index, num_components, typename, stride, base_offset, ...) do {\
+	INNER_WITH_VERTEX_ATTRIBUTE((is_instanced), (index), I,\
+		((index), (num_components), (typename), (stride), (void*) (base_offset)),\
+		__VA_ARGS__\
+	);\
+while (0)
+
+#define WITH_VERTEX_ATTRIBUTE(is_instanced, index, num_components, typename, stride, base_offset, ...) do {\
+	INNER_WITH_VERTEX_ATTRIBUTE((is_instanced), (index), ,\
+		((index), (num_components), (typename), GL_FALSE, (stride), (void*) (base_offset)),\
+		__VA_ARGS__\
+	);\
+while (0)
+
 #define WITH_BINARY_RENDER_STATE(state, ...) do {\
-	glEnable((state));\
-	__VA_ARGS__\
-	glDisable((state));\
+	glEnable((state)); __VA_ARGS__ glDisable((state));\
 } while (0)
 
 #define WITHOUT_BINARY_RENDER_STATE(state, ...) do {\
-	glDisable((state));\
-	__VA_ARGS__\
-	glEnable((state));\
+	glDisable((state)); __VA_ARGS__ glEnable((state));\
 } while (0)
 
 #define WITH_RENDER_STATE(setter, state, inverse_state, ...) do {\
-	setter((state));\
-	__VA_ARGS__\
-	setter((inverse_state));\
+	setter((state)); __VA_ARGS__ setter((inverse_state));\
 } while (0)
 
 ////////// These macros pertain to window + rendering defaults
