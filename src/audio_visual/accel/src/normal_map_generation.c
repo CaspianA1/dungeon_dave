@@ -186,6 +186,28 @@ SDL_Surface* blur_surface(const SDL_Surface* const src, const GaussianBlurContex
 	return vertical_blur_buffer;
 }
 
+/* This is a lot like `init_texture_set`, but between each texture
+in the texture set, there is a normal map that is interleaved. Also,
+at the moment, it only supports non-animated textures. */
+void init_texture_set_with_adjacent_normal_maps(const GLsizei num_src_textures,
+	const GLsizei rescale_w, const GLsizei rescale_h, ...) {
+
+	va_list args;
+	va_start(args, rescale_h);
+
+	printf("rescale size is {%d, %d}\n", rescale_w, rescale_h);
+
+	for (GLsizei i = 0; i < num_src_textures; i++) {
+		const GLchar* const path = va_arg(args, GLchar*);
+		const GLsizei texture_set_index = i << 1;
+
+		printf("(path %s): texture at index %d, with a normal map at index %d\n",
+			path, texture_set_index, texture_set_index + 1);
+	}
+
+	va_end(args);
+}
+
 // TODO: remove
 void test_normal_map_generation(void) {
 	const int rescale_w = 256, rescale_h = 256, blur_radius = 5;

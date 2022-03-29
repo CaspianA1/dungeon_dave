@@ -33,6 +33,14 @@ StateGL demo_17_init(void) {
 	DEBUG(SDL_GetTicks() - before, u);
 	*/
 
+	/*
+	init_texture_set_with_adjacent_normal_maps(3, 256, 256,
+		"../../../../assets/walls/pyramid_bricks_4.bmp",
+		"../../../../assets/walls/hieroglyph.bmp",
+		"../../../../assets/walls/mesa.bmp"
+	);
+	*/
+
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	/* For a 2048x2048 shadow map:
