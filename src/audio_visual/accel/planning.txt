@@ -83,6 +83,6 @@ General future components:
 - Blit 2D sprite to whole screen
 - Flat weapon
 - Use more of the cglm functions in `update_camera`, or make my own
-- A startup setting of magnification filter (and setting other constants like that as well; call that config_constants)
+- A startup setting of magnification filter (and setting other constants like that as well, like the refresh rate; call that `runtime_constants`)
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
