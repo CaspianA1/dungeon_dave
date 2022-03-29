@@ -63,7 +63,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 		first_call = false;
 	}
 
-	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right[0], camera -> right[2]);
+	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right_xz[0], camera -> right_xz[1]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
 	WITH_INTEGER_VERTEX_ATTRIBUTE(true, 0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), 0,
@@ -100,7 +100,7 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 
 		const buffer_size_t num_visible_in_group = (buffer_size_t) (billboard - initial_billboard);
 		if (num_visible_in_group != 0) {
-			memcpy(gpu_billboard_buffer_ptr + num_visible, initial_billboard, num_visible_in_group * sizeof(Billboard));
+			memcpy(gpu_billboard_buffer_ptr + num_visible, initial_billboard, sizeof(Billboard[num_visible_in_group]));
 			num_visible += num_visible_in_group;
 		}
 	}

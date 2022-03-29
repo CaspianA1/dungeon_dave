@@ -19,6 +19,7 @@ typedef struct {
 	the percentage is smoothed out by a Hermite curve. */
 	GLfloat pace, speed_xz_percent, time_since_jump, time_accum_for_full_fov;
 
+	vec2 right_xz; // This is used for billboards
 	vec3 pos, dir, right, up;
 
 	mat4 model_view_projection;

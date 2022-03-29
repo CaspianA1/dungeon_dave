@@ -198,8 +198,8 @@ void demo_17_drawer(const StateGL* const sgl) {
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
 	if (keys[SDL_SCANCODE_C]) {
-		memcpy(shadow_map_context -> light_context.pos, camera.pos, sizeof(vec3));
-		memcpy(shadow_map_context -> light_context.dir, camera.dir, sizeof(vec3));
+		glm_vec3_copy(camera.pos, shadow_map_context -> light_context.pos);
+		glm_vec3_copy(camera.dir, shadow_map_context -> light_context.dir);
 		render_all_sectors_to_shadow_map(shadow_map_context, sector_draw_context, event.screen_size, physics_obj.map_size);
 	}
 

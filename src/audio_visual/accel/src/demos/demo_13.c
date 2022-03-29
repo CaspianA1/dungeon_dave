@@ -70,7 +70,7 @@ void demo_13_move(vec3 pos, vec3 right, mat4 model_view_projection, const GLuint
 	const GLfloat hori_angle_minus_half_pi = hori_angle - HALF_PI, actual_speed = delta_time * move_speed;
 
 	vec3 _right = {sinf(hori_angle_minus_half_pi), 0.0f, cosf(hori_angle_minus_half_pi)};
-	memcpy(right, _right, sizeof(vec3));
+	glm_vec3_copy(_right, right);
 
 	if (keys[SDL_SCANCODE_W]) glm_vec3_muladds(direction, actual_speed, pos);
 	if (keys[SDL_SCANCODE_S]) glm_vec3_muladds(direction, -actual_speed, pos);

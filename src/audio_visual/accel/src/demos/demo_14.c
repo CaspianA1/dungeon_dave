@@ -54,7 +54,7 @@ void demo_14_drawer(const StateGL* const sgl) {
 	WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending on for billboard
 		WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 			use_shader(billboard_shader);
-			UPDATE_UNIFORM(billboard_right_xz_world_space, 2f, camera.right[0], camera.right[2]);
+			UPDATE_UNIFORM(billboard_right_xz_world_space, 2f, camera.right_xz[0], camera.right_xz[1]);
 			UPDATE_UNIFORM(billboard_model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		);
