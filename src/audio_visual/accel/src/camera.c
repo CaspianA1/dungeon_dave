@@ -11,7 +11,7 @@ void init_camera(Camera* const camera, const vec3 init_pos) {
 	camera -> speed_xz_percent = 0.0f;
 	camera -> time_since_jump = 0.0f;
 	camera -> time_accum_for_full_fov = 0.0f;
-	memcpy(camera -> pos, init_pos, sizeof(vec3));
+	glm_vec3_copy((GLfloat*) init_pos, camera -> pos);
 }
 
 static GLfloat limit_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
@@ -188,8 +188,8 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 v
 void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, vec2 dir_xz, vec3 dir) {
 	const GLfloat cos_vert = cosf(vert_angle);
 
-	memcpy(dir_xz, (vec2) {sinf(hori_angle), cosf(hori_angle)}, sizeof(vec2));
-	memcpy(dir, (vec3) {cos_vert * dir_xz[0], sinf(vert_angle), cos_vert * dir_xz[1]}, sizeof(vec3));
+	glm_vec2_copy((vec2) {sinf(hori_angle), cosf(hori_angle)}, dir_xz);
+	glm_vec3_copy((vec3) {cos_vert * dir_xz[0], sinf(vert_angle), cos_vert * dir_xz[1]}, dir);
 }
 
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
@@ -218,10 +218,12 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 	get_dir_in_2D_and_3D(camera -> angles.hori, camera -> angles.vert, dir_xz, dir); // Outputs dir_xz and dir
 
 	vec3 right = {-dir_xz[1], 0.0f, dir_xz[0]}, up, pos;
+	camera -> right_xz[0] = right[0]; // `right_xz` is just like `right`, except that it's not tilted
+	camera -> right_xz[1] = right[2];
 
 	glm_vec3_rotate(right, -camera -> angles.tilt, dir); // Outputs a rotated right vector
 	glm_vec3_cross(right, dir, up); // Outputs an up vector from the direction and right vectors
-	memcpy(pos, camera -> pos, sizeof(vec3)); // Copying the camera's position vector into a local variable
+	glm_vec3_copy(camera -> pos, pos); // Copying the camera's position vector into a local variable
 
 	////////// Moving according to those vectors
 
@@ -252,10 +254,10 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 
 	////////// Copying the local vectors to the camera, and printing important vectors if needed
 
-	memcpy(camera -> pos, pos, sizeof(vec3));
-	memcpy(camera -> dir, dir, sizeof(vec3));
-	memcpy(camera -> right, right, sizeof(vec3));
-	memcpy(camera -> up, up, sizeof(vec3));
+	glm_vec3_copy(pos, camera -> pos);
+	glm_vec3_copy(dir, camera -> dir);
+	glm_vec3_copy(right, camera -> right);
+	glm_vec3_copy(up, camera -> up);
 
 	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(pos);
 	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);

@@ -35,7 +35,7 @@ PLANE_TYPE* join_planes(PLANE_TYPE* const plane_1, PLANE_TYPE* const plane_2) {
 	PLANE_TYPE* const joined = malloc(joined_2_bytes);
 
 	#define set_vert(src, src_vert_ind, dest_vert_ind)\
-		memcpy(joined + dest_vert_ind * vars_per_vertex, src + src_vert_ind * vars_per_vertex, vars_per_vertex * sizeof(PLANE_TYPE))
+		memcpy(joined + dest_vert_ind * vars_per_vertex, src + src_vert_ind * vars_per_vertex, sizeof(PLANE_TYPE[vars_per_vertex]))
 
 	for (int i = 0; i <= 3; i++) {
 		set_vert(plane_2, i, (i + 6));
@@ -104,10 +104,10 @@ StateGL demo_9_init(void) {
 void demo_9_drawer(const StateGL* const sgl) {
 	move(sgl -> shader);
 
-	enum {interleaved_vertex_bytes = 5 * sizeof(PLANE_TYPE), num_planes = 2};
+	enum {interleaved_vertex_bytes = sizeof(PLANE_TYPE[5]), num_planes = 2};
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, PLANE_TYPE_ENUM, interleaved_vertex_bytes, 0,
-		WITH_VERTEX_ATTRIBUTE(false, 1, 2, PLANE_TYPE_ENUM, interleaved_vertex_bytes, 3 * sizeof(PLANE_TYPE),
+		WITH_VERTEX_ATTRIBUTE(false, 1, 2, PLANE_TYPE_ENUM, interleaved_vertex_bytes, sizeof(PLANE_TYPE[3]),
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4 * num_planes);
 		);
 	);

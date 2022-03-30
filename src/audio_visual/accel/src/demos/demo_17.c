@@ -33,6 +33,14 @@ StateGL demo_17_init(void) {
 	DEBUG(SDL_GetTicks() - before, u);
 	*/
 
+	/*
+	init_texture_set_with_adjacent_normal_maps(3, 256, 256,
+		"../../../../assets/walls/pyramid_bricks_4.bmp",
+		"../../../../assets/walls/hieroglyph.bmp",
+		"../../../../assets/walls/mesa.bmp"
+	);
+	*/
+
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	/* For a 2048x2048 shadow map:
@@ -190,8 +198,8 @@ void demo_17_drawer(const StateGL* const sgl) {
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
 	if (keys[SDL_SCANCODE_C]) {
-		memcpy(shadow_map_context -> light_context.pos, camera.pos, sizeof(vec3));
-		memcpy(shadow_map_context -> light_context.dir, camera.dir, sizeof(vec3));
+		glm_vec3_copy(camera.pos, shadow_map_context -> light_context.pos);
+		glm_vec3_copy(camera.dir, shadow_map_context -> light_context.dir);
 		render_all_sectors_to_shadow_map(shadow_map_context, sector_draw_context, event.screen_size, physics_obj.map_size);
 	}
 
