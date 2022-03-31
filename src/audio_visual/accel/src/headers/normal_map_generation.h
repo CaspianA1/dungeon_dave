@@ -17,7 +17,7 @@ typedef struct {
     const int kernel_radius;
 } GaussianBlurContext;
 
-SDL_Surface* generate_normal_map(SDL_Surface* const src_image, const float intensity);
+SDL_Surface* generate_normal_map(SDL_Surface* const src_image);
 
 GaussianBlurContext init_gaussian_blur_context(const float sigma,
 	const int radius, const int blur_buffer_w, const int blur_buffer_h);

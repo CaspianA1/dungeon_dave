@@ -177,6 +177,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(warp_exps, sector_shader, 2fv, 1, constants.shadow_mapping.warp_exps);
 		INIT_UNIFORM_VALUE(metallic_color, sector_shader, 3fv, 1, (vec3) {170.0f / 255.0f, 169.0f / 255.0f, 173.0f / 255.0f});
 		INIT_UNIFORM_VALUE(tint, sector_shader, 3fv, 1, (vec3) {253.0f / 255.0f, 217.0f / 255.0f, 181.0f / 255.0f});
+		INIT_UNIFORM_VALUE(one_over_normal_map_intensity, sector_shader, 1f, 1.0f / 1.2f);
 
 		// `use_texture` not called since the shadow map output has already been bound to the texture unit in shadow_map.c
 		set_sampler_texture_unit_for_shader("shadow_map_sampler", sector_shader, SHADOW_MAP_TEXTURE_UNIT);
