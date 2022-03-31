@@ -45,7 +45,7 @@ of pixels to use those as heightmap values. */
 SDL_Surface* generate_normal_map(SDL_Surface* const src, const float intensity) {
 	const int src_w = src -> w, src_h = src -> h;
 
-	SDL_Surface* const normal_map = init_blank_surface(src_w, src_h);
+	SDL_Surface* const normal_map = init_blank_surface(src_w, src_h, SDL_PIXEL_FORMAT);
 
 	const SDL_PixelFormat
 		*const src_format = src -> format,
@@ -161,7 +161,7 @@ GaussianBlurContext init_gaussian_blur_context(const float sigma,
 
 	return (GaussianBlurContext) {
 		.blur_buffer = {
-			.horizontal = init_blank_surface(blur_buffer_w, blur_buffer_h),
+			.horizontal = init_blank_surface(blur_buffer_w, blur_buffer_h, SDL_PIXEL_FORMAT),
 			.size = {blur_buffer_w, blur_buffer_h}
 		},
 
@@ -178,7 +178,7 @@ void deinit_gaussian_blur_context(const GaussianBlurContext* const context) {
 SDL_Surface* blur_surface(const SDL_Surface* const src, const GaussianBlurContext context) {
 	SDL_Surface
 		*const horizontal_blur_buffer = context.blur_buffer.horizontal,
-		*const vertical_blur_buffer = init_blank_surface(src -> w, src -> h);
+		*const vertical_blur_buffer = init_blank_surface(src -> w, src -> h, SDL_PIXEL_FORMAT);
 
 	do_separable_gaussian_blur_pass(src, horizontal_blur_buffer, context.kernel, context.kernel_radius, 0);
 	do_separable_gaussian_blur_pass(horizontal_blur_buffer, vertical_blur_buffer, context.kernel, context.kernel_radius, 1);
@@ -194,7 +194,7 @@ void test_normal_map_generation(void) {
 	////////// Testing
 
 	SDL_Surface* const test_surface = init_surface("../../../../assets/walls/pyramid_bricks_4.bmp");
-	SDL_Surface* const upscaled_test_surface = init_blank_surface(rescale_w, rescale_h);
+	SDL_Surface* const upscaled_test_surface = init_blank_surface(rescale_w, rescale_h, SDL_PIXEL_FORMAT);
 	SDL_BlitScaled(test_surface, NULL, upscaled_test_surface, NULL);
 
 	const GaussianBlurContext gaussian_blur_context = init_gaussian_blur_context(

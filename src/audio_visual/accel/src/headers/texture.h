@@ -79,7 +79,7 @@ typedef enum {
 	if (must_lock) SDL_UnlockSurface((surface));\
 } while (0)
 
-SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);
+SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height, const SDL_PixelFormatEnum pixel_format_name);
 SDL_Surface* init_surface(const GLchar* const path);
 
 void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader, const byte texture_unit);
