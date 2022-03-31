@@ -46,7 +46,6 @@ Normal mapping:
 - Some aliasing
 - Generating normal maps is slow
 - After the gaussian blur, generate a texture set of normal maps that are paired with the face normal maps
-- Normal maps with a big enough intensity get all blocky
 
 A better shading model:
 - Macros for generation of objects, like GL_INIT(Buffer) for example

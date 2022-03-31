@@ -42,7 +42,7 @@ static float sobel_sample(SDL_Surface* const surface,
 
 Also, this function computes luminance values
 of pixels to use those as heightmap values. */
-SDL_Surface* generate_normal_map(SDL_Surface* const src) {
+SDL_Surface* generate_normal_map(SDL_Surface* const src, const float intensity) {
 	const int src_w = src -> w, src_h = src -> h;
 
 	SDL_Surface* const normal_map = init_blank_surface(src_w, src_h, SDL_PIXEL_FORMAT);
@@ -50,6 +50,8 @@ SDL_Surface* generate_normal_map(SDL_Surface* const src) {
 	const SDL_PixelFormat
 		*const src_format = src -> format,
 		*const dest_format = normal_map -> format;
+
+	const float one_over_intensity = 1.0f / intensity;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(normal_map,
@@ -71,7 +73,7 @@ SDL_Surface* generate_normal_map(SDL_Surface* const src) {
 					vec3 normal = {
 						(-tl - ml * 2.0f - bl) + (tr + mr * 2.0f + br),
 						(-tl - tm * 2.0f - tr) + (bl + bm * 2.0f + br),
-						1.0f
+						one_over_intensity
 					};
 
 					glm_vec3_normalize(normal);
@@ -80,7 +82,10 @@ SDL_Surface* generate_normal_map(SDL_Surface* const src) {
 					for (byte i = 0; i < 3; i++) normal[i] = (normal[i] * 0.5f + 0.5f) * 255.0f;
 
 					const sdl_pixel_t normal_vector_in_rgb_format = SDL_MapRGB(
-						dest_format, (sdl_pixel_component_t) normal[0], (sdl_pixel_component_t) normal[1], 255
+						dest_format,
+						(sdl_pixel_component_t) normal[0],
+						(sdl_pixel_component_t) normal[1],
+						(sdl_pixel_component_t) normal[2]
 					);
 
 					*(sdl_pixel_t*) read_surface_pixel(normal_map, dest_format, x, y) = normal_vector_in_rgb_format;
@@ -189,11 +194,11 @@ SDL_Surface* blur_surface(const SDL_Surface* const src, const GaussianBlurContex
 // TODO: remove
 void test_normal_map_generation(void) {
 	const int rescale_w = 256, rescale_h = 256, blur_radius = 5;
-	const float blur_std_deviation = 3.5f;
+	const float blur_std_deviation = 3.5f, normal_map_intensity = 1.2f;
 
 	////////// Testing
 
-	SDL_Surface* const test_surface = init_surface("../../../../assets/walls/sand.bmp");
+	SDL_Surface* const test_surface = init_surface("../../../../assets/walls/saqqara.bmp");
 	SDL_Surface* const upscaled_test_surface = init_blank_surface(rescale_w, rescale_h, SDL_PIXEL_FORMAT);
 	SDL_BlitScaled(test_surface, NULL, upscaled_test_surface, NULL);
 
@@ -201,7 +206,7 @@ void test_normal_map_generation(void) {
 		blur_std_deviation, blur_radius, rescale_w, rescale_h);
 
 	SDL_Surface* const blurred_test_surface = blur_surface(upscaled_test_surface, gaussian_blur_context);
-	SDL_Surface* const normal_map_of_surface = generate_normal_map(blurred_test_surface);
+	SDL_Surface* const normal_map_of_surface = generate_normal_map(blurred_test_surface, normal_map_intensity);
 
 	SDL_SaveBMP(normal_map_of_surface, "out.bmp");
 

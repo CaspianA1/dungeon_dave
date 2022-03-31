@@ -59,8 +59,7 @@ const GLchar *const sector_vertex_shader =
 
 	"uniform float\n"
 		"ambient, shininess, tint_strength,\n"
-		"umbra_strength_factor, light_bleed_reduction_factor,\n"
-		"one_over_normal_map_intensity;\n"
+		"umbra_strength_factor, light_bleed_reduction_factor;\n"
 
 	"uniform vec2 warp_exps;\n"
 	"uniform vec3 inv_light_dir, metallic_color, tint;\n"
@@ -136,9 +135,10 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"vec3 get_fragment_normal(void) {\n"
-		"vec3 rgb_normal = vec3(texture(normal_map_sampler, UV.xy).rg, one_over_normal_map_intensity);\n"
+		"vec3 rgb_normal = texture(normal_map_sampler, UV.xy).rgb;\n"
 
 		// TODO: differentiate tangent space normal and world space normal
+		// RGB normal is normalized because linear filtering + interpolation may make the normal unnormalized
 		"vec3 tangent_space_normal = normalize(rgb_normal * 2.0f - 1.0f);\n"
 
 		// TODO: move this set of calculations to the vertex shader, in some way

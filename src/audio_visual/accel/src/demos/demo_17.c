@@ -71,7 +71,8 @@ StateGL demo_17_init(void) {
 		.skybox = init_skybox("../assets/desert.bmp"),
 
 		.normal_map = init_plain_texture("../../../../assets/normal_maps/pyramid_bricks_4.bmp",
-			TexPlain, TexRepeating, TexLinear, TexTrilinear, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT),
+			TexPlain, TexRepeating, OPENGL_NORMAL_MAP_MAG_FILTER,
+				OPENGL_NORMAL_MAP_MIN_FILTER, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT),
 
 		.heightmap = (byte*) palace_heightmap,
 		.map_size = {palace_width, palace_height}
