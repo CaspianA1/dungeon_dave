@@ -52,8 +52,8 @@ const GLchar *const sector_vertex_shader =
 *const sector_fragment_shader =
 	"#version 330 core\n"
 
-	"in vec3 UV, fragment_pos_light_space, camera_pos_delta_world_space;\n"
 	"flat in int face_id;\n"
+	"in vec3 UV, fragment_pos_light_space, camera_pos_delta_world_space;\n"
 
 	"out vec3 color;\n"
 
