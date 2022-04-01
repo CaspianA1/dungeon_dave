@@ -58,13 +58,17 @@ static void update_fov(Camera* const camera, const byte movement_bits, const GLf
 	camera -> time_accum_for_full_fov = t;
 }
 
-static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v, const GLfloat delta_move,
-	const GLfloat max_v, const bool moving_in_dir, const bool moving_in_opposite_dir) {
+static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v,
+	const GLfloat delta_move, const GLfloat delta_time, const GLfloat max_v,
+	const bool moving_in_dir, const bool moving_in_opposite_dir) {
 
 	GLfloat v = curr_v + delta_move * moving_in_dir - delta_move * moving_in_opposite_dir;
 
+	const GLfloat percent_v_lost = delta_time * constants.camera.friction;
+	const GLfloat percent_v_kept = 1.0f - ((percent_v_lost < 1.0f) ? percent_v_lost : 1.0f);
+
 	// If 0 or 2 directions are being moved in; `^` maps to 1 if only 1 input is true
-	if (!(moving_in_dir ^ moving_in_opposite_dir)) v *= constants.accel.xz_decel;
+	if (!(moving_in_dir ^ moving_in_opposite_dir)) v *= percent_v_kept;
 	return limit_to_pos_neg_domain(v, max_v);
 }
 
@@ -117,10 +121,10 @@ static void update_pos_via_physics(const byte movement_bits,
 	////////// Updating velocity
 
 	velocity_forward_back = apply_velocity_in_xz_direction(velocity_forward_back, accel_forward_back,
-		max_speed_xz, !!(movement_bits & BIT_MOVE_FORWARD), !!(movement_bits & BIT_MOVE_BACKWARD));
+		delta_time, max_speed_xz, !!(movement_bits & BIT_MOVE_FORWARD), !!(movement_bits & BIT_MOVE_BACKWARD));
 
 	velocity_strafe = apply_velocity_in_xz_direction(velocity_strafe, accel_strafe,
-		max_speed_xz, !!(movement_bits & BIT_STRAFE_LEFT), !!(movement_bits & BIT_STRAFE_RIGHT));
+		delta_time, max_speed_xz, !!(movement_bits & BIT_STRAFE_LEFT), !!(movement_bits & BIT_STRAFE_RIGHT));
 
 	physics_obj -> velocities[0] = velocity_forward_back / delta_time;
 	physics_obj -> velocities[2] = velocity_strafe / delta_time;
