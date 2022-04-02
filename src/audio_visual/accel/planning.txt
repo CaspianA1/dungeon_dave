@@ -41,7 +41,6 @@ Other random ideas:
 - FPS at 120 -> many framerate-dependent things
 
 Normal mapping:
-- Normal map details disappear at steep angles and lower mip levels
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
 - Unshadowed areas have no bumps (or is that okay?)
 - Some aliasing
