@@ -20,8 +20,14 @@ static GLfloat limit_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
 	else return val;
 }
 
+// This is framerate-independent.
+static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delta_time) {
+	const GLfloat percent_lost = delta_time * magnitude;
+	return 1.0f - ((percent_lost < 1.0f) ? percent_lost : 1.0f);
+}
+
 // This does not include FOV, since FOV depends on a tick's speed, and speed is updated after this function is called
-static void update_camera_angles(Camera* const camera, const Event* const event) {
+static void update_camera_angles(Camera* const camera, const Event* const event, const GLfloat delta_time) {
 	const int *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
 
 	const GLfloat delta_vert = (GLfloat) -mouse_movement[1] / screen_size[1] * constants.speeds.look_vert;
@@ -30,7 +36,9 @@ static void update_camera_angles(Camera* const camera, const Event* const event)
 	const GLfloat delta_turn = (GLfloat) -mouse_movement[0] / screen_size[0] * constants.speeds.look_hori;
 	camera -> angles.hori += delta_turn;
 
-	const GLfloat tilt = (camera -> angles.tilt + delta_turn * delta_turn) * constants.camera.tilt_decel_rate;
+	const GLfloat tilt = (camera -> angles.tilt + delta_turn * delta_turn)
+		* get_percent_kept_from(constants.camera.tilt_correction_rate, delta_time);
+
 	camera -> angles.tilt = limit_to_pos_neg_domain(tilt, constants.camera.lims.tilt);
 }
 
@@ -64,11 +72,8 @@ static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v,
 
 	GLfloat v = curr_v + delta_move * moving_in_dir - delta_move * moving_in_opposite_dir;
 
-	const GLfloat percent_v_lost = delta_time * constants.camera.friction;
-	const GLfloat percent_v_kept = 1.0f - ((percent_v_lost < 1.0f) ? percent_v_lost : 1.0f);
-
 	// If 0 or 2 directions are being moved in; `^` maps to 1 if only 1 input is true
-	if (!(moving_in_dir ^ moving_in_opposite_dir)) v *= percent_v_kept;
+	if (!(moving_in_dir ^ moving_in_opposite_dir)) v *= get_percent_kept_from(constants.camera.friction, delta_time);
 	return limit_to_pos_neg_domain(v, max_v);
 }
 
@@ -212,7 +217,7 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 	const GLfloat delta_time = (GLfloat) (curr_time - camera -> last_time) * one_over_performance_freq;
 	camera -> last_time = curr_time;
 
-	update_camera_angles(camera, &event);
+	update_camera_angles(camera, &event, delta_time);
 
 	////////// Defining vectors
 
