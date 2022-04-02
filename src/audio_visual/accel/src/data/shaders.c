@@ -142,7 +142,7 @@ const GLchar *const sector_vertex_shader =
 		"switch (face_id) {\n"
 			"case 0: return vec3(t.xz, -t.y);\n" // Flat
 			"case 1: return vec3(t.zy, -t.x);\n" // Right
-			"case 2: return t;\n"
+			"case 2: return t;\n" // Bottom (equal to tangent space)
 			"case 3: return vec3(-t.z, t.yx);\n" // Left
 			"case 4: return vec3(-t.x, t.y, -t.z);\n" // Top (opposite of tangent space)
 		"}\n"
