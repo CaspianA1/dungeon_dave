@@ -252,13 +252,13 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 
 	//////////
 
-	static bool first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		const GLsizei* const shadow_map_size = shadow_map_context -> buffer_context.size;
 		INIT_UNIFORM_VALUE(texel_size, blur_shader, 2f, 1.0f / shadow_map_size[0], 1.0f / shadow_map_size[1]);
 		set_sampler_texture_unit_for_shader("image_sampler", blur_shader, SHADOW_MAP_TEXTURE_UNIT);
-		first_call = 0;
+		first_call = false;
 	}
 
 	set_current_texture_unit(SHADOW_MAP_TEXTURE_UNIT);
@@ -296,11 +296,11 @@ static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_co
 	const GLuint depth_shader = shadow_map_context.shadow_pass.depth_shader;
 	use_shader(depth_shader);
 
-	static bool first_call = 1;
+	static bool first_call = true;
 
 	if (first_call) {
 		INIT_UNIFORM_VALUE(warp_exps, depth_shader, 2fv, 1, constants.shadow_mapping.warp_exps);
-		first_call = 0;
+		first_call = false;
 	}
 
 	UPDATE_UNIFORM(shadow_map_context.shadow_pass.light_model_view_projection,
