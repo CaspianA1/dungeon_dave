@@ -27,6 +27,7 @@
 #define DEBUG_FLOAT(var) printf(#var " = %ff\n", (double) (var))
 #define DEBUG_VEC2(v) printf(#v " = {%ff, %ff}\n", (double) (v)[0], (double) (v)[1])
 #define DEBUG_VEC3(v) printf(#v " = {%ff, %ff, %ff}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2])
+#define DEBUG_VEC4(v) printf(#v " = {%ff, %ff, %ff, %ff}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2], (double) (v)[3]);
 
 #define DEBUG_BITS(num) do {\
 	printf(#num " = ");\
