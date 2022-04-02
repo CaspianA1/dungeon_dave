@@ -135,30 +135,18 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"vec3 get_fragment_normal(void) {\n"
-		// RGB normal is normalized because linear filtering + interpolation may make the normal unnormalized
-		"vec3 tangent_space_normal = normalize(texture(normal_map_sampler, UV.xy).rgb * 2.0f - 1.0f);\n"
-		"vec3 world_space_normal = tangent_space_normal;\n"
+		// `t` = tangent space normal. Normalized b/c linear filtering + interpolation may unnormalize it.
+		"vec3 t = normalize(texture(normal_map_sampler, UV.xy).rgb * 2.0f - 1.0f);\n"
 
 		// TODO: move this set of calculations to the vertex shader, in some way
 		"switch (face_id) {\n"
-			"case 0:\n" // Flat
-				"world_space_normal.yz = world_space_normal.zy;\n" // Swap yz and zy
-				"world_space_normal.z = -world_space_normal.z;\n" // Negate z
-				"break;\n"
-			"case 1:\n" // Right
-				"world_space_normal.xz = world_space_normal.zx;\n" // Reverse xz and zx
-				"world_space_normal.z = -world_space_normal.z;\n" // Negate z
-				"break;\n"
-			"case 3:\n" // Left
-				"world_space_normal.xz = world_space_normal.zx;\n" // Reverse xz and zx
-				"world_space_normal.x = -world_space_normal.x;\n" // Negate x
-				"break;\n"
-			"case 4:\n" // Top (opposite of tangent space; x and z are reversed)
-				"world_space_normal.xz = -world_space_normal.xz;\n" // Reverse xz and zx, and then negate them both
-				"break;\n"
+			"case 0: return vec3(t.xz, -t.y);\n" // Flat
+			"case 1: return vec3(t.zy, -t.x);\n" // Right
+			"case 2: return t;\n"
+			"case 3: return vec3(-t.z, t.yx);\n" // Left
+			"case 4: return vec3(-t.x, t.y, -t.z);\n" // Top (opposite of tangent space)
 		"}\n"
 
-		"return world_space_normal;\n"
 	"}\n"
 
 	"void main(void) {\n"
