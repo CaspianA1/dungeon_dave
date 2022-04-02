@@ -139,14 +139,15 @@ const GLchar *const sector_vertex_shader =
 		"vec3 t = normalize(texture(normal_map_sampler, UV.xy).rgb * 2.0f - 1.0f);\n"
 
 		// TODO: move this set of calculations to the vertex shader, in some way
-		"switch (face_id) {\n"
-			"case 0: return vec3(t.xz, -t.y);\n" // Flat
-			"case 1: return vec3(t.zy, -t.x);\n" // Right
-			"case 2: return t;\n" // Bottom (equal to tangent space)
-			"case 3: return vec3(-t.z, t.yx);\n" // Left
-			"case 4: return vec3(-t.x, t.y, -t.z);\n" // Top (opposite of tangent space)
-		"}\n"
+		"vec3 rotated_vectors[5] = vec3[5](\n"
+			"vec3(t.xz, -t.y),\n" // Flat
+			"vec3(t.zy, -t.x),\n" // Right
+			"t,\n" // Bottom (equal to tangent space)
+			"vec3(-t.z, t.yx),\n" // Left
+			"vec3(-t.x, t.y, -t.z)\n" // Top (opposite of tangent space)
+		");\n"
 
+		"return rotated_vectors[face_id];\n"
 	"}\n"
 
 	"void main(void) {\n"
