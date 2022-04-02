@@ -139,7 +139,6 @@ const GLchar *const sector_vertex_shader =
 		// `t` = tangent space normal. Normalized b/c linear filtering + interpolation may unnormalize it.
 		"vec3 t = normalize(texture(normal_map_sampler, UV.xy).rgb * 2.0f - 1.0f);\n"
 
-		// TODO: move this set of calculations to the vertex shader, in some way
 		"vec3 rotated_vectors[5] = vec3[5](\n"
 			"vec3(t.xz, -t.y),\n" // Flat
 			"vec3(t.zy, -t.x),\n" // Right
