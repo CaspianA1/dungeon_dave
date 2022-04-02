@@ -85,7 +85,8 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"vec2 warp_depth(float depth) {\n"
-		"return vec2(exp(warp_exps.x * depth), -exp(-warp_exps.y * depth));\n"
+		"vec2 exps_times_depth = warp_exps * depth;\n"
+		"return vec2(exp(exps_times_depth.x), -exp(-exps_times_depth.y));\n"
 	"}\n"
 
 	"float linstep(float low, float high, float v) {\n"
