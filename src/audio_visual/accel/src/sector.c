@@ -77,8 +77,8 @@ List generate_sectors_from_maps(const byte* const heightmap,
 	const buffer_size_t sector_amount_guess = (map_width * map_height) >> 3;
 	List sectors = init_list(sector_amount_guess, Sector);
 
-	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used
-	and 2. for forming faces, will need original heightmap to be unmodified */
+	/* StateMap used instead of copy of heightmap with null map points, because 1. less
+	bytes used and 2. for forming faces, will need original heightmap to be unmodified */
 	const StateMap traversed_points = init_statemap(map_width, map_height);
 
 	for (byte y = 0; y < map_height; y++) {
@@ -101,6 +101,10 @@ List generate_sectors_from_maps(const byte* const heightmap,
 			}, traversed_points, heightmap, texture_id_map, map_width, map_height);
 
 			push_ptr_to_list(&sectors, &sector);
+
+			/* This is a simple optimization; the next `sector_width - 1`
+			tiles will already be traversed, so this just skips those. */
+			x += sector.size[0] - 1;
 		}
 	}
 
