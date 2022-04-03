@@ -38,7 +38,7 @@ Other random ideas:
 - Compile modules separarely, and then link them all together with a given demo
 - Manage shadow map resolution better for bigger scenes
 - FPS at 120 -> many framerate-dependent things
-- Find a way to have low-res textures and normal maps that are not blurry or have a loss of detail
+- Find a way to have low-res textures and normal maps that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry)
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
@@ -81,7 +81,6 @@ Weapon sprite:
 
 General future components:
 - Blit 2D sprite to whole screen
-- Flat weapon
 - Use more of the cglm functions in `update_camera`, or make my own
 - A startup setting of magnification filter (and setting other constants like that as well, like the refresh rate; call that `runtime_constants`)
 
