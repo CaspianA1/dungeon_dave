@@ -1,10 +1,10 @@
 Some TODOs for a recent next time:
-- NEXT: final touches on new_map + a texmap for it
+- NEXT: final touches on the fortress map
 - NEXT 2: a sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
 - NEXT 3: entities that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 4: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
-- NEXT 7: a castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji
+- NEXT 7: a castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji - running along the mountainside
 
 Final lighting model:
 - Ambient overall light, diffuse, specular - done
@@ -39,6 +39,7 @@ Other random ideas:
 - Manage shadow map resolution better for bigger scenes
 - FPS at 120 -> many framerate-dependent things
 - Find a way to have low-res textures and normal maps that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry)
+- A compressed texture for the shadow map, to save space?
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
