@@ -193,7 +193,7 @@ SDL_Surface* blur_surface(const SDL_Surface* const src, const GaussianBlurContex
 
 // TODO: remove
 void test_normal_map_generation(void) {
-	const int rescale_w = 256, rescale_h = 256, blur_radius = 5;
+	const int rescale_w = 1024, rescale_h = 1024, blur_radius = 5;
 	const float blur_std_deviation = 3.5f, normal_map_intensity = 1.2f;
 
 	////////// Testing
