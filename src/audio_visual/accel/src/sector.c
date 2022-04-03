@@ -169,7 +169,8 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(light_model_view_projection, sector_shader);
 
 		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.12f); // This also equals the amount of light in shadows
-		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 32.0f);
+		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 16.0f);
+		INIT_UNIFORM_VALUE(max_percent_metallic, sector_shader, 1f, 0.75f);
 		INIT_UNIFORM_VALUE(tint_strength, sector_shader, 1f, 0.0f);
 		INIT_UNIFORM_VALUE(umbra_strength_factor, sector_shader, 1f, 0.000001f);
 		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.0f);

@@ -58,7 +58,7 @@ const GLchar *const sector_vertex_shader =
 	"out vec3 color;\n"
 
 	"uniform float\n"
-		"ambient, shininess, tint_strength,\n"
+		"ambient, shininess, max_percent_metallic, tint_strength,\n"
 		"umbra_strength_factor, light_bleed_reduction_factor;\n"
 
 	"uniform vec2 warp_exps;\n"
@@ -78,10 +78,15 @@ const GLchar *const sector_vertex_shader =
 		for more metal-like colors on the texture.
 
 		Also, the specular calculation uses Blinn-Phong, rather than just Phong. */
-		"float percent_metallic = 1.0f - length(texture_color - metallic_color);\n"
 
-		"vec3 halfway_dir = normalize(inv_light_dir + normalize(camera_pos_delta_world_space));\n"
-		"return percent_metallic * pow(max(dot(fragment_normal, halfway_dir), 0.0f), shininess);\n"
+		"vec3 view_dir = normalize(camera_pos_delta_world_space);\n"
+		"vec3 halfway_dir = normalize(inv_light_dir + view_dir);\n"
+		"float cos_angle_of_incidence = dot(fragment_normal, halfway_dir);\n"
+
+		"float percent_metallic = max(1.0f - length(texture_color - metallic_color), max_percent_metallic);\n"
+		"float metallic_shininess = shininess * percent_metallic;\n"
+
+		"return pow(max(cos_angle_of_incidence, 0.0f), metallic_shininess);\n"
 	"}\n"
 
 	"vec2 warp_depth(float depth) {\n"
