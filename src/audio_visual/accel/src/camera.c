@@ -100,7 +100,7 @@ static bool pos_collides_with_heightmap(const GLfloat foot_height,
 }
 
 static void update_pos_via_physics(const byte movement_bits,
-	PhysicsObject* const physics_obj, const vec2 dir_xz, vec3 pos,
+	PhysicsContext* const physics_context, const vec2 dir_xz, vec3 pos,
 	const GLfloat pace, const GLfloat delta_time) {
 
 	////////// Declaring a lot of shared vars
@@ -116,13 +116,13 @@ static void update_pos_via_physics(const byte movement_bits,
 		max_speed_xz = constants.speeds.xz_max * delta_time;
 
 	GLfloat
-		velocity_forward_back = physics_obj -> velocities[0] * delta_time,
-		velocity_strafe = physics_obj -> velocities[2] * delta_time,
+		velocity_forward_back = physics_context -> velocities[0] * delta_time,
+		velocity_strafe = physics_context -> velocities[2] * delta_time,
 		foot_height = pos[1] - constants.camera.eye_height - pace;
 
 	const byte
-		*const map_size = physics_obj -> map_size,
-		*const heightmap = physics_obj -> heightmap;
+		*const map_size = physics_context -> map_size,
+		*const heightmap = physics_context -> heightmap;
 
 	////////// Updating velocity
 
@@ -132,8 +132,8 @@ static void update_pos_via_physics(const byte movement_bits,
 	velocity_strafe = apply_velocity_in_xz_direction(velocity_strafe, accel_strafe,
 		delta_time, max_speed_xz, !!(movement_bits & BIT_STRAFE_LEFT), !!(movement_bits & BIT_STRAFE_RIGHT));
 
-	physics_obj -> velocities[0] = velocity_forward_back / delta_time;
-	physics_obj -> velocities[2] = velocity_strafe / delta_time;
+	physics_context -> velocities[0] = velocity_forward_back / delta_time;
+	physics_context -> velocities[2] = velocity_strafe / delta_time;
 
 	////////// X and Z collision detection + setting new xz positions
 
@@ -150,7 +150,7 @@ static void update_pos_via_physics(const byte movement_bits,
 
 	////////// Y collision detection + setting new y position and speed
 
-	GLfloat speed_jump_per_sec = physics_obj -> velocities[1];
+	GLfloat speed_jump_per_sec = physics_context -> velocities[1];
 	if (speed_jump_per_sec == 0.0f && (movement_bits & BIT_JUMP))
 		speed_jump_per_sec = constants.speeds.jump;
 	else speed_jump_per_sec -= constants.accel.g * delta_time;
@@ -166,7 +166,7 @@ static void update_pos_via_physics(const byte movement_bits,
 	}
 
 	pos[1] += constants.camera.eye_height;
-	physics_obj -> velocities[1] = speed_jump_per_sec;
+	physics_context -> velocities[1] = speed_jump_per_sec;
 }
 
 /* This function models how a player's pace should behave given a time input. At time = 0, the pace is 0.
@@ -202,7 +202,7 @@ void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, ve
 	glm_vec3_copy((vec3) {cos_vert * dir_xz[0], sinf(vert_angle), cos_vert * dir_xz[1]}, dir);
 }
 
-void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
+void update_camera(Camera* const camera, const Event event, PhysicsContext* const physics_context) {
 	const Uint32 curr_time = SDL_GetTicks();
 	GLfloat delta_time = (curr_time - camera -> last_time) / 1000.0f;
 	camera -> last_time = curr_time;
@@ -226,7 +226,7 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 
 	////////// Moving according to those vectors
 
-	if (physics_obj == NULL || keys[KEY_FLY]) { // Forward, backward, left, right
+	if (physics_context == NULL || keys[KEY_FLY]) { // Forward, backward, left, right
 		const GLfloat speed = constants.speeds.xz_max * delta_time;
 		if (event.movement_bits & BIT_MOVE_FORWARD) glm_vec3_muladds(dir, speed, pos);
 		if (event.movement_bits & BIT_MOVE_BACKWARD) glm_vec3_muladds(dir, -speed, pos);
@@ -234,8 +234,8 @@ void update_camera(Camera* const camera, const Event event, PhysicsObject* const
 		if (event.movement_bits & BIT_STRAFE_RIGHT) glm_vec3_muladds(right, speed, pos);
 	}
 	else {
-		update_pos_via_physics(event.movement_bits, physics_obj, dir_xz, pos, camera -> pace, delta_time);
-		update_pace(camera, pos + 1, physics_obj -> velocities, delta_time);
+		update_pos_via_physics(event.movement_bits, physics_context, dir_xz, pos, camera -> pace, delta_time);
+		update_pace(camera, pos + 1, physics_context -> velocities, delta_time);
 		update_fov(camera, event.movement_bits, delta_time);
 	}
 

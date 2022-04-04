@@ -29,7 +29,7 @@ typedef struct {
 typedef struct {
 	byte* heightmap, map_size[2];
 	vec3 velocities;
-} PhysicsObject;
+} PhysicsContext;
 
 /* Excluded: limit_to_pos_neg_domain, get_percent_kept_from,
 update_camera_angles, smooth_hermite, update_fov, apply_velocity_in_xz_direction,
@@ -37,7 +37,7 @@ tile_exists_at_pos, pos_collides_with_heightmap, update_pos_via_physics,
 make_pace_function, update_pace */
 
 void init_camera(Camera* const camera, const vec3 init_pos);
-void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj);
+void update_camera(Camera* const camera, const Event event, PhysicsContext* const physics_context);
 void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, vec2 dir_xz, vec3 dir);
 
 #endif

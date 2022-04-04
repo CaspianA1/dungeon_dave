@@ -40,8 +40,8 @@ Other random ideas:
 - Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry)
 - A compressed texture for the shadow map, to save space?
 - Use the bit macros more
-- Make PhysicsObj more specific
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
+- Eventually, put the contents of PhysicsContext inside the camera
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them

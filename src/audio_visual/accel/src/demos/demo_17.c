@@ -170,20 +170,20 @@ void demo_17_drawer(const StateGL* const sgl) {
 	ShadowMapContext* const shadow_map_context = &scene_state -> shadow_map_context;
 
 	static Camera camera;
-	static PhysicsObject physics_obj;
+	static PhysicsContext physics_context;
 	static bool first_call = true;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {1.5f, 0.5f, 1.5f}); // {3.9f, 0.5f, 6.0f}, {12.5f, 3.5f, 22.5f}
-		physics_obj.heightmap = scene_state -> heightmap;
-		physics_obj.map_size[0] = scene_state -> map_size[0];
-		physics_obj.map_size[1] = scene_state -> map_size[1];
+		physics_context.heightmap = scene_state -> heightmap;
+		physics_context.map_size[0] = scene_state -> map_size[0];
+		physics_context.map_size[1] = scene_state -> map_size[1];
 		first_call = false;
 	}
 
 	const Event event = get_next_event();
 
-	update_camera(&camera, event, &physics_obj);
+	update_camera(&camera, event, &physics_context);
 
 	update_billboard_animation_instances(
 		&scene_state -> billboard_animation_instances,
@@ -193,7 +193,7 @@ void demo_17_drawer(const StateGL* const sgl) {
 	if (keys[SDL_SCANCODE_C]) {
 		glm_vec3_copy(camera.pos, shadow_map_context -> light_context.pos);
 		glm_vec3_copy(camera.dir, shadow_map_context -> light_context.dir);
-		render_all_sectors_to_shadow_map(shadow_map_context, sector_draw_context, event.screen_size, physics_obj.map_size);
+		render_all_sectors_to_shadow_map(shadow_map_context, sector_draw_context, event.screen_size, physics_context.map_size);
 	}
 
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise

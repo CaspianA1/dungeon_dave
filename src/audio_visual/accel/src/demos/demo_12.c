@@ -238,7 +238,7 @@ StateGL demo_12_maze_init(void) {
 
 void demo_12_drawer(const StateGL* const sgl) {
 	static Camera camera;
-	static PhysicsObject physics_obj = {.heightmap = (byte*) pyramid_heightmap, .map_size = {pyramid_width, pyramid_height}};
+	static PhysicsContext physics_context = {.heightmap = (byte*) pyramid_heightmap, .map_size = {pyramid_width, pyramid_height}};
 	static GLint camera_pos_world_space_id, model_view_projection_id;
 	static bool first_call = true;
 
@@ -251,7 +251,7 @@ void demo_12_drawer(const StateGL* const sgl) {
 		first_call = false;
 	}
 
-	update_camera(&camera, get_next_event(), &physics_obj);
+	update_camera(&camera, get_next_event(), &physics_context);
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera.pos);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera.model_view_projection[0][0]);
