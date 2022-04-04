@@ -297,7 +297,7 @@ void demo_23_drawer(const StateGL* const sgl) {
 	);
 
 	glm_perspective(constants.camera.init.fov, (GLfloat) depth_capture.texture_size[0] / depth_capture.texture_size[1],
-		constants.camera.clip_dists.near, constants.camera.clip_dists.far, light_projection);
+		constants.camera.clip_dists.near, constants.camera.clip_dists.default_far, light_projection);
 
 	glm_mul(light_projection, light_view, light_view_projection);
 	glm_mul(light_view_projection, GLM_MAT4_IDENTITY, light_model_view_projection);

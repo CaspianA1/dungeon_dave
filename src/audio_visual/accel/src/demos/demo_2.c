@@ -7,7 +7,7 @@ void demo_2_configurable_matrix_setup(const GLuint shader,
 	mat4 projection, model = GLM_MAT4_IDENTITY_INIT, view_times_model;
 
 	glm_perspective(constants.camera.init.fov, (GLfloat) WINDOW_W / WINDOW_H,
-		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
+		constants.camera.clip_dists.near, constants.camera.clip_dists.default_far, projection);
 
 	glm_lookat(pos, rel_origin, up, view);
 

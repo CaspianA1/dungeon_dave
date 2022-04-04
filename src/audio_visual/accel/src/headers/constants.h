@@ -37,10 +37,11 @@ static const struct {
 	const struct { // All angles are in radians
 		const GLfloat eye_height, aabb_collision_box_size, tilt_correction_rate, friction;
 		const struct {const GLfloat fov, hori, vert, tilt;} init;
-		// const struct {const GLfloat time_for_full, max;} fov;
 		const struct {const GLfloat period, max_amplitude;} pace;
 		const struct {const GLfloat vert, tilt, fov;} lims;
-		const struct {const GLfloat near, far;} clip_dists;
+
+		// `default_far` is for when a far clip distance has not been determined for the environment
+		const struct {const GLfloat near, default_far;} clip_dists;
 	} camera;
 
 	const struct {const GLfloat forward_back, additional_forward_back, strafe, xz_decel, g;} accel;
@@ -70,7 +71,7 @@ static const struct {
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
 		.pace = {.period = 0.7f, .max_amplitude = 0.2f},
 		.lims = {.vert = HALF_PI, .tilt = 0.15f, .fov = PI / 18.0f}, // Max FOV equals 10 degrees
-		.clip_dists = {.near = 0.01f, .far = 441.6729559300637f}
+		.clip_dists = {.near = 0.01f, .default_far = 500.0f}
 	},
 
 	.accel = {
@@ -89,9 +90,5 @@ static const struct {
 		.activate_exit = {SDL_SCANCODE_W, SDL_SCANCODE_Q}
 	}
 };
-
-/* Max world size = 255 by 255 by 255 (with top left corner of block as origin).
-So, max look distance in world = sqrt(255 * 255 + 255 * 255 + 255 * 255),
-which equals 441.6729559300637 (that is the clip distance) */
 
 #endif

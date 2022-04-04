@@ -7,13 +7,14 @@
 VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size[2]) {
 	const byte map_size_x = map_size[0], map_size_z = map_size[1];
 
+
 	/* The far clip distance, ideally, would be equal to the diameter of
 	the convex hull of all points in the heightmap. If I had more time,
 	I would implement that, but a simple method that works reasonably well is this:
 
 	- First, find the smallest and tallest points in the map.
 	- Then, the far clip distance equals the length of
-		the <map_width, map_height, tallest_point - smallest_point + max_jump_height> vector.
+		the `<map_width, map_height, (tallest_point - smallest_point) + additional_camera_height>` vector.
 
 	To compute the maximum jump height, use the kinematics equation `v^2 = v0^2 + 2aΔy`.
 	Given that `v` equals 0, rearrange the equation like this:
@@ -23,9 +24,9 @@ VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte
 	-(v0^2)/2a = Δy
 
 	And since downward acceleration is positive in `constants`, to not get a negative result,
-	remove the negative sign of the left term. */
+	remove the negative sign of the left term.
 
-	const GLfloat max_jump_height = (constants.speeds.jump * constants.speeds.jump) / (2.0f * constants.accel.g);
+	Then, `additional_camera_height` equals `max_jump_height + eye_height`. */
 
 	byte min_point_height = constants.max_byte_value, max_point_height = 0;
 
@@ -37,16 +38,15 @@ VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte
 		}
 	}
 
-	const byte map_height_extent = max_point_height - min_point_height;
+	const GLfloat max_jump_height = (constants.speeds.jump * constants.speeds.jump) / (2.0f * constants.accel.g);
+	const GLfloat additional_camera_height = max_jump_height + constants.camera.eye_height;
 
-	// TODO: test without max jump height first
-	const GLfloat far_clip_dist = glm_vec3_norm((vec3) {map_size_x, map_size_z, map_height_extent + max_jump_height});
-	(void) far_clip_dist;
+	const GLfloat max_z_difference = (max_point_height - min_point_height) + additional_camera_height;
+	const GLfloat far_clip_dist = glm_vec3_norm((vec3) {map_size_x, map_size_z, max_z_difference});
 
 	return (VoxelPhysicsContext) {
 		(byte*) heightmap, {map_size_x, map_size_z},
-		0.0f, // TODO: compute this
-		{0.0f, 0.0f, 0.0f}
+		far_clip_dist, {0.0f, 0.0f, 0.0f}
 	};
 }
 
@@ -287,11 +287,15 @@ void update_camera(Camera* const camera, const Event event, VoxelPhysicsContext*
 
 	////////// Making some matrices and frustum planes from the new position and the vectors from before
 
+	const GLfloat far_clip_dist = (physics_context == NULL)
+		? constants.camera.clip_dists.default_far
+		: physics_context -> far_clip_dist;
+
 	mat4 view, projection;
 
 	glm_look(pos, dir, up, view);
 	glm_perspective(camera -> angles.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
-		constants.camera.clip_dists.near, constants.camera.clip_dists.far, projection);
+		constants.camera.clip_dists.near, far_clip_dist, projection);
 
 	// The model matrix is implicit in this, since it equals the identity matrix
 	glm_mul(projection, view, camera -> model_view_projection);
