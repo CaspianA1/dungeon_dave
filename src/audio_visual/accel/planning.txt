@@ -39,6 +39,7 @@ Other random ideas:
 - Manage shadow map resolution better for bigger scenes via cascaded shadow maps
 - Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry)
 - A compressed texture for the shadow map, to save space?
+- Use the bit macros more
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
