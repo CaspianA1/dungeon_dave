@@ -41,7 +41,8 @@ Other random ideas:
 - A compressed texture for the shadow map, to save space?
 - Use the bit macros more
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
-- Eventually, put the contents of PhysicsContext inside the camera
+- Eventually, put the contents of VoxelPhysicsContext inside the camera
+- Occasionally, errors about values outside the range of an unsigned char (not always at initialization time)
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them

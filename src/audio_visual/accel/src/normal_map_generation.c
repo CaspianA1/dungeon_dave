@@ -37,8 +37,8 @@ static float sobel_sample(SDL_Surface* const surface,
 	SDL_GetRGB(pixel, format, &r, &g, &b);
 
 	// This equation is from https://en.wikipedia.org/wiki/Relative_luminance
-	const float luminance = r * 0.2126f + g * 0.7152f + b * 0.0722f;
-	return luminance / 255.0f; // Normalized from 0 to 1
+	const float luminance = r * 0.2126f + g * 0.7152f + b * 0.0722f; // This ranges from 0 to `max_byte_value`
+	return luminance / constants.max_byte_value; // Normalized from 0 to 1
 }
 
 /* This function is based on these sources:
@@ -85,8 +85,8 @@ SDL_Surface* generate_normal_map(SDL_Surface* const src, const float intensity) 
 
 					glm_vec3_normalize(normal);
 
-					// Converting normal from range of (-1, 1) to (0, 1), and then to (0, 255)
-					for (byte i = 0; i < 3; i++) normal[i] = (normal[i] * 0.5f + 0.5f) * 255.0f;
+					// Converting normal from range of (-1, 1) to (0, 1), and then to (0, `max_byte_value`)
+					for (byte i = 0; i < 3; i++) normal[i] = (normal[i] * 0.5f + 0.5f) * constants.max_byte_value;
 
 					const sdl_pixel_t normal_vector_in_rgb_format = SDL_MapRGB(
 						dest_format,
@@ -136,6 +136,8 @@ static void do_separable_gaussian_blur_pass(SDL_Surface* const src,
 		*const src_format = src -> format,
 		*const dest_format = dest -> format;
 
+	const float one_over_max_byte_value = 1.0f / constants.max_byte_value;
+
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
 
@@ -157,18 +159,18 @@ static void do_separable_gaussian_blur_pass(SDL_Surface* const src,
 						sdl_pixel_component_t r, g, b;
 						SDL_GetRGB(pixel, src_format, &r, &g, &b);
 
-						const float weight = kernel[i + kernel_radius];
-						normalized_summed_channels[0] += (r / 255.0f) * weight;
-						normalized_summed_channels[1] += (g / 255.0f) * weight;
-						normalized_summed_channels[2] += (b / 255.0f) * weight;
+						const float one_over_max_byte_value_times_weight = one_over_max_byte_value * kernel[i + kernel_radius];
+						normalized_summed_channels[0] += r * one_over_max_byte_value_times_weight;
+						normalized_summed_channels[1] += g * one_over_max_byte_value_times_weight;
+						normalized_summed_channels[2] += b * one_over_max_byte_value_times_weight;
 					}
 
 					sdl_pixel_t* const dest_pixel = read_surface_pixel(dest, dest_format, x, y);
 
 					*dest_pixel = SDL_MapRGB(dest_format,
-						(sdl_pixel_component_t) (normalized_summed_channels[0] * 255.0f),
-						(sdl_pixel_component_t) (normalized_summed_channels[1] * 255.0f),
-						(sdl_pixel_component_t) (normalized_summed_channels[2] * 255.0f)
+						(sdl_pixel_component_t) (normalized_summed_channels[0] * constants.max_byte_value),
+						(sdl_pixel_component_t) (normalized_summed_channels[1] * constants.max_byte_value),
+						(sdl_pixel_component_t) (normalized_summed_channels[2] * constants.max_byte_value)
 					);
 				}
 			}

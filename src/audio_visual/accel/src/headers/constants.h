@@ -26,7 +26,8 @@ and not in the `constants` struct b/c other values in that struct depend on them
 static const struct {
 	// The FPS should match the vsync refresh rate, since some of the physics code depends on it.
 	const GLfloat almost_zero;
-	const byte fps;
+	const byte fps, max_byte_value;
+
 
 	const struct {
 		const byte num_blur_passes;
@@ -56,7 +57,7 @@ static const struct {
 	} keys;
 
 } constants = {
-	.fps = 60,
+	.fps = 60, .max_byte_value = 255,
 	.almost_zero = 0.001f,
 
 	.shadow_mapping = {

@@ -28,7 +28,7 @@ void check_for_mesh_out_of_bounds(const mesh_type_t origin[3], const mesh_type_t
 		const int start = origin[i], length = size[i];
 		const int end = start + ((i == 1) ? -length : length);
 
-		if (start < 0 || start > 255 || end < 0 || end > 255) {
+		if (start < 0 || start > constants.max_byte_value || end < 0 || end > constants.max_byte_value) {
 			fprintf(stderr, "Mesh out of bounds on %c axis\n", 'x' + i);
 			fail("create mesh: mesh out of bounds", CreateMesh);
 		}

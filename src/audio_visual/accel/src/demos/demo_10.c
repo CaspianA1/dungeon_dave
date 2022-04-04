@@ -85,7 +85,7 @@ void check_for_mesh_out_of_bounds(const plane_type_t origin[3], const plane_type
 		const GLfloat start = origin[i], length = size[i];
 		const GLfloat end = start + ((i == 1) ? -length : length);
 
-		if (start < 0.0f || start > 255.0f || end < 0.0f || end > 255.0f) {
+		if (start < 0.0f || start > constants.max_byte_value || end < 0.0f || end > constants.max_byte_value) {
 			fprintf(stderr, "Mesh out of bounds on %c axis\n", 'x' + i);
 			fail("create mesh: mesh out of bounds", CreateMesh);
 		}

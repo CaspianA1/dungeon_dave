@@ -28,6 +28,7 @@ typedef struct {
 
 typedef struct {
 	byte* heightmap, map_size[2];
+	GLfloat far_clip_dist;
 	vec3 velocities;
 } VoxelPhysicsContext;
 
