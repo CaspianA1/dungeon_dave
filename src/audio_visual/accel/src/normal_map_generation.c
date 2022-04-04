@@ -158,7 +158,7 @@ static void do_separable_gaussian_blur_pass(SDL_Surface* const src,
 					*dest_pixel = SDL_MapRGB(dest_format,
 						(sdl_pixel_component_t) (normalized_summed_channels[0] * 255.0f),
 						(sdl_pixel_component_t) (normalized_summed_channels[1] * 255.0f),
-					(sdl_pixel_component_t) (normalized_summed_channels[2] * 255.0f)
+						(sdl_pixel_component_t) (normalized_summed_channels[2] * 255.0f)
 					);
 				}
 			}
