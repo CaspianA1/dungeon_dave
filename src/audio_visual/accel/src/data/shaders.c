@@ -58,8 +58,8 @@ const GLchar *const sector_vertex_shader =
 	"out vec3 color;\n"
 
 	"uniform float\n"
-		"ambient, shininess, max_percent_metallic, tint_strength,\n"
-		"umbra_strength_factor, light_bleed_reduction_factor;\n"
+		"ambient, shininess, specular_strength, max_percent_metallic,\n"
+		"tint_strength, umbra_strength_factor, light_bleed_reduction_factor;\n"
 
 	"uniform vec2 warp_exps;\n"
 	"uniform vec3 inv_light_dir, metallic_color, tint;\n"
@@ -86,7 +86,7 @@ const GLchar *const sector_vertex_shader =
 		"float percent_metallic = max(1.0f - length(texture_color - metallic_color), max_percent_metallic);\n"
 		"float metallic_shininess = shininess * percent_metallic;\n"
 
-		"return pow(max(cos_angle_of_incidence, 0.0f), metallic_shininess);\n"
+		"return specular_strength * pow(max(cos_angle_of_incidence, 0.0f), metallic_shininess);\n"
 	"}\n"
 
 	"vec2 warp_depth(float depth) {\n"
@@ -134,6 +134,7 @@ const GLchar *const sector_vertex_shader =
 
 		 // Modulating specular by how much the face is facing the light source
 		"float non_ambient = diffuse_amount + specular(texture_color, fragment_normal) * diffuse_amount;\n"
+
 		"float shadowed_non_ambient = non_ambient * one_minus_shadow_percent();\n"
 		"float light = min(ambient + shadowed_non_ambient, 1.0f);\n"
 

@@ -193,25 +193,36 @@ SDL_Surface* blur_surface(const SDL_Surface* const src, const GaussianBlurContex
 
 // TODO: remove
 void test_normal_map_generation(void) {
-	const int rescale_w = 1024, rescale_h = 1024, blur_radius = 5;
+	/* How normal maps are generated:
+	- First, load a surface from disk.
+	- Then, upscale it.
+	- After that, blur it.
+	- Then, generate a normal map.
+	- Finally, minimize it to the original surface size.
+
+	The surface is upscaled and then downscaled to essentially
+	supersample the details captured from a high-res rendering. */
+
+	const int upscale_size[2] = {1024, 1024}, downscale_size[2] = {256, 256}, blur_radius = 5;
 	const float blur_std_deviation = 3.5f, normal_map_intensity = 1.2f;
 
-	////////// Testing
-
 	SDL_Surface* const test_surface = init_surface("../../../../assets/walls/saqqara.bmp");
-	SDL_Surface* const upscaled_test_surface = init_blank_surface(rescale_w, rescale_h, SDL_PIXEL_FORMAT);
+	SDL_Surface* const upscaled_test_surface = init_blank_surface(upscale_size[0], upscale_size[1], SDL_PIXEL_FORMAT);
 	SDL_BlitScaled(test_surface, NULL, upscaled_test_surface, NULL);
 
 	const GaussianBlurContext gaussian_blur_context = init_gaussian_blur_context(
-		blur_std_deviation, blur_radius, rescale_w, rescale_h);
+		blur_std_deviation, blur_radius, upscale_size[0], upscale_size[1]);
 
 	SDL_Surface* const blurred_test_surface = blur_surface(upscaled_test_surface, gaussian_blur_context);
 	SDL_Surface* const normal_map_of_surface = generate_normal_map(blurred_test_surface, normal_map_intensity);
 
-	SDL_SaveBMP(normal_map_of_surface, "out.bmp");
+	SDL_Surface* const minimized_normal_map = init_blank_surface(downscale_size[0], downscale_size[1], SDL_PIXEL_FORMAT);
+	SDL_BlitScaled(normal_map_of_surface, NULL, minimized_normal_map, NULL);
+	SDL_SaveBMP(minimized_normal_map, "out.bmp");
 
 	////////// Deinitialization
 
+	deinit_surface(minimized_normal_map);
 	deinit_surface(normal_map_of_surface);
 	deinit_surface(blurred_test_surface);
 
