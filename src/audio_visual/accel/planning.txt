@@ -37,7 +37,6 @@ Other random ideas:
 - Pass in texture parameters through a bitmask
 - Compile modules separarely, and then link them all together with a given demo
 - Manage shadow map resolution better for bigger scenes via cascaded shadow maps
-- FPS at 120 -> many framerate-dependent things
 - Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry)
 - A compressed texture for the shadow map, to save space?
 
@@ -62,6 +61,7 @@ Physics:
 - Pressing left + forward and backward doesn't stop moving on the X axis
 - A half-stutter when pressing towards a wall and then letting go of a movement key
 - Can get a tiny bit stuck in a wall when jumping downwards close to a wall (so will have to be able to stand a tiny bit off the wall)
+- FPS at 120 -> too fast acceleration, which leads to weapon jitter
 
 Chromebook bugs:
 - Memory leak with debug mode at the end of demos 17 and 22 (rest probably too), the lightmapper, the map editor, and the collision demo
