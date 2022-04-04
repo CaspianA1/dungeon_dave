@@ -67,10 +67,10 @@ static void update_fov(Camera* const camera, const byte movement_bits, const GLf
 }
 
 static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v,
-	const GLfloat delta_move, const GLfloat delta_time, const GLfloat max_v,
+	const GLfloat curr_a, const GLfloat delta_time, const GLfloat max_v,
 	const bool moving_in_dir, const bool moving_in_opposite_dir) {
 
-	GLfloat v = curr_v + delta_move * moving_in_dir - delta_move * moving_in_opposite_dir;
+	GLfloat v = curr_v + curr_a * moving_in_dir - curr_a * moving_in_opposite_dir;
 
 	// If 0 or 2 directions are being moved in; `^` maps to 1 if only 1 input is true
 	if (!(moving_in_dir ^ moving_in_opposite_dir)) v *= get_percent_kept_from(constants.camera.friction, delta_time);
@@ -106,6 +106,7 @@ static void update_pos_via_physics(const byte movement_bits,
 	////////// Declaring a lot of shared vars
 
 	GLfloat accel_forward_back_per_sec = constants.accel.forward_back;
+
 	if (movement_bits & BIT_ACCELERATE)
 		accel_forward_back_per_sec += constants.accel.additional_forward_back;
 
