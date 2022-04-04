@@ -8,7 +8,7 @@
 //////////
 
 typedef struct {
-	Uint64 last_time;
+	Uint32 last_time;
 
 	struct {
 		GLfloat fov, hori, vert, tilt;

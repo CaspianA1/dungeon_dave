@@ -5,7 +5,7 @@
 #include "headers/constants.h"
 
 void init_camera(Camera* const camera, const vec3 init_pos) {
-	camera -> last_time = SDL_GetPerformanceCounter();
+	camera -> last_time = 0.0f;
 	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
 	camera -> pace = 0.0f;
 	camera -> speed_xz_percent = 0.0f;
@@ -203,19 +203,8 @@ void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, ve
 }
 
 void update_camera(Camera* const camera, const Event event, PhysicsObject* const physics_obj) {
-	static GLfloat one_over_performance_freq;
-	static bool first_call = true;
-
-	/* Using the SDL performance counter and frequency functions instead
-	of SDL_GetTicks because the physics timing has to be very exact */
-
-	if (first_call) {
-		one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
-		first_call = false;
-	}
-
-	const Uint64 curr_time = SDL_GetPerformanceCounter();
-	const GLfloat delta_time = (GLfloat) (curr_time - camera -> last_time) * one_over_performance_freq;
+	const Uint32 curr_time = SDL_GetTicks();
+	GLfloat delta_time = (curr_time - camera -> last_time) / 1000.0f;
 	camera -> last_time = curr_time;
 
 	update_camera_angles(camera, &event, delta_time);
