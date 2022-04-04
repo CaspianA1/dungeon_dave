@@ -182,7 +182,6 @@ void demo_17_drawer(const StateGL* const sgl) {
 	}
 
 	const Event event = get_next_event();
-
 	update_camera(&camera, event, physics_context);
 
 	update_billboard_animation_instances(
