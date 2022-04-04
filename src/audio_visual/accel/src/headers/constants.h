@@ -61,7 +61,7 @@ static const struct {
 
 	.shadow_mapping = {
 		.num_blur_passes = 2,
-		.warp_exps = {40.0f, 5.0f} // TODO: test different exponents
+		.warp_exps = {40.0f, 5.0f}
 	},
 
 	.camera = {
