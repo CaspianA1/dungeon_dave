@@ -36,7 +36,7 @@ Other random ideas:
 - Some steeply angled shadows exhibit aliasing
 - Pass in texture parameters through a bitmask
 - Compile modules separarely, and then link them all together with a given demo
-- Manage shadow map resolution better for bigger scenes
+- Manage shadow map resolution better for bigger scenes via cascaded shadow maps
 - FPS at 120 -> many framerate-dependent things
 - Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry)
 - A compressed texture for the shadow map, to save space?
