@@ -7,7 +7,6 @@
 VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size[2]) {
 	const byte map_size_x = map_size[0], map_size_z = map_size[1];
 
-
 	/* The far clip distance, ideally, would be equal to the diameter of
 	the convex hull of all points in the heightmap. If I had more time,
 	I would implement that, but a simple method that works reasonably well is this:
