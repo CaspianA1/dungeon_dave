@@ -27,6 +27,7 @@
 #define DEBUG_FLOAT(var) printf(#var " = %ff\n", (double) (var))
 #define DEBUG_VEC2(v) printf(#v " = {%ff, %ff}\n", (double) (v)[0], (double) (v)[1])
 #define DEBUG_VEC3(v) printf(#v " = {%ff, %ff, %ff}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2])
+#define DEBUG_VEC4(v) printf(#v " = {%ff, %ff, %ff, %ff}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2], (double) (v)[3]);
 
 #define DEBUG_BITS(num) do {\
 	printf(#num " = ");\
@@ -50,7 +51,7 @@
 		if (incr || decr || reset) DEBUG_FLOAT(value_name);\
 	} while (0)
 
-#define MAKE_SHADER_BRANCH(shader, key) INIT_UNIFORM_VALUE(branch, (shader), 1i, keys[SDL_SCANCODE_##key]);
+#define INIT_SHADER_BRANCH(shader, key) INIT_UNIFORM_VALUE(branch, (shader), 1i, keys[SDL_SCANCODE_##key]);
 
 ////////// These are some general-purpose macros used in all demos
 
@@ -68,6 +69,8 @@
 	glUniform##type_prefix(glGetUniformLocation((shader), (name)), __VA_ARGS__)
 
 #define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
+
+#define PARALLELIZE_LOOP() _Pragma("omp parallel for")
 
 ////////// These macros are for handy abstractions over OpenGL functions
 

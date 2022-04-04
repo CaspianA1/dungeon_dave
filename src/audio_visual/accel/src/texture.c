@@ -5,8 +5,8 @@
 
 ////////// Surface initialization
 
-SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height) {
-	return SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(SDL_PIXEL_FORMAT), SDL_PIXEL_FORMAT);
+SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height, const SDL_PixelFormatEnum pixel_format_name) {
+	return SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(pixel_format_name), pixel_format_name);
 }
 
 SDL_Surface* init_surface(const GLchar* const path) {
@@ -73,7 +73,6 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	return texture;
 }
 
-// This function assumes that the surface is locked beforehand. This is legacy code and should be removed if possible
 void write_surface_to_texture(SDL_Surface* const surface,
 	const TextureType type, const GLint internal_format) {
 
@@ -190,7 +189,7 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 		rescale_h, total_num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,
 		OPENGL_COLOR_CHANNEL_TYPE, NULL);
 
-	SDL_Surface* const rescaled_surface = init_blank_surface(rescale_w, rescale_h);
+	SDL_Surface* const rescaled_surface = init_blank_surface(rescale_w, rescale_h, SDL_PIXEL_FORMAT);
 
 	////////// Filling array texture with still and animated subtextures
 

@@ -34,7 +34,7 @@ static const struct {
 	} shadow_mapping;
 
 	const struct { // All angles are in radians
-		const GLfloat eye_height, aabb_collision_box_size, tilt_decel_rate;
+		const GLfloat eye_height, aabb_collision_box_size, tilt_correction_rate, friction;
 		const struct {const GLfloat fov, hori, vert, tilt;} init;
 		// const struct {const GLfloat time_for_full, max;} fov;
 		const struct {const GLfloat period, max_amplitude;} pace;
@@ -65,7 +65,7 @@ static const struct {
 	},
 
 	.camera = {
-		.eye_height = 0.5f, .aabb_collision_box_size = 0.2f, .tilt_decel_rate = 0.9f,
+		.eye_height = 0.5f, .aabb_collision_box_size = 0.2f, .tilt_correction_rate = 11.0f, .friction = 7.5f,
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
 		.pace = {.period = 0.7f, .max_amplitude = 0.2f},
 		.lims = {.vert = HALF_PI, .tilt = 0.15f, .fov = PI / 18.0f}, // Max FOV equals 10 degrees

@@ -77,8 +77,8 @@ List generate_sectors_from_maps(const byte* const heightmap,
 	const buffer_size_t sector_amount_guess = (map_width * map_height) >> 3;
 	List sectors = init_list(sector_amount_guess, Sector);
 
-	/* StateMap used instead of copy of heightmap with null map points, b/c 1. less bytes used
-	and 2. for forming faces, will need original heightmap to be unmodified */
+	/* StateMap used instead of copy of heightmap with null map points, because 1. less
+	bytes used and 2. for forming faces, will need original heightmap to be unmodified */
 	const StateMap traversed_points = init_statemap(map_width, map_height);
 
 	for (byte y = 0; y < map_height; y++) {
@@ -101,6 +101,10 @@ List generate_sectors_from_maps(const byte* const heightmap,
 			}, traversed_points, heightmap, texture_id_map, map_width, map_height);
 
 			push_ptr_to_list(&sectors, &sector);
+
+			/* This is a simple optimization; the next `sector_width - 1`
+			tiles will already be traversed, so this just skips those. */
+			x += sector.size[0] - 1;
 		}
 	}
 
@@ -169,7 +173,9 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(light_model_view_projection, sector_shader);
 
 		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.12f); // This also equals the amount of light in shadows
-		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 32.0f);
+		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 16.0f);
+		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.5f);
+		INIT_UNIFORM_VALUE(max_percent_metallic, sector_shader, 1f, 0.75f);
 		INIT_UNIFORM_VALUE(tint_strength, sector_shader, 1f, 0.0f);
 		INIT_UNIFORM_VALUE(umbra_strength_factor, sector_shader, 1f, 0.000001f);
 		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.0f);

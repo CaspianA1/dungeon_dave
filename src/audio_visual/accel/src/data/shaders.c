@@ -52,12 +52,15 @@ const GLchar *const sector_vertex_shader =
 *const sector_fragment_shader =
 	"#version 330 core\n"
 
-	"in vec3 UV, fragment_pos_light_space, camera_pos_delta_world_space;\n"
 	"flat in int face_id;\n"
+	"in vec3 UV, fragment_pos_light_space, camera_pos_delta_world_space;\n"
 
 	"out vec3 color;\n"
 
-	"uniform float ambient, shininess, tint_strength, umbra_strength_factor, light_bleed_reduction_factor;\n"
+	"uniform float\n"
+		"ambient, shininess, specular_strength, max_percent_metallic,\n"
+		"tint_strength, umbra_strength_factor, light_bleed_reduction_factor;\n"
+
 	"uniform vec2 warp_exps;\n"
 	"uniform vec3 inv_light_dir, metallic_color, tint;\n"
 
@@ -75,14 +78,20 @@ const GLchar *const sector_vertex_shader =
 		for more metal-like colors on the texture.
 
 		Also, the specular calculation uses Blinn-Phong, rather than just Phong. */
-		"float percent_metallic = 1.0f - length(texture_color - metallic_color);\n"
 
-		"vec3 halfway_dir = normalize(inv_light_dir + normalize(camera_pos_delta_world_space));\n"
-		"return percent_metallic * pow(max(dot(fragment_normal, halfway_dir), 0.0f), shininess);\n"
+		"vec3 view_dir = normalize(camera_pos_delta_world_space);\n"
+		"vec3 halfway_dir = normalize(inv_light_dir + view_dir);\n"
+		"float cos_angle_of_incidence = dot(fragment_normal, halfway_dir);\n"
+
+		"float percent_metallic = max(1.0f - length(texture_color - metallic_color), max_percent_metallic);\n"
+		"float metallic_shininess = shininess * percent_metallic;\n"
+
+		"return specular_strength * pow(max(cos_angle_of_incidence, 0.0f), metallic_shininess);\n"
 	"}\n"
 
 	"vec2 warp_depth(float depth) {\n"
-		"return vec2(exp(warp_exps.x * depth), -exp(-warp_exps.y * depth));\n"
+		"vec2 exps_times_depth = warp_exps * depth;\n"
+		"return vec2(exp(exps_times_depth.x), -exp(-exps_times_depth.y));\n"
 	"}\n"
 
 	"float linstep(float low, float high, float v) {\n"
@@ -125,6 +134,7 @@ const GLchar *const sector_vertex_shader =
 
 		 // Modulating specular by how much the face is facing the light source
 		"float non_ambient = diffuse_amount + specular(texture_color, fragment_normal) * diffuse_amount;\n"
+
 		"float shadowed_non_ambient = non_ambient * one_minus_shadow_percent();\n"
 		"float light = min(ambient + shadowed_non_ambient, 1.0f);\n"
 
@@ -132,29 +142,19 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"vec3 get_fragment_normal(void) {\n"
-		"vec3 rgb_normal = texture(normal_map_sampler, UV.xy).rgb;\n"
-		"vec3 tangent_space_normal = normalize(rgb_normal * 2.0f - 1.0f);\n"
+		// `t` = tangent space normal. Normalized b/c linear filtering + interpolation may unnormalize it.
+		"vec3 t = normalize(texture(normal_map_sampler, UV.xy).rgb * 2.0f - 1.0f);\n"
 
-		// TODO: move this set of calculations to the vertex shader, in some way
-		"switch (face_id) {\n"
-			"case 0:\n" // Flat
-				"tangent_space_normal.yz = tangent_space_normal.zy;\n"
-				"tangent_space_normal.z = -tangent_space_normal.z;\n"
-				"break;\n"
-			"case 1:\n" // Right
-				"tangent_space_normal.xz = tangent_space_normal.zx;\n"
-				"tangent_space_normal.z = -tangent_space_normal.z;\n"
-				"break;\n"
-			"case 3:\n" // Left
-				"tangent_space_normal.xz = tangent_space_normal.zx;\n"
-				"tangent_space_normal.x = -tangent_space_normal.x;\n"
-				"break;\n"
-			"case 4:\n" // Top (opposite of tangent space; x and z are reversed)
-				"tangent_space_normal.xz = -tangent_space_normal.xz;\n"
-				"break;\n"
-		"}\n"
+		// No matrix multiplication here! :)
+		"vec3 rotated_vectors[5] = vec3[5](\n"
+			"vec3(t.xz, -t.y),\n" // Flat
+			"vec3(t.zy, -t.x),\n" // Right
+			"t,\n" // Bottom (equal to tangent space)
+			"vec3(-t.z, t.yx),\n" // Left
+			"vec3(-t.x, t.y, -t.z)\n" // Top (opposite of tangent space)
+		");\n"
 
-		"return tangent_space_normal;\n"
+		"return rotated_vectors[face_id];\n"
 	"}\n"
 
 	"void main(void) {\n"

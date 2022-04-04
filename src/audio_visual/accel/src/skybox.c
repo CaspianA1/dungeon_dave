@@ -56,7 +56,7 @@ static GLuint init_skybox_texture(const GLchar* const path) {
 	const GLint cube_size = skybox_w >> 2, twice_cube_size = skybox_w >> 1;
 	const GLuint skybox = preinit_texture(TexSkybox, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SKYBOX_MIN_FILTER);
 
-	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size);
+	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size, SDL_PIXEL_FORMAT);
 
 	typedef struct {const GLint x, y;} ivec2;
 

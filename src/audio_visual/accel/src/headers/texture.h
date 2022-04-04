@@ -11,7 +11,6 @@
 #define OPENGL_INPUT_PIXEL_FORMAT GL_BGRA
 
 #define OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT GL_RGBA
-#define OPENGL_GRAYSCALE_INTERNAL_PIXEL_FORMAT GL_RED
 #define OPENGL_COLOR_CHANNEL_TYPE GL_UNSIGNED_BYTE
 
 #ifdef USE_GAMMA_CORRECTION
@@ -47,6 +46,23 @@ And the biggest number possible with five bits is 31, so that gives you
 #define WEAPON_TEXTURE_UNIT 4
 #define SHADOW_MAP_TEXTURE_UNIT 5
 
+// Excluded: init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
+
+#define set_current_texture glBindTexture
+
+#define deinit_texture(t) glDeleteTextures(1, &(t))
+#define deinit_textures(length, ts) glDeleteTextures((length), (ts))
+#define deinit_surface SDL_FreeSurface
+
+#define WITH_SURFACE_PIXEL_ACCESS(surface, ...) do {\
+	const bool must_lock = SDL_MUSTLOCK((surface));\
+	if (must_lock) SDL_LockSurface((surface));\
+	__VA_ARGS__\
+	if (must_lock) SDL_UnlockSurface((surface));\
+} while (0)
+
+//////////
+
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,
 	TexSet = GL_TEXTURE_2D_ARRAY,
@@ -65,22 +81,12 @@ typedef enum {
 	TexTrilinear = GL_LINEAR_MIPMAP_LINEAR
 } TextureFilterMode;
 
-// Excluded: init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
+typedef Uint8 sdl_pixel_component_t;
+typedef Uint32 sdl_pixel_t;
 
-#define set_current_texture glBindTexture
+//////////
 
-#define deinit_texture(t) glDeleteTextures(1, &(t))
-#define deinit_textures(length, ts) glDeleteTextures((length), (ts))
-#define deinit_surface SDL_FreeSurface
-
-#define WITH_SURFACE_PIXEL_ACCESS(surface, ...) do {\
-	const bool must_lock = SDL_MUSTLOCK((surface));\
-	if (must_lock) SDL_LockSurface((surface));\
-	__VA_ARGS__\
-	if (must_lock) SDL_UnlockSurface((surface));\
-} while (0)
-
-SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);
+SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height, const SDL_PixelFormatEnum pixel_format_name);
 SDL_Surface* init_surface(const GLchar* const path);
 
 void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader, const byte texture_unit);

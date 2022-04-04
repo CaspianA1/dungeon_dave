@@ -1,10 +1,10 @@
 Some TODOs for a recent next time:
-- NEXT: final touches on new_map + a texmap for it
+- NEXT: final touches on the fortress map
 - NEXT 2: a sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
 - NEXT 3: entities that don't turn to face the player (just static ones); defined by center, size, and normal
 - NEXT 4: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
-- NEXT 7: a castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji
+- NEXT 7: a castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji - running along the mountainside
 
 Final lighting model:
 - Ambient overall light, diffuse, specular - done
@@ -28,7 +28,6 @@ Other random ideas:
 - Billboard lighting that matches the sector lighting (share uniforms via a uniform buffer object)
 - Can't use red cross for health since it's copyrighted
 - Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/ (or perhaps not, since alpha just 0 or 1)
-- For some reason, mouse usage gives choppy look movement (with the Mac)
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 - Sliding across the floor (with the head tilted up)
 - Catch more warnings with -Weverything
@@ -37,17 +36,16 @@ Other random ideas:
 - Some steeply angled shadows exhibit aliasing
 - Pass in texture parameters through a bitmask
 - Compile modules separarely, and then link them all together with a given demo
-- Manage shadow map resolution better for bigger scenes
+- Manage shadow map resolution better for bigger scenes via cascaded shadow maps
+- Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry)
+- A compressed texture for the shadow map, to save space?
 
 Normal mapping:
-- Normal map details disappear at steep angles and lower mip levels
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
 - Unshadowed areas have no bumps (or is that okay?)
-- Some aliasing
-- Generating normal maps is slow
+- Mipmaps of normal maps are not normalized, and they disappear at lower mip levels
 - After the gaussian blur, generate a texture set of normal maps that are paired with the face normal maps
-- Pack those normal maps in the same texture set as the face texture set (after them, but perhaps interleaved later)
-- Perhaps store the normal maps with only the x and y gradients, and put the intensity as a fragment shader input later (then, 16 bytes instead of 32)
+- Perhaps a parameter to init_texture_set that specifies whether to interleave them
 
 A better shading model:
 - Macros for generation of objects, like GL_INIT(Buffer) for example
@@ -57,14 +55,13 @@ A better shading model:
 
 Physics:
 - Crouch
-- Make deceleration and tilt decrease framerate-independent
 - Animations go slower at 5 FPS
 - Having an idle window with vsync on leads to high CPU and GPU usage
-- Make tilting not depend on framerate (mouse deltas will always be smaller with a higher FPS)
 - The checker heightmap has faster pacing sometimes
 - Pressing left + forward and backward doesn't stop moving on the X axis
 - A half-stutter when pressing towards a wall and then letting go of a movement key
 - Can get a tiny bit stuck in a wall when jumping downwards close to a wall (so will have to be able to stand a tiny bit off the wall)
+- FPS at 120 -> too fast acceleration, which leads to weapon jitter
 
 Chromebook bugs:
 - Memory leak with debug mode at the end of demos 17 and 22 (rest probably too), the lightmapper, the map editor, and the collision demo
@@ -82,7 +79,6 @@ Weapon sprite:
 
 General future components:
 - Blit 2D sprite to whole screen
-- Flat weapon
 - Use more of the cglm functions in `update_camera`, or make my own
 - A startup setting of magnification filter (and setting other constants like that as well, like the refresh rate; call that `runtime_constants`)
 

@@ -33,14 +33,6 @@ StateGL demo_17_init(void) {
 	DEBUG(SDL_GetTicks() - before, u);
 	*/
 
-	/*
-	init_texture_set_with_adjacent_normal_maps(3, 256, 256,
-		"../../../../assets/walls/pyramid_bricks_4.bmp",
-		"../../../../assets/walls/hieroglyph.bmp",
-		"../../../../assets/walls/mesa.bmp"
-	);
-	*/
-
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	/* For a 2048x2048 shadow map:
@@ -78,8 +70,9 @@ StateGL demo_17_init(void) {
 
 		.skybox = init_skybox("../assets/desert.bmp"),
 
-		.normal_map = init_plain_texture("../../../../assets/normal_maps/pyramid_bricks_4.bmp",
-			TexPlain, TexRepeating, TexLinear, TexTrilinear, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT),
+		.normal_map = init_plain_texture("../../../../assets/normal_maps/saqqara.bmp",
+			TexPlain, TexRepeating, OPENGL_SCENE_MAG_FILTER,
+				OPENGL_SCENE_MIN_FILTER, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT),
 
 		.heightmap = (byte*) palace_heightmap,
 		.map_size = {palace_width, palace_height}
@@ -150,7 +143,7 @@ StateGL demo_17_init(void) {
 
 		// Level 1:
 		/* 8, 0, 256, 256, "../../../../assets/walls/sand.bmp",
-		"../../../../assets/walls/cobblestone_2.bmp",
+		"../../../../assets/walls/saqqara.bmp",
 		"../../../../assets/walls/cobblestone_3.bmp",
 		"../../../../assets/walls/stone_2.bmp",
 		"../../../../assets/walls/pyramid_bricks_3.bmp",
