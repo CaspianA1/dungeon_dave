@@ -132,36 +132,36 @@ static void do_separable_gaussian_blur_pass(SDL_Surface* const src,
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
 
-		for (int y = 0; y < h; y++) {
-			for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				for (int x = 0; x < w; x++) {
 
-				float normalized_summed_channels[3] = {0.0f, 0.0f, 0.0f};
-				for (int i = -kernel_radius; i <= kernel_radius; i++) {
+					float normalized_summed_channels[3] = {0.0f, 0.0f, 0.0f};
+					for (int i = -kernel_radius; i <= kernel_radius; i++) {
 
-					int filter_pos[2] = {x, y};
-					filter_pos[blur_is_vertical] += i; // If blur is vertical, `blur_is_vertical` equals 1; otherwise, 0
+						int filter_pos[2] = {x, y};
+						filter_pos[blur_is_vertical] += i; // If blur is vertical, `blur_is_vertical` equals 1; otherwise, 0
 
-					const sdl_pixel_t pixel = *(sdl_pixel_t*)
-						edge_checked_read_surface_pixel(src, src_format, filter_pos[0], filter_pos[1]);
+						const sdl_pixel_t pixel = *(sdl_pixel_t*)
+							edge_checked_read_surface_pixel(src, src_format, filter_pos[0], filter_pos[1]);
 
-					sdl_pixel_component_t r, g, b;
-					SDL_GetRGB(pixel, src_format, &r, &g, &b);
+						sdl_pixel_component_t r, g, b;
+						SDL_GetRGB(pixel, src_format, &r, &g, &b);
 
-					const float weight = kernel[i + kernel_radius];
-					normalized_summed_channels[0] += (r / 255.0f) * weight;
-					normalized_summed_channels[1] += (g / 255.0f) * weight;
-					normalized_summed_channels[2] += (b / 255.0f) * weight;
-				}
+						const float weight = kernel[i + kernel_radius];
+						normalized_summed_channels[0] += (r / 255.0f) * weight;
+						normalized_summed_channels[1] += (g / 255.0f) * weight;
+						normalized_summed_channels[2] += (b / 255.0f) * weight;
+					}
 
-				sdl_pixel_t* const dest_pixel = read_surface_pixel(dest, dest_format, x, y);
+					sdl_pixel_t* const dest_pixel = read_surface_pixel(dest, dest_format, x, y);
 
-				*dest_pixel = SDL_MapRGB(dest_format,
-					(sdl_pixel_component_t) (normalized_summed_channels[0] * 255.0f),
-					(sdl_pixel_component_t) (normalized_summed_channels[1] * 255.0f),
+					*dest_pixel = SDL_MapRGB(dest_format,
+						(sdl_pixel_component_t) (normalized_summed_channels[0] * 255.0f),
+						(sdl_pixel_component_t) (normalized_summed_channels[1] * 255.0f),
 					(sdl_pixel_component_t) (normalized_summed_channels[2] * 255.0f)
-				);
+					);
+				}
 			}
-		}
 		);
 	);
 }
