@@ -4,6 +4,15 @@
 #include "headers/camera.h"
 #include "headers/constants.h"
 
+VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size[2]) {
+	const byte map_width = map_size[0], map_height = map_size[1];
+
+	return (VoxelPhysicsContext) {
+		(byte*) heightmap, {map_width, map_height},
+		{0.0f, 0.0f, 0.0f}
+	};
+}
+
 void init_camera(Camera* const camera, const vec3 init_pos) {
 	camera -> last_time = 0.0f;
 	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
@@ -100,7 +109,7 @@ static bool pos_collides_with_heightmap(const GLfloat foot_height,
 }
 
 static void update_pos_via_physics(const byte movement_bits,
-	PhysicsContext* const physics_context, const vec2 dir_xz, vec3 pos,
+	VoxelPhysicsContext* const physics_context, const vec2 dir_xz, vec3 pos,
 	const GLfloat pace, const GLfloat delta_time) {
 
 	////////// Declaring a lot of shared vars
@@ -202,7 +211,7 @@ void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, ve
 	glm_vec3_copy((vec3) {cos_vert * dir_xz[0], sinf(vert_angle), cos_vert * dir_xz[1]}, dir);
 }
 
-void update_camera(Camera* const camera, const Event event, PhysicsContext* const physics_context) {
+void update_camera(Camera* const camera, const Event event, VoxelPhysicsContext* const physics_context) {
 	const Uint32 curr_time = SDL_GetTicks();
 	GLfloat delta_time = (curr_time - camera -> last_time) / 1000.0f;
 	camera -> last_time = curr_time;

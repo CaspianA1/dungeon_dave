@@ -170,14 +170,12 @@ void demo_17_drawer(const StateGL* const sgl) {
 	ShadowMapContext* const shadow_map_context = &scene_state -> shadow_map_context;
 
 	static Camera camera;
-	static PhysicsContext physics_context;
+	static VoxelPhysicsContext physics_context;
 	static bool first_call = true;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {1.5f, 0.5f, 1.5f}); // {3.9f, 0.5f, 6.0f}, {12.5f, 3.5f, 22.5f}
-		physics_context.heightmap = scene_state -> heightmap;
-		physics_context.map_size[0] = scene_state -> map_size[0];
-		physics_context.map_size[1] = scene_state -> map_size[1];
+		physics_context = init_physics_context(scene_state -> heightmap, scene_state -> map_size);
 		first_call = false;
 	}
 
