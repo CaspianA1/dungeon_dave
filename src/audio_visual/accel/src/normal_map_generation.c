@@ -119,7 +119,7 @@ static float* compute_1D_gaussian_kernel(const int radius, const float sigma) {
 }
 
 // This function assumes that `src` and `dest` have the same size (which should always be the case).
-static void do_separable_gaussian_blur_pass(const SDL_Surface* const src,
+static void do_separable_gaussian_blur_pass(SDL_Surface* const src,
 	SDL_Surface* const dest, const float* const kernel,
 	const int kernel_radius, const bool blur_is_vertical) {
 
@@ -129,36 +129,41 @@ static void do_separable_gaussian_blur_pass(const SDL_Surface* const src,
 		*const src_format = src -> format,
 		*const dest_format = dest -> format;
 
-	for (int y = 0; y < h; y++) {
-		for (int x = 0; x < w; x++) {
+	WITH_SURFACE_PIXEL_ACCESS(src,
+		WITH_SURFACE_PIXEL_ACCESS(dest,
 
-			float normalized_summed_channels[3] = {0.0f, 0.0f, 0.0f};
-			for (int i = -kernel_radius; i <= kernel_radius; i++) {
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
 
-				int filter_pos[2] = {x, y};
-				filter_pos[blur_is_vertical] += i; // If blur is vertical, `blur_is_vertical` equals 1; otherwise, 0
+				float normalized_summed_channels[3] = {0.0f, 0.0f, 0.0f};
+				for (int i = -kernel_radius; i <= kernel_radius; i++) {
 
-				const sdl_pixel_t pixel = *(sdl_pixel_t*)
-					edge_checked_read_surface_pixel(src, src_format, filter_pos[0], filter_pos[1]);
+					int filter_pos[2] = {x, y};
+					filter_pos[blur_is_vertical] += i; // If blur is vertical, `blur_is_vertical` equals 1; otherwise, 0
 
-				sdl_pixel_component_t r, g, b;
-				SDL_GetRGB(pixel, src_format, &r, &g, &b);
+					const sdl_pixel_t pixel = *(sdl_pixel_t*)
+						edge_checked_read_surface_pixel(src, src_format, filter_pos[0], filter_pos[1]);
 
-				const float weight = kernel[i + kernel_radius];
-				normalized_summed_channels[0] += (r / 255.0f) * weight;
-				normalized_summed_channels[1] += (g / 255.0f) * weight;
-				normalized_summed_channels[2] += (b / 255.0f) * weight;
+					sdl_pixel_component_t r, g, b;
+					SDL_GetRGB(pixel, src_format, &r, &g, &b);
+
+					const float weight = kernel[i + kernel_radius];
+					normalized_summed_channels[0] += (r / 255.0f) * weight;
+					normalized_summed_channels[1] += (g / 255.0f) * weight;
+					normalized_summed_channels[2] += (b / 255.0f) * weight;
+				}
+
+				sdl_pixel_t* const dest_pixel = read_surface_pixel(dest, dest_format, x, y);
+
+				*dest_pixel = SDL_MapRGB(dest_format,
+					(sdl_pixel_component_t) (normalized_summed_channels[0] * 255.0f),
+					(sdl_pixel_component_t) (normalized_summed_channels[1] * 255.0f),
+					(sdl_pixel_component_t) (normalized_summed_channels[2] * 255.0f)
+				);
 			}
-
-			sdl_pixel_t* const dest_pixel = read_surface_pixel(dest, dest_format, x, y);
-
-			*dest_pixel = SDL_MapRGB(dest_format,
-				(sdl_pixel_component_t) (normalized_summed_channels[0] * 255.0f),
-				(sdl_pixel_component_t) (normalized_summed_channels[1] * 255.0f),
-				(sdl_pixel_component_t) (normalized_summed_channels[2] * 255.0f)
-			);
 		}
-	}
+		);
+	);
 }
 
 GaussianBlurContext init_gaussian_blur_context(const float sigma,
@@ -180,7 +185,7 @@ void deinit_gaussian_blur_context(const GaussianBlurContext* const context) {
 	free(context -> kernel);
 }
 
-SDL_Surface* blur_surface(const SDL_Surface* const src, const GaussianBlurContext context) {
+SDL_Surface* blur_surface(SDL_Surface* const src, const GaussianBlurContext context) {
 	SDL_Surface
 		*const horizontal_blur_buffer = context.blur_buffer.horizontal,
 		*const vertical_blur_buffer = init_blank_surface(src -> w, src -> h, SDL_PIXEL_FORMAT);
