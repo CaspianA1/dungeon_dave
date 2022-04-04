@@ -14,6 +14,7 @@ typedef struct {
 
 	BatchDrawContext sector_draw_context, billboard_draw_context;
 	ShadowMapContext shadow_map_context;
+	VoxelPhysicsContext physics_context;
 
 	List sectors; // This is not in the sector draw context b/c the cpu list for that context consists of vertices
 	const List billboard_animations, billboard_animation_instances;
@@ -79,6 +80,8 @@ StateGL demo_17_init(void) {
 	};
 
 	//////////
+
+	scene_state.physics_context = init_physics_context(scene_state.heightmap, scene_state.map_size);
 
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
@@ -156,7 +159,7 @@ StateGL demo_17_init(void) {
 	glEnable(GL_MULTISAMPLE);
 
 	render_all_sectors_to_shadow_map(&scene_state.shadow_map_context,
-		&scene_state.sector_draw_context, get_next_event().screen_size, scene_state.map_size);
+		&scene_state.sector_draw_context, get_next_event().screen_size, scene_state.physics_context.far_clip_dist);
 
 	sgl.any_data = malloc(sizeof(SceneState));
 	memcpy(sgl.any_data, &scene_state, sizeof(SceneState));
@@ -168,20 +171,19 @@ void demo_17_drawer(const StateGL* const sgl) {
 	SceneState* const scene_state = (SceneState*) sgl -> any_data;
 	const BatchDrawContext* const sector_draw_context = &scene_state -> sector_draw_context;
 	ShadowMapContext* const shadow_map_context = &scene_state -> shadow_map_context;
+	VoxelPhysicsContext* const physics_context = &scene_state -> physics_context;
 
 	static Camera camera;
-	static VoxelPhysicsContext physics_context;
 	static bool first_call = true;
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {1.5f, 0.5f, 1.5f}); // {3.9f, 0.5f, 6.0f}, {12.5f, 3.5f, 22.5f}
-		physics_context = init_physics_context(scene_state -> heightmap, scene_state -> map_size);
 		first_call = false;
 	}
 
 	const Event event = get_next_event();
 
-	update_camera(&camera, event, &physics_context);
+	update_camera(&camera, event, physics_context);
 
 	update_billboard_animation_instances(
 		&scene_state -> billboard_animation_instances,
@@ -191,7 +193,8 @@ void demo_17_drawer(const StateGL* const sgl) {
 	if (keys[SDL_SCANCODE_C]) {
 		glm_vec3_copy(camera.pos, shadow_map_context -> light_context.pos);
 		glm_vec3_copy(camera.dir, shadow_map_context -> light_context.dir);
-		render_all_sectors_to_shadow_map(shadow_map_context, sector_draw_context, event.screen_size, physics_context.map_size);
+		render_all_sectors_to_shadow_map(shadow_map_context, sector_draw_context,
+			event.screen_size, physics_context -> far_clip_dist);
 	}
 
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise

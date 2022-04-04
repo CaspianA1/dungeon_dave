@@ -35,13 +35,11 @@ typedef struct {
 	} blur_pass;
 } ShadowMapContext;
 
-/* Excluded:
-init_framebuffer, deinit_framebuffer, deinit_framebuffers,
+/* Excluded: init_framebuffer, deinit_framebuffer,
 get_model_view_projection_matrix_for_shadow_map, blur_shadow_map,
 enable_rendering_to_shadow_map, disable_rendering_to_shadow_map */
 
 #define deinit_framebuffer(f) glDeleteFramebuffers(1, &(f))
-#define deinit_framebuffers(length, fs) glDeleteFramebuffers((length), (fs)) // `fs` = framebuffer set
 
 #define use_framebuffer(f) glBindFramebuffer(GL_FRAMEBUFFER, (f))
 #define disable_current_framebuffer() glBindFramebuffer(GL_FRAMEBUFFER, 0)
@@ -55,6 +53,6 @@ void deinit_shadow_map_context(ShadowMapContext* const shadow_map_context);
 void render_all_sectors_to_shadow_map(
 	ShadowMapContext* const shadow_map_context,
 	const BatchDrawContext* const sector_draw_context,
-	const int screen_size[2], const byte map_size[2]);
+	const int screen_size[2], const GLfloat far_clip_dist);
 
 #endif

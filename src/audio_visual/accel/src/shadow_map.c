@@ -227,14 +227,11 @@ void deinit_shadow_map_context(ShadowMapContext* const shadow_map_context) {
 
 static void get_model_view_projection_matrix_for_shadow_map(
 	const ShadowMapContext* const shadow_map_context,
-	const byte map_size[2], mat4 model_view_projection) {
-
-	(void) map_size;
+	const GLfloat far_clip_dist, mat4 model_view_projection) {
 
 	mat4 view, projection;
 
-	const GLfloat s = 40.0f, h = 20.0f;
-	const GLfloat fcd = glm_vec2_norm((vec2) {s, h}); // Far clip dist
+	const GLfloat fcd = far_clip_dist;
 	glm_look_anyup((GLfloat*) shadow_map_context -> light_context.pos, (GLfloat*) shadow_map_context -> light_context.dir, view);
 	glm_ortho(-fcd, fcd, fcd, -fcd, constants.camera.clip_dists.near, fcd, projection);
 	glm_mul(projection, view, model_view_projection);
@@ -283,14 +280,14 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	);
 }
 
-static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_context_ref, const byte map_size[2]) {
+static void enable_rendering_to_shadow_map(ShadowMapContext* const shadow_map_context_ref, const GLfloat far_clip_dist) {
 	// TODO: copy only variables needed for the shadow pass + the MVP matrix
 	ShadowMapContext shadow_map_context = *shadow_map_context_ref;
 
 	////////// These matrices are relative to the light
 
 	get_model_view_projection_matrix_for_shadow_map(shadow_map_context_ref,
-		map_size, shadow_map_context.light_context.model_view_projection);
+		far_clip_dist, shadow_map_context.light_context.model_view_projection);
 
 	////////// Activate shader, update light mvp, bind framebuffer, resize viewport, clear buffers, and cull front faces
 
@@ -331,7 +328,7 @@ static void disable_rendering_to_shadow_map(const int screen_size[2], ShadowMapC
 void render_all_sectors_to_shadow_map(
 	ShadowMapContext* const shadow_map_context,
 	const BatchDrawContext* const sector_draw_context,
-	const int screen_size[2], const byte map_size[2]) {
+	const int screen_size[2], const GLfloat far_clip_dist) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, sector_draw_context -> buffers.gpu);
 
@@ -345,7 +342,7 @@ void render_all_sectors_to_shadow_map(
 
 	//////////
 
-	enable_rendering_to_shadow_map(shadow_map_context, map_size);
+	enable_rendering_to_shadow_map(shadow_map_context, far_clip_dist);
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
 		glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);
