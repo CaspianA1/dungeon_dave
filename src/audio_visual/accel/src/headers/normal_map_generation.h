@@ -24,6 +24,6 @@ GaussianBlurContext init_gaussian_blur_context(const float sigma,
 
 void deinit_gaussian_blur_context(const GaussianBlurContext* const context);
 
-SDL_Surface* blur_surface(const SDL_Surface* const src, const GaussianBlurContext context);
+SDL_Surface* blur_surface(SDL_Surface* const src, const GaussianBlurContext context);
 
 #endif
