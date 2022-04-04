@@ -5,7 +5,7 @@
 #include "headers/constants.h"
 
 VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size[2]) {
-	const byte map_width = map_size[0], map_height = map_size[1];
+	const byte map_size_x = map_size[0], map_size_z = map_size[1];
 
 	/* The far clip distance, ideally, would be equal to the diameter of
 	the convex hull of all points in the heightmap. If I had more time,
@@ -13,17 +13,45 @@ VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte
 
 	- First, find the smallest and tallest points in the map.
 	- Then, the far clip distance equals the length of
-		the <map_width, map_height, tallest_point - smallest_point> vector. */
+		the <map_width, map_height, tallest_point - smallest_point + max_jump_height> vector.
+
+	To compute the maximum jump height, use the kinematics equation `v^2 = v0^2 + 2aΔy`.
+	Given that `v` equals 0, rearrange the equation like this:
+
+	0 = v0^2 + 2aΔy
+	-(v0^2) = 2aΔy
+	-(v0^2)/2a = Δy
+
+	And since downward acceleration is positive in `constants`, to not get a negative result,
+	remove the negative sign of the left term. */
+
+	const GLfloat max_jump_height = (constants.speeds.jump * constants.speeds.jump) / (2.0f * constants.accel.g);
+
+	byte min_point_height = constants.max_byte_value, max_point_height = 0;
+
+	for (byte y = 0; y < map_size_z; y++) {
+		for (byte x = 0; x < map_size_x; x++) {
+			const byte height = *map_point((byte*) heightmap, x, y, map_size_x);
+			if (height < min_point_height) min_point_height = height;
+			if (height > max_point_height) max_point_height = height;
+		}
+	}
+
+	const byte map_height_extent = max_point_height - min_point_height;
+
+	// TODO: test without max jump height first
+	const GLfloat far_clip_dist = glm_vec3_norm((vec3) {map_size_x, map_size_z, map_height_extent + max_jump_height});
+	(void) far_clip_dist;
 
 	return (VoxelPhysicsContext) {
-		(byte*) heightmap, {map_width, map_height},
+		(byte*) heightmap, {map_size_x, map_size_z},
 		0.0f, // TODO: compute this
 		{0.0f, 0.0f, 0.0f}
 	};
 }
 
 void init_camera(Camera* const camera, const vec3 init_pos) {
-	camera -> last_time = 0.0f;
+	camera -> last_time = 0;
 	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
 	camera -> pace = 0.0f;
 	camera -> speed_xz_percent = 0.0f;
@@ -41,7 +69,7 @@ static GLfloat limit_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
 // This is framerate-independent.
 static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delta_time) {
 	const GLfloat percent_lost = delta_time * magnitude;
-	return 1.0f - ((percent_lost < 1.0f) ? percent_lost : 1.0f);
+	return 1.0f - fminf(percent_lost, 1.0f);
 }
 
 // This does not include FOV, since FOV depends on a tick's speed, and speed is updated after this function is called
@@ -195,7 +223,7 @@ static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const G
 
 static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 velocities, const GLfloat delta_time) {
 	const GLfloat combined_speed_xz_amount = fminf(constants.speeds.xz_max,
-		sqrtf(velocities[0] * velocities[0] + velocities[2] * velocities[2]));
+		glm_vec2_norm((vec2) {velocities[0], velocities[2]}));
 
 	camera -> speed_xz_percent = combined_speed_xz_amount / constants.speeds.xz_max;
 

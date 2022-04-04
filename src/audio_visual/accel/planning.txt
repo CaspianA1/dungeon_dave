@@ -43,6 +43,7 @@ Other random ideas:
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
 - Eventually, put the contents of VoxelPhysicsContext inside the camera
 - Occasionally, errors about values outside the range of an unsigned char (not always at initialization time)
+- Use fminf and fmaxf more
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them

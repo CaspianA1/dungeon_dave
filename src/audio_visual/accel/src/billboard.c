@@ -32,11 +32,9 @@ static bool is_inside_plane(const vec4 sphere, const vec4 plane) {
 }
 
 static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frustum_planes[6]) {
-	const GLfloat half_w = billboard.size[0] * 0.5f, half_h = billboard.size[1] * 0.5f;
-
-	const vec4 sphere = { // For a sphere, first 3 components are position, and last component is radius
+	const vec4 sphere = { // For a sphere, the first 3 components are position, and the last component is radius
 		billboard.pos[0], billboard.pos[1], billboard.pos[2],
-		sqrtf(half_w * half_w + half_h * half_h)
+		glm_vec2_norm((vec2) {billboard.size[0], billboard.size[1]}) * 0.5f
 	};
 
 	return
