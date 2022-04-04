@@ -42,7 +42,6 @@ Other random ideas:
 - Use the bit macros more
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
 - Eventually, put the contents of VoxelPhysicsContext inside the camera
-- Occasionally, errors about values outside the range of an unsigned char (not always at initialization time; and happens when window out of focus)
 - Use fminf and fmaxf more
 
 Normal mapping:
