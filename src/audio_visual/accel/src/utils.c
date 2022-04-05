@@ -3,7 +3,9 @@
 
 #include "headers/utils.h"
 #include "headers/texture.h"
-#include "headers/constants.h"
+
+#include "constants.c"
+
 #include "../include/glad/glad.c"
 
 Screen init_screen(const GLchar* const title) {
@@ -155,7 +157,7 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 
 	#ifndef USE_VSYNC
 	const GLfloat
-		max_delay = 1000.0f / constants.fps,
+		// max_delay = 1000.0f / constants.fps,
 		one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
 	#endif
 
@@ -179,6 +181,10 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 		SDL_GL_SwapWindow(screen -> window);
 
 		#ifndef USE_VSYNC
+
+		// The refresh rate may change, so it is re-fetched
+		const GLfloat max_delay = 1000.0f / get_runtime_constant(RefreshRate);
+
 		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) * one_over_performance_freq * 1000.0f;
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
 		if (wait_for_exact_fps > 12.0f) SDL_Delay((Uint32) (wait_for_exact_fps - 0.5f)); // SDL_Delay tends to be late, so 0.5f accounts for that

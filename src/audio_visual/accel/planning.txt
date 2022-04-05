@@ -44,6 +44,7 @@ Other random ideas:
 - Eventually, put the contents of VoxelPhysicsContext inside the camera
 - Use fminf and fmaxf more
 - Perhaps I can uninvert the light direction if `camera_pos_delta_world_space` is inverted
+- Gauge the number of multisample samples based on a runtime constant
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
@@ -85,6 +86,6 @@ Weapon sprite:
 General future components:
 - Blit 2D sprite to whole screen
 - Use more of the cglm functions in `update_camera`, or make my own
-- A startup setting of magnification filter (and setting other constants like that as well, like the refresh rate; call that `runtime_constants`)
+- A startup setting of magnification filter
 
 - In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements

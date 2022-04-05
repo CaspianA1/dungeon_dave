@@ -2,6 +2,7 @@
 #define TEXTURE_C
 
 #include "headers/texture.h"
+#include "constants.c"
 
 ////////// Surface initialization
 
@@ -63,8 +64,7 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	/* Checking if the extension is available at runtime. Also, skyboxes get no anisotropic
 	filtering, because they are usually magnified and are not viewed at very steep angles. */
 	else if (GLAD_GL_EXT_texture_filter_anisotropic) {
-		float aniso_filtering_level;
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso_filtering_level);
+		const GLfloat aniso_filtering_level = get_runtime_constant(AnisotropicFilteringLevel);
 		glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso_filtering_level);
 	}
 

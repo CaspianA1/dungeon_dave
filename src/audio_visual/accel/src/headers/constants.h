@@ -26,8 +26,7 @@ and not in the `constants` struct b/c other values in that struct depend on them
 static const struct {
 	// The FPS should match the vsync refresh rate, since some of the physics code depends on it.
 	const GLfloat almost_zero;
-	const byte fps, max_byte_value;
-
+	const byte max_byte_value;
 
 	const struct {
 		const byte num_blur_passes;
@@ -58,7 +57,7 @@ static const struct {
 	} keys;
 
 } constants = {
-	.fps = 60, .max_byte_value = 255,
+	.max_byte_value = 255,
 	.almost_zero = 0.001f,
 
 	.shadow_mapping = {
@@ -90,5 +89,9 @@ static const struct {
 		.activate_exit = {SDL_SCANCODE_W, SDL_SCANCODE_Q}
 	}
 };
+
+typedef enum {RefreshRate, AnisotropicFilteringLevel} RuntimeConstantName;
+
+GLfloat get_runtime_constant(const RuntimeConstantName runtime_constant_name);
 
 #endif

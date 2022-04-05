@@ -2,7 +2,7 @@
 #define CAMERA_C
 
 #include "headers/camera.h"
-#include "headers/constants.h"
+#include "constants.c"
 
 VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size[2]) {
 	const byte map_size_x = map_size[0], map_size_z = map_size[1];
@@ -97,8 +97,10 @@ static GLfloat smooth_hermite(const GLfloat x) {
 static void update_fov(Camera* const camera, const byte movement_bits, const GLfloat delta_time) {
 	/* The time to reach the full FOV equals the time to reach the max X speed.
 	Since `v = v0 + at`, and `v0 = 0`, `v = at`, and `t = v / a`. The division
-	by the FPS converts the time from being in terms of ticks to seconds. */
-	const GLfloat time_for_full_fov = constants.speeds.xz_max / constants.accel.forward_back / constants.fps;
+	by the FPS (or the refresh rate) converts the time from being in terms of ticks to seconds. */
+
+	const byte refresh_rate = (byte) get_runtime_constant(RefreshRate);
+	const GLfloat time_for_full_fov = constants.speeds.xz_max / constants.accel.forward_back / refresh_rate;
 	GLfloat t = camera -> time_accum_for_full_fov;
 
 	if (movement_bits & BIT_ACCELERATE) {
