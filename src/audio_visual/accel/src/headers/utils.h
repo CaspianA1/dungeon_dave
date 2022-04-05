@@ -70,8 +70,6 @@
 
 #define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
 
-#define PARALLELIZE_LOOP() _Pragma("omp parallel for")
-
 ////////// These macros are for handy abstractions over OpenGL functions
 
 #define use_shader glUseProgram

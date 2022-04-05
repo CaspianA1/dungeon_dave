@@ -1,11 +1,6 @@
 #ifndef NORMAL_MAP_GENERATION_C
 #define NORMAL_MAP_GENERATION_C
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <omp.h>
-#pragma GCC diagnostic pop
-
 #include "headers/normal_map_generation.h"
 #include "headers/constants.h"
 #include "texture.c"
@@ -61,9 +56,7 @@ SDL_Surface* generate_normal_map(SDL_Surface* const src, const float intensity) 
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(normal_map,
 
-			PARALLELIZE_LOOP()
 			for (int y = 0; y < src_h; y++) {
-				PARALLELIZE_LOOP()
 				for (int x = 0; x < src_w; x++) {
 					const float
 						tl = sobel_sample(src, src_format, x - 1, y - 1),
@@ -141,9 +134,7 @@ static void do_separable_gaussian_blur_pass(SDL_Surface* const src,
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
 
-			PARALLELIZE_LOOP()
 			for (int y = 0; y < h; y++) {
-				PARALLELIZE_LOOP()
 				for (int x = 0; x < w; x++) {
 
 					float normalized_summed_channels[3] = {0.0f, 0.0f, 0.0f};

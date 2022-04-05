@@ -1,7 +1,7 @@
 #include "../utils.c"
 
-/* Current: SDL2, OpenGL (through Glad), OpenMP, cglm
-In the future, perhaps: SDL2, OpenGL, OpenMP, OpenAL */
+/* Current: SDL2, OpenGL (through Glad), cglm
+In the future, perhaps: SDL2, OpenGL, OpenAL */
 
 void demo_1_init_vertex_data(StateGL* const sgl) {
 	const GLfloat triangle_data[9] = {

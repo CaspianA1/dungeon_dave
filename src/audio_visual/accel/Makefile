@@ -16,10 +16,8 @@ NON_GL_LDFLAGS = $$(pkg-config --cflags --libs sdl2) -lm
 
 ifeq ($(shell uname), Darwin) # If on MacOS
 	GL_LDFLAGS = -framework OpenGL
-	NON_GL_LDFLAGS += -Xclang -fopenmp -lomp
 else
 	GL_LDFLAGS = -lGL
-	NON_GL_LDFLAGS += -fopenmp
 endif
 
 all:
