@@ -43,6 +43,7 @@ Other random ideas:
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
 - Eventually, put the contents of VoxelPhysicsContext inside the camera
 - Use fminf and fmaxf more
+- Perhaps I can uninvert the light direction if `camera_pos_delta_world_space` is inverted
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
