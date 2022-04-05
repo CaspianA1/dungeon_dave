@@ -225,30 +225,31 @@ void test_normal_map_generation(void) {
 	const int upscale_size[2] = {1024, 1024}, downscale_size[2] = {256, 256}, blur_radius = 5;
 	const float blur_std_deviation = 3.5f, normal_map_intensity = 1.2f;
 
-	SDL_Surface* const test_surface = init_surface("../../../../assets/walls/saqqara.bmp");
-	SDL_Surface* const upscaled_test_surface = init_blank_surface(upscale_size[0], upscale_size[1], SDL_PIXEL_FORMAT);
-	SDL_BlitScaled(test_surface, NULL, upscaled_test_surface, NULL);
+	SDL_Surface* const input = init_surface("../../../../assets/walls/saqqara.bmp");
+	SDL_Surface* const upscaled_input = init_blank_surface(upscale_size[0], upscale_size[1], SDL_PIXEL_FORMAT);
+	SDL_BlitScaled(input, NULL, upscaled_input, NULL);
 
-	const GaussianBlurContext gaussian_blur_context = init_gaussian_blur_context(
+	const GaussianBlurContext blur_context = init_gaussian_blur_context(
 		blur_std_deviation, blur_radius, upscale_size[0], upscale_size[1]);
 
-	SDL_Surface* const blurred_test_surface = blur_surface(upscaled_test_surface, gaussian_blur_context);
-	SDL_Surface* const normal_map_of_surface = generate_normal_map(blurred_test_surface, normal_map_intensity);
+	SDL_Surface* const blurred_and_upscaled = blur_surface(upscaled_input, blur_context);
+	SDL_Surface* const normal_map = generate_normal_map(blurred_and_upscaled, normal_map_intensity);
 
 	SDL_Surface* const minimized_normal_map = init_blank_surface(downscale_size[0], downscale_size[1], SDL_PIXEL_FORMAT);
-	SDL_BlitScaled(normal_map_of_surface, NULL, minimized_normal_map, NULL);
+	SDL_BlitScaled(normal_map, NULL, minimized_normal_map, NULL);
+
 	SDL_SaveBMP(minimized_normal_map, "out.bmp");
 
 	////////// Deinitialization
 
 	deinit_surface(minimized_normal_map);
-	deinit_surface(normal_map_of_surface);
-	deinit_surface(blurred_test_surface);
+	deinit_surface(normal_map);
+	deinit_surface(blurred_and_upscaled);
 
-	deinit_gaussian_blur_context(&gaussian_blur_context);
+	deinit_gaussian_blur_context(&blur_context);
 
-	deinit_surface(upscaled_test_surface);
-	deinit_surface(test_surface);
+	deinit_surface(upscaled_input);
+	deinit_surface(input);
 }
 
 #endif

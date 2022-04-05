@@ -3,6 +3,7 @@
 
 #include "headers/texture.h"
 #include "constants.c"
+#include "normal_map_generation.c"
 
 ////////// Surface initialization
 
@@ -182,9 +183,10 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 
 	va_end(args_copy);
 
-	////////// Defining texture and rescaled surface
+	////////// Defining texture, rescaled surface, and a possible gaussian blur context
 
-	const GLsizei total_num_subtextures = num_still_subtextures + num_animated_frames;
+	// Right shift of 0 = no change to the number of subtextures. If interleaving, total number of subtextures doubles.
+	const GLsizei total_num_subtextures = (num_still_subtextures + num_animated_frames); // << interleave_normal_maps;
 	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter);
 
 	glTexImage3D(TexSet, 0, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, rescale_w,
