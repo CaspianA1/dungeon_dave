@@ -107,7 +107,6 @@ StateGL demo_17_init(void) {
 
 	scene_state.billboard_draw_context.texture_set = init_texture_set(
 		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, false,
-
 		2, 4, 256, 256,
 
 		"../../../../assets/objects/health_kit.bmp",
