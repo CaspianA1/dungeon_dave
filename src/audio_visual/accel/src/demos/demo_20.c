@@ -33,7 +33,8 @@ StateGL demo_20_init(void) {
 		(Billboard) {9, {1.0f, 1.0f}, {9.0f, 1.0f, 9.0f}}
 	);
 
-	draw_context.texture_set = init_texture_set(TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+	draw_context.texture_set = init_texture_set(TexNonRepeating,
+		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, false,
 		3, 2, 64, 64,
 
 		// "../../../../assets/objects/hot_dog.bmp",

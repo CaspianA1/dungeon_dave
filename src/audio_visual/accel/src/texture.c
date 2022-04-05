@@ -155,8 +155,10 @@ static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_
 
 // Unanimated textures should go first when passed in variadically
 GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
-	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
+	const TextureFilterMode min_filter, const bool interleave_normal_maps, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h, ...) {
+
+	(void) interleave_normal_maps;
 
 	if (num_still_subtextures > MAX_NUM_SECTOR_SUBTEXTURES)
 		fail("load textures; too many still subtextures", TextureIDIsTooLarge);
