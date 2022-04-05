@@ -220,6 +220,8 @@ void test_normal_map_generation(void) {
 	The surface is upscaled and then downscaled to essentially
 	supersample the details captured from a high-res rendering. */
 
+	// TODO: see if the gaussian blur process actually does anything with the upscaling-downscaling in place.
+
 	const int upscale_size[2] = {1024, 1024}, downscale_size[2] = {256, 256}, blur_radius = 5;
 	const float blur_std_deviation = 3.5f, normal_map_intensity = 1.2f;
 
