@@ -61,7 +61,7 @@ A better shading model:
 
 Physics:
 - Crouch
-- Animations go slower at 5 FPS
+- Animations go slower at 5 FPS (the frame delta leads to only increments of 1, where it should be something more there)
 - Having an idle window with vsync on leads to high CPU and GPU usage
 - The checker heightmap has faster pacing sometimes
 - Pressing left + forward and backward doesn't stop moving on the X axis

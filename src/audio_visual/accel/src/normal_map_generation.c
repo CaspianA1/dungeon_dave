@@ -220,31 +220,21 @@ void test_normal_map_generation(void) {
 	The surface is upscaled and then downscaled to essentially
 	supersample the details captured from a high-res rendering. */
 
-	// TODO: see if the gaussian blur process actually does anything with the upscaling-downscaling in place.
-
-	const int upscale_size[2] = {1024, 1024}, downscale_size[2] = {256, 256}, blur_radius = 5;
-	const float blur_std_deviation = 3.5f, normal_map_intensity = 1.2f;
+	const int rescale_w = 256, rescale_h = 256, blur_radius = 1;
+	const float normal_map_strength = 0.25f, blur_std_dev = 0.3f;
 
 	SDL_Surface* const input = init_surface("../../../../assets/walls/saqqara.bmp");
-	SDL_Surface* const upscaled_input = init_blank_surface(upscale_size[0], upscale_size[1], SDL_PIXEL_FORMAT);
+	SDL_Surface* const upscaled_input = init_blank_surface(rescale_w, rescale_h, SDL_PIXEL_FORMAT);
 	SDL_BlitScaled(input, NULL, upscaled_input, NULL);
 
-	const GaussianBlurContext blur_context = init_gaussian_blur_context(
-		blur_std_deviation, blur_radius, upscale_size[0], upscale_size[1]);
+	const GaussianBlurContext blur_context = init_gaussian_blur_context(blur_std_dev, blur_radius, rescale_w, rescale_h);
+	SDL_Surface* const blurred = blur_surface(upscaled_input, blur_context);
+	SDL_Surface* const normal = generate_normal_map(blurred, normal_map_strength);
 
-	SDL_Surface* const blurred_and_upscaled = blur_surface(upscaled_input, blur_context);
-	SDL_Surface* const normal_map = generate_normal_map(blurred_and_upscaled, normal_map_intensity);
+	SDL_SaveBMP(normal, "out.bmp");
 
-	SDL_Surface* const minimized_normal_map = init_blank_surface(downscale_size[0], downscale_size[1], SDL_PIXEL_FORMAT);
-	SDL_BlitScaled(normal_map, NULL, minimized_normal_map, NULL);
-
-	SDL_SaveBMP(minimized_normal_map, "out.bmp");
-
-	////////// Deinitialization
-
-	deinit_surface(minimized_normal_map);
-	deinit_surface(normal_map);
-	deinit_surface(blurred_and_upscaled);
+	deinit_surface(normal);
+	deinit_surface(blurred);
 
 	deinit_gaussian_blur_context(&blur_context);
 
