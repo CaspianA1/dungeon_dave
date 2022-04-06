@@ -101,20 +101,22 @@ GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 static void init_still_subtextures_in_texture_set(const GLsizei num_still_subtextures,
 	SDL_Surface* const rescaled_surface, va_list args) {
 
-	for (GLsizei i = 0; i < num_still_subtextures; i++) {
-		SDL_Surface *const surface = init_surface(va_arg(args, GLchar*)), *surface_copied_to_gpu;
+	const GLsizei correct_w = rescaled_surface -> w, correct_h = rescaled_surface -> h;
 
-		if (surface -> w != rescaled_surface -> w || surface -> h != rescaled_surface -> h) {
+	for (GLsizei i = 0; i < num_still_subtextures; i++) {
+		SDL_Surface *const surface = init_surface(va_arg(args, GLchar*)), *surface_with_right_size;
+
+		if (surface -> w != correct_w || surface -> h != correct_h) {
 			SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
 			SDL_BlitScaled(surface, NULL, rescaled_surface, NULL);
-			surface_copied_to_gpu = rescaled_surface;
+			surface_with_right_size = rescaled_surface;
 		}
-		else surface_copied_to_gpu = surface;
+		else surface_with_right_size = surface;
 
-		WITH_SURFACE_PIXEL_ACCESS(surface_copied_to_gpu,
-			glTexSubImage3D(TexSet, 0, 0, 0, i, surface_copied_to_gpu -> w,
-				surface_copied_to_gpu -> h, 1, OPENGL_INPUT_PIXEL_FORMAT,
-				OPENGL_COLOR_CHANNEL_TYPE, surface_copied_to_gpu -> pixels);
+		WITH_SURFACE_PIXEL_ACCESS(surface_with_right_size,
+			glTexSubImage3D(TexSet, 0, 0, 0, i,
+				correct_w, correct_h, 1, OPENGL_INPUT_PIXEL_FORMAT,
+				OPENGL_COLOR_CHANNEL_TYPE, surface_with_right_size -> pixels);
 		);
 
 		deinit_surface(surface);
@@ -159,8 +161,6 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 	const TextureFilterMode min_filter, const bool interleave_normal_maps, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h, ...) {
 
-	(void) interleave_normal_maps;
-
 	if (num_still_subtextures > MAX_NUM_SECTOR_SUBTEXTURES)
 		fail("load textures; too many still subtextures", TextureIDIsTooLarge);
 
@@ -184,6 +184,8 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 	va_end(args_copy);
 
 	////////// Defining texture, rescaled surface, and a possible gaussian blur context
+
+	(void) interleave_normal_maps;
 
 	// Right shift of 0 = no change to the number of subtextures. If interleaving, total number of subtextures doubles.
 	const GLsizei total_num_subtextures = (num_still_subtextures + num_animated_frames); // << interleave_normal_maps;
