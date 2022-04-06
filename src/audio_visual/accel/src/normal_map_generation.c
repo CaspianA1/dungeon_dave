@@ -205,11 +205,7 @@ void test_normal_map_generation(void) {
 	- First, load a surface from disk.
 	- Then, upscale it.
 	- After that, blur it.
-	- Then, generate a normal map.
-	- Finally, minimize it to the original surface size.
-
-	The surface is upscaled and then downscaled to essentially
-	supersample the details captured from a high-res rendering. */
+	- Then, generate a normal map. */
 
 	const int rescale_w = 256, rescale_h = 256, blur_radius = 1;
 	const float normal_map_strength = 0.25f, blur_std_dev = 0.3f;
