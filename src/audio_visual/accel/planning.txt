@@ -37,7 +37,7 @@ Other random ideas:
 - Pass in texture parameters through a bitmask
 - Compile modules separarely, and then link them all together with a given demo
 - Manage shadow map resolution better for bigger scenes via cascaded shadow maps
-- Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry)
+- Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry; perhaps more antialiasing for nearest?)
 - A compressed texture for the shadow map, to save space?
 - Use the bit macros more
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
@@ -80,7 +80,6 @@ Chromebook bugs:
 
 Weapon sprite:
 - Put weapon shaders in shaders.c
-- Configure mag and min filter as a variable
 - Rescale the weapon to make it not warped by the screen resolution
 
 General future components:
