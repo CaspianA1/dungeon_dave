@@ -7,6 +7,11 @@
 #include "camera.h"
 #include "animation.h"
 
+typedef struct {
+	vec3 center;
+	GLfloat radius;
+} Sphere;
+
 typedef struct { // This struct is perfectly aligned
 	buffer_size_t texture_id;
 	billboard_var_component_t size[2], pos[3];

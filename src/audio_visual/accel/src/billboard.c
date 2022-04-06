@@ -26,15 +26,15 @@ void update_billboard_animation_instances(const List* const billboard_animation_
 }
 
 // https://stackoverflow.com/questions/25572337/frustum-and-sphere-intersection
-static bool is_inside_plane(const vec4 sphere, const vec4 plane) {
-	const GLfloat dist_btwn_plane_and_sphere = glm_vec3_dot((GLfloat*) sphere, (GLfloat*) plane) + plane[3];
-	return dist_btwn_plane_and_sphere > -sphere[3];
+static bool is_inside_plane(const Sphere sphere, const vec4 plane) {
+	const GLfloat dist_btwn_plane_and_sphere = glm_vec3_dot((GLfloat*) sphere.center, (GLfloat*) plane) + plane[3];
+	return dist_btwn_plane_and_sphere > -sphere.radius;
 }
 
 static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frustum_planes[6]) {
-	const vec4 sphere = { // For a sphere, the first 3 components are position, and the last component is radius
-		billboard.pos[0], billboard.pos[1], billboard.pos[2],
-		glm_vec2_norm((vec2) {billboard.size[0], billboard.size[1]}) * 0.5f
+	const Sphere sphere = { // For a sphere, the first 3 components are position, and the last component is radius
+		.center = {billboard.pos[0], billboard.pos[1], billboard.pos[2]},
+		.radius = glm_vec2_norm((vec2) {billboard.size[0], billboard.size[1]}) * 0.5f
 	};
 
 	return
