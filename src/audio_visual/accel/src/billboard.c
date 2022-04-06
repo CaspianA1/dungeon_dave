@@ -37,10 +37,11 @@ static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frus
 		.radius = glm_vec2_norm((vec2) {billboard.size[0], billboard.size[1]}) * 0.5f
 	};
 
-	return
-		is_inside_plane(sphere, frustum_planes[0]) && is_inside_plane(sphere, frustum_planes[1]) &&
-		is_inside_plane(sphere, frustum_planes[2]) && is_inside_plane(sphere, frustum_planes[3]) &&
-		is_inside_plane(sphere, frustum_planes[4]) && is_inside_plane(sphere, frustum_planes[5]);
+	for (byte i = 0; i < 6; i++) {
+		if (!is_inside_plane(sphere, frustum_planes[i])) return false;
+	}
+
+	return true;
 }
 
 static void draw_billboards(const BatchDrawContext* const draw_context,
