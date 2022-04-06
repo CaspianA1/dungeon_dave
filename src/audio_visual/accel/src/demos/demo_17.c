@@ -71,7 +71,7 @@ StateGL demo_17_init(void) {
 
 		.skybox = init_skybox("../assets/desert.bmp"),
 
-		.normal_map = init_plain_texture("../../../../assets/normal_maps/saqqara.bmp",
+		.normal_map = init_plain_texture("../../../../assets/normal_maps/hieroglyph.bmp",
 			TexPlain, TexRepeating, OPENGL_SCENE_MAG_FILTER,
 				OPENGL_SCENE_MIN_FILTER, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT),
 
