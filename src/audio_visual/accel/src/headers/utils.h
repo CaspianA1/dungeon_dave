@@ -51,7 +51,7 @@
 		if (incr || decr || reset) DEBUG_FLOAT(value_name);\
 	} while (0)
 
-#define INIT_SHADER_BRANCH(name, shader, key) INIT_UNIFORM_VALUE(name, (shader), 1i, keys[SDL_SCANCODE_##key])
+#define INIT_SHADER_BRANCH(shader, name, key) INIT_UNIFORM_VALUE(name, (shader), 1i, keys[SDL_SCANCODE_##key])
 
 ////////// These are some general-purpose macros used in all demos
 
