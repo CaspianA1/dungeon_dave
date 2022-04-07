@@ -43,6 +43,7 @@ void use_texture(const GLuint texture, const GLuint shader,
 
 //////////
 
+// This sets the current texture to be the returned texture
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	const TextureFilterMode mag_filter, const TextureFilterMode min_filter) {
 
