@@ -188,10 +188,6 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 	const GLsizei total_num_subtextures = num_still_subtextures + num_animated_frames;
 	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter);
 
-	/* TODO, for normal maps:
-	- From the texture handle returned from this function, use `glGetTexImage` to get the pixels of the texture set.
-	- Then, blur that, and make one big normal map. Make sure that no edge bleeding happens.
-	- After that, upload that to the GPU as a texture set of normal maps. */
 	glTexImage3D(TexSet, 0, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, rescale_w,
 		rescale_h, total_num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,
 		OPENGL_COLOR_CHANNEL_TYPE, NULL);
