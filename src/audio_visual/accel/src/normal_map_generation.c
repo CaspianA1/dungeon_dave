@@ -199,34 +199,73 @@ SDL_Surface* blur_surface(SDL_Surface* const src, const GaussianBlurContext cont
 	return vertical_blur_buffer;
 }
 
-// TODO: remove
-void test_normal_map_generation(void) {
-	/* How normal maps are generated:
-	- First, load a surface from disk.
-	- Then, upscale it.
-	- After that, blur it.
-	- Then, generate a normal map. */
+GLuint init_normal_map_set_from_texture_set(const GLuint texture_set) {
+	/* How this function works:
+	- First, query OpenGL about information about the texture set, like its dimensions, and its filters used
+	- Then, copy over its contents into a big SDL_Surface
+	- Blur it via a two-pass Gaussian blur, and then generate a normal map from that
+	- After that, reupload it to the GPU via a new texture
 
-	const int rescale_w = 256, rescale_h = 256, blur_radius = 1;
-	const float normal_map_strength = 0.25f, blur_std_dev = 0.3f;
+	Note: normal maps are not interleaved with the texture set because if gamma correction is used,
+	the texture set will be in SRGB, and normal maps should be in a linear color space. */
 
-	SDL_Surface* const input = init_surface("../../../../assets/walls/saqqara.bmp");
-	SDL_Surface* const upscaled_input = init_blank_surface(rescale_w, rescale_h, SDL_PIXEL_FORMAT);
-	SDL_BlitScaled(input, NULL, upscaled_input, NULL);
+	////////// Querying OpenGL for information about the texture set
 
-	const GaussianBlurContext blur_context = init_gaussian_blur_context(blur_std_dev, blur_radius, rescale_w, rescale_h);
-	SDL_Surface* const blurred = blur_surface(upscaled_input, blur_context);
-	SDL_Surface* const normal = generate_normal_map(blurred, normal_map_strength);
+	set_current_texture(TexSet, texture_set);
 
-	SDL_SaveBMP(normal, "out.bmp");
+	GLint subtexture_w, subtexture_h, num_subtextures, wrap_mode, mag_filter, min_filter;
+	glGetTexLevelParameteriv(TexSet, 0, GL_TEXTURE_WIDTH, &subtexture_w);
+	glGetTexLevelParameteriv(TexSet, 0, GL_TEXTURE_HEIGHT, &subtexture_h);
+	glGetTexLevelParameteriv(TexSet, 0, GL_TEXTURE_DEPTH, &num_subtextures);
 
-	deinit_surface(normal);
+	// Wrap mode for each axis is the same, so only for 'S' (or across) is fine
+	glGetTexParameteriv(TexSet, GL_TEXTURE_WRAP_S, &wrap_mode);
+	glGetTexParameteriv(TexSet, GL_TEXTURE_MAG_FILTER, &mag_filter);
+	glGetTexParameteriv(TexSet, GL_TEXTURE_MIN_FILTER, &min_filter);
+
+	////////// Uploading the texture to the CPU
+
+	const GLint surface_w = subtexture_w, surface_h = subtexture_h * num_subtextures;
+	SDL_Surface* const cpu_side_surfaces = init_blank_surface(surface_w, surface_h, SDL_PIXEL_FORMAT);
+	sdl_pixel_t* const cpu_side_surface_pixels = cpu_side_surfaces -> pixels;
+
+	WITH_SURFACE_PIXEL_ACCESS(cpu_side_surfaces,
+		glGetTexImage(TexSet, 0, OPENGL_INPUT_PIXEL_FORMAT,
+			OPENGL_COLOR_CHANNEL_TYPE, cpu_side_surface_pixels);
+	);
+
+	////////// Blurring it, and then making a normal map out of it
+
+	const GaussianBlurContext blur_context = init_gaussian_blur_context(0.3f, 1, surface_w, surface_h);
+	SDL_Surface* const blurred = blur_surface(cpu_side_surfaces, blur_context);
+
+	/* TODO: perhaps save memory by writing into the original
+	surface, instead of creating a new one for the normal map */
+	SDL_Surface* const normal_map = generate_normal_map(blurred, 0.25f);
+
+	////////// Making a new texture on the GPU, and then writing the normal map into that
+
+	const GLuint normal_map_set = preinit_texture(TexSet,
+		(TextureWrapMode) wrap_mode,
+		(TextureFilterMode) mag_filter,
+		(TextureFilterMode) min_filter);
+
+	WITH_SURFACE_PIXEL_ACCESS(cpu_side_surfaces,
+		glTexImage3D(TexSet, 0, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, subtexture_w,
+			subtexture_h, num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,
+			OPENGL_COLOR_CHANNEL_TYPE, normal_map -> pixels);
+	);
+
+	glGenerateMipmap(TexSet);
+
+	////////// Deinitialization
+
+	deinit_surface(normal_map);
 	deinit_surface(blurred);
-
 	deinit_gaussian_blur_context(&blur_context);
+	deinit_surface(cpu_side_surfaces);
 
-	deinit_surface(upscaled_input);
-	deinit_surface(input);
+	return normal_map_set;
 }
 
 #endif

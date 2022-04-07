@@ -6,7 +6,8 @@
 /* Excluded: read_surface_pixel, edge_checked_read_surface_pixel,
 sobel_sample, compute_1D_gaussian_kernel, do_separable_gaussian_blur_pass */
 
-// The Gaussian blur performed is separable, so it needs a temporary surface for the horizontal pass
+/* The Gaussian blur performed is separable,
+so it needs a temporary surface for the horizontal pass. */
 typedef struct {
     const struct {
         SDL_Surface* const horizontal;
@@ -21,9 +22,10 @@ SDL_Surface* generate_normal_map(SDL_Surface* const src_image, const float inten
 
 GaussianBlurContext init_gaussian_blur_context(const float sigma,
 	const int radius, const int blur_buffer_w, const int blur_buffer_h);
-
 void deinit_gaussian_blur_context(const GaussianBlurContext* const context);
 
 SDL_Surface* blur_surface(SDL_Surface* const src, const GaussianBlurContext context);
+
+GLuint init_normal_map_set_from_texture_set(const GLuint texture_set);
 
 #endif

@@ -64,8 +64,8 @@ const GLchar *const sector_vertex_shader =
 	"uniform vec2 warp_exps;\n"
 	"uniform vec3 inv_light_dir, metallic_color, tint;\n"
 
-	"uniform sampler2D shadow_map_sampler, normal_map_sampler;\n"
-	"uniform sampler2DArray texture_sampler;\n"
+	"uniform sampler2D shadow_map_sampler;\n"
+	"uniform sampler2DArray texture_sampler, normal_map_sampler;\n"
 
 	"float diffuse(vec3 fragment_normal) {\n"
 		"float diffuse_amount = dot(inv_light_dir, fragment_normal);\n"
@@ -143,7 +143,7 @@ const GLchar *const sector_vertex_shader =
 
 	"vec3 get_fragment_normal(void) {\n"
 		// `t` = tangent space normal. Normalized b/c linear filtering + interpolation may unnormalize it.
-		"vec3 t = normalize(texture(normal_map_sampler, UV.xy).rgb * 2.0f - 1.0f);\n"
+		"vec3 t = normalize(texture(normal_map_sampler, UV).rgb * 2.0f - 1.0f);\n"
 
 		// No matrix multiplication here! :)
 		"vec3 rotated_vectors[5] = vec3[5](\n"

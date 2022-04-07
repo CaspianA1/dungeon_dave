@@ -9,6 +9,8 @@
 #include "../overlay.c"
 #include "../shadow_map.c"
 
+#include "../normal_map_generation.c"
+
 typedef struct {
 	WeaponSprite weapon_sprite;
 
@@ -21,19 +23,13 @@ typedef struct {
 
 	const Skybox skybox;
 
-	const GLuint normal_map;
+	GLuint face_normal_map_set;
 
 	byte* const heightmap;
 	const byte map_size[2];
 } SceneState;
 
 StateGL demo_17_init(void) {
-	/*
-	const Uint32 before = SDL_GetTicks();
-	test_normal_map_generation();
-	DEBUG(SDL_GetTicks() - before, u);
-	*/
-
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
 	/* For a 2048x2048 shadow map:
@@ -70,10 +66,6 @@ StateGL demo_17_init(void) {
 		),
 
 		.skybox = init_skybox("../assets/desert.bmp"),
-
-		.normal_map = init_plain_texture("../../../../assets/normal_maps/hieroglyph.bmp",
-			TexPlain, TexRepeating, OPENGL_SCENE_MAG_FILTER,
-				OPENGL_SCENE_MIN_FILTER, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT),
 
 		.heightmap = (byte*) palace_heightmap,
 		.map_size = {palace_width, palace_height}
@@ -156,6 +148,8 @@ StateGL demo_17_init(void) {
 		"../../../../assets/wolf/colorstone.bmp" */
 	);
 
+	scene_state.face_normal_map_set = init_normal_map_set_from_texture_set(scene_state.sector_draw_context.texture_set);
+
 	enable_all_culling();
 	glEnable(GL_MULTISAMPLE);
 
@@ -198,7 +192,8 @@ void demo_17_drawer(const StateGL* const sgl) {
 	}
 
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
-	draw_visible_sectors(sector_draw_context, shadow_map_context, &scene_state -> sectors, &camera, scene_state -> normal_map);
+	draw_visible_sectors(sector_draw_context, shadow_map_context,
+		&scene_state -> sectors, &camera, scene_state -> face_normal_map_set);
 
 	draw_skybox(scene_state -> skybox, &camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
@@ -220,7 +215,7 @@ void demo_17_deinit(const StateGL* const sgl) {
 	deinit_list(scene_state -> billboard_animation_instances);
 
 	deinit_skybox(scene_state -> skybox);
-	deinit_texture(scene_state -> normal_map);
+	deinit_texture(scene_state -> face_normal_map_set);
 
 	free(scene_state);
 

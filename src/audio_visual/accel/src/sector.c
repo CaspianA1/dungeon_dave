@@ -158,12 +158,15 @@ static byte sector_in_view_frustum(const Sector sector, const vec4 frustum_plane
 
 static void draw_sectors(const BatchDrawContext* const draw_context,
 	const ShadowMapContext* const shadow_map_context, const Camera* const camera,
-	const buffer_size_t num_visible_faces, const GLuint normal_map) {
+	const buffer_size_t num_visible_faces, const GLuint normal_map_set) {
 
 	const GLuint sector_shader = draw_context -> shader;
 	use_shader(sector_shader);
 
-	static GLint camera_pos_world_space_id, inv_light_dir_id, model_view_projection_id, light_model_view_projection_id;
+	static GLint
+		camera_pos_world_space_id, inv_light_dir_id,
+		model_view_projection_id, light_model_view_projection_id;
+
 	static bool first_call = true;
 
 	if (first_call) {
@@ -195,8 +198,8 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		// `use_texture` not called since the shadow map output has already been bound to the texture unit in shadow_map.c
 		set_sampler_texture_unit_for_shader("shadow_map_sampler", sector_shader, SHADOW_MAP_TEXTURE_UNIT);
 
-		use_texture(normal_map, sector_shader, "normal_map_sampler", TexPlain, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
 		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
+		use_texture(normal_map_set, sector_shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
 
 		first_call = false;
 	}
@@ -265,10 +268,10 @@ static buffer_size_t fill_sector_vbo_with_visible_faces(
 // This is just a utility function
 void draw_visible_sectors(const BatchDrawContext* const draw_context,
 	const ShadowMapContext* const shadow_map_context, const List* const sectors,
-	const Camera* const camera, const GLuint normal_map) {
+	const Camera* const camera, const GLuint normal_map_set) {
 
 	const buffer_size_t num_visible_faces = fill_sector_vbo_with_visible_faces(draw_context, sectors, camera);
-	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_map_context, camera, num_visible_faces, normal_map);
+	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_map_context, camera, num_visible_faces, normal_map_set);
 }
 
 #endif
