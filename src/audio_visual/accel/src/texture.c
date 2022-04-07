@@ -3,7 +3,6 @@
 
 #include "headers/texture.h"
 #include "constants.c"
-#include "normal_map_generation.c"
 
 ////////// Surface initialization
 
