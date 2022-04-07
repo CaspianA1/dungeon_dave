@@ -225,8 +225,8 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set) {
 
 	////////// Uploading the texture to the CPU
 
-	const GLint surface_w = subtexture_w, surface_h = subtexture_h * num_subtextures;
-	SDL_Surface* const cpu_side_surfaces = init_blank_surface(surface_w, surface_h, SDL_PIXEL_FORMAT);
+	const GLint surfaces_w = subtexture_w, surfaces_h = subtexture_h * num_subtextures;
+	SDL_Surface* const cpu_side_surfaces = init_blank_surface(surfaces_w, surfaces_h, SDL_PIXEL_FORMAT);
 	sdl_pixel_t* const cpu_side_surface_pixels = cpu_side_surfaces -> pixels;
 
 	WITH_SURFACE_PIXEL_ACCESS(cpu_side_surfaces,
@@ -236,7 +236,7 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set) {
 
 	////////// Blurring it, and then making a normal map out of it
 
-	const GaussianBlurContext blur_context = init_gaussian_blur_context(0.3f, 1, surface_w, surface_h);
+	const GaussianBlurContext blur_context = init_gaussian_blur_context(0.3f, 1, surfaces_w, surfaces_h);
 	SDL_Surface* const blurred = blur_surface(cpu_side_surfaces, blur_context);
 
 	/* This reuses `cpu_side_surfaces` as a normal map, to save memory.
