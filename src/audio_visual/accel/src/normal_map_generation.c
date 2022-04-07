@@ -42,7 +42,7 @@ static float sobel_sample(SDL_Surface* const surface,
 
 Also, this function computes luminance values
 of pixels to use those as heightmap values. */
-SDL_Surface* generate_normal_map(SDL_Surface* const src, const float intensity) {
+static SDL_Surface* generate_normal_map(SDL_Surface* const src, const float intensity) {
 	const int src_w = src -> w, src_h = src -> h;
 
 	SDL_Surface* const normal_map = init_blank_surface(src_w, src_h, SDL_PIXEL_FORMAT);
@@ -169,7 +169,7 @@ static void do_separable_gaussian_blur_pass(SDL_Surface* const src,
 	);
 }
 
-GaussianBlurContext init_gaussian_blur_context(const float sigma,
+static GaussianBlurContext init_gaussian_blur_context(const float sigma,
 	const int radius, const int blur_buffer_w, const int blur_buffer_h) {
 
 	return (GaussianBlurContext) {
@@ -183,12 +183,12 @@ GaussianBlurContext init_gaussian_blur_context(const float sigma,
 	};
 }
 
-void deinit_gaussian_blur_context(const GaussianBlurContext* const context) {
+static void deinit_gaussian_blur_context(const GaussianBlurContext* const context) {
 	deinit_surface(context -> blur_buffer.horizontal);
 	free(context -> kernel);
 }
 
-SDL_Surface* blur_surface(SDL_Surface* const src, const GaussianBlurContext context) {
+static SDL_Surface* blur_surface(SDL_Surface* const src, const GaussianBlurContext context) {
 	SDL_Surface
 		*const horizontal_blur_buffer = context.blur_buffer.horizontal,
 		*const vertical_blur_buffer = init_blank_surface(src -> w, src -> h, SDL_PIXEL_FORMAT);
