@@ -124,7 +124,7 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 	}
 
 	mat4 model_view_projection; // TODO: use glm_mat4_copy
-	memcpy(model_view_projection, camera -> model_view_projection, sizeof(mat4));
+	glm_mat4_copy((vec4*) camera -> model_view_projection, model_view_projection);
 
 	/* This clears X, Y, and W. Z (depth) not cleared
 	b/c it's always set to 1 in the vertex shader. */
