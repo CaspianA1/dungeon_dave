@@ -197,10 +197,14 @@ static SDL_Surface* blur_surface(SDL_Surface* const src, const GaussianBlurConte
 
 GLuint init_normal_map_set_from_texture_set(const GLuint texture_set) {
 	/* How this function works:
-	- First, query OpenGL about information about the texture set, like its dimensions, and its filters used
-	- Then, copy over its contents into a big SDL_Surface
-	- Blur it via a two-pass Gaussian blur, and then generate a normal map from that
-	- After that, reupload it to the GPU via a new texture
+	- First, query OpenGL about information about the texture set, like its dimensions, and its filters used.
+	- Then, copy over its contents into a big surface.
+
+	- Blur it via a two-pass Gaussian blur, and then generate a normal map from that.
+		Note that the generated normal map is written into the original CPU-side surface, since that isn't used
+		anymore at this point, and creating a new surface would be wasteful.
+
+	- After that, reupload the normal map to the GPU via a new texture.
 
 	Note: normal maps are not interleaved with the texture set because if gamma correction is used,
 	the texture set will be in SRGB, and normal maps should be in a linear color space. */
