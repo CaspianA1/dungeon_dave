@@ -55,7 +55,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 	const GLfloat secs_per_frame, const GLchar* const spritesheet_path,
 	const GLsizei frames_across, const GLsizei frames_down, const GLsizei total_frames) {
 
-	/* It's a bit wasteful to load the surface in init_texture_set
+	/* It's a bit wasteful to load the surface in `init_texture_set`
 	and here, but this makes the code much more readable */
 
 	SDL_Surface* const peek_surface = init_surface(spritesheet_path);
@@ -64,7 +64,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 
 	return (WeaponSprite) {
 		.texture = init_texture_set(TexNonRepeating,
-			OPENGL_HUD_MAG_FILTER, OPENGL_HUD_MIN_FILTER, false, 0, 1,
+			OPENGL_HUD_MAG_FILTER, OPENGL_HUD_MIN_FILTER, 0, 1,
 			(GLsizei) (frame_size[0] * texture_rescale_factor),
 			(GLsizei) (frame_size[1] * texture_rescale_factor),
 			spritesheet_path, frames_across, frames_down, total_frames),

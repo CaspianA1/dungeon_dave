@@ -51,8 +51,7 @@ Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
 - Unshadowed areas have no bumps (or is that okay?)
 - Mipmaps of normal maps are not normalized, and they disappear at lower mip levels
-- After the gaussian blur, generate a texture set of normal maps that are paired with the face normal maps
-- Perhaps a parameter to init_texture_set that specifies whether to interleave them
+- No interleaving of normal maps, since the diffuse textures are stored as SRGB textures
 
 A better shading model:
 - Macros for generation of objects, like GL_INIT(Buffer) for example

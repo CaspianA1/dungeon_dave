@@ -106,7 +106,7 @@ StateGL demo_17_init(void) {
 	);
 
 	scene_state.billboard_draw_context.texture_set = init_texture_set(
-		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, false,
+		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 		2, 4, 256, 256,
 
 		"../../../../assets/objects/health_kit.bmp",
@@ -121,7 +121,7 @@ StateGL demo_17_init(void) {
 	//////////
 
 	scene_state.sector_draw_context.texture_set = init_texture_set(
-		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, true,
+		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 		// Fortress:
 		/* 4, 0, 256, 256,
 		"../../../../assets/walls/viney_bricks.bmp",

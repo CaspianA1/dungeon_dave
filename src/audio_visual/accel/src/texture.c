@@ -158,7 +158,7 @@ static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_
 
 // Unanimated textures should go first when passed in variadically
 GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
-	const TextureFilterMode min_filter, const bool interleave_normal_maps, const GLsizei num_still_subtextures,
+	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h, ...) {
 
 	if (num_still_subtextures > MAX_NUM_SECTOR_SUBTEXTURES)
@@ -183,14 +183,15 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 
 	va_end(args_copy);
 
-	////////// Defining texture, rescaled surface, and a possible gaussian blur context
+	////////// Defining texture, and a rescaled surface
 
-	(void) interleave_normal_maps;
-
-	// Right shift of 0 = no change to the number of subtextures. If interleaving, total number of subtextures doubles.
-	const GLsizei total_num_subtextures = (num_still_subtextures + num_animated_frames); // << interleave_normal_maps;
+	const GLsizei total_num_subtextures = num_still_subtextures + num_animated_frames;
 	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter);
 
+	/* TODO, for normal maps:
+	- From the texture handle returned from this function, use `glGetTexImage` to get the pixels of the texture set.
+	- Then, blur that, and make one big normal map. Make sure that no edge bleeding happens.
+	- After that, upload that to the GPU as a texture set of normal maps. */
 	glTexImage3D(TexSet, 0, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, rescale_w,
 		rescale_h, total_num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,
 		OPENGL_COLOR_CHANNEL_TYPE, NULL);
@@ -201,8 +202,10 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 
 	init_still_subtextures_in_texture_set(num_still_subtextures, rescaled_surface, args);
 	init_animated_subtextures_in_texture_set(num_animated_frames, num_still_subtextures, rescaled_surface, args);
-
 	glGenerateMipmap(TexSet);
+
+	////////// Deinitialization
+
 	deinit_surface(rescaled_surface);
 	va_end(args);
 
