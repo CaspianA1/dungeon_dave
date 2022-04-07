@@ -42,10 +42,8 @@ static float sobel_sample(SDL_Surface* const surface,
 
 Also, this function computes luminance values
 of pixels to use those as heightmap values. */
-static SDL_Surface* generate_normal_map(SDL_Surface* const src, const float intensity) {
+static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const normal_map, const float intensity) {
 	const int src_w = src -> w, src_h = src -> h;
-
-	SDL_Surface* const normal_map = init_blank_surface(src_w, src_h, SDL_PIXEL_FORMAT);
 
 	const SDL_PixelFormat
 		*const src_format = src -> format,
@@ -93,8 +91,6 @@ static SDL_Surface* generate_normal_map(SDL_Surface* const src, const float inte
 			}
 		);
 	);
-
-	return normal_map;
 }
 
 ////////// This code concerns Gaussian blur (the normal map input is blurred to cut out high frequencies from the Sobel operator).
@@ -239,9 +235,10 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set) {
 	const GaussianBlurContext blur_context = init_gaussian_blur_context(0.3f, 1, surface_w, surface_h);
 	SDL_Surface* const blurred = blur_surface(cpu_side_surfaces, blur_context);
 
-	/* TODO: perhaps save memory by writing into the original
-	surface, instead of creating a new one for the normal map */
-	SDL_Surface* const normal_map = generate_normal_map(blurred, 0.25f);
+	/* This reuses `cpu_side_surfaces` as a normal map, to save memory.
+	`cpu_side_surfaces` is considered out of scope after this. */
+	SDL_Surface* const normal_map = cpu_side_surfaces;
+	generate_normal_map(blurred, normal_map, 0.25f);
 
 	////////// Making a new texture on the GPU, and then writing the normal map into that
 
@@ -250,7 +247,7 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set) {
 		(TextureFilterMode) mag_filter,
 		(TextureFilterMode) min_filter);
 
-	WITH_SURFACE_PIXEL_ACCESS(cpu_side_surfaces,
+	WITH_SURFACE_PIXEL_ACCESS(normal_map,
 		glTexImage3D(TexSet, 0, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, subtexture_w,
 			subtexture_h, num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,
 			OPENGL_COLOR_CHANNEL_TYPE, normal_map -> pixels);
@@ -263,7 +260,6 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set) {
 	deinit_surface(normal_map);
 	deinit_surface(blurred);
 	deinit_gaussian_blur_context(&blur_context);
-	deinit_surface(cpu_side_surfaces);
 
 	return normal_map_set;
 }
