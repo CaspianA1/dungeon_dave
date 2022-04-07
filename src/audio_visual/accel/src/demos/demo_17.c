@@ -139,7 +139,7 @@ StateGL demo_17_init(void) {
 
 		// Level 1:
 		/* 8, 0, 256, 256, "../../../../assets/walls/sand.bmp",
-		"../../../../assets/walls/saqqara.bmp",
+		"../../../../assets/walls/cobblestone_2.bmp",
 		"../../../../assets/walls/cobblestone_3.bmp",
 		"../../../../assets/walls/stone_2.bmp",
 		"../../../../assets/walls/pyramid_bricks_3.bmp",

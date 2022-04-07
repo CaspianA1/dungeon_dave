@@ -46,6 +46,7 @@ Other random ideas:
 - Perhaps I can uninvert the light direction if `camera_pos_delta_world_space` is inverted
 - Gauge the number of multisample samples based on a runtime constant
 - EVSM with only the positive term may be possible: https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
+- Putting the face texture set at a resolution of 2048x2048 or above turns all of the billboards into this red-green gradient (above 4096x4096, out of OpenGL memory)
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
