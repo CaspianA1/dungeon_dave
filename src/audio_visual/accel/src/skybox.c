@@ -123,7 +123,7 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 		first_call = false;
 	}
 
-	mat4 model_view_projection; // TODO: use glm_mat4_copy
+	mat4 model_view_projection;
 	glm_mat4_copy((vec4*) camera -> model_view_projection, model_view_projection);
 
 	/* This clears X, Y, and W. Z (depth) not cleared
