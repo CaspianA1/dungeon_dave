@@ -19,8 +19,7 @@ StateGL demo_20_init(void) {
 	/* How would I update indices for a texture index? Perhaps mod it by the current time in some way;
 	Or actually not b/c the texture index may also depend on an enemy state */
 
-	BatchDrawContext draw_context = init_billboard_draw_context(
-		10,
+	const Billboard billboards[] = {
 		(Billboard) {0, {0.1f, 0.1f}, {3.0f, 4.0f, 5.0f}},
 		(Billboard) {1, {1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}},
 		(Billboard) {2, {1.0f, 1.0f}, {2.0f, 1.0f, 2.0f}},
@@ -31,7 +30,9 @@ StateGL demo_20_init(void) {
 		(Billboard) {7, {1.0f, 1.0f}, {7.0f, 1.0f, 7.0f}},
 		(Billboard) {8, {1.0f, 1.0f}, {8.0f, 1.0f, 8.0f}},
 		(Billboard) {9, {1.0f, 1.0f}, {9.0f, 1.0f, 9.0f}}
-	);
+	};
+
+	BatchDrawContext draw_context = init_billboard_draw_context(ARRAY_LENGTH(billboards), billboards);
 
 	draw_context.texture_set = init_texture_set(TexNonRepeating,
 		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,

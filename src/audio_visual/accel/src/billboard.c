@@ -108,20 +108,13 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 	if (num_visible != 0) draw_billboards(draw_context, camera, num_visible);
 }
 
-BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, ...) {
+BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, const Billboard* const billboards) {
 	BatchDrawContext draw_context = {
 		.buffers.cpu = init_list(num_billboards, Billboard),
 		.shader = init_shader(billboard_vertex_shader, billboard_fragment_shader)
 	};
 
-	draw_context.buffers.cpu.length = num_billboards;
-
-	va_list args;
-	va_start(args, num_billboards);
-	for (buffer_size_t i = 0; i < num_billboards; i++)
-		((Billboard*) (draw_context.buffers.cpu.data))[i] = va_arg(args, Billboard);
-	va_end(args);
-
+	push_array_to_list(&draw_context.buffers.cpu, billboards, num_billboards);
 	init_batch_draw_context_gpu_buffer(&draw_context, num_billboards, sizeof(Billboard));
 
 	return draw_context;

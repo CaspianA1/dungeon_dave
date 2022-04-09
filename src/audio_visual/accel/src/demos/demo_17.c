@@ -67,8 +67,8 @@ StateGL demo_17_init(void) {
 
 		.skybox = init_skybox("../assets/desert.bmp"),
 
-		.heightmap = (byte*) fortress_heightmap,
-		.map_size = {fortress_width, fortress_height}
+		.heightmap = (byte*) palace_heightmap,
+		.map_size = {palace_width, palace_height}
 	};
 
 	//////////
@@ -77,25 +77,26 @@ StateGL demo_17_init(void) {
 
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		scene_state.heightmap, (byte*) fortress_texture_id_map, scene_state.map_size);
+		scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size);
 
-	scene_state.billboard_draw_context = init_billboard_draw_context(
-		10,
-		(Billboard) {0, {1.0f, 1.0f}, {28.0f, 2.5f, 31.0f}}, // Health kits
-		(Billboard) {0, {1.0f, 1.0f}, {5.0f, 0.5f, 22.5f}},
+	const Billboard billboards[] = {
+		{0, {1.0f, 1.0f}, {28.0f, 2.5f, 31.0f}}, // Health kits
+		{0, {1.0f, 1.0f}, {5.0f, 0.5f, 22.5f}},
 
-		(Billboard) {1, {1.0f, 1.0f}, {12.5f, 0.5f, 38.5f}}, // Teleporters
-		(Billboard) {1, {1.0f, 1.0f}, {8.5f, 0.5f, 25.5f}},
+		{1, {1.0f, 1.0f}, {12.5f, 0.5f, 38.5f}}, // Teleporters
+		{1, {1.0f, 1.0f}, {8.5f, 0.5f, 25.5f}},
 
-		(Billboard) {2, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
-		(Billboard) {48, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
+		{2, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
+		{48, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
 
-		(Billboard) {61, {1.0f, 1.0f}, {6.5f, 0.5f, 21.5f}}, // Eddies
-		(Billboard) {61, {1.0f, 1.0f}, {3.5f, 0.5f, 24.5f}},
+		{61, {1.0f, 1.0f}, {6.5f, 0.5f, 21.5f}}, // Eddies
+		{61, {1.0f, 1.0f}, {3.5f, 0.5f, 24.5f}},
 
-		(Billboard) {76, {1.0f, 1.0f}, {3.0f, 1.5f, 9.5f}}, // Troopers
-		(Billboard) {76, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
-	);
+		{76, {1.0f, 1.0f}, {3.0f, 1.5f, 9.5f}}, // Troopers
+		{76, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
+	};
+
+	scene_state.billboard_draw_context = init_billboard_draw_context(ARRAY_LENGTH(billboards), billboards);
 
 	scene_state.billboard_draw_context.texture_set = init_texture_set(
 		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
@@ -115,20 +116,20 @@ StateGL demo_17_init(void) {
 	scene_state.sector_draw_context.texture_set = init_texture_set(
 		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 		// Fortress:
-		4, 0, 256, 256,
+		/* 4, 0, 256, 256,
 		"../../../../assets/walls/viney_bricks.bmp",
 		"../../../../assets/walls/marble.bmp",
 		"../../../../assets/walls/vines.bmp",
-		"../../../../assets/walls/stone_2.bmp"
+		"../../../../assets/walls/stone_2.bmp" */
 
 		// Palace:
-		/* 11, 0, 256, 256,
+		11, 0, 256, 256,
 		"../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
 		"../../../../assets/walls/window.bmp", "../../../../assets/walls/saqqara.bmp",
 		"../../../../assets/walls/sandstone.bmp", "../../../../assets/walls/cobblestone_3.bmp",
 		"../../../../assets/walls/horses.bmp", "../../../../assets/walls/mesa.bmp",
-		"../../../../assets/walls/arthouse_bricks.bmp" */
+		"../../../../assets/walls/arthouse_bricks.bmp"
 
 		// Pyramid:
 		/* 3, 0, 512, 512, "../../../../assets/walls/pyramid_bricks_4.bmp",
