@@ -236,13 +236,15 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set) {
 
 	////////// Blurring it, and then making a normal map out of it
 
-	const GaussianBlurContext blur_context = init_gaussian_blur_context(0.3f, 1, surfaces_w, surfaces_h);
+	const GaussianBlurContext blur_context = init_gaussian_blur_context(
+		constants.normal_mapping.blur.std_dev, constants.normal_mapping.blur.radius, surfaces_w, surfaces_h);
+
 	SDL_Surface* const blurred = blur_surface(cpu_side_surfaces, blur_context);
 
 	/* This reuses `cpu_side_surfaces` as a normal map, to save memory.
 	`cpu_side_surfaces` is considered out of scope after this. */
 	SDL_Surface* const normal_map = cpu_side_surfaces;
-	generate_normal_map(blurred, normal_map, 0.25f);
+	generate_normal_map(blurred, normal_map, constants.normal_mapping.intensity);
 
 	////////// Making a new texture on the GPU, and then writing the normal map into that
 

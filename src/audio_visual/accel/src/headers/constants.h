@@ -33,6 +33,11 @@ static const struct {
 		const vec2 warp_exps;
 	} shadow_mapping;
 
+	const struct {
+		const struct {const GLint radius; const GLfloat std_dev;} blur;
+		const GLfloat intensity;
+	} normal_mapping;
+
 	const struct { // All angles are in radians
 		const GLfloat eye_height, aabb_collision_box_size, tilt_correction_rate, friction;
 		const struct {const GLfloat fov, hori, vert, tilt;} init;
@@ -63,6 +68,11 @@ static const struct {
 	.shadow_mapping = {
 		.num_blur_passes = 2,
 		.warp_exps = {40.0f, 5.0f}
+	},
+
+	.normal_mapping = {
+		.blur = {.radius = 1, .std_dev = 0.3f},
+		.intensity = 0.25f
 	},
 
 	.camera = {
