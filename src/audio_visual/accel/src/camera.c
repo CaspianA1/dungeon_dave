@@ -228,7 +228,7 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 v
 
 	camera -> speed_xz_percent = combined_speed_xz_amount / constants.speeds.xz_max;
 
-	if (velocities[1] == 0.0f) { // Going in the red area results in a lot of slowdown, but only with pace
+	if (velocities[1] == 0.0f) {
 		camera -> pace = make_pace_function(
 			camera -> time_since_jump, constants.camera.pace.period,
 			constants.camera.pace.max_amplitude * camera -> speed_xz_percent);
