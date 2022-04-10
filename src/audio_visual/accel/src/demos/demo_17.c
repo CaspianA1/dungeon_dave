@@ -67,8 +67,8 @@ StateGL demo_17_init(void) {
 
 		.skybox = init_skybox("../assets/desert.bmp"),
 
-		.heightmap = (byte*) palace_heightmap,
-		.map_size = {palace_width, palace_height}
+		.heightmap = (byte*) architecture_heightmap,
+		.map_size = {architecture_width, architecture_height}
 	};
 
 	//////////
@@ -77,7 +77,7 @@ StateGL demo_17_init(void) {
 
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size);
+		scene_state.heightmap, (byte*) architecture_texture_id_map, scene_state.map_size);
 
 	const Billboard billboards[] = {
 		{0, {1.0f, 1.0f}, {28.0f, 2.5f, 31.0f}}, // Health kits
@@ -123,13 +123,13 @@ StateGL demo_17_init(void) {
 		"../../../../assets/walls/stone_2.bmp" */
 
 		// Palace:
-		11, 0, 256, 256,
+		/* 11, 0, 256, 256,
 		"../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
 		"../../../../assets/walls/alkadhib.bmp", "../../../../assets/walls/saqqara.bmp",
 		"../../../../assets/walls/sandstone.bmp", "../../../../assets/walls/cobblestone_3.bmp",
 		"../../../../assets/walls/horses.bmp", "../../../../assets/walls/mesa.bmp",
-		"../../../../assets/walls/arthouse_bricks.bmp"
+		"../../../../assets/walls/arthouse_bricks.bmp" */
 
 		// Pyramid:
 		/* 3, 0, 512, 512, "../../../../assets/walls/pyramid_bricks_4.bmp",
@@ -147,6 +147,14 @@ StateGL demo_17_init(void) {
 		"../../../../assets/walls/hieroglyphics.bmp",
 		"../../../../assets/walls/desert_snake.bmp",
 		"../../../../assets/wolf/colorstone.bmp" */
+
+		// Architecture:
+		5, 0, 256, 256,
+		"../../../../assets/walls/sand.bmp",
+		"../../../../assets/walls/marble.bmp",
+		"../../../../assets/walls/gold.bmp",
+		"../../../../assets/walls/greece.bmp",
+		"../../../../assets/walls/pyramid_bricks_4.bmp"
 	);
 
 	scene_state.face_normal_map_set = init_normal_map_set_from_texture_set(scene_state.sector_draw_context.texture_set);
