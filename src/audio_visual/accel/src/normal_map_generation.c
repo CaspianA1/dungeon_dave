@@ -11,26 +11,24 @@ static int limit_int_to_domain(const int val, const int lower, const int upper) 
 	else return val;
 }
 
-static void* read_surface_pixel(const SDL_Surface* const surface, const SDL_PixelFormat* const format, const int x, const int y) {
+static void* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y) {
 	sdl_pixel_component_t* const row = (sdl_pixel_component_t*) surface -> pixels + y * surface -> pitch;
-	return row + x * format -> BytesPerPixel;
+	return row + x * (int) sizeof(sdl_pixel_t);
 }
 
 // If a coordinate (x or y) is out of bounds, it is converted to the closest possible edge value.
-static void* edge_checked_read_surface_pixel(const SDL_Surface* const surface, const SDL_PixelFormat* const format, int x, int y) {
+static void* edge_checked_read_surface_pixel(const SDL_Surface* const surface, int x, int y) {
 	x = limit_int_to_domain(x, 0, surface -> w - 1);
 	y = limit_int_to_domain(y, 0, surface -> h - 1);
 
-	return read_surface_pixel(surface, format, x, y);
+	return read_surface_pixel(surface, x, y);
 }
 
-static float sobel_sample(SDL_Surface* const surface,
-	const SDL_PixelFormat* const format, const int x, const int y) {
-
-	const sdl_pixel_t pixel = *(sdl_pixel_t*) edge_checked_read_surface_pixel(surface, format, x, y);
+static float sobel_sample(SDL_Surface* const surface, const int x, const int y) {
+	const sdl_pixel_t pixel = *(sdl_pixel_t*) edge_checked_read_surface_pixel(surface, x, y);
 
 	sdl_pixel_component_t r, g, b;
-	SDL_GetRGB(pixel, format, &r, &g, &b);
+	SDL_GetRGB(pixel, surface -> format, &r, &g, &b);
 
 	// This equation is from https://en.wikipedia.org/wiki/Relative_luminance
 	const float luminance = r * 0.2126f + g * 0.7152f + b * 0.0722f; // This ranges from 0 to `max_byte_value`
@@ -46,10 +44,7 @@ of pixels to use those as heightmap values. */
 static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const normal_map, const float intensity) {
 	const int src_w = src -> w, src_h = src -> h;
 
-	const SDL_PixelFormat
-		*const src_format = src -> format,
-		*const dest_format = normal_map -> format;
-
+	const SDL_PixelFormat *const dest_format = normal_map -> format;
 	const float one_over_intensity = 1.0f / intensity;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
@@ -58,16 +53,16 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const norma
 			for (int y = 0; y < src_h; y++) {
 				for (int x = 0; x < src_w; x++) {
 					const float
-						tl = sobel_sample(src, src_format, x - 1, y - 1),
-						tm = sobel_sample(src, src_format, x,     y - 1),
-						tr = sobel_sample(src, src_format, x + 1, y - 1),
+						tl = sobel_sample(src, x - 1, y - 1),
+						tm = sobel_sample(src, x,     y - 1),
+						tr = sobel_sample(src, x + 1, y - 1),
 
-						ml = sobel_sample(src, src_format, x - 1, y),
-						mr = sobel_sample(src, src_format, x + 1, y),
+						ml = sobel_sample(src, x - 1,     y),
+						mr = sobel_sample(src, x + 1,     y),
 
-						bl = sobel_sample(src, src_format, x - 1, y + 1),
-						bm = sobel_sample(src, src_format, x,     y + 1),
-						br = sobel_sample(src, src_format, x + 1, y + 1);
+						bl = sobel_sample(src, x - 1, y + 1),
+						bm = sobel_sample(src, x,     y + 1),
+						br = sobel_sample(src, x + 1, y + 1);
 
 					vec3 normal = {
 						(-tl - ml * 2.0f - bl) + (tr + mr * 2.0f + br),
@@ -87,7 +82,7 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const norma
 						(sdl_pixel_component_t) normal[2]
 					);
 
-					*(sdl_pixel_t*) read_surface_pixel(normal_map, dest_format, x, y) = normal_vector_in_rgb_format;
+					*(sdl_pixel_t*) read_surface_pixel(normal_map, x, y) = normal_vector_in_rgb_format;
 				}
 			}
 		);
@@ -142,7 +137,7 @@ static void do_separable_gaussian_blur_pass(SDL_Surface* const src,
 						filter_pos[blur_is_vertical] += i; // If blur is vertical, `blur_is_vertical` equals 1; otherwise, 0
 
 						const sdl_pixel_t pixel = *(sdl_pixel_t*)
-							edge_checked_read_surface_pixel(src, src_format, filter_pos[0], filter_pos[1]);
+							edge_checked_read_surface_pixel(src, filter_pos[0], filter_pos[1]);
 
 						sdl_pixel_component_t r, g, b;
 						SDL_GetRGB(pixel, src_format, &r, &g, &b);
@@ -153,9 +148,7 @@ static void do_separable_gaussian_blur_pass(SDL_Surface* const src,
 						normalized_summed_channels[2] += b * one_over_max_byte_value_times_weight;
 					}
 
-					sdl_pixel_t* const dest_pixel = read_surface_pixel(dest, dest_format, x, y);
-
-					*dest_pixel = SDL_MapRGB(dest_format,
+					*(sdl_pixel_t*) read_surface_pixel(dest, x, y) = SDL_MapRGB(dest_format,
 						(sdl_pixel_component_t) (normalized_summed_channels[0] * constants.max_byte_value),
 						(sdl_pixel_component_t) (normalized_summed_channels[1] * constants.max_byte_value),
 						(sdl_pixel_component_t) (normalized_summed_channels[2] * constants.max_byte_value)
