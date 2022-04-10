@@ -31,7 +31,7 @@ const GLchar *const weapon_sprite_vertex_shader =
 		"vec2 weapon_corner = screen_corner * weapon_size_screen_space;\n"
 		"weapon_corner.x *= frame_width_over_height * inverse_screen_aspect_ratio;\n"
 
-		"weapon_corner.y += weapon_size_screen_space - 1.0f;\n" // Makes weapon touch bottom of screen
+		"weapon_corner.y += weapon_size_screen_space - 1.0f;\n" // Makes the weapon touch the bottom of the screen
 		"weapon_corner += pace;\n"
 
 		"gl_Position = vec4(weapon_corner, 0.0f, 1.0f);\n"
