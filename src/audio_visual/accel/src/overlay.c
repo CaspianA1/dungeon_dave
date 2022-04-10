@@ -15,7 +15,7 @@
 const GLchar *const weapon_sprite_vertex_shader =
 	"#version 330 core\n"
 
-	"uniform float frame_width_over_height, weapon_size_screen_space;\n"
+	"uniform float frame_width_over_height, weapon_size_screen_space, inverse_screen_aspect_ratio;\n"
 	"uniform vec2 pace;\n"
 
 	"out vec2 fragment_UV;\n"
@@ -29,7 +29,8 @@ const GLchar *const weapon_sprite_vertex_shader =
 		"vec2 screen_corner = screen_corners[gl_VertexID];\n"
 
 		"vec2 weapon_corner = screen_corner * weapon_size_screen_space;\n"
-		"weapon_corner.x *= frame_width_over_height;\n"
+		"weapon_corner.x *= frame_width_over_height * inverse_screen_aspect_ratio;\n"
+
 		"weapon_corner.y += weapon_size_screen_space - 1.0f;\n" // Makes weapon touch bottom of screen
 		"weapon_corner += pace;\n"
 
@@ -56,7 +57,8 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 	const GLsizei frames_across, const GLsizei frames_down, const GLsizei total_frames) {
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
-	and here, but this makes the code much more readable */
+	and here, but this makes the code much more readable. TODO: perhaps
+	query data about the texture set to figure out the frame size. */
 
 	SDL_Surface* const peek_surface = init_surface(spritesheet_path);
 	const GLsizei frame_size[2] = {peek_surface -> w / frames_across, peek_surface -> h / frames_down};
@@ -125,14 +127,15 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	use_shader(ws.shader);
 
-	static GLint pace_id, frame_index_id;
-
+	static GLint inverse_screen_aspect_ratio_id, pace_id, frame_index_id;
 	static bool first_call = true;
 
 	if (first_call) {
+		// TODO: update these uniforms if the weapon changes
 		INIT_UNIFORM_VALUE(frame_width_over_height, ws.shader, 1f, ws.frame_width_over_height);
 		INIT_UNIFORM_VALUE(weapon_size_screen_space, ws.shader, 1f, ws.size);
 
+		INIT_UNIFORM(inverse_screen_aspect_ratio, ws.shader);
 		INIT_UNIFORM(pace, ws.shader);
 		INIT_UNIFORM(frame_index, ws.shader);
 
@@ -152,6 +155,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	const GLfloat across = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2 to magnitude / 2
 	const GLfloat down = (fabsf(across) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
 
+	UPDATE_UNIFORM(inverse_screen_aspect_ratio, 1f, (GLfloat) event -> screen_size[1] / event -> screen_size[0]);
 	UPDATE_UNIFORM(pace, 2f, across, down);
 	UPDATE_UNIFORM(frame_index, 1ui, ws.curr_frame);
 

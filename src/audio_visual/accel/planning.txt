@@ -82,10 +82,6 @@ Chromebook bugs:
 - Sometimes, mouse control does not work when using the keyboard
 - Framerate drop when using the big monitor + optimized + full screen
 
-Weapon sprite:
-- Put weapon shaders in shaders.c
-- Rescale the weapon to make it not stretched by the screen resolution
-
 General future components:
 - Blit 2D sprite to whole screen
 - Use more of the cglm functions in `update_camera`, or make my own
