@@ -8,17 +8,18 @@ Some TODOs for a recent next time:
 
 Final lighting model:
 - Ambient overall light, diffuse, specular - done
-- No perlin map - done
-- A shadow map also based on that light source - done
+- A shadow map also based on a sun light source - done
 - Not-too-strong, penumbra-heavy shadows
 	(just for sectors, and only recompute for dynamic sectors when they're in view or moving)
 - Ambient occlusion through an occlusion map
-- One global light source, like a sun (that involves everything above)
 - For a sun bounding box, imagine a rotated OBB encompassing an AABB that represents the world (make a demo out of that):
 	- First, make an encompassing OBB around a 2D AABB box
 	- The box doesn't need to encompass the AABB at first, it just needs to be rotated
 	- It can then be resized to the AABB area after
 	- Then, expand that to 3D
+	- Manage shadow map resolution better for bigger scenes via cascaded shadow maps: https://learnopengl.com/Guest-Articles/2021/CSM
+	- A compressed texture for the shadow map, to save space?
+	- EVSM with only the positive term may be possible: https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
 
 Other random ideas:
 - A map maker. An init json file that specifies textures and dimensions;
@@ -32,19 +33,16 @@ Other random ideas:
 - Catch more warnings with -Weverything
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit)
 - File paths may not work on Windows
-- Some steeply angled shadows exhibit aliasing
 - Pass in texture parameters through a bitmask
 - Compile modules separarely, and then link them all together with a given demo
-- Manage shadow map resolution better for bigger scenes via cascaded shadow maps
 - Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry; perhaps more antialiasing for nearest?)
-- A compressed texture for the shadow map, to save space?
 - Use the bit macros more
+- More macros for generation of objects, like GL_INIT(Buffer) for example
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
 - Eventually, put the contents of VoxelPhysicsContext inside the camera
 - Use fminf and fmaxf more
 - Perhaps I can uninvert the light direction if `camera_pos_delta_world_space` is inverted
 - Gauge the number of multisample samples based on a runtime constant
-- EVSM with only the positive term may be possible: https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
 - Putting the face texture set at a resolution of 2048x2048 or above turns all of the billboards into this red-green gradient (above 4096x4096, out of OpenGL memory)
 - Some color banding at the start of the fortress level for whatever reason
 - Remove all variadically defined functions and take lists instead; and with that, remove the LIST_INITIALIZER macro
@@ -61,7 +59,6 @@ Normal mapping:
 - Find a way to remove the stitches between normal maps
 
 A better shading model:
-- Macros for generation of objects, like GL_INIT(Buffer) for example
 - Share code between shaders
 - Read in shaders from files
 - Share shader uniforms via uniform buffer objects
@@ -87,7 +84,7 @@ Chromebook bugs:
 
 Weapon sprite:
 - Put weapon shaders in shaders.c
-- Rescale the weapon to make it not warped by the screen resolution
+- Rescale the weapon to make it not stretched by the screen resolution
 
 General future components:
 - Blit 2D sprite to whole screen

@@ -126,7 +126,6 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	use_shader(ws.shader);
 
 	static GLint pace_id, frame_index_id;
-	const GLfloat max_movement_magitude = 0.2f, time_for_half_movement_cycle = 0.5f; // TODO: put these in constants.c
 
 	static bool first_call = true;
 
@@ -147,8 +146,8 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 		smooth_speed_xz_percent = circular_mapping_from_zero_to_one(camera -> speed_xz_percent);
 
 	const GLfloat
-		time_pace = sinf(curr_time * PI / time_for_half_movement_cycle),
-		weapon_movement_magnitude = max_movement_magitude * smooth_speed_xz_percent;
+		time_pace = sinf(curr_time * PI / constants.weapon_sprite.time_for_half_movement_cycle),
+		weapon_movement_magnitude = constants.weapon_sprite.max_movement_magnitude * smooth_speed_xz_percent;
 
 	const GLfloat across = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2 to magnitude / 2
 	const GLfloat down = (fabsf(across) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude

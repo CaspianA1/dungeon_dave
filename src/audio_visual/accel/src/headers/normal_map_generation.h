@@ -8,7 +8,7 @@ sobel_sample, generate_normal_map, compute_1D_gaussian_kernel, do_separable_gaus
 init_gaussian_blur_context, deinit_gaussian_blur_context, blur_surface */
 
 /* The Gaussian blur performed is separable, so it needs a temporary surface for the horizontal pass.
-TODO: make this struct private in some way from users of `normal_map_generation.c`. */
+TODO: make this struct private in some way from users of the .c file */
 typedef struct {
     const struct {
         SDL_Surface* const horizontal;

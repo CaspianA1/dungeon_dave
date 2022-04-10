@@ -29,6 +29,10 @@ static const struct {
 	const byte max_byte_value;
 
 	const struct {
+		const GLfloat max_movement_magnitude, time_for_half_movement_cycle;
+	} weapon_sprite;
+
+	const struct {
 		const byte num_blur_passes;
 		const vec2 warp_exps;
 	} shadow_mapping;
@@ -64,6 +68,11 @@ static const struct {
 } constants = {
 	.max_byte_value = 255,
 	.almost_zero = 0.001f,
+
+	.weapon_sprite = {
+		.max_movement_magnitude = 0.2f,
+		.time_for_half_movement_cycle = 0.5f
+	},
 
 	.shadow_mapping = {
 		.num_blur_passes = 2,
