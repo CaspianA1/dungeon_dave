@@ -5,6 +5,12 @@
 #include "headers/constants.h"
 #include "texture.c"
 
+static int limit_int_to_domain(const int val, const int lower, const int upper) {
+	if (val < lower) return lower;
+	else if (val > upper) return upper;
+	else return val;
+}
+
 static void* read_surface_pixel(const SDL_Surface* const surface, const SDL_PixelFormat* const format, const int x, const int y) {
 	sdl_pixel_component_t* const row = (sdl_pixel_component_t*) surface -> pixels + y * surface -> pitch;
 	return row + x * format -> BytesPerPixel;
@@ -12,13 +18,8 @@ static void* read_surface_pixel(const SDL_Surface* const surface, const SDL_Pixe
 
 // If a coordinate (x or y) is out of bounds, it is converted to the closest possible edge value.
 static void* edge_checked_read_surface_pixel(const SDL_Surface* const surface, const SDL_PixelFormat* const format, int x, int y) {
-	const int w = surface -> w, h = surface -> h;
-
-	if (x < 0) x = 0;
-	else if (x >= w) x = w - 1;
-
-	if (y < 0) y = 0;
-	else if (y >= h) y = h - 1;
+	x = limit_int_to_domain(x, 0, surface -> w - 1);
+	y = limit_int_to_domain(y, 0, surface -> h - 1);
 
 	return read_surface_pixel(surface, format, x, y);
 }

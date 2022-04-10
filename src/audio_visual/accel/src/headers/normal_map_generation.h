@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL.h>
 
-/* Excluded: read_surface_pixel, edge_checked_read_surface_pixel,
+/* Excluded: limit_int_to_domain, read_surface_pixel, edge_checked_read_surface_pixel,
 sobel_sample, generate_normal_map, compute_1D_gaussian_kernel, do_separable_gaussian_blur_pass,
 init_gaussian_blur_context, deinit_gaussian_blur_context, blur_surface */
 
