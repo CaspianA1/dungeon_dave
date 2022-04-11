@@ -97,15 +97,50 @@ StateGL demo_17_init(void) {
 		{76, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
 	};
 
+	const GLchar *const still_billboard_textures[] = {
+		"../../../../assets/objects/health_kit.bmp",
+		"../../../../assets/objects/teleporter.bmp"
+	},
+
+	*const still_face_textures[] = {
+		// Palace:
+		"../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
+		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
+		"../../../../assets/walls/alkadhib.bmp", "../../../../assets/walls/saqqara.bmp",
+		"../../../../assets/walls/sandstone.bmp", "../../../../assets/walls/cobblestone_3.bmp",
+		"../../../../assets/walls/horses.bmp", "../../../../assets/walls/mesa.bmp",
+		"../../../../assets/walls/arthouse_bricks.bmp"
+
+		// Pyramid:
+		/* "../../../../assets/walls/pyramid_bricks_4.bmp",
+		"../../../../assets/walls/greece.bmp", "../../../../assets/walls/saqqara.bmp" */
+
+		// Fortress:
+		/* "../../../../assets/walls/viney_bricks.bmp", "../../../../assets/walls/marble.bmp",
+		"../../../../assets/walls/vines.bmp", "../../../../assets/walls/stone_2.bmp" */
+
+		// Tiny:
+		// "../../../../assets/walls/mesa.bmp", "../../../../assets/walls/hieroglyph.bmp"
+
+		// Level 1:
+		/* "../../../../assets/walls/sand.bmp", "../../../../assets/walls/cobblestone_2.bmp",
+		"../../../../assets/walls/cobblestone_3.bmp", "../../../../assets/walls/stone_2.bmp",
+		"../../../../assets/walls/pyramid_bricks_3.bmp", "../../../../assets/walls/hieroglyphics.bmp",
+		"../../../../assets/walls/desert_snake.bmp", "../../../../assets/wolf/colorstone.bmp" */
+
+		// Architecture:
+		/* "../../../../assets/walls/sand.bmp",
+		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/gold.bmp",
+		"../../../../assets/walls/greece.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp" */
+	};
+
 	scene_state.billboard_draw_context = init_billboard_draw_context(ARRAY_LENGTH(billboards), billboards);
 
 	scene_state.billboard_draw_context.texture_set = init_texture_set(
 		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		2, 4, 256, 256,
+		ARRAY_LENGTH(still_billboard_textures), 4, 256, 256,
 
-		"../../../../assets/objects/health_kit.bmp",
-		"../../../../assets/objects/teleporter.bmp",
-
+		still_billboard_textures,
 		"../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46,
 		"../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5,
 		"../../../../assets/spritesheets/eddie.bmp", 23, 1, 23,
@@ -116,46 +151,7 @@ StateGL demo_17_init(void) {
 
 	scene_state.sector_draw_context.texture_set = init_texture_set(
 		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		// Fortress:
-		/* 4, 0, 256, 256,
-		"../../../../assets/walls/viney_bricks.bmp",
-		"../../../../assets/walls/marble.bmp",
-		"../../../../assets/walls/vines.bmp",
-		"../../../../assets/walls/stone_2.bmp" */
-
-		// Palace:
-		11, 0, 256, 256,
-		"../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
-		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
-		"../../../../assets/walls/alkadhib.bmp", "../../../../assets/walls/saqqara.bmp",
-		"../../../../assets/walls/sandstone.bmp", "../../../../assets/walls/cobblestone_3.bmp",
-		"../../../../assets/walls/horses.bmp", "../../../../assets/walls/mesa.bmp",
-		"../../../../assets/walls/arthouse_bricks.bmp"
-
-		// Pyramid:
-		/* 3, 0, 512, 512, "../../../../assets/walls/pyramid_bricks_4.bmp",
-		"../../../../assets/walls/greece.bmp", "../../../../assets/walls/saqqara.bmp" */
-
-		// Tiny:
-		// 2, 0, 64, 64, "../../../../assets/walls/mesa.bmp", "../../../../assets/walls/hieroglyph.bmp"
-
-		// Level 1:
-		/* 8, 0, 256, 256, "../../../../assets/walls/sand.bmp",
-		"../../../../assets/walls/cobblestone_2.bmp",
-		"../../../../assets/walls/cobblestone_3.bmp",
-		"../../../../assets/walls/stone_2.bmp",
-		"../../../../assets/walls/pyramid_bricks_3.bmp",
-		"../../../../assets/walls/hieroglyphics.bmp",
-		"../../../../assets/walls/desert_snake.bmp",
-		"../../../../assets/wolf/colorstone.bmp" */
-
-		// Architecture:
-		/* 5, 0, 256, 256,
-		"../../../../assets/walls/sand.bmp",
-		"../../../../assets/walls/marble.bmp",
-		"../../../../assets/walls/gold.bmp",
-		"../../../../assets/walls/greece.bmp",
-		"../../../../assets/walls/pyramid_bricks_4.bmp" */
+		ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures
 	);
 
 	scene_state.face_normal_map_set = init_normal_map_set_from_texture_set(scene_state.sector_draw_context.texture_set);

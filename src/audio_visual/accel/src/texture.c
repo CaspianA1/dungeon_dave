@@ -99,12 +99,12 @@ GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 }
 
 static void init_still_subtextures_in_texture_set(const GLsizei num_still_subtextures,
-	SDL_Surface* const rescaled_surface, va_list args) {
+	const GLchar* const* const still_subtexture_paths, SDL_Surface* const rescaled_surface) {
 
 	const GLsizei correct_w = rescaled_surface -> w, correct_h = rescaled_surface -> h;
 
 	for (GLsizei i = 0; i < num_still_subtextures; i++) {
-		SDL_Surface *const surface = init_surface(va_arg(args, GLchar*)), *surface_with_right_size;
+		SDL_Surface *const surface = init_surface(still_subtexture_paths[i]), *surface_with_right_size;
 
 		if (surface -> w != correct_w || surface -> h != correct_h) {
 			SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
@@ -156,23 +156,21 @@ static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_
 	}
 }
 
-// Unanimated textures should go first when passed in variadically
 GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
-	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h, ...) {
+	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h,
+	const GLchar* const* const still_subtexture_paths, ...) {
 
 	if (num_still_subtextures > MAX_NUM_SECTOR_SUBTEXTURES)
 		fail("load textures; too many still subtextures", TextureIDIsTooLarge);
 
 	va_list args, args_copy;
-	va_start(args, rescale_h);
+	va_start(args, still_subtexture_paths);
 	va_copy(args_copy, args);
 
 	////////// Getting number of animated frames for all animations
 
 	GLsizei num_animated_frames = 0; // A frame is a subtexture
-
-	for (GLsizei i = 0; i < num_still_subtextures; i++, va_arg(args_copy, GLchar*)); // Discarding still subtexture args
 
 	for (GLsizei i = 0; i < num_animation_sets; i++) {
 		va_arg(args_copy, GLchar*); // Discarding path, frames across, and frames down args
@@ -196,7 +194,7 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 
 	////////// Filling array texture with still and animated subtextures
 
-	init_still_subtextures_in_texture_set(num_still_subtextures, rescaled_surface, args);
+	init_still_subtextures_in_texture_set(num_still_subtextures, still_subtexture_paths, rescaled_surface);
 	init_animated_subtextures_in_texture_set(num_animated_frames, num_still_subtextures, rescaled_surface, args);
 	glGenerateMipmap(TexSet);
 

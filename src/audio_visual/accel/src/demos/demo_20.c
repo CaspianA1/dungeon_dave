@@ -38,11 +38,12 @@ StateGL demo_20_init(void) {
 		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 		3, 2, 64, 64,
 
-		// "../../../../assets/objects/hot_dog.bmp",
-		"../../../../assets/walls/hieroglyphics.bmp",
-
-		"../../../../assets/objects/teleporter.bmp",
-		"../../../../assets/objects/robot.bmp",
+		(const GLchar*[]) {
+			// "../../../../assets/objects/hot_dog.bmp",
+			"../../../../assets/walls/hieroglyphics.bmp",
+			"../../../../assets/objects/teleporter.bmp",
+			"../../../../assets/objects/robot.bmp"
+		},
 
 		"../../../../assets/spritesheets/metroid.bmp", 2, 2, 4,
 		"../../../../assets/spritesheets/bogo.bmp", 2, 3, 6
