@@ -39,7 +39,6 @@ Other random ideas:
 - Compile modules separarely, and then link them all together with a given demo
 - Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry; perhaps more antialiasing for nearest?)
 - Use the bit macros more
-- More macros for generation of objects, like GL_INIT(Buffer) for example
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
 - Eventually, put the contents of VoxelPhysicsContext inside the camera
 - Use fminf and fmaxf more
@@ -47,7 +46,7 @@ Other random ideas:
 - Gauge the number of multisample samples based on a runtime constant
 - Putting the face texture set at a resolution of 2048x2048 or above turns all of the billboards into this red-green gradient (above 4096x4096, out of OpenGL memory)
 - Some color banding at the start of the fortress level for whatever reason
-- Remove all variadically defined functions and take lists instead; and with that, remove the LIST_INITIALIZER macro
+- Remove all variadically defined functions and take lists or arrays instead
 - One VAO per draw context as well - done as a VertexSpecification struct, or something like that
 - A LevelDescription struct that then a SceneState (or some other) struct uses to generate sectors, a shadow map, etc.
 	If levels come from C files, put those directly in files; otherwise, JSON will be turned into a LevelDescription.

@@ -71,9 +71,8 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 			OPENGL_HUD_MAG_FILTER, OPENGL_HUD_MIN_FILTER, 0, 1,
 			(GLsizei) (frame_size[0] * texture_rescale_factor),
 			(GLsizei) (frame_size[1] * texture_rescale_factor),
-
-			NULL, animation_spec.spritesheet_path, animation_spec.frames_across,
-			animation_spec.frames_down, animation_spec.total_frames),
+			NULL, &animation_spec
+		),
 
 		// TODO: for multiple weapons, share this shader
 		.shader = init_shader(weapon_sprite_vertex_shader, weapon_sprite_fragment_shader),

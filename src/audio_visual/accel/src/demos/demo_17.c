@@ -98,7 +98,7 @@ StateGL demo_17_init(void) {
 		{76, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
 	};
 
-	const GLchar *const still_billboard_textures[] = {
+	const GLchar *const still_billboard_texture_paths[] = {
 		"../../../../assets/objects/health_kit.bmp",
 		"../../../../assets/objects/teleporter.bmp"
 	},
@@ -135,24 +135,26 @@ StateGL demo_17_init(void) {
 		"../../../../assets/walls/greece.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp" */
 	};
 
+	const AnimationSpec billboard_animation_specs[] = {
+		{"../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46},
+		{"../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5},
+		{"../../../../assets/spritesheets/eddie.bmp", 23, 1, 23},
+		{"../../../../assets/spritesheets/trooper.bmp", 33, 1, 33}
+	};
+
 	scene_state.billboard_draw_context = init_billboard_draw_context(ARRAY_LENGTH(billboards), billboards);
 
 	scene_state.billboard_draw_context.texture_set = init_texture_set(
 		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		ARRAY_LENGTH(still_billboard_textures), 4, 256, 256,
-
-		still_billboard_textures,
-		"../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46,
-		"../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5,
-		"../../../../assets/spritesheets/eddie.bmp", 23, 1, 23,
-		"../../../../assets/spritesheets/trooper.bmp", 33, 1, 33
+		ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_specs), 256, 256,
+		still_billboard_texture_paths, billboard_animation_specs
 	);
 
 	//////////
 
 	scene_state.sector_draw_context.texture_set = init_texture_set(
 		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures
+		ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures, NULL
 	);
 
 	scene_state.face_normal_map_set = init_normal_map_set_from_texture_set(scene_state.sector_draw_context.texture_set);

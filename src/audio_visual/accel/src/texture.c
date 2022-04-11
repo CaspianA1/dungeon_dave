@@ -123,26 +123,26 @@ static void init_still_subtextures_in_texture_set(const GLsizei num_still_subtex
 	}
 }
 
-static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_frames,
-	const GLsizei num_still_subtextures, SDL_Surface* const rescaled_surface, va_list args) {
+static void init_animated_subtextures_in_texture_set(
+	const GLsizei num_animated_frames, const GLsizei num_still_subtextures,
+	const AnimationSpec* const animation_specs, SDL_Surface* const rescaled_surface) {
 
-	for (GLsizei animation_frame_index = num_still_subtextures; animation_frame_index < num_animated_frames;) {
-		SDL_Surface* const spritesheet_surface = init_surface(va_arg(args, GLchar*));
+	for (GLsizei animation_spec_index = 0, animation_frame_index = num_still_subtextures;
+		animation_frame_index < num_animated_frames; animation_spec_index++) {
+
+		const AnimationSpec animation_spec = animation_specs[animation_spec_index];
+
+		SDL_Surface* const spritesheet_surface = init_surface(animation_spec.spritesheet_path);
 		SDL_SetSurfaceBlendMode(spritesheet_surface, SDL_BLENDMODE_NONE);
 
-		const GLsizei
-			frames_across = va_arg(args, GLsizei),
-			frames_down = va_arg(args, GLsizei),
-			total_frames = va_arg(args, GLsizei);
-
 		SDL_Rect spritesheet_frame_area = {
-			.w = spritesheet_surface -> w / frames_across,
-			.h = spritesheet_surface -> h / frames_down
+			.w = spritesheet_surface -> w / animation_spec.frames_across,
+			.h = spritesheet_surface -> h / animation_spec.frames_down
 		};
 
-		for (GLsizei frame_index = 0; frame_index < total_frames; frame_index++, animation_frame_index++) {
-			spritesheet_frame_area.x = (frame_index % frames_across) * spritesheet_frame_area.w;
-			spritesheet_frame_area.y = (frame_index / frames_across) * spritesheet_frame_area.h;
+		for (GLsizei frame_index = 0; frame_index < animation_spec.total_frames; frame_index++, animation_frame_index++) {
+			spritesheet_frame_area.x = (frame_index % animation_spec.frames_across) * spritesheet_frame_area.w;
+			spritesheet_frame_area.y = (frame_index / animation_spec.frames_across) * spritesheet_frame_area.h;
 
 			SDL_BlitScaled(spritesheet_surface, &spritesheet_frame_area, rescaled_surface, NULL);
 
@@ -159,27 +159,13 @@ static void init_animated_subtextures_in_texture_set(const GLsizei num_animated_
 GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h,
-	const GLchar* const* const still_subtexture_paths, ...) {
+	const GLchar* const* const still_subtexture_paths, const AnimationSpec* const animation_specs) {
 
 	if (num_still_subtextures > MAX_NUM_SECTOR_SUBTEXTURES)
 		fail("load textures; too many still subtextures", TextureIDIsTooLarge);
 
-	va_list args, args_copy;
-	va_start(args, still_subtexture_paths);
-	va_copy(args_copy, args);
-
-	////////// Getting number of animated frames for all animations
-
 	GLsizei num_animated_frames = 0; // A frame is a subtexture
-
-	for (GLsizei i = 0; i < num_animation_sets; i++) {
-		va_arg(args_copy, GLchar*); // Discarding path, frames across, and frames down args
-		va_arg(args_copy, GLsizei);
-		va_arg(args_copy, GLsizei);
-		num_animated_frames += va_arg(args_copy, GLsizei); // Adding num frames for one animation set
-	}
-
-	va_end(args_copy);
+	for (GLsizei i = 0; i < num_animation_sets; i++) num_animated_frames += animation_specs[i].total_frames;
 
 	////////// Defining texture, and a rescaled surface
 
@@ -195,13 +181,12 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 	////////// Filling array texture with still and animated subtextures
 
 	init_still_subtextures_in_texture_set(num_still_subtextures, still_subtexture_paths, rescaled_surface);
-	init_animated_subtextures_in_texture_set(num_animated_frames, num_still_subtextures, rescaled_surface, args);
+	init_animated_subtextures_in_texture_set(num_animated_frames, num_still_subtextures, animation_specs, rescaled_surface);
 	glGenerateMipmap(TexSet);
 
 	////////// Deinitialization
 
 	deinit_surface(rescaled_surface);
-	va_end(args);
 
 	return texture;
 }

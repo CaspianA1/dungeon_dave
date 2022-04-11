@@ -5,6 +5,7 @@
 #include "../camera.c"
 #include "../event.c"
 #include "../batch_draw_context.c"
+#include "../animation.c"
 
 // Batched + culled billboard drawing. Only using instancing for glVertexAttribDivisor.
 
@@ -32,21 +33,24 @@ StateGL demo_20_init(void) {
 		(Billboard) {9, {1.0f, 1.0f}, {9.0f, 1.0f, 9.0f}}
 	};
 
+	const GLchar *const still_billboard_texture_paths[] = {
+		// "../../../../assets/objects/hot_dog.bmp",
+		"../../../../assets/walls/hieroglyphics.bmp",
+		"../../../../assets/objects/teleporter.bmp",
+		"../../../../assets/objects/robot.bmp"
+	};
+
+	const AnimationSpec billboard_animation_specs[] = {
+		{"../../../../assets/spritesheets/metroid.bmp", 2, 2, 4},
+		{"../../../../assets/spritesheets/bogo.bmp", 2, 3, 6}
+	};
+
 	BatchDrawContext draw_context = init_billboard_draw_context(ARRAY_LENGTH(billboards), billboards);
 
 	draw_context.texture_set = init_texture_set(TexNonRepeating,
 		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		3, 2, 64, 64,
-
-		(const GLchar*[]) {
-			// "../../../../assets/objects/hot_dog.bmp",
-			"../../../../assets/walls/hieroglyphics.bmp",
-			"../../../../assets/objects/teleporter.bmp",
-			"../../../../assets/objects/robot.bmp"
-		},
-
-		"../../../../assets/spritesheets/metroid.bmp", 2, 2, 4,
-		"../../../../assets/spritesheets/bogo.bmp", 2, 3, 6
+		ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_specs), 64, 64,
+		still_billboard_texture_paths, billboard_animation_specs
 	);
 
 	SceneState* const scene_state = malloc(sizeof(SceneState));
