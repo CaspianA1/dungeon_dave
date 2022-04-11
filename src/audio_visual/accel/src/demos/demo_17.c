@@ -1,14 +1,13 @@
 #include "../utils.c"
 #include "../skybox.c"
 #include "../data/maps.c"
-
 #include "../sector.c"
 #include "../billboard.c"
 #include "../camera.c"
 #include "../event.c"
 #include "../weapon_sprite.c"
+#include "../animation.c"
 #include "../shadow_map.c"
-
 #include "../normal_map_generation.c"
 
 typedef struct {
@@ -42,9 +41,11 @@ StateGL demo_17_init(void) {
 			0.518362f, -1.225221f
 		),
 
-		.weapon_sprite = init_weapon_sprite(0.5f, 2.0f, 0.07f, "../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8),
-		// .weapon_sprite = init_weapon_sprite(0.65f, 2.0f, 0.016f, "../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22),
-		// .weapon_sprite = init_weapon_sprite(0.65f, 2.0f, 0.035f, "../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59),
+		.weapon_sprite = init_weapon_sprite(
+			// 0.5f, 2.0f, 0.07f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
+			0.65f, 2.0f, 0.016f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
+			// 0.65f, 2.0f, 0.035f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
+		),
 
 		.billboard_animations = LIST_INITIALIZER(animation) (4,
 			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
