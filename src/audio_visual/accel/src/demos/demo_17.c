@@ -42,9 +42,9 @@ StateGL demo_17_init(void) {
 		),
 
 		.weapon_sprite = init_weapon_sprite(
-			// 0.5f, 2.0f, 0.07f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
-			0.65f, 2.0f, 0.016f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
-			// 0.65f, 2.0f, 0.035f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
+			// 0.6f, 2.0f, 0.07f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
+			0.75f, 2.0f, 0.016f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
+			// 0.75f, 2.0f, 0.035f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
 		),
 
 		.billboard_animations = LIST_INITIALIZER(animation) (4,
