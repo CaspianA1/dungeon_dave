@@ -3,7 +3,7 @@
 
 #include "headers/list.h"
 
-List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size) {
+static List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size) {
 	return (List) {
 		malloc(init_alloc * item_size),
 		item_size,
