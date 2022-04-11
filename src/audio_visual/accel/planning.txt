@@ -22,8 +22,10 @@ Final lighting model:
 	- EVSM with only the positive term may be possible: https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
 
 Other random ideas:
-- A map maker. An init json file that specifies textures and dimensions;
-	draw/erase modes, line mode, export, and choose heights and textures
+- A map maker; An init json file that specifies textures and dimensions;
+	draw/erase modes, line mode, export, and choose heights and textures.
+	Or simpler than that, and just height + texture mode, and import/export just the map part of a JSON file.
+	Will still have to read textures from the JSON file, and parse out the map. Perhaps use a full JSON parser for that.
 - More efficiently set statemap bit ranges, maybe
 - Camera var names to yaw, pitch, and roll (maybe)
 - Billboard lighting that matches the sector lighting (share uniforms via a uniform buffer object)
@@ -53,7 +55,7 @@ Other random ideas:
 	are then not easily editable.
 
 Normal mapping:
-- Improper EVSM light coverage leads to some in-shadow areas having bumps on them
+- Improper EVSM light coverage leads to some in-shadow areas having bumps on them (this may not make much of a difference)
 - Unshadowed areas have no bumps (or is that okay?)
 - Mipmaps of normal maps are not normalized, and they disappear at lower mip levels
 - Find a way to remove the stitches between normal maps
