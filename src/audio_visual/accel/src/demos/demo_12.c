@@ -87,7 +87,7 @@ OldSector form_sector_area(OldSector sector, const StateMap traversed_points,
 	byte top_right_corner = sector.origin[0];
 
 	while (top_right_corner < map_width
-		&& *map_point((byte*) map, top_right_corner, sector.origin[1], map_width) == sector.height
+		&& sample_map_point(map, top_right_corner, sector.origin[1], map_width) == sector.height
 		&& !get_statemap_bit(traversed_points, top_right_corner, sector.origin[1])) {
 
 		sector.size[0]++;
@@ -98,7 +98,7 @@ OldSector form_sector_area(OldSector sector, const StateMap traversed_points,
 	for (byte y = sector.origin[1]; y < map_height; y++, sector.size[1]++) {
 		for (byte x = sector.origin[0]; x < top_right_corner; x++) {
 			// If consecutive heights didn't continue
-			if (*map_point((byte*) map, x, y, map_width) != sector.height)
+			if (sample_map_point(map, x, y, map_width) != sector.height)
 				goto clear_map_area;
 		}
 	}
@@ -126,7 +126,7 @@ OldSectorList generate_sectors_from_heightmap(const byte* const heightmap,
 		for (byte x = 0; x < map_width; x++) {
 			if (get_statemap_bit(traversed_points, x, y)) continue;
 
-			const byte height = *map_point((byte*) heightmap, x, y, map_width);
+			const byte height = sample_map_point(heightmap, x, y, map_width);
 			const OldSector seed_area = {.height = height, .origin = {x, y}, .size = {0, 0}};
 			const OldSector expanded_area = form_sector_area(seed_area, traversed_points, heightmap, map_width, map_height);
 			push_ptr_to_list(&sector_list.list, &expanded_area);
@@ -171,7 +171,7 @@ void init_sector_list_vbo(OldSectorList* const sector_list) {
 	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) total_bytes, vertices, GL_STATIC_DRAW);
 }
 
-StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, const byte map_height) {
+StateGL configurable_demo_12_init(const byte* const heightmap, const byte map_width, const byte map_height) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0};
 
 	OldSectorList sector_list = generate_sectors_from_heightmap(heightmap, map_width, map_height);
@@ -190,7 +190,7 @@ StateGL configurable_demo_12_init(byte* const heightmap, const byte map_width, c
 }
 
 StateGL demo_12_palace_init(void) {
-	StateGL sgl = configurable_demo_12_init((byte*) palace_heightmap, palace_width, palace_height);
+	StateGL sgl = configurable_demo_12_init((const byte*) palace_heightmap, palace_width, palace_height);
 
 	sgl.num_textures = 1; // 14
 	sgl.textures = init_plain_textures(sgl.num_textures,
@@ -216,21 +216,21 @@ StateGL demo_12_palace_init(void) {
 }
 
 StateGL demo_12_tpt_init(void) {
-	StateGL sgl = configurable_demo_12_init((byte*) tpt_heightmap, tpt_width, tpt_height);
+	StateGL sgl = configurable_demo_12_init((const byte*) tpt_heightmap, tpt_width, tpt_height);
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/pyramid_bricks_2.bmp", TexRepeating);
 	return sgl;
 }
 
 StateGL demo_12_pyramid_init(void) {
-	StateGL sgl = configurable_demo_12_init((byte*) pyramid_heightmap, pyramid_width, pyramid_height);
+	StateGL sgl = configurable_demo_12_init((const byte*) pyramid_heightmap, pyramid_width, pyramid_height);
 	sgl.num_textures = 1;
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/greece.bmp", TexRepeating);
 	return sgl;
 }
 
 StateGL demo_12_maze_init(void) {
-	StateGL sgl = configurable_demo_12_init((byte*) maze_heightmap, maze_width, maze_height);
+	StateGL sgl = configurable_demo_12_init((const byte*) maze_heightmap, maze_width, maze_height);
 	sgl.num_textures = 1; // ivy
 	sgl.textures = init_plain_textures(sgl.num_textures, "../../../../assets/walls/ivy.bmp", TexRepeating);
 	return sgl;
@@ -246,7 +246,7 @@ void demo_12_drawer(const StateGL* const sgl) {
 
 	if (first_call) {
 		init_camera(&camera, (vec3) {1.5f, 1.0f, 1.5f});
-		physics_context = init_physics_context((byte*) pyramid_heightmap, (byte[2]) {pyramid_width, pyramid_height});
+		physics_context = init_physics_context((const byte*) pyramid_heightmap, pyramid_width, pyramid_height);
 		INIT_UNIFORM(camera_pos_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
 		first_call = false;

@@ -30,8 +30,8 @@ static byte point_matches_sector_attributes(const Sector* const sector,
 	const byte x, const byte y, const byte map_width) {
 
 	return
-		*map_point((byte*) heightmap, x, y, map_width) == sector -> visible_heights.max
-		&& *map_point((byte*) texture_id_map, x, y, map_width) == sector -> texture_id;
+		sample_map_point(heightmap, x, y, map_width) == sector -> visible_heights.max
+		&& sample_map_point(texture_id_map, x, y, map_width) == sector -> texture_id;
 }
 
 // Gets length across, and then adds to area size y until out of map or length across not eq
@@ -69,9 +69,7 @@ static Sector form_sector_area(Sector sector, const StateMap traversed_points,
 }
 
 List generate_sectors_from_maps(const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_size[2]) {
-
-	const byte map_width = map_size[0], map_height = map_size[1];
+	const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
 	// `>> 3` = `/ 8`. Works pretty well for my maps.
 	const buffer_size_t sector_amount_guess = (map_width * map_height) >> 3;
@@ -86,8 +84,8 @@ List generate_sectors_from_maps(const byte* const heightmap,
 			if (get_statemap_bit(traversed_points, x, y)) continue;
 
 			const byte
-				height = *map_point((byte*) heightmap, x, y, map_width),
-				texture_id = *map_point((byte*) texture_id_map, x, y, map_width);
+				height = sample_map_point(heightmap, x, y, map_width),
+				texture_id = sample_map_point(texture_id_map, x, y, map_width);
 
 			if (texture_id >= MAX_NUM_SECTOR_SUBTEXTURES) {
 				fprintf(stderr, "Sector creation failure at pos {%d, %d}; texture ID = %d.\n", x, y, texture_id);
@@ -116,9 +114,9 @@ List generate_sectors_from_maps(const byte* const heightmap,
 
 void init_sector_draw_context(BatchDrawContext* const draw_context,
 	List* const sectors_ref, const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_size[2]) {
+	const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
-	List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_size);
+	List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
 
 	/* This contains the actual vertex data for faces. `sectors.length * 3` gives a good guess for the
 	face/sector ratio. Its ownership, after this function, goes to the draw context (which frees it). */
@@ -133,7 +131,7 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 		add_face_mesh_to_list(flat_face, sector.visible_heights.max, 0, sector.texture_id, &face_meshes);
 
 		byte biggest_face_height = 0;
-		init_vert_faces(sector, &face_meshes, heightmap, map_size[0], map_size[1], &biggest_face_height);
+		init_vert_faces(sector, &face_meshes, heightmap, map_width, map_height, &biggest_face_height);
 
 		sector_ref -> visible_heights.min = sector.visible_heights.max - biggest_face_height;
 		sector_ref -> face_range.length = face_meshes.length - sector_ref -> face_range.start;

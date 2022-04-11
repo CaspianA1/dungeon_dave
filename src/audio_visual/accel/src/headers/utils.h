@@ -195,7 +195,7 @@ GLuint init_shader(const GLchar* const vertex_shader, const GLchar* const fragme
 void enable_all_culling(void);
 
 // Note: `x` and `y` are top-down here (making them technically `x` and `z`).
-byte* map_point(byte* const map, const byte x, const byte y, const byte map_width);
+byte sample_map_point(const byte* const map, const byte x, const byte y, const byte map_width);
 
 const char* get_gl_error(void);
 

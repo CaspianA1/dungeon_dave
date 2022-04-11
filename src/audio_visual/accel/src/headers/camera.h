@@ -27,7 +27,8 @@ typedef struct {
 } Camera;
 
 typedef struct {
-	byte* heightmap, map_size[2];
+	const byte* heightmap;
+	byte map_size[2];
 	GLfloat far_clip_dist;
 	vec3 velocities;
 } VoxelPhysicsContext;
@@ -37,7 +38,7 @@ update_camera_angles, smooth_hermite, update_fov, apply_velocity_in_xz_direction
 tile_exists_at_pos, pos_collides_with_heightmap, update_pos_via_physics,
 make_pace_function, update_pace */
 
-VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size[2]);
+VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size_x, const byte map_size_z);
 void init_camera(Camera* const camera, const vec3 init_pos);
 void update_camera(Camera* const camera, const Event event, VoxelPhysicsContext* const physics_context);
 void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, vec2 dir_xz, vec3 dir);

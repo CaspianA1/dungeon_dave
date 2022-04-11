@@ -325,9 +325,9 @@ void enable_all_culling(void) {
 	glEnable(GL_CULL_FACE);
 }
 
-// X and Y are top-down
-byte* map_point(byte* const map, const byte x, const byte y, const byte map_width) {
-	return map + (y * map_width + x);
+// `x` and `y` are top-down
+byte sample_map_point(const byte* const map, const byte x, const byte y, const byte map_width) {
+	return map[y * map_width + x];
 }
 
 const char* get_gl_error(void) {

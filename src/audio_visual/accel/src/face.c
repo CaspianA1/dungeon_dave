@@ -28,8 +28,8 @@ static byte get_next_face(const Sector sector, const byte varying_axis,
 
 	while (start_val < end_edge_val) {
 		map_point_params[varying_axis] = start_val;
-		const int16_t height_diff = sector.visible_heights.max - *map_point((byte*) heightmap,
-			map_point_params[0], map_point_params[1], map_width);
+		const int16_t height_diff = sector.visible_heights.max - sample_map_point(
+			heightmap, map_point_params[0], map_point_params[1], map_width);
 
 		if (height_diff > 0) {
 			face_height_diff = (byte) height_diff;
@@ -43,8 +43,8 @@ static byte get_next_face(const Sector sector, const byte varying_axis,
 	byte end_val = start_val;
 	while (end_val < end_edge_val) {
 		map_point_params[varying_axis] = end_val;
-		const int16_t height_diff = sector.visible_heights.max - *map_point((byte*) heightmap,
-			map_point_params[0], map_point_params[1], map_width);
+		const int16_t height_diff = sector.visible_heights.max - sample_map_point(
+			heightmap, map_point_params[0], map_point_params[1], map_width);
 
 		if (height_diff != face_height_diff) break;
 		end_val++;

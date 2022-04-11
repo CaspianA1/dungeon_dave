@@ -25,8 +25,7 @@ typedef struct {
 
 	GLuint face_normal_map_set;
 
-	byte* const heightmap;
-	const byte map_size[2];
+	const byte* const heightmap, map_size[2];
 } SceneState;
 
 StateGL demo_17_init(void) {
@@ -67,17 +66,19 @@ StateGL demo_17_init(void) {
 
 		.skybox = init_skybox("../assets/desert.bmp"),
 
-		.heightmap = (byte*) palace_heightmap,
+		.heightmap = (const byte*) palace_heightmap,
 		.map_size = {palace_width, palace_height}
 	};
 
 	//////////
 
-	scene_state.physics_context = init_physics_context(scene_state.heightmap, scene_state.map_size);
+	const byte scene_map_width = scene_state.map_size[0], scene_map_height = scene_state.map_size[1];
+
+	scene_state.physics_context = init_physics_context(scene_state.heightmap, scene_map_width, scene_map_height);
 
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		scene_state.heightmap, (byte*) palace_texture_id_map, scene_state.map_size);
+		scene_state.heightmap, (const byte*) palace_texture_id_map, scene_map_width, scene_map_height);
 
 	const Billboard billboards[] = {
 		{0, {1.0f, 1.0f}, {28.0f, 2.5f, 31.0f}}, // Health kits

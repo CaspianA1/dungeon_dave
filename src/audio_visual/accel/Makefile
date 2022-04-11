@@ -8,7 +8,7 @@ DEMO = 17
 TEST_RANGE = 20..23
 OUT = accel_demo
 
-CONVERSION_WARNINGS = -Wfloat-conversion -Wdouble-promotion -Wsign-conversion -Wimplicit-int-conversion -Wshorten-64-to-32
+CONVERSION_WARNINGS = -Wfloat-conversion -Wdouble-promotion -Wsign-conversion -Wimplicit-int-conversion -Wshorten-64-to-32 -Wincompatible-pointer-types
 WARNINGS = -Wall -Wextra -Wpedantic -Wformat $(CONVERSION_WARNINGS)
 CFLAGS = -std=c99 $(WARNINGS)
 

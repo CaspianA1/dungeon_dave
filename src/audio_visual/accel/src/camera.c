@@ -4,9 +4,7 @@
 #include "headers/camera.h"
 #include "constants.c"
 
-VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size[2]) {
-	const byte map_size_x = map_size[0], map_size_z = map_size[1];
-
+VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size_x, const byte map_size_z) {
 	/* The far clip distance, ideally, would be equal to the diameter of
 	the convex hull of all points in the heightmap. If I had more time,
 	I would implement that, but a simple method that works reasonably well is this:
@@ -31,7 +29,7 @@ VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte
 
 	for (byte y = 0; y < map_size_z; y++) {
 		for (byte x = 0; x < map_size_x; x++) {
-			const byte height = *map_point((byte*) heightmap, x, y, map_size_x);
+			const byte height = sample_map_point(heightmap, x, y, map_size_x);
 			if (height < min_point_height) min_point_height = height;
 			if (height > max_point_height) max_point_height = height;
 		}
@@ -44,7 +42,7 @@ VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte
 	const GLfloat far_clip_dist = glm_vec3_norm((vec3) {map_size_x, map_size_z, max_z_difference});
 
 	return (VoxelPhysicsContext) {
-		(byte*) heightmap, {map_size_x, map_size_z},
+		heightmap, {map_size_x, map_size_z},
 		far_clip_dist, {0.0f, 0.0f, 0.0f}
 	};
 }
@@ -130,7 +128,7 @@ static bool tile_exists_at_pos(const GLfloat x, const GLfloat y, const GLfloat f
 
 	if (x < 0.0f || y < 0.0f || x >= map_width || y >= map_height) return 1;
 
-	const byte floor_height = *map_point((byte*) heightmap, (byte) x, (byte) y, map_width);
+	const byte floor_height = sample_map_point(heightmap, (byte) x, (byte) y, map_width);
 	return (foot_height - floor_height) < -constants.almost_zero;
 }
 
@@ -203,7 +201,7 @@ static void update_pos_via_physics(const byte movement_bits,
 	else speed_jump_per_sec -= constants.accel.g * delta_time;
 
 	foot_height += speed_jump_per_sec * delta_time;
-	const byte base_height = *map_point((byte*) heightmap, (byte) pos[0], (byte) pos[2], map_size[0]);
+	const byte base_height = sample_map_point(heightmap, (byte) pos[0], (byte) pos[2], map_size[0]);
 
 	if (foot_height > base_height)
 		pos[1] = foot_height + pace;

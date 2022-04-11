@@ -99,7 +99,7 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 
 		const buffer_size_t num_visible_in_group = (buffer_size_t) (billboard - initial_billboard);
 		if (num_visible_in_group != 0) {
-			memcpy(gpu_billboard_buffer_ptr + num_visible, initial_billboard, sizeof(Billboard[num_visible_in_group]));
+			memcpy(gpu_billboard_buffer_ptr + num_visible, initial_billboard, num_visible_in_group * sizeof(Billboard));
 			num_visible += num_visible_in_group;
 		}
 	}

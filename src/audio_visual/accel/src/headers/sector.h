@@ -19,11 +19,11 @@ typedef struct {
 sector_in_view_frustum, draw_sectors, fill_sector_vbo_with_visible_faces */
 
 List generate_sectors_from_maps(const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_size[2]);
+	const byte* const texture_id_map, const byte map_width, const byte map_height);
 
 void init_sector_draw_context(BatchDrawContext* const draw_context,
 	List* const sectors_ref, const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_size[2]);
+	const byte* const texture_id_map, const byte map_width, const byte map_height);
 
 void draw_visible_sectors(const BatchDrawContext* const draw_context,
 	const ShadowMapContext* const shadow_map_context, const List* const sector_face_meshes,
