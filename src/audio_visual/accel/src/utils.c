@@ -156,9 +156,7 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 	StateGL (*const init) (void), void (*const deinit) (const StateGL* const)) {
 
 	#ifndef USE_VSYNC
-	const GLfloat
-		// max_delay = 1000.0f / constants.fps,
-		one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
+	const GLfloat one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
 	#endif
 
 	const StateGL sgl = init();

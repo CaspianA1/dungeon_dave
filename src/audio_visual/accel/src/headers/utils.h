@@ -60,7 +60,7 @@
 #define bit_is_set(bits, mask) ((bits) & (mask))
 #define set_bit(bits, mask) ((bits) |= (mask))
 
-#define ARRAY_LENGTH(l) (sizeof((l)) / sizeof(*(l)))
+#define ARRAY_LENGTH(array) (sizeof((array)) / sizeof(*(array)))
 
 #define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
 
