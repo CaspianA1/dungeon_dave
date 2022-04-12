@@ -115,16 +115,13 @@ const GLchar *const sector_vertex_shader =
 		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
 		"vec4 moments = texture(shadow_map_sampler, proj_coords.xy);\n"
 
-		"vec2\n"
-			"w_depth = warp_depth(proj_coords.z),\n"
-			"pos_moments = moments.xz, neg_moments = moments.yw;\n"
-
+		"vec2 w_depth = warp_depth(proj_coords.z);\n"
 		"vec2 depth_scale = umbra_strength_factor * warp_exps * w_depth;\n"
 		"vec2 min_variance = depth_scale * depth_scale;\n"
 
 		"float\n"
-			"pos_result = chebyshev(min_variance.x, w_depth.x, pos_moments),\n"
-			"neg_result = chebyshev(min_variance.y, w_depth.y, neg_moments);\n"
+			"pos_result = chebyshev(min_variance.x, w_depth.x, moments.xz),\n"
+			"neg_result = chebyshev(min_variance.y, w_depth.y, moments.yw);\n"
 
 		"return min(pos_result, neg_result);\n"
 	"}\n"
