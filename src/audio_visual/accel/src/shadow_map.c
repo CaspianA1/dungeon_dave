@@ -89,8 +89,9 @@ const GLchar *const depth_vertex_shader =
 	");\n"
 
 	"void main(void) {\n"
-		"gl_Position = vec4(screen_corners[gl_VertexID], 0.0f, 1.0f);\n"
-		"fragment_UV = gl_Position.xy * 0.5f + 0.5f;\n"
+		"vec2 screen_corner = screen_corners[gl_VertexID];\n"
+		"fragment_UV = screen_corner * 0.5f + 0.5f;\n"
+		"gl_Position = vec4(screen_corner, 0.0f, 1.0f);\n"
 	"}\n",
 
 *const blur_fragment_shader =
@@ -104,25 +105,33 @@ const GLchar *const depth_vertex_shader =
 	"uniform vec2 texel_size;\n"
 	"uniform sampler2D image_sampler;\n"
 
-	"#define KERNEL_SIZE 4\n" // Derived from https://observablehq.com/@jobleonard/gaussian-kernel-calculater
-	"const float weights[KERNEL_SIZE] = float[KERNEL_SIZE](0.214606428562373f, 0.1898792328888381f, 0.13151412084312236f, 0.07130343198685299f);\n"
+	"#define KERNEL_SIZE 25\n"
+
+	// Computed using `compute_1D_gaussian_kernel`, with a radius of 12, and a standard deviation of 1.2.
+	"const float weights[KERNEL_SIZE] = float[KERNEL_SIZE](\n"
+		"0.00000000000000000000f, 0.00000000000000000019f, 0.00000000000000027673f, 0.00000000000020286042f,\n"
+		"0.00000000007425755844f, 0.00000001357348544673f, 0.00000123893289583066f, 0.00005646917998092249f,\n"
+		"0.00128523271996527910f, 0.01460691634565591812f, 0.08289761096239089966f, 0.23492655158042907715f,\n"
+		"0.33245187997817993164f, 0.23492655158042907715f, 0.08289761096239089966f, 0.01460691634565591812f,\n"
+		"0.00128523271996527910f, 0.00005646917998092249f, 0.00000123893289583066f, 0.00000001357348544673f,\n"
+		"0.00000000007425755844f, 0.00000000000020286042f, 0.00000000000000027673f, 0.00000000000000000019f,\n"
+		"0.00000000000000000000f\n"
+	");\n"
 
 	"void main(void) {\n"
 		"int index_from_opp_state = int(!blurring_horizontally);\n"
 		"float texel_size_on_blurring_axis = texel_size[index_from_opp_state];\n"
 
-		"vec2 UV_offset = vec2(0.0f);\n"
-		"UV_offset[index_from_opp_state] = texel_size_on_blurring_axis;\n"
+		"vec2 unit_UV_offset = vec2(0.0f);\n"
 
-		"blurred_moments = texture(image_sampler, fragment_UV) * weights[0];\n"
+		"const int kernel_radius = KERNEL_SIZE >> 1;\n"
+		"unit_UV_offset[index_from_opp_state] = texel_size_on_blurring_axis * -kernel_radius;\n"
 
-		"for (int i = 1; i < KERNEL_SIZE; i++) {\n"
-			"blurred_moments += weights[i] * (\n"
-				"texture(image_sampler, fragment_UV + UV_offset) +\n"
-				"texture(image_sampler, fragment_UV - UV_offset)\n"
-			");\n"
+		"blurred_moments = vec4(0.0f);\n"
 
-			"UV_offset[index_from_opp_state] += texel_size_on_blurring_axis;\n"
+		"for (int i = 0; i < KERNEL_SIZE; i++) {\n"
+			"blurred_moments += weights[i] * texture(image_sampler, fragment_UV + unit_UV_offset);\n"
+			"unit_UV_offset[index_from_opp_state] += texel_size_on_blurring_axis;\n"
 		"}\n"
 	"}\n";
 
@@ -255,6 +264,7 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	if (first_call) {
 		const GLsizei* const shadow_map_size = shadow_map_context -> buffer_context.size;
 		INIT_UNIFORM_VALUE(texel_size, blur_shader, 2f, 1.0f / shadow_map_size[0], 1.0f / shadow_map_size[1]);
+
 		set_sampler_texture_unit_for_shader("image_sampler", blur_shader, SHADOW_MAP_TEXTURE_UNIT);
 		first_call = false;
 	}
@@ -262,7 +272,6 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 	set_current_texture_unit(SHADOW_MAP_TEXTURE_UNIT);
 
 	WITHOUT_BINARY_RENDER_STATE(GL_DEPTH_TEST, // Testing depths from the depth render buffer is not needed
-
 		for (byte i = 0; i < constants.shadow_mapping.num_blur_passes << 1; i++) {
 			const byte src_texture_index = i & 1;
 			const byte dest_texture_index = !src_texture_index;
