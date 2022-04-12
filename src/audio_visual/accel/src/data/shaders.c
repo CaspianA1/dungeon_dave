@@ -59,7 +59,7 @@ const GLchar *const sector_vertex_shader =
 
 	"uniform float\n"
 		"ambient, shininess, specular_strength, max_percent_metallic,\n"
-		"tint_strength, umbra_strength_factor, light_bleed_reduction_factor;\n"
+		"diffuse_strength, tint_strength, umbra_strength_factor, light_bleed_reduction_factor;\n"
 
 	"uniform vec2 warp_exps;\n"
 	"uniform vec3 inv_light_dir, metallic_color, tint;\n"
@@ -69,7 +69,7 @@ const GLchar *const sector_vertex_shader =
 
 	"float diffuse(vec3 fragment_normal) {\n"
 		"float diffuse_amount = dot(inv_light_dir, fragment_normal);\n"
-		"return max(diffuse_amount, 0.0f);\n"
+		"return diffuse_strength * max(diffuse_amount, 0.0f);\n"
 	"}\n"
 
 	"float specular(vec3 texture_color, vec3 fragment_normal) {\n"
