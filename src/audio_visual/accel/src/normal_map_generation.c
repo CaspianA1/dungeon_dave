@@ -153,7 +153,7 @@ static void do_separable_gaussian_blur_pass(SDL_Surface* const src,
 	);
 }
 
-GLuint init_normal_map_set_from_texture_set(const GLuint texture_set, const bool apply_blur_beforehand) {
+GLuint init_normal_map_set_from_texture_set(const GLuint texture_set, const bool apply_blur) {
 	/* How this function works:
 
 	- First, query OpenGL about information about the texture set, like its dimensions, and its filters used.
@@ -196,7 +196,7 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set, const bool
 
 	////////// Blurring it (if needed), and then making a normal map
 
-	if (apply_blur_beforehand) {
+	if (apply_blur) {
 		const int blur_radius = constants.normal_mapping.blur.radius; // 1.2f
 		float* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, constants.normal_mapping.blur.std_dev);
 		// Blurring #1 to #2 horizontally, and then blurring #2 vertically to #1
