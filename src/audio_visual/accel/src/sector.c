@@ -162,14 +162,14 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	use_shader(sector_shader);
 
 	static GLint
-		camera_pos_world_space_id, inv_light_dir_id,
+		camera_pos_world_space_id, dir_to_light_id,
 		model_view_projection_id, light_model_view_projection_id;
 
 	static bool first_call = true;
 
 	if (first_call) {
 		INIT_UNIFORM(camera_pos_world_space, sector_shader);
-		INIT_UNIFORM(inv_light_dir, sector_shader);
+		INIT_UNIFORM(dir_to_light, sector_shader);
 		INIT_UNIFORM(model_view_projection, sector_shader);
 		INIT_UNIFORM(light_model_view_projection, sector_shader);
 
@@ -204,7 +204,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
 	const GLfloat* const light_dir = shadow_map_context -> light_context.dir;
-	UPDATE_UNIFORM(inv_light_dir, 3f, -light_dir[0], -light_dir[1], -light_dir[2]);
+	UPDATE_UNIFORM(dir_to_light, 3f, -light_dir[0], -light_dir[1], -light_dir[2]);
 
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE,

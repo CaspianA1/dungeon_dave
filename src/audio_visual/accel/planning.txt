@@ -46,7 +46,6 @@ Other random ideas:
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
 - Eventually, put the contents of VoxelPhysicsContext inside the camera
 - Use fminf and fmaxf more
-- Perhaps I can uninvert the light direction if `camera_pos_delta_world_space` is inverted
 - Gauge the number of multisample samples based on a runtime constant
 - Putting the face texture set at a resolution of 2048x2048 or above turns all of the billboards into this red-green gradient (above 4096x4096, out of OpenGL memory)
 - Some color banding at the start of the fortress level for whatever reason

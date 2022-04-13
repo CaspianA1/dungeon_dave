@@ -61,14 +61,14 @@ const GLchar *const sector_vertex_shader =
 		"ambient, shininess, specular_strength, max_percent_metallic,\n"
 		"diffuse_strength, tint_strength, umbra_strength_factor, light_bleed_reduction_factor;\n"
 
-	"uniform vec2 warp_exps;\n"
-	"uniform vec3 inv_light_dir, metallic_color, tint;\n"
+	"uniform vec2 warp_exps;\n" // `dir_to_light` is the direction pointing to the light source
+	"uniform vec3 dir_to_light, light_pos_world_space, metallic_color, tint;\n"
 
 	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler, normal_map_sampler;\n"
 
 	"float diffuse(vec3 fragment_normal) {\n"
-		"float diffuse_amount = dot(inv_light_dir, fragment_normal);\n"
+		"float diffuse_amount = dot(fragment_normal, dir_to_light);\n"
 		"return diffuse_strength * max(diffuse_amount, 0.0f);\n"
 	"}\n"
 
@@ -80,7 +80,7 @@ const GLchar *const sector_vertex_shader =
 		Also, the specular calculation uses Blinn-Phong, rather than just Phong. */
 
 		"vec3 view_dir = normalize(camera_pos_delta_world_space);\n"
-		"vec3 halfway_dir = normalize(inv_light_dir + view_dir);\n"
+		"vec3 halfway_dir = normalize(dir_to_light + view_dir);\n"
 		"float cos_angle_of_incidence = dot(fragment_normal, halfway_dir);\n"
 
 		"float percent_metallic = max(1.0f - length(texture_color - metallic_color), max_percent_metallic);\n"
