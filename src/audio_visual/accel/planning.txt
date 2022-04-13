@@ -63,7 +63,7 @@ Normal mapping:
 - Mipmaps of normal maps are not normalized, and they disappear at lower mip levels
 - Find a way to remove the stitches between normal maps
 - Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using EVSM)
-- Facing a face directly leads to no bump details being shown
+- Facing a face directly leads to no bump details being shown (perhaps it's because the light source is directional?)
 
 A better shading model:
 - Share code between shaders
