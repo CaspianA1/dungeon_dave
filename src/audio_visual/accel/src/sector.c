@@ -181,7 +181,6 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(tint_strength, sector_shader, 1f, 0.0f);
 		INIT_UNIFORM_VALUE(umbra_strength_factor, sector_shader, 1f, 0.000001f);
 		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.0f);
-
 		INIT_UNIFORM_VALUE(warp_exps, sector_shader, 2fv, 1, constants.shadow_mapping.warp_exps);
 
 		const GLfloat one_over_max_byte_value = 1.0f / constants.max_byte_value;
