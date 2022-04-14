@@ -157,7 +157,7 @@ StateGL demo_17_init(void) {
 		ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures, NULL
 	);
 
-	scene_state.face_normal_map_set = init_normal_map_set_from_texture_set(scene_state.sector_draw_context.texture_set, false);
+	scene_state.face_normal_map_set = init_normal_map_set_from_texture_set(scene_state.sector_draw_context.texture_set, true);
 
 	enable_all_culling();
 	glEnable(GL_MULTISAMPLE);

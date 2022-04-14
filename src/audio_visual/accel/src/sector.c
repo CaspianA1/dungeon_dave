@@ -173,7 +173,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(model_view_projection, sector_shader);
 		INIT_UNIFORM(light_model_view_projection, sector_shader);
 
-		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.12f); // This also equals the amount of light in shadows
+		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.2f); // This also equals the amount of light in shadows
 		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 16.0f);
 		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.5f);
 		INIT_UNIFORM_VALUE(max_percent_metallic, sector_shader, 1f, 0.75f);
@@ -185,13 +185,11 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 		const GLfloat one_over_max_byte_value = 1.0f / constants.max_byte_value;
 
-		INIT_UNIFORM_VALUE(metallic_color, sector_shader, 3fv, 1, (vec3) {
-			170.0f * one_over_max_byte_value, 169.0f * one_over_max_byte_value, 173.0f * one_over_max_byte_value
-		});
+		INIT_UNIFORM_VALUE(metallic_color, sector_shader, 3f, 170.0f * one_over_max_byte_value,
+			169.0f * one_over_max_byte_value, 173.0f * one_over_max_byte_value);
 
-		INIT_UNIFORM_VALUE(tint, sector_shader, 3fv, 1, (vec3) {
-			253.0f * one_over_max_byte_value, 217.0f * one_over_max_byte_value, 181.0f * one_over_max_byte_value
-		});
+		INIT_UNIFORM_VALUE(tint, sector_shader, 3f, 253.0f * one_over_max_byte_value,
+			217.0f * one_over_max_byte_value, 181.0f * one_over_max_byte_value);
 
 		// `use_texture` not called since the shadow map output has already been bound to the texture unit in shadow_map.c
 		set_sampler_texture_unit_for_shader("shadow_map_sampler", sector_shader, SHADOW_MAP_TEXTURE_UNIT);

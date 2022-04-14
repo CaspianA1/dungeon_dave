@@ -65,7 +65,6 @@ Normal mapping:
 - Find a way to remove the stitches between normal maps (find a subtexture index below the
 	outer y-loop for Gaussian blur and the normal map generator, to find a set of y-boundaries)
 - Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using EVSM)
-- Facing a face directly leads to no bump details being shown (perhaps it's because the light source is directional?)
 
 A better shading model:
 - Share code between shaders
