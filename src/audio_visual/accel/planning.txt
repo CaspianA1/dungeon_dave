@@ -56,6 +56,7 @@ Other random ideas:
 	The advantage to C files is that you don't have to parse a file for each level; the disadvantage is that map files
 	are then not easily editable.
 - A demo with a high-res model loaded via assimp, and shadow map resolution management + softness through CSM and ESM (or a penumbra mask)
+- A ON_FIRST_CALL macro
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them (this may not make much of a difference)
