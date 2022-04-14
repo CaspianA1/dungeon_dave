@@ -192,8 +192,9 @@ static void update_pos_via_physics(const byte movement_bits,
 	velocity_strafe = apply_velocity_in_xz_direction(velocity_strafe, accel_strafe,
 		delta_time, max_speed_xz, !!(movement_bits & BIT_STRAFE_LEFT), !!(movement_bits & BIT_STRAFE_RIGHT));
 
-	physics_context -> velocities[0] = velocity_forward_back / delta_time;
-	physics_context -> velocities[2] = velocity_strafe / delta_time;
+	const GLfloat one_over_delta_time = 1.0f / delta_time;
+	physics_context -> velocities[0] = velocity_forward_back * one_over_delta_time;
+	physics_context -> velocities[2] = velocity_strafe * one_over_delta_time;
 
 	////////// X and Z collision detection + setting new xz positions
 
