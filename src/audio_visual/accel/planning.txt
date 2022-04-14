@@ -65,6 +65,7 @@ Normal mapping:
 - Find a way to remove the stitches between normal maps (find a subtexture index below the
 	outer y-loop for Gaussian blur and the normal map generator, to find a set of y-boundaries)
 - Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using EVSM)
+- Custom normal map settings per each texture
 
 A better shading model:
 - Share code between shaders
