@@ -48,7 +48,7 @@ Other random ideas:
 - Use fminf and fmaxf more
 - Gauge the number of multisample samples based on a runtime constant
 - Putting the face texture set at a resolution of 2048x2048 or above turns all of the billboards into this red-green gradient (above 4096x4096, out of OpenGL memory)
-- Some color banding at the start of the fortress level for whatever reason
+- Some color banding at the start of the fortress level for whatever reason. Fix with dithering: https://shader-tutorial.dev/advanced/color-banding-dithering/
 - Remove all variadically defined functions and take lists or arrays instead
 - One VAO per draw context as well - done as a VertexSpecification struct, or something like that
 - A LevelDescription struct that then a SceneState (or some other) struct uses to generate sectors, a shadow map, etc.
