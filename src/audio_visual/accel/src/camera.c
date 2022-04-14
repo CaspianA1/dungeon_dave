@@ -138,10 +138,25 @@ static bool pos_collides_with_heightmap(const GLfloat foot_height,
 	const byte map_width = map_size[0], map_height = map_size[1];
 	const GLfloat half_border = constants.camera.aabb_collision_box_size * 0.5f;
 
-	return tile_exists_at_pos(pos_xz[0] - half_border, pos_xz[1] - half_border, foot_height, heightmap, map_width, map_height)
-		|| tile_exists_at_pos(pos_xz[0] + half_border, pos_xz[1] + half_border, foot_height, heightmap, map_width, map_height)
-		|| tile_exists_at_pos(pos_xz[0] - half_border, pos_xz[1] + half_border, foot_height, heightmap, map_width, map_height)
-		|| tile_exists_at_pos(pos_xz[0] + half_border, pos_xz[1] - half_border, foot_height, heightmap, map_width, map_height);
+	enum {num_aabb_corners = 4};
+
+	const GLfloat pos_x = pos_xz[0], pos_z = pos_xz[1];
+
+	// Top left, top right, bottom left, bottom right
+	const vec2 aabb_corners[num_aabb_corners] = {
+		{pos_x - half_border, pos_z - half_border},
+		{pos_x + half_border, pos_z - half_border},
+		{pos_x - half_border, pos_z + half_border},
+		{pos_x + half_border, pos_z + half_border}
+	};
+
+	for (byte i = 0; i < num_aabb_corners; i++) {
+		const GLfloat* const aabb_corner = aabb_corners[i];
+		if (tile_exists_at_pos(aabb_corner[0], aabb_corner[1], foot_height, heightmap, map_width, map_height))
+			return true;
+	}
+
+	return false;
 }
 
 static void update_pos_via_physics(const byte movement_bits,
