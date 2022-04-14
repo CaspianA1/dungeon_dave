@@ -267,11 +267,11 @@ void update_camera(Camera* const camera, const Event event, VoxelPhysicsContext*
 	////////// Defining vectors
 
 	vec2 dir_xz;
-	vec3 dir;
+	vec3 dir, up, pos;
 
 	get_dir_in_2D_and_3D(camera -> angles.hori, camera -> angles.vert, dir_xz, dir); // Outputs dir_xz and dir
 
-	vec3 right = {-dir_xz[1], 0.0f, dir_xz[0]}, up, pos;
+	vec3 right = {-dir_xz[1], 0.0f, dir_xz[0]};
 	camera -> right_xz[0] = right[0]; // `right_xz` is just like `right`, except that it's not tilted
 	camera -> right_xz[1] = right[2];
 
