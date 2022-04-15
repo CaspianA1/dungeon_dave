@@ -59,6 +59,7 @@ Other random ideas:
 - A ON_FIRST_CALL macro
 - Per each wall texture, define some material parameters like diffuse strength, specularity, and normal map settings
 	(note: the normal map settings will only be useful at normal-map-generation time; the rest are useful in real-time rendering)
+- Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them (this may not make much of a difference)
