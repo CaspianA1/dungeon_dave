@@ -22,7 +22,7 @@
 
 //////////
 
-#define OPENGL_WEAPON_MAG_FILTER TexNearest
+#define OPENGL_WEAPON_MAG_FILTER TexLinear
 #define OPENGL_WEAPON_MIN_FILTER TexLinearMipmapped
 
 #define OPENGL_SCENE_MAG_FILTER TexLinear
