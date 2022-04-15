@@ -68,7 +68,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 
 	return (WeaponSprite) {
 		.texture = init_texture_set(TexNonRepeating,
-			OPENGL_HUD_MAG_FILTER, OPENGL_HUD_MIN_FILTER, 0, 1,
+			OPENGL_WEAPON_MAG_FILTER, OPENGL_WEAPON_MIN_FILTER, 0, 1,
 			(GLsizei) (frame_size[0] * texture_rescale_factor),
 			(GLsizei) (frame_size[1] * texture_rescale_factor),
 			NULL, &animation_spec

@@ -22,8 +22,8 @@
 
 //////////
 
-#define OPENGL_HUD_MAG_FILTER TexLinear
-#define OPENGL_HUD_MIN_FILTER TexLinearMipmapped
+#define OPENGL_WEAPON_MAG_FILTER TexNearest
+#define OPENGL_WEAPON_MIN_FILTER TexLinearMipmapped
 
 #define OPENGL_SCENE_MAG_FILTER TexLinear
 #define OPENGL_SCENE_MIN_FILTER TexTrilinear
