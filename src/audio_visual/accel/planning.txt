@@ -57,6 +57,8 @@ Other random ideas:
 	are then not easily editable.
 - A demo with a high-res model loaded via assimp, and shadow map resolution management + softness through CSM and ESM (or a penumbra mask)
 - A ON_FIRST_CALL macro
+- Per each wall texture, define some material parameters like diffuse strength, specularity, and normal map settings
+	(note: the normal map settings will only be useful at normal-map-generation time; the rest are useful in real-time rendering)
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them (this may not make much of a difference)
@@ -65,7 +67,6 @@ Normal mapping:
 - Find a way to remove the stitches between normal maps (find a subtexture index below the
 	outer y-loop for Gaussian blur and the normal map generator, to find a set of y-boundaries)
 - Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using EVSM)
-- Custom normal map settings per each texture
 
 A better shading model:
 - Share code between shaders
