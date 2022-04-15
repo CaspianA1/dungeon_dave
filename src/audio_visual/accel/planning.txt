@@ -65,9 +65,8 @@ Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them (this may not make much of a difference)
 - Unshadowed areas have no bumps (or is that okay?)
 - Mipmaps of normal maps are not normalized, and they disappear at lower mip levels
-- Find a way to remove the stitches between normal maps (find a subtexture index below the
-	outer y-loop for Gaussian blur and the normal map generator, to find a set of y-boundaries)
 - Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using EVSM)
+- Share some of the looping logic for the Gaussian blur and the normal map generation
 
 A better shading model:
 - Share code between shaders
