@@ -80,7 +80,7 @@ static const struct {
 	},
 
 	.normal_mapping = {
-		.blur = {.radius = 1, .std_dev = 0.8f},
+		.blur = {.radius = 2, .std_dev = 0.8f},
 		.intensity = 1.1f // 0.25f before
 	},
 
