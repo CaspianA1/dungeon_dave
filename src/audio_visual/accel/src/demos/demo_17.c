@@ -107,7 +107,6 @@ StateGL demo_17_init(void) {
 		// Palace:
 		"../../../../assets/walls/sand.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp",
 		"../../../../assets/walls/marble.bmp", "../../../../assets/walls/hieroglyph.bmp",
-
 		"../../../../assets/walls/alkadhib.bmp", "../../../../assets/walls/saqqara.bmp",
 		"../../../../assets/walls/sandstone.bmp", "../../../../assets/walls/cobblestone_3.bmp",
 		"../../../../assets/walls/horses.bmp", "../../../../assets/walls/mesa.bmp",
