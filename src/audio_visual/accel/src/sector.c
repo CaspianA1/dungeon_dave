@@ -168,28 +168,31 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	static bool first_call = true;
 
 	if (first_call) {
-		INIT_UNIFORM(camera_pos_world_space, sector_shader);
 		INIT_UNIFORM(dir_to_light, sector_shader);
+		INIT_UNIFORM(camera_pos_world_space, sector_shader);
 		INIT_UNIFORM(model_view_projection, sector_shader);
 		INIT_UNIFORM(light_model_view_projection, sector_shader);
 
+		// Ambient and diffuse
 		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.2f); // This also equals the amount of light in shadows
-		INIT_UNIFORM_VALUE(shininess, sector_shader, 1f, 16.0f);
-		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 0.5f);
-		INIT_UNIFORM_VALUE(max_percent_metallic, sector_shader, 1f, 0.75f);
 		INIT_UNIFORM_VALUE(diffuse_strength, sector_shader, 1f, 1.0f);
-		INIT_UNIFORM_VALUE(tint_strength, sector_shader, 1f, 0.0f);
+
+		/* Specular. Brighter texture colors get a stronger specular output,
+		and sharper specular highlights (their specular exponents are weighted
+		more towards the upper bound of the specular exponent domain). */
+		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 1.0f);
+		INIT_UNIFORM_VALUE(specular_exponent_domain, sector_shader, 2f, 32.0f, 128.0f);
+
+		// Shadow mapping
 		INIT_UNIFORM_VALUE(umbra_strength_factor, sector_shader, 1f, 0.000001f);
 		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.0f);
 		INIT_UNIFORM_VALUE(warp_exps, sector_shader, 2fv, 1, constants.shadow_mapping.warp_exps);
 
 		const GLfloat one_over_max_byte_value = 1.0f / constants.max_byte_value;
 
-		INIT_UNIFORM_VALUE(metallic_color, sector_shader, 3f, 170.0f * one_over_max_byte_value,
-			169.0f * one_over_max_byte_value, 173.0f * one_over_max_byte_value);
-
-		INIT_UNIFORM_VALUE(tint, sector_shader, 3f, 253.0f * one_over_max_byte_value,
-			217.0f * one_over_max_byte_value, 181.0f * one_over_max_byte_value);
+		INIT_UNIFORM_VALUE(tint_strength, sector_shader, 1f, 0.0f);
+		INIT_UNIFORM_VALUE(tint, sector_shader, 3f, 242.0f * one_over_max_byte_value,
+			156.0f * one_over_max_byte_value, 71.0f * one_over_max_byte_value);
 
 		// `use_texture` not called since the shadow map output has already been bound to the texture unit in shadow_map.c
 		set_sampler_texture_unit_for_shader("shadow_map_sampler", sector_shader, SHADOW_MAP_TEXTURE_UNIT);

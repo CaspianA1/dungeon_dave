@@ -58,11 +58,11 @@ const GLchar *const sector_vertex_shader =
 	"out vec3 color;\n"
 
 	"uniform float\n"
-		"ambient, shininess, specular_strength, max_percent_metallic,\n"
-		"diffuse_strength, tint_strength, umbra_strength_factor, light_bleed_reduction_factor;\n"
+		"ambient, diffuse_strength, specular_strength,\n"
+		"umbra_strength_factor, light_bleed_reduction_factor, tint_strength;\n"
 
-	"uniform vec2 warp_exps;\n" // `dir_to_light` is the direction pointing to the light source
-	"uniform vec3 dir_to_light, light_pos_world_space, metallic_color, tint;\n"
+	"uniform vec2 warp_exps, specular_exponent_domain;\n"
+	"uniform vec3 dir_to_light, tint;\n" // `dir_to_light` is the direction pointing to the light source
 
 	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler, normal_map_sampler;\n"
@@ -73,20 +73,20 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"float specular(vec3 texture_color, vec3 fragment_normal) {\n"
-		/* This equals how close the texture color is to the color of metal.
-		Since metal is very specular, this gives a stronger specular value
-		for more metal-like colors on the texture.
-
+		/* Brighter texture colors have more specularity, and stronger highlights.
 		Also, the specular calculation uses Blinn-Phong, rather than just Phong. */
 
 		"vec3 view_dir = normalize(camera_pos_delta_world_space);\n"
 		"vec3 halfway_dir = normalize(dir_to_light + view_dir);\n"
-		"float cos_angle_of_incidence = dot(fragment_normal, halfway_dir);\n"
+		"float cos_angle_of_incidence = max(dot(fragment_normal, halfway_dir), 0.0f);\n"
 
-		"float percent_metallic = max(1.0f - length(texture_color - metallic_color), max_percent_metallic);\n"
-		"float metallic_shininess = shininess * percent_metallic;\n"
+		//////////
 
-		"return specular_strength * pow(max(cos_angle_of_incidence, 0.0f), metallic_shininess);\n"
+		"const float one_third = 1.0f / 3.0f;\n"
+		"float texture_color_strength = (texture_color.r + texture_color.g + texture_color.b) * one_third;\n"
+
+		"float specular_exponent = mix(specular_exponent_domain.x, specular_exponent_domain.y, texture_color_strength);\n"
+		"return specular_strength * texture_color_strength * pow(cos_angle_of_incidence, specular_exponent);\n"
 	"}\n"
 
 	"vec2 warp_depth(float depth) {\n"
@@ -127,15 +127,10 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {\n"
-		"float diffuse_amount = diffuse(fragment_normal);\n"
-
-		 // Modulating specular by how much the face is facing the light source
-		"float non_ambient = diffuse_amount + specular(texture_color, fragment_normal) * diffuse_amount;\n"
-
+		"float non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);\n"
 		"float shadowed_non_ambient = non_ambient * one_minus_shadow_percent();\n"
 		"float light = min(ambient + shadowed_non_ambient, 1.0f);\n"
-
-		"return mix(texture_color * light, tint, tint_strength);\n"
+		"return light * texture_color;\n"
 	"}\n"
 
 	"vec3 get_fragment_normal(void) {\n"
@@ -155,10 +150,10 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"void main(void) {\n"
-		"color = calculate_light(\n"
-			"texture(texture_sampler, UV).rgb,\n"
-			"get_fragment_normal()\n"
-		");\n"
+		"vec3 base_texture_color = texture(texture_sampler, UV).rgb;\n"
+		"vec3 tinted_texture_color = mix(base_texture_color, tint, tint_strength);\n"
+
+		"color = calculate_light(tinted_texture_color, get_fragment_normal());\n"
 	"}\n",
 
 *const billboard_vertex_shader =

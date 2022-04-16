@@ -24,7 +24,6 @@ and not in the `constants` struct b/c other values in that struct depend on them
 #define BIT_USE_WEAPON BIT_CLICK_LEFT
 
 static const struct {
-	// The FPS should match the vsync refresh rate, since some of the physics code depends on it.
 	const GLfloat almost_zero;
 	const byte max_byte_value;
 

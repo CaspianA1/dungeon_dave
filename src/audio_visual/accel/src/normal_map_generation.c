@@ -28,16 +28,16 @@ static float sobel_sample(const SDL_Surface* const surface, const int x, const i
 	sdl_pixel_component_t r, g, b;
 	SDL_GetRGB(pixel, surface -> format, &r, &g, &b);
 
-	// This equation is from https://en.wikipedia.org/wiki/Relative_luminance
-	return r * 0.2126f + g * 0.7152f + b * 0.0722f;
+	static const float one_third = 1.0f / 3.0f;
+	return (r + g + b) * one_third;
 }
 
 /* This function is based on these sources:
 - https://en.wikipedia.org/wiki/Sobel_operator
 - https://www.shadertoy.com/view/Xtd3DS
 
-Also, this function computes luminance values
-of pixels to use those as heightmap values.
+The strength of a pixel's color is considered
+to be the average of its three color components.
 
 It's assumed that `src` has the same size as `dest`. */
 static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest, const int subtexture_h, const float intensity) {
@@ -225,8 +225,6 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set, const bool
 	// Making a normal map of #1 to #2
 	generate_normal_map(general_purpose_surface_1, general_purpose_surface_2,
 		subtexture_h, constants.normal_mapping.intensity);
-
-	SDL_SaveBMP(general_purpose_surface_2, "normal.bmp");
 
 	////////// Making a new texture on the GPU, and then writing the normal map to that
 
