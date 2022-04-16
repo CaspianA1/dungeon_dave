@@ -69,6 +69,8 @@ Normal mapping:
 - Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using EVSM)
 - Share some of the looping logic for the Gaussian blur and the normal map generation
 - Maybe bake a specular amount into the alpha channel of each normal map
+- Little rectangular bumps in high-resolution normal maps with already fine detail
+- Vary the normal map generation parameters based on the output texture size
 
 A better shading model:
 - Share code between shaders
