@@ -134,7 +134,7 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"vec3 get_fragment_normal(void) {\n"
-		// `t` = tangent space normal. Normalized b/c linear filtering + interpolation may unnormalize it.
+		// `t` = tangent space normal. Normalized b/c linear filtering may unnormalize it.
 		"vec3 t = normalize(texture(normal_map_sampler, UV).rgb * 2.0f - 1.0f);\n"
 
 		// No matrix multiplication here! :)
