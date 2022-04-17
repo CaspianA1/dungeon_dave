@@ -57,10 +57,10 @@ Other random ideas:
 	are then not easily editable.
 - A demo with a high-res model loaded via assimp, and shadow map resolution management + softness through CSM and ESM (or a penumbra mask)
 - A ON_FIRST_CALL macro
-- Per each wall texture, define some material parameters like diffuse strength, specularity, and normal map settings
-	(note: the normal map settings will only be useful at normal-map-generation time; the rest are useful in real-time rendering)
+- For each wall texture, define normal map settings (only useful at normal map generation time)
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else
 - Perhaps read the average texture color (for specular) as if it were in a linear color space instead?
+- Perhaps use the alpha channels of the face texture map or normal maps for something interesting
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them (this may not make much of a difference)
@@ -68,7 +68,6 @@ Normal mapping:
 - Mipmaps of normal maps are not normalized, and they disappear at lower mip levels
 - Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using EVSM)
 - Share some of the looping logic for the Gaussian blur and the normal map generation
-- Maybe bake a specular amount into the alpha channel of each normal map
 - Little rectangular bumps in high-resolution normal maps with already fine detail
 - Vary the normal map generation parameters based on the output texture size
 
