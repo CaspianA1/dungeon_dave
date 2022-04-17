@@ -158,8 +158,8 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	const ShadowMapContext* const shadow_map_context, const Camera* const camera,
 	const buffer_size_t num_visible_faces, const GLuint normal_map_set) {
 
-	const GLuint sector_shader = draw_context -> shader;
-	use_shader(sector_shader);
+	const GLuint shader = draw_context -> shader;
+	use_shader(shader);
 
 	static GLint
 		camera_pos_world_space_id, dir_to_light_id,
@@ -168,37 +168,37 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	static bool first_call = true;
 
 	if (first_call) {
-		INIT_UNIFORM(dir_to_light, sector_shader);
-		INIT_UNIFORM(camera_pos_world_space, sector_shader);
-		INIT_UNIFORM(model_view_projection, sector_shader);
-		INIT_UNIFORM(light_model_view_projection, sector_shader);
+		INIT_UNIFORM(dir_to_light, shader);
+		INIT_UNIFORM(camera_pos_world_space, shader);
+		INIT_UNIFORM(model_view_projection, shader);
+		INIT_UNIFORM(light_model_view_projection, shader);
 
 		// Ambient and diffuse
-		INIT_UNIFORM_VALUE(ambient, sector_shader, 1f, 0.2f); // This also equals the amount of light in shadows
-		INIT_UNIFORM_VALUE(diffuse_strength, sector_shader, 1f, 1.0f);
+		INIT_UNIFORM_VALUE(ambient, shader, 1f, 0.2f); // This also equals the amount of light in shadows
+		INIT_UNIFORM_VALUE(diffuse_strength, shader, 1f, 1.0f);
 
 		/* Specular. Brighter texture colors get a stronger specular output,
 		and sharper specular highlights (their specular exponents are weighted
 		more towards the upper bound of the specular exponent domain). */
-		INIT_UNIFORM_VALUE(specular_strength, sector_shader, 1f, 1.0f);
-		INIT_UNIFORM_VALUE(specular_exponent_domain, sector_shader, 2f, 32.0f, 128.0f);
+		INIT_UNIFORM_VALUE(specular_strength, shader, 1f, 1.0f);
+		INIT_UNIFORM_VALUE(specular_exponent_domain, shader, 2f, 32.0f, 128.0f);
 
 		// Shadow mapping
-		INIT_UNIFORM_VALUE(umbra_strength_factor, sector_shader, 1f, 0.000001f);
-		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, sector_shader, 1f, 0.0f);
-		INIT_UNIFORM_VALUE(warp_exps, sector_shader, 2fv, 1, constants.shadow_mapping.warp_exps);
+		INIT_UNIFORM_VALUE(umbra_strength_factor, shader, 1f, 0.000001f);
+		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, shader, 1f, 0.0f);
+		INIT_UNIFORM_VALUE(warp_exps, shader, 2fv, 1, constants.shadow_mapping.warp_exps);
 
 		const GLfloat one_over_max_byte_value = 1.0f / constants.max_byte_value;
 
-		INIT_UNIFORM_VALUE(tint_strength, sector_shader, 1f, 0.0f);
-		INIT_UNIFORM_VALUE(tint, sector_shader, 3f, 242.0f * one_over_max_byte_value,
+		INIT_UNIFORM_VALUE(tint_strength, shader, 1f, 0.0f);
+		INIT_UNIFORM_VALUE(tint, shader, 3f, 242.0f * one_over_max_byte_value,
 			156.0f * one_over_max_byte_value, 71.0f * one_over_max_byte_value);
 
 		// `use_texture` not called since the shadow map output has already been bound to the texture unit in shadow_map.c
-		set_sampler_texture_unit_for_shader("shadow_map_sampler", sector_shader, SHADOW_MAP_TEXTURE_UNIT);
+		set_sampler_texture_unit_for_shader("shadow_map_sampler", shader, SHADOW_MAP_TEXTURE_UNIT);
 
-		use_texture(draw_context -> texture_set, sector_shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
-		use_texture(normal_map_set, sector_shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
+		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
+		use_texture(normal_map_set, shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
 
 		first_call = false;
 	}

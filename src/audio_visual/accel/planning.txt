@@ -32,8 +32,8 @@ Other random ideas:
 	Will still have to read textures from the JSON file, and parse out the map. Perhaps use a full JSON parser for that.
 - More efficiently set statemap bit ranges, maybe
 - Billboard lighting that matches the sector lighting (share uniforms via a uniform buffer object)
+- Some aliasing of the alpha channel for billboards (check out the article referenced in the billboard fragment shader)
 - Can't use red cross for health since it's copyrighted
-- Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 - Catch more warnings with -Weverything
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit)

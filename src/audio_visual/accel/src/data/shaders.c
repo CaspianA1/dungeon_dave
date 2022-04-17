@@ -159,12 +159,11 @@ const GLchar *const sector_vertex_shader =
 *const billboard_vertex_shader =
 	"#version 330 core\n"
 
-	"layout(location = 0) in uint in_texture_id;\n"
+	"layout(location = 0) in uint texture_id;\n"
 	"layout(location = 1) in vec2 billboard_size_world_space;\n"
 	"layout(location = 2) in vec3 billboard_center_world_space;\n"
 
-	"out float texture_id;\n"
-	"out vec2 UV;\n"
+	"out vec3 UV;\n"
 
 	"uniform vec2 right_xz_world_space;\n"
 	"uniform mat4 model_view_projection;\n"
@@ -184,23 +183,26 @@ const GLchar *const sector_vertex_shader =
 
 		"gl_Position = model_view_projection * vec4(vertex_world_space, 1.0f);\n"
 
-		"texture_id = in_texture_id;\n"
-		"UV = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
+		"UV.xy = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
+		"UV.z = texture_id;\n"
 	"}\n",
 
 *const billboard_fragment_shader =
 	"#version 330 core\n"
 
-	"in float texture_id;\n"
-	"in vec2 UV;\n"
+	"in vec3 UV;\n"
 
 	"out vec4 color;\n"
 
+	"uniform float base_alpha, alpha_cutoff, almost_zero;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
 	"void main(void) {\n"
-		"color = texture(texture_sampler, vec3(UV, texture_id));\n"
-		"if (color.a < 0.28f) discard;\n" // 0.28f empirically tested for best discarding of alpha value
+		// https://bgolus.medium.com/anti-aliased-alpha-test-the-esoteric-alpha-to-coverage-8b177335ae4f
+
+		"color = texture(texture_sampler, UV);\n"
+		"color.a = (color.a - alpha_cutoff) / max(fwidth(color.a), almost_zero) + base_alpha;\n"
+
 	"}\n",
 
 *const skybox_vertex_shader =

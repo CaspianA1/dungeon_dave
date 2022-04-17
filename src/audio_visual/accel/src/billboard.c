@@ -54,9 +54,11 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	if (first_call) {
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
+		INIT_UNIFORM_VALUE(base_alpha, shader, 1f, constants.billboard_alpha.base);
+		INIT_UNIFORM_VALUE(alpha_cutoff, shader, 1f, constants.billboard_alpha.cutoff);
+		INIT_UNIFORM_VALUE(almost_zero, shader, 1f, constants.almost_zero);
 
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, BILLBOARD_TEXTURE_UNIT);
-
 		first_call = false;
 	}
 
@@ -68,9 +70,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 			WITH_VERTEX_ATTRIBUTE(true, 2, 3, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, pos),
 
 				WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
-					WITH_BINARY_RENDER_STATE(GL_BLEND,
-
-						glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+					WITH_BINARY_RENDER_STATE(GL_SAMPLE_ALPHA_TO_COVERAGE,
 						glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
 					);
 				);
