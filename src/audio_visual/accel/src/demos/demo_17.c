@@ -37,8 +37,8 @@ StateGL demo_17_init(void) {
 
 	SceneState scene_state = { // 2 << 13 is the biggest size
 		.shadow_map_context = init_shadow_map_context(2048, 2048,
-			(vec3) {26.563328f, 31.701447f, 12.387274f},
-			0.518362f, -1.225221f
+			// (vec3) {40.0f, 15.0f, 0.0f}, 5.5f, -1.0f
+			(vec3) {26.563328f, 31.701447f, 12.387274f}, 0.518362f, -1.225221f
 		),
 
 		.weapon_sprite = init_weapon_sprite(

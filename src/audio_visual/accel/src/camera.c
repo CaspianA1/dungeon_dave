@@ -63,6 +63,13 @@ static GLfloat limit_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
 	else return val;
 }
 
+// If a value is smaller or larger than an edge of the domain, it is wrapped around to the other side.
+static GLfloat wrap_around_domain(const GLfloat val, const GLfloat lower, const GLfloat upper) {
+	if (val < lower) return upper;
+	else if (val > upper) return lower;
+	else return val;
+}
+
 // This is framerate-independent.
 static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delta_time) {
 	const GLfloat percent_lost = delta_time * magnitude;
@@ -77,7 +84,7 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 	camera -> angles.vert = limit_to_pos_neg_domain(camera -> angles.vert + delta_vert, constants.camera.lims.vert);
 
 	const GLfloat delta_turn = (GLfloat) -mouse_movement[0] / screen_size[0] * constants.speeds.look_hori;
-	camera -> angles.hori += delta_turn;
+	camera -> angles.hori = wrap_around_domain(camera -> angles.hori + delta_turn, 0.0f, TWO_PI);
 
 	const GLfloat tilt = (camera -> angles.tilt + delta_turn * delta_turn)
 		* get_percent_kept_from(constants.camera.tilt_correction_rate, delta_time);
