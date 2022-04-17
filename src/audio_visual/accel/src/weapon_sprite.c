@@ -82,8 +82,6 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 			.secs_per_frame = secs_per_frame
 		},
 
-		// TODO: use the last frame time in the animation struct, not the one in the WeaponSprite
-
 		.curr_frame = 0, .last_frame_time = SDL_GetTicks() / 1000.0f,
 		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
 		.size = size

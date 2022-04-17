@@ -8,8 +8,8 @@
 #include "animation.h"
 
 typedef struct {
-	vec3 center;
-	GLfloat radius;
+	const vec3 center;
+	const GLfloat radius;
 } Sphere;
 
 typedef struct { // This struct is perfectly aligned
