@@ -161,17 +161,16 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 	const GLsizei num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
 	const GLchar* const* const still_subtexture_paths, const AnimationLayout* const animation_layouts) {
 
-	// TODO: perhaps pack everything into one big surface and then upload everything at once to the GPU
-
 	if (num_still_subtextures > MAX_NUM_SECTOR_SUBTEXTURES)
 		fail("load textures; too many still subtextures", TextureIDIsTooLarge);
 
 	GLsizei num_animated_frames = 0; // A frame is a subtexture
 	for (GLsizei i = 0; i < num_animation_layouts; i++) num_animated_frames += animation_layouts[i].total_frames;
 
-	////////// Defining texture, and a rescaled surface
+	////////// Defining the texture set, and a rescaled surface
 
 	const GLsizei total_num_subtextures = num_still_subtextures + num_animated_frames;
+
 	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter);
 
 	glTexImage3D(TexSet, 0, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, rescale_w,
@@ -180,7 +179,7 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 
 	SDL_Surface* const rescaled_surface = init_blank_surface(rescale_w, rescale_h, SDL_PIXEL_FORMAT);
 
-	////////// Filling array texture with still and animated subtextures
+	////////// Filling the texture set with the still and animated subtextures
 
 	init_still_subtextures_in_texture_set(num_still_subtextures, still_subtexture_paths, rescaled_surface);
 	init_animated_subtextures_in_texture_set(num_animated_frames, num_still_subtextures, animation_layouts, rescaled_surface);
