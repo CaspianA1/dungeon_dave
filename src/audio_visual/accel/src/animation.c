@@ -3,8 +3,6 @@
 
 #include "headers/animation.h"
 
-DEF_LIST_INITIALIZER(Animation, animation)
-
 void update_animation_information(GLfloat* const last_frame_time,
 	buffer_size_t* const texture_id, const Animation animation, const GLfloat curr_time) {
 

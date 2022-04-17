@@ -1,7 +1,6 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include <stdio.h> // For reporting errors from push_ptr_to_list
 #include "buffer_defs.h"
 
 const GLfloat list_realloc_rate = 2.0f;
@@ -12,34 +11,14 @@ typedef struct {
 	buffer_size_t item_size, length, max_alloc;
 } List;
 
-////////// Excluded: _init_list, _push_ptr_to_list, copy_to_list_end
+// Excluded: _init_list, copy_to_list_end
 
 // Note: calling `init_list` with `init_alloc` equal to 0 results in undefined behavior.
 #define init_list(init_alloc, type) _init_list((init_alloc), sizeof(type))
 #define deinit_list(list) free((list).data)
-#define push_ptr_to_list(list, item) _push_ptr_to_list((list), (item))
 #define value_at_list_index(list, index, type) *((type*) ptr_to_list_index((list), (index)))
 
 void push_array_to_list(List* const list, const void* const items, const buffer_size_t num_items);
 void* ptr_to_list_index(const List* const list, const buffer_size_t index);
-
-//////////
-
-#define LIST_INITIALIZER(subtype_name) init_##subtype_name##_list
-
-#define LIST_INITIALIZER_SIGNATURE(subtype, subtype_name)\
-	List LIST_INITIALIZER(subtype_name)(const buffer_size_t num_elems, ...)
-
-#define DEF_LIST_INITIALIZER(subtype, subtype_name)\
-	LIST_INITIALIZER_SIGNATURE(subtype, subtype_name) {\
-		va_list args;\
-		va_start(args, num_elems);\
-		List list = init_list(num_elems, subtype);\
-		for (buffer_size_t i = 0; i < num_elems; i++) {\
-			const subtype elem = va_arg(args, subtype);\
-			push_ptr_to_list(&list, &elem);\
-		}\
-		return list;\
-	}
 
 #endif

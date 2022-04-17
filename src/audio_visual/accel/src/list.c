@@ -20,7 +20,7 @@ static void copy_to_list_end(List* const list, const void* const data,
 	memcpy(dest_begin, data, num_bytes);
 }
 
-static void _push_ptr_to_list(List* const list, const void* const item_ptr) {
+void push_ptr_to_list(List* const list, const void* const item_ptr) {
 	const buffer_size_t item_size = list -> item_size;
 
 	if (list -> length == list -> max_alloc) {

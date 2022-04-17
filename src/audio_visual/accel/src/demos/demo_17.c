@@ -17,8 +17,7 @@ typedef struct {
 	ShadowMapContext shadow_map_context;
 	VoxelPhysicsContext physics_context;
 
-	List sectors; // This is not in the sector draw context b/c the cpu list for that context consists of vertices
-	const List billboard_animations, billboard_animation_instances;
+	List sectors, billboard_animations, billboard_animation_instances;
 
 	const Skybox skybox;
 
@@ -30,57 +29,33 @@ typedef struct {
 StateGL demo_17_init(void) {
 	StateGL sgl = {.vertex_array = init_vao(), .num_vertex_buffers = 0, .num_textures = 0};
 
-	/* For a 2048x2048 shadow map:
-	- One texture = 2048 * 2048 * 16 = 67,108,864 bytes
-	- One texture is mipmapped, so one takes up 89,478,486 bytes
-	- Total is 156,587,350 bytes */
+	////////// Defining a bunch of level data
 
-	SceneState scene_state = { // 2 << 13 is the biggest size
-		.shadow_map_context = init_shadow_map_context(2048, 2048,
-			// (vec3) {40.0f, 15.0f, 0.0f}, 5.5f, -1.0f
-			(vec3) {26.563328f, 31.701447f, 12.387274f}, 0.518362f, -1.225221f
-		),
-
-		.weapon_sprite = init_weapon_sprite(
-			// 0.6f, 2.0f, 0.07f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
-			0.75f, 2.0f, 0.016f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
-			// 0.75f, 2.0f, 0.035f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
-		),
-
-		.billboard_animations = LIST_INITIALIZER(animation) (4,
-			(Animation) {.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
-			(Animation) {.texture_id_range = {48, 52}, .secs_per_frame = 0.15f}, // Torch
-			(Animation) {.texture_id_range = {61, 63}, .secs_per_frame = 0.08f}, // Eddie, attacking
-			(Animation) {.texture_id_range = {76, 79}, .secs_per_frame = 0.07f} // Trooper, idle
-		),
-
-		.billboard_animation_instances = LIST_INITIALIZER(billboard_animation_instance) (6,
-			(BillboardAnimationInstance) {.ids = {.billboard = 4, .animation = 0}, .last_frame_time = 0.0f}, // Flying carpet
-			(BillboardAnimationInstance) {.ids = {.billboard = 5, .animation = 1}, .last_frame_time = 0.0f}, // Torch
-
-			(BillboardAnimationInstance) {.ids = {.billboard = 6, .animation = 2}, .last_frame_time = 0.0f}, // Eddies
-			(BillboardAnimationInstance) {.ids = {.billboard = 7, .animation = 2}, .last_frame_time = 0.0f},
-
-			(BillboardAnimationInstance) {.ids = {.billboard = 8, .animation = 3}, .last_frame_time = 0.0f}, // Troopers
-			(BillboardAnimationInstance) {.ids = {.billboard = 9, .animation = 3}, .last_frame_time = 0.0f}
-		),
-
-		.skybox = init_skybox("../assets/desert.bmp"),
-
-		.heightmap = (const byte*) palace_heightmap,
-		.texture_id_map = (const byte*) palace_texture_id_map,
-		.map_size = {palace_width, palace_height}
+	const Animation billboard_animations[] = {
+		{.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
+		{.texture_id_range = {48, 52}, .secs_per_frame = 0.15f}, // Torch
+		{.texture_id_range = {61, 63}, .secs_per_frame = 0.08f}, // Eddie, attacking
+		{.texture_id_range = {76, 79}, .secs_per_frame = 0.07f} // Trooper, idle
 	};
 
-	//////////
+	// TODO: rename AnimationSpec to AnimationFrameLayout
+	const AnimationSpec billboard_animation_specs[] = {
+		{"../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46},
+		{"../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5},
+		{"../../../../assets/spritesheets/eddie.bmp", 23, 1, 23},
+		{"../../../../assets/spritesheets/trooper.bmp", 33, 1, 33}
+	};
 
-	const byte scene_map_width = scene_state.map_size[0], scene_map_height = scene_state.map_size[1];
+	const BillboardAnimationInstance billboard_animation_instances[] = {
+		{.ids = {.billboard = 4, .animation = 0}, .last_frame_time = 0.0f}, // Flying carpet
+		{.ids = {.billboard = 5, .animation = 1}, .last_frame_time = 0.0f}, // Torch
 
-	scene_state.physics_context = init_physics_context(scene_state.heightmap, scene_map_width, scene_map_height);
+		{.ids = {.billboard = 6, .animation = 2}, .last_frame_time = 0.0f}, // Eddies
+		{.ids = {.billboard = 7, .animation = 2}, .last_frame_time = 0.0f},
 
-	// static byte texture_id_map[terrain_height][terrain_width];
-	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		scene_state.heightmap, scene_state.texture_id_map, scene_map_width, scene_map_height);
+		{.ids = {.billboard = 8, .animation = 3}, .last_frame_time = 0.0f}, // Troopers
+		{.ids = {.billboard = 9, .animation = 3}, .last_frame_time = 0.0f}
+	};
 
 	const Billboard billboards[] = {
 		{0, {1.0f, 1.0f}, {28.0f, 2.5f, 31.0f}}, // Health kits
@@ -136,12 +111,50 @@ StateGL demo_17_init(void) {
 		"../../../../assets/walls/greece.bmp", "../../../../assets/walls/pyramid_bricks_4.bmp" */
 	};
 
-	const AnimationSpec billboard_animation_specs[] = {
-		{"../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46},
-		{"../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5},
-		{"../../../../assets/spritesheets/eddie.bmp", 23, 1, 23},
-		{"../../../../assets/spritesheets/trooper.bmp", 33, 1, 33}
+	//////////
+
+	/* For a 2048x2048 shadow map:
+	- One texture = 2048 * 2048 * 16 = 67,108,864 bytes
+	- One texture is mipmapped, so one takes up 89,478,486 bytes
+	- Total is 156,587,350 bytes */
+
+	SceneState scene_state = { // 2 << 13 is the biggest size
+		.shadow_map_context = init_shadow_map_context(2048, 2048,
+			// (vec3) {40.0f, 15.0f, 0.0f}, 5.5f, -1.0f
+			(vec3) {26.563328f, 31.701447f, 12.387274f}, 0.518362f, -1.225221f
+		),
+
+		.weapon_sprite = init_weapon_sprite(
+			// 0.6f, 2.0f, 0.07f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
+			0.75f, 2.0f, 0.016f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
+			// 0.75f, 2.0f, 0.035f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
+		),
+
+		.billboard_animations = init_list(ARRAY_LENGTH(billboard_animations), Animation),
+		.billboard_animation_instances = init_list(ARRAY_LENGTH(billboard_animation_instances), BillboardAnimationInstance),
+
+		.skybox = init_skybox("../assets/desert.bmp"),
+
+		.heightmap = (const byte*) palace_heightmap,
+		.texture_id_map = (const byte*) palace_texture_id_map,
+		.map_size = {palace_width, palace_height}
 	};
+
+	push_array_to_list(&scene_state.billboard_animations,
+		billboard_animations, ARRAY_LENGTH(billboard_animations));
+
+	push_array_to_list(&scene_state.billboard_animation_instances,
+		billboard_animation_instances, ARRAY_LENGTH(billboard_animation_instances));
+
+	//////////
+
+	const byte scene_map_width = scene_state.map_size[0], scene_map_height = scene_state.map_size[1];
+
+	scene_state.physics_context = init_physics_context(scene_state.heightmap, scene_map_width, scene_map_height);
+
+	// static byte texture_id_map[terrain_height][terrain_width];
+	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
+		scene_state.heightmap, scene_state.texture_id_map, scene_map_width, scene_map_height);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(ARRAY_LENGTH(billboards), billboards);
 

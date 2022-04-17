@@ -6,8 +6,6 @@
 #include "animation.c"
 #include "data/shaders.c"
 
-DEF_LIST_INITIALIZER(BillboardAnimationInstance, billboard_animation_instance)
-
 void update_billboard_animation_instances(const List* const billboard_animation_instances,
 	const List* const billboard_animations, const List* const billboards) {
 

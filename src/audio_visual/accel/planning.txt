@@ -31,10 +31,9 @@ Other random ideas:
 	Or simpler than that, and just height + texture mode, and import/export just the map part of a JSON file.
 	Will still have to read textures from the JSON file, and parse out the map. Perhaps use a full JSON parser for that.
 - More efficiently set statemap bit ranges, maybe
-- Camera var names to yaw, pitch, and roll (maybe)
 - Billboard lighting that matches the sector lighting (share uniforms via a uniform buffer object)
 - Can't use red cross for health since it's copyrighted
-- Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/ (or perhaps not, since alpha just 0 or 1)
+- Premultiplied billboard alphas: http://www.realtimerendering.com/blog/gpus-prefer-premultiplication/
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 - Catch more warnings with -Weverything
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit)
@@ -49,7 +48,6 @@ Other random ideas:
 - Gauge the number of multisample samples based on a runtime constant
 - Putting the face texture set at a resolution of 2048x2048 or above turns all of the billboards into this red-green gradient (above 4096x4096, out of OpenGL memory)
 - Some color banding at the start of the fortress level for whatever reason. Fix with dithering: https://shader-tutorial.dev/advanced/color-banding-dithering/
-- Remove all variadically defined functions and take lists or arrays instead
 - One VAO per draw context as well - done as a VertexSpecification struct, or something like that
 - A LevelDescription struct that then a SceneState (or some other) struct uses to generate sectors, a shadow map, etc.
 	If levels come from C files, put those directly in files; otherwise, JSON will be turned into a LevelDescription.

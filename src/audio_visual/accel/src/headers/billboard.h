@@ -18,15 +18,13 @@ typedef struct { // This struct is perfectly aligned
 } Billboard;
 
 typedef struct {
-	/* billboard_id assoc with BillboardAnimationInstance and not
-	Animation b/c one animation instance per billboard */
+	/* The billboard ID is associated with a BillboardAnimationInstance
+	and not an Animation because there's one animation instance per billboard. */
 	const struct {const buffer_size_t billboard, animation;} ids;
 	GLfloat last_frame_time;
 } BillboardAnimationInstance;
 
 // Excluded: is_inside_plane, billboard_in_view_frustum, draw_billboards
-
-LIST_INITIALIZER_SIGNATURE(BillboardAnimationInstance, billboard_animation_instance);
 
 void update_billboard_animation_instances(const List* const billboard_animation_instances,
 	const List* const billboard_animations, const List* const billboards);
