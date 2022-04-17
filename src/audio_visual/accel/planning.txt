@@ -60,7 +60,7 @@ Other random ideas:
 - For each wall texture, define normal map settings (only useful at normal map generation time)
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else
 - Perhaps read the average texture color (for specular) as if it were in a linear color space instead?
-- Perhaps use the alpha channels of the face texture map or normal maps for something interesting
+- Perhaps use the alpha channels of the face texture set or normal map set for something interesting
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them (this may not make much of a difference)
