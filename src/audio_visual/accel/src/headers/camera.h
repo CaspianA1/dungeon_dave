@@ -33,7 +33,7 @@ typedef struct {
 	vec3 velocities;
 } VoxelPhysicsContext;
 
-/* Excluded: limit_to_pos_neg_domain, wrap_around_domain, get_percent_kept_from,
+/* Excluded: clamp_to_pos_neg_domain, wrap_around_domain, get_percent_kept_from,
 update_camera_angles, smooth_hermite, update_fov, apply_velocity_in_xz_direction,
 tile_exists_at_pos, pos_collides_with_heightmap, update_pos_via_physics,
 make_pace_function, update_pace */

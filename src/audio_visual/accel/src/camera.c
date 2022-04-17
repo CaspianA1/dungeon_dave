@@ -57,7 +57,7 @@ void init_camera(Camera* const camera, const vec3 init_pos) {
 	glm_vec3_copy((GLfloat*) init_pos, camera -> pos);
 }
 
-static GLfloat limit_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
+static GLfloat clamp_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
 	if (val > limit) return limit;
 	else if (val < -limit) return -limit;
 	else return val;
@@ -81,7 +81,7 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 	const int *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
 
 	const GLfloat delta_vert = (GLfloat) -mouse_movement[1] / screen_size[1] * constants.speeds.look_vert;
-	camera -> angles.vert = limit_to_pos_neg_domain(camera -> angles.vert + delta_vert, constants.camera.lims.vert);
+	camera -> angles.vert = clamp_to_pos_neg_domain(camera -> angles.vert + delta_vert, constants.camera.lims.vert);
 
 	const GLfloat delta_turn = (GLfloat) -mouse_movement[0] / screen_size[0] * constants.speeds.look_hori;
 	camera -> angles.hori = wrap_around_domain(camera -> angles.hori + delta_turn, 0.0f, TWO_PI);
@@ -89,7 +89,7 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 	const GLfloat tilt = (camera -> angles.tilt + delta_turn * delta_turn)
 		* get_percent_kept_from(constants.camera.tilt_correction_rate, delta_time);
 
-	camera -> angles.tilt = limit_to_pos_neg_domain(tilt, constants.camera.lims.tilt);
+	camera -> angles.tilt = clamp_to_pos_neg_domain(tilt, constants.camera.lims.tilt);
 }
 
 /* Maps a value between 0 and 1 to a smooth output
@@ -126,7 +126,7 @@ static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v,
 
 	// If 0 or 2 directions are being moved in; `^` maps to 1 if only 1 input is true
 	if (!(moving_in_dir ^ moving_in_opposite_dir)) v *= get_percent_kept_from(constants.camera.friction, delta_time);
-	return limit_to_pos_neg_domain(v, max_v);
+	return clamp_to_pos_neg_domain(v, max_v);
 }
 
 // Note: `x` and `y` are top-down here.
