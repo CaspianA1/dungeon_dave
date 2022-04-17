@@ -141,8 +141,9 @@ static void init_animated_subtextures_in_texture_set(
 		};
 
 		for (GLsizei frame_index = 0; frame_index < animation_layout.total_frames; frame_index++, animation_frame_index++) {
-			spritesheet_frame_area.x = (frame_index % animation_layout.frames_across) * spritesheet_frame_area.w;
-			spritesheet_frame_area.y = (frame_index / animation_layout.frames_across) * spritesheet_frame_area.h;
+			const div_t frame_indices_across_and_down = div(frame_index, animation_layout.frames_across);
+			spritesheet_frame_area.x = frame_indices_across_and_down.rem * spritesheet_frame_area.w;
+			spritesheet_frame_area.y = frame_indices_across_and_down.quot * spritesheet_frame_area.h;
 
 			SDL_BlitScaled(spritesheet_surface, &spritesheet_frame_area, rescaled_surface, NULL);
 
