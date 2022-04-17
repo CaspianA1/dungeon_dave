@@ -51,17 +51,17 @@ const GLchar *const weapon_sprite_vertex_shader =
 	"}\n";
 
 WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
-	const GLfloat secs_per_frame, const AnimationSpec animation_spec) {
+	const GLfloat secs_per_frame, const AnimationLayout animation_layout) {
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
 	and here, but this makes the code much more readable. TODO: perhaps
 	query data about the texture set to figure out the frame size. */
 
-	SDL_Surface* const peek_surface = init_surface(animation_spec.spritesheet_path);
+	SDL_Surface* const peek_surface = init_surface(animation_layout.spritesheet_path);
 
 	const GLsizei frame_size[2] = {
-		peek_surface -> w / animation_spec.frames_across,
-		peek_surface -> h / animation_spec.frames_down
+		peek_surface -> w / animation_layout.frames_across,
+		peek_surface -> h / animation_layout.frames_down
 	};
 
 	deinit_surface(peek_surface);
@@ -71,19 +71,20 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 			OPENGL_WEAPON_MAG_FILTER, OPENGL_WEAPON_MIN_FILTER, 0, 1,
 			(GLsizei) (frame_size[0] * texture_rescale_factor),
 			(GLsizei) (frame_size[1] * texture_rescale_factor),
-			NULL, &animation_spec
+			NULL, &animation_layout
 		),
 
 		// TODO: for multiple weapons, share this shader
 		.shader = init_shader(weapon_sprite_vertex_shader, weapon_sprite_fragment_shader),
 
 		.animation = {
-			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_spec.total_frames},
+			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
 			.secs_per_frame = secs_per_frame
 		},
 
-		.curr_frame = 0, .last_frame_time = SDL_GetTicks() / 1000.0f,
+		// TODO: use the last frame time in the animation struct, not the one in the WeaponSprite
 
+		.curr_frame = 0, .last_frame_time = SDL_GetTicks() / 1000.0f,
 		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
 		.size = size
 	};

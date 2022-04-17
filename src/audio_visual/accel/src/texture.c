@@ -125,24 +125,24 @@ static void init_still_subtextures_in_texture_set(const GLsizei num_still_subtex
 
 static void init_animated_subtextures_in_texture_set(
 	const GLsizei num_animated_frames, const GLsizei num_still_subtextures,
-	const AnimationSpec* const animation_specs, SDL_Surface* const rescaled_surface) {
+	const AnimationLayout* const animation_layouts, SDL_Surface* const rescaled_surface) {
 
-	for (GLsizei animation_spec_index = 0, animation_frame_index = num_still_subtextures;
-		animation_frame_index < num_animated_frames; animation_spec_index++) {
+	for (GLsizei animation_layout_index = 0, animation_frame_index = num_still_subtextures;
+		animation_frame_index < num_animated_frames; animation_layout_index++) {
 
-		const AnimationSpec animation_spec = animation_specs[animation_spec_index];
+		const AnimationLayout animation_layout = animation_layouts[animation_layout_index];
 
-		SDL_Surface* const spritesheet_surface = init_surface(animation_spec.spritesheet_path);
+		SDL_Surface* const spritesheet_surface = init_surface(animation_layout.spritesheet_path);
 		SDL_SetSurfaceBlendMode(spritesheet_surface, SDL_BLENDMODE_NONE);
 
 		SDL_Rect spritesheet_frame_area = {
-			.w = spritesheet_surface -> w / animation_spec.frames_across,
-			.h = spritesheet_surface -> h / animation_spec.frames_down
+			.w = spritesheet_surface -> w / animation_layout.frames_across,
+			.h = spritesheet_surface -> h / animation_layout.frames_down
 		};
 
-		for (GLsizei frame_index = 0; frame_index < animation_spec.total_frames; frame_index++, animation_frame_index++) {
-			spritesheet_frame_area.x = (frame_index % animation_spec.frames_across) * spritesheet_frame_area.w;
-			spritesheet_frame_area.y = (frame_index / animation_spec.frames_across) * spritesheet_frame_area.h;
+		for (GLsizei frame_index = 0; frame_index < animation_layout.total_frames; frame_index++, animation_frame_index++) {
+			spritesheet_frame_area.x = (frame_index % animation_layout.frames_across) * spritesheet_frame_area.w;
+			spritesheet_frame_area.y = (frame_index / animation_layout.frames_across) * spritesheet_frame_area.h;
 
 			SDL_BlitScaled(spritesheet_surface, &spritesheet_frame_area, rescaled_surface, NULL);
 
@@ -158,14 +158,16 @@ static void init_animated_subtextures_in_texture_set(
 
 GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
-	const GLsizei num_animation_sets, const GLsizei rescale_w, const GLsizei rescale_h,
-	const GLchar* const* const still_subtexture_paths, const AnimationSpec* const animation_specs) {
+	const GLsizei num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
+	const GLchar* const* const still_subtexture_paths, const AnimationLayout* const animation_layouts) {
+
+	// TODO: perhaps pack everything into one big surface and then upload everything at once to the GPU
 
 	if (num_still_subtextures > MAX_NUM_SECTOR_SUBTEXTURES)
 		fail("load textures; too many still subtextures", TextureIDIsTooLarge);
 
 	GLsizei num_animated_frames = 0; // A frame is a subtexture
-	for (GLsizei i = 0; i < num_animation_sets; i++) num_animated_frames += animation_specs[i].total_frames;
+	for (GLsizei i = 0; i < num_animation_layouts; i++) num_animated_frames += animation_layouts[i].total_frames;
 
 	////////// Defining texture, and a rescaled surface
 
@@ -181,7 +183,7 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 	////////// Filling array texture with still and animated subtextures
 
 	init_still_subtextures_in_texture_set(num_still_subtextures, still_subtexture_paths, rescaled_surface);
-	init_animated_subtextures_in_texture_set(num_animated_frames, num_still_subtextures, animation_specs, rescaled_surface);
+	init_animated_subtextures_in_texture_set(num_animated_frames, num_still_subtextures, animation_layouts, rescaled_surface);
 	glGenerateMipmap(TexSet);
 
 	////////// Deinitialization

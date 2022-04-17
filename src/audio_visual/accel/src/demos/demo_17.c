@@ -38,8 +38,7 @@ StateGL demo_17_init(void) {
 		{.texture_id_range = {76, 79}, .secs_per_frame = 0.07f} // Trooper, idle
 	};
 
-	// TODO: rename AnimationSpec to AnimationFrameLayout
-	const AnimationSpec billboard_animation_specs[] = {
+	const AnimationLayout billboard_animation_layouts[] = {
 		{"../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46},
 		{"../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5},
 		{"../../../../assets/spritesheets/eddie.bmp", 23, 1, 23},
@@ -125,9 +124,9 @@ StateGL demo_17_init(void) {
 		),
 
 		.weapon_sprite = init_weapon_sprite(
-			// 0.6f, 2.0f, 0.07f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
-			0.75f, 2.0f, 0.016f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
-			// 0.75f, 2.0f, 0.035f, (AnimationSpec) {"../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
+			// 0.6f, 2.0f, 0.07f, (AnimationLayout) {"../../../../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
+			0.75f, 2.0f, 0.016f, (AnimationLayout) {"../../../../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
+			// 0.75f, 2.0f, 0.035f, (AnimationLayout) {"../../../../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
 		),
 
 		.billboard_animations = init_list(ARRAY_LENGTH(billboard_animations), Animation),
@@ -160,8 +159,8 @@ StateGL demo_17_init(void) {
 
 	scene_state.billboard_draw_context.texture_set = init_texture_set(
 		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_specs), 256, 256,
-		still_billboard_texture_paths, billboard_animation_specs
+		ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_layouts), 256, 256,
+		still_billboard_texture_paths, billboard_animation_layouts
 	);
 
 	//////////

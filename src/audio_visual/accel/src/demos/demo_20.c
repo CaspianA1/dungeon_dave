@@ -21,26 +21,26 @@ StateGL demo_20_init(void) {
 	Or actually not b/c the texture index may also depend on an enemy state */
 
 	const Billboard billboards[] = {
-		(Billboard) {0, {0.1f, 0.1f}, {3.0f, 4.0f, 5.0f}},
-		(Billboard) {1, {1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}},
-		(Billboard) {2, {1.0f, 1.0f}, {2.0f, 1.0f, 2.0f}},
-		(Billboard) {3, {1.0f, 1.0f}, {3.0f, 1.0f, 3.0f}},
-		(Billboard) {4, {1.0f, 1.0f}, {4.0f, 1.0f, 4.0f}},
-		(Billboard) {5, {1.0f, 1.0f}, {5.0f, 1.0f, 5.0f}},
-		(Billboard) {6, {1.0f, 1.0f}, {6.0f, 1.0f, 6.0f}},
-		(Billboard) {7, {1.0f, 1.0f}, {7.0f, 1.0f, 7.0f}},
-		(Billboard) {8, {1.0f, 1.0f}, {8.0f, 1.0f, 8.0f}},
-		(Billboard) {9, {1.0f, 1.0f}, {9.0f, 1.0f, 9.0f}}
+		{0, {0.1f, 0.1f}, {3.0f, 4.0f, 5.0f}},
+		{1, {1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}},
+		{2, {1.0f, 1.0f}, {2.0f, 1.0f, 2.0f}},
+		{3, {1.0f, 1.0f}, {3.0f, 1.0f, 3.0f}},
+		{4, {1.0f, 1.0f}, {4.0f, 1.0f, 4.0f}},
+		{5, {1.0f, 1.0f}, {5.0f, 1.0f, 5.0f}},
+		{6, {1.0f, 1.0f}, {6.0f, 1.0f, 6.0f}},
+		{7, {1.0f, 1.0f}, {7.0f, 1.0f, 7.0f}},
+		{8, {1.0f, 1.0f}, {8.0f, 1.0f, 8.0f}},
+		{9, {1.0f, 1.0f}, {9.0f, 1.0f, 9.0f}}
 	};
 
-	const GLchar *const still_billboard_texture_paths[] = {
+	const GLchar* const still_billboard_texture_paths[] = {
 		// "../../../../assets/objects/hot_dog.bmp",
 		"../../../../assets/walls/hieroglyphics.bmp",
 		"../../../../assets/objects/teleporter.bmp",
 		"../../../../assets/objects/robot.bmp"
 	};
 
-	const AnimationSpec billboard_animation_specs[] = {
+	const AnimationLayout billboard_animation_layouts[] = {
 		{"../../../../assets/spritesheets/metroid.bmp", 2, 2, 4},
 		{"../../../../assets/spritesheets/bogo.bmp", 2, 3, 6}
 	};
@@ -49,8 +49,8 @@ StateGL demo_20_init(void) {
 
 	draw_context.texture_set = init_texture_set(TexNonRepeating,
 		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_specs), 64, 64,
-		still_billboard_texture_paths, billboard_animation_specs
+		ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_layouts), 64, 64,
+		still_billboard_texture_paths, billboard_animation_layouts
 	);
 
 	SceneState* const scene_state = malloc(sizeof(SceneState));

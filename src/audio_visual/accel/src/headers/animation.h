@@ -11,7 +11,7 @@ typedef struct {
 typedef struct {
 	const GLchar* const spritesheet_path;
 	const GLsizei frames_across, frames_down, total_frames;
-} AnimationSpec;
+} AnimationLayout;
 
 void update_animation_information(GLfloat* const last_frame_time,
 	buffer_size_t* const texture_id, const Animation animation, const GLfloat curr_time);
