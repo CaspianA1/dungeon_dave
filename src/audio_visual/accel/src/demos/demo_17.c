@@ -173,7 +173,6 @@ StateGL demo_17_init(void) {
 	scene_state.face_normal_map_set = init_normal_map_set_from_texture_set(scene_state.sector_draw_context.texture_set, true);
 
 	enable_all_culling();
-	glEnable(GL_MULTISAMPLE);
 
 	render_all_sectors_to_shadow_map(&scene_state.shadow_map_context,
 		&scene_state.sector_draw_context, get_next_event().screen_size,

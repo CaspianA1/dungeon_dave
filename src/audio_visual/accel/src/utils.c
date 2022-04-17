@@ -16,15 +16,17 @@ Screen init_screen(const GLchar* const title) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, OPENGL_MINOR_VERSION);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, DEPTH_BUFFER_BITS);
+
 	#ifdef USE_GAMMA_CORRECTION
 	SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 	#endif
 
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, DEPTH_BUFFER_BITS);
-
+	#ifdef USE_MULTISAMPLING
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, MULTISAMPLE_SAMPLES);
+	#endif
 
 	#ifdef FORCE_SOFTWARE_RENDERER
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 0);
@@ -56,6 +58,15 @@ Screen init_screen(const GLchar* const title) {
 
 	#ifdef USE_GAMMA_CORRECTION
 	glEnable(GL_FRAMEBUFFER_SRGB);
+	#endif
+
+	#ifdef USE_MULTISAMPLING
+	glEnable(GL_MULTISAMPLE);
+	#endif
+
+	#ifdef USE_POLYGON_ANTIALIASING
+	glEnable(GL_POLYGON_SMOOTH);
+	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	#endif
 
 	keys = SDL_GetKeyboardState(NULL);
@@ -182,7 +193,6 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 
 		// The refresh rate may change, so it is re-fetched
 		const GLfloat max_delay = 1000.0f / get_runtime_constant(RefreshRate);
-
 		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) * one_over_performance_freq * 1000.0f;
 		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
 		if (wait_for_exact_fps > 12.0f) SDL_Delay((Uint32) (wait_for_exact_fps - 0.5f)); // SDL_Delay tends to be late, so 0.5f accounts for that
