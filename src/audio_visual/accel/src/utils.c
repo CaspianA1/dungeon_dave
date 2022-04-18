@@ -190,7 +190,6 @@ void loop_application(const Screen* const screen, void (*const drawer) (const St
 		SDL_GL_SwapWindow(screen -> window);
 
 		#ifndef USE_VSYNC
-
 		// The refresh rate may change, so it is re-fetched
 		const GLfloat max_delay = 1000.0f / get_runtime_constant(RefreshRate);
 		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) * one_over_performance_freq * 1000.0f;
