@@ -156,14 +156,14 @@ static byte sector_in_view_frustum(const Sector sector, const vec4 frustum_plane
 
 static void draw_sectors(const BatchDrawContext* const draw_context,
 	const ShadowMapContext* const shadow_map_context, const Camera* const camera,
-	const buffer_size_t num_visible_faces, const GLuint normal_map_set) {
+	const buffer_size_t num_visible_faces, const GLuint normal_map_set, const int screen_size[2]) {
 
 	const GLuint shader = draw_context -> shader;
 	use_shader(shader);
 
 	static GLint
-		camera_pos_world_space_id, dir_to_light_id,
-		model_view_projection_id, light_model_view_projection_id;
+		camera_pos_world_space_id, dir_to_light_id, model_view_projection_id,
+		light_model_view_projection_id, one_over_screen_size_id;
 
 	static bool first_call = true;
 
@@ -172,6 +172,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(camera_pos_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
 		INIT_UNIFORM(light_model_view_projection, shader);
+		INIT_UNIFORM(one_over_screen_size, shader);
 
 		// Ambient and diffuse
 		INIT_UNIFORM_VALUE(ambient, shader, 1f, 0.2f); // This also equals the amount of light in shadows
@@ -194,6 +195,8 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(tint, shader, 3f, 242.0f * one_over_max_byte_value,
 			156.0f * one_over_max_byte_value, 71.0f * one_over_max_byte_value);
 
+		INIT_UNIFORM_VALUE(noise_granularity, shader, 1f, 0.3f / 255.0f);
+
 		// `use_texture` not called since the shadow map output has already been bound to the texture unit in shadow_map.c
 		set_sampler_texture_unit_for_shader("shadow_map_sampler", shader, SHADOW_MAP_TEXTURE_UNIT);
 
@@ -210,6 +213,8 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE,
 		&shadow_map_context -> light_context.model_view_projection[0][0]);
+
+	UPDATE_UNIFORM(one_over_screen_size, 2f, 1.0f / screen_size[0], 1.0f / screen_size[1]);
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
 		WITH_INTEGER_VERTEX_ATTRIBUTE(false, 1, 1, FACE_MESH_COMPONENT_TYPENAME,
@@ -267,10 +272,11 @@ static buffer_size_t fill_sector_vbo_with_visible_faces(
 // This is just a utility function
 void draw_visible_sectors(const BatchDrawContext* const draw_context,
 	const ShadowMapContext* const shadow_map_context, const List* const sectors,
-	const Camera* const camera, const GLuint normal_map_set) {
+	const Camera* const camera, const GLuint normal_map_set, const int screen_size[2]) {
 
 	const buffer_size_t num_visible_faces = fill_sector_vbo_with_visible_faces(draw_context, sectors, camera);
-	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_map_context, camera, num_visible_faces, normal_map_set);
+	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_map_context,
+		camera, num_visible_faces, normal_map_set, screen_size);
 }
 
 #endif

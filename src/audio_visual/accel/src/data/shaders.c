@@ -58,10 +58,10 @@ const GLchar *const sector_vertex_shader =
 	"out vec3 color;\n"
 
 	"uniform float\n"
-		"ambient, diffuse_strength, specular_strength,\n"
-		"umbra_strength_factor, light_bleed_reduction_factor, tint_strength;\n"
+		"ambient, diffuse_strength, specular_strength, umbra_strength_factor,\n"
+		"light_bleed_reduction_factor, tint_strength, noise_granularity;\n"
 
-	"uniform vec2 warp_exps, specular_exponent_domain;\n"
+	"uniform vec2 warp_exps, specular_exponent_domain, one_over_screen_size;\n"
 	"uniform vec3 dir_to_light, tint;\n" // `dir_to_light` is the direction pointing to the light source
 
 	"uniform sampler2D shadow_map_sampler;\n"
@@ -149,11 +149,18 @@ const GLchar *const sector_vertex_shader =
 		"return rotated_vectors[face_id];\n"
 	"}\n"
 
+	"float random(vec2 coords) {\n"
+		"return fract(sin(dot(coords.xy, vec2(12.9898f, 78.233f))) * 43758.5453f);\n"
+	"}\n"
+
 	"void main(void) {\n"
 		"vec3 base_texture_color = texture(texture_sampler, UV).rgb;\n"
 		"vec3 tinted_texture_color = mix(base_texture_color, tint, tint_strength);\n"
 
 		"color = calculate_light(tinted_texture_color, get_fragment_normal());\n"
+
+		// Noise is added to remove color banding
+		"color += mix(-noise_granularity, noise_granularity, random(gl_FragCoord.xy * one_over_screen_size));\n"
 	"}\n",
 
 *const billboard_vertex_shader =
