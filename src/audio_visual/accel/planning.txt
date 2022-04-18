@@ -56,7 +56,7 @@ Other random ideas:
 - A ON_FIRST_CALL macro
 - For each wall texture, define normal map settings (only useful at normal map generation time)
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else
-- Perhaps read the average texture color (for specular) as if it were in a linear color space instead?
+- Perhaps read the average texture color (for specular) as if it were in a linear color space instead. Get monitor gamma through SDL and deconvert.
 - Perhaps use the alpha channels of the face texture set or normal map set for something interesting
 - Make sector and billboard contexts contain all context necessary, not just fragmented around the SceneState struct
 
