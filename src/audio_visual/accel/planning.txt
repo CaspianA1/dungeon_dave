@@ -26,10 +26,9 @@ Final lighting model:
 	- Having specular takes away from shadows that come from voxel edges
 
 Other random ideas:
-- A map maker; An init json file that specifies textures and dimensions;
-	draw/erase modes, line mode, export, and choose heights and textures.
-	Or simpler than that, and just height + texture mode, and import/export just the map part of a JSON file.
-	Will still have to read textures from the JSON file, and parse out the map. Perhaps use a full JSON parser for that.
+- A map editor. Read in a json file that has dimensions, a heightmap, a texture id map, and a texture list.
+	Choose texture or height through number keys (done), draw/move/erase modes (done), line mode, save button,
+	zoom in/out, scroll with the mouse.
 - More efficiently set statemap bit ranges, maybe
 - Billboard lighting that matches the sector lighting (share uniforms via a uniform buffer object)
 - Some aliasing of the alpha channel for billboards (check out the article referenced in the billboard fragment shader)
