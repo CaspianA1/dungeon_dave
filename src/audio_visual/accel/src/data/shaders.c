@@ -209,7 +209,6 @@ const GLchar *const sector_vertex_shader =
 
 		"color = texture(texture_sampler, UV);\n"
 		"color.a = (color.a - alpha_cutoff) / max(fwidth(color.a), almost_zero) + base_alpha;\n"
-
 	"}\n",
 
 *const skybox_vertex_shader =
