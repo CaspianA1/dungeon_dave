@@ -24,6 +24,7 @@ Final lighting model:
 	- And optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map.
 	- EVSM causes some odd light issues where connected voxel sides are partially in shadow, like ambient occlusion (it may be happening b/c of shadow biasing issues; set filtering to nearest to see)
 	- Having specular takes away from shadows that come from voxel edges
+- Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
 
 Other random ideas:
 - A map editor. Read in a json file that has dimensions, a heightmap, a texture id map, and a texture list.
