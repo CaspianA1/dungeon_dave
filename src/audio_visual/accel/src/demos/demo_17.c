@@ -31,13 +31,6 @@ StateGL demo_17_init(void) {
 
 	////////// Defining a bunch of level data
 
-	const Animation billboard_animations[] = {
-		{.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
-		{.texture_id_range = {48, 52}, .secs_per_frame = 0.15f}, // Torch
-		{.texture_id_range = {61, 63}, .secs_per_frame = 0.08f}, // Eddie, attacking
-		{.texture_id_range = {76, 79}, .secs_per_frame = 0.07f} // Trooper, idle
-	};
-
 	const AnimationLayout billboard_animation_layouts[] = {
 		{"../../../../assets/spritesheets/flying_carpet.bmp", 5, 10, 46},
 		{"../../../../assets/spritesheets/torch_2.bmp", 2, 3, 5},
@@ -45,6 +38,12 @@ StateGL demo_17_init(void) {
 		{"../../../../assets/spritesheets/trooper.bmp", 33, 1, 33}
 	};
 
+	const Animation billboard_animations[] = {
+		{.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
+		{.texture_id_range = {48, 52}, .secs_per_frame = 0.15f}, // Torch
+		{.texture_id_range = {61, 63}, .secs_per_frame = 0.08f}, // Eddie, attacking
+		{.texture_id_range = {76, 79}, .secs_per_frame = 0.07f} // Trooper, idle
+	};
 	const BillboardAnimationInstance billboard_animation_instances[] = {
 		{.ids = {.billboard = 4, .animation = 0}, .last_frame_time = 0.0f}, // Flying carpet
 		{.ids = {.billboard = 5, .animation = 1}, .last_frame_time = 0.0f}, // Torch
