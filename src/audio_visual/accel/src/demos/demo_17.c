@@ -39,20 +39,21 @@ StateGL demo_17_init(void) {
 	};
 
 	const Animation billboard_animations[] = {
-		{.texture_id_range = {2, 47}, .secs_per_frame = 0.02f}, // Flying carpet
-		{.texture_id_range = {48, 52}, .secs_per_frame = 0.15f}, // Torch
-		{.texture_id_range = {61, 63}, .secs_per_frame = 0.08f}, // Eddie, attacking
-		{.texture_id_range = {76, 79}, .secs_per_frame = 0.07f} // Trooper, idle
+		{.texture_id_range = {3, 48}, .secs_per_frame = 0.02f}, // Flying carpet
+		{.texture_id_range = {49, 53}, .secs_per_frame = 0.15f}, // Torch
+		{.texture_id_range = {62, 64}, .secs_per_frame = 0.08f}, // Eddie, attacking
+		{.texture_id_range = {77, 80}, .secs_per_frame = 0.07f} // Trooper, idle
 	};
+
 	const BillboardAnimationInstance billboard_animation_instances[] = {
-		{.ids = {.billboard = 4, .animation = 0}, .last_frame_time = 0.0f}, // Flying carpet
-		{.ids = {.billboard = 5, .animation = 1}, .last_frame_time = 0.0f}, // Torch
+		{.ids = {.billboard = 5, .animation = 0}, .last_frame_time = 0.0f}, // Flying carpet
+		{.ids = {.billboard = 6, .animation = 1}, .last_frame_time = 0.0f}, // Torch
 
-		{.ids = {.billboard = 6, .animation = 2}, .last_frame_time = 0.0f}, // Eddies
-		{.ids = {.billboard = 7, .animation = 2}, .last_frame_time = 0.0f},
+		{.ids = {.billboard = 7, .animation = 2}, .last_frame_time = 0.0f}, // Eddies
+		{.ids = {.billboard = 8, .animation = 2}, .last_frame_time = 0.0f},
 
-		{.ids = {.billboard = 8, .animation = 3}, .last_frame_time = 0.0f}, // Troopers
-		{.ids = {.billboard = 9, .animation = 3}, .last_frame_time = 0.0f}
+		{.ids = {.billboard = 9, .animation = 3}, .last_frame_time = 0.0f}, // Troopers
+		{.ids = {.billboard = 10, .animation = 3}, .last_frame_time = 0.0f}
 	};
 
 	const Billboard billboards[] = {
@@ -62,19 +63,22 @@ StateGL demo_17_init(void) {
 		{1, {1.0f, 1.0f}, {12.5f, 0.5f, 38.5f}}, // Teleporters
 		{1, {1.0f, 1.0f}, {8.5f, 0.5f, 25.5f}},
 
-		{2, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
-		{48, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
+		{2, {2.0f, 2.0f}, {6.5f, 6.0f, 7.5f}}, // Shabti
 
-		{61, {1.0f, 1.0f}, {6.5f, 0.5f, 21.5f}}, // Eddies
-		{61, {1.0f, 1.0f}, {3.5f, 0.5f, 24.5f}},
+		{3, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
+		{49, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
 
-		{76, {1.0f, 1.0f}, {3.0f, 1.5f, 9.5f}}, // Troopers
-		{76, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
+		{62, {1.0f, 1.0f}, {6.5f, 0.5f, 21.5f}}, // Eddies
+		{62, {1.0f, 1.0f}, {3.5f, 0.5f, 24.5f}},
+
+		{77, {1.0f, 1.0f}, {3.0f, 1.5f, 9.5f}}, // Troopers
+		{77, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
 	};
 
 	const GLchar *const still_billboard_texture_paths[] = {
 		"../../../../assets/objects/health_kit.bmp",
-		"../../../../assets/objects/teleporter.bmp"
+		"../../../../assets/objects/teleporter.bmp",
+		"../../../../assets/objects/shabti.bmp"
 	},
 
 	*const still_face_textures[] = {

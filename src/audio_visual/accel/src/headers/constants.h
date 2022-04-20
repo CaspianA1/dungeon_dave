@@ -32,10 +32,6 @@ static const struct {
 	} weapon_sprite;
 
 	const struct {
-		const GLfloat base, cutoff;
-	} billboard_alpha;
-
-	const struct {
 		const byte num_blur_passes;
 		const vec2 warp_exps;
 	} shadow_mapping;
@@ -75,11 +71,6 @@ static const struct {
 	.weapon_sprite = {
 		.max_movement_magnitude = 0.2f,
 		.time_for_half_movement_cycle = 0.5f
-	},
-
-	.billboard_alpha = {
-		.base = 1.0f,
-		.cutoff = 0.85f
 	},
 
 	.shadow_mapping = {

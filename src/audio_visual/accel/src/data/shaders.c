@@ -201,14 +201,10 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec4 color;\n"
 
-	"uniform float base_alpha, alpha_cutoff, almost_zero;\n"
 	"uniform sampler2DArray texture_sampler;\n"
 
 	"void main(void) {\n"
-		// https://bgolus.medium.com/anti-aliased-alpha-test-the-esoteric-alpha-to-coverage-8b177335ae4f
-
 		"color = texture(texture_sampler, UV);\n"
-		"color.a = (color.a - alpha_cutoff) / max(fwidth(color.a), almost_zero) + base_alpha;\n"
 	"}\n",
 
 *const skybox_vertex_shader =
