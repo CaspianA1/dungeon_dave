@@ -46,14 +46,14 @@ StateGL demo_17_init(void) {
 	};
 
 	const BillboardAnimationInstance billboard_animation_instances[] = {
-		{.ids = {.billboard = 5, .animation = 0}, .last_frame_time = 0.0f}, // Flying carpet
-		{.ids = {.billboard = 6, .animation = 1}, .last_frame_time = 0.0f}, // Torch
+		{.ids = {.billboard = 7, .animation = 0}, .last_frame_time = 0.0f}, // Flying carpet
+		{.ids = {.billboard = 8, .animation = 1}, .last_frame_time = 0.0f}, // Torch
 
-		{.ids = {.billboard = 7, .animation = 2}, .last_frame_time = 0.0f}, // Eddies
-		{.ids = {.billboard = 8, .animation = 2}, .last_frame_time = 0.0f},
+		{.ids = {.billboard = 9, .animation = 2}, .last_frame_time = 0.0f}, // Eddies
+		{.ids = {.billboard = 10, .animation = 2}, .last_frame_time = 0.0f},
 
-		{.ids = {.billboard = 9, .animation = 3}, .last_frame_time = 0.0f}, // Troopers
-		{.ids = {.billboard = 10, .animation = 3}, .last_frame_time = 0.0f}
+		{.ids = {.billboard = 11, .animation = 3}, .last_frame_time = 0.0f}, // Troopers
+		{.ids = {.billboard = 12, .animation = 3}, .last_frame_time = 0.0f}
 	};
 
 	const Billboard billboards[] = {
@@ -63,7 +63,9 @@ StateGL demo_17_init(void) {
 		{1, {1.0f, 1.0f}, {12.5f, 0.5f, 38.5f}}, // Teleporters
 		{1, {1.0f, 1.0f}, {8.5f, 0.5f, 25.5f}},
 
-		{2, {2.0f, 2.0f}, {4.5f, 4.0f, 12.5f}}, // Shabti
+		{2, {2.0f, 2.0f}, {4.5f, 4.0f, 12.5f}}, // Shabtis
+		{2, {2.0f, 2.0f}, {10.5f, 1.0f, 25.0f}},
+		{2, {2.0f, 2.0f}, {25.5f, 3.0f, 31.0f}},
 
 		{3, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
 		{49, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
