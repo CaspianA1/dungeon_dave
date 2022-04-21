@@ -68,7 +68,8 @@ Normal mapping:
 - Vary the normal map generation parameters based on the output texture size
 
 A better shading model:
-- Share code between shaders
+- Share code between shaders (mostly need to share a `shade_world_vertex` function, the lighting uniform block, the exponential warping function)
+- For code sharing, perhaps build a manual #include mechanism that pre-parses each shader file
 - Read in shaders from files
 - Share shader uniforms via uniform buffer objects
 
