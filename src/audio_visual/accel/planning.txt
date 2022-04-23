@@ -39,6 +39,7 @@ Other random ideas:
 - File paths may not work on Windows
 - Pass in texture parameters through a bitmask
 - Compile modules separarely, and then link them all together with a given demo
+- After that, use CMake instead of Make for cross-platform compilation
 - Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry; perhaps more antialiasing for nearest?). This addresses nearest: https://gamedev.stackexchange.com/questions/93466/multisampled-nearest-filtering-in-ps-2-0-is-it-possible
 - Use the bit macros more
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
@@ -57,6 +58,7 @@ Other random ideas:
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else
 - Perhaps use the alpha channels of the face texture set or normal map set for something interesting
 - Make sector and billboard contexts contain all context necessary, not just fragmented around the SceneState struct
+- Some library memory leaks
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
@@ -87,14 +89,6 @@ Physics:
 	and the wall's normal vector (perhaps find the wall vector from my movement delta). Axis where
 	no moving happened indicates normal vector orientation. If below tile pos, bottom tile; otherwise, top tile.
 	Same idea for side tiles.
-
-Chromebook bugs:
-- Memory leak with debug mode at the end of demos 17 and 22 (rest probably too), the lightmapper, the map editor, and the collision demo
-- Other demos untested
-- Outer project does not even want to start
-- Demo test range doesn't work
-- Sometimes, mouse control does not work when using the keyboard
-- Framerate drop when using the big monitor + optimized + full screen
 
 General future components:
 - Blit 2D sprite to whole screen
