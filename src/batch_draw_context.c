@@ -3,8 +3,6 @@
 
 #include "headers/batch_draw_context.h"
 #include "headers/texture.h"
-#include "utils.c"
-#include "list.c"
 
 // This does not initialize or fill the CPU buffer with data; that's the caller's responsibility
 void init_batch_draw_context_gpu_buffer(BatchDrawContext* const draw_context,

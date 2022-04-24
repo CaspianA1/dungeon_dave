@@ -1,8 +1,16 @@
 #ifndef BUFFER_DEFS_H
 #define BUFFER_DEFS_H
 
-#include "../../include/glad/glad.h"
+#include <SDL2/SDL.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdouble-promotion"
+#include <cglm/cglm.h>
+#pragma GCC diagnostic pop
+
 #include <stdbool.h>
+
+#include "../../include/glad/glad.h"
 
 typedef uint8_t byte;
 

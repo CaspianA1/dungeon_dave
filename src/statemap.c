@@ -7,7 +7,7 @@
 a bitmat because that sounds too much like bitmap. */
 
 StateMap init_statemap(const unsigned bits_across, const unsigned bits_down) {
-	const unsigned across = (unsigned) ceil(bits_across / 8.0);
+	const unsigned across = (unsigned) ceilf(bits_across / 8.0f);
 
 	StateMap statemap = {
 		{across, bits_down},

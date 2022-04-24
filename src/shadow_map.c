@@ -41,8 +41,8 @@ Or, do ping-ponging differently? https://www.khronos.org/opengl/wiki/Memory_Mode
 #include "headers/shadow_map.h"
 #include "headers/constants.h"
 #include "headers/buffer_defs.h"
-#include "texture.c"
-#include "camera.c"
+#include "headers/texture.h"
+#include "headers/camera.h"
 
 // TODO: to shaders.c
 const GLchar *const depth_vertex_shader =

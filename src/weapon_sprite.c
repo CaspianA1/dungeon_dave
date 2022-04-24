@@ -3,11 +3,7 @@
 
 #include "headers/weapon_sprite.h"
 #include "headers/constants.h"
-#include "utils.c"
-#include "camera.c"
-#include "event.c"
-#include "texture.c"
-#include "animation.c"
+#include "headers/texture.h"
 
 // TODO: to shaders.c
 const GLchar *const weapon_sprite_vertex_shader =

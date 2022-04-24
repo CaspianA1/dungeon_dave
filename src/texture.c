@@ -2,7 +2,7 @@
 #define TEXTURE_C
 
 #include "headers/texture.h"
-#include "constants.c"
+#include "headers/constants.h"
 
 ////////// Surface initialization
 

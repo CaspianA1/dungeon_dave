@@ -37,8 +37,7 @@ Other random ideas:
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit)
 - File paths may not work on Windows
 - Pass in texture parameters through a bitmask
-- Compile modules separarely, and then link them all together
-- After that, use CMake instead of Make for cross-platform compilation
+- Use CMake instead of Make for cross-platform compilation
 - Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry; perhaps more antialiasing for nearest?). This addresses nearest: https://gamedev.stackexchange.com/questions/93466/multisampled-nearest-filtering-in-ps-2-0-is-it-possible
 - Use the bit macros more
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
@@ -63,6 +62,7 @@ Other random ideas:
 - Some type of bridge object (perhaps not axis-aligned; just an arbitrary plane)
 - Rescale skyboxes if needed, and copy them over to the GPU in one pass
 - Separate out context + window creation and utils
+- Only recompile modules when needed
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them

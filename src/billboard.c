@@ -2,9 +2,7 @@
 #define BILLBOARD_C
 
 #include "headers/billboard.h"
-#include "list.c"
-#include "animation.c"
-#include "data/shaders.c"
+#include "headers/shaders.h"
 
 void update_billboard_animation_instances(const List* const billboard_animation_instances,
 	const List* const billboard_animations, const List* const billboards) {

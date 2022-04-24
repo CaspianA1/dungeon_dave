@@ -2,8 +2,9 @@
 #define NORMAL_MAP_GENERATION_C
 
 #include "headers/normal_map_generation.h"
+#include "headers/buffer_defs.h"
+#include "headers/texture.h"
 #include "headers/constants.h"
-#include "texture.c"
 
 static int int_min(const int val, const int lower) {
 	return (val < lower) ? val : lower;

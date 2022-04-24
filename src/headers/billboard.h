@@ -6,6 +6,7 @@
 #include "texture.h"
 #include "camera.h"
 #include "animation.h"
+#include "list.h"
 
 typedef struct {
 	const vec3 center;

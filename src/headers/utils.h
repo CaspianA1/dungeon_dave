@@ -1,13 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <SDL2/SDL.h>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdouble-promotion"
-#include <cglm/cglm.h>
-#pragma GCC diagnostic pop
-
 #include "buffer_defs.h"
 
 ////////// These macros pertain to debugging

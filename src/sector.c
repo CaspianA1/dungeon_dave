@@ -3,12 +3,11 @@
 
 #include "headers/utils.h"
 #include "headers/sector.h"
-#include "data/shaders.c"
-#include "face.c"
-#include "batch_draw_context.c"
-#include "texture.c"
-#include "list.c"
-#include "statemap.c"
+#include "headers/statemap.h"
+#include "headers/face.h"
+#include "headers/shaders.h"
+#include "headers/constants.h"
+#include "headers/list.h"
 
 // Attributes here = height and texture id
 static byte point_matches_sector_attributes(const Sector* const sector,

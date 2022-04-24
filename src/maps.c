@@ -1,23 +1,10 @@
 #ifndef MAPS_C
 #define MAPS_C
 
-#include "../headers/buffer_defs.h"
+#include "headers/buffer_defs.h"
+#include "headers/maps.h"
 
-enum {
-	level_one_width = 25, level_one_height = 15,
-	architecture_width = 50, architecture_height = 50,
-	fortress_width = 50, fortress_height = 50,
-	palace_width = 40, palace_height = 40,
-	tpt_width = 10, tpt_height = 20,
-	pyramid_width = 30, pyramid_height = 40,
-	maze_width = 90, maze_height = 61,
-	test_width = 8, test_height = 5,
-	terrain_width = 255, terrain_height = 255,
-	tiny_width = 7, tiny_height = 7,
-	checker_width = 255, checker_height = 255
-};
-
-static const byte level_one_heightmap[level_one_height][level_one_width] = {
+const byte level_one_heightmap[level_one_height][level_one_width] = {
 	{5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
 	{5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
 	{5, 0, 0, 0, 5, 0, 0, 0, 0, 2, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 3},

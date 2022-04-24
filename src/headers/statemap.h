@@ -4,8 +4,8 @@
 #include "utils.h"
 
 typedef struct {
-	unsigned chunk_dimensions[2];
-	buffer_size_t alloc_bytes;
+	const unsigned chunk_dimensions[2];
+	const buffer_size_t alloc_bytes;
 	byte* data;
 } StateMap;
 

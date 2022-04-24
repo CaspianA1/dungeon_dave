@@ -2,7 +2,7 @@
 #define CAMERA_C
 
 #include "headers/camera.h"
-#include "constants.c"
+#include "headers/constants.h"
 
 VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size_x, const byte map_size_z) {
 	/* The far clip distance, ideally, would be equal to the diameter of

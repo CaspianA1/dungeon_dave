@@ -2,8 +2,6 @@
 #define FACE_C
 
 #include "headers/face.h"
-#include "list.c"
-#include "sector.c"
 
 /*
 static void print_face(const Face face, const GLchar* const prefix_msg) {

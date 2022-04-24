@@ -3,8 +3,7 @@
 
 #include "headers/utils.h"
 #include "headers/texture.h"
-#include "constants.c"
-#include "../include/glad/glad.c"
+#include "headers/constants.h"
 
 void fail(const GLchar* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s.\n", msg);
