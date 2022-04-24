@@ -2,7 +2,6 @@
 #define LIST_C
 
 #include "headers/list.h"
-#include <string.h>
 
 List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size) {
 	return (List) {
