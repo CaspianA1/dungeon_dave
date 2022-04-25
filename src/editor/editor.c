@@ -1,7 +1,7 @@
 #include "editor.h"
 #include "info_bar.c"
 #include "level_parser.c"
-#include "../data/maps.c"
+#include "../maps.c"
 
 /*
 Plan:

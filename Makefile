@@ -8,7 +8,7 @@ OUT = dungeon_dave
 
 CONVERSION_WARNINGS = -Wfloat-conversion -Wdouble-promotion -Wsign-conversion -Wimplicit-int-conversion -Wshorten-64-to-32 -Wincompatible-pointer-types
 WARNINGS = -Wall -Wextra -Wpedantic -Wformat $(CONVERSION_WARNINGS)
-CFLAGS = -c -std=c99 $(WARNINGS)
+CFLAGS = -std=c99 $(WARNINGS)
 
 NON_GL_LDFLAGS = $$(pkg-config --cflags --libs sdl2) -lm
 
@@ -32,10 +32,10 @@ all: $(OBJS) glad
 	cd $(BIN_DIR) && ./$(OUT)
 
 $(OBJS):
-	$(CC) $(CFLAGS) $(BUILD_TYPE) -o $(BIN_DIR)/$*.o $(SRC_DIR)/$*.c
+	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $(BIN_DIR)/$*.o $(SRC_DIR)/$*.c
 
 glad:
-	$(CC) $(CFLAGS) $(BUILD_TYPE) -o $(BIN_DIR)/glad.o include/glad/glad.c
+	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $(BIN_DIR)/glad.o include/glad/glad.c
 
 ##########
 
