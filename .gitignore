@@ -3,9 +3,4 @@ scrap_code.txt
 
 .vscode/
 bin/
-
-other/
-unused/
-unused_2/
-scrap_code/
-blender/
+obj/
