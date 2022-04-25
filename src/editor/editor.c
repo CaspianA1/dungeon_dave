@@ -209,7 +209,7 @@ static void editor_loop(EditorState* const eds) {
 }
 
 void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
-	init_editor_state_from_json_file(eds, "../src/data/simple.json");
+	init_editor_state_from_json_file(eds, "../assets/levels/simple.json");
 
 	enum {
 		num_textures = 11, map_width = palace_width, map_height = palace_height
