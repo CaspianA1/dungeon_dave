@@ -30,7 +30,10 @@ GLAD_DIR = include/glad
 
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.c))
 
-all: $(OBJS) $(OBJ_DIR)/glad.o
+all: $(BIN_DIR)/$(OUT)
+
+$(BIN_DIR)/$(OUT): $(OBJS) $(OBJ_DIR)/glad.o
+	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) $(GL_LDFLAGS) -o $(BIN_DIR)/$(OUT) $(OBJ_DIR)/*.o
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(HEADER_DIR)/%.h
 	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $@ $(SRC_DIR)/$*.c
