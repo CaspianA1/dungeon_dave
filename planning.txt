@@ -62,7 +62,6 @@ Other random ideas:
 - Some type of bridge object (perhaps not axis-aligned; just an arbitrary plane)
 - Rescale skyboxes if needed, and copy them over to the GPU in one pass
 - Separate out context + window creation and utils
-- Only recompile modules when needed
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them

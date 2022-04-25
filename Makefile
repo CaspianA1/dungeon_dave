@@ -23,19 +23,20 @@ endif
 .PHONY: all clean
 
 SRC_DIR = src
+HEADER_DIR = $(SRC_DIR)/headers
+OBJ_DIR = obj
 BIN_DIR = bin
+GLAD_DIR = include/glad
 
-OBJS := $(patsubst $(SRC_DIR)/%.c, %.o, $(wildcard $(SRC_DIR)/*.c))
+OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.c))
 
-all: $(OBJS) glad
-	$(CC) $(BUILD_TYPE) $(NON_GL_LDFLAGS) $(GL_LDFLAGS) $(BIN_DIR)/*.o -o $(BIN_DIR)/$(OUT)
-	cd $(BIN_DIR) && ./$(OUT)
+all: $(OBJS) $(OBJ_DIR)/glad.o
 
-$(OBJS):
-	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $(BIN_DIR)/$*.o $(SRC_DIR)/$*.c
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(HEADER_DIR)/%.h
+	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $@ $(SRC_DIR)/$*.c
 
-glad:
-	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $(BIN_DIR)/glad.o include/glad/glad.c
+$(OBJ_DIR)/glad.o: $(GLAD_DIR)/*
+	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $@ $(GLAD_DIR)/glad.c
 
 ##########
 
@@ -44,4 +45,4 @@ editor:
 	cd $(BIN_DIR) && ./editor
 
 clean:
-	rm -r $(BIN_DIR)/*.o
+	rm $(OBJ_DIR)/*.o $(BIN_DIR)/$(OUT)

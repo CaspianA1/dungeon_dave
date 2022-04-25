@@ -1,34 +1,13 @@
-#include "headers/utils.h"
-#include "headers/skybox.h"
+#ifndef MAIN_C
+#define MAIN_C
+
+#include "headers/main.h"
+#include "headers/billboard.h"
 #include "headers/maps.h"
 #include "headers/sector.h"
-#include "headers/billboard.h"
-#include "headers/camera.h"
-#include "headers/event.h"
-#include "headers/weapon_sprite.h"
-#include "headers/animation.h"
-#include "headers/shadow_map.h"
 #include "headers/normal_map_generation.h"
 
-typedef struct {
-	const GLuint vao;
-
-	WeaponSprite weapon_sprite;
-
-	BatchDrawContext sector_draw_context, billboard_draw_context;
-	ShadowMapContext shadow_map_context;
-	VoxelPhysicsContext physics_context;
-
-	List sectors, billboard_animations, billboard_animation_instances;
-
-	const Skybox skybox;
-
-	GLuint face_normal_map_set;
-
-	const byte *const heightmap, *const texture_id_map, map_size[2];
-} SceneState;
-
-void* main_init(void) {
+static void* main_init(void) {
 	////////// Defining a bunch of level data
 
 	const AnimationLayout billboard_animation_layouts[] = {
@@ -194,7 +173,7 @@ void* main_init(void) {
 	return app_context;
 }
 
-void main_drawer(void* const app_context) {
+static void main_drawer(void* const app_context) {
 	SceneState* const scene_state = (SceneState*) app_context;
 	const BatchDrawContext* const sector_draw_context = &scene_state -> sector_draw_context;
 	ShadowMapContext* const shadow_map_context = &scene_state -> shadow_map_context;
@@ -232,7 +211,7 @@ void main_drawer(void* const app_context) {
 	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, &camera, &event);
 }
 
-void main_deinit(void* const app_context) {
+static void main_deinit(void* const app_context) {
 	SceneState* const scene_state = (SceneState*) app_context;
 
 	deinit_weapon_sprite(&scene_state -> weapon_sprite);
@@ -257,3 +236,5 @@ void main_deinit(void* const app_context) {
 int main(void) {
 	make_application(main_drawer, main_init, main_deinit);
 }
+
+#endif
