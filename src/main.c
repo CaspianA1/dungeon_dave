@@ -167,6 +167,7 @@ static void* main_init(void) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	render_all_sectors_to_shadow_map(&scene_state.shadow_map_context,
 		&scene_state.sector_draw_context, get_next_event().screen_size,

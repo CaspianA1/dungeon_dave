@@ -108,13 +108,6 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 }
 
 Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
-	static bool first_call = true;
-
-	if (first_call) {
-		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		first_call = false;
-	}
-
 	const GLuint vbo = init_gpu_buffer();
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
