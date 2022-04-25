@@ -48,10 +48,32 @@ static const GLbyte skybox_vertices[] = {
 	1, -1, 1
 };
 
-static GLuint init_skybox_texture(const GLchar* const path) {
-	SDL_Surface* const skybox_surface = init_surface(path);
+static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
+	SDL_Surface* skybox_surface = init_surface(cubemap_path);
+
+	////////// Rescaling the skybox if needed
+
+	if (texture_rescale_factor != 1.0f) {
+		SDL_Surface* const rescaled_skybox_surface = init_blank_surface(
+			(GLsizei) (skybox_surface -> w * texture_rescale_factor),
+			(GLsizei) (skybox_surface -> h * texture_rescale_factor),
+			SDL_PIXEL_FORMAT);
+
+		SDL_BlitScaled(skybox_surface, NULL, rescaled_skybox_surface, NULL);
+		deinit_surface(skybox_surface);
+
+		skybox_surface = rescaled_skybox_surface;
+	}
 
 	const GLint skybox_w = skybox_surface -> w;
+
+	////////// Failing if the dimensions are not right
+
+	if (skybox_w != (skybox_surface -> h << 2) / 3)
+		fail("create a skybox, because its width does not equal 4/3 of its height", CreateSkybox);
+
+	//////////
+
 	const GLint cube_size = skybox_w >> 2, twice_cube_size = skybox_w >> 1;
 	const GLuint skybox = preinit_texture(TexSkybox, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SKYBOX_MIN_FILTER);
 
@@ -85,7 +107,7 @@ static GLuint init_skybox_texture(const GLchar* const path) {
 	return skybox;
 }
 
-Skybox init_skybox(const GLchar* const cubemap_path) {
+Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
 	static bool first_call = true;
 
 	if (first_call) {
@@ -98,9 +120,9 @@ Skybox init_skybox(const GLchar* const cubemap_path) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
 
 	return (Skybox) {
-		.vbo = vbo,
+		.vbo = vbo, // TODO: share this vbo and shader between different skyboxes. Perhaps a SkyboxRenderer struct?
 		.shader = init_shader(skybox_vertex_shader, skybox_fragment_shader),
-		.texture = init_skybox_texture(cubemap_path)
+		.texture = init_skybox_texture(cubemap_path, texture_rescale_factor)
 	};
 }
 

@@ -141,7 +141,9 @@ typedef enum {
 	LaunchGLAD,
 	OpenImageFile,
 	TextureIDIsTooLarge,
-	CreateFramebuffer
+	CreateFramebuffer,
+	CreateSkybox,
+	CreateBlankSurface
 } FailureType;
 
 //////////

@@ -96,15 +96,19 @@ static void* main_init(void) {
 
 	//////////
 
-	/* For a 2048x2048 shadow map:
-	- One texture = 2048 * 2048 * 16 = 67,108,864 bytes
-	- One texture is mipmapped, so one takes up 89,478,486 bytes
-	- Total is 156,587,350 bytes */
-
+	/* Not initialized in `scene_state` since other values
+	initialized in the struct may depend on it */
 	const GLuint vao = init_vao();
 
-	SceneState scene_state = { // 2 << 13 is the biggest size
+	SceneState scene_state = {
 		.vao = vao,
+
+		/* For a 2048x2048 shadow map:
+		- One texture = 2048 * 2048 * 16 = 67,108,864 bytes
+		- One texture is mipmapped, so one takes up 89,478,486 bytes
+		- Total is 156,587,350 bytes
+
+		Also, 2 << 13 is the biggest possible size. */
 
 		.shadow_map_context = init_shadow_map_context(2048, 2048,
 			// (vec3) {40.0f, 15.0f, 0.0f}, 5.5f, -1.0f
@@ -120,7 +124,7 @@ static void* main_init(void) {
 		.billboard_animations = init_list(ARRAY_LENGTH(billboard_animations), Animation),
 		.billboard_animation_instances = init_list(ARRAY_LENGTH(billboard_animation_instances), BillboardAnimationInstance),
 
-		.skybox = init_skybox("../assets/skyboxes/desert.bmp"),
+		.skybox = init_skybox("../assets/skyboxes/desert.bmp", 1.0f),
 
 		.heightmap = (const byte*) palace_heightmap,
 		.texture_id_map = (const byte*) palace_texture_id_map,

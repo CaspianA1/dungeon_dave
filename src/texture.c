@@ -7,7 +7,12 @@
 ////////// Surface initialization
 
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height, const SDL_PixelFormatEnum pixel_format_name) {
-	return SDL_CreateRGBSurfaceWithFormat(0, width, height, SDL_BITSPERPIXEL(pixel_format_name), pixel_format_name);
+	SDL_Surface* const blank_surface = SDL_CreateRGBSurfaceWithFormat(
+		0, width, height, SDL_BITSPERPIXEL(pixel_format_name), pixel_format_name);
+
+	if (blank_surface == NULL) fail("create a blank surface", CreateBlankSurface);
+
+	return blank_surface;
 }
 
 SDL_Surface* init_surface(const GLchar* const path) {

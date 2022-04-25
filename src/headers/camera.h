@@ -10,9 +10,7 @@
 typedef struct {
 	Uint64 last_time;
 
-	struct {
-		GLfloat fov, hori, vert, tilt;
-	} angles;
+	struct {GLfloat fov, hori, vert, tilt;} angles;
 
 	/* Pace is the amount of head bob that happens when moving.
 	The speed xz percent is not the true speed percent; rather,

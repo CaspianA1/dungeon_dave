@@ -60,7 +60,6 @@ Other random ideas:
 	asset folder in a repo for the old codebase, and 3. put a copy of the statemap code in this repo.
 - A better failure function
 - Some type of bridge object (perhaps not axis-aligned; just an arbitrary plane)
-- Rescale skyboxes if needed, and copy them over to the GPU in one pass
 - Separate out context + window creation and utils
 
 Normal mapping:
