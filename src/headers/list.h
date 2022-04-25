@@ -3,9 +3,6 @@
 
 #include "buffer_defs.h"
 
-static const GLfloat list_realloc_rate = 2.0f;
-#define LIST_REALLOC_AMOUNT_FOR(curr_alloc) ((buffer_size_t) (ceilf((curr_alloc) * list_realloc_rate)))
-
 typedef struct {
 	void* data;
 	buffer_size_t item_size, length, max_alloc;

@@ -4,47 +4,7 @@
 #include "headers/weapon_sprite.h"
 #include "headers/constants.h"
 #include "headers/texture.h"
-
-// TODO: to shaders.c
-const GLchar *const weapon_sprite_vertex_shader =
-	"#version 330 core\n"
-
-	"uniform float frame_width_over_height, weapon_size_screen_space, inverse_screen_aspect_ratio;\n"
-	"uniform vec2 pace;\n"
-
-	"out vec2 fragment_UV;\n"
-
-	"const vec2 screen_corners[4] = vec2[4] (\n"
-		"vec2(-1.0f, -1.0f), vec2(1.0f, -1.0f),\n"
-		"vec2(-1.0f, 1.0f), vec2(1.0f, 1.0f)\n"
-	");\n"
-
-	"void main(void) {\n"
-		"vec2 screen_corner = screen_corners[gl_VertexID];\n"
-
-		"vec2 weapon_corner = screen_corner * weapon_size_screen_space;\n"
-		"weapon_corner.x *= frame_width_over_height * inverse_screen_aspect_ratio;\n"
-
-		"weapon_corner.y += weapon_size_screen_space - 1.0f;\n" // Makes the weapon touch the bottom of the screen
-		"weapon_corner += pace;\n"
-
-		"gl_Position = vec4(weapon_corner, 0.0f, 1.0f);\n"
-		"fragment_UV = vec2(screen_corner.x, -screen_corner.y) * 0.5f + 0.5f;\n"
-	"}\n",
-
-*const weapon_sprite_fragment_shader =
-	"#version 330 core\n"
-
-	"in vec2 fragment_UV;\n"
-
-	"out vec4 color;\n"
-
-	"uniform uint frame_index;\n"
-	"uniform sampler2DArray frame_sampler;\n"
-
-	"void main(void) {\n"
-		"color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
-	"}\n";
+#include "headers/shaders.h"
 
 WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
 	const GLfloat secs_per_frame, const AnimationLayout animation_layout) {
@@ -71,7 +31,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 		),
 
 		// TODO: for multiple weapons, share this shader
-		.shader = init_shader(weapon_sprite_vertex_shader, weapon_sprite_fragment_shader),
+		.shader = init_shader(weapon_vertex_shader, weapon_fragment_shader),
 
 		.animation = {
 			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
