@@ -15,8 +15,8 @@ static byte point_matches_sector_attributes(const Sector* const sector,
 	const byte x, const byte y, const byte map_width) {
 
 	return
-		sample_map_point(heightmap, x, y, map_width) == sector -> visible_heights.max
-		&& sample_map_point(texture_id_map, x, y, map_width) == sector -> texture_id;
+		sample_map_point(heightmap, x, y, map_width) == sector -> visible_heights.max &&
+		sample_map_point(texture_id_map, x, y, map_width) == sector -> texture_id;
 }
 
 // Gets length across, and then adds to area size y until out of map or length across not eq
@@ -27,9 +27,9 @@ static Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	byte top_right_corner_x = sector.origin[0];
 	const byte origin_y = sector.origin[1];
 
-	while (top_right_corner_x < map_width
-		&& !statemap_bit_is_set(traversed_points, top_right_corner_x, origin_y)
-		&& point_matches_sector_attributes(&sector, heightmap, texture_id_map, top_right_corner_x, origin_y, map_width)) {
+	while (top_right_corner_x < map_width &&
+		!statemap_bit_is_set(traversed_points, top_right_corner_x, origin_y) &&
+		point_matches_sector_attributes(&sector, heightmap, texture_id_map, top_right_corner_x, origin_y, map_width)) {
 
 		sector.size[0]++;
 		top_right_corner_x++;

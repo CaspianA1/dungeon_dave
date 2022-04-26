@@ -68,7 +68,7 @@ static void update_weapon_sprite(WeaponSprite* const ws, const Event* const even
 	buffer_size_t curr_frame = ws -> curr_frame;
 
 	if (curr_frame == 0) {
-		if ((event -> movement_bits & BIT_USE_WEAPON) != 0) curr_frame++;
+		if (CHECK_BITMASK(event -> movement_bits, BIT_USE_WEAPON)) curr_frame++;
 	}
 	else {
 		update_animation_information(

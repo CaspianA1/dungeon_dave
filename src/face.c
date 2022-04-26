@@ -15,7 +15,7 @@ static void print_face(const Face face, const GLchar* const prefix_msg) {
 */
 
 // Returns if there is another face to get
-static byte get_next_face(const Sector sector, const byte varying_axis,
+static bool get_next_face(const Sector sector, const byte varying_axis,
 	const byte adjacent_side_val, const byte map_width,
 	const byte* const heightmap, Face* const face) {
 	
@@ -36,7 +36,7 @@ static byte get_next_face(const Sector sector, const byte varying_axis,
 		start_val++;
 	}
 
-	if (start_val == end_edge_val) return 0;
+	if (start_val == end_edge_val) return false;
 
 	byte end_val = start_val;
 	while (end_val < end_edge_val) {
@@ -52,7 +52,7 @@ static byte get_next_face(const Sector sector, const byte varying_axis,
 	face -> size[0] = end_val - start_val;
 	face -> size[1] = face_height_diff;
 
-	return 1;
+	return true;
 }
 
 void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
@@ -67,11 +67,12 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 		4 = top vert EW.
 	Bits 3-7, five bits -> texture id. */
 
-	byte face_id = (byte) (side << 2) | (byte) face.type;
-	if (face_id == 5 || face_id == 6) face_id -= 2;
+	// `u` suffixes used to reduce the chance of undefined behavior with signed bitwise operations
+	byte face_id = (byte) (side << 2u) | (byte) face.type;
+	if (face_id == 5u || face_id == 6u) face_id -= 2u;
 
 	const byte
-		face_info = (byte) (texture_id << 3) | face_id,
+		face_info = (byte) (texture_id << 3u) | face_id,
 		near_x = face.origin[0], near_z = face.origin[1],
 		top_y = sector_max_visible_height;
 
@@ -162,13 +163,14 @@ void init_vert_faces(
 			byte adjacent_side_val;
 
 			if (side) { // Side is a top side or left side of the top-down sector
-				if (next_face.origin[unvarying_axis] == 0) continue;
-				adjacent_side_val = next_face.origin[unvarying_axis] - 1;
+				const byte unvarying_axis_origin = next_face.origin[unvarying_axis];
+				if (unvarying_axis_origin == 0) continue;
+				adjacent_side_val = unvarying_axis_origin - 1;
 			}
 			else {
-				if ((next_face.origin[unvarying_axis] += sector.size[unvarying_axis])
-					== dimensions[unvarying_axis]) continue;
-				adjacent_side_val = next_face.origin[unvarying_axis];
+				byte* const unvarying_axis_origin = next_face.origin + unvarying_axis;
+				if ((*unvarying_axis_origin += sector.size[unvarying_axis]) == dimensions[unvarying_axis]) continue;
+				adjacent_side_val = *unvarying_axis_origin;
 			}
 
 			while (get_next_face(sector, !unvarying_axis, adjacent_side_val, map_width, heightmap, &next_face)) {

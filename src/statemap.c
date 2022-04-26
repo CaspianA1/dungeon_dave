@@ -50,7 +50,7 @@ void set_statemap_bit(const StateMap statemap, const buffer_size_t bits_x, const
 
 bool statemap_bit_is_set(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y) {
 	const statemap_chunk_t chunk = *get_statemap_chunk(statemap, bits_x, bits_y);
-	return !!CHECK_BITS_AGAINST_MASK(chunk, get_mask_for_bit_index_in_chunk(bits_x));
+	return CHECK_BITMASK(chunk, get_mask_for_bit_index_in_chunk(bits_x));
 }
 
 #endif

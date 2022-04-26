@@ -108,7 +108,7 @@ static void update_fov(Camera* const camera, const byte movement_bits, const GLf
 	const GLfloat time_for_full_fov = constants.speeds.xz_max / constants.accel.forward_back / refresh_rate;
 	GLfloat t = camera -> time_accum_for_full_fov;
 
-	if (movement_bits & BIT_ACCELERATE) {
+	if (CHECK_BITMASK(movement_bits, BIT_ACCELERATE)) {
 		if ((t += delta_time) > time_for_full_fov) t = time_for_full_fov;
 	}
 	else if ((t -= delta_time) < 0.0f) t = 0.0f;
@@ -174,7 +174,7 @@ static void update_pos_via_physics(const byte movement_bits,
 
 	GLfloat accel_forward_back_per_sec = constants.accel.forward_back;
 
-	if (movement_bits & BIT_ACCELERATE)
+	if (CHECK_BITMASK(movement_bits, BIT_ACCELERATE))
 		accel_forward_back_per_sec += constants.accel.additional_forward_back;
 
 	const GLfloat // The `* delta_time` exprs get a per-tick version of each multiplicand
@@ -302,10 +302,10 @@ void update_camera(Camera* const camera, const Event event, VoxelPhysicsContext*
 
 	if (physics_context == NULL || keys[KEY_FLY]) { // Forward, backward, left, right
 		const GLfloat speed = constants.speeds.xz_max * delta_time;
-		if (event.movement_bits & BIT_MOVE_FORWARD) glm_vec3_muladds(dir, speed, pos);
-		if (event.movement_bits & BIT_MOVE_BACKWARD) glm_vec3_muladds(dir, -speed, pos);
-		if (event.movement_bits & BIT_STRAFE_LEFT) glm_vec3_muladds(right, -speed, pos);
-		if (event.movement_bits & BIT_STRAFE_RIGHT) glm_vec3_muladds(right, speed, pos);
+		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_FORWARD)) glm_vec3_muladds(dir, speed, pos);
+		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_BACKWARD)) glm_vec3_muladds(dir, -speed, pos);
+		if (CHECK_BITMASK(event.movement_bits, BIT_STRAFE_LEFT)) glm_vec3_muladds(right, -speed, pos);
+		if (CHECK_BITMASK(event.movement_bits, BIT_STRAFE_RIGHT)) glm_vec3_muladds(right, speed, pos);
 	}
 	else {
 		update_pos_via_physics(event.movement_bits, physics_context, dir_xz, pos, camera -> pace, delta_time);
