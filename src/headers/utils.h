@@ -49,7 +49,6 @@
 ////////// These are some general-purpose macros
 
 #define CHECK_BITMASK(bits, mask) (!!((bits) & (mask)))
-#define SET_BIT(bits, mask) ((bits) |= (mask))
 
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof(*(array)))
 

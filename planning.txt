@@ -39,7 +39,6 @@ Other random ideas:
 - Pass in texture parameters through a bitmask
 - Use CMake instead of Make for cross-platform compilation
 - Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry; perhaps more antialiasing for nearest?). This addresses nearest: https://gamedev.stackexchange.com/questions/93466/multisampled-nearest-filtering-in-ps-2-0-is-it-possible
-- Use the bit macros more
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
 - Eventually, put the contents of VoxelPhysicsContext inside the camera
 - Use fminf and fmaxf more

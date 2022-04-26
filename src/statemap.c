@@ -44,8 +44,7 @@ static statemap_chunk_t get_mask_for_bit_index_in_chunk(const buffer_size_t bits
 }
 
 void set_statemap_bit(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y) {
-	statemap_chunk_t* const chunk = get_statemap_chunk(statemap, bits_x, bits_y);
-	SET_BIT(*chunk, get_mask_for_bit_index_in_chunk(bits_x));
+	*get_statemap_chunk(statemap, bits_x, bits_y) |= get_mask_for_bit_index_in_chunk(bits_x);
 }
 
 bool statemap_bit_is_set(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y) {
