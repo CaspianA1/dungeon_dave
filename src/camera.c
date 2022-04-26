@@ -193,14 +193,12 @@ static void update_pos_via_physics(const byte movement_bits,
 
 	////////// Updating velocity
 
-	velocity_forward_back = apply_velocity_in_xz_direction(velocity_forward_back,
-		accel_forward_back, delta_time, max_speed_xz,
-		CHECK_BITMASK(movement_bits, BIT_MOVE_FORWARD),
+	velocity_forward_back = apply_velocity_in_xz_direction(velocity_forward_back, accel_forward_back,
+		delta_time, max_speed_xz, CHECK_BITMASK(movement_bits, BIT_MOVE_FORWARD),
 		CHECK_BITMASK(movement_bits, BIT_MOVE_BACKWARD));
 
-	velocity_strafe = apply_velocity_in_xz_direction(velocity_strafe,
-		accel_strafe, delta_time, max_speed_xz,
-		CHECK_BITMASK(movement_bits, BIT_STRAFE_LEFT),
+	velocity_strafe = apply_velocity_in_xz_direction(velocity_strafe, accel_strafe,
+		delta_time, max_speed_xz, CHECK_BITMASK(movement_bits, BIT_STRAFE_LEFT),
 		CHECK_BITMASK(movement_bits, BIT_STRAFE_RIGHT));
 
 	const GLfloat one_over_delta_time = 1.0f / delta_time;
