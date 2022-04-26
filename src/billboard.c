@@ -17,7 +17,7 @@ void update_billboard_animation_instances(const List* const billboard_animation_
 		BillboardAnimationInstance* const billboard_animation_instance = billboard_animation_instance_data + i;
 		update_animation_information(&billboard_animation_instance -> last_frame_time,
 			&billboard_data[billboard_animation_instance -> ids.billboard].texture_id,
-			 animation_data[billboard_animation_instance -> ids.animation], curr_time);
+			animation_data[billboard_animation_instance -> ids.animation], curr_time);
 	}
 }
 
