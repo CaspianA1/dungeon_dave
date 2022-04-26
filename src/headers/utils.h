@@ -53,6 +53,12 @@
 
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof(*(array)))
 
+////////// These macros are for handy abstractions over OpenGL functions
+
+#define use_shader glUseProgram
+#define deinit_shader glDeleteProgram
+#define deinit_vao(vao) glDeleteVertexArrays(1, &(vao))
+
 #define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
 
 #define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
@@ -62,12 +68,6 @@
 	glUniform##type_prefix(glGetUniformLocation((shader), (name)), __VA_ARGS__)
 
 #define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
-
-////////// These macros are for handy abstractions over OpenGL functions
-
-#define use_shader glUseProgram
-#define deinit_shader glDeleteProgram
-#define deinit_vao(vao) glDeleteVertexArrays(1, &(vao))
 
 #define INNER_WITH_VERTEX_ATTRIBUTE(is_instanced, index, I, function_params, ...)\
 	glEnableVertexAttribArray((index));\
