@@ -89,13 +89,10 @@ static void update_editing_placement_values(EditorState* const eds, const SDL_Ev
 }
 
 static void edit_eds_map(EditorState* const eds) {
-	static bool prev_texture_edit_key = false, first_call = true;
+	static bool prev_texture_edit_key = false;
 	static const Uint8* keys;
 
-	if (first_call) {
-		keys = SDL_GetKeyboardState(NULL);
-		first_call = false;
-	}
+	ON_FIRST_CALL(keys = SDL_GetKeyboardState(NULL););
 
 	const bool texture_edit_key = keys[KEY_TOGGLE_TEXTURE_EDIT_MODE];
 	if (texture_edit_key)

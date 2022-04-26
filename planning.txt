@@ -57,7 +57,6 @@ Other random ideas:
 - A better failure function
 - Some type of bridge object (perhaps not axis-aligned; just an arbitrary plane)
 - Separate out context + window creation and utils
-- Use the ON_FIRST_CALL macro in all possible places
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them

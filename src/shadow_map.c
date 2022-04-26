@@ -263,7 +263,6 @@ static void blur_shadow_map(ShadowMapContext* const shadow_map_context) {
 		const GLsizei* const shadow_map_size = shadow_map_context -> buffer_context.size;
 		INIT_UNIFORM_VALUE(texel_size, blur_shader, 2f, 1.0f / shadow_map_size[0], 1.0f / shadow_map_size[1]);
 		set_sampler_texture_unit_for_shader("image_sampler", blur_shader, SHADOW_MAP_TEXTURE_UNIT);
-		first_call = false;
 	);
 
 	set_current_texture_unit(SHADOW_MAP_TEXTURE_UNIT);
