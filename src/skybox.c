@@ -129,13 +129,11 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 	use_shader(s.shader);
 
 	static GLint model_view_projection_id;
-	static bool first_call = true;
 
-	if (first_call) {
+	ON_FIRST_CALL(
 		INIT_UNIFORM(model_view_projection, s.shader);
 		use_texture(s.texture, s.shader, "texture_sampler", TexSkybox, SKYBOX_TEXTURE_UNIT);
-		first_call = false;
-	}
+	);
 
 	mat4 model_view_projection;
 	glm_mat4_copy((vec4*) camera -> model_view_projection, model_view_projection);

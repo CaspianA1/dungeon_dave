@@ -53,6 +53,14 @@
 
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof(*(array)))
 
+#define ON_FIRST_CALL(...) do {\
+	static bool first_call = true;\
+	if (first_call) {\
+		__VA_ARGS__\
+		first_call = false;\
+	}\
+} while (0)
+
 ////////// These macros are for handy abstractions over OpenGL functions
 
 #define use_shader glUseProgram

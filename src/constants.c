@@ -2,16 +2,12 @@
 #define CONSTANTS_C
 
 #include "headers/constants.h"
+#include "headers/utils.h"
 
 // The return type is GLfloat, in order to be flexible for both integers and floats
 GLfloat get_runtime_constant(const RuntimeConstantName runtime_constant_name) {
 	static GLfloat aniso_filtering_level;
-	static bool first_call = true;
-
-	if (first_call) {
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso_filtering_level);
-		first_call = false;
-	}
+	ON_FIRST_CALL(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso_filtering_level););
 
 	switch (runtime_constant_name) {
 		case RefreshRate: {

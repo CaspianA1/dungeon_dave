@@ -150,9 +150,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		camera_pos_world_space_id, dir_to_light_id, model_view_projection_id,
 		light_model_view_projection_id, one_over_screen_size_id;
 
-	static bool first_call = true;
-
-	if (first_call) {
+	ON_FIRST_CALL(
 		INIT_UNIFORM(dir_to_light, shader);
 		INIT_UNIFORM(camera_pos_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
@@ -187,9 +185,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
 		use_texture(normal_map_set, shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
-
-		first_call = false;
-	}
+	);
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
 	const GLfloat* const light_dir = shadow_map_context -> light_context.dir;

@@ -87,9 +87,8 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	use_shader(ws.shader);
 
 	static GLint inverse_screen_aspect_ratio_id, pace_id, frame_index_id;
-	static bool first_call = true;
 
-	if (first_call) {
+	ON_FIRST_CALL(
 		// TODO: update these uniforms if the weapon changes
 		INIT_UNIFORM_VALUE(frame_width_over_height, ws.shader, 1f, ws.frame_width_over_height);
 		INIT_UNIFORM_VALUE(weapon_size_screen_space, ws.shader, 1f, ws.size);
@@ -99,9 +98,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 		INIT_UNIFORM(frame_index, ws.shader);
 
 		use_texture(ws.texture, ws.shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
-
-		first_call = false;
-	}
+	);
 
 	const GLfloat
 		curr_time = SDL_GetTicks() / 1000.0f,

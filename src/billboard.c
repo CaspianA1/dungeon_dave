@@ -47,14 +47,12 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	use_shader(shader);
 
 	static GLint right_xz_world_space_id, model_view_projection_id;
-	static bool first_call = true;
 
-	if (first_call) {
+	ON_FIRST_CALL(
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, BILLBOARD_TEXTURE_UNIT);
-		first_call = false;
-	}
+	);
 
 	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right_xz[0], camera -> right_xz[1]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);

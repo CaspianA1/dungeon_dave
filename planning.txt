@@ -50,7 +50,6 @@ Other random ideas:
 	If levels come from C files, put those directly in files; otherwise, JSON will be turned into a LevelDescription.
 	The advantage to C files is that you don't have to parse a file for each level; the disadvantage is that map files
 	are then not easily editable.
-- A ON_FIRST_CALL macro
 - For each wall texture, define normal map settings (only useful at normal map generation time)
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else
 - Perhaps use the alpha channels of the face texture set or normal map set for something interesting

@@ -185,12 +185,7 @@ static void main_drawer(void* const app_context) {
 	VoxelPhysicsContext* const physics_context = &scene_state -> physics_context;
 
 	static Camera camera;
-	static bool first_call = true;
-
-	if (first_call) {
-		init_camera(&camera, (vec3) {1.5f, 0.5f, 1.5f}); // {3.9f, 0.5f, 6.0f}, {12.5f, 3.5f, 22.5f}
-		first_call = false;
-	}
+	ON_FIRST_CALL(init_camera(&camera, (vec3) {1.5f, 0.5f, 1.5f});); // {3.9f, 0.5f, 6.0f}, {12.5f, 3.5f, 22.5f}
 
 	const Event event = get_next_event();
 	update_camera(&camera, event, physics_context);

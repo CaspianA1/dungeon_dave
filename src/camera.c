@@ -272,12 +272,8 @@ void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, ve
 
 void update_camera(Camera* const camera, const Event event, VoxelPhysicsContext* const physics_context) {
 	static GLfloat one_over_performance_freq;
-	static bool first_call = true;
 
-	if (first_call) {
-		one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
-		first_call = false;
-	}
+	ON_FIRST_CALL(one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency(););
 
 	/* Using the high-resolution SDL timer (instead of SDL_GetTicks)
 	because lots of timing accuracy is needed for good physics */
