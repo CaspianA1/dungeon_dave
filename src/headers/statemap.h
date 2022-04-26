@@ -3,19 +3,20 @@
 
 #include "utils.h"
 
+// This should not be signed
+typedef byte statemap_chunk_t;
+
 typedef struct {
-	const unsigned chunk_dimensions[2];
-	const buffer_size_t alloc_bytes;
-	byte* data;
+	const buffer_size_t chunks_across;
+	statemap_chunk_t* data;
 } StateMap;
 
-// Excluded: statemap_byte, get_n_for_bits_x
+// Excluded: get_statemap_chunk, get_mask_for_bit_index_in_chunk
 
-#define clear_statemap(s) memset(s.data, 0, s.alloc_bytes)
 #define deinit_statemap(s) free(s.data)
 
-StateMap init_statemap(const unsigned bits_across, const unsigned bits_down);
-void set_statemap_bit(const StateMap statemap, const unsigned bits_x, const unsigned bits_y);
-byte get_statemap_bit(const StateMap statemap, const unsigned bits_x, const unsigned bits_y);
+StateMap init_statemap(const buffer_size_t bits_across, const buffer_size_t bits_down);
+void set_statemap_bit(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y);
+bool statemap_bit_is_set(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y);
 
 #endif

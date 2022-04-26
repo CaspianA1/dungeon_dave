@@ -48,8 +48,8 @@
 
 ////////// These are some general-purpose macros
 
-#define bit_is_set(bits, mask) ((bits) & (mask))
-#define set_bit(bits, mask) ((bits) |= (mask))
+#define CHECK_BITS_AGAINST_MASK(bits, mask) ((bits) & (mask))
+#define SET_BIT(bits, mask) ((bits) |= (mask))
 
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof(*(array)))
 
@@ -156,6 +156,7 @@ typedef enum {
 
 //////////
 
+extern const Uint8* keys;
 const Uint8* keys;
 
 //////////

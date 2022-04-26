@@ -28,7 +28,7 @@ static Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	const byte origin_y = sector.origin[1];
 
 	while (top_right_corner_x < map_width
-		&& !get_statemap_bit(traversed_points, top_right_corner_x, origin_y)
+		&& !statemap_bit_is_set(traversed_points, top_right_corner_x, origin_y)
 		&& point_matches_sector_attributes(&sector, heightmap, texture_id_map, top_right_corner_x, origin_y, map_width)) {
 
 		sector.size[0]++;
@@ -60,28 +60,32 @@ List generate_sectors_from_maps(const byte* const heightmap,
 	const buffer_size_t sector_amount_guess = (map_width * map_height) >> 3;
 	List sectors = init_list(sector_amount_guess, Sector);
 
-	/* StateMap used instead of copy of heightmap with null map points, because 1. less
-	bytes used and 2. for forming faces, will need original heightmap to be unmodified */
+	/* StateMap used instead of a heightmap with null map points, because 1. less
+	bytes used and 2. for forming faces, the original heightmap will need to be unmodified. */
+
 	const StateMap traversed_points = init_statemap(map_width, map_height);
 
 	for (byte y = 0; y < map_height; y++) {
 		for (byte x = 0; x < map_width; x++) {
-			if (get_statemap_bit(traversed_points, x, y)) continue;
+			if (statemap_bit_is_set(traversed_points, x, y)) continue;
 
 			const byte
 				height = sample_map_point(heightmap, x, y, map_width),
 				texture_id = sample_map_point(texture_id_map, x, y, map_width);
 
 			if (texture_id >= MAX_NUM_SECTOR_SUBTEXTURES) {
-				fprintf(stderr, "Sector creation failure at pos {%d, %d}; texture ID = %d.\n", x, y, texture_id);
+				fprintf(stderr, "Sector creation failure at pos {%u, %u}; texture ID = %u.\n", x, y, texture_id);
 				fail("create a sector because the texture ID is too large", TextureIDIsTooLarge);
 			}
 
-			const Sector sector = form_sector_area((Sector) {
-				.texture_id = texture_id,
-				.origin = {x, y}, .size = {0, 0},
-				.visible_heights = {.min = 0, .max = height}
-			}, traversed_points, heightmap, texture_id_map, map_width, map_height);
+			const Sector seed_sector = {
+				.texture_id = texture_id, .origin = {x, y},
+				.size = {0, 0}, .visible_heights = {.min = 0, .max = height},
+				.face_range = {.start = 0, .length = 0}
+			};
+
+			const Sector sector = form_sector_area(seed_sector, traversed_points,
+				heightmap, texture_id_map, map_width, map_height);
 
 			push_ptr_to_list(&sectors, &sector);
 

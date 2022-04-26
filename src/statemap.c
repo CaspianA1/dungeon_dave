@@ -2,42 +2,55 @@
 #define STATEMAP_C
 
 #include "headers/statemap.h"
+#include <limits.h>
 
-/* A statemap is just a matrix of bits. I didn't call it
-a bitmat because that sounds too much like bitmap. */
+static const byte bytes_per_chunk = sizeof(statemap_chunk_t);
+static const byte bits_per_chunk = CHAR_BIT * bytes_per_chunk;
 
-StateMap init_statemap(const unsigned bits_across, const unsigned bits_down) {
-	const unsigned across = (unsigned) ceilf(bits_across / 8.0f);
+/*
+- A StateMap is just a 2D array of bits. I didn't call it
+	a bitmat because that sounds too much like bitmap.
 
-	StateMap statemap = {
-		{across, bits_down},
-		.alloc_bytes = across * bits_down
+- A chunk is a unit of addressable data in the statemap. Rows
+	in the StateMap are composed of these.
+*/
+
+StateMap init_statemap(const buffer_size_t bits_across, const buffer_size_t bits_down) {
+	// The `ceilf` call rounds up the number of bytes needed for the number of bits across necessary
+	const buffer_size_t chunks_across = (buffer_size_t) ceilf((float) bits_across / bits_per_chunk);
+
+	return (StateMap) {
+		.chunks_across = chunks_across,
+		.data = calloc(chunks_across * bits_down, bytes_per_chunk)
 	};
-
-	statemap.data = malloc(statemap.alloc_bytes);
-	clear_statemap(statemap);
-
-	return statemap;
 }
 
-static byte* statemap_byte(const StateMap statemap, const unsigned chunk_x, const unsigned y) {
-	return statemap.data + (y * statemap.chunk_dimensions[0] + chunk_x);
+static statemap_chunk_t* get_statemap_chunk(const StateMap statemap,
+	const buffer_size_t bits_x, const buffer_size_t bits_y) {
+
+	/* The compiler should make this to a bitwise operation; i.e. `bits_x >> a`,
+	where `a` equals the exponent for the power of 2 needed to equal `bits_per_chunk` */
+	const buffer_size_t chunk_index = bits_x / bits_per_chunk;
+	return statemap.data + (bits_y * statemap.chunks_across + chunk_index);
 }
 
-/* For an x-offset in the statemap, this returns the bit offset
-that should be set or returned in a function below */
-static byte get_n_for_bits_x(const unsigned bits_x) {
-	return 7u - (bits_x & 7u); // bits_x & 7 == bits_x % 8
+/* Each x-index for a StateMap belongs to a chunk. First, this calculates the bit index within
+that chunk; and then, it returns a bitmask where the nth bit is set, where n equals the bit index. */
+static statemap_chunk_t get_mask_for_bit_index_in_chunk(const buffer_size_t bits_x) {
+	/* The compiler will probably convert this to `bits_x & (bits_per_chunk - 1)`,
+	if `bits_per_chunk` is a power of two. */
+	const statemap_chunk_t bit_index = bits_x % bits_per_chunk;
+	return (statemap_chunk_t) ((statemap_chunk_t) 1u << bit_index);
 }
 
-void set_statemap_bit(const StateMap statemap, const unsigned bits_x, const unsigned bits_y) {
-	byte* const bits = statemap_byte(statemap, bits_x >> 3u, bits_y);
-	set_bit(*bits, 1u << get_n_for_bits_x(bits_x));
+void set_statemap_bit(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y) {
+	statemap_chunk_t* const chunk = get_statemap_chunk(statemap, bits_x, bits_y);
+	SET_BIT(*chunk, get_mask_for_bit_index_in_chunk(bits_x));
 }
 
-byte get_statemap_bit(const StateMap statemap, const unsigned bits_x, const unsigned bits_y) {
-	const byte smb = *statemap_byte(statemap, bits_x >> 3u, bits_y);
-	return bit_is_set(smb, 1u << get_n_for_bits_x(bits_x));
+bool statemap_bit_is_set(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y) {
+	const statemap_chunk_t chunk = *get_statemap_chunk(statemap, bits_x, bits_y);
+	return !!CHECK_BITS_AGAINST_MASK(chunk, get_mask_for_bit_index_in_chunk(bits_x));
 }
 
 #endif

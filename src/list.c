@@ -3,8 +3,11 @@
 
 #include "headers/list.h"
 
-static const GLfloat list_realloc_rate = 2.0f;
 #define LIST_REALLOC_AMOUNT_FOR(curr_alloc) ((buffer_size_t) (ceilf((curr_alloc) * list_realloc_rate)))
+
+static const GLfloat list_realloc_rate = 2.0f;
+
+//////////
 
 List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size) {
 	return (List) {
