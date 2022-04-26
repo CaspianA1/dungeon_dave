@@ -83,10 +83,9 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	update_weapon_sprite(ws_ref, event);
 
 	const WeaponSprite ws = *ws_ref;
+	static GLint inverse_screen_aspect_ratio_id, pace_id, frame_index_id;
 
 	use_shader(ws.shader);
-
-	static GLint inverse_screen_aspect_ratio_id, pace_id, frame_index_id;
 
 	ON_FIRST_CALL(
 		// TODO: update these uniforms if the weapon changes

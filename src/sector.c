@@ -148,11 +148,12 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	const buffer_size_t num_visible_faces, const GLuint normal_map_set, const int screen_size[2]) {
 
 	const GLuint shader = draw_context -> shader;
-	use_shader(shader);
 
 	static GLint
 		camera_pos_world_space_id, dir_to_light_id, model_view_projection_id,
 		light_model_view_projection_id, one_over_screen_size_id;
+
+	use_shader(shader);
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(dir_to_light, shader);
