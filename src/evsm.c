@@ -1,5 +1,5 @@
-#ifndef SHADOW_MAP_C
-#define SHADOW_MAP_C
+#ifndef EVSM_C // EVSM = exponential variance shadow mapping
+#define EVSM_C
 
 /*
 - Shadows for billboards and the weapon (they should read from the shadow map, not affect it)
@@ -38,7 +38,7 @@ So: render scene -> t0, blur t0 -> t1, blur t1 -> t0
 Or, do ping-ponging differently? https://www.khronos.org/opengl/wiki/Memory_Model#Framebuffer_objects
 */
 
-#include "headers/shadow_map.h"
+#include "headers/evsm.h"
 #include "headers/constants.h"
 #include "headers/buffer_defs.h"
 #include "headers/texture.h"

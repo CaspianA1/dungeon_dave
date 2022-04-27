@@ -1,5 +1,5 @@
-#ifndef SHADOW_MAP_H
-#define SHADOW_MAP_H
+#ifndef EVSM_H
+#define EVSM_H
 
 #include "utils.h"
 #include "buffer_defs.h"
