@@ -4,7 +4,7 @@
 #include "buffer_defs.h"
 #include "weapon_sprite.h"
 #include "batch_draw_context.h"
-#include "evsm.h"
+#include "csm.h"
 #include "camera.h"
 #include "list.h"
 #include "skybox.h"
@@ -13,10 +13,9 @@ typedef struct {
 	const GLuint vao;
 
 	WeaponSprite weapon_sprite;
-
+	VoxelPhysicsContext physics_context;
 	BatchDrawContext sector_draw_context, billboard_draw_context;
 	ShadowMapContext shadow_map_context;
-	VoxelPhysicsContext physics_context;
 
 	List sectors, billboard_animations, billboard_animation_instances;
 

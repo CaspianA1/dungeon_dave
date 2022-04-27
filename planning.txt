@@ -24,6 +24,7 @@ Final lighting model:
 	- EVSM causes some odd light issues where connected voxel sides are partially in shadow, like ambient occlusion (it may be happening b/c of shadow biasing issues; set filtering to nearest to see)
 	- Having specular takes away from shadows that come from voxel edges
 - Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
+- Generalize `render_sectors_to_shadow_map` to take in any BatchDrawContext
 
 Other random ideas:
 - A map editor. Read in a json file that has dimensions, a heightmap, a texture id map, and a texture list.
@@ -57,6 +58,7 @@ Other random ideas:
 - A better failure function
 - Some type of bridge object (perhaps not axis-aligned; just an arbitrary plane)
 - Separate out context + window creation and utils
+- Define the constants in constants.h in constants.c, and make the constants.h struct extern
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
@@ -66,6 +68,7 @@ Normal mapping:
 - Share some of the looping logic for the Gaussian blur and the normal map generation
 - Little rectangular bumps in high-resolution normal maps with already fine detail
 - Vary the normal map generation parameters based on the output texture size
+- Sometimes, the normal maps turn out all dark (a Heisenbug)
 
 A better shading model:
 - Share code between shaders (mostly need to share a `shade_world_vertex` function, the lighting uniform block, the exponential warping function)

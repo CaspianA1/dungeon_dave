@@ -31,8 +31,10 @@
 // Mip level should not change per skybox, so no trilinear needed
 #define OPENGL_SKYBOX_MIN_FILTER TexLinearMipmapped
 
+/*
 #define OPENGL_SHADOW_MAP_MAG_FILTER TexLinear
 #define OPENGL_SHADOW_MAP_MIN_FILTER TexTrilinear
+*/
 
 /* There's five bits to store a texture id in a face mesh's face info byte,
 And the biggest number possible with five bits is 31, so that gives you

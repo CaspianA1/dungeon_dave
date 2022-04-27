@@ -1,10 +1,13 @@
 #ifndef SHADERS_H
 #define SHADERS_H
 
+#define SHADER_PAIR_DEF(name) *const name##_vertex_shader, *const name##_fragment_shader
+
 extern const GLchar
-    *const sector_vertex_shader, *const sector_fragment_shader,
-    *const billboard_vertex_shader, *const billboard_fragment_shader,
-    *const skybox_vertex_shader, *const skybox_fragment_shader,
-    *const weapon_vertex_shader, *const weapon_fragment_shader;
+	SHADER_PAIR_DEF(sector),
+	SHADER_PAIR_DEF(billboard), SHADER_PAIR_DEF(skybox),
+	SHADER_PAIR_DEF(weapon), SHADER_PAIR_DEF(depth);
+
+#undef SHADER_DEF
 
 #endif

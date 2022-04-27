@@ -59,10 +59,10 @@ const GLchar *const sector_vertex_shader =
 	"out vec3 color;\n"
 
 	"uniform float\n"
-		"ambient, diffuse_strength, specular_strength, umbra_strength_factor,\n"
-		"light_bleed_reduction_factor, tint_strength, noise_granularity;\n"
+		"ambient, diffuse_strength, specular_strength,\n"
+		"tint_strength, noise_granularity;\n"
 
-	"uniform vec2 warp_exps, specular_exponent_domain, one_over_screen_size;\n"
+	"uniform vec2 specular_exponent_domain, one_over_screen_size;\n"
 	"uniform vec3 dir_to_light, tint;\n" // `dir_to_light` is the direction pointing to the light source
 
 	"uniform sampler2D shadow_map_sampler;\n"
@@ -90,46 +90,18 @@ const GLchar *const sector_vertex_shader =
 		"return specular_strength * texture_color_strength * pow(cos_angle_of_incidence, specular_exponent);\n"
 	"}\n"
 
-	"vec2 warp_depth(float depth) {\n"
-		"vec2 exps_times_depth = warp_exps * depth;\n"
-		"return vec2(exp(exps_times_depth.x), -exp(-exps_times_depth.y));\n"
-	"}\n"
+	"float shadow(void) {\n"
+		"const float shadow_bias = 0.002f;\n"
 
-	"float linstep(float low, float high, float v) {\n"
-		"return clamp((v - low) / (high - low), 0.0f, 1.0f);\n"
-	"}\n"
-
-	"float chebyshev(float min_variance, float depth, vec2 moments) {\n"
-		"float\n"
-			"d = depth - moments.x,\n" // `d` = distance between receiver (depth) and occluder (moments.x)
-			"variance = max(moments.y - moments.x * moments.x, min_variance);\n"
-
-		// TODO: see if clamping variance on the lower bound actually makes a difference
-
-		"float p_max = variance / (variance + (d * d));\n"
-		"p_max = linstep(light_bleed_reduction_factor, 1.0f, p_max);\n"
-
-		"return (d < 0.0f) ? 1.0f : p_max;\n"
-	"}\n"
-
-	"float one_minus_shadow_percent(void) {\n" // Gives the percent of area in shadow via EVSM
 		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
-		"vec4 moments = texture(shadow_map_sampler, proj_coords.xy);\n"
+		"float depth = texture(shadow_map_sampler, proj_coords.xy).r;\n"
 
-		"vec2 w_depth = warp_depth(proj_coords.z);\n"
-		"vec2 depth_scale = umbra_strength_factor * warp_exps * w_depth;\n"
-		"vec2 min_variance = depth_scale * depth_scale;\n"
-
-		"float\n"
-			"pos_result = chebyshev(min_variance.x, w_depth.x, moments.xz),\n"
-			"neg_result = chebyshev(min_variance.y, w_depth.y, moments.yw);\n"
-
-		"return min(pos_result, neg_result);\n"
+		"return float(depth + shadow_bias > proj_coords.z);\n"
 	"}\n"
 
 	"vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {\n"
 		"float non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);\n"
-		"float shadowed_non_ambient = non_ambient * one_minus_shadow_percent();\n"
+		"float shadowed_non_ambient = non_ambient * shadow();\n"
 		"float light = min(ambient + shadowed_non_ambient, 1.0f);\n"
 		"return light * texture_color;\n"
 	"}\n"
@@ -274,6 +246,24 @@ const GLchar *const sector_vertex_shader =
 
 	"void main(void) {\n"
 		"color = texture(frame_sampler, vec3(fragment_UV, frame_index));\n"
-	"}\n";
+	"}\n",
+
+*const depth_vertex_shader =
+	"#version 330 core\n"
+
+	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
+
+	"uniform mat4 light_model_view_projection;\n"
+
+	"void main(void) {\n"
+		"gl_Position = light_model_view_projection * vec4(vertex_pos_world_space, 1.0f);\n"
+	"}\n",
+
+*const depth_fragment_shader =
+	"#version 330 core\n"
+
+	"out float depth;\n"
+
+	"void main(void) {}\n";
 
 #endif

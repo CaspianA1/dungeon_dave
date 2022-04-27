@@ -96,24 +96,8 @@ static void* main_init(void) {
 
 	//////////
 
-	/* Not initialized in `scene_state` since other values
-	initialized in the struct may depend on it */
-	const GLuint vao = init_vao();
-
 	SceneState scene_state = {
-		.vao = vao,
-
-		/* For a 2048x2048 shadow map:
-		- One texture = 2048 * 2048 * 16 = 67,108,864 bytes
-		- One texture is mipmapped, so one takes up 89,478,486 bytes
-		- Total is 156,587,350 bytes
-
-		Also, 2 << 13 is the biggest possible size. */
-
-		.shadow_map_context = init_shadow_map_context(2048, 2048,
-			// (vec3) {40.0f, 15.0f, 0.0f}, 5.5f, -1.0f
-			(vec3) {26.563328f, 31.701447f, 12.387274f}, 0.518362f, -1.225221f
-		),
+		.vao = init_vao(),
 
 		.weapon_sprite = init_weapon_sprite(
 			// 0.6f, 2.0f, 0.07f, (AnimationLayout) {"../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
@@ -140,8 +124,9 @@ static void* main_init(void) {
 	//////////
 
 	const byte scene_map_width = scene_state.map_size[0], scene_map_height = scene_state.map_size[1];
-
 	scene_state.physics_context = init_physics_context(scene_state.heightmap, scene_map_width, scene_map_height);
+
+	//////////
 
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
@@ -164,14 +149,19 @@ static void* main_init(void) {
 
 	scene_state.face_normal_map_set = init_normal_map_set_from_texture_set(scene_state.sector_draw_context.texture_set, true);
 
+	//////////
+
+	scene_state.shadow_map_context = init_shadow_map_context(4096, 4096,
+		(vec3) {26.563328f, 31.701447f, 12.387274f}, 0.518362f, -1.225221f,
+		scene_state.physics_context.far_clip_dist
+	),
+
+	//////////
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
-	render_all_sectors_to_shadow_map(&scene_state.shadow_map_context,
-		&scene_state.sector_draw_context, get_next_event().screen_size,
-		scene_state.physics_context.far_clip_dist);
 
 	void* const app_context = malloc(sizeof(SceneState));
 	memcpy(app_context, &scene_state, sizeof(SceneState));
@@ -195,12 +185,7 @@ static void main_drawer(void* const app_context) {
 		&scene_state -> billboard_animations,
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
-	if (keys[SDL_SCANCODE_C]) {
-		glm_vec3_copy(camera.pos, shadow_map_context -> light_context.pos);
-		glm_vec3_copy(camera.dir, shadow_map_context -> light_context.dir);
-		render_all_sectors_to_shadow_map(shadow_map_context, sector_draw_context,
-			event.screen_size, physics_context -> far_clip_dist);
-	}
+	render_sectors_to_shadow_map(shadow_map_context, sector_draw_context, event.screen_size);
 
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 	draw_visible_sectors(sector_draw_context, shadow_map_context,
