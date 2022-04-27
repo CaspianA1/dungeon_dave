@@ -24,7 +24,7 @@ and not in the `constants` struct b/c other values in that struct depend on them
 
 static const struct {
 	const GLfloat almost_zero;
-	const byte max_byte_value;
+	const byte max_byte_value, default_fps;
 
 	const struct {
 		const GLfloat max_movement_magnitude, time_for_half_movement_cycle;
@@ -64,8 +64,10 @@ static const struct {
 	} keys;
 
 } constants = {
-	.max_byte_value = 255,
 	.almost_zero = 0.001f,
+
+	.max_byte_value = 255,
+	.default_fps = 60,
 
 	.weapon_sprite = {
 		.max_movement_magnitude = 0.2f,

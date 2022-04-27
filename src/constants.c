@@ -13,7 +13,9 @@ GLfloat get_runtime_constant(const RuntimeConstantName runtime_constant_name) {
 		case RefreshRate: {
 			SDL_DisplayMode display_mode;
 			SDL_GetCurrentDisplayMode(0, &display_mode);
-			return display_mode.refresh_rate;
+
+			return (display_mode.refresh_rate == 0)
+				? constants.default_fps : display_mode.refresh_rate;
 		}
 		case AnisotropicFilteringLevel:
 			return aniso_filtering_level;
