@@ -58,12 +58,14 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec3 color;\n"
 
+	"uniform bool enable_tone_mapping;\n"
+
 	"uniform float\n"
 		"ambient, diffuse_strength, specular_strength, umbra_strength_factor,\n"
-		"light_bleed_reduction_factor, tint_strength, noise_granularity;\n"
+		"light_bleed_reduction_factor, exposure, noise_granularity;\n"
 
 	"uniform vec2 warp_exps, specular_exponent_domain, one_over_screen_size;\n"
-	"uniform vec3 dir_to_light, tint;\n" // `dir_to_light` is the direction pointing to the light source
+	"uniform vec3 dir_to_light, light_color;\n" // `dir_to_light` is the direction pointing to the light source
 
 	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler, normal_map_sampler;\n"
@@ -130,8 +132,8 @@ const GLchar *const sector_vertex_shader =
 	"vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {\n"
 		"float non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);\n"
 		"float shadowed_non_ambient = non_ambient * one_minus_shadow_percent();\n"
-		"float light = min(ambient + shadowed_non_ambient, 1.0f);\n"
-		"return light * texture_color;\n"
+		"float light_strength = ambient + shadowed_non_ambient;\n"
+		"return light_strength * light_color * texture_color;\n"
 	"}\n"
 
 	"vec3 get_fragment_normal(void) {\n"
@@ -154,14 +156,18 @@ const GLchar *const sector_vertex_shader =
 		"return fract(sin(dot(coords.xy, vec2(12.9898f, 78.233f))) * 43758.5453f);\n"
 	"}\n"
 
-	"void main(void) {\n"
-		"vec3 base_texture_color = texture(texture_sampler, UV).rgb;\n"
-		"vec3 tinted_texture_color = mix(base_texture_color, tint, tint_strength);\n"
-
-		"color = calculate_light(tinted_texture_color, get_fragment_normal());\n"
+	"vec3 postprocess_light(vec3 color) {\n"
+		// HDR through tone mapping
+		"vec3 tone_mapped_color = vec3(1.0f) - exp(-color * exposure);\n"
+		"color = mix(color, tone_mapped_color, float(enable_tone_mapping));\n"
 
 		// Noise is added to remove color banding
-		"color += mix(-noise_granularity, noise_granularity, random(gl_FragCoord.xy * one_over_screen_size));\n"
+		"return color + mix(-noise_granularity, noise_granularity, random(gl_FragCoord.xy * one_over_screen_size));\n"
+	"}\n"
+
+	"void main(void) {\n"
+		"color = calculate_light(texture(texture_sampler, UV).rgb, get_fragment_normal());\n"
+		"color = postprocess_light(color);\n"
 	"}\n",
 
 *const billboard_vertex_shader =

@@ -12,7 +12,6 @@ Final lighting model:
 - A shadow map also based on a sun light source - done
 - Shadows, perhaps contact-hardening if possible
 - Ambient occlusion through an occlusion map, maybe
-- HDR or bloom
 - For a sun bounding box, imagine a rotated OBB encompassing an AABB that represents the world
 	- First, make an encompassing OBB around a 2D AABB box
 	- The box doesn't need to encompass the AABB at first, it just needs to be rotated

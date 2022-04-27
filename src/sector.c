@@ -177,13 +177,14 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(light_bleed_reduction_factor, shader, 1f, 0.0f);
 		INIT_UNIFORM_VALUE(warp_exps, shader, 2fv, 1, constants.shadow_mapping.warp_exps);
 
-		const GLfloat one_over_max_byte_value = 1.0f / constants.max_byte_value;
-
-		INIT_UNIFORM_VALUE(tint_strength, shader, 1f, 0.0f);
-		INIT_UNIFORM_VALUE(tint, shader, 3f, 242.0f * one_over_max_byte_value,
-			156.0f * one_over_max_byte_value, 71.0f * one_over_max_byte_value);
-
+		// Tone mapping exposure, color banding elimination through noise, light color
+		INIT_UNIFORM_VALUE(enable_tone_mapping, shader, 1i, true);
+		INIT_UNIFORM_VALUE(exposure, shader, 1f, 1.0f);
 		INIT_UNIFORM_VALUE(noise_granularity, shader, 1f, 0.3f / 255.0f);
+
+		const GLfloat one_over_max_byte_value = 1.0f / constants.max_byte_value;
+		INIT_UNIFORM_VALUE(light_color, shader, 3f, 250.0f * one_over_max_byte_value,
+			210.0f * one_over_max_byte_value, 165.0f * one_over_max_byte_value);
 
 		// `use_texture` not called since the shadow map output has already been bound to the texture unit in shadow_map.c
 		set_sampler_texture_unit_for_shader("shadow_map_sampler", shader, SHADOW_MAP_TEXTURE_UNIT);
@@ -191,6 +192,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
 		use_texture(normal_map_set, shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
 	);
+
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
 	const GLfloat* const light_dir = shadow_map_context -> light_context.dir;
