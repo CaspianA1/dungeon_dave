@@ -52,8 +52,8 @@ static const struct {
 
 	const struct {const GLfloat forward_back, additional_forward_back, strafe, xz_decel, g;} accel;
 
-	/* The `look` constant indicate the angles that shall be
-	turned by for a full mouse cycle across a screen axis. [0] = hori, [1] = vert. */
+	/* The `look` constant indicate the angles that shall be turned by
+	for a full mouse cycle across a screen axis. [0] = hori, [1] = vert. */
 	const struct {const GLfloat xz_max, jump, look[2];} speeds;
 
 	const struct {
