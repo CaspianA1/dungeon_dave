@@ -85,7 +85,7 @@ void deinit_screen(const Screen* const screen) {
 void make_application(void (*const drawer)(void* const),
 	void* (*const init) (void), void (*const deinit) (void* const)) {
 
-	const Screen screen = init_screen("Accel Demo");
+	const Screen screen = init_screen(constants.app_name);
 
 	printf("vendor = %s\nrenderer = %s\nversion = %s\n---\n",
 		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));

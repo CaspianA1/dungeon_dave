@@ -23,6 +23,7 @@ and not in the `constants` struct b/c other values in that struct depend on them
 #define BIT_USE_WEAPON BIT_CLICK_LEFT
 
 static const struct {
+	const GLchar* const app_name;
 	const GLfloat almost_zero;
 	const byte max_byte_value, default_fps;
 
@@ -64,6 +65,8 @@ static const struct {
 	} keys;
 
 } constants = {
+	.app_name = "Dungeon Dave",
+
 	.almost_zero = 0.001f,
 
 	.max_byte_value = 255,
