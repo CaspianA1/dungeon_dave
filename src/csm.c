@@ -88,8 +88,6 @@ void render_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context,
 
 	GLint bytes_for_vertices;
 	glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bytes_for_vertices);
-	const GLsizei total_num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
-
 	glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_for_vertices, sector_draw_context -> buffers.cpu.data);
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
@@ -99,8 +97,9 @@ void render_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context,
 		glBindFramebuffer(GL_FRAMEBUFFER, buffers.frame);
 		glCullFace(GL_FRONT);
 
+		const GLsizei num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glDrawArrays(GL_TRIANGLES, 0, total_num_vertices);
+		glDrawArrays(GL_TRIANGLES, 0, num_vertices);
 
 		glCullFace(GL_BACK);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
