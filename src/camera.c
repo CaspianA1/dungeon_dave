@@ -80,10 +80,10 @@ static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delt
 static void update_camera_angles(Camera* const camera, const Event* const event, const GLfloat delta_time) {
 	const int *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
 
-	const GLfloat delta_vert = (GLfloat) -mouse_movement[1] / screen_size[1] * constants.speeds.look_vert;
+	const GLfloat delta_vert = (GLfloat) -mouse_movement[1] / screen_size[1] * constants.speeds.look[1];
 	camera -> angles.vert = clamp_to_pos_neg_domain(camera -> angles.vert + delta_vert, constants.camera.lims.vert);
 
-	const GLfloat delta_turn = (GLfloat) -mouse_movement[0] / screen_size[0] * constants.speeds.look_hori;
+	const GLfloat delta_turn = (GLfloat) -mouse_movement[0] / screen_size[0] * constants.speeds.look[0];
 	camera -> angles.hori = wrap_around_domain(camera -> angles.hori + delta_turn, 0.0f, TWO_PI);
 
 	const GLfloat tilt = (camera -> angles.tilt + delta_turn * delta_turn)

@@ -52,9 +52,9 @@ static const struct {
 
 	const struct {const GLfloat forward_back, additional_forward_back, strafe, xz_decel, g;} accel;
 
-	/* The `look_*` constants indicate the angle that shall be
-	turned by for a full mouse cycle across a screen axis */
-	const struct {const GLfloat xz_max, jump, look_hori, look_vert;} speeds;
+	/* The `look` constant indicate the angles that shall be
+	turned by for a full mouse cycle across a screen axis. [0] = hori, [1] = vert. */
+	const struct {const GLfloat xz_max, jump, look[2];} speeds;
 
 	const struct {
 		const SDL_Scancode
@@ -95,7 +95,7 @@ static const struct {
 		.strafe = 0.2f, .xz_decel = 0.87f, .g = 13.0f
 	},
 
-	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look_hori = TWO_THIRDS_PI, .look_vert = HALF_PI},
+	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look = {TWO_THIRDS_PI, HALF_PI}},
 
 	.keys = {
 		.forward = SDL_SCANCODE_W, .backward = SDL_SCANCODE_S, .left = SDL_SCANCODE_A,
