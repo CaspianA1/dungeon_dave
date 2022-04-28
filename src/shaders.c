@@ -268,8 +268,6 @@ const GLchar *const sector_vertex_shader =
 *const depth_fragment_shader =
 	"#version 330 core\n"
 
-	"out float depth;\n"
-
 	"void main(void) {}\n";
 
 #endif
