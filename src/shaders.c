@@ -124,17 +124,15 @@ const GLchar *const sector_vertex_shader =
 		"return rotated_vectors[face_id];\n"
 	"}\n"
 
-	"float random(vec2 coords) {\n"
-		"return fract(sin(dot(coords.xy, vec2(12.9898f, 78.233f))) * 43758.5453f);\n"
-	"}\n"
-
 	"vec3 postprocess_light(vec3 color) {\n"
 		// HDR through tone mapping
 		"vec3 tone_mapped_color = vec3(1.0f) - exp(-color * exposure);\n"
 		"color = mix(color, tone_mapped_color, float(enable_tone_mapping));\n"
 
 		// Noise is added to remove color banding
-		"return color + mix(-noise_granularity, noise_granularity, random(gl_FragCoord.xy * one_over_screen_size));\n"
+		"vec2 screen_fragment_pos = gl_FragCoord.xy * one_over_screen_size;\n"
+		"float random_value = fract(sin(dot(screen_fragment_pos, vec2(12.9898f, 78.233f))) * 43758.5453f);\n"
+		"return color + mix(-noise_granularity, noise_granularity, random_value);\n"
 	"}\n"
 
 	"void main(void) {\n"
