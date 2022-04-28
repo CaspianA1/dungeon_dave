@@ -59,6 +59,7 @@ Other random ideas:
 - Some type of bridge object (perhaps not axis-aligned; just an arbitrary plane)
 - Separate out context + window creation and utils
 - Define the constants in constants.h in constants.c, and make the constants.h struct extern
+- Three classes of settings: hardcoded in the `constants` struct, configurable via a level file, and configurable by the player
 
 Normal mapping:
 - Improper EVSM light coverage leads to some in-shadow areas having bumps on them
