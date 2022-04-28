@@ -45,7 +45,7 @@ const GLchar *const sector_vertex_shader =
 		"vec4 vertex_pos_world_space_4D = vec4(vertex_pos_world_space, 1.0f);\n"
 
 		"camera_pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
-		"fragment_pos_light_space = vec3(light_model_view_projection * vertex_pos_world_space_4D);\n"
+		"fragment_pos_light_space = vec3(light_model_view_projection * vertex_pos_world_space_4D) * 0.5f + 0.5f;\n"
 
 		"gl_Position = model_view_projection * vertex_pos_world_space_4D;\n"
 	"}\n",
@@ -62,7 +62,7 @@ const GLchar *const sector_vertex_shader =
 
 	"uniform float\n"
 		"ambient, diffuse_strength, specular_strength,\n"
-		"exposure, noise_granularity;\n"
+		"esm_constant, exposure, noise_granularity;\n"
 
 	"uniform vec2 specular_exponent_domain, one_over_screen_size;\n"
 	"uniform vec3 dir_to_light, light_color;\n" // `dir_to_light` is the direction pointing to the light source
@@ -93,12 +93,13 @@ const GLchar *const sector_vertex_shader =
 	"}\n"
 
 	"float shadow(void) {\n"
-		"const float shadow_bias = 0.002f;\n"
+		/* Notes:
+		- Lighter shadow bases are simply an artifact of ESM
+		- A higher exponent means more shadow acne, but less light bleeding */
 
-		"vec3 proj_coords = fragment_pos_light_space * 0.5f + 0.5f;\n"
-		"float depth = texture(shadow_map_sampler, proj_coords.xy).r;\n"
-
-		"return float(depth + shadow_bias > proj_coords.z);\n"
+		"float occluder_depth = texture(shadow_map_sampler, fragment_pos_light_space.xy).r;\n"
+		"float result = exp(esm_constant * (occluder_depth - fragment_pos_light_space.z));\n"
+		"return clamp(result, 0.0f, 1.0f);\n"
 	"}\n"
 
 	"vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {\n"

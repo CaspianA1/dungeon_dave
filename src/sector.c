@@ -172,6 +172,8 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(specular_strength, shader, 1f, 1.0f);
 		INIT_UNIFORM_VALUE(specular_exponent_domain, shader, 2f, 32.0f, 128.0f);
 
+		INIT_UNIFORM_VALUE(esm_constant, shader, 1f, 50.0f);
+
 		// Tone mapping exposure, color banding elimination through noise, light color
 		INIT_UNIFORM_VALUE(enable_tone_mapping, shader, 1i, true);
 		INIT_UNIFORM_VALUE(exposure, shader, 1f, 1.0f);
