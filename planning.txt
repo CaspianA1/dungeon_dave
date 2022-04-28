@@ -1,100 +1,107 @@
-Some TODOs for a recent next time:
-- NEXT: final touches on the fortress map
-- NEXT 2: a sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
-- NEXT 3: entities that don't turn to face the player (just static ones); defined by center, size, and normal
-- NEXT 4: up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
-- NEXT 6: deprecate most of StateGL's members and rely solely on vertex_array and any_data
-- NEXT 7: a castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji - running along the mountainside
-- NEXT 8: a level based on the Zhangjiajie region
+Levels:
+- Final touches on the fortress map
+- A castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji - running along the mountainside
+- A level based on the Zhangjiajie region
 
 Final lighting model:
-- Ambient overall light, diffuse, specular - done
-- A shadow map also based on a sun light source - done
-- Shadows, perhaps contact-hardening if possible
+- Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
+- Generalize `render_sectors_to_shadow_map` to take in any BatchDrawContext
+- Ambient, diffuse, specular (with procedural specular mapping), HDR, banding removal, light color - done
 - Ambient occlusion through an occlusion map, maybe
-- For a sun bounding box, imagine a rotated OBB encompassing an AABB that represents the world
+- Shadows, perhaps contact-hardening if possible
+- Manage resolution through CSMs: https://learnopengl.com/Guest-Articles/2021/CSM
+- A compressed texture for the shadow map, to save space?
+- If ESM has too much light bleeding, use EVSM with only the positive term: https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
+- And optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map.
+- Old EVSM has a lot of shadow acne - but mostly cleaned out by Gaussian blur - remaining acne looks like ambient occlusion
+- For a sun bounding box, imagine a rotated OBB encompassing an AABB that represents the world:
 	- First, make an encompassing OBB around a 2D AABB box
 	- The box doesn't need to encompass the AABB at first, it just needs to be rotated
 	- It can then be resized to the AABB area after
 	- Then, expand that to 3D
-	- Manage shadow map resolution better for bigger scenes via cascaded shadow maps: https://learnopengl.com/Guest-Articles/2021/CSM
-	- A compressed texture for the shadow map, to save space?
-	- EVSM with only the positive term may be possible: https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
-	- And optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map.
-	- EVSM causes some odd light issues where connected voxel sides are partially in shadow, like ambient occlusion (it may be happening b/c of shadow biasing issues; set filtering to nearest to see)
-	- Having specular takes away from shadows that come from voxel edges
-- Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
-- Generalize `render_sectors_to_shadow_map` to take in any BatchDrawContext
 
-Other random ideas:
-- A map editor. Read in a json file that has dimensions, a heightmap, a texture id map, and a texture list.
-	Choose texture or height through number keys (done), draw/move/erase modes (done), line mode, save button,
-	zoom in/out, scroll with the mouse.
+Architectural/code design ideas:
 - More efficiently set statemap bit ranges, maybe
-- Billboard lighting that matches the sector lighting (share uniforms via a uniform buffer object)
-- Can't use red cross for health since it's copyrighted
-- Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 - Catch more warnings with -Weverything
-- Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit)
 - File paths may not work on Windows
 - Pass in texture parameters through a bitmask
 - Use CMake instead of Make for cross-platform compilation
-- Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry; perhaps more antialiasing for nearest?). This addresses nearest: https://gamedev.stackexchange.com/questions/93466/multisampled-nearest-filtering-in-ps-2-0-is-it-possible
-- Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
 - Eventually, put the contents of VoxelPhysicsContext inside the camera
-- Use fminf and fmaxf more
-- Gauge the number of multisample samples based on a runtime constant
-- Putting the face texture set at a resolution of 2048x2048 or above turns all of the billboards into this red-green gradient (above 4096x4096, out of OpenGL memory)
+- Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
+- Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit); or no macros at all
+- Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 - One VAO per draw context as well - done as a VertexSpecification struct, or something like that
+- Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if enough precision?)
+- Separate out context + window creation and utils
+- Define the constants in constants.h in constants.c, and make the constants.h struct extern
+- Three classes of settings: hardcoded in the `constants` struct, configurable via a level file, and configurable by the player
+- A better failure function
 - A LevelDescription struct that then a SceneState (or some other) struct uses to generate sectors, a shadow map, etc.
 	If levels come from C files, put those directly in files; otherwise, JSON will be turned into a LevelDescription.
 	The advantage to C files is that you don't have to parse a file for each level; the disadvantage is that map files
 	are then not easily editable.
-- For each wall texture, define normal map settings (only useful at normal map generation time)
-- Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else
 - Perhaps use the alpha channels of the face texture set or normal map set for something interesting
+- Some library memory leaks; this should be fixed in some way, if possible
 - Make sector and billboard contexts contain all context necessary, not just fragmented around the SceneState struct
-- Some library memory leaks
-- A better failure function
+- Use more of the cglm functions in `update_camera`, or make my own
+
+Miscellaneous problems:
+- Having an idle window with vsync on leads to high CPU and GPU usage
+- Animations go slower at 5 FPS (the frame delta leads to only increments of 1, where it should be something more there)
+- The checker heightmap has faster pacing sometimes
+
+Object rendering:
+- Up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - Some type of bridge object (perhaps not axis-aligned; just an arbitrary plane)
-- Separate out context + window creation and utils
-- Define the constants in constants.h in constants.c, and make the constants.h struct extern
-- Three classes of settings: hardcoded in the `constants` struct, configurable via a level file, and configurable by the player
+- A sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
+- Billboard lighting that matches the sector lighting (share uniforms via a uniform buffer object)
+
+Random feature ideas:
+- A map editor. Read in a json file that has dimensions, a heightmap, a texture id map, and a texture list.
+	Choose texture or height through number keys (done), draw/move/erase modes (done), line mode, save button,
+	zoom in/out, scroll with the mouse.
+- Can't use red cross for health since it's copyrighted
+- Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry; perhaps more antialiasing for nearest?). This addresses nearest: https://gamedev.stackexchange.com/questions/93466/multisampled-nearest-filtering-in-ps-2-0-is-it-possible
+- Gauge the number of multisample samples based on a runtime constant
 
 Normal mapping:
-- Improper EVSM light coverage leads to some in-shadow areas having bumps on them
-- Unshadowed areas have no bumps (or is that okay?)
-- Mipmaps of normal maps are not normalized, and they disappear at lower mip levels (for my software implementation, verify that it works the same as OpenGL's)
+- Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
+- Mipmaps of normal maps are not normalized, and they disappear at lower mip levels
+	(Generate mipmaps on the CPU, and verify that they can mipmap plain textures like glGenerateMipmap)
 - Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using EVSM)
 - Share some of the looping logic for the Gaussian blur and the normal map generation
-- Little rectangular bumps in high-resolution normal maps with already fine detail
+- Little rectangular bumps exist in high-resolution normal maps with already fine detail
 - Vary the normal map generation parameters based on the output texture size
-- Sometimes, the normal maps turn out all dark (a Heisenbug)
+- Define normal map settings for each wall texture (only useful at normal map generation time).
+	Choose hashmap or array for association between path and settings.
 
 A better shading model:
-- Share code between shaders (mostly need to share a `shade_world_vertex` function, the lighting uniform block, the exponential warping function)
-- For code sharing, perhaps build a manual #include mechanism that pre-parses each shader file
 - Read in shaders from files
-- Share shader uniforms via uniform buffer objects
+- Share shader uniforms via uniform buffer objects (mostly for a LightParams struct)
+- Share code between shaders (mostly need to share a `shade_world_vertex` function, and the lighting uniform
+	block definition; perhaps build a manual #include mechamism, or link completed shaders together)
 
 Physics:
-- Crouch
-- Sliding across the floor (with the head tilted up)
-- Animations go slower at 5 FPS (the frame delta leads to only increments of 1, where it should be something more there)
-- Having an idle window with vsync on leads to high CPU and GPU usage
-- The checker heightmap has faster pacing sometimes
-- Pressing left + forward and backward doesn't stop moving on the X axis
-- A half-stutter when pressing towards a wall and then letting go of a movement key
-- Can get a tiny bit stuck in a wall when jumping downwards close to a wall (so will have to be able to stand a tiny bit off the wall)
-- FPS at 120 -> too fast acceleration, which leads to weapon jitter
-- If hitting a wall, base the player's speed on the dot product of your 2D direction vector
-	and the wall's normal vector (perhaps find the wall vector from my movement delta). Axis where
-	no moving happened indicates normal vector orientation. If below tile pos, bottom tile; otherwise, top tile.
-	Same idea for side tiles.
+	Features:
+	- Sliding across the floor (with the head tilted up), or crouching (either for avoiding enemy projectiles)
+	- If hitting a wall, base the player's speed on the dot product of your 2D direction vector
+		and the wall's normal vector (perhaps find the wall vector from my movement delta). Axis where
+		no moving happened indicates normal vector orientation. If below tile pos, bottom tile; otherwise, top tile.
+		Same idea for side tiles.
+	Problems:
+	- FPS at 120 -> too fast acceleration, which leads to too-fast weapon pacing
+	- Pressing left + forward and backward doesn't stop moving on the X axis
+	- A half-stutter when pressing towards a wall and then letting go of a movement key
+	- Can get a tiny bit stuck in a wall when jumping downwards close to a wall (so the player will
+			have to be able to stand off the wall by half of the extent of the top-down bounding box)
 
-General future components:
-- Blit 2D sprite to whole screen
-- Use more of the cglm functions in `update_camera`, or make my own
-- A startup setting of magnification filter
 
-- In the end, 5 shaders + accel components: sectors, billboards, skybox, weapon, ui elements
+End components:
+- Static sectors
+- Dynamic sectors
+- Billboards (unanimated and animated)
+- Skybox
+- Weapon
+- Particles from a projectile
+- HUD
+- UI

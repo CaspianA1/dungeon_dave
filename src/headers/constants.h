@@ -32,11 +32,6 @@ static const struct {
 	} weapon_sprite;
 
 	const struct {
-		const byte num_blur_passes;
-		const vec2 warp_exps;
-	} shadow_mapping;
-
-	const struct {
 		const struct {const GLint radius; const GLfloat std_dev;} blur;
 		const GLfloat intensity;
 	} normal_mapping;
@@ -75,11 +70,6 @@ static const struct {
 	.weapon_sprite = {
 		.max_movement_magnitude = 0.2f,
 		.time_for_half_movement_cycle = 0.5f
-	},
-
-	.shadow_mapping = {
-		.num_blur_passes = 2,
-		.warp_exps = {40.0f, 5.0f}
 	},
 
 	.normal_mapping = {
