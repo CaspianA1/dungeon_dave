@@ -68,6 +68,7 @@ Random feature ideas:
 - Can't use red cross for health since it's copyrighted
 - Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry; perhaps more antialiasing for nearest?). This addresses nearest: https://gamedev.stackexchange.com/questions/93466/multisampled-nearest-filtering-in-ps-2-0-is-it-possible
 - Gauge the number of multisample samples based on a runtime constant
+- Find a tighter far plane distance by finding the diameter of the sector convex hull
 
 Normal mapping:
 - Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
