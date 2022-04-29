@@ -18,9 +18,9 @@ enum {
 extern const byte
 	level_one_heightmap[level_one_height][level_one_width],
 	level_one_texture_id_map[level_one_height][level_one_width],
-   	architecture_heightmap[architecture_height][architecture_width],
+	architecture_heightmap[architecture_height][architecture_width],
 	architecture_texture_id_map[architecture_height][architecture_width],
-    fortress_heightmap[fortress_height][fortress_width],
+	fortress_heightmap[fortress_height][fortress_width],
 	fortress_texture_id_map[fortress_height][fortress_width],
 	palace_heightmap[palace_height][palace_width],
 	palace_texture_id_map[palace_height][palace_width],
