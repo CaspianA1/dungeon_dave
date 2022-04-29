@@ -19,6 +19,11 @@ Final lighting model:
 	- The box doesn't need to encompass the AABB at first, it just needs to be rotated
 	- It can then be resized to the AABB area after
 	- Then, expand that to 3D
+- After CSM, implement SDSM
+CSM:
+- Generating mipmaps from a depth component texture via ESM freezes my computer
+- If there is still too much light bleeding in the end, perhaps switch to one-term EVSM
+
 
 Architectural/code design ideas:
 - More efficiently set statemap bit ranges, maybe

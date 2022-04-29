@@ -33,13 +33,13 @@ ShadowMapContext init_shadow_map_context(const GLsizei width,
 
 	glGenTextures(1, &s.buffers.depth_texture);
 	set_current_texture(TexPlain, s.buffers.depth_texture);
-	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, TexNearest);
-	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, TexNearest);
+	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, TexLinear);
+	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, TexLinear);
 	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, TexNonRepeating); 
 	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, TexNonRepeating);  
 
 	glTexImage2D(TexPlain, 0, INTERNAL_DEPTH_TEXTURE_FORMAT, width,
-		height, 0, DEPTH_TEXTURE_FORMAT, DEPTH_TEXTURE_COMPONENT_TYPE, 0);
+		height, 0, DEPTH_TEXTURE_FORMAT, DEPTH_TEXTURE_COMPONENT_TYPE, NULL);
 
 	//////////
 
@@ -92,12 +92,12 @@ void render_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context,
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
 		const ShadowMapBuffers buffers = shadow_map_context -> buffers;
+		const GLsizei num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
 
 		glViewport(0, 0, buffers.size[0], buffers.size[1]);
 		glBindFramebuffer(GL_FRAMEBUFFER, buffers.frame);
 		glCullFace(GL_FRONT);
 
-		const GLsizei num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES, 0, num_vertices);
 
