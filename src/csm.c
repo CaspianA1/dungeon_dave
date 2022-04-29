@@ -76,7 +76,7 @@ void render_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context,
 		const GLfloat fcd = shadow_map_context -> light.far_clip_dist;
 
 		glm_look_anyup(shadow_map_context -> light.pos, shadow_map_context -> light.dir, view);
-		glm_ortho(-fcd, fcd, fcd, -fcd, constants.camera.clip_dists.near, fcd, projection);
+		glm_ortho(-fcd, fcd, fcd, -fcd, constants.camera.near_clip_dist, fcd, projection);
 		glm_mul(projection, view, shadow_map_context -> light.model_view_projection);
 
 		INIT_UNIFORM_VALUE(light_model_view_projection, depth_shader, Matrix4fv, 1, GL_FALSE, model_view_projection);

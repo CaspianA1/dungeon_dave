@@ -121,16 +121,9 @@ static void* main_init(void) {
 	push_array_to_list(&scene_state.billboard_animation_instances,
 		billboard_animation_instances, ARRAY_LENGTH(billboard_animation_instances));
 
-	//////////
-
-	const byte scene_map_width = scene_state.map_size[0], scene_map_height = scene_state.map_size[1];
-	scene_state.physics_context = init_physics_context(scene_state.heightmap, scene_map_width, scene_map_height);
-
-	//////////
-
 	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		scene_state.heightmap, scene_state.texture_id_map, scene_map_width, scene_map_height);
+		scene_state.heightmap, scene_state.texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
 
 	scene_state.billboard_draw_context = init_billboard_draw_context(ARRAY_LENGTH(billboards), billboards);
 
@@ -151,9 +144,11 @@ static void* main_init(void) {
 
 	//////////
 
+	init_camera(&scene_state.camera, (vec3) {1.5f, 0.5f, 1.5f}, scene_state.heightmap, scene_state.map_size);
+
 	scene_state.shadow_map_context = init_shadow_map_context(4096, 4096,
 		(vec3) {26.563328f, 31.701447f, 12.387274f}, 0.518362f, -1.225221f,
-		scene_state.physics_context.far_clip_dist
+		scene_state.camera.far_clip_dist // TODO: put the camera in the scene state
 	),
 
 	//////////
@@ -172,13 +167,10 @@ static void main_drawer(void* const app_context) {
 	SceneState* const scene_state = (SceneState*) app_context;
 	const BatchDrawContext* const sector_draw_context = &scene_state -> sector_draw_context;
 	ShadowMapContext* const shadow_map_context = &scene_state -> shadow_map_context;
-	VoxelPhysicsContext* const physics_context = &scene_state -> physics_context;
-
-	static Camera camera;
-	ON_FIRST_CALL(init_camera(&camera, (vec3) {1.5f, 0.5f, 1.5f});); // {3.9f, 0.5f, 6.0f}, {12.5f, 3.5f, 22.5f}
+	Camera* const camera = &scene_state -> camera;
 
 	const Event event = get_next_event();
-	update_camera(&camera, event, physics_context);
+	update_camera(camera, event);
 
 	update_billboard_animation_instances(
 		&scene_state -> billboard_animation_instances,
@@ -189,11 +181,11 @@ static void main_drawer(void* const app_context) {
 
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 	draw_visible_sectors(sector_draw_context, shadow_map_context,
-		&scene_state -> sectors, &camera, scene_state -> face_normal_map_set, event.screen_size);
+		&scene_state -> sectors, camera, scene_state -> face_normal_map_set, event.screen_size);
 
-	draw_skybox(scene_state -> skybox, &camera);
-	draw_visible_billboards(&scene_state -> billboard_draw_context, &camera);
-	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, &camera, &event);
+	draw_skybox(scene_state -> skybox, camera);
+	draw_visible_billboards(&scene_state -> billboard_draw_context, camera);
+	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, camera, &event);
 }
 
 static void main_deinit(void* const app_context) {

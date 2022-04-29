@@ -12,8 +12,9 @@
 typedef struct {
 	const GLuint vao;
 
+	Camera camera;
+
 	WeaponSprite weapon_sprite;
-	VoxelPhysicsContext physics_context;
 	BatchDrawContext sector_draw_context, billboard_draw_context;
 	ShadowMapContext shadow_map_context;
 

@@ -4,7 +4,7 @@
 #include "headers/camera.h"
 #include "headers/constants.h"
 
-VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size_x, const byte map_size_z) {
+static GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size_x, const byte map_size_z) {
 	/* The far clip distance, ideally, would be equal to the diameter of
 	the convex hull of all points in the heightmap. If I had more time,
 	I would implement that, but a simple method that works reasonably well is this:
@@ -39,22 +39,21 @@ VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte
 	const GLfloat additional_camera_height = max_jump_height + constants.camera.eye_height;
 
 	const GLfloat max_z_difference = (max_point_height - min_point_height) + additional_camera_height;
-	const GLfloat far_clip_dist = glm_vec3_norm((vec3) {map_size_x, map_size_z, max_z_difference});
-
-	return (VoxelPhysicsContext) {
-		heightmap, {map_size_x, map_size_z},
-		far_clip_dist, {0.0f, 0.0f, 0.0f}
-	};
+	return glm_vec3_norm((vec3) {map_size_x, map_size_z, max_z_difference});
 }
 
-void init_camera(Camera* const camera, const vec3 init_pos) {
+void init_camera(Camera* const camera, const vec3 init_pos, const byte* const heightmap, const byte map_size[2]) {
+	memset(camera, 0, sizeof(Camera)); // Initializing all members as 0 beforehand to avoid uninitialized values
+
 	camera -> last_time = SDL_GetPerformanceCounter();
+	camera -> heightmap = heightmap;
+	camera -> map_size[0] = map_size[0];
+	camera -> map_size[1] = map_size[1];
+
 	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
-	camera -> pace = 0.0f;
-	camera -> speed_xz_percent = 0.0f;
-	camera -> time_since_jump = 0.0f;
-	camera -> time_accum_for_full_fov = 0.0f;
 	glm_vec3_copy((GLfloat*) init_pos, camera -> pos);
+
+	camera -> far_clip_dist = compute_world_far_clip_dist(heightmap, map_size[0], map_size[1]);
 }
 
 static GLfloat clamp_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
@@ -167,7 +166,8 @@ static bool pos_collides_with_heightmap(const GLfloat foot_height,
 }
 
 static void update_pos_via_physics(const byte movement_bits,
-	VoxelPhysicsContext* const physics_context, const vec2 dir_xz, vec3 pos,
+	const byte* const heightmap, const byte map_size[2],
+	const vec2 dir_xz, vec3 pos, vec3 velocities,
 	const GLfloat pace, const GLfloat delta_time) {
 
 	////////// Declaring a lot of shared vars
@@ -183,13 +183,9 @@ static void update_pos_via_physics(const byte movement_bits,
 		max_speed_xz = constants.speeds.xz_max * delta_time;
 
 	GLfloat
-		velocity_forward_back = physics_context -> velocities[0] * delta_time,
-		velocity_strafe = physics_context -> velocities[2] * delta_time,
+		velocity_forward_back = velocities[0] * delta_time,
+		velocity_strafe = velocities[2] * delta_time,
 		foot_height = pos[1] - constants.camera.eye_height - pace;
-
-	const byte
-		*const map_size = physics_context -> map_size,
-		*const heightmap = physics_context -> heightmap;
 
 	////////// Updating velocity
 
@@ -202,8 +198,8 @@ static void update_pos_via_physics(const byte movement_bits,
 		CHECK_BITMASK(movement_bits, BIT_STRAFE_RIGHT));
 
 	const GLfloat one_over_delta_time = 1.0f / delta_time;
-	physics_context -> velocities[0] = velocity_forward_back * one_over_delta_time;
-	physics_context -> velocities[2] = velocity_strafe * one_over_delta_time;
+	velocities[0] = velocity_forward_back * one_over_delta_time;
+	velocities[2] = velocity_strafe * one_over_delta_time;
 
 	////////// X and Z collision detection + setting new xz positions
 
@@ -220,7 +216,7 @@ static void update_pos_via_physics(const byte movement_bits,
 
 	////////// Y collision detection + setting new y position and speed
 
-	GLfloat speed_jump_per_sec = physics_context -> velocities[1];
+	GLfloat speed_jump_per_sec = velocities[1];
 	if (speed_jump_per_sec == 0.0f && CHECK_BITMASK(movement_bits, BIT_JUMP))
 		speed_jump_per_sec = constants.speeds.jump;
 	else speed_jump_per_sec -= constants.accel.g * delta_time;
@@ -236,7 +232,7 @@ static void update_pos_via_physics(const byte movement_bits,
 	}
 
 	pos[1] += constants.camera.eye_height;
-	physics_context -> velocities[1] = speed_jump_per_sec;
+	velocities[1] = speed_jump_per_sec;
 }
 
 /* This function models how a player's pace should behave given a time input. At time = 0, the pace is 0.
@@ -272,7 +268,7 @@ void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, ve
 	glm_vec3_copy((vec3) {cos_vert * dir_xz[0], sinf(vert_angle), cos_vert * dir_xz[1]}, dir);
 }
 
-void update_camera(Camera* const camera, const Event event, VoxelPhysicsContext* const physics_context) {
+void update_camera(Camera* const camera, const Event event) {
 	static GLfloat one_over_performance_freq;
 
 	ON_FIRST_CALL(one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency(););
@@ -302,7 +298,7 @@ void update_camera(Camera* const camera, const Event event, VoxelPhysicsContext*
 
 	////////// Moving according to those vectors
 
-	if (physics_context == NULL || keys[KEY_FLY]) { // Forward, backward, left, right
+	if (keys[KEY_FLY]) { // Forward, backward, left, right
 		const GLfloat speed = constants.speeds.xz_max * delta_time;
 		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_FORWARD)) glm_vec3_muladds(dir, speed, pos);
 		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_BACKWARD)) glm_vec3_muladds(dir, -speed, pos);
@@ -310,22 +306,22 @@ void update_camera(Camera* const camera, const Event event, VoxelPhysicsContext*
 		if (CHECK_BITMASK(event.movement_bits, BIT_STRAFE_RIGHT)) glm_vec3_muladds(right, speed, pos);
 	}
 	else {
-		update_pos_via_physics(event.movement_bits, physics_context, dir_xz, pos, camera -> pace, delta_time);
-		update_pace(camera, pos + 1, physics_context -> velocities, delta_time);
+		GLfloat* const velocities = camera -> velocities;
+
+		update_pos_via_physics(event.movement_bits, camera -> heightmap,
+			camera -> map_size, dir_xz, pos, velocities, camera -> pace, delta_time);
+
+		update_pace(camera, pos + 1, velocities, delta_time);
 		update_fov(camera, event.movement_bits, delta_time);
 	}
 
 	////////// Making some matrices and frustum planes from the new position and the vectors from before
 
-	const GLfloat far_clip_dist = (physics_context == NULL)
-		? constants.camera.clip_dists.default_far
-		: physics_context -> far_clip_dist;
-
 	mat4 view, projection;
 
 	glm_look(pos, dir, up, view);
 	glm_perspective(camera -> angles.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
-		constants.camera.clip_dists.near, far_clip_dist, projection);
+		constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
 
 	// The model matrix is implicit in this, since it equals the identity matrix
 	glm_mul(projection, view, camera -> model_view_projection);
