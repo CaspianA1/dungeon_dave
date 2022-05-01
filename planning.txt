@@ -25,6 +25,7 @@ CSM:
 - If there is still too much light bleeding in the end, perhaps switch to one-term EVSM
 - Make the weapon cast a shadow, and make functions for enabling/disabling rendering to a
 	shadow map. Also put the vertex specification + glDrawArrays call for sectors in its own function.
+	(via this: https://feepingcreature.github.io/math.html)
 
 Architectural/code design ideas:
 - More efficiently set statemap bit ranges, maybe
