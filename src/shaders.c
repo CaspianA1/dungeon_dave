@@ -8,9 +8,9 @@ const GLchar *const sector_vertex_shader =
 	"#version 330 core\n"
 
 	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
-	"layout(location = 1) in int face_info_bits;\n"
+	"layout(location = 1) in uint face_info_bits;\n"
 
-	"flat out int face_id;\n"
+	"flat out uint face_id;\n"
 
 	"out vec3 UV, fragment_pos_light_space, camera_pos_delta_world_space;\n"
 
@@ -30,7 +30,7 @@ const GLchar *const sector_vertex_shader =
 	"void main(void) {\n"
 		////////// Setting face_normal and UV
 
-		"face_id = face_info_bits & 7;\n"
+		"face_id = face_info_bits & 7u;\n"
 		"FaceAttribute face_attribute = face_attributes[face_id];\n"
 
 		"vec2 UV_xy = face_attribute.uv_signs * vec2(\n"
@@ -38,7 +38,7 @@ const GLchar *const sector_vertex_shader =
 			"vertex_pos_world_space[face_attribute.uv_indices.y]\n"
 		");\n"
 
-		"UV = vec3(UV_xy, face_info_bits >> 3);\n"
+		"UV = vec3(UV_xy, face_info_bits >> 3u);\n"
 
 		////////// Setting camera_pos_delta_world_space, fragment_pos_light_space, and gl_Position
 
@@ -53,7 +53,7 @@ const GLchar *const sector_vertex_shader =
 *const sector_fragment_shader =
 	"#version 330 core\n"
 
-	"flat in int face_id;\n"
+	"flat in uint face_id;\n"
 	"in vec3 UV, fragment_pos_light_space, camera_pos_delta_world_space;\n"
 
 	"out vec3 color;\n"

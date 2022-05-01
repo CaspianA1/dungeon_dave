@@ -33,8 +33,8 @@ ShadowMapContext init_shadow_map_context(const GLsizei width,
 
 	glGenTextures(1, &s.buffers.depth_texture);
 	set_current_texture(TexPlain, s.buffers.depth_texture);
-	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, TexLinear);
-	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, TexLinear);
+	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, OPENGL_SHADOW_MAP_MAG_FILTER);
+	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER);
 	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, TexNonRepeating); 
 	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, TexNonRepeating);  
 

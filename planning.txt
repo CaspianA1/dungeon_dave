@@ -23,9 +23,9 @@ Final lighting model:
 CSM:
 - Generating mipmaps from a depth component texture via ESM freezes my computer
 - If there is still too much light bleeding in the end, perhaps switch to one-term EVSM
+- Put the vertex specification + glDrawArrays call for sector in its own function
 - Make the weapon cast a shadow, and make functions for enabling/disabling rendering to a
-	shadow map. Also put the vertex specification + glDrawArrays call for sectors in its own function.
-	(via this: https://feepingcreature.github.io/math.html)
+- Weapon NDC to world-space like this: https://feepingcreature.github.io/math.html (note: idea didn't fully work at first)
 
 Architectural/code design ideas:
 - More efficiently set statemap bit ranges, maybe

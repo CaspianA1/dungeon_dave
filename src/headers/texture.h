@@ -28,13 +28,12 @@
 #define OPENGL_SCENE_MAG_FILTER TexLinear
 #define OPENGL_SCENE_MIN_FILTER TexTrilinear
 
-// Mip level should not change per skybox, so no trilinear needed
+/* Mip level should not change per skybox, so no trilinear needed.
+The skybox mag filter is the scene mag filter. */
 #define OPENGL_SKYBOX_MIN_FILTER TexLinearMipmapped
 
-/*
 #define OPENGL_SHADOW_MAP_MAG_FILTER TexLinear
-#define OPENGL_SHADOW_MAP_MIN_FILTER TexTrilinear
-*/
+#define OPENGL_SHADOW_MAP_MIN_FILTER TexLinear
 
 /* There's five bits to store a texture id in a face mesh's face info byte,
 And the biggest number possible with five bits is 31, so that gives you
