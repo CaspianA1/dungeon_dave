@@ -248,7 +248,6 @@ static buffer_size_t fill_sector_vbo_with_visible_faces(
 	terrain: 150620 vs 86588. */
 
 	glUnmapBuffer(GL_ARRAY_BUFFER); // If looking out at the distance with no sectors, why do any state switching at all?
-
 	return num_visible_faces;
 }
 
