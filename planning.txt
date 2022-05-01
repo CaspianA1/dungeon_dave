@@ -23,7 +23,8 @@ Final lighting model:
 CSM:
 - Generating mipmaps from a depth component texture via ESM freezes my computer
 - If there is still too much light bleeding in the end, perhaps switch to one-term EVSM
-
+- Make the weapon cast a shadow, and make functions for enabling/disabling rendering to a
+	shadow map. Also put the vertex specification + glDrawArrays call for sectors in its own function.
 
 Architectural/code design ideas:
 - More efficiently set statemap bit ranges, maybe
