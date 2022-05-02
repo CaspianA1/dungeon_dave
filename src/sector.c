@@ -144,7 +144,7 @@ static byte sector_in_view_frustum(const Sector sector, const vec4 frustum_plane
 }
 
 // Used in main.c
-void draw_sectors_for_shadow_map(const void* const param) {
+void draw_all_sectors_for_shadow_map(const void* const param) {
 	const BatchDrawContext* const sector_draw_context = (BatchDrawContext*) param;
 	glBindBuffer(GL_ARRAY_BUFFER, sector_draw_context -> buffers.gpu);
 
@@ -155,7 +155,6 @@ void draw_sectors_for_shadow_map(const void* const param) {
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
 		const GLsizei num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
 		glDrawArrays(GL_TRIANGLES, 0, num_vertices);
-
 	);
 }
 

@@ -178,7 +178,7 @@ static void main_drawer(void* const app_context) {
 		&scene_state -> billboard_animations,
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
-	update_shadow_map(shadow_map_context, event.screen_size, draw_sectors_for_shadow_map, sector_draw_context);
+	update_shadow_map(shadow_map_context, event.screen_size, draw_all_sectors_for_shadow_map, sector_draw_context);
 
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 	draw_visible_sectors(sector_draw_context, shadow_map_context,
