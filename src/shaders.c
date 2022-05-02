@@ -59,6 +59,7 @@ const GLchar *const sector_vertex_shader =
 	"out vec3 color;\n"
 
 	"uniform bool enable_tone_mapping;\n"
+	"uniform int pcf_radius;\n"
 
 	"uniform float\n"
 		"ambient, diffuse_strength, specular_strength,\n"
@@ -103,14 +104,15 @@ const GLchar *const sector_vertex_shader =
 
 		"float average_occluder_depth = 0.0f;\n"
 
-		"for (int y = -1; y <= 1; y++) {\n"
-			"for (int x = -1; x <= 1; x++) {\n"
+		"for (int y = -pcf_radius; y <= pcf_radius; y++) {\n"
+			"for (int x = -pcf_radius; x <= pcf_radius; x++) {\n"
 				"vec2 sample_UV = shadow_map_UV + texel_size * vec2(x, y);\n"
 				"average_occluder_depth += texture(shadow_map_sampler, sample_UV).r;\n"
 			"}\n"
 		"}\n"
 
-		"average_occluder_depth *= 1.0f / 9.0f;\n"
+		"int samples_across = (pcf_radius << 1) + 1;\n"
+		"average_occluder_depth *= 1.0f / (samples_across * samples_across);\n"
 
 		"float result = exp(esm_constant * (average_occluder_depth - fragment_pos_light_space.z));\n"
 		"return clamp(result, 0.0f, 1.0f);\n"
@@ -195,6 +197,7 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec4 color;\n"
 
+	"uniform int pcf_radius;\n"
 	"uniform float ambient, esm_constant;\n"
 	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
@@ -206,14 +209,15 @@ const GLchar *const sector_vertex_shader =
 
 		"float average_occluder_depth = 0.0f;\n"
 
-		"for (int y = -1; y <= 1; y++) {\n"
-			"for (int x = -1; x <= 1; x++) {\n"
+		"for (int y = -pcf_radius; y <= pcf_radius; y++) {\n"
+			"for (int x = -pcf_radius; x <= pcf_radius; x++) {\n"
 				"vec2 sample_UV = shadow_map_UV + texel_size * vec2(x, y);\n"
 				"average_occluder_depth += texture(shadow_map_sampler, sample_UV).r;\n"
 			"}\n"
 		"}\n"
 
-		"average_occluder_depth *= 1.0f / 9.0f;\n"
+		"int samples_across = (pcf_radius << 1) + 1;\n"
+		"average_occluder_depth *= 1.0f / (samples_across * samples_across);\n"
 
 		"float result = exp(esm_constant * (average_occluder_depth - fragment_pos_light_space.z));\n"
 		"return clamp(result, 0.0f, 1.0f);\n"

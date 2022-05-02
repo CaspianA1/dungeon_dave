@@ -181,6 +181,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(one_over_screen_size, shader);
 
 		LIGHTING_UNIFORM(enable_tone_mapping, 1i);
+		LIGHTING_UNIFORM(pcf_radius, 1i);
 		LIGHTING_UNIFORM(ambient, 1f);
 		LIGHTING_UNIFORM(diffuse_strength, 1f);
 		LIGHTING_UNIFORM(specular_strength, 1f);

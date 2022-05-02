@@ -29,6 +29,7 @@ static const struct {
 
 	const struct {
 		const bool enable_tone_mapping;
+		const byte pcf_radius;
 
 		/* Brighter texture colors get a stronger specular output,
 		and sharper specular highlights (their specular exponents are weighted
@@ -78,9 +79,11 @@ static const struct {
 	.default_fps = 60,
 
 	.lighting = {
-		.enable_tone_mapping = true, .ambient = 0.2f, .diffuse_strength = 1.0f,
-		.specular_strength = 1.0f, .specular_exponent_domain = {32.0f, 128.0f},
-		.esm_constant = 70.0f, .exposure = 1.0f, .noise_granularity = 0.3f / 255.0f,
+		.enable_tone_mapping = true, .pcf_radius = 2,
+
+		.ambient = 0.2f, .diffuse_strength = 1.0f, .specular_strength = 1.0f,
+		.specular_exponent_domain = {32.0f, 128.0f}, .esm_constant = 70.0f,
+		.exposure = 1.0f, .noise_granularity = 0.3f / 255.0f,
 		.light_color = {250.0f / 255.0f, 210.0f / 255.0f, 165.0f / 255.0f}
 	},
 
