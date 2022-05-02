@@ -155,6 +155,9 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 	use_shader(shader);
 
+	#define LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, constants.lighting.param);
+	#define ARRAY_LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, 1, constants.lighting.param);
+
 	ON_FIRST_CALL(
 		INIT_UNIFORM(dir_to_light, shader);
 		INIT_UNIFORM(camera_pos_world_space, shader);
@@ -162,31 +165,23 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(light_model_view_projection, shader);
 		INIT_UNIFORM(one_over_screen_size, shader);
 
-		// Ambient and diffuse
-		INIT_UNIFORM_VALUE(ambient, shader, 1f, 0.2f); // This also equals the amount of light in shadows
-		INIT_UNIFORM_VALUE(diffuse_strength, shader, 1f, 1.0f);
-
-		/* Specular. Brighter texture colors get a stronger specular output,
-		and sharper specular highlights (their specular exponents are weighted
-		more towards the upper bound of the specular exponent domain). */
-		INIT_UNIFORM_VALUE(specular_strength, shader, 1f, 1.0f);
-		INIT_UNIFORM_VALUE(specular_exponent_domain, shader, 2f, 32.0f, 128.0f);
-
-		INIT_UNIFORM_VALUE(esm_constant, shader, 1f, 70.0f);
-
-		// Tone mapping exposure, color banding elimination through noise, light color
-		INIT_UNIFORM_VALUE(enable_tone_mapping, shader, 1i, true);
-		INIT_UNIFORM_VALUE(exposure, shader, 1f, 1.0f);
-		INIT_UNIFORM_VALUE(noise_granularity, shader, 1f, 0.3f / 255.0f);
-
-		const GLfloat one_over_max_byte_value = 1.0f / constants.max_byte_value;
-		INIT_UNIFORM_VALUE(light_color, shader, 3f, 250.0f * one_over_max_byte_value,
-			210.0f * one_over_max_byte_value, 165.0f * one_over_max_byte_value);
+		LIGHTING_UNIFORM(enable_tone_mapping, 1i);
+		LIGHTING_UNIFORM(ambient, 1f);
+		LIGHTING_UNIFORM(diffuse_strength, 1f);
+		LIGHTING_UNIFORM(specular_strength, 1f);
+		ARRAY_LIGHTING_UNIFORM(specular_exponent_domain, 2fv);
+		LIGHTING_UNIFORM(esm_constant, 1f);
+		LIGHTING_UNIFORM(exposure, 1f);
+		LIGHTING_UNIFORM(noise_granularity, 1f);
+		ARRAY_LIGHTING_UNIFORM(light_color, 3fv);
 
 		use_texture(shadow_map_context -> buffers.depth_texture, shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
 		use_texture(normal_map_set, shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
 	);
+
+	#undef LIGHTING_UNIFORM
+	#undef ARRAY_LIGHTING_UNIFORM
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
 	const GLfloat* const light_dir = shadow_map_context -> light.dir;

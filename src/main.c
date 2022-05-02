@@ -64,20 +64,20 @@ static void* main_init(void) {
 
 	*const still_face_textures[] = {
 		// Palace:
-		/* "../assets/walls/sand.bmp", "../assets/walls/pyramid_bricks_4.bmp",
+		"../assets/walls/sand.bmp", "../assets/walls/pyramid_bricks_4.bmp",
 		"../assets/walls/marble.bmp", "../assets/walls/hieroglyph.bmp",
 		"../assets/walls/alkadhib.bmp", "../assets/walls/saqqara.bmp",
 		"../assets/walls/sandstone.bmp", "../assets/walls/cobblestone_3.bmp",
 		"../assets/walls/horses.bmp", "../assets/walls/mesa.bmp",
-		"../assets/walls/arthouse_bricks.bmp" */
+		"../assets/walls/arthouse_bricks.bmp"
 
 		// Pyramid:
 		/* "../assets/walls/pyramid_bricks_4.bmp",
 		"../assets/walls/greece.bmp", "../assets/walls/saqqara.bmp" */
 
 		// Fortress:
-		"../assets/walls/viney_bricks.bmp", "../assets/walls/marble.bmp",
-		"../assets/walls/vines.bmp", "../assets/walls/stone_2.bmp"
+		/* "../assets/walls/viney_bricks.bmp", "../assets/walls/marble.bmp",
+		"../assets/walls/vines.bmp", "../assets/walls/stone_2.bmp" */
 
 		// Tiny:
 		// "../assets/walls/mesa.bmp", "../assets/walls/hieroglyph.bmp"
@@ -111,9 +111,9 @@ static void* main_init(void) {
 
 		.skybox = init_skybox("../assets/skyboxes/desert.bmp", 1.0f),
 
-		.heightmap = (const byte*) fortress_heightmap,
-		.texture_id_map = (const byte*) fortress_texture_id_map,
-		.map_size = {fortress_width, fortress_height}
+		.heightmap = (const byte*) palace_heightmap,
+		.texture_id_map = (const byte*) palace_texture_id_map,
+		.map_size = {palace_width, palace_height}
 	};
 
 	push_array_to_list(&scene_state.billboard_animations,
@@ -185,7 +185,7 @@ static void main_drawer(void* const app_context) {
 		&scene_state -> sectors, camera, scene_state -> face_normal_map_set, event.screen_size);
 
 	draw_skybox(scene_state -> skybox, camera);
-	draw_visible_billboards(&scene_state -> billboard_draw_context, camera);
+	draw_visible_billboards(&scene_state -> billboard_draw_context, shadow_map_context, camera);
 	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, camera, &event);
 }
 

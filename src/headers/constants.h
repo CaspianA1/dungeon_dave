@@ -28,6 +28,20 @@ static const struct {
 	const byte max_byte_value, default_fps;
 
 	const struct {
+		const bool enable_tone_mapping;
+
+		/* Brighter texture colors get a stronger specular output,
+		and sharper specular highlights (their specular exponents are weighted
+		more towards the upper bound of the specular exponent domain).
+		Ambient also equals the amount of light in shadows. */
+
+		const GLfloat
+			ambient, diffuse_strength, specular_strength,
+			specular_exponent_domain[2], esm_constant, exposure,
+			noise_granularity, light_color[3];
+	} lighting;
+
+	const struct {
 		const GLfloat max_movement_magnitude, time_for_half_movement_cycle;
 	} weapon_sprite;
 
@@ -60,9 +74,15 @@ static const struct {
 	.app_name = "Dungeon Dave",
 
 	.almost_zero = 0.001f,
-
 	.max_byte_value = 255,
 	.default_fps = 60,
+
+	.lighting = {
+		.enable_tone_mapping = true, .ambient = 0.2f, .diffuse_strength = 1.0f,
+		.specular_strength = 1.0f, .specular_exponent_domain = {32.0f, 128.0f},
+		.esm_constant = 70.0f, .exposure = 1.0f, .noise_granularity = 0.3f / 255.0f,
+		.light_color = {250.0f / 255.0f, 210.0f / 255.0f, 165.0f / 255.0f}
+	},
 
 	.weapon_sprite = {
 		.max_movement_magnitude = 0.2f,
@@ -99,6 +119,8 @@ static const struct {
 		.activate_exit = {SDL_SCANCODE_W, SDL_SCANCODE_Q}
 	}
 };
+
+//////////
 
 typedef enum {RefreshRate, AnisotropicFilteringLevel} RuntimeConstantName;
 

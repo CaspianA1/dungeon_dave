@@ -148,10 +148,10 @@ const GLchar *const sector_vertex_shader =
 	"layout(location = 1) in vec2 billboard_size_world_space;\n"
 	"layout(location = 2) in vec3 billboard_center_world_space;\n"
 
-	"out vec3 UV;\n"
+	"out vec3 UV, fragment_pos_light_space;\n"
 
 	"uniform vec2 right_xz_world_space;\n"
-	"uniform mat4 model_view_projection;\n"
+	"uniform mat4 model_view_projection, light_model_view_projection;\n"
 
 	"const vec2 vertices_model_space[4] = vec2[4](\n"
 		"vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f),\n"
@@ -159,30 +159,41 @@ const GLchar *const sector_vertex_shader =
 	");\n"
 
 	"void main(void) {\n"
-		"vec2 vertex_model_space = vertices_model_space[gl_VertexID];\n"
-		"vec2 upscaled_vertex_world_space = vertex_model_space * billboard_size_world_space;\n"
+		"vec2 vertex_pos_model_space = vertices_model_space[gl_VertexID];\n"
+		"vec2 upscaled_vertex_pos_world_space = vertex_pos_model_space * billboard_size_world_space;\n"
 
-		"vec3 vertex_world_space = billboard_center_world_space\n"
-			"+ upscaled_vertex_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
-			"+ vec3(0.0f, upscaled_vertex_world_space.y, 0.0f);\n"
+		"vec3 vertex_pos_world_space = billboard_center_world_space\n"
+			"+ upscaled_vertex_pos_world_space.x * vec3(right_xz_world_space, 0.0f).xzy\n"
+			"+ vec3(0.0f, upscaled_vertex_pos_world_space.y, 0.0f);\n"
 
-		"gl_Position = model_view_projection * vec4(vertex_world_space, 1.0f);\n"
+		"vec4 vertex_pos_world_space_4D = vec4(vertex_pos_world_space, 1.0f);\n"
+		"gl_Position = model_view_projection * vertex_pos_world_space_4D;\n"
+		"fragment_pos_light_space = vec3(light_model_view_projection * vertex_pos_world_space_4D) * 0.5f + 0.5f;\n"
 
-		"UV.xy = vec2(vertex_model_space.x, -vertex_model_space.y) + 0.5f;\n"
+		"UV.xy = vec2(vertex_pos_model_space.x, -vertex_pos_model_space.y) + 0.5f;\n"
 		"UV.z = texture_id;\n"
 	"}\n",
 
 *const billboard_fragment_shader =
 	"#version 330 core\n"
 
-	"in vec3 UV;\n"
+	"in vec3 UV, fragment_pos_light_space;\n"
 
 	"out vec4 color;\n"
 
+	"uniform float ambient, esm_constant;\n"
+	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler;\n"
+
+	"float shadow(void) {\n" // TODO: share this function between the sector and billboard fragment shaders
+		"float occluder_depth = texture(shadow_map_sampler, fragment_pos_light_space.xy).r;\n"
+		"float result = exp(esm_constant * (occluder_depth - fragment_pos_light_space.z));\n"
+		"return clamp(result, 0.0f, 1.0f);\n"
+	"}\n"
 
 	"void main(void) {\n"
 		"color = texture(texture_sampler, UV);\n"
+		"color.rgb *= mix(ambient, 1.0f, shadow());\n"
 	"}\n",
 
 *const skybox_vertex_shader =

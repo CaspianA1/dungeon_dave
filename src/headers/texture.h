@@ -43,10 +43,10 @@ And the biggest number possible with five bits is 31, so that gives you
 // TODO: make this to an enum
 #define SECTOR_FACE_TEXTURE_UNIT 0
 #define SECTOR_NORMAL_MAP_TEXTURE_UNIT 1
-#define BILLBOARD_TEXTURE_UNIT 2
-#define SKYBOX_TEXTURE_UNIT 3
-#define WEAPON_TEXTURE_UNIT 4
-#define SHADOW_MAP_TEXTURE_UNIT 5
+#define SHADOW_MAP_TEXTURE_UNIT 2
+#define BILLBOARD_TEXTURE_UNIT 3
+#define SKYBOX_TEXTURE_UNIT 4
+#define WEAPON_TEXTURE_UNIT 5
 
 // Excluded: init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 

@@ -3,6 +3,14 @@
 
 #include "headers/billboard.h"
 #include "headers/shaders.h"
+#include "headers/constants.h"
+
+typedef struct {
+	const vec3 center;
+	const GLfloat radius;
+} Sphere;
+
+//////////
 
 void update_billboard_animation_instances(const List* const billboard_animation_instances,
 	const List* const billboard_animations, const List* const billboards) {
@@ -41,21 +49,29 @@ static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frus
 }
 
 static void draw_billboards(const BatchDrawContext* const draw_context,
-	const Camera* const camera, const buffer_size_t num_visible_billboards) {
+	const ShadowMapContext* const shadow_map_context, const Camera* const camera,
+	const buffer_size_t num_visible_billboards) {
 
 	const GLuint shader = draw_context -> shader;
-	static GLint right_xz_world_space_id, model_view_projection_id;
+	static GLint right_xz_world_space_id, model_view_projection_id, light_model_view_projection_id;
 
 	use_shader(shader);
 
 	ON_FIRST_CALL(
+		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
+		INIT_UNIFORM_VALUE(esm_constant, shader, 1f, constants.lighting.esm_constant);
+
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
+		INIT_UNIFORM(light_model_view_projection, shader);
+
+		use_texture(shadow_map_context -> buffers.depth_texture, shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, BILLBOARD_TEXTURE_UNIT);
 	);
 
 	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right_xz[0], camera -> right_xz[1]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
+	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE, &shadow_map_context -> light.model_view_projection[0][0]);
 
 	WITH_INTEGER_VERTEX_ATTRIBUTE(true, 0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), 0,
 		WITH_VERTEX_ATTRIBUTE(true, 1, 2, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, size),
@@ -75,7 +91,9 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	);
 }
 
-void draw_visible_billboards(const BatchDrawContext* const draw_context, const Camera* const camera) {
+void draw_visible_billboards(const BatchDrawContext* const draw_context,
+	const ShadowMapContext* const shadow_map_context, const Camera* const camera) {
+
 	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
 
 	const List cpu_billboards = draw_context -> buffers.cpu;
@@ -85,7 +103,7 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 	buffer_size_t num_visible = 0;
 	const Billboard* const out_of_bounds_billboard = ((Billboard*) cpu_billboards.data) + cpu_billboards.length;
 
-	for (const Billboard* billboard = (Billboard*) cpu_billboards.data; billboard < out_of_bounds_billboard; billboard++) {
+	for (const Billboard* billboard = cpu_billboards.data; billboard < out_of_bounds_billboard; billboard++) {
 
 		const Billboard* const initial_billboard = billboard;
 		while (billboard < out_of_bounds_billboard && billboard_in_view_frustum(*billboard, frustum_planes))
@@ -99,7 +117,7 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context, const C
 	}
 
 	glUnmapBuffer(GL_ARRAY_BUFFER);
-	if (num_visible != 0) draw_billboards(draw_context, camera, num_visible);
+	if (num_visible != 0) draw_billboards(draw_context, shadow_map_context, camera, num_visible);
 }
 
 BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, const Billboard* const billboards) {
