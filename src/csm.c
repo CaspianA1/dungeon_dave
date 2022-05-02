@@ -88,7 +88,6 @@ void update_shadow_map(ShadowMapContext* const shadow_map_context, const GLint s
 	glCullFace(GL_FRONT);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
-
 	drawer(drawer_param);
 
 	if (keys[KEY_MAKE_SHADOW_MAP_MIPMAP]) {
