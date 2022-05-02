@@ -149,7 +149,7 @@ static void* main_init(void) {
 
 	scene_state.shadow_map_context = init_shadow_map_context(4096, 4096,
 		(vec3) {26.563328f, 31.701447f, 12.387274f}, 0.518362f, -1.225221f,
-		scene_state.camera.far_clip_dist // TODO: put the camera in the scene state
+		scene_state.camera.far_clip_dist
 	),
 
 	//////////
@@ -178,7 +178,7 @@ static void main_drawer(void* const app_context) {
 		&scene_state -> billboard_animations,
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
-	render_sectors_to_shadow_map(shadow_map_context, sector_draw_context, event.screen_size);
+	update_shadow_map(shadow_map_context, event.screen_size, draw_sectors_for_shadow_map, sector_draw_context);
 
 	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 	draw_visible_sectors(sector_draw_context, shadow_map_context,

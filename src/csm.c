@@ -62,8 +62,8 @@ void deinit_shadow_map_context(const ShadowMapContext* const s) {
 	glDeleteFramebuffers(1, &s -> buffers.frame);
 }
 
-void render_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context,
-	const BatchDrawContext* const sector_draw_context, const int screen_size[2]) {
+void update_shadow_map(ShadowMapContext* const shadow_map_context, const int screen_size[2],
+	void (*const drawer) (const void* const), const void* const drawer_param) {
 
 	const GLuint depth_shader = shadow_map_context -> depth_shader;
 	use_shader(depth_shader);
@@ -82,33 +82,23 @@ void render_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context,
 
 	//////////
 
-	glBindBuffer(GL_ARRAY_BUFFER, sector_draw_context -> buffers.gpu);
+	const ShadowMapBuffers buffers = shadow_map_context -> buffers;
+	glViewport(0, 0, buffers.size[0], buffers.size[1]);
+	glBindFramebuffer(GL_FRAMEBUFFER, buffers.frame);
+	glCullFace(GL_FRONT);
 
-	GLint bytes_for_vertices;
-	glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bytes_for_vertices);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_for_vertices, sector_draw_context -> buffers.cpu.data);
+	glClear(GL_DEPTH_BUFFER_BIT);
 
-	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
-		const ShadowMapBuffers buffers = shadow_map_context -> buffers;
-		const GLsizei num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
+	drawer(drawer_param);
 
-		glViewport(0, 0, buffers.size[0], buffers.size[1]);
-		glBindFramebuffer(GL_FRAMEBUFFER, buffers.frame);
-		glCullFace(GL_FRONT);
+	if (keys[KEY_MAKE_SHADOW_MAP_MIPMAP]) {
+		glBindTexture(TexPlain, buffers.depth_texture);
+		glGenerateMipmap(TexPlain);
+	};
 
-		glClear(GL_DEPTH_BUFFER_BIT);
-		glDrawArrays(GL_TRIANGLES, 0, num_vertices);
-
-		if (keys[KEY_MAKE_SHADOW_MAP_MIPMAP]) {
-			glBindTexture(TexPlain, shadow_map_context -> buffers.depth_texture);
-			glGenerateMipmap(TexPlain);
-			glBindTexture(TexPlain, 0);
-		};
-
-		glCullFace(GL_BACK);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, screen_size[0], screen_size[1]);
-	);
+	glCullFace(GL_BACK);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, screen_size[0], screen_size[1]);
 }
 
 #endif

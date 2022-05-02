@@ -27,7 +27,7 @@ ShadowMapContext init_shadow_map_context(const GLsizei width,
 
 void deinit_shadow_map_context(const ShadowMapContext* const s);
 
-void render_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context,
-	const BatchDrawContext* const sector_draw_context, const int screen_size[2]);
+void update_shadow_map(ShadowMapContext* const shadow_map_context, const int screen_size[2],
+	void (*const drawer) (const void* const), const void* const drawer_param);
 
 #endif
