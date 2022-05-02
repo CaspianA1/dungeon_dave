@@ -22,24 +22,22 @@ ShadowMapContext init_shadow_map_context(const GLsizei width,
 
 	ShadowMapContext s = {
 		.light.far_clip_dist = far_clip_dist,
-		.buffers.size = {width, height},
+		.buffers = {
+			.depth_texture = preinit_texture(TexPlain, TexNonRepeating,
+				OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER),
+			.size = {width, height}
+		},
+
 		.depth_shader = init_shader(depth_vertex_shader, depth_fragment_shader)
 	};
 
 	glm_vec3_copy((GLfloat*) light_pos, s.light.pos);
 	get_dir_in_2D_and_3D(hori_angle, vert_angle, (vec2) {0.0f, 0.0f}, s.light.dir);
 
-	//////////
-
-	glGenTextures(1, &s.buffers.depth_texture);
-	set_current_texture(TexPlain, s.buffers.depth_texture);
-	glTexParameteri(TexPlain, GL_TEXTURE_MAG_FILTER, OPENGL_SHADOW_MAP_MAG_FILTER);
-	glTexParameteri(TexPlain, GL_TEXTURE_MIN_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER);
-	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_S, TexNonRepeating); 
-	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, TexNonRepeating);  
-
 	glTexImage2D(TexPlain, 0, INTERNAL_DEPTH_TEXTURE_FORMAT, width,
 		height, 0, DEPTH_TEXTURE_FORMAT, DEPTH_TEXTURE_COMPONENT_TYPE, NULL);
+
+	glGenerateMipmap(TexPlain);
 
 	//////////
 
@@ -100,6 +98,12 @@ void render_sectors_to_shadow_map(ShadowMapContext* const shadow_map_context,
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES, 0, num_vertices);
+
+		if (keys[KEY_MAKE_SHADOW_MAP_MIPMAP]) {
+			glBindTexture(TexPlain, shadow_map_context -> buffers.depth_texture);
+			glGenerateMipmap(TexPlain);
+			glBindTexture(TexPlain, 0);
+		};
 
 		glCullFace(GL_BACK);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

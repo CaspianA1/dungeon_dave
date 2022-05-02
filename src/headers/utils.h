@@ -15,6 +15,7 @@
 #define KEY_PRINT_POSITION SDL_SCANCODE_5
 #define KEY_PRINT_DIRECTION SDL_SCANCODE_6
 #define KEY_PRINT_UP SDL_SCANCODE_7
+#define KEY_MAKE_SHADOW_MAP_MIPMAP SDL_SCANCODE_8
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", (var))
 #define DEBUG_FLOAT(var) printf(#var " = %ff\n", (double) (var))

@@ -97,8 +97,22 @@ const GLchar *const sector_vertex_shader =
 		- Lighter shadow bases are simply an artifact of ESM
 		- A higher exponent means more shadow acne, but less light bleeding */
 
-		"float occluder_depth = texture(shadow_map_sampler, fragment_pos_light_space.xy).r;\n"
-		"float result = exp(esm_constant * (occluder_depth - fragment_pos_light_space.z));\n"
+		"vec2\n"
+			"shadow_map_UV = fragment_pos_light_space.xy,\n"
+			"texel_size = 1.0f / textureSize(shadow_map_sampler, 0);\n"
+
+		"float average_occluder_depth = 0.0f;\n"
+
+		"for (int y = -1; y <= 1; y++) {\n"
+			"for (int x = -1; x <= 1; x++) {\n"
+				"vec2 sample_UV = shadow_map_UV + texel_size * vec2(x, y);\n"
+				"average_occluder_depth += texture(shadow_map_sampler, sample_UV).r;\n"
+			"}\n"
+		"}\n"
+
+		"average_occluder_depth *= 1.0f / 9.0f;\n"
+
+		"float result = exp(esm_constant * (average_occluder_depth - fragment_pos_light_space.z));\n"
 		"return clamp(result, 0.0f, 1.0f);\n"
 	"}\n"
 
@@ -186,8 +200,22 @@ const GLchar *const sector_vertex_shader =
 	"uniform sampler2DArray texture_sampler;\n"
 
 	"float shadow(void) {\n" // TODO: share this function between the sector and billboard fragment shaders
-		"float occluder_depth = texture(shadow_map_sampler, fragment_pos_light_space.xy).r;\n"
-		"float result = exp(esm_constant * (occluder_depth - fragment_pos_light_space.z));\n"
+		"vec2\n"
+			"shadow_map_UV = fragment_pos_light_space.xy,\n"
+			"texel_size = 1.0f / textureSize(shadow_map_sampler, 0);\n"
+
+		"float average_occluder_depth = 0.0f;\n"
+
+		"for (int y = -1; y <= 1; y++) {\n"
+			"for (int x = -1; x <= 1; x++) {\n"
+				"vec2 sample_UV = shadow_map_UV + texel_size * vec2(x, y);\n"
+				"average_occluder_depth += texture(shadow_map_sampler, sample_UV).r;\n"
+			"}\n"
+		"}\n"
+
+		"average_occluder_depth *= 1.0f / 9.0f;\n"
+
+		"float result = exp(esm_constant * (average_occluder_depth - fragment_pos_light_space.z));\n"
 		"return clamp(result, 0.0f, 1.0f);\n"
 	"}\n"
 
