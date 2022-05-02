@@ -77,7 +77,7 @@ static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delt
 
 // This does not include FOV, since FOV depends on a tick's speed, and speed is updated after this function is called
 static void update_camera_angles(Camera* const camera, const Event* const event, const GLfloat delta_time) {
-	const int *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
+	const GLint *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
 
 	const GLfloat delta_vert = (GLfloat) -mouse_movement[1] / screen_size[1] * constants.speeds.look[1];
 	camera -> angles.vert = clamp_to_pos_neg_domain(camera -> angles.vert + delta_vert, constants.camera.lims.vert);

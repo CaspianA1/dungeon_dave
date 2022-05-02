@@ -12,11 +12,9 @@
 
 #include "../../include/glad/glad.h"
 
-typedef uint8_t byte;
-
+typedef GLubyte byte;
 typedef GLubyte face_mesh_component_t;
 typedef GLuint buffer_size_t; // Max = 4294967295
-
 typedef GLfloat billboard_var_component_t;
 
 #define FACE_MESH_COMPONENT_TYPENAME GL_UNSIGNED_BYTE

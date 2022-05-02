@@ -59,7 +59,6 @@ Architectural/code design ideas:
 - Some library memory leaks; this should be fixed in some way, if possible
 - Make sector and billboard contexts contain all context necessary, not just fragmented around the SceneState struct
 - Use more of the cglm functions in `update_camera`, or make my own
-- All builtin types to OpenGL or SDL typedefs
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage

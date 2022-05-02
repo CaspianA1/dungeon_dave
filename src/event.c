@@ -9,7 +9,7 @@ Event get_next_event(void) {
 	static GLint viewport_size[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_size);
 
-	int mouse_movement[2];
+	int mouse_movement[2]; // Not GLint b/c `SDL_GetRelativeMouseState` is expecting ints
 
 	const bool
 		attempting_acceleration = keys[constants.keys.accelerate[0]] || keys[constants.keys.accelerate[1]],
@@ -34,5 +34,4 @@ Event get_next_event(void) {
 	};
 }
 
-void foo(void);
 #endif

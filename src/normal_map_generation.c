@@ -6,30 +6,30 @@
 #include "headers/texture.h"
 #include "headers/constants.h"
 
-static int int_min(const int val, const int lower) {
+static GLint int_min(const GLint val, const GLint lower) {
 	return (val < lower) ? val : lower;
 }
 
-static int int_max(const int val, const int upper) {
+static GLint int_max(const GLint val, const GLint upper) {
 	return (val > upper) ? val : upper;
 }
 
-static int limit_int_to_domain(const int val, const int lower, const int upper) {
+static GLint limit_int_to_domain(const GLint val, const GLint lower, const GLint upper) {
 	return int_min(int_max(val, lower), upper);
 }
 
-static void* read_surface_pixel(const SDL_Surface* const surface, const int x, const int y) {
+static void* read_surface_pixel(const SDL_Surface* const surface, const GLint x, const GLint y) {
 	sdl_pixel_component_t* const row = (sdl_pixel_component_t*) surface -> pixels + y * surface -> pitch;
-	return row + x * (int) sizeof(sdl_pixel_t);
+	return row + x * (GLint) sizeof(sdl_pixel_t);
 }
 
-static float sobel_sample(const SDL_Surface* const surface, const int x, const int y) {
+static GLfloat sobel_sample(const SDL_Surface* const surface, const GLint x, const GLint y) {
 	const sdl_pixel_t pixel = *(sdl_pixel_t*) read_surface_pixel(surface, x, y);
 
 	sdl_pixel_component_t r, g, b;
 	SDL_GetRGB(pixel, surface -> format, &r, &g, &b);
 
-	static const float one_third = 1.0f / 3.0f;
+	static const GLfloat one_third = 1.0f / 3.0f;
 	return (r + g + b) * one_third;
 }
 
@@ -41,27 +41,27 @@ The strength of a pixel's color is considered
 to be the average of its three color components.
 
 It's assumed that `src` has the same size as `dest`. */
-static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest, const int subtexture_h, const float intensity) {
-	const int w = src -> w, h = src -> h;
-	const float one_over_intensity_on_rgb_scale = constants.max_byte_value / intensity;
+static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest, const GLint subtexture_h, const GLfloat intensity) {
+	const GLint w = src -> w, h = src -> h;
+	const GLfloat one_over_intensity_on_rgb_scale = constants.max_byte_value / intensity;
 
 	const SDL_PixelFormat* const dest_format = dest -> format;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
 
-			for (int y = 0; y < h; y++) {
+			for (GLint y = 0; y < h; y++) {
 				sdl_pixel_t* dest_pixel = read_surface_pixel(dest, 0, y);
 
-				const int subtexture_top = (y / subtexture_h) * subtexture_h;
-				const int subtexture_bottom = subtexture_top + subtexture_h - 1;
+				const GLint subtexture_top = (y / subtexture_h) * subtexture_h;
+				const GLint subtexture_bottom = subtexture_top + subtexture_h - 1;
 
-				for (int x = 0; x < w; x++, dest_pixel++) {
-					const int
+				for (GLint x = 0; x < w; x++, dest_pixel++) {
+					const GLint
 						left_x = int_max(x - 1, 0),             right_x = int_min(x + 1, w - 1),
 						top_y = int_max(y - 1, subtexture_top), bottom_y = int_min(y + 1, subtexture_bottom);
 
-					const float // These samples are in a range from 0 to 255
+					const GLfloat // These samples are in a range from 0 to 255
 						tl = sobel_sample(src, left_x, top_y),  tm = sobel_sample(src, x, top_y),
 						tr = sobel_sample(src, right_x, top_y), ml = sobel_sample(src, left_x, y),
 						mr = sobel_sample(src, right_x, y),     bl = sobel_sample(src, left_x, bottom_y),
@@ -91,21 +91,21 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 
 ////////// This code concerns Gaussian blur (the normal map input is blurred to cut out high frequencies from the Sobel operator).
 
-static float* compute_1D_gaussian_kernel(const int radius, const float std_dev) {
-	const int kernel_length = radius * 2 + 1;
+static GLfloat* compute_1D_gaussian_kernel(const GLint radius, const GLfloat std_dev) {
+	const GLint kernel_length = radius * 2 + 1;
 
-	float* const kernel = malloc((size_t) kernel_length * sizeof(float)), sum = 0.0f;
-	const float one_over_two_times_std_dev_squared = 1.0f / (2.0f * std_dev * std_dev);
+	GLfloat* const kernel = malloc((size_t) kernel_length * sizeof(GLfloat)), sum = 0.0f;
+	const GLfloat one_over_two_times_std_dev_squared = 1.0f / (2.0f * std_dev * std_dev);
 
-	for (int x = 0; x < kernel_length; x++) {
-		const int dx = x - radius;
-		const float weight = expf(-(dx * dx) * one_over_two_times_std_dev_squared);
+	for (GLint x = 0; x < kernel_length; x++) {
+		const GLint dx = x - radius;
+		const GLfloat weight = expf(-(dx * dx) * one_over_two_times_std_dev_squared);
 		kernel[x] = weight;
 		sum += weight;
 	}
 
-	const float one_over_sum = 1.0f / sum;
-	for (int i = 0; i < kernel_length; i++) kernel[i] *= one_over_sum;
+	const GLfloat one_over_sum = 1.0f / sum;
+	for (GLint i = 0; i < kernel_length; i++) kernel[i] *= one_over_sum;
 
 	return kernel;
 }
@@ -113,10 +113,10 @@ static float* compute_1D_gaussian_kernel(const int radius, const float std_dev) 
 // It's assumed that `src` has the same size as `dest`.
 static void do_separable_gaussian_blur_pass(
 	SDL_Surface* const src, SDL_Surface* const dest,
-	const float* const kernel, const int subtexture_h,
-	const int kernel_radius, const bool blur_is_vertical) {
+	const GLfloat* const kernel, const GLint subtexture_h,
+	const GLint kernel_radius, const bool blur_is_vertical) {
 
-	const int w = src -> w, h = src -> h;
+	const GLint w = src -> w, h = src -> h;
 
 	const SDL_PixelFormat
 		*const src_format = src -> format,
@@ -125,20 +125,20 @@ static void do_separable_gaussian_blur_pass(
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
 
-			for (int y = 0; y < h; y++) {
+			for (GLint y = 0; y < h; y++) {
 				sdl_pixel_t* dest_pixel = read_surface_pixel(dest, 0, y);
 
-				const int subtexture_top = (y / subtexture_h) * subtexture_h;
-				const int subtexture_bottom = subtexture_top + subtexture_h - 1;
+				const GLint subtexture_top = (y / subtexture_h) * subtexture_h;
+				const GLint subtexture_bottom = subtexture_top + subtexture_h - 1;
 
-				for (int x = 0; x < w; x++, dest_pixel++) {
-					float summed_channels[3] = {0.0f, 0.0f, 0.0f};
+				for (GLint x = 0; x < w; x++, dest_pixel++) {
+					GLfloat summed_channels[3] = {0.0f, 0.0f, 0.0f};
 
-					for (int i = -kernel_radius; i <= kernel_radius; i++) {
-						int filter_pos[2] = {x, y};
+					for (GLint i = -kernel_radius; i <= kernel_radius; i++) {
+						GLint filter_pos[2] = {x, y};
 						filter_pos[blur_is_vertical] += i; // If blur is vertical, `blur_is_vertical` equals 1; otherwise, 0
 
-						const int
+						const GLint
 							clamped_filter_x = limit_int_to_domain(filter_pos[0], 0, w - 1),
 							clamped_filter_y = limit_int_to_domain(filter_pos[1], subtexture_top, subtexture_bottom);
 
@@ -209,8 +209,8 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set, const bool
 	////////// Blurring it (if needed), and then making a normal map
 
 	if (apply_blur) {
-		const int blur_radius = constants.normal_mapping.blur.radius;
-		float* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, constants.normal_mapping.blur.std_dev);
+		const GLint blur_radius = constants.normal_mapping.blur.radius;
+		GLfloat* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, constants.normal_mapping.blur.std_dev);
 
 		do_separable_gaussian_blur_pass( // Blurring #1 to #2 horizontally
 			general_purpose_surface_1, general_purpose_surface_2,
