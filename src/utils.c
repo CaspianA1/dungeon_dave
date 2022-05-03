@@ -182,8 +182,6 @@ void loop_application(const Screen* const screen, void (*const drawer) (void* co
 		resize_window_if_needed(screen -> window);
 		set_triangle_fill_mode();
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		drawer(app_context);
 
 		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
