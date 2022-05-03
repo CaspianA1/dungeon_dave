@@ -58,13 +58,13 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	use_shader(shader);
 
 	ON_FIRST_CALL(
-		INIT_UNIFORM_VALUE(pcf_radius, shader, 1i, constants.lighting.pcf_radius);
-		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
-		INIT_UNIFORM_VALUE(esm_constant, shader, 1f, constants.lighting.esm_constant);
-
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
 		INIT_UNIFORM(light_model_view_projection, shader);
+
+		INIT_UNIFORM_VALUE(pcf_radius, shader, 1i, constants.lighting.pcf_radius);
+		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
+		INIT_UNIFORM_VALUE(esm_constant, shader, 1f, constants.lighting.esm_constant);
 
 		use_texture(shadow_map_context -> buffers.depth_texture, shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, BILLBOARD_TEXTURE_UNIT);
