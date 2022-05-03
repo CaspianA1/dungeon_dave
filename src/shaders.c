@@ -222,8 +222,11 @@ const GLchar *const sector_vertex_shader =
 		"int samples_across = (pcf_radius << 1) + 1;\n"
 		"average_occluder_depth *= 1.0f / (samples_across * samples_across);\n"
 
-		"float result = exp(esm_constant * (average_occluder_depth - fragment_pos_light_space.z));\n"
-		"return clamp(result, 0.0f, 1.0f);\n"
+		//////////
+
+		"float occluder_receiver_diff = fragment_pos_light_space.z - average_occluder_depth;\n"
+		"float in_light_percentage = exp(-esm_constant * occluder_receiver_diff);\n"
+		"return clamp(in_light_percentage, 0.0f, 1.0f);\n"
 	"}\n"
 
 	"void main(void) {\n"
