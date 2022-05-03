@@ -116,6 +116,7 @@ Physics:
 End components:
 - Static sectors
 - Dynamic sectors
+- Bridges (perhaps instead of dynamic sectors)
 - Billboards (unanimated and animated)
 - Skybox
 - Weapon
