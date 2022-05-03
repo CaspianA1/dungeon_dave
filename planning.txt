@@ -59,6 +59,7 @@ Architectural/code design ideas:
 - Some library memory leaks; this should be fixed in some way, if possible
 - Make sector and billboard contexts contain all context necessary, not just fragmented around the SceneState struct
 - Use more of the cglm functions in `update_camera`, or make my own
+- Instead of hardcoding the beginning of each asset path ("../assets/"), abstract it away with a macro that concatenates a simpler path with the base path
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
