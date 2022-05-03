@@ -184,12 +184,14 @@ static void main_drawer(void* const app_context) {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Skybox after sectors b/c most skybox fragments would be unnecessarily drawn otherwise
 	draw_visible_sectors(sector_draw_context, shadow_map_context,
 		&scene_state -> sectors, camera, scene_state -> face_normal_map_set, event.screen_size);
 
-	draw_skybox(scene_state -> skybox, camera);
 	draw_visible_billboards(&scene_state -> billboard_draw_context, shadow_map_context, camera);
+
+	/* Drawing the skybox after sectors and billboards because
+	most skybox fragments would unnecessarily be drawn otherwise */
+	draw_skybox(scene_state -> skybox, camera);
 	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, camera, &event);
 }
 
