@@ -335,8 +335,6 @@ void update_camera(Camera* const camera, const Event event) {
 	glm_vec3_copy(up, camera -> up);
 
 	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(pos);
-	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);
-	if (keys[KEY_PRINT_UP]) DEBUG_VEC3(up);
 }
 
 #endif
