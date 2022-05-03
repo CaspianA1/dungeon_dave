@@ -122,7 +122,6 @@ static void* main_init(void) {
 	push_array_to_list(&scene_state.billboard_animation_instances,
 		billboard_animation_instances, ARRAY_LENGTH(billboard_animation_instances));
 
-	// static byte texture_id_map[terrain_height][terrain_width];
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
 		scene_state.heightmap, scene_state.texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
 

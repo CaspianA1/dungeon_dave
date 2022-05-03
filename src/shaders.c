@@ -62,8 +62,8 @@ const GLchar *const sector_vertex_shader =
 	"uniform int pcf_radius;\n"
 
 	"uniform float\n"
-		"ambient, diffuse_strength, specular_strength,\n"
-		"esm_constant, exposure, noise_granularity;\n"
+		"esm_constant, ambient, diffuse_strength,\n"
+		"specular_strength, exposure, noise_granularity;\n"
 
 	"uniform vec2 specular_exponent_domain, one_over_screen_size;\n"
 	"uniform vec3 dir_to_light, light_color;\n" // `dir_to_light` is the direction pointing to the light source
@@ -114,8 +114,11 @@ const GLchar *const sector_vertex_shader =
 		"int samples_across = (pcf_radius << 1) + 1;\n"
 		"average_occluder_depth *= 1.0f / (samples_across * samples_across);\n"
 
-		"float result = exp(esm_constant * (average_occluder_depth - fragment_pos_light_space.z));\n"
-		"return clamp(result, 0.0f, 1.0f);\n"
+		//////////
+
+		"float occluder_receiver_diff = fragment_pos_light_space.z - average_occluder_depth;\n"
+		"float in_light_percentage = exp(-esm_constant * occluder_receiver_diff);\n"
+		"return clamp(in_light_percentage, 0.0f, 1.0f);\n"
 	"}\n"
 
 	"vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {\n"

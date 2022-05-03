@@ -182,11 +182,13 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 		LIGHTING_UNIFORM(enable_tone_mapping, 1i);
 		LIGHTING_UNIFORM(pcf_radius, 1i);
+		LIGHTING_UNIFORM(esm_constant, 1f);
+
 		LIGHTING_UNIFORM(ambient, 1f);
 		LIGHTING_UNIFORM(diffuse_strength, 1f);
 		LIGHTING_UNIFORM(specular_strength, 1f);
 		ARRAY_LIGHTING_UNIFORM(specular_exponent_domain, 2fv);
-		LIGHTING_UNIFORM(esm_constant, 1f);
+
 		LIGHTING_UNIFORM(exposure, 1f);
 		LIGHTING_UNIFORM(noise_granularity, 1f);
 		ARRAY_LIGHTING_UNIFORM(light_color, 3fv);

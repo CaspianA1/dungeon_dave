@@ -37,9 +37,9 @@ static const struct {
 		Ambient also equals the amount of light in shadows. */
 
 		const GLfloat
-			ambient, diffuse_strength, specular_strength,
-			specular_exponent_domain[2], esm_constant, exposure,
-			noise_granularity, light_color[3];
+			esm_constant, ambient, diffuse_strength,
+			specular_strength, specular_exponent_domain[2],
+			exposure, noise_granularity, light_color[3];
 	} lighting;
 
 	const struct {
@@ -79,10 +79,10 @@ static const struct {
 	.default_fps = 60,
 
 	.lighting = {
-		.enable_tone_mapping = true, .pcf_radius = 2,
+		.enable_tone_mapping = true, .pcf_radius = 2, .esm_constant = 80.0f,
 
 		.ambient = 0.2f, .diffuse_strength = 1.0f, .specular_strength = 1.0f,
-		.specular_exponent_domain = {32.0f, 128.0f}, .esm_constant = 70.0f,
+		.specular_exponent_domain = {32.0f, 128.0f},
 		.exposure = 1.0f, .noise_granularity = 0.3f / 255.0f,
 		.light_color = {250.0f / 255.0f, 210.0f / 255.0f, 165.0f / 255.0f}
 	},
