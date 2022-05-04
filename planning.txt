@@ -23,8 +23,8 @@ Final lighting model:
 	- Then, expand that to 3D
 - After CSM, implement SDSM
 - ESM logarithmic space filtering: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
+- Filtering in exp(gl_FragCoord.z) may remove some shadow acne
 CSM:
-- Generating mipmaps from a depth component texture via ESM freezes my computer
 - If there is still too much light bleeding in the end, perhaps switch to one-term EVSM
 - Make the weapon cast a shadow, and make functions for enabling/disabling rendering to a shadow map
 - Weapon NDC to world-space like this: https://feepingcreature.github.io/math.html (note: idea didn't fully work at first)
