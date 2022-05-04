@@ -149,7 +149,7 @@ static void* main_init(void) {
 	scene_state.shadow_map_context = init_shadow_map_context(4096, 4096,
 		(vec3) {26.563328f, 31.701447f, 12.387274f}, 0.518362f, -1.225221f,
 		scene_state.camera.far_clip_dist
-	),
+	);
 
 	//////////
 

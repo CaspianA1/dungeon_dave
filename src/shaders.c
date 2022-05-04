@@ -12,7 +12,7 @@ const GLchar *const sector_vertex_shader =
 
 	"flat out uint face_id;\n"
 
-	"out vec3 UV, fragment_pos_light_space, camera_pos_delta_world_space;\n"
+	"out vec3 UV, fragment_pos_light_space, fragment_pos_world_space;\n"
 
 	"uniform vec3 camera_pos_world_space;\n"
 	"uniform mat4 model_view_projection, light_model_view_projection;\n"
@@ -40,13 +40,13 @@ const GLchar *const sector_vertex_shader =
 
 		"UV = vec3(UV_xy, face_info_bits >> 3u);\n"
 
-		////////// Setting camera_pos_delta_world_space, fragment_pos_light_space, and gl_Position
+		////////// Setting fragment_pos_world_space, fragment_pos_light_space, and gl_Position
+
+		"fragment_pos_world_space = vertex_pos_world_space;\n"
 
 		"vec4 vertex_pos_world_space_4D = vec4(vertex_pos_world_space, 1.0f);\n"
 
-		"camera_pos_delta_world_space = camera_pos_world_space - vertex_pos_world_space;\n"
 		"fragment_pos_light_space = vec3(light_model_view_projection * vertex_pos_world_space_4D) * 0.5f + 0.5f;\n"
-
 		"gl_Position = model_view_projection * vertex_pos_world_space_4D;\n"
 	"}\n",
 
@@ -54,7 +54,7 @@ const GLchar *const sector_vertex_shader =
 	"#version 330 core\n"
 
 	"flat in uint face_id;\n"
-	"in vec3 UV, fragment_pos_light_space, camera_pos_delta_world_space;\n"
+	"in vec3 UV, fragment_pos_light_space, fragment_pos_world_space;\n"
 
 	"out vec3 color;\n"
 
@@ -66,7 +66,7 @@ const GLchar *const sector_vertex_shader =
 		"specular_strength, exposure, noise_granularity;\n"
 
 	"uniform vec2 specular_exponent_domain, one_over_screen_size;\n"
-	"uniform vec3 dir_to_light, light_color;\n" // `dir_to_light` is the direction pointing to the light source
+	"uniform vec3 camera_pos_world_space, dir_to_light, light_color;\n" // `dir_to_light` is the direction pointing to the light source
 
 	"uniform sampler2D shadow_map_sampler;\n"
 	"uniform sampler2DArray texture_sampler, normal_map_sampler;\n"
@@ -80,7 +80,7 @@ const GLchar *const sector_vertex_shader =
 		/* Brighter texture colors have more specularity, and stronger highlights.
 		Also, the specular calculation uses Blinn-Phong, rather than just Phong. */
 
-		"vec3 view_dir = normalize(camera_pos_delta_world_space);\n"
+		"vec3 view_dir = normalize(camera_pos_world_space - fragment_pos_world_space);\n"
 		"vec3 halfway_dir = normalize(dir_to_light + view_dir);\n"
 		"float cos_angle_of_incidence = max(dot(fragment_normal, halfway_dir), 0.0f);\n"
 
