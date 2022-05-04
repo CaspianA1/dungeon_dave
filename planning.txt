@@ -22,6 +22,7 @@ Final lighting model:
 	- It can then be resized to the AABB area after
 	- Then, expand that to 3D
 - After CSM, implement SDSM
+- ESM logarithmic space filtering: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
 CSM:
 - Generating mipmaps from a depth component texture via ESM freezes my computer
 - If there is still too much light bleeding in the end, perhaps switch to one-term EVSM
