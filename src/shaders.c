@@ -112,7 +112,7 @@ const GLchar *const sector_vertex_shader =
 		"}\n"
 
 		"int samples_across = (pcf_radius << 1) + 1;\n"
-		"average_occluder_depth *= 1.0f / (samples_across * samples_across);\n"
+		"average_occluder_depth /= samples_across * samples_across;\n"
 
 		//////////
 
