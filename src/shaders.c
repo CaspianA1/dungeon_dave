@@ -123,8 +123,7 @@ const GLchar *const sector_vertex_shader =
 
 	"vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {\n"
 		"float non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);\n"
-		"float shadowed_non_ambient = non_ambient * shadow();\n"
-		"float light_strength = ambient + shadowed_non_ambient;\n"
+		"float light_strength = ambient + non_ambient * shadow();\n"
 		"return light_strength * light_color * texture_color;\n"
 	"}\n"
 
