@@ -112,7 +112,7 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 	List face_meshes = init_list(sectors.length * 3, face_mesh_component_t[components_per_face]);
 
 	for (buffer_size_t i = 0; i < sectors.length; i++) {
-		Sector* const sector_ref = ((Sector*) sectors.data) + i;
+		Sector* const sector_ref = ptr_to_list_index(&sectors, i);
 		sector_ref -> face_range.start = face_meshes.length;
 
 		const Sector sector = *sector_ref;
