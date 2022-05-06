@@ -15,7 +15,7 @@ const GLchar *const sector_vertex_shader =
 	"out vec3 UV, fragment_pos_light_space, fragment_pos_world_space;\n"
 
 	"uniform vec3 camera_pos_world_space;\n"
-	"uniform mat4 model_view_projection, light_model_view_projection;\n"
+	"uniform mat4 model_view_projection, biased_light_model_view_projection;\n"
 
 	"const struct FaceAttribute {\n"
 		"ivec2 uv_indices, uv_signs;\n"
@@ -43,10 +43,9 @@ const GLchar *const sector_vertex_shader =
 		////////// Setting fragment_pos_world_space, fragment_pos_light_space, and gl_Position
 
 		"fragment_pos_world_space = vertex_pos_world_space;\n"
-
 		"vec4 vertex_pos_world_space_4D = vec4(vertex_pos_world_space, 1.0f);\n"
 
-		"fragment_pos_light_space = vec3(light_model_view_projection * vertex_pos_world_space_4D) * 0.5f + 0.5f;\n"
+		"fragment_pos_light_space = vec3(biased_light_model_view_projection * vertex_pos_world_space_4D);\n"
 		"gl_Position = model_view_projection * vertex_pos_world_space_4D;\n"
 	"}\n",
 
@@ -169,7 +168,7 @@ const GLchar *const sector_vertex_shader =
 	"out vec3 UV, fragment_pos_light_space;\n"
 
 	"uniform vec2 right_xz_world_space;\n"
-	"uniform mat4 model_view_projection, light_model_view_projection;\n"
+	"uniform mat4 model_view_projection, biased_light_model_view_projection;\n"
 
 	"const vec2 vertices_model_space[4] = vec2[4](\n"
 		"vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f),\n"
@@ -186,7 +185,7 @@ const GLchar *const sector_vertex_shader =
 
 		"vec4 vertex_pos_world_space_4D = vec4(vertex_pos_world_space, 1.0f);\n"
 		"gl_Position = model_view_projection * vertex_pos_world_space_4D;\n"
-		"fragment_pos_light_space = vec3(light_model_view_projection * vertex_pos_world_space_4D) * 0.5f + 0.5f;\n"
+		"fragment_pos_light_space = vec3(biased_light_model_view_projection * vertex_pos_world_space_4D);\n"
 
 		"UV.xy = vec2(vertex_pos_model_space.x, -vertex_pos_model_space.y) + 0.5f;\n"
 		"UV.z = texture_id;\n"

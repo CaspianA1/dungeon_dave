@@ -13,7 +13,7 @@ typedef struct {
 	struct {
 		GLfloat far_clip_dist;
 		vec3 pos, dir;
-		mat4 model_view_projection;
+		mat4 biased_model_view_projection;
 	} light;
 
 	ShadowMapBuffers buffers;

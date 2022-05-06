@@ -164,9 +164,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 	const GLuint shader = draw_context -> shader;
 
-	static GLint
-		camera_pos_world_space_id, dir_to_light_id, model_view_projection_id,
-		light_model_view_projection_id, one_over_screen_size_id;
+	static GLint camera_pos_world_space_id, dir_to_light_id, model_view_projection_id, one_over_screen_size_id;
 
 	use_shader(shader);
 
@@ -177,7 +175,6 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(dir_to_light, shader);
 		INIT_UNIFORM(camera_pos_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
-		INIT_UNIFORM(light_model_view_projection, shader);
 		INIT_UNIFORM(one_over_screen_size, shader);
 
 		LIGHTING_UNIFORM(enable_tone_mapping, 1i);
@@ -193,6 +190,9 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		LIGHTING_UNIFORM(noise_granularity, 1f);
 		ARRAY_LIGHTING_UNIFORM(light_color, 3fv);
 
+		INIT_UNIFORM_VALUE(biased_light_model_view_projection, shader, Matrix4fv, 1,
+			GL_FALSE, &shadow_map_context -> light.biased_model_view_projection[0][0]);
+
 		use_texture(shadow_map_context -> buffers.depth_texture, shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
 		use_texture(normal_map_set, shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
@@ -206,10 +206,6 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	UPDATE_UNIFORM(dir_to_light, 3f, -light_dir[0], -light_dir[1], -light_dir[2]);
 
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
-
-	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE,
-		&shadow_map_context -> light.model_view_projection[0][0]);
-
 	UPDATE_UNIFORM(one_over_screen_size, 2f, 1.0f / screen_size[0], 1.0f / screen_size[1]);
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,

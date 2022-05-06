@@ -66,13 +66,15 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
 		INIT_UNIFORM_VALUE(esm_constant, shader, 1f, constants.lighting.esm_constant);
 
+		INIT_UNIFORM_VALUE(biased_light_model_view_projection, shader, Matrix4fv, 1,
+			GL_FALSE, &shadow_map_context -> light.biased_model_view_projection[0][0]);
+
 		use_texture(shadow_map_context -> buffers.depth_texture, shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, BILLBOARD_TEXTURE_UNIT);
 	);
 
 	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right_xz[0], camera -> right_xz[1]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
-	UPDATE_UNIFORM(light_model_view_projection, Matrix4fv, 1, GL_FALSE, &shadow_map_context -> light.model_view_projection[0][0]);
 
 	WITH_INTEGER_VERTEX_ATTRIBUTE(true, 0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), 0,
 		WITH_VERTEX_ATTRIBUTE(true, 1, 2, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, size),

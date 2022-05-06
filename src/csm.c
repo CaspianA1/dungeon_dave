@@ -69,15 +69,21 @@ void update_shadow_map(ShadowMapContext* const shadow_map_context, const GLint s
 	use_shader(depth_shader);
 
 	ON_FIRST_CALL(
-		mat4 view, projection;
-		GLfloat* const model_view_projection = &shadow_map_context -> light.model_view_projection[0][0];
-		const GLfloat fcd = shadow_map_context -> light.far_clip_dist;
+		mat4 view, projection, model_view_projection;
 
+		const GLfloat fcd = shadow_map_context -> light.far_clip_dist;
 		glm_look_anyup(shadow_map_context -> light.pos, shadow_map_context -> light.dir, view);
 		glm_ortho(-fcd, fcd, fcd, -fcd, constants.camera.near_clip_dist, fcd, projection);
-		glm_mul(projection, view, shadow_map_context -> light.model_view_projection);
+		glm_mul(projection, view, model_view_projection);
 
-		INIT_UNIFORM_VALUE(light_model_view_projection, depth_shader, Matrix4fv, 1, GL_FALSE, model_view_projection);
+		INIT_UNIFORM_VALUE(light_model_view_projection, depth_shader, Matrix4fv, 1, GL_FALSE, (GLfloat*) model_view_projection);
+
+		glm_mul((mat4) {
+			{0.5f, 0.0f, 0.0f, 0.0f},
+			{0.0f, 0.5f, 0.0f, 0.0f},
+			{0.0f, 0.0f, 0.5f, 0.0f},
+			{0.5f, 0.5f, 0.5f, 1.0f}
+		}, model_view_projection, shadow_map_context -> light.biased_model_view_projection);
 	);
 
 	//////////
