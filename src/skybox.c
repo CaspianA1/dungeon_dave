@@ -108,12 +108,15 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 }
 
 Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
-	const GLuint vbo = init_gpu_buffer();
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	const GLuint vertex_buffer = init_gpu_buffer();
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
 
+	/* TODO: share this vertex buffer, vertex spec, and shader
+	between different skyboxes. Perhaps a SkyboxRenderer struct? */
+
 	return (Skybox) {
-		.vbo = vbo, // TODO: share this vbo and shader between different skyboxes. Perhaps a SkyboxRenderer struct?
+		.vertex_buffer = vertex_buffer,
 		.shader = init_shader(skybox_vertex_shader, skybox_fragment_shader),
 		.texture = init_skybox_texture(cubemap_path, texture_rescale_factor)
 	};
@@ -122,7 +125,7 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 void deinit_skybox(const Skybox s) {
 	deinit_texture(s.texture);
 	deinit_shader(s.shader);
-	glDeleteBuffers(1, &s.vbo);
+	glDeleteBuffers(1, &s.vertex_buffer);
 }
 
 void draw_skybox(const Skybox s, const Camera* const camera) {
@@ -146,7 +149,7 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
 
-	glBindBuffer(GL_ARRAY_BUFFER, s.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, s.vertex_buffer);
 
 	WITH_VERTEX_ATTRIBUTE(false, 0, 3, GL_BYTE, 0, 0,
 		WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS,

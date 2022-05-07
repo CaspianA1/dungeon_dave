@@ -218,7 +218,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 }
 
 // Returns the number of visible faces
-static buffer_size_t fill_sector_vbo_with_visible_faces(
+static buffer_size_t fill_sector_vertex_buffer_with_visible_faces(
 	const BatchDrawContext* const draw_context,
 	const List* const sectors, const Camera* const camera) {
 
@@ -265,7 +265,7 @@ void draw_visible_sectors(const BatchDrawContext* const draw_context,
 	const ShadowMapContext* const shadow_map_context, const List* const sectors,
 	const Camera* const camera, const GLuint normal_map_set, const GLint screen_size[2]) {
 
-	const buffer_size_t num_visible_faces = fill_sector_vbo_with_visible_faces(draw_context, sectors, camera);
+	const buffer_size_t num_visible_faces = fill_sector_vertex_buffer_with_visible_faces(draw_context, sectors, camera);
 
 	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_map_context,
 		camera, num_visible_faces, normal_map_set, screen_size);

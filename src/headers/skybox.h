@@ -6,7 +6,7 @@
 #include "texture.h"
 
 typedef struct {
-	GLuint vbo, shader, texture;
+	GLuint vertex_buffer, shader, texture;
 } Skybox;
 
 // Excluded: init_skybox_texture

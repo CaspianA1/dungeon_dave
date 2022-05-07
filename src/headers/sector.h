@@ -16,7 +16,7 @@ typedef struct {
 } Sector;
 
 /* Excluded: point_matches_sector_attributes, form_sector_area,
-sector_in_view_frustum, draw_sectors, fill_sector_vbo_with_visible_faces */
+sector_in_view_frustum, draw_sectors, fill_sector_vertex_buffer_with_visible_faces */
 
 List generate_sectors_from_maps(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height);
