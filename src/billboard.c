@@ -97,7 +97,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 void draw_visible_billboards(const BatchDrawContext* const draw_context,
 	const ShadowMapContext* const shadow_map_context, const Camera* const camera) {
 
-	glBindBuffer(GL_ARRAY_BUFFER, draw_context -> buffers.gpu);
+	use_vertex_buffer(draw_context -> buffers.gpu);
 
 	const List cpu_billboards = draw_context -> buffers.cpu;
 	const vec4* const frustum_planes = camera -> frustum_planes;

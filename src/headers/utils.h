@@ -64,6 +64,9 @@
 #define use_shader glUseProgram
 #define deinit_shader glDeleteProgram
 
+#define use_vertex_buffer(vertex_buffer) glBindBuffer(GL_ARRAY_BUFFER, (vertex_buffer))
+#define deinit_gpu_buffer(gpu_buffer) glDeleteBuffers(1, &(gpu_buffer))
+
 #define use_vertex_spec glBindVertexArray
 #define deinit_vertex_spec(vertex_spec) glDeleteVertexArrays(1, &(vertex_spec))
 

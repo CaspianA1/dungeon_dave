@@ -208,9 +208,9 @@ GLuint init_vertex_spec(void) {
 }
 
 GLuint init_gpu_buffer(void) {
-	GLuint buffer;
-	glGenBuffers(1, &buffer);
-	return buffer;
+	GLuint gpu_buffer;
+	glGenBuffers(1, &gpu_buffer);
+	return gpu_buffer;
 }
 
 static void fail_on_shader_creation_error(const GLuint object_id,
