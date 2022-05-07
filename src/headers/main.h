@@ -10,7 +10,7 @@
 #include "skybox.h"
 
 typedef struct {
-	const GLuint vao;
+	const GLuint vertex_spec;
 
 	Camera camera;
 

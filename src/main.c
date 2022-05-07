@@ -96,8 +96,11 @@ static void* main_init(void) {
 
 	//////////
 
+	const GLuint vertex_spec = init_vertex_spec();
+	use_vertex_spec(vertex_spec);
+
 	SceneState scene_state = {
-		.vao = init_vao(),
+		.vertex_spec = vertex_spec,
 
 		.weapon_sprite = init_weapon_sprite(
 			// 0.6f, 2.0f, 0.07f, (AnimationLayout) {"../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
@@ -211,7 +214,7 @@ static void main_deinit(void* const app_context) {
 	deinit_skybox(scene_state -> skybox);
 	deinit_texture(scene_state -> face_normal_map_set);
 
-	deinit_vao(scene_state -> vao);
+	deinit_vertex_spec(scene_state -> vertex_spec);
 
 	free(scene_state);
 }

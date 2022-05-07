@@ -201,11 +201,10 @@ void loop_application(const Screen* const screen, void (*const drawer) (void* co
 	deinit(app_context);
 }
 
-GLuint init_vao(void) {
-	GLuint vertex_array;
-	glGenVertexArrays(1, &vertex_array);
-	glBindVertexArray(vertex_array);
-	return vertex_array;
+GLuint init_vertex_spec(void) {
+	GLuint vertex_spec;
+	glGenVertexArrays(1, &vertex_spec);
+	return vertex_spec;
 }
 
 GLuint init_gpu_buffer(void) {

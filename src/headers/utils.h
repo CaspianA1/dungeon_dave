@@ -63,7 +63,9 @@
 
 #define use_shader glUseProgram
 #define deinit_shader glDeleteProgram
-#define deinit_vao(vao) glDeleteVertexArrays(1, &(vao))
+
+#define use_vertex_spec glBindVertexArray
+#define deinit_vertex_spec(vertex_spec) glDeleteVertexArrays(1, &(vertex_spec))
 
 #define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
 
@@ -174,7 +176,7 @@ void loop_application(const Screen* const screen, void (*const drawer) (void* co
 
 //////////
 
-GLuint init_vao(void);
+GLuint init_vertex_spec(void);
 GLuint init_gpu_buffer(void);
 
 GLuint init_shader(const GLchar* const vertex_shader, const GLchar* const fragment_shader);
