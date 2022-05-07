@@ -76,19 +76,13 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right_xz[0], camera -> right_xz[1]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 
-	WITH_INTEGER_VERTEX_ATTRIBUTE(true, 0, 1, BUFFER_SIZE_TYPENAME, sizeof(Billboard), 0,
-		WITH_VERTEX_ATTRIBUTE(true, 1, 2, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, size),
-			WITH_VERTEX_ATTRIBUTE(true, 2, 3, BILLBOARD_VAR_COMPONENT_TYPENAME, sizeof(Billboard), offsetof(Billboard, pos),
+	use_vertex_spec(draw_context -> vertex_spec);
 
-				WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
-					WITH_BINARY_RENDER_STATE(GL_BLEND,
-						WITH_BINARY_RENDER_STATE(GL_SAMPLE_ALPHA_TO_COVERAGE,
-
-							glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-							glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
-						);
-					);
-				);
+	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+		WITH_BINARY_RENDER_STATE(GL_BLEND,
+			WITH_BINARY_RENDER_STATE(GL_SAMPLE_ALPHA_TO_COVERAGE,
+				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
 			);
 		);
 	);
@@ -126,11 +120,18 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context,
 BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, const Billboard* const billboards) {
 	BatchDrawContext draw_context = {
 		.buffers.cpu = init_list(num_billboards, Billboard),
+		.vertex_spec = init_vertex_spec(),
 		.shader = init_shader(billboard_vertex_shader, billboard_fragment_shader)
 	};
 
 	push_array_to_list(&draw_context.buffers.cpu, billboards, num_billboards);
+
 	init_batch_draw_context_gpu_buffer(&draw_context, num_billboards, sizeof(Billboard));
+
+	use_vertex_spec(draw_context.vertex_spec);
+	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), 0, BUFFER_SIZE_TYPENAME);
+	define_vertex_spec_index(true, true, 1, 2, sizeof(Billboard), offsetof(Billboard, size), BILLBOARD_VAR_COMPONENT_TYPENAME);
+	define_vertex_spec_index(true, true, 2, 3, sizeof(Billboard), offsetof(Billboard, pos), BILLBOARD_VAR_COMPONENT_TYPENAME);
 
 	return draw_context;
 }

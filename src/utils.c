@@ -201,6 +201,17 @@ void loop_application(const Screen* const screen, void (*const drawer) (void* co
 	deinit(app_context);
 }
 
+void define_vertex_spec_index(const bool is_instanced, const bool vertices_are_floats,
+	const byte index, const byte num_components, const byte stride, const size_t initial_offset,
+	const GLenum typename) {
+
+	glEnableVertexAttribArray(index);
+	if (is_instanced) glVertexAttribDivisor(index, 1);
+
+	if (vertices_are_floats) glVertexAttribPointer(index, num_components, typename, GL_FALSE, stride, (void*) initial_offset);
+	else glVertexAttribIPointer(index, num_components, typename, stride, (void*) initial_offset);
+}
+
 GLuint init_vertex_spec(void) {
 	GLuint vertex_spec;
 	glGenVertexArrays(1, &vertex_spec);

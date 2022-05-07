@@ -129,6 +129,12 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 	draw_context -> buffers.cpu = face_meshes;
 	init_batch_draw_context_gpu_buffer(draw_context, face_meshes.length, bytes_per_face);
 	draw_context -> shader = init_shader(sector_vertex_shader, sector_fragment_shader);
+
+	draw_context -> vertex_spec = init_vertex_spec();
+	use_vertex_spec(draw_context -> vertex_spec);
+	define_vertex_spec_index(false, true, 0, 3, bytes_per_face_vertex, 0, FACE_MESH_COMPONENT_TYPENAME);
+	define_vertex_spec_index(false, false, 1, 1, bytes_per_face_vertex, sizeof(face_mesh_component_t[3]), FACE_MESH_COMPONENT_TYPENAME);
+
 	*sectors_ref = sectors;
 }
 
@@ -147,15 +153,18 @@ static byte sector_in_view_frustum(const Sector sector, const vec4 frustum_plane
 void draw_all_sectors_for_shadow_map(const void* const param) {
 	const BatchDrawContext* const sector_draw_context = (BatchDrawContext*) param;
 	use_vertex_buffer(sector_draw_context -> buffers.gpu);
+	use_vertex_spec(sector_draw_context -> vertex_spec);
+
+	glDisableVertexAttribArray(1); // Not using the attribute at index 1
 
 	GLint bytes_for_vertices;
 	glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bytes_for_vertices);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_for_vertices, sector_draw_context -> buffers.cpu.data);
 
-	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
-		const GLsizei num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
-		glDrawArrays(GL_TRIANGLES, 0, num_vertices);
-	);
+	const GLsizei num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
+	glDrawArrays(GL_TRIANGLES, 0, num_vertices);
+
+	glEnableVertexAttribArray(1);
 }
 
 static void draw_sectors(const BatchDrawContext* const draw_context,
@@ -208,13 +217,8 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 	UPDATE_UNIFORM(one_over_screen_size, 2f, 1.0f / screen_size[0], 1.0f / screen_size[1]);
 
-	WITH_VERTEX_ATTRIBUTE(false, 0, 3, FACE_MESH_COMPONENT_TYPENAME, bytes_per_face_vertex, 0,
-		WITH_INTEGER_VERTEX_ATTRIBUTE(false, 1, 1, FACE_MESH_COMPONENT_TYPENAME,
-			bytes_per_face_vertex, sizeof(face_mesh_component_t[3]),
-
-			glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
-		);
-	);
+	use_vertex_spec(draw_context -> vertex_spec);
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
 }
 
 // Returns the number of visible faces

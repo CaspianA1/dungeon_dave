@@ -10,8 +10,6 @@
 #include "skybox.h"
 
 typedef struct {
-	const GLuint vertex_spec;
-
 	Camera camera;
 
 	WeaponSprite weapon_sprite;

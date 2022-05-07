@@ -47,7 +47,6 @@ Architectural/code design ideas:
 - Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit); or no macros at all
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
-- One VAO per draw context as well - done as a VertexSpecification struct, or something like that
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if enough precision?)
 - Separate out context + window creation and utils
 - Define the constants in constants.h in constants.c, and make the constants.h struct extern

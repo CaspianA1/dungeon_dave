@@ -10,7 +10,7 @@ typedef struct {
 		GLuint gpu;
 	} buffers;
 
-	GLuint texture_set, shader;
+	GLuint vertex_spec, texture_set, shader;
 } BatchDrawContext;
 
 void init_batch_draw_context_gpu_buffer(BatchDrawContext* const draw_context,

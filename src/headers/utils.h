@@ -80,29 +80,6 @@
 
 #define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
 
-#define INNER_WITH_VERTEX_ATTRIBUTE(is_instanced, index, I, function_params, ...)\
-	glEnableVertexAttribArray((index));\
-	if ((is_instanced)) glVertexAttribDivisor((index), 1); /* If instanced, the divisor will be 1 */ \
-	glVertexAttrib##I##Pointer function_params;\
-	__VA_ARGS__\
-	if ((is_instanced)) glVertexAttribDivisor((index), 0);\
-	glDisableVertexAttribArray((index));\
-} while (0)
-
-#define WITH_INTEGER_VERTEX_ATTRIBUTE(is_instanced, index, num_components, typename, stride, base_offset, ...) do {\
-	INNER_WITH_VERTEX_ATTRIBUTE((is_instanced), (index), I,\
-		((index), (num_components), (typename), (stride), (void*) (base_offset)),\
-		__VA_ARGS__\
-	);\
-while (0)
-
-#define WITH_VERTEX_ATTRIBUTE(is_instanced, index, num_components, typename, stride, base_offset, ...) do {\
-	INNER_WITH_VERTEX_ATTRIBUTE((is_instanced), (index), ,\
-		((index), (num_components), (typename), GL_FALSE, (stride), (void*) (base_offset)),\
-		__VA_ARGS__\
-	);\
-while (0)
-
 #define WITH_BINARY_RENDER_STATE(state, ...) do {\
 	glEnable((state)); __VA_ARGS__ glDisable((state));\
 } while (0)
@@ -179,9 +156,12 @@ void loop_application(const Screen* const screen, void (*const drawer) (void* co
 
 //////////
 
+void define_vertex_spec_index(const bool is_instanced, const bool vertices_are_floats,
+	const byte index, const byte num_components, const byte stride, const size_t initial_offset,
+	const GLenum typename);
+
 GLuint init_vertex_spec(void);
 GLuint init_gpu_buffer(void);
-
 GLuint init_shader(const GLchar* const vertex_shader, const GLchar* const fragment_shader);
 
 void enable_all_culling(void);

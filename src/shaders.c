@@ -14,7 +14,6 @@ const GLchar *const sector_vertex_shader =
 
 	"out vec3 UV, fragment_pos_light_space, fragment_pos_world_space;\n"
 
-	"uniform vec3 camera_pos_world_space;\n"
 	"uniform mat4 model_view_projection, biased_light_model_view_projection;\n"
 
 	"const struct FaceAttribute {\n"
@@ -235,7 +234,7 @@ const GLchar *const sector_vertex_shader =
 *const skybox_vertex_shader =
 	"#version 330 core\n"
 
-	"layout(location = 0) in vec3 vertex_pos_world_space;\n"
+	"layout(location = 0) in ivec3 vertex_pos_world_space;\n"
 
 	"out vec3 UV_3D;\n"
 

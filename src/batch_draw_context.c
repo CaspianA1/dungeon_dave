@@ -17,6 +17,7 @@ void init_batch_draw_context_gpu_buffer(BatchDrawContext* const draw_context,
 void deinit_batch_draw_context(const BatchDrawContext* const draw_context) {
 	deinit_list(draw_context -> buffers.cpu);
 	deinit_gpu_buffer(draw_context -> buffers.gpu);
+	deinit_vertex_spec(draw_context -> vertex_spec);
 	deinit_texture(draw_context -> texture_set);
 	deinit_shader(draw_context -> shader);
 }
