@@ -262,27 +262,15 @@ const GLchar *const sector_vertex_shader =
 *const weapon_vertex_shader =
 	"#version 330 core\n"
 
-	"uniform float frame_width_over_height, weapon_size_screen_space, inverse_screen_aspect_ratio;\n"
-	"uniform vec2 pace;\n"
+	"uniform vec2 weapon_corners[4];\n"
 
 	"out vec2 fragment_UV;\n"
 
-	"const vec2 screen_corners[4] = vec2[4] (\n"
-		"vec2(-1.0f, -1.0f), vec2(1.0f, -1.0f),\n"
-		"vec2(-1.0f, 1.0f), vec2(1.0f, 1.0f)\n"
-	");\n"
-
 	"void main(void) {\n"
-		"vec2 screen_corner = screen_corners[gl_VertexID];\n"
+		"gl_Position = vec4(weapon_corners[gl_VertexID], 0.0f, 1.0f);\n"
 
-		"vec2 weapon_corner = screen_corner * weapon_size_screen_space;\n"
-		"weapon_corner.x *= frame_width_over_height * inverse_screen_aspect_ratio;\n"
-
-		"weapon_corner.y += weapon_size_screen_space - 1.0f;\n" // Makes the weapon touch the bottom of the screen
-		"weapon_corner += pace;\n"
-
-		"gl_Position = vec4(weapon_corner, 0.0f, 1.0f);\n"
-		"fragment_UV = vec2(screen_corner.x, -screen_corner.y) * 0.5f + 0.5f;\n"
+		"fragment_UV.x = gl_VertexID & 1;\n"
+		"fragment_UV.y = float(gl_VertexID < 2);\n"
 	"}\n",
 
 *const weapon_fragment_shader =

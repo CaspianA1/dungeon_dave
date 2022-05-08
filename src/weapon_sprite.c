@@ -83,35 +83,42 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	update_weapon_sprite(ws_ref, event);
 
 	const WeaponSprite ws = *ws_ref;
-	static GLint inverse_screen_aspect_ratio_id, pace_id, frame_index_id;
 
 	use_shader(ws.shader);
+	static GLint weapon_corners_id, frame_index_id;
 
 	ON_FIRST_CALL(
-		// TODO: update these uniforms if the weapon changes
-		INIT_UNIFORM_VALUE(frame_width_over_height, ws.shader, 1f, ws.frame_width_over_height);
-		INIT_UNIFORM_VALUE(weapon_size_screen_space, ws.shader, 1f, ws.size);
-
-		INIT_UNIFORM(inverse_screen_aspect_ratio, ws.shader);
-		INIT_UNIFORM(pace, ws.shader);
+		INIT_UNIFORM(weapon_corners, ws.shader);
 		INIT_UNIFORM(frame_index, ws.shader);
-
 		use_texture(ws.texture, ws.shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
 	);
 
 	const GLfloat
-		curr_time = SDL_GetTicks() / 1000.0f,
+		inverse_screen_aspect_ratio = (GLfloat) event -> screen_size[1] / event -> screen_size[0],
 		smooth_speed_xz_percent = circular_mapping_from_zero_to_one(camera -> speed_xz_percent);
 
 	const GLfloat
-		time_pace = sinf(curr_time * PI / constants.weapon_sprite.time_for_half_movement_cycle),
+		time_pace = sinf((SDL_GetTicks() / 1000.0f) * PI / constants.weapon_sprite.time_for_half_movement_cycle),
 		weapon_movement_magnitude = constants.weapon_sprite.max_movement_magnitude * smooth_speed_xz_percent;
 
-	const GLfloat across = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2 to magnitude / 2
+	const GLfloat across = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2.0f to magnitude / 2
 	const GLfloat down = (fabsf(across) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
 
-	UPDATE_UNIFORM(inverse_screen_aspect_ratio, 1f, (GLfloat) event -> screen_size[1] / event -> screen_size[0]);
-	UPDATE_UNIFORM(pace, 2f, across, down);
+	//////////
+
+	vec2 weapon_corners[4];
+
+	for (byte i = 0; i < 4; i++) {
+		const signed char screen_corner_x = (i & 1) ? 1 : -1, screen_corner_y = (i > 1) ? 1 : -1;
+
+		GLfloat* const weapon_corner = weapon_corners[i];
+		weapon_corner[0] = screen_corner_x * ws.size * ws.frame_width_over_height * inverse_screen_aspect_ratio + across;
+		weapon_corner[1] = screen_corner_y * ws.size + (ws.size - 1.0f) + down;
+	}
+
+	//////////
+
+	UPDATE_UNIFORM(weapon_corners, 2fv, 4, (GLfloat*) weapon_corners);
 	UPDATE_UNIFORM(frame_index, 1ui, ws.curr_frame);
 
 	WITH_BINARY_RENDER_STATE(GL_BLEND,
