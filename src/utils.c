@@ -5,21 +5,24 @@
 #include "headers/texture.h"
 #include "headers/constants.h"
 
+// TODO: some sort of reason parameter
 void fail(const GLchar* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s.\n", msg);
 	exit((int) failure_type + 1);
 }
 
-Screen init_screen(const GLchar* const title) {
+Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
+	const byte depth_buffer_bits, const byte multisample_samples, const GLint window_size[2]) {
+
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) fail("launch SDL", LaunchSDL);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, OPENGL_MAJOR_VERSION);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, OPENGL_MINOR_VERSION);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, opengl_major_minor_version[0]);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, opengl_major_minor_version[1]);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, DEPTH_BUFFER_BITS);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depth_buffer_bits);
 
 	#ifdef USE_GAMMA_CORRECTION
 	SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
@@ -27,17 +30,19 @@ Screen init_screen(const GLchar* const title) {
 
 	#ifdef USE_MULTISAMPLING
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, MULTISAMPLE_SAMPLES);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisample_samples);
 	#endif
 
 	#ifdef FORCE_SOFTWARE_RENDERER
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 0);
 	#endif
 
+	const GLint window_w = window_size[0], window_h = window_size[1];
+
 	Screen screen = {
 		.window = SDL_CreateWindow(title,
 			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL)
+			window_w, window_h, SDL_WINDOW_OPENGL)
 	};
 
 	if (screen.window == NULL) fail("launch SDL", LaunchSDL);
@@ -46,7 +51,7 @@ Screen init_screen(const GLchar* const title) {
 	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-	SDL_WarpMouseInWindow(screen.window, WINDOW_W >> 1, WINDOW_H >> 1);
+	SDL_WarpMouseInWindow(screen.window, window_w >> 1, window_h >> 1);
 
 	SDL_GL_SetSwapInterval(
 		#ifdef USE_VSYNC
@@ -85,7 +90,9 @@ void deinit_screen(const Screen* const screen) {
 void make_application(void (*const drawer)(void* const),
 	void* (*const init) (void), void (*const deinit) (void* const)) {
 
-	const Screen screen = init_screen(constants.app_name);
+	const Screen screen = init_screen(constants.window.app_name,
+		constants.window.opengl_major_minor_version, constants.window.depth_buffer_bits,
+		constants.window.multisample_samples, constants.window.size);
 
 	printf("vendor = %s\nrenderer = %s\nversion = %s\n---\n",
 		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
@@ -121,10 +128,12 @@ static void resize_window_if_needed(SDL_Window* const window) {
 			glViewport(0, 0, desktop_width, desktop_height);
 		}
 		else {
+			const GLint window_w = constants.window.size[0], window_h = constants.window.size[1];
+
 			SDL_SetWindowFullscreen(window, 0);
-			SDL_SetWindowSize(window, WINDOW_W, WINDOW_H);
+			SDL_SetWindowSize(window, window_w, window_h);
 			SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-			glViewport(0, 0, WINDOW_W, WINDOW_H);
+			glViewport(0, 0, window_w, window_h);
 		}
 
 	}

@@ -94,15 +94,6 @@
 
 ////////// These macros pertain to window + rendering defaults
 
-#define WINDOW_W 800
-#define WINDOW_H 600
-
-#define OPENGL_MAJOR_VERSION 3
-#define OPENGL_MINOR_VERSION 3
-
-#define DEPTH_BUFFER_BITS 24
-#define MULTISAMPLE_SAMPLES 8
-
 #define USE_VSYNC
 
 #define USE_GAMMA_CORRECTION
@@ -145,7 +136,9 @@ void fail(const GLchar* const msg, const FailureType failure_type);
 
 // Excluded: resize_window_if_needed, set_triangle_fill_mode, query_for_application_exit, fail_on_shader_creation_error
 
-Screen init_screen(const GLchar* const title);
+Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
+	const byte depth_buffer_bits, const byte multisample_samples, const GLint window_size[2]);
+
 void deinit_screen(const Screen* const screen);
 
 void make_application(void (*const drawer) (void* const),
