@@ -23,9 +23,19 @@ and not in the `constants` struct b/c other values in that struct depend on them
 #define BIT_USE_WEAPON BIT_CLICK_LEFT
 
 static const struct {
-	const GLchar* const app_name;
 	const GLfloat almost_zero;
-	const byte max_byte_value, default_fps;
+	const byte max_byte_value;
+
+	const struct {
+		const GLchar* const app_name;
+
+		const byte
+			opengl_major_minor_version[2],
+			default_fps, depth_buffer_bits,
+			multisample_samples;
+
+		const GLint size[2];
+	} window;
 
 	const struct {
 		const bool enable_tone_mapping;
@@ -72,11 +82,15 @@ static const struct {
 	} keys;
 
 } constants = {
-	.app_name = "Dungeon Dave",
-
 	.almost_zero = 0.001f,
 	.max_byte_value = 255,
-	.default_fps = 60,
+
+	.window = {
+		.app_name = "Dungeon Dave",
+		.opengl_major_minor_version = {3, 3},
+		.default_fps = 60, .depth_buffer_bits = 24, .multisample_samples = 8,
+		.size = {800, 600}
+	},
 
 	.lighting = {
 		.enable_tone_mapping = true, .pcf_radius = 2, .esm_constant = 80.0f,
