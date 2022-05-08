@@ -4,7 +4,7 @@
 #include "buffer_defs.h"
 #include "weapon_sprite.h"
 #include "batch_draw_context.h"
-#include "csm.h"
+#include "esm.h"
 #include "camera.h"
 #include "list.h"
 #include "skybox.h"

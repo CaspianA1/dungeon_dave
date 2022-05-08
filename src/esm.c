@@ -1,9 +1,7 @@
-#ifndef CSM_C // CSM = cascaded shadow mapping
-#define CSM_C
+#ifndef ESM_C // ESM = exponential shadow mapping
+#define ESM_C
 
-// This is going to start off as plain old shadow mapping
-
-#include "headers/csm.h"
+#include "headers/esm.h"
 #include "headers/camera.h"
 #include "headers/texture.h"
 #include "headers/constants.h"

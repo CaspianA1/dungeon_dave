@@ -1,5 +1,5 @@
-#ifndef CSM_H
-#define CSM_H
+#ifndef ESM_H
+#define ESM_H
 
 #include "buffer_defs.h"
 #include "batch_draw_context.h"

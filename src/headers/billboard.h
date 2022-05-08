@@ -3,7 +3,7 @@
 
 #include "buffer_defs.h"
 #include "batch_draw_context.h"
-#include "csm.h"
+#include "esm.h"
 #include "texture.h"
 #include "camera.h"
 #include "animation.h"
