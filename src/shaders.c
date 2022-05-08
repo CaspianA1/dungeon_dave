@@ -268,9 +268,7 @@ const GLchar *const sector_vertex_shader =
 
 	"void main(void) {\n"
 		"gl_Position = vec4(weapon_corners[gl_VertexID], 0.0f, 1.0f);\n"
-
-		"fragment_UV.x = gl_VertexID & 1;\n"
-		"fragment_UV.y = float(gl_VertexID < 2);\n"
+		"fragment_UV = vec2(gl_VertexID & 1, gl_VertexID < 2);\n"
 	"}\n",
 
 *const weapon_fragment_shader =
