@@ -6,15 +6,17 @@
 #include "headers/constants.h"
 
 // TODO: some sort of reason parameter
+/*
 void fail(const GLchar* const msg, const FailureType failure_type) {
 	fprintf(stderr, "Could not %s.\n", msg);
 	exit((int) failure_type + 1);
 }
+*/
 
 Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
 	const byte depth_buffer_bits, const byte multisample_samples, const GLint window_size[2]) {
 
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) fail("initialize SDL", LoadSDL);
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) FAIL(LoadSDL, "SDL loading failed: '%s'", SDL_GetError());
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, opengl_major_minor_version[0]);
@@ -45,9 +47,10 @@ Screen init_screen(const GLchar* const title, const byte opengl_major_minor_vers
 			window_w, window_h, SDL_WINDOW_OPENGL)
 	};
 
-	if (screen.window == NULL) fail("create SDL window", LoadSDL);
+	if (screen.window == NULL) FAIL(LoadSDL, "Window creation failed: '%s'", SDL_GetError());
 
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);
+	if (screen.opengl_context == NULL) FAIL(LoadOpenGL, "Could not load an OpenGL context: '%s'", SDL_GetError());
 	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -61,7 +64,7 @@ Screen init_screen(const GLchar* const title, const byte opengl_major_minor_vers
 		#endif
 	);
 
-	if (!gladLoadGL()) fail("load GLAD", LoadOpenGL);
+	if (!gladLoadGL()) FAIL(LoadOpenGL, "%s", "GLAD could not load for some reason");
 
 	#ifdef USE_GAMMA_CORRECTION
 	glEnable(GL_FRAMEBUFFER_SRGB);

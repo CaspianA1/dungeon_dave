@@ -69,18 +69,15 @@ List generate_sectors_from_maps(const byte* const heightmap,
 		for (byte x = 0; x < map_width; x++) {
 			if (statemap_bit_is_set(traversed_points, x, y)) continue;
 
-			const byte
-				height = sample_map_point(heightmap, x, y, map_width),
-				texture_id = sample_map_point(texture_id_map, x, y, map_width);
+			const byte texture_id = sample_map_point(texture_id_map, x, y, map_width);
 
-			if (texture_id >= MAX_NUM_SECTOR_SUBTEXTURES) {
-				fprintf(stderr, "Sector creation failure at pos {%u, %u}; texture ID = %u.\n", x, y, texture_id);
-				fail("create a sector because the texture ID is too large", TextureIDIsTooLarge);
-			}
+			if (texture_id >= MAX_NUM_SECTOR_SUBTEXTURES)
+				FAIL(TextureIDIsTooLarge, "Could not create a sector at map position {%u, %u} because the texture "
+					"ID %u exceeds the maximum, which is %u", x, y, texture_id, MAX_NUM_SECTOR_SUBTEXTURES);
 
 			const Sector seed_sector = {
-				.texture_id = texture_id, .origin = {x, y},
-				.size = {0, 0}, .visible_heights = {.min = 0, .max = height},
+				.texture_id = texture_id, .origin = {x, y}, .size = {0, 0},
+				.visible_heights = {.min = 0, .max = sample_map_point(heightmap, x, y, map_width)},
 				.face_range = {.start = 0, .length = 0}
 			};
 

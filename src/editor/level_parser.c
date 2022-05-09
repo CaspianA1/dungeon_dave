@@ -3,7 +3,7 @@
 
 static FileContents read_file_contents(const char* const file_name) {
 	FILE* const file = fopen(file_name, "r");
-	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'.", file_name);
+	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", file_name);
 
 	fseek(file, 0l, SEEK_END); // Set file position to end
 	const size_t num_bytes = (size_t) ftell(file);

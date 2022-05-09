@@ -45,7 +45,7 @@ SDL_Texture* init_texture(const char* const path, SDL_Renderer* const renderer, 
 	if (surface == NULL) FAIL(OpenFile, "Surface with path '%s' not found", path);
 
 	SDL_Texture* const texture = SDL_CreateTextureFromSurface(renderer, surface);
-	if (texture == NULL) FAIL(CreateTexture, "Could not create a wall texture: \"%s\"", SDL_GetError());
+	if (texture == NULL) FAIL(CreateTexture, "Could not create a wall texture from '%s': '%s'", path, SDL_GetError());
 
 	SDL_FreeSurface(surface);
 	return texture;
@@ -269,13 +269,13 @@ void deinit_editor_state(EditorState* const eds) {
 
 int main(void) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
-		FAIL(LoadSDL, "SDL error: \"%s\".", SDL_GetError());
+		FAIL(LoadSDL, "%s", SDL_GetError());
 	
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 
 	if (SDL_CreateWindowAndRenderer(EDITOR_WIDTH, EDITOR_HEIGHT, 0, &window, &renderer) == -1)
-		FAIL(LoadSDL, "Window or renderer creation failure: \"%s\".", SDL_GetError());
+		FAIL(LoadSDL, "Window or renderer creation failure: '%s'", SDL_GetError());
 
 	SDL_SetWindowTitle(window, APP_NAME);
 

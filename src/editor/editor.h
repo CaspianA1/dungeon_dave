@@ -25,8 +25,8 @@
 #define DEBUG(var, format) printf(#var " = %" #format "\n", var)
 
 #define FAIL(failure_type, format, ...) do {\
-	fprintf(stderr, "Failed with error type %s. Message: "\
-		format "\n", #failure_type, __VA_ARGS__);\
+	fprintf(stderr, "Failed with error type '%s'. Reason: '"\
+		format "'.\n", #failure_type, __VA_ARGS__);\
 	exit(failure_type + 1);\
 } while (0)
 

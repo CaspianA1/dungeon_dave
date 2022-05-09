@@ -70,7 +70,8 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 	////////// Failing if the dimensions are not right
 
 	if (skybox_w != (skybox_surface -> h << 2) / 3)
-		fail("create a skybox, because its width does not equal 4/3 of its height", CreateSkybox);
+		FAIL(CreateSkybox, "The skybox with path '%s' does not have "
+			"a width that equals 4/3 of its height", cubemap_path);
 
 	//////////
 

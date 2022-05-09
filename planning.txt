@@ -51,7 +51,6 @@ Architectural/code design ideas:
 - Separate out context + window creation and utils
 - Define the constants in constants.h in constants.c, and make the constants.h struct extern
 - Three classes of settings: hardcoded in the `constants` struct, configurable via a level file, and configurable by the player
-- A better failure function
 - A LevelDescription struct that then a SceneState (or some other) struct uses to generate sectors, a shadow map, etc.
 	If levels come from C files, put those directly in files; otherwise, JSON will be turned into a LevelDescription.
 	The advantage to C files is that you don't have to parse a file for each level; the disadvantage is that map files

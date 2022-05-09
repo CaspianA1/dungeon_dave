@@ -60,6 +60,12 @@
 	}\
 } while (0)
 
+#define FAIL(failure_type, format, ...) do {\
+	fprintf(stderr, "Failed with error type '%s'. Reason: '"\
+		format "'.\n", #failure_type, __VA_ARGS__);\
+	exit(failure_type + 1);\
+} while (0)
+
 ////////// These macros are for handy abstractions over OpenGL functions
 
 #define use_shader glUseProgram
@@ -132,8 +138,6 @@ extern const Uint8* keys;
 const Uint8* keys;
 
 //////////
-
-void fail(const GLchar* const msg, const FailureType failure_type);
 
 // Excluded: resize_window_if_needed, set_triangle_fill_mode, query_for_application_exit, fail_on_shader_creation_error
 

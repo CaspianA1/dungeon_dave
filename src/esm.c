@@ -45,7 +45,7 @@ ShadowMapContext init_shadow_map_context(const GLsizei width,
 	glDrawBuffer(GL_NONE);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		fail("make a framebuffer; framebuffer not complete", CreateFramebuffer);
+		FAIL(CreateFramebuffer, "OpenGL error is '%s'", get_gl_error());
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
