@@ -117,13 +117,13 @@ typedef enum {
 } ShaderCompilationStep;
 
 typedef enum {
-	LaunchSDL,
-	LaunchGLAD,
-	OpenImageFile,
-	TextureIDIsTooLarge,
+	LoadSDL,
+	LoadOpenGL,
+	OpenFile,
 	CreateFramebuffer,
 	CreateSkybox,
-	CreateBlankSurface
+	CreateBlankSurface,
+	TextureIDIsTooLarge
 } FailureType;
 
 //////////

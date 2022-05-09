@@ -269,13 +269,13 @@ void deinit_editor_state(EditorState* const eds) {
 
 int main(void) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
-		FAIL(LaunchSDL, "SDL error: \"%s\".", SDL_GetError());
+		FAIL(LoadSDL, "SDL error: \"%s\".", SDL_GetError());
 	
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 
 	if (SDL_CreateWindowAndRenderer(EDITOR_WIDTH, EDITOR_HEIGHT, 0, &window, &renderer) == -1)
-		FAIL(LaunchSDL, "Window or renderer creation failure: \"%s\".", SDL_GetError());
+		FAIL(LoadSDL, "Window or renderer creation failure: \"%s\".", SDL_GetError());
 
 	SDL_SetWindowTitle(window, APP_NAME);
 

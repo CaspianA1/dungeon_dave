@@ -17,7 +17,7 @@ SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height, const
 
 SDL_Surface* init_surface(const GLchar* const path) {
 	SDL_Surface* const surface = SDL_LoadBMP(path);
-	if (surface == NULL) fail("open texture file", OpenImageFile);
+	if (surface == NULL) fail("open texture file", OpenFile);
 
 	if (surface -> format -> format == SDL_PIXEL_FORMAT)
 		return surface; // Format is already correct

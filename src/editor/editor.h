@@ -41,7 +41,7 @@
 //////////
 
 typedef enum {
-	LaunchSDL,
+	LoadSDL,
 	OpenFile,
 	CreateTexture,
 	CreateTextSurface,
