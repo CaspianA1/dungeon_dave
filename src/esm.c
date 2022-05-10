@@ -2,6 +2,7 @@
 #define ESM_C
 
 #include "headers/esm.h"
+#include "headers/shader.h"
 #include "headers/camera.h"
 #include "headers/texture.h"
 #include "headers/constants.h"

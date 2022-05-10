@@ -5,6 +5,7 @@
 #include "headers/sector.h"
 #include "headers/statemap.h"
 #include "headers/face.h"
+#include "headers/shader.h"
 #include "headers/shader_code.h"
 #include "headers/constants.h"
 #include "headers/list.h"

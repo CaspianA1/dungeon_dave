@@ -117,12 +117,6 @@ typedef struct {
 } Screen;
 
 typedef enum {
-	CompileVertexShader,
-	CompileFragmentShader,
-	LinkShaders
-} ShaderCompilationStep;
-
-typedef enum {
 	LoadSDL,
 	LoadOpenGL,
 	OpenFile,
@@ -160,7 +154,6 @@ void define_vertex_spec_index(const bool is_instanced, const bool vertices_are_f
 
 GLuint init_vertex_spec(void);
 GLuint init_gpu_buffer(void);
-GLuint init_shader(const GLchar* const vertex_shader_code, const GLchar* const fragment_shader_code);
 
 void enable_all_culling(void);
 
