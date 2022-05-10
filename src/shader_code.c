@@ -1,5 +1,5 @@
-#ifndef SHADERS_CODE_C
-#define SHADERS_CODE_C
+#ifndef SHADER_CODE_C
+#define SHADER_CODE_C
 
 #include "headers/buffer_defs.h"
 #include "headers/shader_code.h"
