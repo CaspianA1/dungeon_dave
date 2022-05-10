@@ -68,9 +68,6 @@
 
 ////////// These macros are for handy abstractions over OpenGL functions
 
-#define use_shader glUseProgram
-#define deinit_shader glDeleteProgram
-
 #define use_vertex_buffer(vertex_buffer) glBindBuffer(GL_ARRAY_BUFFER, (vertex_buffer))
 #define deinit_gpu_buffer(gpu_buffer) glDeleteBuffers(1, &(gpu_buffer))
 
@@ -133,7 +130,7 @@ const Uint8* keys;
 
 //////////
 
-// Excluded: resize_window_if_needed, set_triangle_fill_mode, query_for_application_exit, fail_on_shader_creation_error
+// Excluded: resize_window_if_needed, set_triangle_fill_mode, query_for_application_exit
 
 Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
 	const byte depth_buffer_bits, const byte multisample_samples, const GLint window_size[2]);
