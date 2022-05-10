@@ -258,9 +258,9 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 	}
 }
 
-GLuint init_shader(const GLchar* const vertex_shader, const GLchar* const fragment_shader) {
+GLuint init_shader(const GLchar* const vertex_shader_code, const GLchar* const fragment_shader_code) {
 	// In this, a sub-shader is a part of the big shader, like a vertex or fragment shader.
-	const GLchar* const sub_shader_code[2] = {vertex_shader, fragment_shader};
+	const GLchar* const sub_shader_code[2] = {vertex_shader_code, fragment_shader_code};
 	const GLenum sub_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
 	GLuint sub_shaders[2], shader = glCreateProgram();
 
