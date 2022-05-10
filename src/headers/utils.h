@@ -117,6 +117,7 @@ typedef enum {
 	LoadSDL,
 	LoadOpenGL,
 	OpenFile,
+	CreateShader,
 	CreateFramebuffer,
 	CreateSkybox,
 	CreateBlankSurface,

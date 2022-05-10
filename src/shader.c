@@ -1,7 +1,7 @@
 #ifndef SHADER_C
 #define SHADER_C
 
-#include "headers/buffer_defs.h"
+#include "headers/utils.h"
 
 typedef enum {
 	CompileVertexShader,
@@ -26,12 +26,20 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 		GLchar* const error_message = malloc((size_t) log_length + 1);
 		log_getter(object_id, log_length, NULL, error_message);
 
-		const byte compilation_step_id = (byte) compilation_step + 1;  // `fail` not used for this since the error message must be freed
+		// No newlines in error message!
+		for (GLchar* c = error_message; *c != '\0'; c++) {
+			if (*c == '\n') *c = '\0';
+		}
 
-        // TODO: use FAIL
-		fprintf(stderr, "Shader creation step #%d - %s", compilation_step_id, error_message);
-		free(error_message);
-		exit(compilation_step_id);
+		const GLchar* compilation_step_string;
+		switch (compilation_step) {
+			case CompileVertexShader: compilation_step_string = "vertex shader compilation"; break;
+			case CompileFragmentShader: compilation_step_string = "fragment shader compilation"; break;
+			case LinkShaders: compilation_step_string = "linking"; break;
+		}
+
+		// Nothing else is freed anyways during `FAIL`, so it's fine if the `malloc` call is not freed
+		FAIL(CreateShader, "Error during %s: \"%s\"", compilation_step_string, error_message);
 	}
 }
 
