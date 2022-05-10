@@ -4,7 +4,7 @@
 #include "headers/weapon_sprite.h"
 #include "headers/constants.h"
 #include "headers/texture.h"
-#include "headers/shaders.h"
+#include "headers/shader_code.h"
 
 WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
 	const GLfloat secs_per_frame, const AnimationLayout animation_layout) {

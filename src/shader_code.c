@@ -1,8 +1,8 @@
-#ifndef SHADERS_C
-#define SHADERS_C
+#ifndef SHADERS_CODE_C
+#define SHADERS_CODE_C
 
 #include "headers/buffer_defs.h"
-#include "headers/shaders.h"
+#include "headers/shader_code.h"
 
 const GLchar *const sector_vertex_shader =
 	"#version 330 core\n"

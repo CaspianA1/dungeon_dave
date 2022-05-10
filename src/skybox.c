@@ -2,7 +2,7 @@
 #define SKYBOX_C
 
 #include "headers/skybox.h"
-#include "headers/shaders.h"
+#include "headers/shader_code.h"
 
 static const GLbyte skybox_vertices[] = {
 	-1, 1, -1,

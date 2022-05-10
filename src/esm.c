@@ -5,7 +5,7 @@
 #include "headers/camera.h"
 #include "headers/texture.h"
 #include "headers/constants.h"
-#include "headers/shaders.h"
+#include "headers/shader_code.h"
 #include "headers/batch_draw_context.h"
 
 #define DEPTH_TEXTURE_FORMAT GL_DEPTH_COMPONENT

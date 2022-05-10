@@ -2,7 +2,7 @@
 #define BILLBOARD_C
 
 #include "headers/billboard.h"
-#include "headers/shaders.h"
+#include "headers/shader_code.h"
 #include "headers/constants.h"
 
 typedef struct {

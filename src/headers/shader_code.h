@@ -1,5 +1,5 @@
-#ifndef SHADERS_H
-#define SHADERS_H
+#ifndef SHADER_CODE_H
+#define SHADER_CODE_H
 
 #define SHADER_PAIR_DEF(name) *const name##_vertex_shader, *const name##_fragment_shader
 
