@@ -26,7 +26,7 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 		GLchar* const error_message = malloc((size_t) log_length + 1);
 		log_getter(object_id, log_length, NULL, error_message);
 
-		// No newlines in error message!
+		// No newlines in the error message!
 		for (GLchar* c = error_message; *c != '\0'; c++) {
 			if (*c == '\n') *c = '\0';
 		}
