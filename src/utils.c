@@ -108,7 +108,7 @@ static void resize_window_if_needed(SDL_Window* const window) {
 	static bool window_resized_last_tick = false, window_is_fullscreen = false;
 	static GLint desktop_width, desktop_height;
 
-	ON_FIRST_CALL(  // TODO: make this a runtime constant
+	ON_FIRST_CALL( // TODO: make this a runtime constant
 		SDL_DisplayMode display_mode;
 		SDL_GetDesktopDisplayMode(0, &display_mode);
 		desktop_width = display_mode.w;
