@@ -79,7 +79,7 @@ static char* read_file_contents(const char* const path) {
 
 	fseek(file, 0l, SEEK_END); // Set file position to end
 	const size_t num_bytes = (size_t) ftell(file);
-	fseek(file, 0l, SEEK_SET); // Rewind file position (TODO: use `rewind`?)
+	fseek(file, 0l, SEEK_SET); // Rewind file position
 
 	char* const data = malloc(num_bytes + 1l);
 	fread(data, num_bytes, 1, file); // Read file bytes
