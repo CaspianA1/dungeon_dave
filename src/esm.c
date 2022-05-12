@@ -27,7 +27,7 @@ ShadowMapContext init_shadow_map_context(const GLsizei width,
 			.size = {width, height}
 		},
 
-		.depth_shader = init_shader(depth_vertex_shader, depth_fragment_shader)
+		.depth_shader = init_shader_from_source(depth_vertex_shader, depth_fragment_shader)
 	};
 
 	glm_vec3_copy((GLfloat*) light_pos, s.light.pos);
