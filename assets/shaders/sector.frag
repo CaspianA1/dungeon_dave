@@ -94,7 +94,7 @@ vec3 postprocess_light(vec3 color) {
 	vec3 tone_mapped_color = vec3(1.0f) - exp(-color * exposure);
 	color = mix(color, tone_mapped_color, float(enable_tone_mapping));
 
-		// Noise is added to remove color banding
+	// Noise is added to remove color banding
 	vec2 screen_fragment_pos = gl_FragCoord.xy * one_over_screen_size;
 	float random_value = fract(sin(dot(screen_fragment_pos, vec2(12.9898f, 78.233f))) * 43758.5453f);
 	return color + mix(-noise_granularity, noise_granularity, random_value);
