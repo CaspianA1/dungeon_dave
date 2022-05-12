@@ -77,6 +77,9 @@ static char* read_file_contents(const char* const path) {
 	FILE* const file = fopen(path, "r");
 	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);
 
+	 /* (TODO) Possible bug: if `ftell` fails, `num_bytes` will
+	 underflow, and too much data will be allocated. */
+
 	fseek(file, 0l, SEEK_END); // Set file position to end
 	const size_t num_bytes = (size_t) ftell(file);
 	fseek(file, 0l, SEEK_SET); // Rewind file position
