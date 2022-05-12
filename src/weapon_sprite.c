@@ -11,7 +11,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
 	and here, but this makes the code much more readable. TODO: perhaps
-	query data about the texture set to figure out the frame size. */
+	query data about the texture set to figure out the frame size, if possible. */
 
 	SDL_Surface* const peek_surface = init_surface(animation_layout.spritesheet_path);
 
