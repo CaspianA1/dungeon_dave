@@ -5,7 +5,6 @@
 #include "headers/constants.h"
 #include "headers/texture.h"
 #include "headers/shader.h"
-#include "headers/shader_code.h"
 
 WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
 	const GLfloat secs_per_frame, const AnimationLayout animation_layout) {
@@ -32,7 +31,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 		),
 
 		// TODO: for multiple weapons, share this shader
-		.shader = init_shader_from_source(weapon_vertex_shader, weapon_fragment_shader),
+		.shader = init_shader("assets/shaders/weapon.vert", "assets/shaders/weapon.frag"),
 
 		.animation = {
 			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},

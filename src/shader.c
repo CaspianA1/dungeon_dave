@@ -43,7 +43,7 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 	}
 }
 
-GLuint init_shader_from_source(const GLchar* const vertex_shader_code, const GLchar* const fragment_shader_code) {
+static GLuint init_shader_from_source(const GLchar* const vertex_shader_code, const GLchar* const fragment_shader_code) {
 	// In this, a sub-shader is a part of the big shader, like a vertex or fragment shader.
 	const GLchar* const sub_shader_code[2] = {vertex_shader_code, fragment_shader_code};
 	const GLenum sub_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
@@ -72,5 +72,38 @@ GLuint init_shader_from_source(const GLchar* const vertex_shader_code, const GLc
 
 	return shader;
 }
+
+static char* read_file_contents(const char* const path) {
+	FILE* const file = fopen(path, "r");
+	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);
+
+	fseek(file, 0l, SEEK_END); // Set file position to end
+	const size_t num_bytes = (size_t) ftell(file);
+	fseek(file, 0l, SEEK_SET); // Rewind file position (TODO: use `rewind`?)
+
+	char* const data = malloc(num_bytes + 1l);
+	fread(data, num_bytes, 1, file); // Read file bytes
+	data[num_bytes] = '\0';
+
+	fclose(file);
+
+	return data;
+}
+
+GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const fragment_shader_path) {
+	// TODO: support an #include mechanism for shader code
+
+	GLchar
+		*const vertex_shader_code = read_file_contents(vertex_shader_path),
+		*const fragment_shader_code = read_file_contents(fragment_shader_path);
+
+	const GLuint shader = init_shader_from_source(vertex_shader_code, fragment_shader_code);
+
+	free(vertex_shader_code);
+	free(fragment_shader_code);
+
+	return shader;
+}
+
 
 #endif

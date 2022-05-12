@@ -94,7 +94,6 @@ Normal mapping:
 	Choose hashmap or array for association between path and settings.
 
 A better shading model:
-- Read in shaders from files
 - Share shader uniforms via uniform buffer objects (mostly for a LightParams struct)
 - Share code between shaders (mostly need to share a `shade_world_fragment` function, and the lighting uniform
 	block definition; perhaps build a manual #include mechamism, or link completed shaders together)

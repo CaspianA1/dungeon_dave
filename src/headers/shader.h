@@ -4,8 +4,8 @@
 #define use_shader glUseProgram
 #define deinit_shader glDeleteProgram
 
-// Excluded: fail_on_shader_creation_error
+// Excluded: fail_on_shader_creation_error, init_shader_from_source, read_file_contents
 
-GLuint init_shader_from_source(const GLchar* const vertex_shader_code, const GLchar* const fragment_shader_code);
+GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const fragment_shader_path);
 
 #endif

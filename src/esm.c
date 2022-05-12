@@ -6,7 +6,6 @@
 #include "headers/camera.h"
 #include "headers/texture.h"
 #include "headers/constants.h"
-#include "headers/shader_code.h"
 #include "headers/batch_draw_context.h"
 
 #define DEPTH_TEXTURE_FORMAT GL_DEPTH_COMPONENT
@@ -27,7 +26,7 @@ ShadowMapContext init_shadow_map_context(const GLsizei width,
 			.size = {width, height}
 		},
 
-		.depth_shader = init_shader_from_source(depth_vertex_shader, depth_fragment_shader)
+		.depth_shader = init_shader("assets/shaders/depth.vert", "assets/shaders/depth.frag")
 	};
 
 	glm_vec3_copy((GLfloat*) light_pos, s.light.pos);

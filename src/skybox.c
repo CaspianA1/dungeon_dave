@@ -3,7 +3,6 @@
 
 #include "headers/skybox.h"
 #include "headers/shader.h"
-#include "headers/shader_code.h"
 
 static const GLbyte skybox_vertices[] = {
 	-1, 1, -1,
@@ -122,7 +121,7 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 
 	return (Skybox) {
 		.vertex_buffer = vertex_buffer, .vertex_spec = vertex_spec,
-		.shader = init_shader_from_source(skybox_vertex_shader, skybox_fragment_shader),
+		.shader = init_shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag"),
 		.texture = init_skybox_texture(cubemap_path, texture_rescale_factor)
 	};
 }
