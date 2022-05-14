@@ -31,12 +31,16 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 			if (*c == '\n') *c = '\0';
 		}
 
+		#define STRING_CASE(enum_name, string) case enum_name: compilation_step_string = string; break
+
 		const GLchar* compilation_step_string;
 		switch (compilation_step) {
-			case CompileVertexShader: compilation_step_string = "vertex shader compilation"; break;
-			case CompileFragmentShader: compilation_step_string = "fragment shader compilation"; break;
-			case LinkShaders: compilation_step_string = "linking"; break;
+			STRING_CASE(CompileVertexShader, "vertex shader compilation");
+			STRING_CASE(CompileFragmentShader, "fragment shader compilation");
+			STRING_CASE(LinkShaders, "linking");
 		}
+
+		#undef STRING_CASE
 
 		// Nothing else is freed anyways during `FAIL`, so it's fine if the `malloc` call is not freed
 		FAIL(CreateShader, "Error during %s: '%s'", compilation_step_string, error_message);
