@@ -170,7 +170,9 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 	const GLuint shader = draw_context -> shader;
 
-	static GLint camera_pos_world_space_id, dir_to_light_id, model_view_projection_id, one_over_screen_size_id;
+	static GLint
+		camera_pos_world_space_id, dir_to_light_id, model_view_projection_id,
+		one_over_screen_size_id, UV_translation_id;
 
 	use_shader(shader);
 
@@ -182,6 +184,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(camera_pos_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
 		INIT_UNIFORM(one_over_screen_size, shader);
+		INIT_UNIFORM(UV_translation, shader);
 
 		LIGHTING_UNIFORM(enable_tone_mapping, 1i);
 		LIGHTING_UNIFORM(pcf_radius, 1i);
@@ -196,6 +199,11 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		LIGHTING_UNIFORM(noise_granularity, 1f);
 		ARRAY_LIGHTING_UNIFORM(light_color, 3fv);
 
+		const GLfloat epsilon = 0.008f;
+		INIT_UNIFORM_VALUE(UV_translation_area, shader, 3fv, 2, (GLfloat*) (vec3[2]) {
+			{4.0f - epsilon, 0.0f, 1.0f - epsilon}, {6.0f + epsilon, 0.0f, 3.0f + epsilon}
+		});
+
 		INIT_UNIFORM_VALUE(biased_light_model_view_projection, shader, Matrix4fv, 1,
 			GL_FALSE, &shadow_map_context -> light.biased_model_view_projection[0][0]);
 
@@ -203,6 +211,13 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
 		use_texture(normal_map_set, shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
 	);
+
+	//////////
+
+	const GLfloat t = SDL_GetTicks() / 3000.0f;
+	UPDATE_UNIFORM(UV_translation, 2f, cosf(t), t);
+
+	//////////
 
 	#undef LIGHTING_UNIFORM
 	#undef ARRAY_LIGHTING_UNIFORM

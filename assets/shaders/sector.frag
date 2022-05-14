@@ -12,8 +12,9 @@ uniform float
 	esm_constant, ambient, diffuse_strength,
 	specular_strength, exposure, noise_granularity;
 
-uniform vec2 specular_exponent_domain, one_over_screen_size;
-uniform vec3 camera_pos_world_space, dir_to_light, light_color; // `dir_to_light` is the direction pointing to the light source
+uniform vec2 specular_exponent_domain, one_over_screen_size, UV_translation;
+
+uniform vec3 camera_pos_world_space, dir_to_light, light_color, UV_translation_area[2];
 
 uniform sampler2D shadow_map_sampler;
 uniform sampler2DArray texture_sampler, normal_map_sampler;
@@ -73,9 +74,9 @@ vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {
 	return light_strength * light_color * texture_color;
 }
 
-vec3 get_fragment_normal(void) {
+vec3 get_fragment_normal(vec3 offset_UV) {
 	// `t` = tangent space normal. Normalized b/c linear filtering may unnormalize it.
-	vec3 t = normalize(texture(normal_map_sampler, UV).rgb * 2.0f - 1.0f);
+	vec3 t = normalize(texture(normal_map_sampler, offset_UV).rgb * 2.0f - 1.0f);
 
 	// No matrix multiplication here! :)
 	vec3 rotated_vectors[5] = vec3[5](
@@ -100,7 +101,22 @@ vec3 postprocess_light(vec3 color) {
 	return color + mix(-noise_granularity, noise_granularity, random_value);
 }
 
+/* Each level may have an area where sector UV
+coordinates are re-translated for artistic purposes */
+vec3 retranslate_UV(vec3 in_UV) {
+	bvec3
+		in_top_left_extent = bvec3(step(UV_translation_area[0], fragment_pos_world_space)),
+		in_bottom_right_extent = bvec3(step(fragment_pos_world_space, UV_translation_area[1]));
+
+	bool in_translation_area = in_top_left_extent == in_bottom_right_extent == true;
+
+	in_UV.xy += UV_translation * float(in_translation_area);
+	return in_UV;
+}
+
 void main(void) {
-	color = calculate_light(texture(texture_sampler, UV).rgb, get_fragment_normal());
+	vec3 translated_UV = retranslate_UV(UV);
+
+	color = calculate_light(texture(texture_sampler, translated_UV).rgb, get_fragment_normal(translated_UV));
 	color = postprocess_light(color);
 }

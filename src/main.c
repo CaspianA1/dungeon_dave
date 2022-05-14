@@ -68,8 +68,8 @@ static void* main_init(void) {
 		"../assets/walls/marble.bmp", "../assets/walls/hieroglyph.bmp",
 		"../assets/walls/alkadhib.bmp", "../assets/walls/saqqara.bmp",
 		"../assets/walls/sandstone.bmp", "../assets/walls/cobblestone_3.bmp",
-		"../assets/walls/horses.bmp", "../assets/walls/mesa.bmp",
-		"../assets/walls/arthouse_bricks.bmp"
+		"../assets/walls/rug_3.bmp", "../assets/walls/mesa.bmp",
+		"../assets/walls/arthouse_bricks.bmp", "../assets/walls/eye_of_evil.bmp"
 
 		// Pyramid:
 		/* "../assets/walls/pyramid_bricks_4.bmp",
