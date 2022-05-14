@@ -95,6 +95,45 @@ static char* read_file_contents(const char* const path) {
 	return data;
 }
 
+static void get_source_for_included_file(const GLchar* const includer_path, const GLchar* const included_path) {
+	/* When a shader includes a file, the file it includes
+	should be relative to its filesystem directory. So,
+	this function finds a new path for the included file,
+	which is the concatenation of the base includer path
+	with the included file path. */
+
+	////////// Calculating the base path length for the included shader
+
+	const GLchar* const last_slash_pos_in_includer_path = strrchr(includer_path, '/');
+
+	const size_t base_path_length = (last_slash_pos_in_includer_path == NULL)
+		? 0 // If there's no slash in the path, there's no base path
+		: (size_t) (last_slash_pos_in_includer_path - includer_path + 1);
+
+	////////// Allocating a new string that concatenates the includer base path with the included path
+
+	const size_t included_path_length = strlen(included_path);
+	const size_t included_full_path_string_length = base_path_length + included_path_length;
+
+	// One more character for the null terminator
+	GLchar* const path_string_for_included = malloc(included_full_path_string_length + 1);
+
+	memcpy(path_string_for_included, includer_path, base_path_length);
+	memcpy(path_string_for_included + base_path_length, included_path, included_path_length);
+
+	path_string_for_included[included_full_path_string_length] = '\0';
+
+	//////////
+
+	GLchar* const contents = read_file_contents(path_string_for_included);
+
+	DEBUG(path_string_for_included, s);
+	DEBUG(contents, s);
+
+	free(contents);
+	free(path_string_for_included);
+}
+
 static void get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, const GLchar* const sub_shader_path) {
 	/*
 	#include specification:
@@ -152,16 +191,10 @@ static void get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 		}
 	}
 
-	////////// Fetching the included code
+	////////// Fetching the included code, and replacing the #include region with whitespace
 
-	GLchar* const path = after_include_string + 1;
-	printf("path = '%s'\n", path);
-	// printf("The sub shader:\n---%s\n---\n", sub_shader_code);
-
-	////////// Replacing the #include region with whitespace
-
+	get_source_for_included_file(sub_shader_path, after_include_string + 1);
 	memset(include_string, ' ', (size_t) (curr_path_substring - include_string));
-
 	#undef NO_PATH_STRING_ERROR
 }
 
