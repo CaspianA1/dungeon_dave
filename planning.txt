@@ -16,7 +16,7 @@ Final lighting model:
 - Rescale the ESM constant based on the distance between the occluder and the receiver, maybe
 - Old EVSM has a lot of shadow acne - but mostly cleaned out by Gaussian blur - remaining acne looks like ambient occlusion
 - The glDrawArrays call in shadow mapping uses around 30% of my GPU time mostly because of the shadow map size
-- Generate level edge geometry specifically for the shadow map, and cache that with a copy of a static geometry buffer (also pre-cull front faces)
+- Generate level edge geometry specifically for the shadow map, and cache that with a copy of a static geometry buffer (also pre-cull front faces; perhaps via transform feedback)
 - Shadow map frustum culling based on the light MVP, if needed?
 - For a sun bounding box, imagine a rotated OBB encompassing an AABB that represents the world:
 	- First, make an encompassing OBB around a 2D AABB box
