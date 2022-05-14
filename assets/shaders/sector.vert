@@ -34,9 +34,9 @@ void main(void) {
 
 	////////// Setting fragment_pos_world_space, fragment_pos_light_space, and gl_Position
 
-	fragment_pos_world_space = vertex_pos_world_space;
 	vec4 vertex_pos_world_space_4D = vec4(vertex_pos_world_space, 1.0f);
 
+	fragment_pos_world_space = vertex_pos_world_space;
 	fragment_pos_light_space = vec3(biased_light_model_view_projection * vertex_pos_world_space_4D);
 	gl_Position = model_view_projection * vertex_pos_world_space_4D;
 }
