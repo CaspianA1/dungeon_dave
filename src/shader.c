@@ -39,11 +39,13 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 		}
 
 		// Nothing else is freed anyways during `FAIL`, so it's fine if the `malloc` call is not freed
-		FAIL(CreateShader, "Error during %s: \"%s\"", compilation_step_string, error_message);
+		FAIL(CreateShader, "Error during %s: '%s'", compilation_step_string, error_message);
 	}
 }
 
-static GLuint init_shader_from_source(const GLchar* const vertex_shader_code, const GLchar* const fragment_shader_code) {
+static GLuint init_shader_from_source(
+	const GLchar* const vertex_shader_code, const GLchar* const fragment_shader_code) {
+
 	// In this, a sub-shader is a part of the big shader, like a vertex or fragment shader.
 	const GLchar* const sub_shader_code[2] = {vertex_shader_code, fragment_shader_code};
 	const GLenum sub_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
@@ -93,20 +95,93 @@ static char* read_file_contents(const char* const path) {
 	return data;
 }
 
+static void get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, const GLchar* const sub_shader_path) {
+	/*
+	#include specification:
+
+	1. String that equals #include
+	2. Arbitrary whitespace, excluding newline characters (or no whitespace)
+	3. Double quotation mark
+	4. Path string without double quotation mark, with no newline characters
+	5. Double quotation mark
+	6. Newline or EOF
+
+	To handle later:
+	1. Arbitrary whitespace possible between hashtag and `include
+	2. Ignore #include directives in single or multi-line comments
+
+	Other things to do for this:
+	1. After extracting the path, maintain a source list, or concatenate the new file contents with the old via a realloc + strcat
+	2. For a given file, extract all #includes
+	3. Handles #includes recursively
+	*/
+
+	#define NO_PATH_STRING_ERROR() FAIL(ParseIncludeDirectiveInShader,\
+		"Path string expected after #include for '%s'", sub_shader_path)
+
+	const GLchar *const include_directive = "#include";
+
+	//////////
+
+	GLchar* const include_string = strstr(sub_shader_code, include_directive);
+	if (include_string == NULL) return;
+
+	////////// Skipping newlines and tabs
+
+	GLchar* after_include_string = include_string + strlen(include_directive);
+	for (GLchar c = *after_include_string; c == ' ' || c == '\t'; c = *(++after_include_string));
+	if (*after_include_string != '\"') NO_PATH_STRING_ERROR(); // Other character or EOF
+
+	////////// Finding a righthand quote, failing if a newline is reached
+
+	bool found_right_quote = false;
+
+	GLchar* curr_path_substring = after_include_string + 1;
+	for (GLchar c = *curr_path_substring; !found_right_quote; c = *(++curr_path_substring)) {
+		switch (c) {
+			case '\0': case '\r': case '\n':
+				NO_PATH_STRING_ERROR();
+				break;
+
+			case '\"':
+				/* Putting a null terminator here so that
+				the path can be read as its own string */
+				*curr_path_substring = '\0';
+				found_right_quote = true;
+				break;
+		}
+	}
+
+	////////// Fetching the included code
+
+	GLchar* const path = after_include_string + 1;
+	printf("path = '%s'\n", path);
+	// printf("The sub shader:\n---%s\n---\n", sub_shader_code);
+
+	////////// Replacing the #include region with whitespace
+
+	memset(include_string, ' ', (size_t) (curr_path_substring - include_string));
+
+	#undef NO_PATH_STRING_ERROR
+}
+
 GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const fragment_shader_path) {
 	// TODO: support an #include mechanism for shader code
 
-	GLchar
-		*const vertex_shader_code = read_file_contents(vertex_shader_path),
-		*const fragment_shader_code = read_file_contents(fragment_shader_path);
+	const struct {GLchar *const vertex, *const fragment;} sub_shaders = {
+		read_file_contents(vertex_shader_path), read_file_contents(fragment_shader_path)
+	};
 
-	const GLuint shader = init_shader_from_source(vertex_shader_code, fragment_shader_code);
+	// TODO: read all snippets
+	get_include_snippet_in_glsl_code(sub_shaders.vertex, vertex_shader_path);
+	get_include_snippet_in_glsl_code(sub_shaders.fragment, fragment_shader_path);
 
-	free(vertex_shader_code);
-	free(fragment_shader_code);
+	const GLuint shader = init_shader_from_source(sub_shaders.vertex, sub_shaders.fragment);
+
+	free(sub_shaders.vertex);
+	free(sub_shaders.fragment);
 
 	return shader;
 }
-
 
 #endif
