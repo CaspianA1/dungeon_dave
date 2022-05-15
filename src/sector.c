@@ -199,9 +199,9 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		LIGHTING_UNIFORM(noise_granularity, 1f);
 		ARRAY_LIGHTING_UNIFORM(light_color, 3fv);
 
-		const GLfloat epsilon = 0.008f;
+		const GLfloat epsilon = 0.005f;
 		INIT_UNIFORM_VALUE(UV_translation_area, shader, 3fv, 2, (GLfloat*) (vec3[2]) {
-			{4.0f - epsilon, 0.0f, 1.0f - epsilon}, {6.0f + epsilon, 0.0f, 3.0f + epsilon}
+			{4.0f + epsilon, 0.0f, 0.0f}, {6.0f - epsilon, 3.0f, 3.0f + epsilon}
 		});
 
 		INIT_UNIFORM_VALUE(biased_light_model_view_projection, shader, Matrix4fv, 1,
