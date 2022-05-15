@@ -116,6 +116,8 @@ Physics:
 	- Can get a tiny bit stuck in a wall when jumping downwards close to a wall (so the player will
 			have to be able to stand off the wall by half of the extent of the top-down bounding box)
 
+Other:
+- Sultan or vizier?
 
 End components:
 - Static sectors
