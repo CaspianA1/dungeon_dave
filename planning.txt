@@ -70,7 +70,7 @@ Architectural/code design ideas:
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
-- Animations go slower at 5 FPS (the frame delta leads to only increments of 1, where it should be something more there)
+- Animations go slower at 5 FPS (the frame delta leads to only increments of 1, where it should be something more there; perhaps update based on `time_delta / animation.secs_per_frame`?
 - The checker heightmap has faster pacing sometimes
 
 Object rendering:
