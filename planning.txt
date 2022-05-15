@@ -7,26 +7,29 @@ Final lighting model:
 - Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
 - Ambient, diffuse, specular (with procedural specular mapping), HDR, banding removal, light color - done
 - Ambient occlusion through an occlusion map, maybe
-- Shadows, perhaps contact-hardening if possible
-- Manage resolution through CSMs: https://learnopengl.com/Guest-Articles/2021/CSM
+- Perhaps make the shadows contact-hardening
 - If not CSMs, another technique like PSMs or LiSPSMs
-- A compressed texture for the shadow map, to save space?
-- If ESM has too much light bleeding, use EVSM with only the positive term: https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
-- And optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map.
-- Rescale the ESM constant based on the distance between the occluder and the receiver, maybe
-- Old EVSM has a lot of shadow acne - but mostly cleaned out by Gaussian blur - remaining acne looks like ambient occlusion
+- A compressed texture for the depth map, to save space?
+- If ESM isn't good enough in the end, use EVSM with only the positive term (if it's fast enough): https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
+- And optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map
+- For AO, if I instance the texture ID across a whole sector, that way I can get 256 different textures per level, and I can pre-bake ambient occlusion into sectors
+
+Shadow mapping:
 - The glDrawArrays call in shadow mapping uses around 30% of my GPU time mostly because of the shadow map size
 - Generate level edge geometry specifically for the shadow map, and cache that with a copy of a static geometry buffer (also pre-cull front faces; perhaps via transform feedback)
 - Possibly one shadow map for static objects (sectors and bridges), and small dynamic ones for billboards
-- Shadow map frustum culling based on the light MVP, if needed?
+
 - For a sun bounding box, imagine a rotated OBB encompassing an AABB that represents the world:
 	- First, make an encompassing OBB around a 2D AABB box
 	- The box doesn't need to encompass the AABB at first, it just needs to be rotated
 	- It can then be resized to the AABB area after
 	- Then, expand that to 3D
+
 - After CSM, implement SDSM
 - ESM logarithmic space filtering: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
+- Rescale the ESM constant based on the distance between the occluder and the receiver, maybe
 - Filtering in exp(gl_FragCoord.z) may remove some shadow acne
+
 CSM:
 - If there is still too much light bleeding in the end, perhaps switch to one-term EVSM
 - Make the weapon cast a shadow
@@ -36,9 +39,8 @@ CSM:
 	per-frame mipmap generation is expensive. A 3x3 PCF kernel.
 - CSM scheme:
 	linear for near and far, while using CSM for resolution management
-	(same effect as mipmap selection) + anisotropic filtering. A 3x3 PCF kernel.
-	With this, realtime shadow map generation, same goodness in spatial locality
-	as mipmapping, and better resolution management.
+	(same effect as mipmap selection) + anisotropic filtering. A 5x5 PCF kernel.
+	With this, realtime shadow map generation, and better resolution management.
 
 Architectural/code design ideas:
 - More efficiently set statemap bit ranges, maybe
@@ -57,7 +59,7 @@ Architectural/code design ideas:
 - A LevelDescription struct that then a SceneState (or some other) struct uses to generate sectors, a shadow map, etc.
 	If levels come from C files, put those directly in files; otherwise, JSON will be turned into a LevelDescription.
 	The advantage to C files is that you don't have to parse a file for each level; the disadvantage is that map files
-	are then not easily editable.
+	are then not easily editable
 - Perhaps use the alpha channels of the face texture set or normal map set for something interesting
 - Some library memory leaks; this should be fixed in some way, if possible
 - Make sector and billboard contexts contain all context necessary, not just fragmented around the SceneState struct
@@ -68,7 +70,7 @@ Architectural/code design ideas:
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
-- Animations go slower at 5 FPS (the frame delta leads to only increments of 1, where it should be something more there)
+- Animations go slower at 5 FPS (the frame delta leads to only increments of 1, where it should be something more there; perhaps update based on `time_delta / animation.secs_per_frame`?
 - The checker heightmap has faster pacing sometimes
 
 Object rendering:
@@ -90,12 +92,12 @@ Normal mapping:
 - Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
 - Mipmaps of normal maps are not normalized, and they disappear at lower mip levels
 	(Generate mipmaps on the CPU, and verify that they can mipmap plain textures like glGenerateMipmap)
-- Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using EVSM)
+- Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using a shadow method that needs pre-blurring)
 - Share some of the looping logic for the Gaussian blur and the normal map generation
 - Little rectangular bumps exist in high-resolution normal maps with already fine detail
 - Vary the normal map generation parameters based on the output texture size
 - Define normal map settings for each wall texture (only useful at normal map generation time).
-	Choose hashmap or array for association between path and settings.
+	Choose a hash map or an array for association between path and settings
 
 A better shading model:
 - Share shader uniforms via uniform buffer objects (mostly for a LightParams struct)
@@ -118,6 +120,7 @@ Physics:
 
 Other:
 - Sultan or vizier?
+- Set up a little website for the game, with various video clips of gameplay
 
 End components:
 - Static sectors
@@ -126,6 +129,6 @@ End components:
 - Billboards (unanimated and animated)
 - Skybox
 - Weapon
-- Particles from a projectile
+- Particles from a projectile - billboards with a shared texture id
 - HUD
 - UI
