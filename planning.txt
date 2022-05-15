@@ -9,12 +9,14 @@ Final lighting model:
 - Ambient occlusion through an occlusion map, maybe
 - Shadows, perhaps contact-hardening if possible
 - Manage resolution through CSMs: https://learnopengl.com/Guest-Articles/2021/CSM
+- If not CSMs, another technique like PSMs or LiSPSMs
 - A compressed texture for the shadow map, to save space?
 - If ESM has too much light bleeding, use EVSM with only the positive term: https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
 - And optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map.
 - Rescale the ESM constant based on the distance between the occluder and the receiver, maybe
 - Old EVSM has a lot of shadow acne - but mostly cleaned out by Gaussian blur - remaining acne looks like ambient occlusion
 - The glDrawArrays call in shadow mapping uses around 30% of my GPU time mostly because of the shadow map size
+- Generate level edge geometry specifically for the shadow map, and cache that with a copy of a static geometry buffer (also pre-cull front faces; perhaps via transform feedback)
 - Shadow map frustum culling based on the light MVP, if needed?
 - For a sun bounding box, imagine a rotated OBB encompassing an AABB that represents the world:
 	- First, make an encompassing OBB around a 2D AABB box
@@ -61,6 +63,7 @@ Architectural/code design ideas:
 - Use more of the cglm functions in `update_camera`, or make my own
 - Instead of hardcoding the beginning of each asset path ("../assets/"), abstract it away with a macro that concatenates a simpler path with the base path
 - Some sort of common draw context, that when invoked, binds a shader, vertex buffer and vertex spec and draws
+- Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
