@@ -18,7 +18,6 @@ typedef struct {
 	/* The billboard ID is associated with a BillboardAnimationInstance
 	and not an Animation because there's one animation instance per billboard. */
 	const struct {const buffer_size_t billboard, animation;} ids;
-	GLfloat last_frame_time;
 } BillboardAnimationInstance;
 
 // Excluded: is_inside_plane, billboard_in_view_frustum, draw_billboards

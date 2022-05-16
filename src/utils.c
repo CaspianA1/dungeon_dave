@@ -241,7 +241,7 @@ byte sample_map_point(const byte* const map, const byte x, const byte y, const b
 	return map[y * map_width + x];
 }
 
-const char* get_gl_error(void) {
+const char* get_GL_error(void) {
 	#define ERROR_CASE(error) case GL_##error: return #error;
 
 	switch (glGetError()) {
