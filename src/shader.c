@@ -123,9 +123,9 @@ static void get_source_for_included_file(const GLchar* const includer_path, cons
 	GLchar* const path_string_for_included = malloc(included_full_path_string_length + 1);
 
 	memcpy(path_string_for_included, includer_path, base_path_length);
-	memcpy(path_string_for_included + base_path_length, included_path, included_path_length);
 
-	path_string_for_included[included_full_path_string_length] = '\0';
+	// Copying the included path length + 1 to include the null terminator
+	memcpy(path_string_for_included + base_path_length, included_path, included_path_length + 1);
 
 	//////////
 
