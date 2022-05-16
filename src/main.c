@@ -18,21 +18,21 @@ static void* main_init(void) {
 	};
 
 	const Animation billboard_animations[] = {
-		{.texture_id_range = {3, 48}, .secs_per_frame = 0.02f}, // Flying carpet
-		{.texture_id_range = {49, 53}, .secs_per_frame = 0.15f}, // Torch
-		{.texture_id_range = {62, 64}, .secs_per_frame = 0.08f}, // Eddie, attacking
-		{.texture_id_range = {77, 80}, .secs_per_frame = 0.07f} // Trooper, idle
+		{.texture_id_range = {3, 48}, .secs_for_frame = 0.02f}, // Flying carpet
+		{.texture_id_range = {49, 53}, .secs_for_frame = 0.15f}, // Torch
+		{.texture_id_range = {62, 64}, .secs_for_frame = 0.08f}, // Eddie, attacking
+		{.texture_id_range = {77, 80}, .secs_for_frame = 0.07f} // Trooper, idle
 	};
 
 	const BillboardAnimationInstance billboard_animation_instances[] = {
-		{.ids = {.billboard = 7, .animation = 0}, .last_frame_time = 0.0f}, // Flying carpet
-		{.ids = {.billboard = 8, .animation = 1}, .last_frame_time = 0.0f}, // Torch
+		{.ids = {.billboard = 7, .animation = 0}}, // Flying carpet
+		{.ids = {.billboard = 8, .animation = 1}}, // Torch
 
-		{.ids = {.billboard = 9, .animation = 2}, .last_frame_time = 0.0f}, // Eddies
-		{.ids = {.billboard = 10, .animation = 2}, .last_frame_time = 0.0f},
+		{.ids = {.billboard = 9, .animation = 2}}, // Eddies
+		{.ids = {.billboard = 10, .animation = 2}},
 
-		{.ids = {.billboard = 11, .animation = 3}, .last_frame_time = 0.0f}, // Troopers
-		{.ids = {.billboard = 12, .animation = 3}, .last_frame_time = 0.0f}
+		{.ids = {.billboard = 11, .animation = 3}}, // Troopers
+		{.ids = {.billboard = 12, .animation = 3}}
 	};
 
 	const Billboard billboards[] = {
@@ -99,7 +99,7 @@ static void* main_init(void) {
 	SceneState scene_state = {
 		.weapon_sprite = init_weapon_sprite(
 			// 0.6f, 2.0f, 0.07f, (AnimationLayout) {"../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
-			0.75f, 2.0f, 0.016f, (AnimationLayout) {"../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
+			0.75f, 2.0f, 0.02f, (AnimationLayout) {"../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
 			// 0.75f, 2.0f, 0.035f, (AnimationLayout) {"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
 			// 0.8f, 1.0f, 0.04f, (AnimationLayout) {"../assets/spritesheets/weapons/reload_pistol.bmp", 4, 7, 28}
 		),

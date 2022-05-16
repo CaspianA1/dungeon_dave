@@ -5,7 +5,7 @@
 
 ////////// These macros pertain to debugging
 
-#define GL_ERR_CHECK printf("GL error check: %s\n", get_gl_error());
+#define GL_ERR_CHECK printf("GL error check: %s\n", get_GL_error());
 #define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
 
 #define KEY_FLY SDL_SCANCODE_1
@@ -158,6 +158,6 @@ void enable_all_culling(void);
 // Note: `x` and `y` are top-down here (making them technically `x` and `z`).
 byte sample_map_point(const byte* const map, const byte x, const byte y, const byte map_width);
 
-const char* get_gl_error(void);
+const char* get_GL_error(void);
 
 #endif

@@ -7,7 +7,7 @@
 #include "headers/shader.h"
 
 WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
-	const GLfloat secs_per_frame, const AnimationLayout animation_layout) {
+	const GLfloat secs_for_frame, const AnimationLayout animation_layout) {
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
 	and here, but this makes the code much more readable. TODO: perhaps
@@ -35,10 +35,10 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 
 		.animation = {
 			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
-			.secs_per_frame = secs_per_frame
+			.secs_for_frame = secs_for_frame
 		},
 
-		.curr_frame = 0, .last_frame_time = SDL_GetTicks() / 1000.0f,
+		.cycle_base_time = 0, .curr_frame = 0,
 		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
 		.size = size
 	};
@@ -68,13 +68,12 @@ static void update_weapon_sprite(WeaponSprite* const ws, const Event* const even
 	buffer_size_t curr_frame = ws -> curr_frame;
 
 	if (curr_frame == 0) {
-		if (CHECK_BITMASK(event -> movement_bits, BIT_USE_WEAPON)) curr_frame++;
+		if (CHECK_BITMASK(event -> movement_bits, BIT_USE_WEAPON)) {
+			ws -> cycle_base_time = SDL_GetTicks();
+			curr_frame++;
+		}
 	}
-	else {
-		update_animation_information(
-			&ws -> last_frame_time, &curr_frame,
-			ws -> animation, SDL_GetTicks() / 1000.0f);
-	}
+	else update_animation_information(ws -> cycle_base_time, &curr_frame, ws -> animation);
 
 	ws -> curr_frame = curr_frame;
 }

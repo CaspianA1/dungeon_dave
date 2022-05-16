@@ -15,17 +15,20 @@ typedef struct {
 void update_billboard_animation_instances(const List* const billboard_animation_instances,
 	const List* const billboard_animations, const List* const billboards) {
 
-	const GLfloat curr_time = SDL_GetTicks() / 1000.0f;
-
 	BillboardAnimationInstance* const billboard_animation_instance_data = billboard_animation_instances -> data;
 	const Animation* const animation_data = billboard_animations -> data;
 	Billboard* const billboard_data = billboards -> data;
 
+	/* Billboard animations are constantly looping, so their
+	cycle base time is for when this function is first called */
+	static Uint32 cycle_base_time;
+	ON_FIRST_CALL(cycle_base_time = SDL_GetTicks(););
+
 	for (buffer_size_t i = 0; i < billboard_animation_instances -> length; i++) {
 		BillboardAnimationInstance* const billboard_animation_instance = billboard_animation_instance_data + i;
-		update_animation_information(&billboard_animation_instance -> last_frame_time,
+		update_animation_information(cycle_base_time,
 			&billboard_data[billboard_animation_instance -> ids.billboard].texture_id,
-			animation_data[billboard_animation_instance -> ids.animation], curr_time);
+			animation_data[billboard_animation_instance -> ids.animation]);
 	}
 }
 
