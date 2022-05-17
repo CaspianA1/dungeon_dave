@@ -56,23 +56,26 @@ static bool get_next_face(const Sector sector, const byte varying_axis,
 }
 
 void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
-	const byte side, const byte texture_id, List* const face_mesh_list) {
+	const byte side, const byte texture_id, const byte map_width,
+	const byte* const heightmap, List* const face_mesh_list) {
 
 	/* Face info bits, layout:
-	Bits 0-2, three bits -> face id.
-		0 = flat,
-		1 = right vert NS,
-		2 = bottom vert EW,
-		3 = left vert NS,
-		4 = top vert EW.
-	Bits 3-7, five bits -> texture id. */
+		Bits 0-2, three bits -> face id.
+			0 = flat,
+			1 = right vert NS,
+			2 = bottom vert EW,
+			3 = left vert NS,
+			4 = top vert EW.
+
+		Bit 3, for AO term.
+		Bits 4-7, four bits -> texture id. */
 
 	// `u` suffixes used to reduce the chance of undefined behavior with signed bitwise operations
 	byte face_id = (byte) (side << 2u) | (byte) face.type;
 	if (face_id == 5u || face_id == 6u) face_id -= 2u;
 
 	const byte
-		face_info = (byte) (texture_id << 3u) | face_id,
+		face_info = (byte) (texture_id << 4u) | face_id,
 		near_x = face.origin[0], near_z = face.origin[1],
 		top_y = sector_max_visible_height;
 
@@ -121,6 +124,12 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 			const byte size_x = face.size[0], size_y = face.size[1];
 			const byte far_x = near_x + size_x, bottom_y = top_y - size_y;
 
+			/*
+			- Bug (?): It seems that the strength of the AO term is viewpoint-dependent.
+			- Instead of scaling the AO term according to the face's size, greedily mesh also based on AO terms
+			- If the term is 1, the area is in darkness.
+			*/
+
 			push_ptr_to_list(face_mesh_list,
 				(side ? (face_mesh_component_t[components_per_face]) {
 					near_x, top_y, near_z, face_info,
@@ -143,6 +152,40 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 			break;
 		}
 	}
+
+	////////// I now need to split sectors based on their AO values during mesh construction
+
+	face_mesh_component_t* const recent = ptr_to_list_index(face_mesh_list, face_mesh_list -> length - 1);
+
+	for (byte i = 0; i < 6; i++) {
+		face_mesh_component_t* const vertex = recent + i * components_per_face_vertex;
+		const face_mesh_component_t vx = vertex[0], vy = vertex[1], vz = vertex[2];
+		if (vx == 40 || vz == 40 || vz == 39) continue;
+
+		const byte height_value = sample_map_point(heightmap, vx, vz, map_width);
+		if (height_value > vy) vertex[3] |= 1u << 3u;
+
+		/*
+		for (int8_t oz = -1; oz <= 1; oz++) {
+			const int8_t off_z = (int8_t) (oz + vz);
+			if (off_z <= 0 || off_z >= 39) continue;
+
+			for (int8_t ox = -1; ox <= 1; ox++) {
+				const int8_t off_x = (int8_t) (ox + vx);
+				if (off_x < 0 || off_x >= 39) continue;
+
+				const byte height_value = sample_map_point(heightmap, (byte) off_x, (byte) off_z, map_width);
+
+				if (height_value > vy) {
+					vertex[3] |= 1u << 3u;
+					goto v_end;
+				}
+			}
+		}
+		v_end: {}
+		*/
+	}
+	//////////
 }
 
 void init_vert_faces(
@@ -174,7 +217,8 @@ void init_vert_faces(
 			}
 
 			while (get_next_face(sector, !unvarying_axis, adjacent_side_val, map_width, heightmap, &next_face)) {
-				add_face_mesh_to_list(next_face, sector.visible_heights.max, side, sector.texture_id, face_mesh_list);
+				add_face_mesh_to_list(next_face, sector.visible_heights.max, side,
+					sector.texture_id, map_width, heightmap, face_mesh_list);
 
 				const byte face_height = next_face.size[1];
 				if (face_height > *biggest_face_height) *biggest_face_height = face_height;

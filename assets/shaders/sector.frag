@@ -1,6 +1,7 @@
 #version 330 core
 
 flat in uint face_id;
+in float ao_term;
 in vec3 UV, fragment_pos_light_space, fragment_pos_world_space;
 
 out vec3 color;
@@ -69,9 +70,15 @@ float shadow(void) {
 }
 
 vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {
+	/*
+	ao_term;
 	float non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);
 	float light_strength = ambient + non_ambient * shadow();
 	return light_strength * light_color * texture_color;
+	*/
+
+	fragment_pos_light_space;
+	return vec3(ao_term);
 }
 
 vec3 get_fragment_normal(vec3 offset_UV) {
@@ -116,7 +123,6 @@ vec3 retranslate_UV(vec3 in_UV) {
 
 void main(void) {
 	vec3 translated_UV = retranslate_UV(UV);
-
 	color = calculate_light(texture(texture_sampler, translated_UV).rgb, get_fragment_normal(translated_UV));
 	color = postprocess_light(color);
 }

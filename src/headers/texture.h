@@ -36,9 +36,9 @@ The skybox mag filter is the scene mag filter. */
 #define OPENGL_SHADOW_MAP_MIN_FILTER TexTrilinear
 
 /* There's five bits to store a texture id in a face mesh's face info byte,
-And the biggest number possible with five bits is 31, so that gives you
-32 different possible texture ids. Also, this is just for wall textures. */
-#define MAX_NUM_SECTOR_SUBTEXTURES 32
+And the biggest number possible with five bits is 15, so that gives you
+16 different possible texture ids. Also, this is just for wall textures. */
+#define MAX_NUM_SECTOR_SUBTEXTURES 16
 
 // TODO: make this to an enum
 #define SECTOR_FACE_TEXTURE_UNIT 0

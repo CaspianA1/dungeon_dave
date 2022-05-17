@@ -27,6 +27,7 @@ void init_vert_faces(
 	const byte map_height, byte* const biggest_face_height);
 
 void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
-	const byte side, const byte texture_id, List* const face_mesh_list);
+	const byte side, const byte texture_id, const byte map_width,
+	const byte* const heightmap, List* const face_mesh_list);
 
 #endif

@@ -4,7 +4,7 @@ layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
 
 flat out uint face_id;
-
+out float ao_term;
 out vec3 UV, fragment_pos_light_space, fragment_pos_world_space;
 
 uniform mat4 model_view_projection, biased_light_model_view_projection;
@@ -30,7 +30,9 @@ void main(void) {
 		vertex_pos_world_space[face_attribute.uv_indices.y]
 	);
 
-	UV = vec3(UV_xy, face_info_bits >> 3u);
+	// These extract a flipped fourth bit, and the fifth through eighth bits respectively.
+	ao_term = float(~(face_info_bits >> 3u) & 1u);
+	UV = vec3(UV_xy, face_info_bits >> 4u);
 
 	////////// Setting fragment_pos_world_space, fragment_pos_light_space, and gl_Position
 

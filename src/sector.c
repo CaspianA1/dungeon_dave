@@ -27,6 +27,11 @@ static Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	byte top_right_corner_x = sector.origin[0];
 	const byte origin_y = sector.origin[1];
 
+	// TODO: remove. First do this dumb method, then mesh based on shared AO terms.
+	sector.size[0] = 1;
+	sector.size[1] = 1;
+	goto clear_map_area;
+
 	while (top_right_corner_x < map_width &&
 		!statemap_bit_is_set(traversed_points, top_right_corner_x, origin_y) &&
 		point_matches_sector_attributes(&sector, heightmap, texture_id_map, top_right_corner_x, origin_y, map_width)) {
@@ -114,7 +119,7 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 
 		const Sector sector = *sector_ref;
 		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
-		add_face_mesh_to_list(flat_face, sector.visible_heights.max, 0, sector.texture_id, &face_meshes);
+		add_face_mesh_to_list(flat_face, sector.visible_heights.max, 0, sector.texture_id, map_width, heightmap, &face_meshes);
 
 		byte biggest_face_height = 0;
 		init_vert_faces(sector, &face_meshes, heightmap, map_width, map_height, &biggest_face_height);
@@ -266,11 +271,6 @@ static buffer_size_t fill_sector_vertex_buffer_with_visible_faces(
 			num_visible_faces += num_visible_faces_in_group;
 		}
 	}
-
-	/* (triangle counts, 12 vs 17):
-	palace: 1466 vs 1130. tpt: 232 vs 150.
-	pyramid: 816 vs 542. maze: 5796 vs 6114.
-	terrain: 150620 vs 86588. */
 
 	glUnmapBuffer(GL_ARRAY_BUFFER); // If looking out at the distance with no sectors, why do any state switching at all?
 	return num_visible_faces;
