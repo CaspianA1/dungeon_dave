@@ -186,7 +186,6 @@ static void get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 				the path can be read as its own string */
 				*curr_path_substring = '\0';
 				found_right_quote = true;
-				break;
 		}
 	}
 
