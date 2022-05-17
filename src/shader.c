@@ -99,7 +99,7 @@ static char* read_file_contents(const char* const path) {
 	return data;
 }
 
-static void get_source_for_included_file(const GLchar* const includer_path, const GLchar* const included_path) {
+static GLchar* get_source_for_included_file(const GLchar* const includer_path, const GLchar* const included_path) {
 	/* When a shader includes a file, the file it includes
 	should be relative to its filesystem directory. So,
 	this function finds a new path for the included file,
@@ -123,19 +123,14 @@ static void get_source_for_included_file(const GLchar* const includer_path, cons
 	GLchar* const path_string_for_included = malloc(included_full_path_string_length + 1);
 
 	memcpy(path_string_for_included, includer_path, base_path_length);
-
 	// Copying the included path length + 1 to include the null terminator
 	memcpy(path_string_for_included + base_path_length, included_path, included_path_length + 1);
 
 	//////////
 
-	GLchar* const contents = read_file_contents(path_string_for_included);
-
-	DEBUG(path_string_for_included, s);
-	DEBUG(contents, s);
-
-	free(contents);
+	GLchar* const file_contents = read_file_contents(path_string_for_included);
 	free(path_string_for_included);
+	return file_contents;
 }
 
 static void get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, const GLchar* const sub_shader_path) {
@@ -197,7 +192,10 @@ static void get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 
 	////////// Fetching the included code, and replacing the #include region with whitespace
 
-	get_source_for_included_file(sub_shader_path, after_include_string + 1);
+	GLchar* const source = get_source_for_included_file(sub_shader_path, after_include_string + 1);
+	DEBUG(source, s);
+	free(source);
+
 	memset(include_string, ' ', (size_t) (curr_path_substring - include_string));
 	#undef NO_PATH_STRING_ERROR
 }
@@ -205,6 +203,7 @@ static void get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const fragment_shader_path) {
 	// TODO: support an #include mechanism for shader code
 
+	// `get_include_snippet_in_glsl_code` may modify the contents of these
 	const struct {GLchar *const vertex, *const fragment;} sub_shaders = {
 		read_file_contents(vertex_shader_path), read_file_contents(fragment_shader_path)
 	};
