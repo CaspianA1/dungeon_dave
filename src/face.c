@@ -138,7 +138,6 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 					far_x, top_y, near_z, face_info,
 					far_x, bottom_y, near_z, face_info,
 					near_x, bottom_y, near_z, face_info
-
 				}
 				: (face_mesh_component_t[components_per_face]) {
 					near_x, bottom_y, near_z, face_info,
