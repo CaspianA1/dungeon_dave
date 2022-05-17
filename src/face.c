@@ -162,8 +162,17 @@ void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height
 		const face_mesh_component_t vx = vertex[0], vy = vertex[1], vz = vertex[2];
 		if (vx == 40 || vz == 40 || vz == 39) continue;
 
-		const byte height_value = sample_map_point(heightmap, vx, vz, map_width);
-		if (height_value > vy) vertex[3] |= 1u << 3u;
+		const byte ao_mask = 1u << 3u;
+		byte* const info = vertex + 3;
+
+		#define is_canyon(a, b) ((a <= 0 || b <= 0 || a >= 39 || b >= 39) ? false : (sample_map_point(heightmap, a, b, map_width) > vy))
+
+		const byte canyon = is_canyon(vx, vz - 1); // This gets bottom and left
+		if (canyon) *info |= ao_mask;
+
+		// Before continuing, I need one more AO bit to make corners especially dark
+
+		#undef is_canyon
 
 		/*
 		for (int8_t oz = -1; oz <= 1; oz++) {
