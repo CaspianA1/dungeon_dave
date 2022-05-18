@@ -56,14 +56,13 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	const buffer_size_t num_visible_billboards) {
 
 	const GLuint shader = draw_context -> shader;
-	static GLint right_xz_world_space_id, model_view_projection_id, light_model_view_projection_id;
+	static GLint right_xz_world_space_id, model_view_projection_id;
 
 	use_shader(shader);
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
-		INIT_UNIFORM(light_model_view_projection, shader);
 
 		INIT_UNIFORM_VALUE(pcf_radius, shader, 1i, constants.lighting.pcf_radius);
 		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
