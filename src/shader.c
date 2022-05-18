@@ -9,6 +9,10 @@ typedef enum {
 	LinkShaders
 } ShaderCompilationStep;
 
+/* This is just here because `get_include_snippet_in_glsl_code`
+and `get_source_for_included_file` are mutually recursive */
+static bool get_include_snippet_in_glsl_code(GLchar* const, const GLchar* const);
+
 //////////
 
 static void fail_on_shader_creation_error(const GLuint object_id,
@@ -127,15 +131,18 @@ static GLchar* get_source_for_included_file(const GLchar* const includer_path, c
 	// Copying the included path length + 1 to include the null terminator
 	memcpy(path_string_for_included + base_path_length, included_path, included_path_length + 1);
 
-	//////////
+	////////// Reading the included file, recursively read its #includes, and returning the included contents
 
-	GLchar* const file_contents = read_file_contents(path_string_for_included);
+	GLchar* const included_contents = read_file_contents(path_string_for_included);
+	while (get_include_snippet_in_glsl_code(included_contents, path_string_for_included));
 	free(path_string_for_included);
-	return file_contents;
+
+	return included_contents;
 }
 
 // Returns if an include snippet was found
 static bool get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, const GLchar* const sub_shader_path) {
+
 	/*
 	#include specification:
 
@@ -147,13 +154,13 @@ static bool get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 	6. Newline or EOF
 
 	To handle later:
-	1. Arbitrary whitespace possible between hashtag and `include
+	1. Arbitrary whitespace possible between hashtag and #include
 	2. Ignore #include directives in single or multi-line comments
 
 	Other things to do for this:
 	1. After extracting the path, maintain a source list, or concatenate the new file contents with the old via a realloc + strcat
-	2. For a given file, extract all #includes
-	3. Handles #includes recursively
+	2. Detect dependency cycles
+	3. Perhaps handle #defines
 	*/
 
 	#define NO_PATH_STRING_ERROR() FAIL(ParseIncludeDirectiveInShader,\
@@ -192,6 +199,12 @@ static bool get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 	}
 
 	////////// Fetching the included code, and replacing the #include region with whitespace
+
+	/*
+	Order management:
+
+	includer A includes B: (B, A). includer A includes C: (B, C, A). So all included go before in order.
+	*/
 
 	GLchar* const source = get_source_for_included_file(sub_shader_path, after_include_string + 1);
 	DEBUG(source, s);
