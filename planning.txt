@@ -17,7 +17,7 @@ Final lighting model:
 Shadow mapping:
 - The glDrawArrays call in shadow mapping uses around 30% of my GPU time mostly because of the shadow map size
 - Generate level edge geometry specifically for the shadow map, and cache that with a copy of a static geometry buffer (also pre-cull front faces; perhaps via transform feedback)
-- Possibly one shadow map for static objects (sectors and bridges), and small dynamic ones for billboards
+- Possibly one shadow map for static objects (sectors and bridges), and small dynamic ones for billboards (low-res small one, but smoothed out with RBSM)
 
 - For a sun bounding box, imagine a rotated OBB encompassing an AABB that represents the world:
 	- First, make an encompassing OBB around a 2D AABB box
