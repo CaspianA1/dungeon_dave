@@ -34,6 +34,7 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 		#define STRING_CASE(enum_name, string) case enum_name: compilation_step_string = string; break
 
 		const GLchar* compilation_step_string;
+
 		switch (compilation_step) {
 			STRING_CASE(CompileVertexShader, "vertex shader compilation");
 			STRING_CASE(CompileFragmentShader, "fragment shader compilation");
