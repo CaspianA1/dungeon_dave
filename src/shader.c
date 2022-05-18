@@ -134,7 +134,8 @@ static GLchar* get_source_for_included_file(const GLchar* const includer_path, c
 	return file_contents;
 }
 
-static void get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, const GLchar* const sub_shader_path) {
+// Returns if an include snippet was found
+static bool get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, const GLchar* const sub_shader_path) {
 	/*
 	#include specification:
 
@@ -163,7 +164,7 @@ static void get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 	//////////
 
 	GLchar* const include_string = strstr(sub_shader_code, include_directive);
-	if (include_string == NULL) return;
+	if (include_string == NULL) return false;
 
 	////////// Skipping newlines and tabs
 
@@ -198,24 +199,27 @@ static void get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 
 	memset(include_string, ' ', (size_t) (curr_path_substring - include_string));
 	#undef NO_PATH_STRING_ERROR
+
+	return true;
 }
 
 GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const fragment_shader_path) {
 	// TODO: support an #include mechanism for shader code
 
-	// `get_include_snippet_in_glsl_code` may modify the contents of these
-	const struct {GLchar *const vertex, *const fragment;} sub_shaders = {
-		read_file_contents(vertex_shader_path), read_file_contents(fragment_shader_path)
-	};
+	GLchar* sub_shader_code[2];
 
-	// TODO: read all snippets
-	get_include_snippet_in_glsl_code(sub_shaders.vertex, vertex_shader_path);
-	get_include_snippet_in_glsl_code(sub_shaders.fragment, fragment_shader_path);
+	for (byte i = 0; i < 2; i++) {
+		const GLchar* const path = i ? fragment_shader_path : vertex_shader_path;
+		GLchar* const code = read_file_contents(path);
 
-	const GLuint shader = init_shader_from_source(sub_shaders.vertex, sub_shaders.fragment);
+		// `get_include_snippet_in_glsl_code` blanks out #include lines
+		while (get_include_snippet_in_glsl_code(code, path));
+		sub_shader_code[i] = code;
+	}
 
-	free(sub_shaders.vertex);
-	free(sub_shaders.fragment);
+	const GLuint shader = init_shader_from_source(sub_shader_code[0], sub_shader_code[1]);
+
+	for (byte i = 0; i < 2; i++) free(sub_shader_code[i]);
 
 	return shader;
 }
