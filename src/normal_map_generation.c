@@ -148,7 +148,7 @@ static void do_separable_gaussian_blur_pass(
 						sdl_pixel_component_t r, g, b;
 						SDL_GetRGB(src_pixel, src_format, &r, &g, &b);
 
-						const float weight = kernel[i + kernel_radius];
+						const GLfloat weight = kernel[i + kernel_radius];
 						summed_channels[0] += r * weight;
 						summed_channels[1] += g * weight;
 						summed_channels[2] += b * weight;
