@@ -1,13 +1,15 @@
 #version 330 core
 
+#include "common/shadow.vert"
+
 layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
 
 flat out uint face_id;
 out float ao_term;
-out vec3 UV, fragment_pos_light_space, fragment_pos_world_space;
+out vec3 UV, fragment_pos_world_space;
 
-uniform mat4 model_view_projection, biased_light_model_view_projection;
+uniform mat4 model_view_projection;
 
 const struct FaceAttribute {
 	ivec2 uv_indices, uv_signs;
@@ -36,9 +38,7 @@ void main(void) {
 
 	////////// Setting fragment_pos_world_space, fragment_pos_light_space, and gl_Position
 
-	vec4 vertex_pos_world_space_4D = vec4(vertex_pos_world_space, 1.0f);
-
 	fragment_pos_world_space = vertex_pos_world_space;
-	fragment_pos_light_space = vec3(biased_light_model_view_projection * vertex_pos_world_space_4D);
-	gl_Position = model_view_projection * vertex_pos_world_space_4D;
+	fragment_pos_light_space = world_to_light_space(vertex_pos_world_space);
+	gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);
 }

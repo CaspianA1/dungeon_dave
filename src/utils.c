@@ -191,7 +191,7 @@ void loop_application(const Screen* const screen, void (*const drawer) (void* co
 		const Uint64 before = SDL_GetPerformanceCounter();
 		#endif
 
-		resize_window_if_needed(screen -> window);
+		resize_window_if_needed(window);
 		set_triangle_fill_mode();
 
 		drawer(app_context);

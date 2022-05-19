@@ -118,6 +118,7 @@ typedef enum {
 	LoadOpenGL,
 	OpenFile,
 	CreateShader,
+	ParseIncludeDirectiveInShader,
 	CreateFramebuffer,
 	CreateSkybox,
 	CreateBlankSurface,
