@@ -55,17 +55,15 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 	}
 }
 
-static GLuint init_shader_from_source(
-	const GLchar* const vertex_shader_code, const GLchar* const fragment_shader_code) {
-
-	// In this, a sub-shader is a part of the big shader, like a vertex or fragment shader.
-	const GLchar* const sub_shader_code[2] = {vertex_shader_code, fragment_shader_code};
+static GLuint init_shader_from_source(const List shader_code[2]) {
 	const GLenum sub_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
 	GLuint sub_shaders[2], shader = glCreateProgram();
 
 	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
 		const GLuint sub_shader = glCreateShader(sub_shader_types[step]);
-		glShaderSource(sub_shader, 1, sub_shader_code + step, NULL);
+
+		const List* const sub_shader_code = shader_code + step;
+		glShaderSource(sub_shader, (GLsizei) sub_shader_code -> length, sub_shader_code -> data, NULL);
 
 		fail_on_shader_creation_error(sub_shader, step,
 			glCompileShader, glGetShaderiv, glGetShaderInfoLog);
@@ -129,16 +127,16 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 	const size_t included_full_path_string_length = base_path_length + strlen(included_path);
 
 	// One more character for the null terminator
-	GLchar* const path_string_for_included = malloc(included_full_path_string_length + 1);
+	GLchar* const full_path_string_for_included = malloc(included_full_path_string_length + 1);
 
-	memcpy(path_string_for_included, includer_path, base_path_length);
-	strcpy(path_string_for_included + base_path_length, included_path);
+	memcpy(full_path_string_for_included, includer_path, base_path_length);
+	strcpy(full_path_string_for_included + base_path_length, included_path);
 
-	////////// Reading the included file, recursively read its #includes, and returning the included contents
+	////////// Reading the included file, blanking out #versions, recursively reading its #includes, and returning the contents
 
-	GLchar* const included_contents = read_file_contents(path_string_for_included);
-	while (read_and_parse_includes_for_glsl(dependency_list, included_contents, path_string_for_included));
-	free(path_string_for_included);
+	GLchar* const included_contents = read_file_contents(full_path_string_for_included);
+	while (read_and_parse_includes_for_glsl(dependency_list, included_contents, full_path_string_for_included));
+	free(full_path_string_for_included);
 
 	return included_contents;
 }
@@ -162,9 +160,8 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	2. Ignore #include directives in single or multi-line comments
 
 	Other things to do for this:
-	1. Pass dependencies to `init_shader_from_source`
-	2. Detect dependency cycles
-	3. Perhaps handle #defines
+	1. Detect dependency cycles
+	2. Perhaps handle #defines
 	*/
 
 	#define NO_PATH_STRING_ERROR() FAIL(ParseIncludeDirectiveInShader,\
@@ -214,8 +211,20 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	return true;
 }
 
+static void erase_version_strings_from_dependency_list(List* const dependency_list) {
+	const GLchar* const version_string = "#version 330 core\n";
+	const size_t version_string_length = strlen(version_string);
+
+	// Not erasing the version string from the first one because it's the only one that should keep #version in it
+	for (buffer_size_t i = 1; i < dependency_list -> length; i++) {
+		GLchar* const dependency = value_at_list_index(dependency_list, i, GLchar*);
+
+		GLchar* const version_string_pos = strstr(dependency, version_string);
+		if (version_string_pos != NULL) memset(version_string_pos, ' ', version_string_length);
+	}
+}
+
 GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const fragment_shader_path) {
-	GLchar* sub_shader_code[2];
 	List dependency_lists[2];
 
 	for (byte i = 0; i < 2; i++) {
@@ -228,13 +237,12 @@ GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const f
 		// `get_include_snippet_in_glsl_code` blanks out #include lines and recursively adds to the dependency list
 		while (read_and_parse_includes_for_glsl(dependency_list, code, path));
 		push_ptr_to_list(dependency_list, &code);
-		sub_shader_code[i] = code;
+
+		// This blanks out #version lines for all included files
+		erase_version_strings_from_dependency_list(dependency_list);
 	}
 
-	const GLuint shader = init_shader_from_source( // Last values = dependers
-		value_at_list_index(dependency_lists, dependency_lists[0].length - 1, GLchar*),
-		value_at_list_index(dependency_lists + 1, dependency_lists[1].length - 1, GLchar*)
-	);
+	const GLuint shader = init_shader_from_source(dependency_lists);
 
 	for (byte i = 0; i < 2; i++) {
 		const List* const dependency_list = dependency_lists + i;
