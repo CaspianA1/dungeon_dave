@@ -155,6 +155,7 @@ static void* main_init(void) {
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	glFinish(); // Making sure that all initialization operations are finished
 
 	void* const app_context = malloc(sizeof(SceneState));
 	memcpy(app_context, &scene_state, sizeof(SceneState));
