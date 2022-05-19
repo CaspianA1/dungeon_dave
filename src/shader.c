@@ -162,7 +162,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	2. Ignore #include directives in single or multi-line comments
 
 	Other things to do for this:
-	1. Pass dependencies to init_shader
+	1. Pass dependencies to `init_shader_from_source`
 	2. Detect dependency cycles
 	3. Perhaps handle #defines
 	*/
@@ -202,13 +202,14 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 		}
 	}
 
+	#undef NO_PATH_STRING_ERROR
+
 	////////// Fetching the included code, and replacing the #include region with whitespace
 
 	GLchar* const included_code = get_source_for_included_file(dependency_list, sub_shader_path, after_include_string + 1);
 	push_ptr_to_list(dependency_list, &included_code); // The included code is freed by `init_shader`
 
 	memset(include_string, ' ', (size_t) (curr_path_substring - include_string));
-	#undef NO_PATH_STRING_ERROR
 
 	return true;
 }
