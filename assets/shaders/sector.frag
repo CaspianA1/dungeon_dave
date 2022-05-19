@@ -8,15 +8,9 @@ in vec3 UV, fragment_pos_world_space;
 out vec3 color;
 
 uniform bool enable_tone_mapping;
-
-uniform float
-	ambient, diffuse_strength,
-	specular_strength, exposure, noise_granularity;
-
+uniform float ambient, diffuse_strength, specular_strength, exposure, noise_granularity;
 uniform vec2 specular_exponent_domain, one_over_screen_size, UV_translation;
-
 uniform vec3 camera_pos_world_space, dir_to_light, light_color, UV_translation_area[2];
-
 uniform sampler2DArray texture_sampler, normal_map_sampler;
 
 float diffuse(vec3 fragment_normal) {

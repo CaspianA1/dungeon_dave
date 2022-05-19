@@ -1,9 +1,9 @@
 #version 330 core
 
+out vec3 fragment_UV;
+
 uniform uint frame_index;
 uniform vec2 weapon_corners[4];
-
-out vec3 fragment_UV;
 
 void main(void) {
 	gl_Position = vec4(weapon_corners[gl_VertexID], 0.0f, 1.0f);
