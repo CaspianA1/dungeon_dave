@@ -1,7 +1,9 @@
 #ifndef SHADER_C
 #define SHADER_C
 
+#include "headers/shader.h"
 #include "headers/utils.h"
+#include "headers/list.h"
 
 typedef enum {
 	CompileVertexShader,
@@ -9,9 +11,10 @@ typedef enum {
 	LinkShaders
 } ShaderCompilationStep;
 
-/* This is just here because `get_include_snippet_in_glsl_code`
+/* This is just here because `read_and_parse_includes_for_glsl`
 and `get_source_for_included_file` are mutually recursive */
-static bool get_include_snippet_in_glsl_code(GLchar* const, const GLchar* const);
+static bool read_and_parse_includes_for_glsl(List* const dependency_list,
+	GLchar* const sub_shader_code, const GLchar* const sub_shader_path);
 
 //////////
 
@@ -104,7 +107,9 @@ static char* read_file_contents(const char* const path) {
 	return data;
 }
 
-static GLchar* get_source_for_included_file(const GLchar* const includer_path, const GLchar* const included_path) {
+static GLchar* get_source_for_included_file(List* const dependency_list,
+	const GLchar* const includer_path, const GLchar* const included_path) {
+
 	/* When a shader includes a file, the file it includes
 	should be relative to its filesystem directory. So,
 	this function finds a new path for the included file,
@@ -121,27 +126,26 @@ static GLchar* get_source_for_included_file(const GLchar* const includer_path, c
 
 	////////// Allocating a new string that concatenates the includer base path with the included path
 
-	const size_t included_path_length = strlen(included_path);
-	const size_t included_full_path_string_length = base_path_length + included_path_length;
+	const size_t included_full_path_string_length = base_path_length + strlen(included_path);
 
 	// One more character for the null terminator
 	GLchar* const path_string_for_included = malloc(included_full_path_string_length + 1);
 
 	memcpy(path_string_for_included, includer_path, base_path_length);
-	// Copying the included path length + 1 to include the null terminator
-	memcpy(path_string_for_included + base_path_length, included_path, included_path_length + 1);
+	strcpy(path_string_for_included + base_path_length, included_path);
 
 	////////// Reading the included file, recursively read its #includes, and returning the included contents
 
 	GLchar* const included_contents = read_file_contents(path_string_for_included);
-	while (get_include_snippet_in_glsl_code(included_contents, path_string_for_included));
+	while (read_and_parse_includes_for_glsl(dependency_list, included_contents, path_string_for_included));
 	free(path_string_for_included);
 
 	return included_contents;
 }
 
 // Returns if an include snippet was found
-static bool get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, const GLchar* const sub_shader_path) {
+static bool read_and_parse_includes_for_glsl(List* const dependency_list,
+	GLchar* const sub_shader_code, const GLchar* const sub_shader_path) {
 
 	/*
 	#include specification:
@@ -158,7 +162,7 @@ static bool get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 	2. Ignore #include directives in single or multi-line comments
 
 	Other things to do for this:
-	1. After extracting the path, maintain a source list, or concatenate the new file contents with the old via a realloc + strcat
+	1. Pass dependencies to init_shader
 	2. Detect dependency cycles
 	3. Perhaps handle #defines
 	*/
@@ -200,15 +204,8 @@ static bool get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 
 	////////// Fetching the included code, and replacing the #include region with whitespace
 
-	/*
-	Order management:
-
-	includer A includes B: (B, A). includer A includes C: (B, C, A). So all included go before in order.
-	*/
-
-	GLchar* const source = get_source_for_included_file(sub_shader_path, after_include_string + 1);
-	DEBUG(source, s);
-	free(source);
+	GLchar* const included_code = get_source_for_included_file(dependency_list, sub_shader_path, after_include_string + 1);
+	push_ptr_to_list(dependency_list, &included_code); // The included code is freed by `init_shader`
 
 	memset(include_string, ' ', (size_t) (curr_path_substring - include_string));
 	#undef NO_PATH_STRING_ERROR
@@ -217,22 +214,35 @@ static bool get_include_snippet_in_glsl_code(GLchar* const sub_shader_code, cons
 }
 
 GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const fragment_shader_path) {
-	// TODO: support an #include mechanism for shader code
-
 	GLchar* sub_shader_code[2];
+	List dependency_lists[2];
 
 	for (byte i = 0; i < 2; i++) {
+		List* const dependency_list = dependency_lists + i;
+		*dependency_list = init_list(1, GLchar*);
+
 		const GLchar* const path = i ? fragment_shader_path : vertex_shader_path;
 		GLchar* const code = read_file_contents(path);
 
-		// `get_include_snippet_in_glsl_code` blanks out #include lines
-		while (get_include_snippet_in_glsl_code(code, path));
+		// `get_include_snippet_in_glsl_code` blanks out #include lines and recursively adds to the dependency list
+		while (read_and_parse_includes_for_glsl(dependency_list, code, path));
+		push_ptr_to_list(dependency_list, &code);
 		sub_shader_code[i] = code;
 	}
 
-	const GLuint shader = init_shader_from_source(sub_shader_code[0], sub_shader_code[1]);
+	const GLuint shader = init_shader_from_source( // Last values = dependers
+		value_at_list_index(dependency_lists, dependency_lists[0].length - 1, GLchar*),
+		value_at_list_index(dependency_lists + 1, dependency_lists[1].length - 1, GLchar*)
+	);
 
-	for (byte i = 0; i < 2; i++) free(sub_shader_code[i]);
+	for (byte i = 0; i < 2; i++) {
+		const List* const dependency_list = dependency_lists + i;
+
+		for (buffer_size_t i = 0; i < dependency_list -> length; i++)
+			free(value_at_list_index(dependency_list, i, GLchar*));
+
+		deinit_list(*dependency_list);
+	}
 
 	return shader;
 }

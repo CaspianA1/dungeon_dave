@@ -1,6 +1,8 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+#include "buffer_defs.h"
+
 #define use_shader glUseProgram
 #define deinit_shader glDeleteProgram
 
