@@ -37,6 +37,8 @@ static const struct {
 		const GLint size[2];
 	} window;
 
+	const struct {const GLfloat min_brightness, brightness_repeat_ms;} title_screen;
+
 	const struct {
 		const bool enable_tone_mapping;
 		const byte pcf_radius;
@@ -91,6 +93,8 @@ static const struct {
 		.default_fps = 60, .depth_buffer_bits = 24, .multisample_samples = 8,
 		.size = {800, 600}
 	},
+
+	.title_screen = {.min_brightness = 0.7f, .brightness_repeat_ms = 500.0f},
 
 	.lighting = {
 		.enable_tone_mapping = true, .pcf_radius = 2, .esm_constant = 80.0f,

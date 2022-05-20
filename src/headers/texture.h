@@ -47,6 +47,7 @@ And the biggest number possible with five bits is 15, so that gives you
 #define BILLBOARD_TEXTURE_UNIT 3
 #define SKYBOX_TEXTURE_UNIT 4
 #define WEAPON_TEXTURE_UNIT 5
+#define TITLE_SCREEN_LOGO_TEXTURE_UNIT 6
 
 // Excluded: init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 

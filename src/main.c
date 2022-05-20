@@ -113,6 +113,7 @@ static void* main_init(void) {
 		.billboard_animation_instances = init_list(ARRAY_LENGTH(billboard_animation_instances), BillboardAnimationInstance),
 
 		.skybox = init_skybox("../assets/skyboxes/desert.bmp", 1.0f),
+		.title_screen = init_title_screen(),
 
 		.heightmap = (const byte*) palace_heightmap,
 		.texture_id_map = (const byte*) palace_texture_id_map,
@@ -168,12 +169,23 @@ static void* main_init(void) {
 }
 
 static void main_drawer(void* const app_context) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	SceneState* const scene_state = (SceneState*) app_context;
+	const Event event = get_next_event();
+
+	TitleScreen* const title_screen = &scene_state -> title_screen;
+	if (!title_screen_finished(title_screen, &event)) {
+		tick_title_screen(*title_screen);
+		return;
+	}
+
+	////////// Some variable initialization + object updating
+
 	const BatchDrawContext* const sector_draw_context = &scene_state -> sector_draw_context;
 	ShadowMapContext* const shadow_map_context = &scene_state -> shadow_map_context;
 	Camera* const camera = &scene_state -> camera;
 
-	const Event event = get_next_event();
 	update_camera(camera, event);
 
 	update_billboard_animation_instances(
@@ -184,8 +196,6 @@ static void main_drawer(void* const app_context) {
 	update_shadow_map(shadow_map_context, event.screen_size, draw_all_sectors_for_shadow_map, sector_draw_context);
 
 	////////// The main drawing code
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	draw_visible_sectors(sector_draw_context, shadow_map_context,
 		&scene_state -> sectors, camera, scene_state -> face_normal_map_set, event.screen_size);
@@ -212,6 +222,7 @@ static void main_deinit(void* const app_context) {
 	deinit_list(scene_state -> billboard_animations);
 	deinit_list(scene_state -> billboard_animation_instances);
 
+	deinit_title_screen(&scene_state -> title_screen);
 	deinit_skybox(scene_state -> skybox);
 	deinit_texture(scene_state -> face_normal_map_set);
 

@@ -119,6 +119,10 @@ Physics:
 	- Can get a tiny bit stuck in a wall when jumping downwards close to a wall (so the player will
 			have to be able to stand off the wall by half of the extent of the top-down bounding box)
 
+The title screen:
+	- Make the mouse visible when in it
+	- Only go to the next window once the mouse is raised (this should also stop the weapon usage from carrying over)
+
 Other:
 - Sultan or vizier?
 - Set up a little website for the game, with various video clips of gameplay
