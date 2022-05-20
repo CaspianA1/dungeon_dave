@@ -68,6 +68,7 @@ Architectural/code design ideas:
 - Instead of hardcoding the beginning of each asset path ("../assets/"), abstract it away with a macro that concatenates a simpler path with the base path
 - Some sort of common draw context, that when invoked, binds a shader, vertex buffer and vertex spec and draws
 - Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
+- Perhaps use just OpenGL + ImGUI for the editor
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
