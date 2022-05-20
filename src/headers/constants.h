@@ -37,9 +37,7 @@ static const struct {
 		const GLint size[2];
 	} window;
 
-	const struct {
-		const GLfloat min_brightness, brightness_repeat_ms;
-	} title_screen;
+	const struct {const GLfloat min_brightness, brightness_repeat_ms;} title_screen;
 
 	const struct {
 		const bool enable_tone_mapping;
