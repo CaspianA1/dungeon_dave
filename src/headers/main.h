@@ -8,6 +8,7 @@
 #include "camera.h"
 #include "list.h"
 #include "skybox.h"
+#include "title_screen.h"
 
 typedef struct {
 	Camera camera;
@@ -19,6 +20,7 @@ typedef struct {
 	List sectors, billboard_animations, billboard_animation_instances;
 
 	const Skybox skybox;
+	TitleScreen title_screen;
 
 	GLuint face_normal_map_set;
 
