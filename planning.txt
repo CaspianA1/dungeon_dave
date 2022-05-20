@@ -2,6 +2,7 @@ Levels:
 - Final touches on the fortress map
 - A castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji - running along the mountainside
 - A level based on the Zhangjiajie region
+- A map like this one: https://www.planetminecraft.com/project/the-sultans-palace-3351849/ (can look up similar Sultan maps for Minecraft)
 
 Final lighting model:
 - Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
@@ -120,6 +121,7 @@ Physics:
 Other:
 - Sultan or vizier?
 - Set up a little website for the game, with various video clips of gameplay
+- Perhaps the Shabti should blink
 
 End components:
 - Static sectors

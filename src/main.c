@@ -25,26 +25,29 @@ static void* main_init(void) {
 	};
 
 	const BillboardAnimationInstance billboard_animation_instances[] = {
-		{.ids = {.billboard = 7, .animation = 0}}, // Flying carpet
-		{.ids = {.billboard = 8, .animation = 1}}, // Torch
+		{.ids = {.billboard = 10, .animation = 0}}, // Flying carpet
+		{.ids = {.billboard = 11, .animation = 1}}, // Torch
 
-		{.ids = {.billboard = 9, .animation = 2}}, // Eddies
-		{.ids = {.billboard = 10, .animation = 2}},
+		{.ids = {.billboard = 12, .animation = 2}}, // Eddies
+		{.ids = {.billboard = 13, .animation = 2}},
 
-		{.ids = {.billboard = 11, .animation = 3}}, // Troopers
-		{.ids = {.billboard = 12, .animation = 3}}
+		{.ids = {.billboard = 14, .animation = 3}}, // Troopers
+		{.ids = {.billboard = 15, .animation = 3}}
 	};
 
 	const Billboard billboards[] = {
 		{0, {1.0f, 1.0f}, {28.0f, 2.5f, 31.0f}}, // Health kits
 		{0, {1.0f, 1.0f}, {5.0f, 0.5f, 22.5f}},
+		{0, {1.0f, 1.0f}, {31.5f, 0.5f, 10.5f}},
 
 		{1, {1.0f, 1.0f}, {12.5f, 0.5f, 38.5f}}, // Teleporters
 		{1, {1.0f, 1.0f}, {8.5f, 0.5f, 25.5f}},
+		{1, {1.0f, 1.0f}, {32.5f, 2.5f, 7.5f}},
 
 		{2, {2.0f, 2.0f}, {4.5f, 4.0f, 12.5f}}, // Shabtis
 		{2, {2.0f, 2.0f}, {10.5f, 1.0f, 25.0f}},
 		{2, {2.0f, 2.0f}, {25.5f, 3.0f, 31.0f}},
+		{2, {4.0f, 4.0f}, {36.0f, 18.0f, 4.0f}},
 
 		{3, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
 		{49, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
@@ -69,7 +72,9 @@ static void* main_init(void) {
 		"../assets/walls/alkadhib.bmp", "../assets/walls/saqqara.bmp",
 		"../assets/walls/sandstone.bmp", "../assets/walls/cobblestone_3.bmp",
 		"../assets/walls/rug_3.bmp", "../assets/walls/mesa.bmp",
-		"../assets/walls/arthouse_bricks.bmp", "../assets/walls/eye_of_evil.bmp"
+		"../assets/walls/arthouse_bricks.bmp", "../assets/walls/eye_of_evil.bmp",
+		"../assets/walls/rough_marble.bmp", "../assets/walls/mosaic.bmp",
+		"../assets/walls/aquamarine_tiles.bmp"
 
 		// Pyramid:
 		/* "../assets/walls/pyramid_bricks_4.bmp",
@@ -99,7 +104,7 @@ static void* main_init(void) {
 	SceneState scene_state = {
 		.weapon_sprite = init_weapon_sprite(
 			// 0.6f, 2.0f, 0.07f, (AnimationLayout) {"../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
-			0.75f, 2.0f, 0.02f, (AnimationLayout) {"../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
+			0.75f, 2.0f, 0.022f, (AnimationLayout) {"../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
 			// 0.75f, 2.0f, 0.035f, (AnimationLayout) {"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
 			// 0.8f, 1.0f, 0.04f, (AnimationLayout) {"../assets/spritesheets/weapons/reload_pistol.bmp", 4, 7, 28}
 		),
