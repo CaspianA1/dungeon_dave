@@ -91,11 +91,10 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 	camera -> angles.tilt = clamp_to_pos_neg_domain(tilt, constants.camera.lims.tilt);
 }
 
-/* Maps a value between 0 and 1 to a smooth output
-between 0 and 1, via a cubic Hermite spline. */
+/* From https://en.wikipedia.org/wiki/Smoothstep.
+This is Ken Perlin's improvement of the typical `smoothstep`. */
 static GLfloat smooth_hermite(const GLfloat x) {
-	const GLfloat x_squared = x * x;
-	return 3.0f * x_squared - 2.0f * x_squared * x;
+	return x * x * x * (x * (x * 6.0f - 15.0f) + 10.0f);
 }
 
 static void update_fov(Camera* const camera, const byte movement_bits, const GLfloat delta_time) {
