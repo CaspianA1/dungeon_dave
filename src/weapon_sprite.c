@@ -64,7 +64,7 @@ static GLfloat circular_mapping_from_zero_to_one(const GLfloat x) {
 	return sqrtf(1.0f - x_minus_one * x_minus_one);
 }
 
-static void update_weapon_sprite(WeaponSprite* const ws, const Event* const event) {
+static void update_weapon_sprite_animation(WeaponSprite* const ws, const Event* const event) {
 	buffer_size_t curr_frame = ws -> curr_frame;
 
 	if (curr_frame == 0) {
@@ -82,7 +82,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	const Event* const event, const ShadowMapContext* const shadow_map_context,
 	const mat4 model_view_projection) {
 
-	update_weapon_sprite(ws_ref, event);
+	update_weapon_sprite_animation(ws_ref, event);
 
 	const WeaponSprite ws = *ws_ref;
 
