@@ -107,13 +107,14 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	vec2 weapon_corners[4];
 
-	for (byte i = 0; i < 4; i++) {
-		const signed char screen_corner_x = (i & 1) ? 1 : -1, screen_corner_y = (i > 1) ? 1 : -1;
+	const GLfloat
+		across_term = ws.size * ws.frame_width_over_height * inverse_screen_aspect_ratio,
+		down_term = (ws.size - 1.0f) + down;
 
-		GLfloat* const weapon_corner = weapon_corners[i];
-		weapon_corner[0] = screen_corner_x * ws.size * ws.frame_width_over_height * inverse_screen_aspect_ratio + across;
-		weapon_corner[1] = screen_corner_y * ws.size + (ws.size - 1.0f) + down;
-	}
+	weapon_corners[0][0] = weapon_corners[2][0] = across - across_term;
+	weapon_corners[1][0] = weapon_corners[3][0] = across + across_term;
+	weapon_corners[0][1] = weapon_corners[1][1] = down_term - ws.size;
+	weapon_corners[2][1] = weapon_corners[3][1] = down_term + ws.size;
 
 	//////////
 
