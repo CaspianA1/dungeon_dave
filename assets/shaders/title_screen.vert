@@ -1,6 +1,6 @@
 #version 330 core
 
-out vec2 UV;
+noperspective out vec2 UV;
 
 const vec2 screen_corners[4] = vec2[4](
 	vec2(-1.0f, -1.0f), vec2(1.0f, -1.0f), vec2(-1.0f, 1.0f), vec2(1.0f, 1.0f)
