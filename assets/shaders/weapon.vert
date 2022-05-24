@@ -1,6 +1,6 @@
 #version 330 core
 
-out vec3 fragment_UV;
+noperspective out vec3 fragment_UV;
 
 uniform uint frame_index;
 uniform vec2 weapon_corners[4];

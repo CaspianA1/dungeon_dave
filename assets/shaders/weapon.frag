@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec3 fragment_UV;
+noperspective in vec3 fragment_UV;
 
 out vec4 color;
 
