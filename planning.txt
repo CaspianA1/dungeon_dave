@@ -30,11 +30,10 @@ Shadow mapping:
 - ESM logarithmic space filtering: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
 - Rescale the ESM constant based on the distance between the occluder and the receiver, maybe
 - Filtering in exp(gl_FragCoord.z) may remove some shadow acne
+- Make the weapon cast a shadow
 
 CSM:
 - If there is still too much light bleeding in the end, perhaps switch to one-term EVSM
-- Make the weapon cast a shadow
-- Weapon NDC to world-space like this: https://feepingcreature.github.io/math.html (note: idea didn't fully work at first)
 - Current CSM scheme:
 	ESM with linear + trilinear (i.e. with mipmaps) + anisotropic filtering;
 	per-frame mipmap generation is expensive. A 3x3 PCF kernel.

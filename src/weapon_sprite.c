@@ -78,18 +78,31 @@ static void update_weapon_sprite(WeaponSprite* const ws, const Event* const even
 	ws -> curr_frame = curr_frame;
 }
 
-void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera, const Event* const event) {
+void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera,
+	const Event* const event, const ShadowMapContext* const shadow_map_context,
+	const mat4 model_view_projection) {
+
 	update_weapon_sprite(ws_ref, event);
 
 	const WeaponSprite ws = *ws_ref;
 
 	use_shader(ws.shader);
-	static GLint weapon_corners_id, frame_index_id;
+	static GLint frame_index_id, screen_corners_id, world_corners_id;
 
 	ON_FIRST_CALL(
-		INIT_UNIFORM(weapon_corners, ws.shader);
 		INIT_UNIFORM(frame_index, ws.shader);
+		INIT_UNIFORM(screen_corners, ws.shader);
+		INIT_UNIFORM(world_corners, ws.shader);
+
+		INIT_UNIFORM_VALUE(ambient, ws.shader, 1f, constants.lighting.ambient);
+		INIT_UNIFORM_VALUE(pcf_radius, ws.shader, 1i, constants.lighting.pcf_radius);
+		INIT_UNIFORM_VALUE(esm_constant, ws.shader, 1f, constants.lighting.esm_constant);
+		INIT_UNIFORM_VALUE(biased_light_model_view_projection, ws.shader, Matrix4fv,
+			1, GL_FALSE, &shadow_map_context -> light.biased_model_view_projection[0][0]);
+
 		use_texture(ws.texture, ws.shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
+		use_texture(shadow_map_context -> buffers.depth_texture, ws.shader, "shadow_map_sampler",
+			TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 	);
 
 	const GLfloat
@@ -100,26 +113,41 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 		time_pace = sinf((SDL_GetTicks() / 1000.0f) * PI / constants.weapon_sprite.time_for_half_movement_cycle),
 		weapon_movement_magnitude = constants.weapon_sprite.max_movement_magnitude * smooth_speed_xz_percent;
 
-	const GLfloat across = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2.0f to magnitude / 2
+	const GLfloat across = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2.0f to magnitude / 2.0f
 	const GLfloat down = (fabsf(across) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
 
-	//////////
+	////////// Screen corner determination
 
-	vec2 weapon_corners[4];
+	vec2 screen_corners[4];
 
 	const GLfloat
 		across_term = ws.size * ws.frame_width_over_height * inverse_screen_aspect_ratio,
 		down_term = (ws.size - 1.0f) + down;
 
-	weapon_corners[0][0] = weapon_corners[2][0] = across - across_term;
-	weapon_corners[1][0] = weapon_corners[3][0] = across + across_term;
-	weapon_corners[0][1] = weapon_corners[1][1] = down_term - ws.size;
-	weapon_corners[2][1] = weapon_corners[3][1] = down_term + ws.size;
+	screen_corners[0][0] = screen_corners[2][0] = across - across_term;
+	screen_corners[1][0] = screen_corners[3][0] = across + across_term;
+	screen_corners[0][1] = screen_corners[1][1] = down_term - ws.size;
+	screen_corners[2][1] = screen_corners[3][1] = down_term + ws.size;
+
+	////////// World corner determination
+
+	vec3 world_corners[4];
+	mat4 inverse;
+	glm_mat4_inv((vec4*) model_view_projection, inverse);
+	const vec4 viewport = {-1.0f, -1.0f, 1.0f, 1.0f};
+
+	for (byte i = 0; i < 4; i++) {
+		const GLfloat* const screen_corner = screen_corners[i];
+
+		glm_unprojecti((vec3) {screen_corner[0], screen_corner[1], constants.weapon_sprite.ndc_dist_from_camera},
+			(vec4*) inverse, (GLfloat*) viewport, world_corners[i]);
+	}
 
 	//////////
 
-	UPDATE_UNIFORM(weapon_corners, 2fv, 4, (GLfloat*) weapon_corners);
 	UPDATE_UNIFORM(frame_index, 1ui, ws.curr_frame);
+	UPDATE_UNIFORM(screen_corners, 2fv, 4, (GLfloat*) screen_corners);
+	UPDATE_UNIFORM(world_corners, 3fv, 4, (GLfloat*) world_corners);
 
 	WITH_BINARY_RENDER_STATE(GL_BLEND,
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -103,8 +103,8 @@ static void* main_init(void) {
 
 	SceneState scene_state = {
 		.weapon_sprite = init_weapon_sprite(
-			// 0.6f, 2.0f, 0.07f, (AnimationLayout) {"../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
-			0.75f, 2.0f, 0.022f, (AnimationLayout) {"../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
+			0.6f, 2.0f, 0.07f, (AnimationLayout) {"../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
+			// 0.75f, 2.0f, 0.122f, (AnimationLayout) {"../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
 			// 0.75f, 2.0f, 0.035f, (AnimationLayout) {"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
 			// 0.8f, 1.0f, 0.04f, (AnimationLayout) {"../assets/spritesheets/weapons/reload_pistol.bmp", 4, 7, 28}
 		),
@@ -205,7 +205,9 @@ static void main_drawer(void* const app_context) {
 	/* Drawing the skybox after sectors and billboards because
 	most skybox fragments would unnecessarily be drawn otherwise */
 	draw_skybox(scene_state -> skybox, camera);
-	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, camera, &event);
+
+	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, camera,
+		&event, shadow_map_context, camera -> model_view_projection);
 }
 
 static void main_deinit(void* const app_context) {

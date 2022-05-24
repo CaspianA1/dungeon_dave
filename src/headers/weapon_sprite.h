@@ -5,6 +5,7 @@
 #include "animation.h"
 #include "camera.h"
 #include "event.h"
+#include "esm.h"
 
 typedef struct {
 	const GLuint texture, shader;
@@ -22,6 +23,9 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 	const GLfloat secs_for_frame, const AnimationLayout animation_layout);
 
 void deinit_weapon_sprite(const WeaponSprite* const ws);
-void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera, const Event* const event);
+
+void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera,
+	const Event* const event, const ShadowMapContext* const shadow_map_context,
+	const mat4 model_view_projection);
 
 #endif

@@ -55,7 +55,7 @@ static const struct {
 	} lighting;
 
 	const struct {
-		const GLfloat max_movement_magnitude, time_for_half_movement_cycle;
+		const GLfloat max_movement_magnitude, time_for_half_movement_cycle, ndc_dist_from_camera;
 	} weapon_sprite;
 
 	const struct {
@@ -107,7 +107,8 @@ static const struct {
 
 	.weapon_sprite = {
 		.max_movement_magnitude = 0.2f,
-		.time_for_half_movement_cycle = 0.5f
+		.time_for_half_movement_cycle = 0.5f,
+		.ndc_dist_from_camera = 2.0f / 3.0f
 	},
 
 	.normal_mapping = {
