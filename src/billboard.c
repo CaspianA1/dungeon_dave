@@ -64,8 +64,8 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
 
-		INIT_UNIFORM_VALUE(pcf_radius, shader, 1i, constants.lighting.pcf_radius);
 		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
+		INIT_UNIFORM_VALUE(pcf_radius, shader, 1i, constants.lighting.pcf_radius);
 		INIT_UNIFORM_VALUE(esm_constant, shader, 1f, constants.lighting.esm_constant);
 
 		INIT_UNIFORM_VALUE(biased_light_model_view_projection, shader, Matrix4fv, 1,

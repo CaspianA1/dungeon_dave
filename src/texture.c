@@ -33,15 +33,11 @@ void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const
 	INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(sampler_name, shader, 1i, texture_unit); // Sets texture unit for shader
 }
 
-void set_current_texture_unit(const byte texture_unit) {
-	glActiveTexture(GL_TEXTURE0 + texture_unit);
-}
-
 void use_texture(const GLuint texture, const GLuint shader,
 	const GLchar* const sampler_name, const TextureType type, const byte texture_unit) {
 
 	set_sampler_texture_unit_for_shader(sampler_name, shader, texture_unit);
-	set_current_texture_unit(texture_unit);
+	glActiveTexture(GL_TEXTURE0 + texture_unit);
 	set_current_texture(type, texture); // Associates the input texture with the right texture unit
 }
 
