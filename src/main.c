@@ -7,6 +7,8 @@
 #include "headers/sector.h"
 #include "headers/normal_map_generation.h"
 
+#include "headers/csm.h" // TODO: remove
+
 static void* main_init(void) {
 	////////// Defining a bunch of level data
 
@@ -187,6 +189,8 @@ static void main_drawer(void* const app_context) {
 	Camera* const camera = &scene_state -> camera;
 
 	update_camera(camera, event);
+
+	csm_test(camera, shadow_map_context -> light.dir); // TODO: remove
 
 	update_billboard_animation_instances(
 		&scene_state -> billboard_animation_instances,

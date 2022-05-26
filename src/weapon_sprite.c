@@ -132,15 +132,15 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	////////// World corner determination
 
 	vec3 world_corners[4];
-	mat4 inverse;
-	glm_mat4_inv((vec4*) model_view_projection, inverse);
+	mat4 inv_model_view_projection;
+	glm_mat4_inv((vec4*) model_view_projection, inv_model_view_projection);
 	const vec4 viewport = {-1.0f, -1.0f, 1.0f, 1.0f};
 
 	for (byte i = 0; i < 4; i++) {
 		const GLfloat* const screen_corner = screen_corners[i];
 
 		glm_unprojecti((vec3) {screen_corner[0], screen_corner[1], constants.weapon_sprite.ndc_dist_from_camera},
-			(vec4*) inverse, (GLfloat*) viewport, world_corners[i]);
+			(vec4*) inv_model_view_projection, (GLfloat*) viewport, world_corners[i]);
 	}
 
 	//////////

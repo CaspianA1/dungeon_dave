@@ -11,6 +11,8 @@ typedef enum {
 	LinkShaders
 } ShaderCompilationStep;
 
+enum {num_sub_shaders = 2};
+
 /* This is just here because `read_and_parse_includes_for_glsl`
 and `get_source_for_included_file` are mutually recursive */
 static bool read_and_parse_includes_for_glsl(List* const dependency_list,
@@ -55,9 +57,9 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 	}
 }
 
-static GLuint init_shader_from_source(const List shader_code[2]) {
-	const GLenum sub_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
-	GLuint sub_shaders[2], shader = glCreateProgram();
+static GLuint init_shader_from_source(const List shader_code[num_sub_shaders]) {
+	const GLenum sub_shader_types[num_sub_shaders] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
+	GLuint sub_shaders[num_sub_shaders], shader = glCreateProgram();
 
 	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
 		const GLuint sub_shader = glCreateShader(sub_shader_types[step]);
@@ -225,9 +227,9 @@ static void erase_version_strings_from_dependency_list(List* const dependency_li
 }
 
 GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const fragment_shader_path) {
-	List dependency_lists[2];
+	List dependency_lists[num_sub_shaders];
 
-	for (byte i = 0; i < 2; i++) {
+	for (byte i = 0; i < num_sub_shaders; i++) {
 		List* const dependency_list = dependency_lists + i;
 		*dependency_list = init_list(1, GLchar*);
 
@@ -244,7 +246,7 @@ GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const f
 
 	const GLuint shader = init_shader_from_source(dependency_lists);
 
-	for (byte i = 0; i < 2; i++) {
+	for (byte i = 0; i < num_sub_shaders; i++) {
 		const List* const dependency_list = dependency_lists + i;
 
 		for (buffer_size_t i = 0; i < dependency_list -> length; i++)
