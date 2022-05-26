@@ -164,6 +164,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	Other things to do for this:
 	1. Detect dependency cycles
 	2. Perhaps handle #defines
+	3. Report correct line numbers when errors are given
 	*/
 
 	#define NO_PATH_STRING_ERROR() FAIL(ParseIncludeDirectiveInShader,\
