@@ -105,10 +105,9 @@ static const struct {
 	.lighting = {
 		.enable_tone_mapping = true, .pcf_radius = 2, .esm_constant = 80.0f,
 
-		.ambient = 0.2f, .diffuse_strength = 0.5f, .specular_strength = 0.5f,
+		.ambient = 0.25f, .diffuse_strength = 0.5f, .specular_strength = 0.5f,
 		.specular_exponent_domain = {32.0f, 96.0f}, .noise_granularity = 0.3f / 255.0f,
-		// .light_color = {238.0f / 255.0f, 196.0f / 255.0f, 120.0f / 255.0f}
-		.light_color = {1.0f, 1.0f, 1.0f},
+		.light_color = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
 
 		.tone_mapping = {
 			.max_brightness = 1.0f, .linear_contrast = 1.0f,
