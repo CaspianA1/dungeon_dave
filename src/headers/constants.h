@@ -51,7 +51,13 @@ static const struct {
 		const GLfloat
 			esm_constant, ambient, diffuse_strength,
 			specular_strength, specular_exponent_domain[2],
-			exposure, noise_granularity, light_color[3];
+			noise_granularity, light_color[3];
+
+		const struct {
+			const GLfloat
+				max_brightness, linear_contrast,
+				linear_start, linear_length, black, pedestal;
+		} tone_mapping;
 	} lighting;
 
 	const struct {
@@ -99,10 +105,16 @@ static const struct {
 	.lighting = {
 		.enable_tone_mapping = true, .pcf_radius = 2, .esm_constant = 80.0f,
 
-		.ambient = 0.2f, .diffuse_strength = 1.0f, .specular_strength = 1.0f,
-		.specular_exponent_domain = {32.0f, 128.0f},
-		.exposure = 1.0f, .noise_granularity = 0.3f / 255.0f,
-		.light_color = {250.0f / 255.0f, 210.0f / 255.0f, 165.0f / 255.0f}
+		.ambient = 0.2f, .diffuse_strength = 0.5f, .specular_strength = 0.5f,
+		.specular_exponent_domain = {32.0f, 96.0f}, .noise_granularity = 0.3f / 255.0f,
+		// .light_color = {238.0f / 255.0f, 196.0f / 255.0f, 120.0f / 255.0f}
+		.light_color = {1.0f, 1.0f, 1.0f},
+
+		.tone_mapping = {
+			.max_brightness = 1.0f, .linear_contrast = 1.0f,
+			.linear_start = 0.22f, .linear_length = 0.4f,
+			.black = 1.33f, .pedestal = 0.0f
+		}
 	},
 
 	.weapon_sprite = {

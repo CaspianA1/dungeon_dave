@@ -100,9 +100,8 @@ Normal mapping:
 	Choose a hash map or an array for association between path and settings
 
 A better shading model:
-- Share shader uniforms via uniform buffer objects (mostly for a LightParams struct)
-- Share code between shaders (mostly need to share a `shade_world_fragment` function, and the lighting uniform
-	block definition; perhaps build a manual #include mechamism, or link completed shaders together)
+- JSON file -> LightParams struct -> shared shader uniforms via uniform buffer objects
+- Those UBOs then can share a common fragment shading function that uses those params and takes in a surface normal
 
 Physics:
 	Features:
