@@ -7,7 +7,6 @@ layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
 
 flat out uint face_id;
-
 out vec3 UV, fragment_pos_world_space;
 
 uniform mat4 model_view_projection;
