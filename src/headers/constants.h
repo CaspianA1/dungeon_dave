@@ -112,7 +112,7 @@ static const struct {
 		.tone_mapping = {
 			.max_brightness = 1.0f, .linear_contrast = 1.0f,
 			.linear_start = 0.22f, .linear_length = 0.4f,
-			.black = 1.33f, .pedestal = 0.0f
+			.black = 1.2f, /* 1.33f */ .pedestal = 0.0f
 		}
 	},
 
