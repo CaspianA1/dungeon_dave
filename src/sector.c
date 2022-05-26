@@ -181,8 +181,9 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 
 	use_shader(shader);
 
-	#define LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, constants.lighting.param);
-	#define ARRAY_LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, 1, constants.lighting.param);
+	#define TONE_MAPPING_UNIFORM(param) INIT_UNIFORM_VALUE(tm_##param, shader, 1f, constants.lighting.tone_mapping.param)
+	#define LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, constants.lighting.param)
+	#define ARRAY_LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, 1, constants.lighting.param)
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(dir_to_light, shader);
@@ -200,7 +201,13 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		LIGHTING_UNIFORM(specular_strength, 1f);
 		ARRAY_LIGHTING_UNIFORM(specular_exponent_domain, 2fv);
 
-		LIGHTING_UNIFORM(exposure, 1f);
+		TONE_MAPPING_UNIFORM(max_brightness);
+		TONE_MAPPING_UNIFORM(linear_contrast);
+		TONE_MAPPING_UNIFORM(linear_start);
+		TONE_MAPPING_UNIFORM(linear_length);
+		TONE_MAPPING_UNIFORM(black);
+		TONE_MAPPING_UNIFORM(pedestal);
+
 		LIGHTING_UNIFORM(noise_granularity, 1f);
 		ARRAY_LIGHTING_UNIFORM(light_color, 3fv);
 
@@ -220,10 +227,11 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	//////////
 
 	const GLfloat t = SDL_GetTicks() / 3000.0f;
-	UPDATE_UNIFORM(UV_translation, 2f, cosf(t), t);
+	UPDATE_UNIFORM(UV_translation, 2f, cosf(t), tanf(t));
 
 	//////////
 
+	#undef TONE_MAPPING_UNIFORM
 	#undef LIGHTING_UNIFORM
 	#undef ARRAY_LIGHTING_UNIFORM
 

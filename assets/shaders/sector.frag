@@ -9,7 +9,13 @@ in vec3 UV, fragment_pos_world_space;
 out vec3 color;
 
 uniform bool enable_tone_mapping;
-uniform float ambient, diffuse_strength, specular_strength, exposure, noise_granularity;
+
+uniform float
+	ambient, diffuse_strength, specular_strength, noise_granularity,
+
+	tm_max_brightness, tm_linear_contrast, tm_linear_start, // `tm` = tone mapping
+	tm_linear_length, tm_black, tm_pedestal;
+
 uniform vec2 specular_exponent_domain, one_over_screen_size, UV_translation;
 uniform vec3 camera_pos_world_space, dir_to_light, light_color, UV_translation_area[2];
 uniform sampler2DArray texture_sampler, normal_map_sampler;
@@ -63,10 +69,28 @@ vec3 get_fragment_normal(vec3 offset_UV) {
 	return rotated_vectors[face_id];
 }
 
+// https://github.com/dmnsgn/glsl-tone-map/blob/master/uchimura.glsl (but with better variable names)
+vec3 uchimura_tone_mapping(vec3 color) {
+	float L0 = ((tm_max_brightness - tm_linear_start) * tm_linear_length) / tm_linear_contrast;
+	float S0 = tm_linear_start + L0, S1 = tm_linear_start + tm_linear_contrast * L0;
+	float C2 = (tm_linear_contrast * tm_max_brightness) / (tm_max_brightness - S1);
+	float CM = -C2 / tm_max_brightness;
+
+	vec3
+		W0 = vec3(1.0f - smoothstep(0.0f, tm_linear_start, color)),
+		W2 = vec3(step(tm_linear_start + L0, color));
+
+	vec3
+		W1 = vec3(1.0f - W0 - W2),
+		T = vec3(tm_linear_start * pow(color / tm_linear_start, vec3(tm_black)) + tm_pedestal),
+		L = vec3(tm_linear_start + tm_linear_contrast * (color - tm_linear_start)),
+		S = vec3(tm_max_brightness - (tm_max_brightness - S1) * exp(CM * (color - S0)));
+
+	return (T * W0) + (L * W1) + (S * W2);
+}
+
 vec3 postprocess_light(vec3 color) {
-	// HDR through tone mapping
-	vec3 tone_mapped_color = vec3(1.0f) - exp(-color * exposure);
-	color = mix(color, tone_mapped_color, float(enable_tone_mapping));
+	color = mix(color, uchimura_tone_mapping(color), float(enable_tone_mapping));
 
 	// Noise is added to remove color banding
 	vec2 screen_fragment_pos = gl_FragCoord.xy * one_over_screen_size;
