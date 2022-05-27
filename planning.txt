@@ -26,6 +26,7 @@ Shadow mapping:
 	- It can then be resized to the AABB area after
 	- Then, expand that to 3D
 
+- For CSM, allow integration of an optional geometry sub-shader before the vertex and fragment sub-shaders
 - After CSM, implement SDSM
 - ESM logarithmic space filtering: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
 - Rescale the ESM constant based on the distance between the occluder and the receiver, maybe
