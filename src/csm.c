@@ -2,6 +2,8 @@
 #define CSM_C
 
 #include "headers/csm.h"
+#include "headers/shader.h"
+#include "headers/texture.h"
 
 // https://learnopengl.com/Guest-Articles/2021/CSM
 
@@ -10,68 +12,10 @@ Details:
 - Have the MVP getter set up
 - Will use array textures at first for layers (with the normal framebuffer setup)
 
-- Geo shader setup:
-- Vertex shader: normal gl_Position setting
-- Fragment shader: some special code
-- Then, the remaining code concerns cascade selection
+- The remaining code concerns cascade selection in the depth + other shader
 */
 
 //////////
-
-static void init_csm_geo_shader(void) {
-	const GLchar* const geo_shader_code =
-		// Hm, this does not work under 3.3
-
-		"#version 330 core\n"
-
-		"layout(triangles, invocations = 5) in;\n"
-		"layout(triangle_strip, max_vertices = 3) out;\n"
-
-		"uniform mat4 light_space_matrices[16];\n"
-
-		"void main(void) {\n"
-			"for (int i = 0; i < 3; i++) {\n"
-				"gl_Position = light_space_matrices[gl_InvocationID] * gl_in[i].gl_Position;\n"
-				"gl_Layer = gl_InvocationID;\n"
-				"EmitVertex();\n"
-			"}\n"
-		"EndPrimitive();\n"
-	"}\n";
-
-	//////////
-
-	puts("Initing the csm geo shader");
-
-	const GLuint shader = glCreateProgram();
-
-	const GLuint geo_sub_shader = glCreateShader(GL_GEOMETRY_SHADER);
-	glShaderSource(geo_sub_shader, (GLsizei) 1, &geo_shader_code, NULL);
-	glCompileShader(geo_sub_shader);
-
-	GLint log_length;
-	glGetShaderiv(geo_sub_shader, GL_INFO_LOG_LENGTH, &log_length);
-
-	if (log_length > 0) {
-		GLchar* const error_message = malloc((size_t) log_length + 1);
-		glGetShaderInfoLog(geo_sub_shader, log_length, NULL, error_message);
-		DEBUG(error_message, s);
-		free(error_message);
-
-		GL_ERR_CHECK;
-		puts("Problemo");
-		return;
-	}
-
-	puts("All bueno");
-
-	glAttachShader(shader, geo_sub_shader);
-
-	/*
-	- Now, will also need a vertex and fragment shader.
-	- Would be so much easier to be able to inject in a geo shader.
-	- TODO: add that functionality.
-	*/
-}
 
 // TODO: split up this function wherever possible
 static void get_csm_model_view_projection(const Camera* const camera,
@@ -112,8 +56,45 @@ static void get_csm_model_view_projection(const Camera* const camera,
 	glm_mul(projection, view, model_view_projection);
 }
 
+static void init_csm_layered_texture(const GLsizei width, const GLsizei height, const GLsizei num_layers, const GLint depth_format) {
+	GLuint depth_layers;
+	glGenTextures(1, &depth_layers);
+	glBindTexture(TexSet, depth_layers);
+
+	glTexParameteri(TexSet, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(TexSet, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(TexSet, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(TexSet, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTexImage3D(TexSet, 0, depth_format, width, height, num_layers, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+	GLuint framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_layers, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		FAIL(CreateFramebuffer, "OpenGL error is '%s'", get_GL_error());
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//////////
+
+	glDeleteTextures(1, &depth_layers);
+	glDeleteFramebuffers(1, &framebuffer);
+}
+
 void csm_test(const Camera* const camera, const vec3 light_dir) {
-	// ON_FIRST_CALL(init_csm_geo_shader(););
+	// NEXT: set up a context similar to esm, where stuff can be drawn to the layers
+
+	ON_FIRST_CALL(
+		const GLuint shader = init_shader("assets/shaders/csm/depth.vert",
+			"assets/shaders/csm/depth.geom", "assets/shaders/csm/depth.frag");
+
+		deinit_shader(shader);
+
+		init_csm_layered_texture(1024, 1024, 3, GL_DEPTH_COMPONENT16);
+	);
 
 	mat4 model_view_projection;
 	get_csm_model_view_projection(camera, light_dir, 10.0f, model_view_projection);

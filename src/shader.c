@@ -7,11 +7,12 @@
 
 typedef enum {
 	CompileVertexShader,
+	CompileGeoShader,
 	CompileFragmentShader,
 	LinkShaders
 } ShaderCompilationStep;
 
-enum {num_sub_shaders = 2};
+enum {num_sub_shaders = 3};
 
 /* This is just here because `read_and_parse_includes_for_glsl`
 and `get_source_for_included_file` are mutually recursive */
@@ -46,6 +47,7 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 
 		switch (compilation_step) {
 			STRING_CASE(CompileVertexShader, "vertex shader compilation");
+			STRING_CASE(CompileGeoShader, "geometry shader compilation");
 			STRING_CASE(CompileFragmentShader, "fragment shader compilation");
 			STRING_CASE(LinkShaders, "linking");
 		}
@@ -57,11 +59,13 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 	}
 }
 
-static GLuint init_shader_from_source(const List shader_code[num_sub_shaders]) {
-	const GLenum sub_shader_types[num_sub_shaders] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
+static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], const GLchar* const sub_shader_paths[num_sub_shaders]) {
+	const GLenum sub_shader_types[num_sub_shaders] = {GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER};
 	GLuint sub_shaders[num_sub_shaders], shader = glCreateProgram();
 
 	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
+		if (sub_shader_paths[step] == NULL) continue;
+
 		const GLuint sub_shader = glCreateShader(sub_shader_types[step]);
 
 		const List* const sub_shader_code = shader_code + step;
@@ -79,6 +83,8 @@ static GLuint init_shader_from_source(const List shader_code[num_sub_shaders]) {
 		glLinkProgram, glGetProgramiv, glGetProgramInfoLog);
 
 	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
+		if (sub_shader_paths[step] == NULL) continue;
+
 		const GLuint sub_shader = sub_shaders[step];
 		glDetachShader(shader, sub_shader);
 		glDeleteShader(sub_shader);
@@ -214,7 +220,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	return true;
 }
 
-static void erase_version_strings_from_dependency_list(List* const dependency_list) {
+static void erase_version_strings_from_dependency_list(const List* const dependency_list) {
 	const GLchar* const version_string = "#version 330 core\n";
 	const size_t version_string_length = strlen(version_string);
 
@@ -227,27 +233,38 @@ static void erase_version_strings_from_dependency_list(List* const dependency_li
 	}
 }
 
-GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const fragment_shader_path) {
+GLuint init_shader(
+	const GLchar* const vertex_shader_path,
+	const GLchar* const geo_shader_path,
+	const GLchar* const fragment_shader_path) {
+
+	const GLchar* const paths[num_sub_shaders] = {vertex_shader_path, geo_shader_path, fragment_shader_path};
+
 	List dependency_lists[num_sub_shaders];
 
 	for (byte i = 0; i < num_sub_shaders; i++) {
+		const GLchar* const path = paths[i];
+		if (path == NULL) continue;
+
 		List* const dependency_list = dependency_lists + i;
 		*dependency_list = init_list(1, GLchar*);
 
-		const GLchar* const path = i ? fragment_shader_path : vertex_shader_path;
 		GLchar* const code = read_file_contents(path);
 
 		// `get_include_snippet_in_glsl_code` blanks out #include lines and recursively adds to the dependency list
 		while (read_and_parse_includes_for_glsl(dependency_list, code, path));
+
 		push_ptr_to_list(dependency_list, &code);
 
 		// This blanks out #version lines for all included files
 		erase_version_strings_from_dependency_list(dependency_list);
 	}
 
-	const GLuint shader = init_shader_from_source(dependency_lists);
+	const GLuint shader = init_shader_from_source(dependency_lists, paths);
 
 	for (byte i = 0; i < num_sub_shaders; i++) {
+		if (paths[i] == NULL) continue;
+
 		const List* const dependency_list = dependency_lists + i;
 
 		for (buffer_size_t i = 0; i < dependency_list -> length; i++)

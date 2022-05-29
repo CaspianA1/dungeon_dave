@@ -94,9 +94,8 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 
 	for (byte i = 0; i < 6; i++) {
 		const ivec2 src_origin = src_origins[i];
-		SDL_Rect src_rect = {src_origin.x, src_origin.y, cube_size, cube_size};
 
-		SDL_BlitSurface(skybox_surface, &src_rect, face_surface, NULL);
+		SDL_BlitSurface(skybox_surface, &(SDL_Rect) {src_origin.x, src_origin.y, cube_size, cube_size}, face_surface, NULL);
 		write_surface_to_texture(face_surface, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 	}
 
@@ -121,7 +120,7 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 
 	return (Skybox) {
 		.vertex_buffer = vertex_buffer, .vertex_spec = vertex_spec,
-		.shader = init_shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag"),
+		.shader = init_shader("assets/shaders/skybox.vert", NULL, "assets/shaders/skybox.frag"),
 		.texture = init_skybox_texture(cubemap_path, texture_rescale_factor)
 	};
 }
