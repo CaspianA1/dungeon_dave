@@ -117,6 +117,7 @@ void deinit_csm_context(const CascadedShadowContext* const csm_context) {
 void render_to_csm_context(const CascadedShadowContext* const csm_context, const Camera* const camera) {
 	mat4 model_view_projection;
 	get_csm_model_view_projection(camera, csm_context -> light_dir, csm_context -> z_scale, model_view_projection);
+	// TODO: actually do stuff here
 }
 
 #endif
