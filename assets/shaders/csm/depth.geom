@@ -1,4 +1,4 @@
-#version 410 core // TODO: figure out how to change the version to 330
+#version 400 core // TODO: figure out how to change the version to 330
 
 // TODO: can remove the `invocations` part?
 layout(triangles, invocations = 5) in;

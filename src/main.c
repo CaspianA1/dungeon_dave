@@ -190,7 +190,10 @@ static void main_drawer(void* const app_context) {
 
 	update_camera(camera, event);
 
-	csm_test(camera, shadow_map_context -> light.dir); // TODO: remove
+	// A test:
+	const CascadedShadowContext csm_context = init_csm_context((vec3) {0.0f, 1.0f, 0.0f}, 10.0f, 1024, 1024, 3);
+	deinit_csm_context(&csm_context);
+	//
 
 	update_billboard_animation_instances(
 		&scene_state -> billboard_animation_instances,
