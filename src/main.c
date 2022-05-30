@@ -157,6 +157,11 @@ static void* main_init(void) {
 		scene_state.camera.far_clip_dist
 	);
 
+	// A test:
+	const CascadedShadowContext csm_context = init_csm_context((vec3) {0.0f, 1.0f, 0.0f}, 10.0f, 1024, 1024, 3);
+	deinit_csm_context(&csm_context);
+	//
+
 	//////////
 
 	glEnable(GL_DEPTH_TEST);
@@ -189,11 +194,6 @@ static void main_drawer(void* const app_context) {
 	Camera* const camera = &scene_state -> camera;
 
 	update_camera(camera, event);
-
-	// A test:
-	const CascadedShadowContext csm_context = init_csm_context((vec3) {0.0f, 1.0f, 0.0f}, 10.0f, 1024, 1024, 3);
-	deinit_csm_context(&csm_context);
-	//
 
 	update_billboard_animation_instances(
 		&scene_state -> billboard_animation_instances,
