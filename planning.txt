@@ -99,9 +99,11 @@ Normal mapping:
 - Vary the normal map generation parameters based on the output texture size
 - Define normal map settings for each wall texture (only useful at normal map generation time).
 	Choose a hash map or an array for association between path and settings
+- Note: normal maps calculated via dFdx/y won't work because 1. derivatives are in screen space and 2. normals can then not be filtered
 
 A better shading model:
-- JSON file -> LightParams struct -> shared shader uniforms via uniform buffer objects
+- JSON file -> LightParams struct -> shared shader uniforms via uniform buffer objects (or no intermediate LightParams struct at all)
+- Possibility: instead of ambient, diffuse, and specular parameters per level, perhaps a material system (include normal map intensity in this; for the CPU only)
 - Those UBOs then can share a common fragment shading function that uses those params and takes in a surface normal
 
 Physics:

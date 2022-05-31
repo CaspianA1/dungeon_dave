@@ -221,15 +221,15 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 }
 
 static void erase_version_strings_from_dependency_list(const List* const dependency_list) {
-	const GLchar* const version_string = "#version 330 core\n";
-	const size_t version_string_length = strlen(version_string);
+	const GLchar *const base_version_string = "#version", *const full_version_string = "#version ___ core\n";
+	const GLsizei full_version_string_length = strlen(full_version_string);
 
 	// Not erasing the version string from the first one because it's the only one that should keep #version in it
 	for (buffer_size_t i = 1; i < dependency_list -> length; i++) {
 		GLchar* const dependency = value_at_list_index(dependency_list, i, GLchar*);
 
-		GLchar* const version_string_pos = strstr(dependency, version_string);
-		if (version_string_pos != NULL) memset(version_string_pos, ' ', version_string_length);
+		GLchar* const version_string_pos = strstr(dependency, base_version_string);
+		if (version_string_pos != NULL) memset(version_string_pos, ' ', full_version_string_length);
 	}
 }
 

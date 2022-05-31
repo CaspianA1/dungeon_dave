@@ -46,9 +46,9 @@ vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {
 	return light_strength * light_color * texture_color;
 }
 
-vec3 get_fragment_normal(vec3 offset_UV) {
+vec3 get_fragment_normal(vec3 UV) {
 	// `t` = tangent space normal. Normalized b/c linear filtering may unnormalize it.
-	vec3 t = normalize(texture(normal_map_sampler, offset_UV).rgb * 2.0f - 1.0f);
+	vec3 t = normalize(texture(normal_map_sampler, UV).rgb * 2.0f - 1.0f);
 
 	// No matrix multiplication here! :)
 	vec3 rotated_vectors[5] = vec3[5](
@@ -82,13 +82,15 @@ vec3 uchimura_tone_mapping(vec3 color) {
 	return (T * W0) + (L * W1) + (S * W2);
 }
 
-vec3 postprocess_light(vec3 color) {
-	color = mix(color, uchimura_tone_mapping(color), float(enable_tone_mapping));
-
-	// Noise is added to remove color banding
+vec3 noise_for_banding_removal(vec3 color) {
 	vec2 screen_fragment_pos = gl_FragCoord.xy * one_over_screen_size;
 	float random_value = fract(sin(dot(screen_fragment_pos, vec2(12.9898f, 78.233f))) * 43758.5453f);
 	return color + mix(-noise_granularity, noise_granularity, random_value);
+}
+
+vec3 postprocess_light(vec3 color) {
+	color = mix(color, uchimura_tone_mapping(color), float(enable_tone_mapping));
+	return noise_for_banding_removal(color);
 }
 
 /* Each level may have an area where sector UV
