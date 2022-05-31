@@ -61,17 +61,8 @@ static void get_csm_model_view_projection(const Camera* const camera,
 static GLuint init_csm_depth_layers(const GLsizei width,
 	const GLsizei height, const GLsizei num_layers) {
 
-	GLuint depth_layers;
-	glGenTextures(1, &depth_layers);
-	set_current_texture(TexSet, depth_layers);
-
-	glTexParameteri(TexSet, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(TexSet, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(TexSet, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(TexSet, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
+	const GLuint depth_layers = preinit_texture(TexSet, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST);
 	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, width, height, num_layers, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-
 	return depth_layers;
 }
 
