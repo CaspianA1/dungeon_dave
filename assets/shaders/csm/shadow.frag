@@ -8,9 +8,7 @@ uniform mat4 view; // Is this the light view matrix?
 uniform sampler2DArray cascaded_shadow_map;
 
 uint get_cascade_layer(vec3 fragment_pos_world_space) {
-	vec4 fragment_pos_world_space_4D = vec4(fragment_pos_world_space, 1.0f);
-
-	vec4 fragment_pos_view_space = view * fragment_pos_world_space_4D;
+	vec4 fragment_pos_view_space = view * vec4(fragment_pos_world_space, 1.0f);
 	float depth_value = abs(fragment_pos_view_space.z);
 
 	int layer = -1; // TODO: select the cascade using some constant-time math
