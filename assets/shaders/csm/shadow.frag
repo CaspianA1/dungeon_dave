@@ -4,7 +4,7 @@
 
 uniform int num_cascades;
 uniform float cascade_plane_distances[3]; // TODO: find out if the length of this array should equal `num_cascades`
-uniform mat4 view;
+uniform mat4 view; // Is this the light view matrix?
 uniform sampler2DArray cascaded_shadow_map;
 
 uint get_cascade_layer(vec3 fragment_pos_world_space) {
@@ -29,4 +29,4 @@ bool in_shadow(uint layer, vec3 fragment_pos_light_space) {
 
 	float occluder_depth = texture(cascaded_shadow_map, vec3(fragment_pos_light_space.xy, layer)).r; 
 	return occluder_depth + 0.005f > fragment_pos_light_space.z;
-j
+}
