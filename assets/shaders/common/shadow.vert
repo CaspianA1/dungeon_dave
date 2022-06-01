@@ -1,4 +1,4 @@
-#version 330 core
+#version 400 core
 
 out vec3 fragment_pos_light_space;
 

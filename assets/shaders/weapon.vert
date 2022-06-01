@@ -1,4 +1,4 @@
-#version 330 core
+#version 400 core
 
 #include "common/shadow.vert"
 #include "common/utils.vert"
