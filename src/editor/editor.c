@@ -209,7 +209,7 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 	init_editor_state_from_json_file(eds, "../assets/levels/simple.json");
 
 	enum {
-		num_textures = 11, map_width = palace_width, map_height = palace_height
+		num_textures = 15, map_width = palace_width, map_height = palace_height
 		// num_textures = 3, map_width = pyramid_width, map_height = pyramid_height
 		};
 
@@ -219,10 +219,12 @@ void init_editor_state(EditorState* const eds, SDL_Renderer* const renderer) {
 
 		"../assets/walls/sand.bmp", "../assets/walls/pyramid_bricks_4.bmp",
 		"../assets/walls/marble.bmp", "../assets/walls/hieroglyph.bmp",
-		"../assets/walls/window.bmp", "../assets/walls/saqqara.bmp",
+		"../assets/walls/alkadhib.bmp", "../assets/walls/saqqara.bmp",
 		"../assets/walls/sandstone.bmp", "../assets/walls/cobblestone_3.bmp",
-		"../assets/walls/horses.bmp", "../assets/walls/mesa.bmp",
-		"../assets/walls/arthouse_bricks.bmp"
+		"../assets/walls/rug_3.bmp", "../assets/walls/mesa.bmp",
+		"../assets/walls/arthouse_bricks.bmp", "../assets/walls/eye_of_evil.bmp",
+		"../assets/walls/rough_marble.bmp", "../assets/walls/mosaic.bmp",
+		"../assets/walls/aquamarine_tiles.bmp"
 	};
 
 	// static byte _texture_id_map[map_height][map_width];
