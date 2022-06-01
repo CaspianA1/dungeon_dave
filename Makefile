@@ -34,20 +34,23 @@ OBJ_DIR = obj
 BIN_DIR = bin
 GLAD_DIR = include/glad
 
-OBJS := $(OBJ_DIR)/glad.o $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.c))
+# OBJS := $(OBJ_DIR)/glad.o $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.c))
+OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.c))
 
 ########## Rules for the main project
 
+# Why is glad continously being rebuilt?
+
 all: $(BIN_DIR)/$(OUT)
 
-$(BIN_DIR)/$(OUT): $(OBJS)
+$(BIN_DIR)/$(OUT): $(OBJS) $(OBJ_DIR)/glad.o
 	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) $(GL_LDFLAGS) -o $@ $^
-
-$(OBJ_DIR)/glad.o: $(GLAD_DIR)/*
-	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $@ $(GLAD_DIR)/glad.c
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(HEADER_DIR)/%.h
 	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $@ $(SRC_DIR)/$*.c
+
+$(OBJ_DIR)/glad.o: $(GLAD_DIR)/*.c
+	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $@ $(GLAD_DIR)/glad.c
 
 ########## The rule for the editor + the clean rule
 
