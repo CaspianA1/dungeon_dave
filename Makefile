@@ -39,8 +39,6 @@ OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.c))
 
 ########## Rules for the main project
 
-# Why is glad continously being rebuilt?
-
 all: $(BIN_DIR)/$(OUT)
 
 $(BIN_DIR)/$(OUT): $(OBJS) $(OBJ_DIR)/glad.o
