@@ -1,8 +1,8 @@
 #version 400 core
 
-#define VERTICES_PER_TRIANGLE 3u
-
 #include "csm.common"
+
+#define VERTICES_PER_TRIANGLE 3u
 
 layout(triangles, invocations = NUM_CASCADE_LAYERS) in;
 layout(triangle_strip, max_vertices = VERTICES_PER_TRIANGLE) out;

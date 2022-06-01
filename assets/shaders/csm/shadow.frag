@@ -1,6 +1,5 @@
 #version 400 core
 
-
 #include "csm.common"
 
 // TODO: initialize all of these uniforms
