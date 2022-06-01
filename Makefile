@@ -34,7 +34,6 @@ OBJ_DIR = obj
 BIN_DIR = bin
 GLAD_DIR = include/glad
 
-# OBJS := $(OBJ_DIR)/glad.o $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.c))
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.c))
 
 ########## Rules for the main project
