@@ -42,8 +42,9 @@ CSM:
 	linear for near and far, while using CSM for resolution management
 	(same effect as mipmap selection) + anisotropic filtering. A 5x5 PCF kernel.
 	With this, realtime shadow map generation, and better resolution management.
-	Sector mesh optimization: 1. In high-speed memory. 2. Front faces pre-culled.
-	3. Face info bits removed. 4. Additional faces added for external map edges.
+	Sector mesh optimization:
+		1. In high-speed memory. 2. Front faces pre-culled (result is half the size?).
+		3. Face info bits removed. 4. Additional faces added for external map edges.
 
 Architectural/code design ideas:
 - More efficiently set statemap bit ranges, maybe
