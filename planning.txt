@@ -35,13 +35,15 @@ Shadow mapping:
 
 CSM:
 - If there is still too much light bleeding in the end, perhaps switch to one-term EVSM
-- Current CSM scheme:
+- Current scheme:
 	ESM with linear + trilinear (i.e. with mipmaps) + anisotropic filtering;
-	per-frame mipmap generation is expensive. A 3x3 PCF kernel.
+	per-frame mipmap generation is expensive. A 5x5 occluder depth estimator kernel.
 - CSM scheme:
 	linear for near and far, while using CSM for resolution management
 	(same effect as mipmap selection) + anisotropic filtering. A 5x5 PCF kernel.
 	With this, realtime shadow map generation, and better resolution management.
+	Sector mesh optimization: 1. In high-speed memory. 2. Front faces pre-culled.
+	3. Face info bits removed. 4. Additional faces added for external map edges.
 
 Architectural/code design ideas:
 - More efficiently set statemap bit ranges, maybe
