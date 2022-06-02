@@ -5,7 +5,7 @@
 // TODO: initialize all of these uniforms
 
 uniform float cascade_plane_distances[NUM_CASCADE_LAYERS];
-// TODO: is `view` the light view matrix, or the world view marix? Also, share `light_space_matrices` with `depth.geom`.
+//  Note: `light_space_matrices` is implicitly shared with `depth.geom` (same shader). TODO: is `view` in light view, or world view?
 uniform mat4 view, light_space_matrices[NUM_CASCADE_LAYERS];
 uniform sampler2DArray cascade_sampler;
 
