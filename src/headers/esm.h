@@ -22,8 +22,8 @@ typedef struct {
 } ShadowMapContext;
 
 ShadowMapContext init_shadow_map_context(const GLsizei width,
-	const GLsizei height, const vec3 light_pos, const GLfloat hori_angle,
-	const GLfloat vert_angle, const GLfloat far_clip_dist);
+	const GLsizei height, const GLfloat far_clip_dist,
+	const vec3 light_pos, const vec3 looking_at);
 
 void deinit_shadow_map_context(const ShadowMapContext* const s);
 

@@ -15,8 +15,8 @@
 //////////
 
 ShadowMapContext init_shadow_map_context(const GLsizei width,
-	const GLsizei height, const vec3 light_pos, const GLfloat hori_angle,
-	const GLfloat vert_angle, const GLfloat far_clip_dist) {
+	const GLsizei height, const GLfloat far_clip_dist,
+	const vec3 light_pos, const vec3 looking_at) {
 
 	ShadowMapContext s = {
 		.light.far_clip_dist = far_clip_dist,
@@ -30,7 +30,9 @@ ShadowMapContext init_shadow_map_context(const GLsizei width,
 	};
 
 	glm_vec3_copy((GLfloat*) light_pos, s.light.pos);
-	get_dir_in_2D_and_3D(hori_angle, vert_angle, (vec2) {0.0f, 0.0f}, s.light.dir);
+
+	glm_vec3_sub((GLfloat*) looking_at, (GLfloat*) light_pos, s.light.dir);
+	glm_vec3_normalize(s.light.dir);
 
 	glTexImage2D(TexPlain, 0, INTERNAL_DEPTH_TEXTURE_FORMAT, width,
 		height, 0, DEPTH_TEXTURE_FORMAT, DEPTH_TEXTURE_COMPONENT_TYPE, NULL);
