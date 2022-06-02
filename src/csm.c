@@ -116,7 +116,7 @@ void render_to_csm_context(const CascadedShadowContext* const csm_context, const
 
 	const GLfloat sub_near = 0.01f, sub_far = 5.0f;
 
-	mat4 light_view_projection; // TODO: figure out why some entries in this matrix are `nan` (perhaps because it's orthographic?)
+	mat4 light_view_projection;
 	get_csm_light_view_projection(camera, sub_near, sub_far, csm_context -> z_scale, csm_context -> light_dir, light_view_projection);
 
 	/*
