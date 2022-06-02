@@ -316,14 +316,16 @@ void update_camera(Camera* const camera, const Event event) {
 
 	////////// Making some matrices and frustum planes from the new position and the vectors from before
 
-	mat4 view, projection;
+	camera -> aspect_ratio = (GLfloat) event.screen_size[0] / event.screen_size[1];
 
-	glm_look(pos, dir, up, view);
-	glm_perspective(camera -> angles.fov, (GLfloat) event.screen_size[0] / event.screen_size[1],
+	mat4 projection;
+
+	glm_look(pos, dir, up, camera -> view);
+	glm_perspective(camera -> angles.fov, camera -> aspect_ratio,
 		constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
 
 	// The model matrix is implicit in this, since it equals the identity matrix
-	glm_mul(projection, view, camera -> model_view_projection);
+	glm_mul(projection, camera -> view, camera -> model_view_projection);
 	glm_frustum_planes(camera -> model_view_projection, camera -> frustum_planes);
 
 	////////// Copying the local vectors to the camera, and printing important vectors if needed

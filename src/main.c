@@ -157,11 +157,6 @@ static void* main_init(void) {
 		(vec3) {27.0f, 30.0f, 12.0f}, (vec3) {20.0f, 3.0f, 20.0f}
 	);
 
-	// A test:
-	const CascadedShadowContext csm_context = init_csm_context((vec3) {0.0f, 1.0f, 0.0f}, 10.0f, 1024, 1024, 3);
-	deinit_csm_context(&csm_context);
-	//
-
 	//////////
 
 	glEnable(GL_DEPTH_TEST);
@@ -194,6 +189,14 @@ static void main_drawer(void* const app_context) {
 	Camera* const camera = &scene_state -> camera;
 
 	update_camera(camera, event);
+
+	////////// A test:
+	ON_FIRST_CALL(
+		const CascadedShadowContext csm_context = init_csm_context((vec3) {0.0f, 1.0f, 0.0f}, 10.0f, 1024, 1024, 3);
+		render_to_csm_context(&csm_context, camera);
+		deinit_csm_context(&csm_context);
+	);
+	//////////
 
 	update_billboard_animation_instances(
 		&scene_state -> billboard_animation_instances,

@@ -2,6 +2,7 @@
 #define CSM_C
 
 #include "headers/csm.h"
+#include "headers/constants.h"
 #include "headers/shader.h"
 #include "headers/texture.h"
 
@@ -18,44 +19,50 @@ Details:
 
 //////////
 
-static void get_csm_model_view_projection(const Camera* const camera,
-	const vec3 light_dir, const GLfloat z_scale, mat4 model_view_projection) {
+static void get_csm_light_view_projection(const Camera* const camera,
+	const GLfloat near_clip, const GLfloat far_clip, const GLfloat z_scale,
+	const vec3 light_dir, mat4 light_view_projection) {
 
-	enum {corners_per_frustum = 8};
+	////////// Getting sub frustum center
 
-	////////// Inv model view projection -> frustum corners -> frustum center -> light eye -> view
+	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection;
 
-	mat4 inv_model_view_projection;
-	glm_mat4_inv((vec4*) camera -> model_view_projection, inv_model_view_projection);
+	glm_perspective(camera -> angles.fov, camera -> aspect_ratio,
+		near_clip, far_clip, camera_sub_frustum_projection);
 
-	vec4 frustum_corners[corners_per_frustum];
-	glm_frustum_corners(inv_model_view_projection, frustum_corners);
+	glm_mul(camera_sub_frustum_projection, (vec4*) camera -> view, camera_sub_frustum_view_projection);
 
-	vec4 frustum_center;
-	glm_frustum_center(frustum_corners, frustum_center);
+	vec4 camera_sub_frustum_corners[8], camera_sub_frustum_center;
+
+	glm_frustum_corners(camera_sub_frustum_view_projection, camera_sub_frustum_corners);
+	glm_frustum_center(camera_sub_frustum_corners, camera_sub_frustum_center);
+
+	////////// Getting light view
 
 	vec3 light_eye;
-	glm_vec3_add(frustum_center, (GLfloat*) light_dir, light_eye);
+	glm_vec3_add(camera_sub_frustum_center, (GLfloat*) light_dir, light_eye);
 
-	mat4 view;
-	glm_lookat(light_eye, frustum_center, (vec3) {0.0f, 1.0f, 0.0f}, view);
+	mat4 light_view;
+	glm_lookat(light_eye, camera_sub_frustum_center, (vec3) {0.0f, 1.0f, 0.0f}, light_view);
 
-	////////// Frustum box -> scaling min and max z -> projection
+	////////// Getting a bounding box of the light view
 
-	vec3 frustum_box[2];
-	glm_frustum_box(frustum_corners, view, frustum_box);
+	vec3 light_view_frustum_box[2];
+	glm_frustum_box(camera_sub_frustum_corners, light_view, light_view_frustum_box);
 
-	GLfloat* const min_z_ref = &frustum_box[0][2];
+	GLfloat* const min_z_ref = &light_view_frustum_box[0][2];
 	GLfloat min_z = *min_z_ref;
 	*min_z_ref = (min_z < 0.0f) ? (min_z * z_scale) : (min_z / z_scale);
 
-	GLfloat* const max_z_ref = &frustum_box[1][2];
+	GLfloat* const max_z_ref = &light_view_frustum_box[1][2];
 	GLfloat max_z = *max_z_ref;
 	*max_z_ref = (max_z < 0.0f) ? (max_z / z_scale) : (max_z * z_scale);
 
-	mat4 projection;
-	glm_ortho_aabb(frustum_box, projection);
-	glm_mul(projection, view, model_view_projection);
+	////////// Using the light view frustum box, light projection, and light view to make a light view projection
+
+	mat4 light_projection;
+	glm_ortho_aabb(light_view_frustum_box, light_projection);
+	glm_mul(light_projection, light_view, light_view_projection);
 }
 
 static GLuint init_csm_depth_layers(const GLsizei width,
@@ -106,8 +113,21 @@ void deinit_csm_context(const CascadedShadowContext* const csm_context) {
 }
 
 void render_to_csm_context(const CascadedShadowContext* const csm_context, const Camera* const camera) {
-	mat4 model_view_projection;
-	get_csm_model_view_projection(camera, csm_context -> light_dir, csm_context -> z_scale, model_view_projection);
+
+	const GLfloat sub_near = 0.01f, sub_far = 5.0f;
+
+	mat4 light_view_projection; // TODO: figure out why some entries in this matrix are `nan` (perhaps because it's orthographic?)
+	get_csm_light_view_projection(camera, sub_near, sub_far, csm_context -> z_scale, csm_context -> light_dir, light_view_projection);
+
+	/*
+	for (byte y = 0; y < 4; y++) {
+		for (byte x = 0; x < 4; x++) {
+			printf("%lf ", light_view_projection[y][x]);
+		}
+	}
+	puts("---");
+	*/
+
 	// TODO: actually do stuff here
 }
 
