@@ -31,6 +31,8 @@ bool in_shadow(vec3 fragment_pos_world_space) {
 	// No slope-scale depth bias here because ESM will be used later. TODO: use ESM.
 
 	vec4 fragment_pos_light_space = light_space_matrices[layer] * fragment_pos_world_space_4D;
-	float occluder_depth = texture(cascade_sampler, vec3(fragment_pos_light_space.xy, layer)).r;
-	return occluder_depth + 0.005f > fragment_pos_light_space.z;
+	vec3 cascade_UV = fragment_pos_light_space.xyz * 0.5f + 0.5f; // TODO: incorporate a bias matrix on the CPU
+
+	float occluder_depth = texture(cascade_sampler, vec3(cascade_UV.xy, layer)).r;
+	return occluder_depth + 0.005f > cascade_UV.z;
 }
