@@ -2,4 +2,5 @@
 
 #version 400 core
 
+// TODO: write to this from the CPU (get the version from the `constants` struct)
 #define NUM_CASCADES 10u
