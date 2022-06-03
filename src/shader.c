@@ -93,12 +93,19 @@ static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], c
 	return shader;
 }
 
-static char* read_file_contents(const char* const path) {
-	FILE* const file = fopen(path, "r");
-	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);
+////////// File utils
 
-	 /* (TODO) Possible bug: if `ftell` fails, `num_bytes` will
-	 underflow, and too much data will be allocated. */
+static FILE* open_file_safely(const char* const path, const char* const mode) {
+	FILE* const file = fopen(path, mode);
+	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);
+	return file;
+}
+
+static char* read_file_contents(const char* const path) {
+	FILE* const file = open_file_safely(path, "r");
+
+	/* (TODO) Possible bug: if `ftell` fails, `num_bytes` will
+	underflow, and too much data will be allocated. */
 
 	fseek(file, 0l, SEEK_END); // Set file position to end
 	const size_t num_bytes = (size_t) ftell(file);
@@ -112,6 +119,8 @@ static char* read_file_contents(const char* const path) {
 
 	return data;
 }
+
+//////////
 
 static GLchar* get_source_for_included_file(List* const dependency_list,
 	const GLchar* const includer_path, const GLchar* const included_path) {

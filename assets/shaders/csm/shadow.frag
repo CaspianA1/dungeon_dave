@@ -4,8 +4,8 @@
 
 // TODO: initialize all of these uniforms, and share `light_space_matrices` with `depth.geom`
 
-uniform float cascade_plane_distances[NUM_CASCADE_LAYERS];
-uniform mat4 camera_view, light_space_matrices[NUM_CASCADE_LAYERS];
+uniform float cascade_plane_distances[NUM_CASCADES];
+uniform mat4 camera_view, light_space_matrices[NUM_CASCADES];
 uniform sampler2DArray cascade_sampler;
 
 bool in_shadow(vec3 fragment_pos_world_space) {
@@ -17,14 +17,14 @@ bool in_shadow(vec3 fragment_pos_world_space) {
 	float depth_value = abs(fragment_pos_view_space.z);
 
 	int layer = -1; // TODO: select the cascade using some constant-time math
-	for (int i = 0; i < NUM_CASCADE_LAYERS; i++) {
+	for (int i = 0; i < NUM_CASCADES; i++) {
 		if (depth_value < cascade_plane_distances[i]) {
 			layer = i;
 			break;
 		}
 	}
 
-	layer = (layer == -1) ? int(NUM_CASCADE_LAYERS - 1u) : layer;
+	layer = (layer == -1) ? int(NUM_CASCADES - 1u) : layer;
 
 	////////// Testing to see if the cascade's fragment is in shadow
 

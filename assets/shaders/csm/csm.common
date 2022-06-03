@@ -2,4 +2,4 @@
 
 #version 400 core
 
-#define NUM_CASCADE_LAYERS 5u
+#define NUM_CASCADES 10u

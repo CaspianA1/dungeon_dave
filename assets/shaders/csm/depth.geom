@@ -4,11 +4,11 @@
 
 #define VERTICES_PER_TRIANGLE 3u
 
-layout(triangles, invocations = NUM_CASCADE_LAYERS) in;
+layout(triangles, invocations = NUM_CASCADES) in;
 layout(triangle_strip, max_vertices = VERTICES_PER_TRIANGLE) out;
 	
 // TODO: initialize this uniform
-uniform mat4 light_space_matrices[NUM_CASCADE_LAYERS];
+uniform mat4 light_space_matrices[NUM_CASCADES];
 	
 void main(void) {
 	mat4 light_space_matrix = light_space_matrices[gl_InvocationID]; // TODO: find the type of matrix that this is
