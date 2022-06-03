@@ -81,11 +81,10 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	use_vertex_spec(draw_context -> vertex_spec);
 
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
-		WITH_BINARY_RENDER_STATE(GL_BLEND,
-			WITH_BINARY_RENDER_STATE(GL_SAMPLE_ALPHA_TO_COVERAGE,
-				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-				glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
-			);
+		/* Not using blending or alpha testing because they're
+		not order independent and they have some funky artifacts */
+		WITH_BINARY_RENDER_STATE(GL_SAMPLE_ALPHA_TO_COVERAGE,
+			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
 		);
 	);
 }
