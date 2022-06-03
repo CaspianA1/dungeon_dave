@@ -102,31 +102,32 @@ CascadedShadowContext init_csm_context(const vec3 light_dir, const GLfloat z_sca
 			"assets/shaders/csm/depth.geom", "assets/shaders/csm/depth.frag"),
 
 		.z_scale = z_scale,
-		.light_dir = {light_dir[0], light_dir[1], light_dir[2]}
+		.light_dir = {light_dir[0], light_dir[1], light_dir[2]},
+		.light_view_projection_matrices = init_list((buffer_size_t) num_layers, mat4)
 	};
 }
 
 void deinit_csm_context(const CascadedShadowContext* const csm_context) {
+	deinit_list(csm_context -> light_view_projection_matrices);
 	deinit_shader(csm_context -> depth_shader);
 	deinit_texture(csm_context -> depth_layers);
 	glDeleteFramebuffers(1, &csm_context -> framebuffer);
 }
 
 void render_to_csm_context(const CascadedShadowContext* const csm_context, const Camera* const camera) {
+	const List* const light_view_projection_matrices = &csm_context -> light_view_projection_matrices;
+	const buffer_size_t num_cascades = light_view_projection_matrices -> max_alloc;
 
-	const GLfloat sub_near = 0.01f, sub_far = 5.0f;
+	const GLfloat
+		z_scale = csm_context -> z_scale,
+		dist_per_split = camera -> far_clip_dist / num_cascades,
+		*const light_dir = csm_context -> light_dir;
 
-	mat4 light_view_projection;
-	get_csm_light_view_projection(camera, sub_near, sub_far, csm_context -> z_scale, csm_context -> light_dir, light_view_projection);
-
-	/*
-	for (byte y = 0; y < 4; y++) {
-		for (byte x = 0; x < 4; x++) {
-			printf("%lf ", light_view_projection[y][x]);
-		}
+	for (buffer_size_t i = 0; i < num_cascades; i++) {
+		const GLfloat near_clip = i * dist_per_split;
+		vec4* const matrix = ptr_to_list_index(light_view_projection_matrices, i);
+		get_csm_light_view_projection(camera, near_clip, near_clip + dist_per_split, z_scale, light_dir, matrix);
 	}
-	puts("---");
-	*/
 
 	// TODO: actually do stuff here
 }

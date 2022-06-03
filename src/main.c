@@ -193,7 +193,7 @@ static void main_drawer(void* const app_context) {
 	////////// A test:
 	ON_FIRST_CALL(
 		const CascadedShadowContext csm_context = init_csm_context(
-			(vec3) {-0.241236f, -0.930481f, 0.275698f}, 10.0f, 1024, 1024, 3);
+			(vec3) {-0.241236f, -0.930481f, 0.275698f}, 10.0f, 1024, 1024, 5);
 
 		render_to_csm_context(&csm_context, camera);
 		deinit_csm_context(&csm_context);
