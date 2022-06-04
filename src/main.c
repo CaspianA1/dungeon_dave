@@ -7,8 +7,6 @@
 #include "headers/sector.h"
 #include "headers/normal_map_generation.h"
 
-#include "headers/csm.h" // TODO: remove
-
 static void* main_init(void) {
 	////////// Defining a bunch of level data
 
@@ -114,6 +112,8 @@ static void* main_init(void) {
 		.billboard_animations = init_list(ARRAY_LENGTH(billboard_animations), Animation),
 		.billboard_animation_instances = init_list(ARRAY_LENGTH(billboard_animation_instances), BillboardAnimationInstance),
 
+		.cascaded_shadow_context = init_csm_context((vec3) {-0.241236f, -0.930481f, 0.275698f}, 10.0f, 1024, 1024, 5),
+
 		.skybox = init_skybox("../assets/skyboxes/desert.bmp", 1.0f),
 		.title_screen = init_title_screen(),
 
@@ -190,20 +190,15 @@ static void main_drawer(void* const app_context) {
 
 	update_camera(camera, event);
 
-	////////// A test:
-	ON_FIRST_CALL(
-		const CascadedShadowContext csm_context = init_csm_context(
-			(vec3) {-0.241236f, -0.930481f, 0.275698f}, 10.0f, 1024, 1024, 5);
-
-		render_to_csm_context(&csm_context, camera);
-		deinit_csm_context(&csm_context);
-	);
 	//////////
 
 	update_billboard_animation_instances(
 		&scene_state -> billboard_animation_instances,
 		&scene_state -> billboard_animations,
 		&scene_state -> billboard_draw_context.buffers.cpu);
+
+	draw_to_csm_context(&scene_state -> cascaded_shadow_context,
+		camera, event.screen_size, draw_all_sectors_for_shadow_map, sector_draw_context);
 
 	update_shadow_map(shadow_map_context, event.screen_size, draw_all_sectors_for_shadow_map, sector_draw_context);
 
@@ -230,6 +225,7 @@ static void main_deinit(void* const app_context) {
 	deinit_batch_draw_context(&scene_state -> sector_draw_context);
 	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
 
+	deinit_csm_context(&scene_state -> cascaded_shadow_context);
 	deinit_shadow_map_context(&scene_state -> shadow_map_context);
 
 	deinit_list(scene_state -> sectors);

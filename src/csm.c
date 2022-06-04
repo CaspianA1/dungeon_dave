@@ -19,7 +19,7 @@ Details:
 
 //////////
 
-static void get_csm_light_view_projection(const Camera* const camera,
+static void get_csm_light_view_projection_matrix(const Camera* const camera,
 	const GLfloat near_clip, const GLfloat far_clip, const GLfloat z_scale,
 	const vec3 light_dir, mat4 light_view_projection) {
 
@@ -101,6 +101,8 @@ CascadedShadowContext init_csm_context(const vec3 light_dir, const GLfloat z_sca
 		.depth_shader = init_shader("assets/shaders/csm/depth.vert",
 			"assets/shaders/csm/depth.geom", "assets/shaders/csm/depth.frag"),
 
+		.resolution = {width, height},
+
 		.z_scale = z_scale,
 		.light_dir = {light_dir[0], light_dir[1], light_dir[2]},
 		.light_view_projection_matrices = init_list((buffer_size_t) num_layers, mat4)
@@ -114,7 +116,11 @@ void deinit_csm_context(const CascadedShadowContext* const csm_context) {
 	glDeleteFramebuffers(1, &csm_context -> framebuffer);
 }
 
-void render_to_csm_context(const CascadedShadowContext* const csm_context, const Camera* const camera) {
+void draw_to_csm_context(const CascadedShadowContext* const csm_context, const Camera* const camera,
+	const GLint screen_size[2], void (*const drawer) (const void* const), const void* const drawer_param) {
+
+	////////// Getting the matrices needed (a linear split at the moment)
+
 	const List* const light_view_projection_matrices = &csm_context -> light_view_projection_matrices;
 	const buffer_size_t num_cascades = light_view_projection_matrices -> max_alloc;
 
@@ -126,10 +132,33 @@ void render_to_csm_context(const CascadedShadowContext* const csm_context, const
 	for (buffer_size_t i = 0; i < num_cascades; i++) {
 		const GLfloat near_clip = i * dist_per_split;
 		vec4* const matrix = ptr_to_list_index(light_view_projection_matrices, i);
-		get_csm_light_view_projection(camera, near_clip, near_clip + dist_per_split, z_scale, light_dir, matrix);
+		get_csm_light_view_projection_matrix(camera, near_clip, near_clip + dist_per_split, z_scale, light_dir, matrix);
 	}
 
-	// TODO: actually do stuff here
+	////////// Updating the light view projection matrices uniform
+
+	const GLuint depth_shader = csm_context -> depth_shader;
+	use_shader(depth_shader);
+
+	static GLint light_view_projection_matrices_id;
+	ON_FIRST_CALL(INIT_UNIFORM(light_view_projection_matrices, depth_shader););
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei) num_cascades, GL_FALSE, light_view_projection_matrices -> data);
+
+	// for shadow.frag: init `cascade_plane_distances`, `camera_view`, `light_view_projection_matrices`, and `cascade_sampler`
+
+	////////// Rendering to the cascades
+
+	const GLsizei* const resolution = csm_context -> resolution;
+	glViewport(0, 0, resolution[0], resolution[1]);
+	glBindFramebuffer(GL_FRAMEBUFFER, csm_context -> framebuffer);
+	glCullFace(GL_FRONT);
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	drawer(drawer_param);
+
+	glCullFace(GL_BACK);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, screen_size[0], screen_size[1]);
 }
 
 #endif

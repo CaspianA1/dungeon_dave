@@ -2,10 +2,10 @@
 
 #include "num_cascades.geom" // `num_cascades.frag` is written to by the CPU before any shader compilation
 
-// TODO: initialize all of these uniforms, and share `light_space_matrices` with `depth.geom`
+// TODO: initialize all of these uniforms, and share `light_view_projection_matrices` with `depth.geom`
 
 uniform float cascade_plane_distances[NUM_CASCADES];
-uniform mat4 camera_view, light_space_matrices[NUM_CASCADES];
+uniform mat4 camera_view, light_view_projection_matrices[NUM_CASCADES];
 uniform sampler2DArray cascade_sampler;
 
 bool in_shadow(vec3 fragment_pos_world_space) {
@@ -30,7 +30,7 @@ bool in_shadow(vec3 fragment_pos_world_space) {
 
 	// No slope-scale depth bias here because ESM will be used later. TODO: use ESM.
 
-	vec4 fragment_pos_light_space = light_space_matrices[layer] * fragment_pos_world_space_4D;
+	vec4 fragment_pos_light_space = light_view_projection_matrices[layer] * fragment_pos_world_space_4D;
 	vec3 cascade_UV = fragment_pos_light_space.xyz * 0.5f + 0.5f; // TODO: incorporate a bias matrix on the CPU
 
 	float occluder_depth = texture(cascade_sampler, vec3(cascade_UV.xy, layer)).r;

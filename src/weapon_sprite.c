@@ -131,10 +131,12 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	////////// World corner determination
 
+	const vec4 viewport = {-1.0f, -1.0f, 1.0f, 1.0f};
+
 	vec3 world_corners[4];
 	mat4 inv_model_view_projection;
+
 	glm_mat4_inv((vec4*) model_view_projection, inv_model_view_projection);
-	const vec4 viewport = {-1.0f, -1.0f, 1.0f, 1.0f};
 
 	for (byte i = 0; i < 4; i++) {
 		const GLfloat* const screen_corner = screen_corners[i];
@@ -149,6 +151,8 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	UPDATE_UNIFORM(screen_corners, 2fv, 4, (GLfloat*) screen_corners);
 	UPDATE_UNIFORM(world_corners, 3fv, 4, (GLfloat*) world_corners);
 
+	/* Not using alpha to coverage here b/c blending is guaranteed
+	to be correct for the last-rendered weapon's z-depth of zero */
 	WITH_BINARY_RENDER_STATE(GL_BLEND,
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
