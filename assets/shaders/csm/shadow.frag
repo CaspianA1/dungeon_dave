@@ -14,7 +14,7 @@ bool in_shadow(vec3 fragment_pos_world_space) {
 	////////// Selecting a cascade
 
 	vec4 fragment_pos_view_space = camera_view * fragment_pos_world_space_4D;
-	float depth_value = abs(fragment_pos_view_space.z);
+	float depth_value = abs(fragment_pos_view_space.z); // TODO: see if I can just do a simple negation instead
 
 	int layer = -1; // TODO: select the cascade using some constant-time math
 	for (int i = 0; i < NUM_CASCADES; i++) {
