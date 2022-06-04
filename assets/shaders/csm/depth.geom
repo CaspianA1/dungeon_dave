@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "csm.common"
+#include "num_cascades.geom"
 
 #define VERTICES_PER_TRIANGLE 3u
 

@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "csm.common"
+#include "num_cascades.geom" // `num_cascades.frag` is written to by the CPU before any shader compilation
 
 // TODO: initialize all of these uniforms, and share `light_space_matrices` with `depth.geom`
 
