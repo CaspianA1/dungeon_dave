@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "num_cascades.geom" // `num_cascades.frag` is written to by the CPU before any shader compilation
+#include "num_cascades.geom" // `num_cascades.geom` is written to by the CPU before any shader compilation
 
 // TODO: initialize all of these uniforms, and share `light_view_projection_matrices` with `depth.geom`
 
