@@ -144,7 +144,8 @@ void draw_to_csm_context(const CascadedShadowContext* const csm_context, const C
 	ON_FIRST_CALL(INIT_UNIFORM(light_view_projection_matrices, depth_shader););
 	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei) num_cascades, GL_FALSE, light_view_projection_matrices -> data);
 
-	// for shadow.frag: init `cascade_plane_distances`, `camera_view`, `light_view_projection_matrices`, and `cascade_sampler`
+	/* TODO: read the cascaded shadow map contents in the sector shader first (then, generalize that after).
+	For shadow.frag: init `cascade_plane_distances`, `camera_view`, `light_view_projection_matrices`, and `cascade_sampler`. */
 
 	////////// Rendering to the cascades
 
