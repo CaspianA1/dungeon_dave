@@ -31,7 +31,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 		),
 
 		// TODO: for multiple weapons, share this shader
-		.shader = init_shader("assets/shaders/weapon.vert", "assets/shaders/weapon.frag"),
+		.shader = init_shader("../assets/shaders/weapon.vert", "../assets/shaders/weapon.frag"),
 
 		.animation = {
 			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},

@@ -39,6 +39,7 @@ OBJS := $(OBJ_DIR)/glad.o $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(wildcard 
 ########## Rules for the main project
 
 all: $(BIN_DIR)/$(OUT)
+	cd bin && ./$(OUT) && cd ..
 
 $(BIN_DIR)/$(OUT): $(OBJS)
 	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) $(GL_LDFLAGS) -o $@ $^

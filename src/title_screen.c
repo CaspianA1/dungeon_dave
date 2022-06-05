@@ -9,7 +9,7 @@
 TitleScreen init_title_screen(void) {
 	return (TitleScreen) {
 		.done = false,
-		.shader = init_shader("assets/shaders/title_screen.vert", "assets/shaders/title_screen.frag"),
+		.shader = init_shader("../assets/shaders/title_screen.vert", "../assets/shaders/title_screen.frag"),
 		.texture = init_plain_texture("../assets/logo.bmp", TexPlain, TexNonRepeating,
 			TexNearest, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT)
 	};
