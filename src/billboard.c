@@ -123,7 +123,7 @@ BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards,
 	BatchDrawContext draw_context = {
 		.buffers.cpu = init_list(num_billboards, Billboard),
 		.vertex_spec = init_vertex_spec(),
-		.shader = init_shader("../assets/shaders/billboard.vert", "../assets/shaders/billboard.frag")
+		.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), ASSET_PATH("shaders/billboard.frag"))
 	};
 
 	push_array_to_list(&draw_context.buffers.cpu, billboards, num_billboards);

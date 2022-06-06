@@ -11,10 +11,11 @@ static void* main_init(void) {
 	////////// Defining a bunch of level data
 
 	const AnimationLayout billboard_animation_layouts[] = {
-		{"../assets/spritesheets/flying_carpet.bmp", 5, 10, 46},
-		{"../assets/spritesheets/torch_2.bmp", 2, 3, 5},
-		{"../assets/spritesheets/eddie.bmp", 23, 1, 23},
-		{"../assets/spritesheets/trooper.bmp", 33, 1, 33}
+		// ASSET_PATH("spritesheets/_.bmp"),
+		{ASSET_PATH("spritesheets/flying_carpet.bmp"), 5, 10, 46},
+		{ASSET_PATH("spritesheets/torch_2.bmp"), 2, 3, 5},
+		{ASSET_PATH("spritesheets/eddie.bmp"), 23, 1, 23},
+		{ASSET_PATH("spritesheets/trooper.bmp"), 33, 1, 33}
 	};
 
 	const Animation billboard_animations[] = {
@@ -60,59 +61,67 @@ static void* main_init(void) {
 	};
 
 	const GLchar *const still_billboard_texture_paths[] = {
-		"../assets/objects/health_kit.bmp",
-		"../assets/objects/teleporter.bmp",
-		"../assets/objects/shabti.bmp"
+		ASSET_PATH("objects/health_kit.bmp"),
+		ASSET_PATH("objects/teleporter.bmp"),
+		ASSET_PATH("objects/shabti.bmp")
 	},
 
 	*const still_face_textures[] = {
 		// Palace:
-		"../assets/walls/sand.bmp", "../assets/walls/pyramid_bricks_4.bmp",
-		"../assets/walls/marble.bmp", "../assets/walls/hieroglyph.bmp",
-		"../assets/walls/alkadhib.bmp", "../assets/walls/saqqara.bmp",
-		"../assets/walls/sandstone.bmp", "../assets/walls/cobblestone_3.bmp",
-		"../assets/walls/rug_3.bmp", "../assets/walls/mesa.bmp",
-		"../assets/walls/arthouse_bricks.bmp", "../assets/walls/eye_of_evil.bmp",
-		"../assets/walls/rough_marble.bmp", "../assets/walls/mosaic.bmp",
-		"../assets/walls/aquamarine_tiles.bmp"
+		ASSET_PATH("walls/sand.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp"),
+		ASSET_PATH("walls/marble.bmp"), ASSET_PATH("walls/hieroglyph.bmp"),
+		ASSET_PATH("walls/alkadhib.bmp"), ASSET_PATH("walls/saqqara.bmp"),
+		ASSET_PATH("walls/sandstone.bmp"), ASSET_PATH("walls/cobblestone_3.bmp"),
+		ASSET_PATH("walls/rug_3.bmp"), ASSET_PATH("walls/mesa.bmp"),
+		ASSET_PATH("walls/arthouse_bricks.bmp"), ASSET_PATH("walls/eye_of_evil.bmp"),
+		ASSET_PATH("walls/rough_marble.bmp"), ASSET_PATH("walls/mosaic.bmp"),
+		ASSET_PATH("walls/aquamarine_tiles.bmp")
 
 		// Pyramid:
-		/* "../assets/walls/pyramid_bricks_4.bmp",
-		"../assets/walls/greece.bmp", "../assets/walls/saqqara.bmp" */
+		/*
+		ASSET_PATH("walls/pyramid_bricks_4.bmp"),
+		ASSET_PATH("walls/greece.bmp"), ASSET_PATH("walls/saqqara.bmp")
+		*/
 
 		// Fortress:
-		/* "../assets/walls/viney_bricks.bmp", "../assets/walls/marble.bmp",
-		"../assets/walls/vines.bmp", "../assets/walls/stone_2.bmp" */
+		/*
+		ASSET_PATH("walls/viney_bricks.bmp"), ASSET_PATH("walls/marble.bmp"),
+		ASSET_PATH("walls/vines.bmp"),  ASSET_PATH("walls/stone_2.bmp")
+		*/
 
 		// Tiny:
-		// "../assets/walls/mesa.bmp", "../assets/walls/hieroglyph.bmp"
+		// ASSET_PATH("walls/mesa.bmp"), ASSET_PATH("walls/hieroglyph.bmp")
 
 		// Level 1:
-		/* "../assets/walls/sand.bmp", "../assets/walls/cobblestone_2.bmp",
-		"../assets/walls/cobblestone_3.bmp", "../assets/walls/stone_2.bmp",
-		"../assets/walls/pyramid_bricks_3.bmp", "../assets/walls/hieroglyphics.bmp",
-		"../assets/walls/desert_snake.bmp", "../assets/walls/colorstone.bmp" */
+		/*
+		ASSET_PATH("walls/sand.bmp"), ASSET_PATH("walls/cobblestone_2.bmp"),
+		ASSET_PATH("walls/cobblestone_3.bmp"), ASSET_PATH("walls/stone_2.bmp"),
+		ASSET_PATH("walls/pyramid_bricks_3.bmp"), ASSET_PATH("walls/hieroglyphics.bmp"),
+		ASSET_PATH("walls/desert_snake.bmp"), ASSET_PATH("walls/colorstone.bmp")
+		*/
 
 		// Architecture:
-		/* "../assets/walls/sand.bmp",
-		"../assets/walls/marble.bmp", "../assets/walls/gold.bmp",
-		"../assets/walls/greece.bmp", "../assets/walls/pyramid_bricks_4.bmp" */
+		/*
+		ASSET_PATH("walls/sand.bmp"),
+		ASSET_PATH("walls/marble.bmp"), ASSET_PATH("walls/gold.bmp"),
+		ASSET_PATH("walls/greece.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp")
+		*/
 	};
 
 	//////////
 
 	SceneState scene_state = {
 		.weapon_sprite = init_weapon_sprite(
-			0.6f, 2.0f, 0.07f, (AnimationLayout) {"../assets/spritesheets/weapons/desecrator_cropped.bmp", 1, 8, 8}
-			// 0.75f, 2.0f, 0.122f, (AnimationLayout) {"../assets/spritesheets/weapons/whip.bmp", 4, 6, 22}
-			// 0.75f, 2.0f, 0.035f, (AnimationLayout) {"../assets/spritesheets/weapons/snazzy_shotgun.bmp", 6, 10, 59}
-			// 0.8f, 1.0f, 0.04f, (AnimationLayout) {"../assets/spritesheets/weapons/reload_pistol.bmp", 4, 7, 28}
+			0.6f, 2.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
+			// 0.75f, 2.0f, 0.122f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22} // TODO: stop this from animating slowly
+			// 0.75f, 2.0f, 0.035f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}
+			// 0.8f, 1.0f, 0.04f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}
 		),
 
 		.billboard_animations = init_list(ARRAY_LENGTH(billboard_animations), Animation),
 		.billboard_animation_instances = init_list(ARRAY_LENGTH(billboard_animation_instances), BillboardAnimationInstance),
 
-		.skybox = init_skybox("../assets/skyboxes/desert.bmp", 1.0f),
+		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
 		.title_screen = init_title_screen(),
 
 		.heightmap = (const byte*) palace_heightmap,
