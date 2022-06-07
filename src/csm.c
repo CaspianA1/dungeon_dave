@@ -9,13 +9,14 @@
 #define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT16
 
 /*
-For later on
+https://learnopengl.com/Guest-Articles/2021/CSM
+
+For later on:
 - Texel snapping
 - Blending between layers
 - Filtering
+- Merging the master branch with this one
 */
-
-// https://learnopengl.com/Guest-Articles/2021/CSM
 
 //////////
 
