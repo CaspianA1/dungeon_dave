@@ -115,9 +115,9 @@ static void* main_init(void) {
 		.skybox = init_skybox("../assets/skyboxes/desert.bmp", 1.0f),
 		.title_screen = init_title_screen(),
 
-		.heightmap = (const byte*) palace_heightmap,
-		.texture_id_map = (const byte*) palace_texture_id_map,
-		.map_size = {palace_width, palace_height}
+		.heightmap = (const byte*) terrain_heightmap,
+		.texture_id_map = (const byte*) terrain_texture_id_map,
+		.map_size = {terrain_width, terrain_height}
 	};
 
 	push_array_to_list(&scene_state.billboard_animations,
@@ -151,8 +151,8 @@ static void* main_init(void) {
 	init_camera(&scene_state.camera, (vec3) {1.5f, 0.5f, 1.5f}, scene_state.heightmap, scene_state.map_size);
 
 	scene_state.cascaded_shadow_context = init_csm_context(
-		(vec3) {0.241236f, 0.930481f, -0.275698f}, 10.0f,
-		scene_state.camera.far_clip_dist, 0.4f, 1024, 1024, 4
+		(vec3) {0.241236f, 0.930481f, -0.275698f}, 20.0f,
+		scene_state.camera.far_clip_dist, 0.1f, 1024, 1024, 8
 	);
 
 	//////////

@@ -6,14 +6,16 @@
 #include "headers/shader.h"
 #include "headers/texture.h"
 
-#define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT16
+#define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT32F
 
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
 
 For later on:
+- Write to `num_cascades.geom` before any shaders are initialized
 - Texel snapping
 - Blending between layers
+- Ugly stitches near block borders
 - Filtering
 - Merging the master branch with this one
 */
