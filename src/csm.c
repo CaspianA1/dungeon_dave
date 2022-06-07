@@ -6,7 +6,7 @@
 #include "headers/shader.h"
 #include "headers/texture.h"
 
-#define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT32F
+#define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT16
 
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
