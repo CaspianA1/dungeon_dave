@@ -5,7 +5,7 @@
 #include "list.h"
 #include "camera.h"
 #include "batch_draw_context.h"
-#include "esm.h"
+#include "csm.h"
 #include "texture.h"
 
 typedef struct {
@@ -28,7 +28,7 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 void draw_all_sectors_for_shadow_map(const void* const param);
 
 void draw_visible_sectors(const BatchDrawContext* const draw_context,
-	const ShadowMapContext* const shadow_map_context, const List* const sector_face_meshes,
+	const CascadedShadowContext* const csm_context, const List* const sectors,
 	const Camera* const camera, const GLuint normal_map_set, const GLint screen_size[2]);
 
 #endif

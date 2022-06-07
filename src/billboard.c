@@ -52,31 +52,43 @@ static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frus
 }
 
 static void draw_billboards(const BatchDrawContext* const draw_context,
-	const ShadowMapContext* const shadow_map_context, const Camera* const camera,
+	const CascadedShadowContext* const csm_context, const Camera* const camera,
 	const buffer_size_t num_visible_billboards) {
 
 	const GLuint shader = draw_context -> shader;
-	static GLint right_xz_world_space_id, model_view_projection_id;
+	static GLint right_xz_world_space_id, model_view_projection_id, camera_view_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
+		INIT_UNIFORM(camera_view, shader);
+		INIT_UNIFORM(light_view_projection_matrices, shader);
 
 		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
-		INIT_UNIFORM_VALUE(pcf_radius, shader, 1i, constants.lighting.pcf_radius);
-		INIT_UNIFORM_VALUE(esm_constant, shader, 1f, constants.lighting.esm_constant);
 
-		INIT_UNIFORM_VALUE(biased_light_model_view_projection, shader, Matrix4fv, 1,
-			GL_FALSE, &shadow_map_context -> light.biased_model_view_projection[0][0]);
+		const List* const split_dists = &csm_context -> split_dists;
+		INIT_UNIFORM_VALUE(cascade_plane_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
-		use_texture(shadow_map_context -> buffers.depth_texture, shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, BILLBOARD_TEXTURE_UNIT);
+		use_texture(csm_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
 
 	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right_xz[0], camera -> right_xz[1]);
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
+
+	////////// This little part concerns CSM
+
+	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &camera -> view[0][0]);
+
+	const List* const light_view_projection_matrices = &csm_context -> light_view_projection_matrices;
+
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
+		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
+		light_view_projection_matrices -> data);
+
+	//////////
 
 	use_vertex_spec(draw_context -> vertex_spec);
 
@@ -90,7 +102,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 }
 
 void draw_visible_billboards(const BatchDrawContext* const draw_context,
-	const ShadowMapContext* const shadow_map_context, const Camera* const camera) {
+	const CascadedShadowContext* const csm_context, const Camera* const camera) {
 
 	use_vertex_buffer(draw_context -> buffers.gpu);
 
@@ -115,7 +127,7 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context,
 	}
 
 	glUnmapBuffer(GL_ARRAY_BUFFER);
-	if (num_visible != 0) draw_billboards(draw_context, shadow_map_context, camera, num_visible);
+	if (num_visible != 0) draw_billboards(draw_context, csm_context, camera, num_visible);
 }
 
 BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, const Billboard* const billboards) {

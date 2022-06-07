@@ -1,7 +1,6 @@
 #version 400 core
 
-#include "common/shadow.vert"
-#include "common/utils.vert"
+#include "csm/shadow.vert"
 
 layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
@@ -34,9 +33,9 @@ void main(void) {
 
 	UV = vec3(UV_xy, face_info_bits >> 3u);
 
-	////////// Setting fragment_pos_world_space, fragment_pos_light_space, and gl_Position
+	////////// Setting world_depth_value, fragment_pos_world_space, and gl_Position
 
+	world_depth_value = get_world_depth_value(vertex_pos_world_space);
 	fragment_pos_world_space = vertex_pos_world_space;
-	fragment_pos_light_space = world_space_transformation(vertex_pos_world_space, biased_light_model_view_projection).xyz;
-	gl_Position = world_space_transformation(vertex_pos_world_space, model_view_projection);
+	gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);
 }

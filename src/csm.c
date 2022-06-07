@@ -8,14 +8,14 @@
 
 #define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT16
 
-// https://learnopengl.com/Guest-Articles/2021/CSM
-
 /*
-Details:
-- Have the MVP getter set up
-- Will use array textures at first for layers (with the normal framebuffer setup)
-- The remaining code concerns cascade selection in the depth + other shader
+For later on
+- Texel snapping
+- Blending between layers
+- Filtering
 */
+
+// https://learnopengl.com/Guest-Articles/2021/CSM
 
 //////////
 
@@ -23,21 +23,21 @@ static void get_csm_light_view_projection_matrix(const Camera* const camera,
 	const GLfloat near_clip, const GLfloat far_clip, const GLfloat z_scale,
 	const vec3 light_dir, mat4 light_view_projection) {
 
-	////////// Getting sub frustum center
+	////////// Getting the sub frustum center
 
-	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection;
+	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection;
 
 	glm_perspective(camera -> angles.fov, camera -> aspect_ratio,
 		near_clip, far_clip, camera_sub_frustum_projection);
 
 	glm_mul(camera_sub_frustum_projection, (vec4*) camera -> view, camera_sub_frustum_view_projection);
+	glm_mat4_inv(camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection);
 
 	vec4 camera_sub_frustum_corners[8], camera_sub_frustum_center;
-
-	glm_frustum_corners(camera_sub_frustum_view_projection, camera_sub_frustum_corners);
+	glm_frustum_corners(inv_camera_sub_frustum_view_projection, camera_sub_frustum_corners);
 	glm_frustum_center(camera_sub_frustum_corners, camera_sub_frustum_center);
 
-	////////// Getting light view
+	////////// Getting the light view
 
 	vec3 light_eye;
 	glm_vec3_add(camera_sub_frustum_center, (GLfloat*) light_dir, light_eye);
@@ -90,9 +90,34 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 }
 
 CascadedShadowContext init_csm_context(const vec3 light_dir, const GLfloat z_scale,
-	const GLsizei width, const GLsizei height, const GLsizei num_layers) {
+	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei width,
+	const GLsizei height, const GLsizei num_layers) {
 
 	const GLuint depth_layers = init_csm_depth_layers(width, height, num_layers);
+
+	//////////
+
+	List
+		split_dists = init_list((buffer_size_t) num_layers - 1, GLfloat),
+		light_view_projection_matrices = init_list((buffer_size_t) num_layers, mat4);
+
+	light_view_projection_matrices.length = light_view_projection_matrices.max_alloc;
+	split_dists.length = split_dists.max_alloc;
+
+	const GLfloat
+		near_dist = constants.camera.near_clip_dist,
+		clip_dist_diff = far_clip_dist - constants.camera.near_clip_dist;
+
+	for (buffer_size_t i = 0; i < split_dists.length; i++) {
+		const GLfloat layer_percent = (GLfloat) (i + 1) / num_layers;
+
+		const GLfloat linear_dist = near_dist + layer_percent * clip_dist_diff;
+		const GLfloat log_dist = near_dist * powf(far_clip_dist / near_dist, layer_percent);
+
+		const GLfloat weighted_dist = glm_lerp(log_dist, linear_dist, linear_split_weight);
+
+		*((GLfloat*) ptr_to_list_index(&split_dists, i)) = weighted_dist;
+	}
 
 	return (CascadedShadowContext) {
 		.depth_layers = depth_layers,
@@ -105,11 +130,13 @@ CascadedShadowContext init_csm_context(const vec3 light_dir, const GLfloat z_sca
 
 		.z_scale = z_scale,
 		.light_dir = {light_dir[0], light_dir[1], light_dir[2]},
-		.light_view_projection_matrices = init_list((buffer_size_t) num_layers, mat4)
+		.split_dists = split_dists,
+		.light_view_projection_matrices = light_view_projection_matrices
 	};
 }
 
 void deinit_csm_context(const CascadedShadowContext* const csm_context) {
+	deinit_list(csm_context -> split_dists);
 	deinit_list(csm_context -> light_view_projection_matrices);
 	deinit_shader(csm_context -> depth_shader);
 	deinit_texture(csm_context -> depth_layers);
@@ -119,20 +146,33 @@ void deinit_csm_context(const CascadedShadowContext* const csm_context) {
 void draw_to_csm_context(const CascadedShadowContext* const csm_context, const Camera* const camera,
 	const GLint screen_size[2], void (*const drawer) (const void* const), const void* const drawer_param) {
 
-	////////// Getting the matrices needed (a linear split at the moment)
+	const List
+		*const light_view_projection_matrices = &csm_context -> light_view_projection_matrices,
+		*const split_dists = &csm_context -> split_dists;
 
-	const List* const light_view_projection_matrices = &csm_context -> light_view_projection_matrices;
-	const buffer_size_t num_cascades = light_view_projection_matrices -> max_alloc;
+	const buffer_size_t num_cascades = light_view_projection_matrices -> length;
 
 	const GLfloat
 		z_scale = csm_context -> z_scale,
-		dist_per_split = camera -> far_clip_dist / num_cascades,
+		far_clip_dist = camera -> far_clip_dist,
 		*const light_dir = csm_context -> light_dir;
 
+	////////// Getting the matrices needed
+
 	for (buffer_size_t i = 0; i < num_cascades; i++) {
-		const GLfloat near_clip = i * dist_per_split;
+		GLfloat near_clip, far_clip;
+
+		if (i == 0) {
+			near_clip = constants.camera.near_clip_dist;
+			far_clip = value_at_list_index(split_dists, i, GLfloat);
+		}
+		else {
+			near_clip = value_at_list_index(split_dists, i - 1, GLfloat);
+			far_clip = (i == num_cascades - 1) ? far_clip_dist : value_at_list_index(split_dists, i, GLfloat);
+		}
+
 		vec4* const matrix = ptr_to_list_index(light_view_projection_matrices, i);
-		get_csm_light_view_projection_matrix(camera, near_clip, near_clip + dist_per_split, z_scale, light_dir, matrix);
+		get_csm_light_view_projection_matrix(camera, near_clip, far_clip, z_scale, light_dir, matrix);
 	}
 
 	////////// Updating the light view projection matrices uniform
@@ -143,9 +183,6 @@ void draw_to_csm_context(const CascadedShadowContext* const csm_context, const C
 	static GLint light_view_projection_matrices_id;
 	ON_FIRST_CALL(INIT_UNIFORM(light_view_projection_matrices, depth_shader););
 	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei) num_cascades, GL_FALSE, light_view_projection_matrices -> data);
-
-	/* TODO: read the cascaded shadow map contents in the sector shader first (then, generalize that after).
-	For shadow.frag: init `cascade_plane_distances`, `camera_view`, `light_view_projection_matrices`, and `cascade_sampler`. */
 
 	////////// Rendering to the cascades
 

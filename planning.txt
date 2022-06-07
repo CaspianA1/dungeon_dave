@@ -9,42 +9,24 @@ Final lighting model:
 - Ambient, diffuse, specular (with procedural specular mapping), HDR, banding removal, light color - done
 - Ambient occlusion through an occlusion map, maybe
 - Perhaps make the shadows contact-hardening
-- If not CSMs, another technique like PSMs or LiSPSMs
-- A compressed texture for the depth map, to save space?
 - If ESM isn't good enough in the end, use EVSM with only the positive term (if it's fast enough): https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
 - And optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map
-- For AO, if I instance the texture ID across a whole sector, that way I can get 256 different textures per level, and I can pre-bake ambient occlusion into sectors
+- For AO, if I instance the texture ID across a whole sector, I can get 256 different textures per level, and I can pre-bake ambient occlusion into sectors
 
 Shadow mapping:
 - The glDrawArrays call in shadow mapping uses around 30% of my GPU time mostly because of the shadow map size
-- Generate level edge geometry specifically for the shadow map, and cache that with a copy of a static geometry buffer (also pre-cull front faces; perhaps via transform feedback)
-- Possibly one shadow map for static objects (sectors and bridges), and small dynamic ones for billboards (low-res small one, but smoothed out with RBSM), only if that works with something like CSM
 
-- For a sun bounding box, imagine a rotated OBB encompassing an AABB that represents the world:
-	- First, make an encompassing OBB around a 2D AABB box
-	- The box doesn't need to encompass the AABB at first, it just needs to be rotated
-	- It can then be resized to the AABB area after
-	- Then, expand that to 3D
-
-- For CSM, allow integration of an optional geometry sub-shader before the vertex and fragment sub-shaders
 - After CSM, implement SDSM
 - ESM logarithmic space filtering: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
 - Rescale the ESM constant based on the distance between the occluder and the receiver, maybe
 - Filtering in exp(gl_FragCoord.z) may remove some shadow acne
-- Make the weapon cast a shadow
+- Make the weapon and billboards cast shadows
 
-CSM:
-- If there is still too much light bleeding in the end, perhaps switch to one-term EVSM
-- Current scheme:
-	ESM with linear + trilinear (i.e. with mipmaps) + anisotropic filtering;
-	per-frame mipmap generation is expensive. A 5x5 occluder depth estimator kernel.
-- CSM scheme:
-	linear for near and far, while using CSM for resolution management
-	(same effect as mipmap selection) + anisotropic filtering. A 5x5 PCF kernel.
-	With this, realtime shadow map generation, and better resolution management.
-	Sector mesh optimization:
+Ideal CSM:
+	- Sector mesh optimization:
 		1. In high-speed memory. 2. Front faces pre-culled (result is half the size?).
 		3. Face info bits removed. 4. Additional faces added for external map edges.
+	- A technique like ESM or EVSM.
 
 Architectural/code design ideas:
 - More efficiently set statemap bit ranges, maybe

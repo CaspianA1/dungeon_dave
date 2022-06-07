@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "common/shadow.frag"
+#include "csm/shadow.frag"
 
 flat in uint face_id;
 in vec3 UV, fragment_pos_world_space;
@@ -16,11 +16,11 @@ uniform float
 	tm_linear_length, tm_black, tm_pedestal;
 
 uniform vec2 specular_exponent_domain, one_over_screen_size, UV_translation;
-uniform vec3 camera_pos_world_space, dir_to_light, light_color, UV_translation_area[2];
+uniform vec3 camera_pos_world_space, light_dir, light_color, UV_translation_area[2];
 uniform sampler2DArray texture_sampler, normal_map_sampler;
 
 float diffuse(vec3 fragment_normal) {
-	float diffuse_amount = dot(fragment_normal, dir_to_light);
+	float diffuse_amount = dot(fragment_normal, light_dir);
 	return diffuse_strength * max(diffuse_amount, 0.0f);
 }
 
@@ -29,7 +29,7 @@ float specular(vec3 texture_color, vec3 fragment_normal) {
 	Also, the specular calculation uses Blinn-Phong, rather than just Phong. */
 
 	vec3 view_dir = normalize(camera_pos_world_space - fragment_pos_world_space);
-	vec3 halfway_dir = normalize(dir_to_light + view_dir);
+	vec3 halfway_dir = normalize(light_dir + view_dir);
 	float cos_angle_of_incidence = max(dot(fragment_normal, halfway_dir), 0.0f);
 
 	//////////
@@ -42,7 +42,8 @@ float specular(vec3 texture_color, vec3 fragment_normal) {
 
 vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {
 	float non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);
-	float light_strength = ambient + non_ambient * shadow();
+
+	float light_strength = ambient + non_ambient * in_csm_shadow(fragment_pos_world_space);
 	return light_strength * light_color * texture_color;
 }
 

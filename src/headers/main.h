@@ -4,7 +4,6 @@
 #include "buffer_defs.h"
 #include "weapon_sprite.h"
 #include "batch_draw_context.h"
-#include "esm.h"
 #include "csm.h"
 #include "camera.h"
 #include "list.h"
@@ -18,7 +17,6 @@ typedef struct {
 	WeaponSprite weapon_sprite;
 	BatchDrawContext sector_draw_context, billboard_draw_context;
 
-	ShadowMapContext shadow_map_context; // TODO: get rid of the old ESM context once CSM is figured out
 	CascadedShadowContext cascaded_shadow_context;
 
 	List sectors, billboard_animations, billboard_animation_instances;

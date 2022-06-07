@@ -2,37 +2,34 @@
 
 #include "num_cascades.geom" // `num_cascades.geom` is written to by the CPU before any shader compilation
 
-// TODO: initialize all of these uniforms, and share `light_view_projection_matrices` with `depth.geom`
+// TODO: share `light_view_projection_matrices` with `depth.geom`
 
-uniform float cascade_plane_distances[NUM_CASCADES];
-uniform mat4 camera_view, light_view_projection_matrices[NUM_CASCADES];
-uniform sampler2DArray cascade_sampler;
+in float world_depth_value;
 
-bool in_shadow(vec3 fragment_pos_world_space) {
-	vec4 fragment_pos_world_space_4D = vec4(fragment_pos_world_space, 1.0f);
+uniform float cascade_plane_distances[NUM_CASCADES - 1];
+uniform mat4 light_view_projection_matrices[NUM_CASCADES];
+uniform sampler2DArray shadow_cascade_sampler;
 
+float in_csm_shadow(vec3 fragment_pos_world_space) {
 	////////// Selecting a cascade
 
-	vec4 fragment_pos_view_space = camera_view * fragment_pos_world_space_4D;
-	float depth_value = abs(fragment_pos_view_space.z); // TODO: see if I can just do a simple negation instead
-
 	int layer = -1; // TODO: select the cascade using some constant-time math
-	for (int i = 0; i < NUM_CASCADES; i++) {
-		if (depth_value < cascade_plane_distances[i]) {
+	const int num_splits_between_cascades = int(NUM_CASCADES) - 1;
+
+	for (int i = 0; i < num_splits_between_cascades; i++) {
+		if (cascade_plane_distances[i] > world_depth_value) {
 			layer = i;
 			break;
 		}
 	}
 
-	layer = (layer == -1) ? int(NUM_CASCADES - 1u) : layer;
+	layer = (layer == -1) ? num_splits_between_cascades : layer;
 
 	////////// Testing to see if the cascade's fragment is in shadow
 
-	// No slope-scale depth bias here because ESM will be used later. TODO: use ESM.
+	vec4 fragment_pos_light_space = light_view_projection_matrices[layer] * vec4(fragment_pos_world_space, 1.0f);
+	vec3 UV = fragment_pos_light_space.xyz * 0.5f + 0.5f;
 
-	vec4 fragment_pos_light_space = light_view_projection_matrices[layer] * fragment_pos_world_space_4D;
-	vec3 cascade_UV = fragment_pos_light_space.xyz * 0.5f + 0.5f; // TODO: incorporate a bias matrix on the CPU
-
-	float occluder_depth = texture(cascade_sampler, vec3(cascade_UV.xy, layer)).r;
-	return occluder_depth + 0.005f > cascade_UV.z;
+	float occluder_depth = texture(shadow_cascade_sampler, vec3(UV.xy, layer)).r;
+	return float(UV.z <= occluder_depth);
 }
