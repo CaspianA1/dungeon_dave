@@ -197,12 +197,10 @@ void draw_to_csm_context(const CascadedShadowContext* const csm_context, const C
 	const GLsizei* const resolution = csm_context -> resolution;
 	glViewport(0, 0, resolution[0], resolution[1]);
 	glBindFramebuffer(GL_FRAMEBUFFER, csm_context -> framebuffer);
-	glCullFace(GL_BACK);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	drawer(drawer_param);
 
-	glCullFace(GL_BACK);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, screen_size[0], screen_size[1]);
 }
