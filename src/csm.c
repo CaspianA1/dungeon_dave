@@ -67,18 +67,18 @@ static void get_csm_light_view_projection_matrix(const Camera* const camera,
 	glm_mul(light_projection, light_view, light_view_projection);
 }
 
-static GLuint init_csm_depth_layers(const GLsizei width,
-	const GLsizei height, const GLsizei num_layers) {
-
+static GLuint init_depth_layers(const CascadedShadowSpec* const spec) {
 	const GLuint depth_layers = preinit_texture(TexSet, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 
 	glTexParameteri(TexSet, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, width, height, num_layers, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, spec -> resolution[0], spec -> resolution[1],
+		spec -> num_layers, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
 	return depth_layers;
 }
 
-static GLuint init_csm_framebuffer(const GLuint depth_layers) {
+static GLuint init_framebuffer_with_depth_layers(const GLuint depth_layers) {
 	GLuint framebuffer;
 
 	glGenFramebuffers(1, &framebuffer);
@@ -94,17 +94,10 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 	return framebuffer;
 }
 
-CascadedShadowContext init_csm_context(const vec3 light_dir, const GLfloat z_scale,
-	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei width,
-	const GLsizei height, const GLsizei num_layers) {
-
-	const GLuint depth_layers = init_csm_depth_layers(width, height, num_layers);
-
-	//////////
-
+CascadedShadowContext init_shadow_context(const CascadedShadowSpec spec, const GLfloat far_clip_dist) {
 	List
-		split_dists = init_list((buffer_size_t) num_layers - 1, GLfloat),
-		light_view_projection_matrices = init_list((buffer_size_t) num_layers, mat4);
+		split_dists = init_list((buffer_size_t) spec.num_layers - 1, GLfloat),
+		light_view_projection_matrices = init_list((buffer_size_t) spec.num_layers, mat4);
 
 	light_view_projection_matrices.length = light_view_projection_matrices.max_alloc;
 	split_dists.length = split_dists.max_alloc;
@@ -113,55 +106,64 @@ CascadedShadowContext init_csm_context(const vec3 light_dir, const GLfloat z_sca
 		near_dist = constants.camera.near_clip_dist,
 		clip_dist_diff = far_clip_dist - constants.camera.near_clip_dist;
 
+	//////////
+
 	for (buffer_size_t i = 0; i < split_dists.length; i++) {
-		const GLfloat layer_percent = (GLfloat) (i + 1) / num_layers;
+		const GLfloat layer_percent = (GLfloat) (i + 1) / spec.num_layers;
 
 		const GLfloat linear_dist = near_dist + layer_percent * clip_dist_diff;
 		const GLfloat log_dist = near_dist * powf(far_clip_dist / near_dist, layer_percent);
 
-		const GLfloat weighted_dist = glm_lerp(log_dist, linear_dist, linear_split_weight);
+		const GLfloat weighted_dist = glm_lerp(log_dist, linear_dist, spec.linear_split_weight);
 
 		*((GLfloat*) ptr_to_list_index(&split_dists, i)) = weighted_dist;
 	}
 
+	//////////
+
+	const GLuint depth_layers = init_depth_layers(&spec);
+	vec3 dir;
+
+	get_dir_in_2D_and_3D(glm_rad(spec.light_angles.hori),
+		glm_rad(spec.light_angles.vert), (vec2) {0.0f, 0.0f}, dir);
+
 	return (CascadedShadowContext) {
 		.depth_layers = depth_layers,
-		.framebuffer = init_csm_framebuffer(depth_layers),
+		.framebuffer = init_framebuffer_with_depth_layers(depth_layers),
 
 		.depth_shader = init_shader(ASSET_PATH("shaders/csm/depth.vert"),
 			ASSET_PATH("shaders/csm/depth.geom"), ASSET_PATH("shaders/csm/depth.frag")
 		),
 
-		.resolution = {width, height},
-
-		.z_scale = z_scale,
-		.light_dir = {light_dir[0], light_dir[1], light_dir[2]},
-		.split_dists = split_dists,
-		.light_view_projection_matrices = light_view_projection_matrices
+		.light_dir = {dir[0], dir[1], dir[2]},
+		.light_view_projection_matrices = light_view_projection_matrices,
+		.split_dists = split_dists, .spec = spec
 	};
 }
 
-void deinit_csm_context(const CascadedShadowContext* const csm_context) {
-	deinit_list(csm_context -> split_dists);
-	deinit_list(csm_context -> light_view_projection_matrices);
-	deinit_shader(csm_context -> depth_shader);
-	deinit_texture(csm_context -> depth_layers);
-	glDeleteFramebuffers(1, &csm_context -> framebuffer);
+void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
+	deinit_list(shadow_context -> split_dists);
+	deinit_list(shadow_context -> light_view_projection_matrices);
+	deinit_shader(shadow_context -> depth_shader);
+	deinit_texture(shadow_context -> depth_layers);
+	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
 }
 
-void draw_to_csm_context(const CascadedShadowContext* const csm_context, const Camera* const camera,
+void draw_to_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera,
 	const GLint screen_size[2], void (*const drawer) (const void* const), const void* const drawer_param) {
 
+	const CascadedShadowSpec* const spec = &shadow_context -> spec;
+
 	const List
-		*const light_view_projection_matrices = &csm_context -> light_view_projection_matrices,
-		*const split_dists = &csm_context -> split_dists;
+		*const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices,
+		*const split_dists = &shadow_context -> split_dists;
 
 	const buffer_size_t num_cascades = light_view_projection_matrices -> length;
 
 	const GLfloat
-		z_scale = csm_context -> z_scale,
+		z_scale = spec -> z_scale,
 		far_clip_dist = camera -> far_clip_dist,
-		*const light_dir = csm_context -> light_dir;
+		*const light_dir = shadow_context -> light_dir;
 
 	////////// Getting the matrices needed
 
@@ -183,7 +185,7 @@ void draw_to_csm_context(const CascadedShadowContext* const csm_context, const C
 
 	////////// Updating the light view projection matrices uniform
 
-	const GLuint depth_shader = csm_context -> depth_shader;
+	const GLuint depth_shader = shadow_context -> depth_shader;
 	use_shader(depth_shader);
 
 	static GLint light_view_projection_matrices_id;
@@ -194,9 +196,9 @@ void draw_to_csm_context(const CascadedShadowContext* const csm_context, const C
 
 	////////// Rendering to the cascades
 
-	const GLsizei* const resolution = csm_context -> resolution;
+	const GLsizei* const resolution = spec -> resolution;
 	glViewport(0, 0, resolution[0], resolution[1]);
-	glBindFramebuffer(GL_FRAMEBUFFER, csm_context -> framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadow_context -> framebuffer);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	drawer(drawer_param);

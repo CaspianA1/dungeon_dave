@@ -17,7 +17,7 @@ typedef struct {
 	WeaponSprite weapon_sprite;
 	BatchDrawContext sector_draw_context, billboard_draw_context;
 
-	CascadedShadowContext cascaded_shadow_context;
+	CascadedShadowContext shadow_context;
 
 	List sectors, billboard_animations, billboard_animation_instances;
 

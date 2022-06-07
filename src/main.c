@@ -6,6 +6,7 @@
 #include "headers/maps.h"
 #include "headers/sector.h"
 #include "headers/normal_map_generation.h"
+#include "headers/level.h" // TODO: remove this include
 
 static void* main_init(void) {
 	////////// Defining a bunch of level data
@@ -159,10 +160,13 @@ static void* main_init(void) {
 
 	init_camera(&scene_state.camera, (vec3) {1.5f, 0.5f, 1.5f}, scene_state.heightmap, scene_state.map_size);
 
-	scene_state.cascaded_shadow_context = init_csm_context(
-		(vec3) {0.241236f, 0.930481f, -0.275698f}, 20.0f,
-		scene_state.camera.far_clip_dist, 0.1f, 1024, 1024, 5
-	);
+	const CascadedShadowSpec shadow_spec = {
+		.resolution = {1024, 1024}, .num_layers = 5,
+		.linear_split_weight = 0.1f, .z_scale = 20.0f,
+		.light_angles = {150.0f, 55.0f}
+	};
+
+	scene_state.shadow_context = init_shadow_context(shadow_spec, scene_state.camera.far_clip_dist);
 
 	//////////
 
@@ -192,7 +196,7 @@ static void main_drawer(void* const app_context) {
 	////////// Some variable initialization + object updating
 
 	const BatchDrawContext* const sector_draw_context = &scene_state -> sector_draw_context;
-	const CascadedShadowContext* const csm_context = &scene_state -> cascaded_shadow_context;
+	const CascadedShadowContext* const shadow_context = &scene_state -> shadow_context;
 	Camera* const camera = &scene_state -> camera;
 
 	update_camera(camera, event);
@@ -204,21 +208,21 @@ static void main_drawer(void* const app_context) {
 		&scene_state -> billboard_animations,
 		&scene_state -> billboard_draw_context.buffers.cpu);
 
-	draw_to_csm_context(csm_context, camera, event.screen_size, draw_all_sectors_for_shadow_map, sector_draw_context);
+	draw_to_shadow_context(shadow_context, camera, event.screen_size, draw_all_sectors_for_shadow_map, sector_draw_context);
 
 	////////// The main drawing code
 
-	draw_visible_sectors(sector_draw_context, csm_context, &scene_state -> sectors,
+	draw_visible_sectors(sector_draw_context, shadow_context, &scene_state -> sectors,
 		camera, scene_state -> face_normal_map_set, event.screen_size);
 
-	draw_visible_billboards(&scene_state -> billboard_draw_context, csm_context, camera);
+	draw_visible_billboards(&scene_state -> billboard_draw_context, shadow_context, camera);
 
 	/* Drawing the skybox after sectors and billboards because
 	most skybox fragments would unnecessarily be drawn otherwise */
 	draw_skybox(scene_state -> skybox, camera);
 
 	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, camera,
-		&event, csm_context, camera -> model_view_projection);
+		&event, shadow_context, camera -> model_view_projection);
 }
 
 static void main_deinit(void* const app_context) {
@@ -229,7 +233,7 @@ static void main_deinit(void* const app_context) {
 	deinit_batch_draw_context(&scene_state -> sector_draw_context);
 	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
 
-	deinit_csm_context(&scene_state -> cascaded_shadow_context);
+	deinit_shadow_context(&scene_state -> shadow_context);
 
 	deinit_list(scene_state -> sectors);
 	deinit_list(scene_state -> billboard_animations);

@@ -79,7 +79,7 @@ static void update_weapon_sprite_animation(WeaponSprite* const ws, const Event* 
 }
 
 void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera,
-	const Event* const event, const CascadedShadowContext* const csm_context, const mat4 model_view_projection) {
+	const Event* const event, const CascadedShadowContext* const shadow_context, const mat4 model_view_projection) {
 
 	update_weapon_sprite_animation(ws_ref, event);
 
@@ -99,11 +99,11 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 		INIT_UNIFORM_VALUE(ambient, ws.shader, 1f, constants.lighting.ambient);
 
-		const List* const split_dists = &csm_context -> split_dists;
+		const List* const split_dists = &shadow_context -> split_dists;
 		INIT_UNIFORM_VALUE(cascade_plane_distances, ws.shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
 		use_texture(ws.texture, ws.shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
-		use_texture(csm_context -> depth_layers, ws.shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
+		use_texture(shadow_context -> depth_layers, ws.shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
 
 	const GLfloat
@@ -155,7 +155,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &camera -> view[0][0]);
 
-	const List* const light_view_projection_matrices = &csm_context -> light_view_projection_matrices;
+	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
 
 	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
 		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,

@@ -26,7 +26,7 @@ void update_billboard_animation_instances(const List* const billboard_animation_
 	const List* const billboard_animations, const List* const billboards);
 
 void draw_visible_billboards(const BatchDrawContext* const draw_context,
-	const CascadedShadowContext* const csm_context, const Camera* const camera);
+	const CascadedShadowContext* const shadow_context, const Camera* const camera);
 
 BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, const Billboard* const billboards);
 
