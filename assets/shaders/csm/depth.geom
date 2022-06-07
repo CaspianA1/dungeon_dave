@@ -19,4 +19,6 @@ void main(void) {
 		EmitVertex();
 	}
 	EndPrimitive();
-}  
+}
+
+#undef VERTICES_PER_TRIANGLE
