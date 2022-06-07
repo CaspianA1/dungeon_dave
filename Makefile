@@ -45,15 +45,15 @@ $(BIN_DIR)/$(OUT): $(OBJS)
 	$(CC) $(BUILD_TYPE) $(NON_GL_LDFLAGS) $(GL_LDFLAGS) -o $@ $^
 
 $(OBJ_DIR)/glad.o: $(GLAD_DIR)/*
-	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $@ $(GLAD_DIR)/glad.c
+	$(CC) -c $(BUILD_TYPE) $(CFLAGS) -o $@ $(GLAD_DIR)/glad.c
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(HEADER_DIR)/%.h
-	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $@ $(SRC_DIR)/$*.c
+	$(CC) -c $(BUILD_TYPE) $(CFLAGS) -o $@ $(SRC_DIR)/$*.c
 
 ########## The rule for the editor + the clean rule
 
 editor:
-	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) -o $(BIN_DIR)/editor $(SRC_DIR)/editor/editor.c
+	$(CC) $(BUILD_TYPE) $(CFLAGS) $(NON_GL_LDFLAGS) -o $(BIN_DIR)/editor $(SRC_DIR)/editor/editor.c
 	cd $(BIN_DIR) && ./editor
 
 clean:
