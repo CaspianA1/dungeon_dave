@@ -152,7 +152,7 @@ static void* main_init(void) {
 
 	scene_state.cascaded_shadow_context = init_csm_context(
 		(vec3) {0.241236f, 0.930481f, -0.275698f}, 20.0f,
-		scene_state.camera.far_clip_dist, 0.1f, 1024, 1024, 8
+		scene_state.camera.far_clip_dist, 0.1f, 1024, 1024, 5
 	);
 
 	//////////

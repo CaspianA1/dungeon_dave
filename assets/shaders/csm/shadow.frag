@@ -16,8 +16,8 @@ float get_csm_shadow_from_layer(uint layer, vec3 fragment_pos_world_space) {
 }
 
 float in_csm_shadow(float world_depth_value, vec3 fragment_pos_world_space) {
-	int layer = -1; // TODO: select the cascade using some constant-time math
 	const int num_splits_between_cascades = int(NUM_CASCADES) - 1;
+	int layer = num_splits_between_cascades; // TODO: select the cascade using some constant-time math
 
 	for (int i = 0; i < num_splits_between_cascades; i++) {
 		if (cascade_plane_distances[i] > world_depth_value) {
@@ -26,6 +26,5 @@ float in_csm_shadow(float world_depth_value, vec3 fragment_pos_world_space) {
 		}
 	}
 
-	layer = (layer == -1) ? num_splits_between_cascades : layer;
 	return get_csm_shadow_from_layer(uint(layer), fragment_pos_world_space);
 }
