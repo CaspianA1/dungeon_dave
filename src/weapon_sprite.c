@@ -31,7 +31,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 		),
 
 		// TODO: for multiple weapons, share this shader
-		.shader = init_shader("assets/shaders/weapon.vert", NULL, "assets/shaders/weapon.frag"),
+		.shader = init_shader(ASSET_PATH("shaders/weapon.vert"), NULL, ASSET_PATH("shaders/weapon.frag")),
 
 		.animation = {
 			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
@@ -119,7 +119,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	////////// Screen corner determination
 
-	vec2 screen_corners[4];
+	vec2 screen_corners[corners_per_quad];
 
 	const GLfloat
 		across_term = ws.size * ws.frame_width_over_height * inverse_screen_aspect_ratio,
@@ -133,13 +133,12 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	////////// World corner determination
 
 	const vec4 viewport = {-1.0f, -1.0f, 1.0f, 1.0f};
-
-	vec3 world_corners[4];
+	vec3 world_corners[corners_per_quad];
 	mat4 inv_model_view_projection;
 
 	glm_mat4_inv((vec4*) model_view_projection, inv_model_view_projection);
 
-	for (byte i = 0; i < 4; i++) {
+	for (byte i = 0; i < corners_per_quad; i++) {
 		const GLfloat* const screen_corner = screen_corners[i];
 
 		glm_unprojecti((vec3) {screen_corner[0], screen_corner[1], constants.weapon_sprite.ndc_dist_from_camera},

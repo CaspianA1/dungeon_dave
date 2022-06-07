@@ -1,7 +1,6 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-#include <SDL2/SDL.h>
 #include "../headers/buffer_defs.h"
 
 #define EDITOR_WIDTH 1440

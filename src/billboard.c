@@ -114,7 +114,6 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context,
 	const Billboard* const out_of_bounds_billboard = ((Billboard*) cpu_billboards.data) + cpu_billboards.length;
 
 	for (const Billboard* billboard = cpu_billboards.data; billboard < out_of_bounds_billboard; billboard++) {
-
 		const Billboard* const initial_billboard = billboard;
 		while (billboard < out_of_bounds_billboard && billboard_in_view_frustum(*billboard, frustum_planes))
 			billboard++;
@@ -134,7 +133,7 @@ BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards,
 	BatchDrawContext draw_context = {
 		.buffers.cpu = init_list(num_billboards, Billboard),
 		.vertex_spec = init_vertex_spec(),
-		.shader = init_shader("assets/shaders/billboard.vert", NULL, "assets/shaders/billboard.frag")
+		.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag"))
 	};
 
 	push_array_to_list(&draw_context.buffers.cpu, billboards, num_billboards);

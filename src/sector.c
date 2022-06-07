@@ -125,7 +125,7 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 
 	draw_context -> buffers.cpu = face_meshes;
 	init_batch_draw_context_gpu_buffer(draw_context, face_meshes.length, bytes_per_face);
-	draw_context -> shader = init_shader("assets/shaders/sector.vert", NULL, "assets/shaders/sector.frag");
+	draw_context -> shader = init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag"));
 
 	draw_context -> vertex_spec = init_vertex_spec();
 	use_vertex_spec(draw_context -> vertex_spec);

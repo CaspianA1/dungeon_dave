@@ -54,6 +54,7 @@ Architectural/code design ideas:
 - Some sort of common draw context, that when invoked, binds a shader, vertex buffer and vertex spec and draws
 - Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
 - Perhaps use just OpenGL + ImGUI for the editor
+- An asset path macro
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage

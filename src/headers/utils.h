@@ -73,6 +73,8 @@
 #define use_vertex_spec glBindVertexArray
 #define deinit_vertex_spec(vertex_spec) glDeleteVertexArrays(1, &(vertex_spec))
 
+#define ASSET_PATH(suffix) ("../assets/" suffix)
+
 #define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
 
 #define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\

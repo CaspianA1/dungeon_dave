@@ -5,7 +5,7 @@
 #include "buffer_defs.h"
 #include "animation.h"
 
-// These macros aren't enums because they're configurable values, whereas the enums are not
+// TODO: put these macros in the constants struct
 
 #define SDL_PIXEL_FORMAT SDL_PIXELFORMAT_BGRA32
 

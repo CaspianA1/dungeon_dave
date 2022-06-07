@@ -129,8 +129,9 @@ CascadedShadowContext init_csm_context(const vec3 light_dir, const GLfloat z_sca
 		.depth_layers = depth_layers,
 		.framebuffer = init_csm_framebuffer(depth_layers),
 
-		.depth_shader = init_shader("assets/shaders/csm/depth.vert",
-			"assets/shaders/csm/depth.geom", "assets/shaders/csm/depth.frag"),
+		.depth_shader = init_shader(ASSET_PATH("shaders/csm/depth.vert"),
+			ASSET_PATH("shaders/csm/depth.geom"), ASSET_PATH("shaders/csm/depth.frag")
+		),
 
 		.resolution = {width, height},
 

@@ -120,7 +120,7 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 
 	return (Skybox) {
 		.vertex_buffer = vertex_buffer, .vertex_spec = vertex_spec,
-		.shader = init_shader("assets/shaders/skybox.vert", NULL, "assets/shaders/skybox.frag"),
+		.shader = init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag")),
 		.texture = init_skybox_texture(cubemap_path, texture_rescale_factor)
 	};
 }
