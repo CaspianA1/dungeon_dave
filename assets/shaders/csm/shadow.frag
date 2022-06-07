@@ -12,7 +12,8 @@ float get_csm_shadow_from_layer(uint layer, vec3 fragment_pos_world_space) {
 	vec4 fragment_pos_light_space = light_view_projection_matrices[layer] * vec4(fragment_pos_world_space, 1.0f);
 	vec3 UV = fragment_pos_light_space.xyz * 0.5f + 0.5f;
 
-	return texture(shadow_cascade_sampler, vec4(UV.xy, layer, UV.z));
+	const float bias = 0.0005f;
+	return texture(shadow_cascade_sampler, vec4(UV.xy, layer, UV.z - bias));
 }
 
 float in_csm_shadow(float world_depth_value, vec3 fragment_pos_world_space) {
