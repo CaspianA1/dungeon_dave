@@ -1,15 +1,25 @@
 #ifndef BUFFER_DEFS_H
 #define BUFFER_DEFS_H
 
-#include <SDL2/SDL.h>
+////////// cglm and sdl2 have plenty of floating-point promotion errors, so this ignores them
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdouble-promotion"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdouble-promotion"
+
 #include <cglm/cglm.h>
-#pragma GCC diagnostic pop
+
+// If SDL2/SDL.h isn't found, try SDL.h
+#if __has_include("SDL2/SDL.h")
+	#include <SDL2/SDL.h>
+#else
+	#include <SDL.h>
+#endif
+
+#pragma clang diagnostic pop
+
+//////////
 
 #include <stdbool.h>
-
 #include "../../include/glad/glad.h"
 
 typedef GLubyte byte;

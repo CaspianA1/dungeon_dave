@@ -12,8 +12,7 @@ static const GLfloat list_realloc_rate = 2.0f;
 List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size) {
 	return (List) {
 		malloc(init_alloc * item_size),
-		item_size,
-		0, init_alloc
+		item_size, 0, init_alloc
 	};
 }
 

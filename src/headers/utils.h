@@ -13,7 +13,6 @@
 #define KEY_PRINT_POSITION SDL_SCANCODE_3
 #define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_4
 #define KEY_PRINT_SDL_ERROR SDL_SCANCODE_5
-#define KEY_MAKE_SHADOW_MAP_MIPMAP SDL_SCANCODE_6
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", (var))
 #define DEBUG_FLOAT(var) printf(#var " = %ff\n", (double) (var))
@@ -73,6 +72,8 @@
 
 #define use_vertex_spec glBindVertexArray
 #define deinit_vertex_spec(vertex_spec) glDeleteVertexArrays(1, &(vertex_spec))
+
+#define ASSET_PATH(suffix) ("../assets/" suffix)
 
 #define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
 

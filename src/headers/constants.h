@@ -95,7 +95,7 @@ static const struct {
 
 	.window = {
 		.app_name = "Dungeon Dave",
-		.opengl_major_minor_version = {3, 3},
+		.opengl_major_minor_version = {4, 0},
 		.default_fps = 60, .depth_buffer_bits = 24, .multisample_samples = 8,
 		.size = {800, 600}
 	},
@@ -103,7 +103,7 @@ static const struct {
 	.title_screen = {.min_brightness = 0.7f, .brightness_repeat_ms = 500.0f},
 
 	.lighting = {
-		.enable_tone_mapping = true, .pcf_radius = 2, .esm_constant = 80.0f,
+		.enable_tone_mapping = true,
 
 		.ambient = 0.25f, .diffuse_strength = 0.5f, .specular_strength = 0.5f,
 		.specular_exponent_domain = {32.0f, 96.0f}, .noise_granularity = 0.3f / 255.0f,

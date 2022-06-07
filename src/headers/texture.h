@@ -5,7 +5,7 @@
 #include "buffer_defs.h"
 #include "animation.h"
 
-// These macros aren't enums because they're configurable values, whereas the enums are not
+// TODO: put these macros in the constants struct
 
 #define SDL_PIXEL_FORMAT SDL_PIXELFORMAT_BGRA32
 
@@ -43,7 +43,7 @@ And the biggest number possible with five bits is 15, so that gives you
 // TODO: make this to an enum
 #define SECTOR_FACE_TEXTURE_UNIT 0
 #define SECTOR_NORMAL_MAP_TEXTURE_UNIT 1
-#define SHADOW_MAP_TEXTURE_UNIT 2
+#define CASCADED_SHADOW_MAP_TEXTURE_UNIT 2
 #define BILLBOARD_TEXTURE_UNIT 3
 #define SKYBOX_TEXTURE_UNIT 4
 #define WEAPON_TEXTURE_UNIT 5

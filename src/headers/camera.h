@@ -17,12 +17,14 @@ typedef struct {
 	/* Pace is the amount of head bob that happens when moving.
 	The speed xz percent is not the true speed percent; rather,
 	the percentage is smoothed out by a Hermite curve. */
-	GLfloat pace, speed_xz_percent, time_since_jump, time_accum_for_full_fov, far_clip_dist;
+	GLfloat
+		pace, speed_xz_percent, time_since_jump,
+		time_accum_for_full_fov, far_clip_dist, aspect_ratio;
 
 	vec2 right_xz; // This is used for billboards
 	vec3 pos, dir, right, up, velocities;
 
-	mat4 model_view_projection;
+	mat4 view, model_view_projection;
 	vec4 frustum_planes[6];
 } Camera;
 

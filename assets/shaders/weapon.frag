@@ -1,7 +1,8 @@
-#version 330 core
+#version 400 core
 
-#include "common/shadow.frag"
+#include "csm/shadow.frag"
 
+in vec3 fragment_pos_world_space;
 noperspective in vec3 fragment_UV;
 
 out vec4 color;
@@ -11,6 +12,7 @@ uniform sampler2DArray frame_sampler;
 
 void main(void) {
 	color = texture(frame_sampler, fragment_UV);
-	color.rgb *= mix(ambient, 1.0f, shadow());
 
+	// Layer is always 0 for weapon, so `in_csm_shadow` doesn't need to be called
+	color.rgb *= mix(ambient, 1.0f, get_csm_shadow_from_layer(0u, fragment_pos_world_space));
 }

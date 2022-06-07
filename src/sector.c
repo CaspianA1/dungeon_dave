@@ -130,7 +130,7 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 
 	draw_context -> buffers.cpu = face_meshes;
 	init_batch_draw_context_gpu_buffer(draw_context, face_meshes.length, bytes_per_face);
-	draw_context -> shader = init_shader("assets/shaders/sector.vert", "assets/shaders/sector.frag");
+	draw_context -> shader = init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag"));
 
 	draw_context -> vertex_spec = init_vertex_spec();
 	use_vertex_spec(draw_context -> vertex_spec);
@@ -170,14 +170,14 @@ void draw_all_sectors_for_shadow_map(const void* const param) {
 }
 
 static void draw_sectors(const BatchDrawContext* const draw_context,
-	const ShadowMapContext* const shadow_map_context, const Camera* const camera,
-	const buffer_size_t num_visible_faces, const GLuint normal_map_set, const int screen_size[2]) {
+	const CascadedShadowContext* const csm_context, const Camera* const camera,
+	const buffer_size_t num_visible_faces, const GLuint normal_map_set, const GLint screen_size[2]) {
 
 	const GLuint shader = draw_context -> shader;
 
 	static GLint
-		camera_pos_world_space_id, dir_to_light_id, model_view_projection_id,
-		one_over_screen_size_id, UV_translation_id;
+		camera_pos_world_space_id, light_dir_id, model_view_projection_id,
+		one_over_screen_size_id, UV_translation_id, camera_view_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
 
@@ -186,15 +186,15 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	#define ARRAY_LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, 1, constants.lighting.param)
 
 	ON_FIRST_CALL(
-		INIT_UNIFORM(dir_to_light, shader);
+		INIT_UNIFORM(light_dir, shader);
 		INIT_UNIFORM(camera_pos_world_space, shader);
 		INIT_UNIFORM(model_view_projection, shader);
 		INIT_UNIFORM(one_over_screen_size, shader);
 		INIT_UNIFORM(UV_translation, shader);
+		INIT_UNIFORM(camera_view, shader);
+		INIT_UNIFORM(light_view_projection_matrices, shader);
 
 		LIGHTING_UNIFORM(enable_tone_mapping, 1i);
-		LIGHTING_UNIFORM(pcf_radius, 1i);
-		LIGHTING_UNIFORM(esm_constant, 1f);
 
 		LIGHTING_UNIFORM(ambient, 1f);
 		LIGHTING_UNIFORM(diffuse_strength, 1f);
@@ -216,15 +216,13 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 			{4.0f + epsilon, 0.0f, 0.0f}, {6.0f - epsilon, 3.0f, 3.0f + epsilon}
 		});
 
-		INIT_UNIFORM_VALUE(biased_light_model_view_projection, shader, Matrix4fv, 1,
-			GL_FALSE, &shadow_map_context -> light.biased_model_view_projection[0][0]);
+		const List* const split_dists = &csm_context -> split_dists;
+		INIT_UNIFORM_VALUE(cascade_plane_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
-		use_texture(shadow_map_context -> buffers.depth_texture, shader, "shadow_map_sampler", TexPlain, SHADOW_MAP_TEXTURE_UNIT);
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
 		use_texture(normal_map_set, shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
+		use_texture(csm_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
-
-	//////////
 
 	const GLfloat t = SDL_GetTicks() / 3000.0f;
 	UPDATE_UNIFORM(UV_translation, 2f, cosf(t), tanf(t));
@@ -236,11 +234,22 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	#undef ARRAY_LIGHTING_UNIFORM
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
-	const GLfloat* const light_dir = shadow_map_context -> light.dir;
-	UPDATE_UNIFORM(dir_to_light, 3f, -light_dir[0], -light_dir[1], -light_dir[2]);
+	UPDATE_UNIFORM(light_dir, 3fv, 1, csm_context -> light_dir);
 
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
 	UPDATE_UNIFORM(one_over_screen_size, 2f, 1.0f / screen_size[0], 1.0f / screen_size[1]);
+
+	////////// This little part concerns CSM
+
+	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &camera -> view[0][0]);
+
+	const List* const light_view_projection_matrices = &csm_context -> light_view_projection_matrices;
+
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
+		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
+		light_view_projection_matrices -> data);
+
+	//////////
 
 	use_vertex_spec(draw_context -> vertex_spec);
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
@@ -286,12 +295,12 @@ static buffer_size_t fill_sector_vertex_buffer_with_visible_faces(
 
 // This is just a utility function
 void draw_visible_sectors(const BatchDrawContext* const draw_context,
-	const ShadowMapContext* const shadow_map_context, const List* const sectors,
+	const CascadedShadowContext* const csm_context, const List* const sectors,
 	const Camera* const camera, const GLuint normal_map_set, const GLint screen_size[2]) {
 
 	const buffer_size_t num_visible_faces = fill_sector_vertex_buffer_with_visible_faces(draw_context, sectors, camera);
 
-	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_map_context,
+	if (num_visible_faces != 0) draw_sectors(draw_context, csm_context,
 		camera, num_visible_faces, normal_map_set, screen_size);
 }
 

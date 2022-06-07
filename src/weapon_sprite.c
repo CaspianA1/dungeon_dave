@@ -31,7 +31,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 		),
 
 		// TODO: for multiple weapons, share this shader
-		.shader = init_shader("assets/shaders/weapon.vert", "assets/shaders/weapon.frag"),
+		.shader = init_shader(ASSET_PATH("shaders/weapon.vert"), NULL, ASSET_PATH("shaders/weapon.frag")),
 
 		.animation = {
 			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
@@ -79,30 +79,31 @@ static void update_weapon_sprite_animation(WeaponSprite* const ws, const Event* 
 }
 
 void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera,
-	const Event* const event, const ShadowMapContext* const shadow_map_context,
-	const mat4 model_view_projection) {
+	const Event* const event, const CascadedShadowContext* const csm_context, const mat4 model_view_projection) {
 
 	update_weapon_sprite_animation(ws_ref, event);
 
 	const WeaponSprite ws = *ws_ref;
 
 	use_shader(ws.shader);
-	static GLint frame_index_id, screen_corners_id, world_corners_id;
+	static GLint
+		frame_index_id, screen_corners_id, world_corners_id,
+		camera_view_id, light_view_projection_matrices_id;
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(frame_index, ws.shader);
 		INIT_UNIFORM(screen_corners, ws.shader);
 		INIT_UNIFORM(world_corners, ws.shader);
+		INIT_UNIFORM(camera_view, ws.shader);
+		INIT_UNIFORM(light_view_projection_matrices, ws.shader);
 
 		INIT_UNIFORM_VALUE(ambient, ws.shader, 1f, constants.lighting.ambient);
-		INIT_UNIFORM_VALUE(pcf_radius, ws.shader, 1i, constants.lighting.pcf_radius);
-		INIT_UNIFORM_VALUE(esm_constant, ws.shader, 1f, constants.lighting.esm_constant);
-		INIT_UNIFORM_VALUE(biased_light_model_view_projection, ws.shader, Matrix4fv,
-			1, GL_FALSE, &shadow_map_context -> light.biased_model_view_projection[0][0]);
+
+		const List* const split_dists = &csm_context -> split_dists;
+		INIT_UNIFORM_VALUE(cascade_plane_distances, ws.shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
 		use_texture(ws.texture, ws.shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
-		use_texture(shadow_map_context -> buffers.depth_texture, ws.shader, "shadow_map_sampler",
-			TexPlain, SHADOW_MAP_TEXTURE_UNIT);
+		use_texture(csm_context -> depth_layers, ws.shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
 
 	const GLfloat
@@ -118,7 +119,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	////////// Screen corner determination
 
-	vec2 screen_corners[4];
+	vec2 screen_corners[corners_per_quad];
 
 	const GLfloat
 		across_term = ws.size * ws.frame_width_over_height * inverse_screen_aspect_ratio,
@@ -131,16 +132,17 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	////////// World corner determination
 
-	vec3 world_corners[4];
-	mat4 inverse;
-	glm_mat4_inv((vec4*) model_view_projection, inverse);
 	const vec4 viewport = {-1.0f, -1.0f, 1.0f, 1.0f};
+	vec3 world_corners[corners_per_quad];
+	mat4 inv_model_view_projection;
 
-	for (byte i = 0; i < 4; i++) {
+	glm_mat4_inv((vec4*) model_view_projection, inv_model_view_projection);
+
+	for (byte i = 0; i < corners_per_quad; i++) {
 		const GLfloat* const screen_corner = screen_corners[i];
 
 		glm_unprojecti((vec3) {screen_corner[0], screen_corner[1], constants.weapon_sprite.ndc_dist_from_camera},
-			(vec4*) inverse, (GLfloat*) viewport, world_corners[i]);
+			(vec4*) inv_model_view_projection, (GLfloat*) viewport, world_corners[i]);
 	}
 
 	//////////
@@ -149,6 +151,20 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	UPDATE_UNIFORM(screen_corners, 2fv, 4, (GLfloat*) screen_corners);
 	UPDATE_UNIFORM(world_corners, 3fv, 4, (GLfloat*) world_corners);
 
+	////////// This little part concerns CSM
+
+	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &camera -> view[0][0]);
+
+	const List* const light_view_projection_matrices = &csm_context -> light_view_projection_matrices;
+
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
+		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
+		light_view_projection_matrices -> data);
+
+	//////////
+
+	/* Not using alpha to coverage here b/c blending is guaranteed
+	to be correct for the last-rendered weapon's z-depth of zero */
 	WITH_BINARY_RENDER_STATE(GL_BLEND,
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);

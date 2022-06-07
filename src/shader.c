@@ -7,9 +7,12 @@
 
 typedef enum {
 	CompileVertexShader,
+	CompileGeoShader,
 	CompileFragmentShader,
 	LinkShaders
 } ShaderCompilationStep;
+
+enum {num_sub_shaders = 3};
 
 /* This is just here because `read_and_parse_includes_for_glsl`
 and `get_source_for_included_file` are mutually recursive */
@@ -44,6 +47,7 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 
 		switch (compilation_step) {
 			STRING_CASE(CompileVertexShader, "vertex shader compilation");
+			STRING_CASE(CompileGeoShader, "geometry shader compilation");
 			STRING_CASE(CompileFragmentShader, "fragment shader compilation");
 			STRING_CASE(LinkShaders, "linking");
 		}
@@ -55,11 +59,13 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 	}
 }
 
-static GLuint init_shader_from_source(const List shader_code[2]) {
-	const GLenum sub_shader_types[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
-	GLuint sub_shaders[2], shader = glCreateProgram();
+static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], const GLchar* const sub_shader_paths[num_sub_shaders]) {
+	const GLenum sub_shader_types[num_sub_shaders] = {GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER};
+	GLuint sub_shaders[num_sub_shaders], shader = glCreateProgram();
 
 	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
+		if (sub_shader_paths[step] == NULL) continue;
+
 		const GLuint sub_shader = glCreateShader(sub_shader_types[step]);
 
 		const List* const sub_shader_code = shader_code + step;
@@ -77,6 +83,8 @@ static GLuint init_shader_from_source(const List shader_code[2]) {
 		glLinkProgram, glGetProgramiv, glGetProgramInfoLog);
 
 	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
+		if (sub_shader_paths[step] == NULL) continue;
+
 		const GLuint sub_shader = sub_shaders[step];
 		glDetachShader(shader, sub_shader);
 		glDeleteShader(sub_shader);
@@ -85,12 +93,19 @@ static GLuint init_shader_from_source(const List shader_code[2]) {
 	return shader;
 }
 
-static char* read_file_contents(const char* const path) {
-	FILE* const file = fopen(path, "r");
-	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);
+////////// File utils
 
-	 /* (TODO) Possible bug: if `ftell` fails, `num_bytes` will
-	 underflow, and too much data will be allocated. */
+static FILE* open_file_safely(const char* const path, const char* const mode) {
+	FILE* const file = fopen(path, mode);
+	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);
+	return file;
+}
+
+static char* read_file_contents(const char* const path) {
+	FILE* const file = open_file_safely(path, "r");
+
+	/* (TODO) Possible bug: if `ftell` fails, `num_bytes` will
+	underflow, and too much data will be allocated. */
 
 	fseek(file, 0l, SEEK_END); // Set file position to end
 	const size_t num_bytes = (size_t) ftell(file);
@@ -104,6 +119,8 @@ static char* read_file_contents(const char* const path) {
 
 	return data;
 }
+
+//////////
 
 static GLchar* get_source_for_included_file(List* const dependency_list,
 	const GLchar* const includer_path, const GLchar* const included_path) {
@@ -212,40 +229,51 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	return true;
 }
 
-static void erase_version_strings_from_dependency_list(List* const dependency_list) {
-	const GLchar* const version_string = "#version 330 core\n";
-	const size_t version_string_length = strlen(version_string);
+static void erase_version_strings_from_dependency_list(const List* const dependency_list) {
+	const GLchar *const base_version_string = "#version", *const full_version_string = "#version ___ core\n";
+	const GLsizei full_version_string_length = strlen(full_version_string);
 
 	// Not erasing the version string from the first one because it's the only one that should keep #version in it
 	for (buffer_size_t i = 1; i < dependency_list -> length; i++) {
 		GLchar* const dependency = value_at_list_index(dependency_list, i, GLchar*);
 
-		GLchar* const version_string_pos = strstr(dependency, version_string);
-		if (version_string_pos != NULL) memset(version_string_pos, ' ', version_string_length);
+		GLchar* const version_string_pos = strstr(dependency, base_version_string);
+		if (version_string_pos != NULL) memset(version_string_pos, ' ', full_version_string_length);
 	}
 }
 
-GLuint init_shader(const GLchar* const vertex_shader_path, const GLchar* const fragment_shader_path) {
-	List dependency_lists[2];
+GLuint init_shader(
+	const GLchar* const vertex_shader_path,
+	const GLchar* const geo_shader_path,
+	const GLchar* const fragment_shader_path) {
 
-	for (byte i = 0; i < 2; i++) {
+	const GLchar* const paths[num_sub_shaders] = {vertex_shader_path, geo_shader_path, fragment_shader_path};
+
+	List dependency_lists[num_sub_shaders];
+
+	for (byte i = 0; i < num_sub_shaders; i++) {
+		const GLchar* const path = paths[i];
+		if (path == NULL) continue;
+
 		List* const dependency_list = dependency_lists + i;
 		*dependency_list = init_list(1, GLchar*);
 
-		const GLchar* const path = i ? fragment_shader_path : vertex_shader_path;
 		GLchar* const code = read_file_contents(path);
 
 		// `get_include_snippet_in_glsl_code` blanks out #include lines and recursively adds to the dependency list
 		while (read_and_parse_includes_for_glsl(dependency_list, code, path));
+
 		push_ptr_to_list(dependency_list, &code);
 
 		// This blanks out #version lines for all included files
 		erase_version_strings_from_dependency_list(dependency_list);
 	}
 
-	const GLuint shader = init_shader_from_source(dependency_lists);
+	const GLuint shader = init_shader_from_source(dependency_lists, paths);
 
-	for (byte i = 0; i < 2; i++) {
+	for (byte i = 0; i < num_sub_shaders; i++) {
+		if (paths[i] == NULL) continue;
+
 		const List* const dependency_list = dependency_lists + i;
 
 		for (buffer_size_t i = 0; i < dependency_list -> length; i++)

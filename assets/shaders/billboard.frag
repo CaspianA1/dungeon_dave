@@ -1,8 +1,9 @@
-#version 330 core
+#version 400 core
 
-#include "common/shadow.frag"
+#include "csm/shadow.frag"
 
-in vec3 UV;
+in float world_depth_value;
+in vec3 UV, fragment_pos_world_space;
 out vec4 color;
 
 uniform float ambient;
@@ -10,5 +11,5 @@ uniform sampler2DArray texture_sampler;
 
 void main(void) {
 	color = texture(texture_sampler, UV);
-	color.rgb *= mix(ambient, 1.0f, shadow());
+	color.rgb *= mix(ambient, 1.0f, in_csm_shadow(world_depth_value, fragment_pos_world_space));
 }
