@@ -17,5 +17,4 @@ void main(void) {
 	fragment_UV = vec3(gl_VertexID & 1, gl_VertexID < 2, frame_index);
 
 	fragment_pos_world_space = world_corners[gl_VertexID];
-	world_depth_value = get_world_depth_value(fragment_pos_world_space);
 }

@@ -6,6 +6,7 @@ layout(location = 0) in uint texture_id;
 layout(location = 1) in vec2 billboard_size_world_space;
 layout(location = 2) in vec3 billboard_center_world_space;
 
+out float world_depth_value;
 out vec3 UV, fragment_pos_world_space;
 
 uniform vec2 right_xz_world_space;

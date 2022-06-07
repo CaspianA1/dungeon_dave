@@ -4,15 +4,19 @@
 
 // TODO: share `light_view_projection_matrices` with `depth.geom`
 
-in float world_depth_value;
-
 uniform float cascade_plane_distances[NUM_CASCADES - 1];
 uniform mat4 light_view_projection_matrices[NUM_CASCADES];
 uniform sampler2DArray shadow_cascade_sampler;
 
-float in_csm_shadow(vec3 fragment_pos_world_space) {
-	////////// Selecting a cascade
+float get_csm_shadow_from_layer(uint layer, vec3 fragment_pos_world_space) {
+	vec4 fragment_pos_light_space = light_view_projection_matrices[layer] * vec4(fragment_pos_world_space, 1.0f);
+	vec3 UV = fragment_pos_light_space.xyz * 0.5f + 0.5f;
 
+	float occluder_depth = texture(shadow_cascade_sampler, vec3(UV.xy, layer)).r;
+	return float(UV.z <= occluder_depth);
+}
+
+float in_csm_shadow(float world_depth_value, vec3 fragment_pos_world_space) {
 	int layer = -1; // TODO: select the cascade using some constant-time math
 	const int num_splits_between_cascades = int(NUM_CASCADES) - 1;
 
@@ -24,12 +28,5 @@ float in_csm_shadow(vec3 fragment_pos_world_space) {
 	}
 
 	layer = (layer == -1) ? num_splits_between_cascades : layer;
-
-	////////// Testing to see if the cascade's fragment is in shadow
-
-	vec4 fragment_pos_light_space = light_view_projection_matrices[layer] * vec4(fragment_pos_world_space, 1.0f);
-	vec3 UV = fragment_pos_light_space.xyz * 0.5f + 0.5f;
-
-	float occluder_depth = texture(shadow_cascade_sampler, vec3(UV.xy, layer)).r;
-	return float(UV.z <= occluder_depth);
+	return get_csm_shadow_from_layer(uint(layer), fragment_pos_world_space);
 }
