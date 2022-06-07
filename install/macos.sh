@@ -1,6 +1,7 @@
-# This script assumes that git, make, brew, and clang are installed (they come in the developer tools package)
+# This script assumes that the developer tools are installed.
+# That should include clang, make, and git.
 
-brew install sdl2 cmake
+brew install pkg-config sdl2 cmake
 
 git clone git@github.com:recp/cglm.git
 cd cglm
