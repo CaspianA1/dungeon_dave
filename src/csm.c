@@ -183,7 +183,9 @@ void draw_to_csm_context(const CascadedShadowContext* const csm_context, const C
 
 	static GLint light_view_projection_matrices_id;
 	ON_FIRST_CALL(INIT_UNIFORM(light_view_projection_matrices, depth_shader););
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei) num_cascades, GL_FALSE, light_view_projection_matrices -> data);
+
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei)
+		num_cascades, GL_FALSE, light_view_projection_matrices -> data);
 
 	////////// Rendering to the cascades
 
