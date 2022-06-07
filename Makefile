@@ -10,9 +10,9 @@ CONVERSION_WARNINGS = -Wfloat-conversion -Wdouble-promotion -Wsign-conversion\
 	-Wimplicit-int-conversion -Wshorten-64-to-32 -Wincompatible-pointer-types
 
 WARNINGS = -Wall -Wextra -Wpedantic -Wformat $(CONVERSION_WARNINGS)
-CFLAGS = -std=c99 $(WARNINGS)
 
-NON_GL_LDFLAGS = $$(pkg-config --cflags --libs sdl2) -lm -ldl
+CFLAGS := `pkg-config --cflags sdl2` -std=c99 $(WARNINGS)
+NON_GL_LDFLAGS := -lm -ldl `pkg-config --libs sdl2`
 
 ##########
 
@@ -42,7 +42,7 @@ all: $(BIN_DIR)/$(OUT)
 	cd bin && ./$(OUT) && cd ..
 
 $(BIN_DIR)/$(OUT): $(OBJS)
-	$(CC) $(CFLAGS) $(BUILD_TYPE) $(NON_GL_LDFLAGS) $(GL_LDFLAGS) -o $@ $^
+	$(CC) $(BUILD_TYPE) $(NON_GL_LDFLAGS) $(GL_LDFLAGS) -o $@ $^
 
 $(OBJ_DIR)/glad.o: $(GLAD_DIR)/*
 	$(CC) -c $(CFLAGS) $(BUILD_TYPE) -o $@ $(GLAD_DIR)/glad.c
