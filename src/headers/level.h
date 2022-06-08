@@ -7,7 +7,7 @@
 
 typedef struct {
 	const struct {
-		const GLchar* const skybox;
+		const GLchar *const skybox, *background_theme;
 		const List wall_texture;
 	} asset_paths;
 
@@ -27,5 +27,7 @@ typedef struct {
 	const byte map_width, map_height;
 	const byte* const heightmap;
 } LevelDescription;
+
+void level_test(void);
 
 #endif

@@ -133,7 +133,7 @@ const Uint8* keys;
 
 //////////
 
-// Excluded: resize_window_if_needed, set_triangle_fill_mode, query_for_application_exit
+// Excluded: resize_window_if_needed, set_triangle_fill_mode, query_for_application_exit, open_file_safely
 
 Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
 	const byte depth_buffer_bits, const byte multisample_samples, const GLint window_size[2]);
@@ -161,5 +161,7 @@ void enable_all_culling(void);
 byte sample_map_point(const byte* const map, const byte x, const byte y, const byte map_width);
 
 const char* get_GL_error(void);
+
+char* read_file_contents(const char* const path);
 
 #endif

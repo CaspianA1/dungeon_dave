@@ -12,7 +12,7 @@ CONVERSION_WARNINGS = -Wfloat-conversion -Wdouble-promotion -Wsign-conversion\
 WARNINGS = -Wall -Wextra -Wpedantic -Wformat $(CONVERSION_WARNINGS)
 
 CFLAGS := `pkg-config --cflags sdl2` -std=c99 $(WARNINGS)
-NON_GL_LDFLAGS := -lm -ldl `pkg-config --libs sdl2`
+NON_GL_LDFLAGS := -lm -ldl -lcjson `pkg-config --libs sdl2`
 
 ##########
 

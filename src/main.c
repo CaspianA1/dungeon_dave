@@ -111,6 +111,8 @@ static void* main_init(void) {
 
 	//////////
 
+	level_test();
+
 	SceneState scene_state = {
 		.weapon_sprite = init_weapon_sprite(
 			0.6f, 2.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
