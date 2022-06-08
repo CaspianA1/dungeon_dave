@@ -86,10 +86,8 @@ static StructuralEquivalenceState check_json_structural_equivalence(const cJSON*
 	}
 
 	else if (type_a == cJSON_Object) {
-		// Checking that each has the same set of keys in the same order, and the structural equivalence of all values.
-		for (const cJSON *kv_a = a -> child, *kv_b = b -> child;;
-			kv_a = kv_a -> next, kv_b = kv_b -> next) { // kv = key value
-
+		// kv = key value. Checking that keys are in the same order, and that all values are structurally equivalent.
+		for (const cJSON *kv_a = a -> child, *kv_b = b -> child;; kv_a = kv_a -> next, kv_b = kv_b -> next) {
 			const bool end_of_a = kv_a == NULL, end_of_b = kv_b == NULL;
 			if (end_of_a && end_of_b) break; // End of both objects
 
