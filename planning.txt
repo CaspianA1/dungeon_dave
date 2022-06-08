@@ -55,6 +55,7 @@ Architectural/code design ideas:
 - Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
 - Perhaps use just OpenGL + ImGUI for the editor
 - An asset path macro
+- Make all static billboards to animated (to simplify the code)
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
