@@ -1,5 +1,5 @@
-#ifndef LEVEL_H
-#define LEVEL_H
+#ifndef LEVEL_FILE_H
+#define LEVEL_FILE_H
 
 #include "buffer_defs.h"
 #include "list.h"
@@ -11,8 +11,6 @@ typedef struct {
 		const List wall_texture;
 	} asset_paths;
 
-	const List wall_texture_paths;
-
 	//////////
 
 	const vec3 init_pos;
@@ -20,6 +18,7 @@ typedef struct {
 
 	/*
 	- Light params
+	- Normal map params
 	- How to handle switching weapons? Perhaps just one weapon per level for now
 	- Rescaling of assets?
 	*/
@@ -28,6 +27,8 @@ typedef struct {
 	const byte* const heightmap;
 } LevelDescription;
 
-void level_test(void);
+// Excluded: get_json_type_string, print_json, init_json_from_path, check_json_structural_equivalence
+
+void level_file_test(void);
 
 #endif

@@ -120,6 +120,7 @@ typedef enum {
 	OpenFile,
 	CreateShader,
 	ParseIncludeDirectiveInShader,
+	ParseLevelFile,
 	CreateFramebuffer,
 	CreateSkybox,
 	CreateBlankSurface,

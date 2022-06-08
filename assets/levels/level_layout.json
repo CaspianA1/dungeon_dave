@@ -1,0 +1,25 @@
+{
+	"init_pos_x": 0.0, "init_pos_y": 0.0, "init_pos_z": 0.0,
+
+	"shadow_mapping": {
+		"resolution_x": 0, "resolution_y": 0, "num_layers": 0,
+		"linear_split_weight": 0.0, "z_scale": 0.0,
+		"light_angle_hori": 0.0, "light_angle_vert": 0.0
+	},
+
+	"normal_mapping": {
+		"blur": {"radius": 0, "std_dev": 0.0},
+		"intensity": 0.0
+	},
+
+	"heightmap": [],
+	"texture_id_map": [],
+
+	"assets_from_disk": {
+		"base_asset_path": "",
+		"image_extension": "",
+
+		"wall_texture_directory": "",
+		"wall_textures": []
+	}
+}

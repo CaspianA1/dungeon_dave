@@ -6,7 +6,7 @@
 #include "headers/maps.h"
 #include "headers/sector.h"
 #include "headers/normal_map_generation.h"
-#include "headers/level.h" // TODO: remove this include
+#include "headers/level_file.h" // TODO: remove
 
 static void* main_init(void) {
 	////////// Defining a bunch of level data
@@ -111,7 +111,7 @@ static void* main_init(void) {
 
 	//////////
 
-	level_test();
+	level_file_test();
 
 	SceneState scene_state = {
 		.weapon_sprite = init_weapon_sprite(
