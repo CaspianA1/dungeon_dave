@@ -17,6 +17,9 @@ For later on:
 - Blending between layers
 - Filtering
 - Merging the master branch with this one
+
+- Note: shadows are disappearing in the distance because of the shadow bias parameter.
+- Objects disappear up close becasuse of `z_scale` being incorrect.
 */
 
 //////////
