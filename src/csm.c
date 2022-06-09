@@ -6,7 +6,7 @@
 #include "headers/shader.h"
 #include "headers/texture.h"
 
-#define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT16
+#define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT32F
 
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
@@ -70,14 +70,9 @@ static void get_csm_light_view_projection_matrix(const Camera* const camera,
 	glm_mul(light_projection, light_view, light_view_projection);
 }
 
-static GLuint init_csm_depth_layers(const GLsizei width,
-	const GLsizei height, const GLsizei num_layers) {
-
+static GLuint init_csm_depth_layers(const GLsizei width, const GLsizei height, const GLsizei num_layers) {
 	const GLuint depth_layers = preinit_texture(TexSet, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
-
-	glTexParameteri(TexSet, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, width, height, num_layers, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-
 	return depth_layers;
 }
 
