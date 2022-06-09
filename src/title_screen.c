@@ -28,8 +28,8 @@ void tick_title_screen(const TitleScreen title_screen) {
 	static GLint brightness_id;
 
 	ON_FIRST_CALL(
-		use_texture(title_screen.texture, title_screen.shader, "texture_sampler", TexPlain, TITLE_SCREEN_LOGO_TEXTURE_UNIT);
 		INIT_UNIFORM(brightness, title_screen.shader);
+		use_texture(title_screen.texture, title_screen.shader, "texture_sampler", TexPlain, TITLE_SCREEN_LOGO_TEXTURE_UNIT);
 	);
 
 	const GLfloat
