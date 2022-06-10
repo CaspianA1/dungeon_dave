@@ -14,7 +14,7 @@ float get_average_occluder_depth(vec2 UV, uint layer, int sample_radius) {
 
 	for (int y = -sample_radius; y <= sample_radius; y++) {
 		for (int x = -sample_radius; x <= sample_radius; x++) {
-			vec3 sample_UV = vec3(UV.xy + texel_size * vec2(x, y), layer);
+			vec3 sample_UV = vec3(texel_size * vec2(x, y) + UV.xy, layer);
 			average_occluder_depth += texture(shadow_cascade_sampler, sample_UV).r;
 		}
 	}
@@ -25,7 +25,12 @@ float get_average_occluder_depth(vec2 UV, uint layer, int sample_radius) {
 
 float get_csm_shadow_from_layer(uint layer, vec3 fragment_pos_world_space) {
 	const int sample_radius = 0;
-	const float esm_constant = 80.0f;
+	const float esm_constant = 300.0f, layer_scaling_component = 1.2f;
+
+	/* (TODO) esm scaling:
+	- Bigger depth range will be darker, so scale the exponent primarily on that
+	- Secondarily, depth values will be different b/c depth values are normalized
+		based on the cascade depth range, so also rescale also on the cascade */
 
 	/////////// Getting UV
 
@@ -34,13 +39,13 @@ float get_csm_shadow_from_layer(uint layer, vec3 fragment_pos_world_space) {
 
 	/////////// Calculating the shadow strength
 
-	float scaled_esm_constant = exp(layer) * esm_constant;// TODO: scale in a more effective way
 	float occluder_receiver_diff = UV.z - get_average_occluder_depth(UV.xy, layer, sample_radius);
-	float in_light_percentage = exp(-scaled_esm_constant * occluder_receiver_diff);
+	float layer_scaled_esm_constant = esm_constant * pow(layer + 1u, layer_scaling_component);
+	float in_light_percentage = exp(-layer_scaled_esm_constant * occluder_receiver_diff);
 	return clamp(in_light_percentage, 0.0f, 1.0f);
 }
 
-float in_csm_shadow(float world_depth_value, vec3 fragment_pos_world_space) {
+float csm_shadow(float world_depth_value, vec3 fragment_pos_world_space) {
 	const int num_splits_between_cascades = int(NUM_CASCADES) - 1;
 	int layer = num_splits_between_cascades; // TODO: select the cascade using some constant-time math
 
