@@ -24,6 +24,29 @@ For later on:
 
 //////////
 
+// This modifies `light_projection` to avoid shadow swimming
+static void apply_texel_snapping(mat4 light_projection, const mat4 light_view_projection) {
+	/*
+	First tried https://www.junkship.net/News/2020/11/22/shadow-of-a-doubt-part-2
+	Then settling with https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering for now
+
+	Second way only works for far-away shadows (shimmering for close ones).
+	For far-away shadows, shimmering doesn't happen for movement, but it does for turning.
+	*/
+
+	const GLsizei resolution = 1024;
+
+	vec2 shadow_origin;
+	glm_vec2_scale((GLfloat*) light_view_projection[3], resolution / 2.0f, shadow_origin);
+
+	vec2 rounding_offset;
+	glm_vec2_sub((vec2) {roundf(shadow_origin[0]), roundf(shadow_origin[1])}, shadow_origin, rounding_offset);
+	glm_vec2_scale(rounding_offset, 2.0f / resolution, rounding_offset);
+
+	GLfloat* const column = light_projection[3];
+	glm_vec2_add(column, rounding_offset, column);
+}
+
 static void get_csm_light_view_projection_matrix(const Camera* const camera,
 	const GLfloat near_clip, const GLfloat far_clip, const GLfloat z_scale,
 	const vec3 light_dir, mat4 light_view_projection) {
@@ -67,6 +90,11 @@ static void get_csm_light_view_projection_matrix(const Camera* const camera,
 
 	mat4 light_projection;
 	glm_ortho_aabb(light_view_frustum_box, light_projection);
+	glm_mul(light_projection, light_view, light_view_projection);
+
+	////////// Texel snapping
+
+	apply_texel_snapping(light_projection, light_view_projection);
 	glm_mul(light_projection, light_view, light_view_projection);
 }
 
