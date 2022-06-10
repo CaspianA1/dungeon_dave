@@ -55,6 +55,7 @@ Architectural/code design ideas:
 - Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
 - Perhaps use just OpenGL + ImGUI for the editor
 - Make all static billboards to animated (to simplify the code)
+- Later on, when doing the audio code, use a more compressed audio format, like FLAC or WAV (since SDL_Mixer supports more audio types)
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
