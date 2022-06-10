@@ -29,6 +29,8 @@ static void apply_texel_snapping(mat4 light_projection, const mat4 light_view_pr
 	/*
 	First tried https://www.junkship.net/News/2020/11/22/shadow-of-a-doubt-part-2
 	Then settling with https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering for now
+	Perhaps try https://dev.theomader.com/stable-csm/ later
+	Or https://www.gamedev.net/forums/topic/711114-minimizing-shadow-mapping-shimmer/5443275/?
 
 	Second way only works for far-away shadows (shimmering for close ones).
 	For far-away shadows, shimmering doesn't happen for movement, but it does for turning.
