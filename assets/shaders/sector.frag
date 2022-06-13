@@ -35,15 +35,14 @@ float specular(vec3 texture_color, vec3 fragment_normal) {
 
 	//////////
 
-	const float one_third = 1.0f / 3.0f;
-	float texture_color_strength = (texture_color.r + texture_color.g + texture_color.b) * one_third;
+	float texture_color_strength = (texture_color.r + texture_color.g + texture_color.b) / 3.0f;
 	float specular_exponent = mix(specular_exponent_domain.x, specular_exponent_domain.y, texture_color_strength);
 	return specular_strength * texture_color_strength * pow(cos_angle_of_incidence, specular_exponent);
 }
 
 vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {
 	float non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);
-	float light_strength = ambient + non_ambient * csm_shadow(world_depth_value, fragment_pos_world_space);;
+	float light_strength = ambient + non_ambient * csm_shadow(world_depth_value, fragment_pos_world_space);
 	return light_strength * light_color * texture_color;
 }
 

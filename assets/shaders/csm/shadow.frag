@@ -2,19 +2,21 @@
 
 #include "num_cascades.geom" // `num_cascades.geom` is written to by the CPU before any shader compilation
 
+const uint out_of_bounds_split_index = NUM_CASCADES - 1u;
+
 // TODO: share `light_view_projection_matrices` with `depth.geom`
 
-uniform float cascade_plane_distances[NUM_CASCADES - 1];
+uniform float cascade_split_distances[out_of_bounds_split_index];
 uniform mat4 light_view_projection_matrices[NUM_CASCADES];
 uniform sampler2DArray shadow_cascade_sampler;
 
-float get_average_occluder_depth(vec2 UV, uint layer, int sample_radius) {
+float get_average_occluder_depth(vec2 UV, uint layer_index, int sample_radius) {
 	float average_occluder_depth = 0.0f;
 	vec2 texel_size = 1.0f / textureSize(shadow_cascade_sampler, 0).xy;
 
 	for (int y = -sample_radius; y <= sample_radius; y++) {
 		for (int x = -sample_radius; x <= sample_radius; x++) {
-			vec3 sample_UV = vec3(texel_size * vec2(x, y) + UV.xy, layer);
+			vec3 sample_UV = vec3(texel_size * vec2(x, y) + UV.xy, layer_index);
 			average_occluder_depth += texture(shadow_cascade_sampler, sample_UV).r;
 		}
 	}
@@ -23,9 +25,9 @@ float get_average_occluder_depth(vec2 UV, uint layer, int sample_radius) {
 	return average_occluder_depth / (samples_across * samples_across);
 }
 
-float get_csm_shadow_from_layer(uint layer, vec3 fragment_pos_world_space) {
-	const int sample_radius = 0;
-	const float esm_constant = 300.0f, layer_scaling_component = 1.2f;
+float get_csm_shadow_from_layer(uint layer_index, vec3 fragment_pos_world_space) {
+	const int sample_radius = 1;
+	const float esm_constant = 300.0f, layer_scaling_component = 1.2f; // Palace: 2.0f
 
 	/* (TODO) esm scaling:
 	- Bigger depth range will be darker, so scale the exponent primarily on that
@@ -34,27 +36,45 @@ float get_csm_shadow_from_layer(uint layer, vec3 fragment_pos_world_space) {
 
 	/////////// Getting UV
 
-	vec4 fragment_pos_light_space = light_view_projection_matrices[layer] * vec4(fragment_pos_world_space, 1.0f);
+	vec4 fragment_pos_light_space = light_view_projection_matrices[layer_index] * vec4(fragment_pos_world_space, 1.0f);
 	vec3 UV = fragment_pos_light_space.xyz * 0.5f + 0.5f;
 
 	/////////// Calculating the shadow strength
 
-	float occluder_receiver_diff = UV.z - get_average_occluder_depth(UV.xy, layer, sample_radius);
-	float layer_scaled_esm_constant = esm_constant * pow(layer + 1u, layer_scaling_component);
+	float occluder_receiver_diff = UV.z - get_average_occluder_depth(UV.xy, layer_index, sample_radius);
+	float layer_scaled_esm_constant = esm_constant * pow(layer_index + 1u, layer_scaling_component);
 	float in_light_percentage = exp(-layer_scaled_esm_constant * occluder_receiver_diff);
 	return clamp(in_light_percentage, 0.0f, 1.0f);
 }
 
+float get_blended_csm_shadow(uint layer_index, uint depth_range_shift, float world_depth_value, vec3 fragment_pos_world_space) {
+	// If the layer index equals 0, this makes the previous layer 0
+	uint prev_layer_index = max(int(layer_index) - 1, 0);
+
+	float
+		dist_ahead_of_last_split = world_depth_value - cascade_split_distances[prev_layer_index],
+		depth_range = cascade_split_distances[layer_index - depth_range_shift] -
+					  cascade_split_distances[prev_layer_index - depth_range_shift];
+
+	/* If the layer index equals 0, this will be less than 0; and if it's the last layer index,
+	it may be over 1. This clamps the blend factor between 0 and 1 for when that happens. */
+	// float percent_between = min(dist_ahead_of_last_split / depth_range, 1.0f);
+	float percent_between = clamp(dist_ahead_of_last_split / depth_range, 0.0f, 1.0f);
+
+	return mix(
+		get_csm_shadow_from_layer(prev_layer_index, fragment_pos_world_space),
+		get_csm_shadow_from_layer(layer_index, fragment_pos_world_space),
+		percent_between
+	);
+}
+
 float csm_shadow(float world_depth_value, vec3 fragment_pos_world_space) {
-	const int num_splits_between_cascades = int(NUM_CASCADES) - 1;
-	int layer = num_splits_between_cascades; // TODO: select the cascade using some constant-time math
+	uint layer_index = 0;
 
-	for (int i = 0; i < num_splits_between_cascades; i++) {
-		if (cascade_plane_distances[i] > world_depth_value) {
-			layer = i;
-			break;
-		}
-	}
+	while (layer_index < out_of_bounds_split_index
+		&& cascade_split_distances[layer_index] <= world_depth_value)
+		layer_index++;
 
-	return get_csm_shadow_from_layer(uint(layer), fragment_pos_world_space);
+	bool on_last_split = layer_index == out_of_bounds_split_index;
+	return get_blended_csm_shadow(layer_index, int(on_last_split), world_depth_value, fragment_pos_world_space);
 }
