@@ -35,7 +35,7 @@ Architectural/code design ideas:
 - Pass in texture parameters through a bitmask
 - Use CMake instead of Make for cross-platform compilation
 - Set up dependencies properly in the Makefile
-- Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
+- Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame (housed in a TickContext struct - which also tells if a level was just initialized)
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit); or no macros at all
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if enough precision?)
