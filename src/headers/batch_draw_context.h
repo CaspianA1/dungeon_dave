@@ -4,6 +4,8 @@
 #include "../../include/glad/glad.h"
 #include "list.h"
 
+// TODO: deprecate this once Drawable is done
+
 typedef struct {
 	struct {
 		List cpu;

@@ -38,7 +38,7 @@ void draw_drawable(const Drawable drawable, const GLsizei num_vertices_to_draw, 
 	drawable.uniform_updater((struct Drawable*) &drawable, uniform_updater_param);
 
 	glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer);
-	glBindVertexArray(drawable.vertex_spec); // TODO: account for vertex specs that equal 0?
+	glBindVertexArray(drawable.vertex_spec);
 
 	const GLenum mode = drawable.using_triangle_strip ? GL_TRIANGLE_STRIP : GL_TRIANGLES;
 	glDrawArrays(mode, 0, num_vertices_to_draw);
