@@ -10,7 +10,7 @@
 
 typedef struct {
 	BatchDrawContext draw_context; // TODO: integrate the Drawable code into this later
-	List animations, animation_instances; // TODO: remove the `billboard` prefix from these
+	List animations, animation_instances;
 } BillboardContext;
 
 typedef struct { // This struct is perfectly aligned
