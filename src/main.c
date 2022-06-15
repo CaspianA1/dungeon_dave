@@ -110,7 +110,7 @@ static void* main_init(void) {
 
 	//////////
 
-	SceneState scene_state = {
+	SceneContext scene_context = {
 		.weapon_sprite = init_weapon_sprite(
 			0.6f, 2.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
 			// 0.75f, 2.0f, 0.122f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22} // TODO: stop this from animating slowly
@@ -138,31 +138,31 @@ static void* main_init(void) {
 		.map_size = {terrain_width, terrain_height}
 	};
 
-	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		scene_state.heightmap, scene_state.texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
+	init_sector_draw_context(&scene_context.sector_draw_context, &scene_context.sectors,
+		scene_context.heightmap, scene_context.texture_id_map, scene_context.map_size[0], scene_context.map_size[1]);
 
 	//////////
 
-	scene_state.sector_draw_context.texture_set = init_texture_set(
+	scene_context.sector_draw_context.texture_set = init_texture_set(
 		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 		ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures, NULL
 	);
 
-	scene_state.face_normal_map_set = init_normal_map_set_from_texture_set(scene_state.sector_draw_context.texture_set, true);
+	scene_context.face_normal_map_set = init_normal_map_set_from_texture_set(scene_context.sector_draw_context.texture_set, true);
 
 	//////////
 
-	init_camera(&scene_state.camera, (vec3) {1.5f, 0.5f, 1.5f}, scene_state.heightmap, scene_state.map_size);
+	init_camera(&scene_context.camera, (vec3) {1.5f, 0.5f, 1.5f}, scene_context.heightmap, scene_context.map_size);
 
-	scene_state.cascaded_shadow_context = init_shadow_context(
+	scene_context.cascaded_shadow_context = init_shadow_context(
 		// Terrain:
 		(vec3) {0.241236f, 0.930481f, -0.275698f}, 20.0f,
-		scene_state.camera.far_clip_dist, 0.2f, 1024, 1024, 8
+		scene_context.camera.far_clip_dist, 0.2f, 1024, 1024, 8
 
 		// Palace:
 		/*
 		(vec3) {0.241236f, 0.930481f, -0.275698f}, 20.0f,
-		scene_state.camera.far_clip_dist, 0.4f, 1024, 1024, 4
+		scene_context.camera.far_clip_dist, 0.4f, 1024, 1024, 4
 		*/
 	);
 
@@ -174,18 +174,18 @@ static void* main_init(void) {
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glFinish(); // Making sure that all initialization operations are finished
 
-	void* const app_context = malloc(sizeof(SceneState));
-	memcpy(app_context, &scene_state, sizeof(SceneState));
+	void* const app_context = malloc(sizeof(SceneContext));
+	memcpy(app_context, &scene_context, sizeof(SceneContext));
 	return app_context;
 }
 
 static void main_drawer(void* const app_context) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	SceneState* const scene_state = (SceneState*) app_context;
+	SceneContext* const scene_context = (SceneContext*) app_context;
 	const Event event = get_next_event();
 
-	TitleScreen* const title_screen = &scene_state -> title_screen;
+	TitleScreen* const title_screen = &scene_context -> title_screen;
 	if (!title_screen_finished(title_screen, &event)) {
 		tick_title_screen(*title_screen);
 		return;
@@ -193,10 +193,10 @@ static void main_drawer(void* const app_context) {
 
 	////////// Some variable initialization + object updating
 
-	const BillboardContext* const billboard_context = &scene_state -> billboard_context;
-	const BatchDrawContext* const sector_draw_context = &scene_state -> sector_draw_context;
-	const CascadedShadowContext* const shadow_context = &scene_state -> cascaded_shadow_context;
-	Camera* const camera = &scene_state -> camera;
+	const BillboardContext* const billboard_context = &scene_context -> billboard_context;
+	const BatchDrawContext* const sector_draw_context = &scene_context -> sector_draw_context;
+	const CascadedShadowContext* const shadow_context = &scene_context -> cascaded_shadow_context;
+	Camera* const camera = &scene_context -> camera;
 
 	update_camera(camera, event);
 
@@ -207,35 +207,35 @@ static void main_drawer(void* const app_context) {
 
 	////////// The main drawing code
 
-	draw_visible_sectors(sector_draw_context, shadow_context, &scene_state -> sectors,
-		camera, scene_state -> face_normal_map_set, event.screen_size);
+	draw_visible_sectors(sector_draw_context, shadow_context, &scene_context -> sectors,
+		camera, scene_context -> face_normal_map_set, event.screen_size);
 
 	draw_visible_billboards(billboard_context, shadow_context, camera);
 
 	/* Drawing the skybox after sectors and billboards because
 	most skybox fragments would unnecessarily be drawn otherwise */
-	draw_skybox(&scene_state -> skybox, camera -> model_view_projection);
+	draw_skybox(&scene_context -> skybox, camera -> model_view_projection);
 
-	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, camera, &event, shadow_context);
+	update_and_draw_weapon_sprite(&scene_context -> weapon_sprite, camera, &event, shadow_context);
 }
 
 static void main_deinit(void* const app_context) {
-	SceneState* const scene_state = (SceneState*) app_context;
+	SceneContext* const scene_context = (SceneContext*) app_context;
 
-	deinit_weapon_sprite(&scene_state -> weapon_sprite);
+	deinit_weapon_sprite(&scene_context -> weapon_sprite);
 
-	deinit_batch_draw_context(&scene_state -> sector_draw_context);
-	deinit_list(scene_state -> sectors);
-	deinit_texture(scene_state -> face_normal_map_set);
+	deinit_batch_draw_context(&scene_context -> sector_draw_context);
+	deinit_list(scene_context -> sectors);
+	deinit_texture(scene_context -> face_normal_map_set);
 
-	deinit_billboard_context(&scene_state -> billboard_context);
+	deinit_billboard_context(&scene_context -> billboard_context);
 
-	deinit_shadow_context(&scene_state -> cascaded_shadow_context);
+	deinit_shadow_context(&scene_context -> cascaded_shadow_context);
 
-	deinit_title_screen(&scene_state -> title_screen);
-	deinit_skybox(scene_state -> skybox);
+	deinit_title_screen(&scene_context -> title_screen);
+	deinit_skybox(scene_context -> skybox);
 
-	free(scene_state);
+	free(scene_context);
 }
 
 int main(void) {

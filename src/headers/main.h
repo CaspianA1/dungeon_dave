@@ -33,7 +33,7 @@ typedef struct {
 	TitleScreen title_screen;
 
 	const byte *const heightmap, *const texture_id_map, map_size[2];
-} SceneState; // TODO: name this SceneContext
+} SceneContext;
 
 // Excluded: main_init, main_drawer, main_deinit
 
