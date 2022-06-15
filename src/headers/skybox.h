@@ -1,18 +1,16 @@
 #ifndef SKYBOX_H
 #define SKYBOX_H
 
-#include "utils.h"
+#include "drawable.h"
 #include "camera.h"
-#include "texture.h"
 
-typedef struct {
-	GLuint vertex_buffer, vertex_spec, shader, texture;
-} Skybox;
+typedef Drawable Skybox;
 
-// Excluded: init_skybox_texture
+#define deinit_skybox deinit_drawable
+
+// Excluded: init_skybox_texture, define_vertex_spec_for_skybox, update_skybox_uniforms
 
 Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor);
-void deinit_skybox(const Skybox s);
-void draw_skybox(const Skybox s, const Camera* const camera);
+void draw_skybox(const Skybox* const skybox, const mat4 model_view_projection);
 
 #endif

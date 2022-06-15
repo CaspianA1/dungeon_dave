@@ -205,6 +205,7 @@ void loop_application(const Screen* const screen, void (*const drawer) (void* co
 	deinit(app_context);
 }
 
+// TODO: put this in drawable.c once Drawable is done
 void define_vertex_spec_index(const bool is_instanced, const bool vertices_are_floats,
 	const byte index, const byte num_components, const byte stride, const size_t initial_offset,
 	const GLenum typename) {
@@ -216,12 +217,14 @@ void define_vertex_spec_index(const bool is_instanced, const bool vertices_are_f
 	else glVertexAttribIPointer(index, num_components, typename, stride, (void*) initial_offset);
 }
 
+// TODO: remove this once Drawable is done
 GLuint init_vertex_spec(void) {
 	GLuint vertex_spec;
 	glGenVertexArrays(1, &vertex_spec);
 	return vertex_spec;
 }
 
+// TODO: remove this too once Drawable is done
 GLuint init_gpu_buffer(void) {
 	GLuint gpu_buffer;
 	glGenBuffers(1, &gpu_buffer);

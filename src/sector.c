@@ -129,8 +129,10 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 
 	draw_context -> vertex_spec = init_vertex_spec();
 	use_vertex_spec(draw_context -> vertex_spec);
-	define_vertex_spec_index(false, true, 0, 3, bytes_per_face_vertex, 0, FACE_MESH_COMPONENT_TYPENAME);
-	define_vertex_spec_index(false, false, 1, 1, bytes_per_face_vertex, sizeof(face_mesh_component_t[3]), FACE_MESH_COMPONENT_TYPENAME);
+
+	enum {v = vertices_per_triangle};
+	define_vertex_spec_index(false, true, 0, v, bytes_per_face_vertex, 0, FACE_MESH_COMPONENT_TYPENAME);
+	define_vertex_spec_index(false, false, 1, 1, bytes_per_face_vertex, sizeof(face_mesh_component_t[v]), FACE_MESH_COMPONENT_TYPENAME);
 
 	*sectors_ref = sectors;
 }

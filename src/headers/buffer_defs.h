@@ -31,6 +31,7 @@ typedef GLfloat billboard_var_component_t;
 #define BILLBOARD_VAR_COMPONENT_TYPENAME GL_FLOAT
 #define BUFFER_SIZE_TYPENAME GL_UNSIGNED_INT
 
+// TODO: put this in constants.h
 enum { // `enum` is used to make these values compile-time constants
 	components_per_face_vertex = 4,
 	vertices_per_face = 6,
@@ -38,6 +39,7 @@ enum { // `enum` is used to make these values compile-time constants
 	bytes_per_face_vertex = sizeof(face_mesh_component_t[components_per_face_vertex]),
 	bytes_per_face = sizeof(face_mesh_component_t[components_per_face]),
 
+	vertices_per_triangle = 3,
 	corners_per_quad = 4
 };
 

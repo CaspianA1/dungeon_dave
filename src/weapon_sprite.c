@@ -79,7 +79,7 @@ static void update_weapon_sprite_animation(WeaponSprite* const ws, const Event* 
 }
 
 void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera,
-	const Event* const event, const CascadedShadowContext* const shadow_context, const mat4 model_view_projection) {
+	const Event* const event, const CascadedShadowContext* const shadow_context) {
 
 	update_weapon_sprite_animation(ws_ref, event);
 
@@ -136,7 +136,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	vec3 world_corners[corners_per_quad];
 	mat4 inv_model_view_projection;
 
-	glm_mat4_inv((vec4*) model_view_projection, inv_model_view_projection);
+	glm_mat4_inv((vec4*) camera -> model_view_projection, inv_model_view_projection);
 
 	for (byte i = 0; i < corners_per_quad; i++) {
 		const GLfloat* const screen_corner = screen_corners[i];
@@ -148,8 +148,8 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 	//////////
 
 	UPDATE_UNIFORM(frame_index, 1ui, ws.curr_frame);
-	UPDATE_UNIFORM(screen_corners, 2fv, 4, (GLfloat*) screen_corners);
-	UPDATE_UNIFORM(world_corners, 3fv, 4, (GLfloat*) world_corners);
+	UPDATE_UNIFORM(screen_corners, 2fv, corners_per_quad, (GLfloat*) screen_corners);
+	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
 
 	////////// This little part concerns CSM
 

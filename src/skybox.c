@@ -3,6 +3,7 @@
 
 #include "headers/skybox.h"
 #include "headers/shader.h"
+#include "headers/texture.h"
 
 static const GLbyte skybox_vertices[] = {
 	-1, 1, -1,
@@ -81,9 +82,10 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size, SDL_PIXEL_FORMAT);
 
 	typedef struct {const GLint x, y;} ivec2;
+	enum {faces_per_cubemap = 6};
 
-	// right, left, top, bottom, back, front
-	const ivec2 src_origins[6] = {
+	// Right, left, top, bottom, back, front
+	const ivec2 src_origins[faces_per_cubemap] = {
 		{twice_cube_size, cube_size},
 		{0, cube_size},
 		{cube_size, 0},
@@ -92,7 +94,7 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 		{twice_cube_size + cube_size, cube_size}
 	};
 
-	for (byte i = 0; i < 6; i++) {
+	for (byte i = 0; i < faces_per_cubemap; i++) {
 		const ivec2 src_origin = src_origins[i];
 
 		SDL_BlitSurface(skybox_surface, &(SDL_Rect) {src_origin.x, src_origin.y, cube_size, cube_size}, face_surface, NULL);
@@ -107,43 +109,22 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 	return skybox;
 }
 
-Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
-	const GLuint vertex_buffer = init_gpu_buffer(), vertex_spec = init_vertex_spec();
-	use_vertex_buffer(vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
-
-	use_vertex_spec(vertex_spec);
-	define_vertex_spec_index(false, false, 0, 3, 0, 0, GL_BYTE);
-
-	/* TODO: share this vertex buffer, vertex spec, and shader
-	between different skyboxes. Perhaps a SkyboxRenderer struct? */
-
-	return (Skybox) {
-		.vertex_buffer = vertex_buffer, .vertex_spec = vertex_spec,
-		.shader = init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag")),
-		.texture = init_skybox_texture(cubemap_path, texture_rescale_factor)
-	};
+static void define_vertex_spec_for_skybox(void) {
+	define_vertex_spec_index(false, false, 0, vertices_per_triangle, 0, 0, GL_BYTE);
 }
 
-void deinit_skybox(const Skybox s) {
-	deinit_gpu_buffer(s.vertex_buffer);
-	deinit_vertex_spec(s.vertex_spec);
-	deinit_texture(s.texture);
-	deinit_shader(s.shader);
-}
-
-void draw_skybox(const Skybox s, const Camera* const camera) {
-	use_shader(s.shader);
+static void update_skybox_uniforms(const Drawable* const drawable, const void* const param) {
+	const GLuint shader = drawable -> shader;
 
 	static GLint model_view_projection_id;
 
 	ON_FIRST_CALL(
-		INIT_UNIFORM(model_view_projection, s.shader);
-		use_texture(s.texture, s.shader, "texture_sampler", TexSkybox, SKYBOX_TEXTURE_UNIT);
+		INIT_UNIFORM(model_view_projection, shader);
+		use_texture(drawable -> diffuse_texture, shader, "texture_sampler", TexSkybox, SKYBOX_TEXTURE_UNIT);
 	);
 
 	mat4 model_view_projection;
-	glm_mat4_copy((vec4*) camera -> model_view_projection, model_view_projection);
+	glm_mat4_copy((vec4*) param, model_view_projection);
 
 	/* This clears X, Y, and W. Z (depth) not cleared
 	b/c it's always set to 1 in the vertex shader. */
@@ -152,13 +133,33 @@ void draw_skybox(const Skybox s, const Camera* const camera) {
 	model_view_projection[3][3] = 0.0f;
 
 	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
+}
 
-	use_vertex_buffer(s.vertex_buffer);
-	use_vertex_spec(s.vertex_spec);
+Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
+	/* TODO: when creating a new skybox, just switch out the texture,
+	instead of recreating the vertex buffer, spec, and shader. */
 
+	// TODO: make sure that the allocated amount is correct to avoid the realloc
+	List vertices_in_list = init_list(sizeof(skybox_vertices), GLbyte);
+	push_array_to_list(&vertices_in_list, skybox_vertices, ARRAY_LENGTH(skybox_vertices));
+
+	const Drawable drawable = init_drawable(define_vertex_spec_for_skybox,
+		(uniform_updater_t) update_skybox_uniforms, false, false, vertices_in_list,
+
+		init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag")),
+		init_skybox_texture(cubemap_path, texture_rescale_factor)
+	);
+
+	deinit_list(vertices_in_list);
+
+	return drawable;
+}
+
+void draw_skybox(const Skybox* const skybox, const mat4 model_view_projection) {
 	WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS,
 		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			const GLsizei num_vertices = sizeof(skybox_vertices) / vertices_per_triangle;
+			draw_drawable(*skybox, num_vertices, model_view_projection);
 		);
 	);
 }

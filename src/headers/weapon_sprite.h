@@ -29,6 +29,6 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 void deinit_weapon_sprite(const WeaponSprite* const ws);
 
 void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera,
-	const Event* const event, const CascadedShadowContext* const shadow_context, const mat4 model_view_projection);
+	const Event* const event, const CascadedShadowContext* const shadow_context);
 
 #endif
