@@ -4,10 +4,14 @@
 #include "buffer_defs.h"
 #include "batch_draw_context.h"
 #include "csm.h"
-#include "texture.h"
 #include "camera.h"
 #include "animation.h"
 #include "list.h"
+
+typedef struct {
+	BatchDrawContext draw_context; // TODO: integrate the Drawable code into this later
+	List animations, animation_instances; // TODO: remove the `billboard` prefix from these
+} BillboardContext;
 
 typedef struct { // This struct is perfectly aligned
 	buffer_size_t texture_id;
@@ -20,14 +24,18 @@ typedef struct {
 	const struct {const buffer_size_t billboard, animation;} ids;
 } BillboardAnimationInstance;
 
-// Excluded: is_inside_plane, billboard_in_view_frustum, draw_billboards
+////////// Excluded: is_inside_plane, billboard_in_view_frustum, draw_billboards
 
-void update_billboard_animation_instances(const List* const billboard_animation_instances,
-	const List* const billboard_animations, const List* const billboards);
+void update_billboards(const BillboardContext* const billboard_context);
 
-void draw_visible_billboards(const BatchDrawContext* const draw_context,
+void draw_visible_billboards(const BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context, const Camera* const camera);
 
-BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, const Billboard* const billboards);
+BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
+	const buffer_size_t num_billboards, const Billboard* const billboards,
+	const buffer_size_t num_billboard_animations, const Animation* const billboard_animations,
+	const buffer_size_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances);
+
+void deinit_billboard_context(const BillboardContext* const billboard_context);
 
 #endif

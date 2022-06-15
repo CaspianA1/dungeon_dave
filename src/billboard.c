@@ -2,6 +2,7 @@
 #define BILLBOARD_C
 
 #include "headers/billboard.h"
+#include "headers/texture.h"
 #include "headers/shader.h"
 #include "headers/constants.h"
 
@@ -12,23 +13,25 @@ typedef struct {
 
 //////////
 
-void update_billboard_animation_instances(const List* const billboard_animation_instances,
-	const List* const billboard_animations, const List* const billboards) {
+// This just updates the billboard animation instances at the moment
+void update_billboards(const BillboardContext* const billboard_context) {
+	const List* const animation_instances = &billboard_context -> animation_instances;
 
-	BillboardAnimationInstance* const billboard_animation_instance_data = billboard_animation_instances -> data;
-	const Animation* const animation_data = billboard_animations -> data;
-	Billboard* const billboard_data = billboards -> data;
+	BillboardAnimationInstance* const animation_instance_data = animation_instances -> data;
+	const Animation* const animation_data = billboard_context -> animations.data;
+	Billboard* const billboard_data = billboard_context -> draw_context.buffers.cpu.data;
 
 	/* Billboard animations are constantly looping, so their
 	cycle base time is for when this function is first called */
 	static Uint32 cycle_base_time;
 	ON_FIRST_CALL(cycle_base_time = SDL_GetTicks(););
 
-	for (buffer_size_t i = 0; i < billboard_animation_instances -> length; i++) {
-		BillboardAnimationInstance* const billboard_animation_instance = billboard_animation_instance_data + i;
+	for (buffer_size_t i = 0; i < animation_instances -> length; i++) {
+		BillboardAnimationInstance* const animation_instance = animation_instance_data + i;
+
 		update_animation_information(cycle_base_time,
-			&billboard_data[billboard_animation_instance -> ids.billboard].texture_id,
-			animation_data[billboard_animation_instance -> ids.animation]);
+			&billboard_data[animation_instance -> ids.billboard].texture_id,
+			animation_data[animation_instance -> ids.animation]);
 	}
 }
 
@@ -101,8 +104,10 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	);
 }
 
-void draw_visible_billboards(const BatchDrawContext* const draw_context,
+void draw_visible_billboards(const BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context, const Camera* const camera) {
+
+	const BatchDrawContext* const draw_context = &billboard_context -> draw_context;
 
 	use_vertex_buffer(draw_context -> buffers.gpu);
 
@@ -129,23 +134,43 @@ void draw_visible_billboards(const BatchDrawContext* const draw_context,
 	if (num_visible != 0) draw_billboards(draw_context, shadow_context, camera, num_visible);
 }
 
-BatchDrawContext init_billboard_draw_context(const buffer_size_t num_billboards, const Billboard* const billboards) {
-	BatchDrawContext draw_context = {
-		.buffers.cpu = init_list(num_billboards, Billboard),
-		.vertex_spec = init_vertex_spec(),
-		.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag"))
+BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
+	const buffer_size_t num_billboards, const Billboard* const billboards,
+	const buffer_size_t num_billboard_animations, const Animation* const billboard_animations,
+	const buffer_size_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances) {
+
+	BillboardContext billboard_context = {
+		.draw_context = {
+			.buffers.cpu = init_list(num_billboards, Billboard),
+			.vertex_spec = init_vertex_spec(),
+			.texture_set = diffuse_texture_set,
+			.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag"))
+		},
+
+		.animations = init_list(num_billboard_animations, Animation),
+		.animation_instances = init_list(num_billboard_animation_instances, BillboardAnimationInstance)
 	};
 
-	push_array_to_list(&draw_context.buffers.cpu, billboards, num_billboards);
+	push_array_to_list(&billboard_context.draw_context.buffers.cpu, billboards, num_billboards);
+	init_batch_draw_context_gpu_buffer(&billboard_context.draw_context, num_billboards, sizeof(Billboard));
 
-	init_batch_draw_context_gpu_buffer(&draw_context, num_billboards, sizeof(Billboard));
-
-	use_vertex_spec(draw_context.vertex_spec);
+	use_vertex_spec(billboard_context.draw_context.vertex_spec);
 	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), 0, BUFFER_SIZE_TYPENAME);
 	define_vertex_spec_index(true, true, 1, 2, sizeof(Billboard), offsetof(Billboard, size), BILLBOARD_VAR_COMPONENT_TYPENAME);
 	define_vertex_spec_index(true, true, 2, 3, sizeof(Billboard), offsetof(Billboard, pos), BILLBOARD_VAR_COMPONENT_TYPENAME);
 
-	return draw_context;
+	//////////
+
+	push_array_to_list(&billboard_context.animations, billboard_animations, num_billboard_animations);
+	push_array_to_list(&billboard_context.animation_instances, billboard_animation_instances, num_billboard_animation_instances);
+
+	return billboard_context;
+}
+
+void deinit_billboard_context(const BillboardContext* const billboard_context) {
+	deinit_list(billboard_context -> animation_instances);
+	deinit_list(billboard_context -> animations);
+	deinit_batch_draw_context(&billboard_context -> draw_context);
 }
 
 #endif

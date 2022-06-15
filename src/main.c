@@ -118,8 +118,17 @@ static void* main_init(void) {
 			// 0.8f, 1.0f, 0.04f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}
 		),
 
-		.billboard_animations = init_list(ARRAY_LENGTH(billboard_animations), Animation),
-		.billboard_animation_instances = init_list(ARRAY_LENGTH(billboard_animation_instances), BillboardAnimationInstance),
+		.billboard_context = init_billboard_context(
+			init_texture_set(
+				TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+				ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_layouts),
+				256, 256, still_billboard_texture_paths, billboard_animation_layouts
+			),
+
+			ARRAY_LENGTH(billboards), billboards,
+			ARRAY_LENGTH(billboard_animations), billboard_animations,
+			ARRAY_LENGTH(billboard_animation_instances), billboard_animation_instances
+		),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
 		.title_screen = init_title_screen(),
@@ -129,22 +138,8 @@ static void* main_init(void) {
 		.map_size = {terrain_width, terrain_height}
 	};
 
-	push_array_to_list(&scene_state.billboard_animations,
-		billboard_animations, ARRAY_LENGTH(billboard_animations));
-
-	push_array_to_list(&scene_state.billboard_animation_instances,
-		billboard_animation_instances, ARRAY_LENGTH(billboard_animation_instances));
-
 	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
 		scene_state.heightmap, scene_state.texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
-
-	scene_state.billboard_draw_context = init_billboard_draw_context(ARRAY_LENGTH(billboards), billboards);
-
-	scene_state.billboard_draw_context.texture_set = init_texture_set(
-		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_layouts), 256, 256,
-		still_billboard_texture_paths, billboard_animation_layouts
-	);
 
 	//////////
 
@@ -198,6 +193,7 @@ static void main_drawer(void* const app_context) {
 
 	////////// Some variable initialization + object updating
 
+	const BillboardContext* const billboard_context = &scene_state -> billboard_context;
 	const BatchDrawContext* const sector_draw_context = &scene_state -> sector_draw_context;
 	const CascadedShadowContext* const shadow_context = &scene_state -> cascaded_shadow_context;
 	Camera* const camera = &scene_state -> camera;
@@ -206,11 +202,7 @@ static void main_drawer(void* const app_context) {
 
 	//////////
 
-	update_billboard_animation_instances(
-		&scene_state -> billboard_animation_instances,
-		&scene_state -> billboard_animations,
-		&scene_state -> billboard_draw_context.buffers.cpu);
-
+	update_billboards(billboard_context);
 	draw_to_shadow_context(shadow_context, camera, event.screen_size, draw_all_sectors_for_shadow_map, sector_draw_context);
 
 	////////// The main drawing code
@@ -218,7 +210,7 @@ static void main_drawer(void* const app_context) {
 	draw_visible_sectors(sector_draw_context, shadow_context, &scene_state -> sectors,
 		camera, scene_state -> face_normal_map_set, event.screen_size);
 
-	draw_visible_billboards(&scene_state -> billboard_draw_context, shadow_context, camera);
+	draw_visible_billboards(billboard_context, shadow_context, camera);
 
 	/* Drawing the skybox after sectors and billboards because
 	most skybox fragments would unnecessarily be drawn otherwise */
@@ -233,17 +225,15 @@ static void main_deinit(void* const app_context) {
 	deinit_weapon_sprite(&scene_state -> weapon_sprite);
 
 	deinit_batch_draw_context(&scene_state -> sector_draw_context);
-	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
+	deinit_list(scene_state -> sectors);
+	deinit_texture(scene_state -> face_normal_map_set);
+
+	deinit_billboard_context(&scene_state -> billboard_context);
 
 	deinit_shadow_context(&scene_state -> cascaded_shadow_context);
 
-	deinit_list(scene_state -> sectors);
-	deinit_list(scene_state -> billboard_animations);
-	deinit_list(scene_state -> billboard_animation_instances);
-
 	deinit_title_screen(&scene_state -> title_screen);
 	deinit_skybox(scene_state -> skybox);
-	deinit_texture(scene_state -> face_normal_map_set);
 
 	free(scene_state);
 }
