@@ -23,15 +23,15 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 	deinit_surface(peek_surface);
 
 	return (WeaponSprite) {
+		// TODO: for multiple weapons, share this shader
+		.shader = init_shader(ASSET_PATH("shaders/weapon.vert"), NULL, ASSET_PATH("shaders/weapon.frag")),
+
 		.texture = init_texture_set(TexNonRepeating,
 			OPENGL_WEAPON_MAG_FILTER, OPENGL_WEAPON_MIN_FILTER, 0, 1,
 			(GLsizei) (frame_size[0] * texture_rescale_factor),
 			(GLsizei) (frame_size[1] * texture_rescale_factor),
 			NULL, &animation_layout
 		),
-
-		// TODO: for multiple weapons, share this shader
-		.shader = init_shader(ASSET_PATH("shaders/weapon.vert"), NULL, ASSET_PATH("shaders/weapon.frag")),
 
 		.animation = {
 			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},

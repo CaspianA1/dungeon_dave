@@ -12,7 +12,7 @@ define a vao (so that the weapon can cast a shadow later). But make a
 Drawable struct first, or something along those lines. */
 
 typedef struct {
-	const GLuint texture, shader;
+	const GLuint shader, texture;
 	const Animation animation;
 
 	Uint32 cycle_base_time;
