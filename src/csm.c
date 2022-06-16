@@ -99,7 +99,7 @@ static void get_csm_light_view_projection_matrix(const Camera* const camera,
 }
 
 static GLuint init_csm_depth_layers(const GLsizei width, const GLsizei height, const GLsizei num_layers) {
-	const GLuint depth_layers = preinit_texture(TexSet, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, TexLinear, TexLinear);
 	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, width, height, num_layers, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	return depth_layers;
 }
