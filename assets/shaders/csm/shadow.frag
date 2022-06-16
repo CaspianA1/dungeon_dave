@@ -2,11 +2,11 @@
 
 #include "num_cascades.geom" // `num_cascades.geom` is written to by the CPU before any shader compilation
 
-const uint out_of_bounds_split_index = NUM_CASCADES - 1u;
+const uint NUM_CASCADE_SPLITS = NUM_CASCADES - 1u;
 
 // TODO: share `light_view_projection_matrices` with `depth.geom`
 
-uniform float cascade_split_distances[out_of_bounds_split_index];
+uniform float cascade_split_distances[NUM_CASCADE_SPLITS];
 uniform mat4 light_view_projection_matrices[NUM_CASCADES];
 uniform sampler2DArray shadow_cascade_sampler;
 
@@ -72,10 +72,10 @@ float get_blended_csm_shadow(uint layer_index, uint depth_range_shift, float wor
 float csm_shadow(float world_depth_value, vec3 fragment_pos_world_space) {
 	uint layer_index = 0;
 
-	while (layer_index < out_of_bounds_split_index
+	while (layer_index < NUM_CASCADE_SPLITS
 		&& cascade_split_distances[layer_index] <= world_depth_value)
 		layer_index++;
 
-	bool on_last_split = layer_index == out_of_bounds_split_index;
+	bool on_last_split = layer_index == NUM_CASCADE_SPLITS;
 	return get_blended_csm_shadow(layer_index, int(on_last_split), world_depth_value, fragment_pos_world_space);
 }
