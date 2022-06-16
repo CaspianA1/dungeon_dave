@@ -71,7 +71,7 @@ static void get_csm_light_view_projection_matrix(const Camera* const camera,
 	mat4 light_view;
 	glm_lookat(light_eye, camera_sub_frustum_center, (vec3) {0.0f, 1.0f, 0.0f}, light_view);
 
-	////////// Getting a bounding box of the light view
+	////////// Getting a bounding box of the light view, and re-scaling the near and far planes as needed
 
 	vec3 light_view_frustum_box[2];
 	glm_frustum_box(camera_sub_frustum_corners, light_view, light_view_frustum_box);
