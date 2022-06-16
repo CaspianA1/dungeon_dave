@@ -15,10 +15,8 @@ For later on:
 - Writing to `num_cascades.geom` before any shaders are initialized
 - Texel snapping
 - Merging the master branch with this one
-- Stitches between layers
-
-- Note: shadows are disappearing in the distance because of the shadow bias parameter.
-- Objects disappear up close becasuse of `z_scale` being incorrect.
+- A world-space approach to merging the AABB of the sub frustum box
+	with PSRs, instead of defining a scale factor for the frustum
 */
 
 //////////
@@ -45,7 +43,7 @@ static void apply_texel_snapping(const GLsizei resolution[2], mat4 light_project
 	glm_vec2_add(column, rounding_offset, column);
 }
 
-static void get_csm_light_view_projection_matrix(const Camera* const camera,
+static void get_sub_frustum_light_view_projection_matrix(const Camera* const camera,
 	const CascadedShadowContext* const shadow_context, const GLfloat near_clip_dist,
 	const GLfloat far_clip_dist, mat4 light_view_projection) {
 
@@ -71,20 +69,24 @@ static void get_csm_light_view_projection_matrix(const Camera* const camera,
 	mat4 light_view;
 	glm_lookat(light_eye, camera_sub_frustum_center, (vec3) {0.0f, 1.0f, 0.0f}, light_view);
 
-	////////// Getting a bounding box of the light view, and re-scaling the near and far planes as needed
+	////////// Getting a bounding box of the light view, and re-scaling it as needed
 
 	vec3 light_view_frustum_box[2];
 	glm_frustum_box(camera_sub_frustum_corners, light_view, light_view_frustum_box);
 
-	const GLfloat z_scale = shadow_context -> z_scale;
-	const GLfloat one_over_z_scale = 1.0f / z_scale;
+	const GLfloat* const light_view_frustum_box_scale = shadow_context -> sub_frustum_scale;
 
-	GLfloat
-		*const min_z = &light_view_frustum_box[0][2],
-		*const max_z = &light_view_frustum_box[1][2];
+	for (byte i = 0; i < 3; i++) {
+		const GLfloat scale = light_view_frustum_box_scale[i];
+		const GLfloat one_over_scale = 1.0f / scale;
 
-	*min_z *= (*min_z < 0.0f) ? z_scale : one_over_z_scale;
-	*max_z *= (*max_z < 0.0f) ? one_over_z_scale : z_scale;
+		GLfloat
+			*const min = &light_view_frustum_box[0][i],
+			*const max = &light_view_frustum_box[1][i];
+
+		*min *= (*min < 0.0f) ? scale : one_over_scale;
+		*max *= (*max < 0.0f) ? one_over_scale : scale;
+	}
 
 	////////// Using the light view frustum box, light projection, and light view to make a light view projection
 
@@ -99,7 +101,7 @@ static void get_csm_light_view_projection_matrix(const Camera* const camera,
 }
 
 static GLuint init_csm_depth_layers(const GLsizei width, const GLsizei height, const GLsizei num_layers) {
-	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, TexLinear, TexLinear);
+	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, TexLinear, TexLinear, true);
 	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, width, height, num_layers, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	return depth_layers;
 }
@@ -120,13 +122,9 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 	return framebuffer;
 }
 
-CascadedShadowContext init_shadow_context(const vec3 light_dir, const GLfloat z_scale,
+CascadedShadowContext init_shadow_context(const vec3 light_dir, const vec3 sub_frustum_scale,
 	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei width,
 	const GLsizei height, const GLsizei num_layers) {
-
-	const GLuint depth_layers = init_csm_depth_layers(width, height, num_layers);
-
-	//////////
 
 	List
 		split_dists = init_list((buffer_size_t) num_layers - 1, GLfloat),
@@ -139,6 +137,8 @@ CascadedShadowContext init_shadow_context(const vec3 light_dir, const GLfloat z_
 		near_clip_dist = constants.camera.near_clip_dist,
 		clip_dist_diff = far_clip_dist - constants.camera.near_clip_dist;
 
+	//////////
+
 	for (buffer_size_t i = 0; i < split_dists.length; i++) {
 		const GLfloat layer_percent = (GLfloat) (i + 1) / num_layers;
 
@@ -150,6 +150,10 @@ CascadedShadowContext init_shadow_context(const vec3 light_dir, const GLfloat z_
 		*((GLfloat*) ptr_to_list_index(&split_dists, i)) = weighted_dist;
 	}
 
+	//////////
+
+	const GLuint depth_layers = init_csm_depth_layers(width, height, num_layers);
+
 	return (CascadedShadowContext) {
 		.depth_layers = depth_layers,
 		.framebuffer = init_csm_framebuffer(depth_layers),
@@ -160,8 +164,8 @@ CascadedShadowContext init_shadow_context(const vec3 light_dir, const GLfloat z_
 
 		.resolution = {width, height},
 
-		.z_scale = z_scale,
 		.light_dir = {light_dir[0], light_dir[1], light_dir[2]},
+		.sub_frustum_scale = {sub_frustum_scale[0], sub_frustum_scale[1], sub_frustum_scale[2]},
 		.split_dists = split_dists,
 		.light_view_projection_matrices = light_view_projection_matrices
 	};
@@ -201,7 +205,7 @@ void draw_to_shadow_context(const CascadedShadowContext* const shadow_context, c
 		}
 
 		vec4* const matrix = ptr_to_list_index(light_view_projection_matrices, i);
-		get_csm_light_view_projection_matrix(camera, shadow_context, sub_near_clip, sub_far_clip, matrix);
+		get_sub_frustum_light_view_projection_matrix(camera, shadow_context, sub_near_clip, sub_far_clip, matrix);
 	}
 
 	////////// Updating the light view projection matrices uniform

@@ -45,7 +45,8 @@ void use_texture(const GLuint texture, const GLuint shader,
 
 // This sets the current texture to be the returned texture
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
-	const TextureFilterMode mag_filter, const TextureFilterMode min_filter) {
+	const TextureFilterMode mag_filter, const TextureFilterMode min_filter,
+	const bool force_disable_anisotropic_filtering) {
 
 	GLuint texture;
 	glGenTextures(1, &texture);
@@ -62,9 +63,9 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 
 	#ifdef USE_ANISOTROPIC_FILTERING
 
-	/* Checking if the extension is available at runtime. Also, skyboxes get no anisotropic
-	filtering, because they are usually magnified and are not viewed at very steep angles. */
-	else if (GLAD_GL_EXT_texture_filter_anisotropic) {
+	/* For anisotropic filtering to be enabled, 1. USE_ANISOTROPIC_FILTERING must be defined,
+	2. GLAD has to have loaded the extension successfully, and 3. it must not be force-disabled. */
+	if (GLAD_GL_EXT_texture_filter_anisotropic && !force_disable_anisotropic_filtering) {
 		const GLfloat aniso_filtering_level = get_runtime_constant(AnisotropicFilteringLevel);
 		glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso_filtering_level);
 	}
@@ -88,7 +89,7 @@ GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLint internal_format) {
 
-	const GLuint texture = preinit_texture(type, wrap_mode, mag_filter, min_filter);
+	const GLuint texture = preinit_texture(type, wrap_mode, mag_filter, min_filter, false);
 	SDL_Surface* const surface = init_surface(path);
 
 	write_surface_to_texture(surface, TexPlain, internal_format);
@@ -169,7 +170,7 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 
 	const GLsizei total_num_subtextures = num_still_subtextures + num_animated_frames;
 
-	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter);
+	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter, false);
 
 	glTexImage3D(TexSet, 0, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, rescale_w,
 		rescale_h, total_num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,

@@ -232,7 +232,7 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set, const bool
 	const GLuint normal_map_set = preinit_texture(TexSet,
 		(TextureWrapMode) wrap_mode,
 		(TextureFilterMode) mag_filter,
-		(TextureFilterMode) min_filter);
+		(TextureFilterMode) min_filter, false);
 
 	// Copying #2 to a new texture on the GPU
 	WITH_SURFACE_PIXEL_ACCESS(general_purpose_surface_2,
