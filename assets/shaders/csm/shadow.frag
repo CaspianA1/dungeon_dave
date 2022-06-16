@@ -25,9 +25,9 @@ float get_average_occluder_depth(vec2 UV, uint layer_index, int sample_radius) {
 	return average_occluder_depth / (samples_across * samples_across);
 }
 
-float get_csm_shadow_from_layer(uint layer_index, vec3 fragment_pos_world_space) {
+float get_csm_shadow_from_layer(uint layer_index, float percent_between_cascades, vec3 fragment_pos_world_space) {
 	const int sample_radius = 1;
-	const float esm_constant = 300.0f, layer_scaling_component = 1.2f; // Palace: 2.0f
+	const float esm_constant = 300.0f, layer_scaling_component = 1.5f; // Terrain: 1.2f. Palace: 1.5f.
 
 	/* (TODO) esm scaling:
 	- Bigger depth range will be darker, so scale the exponent primarily on that
@@ -41,8 +41,10 @@ float get_csm_shadow_from_layer(uint layer_index, vec3 fragment_pos_world_space)
 
 	/////////// Calculating the shadow strength
 
+	float fractional_layer_index = layer_index + percent_between_cascades;
+	float layer_scaled_esm_constant = esm_constant * pow(fractional_layer_index + 1u, layer_scaling_component);
+
 	float occluder_receiver_diff = UV.z - get_average_occluder_depth(UV.xy, layer_index, sample_radius);
-	float layer_scaled_esm_constant = esm_constant * pow(layer_index + 1u, layer_scaling_component);
 	float in_light_percentage = exp(-layer_scaled_esm_constant * occluder_receiver_diff);
 	return clamp(in_light_percentage, 0.0f, 1.0f);
 }
@@ -58,12 +60,11 @@ float get_blended_csm_shadow(uint layer_index, uint depth_range_shift, float wor
 
 	/* If the layer index equals 0, this will be less than 0; and if it's the last layer index,
 	it may be over 1. This clamps the blend factor between 0 and 1 for when that happens. */
-	// float percent_between = min(dist_ahead_of_last_split / depth_range, 1.0f);
 	float percent_between = clamp(dist_ahead_of_last_split / depth_range, 0.0f, 1.0f);
 
 	return mix(
-		get_csm_shadow_from_layer(prev_layer_index, fragment_pos_world_space),
-		get_csm_shadow_from_layer(layer_index, fragment_pos_world_space),
+		get_csm_shadow_from_layer(prev_layer_index, percent_between, fragment_pos_world_space),
+		get_csm_shadow_from_layer(layer_index, percent_between, fragment_pos_world_space),
 		percent_between
 	);
 }
