@@ -291,7 +291,7 @@ static buffer_size_t fill_sector_vertex_buffer_with_visible_faces(
 	pyramid: 816 vs 542. maze: 5796 vs 6114.
 	terrain: 150620 vs 86588. */
 
-	glUnmapBuffer(GL_ARRAY_BUFFER); // If looking out at the distance with no sectors, why do any state switching at all?
+	glUnmapBuffer(GL_ARRAY_BUFFER);
 	return num_visible_faces;
 }
 
@@ -302,6 +302,7 @@ void draw_visible_sectors(const BatchDrawContext* const draw_context,
 
 	const buffer_size_t num_visible_faces = fill_sector_vertex_buffer_with_visible_faces(draw_context, sectors, camera);
 
+	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_context,
 		camera, num_visible_faces, normal_map_set, screen_size);
 }
