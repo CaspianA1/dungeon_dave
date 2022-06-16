@@ -77,14 +77,14 @@ static void get_csm_light_view_projection_matrix(const Camera* const camera,
 	glm_frustum_box(camera_sub_frustum_corners, light_view, light_view_frustum_box);
 
 	const GLfloat z_scale = shadow_context -> z_scale;
+	const GLfloat one_over_z_scale = 1.0f / z_scale;
 
-	GLfloat* const min_z_ref = &light_view_frustum_box[0][2];
-	GLfloat min_z = *min_z_ref;
-	*min_z_ref = (min_z < 0.0f) ? (min_z * z_scale) : (min_z / z_scale);
+	GLfloat
+		*const min_z = &light_view_frustum_box[0][2],
+		*const max_z = &light_view_frustum_box[1][2];
 
-	GLfloat* const max_z_ref = &light_view_frustum_box[1][2];
-	GLfloat max_z = *max_z_ref;
-	*max_z_ref = (max_z < 0.0f) ? (max_z / z_scale) : (max_z * z_scale);
+	*min_z *= (*min_z < 0.0f) ? z_scale : one_over_z_scale;
+	*max_z *= (*max_z < 0.0f) ? one_over_z_scale : z_scale;
 
 	////////// Using the light view frustum box, light projection, and light view to make a light view projection
 
