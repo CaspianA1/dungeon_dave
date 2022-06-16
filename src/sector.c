@@ -267,7 +267,8 @@ static buffer_size_t fill_sector_vertex_buffer_with_visible_faces(
 	const vec4* const frustum_planes = camera -> frustum_planes;
 
 	const face_mesh_component_t* const face_meshes_cpu = draw_context -> buffers.cpu.data;
-	face_mesh_component_t* const face_meshes_gpu = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	face_mesh_component_t* const face_meshes_gpu = init_mapping_for_culled_batching(draw_context);
+
 	buffer_size_t num_visible_faces = 0;
 
 	for (const Sector* sector = sector_data; sector < out_of_bounds_sector; sector++) {
@@ -286,12 +287,7 @@ static buffer_size_t fill_sector_vertex_buffer_with_visible_faces(
 		}
 	}
 
-	/* (triangle counts, 12 vs 17):
-	palace: 1466 vs 1130. tpt: 232 vs 150.
-	pyramid: 816 vs 542. maze: 5796 vs 6114.
-	terrain: 150620 vs 86588. */
-
-	glUnmapBuffer(GL_ARRAY_BUFFER);
+	deinit_current_mapping_for_culled_batching();
 	return num_visible_faces;
 }
 

@@ -20,4 +20,8 @@ void init_batch_draw_context_gpu_buffer(BatchDrawContext* const draw_context,
 
 void deinit_batch_draw_context(const BatchDrawContext* const draw_context);
 
+// This assumes that the current bound buffer is the draw context's buffer
+void* init_mapping_for_culled_batching(const BatchDrawContext* const draw_context);
+#define deinit_current_mapping_for_culled_batching() glUnmapBuffer(GL_ARRAY_BUFFER)
+
 #endif

@@ -133,9 +133,9 @@ static void* main_init(void) {
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
 		.title_screen = init_title_screen(),
 
-		.heightmap = (const byte*) terrain_heightmap,
-		.texture_id_map = (const byte*) terrain_texture_id_map,
-		.map_size = {terrain_width, terrain_height}
+		.heightmap = (const byte*) palace_heightmap,
+		.texture_id_map = (const byte*) palace_texture_id_map,
+		.map_size = {palace_width, palace_height}
 	};
 
 	init_sector_draw_context(&scene_context.sector_draw_context, &scene_context.sectors,
@@ -156,14 +156,14 @@ static void* main_init(void) {
 
 	scene_context.cascaded_shadow_context = init_shadow_context(
 		// Terrain:
-		(vec3) {0.241236f, 0.930481f, -0.275698f}, 20.0f,
-		scene_context.camera.far_clip_dist, 0.2f, 1024, 1024, 8
-
-		// Palace:
 		/*
 		(vec3) {0.241236f, 0.930481f, -0.275698f}, 20.0f,
-		scene_context.camera.far_clip_dist, 0.4f, 1024, 1024, 4
+		scene_context.camera.far_clip_dist, 0.2f, 1024, 1024, 8
 		*/
+
+		// Palace:
+		(vec3) {0.241236f, 0.930481f, -0.275698f}, 20.0f,
+		scene_context.camera.far_clip_dist, 0.4f, 1024, 1024, 4
 	);
 
 	//////////
