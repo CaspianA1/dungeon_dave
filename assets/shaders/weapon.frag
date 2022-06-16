@@ -14,5 +14,5 @@ void main(void) {
 	color = texture(frame_sampler, fragment_UV);
 
 	// Layer is always 0 for weapon, so `in_csm_shadow` doesn't need to be called
-	color.rgb *= mix(ambient, 1.0f, get_csm_shadow_from_layer(0u, 0.0f, fragment_pos_world_space));
+	color.rgb *= mix(ambient, 1.0f, get_csm_shadow_from_layer(0u, fragment_pos_world_space));
 }
