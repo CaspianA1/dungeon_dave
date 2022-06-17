@@ -41,6 +41,7 @@ static bool is_inside_plane(const Sphere sphere, const vec4 plane) {
 	return dist_btwn_plane_and_sphere > -sphere.radius;
 }
 
+// TODO: test against an AABB, instead of a sphere (1. more accurate, 2. unified with sector culling)
 static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frustum_planes[6]) {
 	const Sphere sphere = { // For a sphere, the first 3 components are position, and the last component is radius
 		.center = {billboard.pos[0], billboard.pos[1], billboard.pos[2]},
