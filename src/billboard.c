@@ -104,7 +104,7 @@ void draw_visible_billboards(const BillboardContext* const billboard_context,
 	const vec4* const frustum_planes = camera -> frustum_planes;
 	Billboard* const gpu_billboard_buffer = init_mapping_for_culled_batching(draw_context);
 
-	buffer_size_t num_visible = 0;
+	buffer_size_t num_visible_billboards = 0;
 	const Billboard* const out_of_bounds_billboard = ((Billboard*) cpu_billboards.data) + cpu_billboards.length;
 
 	for (const Billboard* billboard = cpu_billboards.data; billboard < out_of_bounds_billboard; billboard++) {
@@ -114,13 +114,13 @@ void draw_visible_billboards(const BillboardContext* const billboard_context,
 
 		const buffer_size_t num_visible_in_group = (buffer_size_t) (billboard - initial_billboard);
 		if (num_visible_in_group != 0) {
-			memcpy(gpu_billboard_buffer + num_visible, initial_billboard, num_visible_in_group * sizeof(Billboard));
-			num_visible += num_visible_in_group;
+			memcpy(gpu_billboard_buffer + num_visible_billboards, initial_billboard, num_visible_in_group * sizeof(Billboard));
+			num_visible_billboards += num_visible_in_group;
 		}
 	}
 
 	deinit_current_mapping_for_culled_batching();
-	if (num_visible != 0) draw_billboards(draw_context, shadow_context, camera, num_visible);
+	if (num_visible_billboards != 0) draw_billboards(draw_context, shadow_context, camera, num_visible_billboards);
 }
 
 BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
