@@ -6,6 +6,7 @@
 #include "headers/maps.h"
 #include "headers/sector.h"
 #include "headers/normal_map_generation.h"
+#include "headers/texture.h"
 
 static void* main_init(void) {
 	////////// Defining a bunch of level data

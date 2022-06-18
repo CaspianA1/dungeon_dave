@@ -1,15 +1,16 @@
 #ifndef SECTOR_C
 #define SECTOR_C
 
-#include "headers/utils.h"
 #include "headers/sector.h"
 #include "headers/statemap.h"
+#include "headers/buffer_defs.h"
+#include "headers/list.h"
+#include "headers/texture.h"
 #include "headers/face.h"
 #include "headers/shader.h"
 #include "headers/constants.h"
-#include "headers/list.h"
 
-// Attributes here = height and texture id
+// Attributes here are height and texture id
 static byte point_matches_sector_attributes(const Sector* const sector,
 	const byte* const heightmap, const byte* const texture_id_map,
 	const byte x, const byte y, const byte map_width) {
@@ -35,28 +36,27 @@ static Sector form_sector_area(Sector sector, const StateMap traversed_points,
 		top_right_corner_x++;
 	}
 
-	// Now, area.size[0] equals the first horizontal length of equivalent height found
+	// Now, `sector.size[0]` equals the first horizontal span length where equal attributes were found
 	for (byte y = origin_y; y < map_height; y++, sector.size[1]++) {
 		for (byte x = sector.origin[0]; x < top_right_corner_x; x++) {
-			if (!point_matches_sector_attributes(&sector, heightmap, texture_id_map, x, y, map_width))
-				goto clear_map_area;
+			if (!point_matches_sector_attributes(&sector, heightmap, texture_id_map, x, y, map_width)) {
+
+				set_statemap_area(traversed_points, (buffer_size_t[4]) {
+					sector.origin[0], sector.origin[1], sector.size[0], sector.size[1]
+				});
+
+				goto end;
+			}
 		}
 	}
 
-	clear_map_area:
-
-	for (byte y = origin_y; y < origin_y + sector.size[1]; y++) {
-		for (byte x = sector.origin[0]; x < sector.origin[0] + sector.size[0]; x++)
-			set_statemap_bit(traversed_points, x, y);
-	}
-
-	return sector;
+	end: return sector;
 }
 
 List generate_sectors_from_maps(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
-	// `>> 3` = `/ 8`. Works pretty well for my maps.
+	// `>> 3` = `/ 8`. Works pretty well for my maps. TODO: make this a constant somewhere.
 	const buffer_size_t sector_amount_guess = (map_width * map_height) >> 3;
 	List sectors = init_list(sector_amount_guess, Sector);
 
@@ -87,7 +87,7 @@ List generate_sectors_from_maps(const byte* const heightmap,
 			push_ptr_to_list(&sectors, &sector);
 
 			/* This is a simple optimization; the next `sector_width - 1`
-			tiles will already be traversed, so this just skips those. */
+			tiles will already be marked traversed, so this just skips those. */
 			x += sector.size[0] - 1;
 		}
 	}
@@ -96,46 +96,28 @@ List generate_sectors_from_maps(const byte* const heightmap,
 	return sectors;
 }
 
-////////// This next part concerns the drawing of sectors
+////////// This next part concerns the creation of sa sector context + the drawing of sectors
 
 void init_sector_draw_context(BatchDrawContext* const draw_context, List* const sectors,
 	const byte* const heightmap, const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
 	*sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
-	const buffer_size_t num_sectors = sectors -> length;
 
-	/* This contains the actual vertex data for faces. `num_sectors * 3` gives a good guess for the
-	face/sector ratio. Its ownership, after this function, goes to the draw context (which frees it). */
-	List face_meshes = init_list(num_sectors * 3, face_mesh_component_t[components_per_face]);
+	List* const face_meshes_ref = &draw_context -> buffers.cpu;
+	*face_meshes_ref = init_face_meshes_from_sectors(sectors, heightmap, map_width, map_height);
 
-	for (buffer_size_t i = 0; i < num_sectors; i++) {
-		Sector* const sector_ref = ptr_to_list_index(sectors, i);
-		sector_ref -> face_range.start = face_meshes.length;
-
-		const Sector sector = *sector_ref;
-		const Face flat_face = {Flat, {sector.origin[0], sector.origin[1]}, {sector.size[0], sector.size[1]}};
-		add_face_mesh_to_list(flat_face, sector.visible_heights.max, 0, sector.texture_id, &face_meshes);
-
-		byte biggest_face_height = 0;
-		init_vert_faces(sector, &face_meshes, heightmap, map_width, map_height, &biggest_face_height);
-
-		sector_ref -> visible_heights.min = sector.visible_heights.max - biggest_face_height;
-		sector_ref -> face_range.length = face_meshes.length - sector_ref -> face_range.start;
-	}
-
-	draw_context -> buffers.cpu = face_meshes;
-	init_batch_draw_context_gpu_buffer(draw_context, face_meshes.length, bytes_per_face);
+	init_batch_draw_context_gpu_buffer(draw_context, face_meshes_ref -> length, sizeof(face_mesh_t));
 	draw_context -> shader = init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag"));
 
 	draw_context -> vertex_spec = init_vertex_spec();
 	use_vertex_spec(draw_context -> vertex_spec);
 
-	enum {v = vertices_per_triangle};
-	define_vertex_spec_index(false, true, 0, v, bytes_per_face_vertex, 0, FACE_MESH_COMPONENT_TYPENAME);
-	define_vertex_spec_index(false, false, 1, 1, bytes_per_face_vertex, sizeof(face_mesh_component_t[v]), FACE_MESH_COMPONENT_TYPENAME);
+	enum {vpt = vertices_per_triangle};
+	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, FACE_MESH_COMPONENT_TYPENAME); // Position
+	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), FACE_MESH_COMPONENT_TYPENAME); // Face info
 }
 
-static byte sector_in_view_frustum(const Sector sector, const vec4 frustum_planes[6]) {
+static bool sector_in_view_frustum(const Sector sector, const vec4 frustum_planes[planes_per_frustum]) {
 	// First corner is bottom left (if looking top-down, top left), and second is top right
 	vec3 aabb_corners[2] = {{sector.origin[0], sector.visible_heights.min, sector.origin[1]}};
 
@@ -158,7 +140,7 @@ void draw_all_sectors_for_shadow_map(const void* const param) {
 	glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bytes_for_vertices);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_for_vertices, sector_draw_context -> buffers.cpu.data);
 
-	const GLsizei num_vertices = bytes_for_vertices / bytes_per_face * vertices_per_face;
+	const GLsizei num_vertices = bytes_for_vertices / (GLint) sizeof(face_mesh_t) * vertices_per_face;
 	glDrawArrays(GL_TRIANGLES, 0, num_vertices);
 
 	glEnableVertexAttribArray(1);
@@ -264,22 +246,22 @@ static buffer_size_t fill_sector_vertex_buffer_with_visible_faces(
 	normal and the closest distance to the origin in the fourth component */
 	const vec4* const frustum_planes = camera -> frustum_planes;
 
-	const face_mesh_component_t* const face_meshes_cpu = draw_context -> buffers.cpu.data;
-	face_mesh_component_t* const face_meshes_gpu = init_mapping_for_culled_batching(draw_context);
+	const face_mesh_t* const face_meshes_cpu = draw_context -> buffers.cpu.data;
+	face_mesh_t* const face_meshes_gpu = init_mapping_for_culled_batching(draw_context);
 
 	buffer_size_t num_visible_faces = 0;
 
 	for (const Sector* sector = sector_data; sector < out_of_bounds_sector; sector++) {
 		buffer_size_t num_visible_faces_in_group = 0;
-		const buffer_size_t cpu_buffer_start_index = sector -> face_range.start * components_per_face;
+		const buffer_size_t initial_face_index = sector -> face_range.start;
 
 		while (sector < out_of_bounds_sector && sector_in_view_frustum(*sector, frustum_planes))
 			num_visible_faces_in_group += sector++ -> face_range.length;
 
 		if (num_visible_faces_in_group != 0) {
-			memcpy(face_meshes_gpu + num_visible_faces * components_per_face,
-				face_meshes_cpu + cpu_buffer_start_index,
-				num_visible_faces_in_group * bytes_per_face);
+			memcpy(face_meshes_gpu + num_visible_faces,
+				face_meshes_cpu + initial_face_index,
+				num_visible_faces_in_group * sizeof(face_mesh_t));
 
 			num_visible_faces += num_visible_faces_in_group;
 		}

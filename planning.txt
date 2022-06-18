@@ -48,14 +48,14 @@ Architectural/code design ideas:
 	are then not easily editable
 - Perhaps use the alpha channels of the face texture set or normal map set for something interesting
 - Some library memory leaks; this should be fixed in some way, if possible
-- Make sector and billboard contexts contain all context necessary, not just fragmented around the SceneState struct
+- Make the sector context contain all context necessary
 - Use more of the cglm functions in `update_camera`, or make my own
-- Instead of hardcoding the beginning of each asset path ("../assets/"), abstract it away with a macro that concatenates a simpler path with the base path
-- Some sort of common draw context, that when invoked, binds a shader, vertex buffer and vertex spec and draws
+- Use Drawable for as many drawable things as possible
 - Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
 - Perhaps use just OpenGL + ImGUI for the editor
 - Make all static billboards to animated (to simplify the code)
-- Later on, when doing the audio code, use a more compressed audio format, like FLAC or WAV (since SDL_Mixer supports more audio types)
+- If using SDL_Mixer in the end for audio and not OpenAL, use a more compressed audio format, like FLAC or WAV
+- Make `map_size_t` an alias for `byte` or `GLubyte`, and make an alias for `map_value_t` too
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
@@ -83,7 +83,7 @@ Normal mapping:
 	(Generate mipmaps on the CPU, and verify that they can mipmap plain textures like glGenerateMipmap)
 - Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using a shadow method that needs pre-blurring)
 - Share some of the looping logic for the Gaussian blur and the normal map generation
-- Little rectangular bumps exist in high-resolution normal maps with already fine detail
+- Little odd rectangles exist in the marble texture (due to compression)? This shows up in the normal map
 - Vary the normal map generation parameters based on the output texture size
 - Define normal map settings for each wall texture (only useful at normal map generation time).
 	Choose a hash map or an array for association between path and settings

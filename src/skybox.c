@@ -4,6 +4,7 @@
 #include "headers/skybox.h"
 #include "headers/shader.h"
 #include "headers/texture.h"
+#include "headers/buffer_defs.h"
 
 static const GLbyte skybox_vertices[] = {
 	-1, 1, -1,
@@ -82,7 +83,6 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size, SDL_PIXEL_FORMAT);
 
 	typedef struct {const GLint x, y;} ivec2;
-	enum {faces_per_cubemap = 6};
 
 	// Right, left, top, bottom, back, front
 	const ivec2 src_origins[faces_per_cubemap] = {

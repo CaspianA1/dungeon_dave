@@ -6,7 +6,6 @@
 #include "camera.h"
 #include "batch_draw_context.h"
 #include "csm.h"
-#include "texture.h"
 
 typedef struct {
 	const byte texture_id, origin[2];

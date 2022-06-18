@@ -47,6 +47,17 @@ void set_statemap_bit(const StateMap statemap, const buffer_size_t bits_x, const
 	*get_statemap_chunk(statemap, bits_x, bits_y) |= get_mask_for_bit_index_in_chunk(bits_x);
 }
 
+// For `area`, [0] and [1] are the origin, and [2] and [3] are the size.
+void set_statemap_area(const StateMap statemap, const buffer_size_t area[4]) {
+	const buffer_size_t start_x = area[0], start_y = area[1];
+
+	// TODO: make this more effecient by finding a way to set many bits at once across
+	for (buffer_size_t y = start_y; y < start_y + area[3]; y++) {
+		for (buffer_size_t x = start_x; x < start_x + area[2]; x++)
+			set_statemap_bit(statemap, x, y);
+	}
+}
+
 bool statemap_bit_is_set(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y) {
 	const statemap_chunk_t chunk = *get_statemap_chunk(statemap, bits_x, bits_y);
 	return CHECK_BITMASK(chunk, get_mask_for_bit_index_in_chunk(bits_x));

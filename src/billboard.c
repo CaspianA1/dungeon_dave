@@ -30,10 +30,8 @@ void update_billboards(const BillboardContext* const billboard_context) {
 	}
 }
 
-// TODO: unify billboard culling with sector culling
-static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frustum_planes[6]) {
-	// TODO: Later, test against single plane (most accurate method)
-
+// TODO: unify billboard culling with sector culling, if testing against a plane is not done
+static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frustum_planes[planes_per_frustum]) {
 	vec3 extents = {billboard.size[0], billboard.size[1], billboard.size[0]}, aabb[2];
 
 	glm_vec3_scale(extents, 0.5f, extents);

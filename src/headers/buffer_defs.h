@@ -35,12 +35,11 @@ typedef GLfloat billboard_var_component_t;
 enum { // `enum` is used to make these values compile-time constants
 	components_per_face_vertex = 4,
 	vertices_per_face = 6,
-	components_per_face = components_per_face_vertex * vertices_per_face,
-	bytes_per_face_vertex = sizeof(face_mesh_component_t[components_per_face_vertex]),
-	bytes_per_face = sizeof(face_mesh_component_t[components_per_face]),
 
 	vertices_per_triangle = 3,
-	corners_per_quad = 4
+	corners_per_quad = 4,
+	planes_per_frustum = 6,
+	faces_per_cubemap = 6
 };
 
 #endif

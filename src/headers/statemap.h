@@ -17,6 +17,7 @@ typedef struct {
 
 StateMap init_statemap(const buffer_size_t bits_across, const buffer_size_t bits_down);
 void set_statemap_bit(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y);
+void set_statemap_area(const StateMap statemap, const buffer_size_t area[4]);
 bool statemap_bit_is_set(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y);
 
 #endif

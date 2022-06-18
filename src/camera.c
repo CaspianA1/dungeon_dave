@@ -312,7 +312,7 @@ void update_camera(Camera* const camera, const Event event) {
 		update_fov(camera, event.movement_bits, delta_time);
 	}
 
-	////////// Making some matrices and frustum planes from the new position and the vectors from before
+	////////// Making some matrices and frustum planes from the new position and copying over the vectors from before
 
 	camera -> aspect_ratio = (GLfloat) event.screen_size[0] / event.screen_size[1];
 

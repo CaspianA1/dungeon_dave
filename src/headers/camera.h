@@ -25,7 +25,7 @@ typedef struct {
 	vec3 pos, dir, right, up, velocities;
 
 	mat4 view, view_projection;
-	vec4 frustum_planes[6];
+	vec4 frustum_planes[planes_per_frustum];
 } Camera;
 
 /* Excluded: compute_world_far_clip_dist, clamp_to_pos_neg_domain,

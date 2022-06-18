@@ -1,15 +1,14 @@
 #ifndef FACE_H
 #define FACE_H
 
+#include "buffer_defs.h"
 #include "sector.h"
 #include "list.h"
 
-/* NS - north-south, and EW = east-west.
+/* NS = north-south, and EW = east-west.
 If a face is NS, its two ends lie on a vertical top-down axis;
-and if a face is EW, its two ends lie on a horizontal axis. */
-typedef enum {
-	Flat, Vert_NS, Vert_EW
-} FaceType;
+and if a face is EW, its two ends lie on a horizontal top-down axis. */
+typedef enum {Flat, Vert_NS, Vert_EW} FaceType;
 
 /* Faces don't store their height origin, since sectors store that.
 For vert faces, origin and size[0] are top-down, and size[1] is depth.
@@ -19,14 +18,12 @@ typedef struct {
 	byte origin[2], size[2];
 } Face;
 
-// Excluded: print_face, get_next_face. init_vert_faces and add_face_mesh_to_list are only used by sector.c
+typedef face_mesh_component_t face_vertex_t[components_per_face_vertex];
+typedef face_vertex_t face_mesh_t[vertices_per_face];
 
-void init_vert_faces(
-	const Sector sector, List* const face_mesh_list,
-	const byte* const heightmap, const byte map_width,
-	const byte map_height, byte* const biggest_face_height);
+////////// Excluded: print_face, get_next_face, add_face_mesh_to_list, init_vert_faces.
 
-void add_face_mesh_to_list(const Face face, const byte sector_max_visible_height,
-	const byte side, const byte texture_id, List* const face_mesh_list);
+List init_face_meshes_from_sectors(const List* const sectors,
+	const byte* const heightmap, const byte map_width, const byte map_height);
 
 #endif
