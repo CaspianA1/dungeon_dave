@@ -142,7 +142,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 		const GLfloat* const screen_corner = screen_corners[i];
 
 		glm_unprojecti((vec3) {screen_corner[0], screen_corner[1], constants.weapon_sprite.ndc_dist_from_camera},
-			(vec4*) inv_view_projection, (GLfloat*) viewport, world_corners[i]);
+			inv_view_projection, (GLfloat*) viewport, world_corners[i]);
 	}
 
 	//////////
