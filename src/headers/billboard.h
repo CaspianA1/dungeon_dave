@@ -24,7 +24,7 @@ typedef struct {
 	const struct {const buffer_size_t billboard, animation;} ids;
 } BillboardAnimationInstance;
 
-////////// Excluded: billboard_in_view_frustum, draw_billboards
+////////// Excluded: draw_billboards, make_aabb, get_renderable_index_from_cullable, get_num_renderable_from_cullable
 
 void update_billboards(const BillboardContext* const billboard_context);
 

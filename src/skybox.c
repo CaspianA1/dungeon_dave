@@ -139,7 +139,6 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 	/* TODO: when creating a new skybox, just switch out the texture,
 	instead of recreating the vertex buffer, spec, and shader. */
 
-	// TODO: make sure that the allocated amount is correct to avoid the realloc
 	List vertices_in_list = init_list(sizeof(skybox_vertices), GLbyte);
 	push_array_to_list(&vertices_in_list, skybox_vertices, ARRAY_LENGTH(skybox_vertices));
 

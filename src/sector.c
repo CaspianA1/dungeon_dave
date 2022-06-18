@@ -96,7 +96,7 @@ List generate_sectors_from_maps(const byte* const heightmap,
 	return sectors;
 }
 
-////////// This next part concerns the creation of sa sector context + the drawing of sectors
+////////// This next part concerns the creation of a sector context + the drawing of sectors
 
 void init_sector_draw_context(BatchDrawContext* const draw_context, List* const sectors,
 	const byte* const heightmap, const byte* const texture_id_map, const byte map_width, const byte map_height) {
@@ -115,17 +115,6 @@ void init_sector_draw_context(BatchDrawContext* const draw_context, List* const 
 	enum {vpt = vertices_per_triangle};
 	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, FACE_MESH_COMPONENT_TYPENAME); // Position
 	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), FACE_MESH_COMPONENT_TYPENAME); // Face info
-}
-
-static bool sector_in_view_frustum(const Sector sector, const vec4 frustum_planes[planes_per_frustum]) {
-	// First corner is bottom left (if looking top-down, top left), and second is top right
-	vec3 aabb_corners[2] = {{sector.origin[0], sector.visible_heights.min, sector.origin[1]}};
-
-	aabb_corners[1][0] = aabb_corners[0][0] + sector.size[0];
-	aabb_corners[1][1] = aabb_corners[0][1] + sector.visible_heights.max - sector.visible_heights.min;
-	aabb_corners[1][2] = aabb_corners[0][2] + sector.size[1];
-
-	return glm_aabb_frustum(aabb_corners, (vec4*) frustum_planes);
 }
 
 // Used in main.c
@@ -232,51 +221,43 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
 }
 
-// Returns the number of visible faces
-static buffer_size_t fill_sector_vertex_buffer_with_visible_faces(
-	const BatchDrawContext* const draw_context,
-	const List* const sectors, const Camera* const camera) {
+////////// These functions are for frustum culling
 
-	use_vertex_buffer(draw_context -> buffers.gpu);
+static void make_aabb(const byte* const typeless_sector, vec3 aabb[2]) {
+	const Sector sector = *(Sector*) typeless_sector;
 
-	const Sector* const sector_data = sectors -> data;
-	const Sector* const out_of_bounds_sector = sector_data + sectors -> length;
+	// TODO: avoid some pointer math by caching the zeroth and first indices here
+	GLfloat *const min = aabb[0], *const max = aabb[1];
 
-	/* Each vec4 plane in `frustum_planes` is composed of a vec3 surface
-	normal and the closest distance to the origin in the fourth component */
-	const vec4* const frustum_planes = camera -> frustum_planes;
+	min[0] = sector.origin[0];
+	min[1] = sector.visible_heights.min;
+	min[2] = sector.origin[1];
 
-	const face_mesh_t* const face_meshes_cpu = draw_context -> buffers.cpu.data;
-	face_mesh_t* const face_meshes_gpu = init_mapping_for_culled_batching(draw_context);
-
-	buffer_size_t num_visible_faces = 0;
-
-	for (const Sector* sector = sector_data; sector < out_of_bounds_sector; sector++) {
-		buffer_size_t num_visible_faces_in_group = 0;
-		const buffer_size_t initial_face_index = sector -> face_range.start;
-
-		while (sector < out_of_bounds_sector && sector_in_view_frustum(*sector, frustum_planes))
-			num_visible_faces_in_group += sector++ -> face_range.length;
-
-		if (num_visible_faces_in_group != 0) {
-			memcpy(face_meshes_gpu + num_visible_faces,
-				face_meshes_cpu + initial_face_index,
-				num_visible_faces_in_group * sizeof(face_mesh_t));
-
-			num_visible_faces += num_visible_faces_in_group;
-		}
-	}
-
-	deinit_current_mapping_for_culled_batching();
-	return num_visible_faces;
+	max[0] = min[0] + sector.size[0];
+	max[1] = min[1] + sector.visible_heights.max - sector.visible_heights.min;
+	max[2] = min[2] + sector.size[1];
 }
+
+static buffer_size_t get_renderable_index_from_cullable(const byte* const typeless_sector, const byte* const typeless_first_sector) {
+	(void) typeless_first_sector;
+	return ((Sector*) typeless_sector) -> face_range.start;
+}
+
+static buffer_size_t get_num_renderable_from_cullable(const byte* const typeless_sector) {
+	return ((Sector*) typeless_sector) -> face_range.length;
+}
+
+//////////
 
 // This is just a utility function
 void draw_visible_sectors(const BatchDrawContext* const draw_context,
 	const CascadedShadowContext* const shadow_context, const List* const sectors,
 	const Camera* const camera, const GLuint normal_map_set, const GLint screen_size[2]) {
 
-	const buffer_size_t num_visible_faces = fill_sector_vertex_buffer_with_visible_faces(draw_context, sectors, camera);
+	const buffer_size_t num_visible_faces = cull_from_frustum_into_gpu_buffer(
+		draw_context, *sectors, camera -> frustum_planes, make_aabb,
+		get_renderable_index_from_cullable, get_num_renderable_from_cullable
+	);
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_context,

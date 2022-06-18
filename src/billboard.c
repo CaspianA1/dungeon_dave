@@ -6,8 +6,6 @@
 #include "headers/shader.h"
 #include "headers/constants.h"
 
-//////////
-
 // This just updates the billboard animation instances at the moment
 void update_billboards(const BillboardContext* const billboard_context) {
 	const List* const animation_instances = &billboard_context -> animation_instances;
@@ -28,17 +26,6 @@ void update_billboards(const BillboardContext* const billboard_context) {
 			&billboard_data[animation_instance -> ids.billboard].texture_id,
 			animation_data[animation_instance -> ids.animation]);
 	}
-}
-
-// TODO: unify billboard culling with sector culling, if testing against a plane is not done
-static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frustum_planes[planes_per_frustum]) {
-	vec3 extents = {billboard.size[0], billboard.size[1], billboard.size[0]}, aabb[2];
-
-	glm_vec3_scale(extents, 0.5f, extents);
-	glm_vec3_sub((GLfloat*) billboard.pos, extents, aabb[0]);
-	glm_vec3_add((GLfloat*) billboard.pos, extents, aabb[1]);
-
-	return glm_aabb_frustum((vec3*) aabb, (vec4*) frustum_planes);
 }
 
 static void draw_billboards(const BatchDrawContext* const draw_context,
@@ -91,35 +78,48 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	);
 }
 
+////////// These functions are for frustum culling
+
+static void make_aabb(const byte* const typeless_billboard, vec3 aabb[2]) {
+	const Billboard billboard = *(Billboard*) typeless_billboard;
+
+	vec3 extents = {billboard.size[0], billboard.size[1], billboard.size[0]};
+
+	glm_vec3_scale(extents, 0.5f, extents);
+	glm_vec3_sub((GLfloat*) billboard.pos, extents, aabb[0]);
+	glm_vec3_add((GLfloat*) billboard.pos, extents, aabb[1]);
+}
+
+static buffer_size_t get_renderable_index_from_cullable(const byte* const typeless_billboard, const byte* const typeless_first_billboard) {
+	const buffer_size_t byte_difference = (buffer_size_t) (typeless_billboard - typeless_first_billboard);
+	return byte_difference / sizeof(Billboard);
+}
+
+static buffer_size_t get_num_renderable_from_cullable(const byte* const typeless_billboard) {
+	(void) typeless_billboard;
+	return 1;
+}
+
+//////////
+
+// This is just a utility function
 void draw_visible_billboards(const BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context, const Camera* const camera) {
 
 	const BatchDrawContext* const draw_context = &billboard_context -> draw_context;
 
-	use_vertex_buffer(draw_context -> buffers.gpu);
+	const buffer_size_t num_visible_billboards = cull_from_frustum_into_gpu_buffer(
+		draw_context, draw_context -> buffers.cpu,
+		camera -> frustum_planes, make_aabb,
+		get_renderable_index_from_cullable,
+		get_num_renderable_from_cullable
+	);
 
-	const List cpu_billboards = draw_context -> buffers.cpu;
-	const vec4* const frustum_planes = camera -> frustum_planes;
-	Billboard* const gpu_billboard_buffer = init_mapping_for_culled_batching(draw_context);
-
-	buffer_size_t num_visible_billboards = 0;
-	const Billboard* const out_of_bounds_billboard = ((Billboard*) cpu_billboards.data) + cpu_billboards.length;
-
-	for (const Billboard* billboard = cpu_billboards.data; billboard < out_of_bounds_billboard; billboard++) {
-		const Billboard* const initial_billboard = billboard;
-		while (billboard < out_of_bounds_billboard && billboard_in_view_frustum(*billboard, frustum_planes))
-			billboard++;
-
-		const buffer_size_t num_visible_in_group = (buffer_size_t) (billboard - initial_billboard);
-		if (num_visible_in_group != 0) {
-			memcpy(gpu_billboard_buffer + num_visible_billboards, initial_billboard, num_visible_in_group * sizeof(Billboard));
-			num_visible_billboards += num_visible_in_group;
-		}
-	}
-
-	deinit_current_mapping_for_culled_batching();
-	if (num_visible_billboards != 0) draw_billboards(draw_context, shadow_context, camera, num_visible_billboards);
+	if (num_visible_billboards != 0)
+		draw_billboards(draw_context, shadow_context, camera, num_visible_billboards);
 }
+
+//////////
 
 BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
 	const buffer_size_t num_billboards, const Billboard* const billboards,

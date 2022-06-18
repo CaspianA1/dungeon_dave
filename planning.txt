@@ -53,7 +53,7 @@ Architectural/code design ideas:
 - Use Drawable for as many drawable things as possible
 - Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
 - Perhaps use just OpenGL + ImGUI for the editor
-- Make all static billboards to animated (to simplify the code)
+- Make all static billboards to animated (to simplify the code), if complexity doesn't increase too much because of that
 - If using SDL_Mixer in the end for audio and not OpenAL, use a more compressed audio format, like FLAC or WAV
 - Make `map_size_t` an alias for `byte` or `GLubyte`, and make an alias for `map_value_t` too
 

@@ -18,12 +18,11 @@ List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size) {
 
 static void copy_to_list_end(List* const list, const void* const data, const buffer_size_t num_items) {
 	const buffer_size_t item_size = list -> item_size;
-	const buffer_size_t num_bytes = num_items * item_size;
 
 	// Cast to byte, because offset is calculated bytewise
 	void* const dest_begin = (byte*) list -> data + (list -> length * item_size);
 	list -> length += num_items;
-	memcpy(dest_begin, data, num_bytes);
+	memcpy(dest_begin, data, num_items * item_size);
 }
 
 void push_ptr_to_list(List* const list, const void* const item_ptr) {
