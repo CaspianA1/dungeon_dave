@@ -11,7 +11,6 @@ static void* main_init(void) {
 	////////// Defining a bunch of level data
 
 	const AnimationLayout billboard_animation_layouts[] = {
-		// ASSET_PATH("spritesheets/_.bmp"),
 		{ASSET_PATH("spritesheets/flying_carpet.bmp"), 5, 10, 46},
 		{ASSET_PATH("spritesheets/torch_2.bmp"), 2, 3, 5},
 		{ASSET_PATH("spritesheets/eddie.bmp"), 23, 1, 23},
