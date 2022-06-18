@@ -24,7 +24,7 @@ typedef struct {
 	const struct {const buffer_size_t billboard, animation;} ids;
 } BillboardAnimationInstance;
 
-////////// Excluded: is_inside_plane, billboard_in_view_frustum, draw_billboards
+////////// Excluded: billboard_in_view_frustum, draw_billboards
 
 void update_billboards(const BillboardContext* const billboard_context);
 

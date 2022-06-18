@@ -6,11 +6,6 @@
 #include "headers/shader.h"
 #include "headers/constants.h"
 
-typedef struct {
-	const vec3 center;
-	const GLfloat radius;
-} Sphere;
-
 //////////
 
 // This just updates the billboard animation instances at the moment
@@ -35,24 +30,17 @@ void update_billboards(const BillboardContext* const billboard_context) {
 	}
 }
 
-// https://stackoverflow.com/questions/25572337/frustum-and-sphere-intersection
-static bool is_inside_plane(const Sphere sphere, const vec4 plane) {
-	const GLfloat dist_btwn_plane_and_sphere = glm_vec3_dot((GLfloat*) sphere.center, (GLfloat*) plane) + plane[3];
-	return dist_btwn_plane_and_sphere > -sphere.radius;
-}
-
-// TODO: test against an AABB, instead of a sphere (1. more accurate, 2. unified with sector culling)
+// TODO: unify billboard culling with sector culling
 static bool billboard_in_view_frustum(const Billboard billboard, const vec4 frustum_planes[6]) {
-	const Sphere sphere = { // For a sphere, the first 3 components are position, and the last component is radius
-		.center = {billboard.pos[0], billboard.pos[1], billboard.pos[2]},
-		.radius = glm_vec2_norm((vec2) {billboard.size[0], billboard.size[1]}) * 0.5f
-	};
+	// TODO: Later, test against single plane (most accurate method)
 
-	for (byte i = 0; i < 6; i++) {
-		if (!is_inside_plane(sphere, frustum_planes[i])) return false;
-	}
+	vec3 extents = {billboard.size[0], billboard.size[1], billboard.size[0]}, aabb[2];
 
-	return true;
+	glm_vec3_scale(extents, 0.5f, extents);
+	glm_vec3_sub((GLfloat*) billboard.pos, extents, aabb[0]);
+	glm_vec3_add((GLfloat*) billboard.pos, extents, aabb[1]);
+
+	return glm_aabb_frustum((vec3*) aabb, (vec4*) frustum_planes);
 }
 
 static void draw_billboards(const BatchDrawContext* const draw_context,
