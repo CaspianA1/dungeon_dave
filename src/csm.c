@@ -139,15 +139,15 @@ CascadedShadowContext init_shadow_context(const vec3 light_dir, const vec3 sub_f
 
 	//////////
 
+	GLfloat* const split_dists_data = split_dists.data;
+
 	for (buffer_size_t i = 0; i < split_dists.length; i++) {
 		const GLfloat layer_percent = (GLfloat) (i + 1) / num_layers;
 
 		const GLfloat linear_dist = near_clip_dist + layer_percent * clip_dist_diff;
 		const GLfloat log_dist = near_clip_dist * powf(far_clip_dist / near_clip_dist, layer_percent);
 
-		const GLfloat weighted_dist = glm_lerp(log_dist, linear_dist, linear_split_weight);
-
-		*((GLfloat*) ptr_to_list_index(&split_dists, i)) = weighted_dist;
+		split_dists_data[i] = glm_lerp(log_dist, linear_dist, linear_split_weight);
 	}
 
 	//////////
