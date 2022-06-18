@@ -24,7 +24,7 @@ typedef struct {
 	vec2 right_xz; // This is used for billboards
 	vec3 pos, dir, right, up, velocities;
 
-	mat4 view, model_view_projection;
+	mat4 view, view_projection;
 	vec4 frustum_planes[6];
 } Camera;
 

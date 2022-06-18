@@ -116,23 +116,23 @@ static void define_vertex_spec_for_skybox(void) {
 static void update_skybox_uniforms(const Drawable* const drawable, const void* const param) {
 	const GLuint shader = drawable -> shader;
 
-	static GLint model_view_projection_id;
+	static GLint view_projection_id;
 
 	ON_FIRST_CALL(
-		INIT_UNIFORM(model_view_projection, shader);
+		INIT_UNIFORM(view_projection, shader);
 		use_texture(drawable -> diffuse_texture, shader, "texture_sampler", TexSkybox, SKYBOX_TEXTURE_UNIT);
 	);
 
-	mat4 model_view_projection;
-	glm_mat4_copy((vec4*) param, model_view_projection);
+	mat4 view_projection;
+	glm_mat4_copy((vec4*) param, view_projection);
 
 	/* This clears X, Y, and W. Z (depth) not cleared
 	b/c it's always set to 1 in the vertex shader. */
-	model_view_projection[3][0] = 0.0f;
-	model_view_projection[3][1] = 0.0f;
-	model_view_projection[3][3] = 0.0f;
+	view_projection[3][0] = 0.0f;
+	view_projection[3][1] = 0.0f;
+	view_projection[3][3] = 0.0f;
 
-	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &model_view_projection[0][0]);
+	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &view_projection[0][0]);
 }
 
 Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
@@ -155,11 +155,11 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 	return drawable;
 }
 
-void draw_skybox(const Skybox* const skybox, const mat4 model_view_projection) {
+void draw_skybox(const Skybox* const skybox, const mat4 view_projection) {
 	WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS,
 		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
 			const GLsizei num_vertices = sizeof(skybox_vertices) / vertices_per_triangle;
-			draw_drawable(*skybox, num_vertices, model_view_projection);
+			draw_drawable(*skybox, num_vertices, view_projection);
 		);
 	);
 }

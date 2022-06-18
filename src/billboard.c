@@ -48,13 +48,13 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	const buffer_size_t num_visible_billboards) {
 
 	const GLuint shader = draw_context -> shader;
-	static GLint right_xz_world_space_id, model_view_projection_id, camera_view_id, light_view_projection_matrices_id;
+	static GLint right_xz_world_space_id, view_projection_id, camera_view_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(right_xz_world_space, shader);
-		INIT_UNIFORM(model_view_projection, shader);
+		INIT_UNIFORM(view_projection, shader);
 		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
@@ -68,7 +68,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	);
 
 	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right_xz[0], camera -> right_xz[1]);
-	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
+	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &camera -> view_projection[0][0]);
 
 	////////// This little part concerns CSM
 

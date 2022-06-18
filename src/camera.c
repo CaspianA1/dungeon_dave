@@ -323,8 +323,8 @@ void update_camera(Camera* const camera, const Event event) {
 		constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
 
 	// The model matrix is implicit in this, since it equals the identity matrix
-	glm_mul(projection, camera -> view, camera -> model_view_projection);
-	glm_frustum_planes(camera -> model_view_projection, camera -> frustum_planes);
+	glm_mul(projection, camera -> view, camera -> view_projection);
+	glm_frustum_planes(camera -> view_projection, camera -> frustum_planes);
 
 	////////// Copying the local vectors to the camera, and printing important vectors if needed
 

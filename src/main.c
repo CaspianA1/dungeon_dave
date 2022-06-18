@@ -213,7 +213,7 @@ static void main_drawer(void* const app_context) {
 
 	/* Drawing the skybox after sectors and billboards because
 	most skybox fragments would unnecessarily be drawn otherwise */
-	draw_skybox(&scene_context -> skybox, camera -> model_view_projection);
+	draw_skybox(&scene_context -> skybox, camera -> view_projection);
 
 	update_and_draw_weapon_sprite(&scene_context -> weapon_sprite, camera, &event, shadow_context);
 }

@@ -173,7 +173,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	const GLuint shader = draw_context -> shader;
 
 	static GLint
-		camera_pos_world_space_id, light_dir_id, model_view_projection_id,
+		camera_pos_world_space_id, light_dir_id, view_projection_id,
 		one_over_screen_size_id, UV_translation_id, camera_view_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
@@ -185,7 +185,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	ON_FIRST_CALL(
 		INIT_UNIFORM(light_dir, shader);
 		INIT_UNIFORM(camera_pos_world_space, shader);
-		INIT_UNIFORM(model_view_projection, shader);
+		INIT_UNIFORM(view_projection, shader);
 		INIT_UNIFORM(one_over_screen_size, shader);
 		INIT_UNIFORM(UV_translation, shader);
 		INIT_UNIFORM(camera_view, shader);
@@ -233,7 +233,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
 	UPDATE_UNIFORM(light_dir, 3fv, 1, shadow_context -> light_dir);
 
-	UPDATE_UNIFORM(model_view_projection, Matrix4fv, 1, GL_FALSE, &camera -> model_view_projection[0][0]);
+	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &camera -> view_projection[0][0]);
 	UPDATE_UNIFORM(one_over_screen_size, 2f, 1.0f / screen_size[0], 1.0f / screen_size[1]);
 
 	////////// This little part concerns CSM

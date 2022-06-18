@@ -10,7 +10,7 @@ out float world_depth_value;
 out vec3 UV, fragment_pos_world_space;
 
 uniform vec2 right_xz_world_space;
-uniform mat4 model_view_projection;
+uniform mat4 view_projection;
 
 const vec2 vertices_model_space[4] = vec2[4](
 	vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f),
@@ -27,7 +27,7 @@ void main(void) {
 
 	fragment_pos_world_space = vertex_pos_world_space;
 	world_depth_value = get_world_depth_value(vertex_pos_world_space);
-	gl_Position = model_view_projection * vec4(vertex_pos_world_space, 1.0f);
+	gl_Position = view_projection * vec4(vertex_pos_world_space, 1.0f);
 
 	UV.xy = vec2(vertex_pos_model_space.x, -vertex_pos_model_space.y) + 0.5f;
 	UV.z = texture_id;
