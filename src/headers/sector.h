@@ -21,9 +21,8 @@ sector_in_view_frustum, draw_sectors, fill_sector_vertex_buffer_with_visible_fac
 List generate_sectors_from_maps(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height);
 
-void init_sector_draw_context(BatchDrawContext* const draw_context,
-	List* const sectors_ref, const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_width, const byte map_height);
+void init_sector_draw_context(BatchDrawContext* const draw_context, List* const sectors,
+	const byte* const heightmap, const byte* const texture_id_map, const byte map_width, const byte map_height);
 
 void draw_all_sectors_for_shadow_map(const void* const param);
 

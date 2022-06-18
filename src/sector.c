@@ -98,18 +98,18 @@ List generate_sectors_from_maps(const byte* const heightmap,
 
 ////////// This next part concerns the drawing of sectors
 
-void init_sector_draw_context(BatchDrawContext* const draw_context,
-	List* const sectors_ref, const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_width, const byte map_height) {
+void init_sector_draw_context(BatchDrawContext* const draw_context, List* const sectors,
+	const byte* const heightmap, const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
-	List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
+	*sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
+	const buffer_size_t num_sectors = sectors -> length;
 
-	/* This contains the actual vertex data for faces. `sectors.length * 3` gives a good guess for the
+	/* This contains the actual vertex data for faces. `num_sectors * 3` gives a good guess for the
 	face/sector ratio. Its ownership, after this function, goes to the draw context (which frees it). */
-	List face_meshes = init_list(sectors.length * 3, face_mesh_component_t[components_per_face]);
+	List face_meshes = init_list(num_sectors * 3, face_mesh_component_t[components_per_face]);
 
-	for (buffer_size_t i = 0; i < sectors.length; i++) {
-		Sector* const sector_ref = ptr_to_list_index(&sectors, i);
+	for (buffer_size_t i = 0; i < num_sectors; i++) {
+		Sector* const sector_ref = ptr_to_list_index(sectors, i);
 		sector_ref -> face_range.start = face_meshes.length;
 
 		const Sector sector = *sector_ref;
@@ -133,8 +133,6 @@ void init_sector_draw_context(BatchDrawContext* const draw_context,
 	enum {v = vertices_per_triangle};
 	define_vertex_spec_index(false, true, 0, v, bytes_per_face_vertex, 0, FACE_MESH_COMPONENT_TYPENAME);
 	define_vertex_spec_index(false, false, 1, 1, bytes_per_face_vertex, sizeof(face_mesh_component_t[v]), FACE_MESH_COMPONENT_TYPENAME);
-
-	*sectors_ref = sectors;
 }
 
 static byte sector_in_view_frustum(const Sector sector, const vec4 frustum_planes[6]) {
