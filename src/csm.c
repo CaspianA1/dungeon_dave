@@ -19,7 +19,50 @@ For later on:
 	with PSRs, instead of defining a scale factor for the frustum
 */
 
-//////////
+////////// This part concerns getting the light view projection matrix of a camera sub frustum
+
+static void get_camera_sub_frustum_corners_and_center(const Camera* const camera, const GLfloat near_clip_dist,
+	const GLfloat far_clip_dist, vec4 camera_sub_frustum_corners[corners_per_frustum], vec4 camera_sub_frustum_center) {
+
+	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection;
+
+	glm_perspective(camera -> angles.fov, camera -> aspect_ratio,
+		near_clip_dist, far_clip_dist, camera_sub_frustum_projection);
+
+	glm_mul(camera_sub_frustum_projection, (vec4*) camera -> view, camera_sub_frustum_view_projection);
+	glm_mat4_inv(camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection);
+
+	glm_frustum_corners(inv_camera_sub_frustum_view_projection, camera_sub_frustum_corners);
+	glm_frustum_center(camera_sub_frustum_corners, camera_sub_frustum_center);
+}
+
+static void get_light_view(const vec4 camera_sub_frustum_center, const vec3 light_dir, mat4 light_view) {
+	vec3 light_eye;
+	glm_vec3_add((GLfloat*) camera_sub_frustum_center, (GLfloat*) light_dir, light_eye);
+	glm_lookat(light_eye, (GLfloat*) camera_sub_frustum_center, (vec3) {0.0f, 1.0f, 0.0f}, light_view);
+}
+
+static void get_light_projection(const vec4 camera_sub_frustum_corners[corners_per_frustum],
+	const vec3 light_view_frustum_box_scale, const mat4 light_view, mat4 light_projection) {
+
+	vec3 light_view_frustum_box[2];
+	glm_frustum_box((vec4*) camera_sub_frustum_corners, (vec4*) light_view, light_view_frustum_box);
+
+	for (byte i = 0; i < 3; i++) {
+		const GLfloat scale = light_view_frustum_box_scale[i];
+		const GLfloat one_over_scale = 1.0f / scale;
+
+		GLfloat
+			*const min = &light_view_frustum_box[0][i],
+			*const max = &light_view_frustum_box[1][i];
+
+		*min *= (*min < 0.0f) ? scale : one_over_scale;
+		*max *= (*max < 0.0f) ? one_over_scale : scale;
+	}
+
+	glm_ortho_aabb(light_view_frustum_box, light_projection);
+}
+
 
 // This modifies `light_projection` to avoid shadow swimming
 static void apply_texel_snapping(const GLsizei resolution[2], mat4 light_projection, const mat4 light_view_projection) {
@@ -47,58 +90,22 @@ static void get_sub_frustum_light_view_projection_matrix(const Camera* const cam
 	const CascadedShadowContext* const shadow_context, const GLfloat near_clip_dist,
 	const GLfloat far_clip_dist, mat4 light_view_projection) {
 
-	////////// Getting the sub frustum center
+	vec4 camera_sub_frustum_corners[corners_per_frustum], camera_sub_frustum_center;
 
-	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection;
+	get_camera_sub_frustum_corners_and_center(camera, near_clip_dist,
+		far_clip_dist, camera_sub_frustum_corners, camera_sub_frustum_center);
 
-	glm_perspective(camera -> angles.fov, camera -> aspect_ratio,
-		near_clip_dist, far_clip_dist, camera_sub_frustum_projection);
+	mat4 light_view, light_projection;
 
-	glm_mul(camera_sub_frustum_projection, (vec4*) camera -> view, camera_sub_frustum_view_projection);
-	glm_mat4_inv(camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection);
+	get_light_view(camera_sub_frustum_center, shadow_context -> light_dir, light_view);
+	get_light_projection(camera_sub_frustum_corners, shadow_context -> sub_frustum_scale, light_view, light_projection);
 
-	vec4 camera_sub_frustum_corners[8], camera_sub_frustum_center;
-	glm_frustum_corners(inv_camera_sub_frustum_view_projection, camera_sub_frustum_corners);
-	glm_frustum_center(camera_sub_frustum_corners, camera_sub_frustum_center);
-
-	////////// Getting the light view
-
-	vec3 light_eye;
-	glm_vec3_add(camera_sub_frustum_center, (GLfloat*) shadow_context -> light_dir, light_eye);
-
-	mat4 light_view;
-	glm_lookat(light_eye, camera_sub_frustum_center, (vec3) {0.0f, 1.0f, 0.0f}, light_view);
-
-	////////// Getting a bounding box of the light view, and re-scaling it as needed
-
-	vec3 light_view_frustum_box[2];
-	glm_frustum_box(camera_sub_frustum_corners, light_view, light_view_frustum_box);
-
-	const GLfloat* const light_view_frustum_box_scale = shadow_context -> sub_frustum_scale;
-
-	for (byte i = 0; i < 3; i++) {
-		const GLfloat scale = light_view_frustum_box_scale[i];
-		const GLfloat one_over_scale = 1.0f / scale;
-
-		GLfloat
-			*const min = &light_view_frustum_box[0][i],
-			*const max = &light_view_frustum_box[1][i];
-
-		*min *= (*min < 0.0f) ? scale : one_over_scale;
-		*max *= (*max < 0.0f) ? one_over_scale : scale;
-	}
-
-	////////// Using the light view frustum box, light projection, and light view to make a light view projection
-
-	mat4 light_projection;
-	glm_ortho_aabb(light_view_frustum_box, light_projection);
 	glm_mul(light_projection, light_view, light_view_projection);
-
-	////////// Texel snapping
-
 	apply_texel_snapping(shadow_context -> resolution, light_projection, light_view_projection);
 	glm_mul(light_projection, light_view, light_view_projection);
 }
+
+//////////
 
 static GLuint init_csm_depth_layers(const GLsizei width, const GLsizei height, const GLsizei num_layers) {
 	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, TexLinear, TexLinear, true);

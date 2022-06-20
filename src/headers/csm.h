@@ -12,7 +12,9 @@ typedef struct {
 	List light_view_projection_matrices, split_dists;
 } CascadedShadowContext;
 
-// Excluded: apply_texel_snapping, get_sub_frustum_light_view_projection_matrix, init_csm_depth_layers, init_csm_framebuffer
+/* Excluded:
+get_camera_sub_frustum_corners_and_center, get_light_view, get_light_projection, apply_texel_snapping,
+get_sub_frustum_light_view_projection_matrix, init_csm_depth_layers, init_csm_framebuffer */
 
 CascadedShadowContext init_shadow_context(const vec3 light_dir, const vec3 sub_frustum_scale,
 	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei width,

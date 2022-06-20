@@ -38,6 +38,7 @@ enum { // `enum` is used to make these values compile-time constants
 
 	vertices_per_triangle = 3,
 	corners_per_quad = 4,
+	corners_per_frustum = 8,
 	planes_per_frustum = 6,
 	faces_per_cubemap = 6
 };
