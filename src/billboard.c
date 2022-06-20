@@ -81,18 +81,18 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 ////////// These functions are for frustum culling
 
 static void make_aabb(const byte* const typeless_billboard, vec3 aabb[2]) {
-	const Billboard billboard = *(Billboard*) typeless_billboard;
+	const Billboard* const billboard = (Billboard*) typeless_billboard;
+	const GLfloat *const size = billboard -> size, *const pos = billboard -> pos;
 
-	vec3 extents = {billboard.size[0], billboard.size[1], billboard.size[0]};
+	vec3 extents = {size[0], size[1], size[0]};
 
 	glm_vec3_scale(extents, 0.5f, extents);
-	glm_vec3_sub((GLfloat*) billboard.pos, extents, aabb[0]);
-	glm_vec3_add((GLfloat*) billboard.pos, extents, aabb[1]);
+	glm_vec3_sub((GLfloat*) pos, extents, aabb[0]);
+	glm_vec3_add((GLfloat*) pos, extents, aabb[1]);
 }
 
 static buffer_size_t get_renderable_index_from_cullable(const byte* const typeless_billboard, const byte* const typeless_first_billboard) {
-	const buffer_size_t byte_difference = (buffer_size_t) (typeless_billboard - typeless_first_billboard);
-	return byte_difference / sizeof(Billboard);
+	return (buffer_size_t) ((Billboard*) typeless_billboard - (Billboard*) typeless_first_billboard);
 }
 
 static buffer_size_t get_num_renderable_from_cullable(const byte* const typeless_billboard) {
