@@ -68,7 +68,7 @@ static void get_light_projection(const vec4 camera_sub_frustum_corners[corners_p
 static void apply_texel_snapping(const GLsizei resolution[2], const mat4 light_view_projection, mat4 light_projection) {
 	/* First tried https://www.junkship.net/News/2020/11/22/shadow-of-a-doubt-part-2
 	Then settling with https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering for now
-	Perhaps try https://dev.theomader.com/stable-csm/ later
+	Perhaps try https://dev.theomader.com/stable-csm/ later (actually not, since its ortho matrix is in screen-space)
 	Or https://www.gamedev.net/forums/topic/711114-minimizing-shadow-mapping-shimmer/5443275/?
 
 	Second way only works for far-away shadows (shimmering for close ones).
