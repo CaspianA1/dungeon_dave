@@ -65,7 +65,7 @@ static void get_light_projection(const vec4 camera_sub_frustum_corners[corners_p
 
 
 // This modifies `light_projection` to avoid shadow swimming
-static void apply_texel_snapping(const GLsizei resolution[2], mat4 light_projection, const mat4 light_view_projection) {
+static void apply_texel_snapping(const GLsizei resolution[2], const mat4 light_view_projection, mat4 light_projection) {
 	/* First tried https://www.junkship.net/News/2020/11/22/shadow-of-a-doubt-part-2
 	Then settling with https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering for now
 	Perhaps try https://dev.theomader.com/stable-csm/ later
@@ -101,7 +101,7 @@ static void get_sub_frustum_light_view_projection_matrix(const Camera* const cam
 	get_light_projection(camera_sub_frustum_corners, shadow_context -> sub_frustum_scale, light_view, light_projection);
 
 	glm_mul(light_projection, light_view, light_view_projection);
-	apply_texel_snapping(shadow_context -> resolution, light_projection, light_view_projection);
+	apply_texel_snapping(shadow_context -> resolution, light_view_projection, light_projection);
 	glm_mul(light_projection, light_view, light_view_projection);
 }
 
