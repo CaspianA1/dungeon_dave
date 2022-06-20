@@ -77,6 +77,7 @@ static void apply_texel_snapping(const GLsizei resolution[2], const mat4 light_v
 	For far-away shadows, shimmering doesn't happen for movement, but it does for turning.
 
 	- Check out this, maybe: https://www.gamedev.net/forums/topic/673197-cascaded-shadow-map-shimmering-effect/
+	- Or https://github.com/TheRealMJP/Shadows/blob/master/Shadows/MeshRenderer.cpp#L1492%E2%80%8B
 	- Or ask on Stackoverflow
 	*/
 
