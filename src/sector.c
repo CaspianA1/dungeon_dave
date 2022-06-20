@@ -39,18 +39,18 @@ static Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	// Now, `sector.size[0]` equals the first horizontal span length where equal attributes were found
 	for (byte y = origin_y; y < map_height; y++, sector.size[1]++) {
 		for (byte x = sector.origin[0]; x < top_right_corner_x; x++) {
-			if (!point_matches_sector_attributes(&sector, heightmap, texture_id_map, x, y, map_width)) {
-
-				set_statemap_area(traversed_points, (buffer_size_t[4]) {
-					sector.origin[0], sector.origin[1], sector.size[0], sector.size[1]
-				});
-
-				goto end;
-			}
+			if (!point_matches_sector_attributes(&sector, heightmap, texture_id_map, x, y, map_width))
+				goto done;
 		}
 	}
 
-	end: return sector;
+	done:
+
+	set_statemap_area(traversed_points, (buffer_size_t[4]) {
+		sector.origin[0], sector.origin[1], sector.size[0], sector.size[1]
+	});
+
+	return sector;
 }
 
 List generate_sectors_from_maps(const byte* const heightmap,
