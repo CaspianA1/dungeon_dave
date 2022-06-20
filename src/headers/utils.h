@@ -26,7 +26,7 @@
 	for (int16_t i = (sizeof(num) << 3) - 1; i >= 0; i--)\
 		putchar((((num) >> i) & 1) + '0');\
 	putchar('\n');\
-} while (0)
+} while (false)
 
 #define TWEAK_REALTIME_VALUE(value_name, init_value, min_value, max_value, step, key_decr, key_incr, key_reset)\
 	static GLfloat value_name = (init_value);\
@@ -41,7 +41,7 @@
 		if (value_name < (min_value)) value_name = (min_value);\
 		else if (value_name > (max_value)) value_name = (max_value);\
 		if (incr || decr || reset) DEBUG_FLOAT(value_name);\
-	} while (0)
+	} while (false)
 
 #define INIT_SHADER_BRANCH(shader, name, key) INIT_UNIFORM_VALUE(name, (shader), 1i, keys[SDL_SCANCODE_##key])
 
@@ -57,13 +57,13 @@
 		__VA_ARGS__\
 		first_call = false;\
 	}\
-} while (0)
+} while (false)
 
 #define FAIL(failure_type, format, ...) do {\
 	fprintf(stderr, "Failed with error type '%s'. Reason: '"\
 		format "'.\n", #failure_type, __VA_ARGS__);\
 	exit(failure_type + 1);\
-} while (0)
+} while (false)
 
 ////////// These macros are for handy abstractions over OpenGL functions
 
@@ -87,15 +87,15 @@
 
 #define WITH_BINARY_RENDER_STATE(state, ...) do {\
 	glEnable((state)); __VA_ARGS__ glDisable((state));\
-} while (0)
+} while (false)
 
 #define WITHOUT_BINARY_RENDER_STATE(state, ...) do {\
 	glDisable((state)); __VA_ARGS__ glEnable((state));\
-} while (0)
+} while (false)
 
 #define WITH_RENDER_STATE(setter, state, inverse_state, ...) do {\
 	setter((state)); __VA_ARGS__ setter((inverse_state));\
-} while (0)
+} while (false)
 
 ////////// These macros pertain to window + rendering defaults
 

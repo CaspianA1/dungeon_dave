@@ -275,10 +275,7 @@ GLuint init_shader(
 		if (paths[i] == NULL) continue;
 
 		const List* const dependency_list = dependency_lists + i;
-
-		for (buffer_size_t i = 0; i < dependency_list -> length; i++)
-			free(value_at_list_index(dependency_list, i, GLchar*));
-
+		LIST_FOR_EACH(dependency_list, dependency_code, _, free(*(GLchar**) dependency_code););
 		deinit_list(*dependency_list);
 	}
 

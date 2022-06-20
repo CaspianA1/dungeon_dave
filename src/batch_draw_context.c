@@ -47,8 +47,6 @@ buffer_size_t cull_from_frustum_into_gpu_buffer(
 
 	use_vertex_buffer(draw_context -> buffers.gpu);
 
-	const byte* const out_of_bounds_cullable = ptr_to_list_index(&cullable_objects, cullable_objects.length);
-
 	byte* const renderable_gpu_buffer = init_mapping_for_culled_batching(draw_context);
 	const List* const renderable_cpu_buffer = &draw_context -> buffers.cpu;
 	const buffer_size_t renderable_size = renderable_cpu_buffer -> item_size;
@@ -57,7 +55,7 @@ buffer_size_t cull_from_frustum_into_gpu_buffer(
 
 	buffer_size_t total_num_visible = 0;
 
-	for (const byte* cullable = cullable_objects.data; cullable < out_of_bounds_cullable; cullable += cullable_objects.item_size) {
+	LIST_FOR_EACH(&cullable_objects, cullable, out_of_bounds_cullable,
 		const buffer_size_t initial_renderable_index_in_span = get_renderable_index_from_cullable(cullable, cullable_objects.data);
 
 		buffer_size_t num_visible_in_group = 0;
@@ -80,7 +78,7 @@ buffer_size_t cull_from_frustum_into_gpu_buffer(
 
 			total_num_visible += num_visible_in_group;
 		}
-	}
+	);
 
 	//////////
 

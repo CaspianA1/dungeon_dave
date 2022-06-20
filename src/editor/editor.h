@@ -27,7 +27,7 @@
 	fprintf(stderr, "Failed with error type '%s'. Reason: '"\
 		format "'.\n", #failure_type, __VA_ARGS__);\
 	exit(failure_type + 1);\
-} while (0)
+} while (false)
 
 #define ON_FIRST_CALL(...) do {\
 	static bool first_call = true;\
@@ -35,7 +35,7 @@
 		__VA_ARGS__\
 		first_call = false;\
 	}\
-} while (0)
+} while (false)
 
 //////////
 

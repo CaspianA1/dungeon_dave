@@ -15,6 +15,12 @@ typedef struct {
 #define deinit_list(list) free((list).data)
 #define value_at_list_index(list, index, type) ((type*) (list) -> data)[index]
 
+#define LIST_FOR_EACH(list, item, out_of_bounds, ...) do {\
+	List copied = *(list);\
+	const byte* const out_of_bounds = (byte*) copied.data + copied.length * copied.item_size;\
+	for (byte* item = copied.data; item < out_of_bounds; item += copied.item_size) do {__VA_ARGS__} while (false);\
+} while (0)
+
 List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size);
 void push_ptr_to_list(List* const list, const void* const item_ptr);
 void push_array_to_list(List* const list, const void* const items, const buffer_size_t num_items);

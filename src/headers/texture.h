@@ -62,7 +62,7 @@ And the biggest number possible with five bits is 31, so that gives you
 	if (must_lock) SDL_LockSurface((surface));\
 	__VA_ARGS__\
 	if (must_lock) SDL_UnlockSurface((surface));\
-} while (0)
+} while (false)
 
 //////////
 

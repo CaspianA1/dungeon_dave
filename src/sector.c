@@ -120,17 +120,21 @@ void init_sector_draw_context(BatchDrawContext* const draw_context, List* const 
 // Used in main.c
 void draw_all_sectors_for_shadow_map(const void* const param) {
 	const BatchDrawContext* const sector_draw_context = (BatchDrawContext*) param;
+
 	use_vertex_buffer(sector_draw_context -> buffers.gpu);
 	use_vertex_spec(sector_draw_context -> vertex_spec);
 
 	glDisableVertexAttribArray(1); // Not using the attribute at index 1
 
-	GLint bytes_for_vertices;
-	glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bytes_for_vertices);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_for_vertices, sector_draw_context -> buffers.cpu.data);
+	//////////
 
-	const GLsizei num_vertices = bytes_for_vertices / (GLint) sizeof(face_mesh_t) * vertices_per_face;
-	glDrawArrays(GL_TRIANGLES, 0, num_vertices);
+	const List* const face_meshes = &sector_draw_context -> buffers.cpu;
+	const buffer_size_t num_face_meshes = face_meshes -> length;
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, num_face_meshes * sizeof(face_mesh_t), face_meshes -> data);
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_face_meshes * vertices_per_face));
+
+	//////////
 
 	glEnableVertexAttribArray(1);
 }

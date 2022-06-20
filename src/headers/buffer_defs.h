@@ -1,7 +1,7 @@
 #ifndef BUFFER_DEFS_H
 #define BUFFER_DEFS_H
 
-////////// cglm and sdl2 have plenty of floating-point promotion errors, so this ignores them
+////////// cglm and SDL2 have plenty of floating-point promotion errors, so this ignores them
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdouble-promotion"

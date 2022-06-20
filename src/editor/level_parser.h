@@ -30,7 +30,7 @@ typedef struct {
 	FAIL(ParseLevelFile, "Could not parse '%s' (%s):\n---\n" COLOR_STRING(RED_COLOR, "%.*s") "\n---",\
 		(file_contents).name, (message), (int) ((contents_end) - (contents_start)),\
 		file_contents.data + (contents_start));\
-} while (0)
+} while (false)
 
 ////////// Excluded: read_file_contents, is_delim, tokenize, lex_json_file, parse_json_file
 
