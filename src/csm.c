@@ -7,6 +7,7 @@
 #include "headers/texture.h"
 
 #define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT16
+#define CSM_FILTERING_MODE TexLinear
 
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
@@ -66,13 +67,18 @@ static void get_light_projection(const vec4 camera_sub_frustum_corners[corners_p
 
 // This modifies `light_projection` to avoid shadow swimming
 static void apply_texel_snapping(const GLsizei resolution[2], const mat4 light_view_projection, mat4 light_projection) {
-	/* First tried https://www.junkship.net/News/2020/11/22/shadow-of-a-doubt-part-2
-	Then settling with https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering for now
-	Perhaps try https://dev.theomader.com/stable-csm/ later (actually not, since its ortho matrix is in screen-space)
-	Or https://www.gamedev.net/forums/topic/711114-minimizing-shadow-mapping-shimmer/5443275/?
+	/*
+	- First tried https://www.junkship.net/News/2020/11/22/shadow-of-a-doubt-part-2
+	- Then settling with https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering for now (using bounding sphere, which doesn't match with mine)
+	- Perhaps try https://dev.theomader.com/stable-csm/ later (actually not, since its ortho matrix is in screen-space)
+	- Or https://www.gamedev.net/forums/topic/711114-minimizing-shadow-mapping-shimmer/5443275/?
 
-	Second way only works for far-away shadows (shimmering for close ones).
-	For far-away shadows, shimmering doesn't happen for movement, but it does for turning. */
+	Second way only works for far-away shadows (shimmering for close ones over especially big terrains).
+	For far-away shadows, shimmering doesn't happen for movement, but it does for turning.
+
+	- Check out this, maybe: https://www.gamedev.net/forums/topic/673197-cascaded-shadow-map-shimmering-effect/
+	- Or ask on Stackoverflow
+	*/
 
 	const vec2 half_resolution = {resolution[0] * 0.5f, resolution[1] * 0.5f};
 	vec2 shadow_origin, rounding_offset;
@@ -108,7 +114,7 @@ static void get_sub_frustum_light_view_projection_matrix(const Camera* const cam
 //////////
 
 static GLuint init_csm_depth_layers(const GLsizei width, const GLsizei height, const GLsizei num_layers) {
-	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, TexLinear, TexLinear, true);
+	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, CSM_FILTERING_MODE, CSM_FILTERING_MODE, true);
 	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, width, height, num_layers, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	return depth_layers;
 }
