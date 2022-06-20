@@ -6,49 +6,11 @@
 #include "headers/texture.h"
 #include "headers/buffer_defs.h"
 
-// TODO: use a triangle strip in some way instead
-static const GLbyte skybox_vertices[] = {
-	-1, 1, -1,
-	-1, -1, -1,
-	1, -1, -1,
-	1, -1, -1,
-	1, 1, -1,
-	-1, 1, -1,
-
-	-1, -1, 1,
-	-1, -1, -1,
-	-1, 1, -1,
-	-1, 1, -1,
-	-1, 1, 1,
-	-1, -1, 1,
-
-	1, -1, -1,
-	1, -1, 1,
-	1, 1, 1,
-	1, 1, 1,
-	1, 1, -1,
-	1, -1, -1,
-
-	-1, -1, 1,
-	-1, 1, 1,
-	1, 1, 1,
-	1, 1, 1,
-	1, -1, 1,
-	-1, -1, 1,
-
-	-1, 1, -1,
-	1, 1, -1,
-	1, 1, 1,
-	1, 1, 1,
-	-1, 1, 1,
-	-1, 1, -1,
-
-	-1, -1, -1,
-	-1, -1, 1,
-	1, -1, -1,
-	1, -1, -1,
-	-1, -1, 1,
-	1, -1, 1
+// https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
+static const GLbyte skybox_vertices[][vertices_per_triangle] = {
+	{-1, 1, 1}, {1, 1, 1}, {-1, -1, 1}, {1, -1, 1},
+	{1, -1, -1}, {1, 1, 1}, {1, 1, -1}, {-1, 1, 1}, {-1, 1, -1},
+	{-1, -1, 1}, {-1, -1, -1}, {1, -1, -1}, {-1, 1, -1}, {1, 1, -1}
 };
 
 static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
@@ -140,11 +102,12 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 	/* TODO: when creating a new skybox, just switch out the texture,
 	instead of recreating the vertex buffer, spec, and shader. */
 
-	List vertices_in_list = init_list(sizeof(skybox_vertices), GLbyte);
-	push_array_to_list(&vertices_in_list, skybox_vertices, ARRAY_LENGTH(skybox_vertices));
+	const buffer_size_t num_vertices = ARRAY_LENGTH(skybox_vertices);
+	List vertices_in_list = init_list(num_vertices, GLbyte[vertices_per_triangle]);
+	push_array_to_list(&vertices_in_list, skybox_vertices, num_vertices);
 
 	const Drawable drawable = init_drawable(define_vertex_spec_for_skybox,
-		(uniform_updater_t) update_skybox_uniforms, GL_STATIC_DRAW, GL_TRIANGLES, vertices_in_list,
+		(uniform_updater_t) update_skybox_uniforms, GL_STATIC_DRAW, GL_TRIANGLE_STRIP, vertices_in_list,
 
 		init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag")),
 		init_skybox_texture(cubemap_path, texture_rescale_factor)
@@ -158,8 +121,7 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 void draw_skybox(const Skybox* const skybox, const mat4 view_projection) {
 	WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS,
 		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
-			const GLsizei num_vertices = sizeof(skybox_vertices) / vertices_per_triangle;
-			draw_drawable(*skybox, num_vertices, view_projection);
+			draw_drawable(*skybox, ARRAY_LENGTH(skybox_vertices), view_projection);
 		);
 	);
 }
