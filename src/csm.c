@@ -84,7 +84,6 @@ static void apply_texel_snapping(const GLsizei resolution[2], const mat4 light_v
 	vec2 shadow_origin, rounding_offset;
 
 	glm_vec2_mul((GLfloat*) light_view_projection[3], (GLfloat*) half_resolution, shadow_origin);
-
 	glm_vec2_sub((vec2) {roundf(shadow_origin[0]), roundf(shadow_origin[1])}, shadow_origin, rounding_offset);
 	glm_vec2_div(rounding_offset, (GLfloat*) half_resolution, rounding_offset);
 
