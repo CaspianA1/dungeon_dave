@@ -5,22 +5,21 @@
 
 Drawable init_drawable(
 	void (*const vertex_spec_definer) (void), const uniform_updater_t uniform_updater,
-	const bool will_modify_vertices, const bool using_triangle_strip,
+	const GLenum vertex_buffer_access, const GLenum triangle_mode,
 	const List vertices, const GLuint shader, const GLuint diffuse_texture) {
 
 	GLuint vertex_buffer, vertex_spec;
 
 	glGenBuffers(1, &vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, vertices.length * vertices.item_size,
-		vertices.data, will_modify_vertices ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
-	
+	glBufferData(GL_ARRAY_BUFFER, vertices.length * vertices.item_size, vertices.data, vertex_buffer_access);
+
 	glGenVertexArrays(1, &vertex_spec);
 	glBindVertexArray(vertex_spec);
 	vertex_spec_definer();
 
 	return (Drawable) {
-		using_triangle_strip, vertex_spec, vertex_buffer,
+		triangle_mode, vertex_spec, vertex_buffer,
 		shader, diffuse_texture, uniform_updater
 	};
 }
@@ -39,9 +38,7 @@ void draw_drawable(const Drawable drawable, const GLsizei num_vertices_to_draw, 
 
 	glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer);
 	glBindVertexArray(drawable.vertex_spec);
-
-	const GLenum mode = drawable.using_triangle_strip ? GL_TRIANGLE_STRIP : GL_TRIANGLES;
-	glDrawArrays(mode, 0, num_vertices_to_draw);
+	glDrawArrays(drawable.triangle_mode, 0, num_vertices_to_draw);
 }
 
 #endif

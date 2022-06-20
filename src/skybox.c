@@ -6,6 +6,7 @@
 #include "headers/texture.h"
 #include "headers/buffer_defs.h"
 
+// TODO: use a triangle strip in some way instead
 static const GLbyte skybox_vertices[] = {
 	-1, 1, -1,
 	-1, -1, -1,
@@ -78,7 +79,7 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 	//////////
 
 	const GLint cube_size = skybox_w >> 2, twice_cube_size = skybox_w >> 1;
-	const GLuint skybox = preinit_texture(TexSkybox, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SKYBOX_MIN_FILTER, false);
+	const GLuint skybox_texture = preinit_texture(TexSkybox, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SKYBOX_MIN_FILTER, false);
 
 	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size, SDL_PIXEL_FORMAT);
 
@@ -106,7 +107,7 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 	deinit_surface(face_surface);
 	deinit_surface(skybox_surface);
 
-	return skybox;
+	return skybox_texture;
 }
 
 static void define_vertex_spec_for_skybox(void) {
@@ -143,7 +144,7 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 	push_array_to_list(&vertices_in_list, skybox_vertices, ARRAY_LENGTH(skybox_vertices));
 
 	const Drawable drawable = init_drawable(define_vertex_spec_for_skybox,
-		(uniform_updater_t) update_skybox_uniforms, false, false, vertices_in_list,
+		(uniform_updater_t) update_skybox_uniforms, GL_STATIC_DRAW, GL_TRIANGLES, vertices_in_list,
 
 		init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag")),
 		init_skybox_texture(cubemap_path, texture_rescale_factor)

@@ -6,6 +6,8 @@
 #include "headers/texture.h"
 #include "headers/constants.h"
 
+// TODO: use Drawable for this
+
 TitleScreen init_title_screen(void) {
 	return (TitleScreen) {
 		.done = false,

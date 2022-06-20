@@ -7,10 +7,6 @@
 #include "event.h"
 #include "csm.h"
 
-/* TODO: contain the world-space weapon sprite coordinates in a vbo, and
-define a vao (so that the weapon can cast a shadow later). But make a
-Drawable struct first, or something along those lines. */
-
 typedef struct {
 	const GLuint shader, texture;
 	const Animation animation;

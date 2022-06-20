@@ -6,6 +6,33 @@
 #include "headers/texture.h"
 #include "headers/shader.h"
 
+/*
+Details on weapon coordinate space transformations:
+- Certain parameters define how the weapon swings back and forth
+
+- Screen-space coordinates are generated from those
+- Then, those coordinates are unprojected into world-space, and copied over to the vbo
+- In the fragment shader, the world-space coordinates are then reprojected to screen-space to get gl_Position
+
+- This screen -> world -> screen process is done, instead of doing screen -> screen, for a few reasons:
+	1. World-space coordinates are needed for lighting calculations
+	2. Getting world coordinates, and then going to screen-space after that
+		(in the fragment shader), works better with the shadow mapping pipeline
+*/
+
+/* TODO:
+Plan for getting cast shadows in weapon sprites:
+
+For drawing the weapon normally:
+- First, use vbo for storing vertices on GPU + vao
+- No array uniforms supplying any coordinates
+
+Later, when shadow casting:
+- Bind vbo + vao
+- World coordinates are in the vbo
+- They then get turned into screen coordinates through the view projection matrix
+*/
+
 WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
 	const GLfloat secs_for_frame, const AnimationLayout animation_layout) {
 
