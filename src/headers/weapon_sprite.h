@@ -17,7 +17,8 @@ typedef struct {
 	const GLfloat frame_width_over_height, size;
 } WeaponSprite;
 
-// Excluded: circular_mapping_from_zero_to_one, update_weapon_sprite_animation
+/* Excluded: update_weapon_sprite_animation, circular_mapping_from_zero_to_one,
+get_sway, get_screen_corners_from_sway, get_world_corners_from_screen_corners */
 
 WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
 	const GLfloat secs_for_frame, const AnimationLayout animation_layout);

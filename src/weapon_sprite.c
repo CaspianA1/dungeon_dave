@@ -76,21 +76,6 @@ void deinit_weapon_sprite(const WeaponSprite* const ws) {
 	deinit_shader(ws -> shader);
 }
 
-// Given an input between 0 and 1, this returns the y-value of the top left side of a circle
-static GLfloat circular_mapping_from_zero_to_one(const GLfloat x) {
-	/*
-	- Goal: a smooth mapping from 0 to 1
-	- And the y-value of a circle from x = 0 to 1, when its center equals (1, 0), achieves just that
-
-	Circle equation: x^2 + y^2 = 1
-	Shifted 1 unit to the right: (x - 1)^2 + y^2 = 1
-	y^2 = 1 - (x - 1)^2
-	y = sqrt(1 - (x - 1)^2) */
-
-	const GLfloat x_minus_one = x - 1.0f;
-	return sqrtf(1.0f - x_minus_one * x_minus_one);
-}
-
 static void update_weapon_sprite_animation(WeaponSprite* const ws, const Event* const event) {
 	buffer_size_t curr_frame = ws -> curr_frame;
 
@@ -104,6 +89,68 @@ static void update_weapon_sprite_animation(WeaponSprite* const ws, const Event* 
 
 	ws -> curr_frame = curr_frame;
 }
+
+////////// This part concerns the mapping from weapon sway -> screen corners -> world corners
+
+// Given an input between 0 and 1, this returns the y-value of the top left side of a circle
+static GLfloat circular_mapping_from_zero_to_one(const GLfloat x) {
+	/*
+	- Goal: a smooth mapping from 0 to 1
+	- And the y-value of a circle from x = 0 to 1, when its center equals (1, 0), achieves just that
+
+	Circle equation: x^2 + y^2 = 1
+	Shifted 1 unit to the right: (x - 1)^2 + y^2 = 1
+	y^2 = 1 - (x - 1)^2
+	y = sqrt(1 - (x - 1)^2)
+	*/
+
+	const GLfloat x_minus_one = x - 1.0f;
+	return sqrtf(1.0f - x_minus_one * x_minus_one);
+}
+
+static void get_sway(const GLfloat speed_xz_percent, GLfloat sway[2]) {
+	const GLfloat smooth_speed_xz_percent = circular_mapping_from_zero_to_one(speed_xz_percent);
+
+	const GLfloat
+		time_pace = sinf((SDL_GetTicks() / 1000.0f) * PI / constants.weapon_sprite.time_for_half_movement_cycle),
+		weapon_movement_magnitude = constants.weapon_sprite.max_movement_magnitude * smooth_speed_xz_percent;
+
+	sway[0] = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2.0f to magnitude / 2.0f
+	sway[1] = (fabsf(sway[0]) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
+}
+
+static void get_screen_corners_from_sway(const WeaponSprite* const ws, const GLfloat sway[2],
+	const GLint screen_size[2], vec2 screen_corners[corners_per_quad]) {
+
+	const GLfloat weapon_size = ws -> size, inv_screen_aspect_ratio = (GLfloat) screen_size[1] / screen_size[0];
+
+	const GLfloat
+		sway_across = sway[0],
+		down_term = (weapon_size - 1.0f) + sway[1],
+		across_term = weapon_size * ws -> frame_width_over_height * inv_screen_aspect_ratio;
+
+	screen_corners[0][0] = screen_corners[2][0] = sway_across - across_term;
+	screen_corners[1][0] = screen_corners[3][0] = sway_across + across_term;
+	screen_corners[0][1] = screen_corners[1][1] = down_term - weapon_size;
+	screen_corners[2][1] = screen_corners[3][1] = down_term + weapon_size;
+}
+
+static void get_world_corners_from_screen_corners(const mat4 view_projection,
+	const vec2 screen_corners[corners_per_quad], vec3 world_corners[corners_per_quad]) {
+
+	const GLfloat ndc_dist = constants.weapon_sprite.ndc_dist_from_camera;
+	const vec4 viewport = {-1.0f, -1.0f, 2.0f, 2.0f};
+
+	mat4 inv_view_projection;
+	glm_mat4_inv((vec4*) view_projection, inv_view_projection);
+
+	for (byte i = 0; i < corners_per_quad; i++) {
+		const GLfloat* const corner = screen_corners[i];
+		glm_unprojecti((vec3) {corner[0], corner[1], ndc_dist}, inv_view_projection, (GLfloat*) viewport, world_corners[i]);
+	}
+}
+
+//////////
 
 void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera,
 	const Event* const event, const CascadedShadowContext* const shadow_context) {
@@ -133,45 +180,18 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 		use_texture(shadow_context -> depth_layers, ws.shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
 
-	const GLfloat
-		inverse_screen_aspect_ratio = (GLfloat) event -> screen_size[1] / event -> screen_size[0],
-		smooth_speed_xz_percent = circular_mapping_from_zero_to_one(camera -> speed_xz_percent);
+	const vec4* const view_projection = camera -> view_projection;
 
-	const GLfloat
-		time_pace = sinf((SDL_GetTicks() / 1000.0f) * PI / constants.weapon_sprite.time_for_half_movement_cycle),
-		weapon_movement_magnitude = constants.weapon_sprite.max_movement_magnitude * smooth_speed_xz_percent;
+	GLfloat sway[2];
+	get_sway(camera -> speed_xz_percent, sway);
 
-	const GLfloat across = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2.0f to magnitude / 2.0f
-	const GLfloat down = (fabsf(across) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
-
-	////////// Screen corner determination
-
-	// TODO: make a function out of the world corner determination
 	vec2 screen_corners[corners_per_quad];
+	get_screen_corners_from_sway(ws_ref, sway, event -> screen_size, screen_corners);
 
-	const GLfloat
-		across_term = ws.size * ws.frame_width_over_height * inverse_screen_aspect_ratio,
-		down_term = (ws.size - 1.0f) + down;
-
-	screen_corners[0][0] = screen_corners[2][0] = across - across_term;
-	screen_corners[1][0] = screen_corners[3][0] = across + across_term;
-	screen_corners[0][1] = screen_corners[1][1] = down_term - ws.size;
-	screen_corners[2][1] = screen_corners[3][1] = down_term + ws.size;
-
-	////////// World corner determination
-
-	const vec4 viewport = {-1.0f, -1.0f, 2.0f, 2.0f}, *const view_projection = camera -> view_projection;
 	vec3 world_corners[corners_per_quad];
-	mat4 inv_view_projection;
+	get_world_corners_from_screen_corners(view_projection, screen_corners, world_corners);
 
-	glm_mat4_inv((vec4*) view_projection, inv_view_projection);
-
-	for (byte i = 0; i < corners_per_quad; i++) {
-		const GLfloat* const screen_corner = screen_corners[i];
-
-		glm_unprojecti((vec3) {screen_corner[0], screen_corner[1], constants.weapon_sprite.ndc_dist_from_camera},
-			inv_view_projection, (GLfloat*) viewport, world_corners[i]);
-	}
+	//////////
 
 	UPDATE_UNIFORM(frame_index, 1ui, ws.curr_frame);
 	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
