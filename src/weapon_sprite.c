@@ -33,48 +33,7 @@ Later, when shadow casting:
 - They then get turned into screen coordinates through the view projection matrix
 */
 
-WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
-	const GLfloat secs_for_frame, const AnimationLayout animation_layout) {
-
-	/* It's a bit wasteful to load the surface in `init_texture_set`
-	and here, but this makes the code much more readable. TODO: perhaps
-	query data about the texture set to figure out the frame size, if possible. */
-
-	SDL_Surface* const peek_surface = init_surface(animation_layout.spritesheet_path);
-
-	const GLsizei frame_size[2] = {
-		peek_surface -> w / animation_layout.frames_across,
-		peek_surface -> h / animation_layout.frames_down
-	};
-
-	deinit_surface(peek_surface);
-
-	return (WeaponSprite) {
-		// TODO: for multiple weapons, share this shader
-		.shader = init_shader(ASSET_PATH("shaders/weapon.vert"), NULL, ASSET_PATH("shaders/weapon.frag")),
-
-		.texture = init_texture_set(TexNonRepeating,
-			OPENGL_WEAPON_MAG_FILTER, OPENGL_WEAPON_MIN_FILTER, 0, 1,
-			(GLsizei) (frame_size[0] * texture_rescale_factor),
-			(GLsizei) (frame_size[1] * texture_rescale_factor),
-			NULL, &animation_layout
-		),
-
-		.animation = {
-			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
-			.secs_for_frame = secs_for_frame
-		},
-
-		.cycle_base_time = 0, .curr_frame = 0,
-		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
-		.size = size
-	};
-}
-
-void deinit_weapon_sprite(const WeaponSprite* const ws) {
-	deinit_texture(ws -> texture);
-	deinit_shader(ws -> shader);
-}
+//////////
 
 static void update_weapon_sprite_animation(WeaponSprite* const ws, const Event* const event) {
 	buffer_size_t curr_frame = ws -> curr_frame;
@@ -151,6 +110,49 @@ static void get_world_corners_from_screen_corners(const mat4 view_projection,
 }
 
 //////////
+
+WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
+	const GLfloat secs_for_frame, const AnimationLayout animation_layout) {
+
+	/* It's a bit wasteful to load the surface in `init_texture_set`
+	and here, but this makes the code much more readable. TODO: perhaps
+	query data about the texture set to figure out the frame size, if possible. */
+
+	SDL_Surface* const peek_surface = init_surface(animation_layout.spritesheet_path);
+
+	const GLsizei frame_size[2] = {
+		peek_surface -> w / animation_layout.frames_across,
+		peek_surface -> h / animation_layout.frames_down
+	};
+
+	deinit_surface(peek_surface);
+
+	return (WeaponSprite) {
+		// TODO: for multiple weapons, share this shader
+		.shader = init_shader(ASSET_PATH("shaders/weapon.vert"), NULL, ASSET_PATH("shaders/weapon.frag")),
+
+		.texture = init_texture_set(TexNonRepeating,
+			OPENGL_WEAPON_MAG_FILTER, OPENGL_WEAPON_MIN_FILTER, 0, 1,
+			(GLsizei) (frame_size[0] * texture_rescale_factor),
+			(GLsizei) (frame_size[1] * texture_rescale_factor),
+			NULL, &animation_layout
+		),
+
+		.animation = {
+			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
+			.secs_for_frame = secs_for_frame
+		},
+
+		.cycle_base_time = 0, .curr_frame = 0,
+		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
+		.size = size
+	};
+}
+
+void deinit_weapon_sprite(const WeaponSprite* const ws) {
+	deinit_texture(ws -> texture);
+	deinit_shader(ws -> shader);
+}
 
 void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* const camera,
 	const Event* const event, const CascadedShadowContext* const shadow_context) {
