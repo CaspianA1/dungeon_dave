@@ -182,6 +182,8 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const c
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
 
+	////////// Getting the weapon world corners
+
 	const vec4* const view_projection = camera -> view_projection;
 
 	GLfloat sway[2];
@@ -193,7 +195,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const c
 	vec3 world_corners[corners_per_quad];
 	get_world_corners_from_screen_corners(view_projection, screen_corners, world_corners);
 
-	//////////
+	////////// Updating uniforms
 
 	UPDATE_UNIFORM(frame_index, 1ui, ws -> curr_frame);
 	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
@@ -209,7 +211,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const c
 		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
 		light_view_projection_matrices -> data);
 
-	//////////
+	////////// Rendering
 
 	/* Not using alpha to coverage here b/c blending is guaranteed
 	to be correct for the last-rendered weapon's z-depth of zero */
