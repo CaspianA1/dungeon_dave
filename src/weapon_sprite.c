@@ -114,13 +114,13 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	use_shader(ws.shader);
 	static GLint
-		frame_index_id, screen_corners_id, world_corners_id,
+		frame_index_id, world_corners_id, view_projection_id,
 		camera_view_id, light_view_projection_matrices_id;
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(frame_index, ws.shader);
-		INIT_UNIFORM(screen_corners, ws.shader);
 		INIT_UNIFORM(world_corners, ws.shader);
+		INIT_UNIFORM(view_projection, ws.shader);
 		INIT_UNIFORM(camera_view, ws.shader);
 		INIT_UNIFORM(light_view_projection_matrices, ws.shader);
 
@@ -146,6 +146,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	////////// Screen corner determination
 
+	// TODO: make a function out of the world corner determination
 	vec2 screen_corners[corners_per_quad];
 
 	const GLfloat
@@ -159,11 +160,11 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 
 	////////// World corner determination
 
-	const vec4 viewport = {-1.0f, -1.0f, 1.0f, 1.0f};
+	const vec4 viewport = {-1.0f, -1.0f, 2.0f, 2.0f}, *const view_projection = camera -> view_projection;
 	vec3 world_corners[corners_per_quad];
 	mat4 inv_view_projection;
 
-	glm_mat4_inv((vec4*) camera -> view_projection, inv_view_projection);
+	glm_mat4_inv((vec4*) view_projection, inv_view_projection);
 
 	for (byte i = 0; i < corners_per_quad; i++) {
 		const GLfloat* const screen_corner = screen_corners[i];
@@ -172,11 +173,9 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws_ref, const Camera* con
 			inv_view_projection, (GLfloat*) viewport, world_corners[i]);
 	}
 
-	//////////
-
 	UPDATE_UNIFORM(frame_index, 1ui, ws.curr_frame);
-	UPDATE_UNIFORM(screen_corners, 2fv, corners_per_quad, (GLfloat*) screen_corners);
 	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
+	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, (GLfloat*) view_projection);
 
 	////////// This little part concerns CSM
 
