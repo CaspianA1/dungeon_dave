@@ -11,13 +11,14 @@ Details on weapon coordinate space transformations:
 - Certain parameters define how the weapon swings back and forth
 
 - Screen-space coordinates are generated from those
-- Then, those coordinates are unprojected into world-space, and copied over to the vbo
+- Then, those coordinates are unprojected into world-space, tilted, and copied over to the vbo
 - In the fragment shader, the world-space coordinates are then reprojected to screen-space to get gl_Position
 
 - This screen -> world -> screen process is done, instead of doing screen -> screen, for a few reasons:
 	1. World-space coordinates are needed for lighting calculations
 	2. Getting world coordinates, and then going to screen-space after that
 		(in the fragment shader), works better with the shadow mapping pipeline
+	3. Tilting can't be done in screen-space
 */
 
 /* TODO:
@@ -49,7 +50,7 @@ static void update_weapon_sprite_animation(WeaponSprite* const ws, const Event* 
 	ws -> curr_frame = curr_frame;
 }
 
-////////// This part concerns the mapping from weapon sway -> screen corners -> world corners
+////////// This part concerns the mapping from weapon sway -> screen corners -> world corners -> tilted world corners
 
 // Given an input between 0 and 1, this returns the y-value of the top left side of a circle
 static GLfloat circular_mapping_from_zero_to_one(const GLfloat x) {
@@ -109,9 +110,23 @@ static void get_world_corners_from_screen_corners(const mat4 view_projection,
 	}
 }
 
+// TODO: also rotate sideways based on the camera tilt
+static void tilt_weapon_forward(const GLfloat max_downwards_tilt, const Camera* const camera, vec3 world_corners[corners_per_quad]) {
+	const GLfloat tilt_percent = camera -> angles.vert / constants.camera.lims.vert;
+	const GLfloat tilt_amount = tilt_percent * max_downwards_tilt;
+	GLfloat *const top_left = world_corners[2], *const top_right = world_corners[3];
+
+	vec3 forward_tilt_offset;
+	glm_vec3_scale((GLfloat*) camera -> dir, -tilt_amount, forward_tilt_offset);
+
+	glm_vec3_add(top_left, forward_tilt_offset, top_left);
+	glm_vec3_add(top_right, forward_tilt_offset, top_right);
+}
+
 //////////
 
-WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescale_factor,
+WeaponSprite init_weapon_sprite(const GLfloat max_downwards_tilt_degrees,
+	const GLfloat size, const GLfloat texture_rescale_factor,
 	const GLfloat secs_for_frame, const AnimationLayout animation_layout) {
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
@@ -145,7 +160,7 @@ WeaponSprite init_weapon_sprite(const GLfloat size, const GLfloat texture_rescal
 
 		.cycle_base_time = 0, .curr_frame = 0,
 		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
-		.size = size
+		.size = size, .max_downwards_tilt = glm_rad(max_downwards_tilt_degrees)
 	};
 }
 
@@ -194,6 +209,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const c
 
 	vec3 world_corners[corners_per_quad];
 	get_world_corners_from_screen_corners(view_projection, screen_corners, world_corners);
+	tilt_weapon_forward(ws -> max_downwards_tilt, camera, world_corners);
 
 	////////// Updating uniforms
 

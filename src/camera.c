@@ -83,7 +83,7 @@ static void update_camera_angles(Camera* const camera, const Event* const event,
 	camera -> angles.vert = clamp_to_pos_neg_domain(camera -> angles.vert + delta_vert, constants.camera.lims.vert);
 
 	const GLfloat delta_turn = (GLfloat) -mouse_movement[0] / screen_size[0] * constants.speeds.look[0];
-	camera -> angles.hori = wrap_around_domain(camera -> angles.hori + delta_turn, 0.0f, TWO_PI);
+	camera -> angles.hori = wrap_around_domain(camera -> angles.hori + delta_turn, 0.0f, constants.camera.lims.hori);
 
 	const GLfloat tilt = (camera -> angles.tilt + delta_turn * delta_turn)
 		* get_percent_kept_from(constants.camera.tilt_correction_rate, delta_time);
@@ -112,7 +112,8 @@ static void update_fov(Camera* const camera, const byte movement_bits, const GLf
 	else if ((t -= delta_time) < 0.0f) t = 0.0f;
 
 	const GLfloat fov_percent = smooth_hermite(t / time_for_full_fov);
-	camera -> angles.fov = constants.camera.init.fov + constants.camera.lims.fov * fov_percent;
+	camera -> angles.fov = constants.camera.init.fov + constants.camera.lims.fov_change * fov_percent;
+
 	camera -> time_accum_for_full_fov = t;
 }
 

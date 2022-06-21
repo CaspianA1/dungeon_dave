@@ -2,8 +2,7 @@
 
 #include "csm/shadow.vert"
 
-out vec3 fragment_pos_world_space;
-noperspective out vec3 fragment_UV;
+out vec3 fragment_pos_world_space, fragment_UV;
 
 uniform uint frame_index;
 uniform vec3 world_corners[4];

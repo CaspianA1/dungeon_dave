@@ -73,7 +73,7 @@ static const struct {
 		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, friction;
 		const struct {const GLfloat fov, hori, vert, tilt;} init;
 		const struct {const GLfloat period, max_amplitude;} pace;
-		const struct {const GLfloat vert, tilt, fov;} lims;
+		const struct {const GLfloat hori, vert, tilt, fov_change;} lims;
 	} camera;
 
 	const struct {const GLfloat forward_back, additional_forward_back, strafe, xz_decel, g;} accel;
@@ -133,7 +133,7 @@ static const struct {
 
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
 		.pace = {.period = 0.7f, .max_amplitude = 0.2f},
-		.lims = {.vert = HALF_PI, .tilt = 0.15f, .fov = PI / 18.0f} // Max FOV equals 10 degrees
+		.lims = {.hori = TWO_PI, .vert = HALF_PI, .tilt = 0.15f, .fov_change = PI / 18.0f}
 	},
 
 	.accel = {
