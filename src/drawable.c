@@ -24,6 +24,12 @@ Drawable init_drawable(
 	};
 }
 
+Drawable init_drawable_without_vertices(const uniform_updater_t uniform_updater,
+	const GLenum triangle_mode, const GLuint shader, const GLuint diffuse_texture) {
+
+	return (Drawable) {triangle_mode, 0, 1, shader, diffuse_texture, uniform_updater};
+}
+
 void deinit_drawable(const Drawable drawable) {
 	glDeleteTextures(1, &drawable.diffuse_texture);
 	glDeleteProgram(drawable.shader);
@@ -36,8 +42,11 @@ void draw_drawable(const Drawable drawable, const GLsizei num_vertices_to_draw, 
 	glUseProgram(drawable.shader);
 	drawable.uniform_updater((struct Drawable*) &drawable, uniform_updater_param);
 
-	glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer);
-	glBindVertexArray(drawable.vertex_spec);
+	if (drawable.vertex_buffer != 0 && drawable.vertex_spec != 0) {
+		glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer);
+		glBindVertexArray(drawable.vertex_spec);
+	}
+
 	glDrawArrays(drawable.triangle_mode, 0, num_vertices_to_draw);
 }
 

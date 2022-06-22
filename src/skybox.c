@@ -76,7 +76,7 @@ static void define_vertex_spec_for_skybox(void) {
 	define_vertex_spec_index(false, false, 0, vertices_per_triangle, 0, 0, GL_BYTE);
 }
 
-static void update_skybox_uniforms(const Drawable* const drawable, const void* const param) {
+static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const GLuint shader = drawable -> shader;
 
 	static GLint view_projection_id;
@@ -107,7 +107,7 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 	push_array_to_list(&vertices_in_list, skybox_vertices, num_vertices);
 
 	const Drawable drawable = init_drawable(define_vertex_spec_for_skybox,
-		(uniform_updater_t) update_skybox_uniforms, GL_STATIC_DRAW, GL_TRIANGLE_STRIP, vertices_in_list,
+		(uniform_updater_t) update_uniforms, GL_STATIC_DRAW, GL_TRIANGLE_STRIP, vertices_in_list,
 
 		init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag")),
 		init_skybox_texture(cubemap_path, texture_rescale_factor)

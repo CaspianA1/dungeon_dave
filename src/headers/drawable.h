@@ -22,6 +22,9 @@ Drawable init_drawable(
 	const GLenum vertex_buffer_access, const GLenum triangle_mode,
 	const List vertices, const GLuint shader, const GLuint diffuse_texture);
 
+Drawable init_drawable_without_vertices(const uniform_updater_t uniform_updater,
+	const GLenum triangle_mode, const GLuint shader, const GLuint diffuse_texture);
+
 void deinit_drawable(const Drawable drawable);
 void draw_drawable(const Drawable drawable, const GLsizei num_vertices_to_draw, const void* const uniform_updater_param);
 

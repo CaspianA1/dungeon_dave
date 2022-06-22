@@ -186,11 +186,7 @@ static void main_drawer(void* const app_context) {
 	SceneContext* const scene_context = (SceneContext*) app_context;
 	const Event event = get_next_event();
 
-	TitleScreen* const title_screen = &scene_context -> title_screen;
-	if (!title_screen_finished(title_screen, &event)) {
-		tick_title_screen(*title_screen);
-		return;
-	}
+	if (tick_title_screen(&scene_context -> title_screen, &event)) return;
 
 	////////// Some variable initialization + object updating
 
