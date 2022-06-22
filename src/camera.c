@@ -78,14 +78,20 @@ static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delt
 // This does not include FOV, since FOV depends on a tick's speed, and speed is updated after this function is called
 static void update_camera_angles(Camera* const camera, const Event* const event, const GLfloat delta_time) {
 	const GLint *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
+	const GLint hori_mouse_movement = mouse_movement[0];
 
 	const GLfloat delta_vert = (GLfloat) -mouse_movement[1] / screen_size[1] * constants.speeds.look[1];
 	camera -> angles.vert = clamp_to_pos_neg_domain(camera -> angles.vert + delta_vert, constants.camera.lims.vert);
 
-	const GLfloat delta_turn = (GLfloat) -mouse_movement[0] / screen_size[0] * constants.speeds.look[0];
+	const GLfloat delta_turn = (GLfloat) -hori_mouse_movement / screen_size[0] * constants.speeds.look[0];
 	camera -> angles.hori = wrap_around_domain(camera -> angles.hori + delta_turn, 0.0f, constants.camera.lims.hori);
 
-	const GLfloat tilt = (camera -> angles.tilt + delta_turn * delta_turn)
+	////////// Tilt
+
+	const GLint turn_sign = (hori_mouse_movement > 0) - (hori_mouse_movement < 0);
+
+	// Without the turn sign, the camera would only tilt one direction
+	const GLfloat tilt = (camera -> angles.tilt + delta_turn * delta_turn * turn_sign)
 		* get_percent_kept_from(constants.camera.tilt_correction_rate, delta_time);
 
 	camera -> angles.tilt = clamp_to_pos_neg_domain(tilt, constants.camera.lims.tilt);
@@ -290,9 +296,9 @@ void update_camera(Camera* const camera, const Event event) {
 	camera -> right_xz[0] = right[0]; // `right_xz` is just like `right`, except that it's not tilted
 	camera -> right_xz[1] = right[2];
 
-	glm_vec3_rotate(right, -camera -> angles.tilt, dir); // Outputs a rotated right vector
+	glm_vec3_rotate(right, camera -> angles.tilt, dir); // Outputs a rotated right vector
 	glm_vec3_cross(right, dir, up); // Outputs an up vector from the direction and right vectors
-	glm_vec3_copy(camera -> pos, pos); // Copying the camera's position vector into a local variable
+	glm_vec3_copy(camera -> pos, pos); // Copies the camera's position vector into a local variable
 
 	////////// Moving according to those vectors
 

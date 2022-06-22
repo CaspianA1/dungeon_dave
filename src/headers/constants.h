@@ -133,7 +133,7 @@ static const struct {
 
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
 		.pace = {.period = 0.7f, .max_amplitude = 0.2f},
-		.lims = {.hori = TWO_PI, .vert = HALF_PI, .tilt = 0.15f, .fov_change = PI / 18.0f}
+		.lims = {.hori = TWO_PI, .vert = HALF_PI, .tilt = 0.2f, .fov_change = PI / 18.0f}
 	},
 
 	.accel = {

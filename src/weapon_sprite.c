@@ -110,24 +110,44 @@ static void get_world_corners_from_screen_corners(const mat4 view_projection,
 	}
 }
 
-// TODO: also rotate sideways based on the camera tilt
-static void tilt_weapon_forward(const GLfloat max_downwards_tilt, const Camera* const camera, vec3 world_corners[corners_per_quad]) {
-	const GLfloat tilt_percent = camera -> angles.vert / constants.camera.lims.vert;
-	const GLfloat tilt_amount = tilt_percent * max_downwards_tilt;
+static void rotate_from_camera_movement(const GLfloat max_yaw, const GLfloat max_pitch, const Camera* const camera, vec3 world_corners[corners_per_quad]) {
+	const GLfloat* const dir = camera -> dir;
+
+	////////// This part influences the yaw that's based on the camera's sideways tilt (the yaw rotates around a weapon's left or right side).
+
+	const GLfloat yaw_percent = camera -> angles.tilt / constants.camera.lims.tilt;
+	const GLfloat yaw_amount = yaw_percent * max_yaw;
+
+	vec3 shortened_and_rotated_vector;
+	glm_vec3_scale((GLfloat*) dir, yaw_amount, shortened_and_rotated_vector); // First, the direction vector's length is downscaled to the tilt amount
+	glm_vec3_rotate(shortened_and_rotated_vector, yaw_amount, (GLfloat*) camera -> up); // Then, it's rotated around the up vector
+
+	const bool turning_right = yaw_amount > 0.0f;
+	if (turning_right) glm_vec3_negate(shortened_and_rotated_vector);
+
+	GLfloat *const bottom_edge = world_corners[turning_right], *const top_edge = world_corners[turning_right + 2];
+	glm_vec3_add(bottom_edge, shortened_and_rotated_vector, bottom_edge);
+	glm_vec3_add(top_edge, shortened_and_rotated_vector, top_edge);
+
+	////////// This part controls the weapon's pitch, which scales with the camera's pitch.
+
+	const GLfloat downwards_pitch_percent = -camera -> angles.vert / constants.camera.lims.vert;
+	const GLfloat downwards_pitch_amount = downwards_pitch_percent * max_pitch;
+
+	vec3 forward_pitch_offset;
+	glm_vec3_scale((GLfloat*) dir, downwards_pitch_amount, forward_pitch_offset);
+
 	GLfloat *const top_left = world_corners[2], *const top_right = world_corners[3];
-
-	vec3 forward_tilt_offset;
-	glm_vec3_scale((GLfloat*) camera -> dir, -tilt_amount, forward_tilt_offset);
-
-	glm_vec3_add(top_left, forward_tilt_offset, top_left);
-	glm_vec3_add(top_right, forward_tilt_offset, top_right);
+	glm_vec3_add(top_left, forward_pitch_offset, top_left);
+	glm_vec3_add(top_right, forward_pitch_offset, top_right);
 }
 
 //////////
 
-WeaponSprite init_weapon_sprite(const GLfloat max_downwards_tilt_degrees,
-	const GLfloat size, const GLfloat texture_rescale_factor,
-	const GLfloat secs_for_frame, const AnimationLayout animation_layout) {
+WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
+	const GLfloat max_pitch_degrees, const GLfloat size,
+	const GLfloat texture_rescale_factor, const GLfloat secs_for_frame,
+	const AnimationLayout animation_layout) {
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
 	and here, but this makes the code much more readable. TODO: perhaps
@@ -160,7 +180,8 @@ WeaponSprite init_weapon_sprite(const GLfloat max_downwards_tilt_degrees,
 
 		.cycle_base_time = 0, .curr_frame = 0,
 		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
-		.size = size, .max_downwards_tilt = glm_rad(max_downwards_tilt_degrees)
+		.size = size, .max_yaw = glm_rad(max_yaw_degrees),
+		.max_pitch = glm_rad(max_pitch_degrees)
 	};
 }
 
@@ -209,7 +230,7 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const c
 
 	vec3 world_corners[corners_per_quad];
 	get_world_corners_from_screen_corners(view_projection, screen_corners, world_corners);
-	tilt_weapon_forward(ws -> max_downwards_tilt, camera, world_corners);
+	rotate_from_camera_movement(ws -> max_yaw, ws -> max_pitch, camera, world_corners);
 
 	////////// Updating uniforms
 
