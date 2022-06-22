@@ -7,7 +7,6 @@
 #include "headers/texture.h"
 
 #define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT16
-#define CSM_FILTERING_MODE TexLinear
 
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
@@ -114,7 +113,7 @@ static void get_sub_frustum_light_view_projection_matrix(const Camera* const cam
 //////////
 
 static GLuint init_csm_depth_layers(const GLsizei width, const GLsizei height, const GLsizei num_layers) {
-	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, CSM_FILTERING_MODE, CSM_FILTERING_MODE, true);
+	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
 	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, width, height, num_layers, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	return depth_layers;
 }
