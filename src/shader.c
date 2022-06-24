@@ -179,7 +179,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	Other things to do for this:
 	1. Detect dependency cycles
 	2. Perhaps handle #defines
-	3. Report correct line numbers when errors are given
+	3. Correct line numbers for errors when including files
 	*/
 
 	#define NO_PATH_STRING_ERROR() FAIL(ParseIncludeDirectiveInShader,\
@@ -210,8 +210,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 				break;
 
 			case '\"':
-				/* Putting a null terminator here so that
-				the path can be read as its own string */
+				// Putting a null terminator here so that the path can be read as its own string
 				*curr_path_substring = '\0';
 				found_right_quote = true;
 		}
@@ -230,7 +229,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 }
 
 static void erase_version_strings_from_dependency_list(const List* const dependency_list) {
-	const GLchar *const base_version_string = "#version", *const full_version_string = "#version ___ core\n";
+	const GLchar *const base_version_string = "#version", *const full_version_string = "#version ___ core";
 	const GLsizei full_version_string_length = strlen(full_version_string);
 
 	// Not erasing the version string from the first one because it's the only one that should keep #version in it
