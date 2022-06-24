@@ -16,9 +16,11 @@ typedef struct {
 #define value_at_list_index(list, index, type) ((type*) (list) -> data)[index]
 
 #define LIST_FOR_EACH(initial_offset, list, item_name, out_of_bounds_name, ...) do {\
-	List copy = *(list);\
-	const byte* const out_of_bounds_name = (byte*) copy.data + copy.length * copy.item_size;\
-	for (byte* item_name = (byte*) copy.data + (initial_offset) * copy.item_size; item_name < out_of_bounds_name; item_name += copy.item_size)\
+	const buffer_size_t length = (list) -> length, item_size = (list) -> item_size;\
+	byte* const data = (byte*) (list) -> data;\
+	byte* const out_of_bounds_name = data + length * item_size;\
+	\
+	for (byte* item_name = data + (initial_offset) * item_size; item_name < out_of_bounds_name; item_name += item_size)\
 		do {__VA_ARGS__} while (false);\
 } while (0)
 
