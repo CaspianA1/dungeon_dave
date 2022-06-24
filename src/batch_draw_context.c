@@ -55,7 +55,7 @@ buffer_size_t cull_from_frustum_into_gpu_buffer(
 
 	buffer_size_t total_num_visible = 0;
 
-	LIST_FOR_EACH(&cullable_objects, cullable, out_of_bounds_cullable,
+	LIST_FOR_EACH(0, &cullable_objects, cullable, out_of_bounds_cullable,
 		const buffer_size_t initial_renderable_index_in_span = get_renderable_index_from_cullable(cullable, cullable_objects.data);
 
 		buffer_size_t num_visible_in_group = 0;

@@ -189,8 +189,7 @@ List init_face_meshes_from_sectors(const List* const sectors,
 	guess for the face/sector ratio. TODO: make this a constant somewhere. */
 	List face_meshes = init_list(num_sectors * 3, face_mesh_t);
 
-	LIST_FOR_EACH(sectors, untyped_sector_ref, _,
-
+	LIST_FOR_EACH(0, sectors, untyped_sector_ref, _,
 		Sector* const sector_ref = (Sector*) untyped_sector_ref;
 		sector_ref -> face_range.start = face_meshes.length;
 

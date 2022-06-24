@@ -234,12 +234,11 @@ static void erase_version_strings_from_dependency_list(const List* const depende
 	const GLsizei full_version_string_length = strlen(full_version_string);
 
 	// Not erasing the version string from the first one because it's the only one that should keep #version in it
-	for (buffer_size_t i = 1; i < dependency_list -> length; i++) {
-		GLchar* const dependency = value_at_list_index(dependency_list, i, GLchar*);
-
+	LIST_FOR_EACH(1, dependency_list, untyped_dependency, _,
+		const GLchar* const dependency = *((GLchar**) untyped_dependency);
 		GLchar* const version_string_pos = strstr(dependency, base_version_string);
 		if (version_string_pos != NULL) memset(version_string_pos, ' ', full_version_string_length);
-	}
+	);
 }
 
 GLuint init_shader(
@@ -275,7 +274,7 @@ GLuint init_shader(
 		if (paths[i] == NULL) continue;
 
 		const List* const dependency_list = dependency_lists + i;
-		LIST_FOR_EACH(dependency_list, dependency_code, _, free(*(GLchar**) dependency_code););
+		LIST_FOR_EACH(0, dependency_list, dependency_code, _, free(*(GLchar**) dependency_code););
 		deinit_list(*dependency_list);
 	}
 
