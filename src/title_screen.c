@@ -27,12 +27,12 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	UPDATE_UNIFORM(brightness, 1f, brightness);
 }
 
-TitleScreen init_title_screen(void) {
+TitleScreen init_title_screen(const GLchar* const title_screen_path) {
 	return (TitleScreen) {
 		.active = true,
 		.drawable = init_drawable_without_vertices((uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP,
 			init_shader(ASSET_PATH("shaders/title_screen.vert"), NULL, ASSET_PATH("shaders/title_screen.frag")),
-			init_plain_texture(ASSET_PATH("logo.bmp"), TexPlain, TexNonRepeating, TexNearest, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT)
+			init_plain_texture(title_screen_path, TexPlain, TexNonRepeating, TexNearest, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT)
 		)
 	};
 }

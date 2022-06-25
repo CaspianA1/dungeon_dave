@@ -12,7 +12,7 @@ typedef struct {
 
 // Excluded: update_uniforms
 
-TitleScreen init_title_screen(void);
+TitleScreen init_title_screen(const GLchar* const title_screen_path);
 void deinit_title_screen(const TitleScreen* const title_screen);
 
 // This returns if the title screen is active

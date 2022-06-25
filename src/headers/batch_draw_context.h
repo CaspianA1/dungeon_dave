@@ -13,7 +13,7 @@ typedef struct {
 		GLuint gpu;
 	} buffers;
 
-	GLuint vertex_spec, texture_set, shader;
+	const GLuint vertex_spec, texture_set, shader;
 } BatchDrawContext;
 
 typedef void (*const aabb_creator_t) (const byte* const cullable, vec3 aabb[2]);

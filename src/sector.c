@@ -9,6 +9,7 @@
 #include "headers/face.h"
 #include "headers/shader.h"
 #include "headers/constants.h"
+#include "headers/normal_map_generation.h"
 
 // Attributes here are height and texture id
 static byte point_matches_sector_attributes(const Sector* const sector,
@@ -53,7 +54,7 @@ static Sector form_sector_area(Sector sector, const StateMap traversed_points,
 	return sector;
 }
 
-List generate_sectors_from_maps(const byte* const heightmap,
+static List generate_sectors_from_maps(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
 	// `>> 3` = `/ 8`. Works pretty well for my maps. TODO: make this a constant somewhere.
@@ -96,27 +97,6 @@ List generate_sectors_from_maps(const byte* const heightmap,
 	return sectors;
 }
 
-////////// This next part concerns the creation of a sector context + the drawing of sectors
-
-void init_sector_draw_context(BatchDrawContext* const draw_context, List* const sectors,
-	const byte* const heightmap, const byte* const texture_id_map, const byte map_width, const byte map_height) {
-
-	*sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
-
-	List* const face_meshes_ref = &draw_context -> buffers.cpu;
-	*face_meshes_ref = init_face_meshes_from_sectors(sectors, heightmap, map_width, map_height);
-
-	init_batch_draw_context_gpu_buffer(draw_context, face_meshes_ref -> length, sizeof(face_mesh_t));
-	draw_context -> shader = init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag"));
-
-	draw_context -> vertex_spec = init_vertex_spec();
-	use_vertex_spec(draw_context -> vertex_spec);
-
-	enum {vpt = vertices_per_triangle};
-	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, FACE_MESH_COMPONENT_TYPENAME); // Position
-	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), FACE_MESH_COMPONENT_TYPENAME); // Face info
-}
-
 // Used in main.c
 void draw_all_sectors_for_shadow_map(const void* const param) {
 	const BatchDrawContext* const sector_draw_context = (BatchDrawContext*) param;
@@ -139,9 +119,13 @@ void draw_all_sectors_for_shadow_map(const void* const param) {
 	glEnableVertexAttribArray(1);
 }
 
-static void draw_sectors(const BatchDrawContext* const draw_context,
-	const CascadedShadowContext* const shadow_context, const Camera* const camera,
-	const buffer_size_t num_visible_faces, const GLuint normal_map_set, const GLint screen_size[2]) {
+static void draw_sectors(
+	const SectorContext* const sector_context,
+	const CascadedShadowContext* const shadow_context,
+	const Camera* const camera, const buffer_size_t num_visible_faces,
+	const GLint screen_size[2]) {
+
+	const BatchDrawContext* const draw_context = &sector_context -> draw_context;
 
 	const GLuint shader = draw_context -> shader;
 
@@ -190,7 +174,7 @@ static void draw_sectors(const BatchDrawContext* const draw_context,
 		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
 		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, SECTOR_FACE_TEXTURE_UNIT);
-		use_texture(normal_map_set, shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
+		use_texture(sector_context -> face_normal_map_set, shader, "normal_map_sampler", TexSet, SECTOR_NORMAL_MAP_TEXTURE_UNIT);
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
 
@@ -254,18 +238,52 @@ static buffer_size_t get_num_renderable_from_cullable(const byte* const typeless
 //////////
 
 // This is just a utility function
-void draw_visible_sectors(const BatchDrawContext* const draw_context,
-	const CascadedShadowContext* const shadow_context, const List* const sectors,
-	const Camera* const camera, const GLuint normal_map_set, const GLint screen_size[2]) {
+void draw_visible_sectors(const SectorContext* const sector_context,
+	const CascadedShadowContext* const shadow_context,
+	const Camera* const camera, const GLint screen_size[2]) {
 
 	const buffer_size_t num_visible_faces = cull_from_frustum_into_gpu_buffer(
-		draw_context, *sectors, camera -> frustum_planes, make_aabb,
-		get_renderable_index_from_cullable, get_num_renderable_from_cullable
+		&sector_context -> draw_context, sector_context -> sectors, camera -> frustum_planes,
+		make_aabb, get_renderable_index_from_cullable, get_num_renderable_from_cullable
 	);
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
-	if (num_visible_faces != 0) draw_sectors(draw_context, shadow_context,
-		camera, num_visible_faces, normal_map_set, screen_size);
+	if (num_visible_faces != 0) draw_sectors(sector_context,
+		shadow_context, camera, num_visible_faces, screen_size);
+}
+
+////////// Initialization and deinitialization
+
+SectorContext init_sector_context(const byte* const heightmap, const byte* const texture_id_map,
+	const byte map_width, const byte map_height, const bool apply_normal_map_blur, const GLuint texture_set) {
+
+	SectorContext sector_context = {
+		.face_normal_map_set = init_normal_map_set_from_texture_set(texture_set, apply_normal_map_blur),
+
+		.draw_context = {
+			.vertex_spec = init_vertex_spec(), .texture_set = texture_set,
+			.shader = init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag"))
+		},
+
+		.sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height)
+	};
+
+	List* const face_meshes_cpu = &sector_context.draw_context.buffers.cpu;
+	*face_meshes_cpu = init_face_meshes_from_sectors(&sector_context.sectors, heightmap, map_width, map_height);
+	init_batch_draw_context_gpu_buffer(&sector_context.draw_context, face_meshes_cpu -> length, sizeof(face_mesh_t));
+
+	enum {vpt = vertices_per_triangle};
+	use_vertex_spec(sector_context.draw_context.vertex_spec);
+	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, FACE_MESH_COMPONENT_TYPENAME); // Position
+	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), FACE_MESH_COMPONENT_TYPENAME); // Face info
+
+	return sector_context;
+}
+
+void deinit_sector_context(const SectorContext* const sector_context) {
+	deinit_batch_draw_context(&sector_context -> draw_context);
+	deinit_list(sector_context -> sectors);
+	deinit_texture(sector_context -> face_normal_map_set);
 }
 
 #endif

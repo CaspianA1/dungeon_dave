@@ -2,10 +2,7 @@
 #define MAIN_C
 
 #include "headers/main.h"
-#include "headers/billboard.h"
 #include "headers/maps.h"
-#include "headers/sector.h"
-#include "headers/normal_map_generation.h"
 #include "headers/texture.h"
 
 static void* main_init(void) {
@@ -110,6 +107,13 @@ static void* main_init(void) {
 
 	//////////
 
+	const byte
+		*const heightmap = (const byte*) palace_heightmap,
+		*const texture_id_map = (const byte*) palace_texture_id_map,
+		map_size[2] = {palace_width, palace_height};
+
+	//////////
+
 	SceneContext scene_context = {
 		.weapon_sprite = init_weapon_sprite(
 			// 0.6f, 1.0f, 1.0f, 1.0f, 1.0f, (AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}
@@ -117,6 +121,12 @@ static void* main_init(void) {
 			// 0.4f, 0.5f, 0.75f, 2.0f, 0.02f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}
 			// 0.5f, 0.2f, 0.75f, 2.0f, 0.035f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}
 			// 0.5f, 0.3f, 0.8f, 1.0f, 0.04f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}
+		),
+
+		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
+			true, init_texture_set(TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+				ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures, NULL
+			)
 		),
 
 		.billboard_context = init_billboard_context(
@@ -132,28 +142,12 @@ static void* main_init(void) {
 		),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
-		.title_screen = init_title_screen(),
-
-		.heightmap = (const byte*) palace_heightmap,
-		.texture_id_map = (const byte*) palace_texture_id_map,
-		.map_size = {palace_width, palace_height}
+		.title_screen = init_title_screen(ASSET_PATH("logo.bmp"))
 	};
 
-	init_sector_draw_context(&scene_context.sector_draw_context, &scene_context.sectors,
-		scene_context.heightmap, scene_context.texture_id_map, scene_context.map_size[0], scene_context.map_size[1]);
-
 	//////////
 
-	scene_context.sector_draw_context.texture_set = init_texture_set(
-		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures, NULL
-	);
-
-	scene_context.face_normal_map_set = init_normal_map_set_from_texture_set(scene_context.sector_draw_context.texture_set, true);
-
-	//////////
-
-	init_camera(&scene_context.camera, (vec3) {1.5f, 0.5f, 1.5f}, scene_context.heightmap, scene_context.map_size);
+	init_camera(&scene_context.camera, (vec3) {1.5f, 0.5f, 1.5f}, heightmap, map_size);
 
 	scene_context.cascaded_shadow_context = init_shadow_context(
 		// Terrain:
@@ -173,7 +167,6 @@ static void* main_init(void) {
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-	glFinish(); // Making sure that all initialization operations are finished
 
 	void* const app_context = malloc(sizeof(SceneContext));
 	memcpy(app_context, &scene_context, sizeof(SceneContext));
@@ -190,8 +183,8 @@ static void main_drawer(void* const app_context) {
 
 	////////// Some variable initialization + object updating
 
+	const SectorContext* const sector_context = &scene_context -> sector_context;
 	const BillboardContext* const billboard_context = &scene_context -> billboard_context;
-	const BatchDrawContext* const sector_draw_context = &scene_context -> sector_draw_context;
 	const CascadedShadowContext* const shadow_context = &scene_context -> cascaded_shadow_context;
 	Camera* const camera = &scene_context -> camera;
 
@@ -200,13 +193,11 @@ static void main_drawer(void* const app_context) {
 	//////////
 
 	update_billboards(billboard_context);
-	draw_to_shadow_context(shadow_context, camera, event.screen_size, draw_all_sectors_for_shadow_map, sector_draw_context);
+	draw_to_shadow_context(shadow_context, camera, event.screen_size, draw_all_sectors_for_shadow_map, &sector_context -> draw_context);
 
 	////////// The main drawing code
 
-	draw_visible_sectors(sector_draw_context, shadow_context, &scene_context -> sectors,
-		camera, scene_context -> face_normal_map_set, event.screen_size);
-
+	draw_visible_sectors(sector_context, shadow_context, camera, event.screen_size);
 	draw_visible_billboards(billboard_context, shadow_context, camera);
 
 	/* Drawing the skybox after sectors and billboards because
@@ -220,15 +211,9 @@ static void main_deinit(void* const app_context) {
 	SceneContext* const scene_context = (SceneContext*) app_context;
 
 	deinit_weapon_sprite(&scene_context -> weapon_sprite);
-
-	deinit_batch_draw_context(&scene_context -> sector_draw_context);
-	deinit_list(scene_context -> sectors);
-	deinit_texture(scene_context -> face_normal_map_set);
-
+	deinit_sector_context(&scene_context -> sector_context);
 	deinit_billboard_context(&scene_context -> billboard_context);
-
 	deinit_shadow_context(&scene_context -> cascaded_shadow_context);
-
 	deinit_title_screen(&scene_context -> title_screen);
 	deinit_skybox(scene_context -> skybox);
 
