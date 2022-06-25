@@ -214,7 +214,6 @@ static void draw_sectors(
 static void make_aabb(const byte* const typeless_sector, vec3 aabb[2]) {
 	const Sector sector = *(Sector*) typeless_sector;
 
-	// TODO: avoid some pointer math by caching the zeroth and first indices here
 	GLfloat *const min = aabb[0], *const max = aabb[1];
 
 	min[0] = sector.origin[0];
