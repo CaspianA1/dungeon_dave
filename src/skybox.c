@@ -103,19 +103,14 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 	instead of recreating the vertex buffer, spec, and shader. */
 
 	const buffer_size_t num_vertices = ARRAY_LENGTH(skybox_vertices);
-	List vertices_in_list = init_list(num_vertices, GLbyte[vertices_per_triangle]);
-	push_array_to_list(&vertices_in_list, skybox_vertices, num_vertices);
 
-	const Drawable drawable = init_drawable(define_vertex_spec_for_skybox,
-		(uniform_updater_t) update_uniforms, GL_STATIC_DRAW, GL_TRIANGLE_STRIP, vertices_in_list,
+	return init_drawable(define_vertex_spec_for_skybox,
+		(uniform_updater_t) update_uniforms, GL_STATIC_DRAW, GL_TRIANGLE_STRIP,
+		(List) {(void*) skybox_vertices, sizeof(GLbyte[vertices_per_triangle]), num_vertices, num_vertices},
 
 		init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag")),
 		init_skybox_texture(cubemap_path, texture_rescale_factor)
 	);
-
-	deinit_list(vertices_in_list);
-
-	return drawable;
 }
 
 void draw_skybox(const Skybox* const skybox, const mat4 view_projection) {
