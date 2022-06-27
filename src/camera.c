@@ -4,7 +4,7 @@
 #include "headers/camera.h"
 #include "headers/constants.h"
 
-GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size_x, const byte map_size_z) {
+GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size[2]) {
 	/* The far clip distance, ideally, would be equal to the diameter of
 	the convex hull of all points in the heightmap. If I had more time,
 	I would implement that, but a simple method that works reasonably well is this:
@@ -24,6 +24,8 @@ GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_
 	remove the negative sign of the left term.
 
 	Then, `additional_camera_height` equals `max_jump_height + eye_height`. */
+
+	const byte map_size_x = map_size[0], map_size_z = map_size[1];
 
 	byte min_point_height = constants.max_byte_value, max_point_height = 0;
 
