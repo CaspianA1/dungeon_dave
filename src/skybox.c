@@ -44,8 +44,7 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 	const GLuint skybox_texture = preinit_texture(TexSkybox, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SKYBOX_MIN_FILTER, false);
 
 	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size, SDL_PIXEL_FORMAT);
-
-	typedef struct {const GLint x, y;} ivec2;
+	const void* const face_surface_pixels = face_surface -> pixels;
 
 	// Right, left, top, bottom, back, front
 	const ivec2 src_origins[faces_per_cubemap] = {
@@ -57,12 +56,17 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 		{twice_cube_size + cube_size, cube_size}
 	};
 
-	for (byte i = 0; i < faces_per_cubemap; i++) {
-		const ivec2 src_origin = src_origins[i];
 
-		SDL_BlitSurface(skybox_surface, &(SDL_Rect) {src_origin.x, src_origin.y, cube_size, cube_size}, face_surface, NULL);
-		write_surface_to_texture(face_surface, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
-	}
+	WITH_SURFACE_PIXEL_ACCESS(face_surface,
+		for (byte i = 0; i < faces_per_cubemap; i++) {
+			const GLint* const src_origin = src_origins[i];
+
+			SDL_BlitSurface(skybox_surface, &(SDL_Rect) {src_origin[0], src_origin[1], cube_size, cube_size}, face_surface, NULL);
+
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT,
+				cube_size, cube_size, 0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, face_surface_pixels);
+		}
+	);
 
 	glGenerateMipmap(TexSkybox);
 

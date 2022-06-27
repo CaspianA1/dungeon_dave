@@ -75,16 +75,6 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	return texture;
 }
 
-void write_surface_to_texture(SDL_Surface* const surface,
-	const TextureType type, const GLint internal_format) {
-
-	WITH_SURFACE_PIXEL_ACCESS(surface,
-		glTexImage2D(type, 0, internal_format, surface -> w,
-			surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
-	);
-}
-
 GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLint internal_format) {
@@ -92,7 +82,12 @@ GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 	const GLuint texture = preinit_texture(type, wrap_mode, mag_filter, min_filter, false);
 	SDL_Surface* const surface = init_surface(path);
 
-	write_surface_to_texture(surface, TexPlain, internal_format);
+	WITH_SURFACE_PIXEL_ACCESS(surface,
+		glTexImage2D(TexPlain, 0, internal_format, surface -> w,
+			surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
+			OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
+	);
+
 	glGenerateMipmap(TexPlain);
 	deinit_surface(surface);
 

@@ -101,9 +101,6 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	const TextureFilterMode mag_filter, const TextureFilterMode min_filter,
 	const bool force_disable_aniso_filtering);
 
-void write_surface_to_texture(SDL_Surface* const surface,
-	const TextureType type, const GLint internal_format);
-
 GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLint internal_format);

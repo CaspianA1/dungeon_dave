@@ -190,6 +190,7 @@ void deinit_weapon_sprite(const WeaponSprite* const ws) {
 	deinit_shader(ws -> shader);
 }
 
+// TODO: fix jitter of bottom of weapon
 void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const camera,
 	const Event* const event, const CascadedShadowContext* const shadow_context) {
 
