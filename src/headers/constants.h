@@ -61,7 +61,7 @@ static const struct {
 	} lighting;
 
 	const struct {
-		const GLfloat max_movement_magnitude, time_for_half_movement_cycle, ndc_dist_from_camera;
+		const GLfloat max_movement_magnitude, time_for_half_movement_cycle;
 	} weapon_sprite;
 
 	const struct {
@@ -116,19 +116,12 @@ static const struct {
 		}
 	},
 
-	.weapon_sprite = {
-		.max_movement_magnitude = 0.2f,
-		.time_for_half_movement_cycle = 0.5f,
-		.ndc_dist_from_camera = 2.0f / 3.0f
-	},
+	.weapon_sprite = {.max_movement_magnitude = 0.2f, .time_for_half_movement_cycle = 0.5f},
 
-	.normal_mapping = {
-		.blur = {.radius = 2, .std_dev = 0.8f},
-		.intensity = 1.1f // 0.25f before
-	},
+	.normal_mapping = {.blur = {.radius = 2, .std_dev = 0.8f}, .intensity = 1.1f /* 0.25f before */},
 
-	.camera = {
-		.near_clip_dist = 0.01f, .eye_height = 0.5f, .aabb_collision_box_size = 0.2f,
+	.camera = { // TODO: near is not tight enough
+		.near_clip_dist = 0.052f, .eye_height = 0.5f, .aabb_collision_box_size = 0.2f,
 		.tilt_correction_rate = 11.0f, .friction = 7.5f,
 
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},

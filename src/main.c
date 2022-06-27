@@ -108,9 +108,9 @@ static void* main_init(void) {
 	//////////
 
 	const byte
-		*const heightmap = (const byte*) terrain_heightmap,
-		*const texture_id_map = (const byte*) terrain_texture_id_map,
-		map_size[2] = {terrain_width, terrain_height};
+		*const heightmap = (const byte*) palace_heightmap,
+		*const texture_id_map = (const byte*) palace_texture_id_map,
+		map_size[2] = {palace_width, palace_height};
 
 	const GLfloat far_clip_dist = compute_world_far_clip_dist(heightmap, map_size);
 
@@ -147,14 +147,14 @@ static void* main_init(void) {
 
 		.cascaded_shadow_context = init_shadow_context(
 			// Terrain:
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.0f, 20.0f},
-			far_clip_dist, 0.2f, 1024, 1024, 8
+			/*
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.5f, 1.5f, 15.0f},
+			far_clip_dist, 0.3f, 1024, 1024, 6
+			*/
 
 			// Palace:
-			/*
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.7f, 2.0f, 15.0f},
-			far_clip_dist, 0.4f, 1024, 1024, 5
-			*/
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.7f, 2.0f, 5.0f},
+			far_clip_dist, 0.5f, 1024, 1024, 5
 		),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),

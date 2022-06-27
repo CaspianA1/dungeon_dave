@@ -236,9 +236,9 @@ void draw_to_shadow_context(const CascadedShadowContext* const shadow_context, c
 	const GLsizei* const resolution = shadow_context -> resolution;
 	glViewport(0, 0, resolution[0], resolution[1]);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadow_context -> framebuffer);
-
 	glClear(GL_DEPTH_BUFFER_BIT);
-	drawer(drawer_param);
+
+	WITH_BINARY_RENDER_STATE(GL_DEPTH_CLAMP, drawer(drawer_param);); // Shadow pancaking
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, screen_size[0], screen_size[1]);

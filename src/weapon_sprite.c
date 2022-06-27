@@ -98,7 +98,6 @@ static void get_screen_corners_from_sway(const WeaponSprite* const ws, const GLf
 static void get_world_corners_from_screen_corners(const mat4 view_projection,
 	const vec2 screen_corners[corners_per_quad], vec3 world_corners[corners_per_quad]) {
 
-	const GLfloat ndc_dist = constants.weapon_sprite.ndc_dist_from_camera;
 	const vec4 viewport = {-1.0f, -1.0f, 2.0f, 2.0f};
 
 	mat4 inv_view_projection;
@@ -106,7 +105,7 @@ static void get_world_corners_from_screen_corners(const mat4 view_projection,
 
 	for (byte i = 0; i < corners_per_quad; i++) {
 		const GLfloat* const corner = screen_corners[i];
-		glm_unprojecti((vec3) {corner[0], corner[1], ndc_dist}, inv_view_projection, (GLfloat*) viewport, world_corners[i]);
+		glm_unprojecti((vec3) {corner[0], corner[1], 0.0f}, inv_view_projection, (GLfloat*) viewport, world_corners[i]);
 	}
 }
 
@@ -251,11 +250,14 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const c
 
 	////////// Rendering
 
-	/* Not using alpha to coverage here b/c blending is guaranteed
-	to be correct for the last-rendered weapon's z-depth of zero */
-	WITH_BINARY_RENDER_STATE(GL_BLEND,
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
+	// Clamping the depth to avoid clipping with the near plane
+	WITH_BINARY_RENDER_STATE(GL_DEPTH_CLAMP,
+		WITH_BINARY_RENDER_STATE(GL_BLEND,
+			/* Not using alpha to coverage here b/c blending is guaranteed
+			to be correct for the last-rendered weapon's z-depth of zero */
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
+		);
 	);
 }
 
