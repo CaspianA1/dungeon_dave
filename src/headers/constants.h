@@ -120,8 +120,8 @@ static const struct {
 
 	.normal_mapping = {.blur = {.radius = 2, .std_dev = 0.8f}, .intensity = 1.1f /* 0.25f before */},
 
-	.camera = { // TODO: near is not tight enough
-		.near_clip_dist = 0.052f, .eye_height = 0.5f, .aabb_collision_box_size = 0.2f,
+	.camera = {
+		.near_clip_dist = 0.045f, .eye_height = 0.5f, .aabb_collision_box_size = 0.2f,
 		.tilt_correction_rate = 11.0f, .friction = 7.5f,
 
 		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
