@@ -4,7 +4,7 @@
 #include "headers/camera.h"
 #include "headers/constants.h"
 
-static GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size_x, const byte map_size_z) {
+GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size_x, const byte map_size_z) {
 	/* The far clip distance, ideally, would be equal to the diameter of
 	the convex hull of all points in the heightmap. If I had more time,
 	I would implement that, but a simple method that works reasonably well is this:
@@ -42,18 +42,16 @@ static GLfloat compute_world_far_clip_dist(const byte* const heightmap, const by
 	return glm_vec3_norm((vec3) {map_size_x, map_size_z, max_z_difference});
 }
 
-void init_camera(Camera* const camera, const vec3 init_pos, const byte* const heightmap, const byte map_size[2]) {
-	memset(camera, 0, sizeof(Camera)); // Initializing all members as 0 beforehand to avoid uninitialized values
+Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist) {
+	Camera camera = {
+		.last_time = SDL_GetPerformanceCounter(),
+		.far_clip_dist = far_clip_dist
+	};
 
-	camera -> last_time = SDL_GetPerformanceCounter();
-	camera -> heightmap = heightmap;
-	camera -> map_size[0] = map_size[0];
-	camera -> map_size[1] = map_size[1];
+	memcpy(&camera.angles, &constants.camera.init, sizeof(constants.camera.init));
+	glm_vec3_copy((GLfloat*) init_pos, camera.pos);
 
-	memcpy(&camera -> angles, &constants.camera.init, sizeof(constants.camera.init));
-	glm_vec3_copy((GLfloat*) init_pos, camera -> pos);
-
-	camera -> far_clip_dist = compute_world_far_clip_dist(heightmap, map_size[0], map_size[1]);
+	return camera;
 }
 
 static GLfloat clamp_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
@@ -272,7 +270,7 @@ void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, ve
 	glm_vec3_copy((vec3) {cos_vert * dir_xz[0], sinf(vert_angle), cos_vert * dir_xz[1]}, dir);
 }
 
-void update_camera(Camera* const camera, const Event event) {
+void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]) {
 	static GLfloat one_over_performance_freq;
 
 	ON_FIRST_CALL(one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency(););
@@ -311,10 +309,7 @@ void update_camera(Camera* const camera, const Event event) {
 	}
 	else {
 		GLfloat* const velocities = camera -> velocities;
-
-		update_pos_via_physics(event.movement_bits, camera -> heightmap,
-			camera -> map_size, dir_xz, pos, velocities, camera -> pace, delta_time);
-
+		update_pos_via_physics(event.movement_bits, heightmap, map_size, dir_xz, pos, velocities, camera -> pace, delta_time);
 		update_pace(camera, pos + 1, velocities, delta_time);
 		update_fov(camera, event.movement_bits, delta_time);
 	}

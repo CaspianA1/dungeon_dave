@@ -112,9 +112,13 @@ static void* main_init(void) {
 		*const texture_id_map = (const byte*) palace_texture_id_map,
 		map_size[2] = {palace_width, palace_height};
 
+	const GLfloat far_clip_dist = compute_world_far_clip_dist(heightmap, map_size[0], map_size[1]);
+
 	//////////
 
 	SceneContext scene_context = {
+		.camera = init_camera((vec3) {1.5f, 0.5f, 1.5f}, far_clip_dist),
+
 		.weapon_sprite = init_weapon_sprite(
 			// 0.6f, 1.0f, 1.0f, 1.0f, 1.0f, (AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}
 			0.45f, 0.4f, 0.6f, 2.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
@@ -141,32 +145,27 @@ static void* main_init(void) {
 			ARRAY_LENGTH(billboard_animation_instances), billboard_animation_instances
 		),
 
+		.cascaded_shadow_context = init_shadow_context(
+			// Terrain:
+			/*
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.0f, 20.0f},
+			far_clip_dist, 0.2f, 1024, 1024, 8
+			*/
+
+			// Palace:
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.7f, 2.0f, 15.0f},
+			far_clip_dist, 0.4f, 1024, 1024, 5
+		),
+
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
-		.title_screen = init_title_screen(ASSET_PATH("logo.bmp"))
+		.title_screen = init_title_screen(ASSET_PATH("logo.bmp")),
+
+		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
 
-	//////////
-
-	init_camera(&scene_context.camera, (vec3) {1.5f, 0.5f, 1.5f}, heightmap, map_size);
-
-	scene_context.cascaded_shadow_context = init_shadow_context(
-		// Terrain:
-		/*
-		(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.0f, 20.0f},
-		scene_context.camera.far_clip_dist, 0.2f, 1024, 1024, 8
-		*/
-
-		// Palace:
-		(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.7f, 2.0f, 15.0f},
-		scene_context.camera.far_clip_dist, 0.4f, 1024, 1024, 5
-	);
-
-	//////////
-
-	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	const GLenum states[] = {GL_DEPTH_TEST, GL_CULL_FACE, GL_TEXTURE_CUBE_MAP_SEAMLESS};
+	for (byte i = 0; i < ARRAY_LENGTH(states); i++) glEnable(states[i]);
 
 	void* const app_context = malloc(sizeof(SceneContext));
 	memcpy(app_context, &scene_context, sizeof(SceneContext));
@@ -188,7 +187,7 @@ static void main_drawer(void* const app_context) {
 	const CascadedShadowContext* const shadow_context = &scene_context -> cascaded_shadow_context;
 	Camera* const camera = &scene_context -> camera;
 
-	update_camera(camera, event);
+	update_camera(camera, event, scene_context -> heightmap, scene_context -> map_size);
 
 	//////////
 

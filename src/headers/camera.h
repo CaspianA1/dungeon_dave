@@ -9,8 +9,6 @@
 
 typedef struct {
 	Uint64 last_time;
-	const byte* heightmap;
-	byte map_size[2];
 
 	struct {GLfloat fov, hori, vert, tilt;} angles;
 
@@ -28,15 +26,15 @@ typedef struct {
 	vec4 frustum_planes[planes_per_frustum];
 } Camera;
 
-/* Excluded: compute_world_far_clip_dist, clamp_to_pos_neg_domain,
-wrap_around_domain, get_percent_kept_from, update_camera_angles,
-smooth_hermite, update_fov, apply_velocity_in_xz_direction,
-tile_exists_at_pos, pos_collides_with_heightmap, update_pos_via_physics,
+/* Excluded: clamp_to_pos_neg_domain, wrap_around_domain,
+get_percent_kept_from, update_camera_angles, smooth_hermite,
+update_fov, apply_velocity_in_xz_direction, tile_exists_at_pos,
+pos_collides_with_heightmap, update_pos_via_physics,
 make_pace_function, update_pace */
 
-// VoxelPhysicsContext init_physics_context(const byte* const heightmap, const byte map_size_x, const byte map_size_z);
-void init_camera(Camera* const camera, const vec3 init_pos, const byte* const heightmap, const byte map_size[2]);
-void update_camera(Camera* const camera, const Event event);
+GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size_x, const byte map_size_z);
+Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist);
+void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]);
 void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, vec2 dir_xz, vec3 dir);
 
 #endif
