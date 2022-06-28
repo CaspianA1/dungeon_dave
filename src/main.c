@@ -153,8 +153,8 @@ static void* main_init(void) {
 			*/
 
 			// Palace:
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.7f, 2.0f, 5.0f},
-			far_clip_dist, 0.35f, 1024, 1024, 5
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.5f, 1.5f, 5.0f},
+			far_clip_dist, 0.4f, 1024, 1024, 8
 		),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),

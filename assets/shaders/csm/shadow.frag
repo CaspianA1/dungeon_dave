@@ -29,8 +29,8 @@ float get_csm_shadow_from_layer(uint layer_index, vec3 fragment_pos_world_space)
 	const int sample_radius = 1;
 
 	const float
-		// esm_constant = 200.0f, layer_scaling_component = 1.5f; // Palace
-		esm_constant = 300.0f, layer_scaling_component = 1.8f; // Terrain
+		esm_constant = 100.0f, layer_scaling_component = 1.0f; // Palace
+		// esm_constant = 300.0f, layer_scaling_component = 1.8f; // Terrain
 
 	/* (TODO) ESM scaling:
 	- Bigger depth range will be darker, so scale the exponent primarily on that
@@ -57,7 +57,7 @@ float get_blended_csm_shadow(uint layer_index, uint depth_range_shift, float wor
 	float
 		dist_ahead_of_last_split = world_depth_value - cascade_split_distances[prev_layer_index],
 		depth_range = cascade_split_distances[layer_index - depth_range_shift] -
-					  cascade_split_distances[prev_layer_index - depth_range_shift];
+					cascade_split_distances[prev_layer_index - depth_range_shift];
 
 	/* If the layer index equals 0, this will be less than 0; and if it's the last layer index,
 	it may be over 1. This clamps the blend factor between 0 and 1 for when that happens. */
