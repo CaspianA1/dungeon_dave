@@ -250,8 +250,8 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const c
 
 	////////// Rendering
 
-	// Clamping the depth to avoid clipping with the near plane
 	WITH_BINARY_RENDER_STATE(GL_DEPTH_CLAMP,
+		// Clamping the depth to avoid clipping with the near plane
 		WITH_BINARY_RENDER_STATE(GL_BLEND,
 			/* Not using alpha to coverage here b/c blending is guaranteed
 			to be correct for the last-rendered weapon's z-depth of zero */
