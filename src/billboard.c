@@ -6,14 +6,10 @@
 #include "headers/shader.h"
 #include "headers/constants.h"
 
-/* TODO: for accurate edges:
-
+/* For accurate alpha, TODO:
 1. Use these blend settings:
-
 2. Premultiply alpha
-
-3. Divide .rgb by .a (already doing)
-*/
+3. Divide .rgb by .a (already doing) */
 
 // This just updates the billboard animation instances at the moment
 void update_billboards(const BillboardContext* const billboard_context) {
