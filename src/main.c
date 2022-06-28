@@ -164,6 +164,8 @@ static void* main_init(void) {
 	};
 
 	glDepthFunc(GL_LESS);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	const GLenum states[] = {GL_DEPTH_TEST, GL_CULL_FACE, GL_TEXTURE_CUBE_MAP_SEAMLESS};
 	for (byte i = 0; i < ARRAY_LENGTH(states); i++) glEnable(states[i]);
 

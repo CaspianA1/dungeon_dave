@@ -255,7 +255,6 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const c
 		WITH_BINARY_RENDER_STATE(GL_BLEND,
 			/* Not using alpha to coverage here b/c blending is guaranteed
 			to be correct for the last-rendered weapon's z-depth of zero */
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
 		);
 	);
