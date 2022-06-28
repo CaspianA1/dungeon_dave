@@ -20,7 +20,7 @@ static void copy_to_list_end(List* const list, const void* const data, const buf
 	const buffer_size_t item_size = list -> item_size;
 
 	// Cast to byte, because offset is calculated bytewise
-	void* const dest_begin = (byte*) list -> data + (list -> length * item_size);
+	void* const dest_begin = (byte*) list -> data + list -> length * item_size;
 	list -> length += num_items;
 	memcpy(dest_begin, data, num_items * item_size);
 }
