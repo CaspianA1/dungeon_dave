@@ -135,7 +135,6 @@ static void draw_sectors(
 
 	use_shader(shader);
 
-	#define TONE_MAPPING_UNIFORM(param) INIT_UNIFORM_VALUE(tm_##param, shader, 1f, constants.lighting.tone_mapping.param)
 	#define LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, constants.lighting.param)
 	#define ARRAY_LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, 1, constants.lighting.param)
 
@@ -148,20 +147,14 @@ static void draw_sectors(
 		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
-		LIGHTING_UNIFORM(enable_tone_mapping, 1i);
+		INIT_UNIFORM_VALUE(enable_tone_mapping, shader, 1i, constants.lighting.tone_mapping.enabled);
 
 		LIGHTING_UNIFORM(ambient, 1f);
 		LIGHTING_UNIFORM(diffuse_strength, 1f);
 		LIGHTING_UNIFORM(specular_strength, 1f);
 		ARRAY_LIGHTING_UNIFORM(specular_exponent_domain, 2fv);
 
-		TONE_MAPPING_UNIFORM(max_brightness);
-		TONE_MAPPING_UNIFORM(linear_contrast);
-		TONE_MAPPING_UNIFORM(linear_start);
-		TONE_MAPPING_UNIFORM(linear_length);
-		TONE_MAPPING_UNIFORM(black);
-		TONE_MAPPING_UNIFORM(pedestal);
-
+		INIT_UNIFORM_VALUE(tone_mapping_max_white, shader, 1f, constants.lighting.tone_mapping.max_white);
 		LIGHTING_UNIFORM(noise_granularity, 1f);
 		ARRAY_LIGHTING_UNIFORM(light_color, 3fv);
 
@@ -183,7 +176,6 @@ static void draw_sectors(
 
 	//////////
 
-	#undef TONE_MAPPING_UNIFORM
 	#undef LIGHTING_UNIFORM
 	#undef ARRAY_LIGHTING_UNIFORM
 

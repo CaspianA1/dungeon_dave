@@ -7,6 +7,8 @@
 #include "headers/texture.h"
 #include "headers/constants.h"
 
+// TODO: incorporate the palace city texture into this in some way
+
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	(void) param;
 
@@ -20,7 +22,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 	const GLfloat
 		m = constants.title_screen.min_brightness,
-		time_seed = SDL_GetTicks() / constants.title_screen.brightness_repeat_ms;
+		time_seed = (GLfloat) SDL_GetTicks() / constants.title_screen.brightness_repeat_ms;
 
 	// This fluctuates between `m` and 1.0f
 	const GLfloat brightness = (sinf(time_seed * PI) * 0.5f + 0.5f) * (1.0f - m) + m;

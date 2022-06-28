@@ -37,10 +37,12 @@ static const struct {
 		const GLint size[2];
 	} window;
 
-	const struct {const GLfloat min_brightness, brightness_repeat_ms;} title_screen;
+	const struct {
+		const GLint brightness_repeat_ms;
+		const GLfloat min_brightness;
+	} title_screen;
 
 	const struct {
-		const bool enable_tone_mapping;
 		const byte pcf_radius;
 
 		/* Brighter texture colors get a stronger specular output,
@@ -54,9 +56,8 @@ static const struct {
 			noise_granularity, light_color[3];
 
 		const struct {
-			const GLfloat
-				max_brightness, linear_contrast,
-				linear_start, linear_length, black, pedestal;
+			const bool enabled;
+			const GLfloat max_white;
 		} tone_mapping;
 	} lighting;
 
@@ -100,19 +101,16 @@ static const struct {
 		.size = {800, 600}
 	},
 
-	.title_screen = {.min_brightness = 0.7f, .brightness_repeat_ms = 500.0f},
+	.title_screen = {.brightness_repeat_ms = 500, .min_brightness = 0.7f},
 
 	.lighting = {
-		.enable_tone_mapping = true,
-
-		.ambient = 0.25f, .diffuse_strength = 0.5f, .specular_strength = 0.5f,
+		.ambient = 0.3f, .diffuse_strength = 0.8f, .specular_strength = 0.7f,
 		.specular_exponent_domain = {32.0f, 96.0f}, .noise_granularity = 0.3f / 255.0f,
 		.light_color = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
 
 		.tone_mapping = {
-			.max_brightness = 1.0f, .linear_contrast = 1.0f,
-			.linear_start = 0.22f, .linear_length = 0.4f,
-			.black = 1.2f, /* 1.33f */ .pedestal = 0.0f
+			.enabled = true,
+			.max_white = 1.3f
 		}
 	},
 

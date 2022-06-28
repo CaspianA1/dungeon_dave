@@ -9,13 +9,7 @@ in vec3 UV, fragment_pos_world_space;
 out vec3 color;
 
 uniform bool enable_tone_mapping;
-
-uniform float
-	ambient, diffuse_strength, specular_strength, noise_granularity,
-
-	tm_max_brightness, tm_linear_contrast, tm_linear_start, // `tm` = tone mapping
-	tm_linear_length, tm_black, tm_pedestal;
-
+uniform float ambient, diffuse_strength, specular_strength, tone_mapping_max_white, noise_granularity;
 uniform vec2 specular_exponent_domain, one_over_screen_size, UV_translation;
 uniform vec3 camera_pos_world_space, light_dir, light_color, UV_translation_area[2];
 uniform sampler2DArray texture_sampler, normal_map_sampler;
@@ -62,24 +56,12 @@ vec3 get_fragment_normal(vec3 UV) {
 	return rotated_vectors[face_id];
 }
 
-// https://github.com/dmnsgn/glsl-tone-map/blob/master/uchimura.glsl (but with better variable names)
-vec3 uchimura_tone_mapping(vec3 color) {
-	float L0 = ((tm_max_brightness - tm_linear_start) * tm_linear_length) / tm_linear_contrast;
-	float S0 = tm_linear_start + L0, S1 = tm_linear_start + tm_linear_contrast * L0;
-	float C2 = (tm_linear_contrast * tm_max_brightness) / (tm_max_brightness - S1);
-	float CM = -C2 / tm_max_brightness;
-
-	vec3
-		W0 = vec3(1.0f - smoothstep(0.0f, tm_linear_start, color)),
-		W2 = vec3(step(tm_linear_start + L0, color));
-
-	vec3
-		W1 = vec3(1.0f - W0 - W2),
-		T = vec3(tm_linear_start * pow(color / tm_linear_start, vec3(tm_black)) + tm_pedestal),
-		L = vec3(tm_linear_start + tm_linear_contrast * (color - tm_linear_start)),
-		S = vec3(tm_max_brightness - (tm_max_brightness - S1) * exp(CM * (color - S0)));
-
-	return (T * W0) + (L * W1) + (S * W2);
+// https://64.github.io/tonemapping/ (Reinhard Extended Luminance)
+vec3 apply_tone_mapping(vec3 color, float max_white) {
+	float old_luminance = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
+	float numerator = old_luminance * (1.0f + (old_luminance / (max_white * max_white)));
+	float new_luminance = numerator / (1.0f + old_luminance);
+	return color * (new_luminance / old_luminance);
 }
 
 vec3 noise_for_banding_removal(vec3 color) {
@@ -89,7 +71,8 @@ vec3 noise_for_banding_removal(vec3 color) {
 }
 
 vec3 postprocess_light(vec3 color) {
-	color = mix(color, uchimura_tone_mapping(color), float(enable_tone_mapping));
+	vec3 tone_mapped_color = apply_tone_mapping(color, tone_mapping_max_white);
+	color = mix(color, tone_mapped_color, float(enable_tone_mapping));
 	return noise_for_banding_removal(color);
 }
 
