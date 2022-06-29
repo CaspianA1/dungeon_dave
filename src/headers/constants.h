@@ -43,15 +43,13 @@ static const struct {
 	} title_screen;
 
 	const struct {
-		const byte pcf_radius;
-
 		/* Brighter texture colors get a stronger specular output,
 		and sharper specular highlights (their specular exponents are weighted
 		more towards the upper bound of the specular exponent domain).
 		Ambient also equals the amount of light in shadows. */
 
 		const GLfloat
-			esm_constant, ambient, diffuse_strength,
+			ambient, diffuse_strength,
 			specular_strength, specular_exponent_domain[2],
 			noise_granularity, light_color[3];
 
