@@ -24,14 +24,9 @@ Details on weapon coordinate space transformations:
 /* TODO:
 Plan for getting cast shadows in weapon sprites:
 
-For drawing the weapon normally:
-- First, use vbo for storing vertices on GPU + vao
-- No array uniforms supplying any coordinates
-
-Later, when shadow casting:
-- Bind vbo + vao
-- World coordinates are in the vbo
-- They then get turned into screen coordinates through the view projection matrix
+- Calculate world-space pos early on, and store it in the weapon sprite
+- When shadow casting, fill the weapon vbo with that, and bind that + the vao
+- When drawing normally, pass the world space corners as uniforms, and draw
 */
 
 //////////
@@ -189,11 +184,23 @@ void deinit_weapon_sprite(const WeaponSprite* const ws) {
 	deinit_shader(ws -> shader);
 }
 
-// TODO: fix jitter of bottom of weapon
-void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const camera,
-	const Event* const event, const CascadedShadowContext* const shadow_context) {
-
+void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event) {
 	update_weapon_sprite_animation(ws, event);
+
+	GLfloat sway[2];
+	get_sway(camera -> speed_xz_percent, sway);
+
+	vec2 screen_corners[corners_per_quad];
+	get_screen_corners_from_sway(ws, sway, event -> screen_size, screen_corners);
+
+	vec3* const world_corners = ws -> world_corners;
+	get_world_corners_from_screen_corners(camera -> view_projection, screen_corners, world_corners);
+	rotate_from_camera_movement(ws -> max_yaw, ws -> max_pitch, camera, world_corners);
+}
+
+void draw_weapon_sprite(
+	const WeaponSprite* const ws, const Camera* const camera,
+	const CascadedShadowContext* const shadow_context) {
 
 	const GLuint shader = ws -> shader;
 	use_shader(shader);
@@ -218,25 +225,11 @@ void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const c
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
 
-	////////// Getting the weapon world corners
-
-	const vec4* const view_projection = camera -> view_projection;
-
-	GLfloat sway[2];
-	get_sway(camera -> speed_xz_percent, sway);
-
-	vec2 screen_corners[corners_per_quad];
-	get_screen_corners_from_sway(ws, sway, event -> screen_size, screen_corners);
-
-	vec3 world_corners[corners_per_quad];
-	get_world_corners_from_screen_corners(view_projection, screen_corners, world_corners);
-	rotate_from_camera_movement(ws -> max_yaw, ws -> max_pitch, camera, world_corners);
-
 	////////// Updating uniforms
 
 	UPDATE_UNIFORM(frame_index, 1ui, ws -> curr_frame);
-	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, (GLfloat*) view_projection);
+	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) ws -> world_corners);
+	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, (GLfloat*) camera -> view_projection);
 
 	////////// This little part concerns CSM
 

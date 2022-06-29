@@ -187,13 +187,15 @@ static void main_drawer(void* const app_context) {
 	const SectorContext* const sector_context = &scene_context -> sector_context;
 	const BillboardContext* const billboard_context = &scene_context -> billboard_context;
 	const CascadedShadowContext* const shadow_context = &scene_context -> cascaded_shadow_context;
+
+	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
 	Camera* const camera = &scene_context -> camera;
 
 	update_camera(camera, event, scene_context -> heightmap, scene_context -> map_size);
 
 	//////////
 
-	update_billboards(billboard_context);
+	update_weapon_sprite(weapon_sprite, camera, &event);
 	draw_to_shadow_context(shadow_context, camera, event.screen_size, draw_all_sectors_for_shadow_map, &sector_context -> draw_context);
 
 	////////// The main drawing code
@@ -205,7 +207,7 @@ static void main_drawer(void* const app_context) {
 	most skybox fragments would unnecessarily be drawn otherwise */
 	draw_skybox(&scene_context -> skybox, camera -> view_projection);
 
-	update_and_draw_weapon_sprite(&scene_context -> weapon_sprite, camera, &event, shadow_context);
+	draw_weapon_sprite(weapon_sprite, camera, shadow_context);
 }
 
 static void main_deinit(void* const app_context) {

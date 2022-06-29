@@ -15,6 +15,7 @@ typedef struct {
 	buffer_size_t curr_frame;
 
 	const GLfloat frame_width_over_height, size, max_yaw, max_pitch;
+	vec3 world_corners[corners_per_quad];
 } WeaponSprite;
 
 /* Excluded: update_weapon_sprite_animation, circular_mapping_from_zero_to_one, get_sway,
@@ -27,7 +28,10 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 
 void deinit_weapon_sprite(const WeaponSprite* const ws);
 
-void update_and_draw_weapon_sprite(WeaponSprite* const ws, const Camera* const camera,
-	const Event* const event, const CascadedShadowContext* const shadow_context);
+void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event);
+
+void draw_weapon_sprite(
+	const WeaponSprite* const ws, const Camera* const camera,
+	const CascadedShadowContext* const shadow_context);
 
 #endif
