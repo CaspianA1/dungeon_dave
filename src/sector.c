@@ -262,10 +262,13 @@ SectorContext init_sector_context(const byte* const heightmap, const byte* const
 	*face_meshes_cpu = init_face_meshes_from_sectors(&sector_context.sectors, heightmap, map_width, map_height);
 	init_batch_draw_context_gpu_buffer(&sector_context.draw_context, face_meshes_cpu -> length, sizeof(face_mesh_t));
 
-	enum {vpt = vertices_per_triangle};
 	use_vertex_spec(sector_context.draw_context.vertex_spec);
-	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, FACE_MESH_COMPONENT_TYPENAME); // Position
-	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), FACE_MESH_COMPONENT_TYPENAME); // Face info
+
+	enum {vpt = vertices_per_triangle};
+	const GLenum typename = FACE_MESH_COMPONENT_TYPENAME;
+
+	define_vertex_spec_index(false, false,  0, vpt, sizeof(face_vertex_t), 0, typename); // Position
+	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), typename); // Face info
 
 	return sector_context;
 }

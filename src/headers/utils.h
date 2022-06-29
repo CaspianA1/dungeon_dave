@@ -81,6 +81,7 @@
 #define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
 	glUniform##type_prefix(glGetUniformLocation((shader), #name), __VA_ARGS__)
 
+// TODO: try to remove this
 #define INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(name, shader, type_prefix, ...)\
 	glUniform##type_prefix(glGetUniformLocation((shader), (name)), __VA_ARGS__)
 
@@ -150,8 +151,8 @@ void loop_application(const Screen* const screen, void (*const drawer) (void* co
 //////////
 
 void define_vertex_spec_index(const bool is_instanced, const bool vertices_are_floats,
-	const byte index, const byte num_components, const byte stride, const size_t initial_offset,
-	const GLenum typename);
+	const byte index, const byte num_components, const buffer_size_t stride,
+	const buffer_size_t initial_offset, const GLenum typename);
 
 GLuint init_vertex_spec(void);
 GLuint init_gpu_buffer(void);
