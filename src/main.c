@@ -120,11 +120,11 @@ static void* main_init(void) {
 		.camera = init_camera((vec3) {1.5f, 0.5f, 1.5f}, far_clip_dist),
 
 		.weapon_sprite = init_weapon_sprite(
-			// 0.6f, 1.0f, 1.0f, 1.0f, 1.0f, (AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}
-			0.5f, 0.5f, 0.6f, 2.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
-			// 0.4f, 0.5f, 0.75f, 2.0f, 0.02f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}
-			// 0.5f, 0.2f, 0.75f, 2.0f, 0.035f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}
-			// 0.5f, 0.3f, 0.8f, 1.0f, 0.04f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}
+			// 3.0f, 3.0f, 1.0f, 1.0f, 1.0f, (AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}
+			// 3.0f, 8.0f, 0.6f, 2.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
+			3.0f, 2.0f, 0.75f, 2.0f, 0.02f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}
+			// 4.0f, 4.0f, 0.75f, 2.0f, 0.035f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}
+			// 2.0f, 2.0f, 0.8f, 1.0f, 0.04f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}
 		),
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
@@ -148,7 +148,7 @@ static void* main_init(void) {
 		.cascaded_shadow_context = init_shadow_context(
 			// Terrain:
 			/*
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.5f, 1.5f, 15.0f},
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.5f, 1.5f, 10.0f},
 			far_clip_dist, 0.3f, (GLsizei[3]) {1024, 1024, 6}
 			*/
 
@@ -166,7 +166,9 @@ static void* main_init(void) {
 	glDepthFunc(GL_LESS);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	const GLenum states[] = {GL_DEPTH_TEST, GL_CULL_FACE, GL_TEXTURE_CUBE_MAP_SEAMLESS};
+	/* Depth clamping is used for 1. shadow pancaking, 2. avoiding clipping with sectors when walking
+	against them, and 3. stopping too much upwards weapon pitch from going through the near plane */
+	const GLenum states[] = {GL_DEPTH_TEST, GL_DEPTH_CLAMP, GL_CULL_FACE, GL_TEXTURE_CUBE_MAP_SEAMLESS};
 	for (byte i = 0; i < ARRAY_LENGTH(states); i++) glEnable(states[i]);
 
 	void* const app_context = malloc(sizeof(SceneContext));
@@ -202,8 +204,11 @@ static void main_drawer(void* const app_context) {
 
 	draw_skybox(&scene_context -> skybox, camera -> view_projection); // Skybox after sectors + billboards to avoid a lot of unnecessary drawing
 	draw_visible_sectors(sector_context, shadow_context, camera, event.screen_size);
-	draw_visible_billboards(billboard_context, shadow_context, camera);
-	draw_weapon_sprite(weapon_sprite, camera, shadow_context);
+
+	WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE, // Not writing to the depth buffer for these
+		draw_visible_billboards(billboard_context, shadow_context, camera);
+		draw_weapon_sprite(weapon_sprite, camera, shadow_context);
+	);
 }
 
 static void main_deinit(void* const app_context) {

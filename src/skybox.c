@@ -119,9 +119,7 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 
 void draw_skybox(const Skybox* const skybox, const mat4 view_projection) {
 	WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS, // Other depth testing mode for the skybox
-		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE, // Not writing to the depth buffer
-			draw_drawable(*skybox, ARRAY_LENGTH(skybox_vertices), view_projection);
-		);
+		draw_drawable(*skybox, ARRAY_LENGTH(skybox_vertices), view_projection);
 	);
 }
 

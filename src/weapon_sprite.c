@@ -46,7 +46,7 @@ static void update_weapon_sprite_animation(WeaponSpriteAnimationContext* const a
 	animation_context -> curr_frame = curr_frame;
 }
 
-////////// This part concerns the mapping from weapon sway -> screen corners -> world corners -> tilted world corners
+////////// This part concerns the mapping from weapon sway -> screen corners -> world corners -> rotated world corners
 
 // Given an input between 0 and 1, this returns the y-value of the top left side of a circle
 static GLfloat circular_mapping_from_zero_to_one(const GLfloat x) {
@@ -122,8 +122,8 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 	const GLfloat yaw_percent = camera -> angles.tilt / constants.camera.lims.tilt;
 	const GLfloat yaw_amount = yaw_percent * appearance_context -> world_space.max_yaw;
 
-	vec3 shortened_and_rotated_vector;
-	glm_vec3_scale((GLfloat*) dir, yaw_amount, shortened_and_rotated_vector); // First, the direction vector's length is downscaled to the tilt amount
+	vec3 shortened_and_rotated_vector; // Perhaps scale by weapon world-space size
+	glm_vec3_scale((GLfloat*) dir, yaw_amount, shortened_and_rotated_vector); // First, the direction vector's length is downscaled to the yaw amount
 	glm_vec3_rotate(shortened_and_rotated_vector, yaw_amount, (GLfloat*) camera -> up); // Then, it's rotated around the up vector
 
 	const bool turning_right = yaw_amount > 0.0f;
@@ -211,7 +211,7 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	rotate_from_camera_movement(appearance_context, camera);
 }
 
-void draw_weapon_sprite( // TODO: stop the weapon sprite flickering for large depth values (especially the terrain)
+void draw_weapon_sprite(
 	const WeaponSprite* const ws, const Camera* const camera,
 	const CascadedShadowContext* const shadow_context) {
 
@@ -256,8 +256,8 @@ void draw_weapon_sprite( // TODO: stop the weapon sprite flickering for large de
 
 	////////// Rendering
 
-	WITH_BINARY_RENDER_STATE(GL_DEPTH_CLAMP,
-		// Clamping the depth to avoid clipping with the near plane
+	// No depth testing b/c depth values from sectors or billboards may intersect
+	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
 		WITH_BINARY_RENDER_STATE(GL_BLEND,
 			/* Not using alpha to coverage here b/c blending is guaranteed
 			to be correct for the last-rendered weapon's z-depth of zero */

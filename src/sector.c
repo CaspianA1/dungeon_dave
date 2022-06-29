@@ -104,7 +104,7 @@ void draw_all_sectors_for_shadow_map(const void* const param) {
 	use_vertex_buffer(sector_draw_context -> buffers.gpu);
 	use_vertex_spec(sector_draw_context -> vertex_spec);
 
-	glDisableVertexAttribArray(1); // Not using the attribute at index 1
+	glDisableVertexAttribArray(1); // Not using the face info bit attribute at index 1
 
 	//////////
 
