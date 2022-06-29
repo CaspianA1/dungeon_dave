@@ -211,7 +211,7 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	rotate_from_camera_movement(appearance_context, camera);
 }
 
-void draw_weapon_sprite(
+void draw_weapon_sprite( // TODO: stop the weapon sprite flickering for large depth values (especially the terrain)
 	const WeaponSprite* const ws, const Camera* const camera,
 	const CascadedShadowContext* const shadow_context) {
 

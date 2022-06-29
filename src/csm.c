@@ -6,7 +6,7 @@
 #include "headers/shader.h"
 #include "headers/texture.h"
 
-#define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT32 // TODO: make this a parameter
+#define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT16
 
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
@@ -112,9 +112,9 @@ static void get_sub_frustum_light_view_projection_matrix(const Camera* const cam
 
 //////////
 
-static GLuint init_csm_depth_layers(const GLsizei width, const GLsizei height, const GLsizei num_layers) {
+static GLuint init_csm_depth_layers(const GLsizei resolution[3]) {
 	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
-	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, width, height, num_layers, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, resolution[0], resolution[1], resolution[2], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	return depth_layers;
 }
 
@@ -138,9 +138,7 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 sub_frustum_scale,
 	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei resolution[3]) {
 
-	const GLsizei
-		width = resolution[0], height = resolution[1],
-		num_layers = resolution[2];
+	const GLsizei num_layers = resolution[2];
 
 	List
 		split_dists = init_list((buffer_size_t) num_layers - 1, GLfloat),
@@ -166,7 +164,7 @@ CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 su
 
 	//////////
 
-	const GLuint depth_layers = init_csm_depth_layers(width, height, num_layers);
+	const GLuint depth_layers = init_csm_depth_layers(resolution);
 
 	return (CascadedShadowContext) {
 		.depth_layers = depth_layers,
@@ -176,7 +174,7 @@ CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 su
 			ASSET_PATH("shaders/csm/depth.geom"), ASSET_PATH("shaders/csm/depth.frag")
 		),
 
-		.resolution = {width, height},
+		.resolution = {resolution[0], resolution[1]},
 
 		.dir_to_light = {dir_to_light[0], dir_to_light[1], dir_to_light[2]},
 		.sub_frustum_scale = {sub_frustum_scale[0], sub_frustum_scale[1], sub_frustum_scale[2]},
