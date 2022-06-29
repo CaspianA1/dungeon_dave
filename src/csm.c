@@ -37,7 +37,7 @@ static void get_camera_sub_frustum_corners_and_center(const Camera* const camera
 }
 
 static void get_light_view(const vec4 camera_sub_frustum_center, const vec3 light_dir, mat4 light_view) {
-	vec3 light_eye;
+	vec3 light_eye; // TODO: give this a better name
 	glm_vec3_add((GLfloat*) camera_sub_frustum_center, (GLfloat*) light_dir, light_eye);
 	glm_lookat(light_eye, (GLfloat*) camera_sub_frustum_center, (vec3) {0.0f, 1.0f, 0.0f}, light_view);
 }
@@ -135,8 +135,11 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 }
 
 CascadedShadowContext init_shadow_context(const vec3 light_dir, const vec3 sub_frustum_scale,
-	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei width,
-	const GLsizei height, const GLsizei num_layers) {
+	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei resolution[3]) {
+
+	const GLsizei
+		width = resolution[0], height = resolution[1],
+		num_layers = resolution[2];
 
 	List
 		split_dists = init_list((buffer_size_t) num_layers - 1, GLfloat),
@@ -151,15 +154,13 @@ CascadedShadowContext init_shadow_context(const vec3 light_dir, const vec3 sub_f
 
 	//////////
 
-	GLfloat* const split_dists_data = split_dists.data;
-
 	for (buffer_size_t i = 0; i < split_dists.length; i++) {
 		const GLfloat layer_percent = (GLfloat) (i + 1) / num_layers;
 
 		const GLfloat linear_dist = near_clip_dist + layer_percent * clip_dist_diff;
 		const GLfloat log_dist = near_clip_dist * powf(far_clip_dist / near_clip_dist, layer_percent);
 
-		split_dists_data[i] = glm_lerp(log_dist, linear_dist, linear_split_weight);
+		((GLfloat*) split_dists.data)[i] = glm_lerp(log_dist, linear_dist, linear_split_weight);
 	}
 
 	//////////
@@ -178,8 +179,7 @@ CascadedShadowContext init_shadow_context(const vec3 light_dir, const vec3 sub_f
 
 		.light_dir = {light_dir[0], light_dir[1], light_dir[2]},
 		.sub_frustum_scale = {sub_frustum_scale[0], sub_frustum_scale[1], sub_frustum_scale[2]},
-		.split_dists = split_dists,
-		.light_view_projection_matrices = light_view_projection_matrices
+		.split_dists = split_dists, .light_view_projection_matrices = light_view_projection_matrices
 	};
 }
 
