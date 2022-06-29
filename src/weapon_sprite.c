@@ -178,9 +178,7 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 		),
 
 		.animation_context = {
-			.curr_frame = 0,
-			.cycle_base_time = 0,
-
+			.curr_frame = 0, .cycle_base_time = 0,
 			.animation = {
 				.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
 				.secs_for_frame = secs_for_frame
