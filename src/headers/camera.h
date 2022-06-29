@@ -5,6 +5,8 @@
 #include "buffer_defs.h"
 #include "event.h"
 
+// TODO: use the yaw, pitch, roll nomenclature; and make an anonymous struct for vectors
+
 //////////
 
 typedef struct {

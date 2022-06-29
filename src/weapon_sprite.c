@@ -31,18 +31,19 @@ Plan for getting cast shadows in weapon sprites:
 
 //////////
 
-static void update_weapon_sprite_animation(WeaponSprite* const ws, const Event* const event) {
-	buffer_size_t curr_frame = ws -> curr_frame;
+static void update_weapon_sprite_animation(WeaponSpriteAnimationContext* const animation_context, const Event* const event) {
+	buffer_size_t curr_frame = animation_context -> curr_frame;
 
 	if (curr_frame == 0) {
 		if (CHECK_BITMASK(event -> movement_bits, BIT_USE_WEAPON)) {
-			ws -> cycle_base_time = SDL_GetTicks();
+			animation_context -> cycle_base_time = SDL_GetTicks();
 			curr_frame++;
 		}
 	}
-	else update_animation_information(ws -> cycle_base_time, &curr_frame, ws -> animation);
+	else update_animation_information(animation_context -> cycle_base_time,
+		&curr_frame, animation_context -> animation);
 
-	ws -> curr_frame = curr_frame;
+	animation_context -> curr_frame = curr_frame;
 }
 
 ////////// This part concerns the mapping from weapon sway -> screen corners -> world corners -> tilted world corners
@@ -77,17 +78,22 @@ static void get_sway(const GLfloat speed_xz_percent, GLfloat sway[2]) {
 static void get_screen_corners_from_sway(const WeaponSprite* const ws, const GLfloat sway[2],
 	const GLint screen_size[2], vec2 screen_corners[corners_per_quad]) {
 
-	const GLfloat weapon_size = ws -> size, inv_screen_aspect_ratio = (GLfloat) screen_size[1] / screen_size[0];
+	const WeaponSpriteAppearanceContext* const appearance_context = &ws -> appearance_context;
+
+	const GLfloat
+		screen_space_size = appearance_context -> screen_space.size,
+		sprite_frame_width_over_height = appearance_context -> screen_space.frame_width_over_height,
+		inv_screen_aspect_ratio = (GLfloat) screen_size[1] / screen_size[0];
 
 	const GLfloat
 		sway_across = sway[0],
-		down_term = (weapon_size - 1.0f) + sway[1],
-		across_term = weapon_size * ws -> frame_width_over_height * inv_screen_aspect_ratio;
+		down_term = (screen_space_size - 1.0f) + sway[1],
+		across_term = screen_space_size * sprite_frame_width_over_height * inv_screen_aspect_ratio;
 
 	screen_corners[0][0] = screen_corners[2][0] = sway_across - across_term;
 	screen_corners[1][0] = screen_corners[3][0] = sway_across + across_term;
-	screen_corners[0][1] = screen_corners[1][1] = down_term - weapon_size;
-	screen_corners[2][1] = screen_corners[3][1] = down_term + weapon_size;
+	screen_corners[0][1] = screen_corners[1][1] = down_term - screen_space_size;
+	screen_corners[2][1] = screen_corners[3][1] = down_term + screen_space_size;
 }
 
 static void get_world_corners_from_screen_corners(const mat4 view_projection,
@@ -99,18 +105,22 @@ static void get_world_corners_from_screen_corners(const mat4 view_projection,
 	glm_mat4_inv((vec4*) view_projection, inv_view_projection);
 
 	for (byte i = 0; i < corners_per_quad; i++) {
-		const GLfloat* const corner = screen_corners[i];
-		glm_unprojecti((vec3) {corner[0], corner[1], 0.0f}, inv_view_projection, (GLfloat*) viewport, world_corners[i]);
+		const GLfloat* const screen_corner = screen_corners[i];
+
+		glm_unprojecti((vec3) {screen_corner[0], screen_corner[1], 0.0f},
+			inv_view_projection, (GLfloat*) viewport, world_corners[i]);
 	}
 }
 
-static void rotate_from_camera_movement(const GLfloat max_yaw, const GLfloat max_pitch, const Camera* const camera, vec3 world_corners[corners_per_quad]) {
+// This rotates the appearance context's world corners
+static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const appearance_context, const Camera* const camera) {
 	const GLfloat* const dir = camera -> dir;
+	vec3* const world_corners = appearance_context -> world_space.corners;
 
 	////////// This part influences the yaw that's based on the camera's sideways tilt (the yaw rotates around a weapon's left or right side).
 
 	const GLfloat yaw_percent = camera -> angles.tilt / constants.camera.lims.tilt;
-	const GLfloat yaw_amount = yaw_percent * max_yaw;
+	const GLfloat yaw_amount = yaw_percent * appearance_context -> world_space.max_yaw;
 
 	vec3 shortened_and_rotated_vector;
 	glm_vec3_scale((GLfloat*) dir, yaw_amount, shortened_and_rotated_vector); // First, the direction vector's length is downscaled to the tilt amount
@@ -126,7 +136,7 @@ static void rotate_from_camera_movement(const GLfloat max_yaw, const GLfloat max
 	////////// This part controls the weapon's pitch, which scales with the camera's pitch.
 
 	const GLfloat downwards_pitch_percent = -camera -> angles.vert / constants.camera.lims.vert;
-	const GLfloat downwards_pitch_amount = downwards_pitch_percent * max_pitch;
+	const GLfloat downwards_pitch_amount = downwards_pitch_percent * appearance_context -> world_space.max_pitch;
 
 	vec3 forward_pitch_offset;
 	glm_vec3_scale((GLfloat*) dir, downwards_pitch_amount, forward_pitch_offset);
@@ -167,15 +177,20 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 			NULL, &animation_layout
 		),
 
-		.animation = {
-			.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
-			.secs_for_frame = secs_for_frame
+		.animation_context = {
+			.curr_frame = 0,
+			.cycle_base_time = 0,
+
+			.animation = {
+				.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
+				.secs_for_frame = secs_for_frame
+			}
 		},
 
-		.cycle_base_time = 0, .curr_frame = 0,
-		.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
-		.size = size, .max_yaw = glm_rad(max_yaw_degrees),
-		.max_pitch = glm_rad(max_pitch_degrees)
+		.appearance_context = {
+			.screen_space = {.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1], .size = size},
+			.world_space = {.max_yaw = glm_rad(max_yaw_degrees), .max_pitch = glm_rad(max_pitch_degrees)}
+		}
 	};
 }
 
@@ -185,7 +200,7 @@ void deinit_weapon_sprite(const WeaponSprite* const ws) {
 }
 
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event) {
-	update_weapon_sprite_animation(ws, event);
+	update_weapon_sprite_animation(&ws -> animation_context, event);
 
 	GLfloat sway[2];
 	get_sway(camera -> speed_xz_percent, sway);
@@ -193,9 +208,9 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	vec2 screen_corners[corners_per_quad];
 	get_screen_corners_from_sway(ws, sway, event -> screen_size, screen_corners);
 
-	vec3* const world_corners = ws -> world_corners;
-	get_world_corners_from_screen_corners(camera -> view_projection, screen_corners, world_corners);
-	rotate_from_camera_movement(ws -> max_yaw, ws -> max_pitch, camera, world_corners);
+	WeaponSpriteAppearanceContext* const appearance_context = &ws -> appearance_context;
+	get_world_corners_from_screen_corners(camera -> view_projection, screen_corners, appearance_context -> world_space.corners);
+	rotate_from_camera_movement(appearance_context, camera);
 }
 
 void draw_weapon_sprite(
@@ -227,8 +242,8 @@ void draw_weapon_sprite(
 
 	////////// Updating uniforms
 
-	UPDATE_UNIFORM(frame_index, 1ui, ws -> curr_frame);
-	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) ws -> world_corners);
+	UPDATE_UNIFORM(frame_index, 1ui, ws -> animation_context.curr_frame);
+	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) ws -> appearance_context.world_space.corners);
 	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, (GLfloat*) camera -> view_projection);
 
 	////////// This little part concerns CSM

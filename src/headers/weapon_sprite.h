@@ -8,14 +8,26 @@
 #include "csm.h"
 
 typedef struct {
-	const GLuint shader, texture;
-	const Animation animation;
-
-	Uint32 cycle_base_time;
 	buffer_size_t curr_frame;
+	Uint32 cycle_base_time;
+	const Animation animation;
+} WeaponSpriteAnimationContext;
 
-	const GLfloat frame_width_over_height, size, max_yaw, max_pitch;
-	vec3 world_corners[corners_per_quad];
+typedef struct {
+	const struct {
+		const GLfloat frame_width_over_height, size;
+	} screen_space;
+
+	struct {
+		const GLfloat max_yaw, max_pitch;
+		vec3 corners[corners_per_quad];
+	} world_space;
+} WeaponSpriteAppearanceContext;
+
+typedef struct {
+	const GLuint shader, texture;
+	WeaponSpriteAnimationContext animation_context;
+	WeaponSpriteAppearanceContext appearance_context;
 } WeaponSprite;
 
 /* Excluded: update_weapon_sprite_animation, circular_mapping_from_zero_to_one, get_sway,
