@@ -6,8 +6,6 @@
 #include "headers/shader.h"
 #include "headers/texture.h"
 
-#define CSM_SIZED_DEPTH_FORMAT GL_DEPTH_COMPONENT16
-
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
 
@@ -114,7 +112,7 @@ static void get_sub_frustum_light_view_projection_matrix(const Camera* const cam
 
 static GLuint init_csm_depth_layers(const GLsizei resolution[3]) {
 	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
-	glTexImage3D(TexSet, 0, CSM_SIZED_DEPTH_FORMAT, resolution[0], resolution[1], resolution[2], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage3D(TexSet, 0, OPENGL_SIZED_SHADOW_MAP_PIXEL_FORMAT, resolution[0], resolution[1], resolution[2], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	return depth_layers;
 }
 
