@@ -130,8 +130,8 @@ static void draw_sectors(
 	const GLuint shader = draw_context -> shader;
 
 	static GLint
-		camera_pos_world_space_id, light_dir_id, view_projection_id,
-		one_over_screen_size_id, UV_translation_id, camera_view_id, light_view_projection_matrices_id;
+		camera_pos_world_space_id, view_projection_id, one_over_screen_size_id,
+		UV_translation_id, camera_view_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
 
@@ -139,7 +139,6 @@ static void draw_sectors(
 	#define ARRAY_LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, 1, constants.lighting.param)
 
 	ON_FIRST_CALL(
-		INIT_UNIFORM(light_dir, shader);
 		INIT_UNIFORM(camera_pos_world_space, shader);
 		INIT_UNIFORM(view_projection, shader);
 		INIT_UNIFORM(one_over_screen_size, shader);
@@ -147,6 +146,7 @@ static void draw_sectors(
 		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
+		INIT_UNIFORM_VALUE(dir_to_light, shader, 3fv, 1, shadow_context -> dir_to_light);
 		INIT_UNIFORM_VALUE(enable_tone_mapping, shader, 1i, constants.lighting.tone_mapping.enabled);
 
 		LIGHTING_UNIFORM(ambient, 1f);
@@ -180,7 +180,6 @@ static void draw_sectors(
 	#undef ARRAY_LIGHTING_UNIFORM
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
-	UPDATE_UNIFORM(light_dir, 3fv, 1, shadow_context -> light_dir);
 
 	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &camera -> view_projection[0][0]);
 	UPDATE_UNIFORM(one_over_screen_size, 2f, 1.0f / screen_size[0], 1.0f / screen_size[1]);

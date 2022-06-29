@@ -11,7 +11,7 @@ typedef struct {
 	equals the length of `light_view_projection_matrices` */
 	const GLsizei resolution[2];
 
-	const vec3 light_dir, sub_frustum_scale;
+	const vec3 dir_to_light, sub_frustum_scale;
 
 	const List split_dists, light_view_projection_matrices;
 } CascadedShadowContext;
@@ -20,7 +20,7 @@ typedef struct {
 get_camera_sub_frustum_corners_and_center, get_light_view, get_light_projection, apply_texel_snapping,
 get_sub_frustum_light_view_projection_matrix, init_csm_depth_layers, init_csm_framebuffer */
 
-CascadedShadowContext init_shadow_context(const vec3 light_dir, const vec3 sub_frustum_scale,
+CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 sub_frustum_scale,
 	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei resolution[3]);
 
 void deinit_shadow_context(const CascadedShadowContext* const shadow_context);

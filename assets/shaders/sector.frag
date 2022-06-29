@@ -11,11 +11,11 @@ out vec3 color;
 uniform bool enable_tone_mapping;
 uniform float ambient, diffuse_strength, specular_strength, tone_mapping_max_white, noise_granularity;
 uniform vec2 specular_exponent_domain, one_over_screen_size, UV_translation;
-uniform vec3 camera_pos_world_space, light_dir, light_color, UV_translation_area[2];
+uniform vec3 camera_pos_world_space, dir_to_light, light_color, UV_translation_area[2];
 uniform sampler2DArray texture_sampler, normal_map_sampler;
 
 float diffuse(vec3 fragment_normal) {
-	float diffuse_amount = dot(fragment_normal, light_dir);
+	float diffuse_amount = dot(fragment_normal, dir_to_light);
 	return diffuse_strength * max(diffuse_amount, 0.0f);
 }
 
@@ -24,7 +24,7 @@ float specular(vec3 texture_color, vec3 fragment_normal) {
 	Also, the specular calculation uses Blinn-Phong, rather than just Phong. */
 
 	vec3 view_dir = normalize(camera_pos_world_space - fragment_pos_world_space);
-	vec3 halfway_dir = normalize(light_dir + view_dir);
+	vec3 halfway_dir = normalize(dir_to_light + view_dir);
 	float cos_angle_of_incidence = max(dot(fragment_normal, halfway_dir), 0.0f);
 
 	//////////

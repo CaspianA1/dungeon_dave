@@ -36,9 +36,9 @@ static void get_camera_sub_frustum_corners_and_center(const Camera* const camera
 	glm_frustum_center(camera_sub_frustum_corners, camera_sub_frustum_center);
 }
 
-static void get_light_view(const vec4 camera_sub_frustum_center, const vec3 light_dir, mat4 light_view) {
+static void get_light_view(const vec4 camera_sub_frustum_center, const vec3 dir_to_light, mat4 light_view) {
 	vec3 light_eye; // TODO: give this a better name
-	glm_vec3_add((GLfloat*) camera_sub_frustum_center, (GLfloat*) light_dir, light_eye);
+	glm_vec3_add((GLfloat*) camera_sub_frustum_center, (GLfloat*) dir_to_light, light_eye);
 	glm_lookat(light_eye, (GLfloat*) camera_sub_frustum_center, (vec3) {0.0f, 1.0f, 0.0f}, light_view);
 }
 
@@ -102,7 +102,7 @@ static void get_sub_frustum_light_view_projection_matrix(const Camera* const cam
 
 	mat4 light_view, light_projection;
 
-	get_light_view(camera_sub_frustum_center, shadow_context -> light_dir, light_view);
+	get_light_view(camera_sub_frustum_center, shadow_context -> dir_to_light, light_view);
 	get_light_projection(camera_sub_frustum_corners, shadow_context -> sub_frustum_scale, light_view, light_projection);
 
 	glm_mul(light_projection, light_view, light_view_projection);
@@ -124,7 +124,8 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_layers, 0);
-	glDrawBuffer(GL_NONE);
+	glDrawBuffer(GL_NONE); // Not drawing into any color buffers
+	glReadBuffer(GL_NONE); // Not reading from any color buffers
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		FAIL(CreateFramebuffer, "OpenGL error is '%s'", get_GL_error());
@@ -134,7 +135,7 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 	return framebuffer;
 }
 
-CascadedShadowContext init_shadow_context(const vec3 light_dir, const vec3 sub_frustum_scale,
+CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 sub_frustum_scale,
 	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei resolution[3]) {
 
 	const GLsizei
@@ -177,7 +178,7 @@ CascadedShadowContext init_shadow_context(const vec3 light_dir, const vec3 sub_f
 
 		.resolution = {width, height},
 
-		.light_dir = {light_dir[0], light_dir[1], light_dir[2]},
+		.dir_to_light = {dir_to_light[0], dir_to_light[1], dir_to_light[2]},
 		.sub_frustum_scale = {sub_frustum_scale[0], sub_frustum_scale[1], sub_frustum_scale[2]},
 		.split_dists = split_dists, .light_view_projection_matrices = light_view_projection_matrices
 	};
