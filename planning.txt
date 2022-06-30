@@ -3,6 +3,7 @@ Levels:
 - A castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji - running along the mountainside
 - A level based on the Zhangjiajie region
 - A map like this one: https://www.planetminecraft.com/project/the-sultans-palace-3351849/ (can look up similar Sultan maps for Minecraft)
+- Maybe a level based in a lost city of gold
 
 Final lighting model:
 - Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
