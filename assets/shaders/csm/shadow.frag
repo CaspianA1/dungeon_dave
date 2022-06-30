@@ -25,9 +25,7 @@ float get_average_occluder_depth(vec2 UV, uint layer_index, int sample_radius) {
 	return average_occluder_depth / (samples_across * samples_across);
 }
 
-float get_csm_shadow_from_layer(uint layer_index, vec3 fragment_pos_world_space) {
-	const int sample_radius = 1;
-
+float get_csm_shadow_from_layer(uint layer_index, vec3 fragment_pos_world_space, int sample_radius) {
 	const float
 		esm_constant = 100.0f, layer_scaling_component = 1.0f; // Palace
 		// esm_constant = 300.0f, layer_scaling_component = 1.8f; // Terrain
@@ -63,9 +61,11 @@ float get_blended_csm_shadow(uint layer_index, uint depth_range_shift, float wor
 	it may be over 1. This clamps the blend factor between 0 and 1 for when that happens. */
 	float percent_between = clamp(dist_ahead_of_last_split / depth_range, 0.0f, 1.0f);
 
+	const int sample_radius = 1;
+
 	return mix(
-		get_csm_shadow_from_layer(prev_layer_index, fragment_pos_world_space),
-		get_csm_shadow_from_layer(layer_index, fragment_pos_world_space),
+		get_csm_shadow_from_layer(prev_layer_index, fragment_pos_world_space, sample_radius),
+		get_csm_shadow_from_layer(layer_index, fragment_pos_world_space, sample_radius),
 		percent_between
 	);
 }
