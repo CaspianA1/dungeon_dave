@@ -114,6 +114,9 @@ static void* main_init(void) {
 
 	const GLfloat far_clip_dist = compute_world_far_clip_dist(heightmap, map_size);
 
+	const GLsizei num_cascades = 8; // 8 for palace, 6 for terrain
+	specify_cascade_count_before_any_shader_compilation(num_cascades);
+
 	//////////
 
 	SceneContext scene_context = {
@@ -149,12 +152,12 @@ static void* main_init(void) {
 			// Terrain:
 			/*
 			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.5f, 1.5f, 10.0f},
-			far_clip_dist, 0.3f, (GLsizei[3]) {1024, 1024, 6}
+			far_clip_dist, 0.3f, (GLsizei[3]) {1024, 1024, num_cascades}
 			*/
 
 			// Palace:
 			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.5f, 1.5f, 5.0f},
-			far_clip_dist, 0.4f, (GLsizei[3]) {1024, 1024, 8}
+			far_clip_dist, 0.4f, (GLsizei[3]) {1024, 1024, num_cascades}
 		),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),

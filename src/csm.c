@@ -10,7 +10,6 @@
 https://learnopengl.com/Guest-Articles/2021/CSM
 
 For later on:
-- Writing to `num_cascades.geom` before any shaders are initialized
 - Texel snapping
 - Merging the master branch with this one
 - A world-space approach to merging the AABB of the sub frustum box
@@ -131,6 +130,24 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return framebuffer;
+}
+
+/* For shaders, he number of cascades equals the value of the macro `NUM_CASCADES`
+in `num_cascades.geom`. This is a macro, and not a uniform, since the shadow
+geometry shader must clone the scene geometry a fixed number of times
+(specified at compile time). `cascade_split_distances` has a compile-time size
+as well. So, before all shader compilation, this function writes the number of
+cascades to `num_cascades.geom.` */
+void specify_cascade_count_before_any_shader_compilation(const GLsizei num_cascades) {
+	FILE* const file = open_file_safely(ASSET_PATH("shaders/csm/num_cascades.geom"), "w");
+
+	const byte* const opengl_version = constants.window.opengl_major_minor_version;
+	const GLchar* const file_description = "This file is written to before any other shaders include it";
+
+	fprintf(file, "#version %u%u0 core\n\n// %s\n#define NUM_CASCADES %uu\n",
+		opengl_version[0], opengl_version[1], file_description, num_cascades);
+
+	fclose(file);
 }
 
 CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 sub_frustum_scale,

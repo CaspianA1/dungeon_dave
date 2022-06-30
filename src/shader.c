@@ -93,14 +93,6 @@ static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], c
 	return shader;
 }
 
-////////// File utils
-
-static FILE* open_file_safely(const char* const path, const char* const mode) {
-	FILE* const file = fopen(path, mode);
-	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);
-	return file;
-}
-
 static char* read_file_contents(const char* const path) {
 	FILE* const file = open_file_safely(path, "r");
 
@@ -119,8 +111,6 @@ static char* read_file_contents(const char* const path) {
 
 	return data;
 }
-
-//////////
 
 static GLchar* get_source_for_included_file(List* const dependency_list,
 	const GLchar* const includer_path, const GLchar* const included_path) {

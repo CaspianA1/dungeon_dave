@@ -162,6 +162,8 @@ void enable_all_culling(void);
 // Note: `x` and `y` are top-down here (making them technically `x` and `z`).
 byte sample_map_point(const byte* const map, const byte x, const byte y, const byte map_width);
 
-const char* get_GL_error(void);
+const GLchar* get_GL_error(void);
+
+FILE* open_file_safely(const GLchar* const path, const GLchar* const mode);
 
 #endif

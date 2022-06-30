@@ -239,7 +239,7 @@ byte sample_map_point(const byte* const map, const byte x, const byte y, const b
 	return map[y * map_width + x];
 }
 
-const char* get_GL_error(void) {
+const GLchar* get_GL_error(void) {
 	#define ERROR_CASE(error) case GL_##error: return #error;
 
 	switch (glGetError()) {
@@ -253,6 +253,12 @@ const char* get_GL_error(void) {
 	}
 
 	#undef ERROR_CASE
+}
+
+FILE* open_file_safely(const GLchar* const path, const GLchar* const mode) {
+	FILE* const file = fopen(path, mode);
+	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);
+	return file;
 }
 
 #endif

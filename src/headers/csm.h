@@ -20,6 +20,8 @@ typedef struct {
 get_camera_sub_frustum_corners_and_center, get_light_view, get_light_projection, apply_texel_snapping,
 get_sub_frustum_light_view_projection_matrix, init_csm_depth_layers, init_csm_framebuffer */
 
+void specify_cascade_count_before_any_shader_compilation(const GLsizei num_cascades);
+
 CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 sub_frustum_scale,
 	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei resolution[3]);
 

@@ -1,4 +1,4 @@
 #version 400 core
 
-// TODO: modify this before the shaders for any level are compiled
+// This file is written to before any other shaders include it
 #define NUM_CASCADES 8u
