@@ -10,7 +10,7 @@ out vec3 color;
 
 uniform bool enable_tone_mapping;
 uniform float ambient, diffuse_strength, specular_strength, tone_mapping_max_white, noise_granularity;
-uniform vec2 specular_exponent_domain, one_over_screen_size, UV_translation;
+uniform vec2 specular_exponent_domain, UV_translation;
 uniform vec3 camera_pos_world_space, dir_to_light, light_color, UV_translation_area[2];
 uniform sampler2DArray texture_sampler, normal_map_sampler;
 
@@ -64,16 +64,15 @@ vec3 apply_tone_mapping(const vec3 color, const float max_white) {
 	return color * (new_luminance / old_luminance);
 }
 
-vec3 noise_for_banding_removal(const vec3 color) {
-	vec2 screen_fragment_pos = gl_FragCoord.xy * one_over_screen_size;
-	float random_value = fract(sin(dot(screen_fragment_pos, vec2(12.9898f, 78.233f))) * 43758.5453f);
+vec3 noise_for_banding_removal(const vec2 seed, const vec3 color) {
+	float random_value = fract(sin(dot(seed, vec2(12.9898f, 78.233f))) * 43758.5453f);
 	return color + mix(-noise_granularity, noise_granularity, random_value);
 }
 
-vec3 postprocess_light(const vec3 color) {
+vec3 postprocess_light(const vec2 UV, const vec3 color) {
 	vec3 tone_mapped_color = apply_tone_mapping(color, tone_mapping_max_white);
 	tone_mapped_color = mix(color, tone_mapped_color, float(enable_tone_mapping));
-	return noise_for_banding_removal(tone_mapped_color);
+	return noise_for_banding_removal(UV, tone_mapped_color);
 }
 
 /* Each level may have an area where sector UV
@@ -92,5 +91,5 @@ vec3 retranslate_UV(const vec3 untranslated_UV) {
 void main(void) {
 	vec3 translated_UV = retranslate_UV(UV);
 	color = calculate_light(texture(texture_sampler, translated_UV).rgb, get_fragment_normal(translated_UV));
-	color = postprocess_light(color);
+	color = postprocess_light(translated_UV.xy, color);
 }

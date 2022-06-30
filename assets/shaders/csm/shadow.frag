@@ -10,6 +10,9 @@ uniform float cascade_split_distances[NUM_CASCADE_SPLITS];
 uniform mat4 light_view_projection_matrices[NUM_CASCADES];
 uniform sampler2DArray shadow_cascade_sampler;
 
+/* TODO: perhaps use Vogel disk or stratified Poisson sampling instead:
+- https://www.gamedev.net/tutorials/programming/graphics/contact-hardening-soft-shadows-made-fast-r4906/
+- http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/ */
 float get_average_occluder_depth(const vec2 UV, const uint layer_index, const int sample_radius) {
 	float average_occluder_depth = 0.0f;
 	vec2 texel_size = 1.0f / textureSize(shadow_cascade_sampler, 0).xy;
@@ -25,9 +28,11 @@ float get_average_occluder_depth(const vec2 UV, const uint layer_index, const in
 	return average_occluder_depth / (samples_across * samples_across);
 }
 
-float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_world_space, const int sample_radius) {
+float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_world_space) {
+	const int sample_radius = 1;
+
 	const float
-		esm_constant = 100.0f, layer_scaling_component = 1.0f; // Palace
+		esm_constant = 85.0f, layer_scaling_component = 1.0f; // Palace
 		// esm_constant = 300.0f, layer_scaling_component = 1.8f; // Terrain
 
 	/* (TODO) ESM scaling:
@@ -61,11 +66,9 @@ float get_blended_csm_shadow(const uint layer_index, const uint depth_range_shif
 	it may be over 1. This clamps the blend factor between 0 and 1 for when that happens. */
 	float percent_between = clamp(dist_ahead_of_last_split / depth_range, 0.0f, 1.0f);
 
-	const int sample_radius = 1;
-
 	return mix(
-		get_csm_shadow_from_layer(prev_layer_index, fragment_pos_world_space, sample_radius),
-		get_csm_shadow_from_layer(layer_index, fragment_pos_world_space, sample_radius),
+		get_csm_shadow_from_layer(prev_layer_index, fragment_pos_world_space),
+		get_csm_shadow_from_layer(layer_index, fragment_pos_world_space),
 		percent_between
 	);
 }

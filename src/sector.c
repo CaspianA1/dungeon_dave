@@ -122,16 +122,15 @@ void draw_all_sectors_for_shadow_map(const void* const param) {
 static void draw_sectors(
 	const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
-	const Camera* const camera, const buffer_size_t num_visible_faces,
-	const GLint screen_size[2]) {
+	const Camera* const camera, const buffer_size_t num_visible_faces) {
 
 	const BatchDrawContext* const draw_context = &sector_context -> draw_context;
 
 	const GLuint shader = draw_context -> shader;
 
 	static GLint
-		camera_pos_world_space_id, view_projection_id, one_over_screen_size_id,
-		UV_translation_id, camera_view_id, light_view_projection_matrices_id;
+		camera_pos_world_space_id, view_projection_id, UV_translation_id,
+		camera_view_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
 
@@ -141,7 +140,6 @@ static void draw_sectors(
 	ON_FIRST_CALL(
 		INIT_UNIFORM(camera_pos_world_space, shader);
 		INIT_UNIFORM(view_projection, shader);
-		INIT_UNIFORM(one_over_screen_size, shader);
 		INIT_UNIFORM(UV_translation, shader);
 		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
@@ -180,9 +178,7 @@ static void draw_sectors(
 	#undef ARRAY_LIGHTING_UNIFORM
 
 	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
-
 	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &camera -> view_projection[0][0]);
-	UPDATE_UNIFORM(one_over_screen_size, 2f, 1.0f / screen_size[0], 1.0f / screen_size[1]);
 
 	////////// This little part concerns CSM
 
@@ -230,7 +226,7 @@ static buffer_size_t get_num_renderable_from_cullable(const byte* const typeless
 // This is just a utility function
 void draw_visible_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
-	const Camera* const camera, const GLint screen_size[2]) {
+	const Camera* const camera) {
 
 	const buffer_size_t num_visible_faces = cull_from_frustum_into_gpu_buffer(
 		&sector_context -> draw_context, sector_context -> sectors, camera -> frustum_planes,
@@ -239,7 +235,7 @@ void draw_visible_sectors(const SectorContext* const sector_context,
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0) draw_sectors(sector_context,
-		shadow_context, camera, num_visible_faces, screen_size);
+		shadow_context, camera, num_visible_faces);
 }
 
 ////////// Initialization and deinitialization

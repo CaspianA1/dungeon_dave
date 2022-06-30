@@ -103,7 +103,7 @@ static const struct {
 
 	.lighting = {
 		.ambient = 0.3f, .diffuse_strength = 0.8f, .specular_strength = 0.7f,
-		.specular_exponent_domain = {32.0f, 96.0f}, .noise_granularity = 0.3f / 255.0f,
+		.specular_exponent_domain = {32.0f, 96.0f}, .noise_granularity = 0.2f / 255.0f,
 		.light_color = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
 		.tone_mapping = {.enabled = true, .max_white = 1.5f}
 	},
