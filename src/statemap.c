@@ -51,7 +51,7 @@ void set_statemap_bit(const StateMap statemap, const buffer_size_t bits_x, const
 void set_statemap_area(const StateMap statemap, const buffer_size_t area[4]) {
 	const buffer_size_t start_x = area[0], start_y = area[1];
 
-	// TODO: make this more efficient by finding a way to set many bits at once across
+	// TODO: make this more efficient by finding a way to set many bits at once across (with an integer type that's as wide as possible)
 	for (buffer_size_t y = start_y; y < start_y + area[3]; y++) {
 		for (buffer_size_t x = start_x; x < start_x + area[2]; x++)
 			set_statemap_bit(statemap, x, y);
