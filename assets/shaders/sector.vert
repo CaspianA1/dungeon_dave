@@ -24,7 +24,7 @@ const struct FaceAttribute {
 void main(void) {
  	////////// Setting face_normal and UV
 
-	face_id = face_info_bits & 7u;
+	face_id = face_info_bits & 7u; // Extracting the first 3 bits
 	FaceAttribute face_attribute = face_attributes[face_id];
 
 	vec2 UV_xy = face_attribute.uv_signs * vec2(
@@ -32,7 +32,7 @@ void main(void) {
 		vertex_pos_world_space[face_attribute.uv_indices.y]
 	);
 
-	UV = vec3(UV_xy, face_info_bits >> 3u);
+	UV = vec3(UV_xy, face_info_bits >> 3u); // Shifting over to get the texture id
 
 	////////// Setting world_depth_value, fragment_pos_world_space, and gl_Position
 

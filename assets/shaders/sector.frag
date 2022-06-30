@@ -14,12 +14,12 @@ uniform vec2 specular_exponent_domain, one_over_screen_size, UV_translation;
 uniform vec3 camera_pos_world_space, dir_to_light, light_color, UV_translation_area[2];
 uniform sampler2DArray texture_sampler, normal_map_sampler;
 
-float diffuse(vec3 fragment_normal) {
+float diffuse(const vec3 fragment_normal) {
 	float diffuse_amount = dot(fragment_normal, dir_to_light);
 	return diffuse_strength * max(diffuse_amount, 0.0f);
 }
 
-float specular(vec3 texture_color, vec3 fragment_normal) {
+float specular(const vec3 texture_color, const vec3 fragment_normal) {
 	/* Brighter texture colors have more specularity, and stronger highlights.
 	Also, the specular calculation uses Blinn-Phong, rather than just Phong. */
 
@@ -34,13 +34,13 @@ float specular(vec3 texture_color, vec3 fragment_normal) {
 	return specular_strength * texture_color_strength * pow(cos_angle_of_incidence, specular_exponent);
 }
 
-vec3 calculate_light(vec3 texture_color, vec3 fragment_normal) {
+vec3 calculate_light(const vec3 texture_color, const vec3 fragment_normal) {
 	float non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);
-	float light_strength = ambient + non_ambient * csm_shadow(world_depth_value, fragment_pos_world_space);
+	float light_strength = ambient + non_ambient * get_csm_shadow(world_depth_value, fragment_pos_world_space);
 	return light_strength * light_color * texture_color;
 }
 
-vec3 get_fragment_normal(vec3 UV) {
+vec3 get_fragment_normal(const vec3 UV) {
 	// `t` = tangent space normal. Normalized b/c linear filtering may unnormalize it.
 	vec3 t = normalize(texture(normal_map_sampler, UV).rgb * 2.0f - 1.0f);
 
@@ -57,36 +57,36 @@ vec3 get_fragment_normal(vec3 UV) {
 }
 
 // https://64.github.io/tonemapping/ (Reinhard Extended Luminance)
-vec3 apply_tone_mapping(vec3 color, float max_white) {
+vec3 apply_tone_mapping(const vec3 color, const float max_white) {
 	float old_luminance = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
 	float numerator = old_luminance * (1.0f + (old_luminance / (max_white * max_white)));
 	float new_luminance = numerator / (1.0f + old_luminance);
 	return color * (new_luminance / old_luminance);
 }
 
-vec3 noise_for_banding_removal(vec3 color) {
+vec3 noise_for_banding_removal(const vec3 color) {
 	vec2 screen_fragment_pos = gl_FragCoord.xy * one_over_screen_size;
 	float random_value = fract(sin(dot(screen_fragment_pos, vec2(12.9898f, 78.233f))) * 43758.5453f);
 	return color + mix(-noise_granularity, noise_granularity, random_value);
 }
 
-vec3 postprocess_light(vec3 color) {
+vec3 postprocess_light(const vec3 color) {
 	vec3 tone_mapped_color = apply_tone_mapping(color, tone_mapping_max_white);
-	color = mix(color, tone_mapped_color, float(enable_tone_mapping));
-	return noise_for_banding_removal(color);
+	tone_mapped_color = mix(color, tone_mapped_color, float(enable_tone_mapping));
+	return noise_for_banding_removal(tone_mapped_color);
 }
 
 /* Each level may have an area where sector UV
 coordinates are re-translated for artistic purposes */
-vec3 retranslate_UV(vec3 in_UV) {
+vec3 retranslate_UV(const vec3 untranslated_UV) {
 	bvec3
 		in_top_left_extent = bvec3(step(UV_translation_area[0], fragment_pos_world_space)),
 		in_bottom_right_extent = bvec3(step(fragment_pos_world_space, UV_translation_area[1]));
 
 	bool in_translation_area = in_top_left_extent == in_bottom_right_extent == true;
 
-	in_UV.xy += UV_translation * float(in_translation_area);
-	return in_UV;
+	vec2 translated_UV_xy = UV_translation * float(in_translation_area) + untranslated_UV.xy;
+	return vec3(translated_UV_xy, untranslated_UV.z);
 }
 
 void main(void) {

@@ -10,7 +10,7 @@ uniform float cascade_split_distances[NUM_CASCADE_SPLITS];
 uniform mat4 light_view_projection_matrices[NUM_CASCADES];
 uniform sampler2DArray shadow_cascade_sampler;
 
-float get_average_occluder_depth(vec2 UV, uint layer_index, int sample_radius) {
+float get_average_occluder_depth(const vec2 UV, const uint layer_index, const int sample_radius) {
 	float average_occluder_depth = 0.0f;
 	vec2 texel_size = 1.0f / textureSize(shadow_cascade_sampler, 0).xy;
 
@@ -25,7 +25,7 @@ float get_average_occluder_depth(vec2 UV, uint layer_index, int sample_radius) {
 	return average_occluder_depth / (samples_across * samples_across);
 }
 
-float get_csm_shadow_from_layer(uint layer_index, vec3 fragment_pos_world_space, int sample_radius) {
+float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_world_space, const int sample_radius) {
 	const float
 		esm_constant = 100.0f, layer_scaling_component = 1.0f; // Palace
 		// esm_constant = 300.0f, layer_scaling_component = 1.8f; // Terrain
@@ -48,7 +48,7 @@ float get_csm_shadow_from_layer(uint layer_index, vec3 fragment_pos_world_space,
 	return clamp(in_light_percentage, 0.0f, 1.0f);
 }
 
-float get_blended_csm_shadow(uint layer_index, uint depth_range_shift, float world_depth_value, vec3 fragment_pos_world_space) {
+float get_blended_csm_shadow(const uint layer_index, const uint depth_range_shift, const float world_depth_value, const vec3 fragment_pos_world_space) {
 	// If the layer index equals 0, this makes the previous layer 0
 	uint prev_layer_index = max(int(layer_index) - 1, 0);
 
@@ -70,7 +70,7 @@ float get_blended_csm_shadow(uint layer_index, uint depth_range_shift, float wor
 	);
 }
 
-float csm_shadow(float world_depth_value, vec3 fragment_pos_world_space) {
+float get_csm_shadow(const float world_depth_value, const vec3 fragment_pos_world_space) {
 	uint layer_index = 0;
 
 	while (layer_index < NUM_CASCADE_SPLITS
