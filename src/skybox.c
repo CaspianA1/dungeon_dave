@@ -44,7 +44,7 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 	const GLuint skybox_texture = preinit_texture(TexSkybox, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SKYBOX_MIN_FILTER, false);
 
 	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size, SDL_PIXEL_FORMAT);
-	const void* const face_surface_pixels = face_surface -> pixels;
+	void* const face_surface_pixels = face_surface -> pixels;
 
 	// Right, left, top, bottom, back, front
 	const ivec2 src_origins[faces_per_cubemap] = {
@@ -55,7 +55,6 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 		{cube_size, cube_size},
 		{twice_cube_size + cube_size, cube_size}
 	};
-
 
 	WITH_SURFACE_PIXEL_ACCESS(face_surface,
 		for (byte i = 0; i < faces_per_cubemap; i++) {
