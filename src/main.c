@@ -189,6 +189,8 @@ static void main_drawer(void* const app_context, const Event* const event) {
 
 	////////// Some variable initialization + object updating
 
+	const GLfloat curr_time_secs = event -> curr_time_secs;
+
 	const SectorContext* const sector_context = &scene_context -> sector_context;
 	const BillboardContext* const billboard_context = &scene_context -> billboard_context;
 	const CascadedShadowContext* const shadow_context = &scene_context -> cascaded_shadow_context;
@@ -197,7 +199,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	Camera* const camera = &scene_context -> camera;
 
 	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
-	update_billboards(billboard_context);
+	update_billboards(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
 
 	//////////
@@ -206,7 +208,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 
 	////////// The main drawing code
 
-	draw_visible_sectors(sector_context, shadow_context, camera);
+	draw_visible_sectors(sector_context, shadow_context, camera, curr_time_secs);
 	draw_visible_billboards(billboard_context, shadow_context, camera);
 
 	WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE, // Not writing to the depth buffer for these

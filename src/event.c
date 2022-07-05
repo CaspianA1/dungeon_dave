@@ -37,7 +37,9 @@ Event get_next_event(void) {
 		.mouse_movement_percent = {
 			(GLfloat) -mouse_movement[0] / screen_width,
 			(GLfloat) -mouse_movement[1] / screen_height
-		}
+		},
+
+		.curr_time_secs = SDL_GetTicks() / 1000.0f
 	};
 }
 

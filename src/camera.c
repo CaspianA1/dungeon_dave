@@ -299,6 +299,7 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 
 	/* Using the high-resolution SDL timer (instead of SDL_GetTicks)
 	because lots of timing accuracy is needed for good physics */
+
 	const Uint64 curr_time = SDL_GetPerformanceCounter();
 	const GLfloat delta_time = (GLfloat) (curr_time - camera -> last_time) * one_over_performance_freq;
 	camera -> last_time = curr_time;

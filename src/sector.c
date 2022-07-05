@@ -122,7 +122,8 @@ void draw_all_sectors_for_shadow_map(const void* const param) {
 static void draw_sectors(
 	const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
-	const Camera* const camera, const buffer_size_t num_visible_faces) {
+	const Camera* const camera, const buffer_size_t num_visible_faces,
+	const GLfloat curr_time_secs) {
 
 	const BatchDrawContext* const draw_context = &sector_context -> draw_context;
 
@@ -169,7 +170,7 @@ static void draw_sectors(
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
 
-	const GLfloat t = SDL_GetTicks() / 3000.0f;
+	const GLfloat t = curr_time_secs / 3.0f;
 	UPDATE_UNIFORM(UV_translation, 2f, cosf(t), tanf(t));
 
 	//////////
@@ -226,7 +227,7 @@ static buffer_size_t get_num_renderable_from_cullable(const byte* const typeless
 // This is just a utility function
 void draw_visible_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
-	const Camera* const camera) {
+	const Camera* const camera, const GLfloat curr_time_secs) {
 
 	const buffer_size_t num_visible_faces = cull_from_frustum_into_gpu_buffer(
 		&sector_context -> draw_context, sector_context -> sectors, camera -> frustum_planes,
@@ -235,7 +236,7 @@ void draw_visible_sectors(const SectorContext* const sector_context,
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0) draw_sectors(sector_context,
-		shadow_context, camera, num_visible_faces);
+		shadow_context, camera, num_visible_faces, curr_time_secs);
 }
 
 ////////// Initialization and deinitialization

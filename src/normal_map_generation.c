@@ -61,7 +61,7 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 						left_x = int_max(x - 1, 0),             right_x = int_min(x + 1, w - 1),
 						top_y = int_max(y - 1, subtexture_top), bottom_y = int_min(y + 1, subtexture_bottom);
 
-					const GLfloat // These samples are in a range from 0 to 255
+					const GLfloat // These samples are in a range from 0 to `constants.max_byte_value`
 						tl = sobel_sample(src, left_x, top_y),  tm = sobel_sample(src, x, top_y),
 						tr = sobel_sample(src, right_x, top_y), ml = sobel_sample(src, left_x, y),
 						mr = sobel_sample(src, right_x, y),     bl = sobel_sample(src, left_x, bottom_y),

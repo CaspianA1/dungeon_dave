@@ -8,8 +8,8 @@
 #include "csm.h"
 
 typedef struct {
+	GLfloat cycle_base_time;
 	buffer_size_t curr_frame;
-	Uint32 cycle_base_time;
 	const Animation animation;
 } WeaponSpriteAnimationContext;
 

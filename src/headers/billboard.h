@@ -26,7 +26,7 @@ typedef struct {
 
 ////////// Excluded: draw_billboards, make_aabb, get_renderable_index_from_cullable, get_num_renderable_from_cullable
 
-void update_billboards(const BillboardContext* const billboard_context);
+void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs);
 
 void draw_visible_billboards(const BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context, const Camera* const camera);

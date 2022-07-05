@@ -10,8 +10,6 @@
 // TODO: incorporate the palace city texture into this in some way
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
-	(void) param;
-
 	static GLint brightness_id;
 
 	ON_FIRST_CALL(
@@ -20,12 +18,14 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		use_texture(drawable -> diffuse_texture, shader, "texture_sampler", TexPlain, TITLE_SCREEN_LOGO_TEXTURE_UNIT);
 	);
 
-	const GLfloat
-		m = constants.title_screen.min_brightness,
-		time_seed = (GLfloat) SDL_GetTicks() / constants.title_screen.brightness_repeat_ms;
+	const GLfloat curr_time_secs = *(GLfloat*) param;
 
-	// This fluctuates between `m` and 1.0f
-	const GLfloat brightness = (sinf(time_seed * PI) * 0.5f + 0.5f) * (1.0f - m) + m;
+	const GLfloat
+		min = constants.title_screen.min_brightness,
+		time_seed = curr_time_secs / constants.title_screen.brightness_repeat_secs;
+
+	const GLfloat brightness = (sinf(time_seed * PI) * 0.5f + 0.5f) * (1.0f - min) + min;
+
 	UPDATE_UNIFORM(brightness, 1f, brightness);
 }
 
@@ -48,7 +48,7 @@ bool tick_title_screen(TitleScreen* const title_screen, const Event* const event
 		title_screen -> active = false;
 
 	const bool active = title_screen -> active;
-	if (active) draw_drawable(title_screen -> drawable, corners_per_quad, NULL);
+	if (active) draw_drawable(title_screen -> drawable, corners_per_quad, &event -> curr_time_secs);
 	return active;
 }
 

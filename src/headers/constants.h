@@ -45,10 +45,7 @@ static const struct {
 		const GLint size[2];
 	} window;
 
-	const struct {
-		const GLint brightness_repeat_ms;
-		const GLfloat min_brightness;
-	} title_screen;
+	const struct {const GLfloat brightness_repeat_secs, min_brightness;} title_screen;
 
 	const struct {
 		/* Brighter texture colors get a stronger specular output,
@@ -108,7 +105,7 @@ static const struct {
 		.size = {800, 600}
 	},
 
-	.title_screen = {.brightness_repeat_ms = 500, .min_brightness = 0.7f},
+	.title_screen = {.brightness_repeat_secs = 0.5f, .min_brightness = 0.7f},
 
 	.lighting = {
 		.ambient = 0.3f, .diffuse_strength = 0.8f, .specular_strength = 0.7f,

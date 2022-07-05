@@ -3,8 +3,11 @@
 
 #include "headers/animation.h"
 
-void update_animation_information(const Uint32 cycle_base_time, buffer_size_t* const texture_id, const Animation animation) {
-	const GLfloat total_time = (SDL_GetTicks() - cycle_base_time) / 1000.0f;
+void update_animation_information(
+	const GLfloat curr_time_secs, const GLfloat cycle_base_time,
+	const Animation animation, buffer_size_t* const texture_id) {
+
+	const GLfloat total_time = curr_time_secs - cycle_base_time;
 	const buffer_size_t frames_so_far = (buffer_size_t) ceilf(total_time / animation.secs_for_frame);
 
 	const buffer_size_t texture_id_range = animation.texture_id_range.end - animation.texture_id_range.start;

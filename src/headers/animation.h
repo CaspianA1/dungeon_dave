@@ -13,6 +13,8 @@ typedef struct {
 	const GLsizei frames_across, frames_down, total_frames;
 } AnimationLayout;
 
-void update_animation_information(const Uint32 cycle_base_time, buffer_size_t* const texture_id, const Animation animation);
+void update_animation_information(
+	const GLfloat curr_time_secs, const GLfloat cycle_base_time,
+	const Animation animation, buffer_size_t* const texture_id);
 
 #endif

@@ -12,7 +12,7 @@
 3. Divide .rgb by .a (already doing) */
 
 // This just updates the billboard animation instances at the moment
-void update_billboards(const BillboardContext* const billboard_context) {
+void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs) {
 	const List* const animation_instances = &billboard_context -> animation_instances;
 
 	BillboardAnimationInstance* const animation_instance_data = animation_instances -> data;
@@ -21,15 +21,16 @@ void update_billboards(const BillboardContext* const billboard_context) {
 
 	/* Billboard animations are constantly looping, so their
 	cycle base time is for when this function is first called */
-	static Uint32 cycle_base_time;
-	ON_FIRST_CALL(cycle_base_time = SDL_GetTicks(););
+	static GLfloat cycle_base_time;
+	ON_FIRST_CALL(cycle_base_time = curr_time_secs;);
 
 	for (buffer_size_t i = 0; i < animation_instances -> length; i++) {
 		BillboardAnimationInstance* const animation_instance = animation_instance_data + i;
 
-		update_animation_information(cycle_base_time,
-			&billboard_data[animation_instance -> ids.billboard].texture_id,
-			animation_data[animation_instance -> ids.animation]);
+		update_animation_information(
+			curr_time_secs, cycle_base_time,
+			animation_data[animation_instance -> ids.animation],
+			&billboard_data[animation_instance -> ids.billboard].texture_id);
 	}
 }
 

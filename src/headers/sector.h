@@ -29,7 +29,7 @@ void draw_all_sectors_for_shadow_map(const void* const param);
 
 void draw_visible_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
-	const Camera* const camera);
+	const Camera* const camera, const GLfloat curr_time_secs);
 
 SectorContext init_sector_context(const byte* const heightmap, const byte* const texture_id_map,
 	const byte map_width, const byte map_height, const bool apply_normal_map_blur, const GLuint texture_set);

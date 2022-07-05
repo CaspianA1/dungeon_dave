@@ -33,15 +33,19 @@ Plan for getting cast shadows in weapon sprites:
 
 static void update_weapon_sprite_animation(WeaponSpriteAnimationContext* const animation_context, const Event* const event) {
 	buffer_size_t curr_frame = animation_context -> curr_frame;
+	const GLfloat curr_time_secs = event -> curr_time_secs;
 
 	if (curr_frame == 0) {
 		if (CHECK_BITMASK(event -> movement_bits, BIT_USE_WEAPON)) {
-			animation_context -> cycle_base_time = SDL_GetTicks();
+			animation_context -> cycle_base_time = curr_time_secs;
 			curr_frame++;
 		}
 	}
-	else update_animation_information(animation_context -> cycle_base_time,
-		&curr_frame, animation_context -> animation);
+	else update_animation_information(
+		curr_time_secs,
+		animation_context -> cycle_base_time,
+		animation_context -> animation, &curr_frame
+	);
 
 	animation_context -> curr_frame = curr_frame;
 }
@@ -64,11 +68,11 @@ static GLfloat circular_mapping_from_zero_to_one(const GLfloat x) {
 	return sqrtf(1.0f - x_minus_one * x_minus_one);
 }
 
-static void get_sway(const GLfloat speed_xz_percent, GLfloat sway[2]) {
+static void get_sway(const GLfloat curr_time_secs, const GLfloat speed_xz_percent, GLfloat sway[2]) {
 	const GLfloat smooth_speed_xz_percent = circular_mapping_from_zero_to_one(speed_xz_percent);
 
 	const GLfloat
-		time_pace = sinf((SDL_GetTicks() / 1000.0f) * PI / constants.weapon_sprite.time_for_half_movement_cycle),
+		time_pace = sinf(curr_time_secs * PI / constants.weapon_sprite.time_for_half_movement_cycle),
 		weapon_movement_magnitude = constants.weapon_sprite.max_movement_magnitude * smooth_speed_xz_percent;
 
 	sway[0] = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2.0f to magnitude / 2.0f
@@ -176,7 +180,7 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 		),
 
 		.animation_context = {
-			.curr_frame = 0, .cycle_base_time = 0,
+			.cycle_base_time = 0.0f, .curr_frame = 0,
 			.animation = {
 				.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
 				.secs_for_frame = secs_for_frame
@@ -199,7 +203,7 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	update_weapon_sprite_animation(&ws -> animation_context, event);
 
 	GLfloat sway[2];
-	get_sway(camera -> speed_xz_percent, sway);
+	get_sway(event -> curr_time_secs, camera -> speed_xz_percent, sway);
 
 	vec2 screen_corners[corners_per_quad];
 	get_screen_corners_from_sway(ws, camera, sway, screen_corners);
