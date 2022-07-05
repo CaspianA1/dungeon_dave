@@ -57,7 +57,8 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
 
-	UPDATE_UNIFORM(right_xz_world_space, 2f, camera -> right_xz[0], camera -> right_xz[1]);
+	const GLfloat* const right_xz = camera -> right_xz;
+	UPDATE_UNIFORM(right_xz_world_space, 2f, right_xz[0], right_xz[1]);
 	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &camera -> view_projection[0][0]);
 
 	////////// This little part concerns CSM

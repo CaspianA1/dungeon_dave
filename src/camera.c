@@ -77,31 +77,31 @@ static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delt
 
 // This does not include FOV, since FOV depends on a tick's speed, and speed is updated after this function is called
 static void update_camera_angles(Angles* const angles, const Event* const event, const GLfloat delta_time) {
-	// const GLint *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
-
 	const GLfloat* const mouse_movement_percent = event -> mouse_movement_percent;
-
-	const GLfloat hori_mouse_movement_percent = mouse_movement_percent[0];
 
 	const GLfloat delta_vert = mouse_movement_percent[1] * constants.speeds.look[1];
 	angles -> vert = clamp_to_pos_neg_domain(angles -> vert + delta_vert, constants.camera.limits.vert_max);
+
+	const GLfloat hori_mouse_movement_percent = mouse_movement_percent[0];
 
 	const GLfloat delta_hori = hori_mouse_movement_percent * constants.speeds.look[0];
 	angles -> hori = wrap_around_domain(angles -> hori + delta_hori, 0.0f, constants.camera.limits.hori_wrap_around);
 
 	////////// Tilt
 
-	const GLint hori_turn_sign = (hori_mouse_movement_percent > 0.0f) - (hori_mouse_movement_percent < 0.0f);
+	/* Not necessary to account for a sign of 0, since if
+	`hori_mouse_movement_percent` is 0, `delta_hori` will be 0 too */
+	const GLint tilt_sign = (hori_mouse_movement_percent > 0.0f) ? -1 : 1;
 
 	// Without the turn sign, the camera would only tilt one direction
-	const GLfloat tilt = (angles -> tilt + delta_hori * delta_hori * hori_turn_sign)
+	const GLfloat tilt = (angles -> tilt + delta_hori * delta_hori * tilt_sign)
 		* get_percent_kept_from(constants.camera.tilt_correction_rate, delta_time);
 
 	angles -> tilt = clamp_to_pos_neg_domain(tilt, constants.camera.limits.tilt_max);
 }
 
-/* From https://en.wikipedia.org/wiki/Smoothstep.
-This is Ken Perlin's improvement of the typical `smoothstep`. */
+/* From https://en.wikipedia.org/wiki/Smoothstep. This is
+Ken Perlin's improvement of the typical `smoothstep`. */
 static GLfloat smooth_hermite(const GLfloat x) {
 	return x * x * x * (x * (x * 6.0f - 15.0f) + 10.0f);
 }
@@ -267,11 +267,29 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 v
 	}
 }
 
-void get_dir_in_2D_and_3D(const GLfloat hori_angle, const GLfloat vert_angle, vec2 dir_xz, vec3 dir) {
-	const GLfloat cos_vert = cosf(vert_angle);
+static void get_camera_directions(const Angles* const angles, vec2 dir_xz, vec3 dir, vec2 right_xz, vec3 right, vec3 up) {
+	const GLfloat hori_angle = angles -> hori, vert_angle = angles -> vert;
 
-	glm_vec2_copy((vec2) {sinf(hori_angle), cosf(hori_angle)}, dir_xz);
-	glm_vec3_copy((vec3) {cos_vert * dir_xz[0], sinf(vert_angle), cos_vert * dir_xz[1]}, dir);
+	const GLfloat
+		sin_vert = sinf(vert_angle), cos_vert = cosf(vert_angle),
+		sin_hori = sinf(hori_angle), cos_hori = cosf(hori_angle);
+
+	dir_xz[0] = sin_hori;
+	dir_xz[1] = cos_hori;
+
+	dir[0] = cos_vert * sin_hori;
+	dir[1] = sin_vert;
+	dir[2] = cos_vert * cos_hori;
+
+	right_xz[0] = -cos_hori;
+	right_xz[1] = sin_hori;
+
+	right[0] = -cos_hori;
+	right[1] = 0.0f;
+	right[2] = sin_hori;
+
+	glm_vec3_rotate(right, angles -> tilt, dir); // Outputs a rotated right vector
+	glm_vec3_cross(right, dir, up); // Outputs an up vector from the direction and right vectors
 }
 
 void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]) {
@@ -291,26 +309,20 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 	////////// Defining vectors
 
 	vec2 dir_xz;
-	vec3 dir, up, pos;
+	vec3 right, pos;
+	GLfloat* const dir = camera -> dir, *const up = camera -> up;
 
-	get_dir_in_2D_and_3D(angles -> hori, angles -> vert, dir_xz, dir); // Outputs dir_xz and dir
-
-	vec3 right = {-dir_xz[1], 0.0f, dir_xz[0]};
-	camera -> right_xz[0] = right[0]; // `right_xz` is just like `right`, except that it's not tilted
-	camera -> right_xz[1] = right[2];
-
-	glm_vec3_rotate(right, angles -> tilt, dir); // Outputs a rotated right vector
-	glm_vec3_cross(right, dir, up); // Outputs an up vector from the direction and right vectors
+	get_camera_directions(angles, dir_xz, dir, camera -> right_xz, right, up);
 	glm_vec3_copy(camera -> pos, pos); // Copies the camera's position vector into a local variable
 
 	////////// Moving according to those vectors
 
 	if (keys[KEY_FLY]) { // Forward, backward, left, right
-		const GLfloat speed = constants.speeds.xz_max * delta_time;
-		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_FORWARD)) glm_vec3_muladds(dir, speed, pos);
-		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_BACKWARD)) glm_vec3_muladds(dir, -speed, pos);
-		if (CHECK_BITMASK(event.movement_bits, BIT_STRAFE_LEFT)) glm_vec3_muladds(right, -speed, pos);
-		if (CHECK_BITMASK(event.movement_bits, BIT_STRAFE_RIGHT)) glm_vec3_muladds(right, speed, pos);
+		const GLfloat velocity = constants.speeds.xz_max * delta_time;
+		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_FORWARD)) glm_vec3_muladds(dir, velocity, pos);
+		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_BACKWARD)) glm_vec3_muladds(dir, -velocity, pos);
+		if (CHECK_BITMASK(event.movement_bits, BIT_STRAFE_LEFT)) glm_vec3_muladds(right, -velocity, pos);
+		if (CHECK_BITMASK(event.movement_bits, BIT_STRAFE_RIGHT)) glm_vec3_muladds(right, velocity, pos);
 	}
 	else {
 		GLfloat* const velocities = camera -> velocities;
@@ -329,16 +341,13 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 	glm_perspective(camera -> angles.fov, camera -> aspect_ratio,
 		constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
 
-	// The model matrix is implicit in this, since it equals the identity matrix
-	glm_mul(projection, camera -> view, camera -> view_projection);
-	glm_frustum_planes(camera -> view_projection, camera -> frustum_planes);
+	vec4* const view_projection = camera -> view_projection;
+	glm_mul(projection, camera -> view, view_projection);
+	glm_frustum_planes(view_projection, camera -> frustum_planes);
 
 	////////// Copying the local vectors to the camera, and printing important vectors if needed
 
 	glm_vec3_copy(pos, camera -> pos);
-	glm_vec3_copy(dir, camera -> dir);
-	glm_vec3_copy(right, camera -> right);
-	glm_vec3_copy(up, camera -> up);
 
 	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(pos);
 	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);

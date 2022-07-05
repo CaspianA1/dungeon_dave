@@ -36,7 +36,7 @@ static void get_camera_sub_frustum_corners_and_center(const Camera* const camera
 static void get_light_view(const vec4 camera_sub_frustum_center, const vec3 dir_to_light, mat4 light_view) {
 	vec3 light_eye;
 	glm_vec3_add((GLfloat*) camera_sub_frustum_center, (GLfloat*) dir_to_light, light_eye);
-	glm_lookat(light_eye, (GLfloat*) camera_sub_frustum_center, (vec3) {0.0f, 1.0f, 0.0f}, light_view);
+	glm_lookat(light_eye, (GLfloat*) camera_sub_frustum_center, GLM_YUP, light_view);
 }
 
 static void get_light_projection(const vec4 camera_sub_frustum_corners[corners_per_frustum],
