@@ -47,10 +47,10 @@ GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_
 Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist) {
 	Camera camera = {
 		.last_time = SDL_GetPerformanceCounter(),
+		.angles = constants.camera.init,
 		.far_clip_dist = far_clip_dist
 	};
 
-	memcpy(&camera.angles, &constants.camera.init, sizeof(constants.camera.init));
 	glm_vec3_copy((GLfloat*) init_pos, camera.pos);
 
 	return camera;
@@ -76,25 +76,28 @@ static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delt
 }
 
 // This does not include FOV, since FOV depends on a tick's speed, and speed is updated after this function is called
-static void update_camera_angles(Camera* const camera, const Event* const event, const GLfloat delta_time) {
-	const GLint *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
-	const GLint hori_mouse_movement = mouse_movement[0];
+static void update_camera_angles(Angles* const angles, const Event* const event, const GLfloat delta_time) {
+	// const GLint *const mouse_movement = event -> mouse_movement, *const screen_size = event -> screen_size;
 
-	const GLfloat delta_vert = (GLfloat) -mouse_movement[1] / screen_size[1] * constants.speeds.look[1];
-	camera -> angles.vert = clamp_to_pos_neg_domain(camera -> angles.vert + delta_vert, constants.camera.lims.vert);
+	const GLfloat* const mouse_movement_percent = event -> mouse_movement_percent;
 
-	const GLfloat delta_turn = (GLfloat) -hori_mouse_movement / screen_size[0] * constants.speeds.look[0];
-	camera -> angles.hori = wrap_around_domain(camera -> angles.hori + delta_turn, 0.0f, constants.camera.lims.hori);
+	const GLfloat hori_mouse_movement_percent = mouse_movement_percent[0];
+
+	const GLfloat delta_vert = mouse_movement_percent[1] * constants.speeds.look[1];
+	angles -> vert = clamp_to_pos_neg_domain(angles -> vert + delta_vert, constants.camera.limits.vert_max);
+
+	const GLfloat delta_hori = hori_mouse_movement_percent * constants.speeds.look[0];
+	angles -> hori = wrap_around_domain(angles -> hori + delta_hori, 0.0f, constants.camera.limits.hori_wrap_around);
 
 	////////// Tilt
 
-	const GLint turn_sign = (hori_mouse_movement > 0) - (hori_mouse_movement < 0);
+	const GLint hori_turn_sign = (hori_mouse_movement_percent > 0.0f) - (hori_mouse_movement_percent < 0.0f);
 
 	// Without the turn sign, the camera would only tilt one direction
-	const GLfloat tilt = (camera -> angles.tilt + delta_turn * delta_turn * turn_sign)
+	const GLfloat tilt = (angles -> tilt + delta_hori * delta_hori * hori_turn_sign)
 		* get_percent_kept_from(constants.camera.tilt_correction_rate, delta_time);
 
-	camera -> angles.tilt = clamp_to_pos_neg_domain(tilt, constants.camera.lims.tilt);
+	angles -> tilt = clamp_to_pos_neg_domain(tilt, constants.camera.limits.tilt_max);
 }
 
 /* From https://en.wikipedia.org/wiki/Smoothstep.
@@ -118,8 +121,7 @@ static void update_fov(Camera* const camera, const byte movement_bits, const GLf
 	else if ((t -= delta_time) < 0.0f) t = 0.0f;
 
 	const GLfloat fov_percent = smooth_hermite(t / time_for_full_fov);
-	camera -> angles.fov = constants.camera.init.fov + constants.camera.lims.fov_change * fov_percent;
-
+	camera -> angles.fov = constants.camera.init.fov + constants.camera.limits.fov_change * fov_percent;
 	camera -> time_accum_for_full_fov = t;
 }
 
@@ -283,20 +285,21 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 	const GLfloat delta_time = (GLfloat) (curr_time - camera -> last_time) * one_over_performance_freq;
 	camera -> last_time = curr_time;
 
-	update_camera_angles(camera, &event, delta_time);
+	Angles* const angles = &camera -> angles;
+	update_camera_angles(angles, &event, delta_time);
 
 	////////// Defining vectors
 
 	vec2 dir_xz;
 	vec3 dir, up, pos;
 
-	get_dir_in_2D_and_3D(camera -> angles.hori, camera -> angles.vert, dir_xz, dir); // Outputs dir_xz and dir
+	get_dir_in_2D_and_3D(angles -> hori, angles -> vert, dir_xz, dir); // Outputs dir_xz and dir
 
 	vec3 right = {-dir_xz[1], 0.0f, dir_xz[0]};
 	camera -> right_xz[0] = right[0]; // `right_xz` is just like `right`, except that it's not tilted
 	camera -> right_xz[1] = right[2];
 
-	glm_vec3_rotate(right, camera -> angles.tilt, dir); // Outputs a rotated right vector
+	glm_vec3_rotate(right, angles -> tilt, dir); // Outputs a rotated right vector
 	glm_vec3_cross(right, dir, up); // Outputs an up vector from the direction and right vectors
 	glm_vec3_copy(camera -> pos, pos); // Copies the camera's position vector into a local variable
 

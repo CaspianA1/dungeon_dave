@@ -117,7 +117,7 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 
 	////////// This part influences the yaw that's based on the camera's sideways tilt (the yaw rotates around a weapon's left or right side).
 
-	const GLfloat yaw_percent = camera -> angles.tilt / constants.camera.lims.tilt;
+	const GLfloat yaw_percent = camera -> angles.tilt / constants.camera.limits.tilt_max;
 	const GLfloat yaw_amount = yaw_percent * appearance_context -> world_space.max_yaw;
 
 	vec3 shortened_and_rotated_vector;
@@ -133,7 +133,7 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 
 	////////// This part controls the weapon's pitch, which scales with the camera's pitch.
 
-	const GLfloat downwards_pitch_percent = -camera -> angles.vert / constants.camera.lims.vert;
+	const GLfloat downwards_pitch_percent = -camera -> angles.vert / constants.camera.limits.vert_max;
 	const GLfloat downwards_pitch_amount = downwards_pitch_percent * appearance_context -> world_space.max_pitch;
 
 	vec3 forward_pitch_offset;

@@ -3,6 +3,7 @@
 
 #include "utils.h"
 #include "buffer_defs.h"
+#include "constants.h"
 #include "event.h"
 
 // TODO: use the yaw, pitch, roll nomenclature; and make an anonymous struct for vectors
@@ -12,7 +13,7 @@
 typedef struct {
 	Uint64 last_time;
 
-	struct {GLfloat fov, hori, vert, tilt;} angles;
+	Angles angles;
 
 	/* Pace is the amount of head bob that happens when moving.
 	The speed xz percent is not the true speed percent; rather,

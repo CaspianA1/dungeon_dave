@@ -22,6 +22,14 @@ and not in the `constants` struct b/c other values in that struct depend on them
 #define BIT_CLICK_LEFT 64
 #define BIT_USE_WEAPON BIT_CLICK_LEFT
 
+typedef struct { // These are the Euler angles + FOV
+	GLfloat fov, hori, vert, tilt;
+} Angles;
+
+typedef struct {
+	const GLfloat fov_change, hori_wrap_around, vert_max, tilt_max;
+} AngleLimits;
+
 static const struct {
 	const GLfloat almost_zero;
 	const byte max_byte_value;
@@ -70,9 +78,10 @@ static const struct {
 
 	const struct { // All angles are in radians
 		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, friction;
-		const struct {const GLfloat fov, hori, vert, tilt;} init;
 		const struct {const GLfloat period, max_amplitude;} pace;
-		const struct {const GLfloat hori, vert, tilt, fov_change;} lims;
+
+		const Angles init;
+		const AngleLimits limits;
 	} camera;
 
 	const struct {const GLfloat forward_back, additional_forward_back, strafe, xz_decel, g;} accel;
@@ -116,9 +125,9 @@ static const struct {
 		.near_clip_dist = 0.25f, .eye_height = 0.5f, .aabb_collision_box_size = 0.2f,
 		.tilt_correction_rate = 11.0f, .friction = 7.5f,
 
-		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
 		.pace = {.period = 0.7f, .max_amplitude = 0.2f},
-		.lims = {.hori = TWO_PI, .vert = HALF_PI, .tilt = 0.2f, .fov_change = PI / 18.0f}
+		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
+		.limits = {.fov_change = PI / 18.0f, .hori_wrap_around = TWO_PI, .vert_max = HALF_PI, .tilt_max = 0.2f}
 	},
 
 	.accel = {
