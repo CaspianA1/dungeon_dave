@@ -5,7 +5,7 @@
 #include "headers/constants.h"
 #include "headers/utils.h"
 
-Event get_next_event(void) {
+Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_between_frames) {
 	static GLint viewport_size[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_size);
 
@@ -39,7 +39,8 @@ Event get_next_event(void) {
 			(GLfloat) -mouse_movement[1] / screen_height
 		},
 
-		.curr_time_secs = SDL_GetTicks() / 1000.0f
+		.curr_time_secs = curr_time_ms / constants.milliseconds_per_second,
+		.delta_time = secs_elapsed_between_frames
 	};
 }
 

@@ -45,14 +45,8 @@ GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_
 }
 
 Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist) {
-	Camera camera = {
-		.last_time = SDL_GetPerformanceCounter(),
-		.angles = constants.camera.init,
-		.far_clip_dist = far_clip_dist
-	};
-
+	Camera camera = {.angles = constants.camera.init, .far_clip_dist = far_clip_dist};
 	glm_vec3_copy((GLfloat*) init_pos, camera.pos);
-
 	return camera;
 }
 
@@ -76,7 +70,7 @@ static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delt
 }
 
 // This does not include FOV, since FOV depends on a tick's speed, and speed is updated after this function is called
-static void update_camera_angles(Angles* const angles, const Event* const event, const GLfloat delta_time) {
+static void update_camera_angles(Angles* const angles, const Event* const event) {
 	const GLfloat* const mouse_movement_percent = event -> mouse_movement_percent;
 
 	const GLfloat delta_vert = mouse_movement_percent[1] * constants.speeds.look[1];
@@ -95,7 +89,7 @@ static void update_camera_angles(Angles* const angles, const Event* const event,
 
 	// Without the turn sign, the camera would only tilt one direction
 	const GLfloat tilt = (angles -> tilt + delta_hori * delta_hori * tilt_sign)
-		* get_percent_kept_from(constants.camera.tilt_correction_rate, delta_time);
+		* get_percent_kept_from(constants.camera.tilt_correction_rate, event -> delta_time);
 
 	angles -> tilt = clamp_to_pos_neg_domain(tilt, constants.camera.limits.tilt_max);
 }
@@ -293,19 +287,8 @@ static void get_camera_directions(const Angles* const angles, vec2 dir_xz, vec3 
 }
 
 void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]) {
-	static GLfloat one_over_performance_freq;
-
-	ON_FIRST_CALL(one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency(););
-
-	/* Using the high-resolution SDL timer (instead of SDL_GetTicks)
-	because lots of timing accuracy is needed for good physics */
-
-	const Uint64 curr_time = SDL_GetPerformanceCounter();
-	const GLfloat delta_time = (GLfloat) (curr_time - camera -> last_time) * one_over_performance_freq;
-	camera -> last_time = curr_time;
-
 	Angles* const angles = &camera -> angles;
-	update_camera_angles(angles, &event, delta_time);
+	update_camera_angles(angles, &event);
 
 	////////// Defining vectors
 
@@ -319,7 +302,7 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 	////////// Moving according to those vectors
 
 	if (keys[KEY_FLY]) { // Forward, backward, left, right
-		const GLfloat velocity = constants.speeds.xz_max * delta_time;
+		const GLfloat velocity = constants.speeds.xz_max * event.delta_time;
 		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_FORWARD)) glm_vec3_muladds(dir, velocity, pos);
 		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_BACKWARD)) glm_vec3_muladds(dir, -velocity, pos);
 		if (CHECK_BITMASK(event.movement_bits, BIT_STRAFE_LEFT)) glm_vec3_muladds(right, -velocity, pos);
@@ -327,9 +310,9 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 	}
 	else {
 		GLfloat* const velocities = camera -> velocities;
-		update_pos_via_physics(event.movement_bits, heightmap, map_size, dir_xz, pos, velocities, camera -> pace, delta_time);
-		update_pace(camera, pos + 1, velocities, delta_time);
-		update_fov(camera, event.movement_bits, delta_time);
+		update_pos_via_physics(event.movement_bits, heightmap, map_size, dir_xz, pos, velocities, camera -> pace, event.delta_time); // TODO: pass only the event
+		update_pace(camera, pos + 1, velocities, event.delta_time);
+		update_fov(camera, event.movement_bits, event.delta_time); // TODO: pass only the event here too
 	}
 
 	////////// Making some matrices and frustum planes from the new position and copying over the vectors from before

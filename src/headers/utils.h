@@ -136,7 +136,7 @@ const Uint8* keys;
 
 //////////
 
-// Excluded: resize_window_if_needed, set_triangle_fill_mode, query_for_application_exit
+// Excluded: resize_window_if_needed, set_triangle_fill_mode, application_should_exit
 
 Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
 	const byte depth_buffer_bits, const byte multisample_samples, const GLint window_size[2]);

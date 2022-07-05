@@ -31,7 +31,7 @@ typedef struct {
 } AngleLimits;
 
 static const struct {
-	const GLfloat almost_zero;
+	const GLfloat almost_zero, milliseconds_per_second;
 	const byte max_byte_value;
 
 	const struct {
@@ -96,6 +96,7 @@ static const struct {
 
 } constants = {
 	.almost_zero = 0.001f,
+	.milliseconds_per_second = 1000.0f,
 	.max_byte_value = 255,
 
 	.window = {
@@ -146,7 +147,10 @@ static const struct {
 
 //////////
 
-typedef enum {RefreshRate, AnisotropicFilteringLevel} RuntimeConstantName;
+typedef enum {
+	RefreshRate,
+	AnisotropicFilteringLevel
+} RuntimeConstantName;
 
 GLfloat get_runtime_constant(const RuntimeConstantName runtime_constant_name);
 

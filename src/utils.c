@@ -172,22 +172,34 @@ void loop_application(const Screen* const screen,
 	void (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const)) {
 
-	#ifndef USE_VSYNC
-	const GLfloat one_over_performance_freq = 1.0f / SDL_GetPerformanceFrequency();
-	#endif
-
 	void* const app_context = init();
 	SDL_Window* const window = screen -> window;
 
+	////////// Timing-related variables
+
+	#ifndef USE_VSYNC
+	const GLfloat max_delay = constants.milliseconds_per_second / get_runtime_constant(RefreshRate);
+	#endif
+
+	const GLfloat one_over_time_frequency = 1.0f / SDL_GetPerformanceFrequency();
+
+	GLfloat secs_elapsed_between_frames = 0.0f;
+	Uint64 time_counter_for_last_frame = SDL_GetPerformanceCounter();
+
+	//////////
+
 	while (!application_should_exit()) {
-		#ifndef USE_VSYNC
-		const Uint64 before = SDL_GetPerformanceCounter();
-		#endif
+		////////// Getting `time_before_tick_ms`, resizing the window, and setting the triangle fill mode
+
+		const Uint32 time_before_tick_ms = SDL_GetTicks();
 
 		resize_window_if_needed(window);
 		set_triangle_fill_mode();
 
-		const Event event = get_next_event();
+		////////// Getting the next event, drawing the screen, debugging errors, and swapping the framebuffer
+
+		const Event event = get_next_event(time_before_tick_ms, secs_elapsed_between_frames);
+
 		drawer(app_context, &event);
 
 		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
@@ -195,11 +207,16 @@ void loop_application(const Screen* const screen,
 
 		SDL_GL_SwapWindow(window);
 
+		////////// Updating `secs_elapsed_between_frames` and `time_counter_for_last_frame`, and delaying if needed
+
+		const Uint64 time_counter_for_curr_frame = SDL_GetPerformanceCounter();
+		const Uint64 time_counter_delta = time_counter_for_curr_frame - time_counter_for_last_frame;
+
+		secs_elapsed_between_frames = (GLfloat) time_counter_delta * one_over_time_frequency;
+		time_counter_for_last_frame = time_counter_for_curr_frame;
+
 		#ifndef USE_VSYNC
-		// The refresh rate may change, so it is re-fetched
-		const GLfloat max_delay = 1000.0f / get_runtime_constant(RefreshRate);
-		const GLfloat ms_elapsed = (GLfloat) (SDL_GetPerformanceCounter() - before) * one_over_performance_freq * 1000.0f;
-		const GLfloat wait_for_exact_fps = max_delay - ms_elapsed;
+		const GLfloat wait_for_exact_fps = max_delay - secs_elapsed_between_frames * constants.milliseconds_per_second;
 		if (wait_for_exact_fps > 0.0f) SDL_Delay((Uint32) wait_for_exact_fps);
 		#endif
 	}

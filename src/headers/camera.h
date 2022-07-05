@@ -11,8 +11,6 @@
 //////////
 
 typedef struct {
-	Uint64 last_time;
-
 	Angles angles;
 
 	/* Pace is the amount of head bob that happens when moving.
