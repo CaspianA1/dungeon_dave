@@ -105,18 +105,16 @@ static void update_fov(Camera* const camera, const Event* const event) {
 	Since `v = v0 + at`, and `v0 = 0`, `v = at`, and `t = v / a`. The division
 	by the FPS (or the refresh rate) converts the time from being in terms of ticks to seconds. */
 
-	const GLfloat accel_forward_back_per_tick = constants.accel.forward_back / get_runtime_constant(RefreshRate);
-
 	const GLfloat
 		delta_time = event -> delta_time,
-		time_for_full_fov = constants.speeds.xz_max / accel_forward_back_per_tick;
+		time_for_full_fov = constants.speeds.xz_max
+			/ constants.accel.forward_back
+			/ get_runtime_constant(RefreshRate);
+
+	const bool accelerating = CHECK_BITMASK(event -> movement_bits, BIT_ACCELERATE);
 
 	GLfloat t = camera -> time_accum_for_full_fov;
-
-	if (CHECK_BITMASK(event -> movement_bits, BIT_ACCELERATE)) {
-		if ((t += delta_time) > time_for_full_fov) t = time_for_full_fov;
-	}
-	else if ((t -= delta_time) < 0.0f) t = 0.0f;
+	t = accelerating ? fminf(t + delta_time, time_for_full_fov) : fmaxf(t - delta_time, 0.0f);
 
 	const GLfloat fov_percent = smooth_hermite(t / time_for_full_fov);
 	camera -> angles.fov = constants.camera.init.fov + constants.camera.limits.fov_change * fov_percent;
