@@ -75,20 +75,18 @@ static void get_sway(const GLfloat speed_xz_percent, GLfloat sway[2]) {
 	sway[1] = (fabsf(sway[0]) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
 }
 
-static void get_screen_corners_from_sway(const WeaponSprite* const ws, const GLfloat sway[2],
-	const GLint screen_size[2], vec2 screen_corners[corners_per_quad]) {
+static void get_screen_corners_from_sway(const WeaponSprite* const ws, const Camera* const camera,
+	const GLfloat sway[2], vec2 screen_corners[corners_per_quad]) {
 
 	const WeaponSpriteAppearanceContext* const appearance_context = &ws -> appearance_context;
 
 	const GLfloat
 		screen_space_size = appearance_context -> screen_space.size,
-		sprite_frame_width_over_height = appearance_context -> screen_space.frame_width_over_height,
-		inv_screen_aspect_ratio = (GLfloat) screen_size[1] / screen_size[0];
+		sprite_frame_width_over_height = appearance_context -> screen_space.frame_width_over_height;
 
 	const GLfloat
-		sway_across = sway[0],
-		down_term = (screen_space_size - 1.0f) + sway[1],
-		across_term = screen_space_size * sprite_frame_width_over_height * inv_screen_aspect_ratio;
+		sway_across = sway[0], down_term = (screen_space_size - 1.0f) + sway[1],
+		across_term = screen_space_size * sprite_frame_width_over_height / camera -> aspect_ratio;
 
 	screen_corners[0][0] = screen_corners[2][0] = sway_across - across_term;
 	screen_corners[1][0] = screen_corners[3][0] = sway_across + across_term;
@@ -122,7 +120,7 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 	const GLfloat yaw_percent = camera -> angles.tilt / constants.camera.lims.tilt;
 	const GLfloat yaw_amount = yaw_percent * appearance_context -> world_space.max_yaw;
 
-	vec3 shortened_and_rotated_vector; // Perhaps scale by weapon world-space size
+	vec3 shortened_and_rotated_vector;
 	glm_vec3_scale((GLfloat*) dir, yaw_amount, shortened_and_rotated_vector); // First, the direction vector's length is downscaled to the yaw amount
 	glm_vec3_rotate(shortened_and_rotated_vector, yaw_amount, (GLfloat*) camera -> up); // Then, it's rotated around the up vector
 
@@ -204,7 +202,7 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	get_sway(camera -> speed_xz_percent, sway);
 
 	vec2 screen_corners[corners_per_quad];
-	get_screen_corners_from_sway(ws, sway, event -> screen_size, screen_corners);
+	get_screen_corners_from_sway(ws, camera, sway, screen_corners);
 
 	WeaponSpriteAppearanceContext* const appearance_context = &ws -> appearance_context;
 	get_world_corners_from_screen_corners(camera -> view_projection, screen_corners, appearance_context -> world_space.corners);
