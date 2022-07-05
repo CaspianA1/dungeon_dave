@@ -100,16 +100,20 @@ static GLfloat smooth_hermite(const GLfloat x) {
 	return x * x * x * (x * (x * 6.0f - 15.0f) + 10.0f);
 }
 
-static void update_fov(Camera* const camera, const byte movement_bits, const GLfloat delta_time) {
+static void update_fov(Camera* const camera, const Event* const event) {
 	/* The time to reach the full FOV equals the time to reach the max X speed.
 	Since `v = v0 + at`, and `v0 = 0`, `v = at`, and `t = v / a`. The division
 	by the FPS (or the refresh rate) converts the time from being in terms of ticks to seconds. */
 
-	const byte refresh_rate = (byte) get_runtime_constant(RefreshRate);
-	const GLfloat time_for_full_fov = constants.speeds.xz_max / constants.accel.forward_back / refresh_rate;
+	const GLfloat accel_forward_back_per_tick = constants.accel.forward_back / get_runtime_constant(RefreshRate);
+
+	const GLfloat
+		delta_time = event -> delta_time,
+		time_for_full_fov = constants.speeds.xz_max / accel_forward_back_per_tick;
+
 	GLfloat t = camera -> time_accum_for_full_fov;
 
-	if (CHECK_BITMASK(movement_bits, BIT_ACCELERATE)) {
+	if (CHECK_BITMASK(event -> movement_bits, BIT_ACCELERATE)) {
 		if ((t += delta_time) > time_for_full_fov) t = time_for_full_fov;
 	}
 	else if ((t -= delta_time) < 0.0f) t = 0.0f;
@@ -165,10 +169,12 @@ static bool pos_collides_with_heightmap(const GLfloat foot_height,
 	return false;
 }
 
-static void update_pos_via_physics(const byte movement_bits,
-	const byte* const heightmap, const byte map_size[2],
-	const vec2 dir_xz, vec3 pos, vec3 velocities,
-	const GLfloat pace, const GLfloat delta_time) {
+static void update_pos_via_physics(const byte* const heightmap,
+	const byte map_size[2], const vec2 dir_xz, vec3 pos,
+	vec3 velocities, const GLfloat pace, const Event* const event) {
+
+	const byte movement_bits = event -> movement_bits;
+	const GLfloat delta_time = event -> delta_time;
 
 	////////// Declaring a lot of shared vars
 
@@ -310,9 +316,9 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 	}
 	else {
 		GLfloat* const velocities = camera -> velocities;
-		update_pos_via_physics(event.movement_bits, heightmap, map_size, dir_xz, pos, velocities, camera -> pace, event.delta_time); // TODO: pass only the event
+		update_pos_via_physics(heightmap, map_size, dir_xz, pos, velocities, camera -> pace, &event);
 		update_pace(camera, pos + 1, velocities, event.delta_time);
-		update_fov(camera, event.movement_bits, event.delta_time); // TODO: pass only the event here too
+		update_fov(camera, &event);
 	}
 
 	////////// Making some matrices and frustum planes from the new position and copying over the vectors from before
