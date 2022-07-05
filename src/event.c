@@ -1,8 +1,8 @@
 #ifndef EVENT_C
 #define EVENT_C
 
-#include "headers/constants.h"
 #include "headers/event.h"
+#include "headers/constants.h"
 #include "headers/utils.h"
 
 Event get_next_event(void) {
@@ -18,7 +18,7 @@ Event get_next_event(void) {
 		moving_forward = keys[constants.keys.forward], moving_backward = keys[constants.keys.backward],
 		clicking_left = CHECK_BITMASK(SDL_GetRelativeMouseState(mouse_movement, mouse_movement + 1), SDL_BUTTON_LMASK);
 
-	// Only accelerating if attempting and moving forward or backward exclusively (not both or none)
+	// Only accelerating if attempting it, and moving forward or backward exclusively (not both or none)
 	const bool accelerating = attempting_acceleration && (moving_forward ^ moving_backward);
 
 	return (Event) {

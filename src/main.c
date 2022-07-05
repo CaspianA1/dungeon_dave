@@ -4,6 +4,7 @@
 #include "headers/main.h"
 #include "headers/maps.h"
 #include "headers/texture.h"
+#include "headers/event.h"
 
 static void* main_init(void) {
 	////////// Defining a bunch of level data
@@ -179,13 +180,12 @@ static void* main_init(void) {
 	return app_context;
 }
 
-static void main_drawer(void* const app_context) {
+static void main_drawer(void* const app_context, const Event* const event) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	SceneContext* const scene_context = (SceneContext*) app_context;
-	const Event event = get_next_event();
 
-	if (tick_title_screen(&scene_context -> title_screen, &event)) return;
+	if (tick_title_screen(&scene_context -> title_screen, event)) return;
 
 	////////// Some variable initialization + object updating
 
@@ -196,13 +196,13 @@ static void main_drawer(void* const app_context) {
 	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
 	Camera* const camera = &scene_context -> camera;
 
-	update_camera(camera, event, scene_context -> heightmap, scene_context -> map_size);
+	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
 	update_billboards(billboard_context);
-	update_weapon_sprite(weapon_sprite, camera, &event);
+	update_weapon_sprite(weapon_sprite, camera, event);
 
 	//////////
 
-	draw_to_shadow_context(shadow_context, camera, event.screen_size, draw_all_sectors_for_shadow_map, &sector_context -> draw_context);
+	draw_to_shadow_context(shadow_context, camera, event -> screen_size, draw_all_sectors_for_shadow_map, &sector_context -> draw_context);
 
 	////////// The main drawing code
 

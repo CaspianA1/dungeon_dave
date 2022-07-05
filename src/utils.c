@@ -82,7 +82,7 @@ void deinit_screen(const Screen* const screen) {
 	SDL_Quit();
 }
 
-void make_application(void (*const drawer)(void* const),
+void make_application(void (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const)) {
 
 	const Screen screen = init_screen(constants.window.app_name,
@@ -168,7 +168,8 @@ static bool application_should_exit(void) {
 	return ctrl_key && activate_exit_key;
 }
 
-void loop_application(const Screen* const screen, void (*const drawer) (void* const),
+void loop_application(const Screen* const screen,
+	void (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const)) {
 
 	#ifndef USE_VSYNC
@@ -186,7 +187,8 @@ void loop_application(const Screen* const screen, void (*const drawer) (void* co
 		resize_window_if_needed(window);
 		set_triangle_fill_mode();
 
-		drawer(app_context);
+		const Event event = get_next_event();
+		drawer(app_context, &event);
 
 		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
 		if (keys[KEY_PRINT_SDL_ERROR]) SDL_ERR_CHECK;

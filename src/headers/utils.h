@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include "buffer_defs.h"
+#include "event.h"
 
 ////////// These macros pertain to debugging
 
@@ -142,10 +143,11 @@ Screen init_screen(const GLchar* const title, const byte opengl_major_minor_vers
 
 void deinit_screen(const Screen* const screen);
 
-void make_application(void (*const drawer) (void* const),
+void make_application(void (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const));
 
-void loop_application(const Screen* const screen, void (*const drawer) (void* const),
+void loop_application(const Screen* const screen,
+	void (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const));
 
 //////////
