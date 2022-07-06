@@ -221,20 +221,18 @@ void draw_weapon_sprite(
 	use_shader(shader);
 
 	static GLint
-		frame_index_id, world_corners_id, view_projection_id,
-		camera_view_id, light_view_projection_matrices_id;
+		frame_index_id, world_corners_id,
+		view_projection_id, light_view_projection_matrices_id;
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(frame_index, shader);
 		INIT_UNIFORM(world_corners, shader);
 		INIT_UNIFORM(view_projection, shader);
-		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
 		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
 
-		const List* const split_dists = &shadow_context -> split_dists;
-		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
+		// `camera_view` and `cascade_split_distances` are not needed, since the layer will always be 0
 
 		use_texture(ws -> texture, shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
@@ -247,8 +245,6 @@ void draw_weapon_sprite(
 	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, (GLfloat*) camera -> view_projection);
 
 	////////// This little part concerns CSM
-
-	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &camera -> view[0][0]);
 
 	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
 

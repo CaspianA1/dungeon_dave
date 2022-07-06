@@ -5,7 +5,12 @@
 #include "headers/texture.h"
 #include "headers/constants.h"
 
-Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
+typedef struct {
+	SDL_Window* const window;
+	SDL_GLContext opengl_context;
+} Screen;
+
+static Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
 	const byte depth_buffer_bits, const byte multisample_samples, const GLint window_size[2]) {
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) FAIL(LoadSDL, "SDL loading failed: '%s'", SDL_GetError());
@@ -76,24 +81,10 @@ Screen init_screen(const GLchar* const title, const byte opengl_major_minor_vers
 	return screen;
 }
 
-void deinit_screen(const Screen* const screen) {
+static void deinit_screen(const Screen* const screen) {
 	SDL_GL_DeleteContext(screen -> opengl_context);
 	SDL_DestroyWindow(screen -> window);
 	SDL_Quit();
-}
-
-void make_application(void (*const drawer) (void* const, const Event* const),
-	void* (*const init) (void), void (*const deinit) (void* const)) {
-
-	const Screen screen = init_screen(constants.window.app_name,
-		constants.window.opengl_major_minor_version, constants.window.depth_buffer_bits,
-		constants.window.multisample_samples, constants.window.size);
-
-	printf("vendor = %s\nrenderer = %s\nversion = %s\n---\n",
-		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
-
-	loop_application(&screen, drawer, init, deinit);
-	deinit_screen(&screen);
 }
 
 static void resize_window_if_needed(SDL_Window* const window) {
@@ -168,7 +159,7 @@ static bool application_should_exit(void) {
 	return ctrl_key && activate_exit_key;
 }
 
-void loop_application(const Screen* const screen,
+static void loop_application(const Screen* const screen,
 	void (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const)) {
 
@@ -222,6 +213,20 @@ void loop_application(const Screen* const screen,
 	}
 
 	deinit(app_context);
+}
+
+void make_application(void (*const drawer) (void* const, const Event* const),
+	void* (*const init) (void), void (*const deinit) (void* const)) {
+
+	const Screen screen = init_screen(constants.window.app_name,
+		constants.window.opengl_major_minor_version, constants.window.depth_buffer_bits,
+		constants.window.multisample_samples, constants.window.size);
+
+	printf("vendor = %s\nrenderer = %s\nversion = %s\n---\n",
+		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
+
+	loop_application(&screen, drawer, init, deinit);
+	deinit_screen(&screen);
 }
 
 // TODO: put this in drawable.c once Drawable is used everywhere

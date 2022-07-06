@@ -4,6 +4,21 @@
 #include "buffer_defs.h"
 #include "event.h"
 
+//////////
+
+typedef enum {
+	LoadSDL,
+	LoadOpenGL,
+	OpenFile,
+	CreateShader,
+	ParseIncludeDirectiveInShader,
+	InitializeShaderUniform,
+	CreateFramebuffer,
+	CreateSkybox,
+	CreateBlankSurface,
+	TextureIDIsTooLarge
+} FailureType;
+
 ////////// These macros pertain to debugging
 
 #define GL_ERR_CHECK printf("GL error check: %s\n", get_GL_error());
@@ -77,16 +92,26 @@
 
 #define ASSET_PATH(suffix) ("../assets/" suffix)
 
-#define INIT_UNIFORM(name, shader) name##_id = glGetUniformLocation((shader), #name)
+////////// Uniform-related macros
+
+static inline GLint safely_get_uniform(const GLuint shader, const GLchar* const name) {
+	const GLint id = glGetUniformLocation(shader, name);
+	if (id == -1) FAIL(InitializeShaderUniform, "Uniform with name of %s was not found in shader", name);
+	return id;
+}
+
+#define INIT_UNIFORM(name, shader) name##_id = safely_get_uniform((shader), #name)
 
 #define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
-	glUniform##type_prefix(glGetUniformLocation((shader), #name), __VA_ARGS__)
+	glUniform##type_prefix(safely_get_uniform((shader), #name), __VA_ARGS__)
 
 // TODO: try to remove this
 #define INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(name, shader, type_prefix, ...)\
-	glUniform##type_prefix(glGetUniformLocation((shader), (name)), __VA_ARGS__)
+	glUniform##type_prefix(safely_get_uniform((shader), (name)), __VA_ARGS__)
 
 #define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
+
+//////////
 
 #define WITH_BINARY_RENDER_STATE(state, ...) do {\
 	glEnable((state)); __VA_ARGS__ glDisable((state));\
@@ -112,42 +137,15 @@
 
 //////////
 
-typedef struct {
-	SDL_Window* const window;
-	SDL_GLContext opengl_context;
-} Screen;
-
-typedef enum {
-	LoadSDL,
-	LoadOpenGL,
-	OpenFile,
-	CreateShader,
-	ParseIncludeDirectiveInShader,
-	CreateFramebuffer,
-	CreateSkybox,
-	CreateBlankSurface,
-	TextureIDIsTooLarge
-} FailureType;
-
-//////////
-
 extern const Uint8* keys;
 const Uint8* keys;
 
 //////////
 
-// Excluded: resize_window_if_needed, set_triangle_fill_mode, application_should_exit
-
-Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
-	const byte depth_buffer_bits, const byte multisample_samples, const GLint window_size[2]);
-
-void deinit_screen(const Screen* const screen);
+/* Excluded: init_screen, deinit_screen, resize_window_if_needed,
+set_triangle_fill_mode, application_should_exit, loop_application */
 
 void make_application(void (*const drawer) (void* const, const Event* const),
-	void* (*const init) (void), void (*const deinit) (void* const));
-
-void loop_application(const Screen* const screen,
-	void (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const));
 
 //////////
