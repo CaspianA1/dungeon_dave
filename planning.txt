@@ -118,6 +118,7 @@ Other:
 - Set up a little website for the game, with various video clips of gameplay
 - Perhaps the Shabti should blink
 - A 3D character model that casts a shadow (or a flat one, like the weapon - like paper Mario?)
+- Very short, but memorable little audio tracks that play for the cutscenes
 
 End components:
 - Static sectors
