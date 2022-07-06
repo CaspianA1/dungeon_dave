@@ -27,14 +27,17 @@ typedef struct {
 	vec4 frustum_planes[planes_per_frustum];
 } Camera;
 
-/* Excluded: clamp_to_pos_neg_domain, wrap_around_domain,
-get_percent_kept_from, update_camera_angles, smooth_hermite,
-update_fov, apply_velocity_in_xz_direction, tile_exists_at_pos,
-pos_collides_with_heightmap, update_pos_via_physics,
-make_pace_function, update_pace, get_camera_directions */
+/* Excluded:
 
-GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size[2]);
-Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist);
+Utils: clamp_to_pos_neg_domain, wrap_around_domain, get_percent_kept_from, smooth_hermite
+Angle updating: update_camera_angles, update_fov
+Physics + collision: apply_velocity_in_xz_direction, tile_exists_at_pos, pos_collides_with_heightmap, update_pos_via_physics
+Pace: make_pace_function, update_pace
+Miscellaneous: get_camera_directions, update_camera_pos, update_camera_matrices
+*/
+
 void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]);
+Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist);
+GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size[2]);
 
 #endif

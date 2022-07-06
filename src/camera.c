@@ -4,51 +4,7 @@
 #include "headers/camera.h"
 #include "headers/constants.h"
 
-GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size[2]) {
-	/* The far clip distance, ideally, would be equal to the diameter of
-	the convex hull of all points in the heightmap. If I had more time,
-	I would implement that, but a simple method that works reasonably well is this:
-
-	- First, find the smallest and tallest points in the map.
-	- Then, the far clip distance equals the length of
-		the `<map_width, map_height, (tallest_point - smallest_point) + additional_camera_height>` vector.
-
-	To compute the maximum jump height, use the kinematics equation `v^2 = v0^2 + 2aΔy`.
-	Given that `v` equals 0, rearrange the equation like this:
-
-	0 = v0^2 + 2aΔy
-	-(v0^2) = 2aΔy
-	-(v0^2)/2a = Δy
-
-	And since downward acceleration is positive in `constants`, to not get a negative result,
-	remove the negative sign of the left term.
-
-	Then, `additional_camera_height` equals `max_jump_height + eye_height`. */
-
-	const byte map_size_x = map_size[0], map_size_z = map_size[1];
-
-	byte min_point_height = constants.max_byte_value, max_point_height = 0;
-
-	for (byte y = 0; y < map_size_z; y++) {
-		for (byte x = 0; x < map_size_x; x++) {
-			const byte height = sample_map_point(heightmap, x, y, map_size_x);
-			if (height < min_point_height) min_point_height = height;
-			if (height > max_point_height) max_point_height = height;
-		}
-	}
-
-	const GLfloat max_jump_height = (constants.speeds.jump * constants.speeds.jump) / (2.0f * constants.accel.g);
-	const GLfloat additional_camera_height = max_jump_height + constants.camera.eye_height;
-
-	const GLfloat max_z_difference = (max_point_height - min_point_height) + additional_camera_height;
-	return glm_vec3_norm((vec3) {map_size_x, map_size_z, max_z_difference});
-}
-
-Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist) {
-	Camera camera = {.angles = constants.camera.init, .far_clip_dist = far_clip_dist};
-	glm_vec3_copy((GLfloat*) init_pos, camera.pos);
-	return camera;
-}
+////////// Small utility functions
 
 static GLfloat clamp_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
 	if (val > limit) return limit;
@@ -68,6 +24,14 @@ static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delt
 	const GLfloat percent_lost = delta_time * magnitude;
 	return 1.0f - fminf(percent_lost, 1.0f);
 }
+
+/* From https://en.wikipedia.org/wiki/Smoothstep. This is
+Ken Perlin's improvement of the typical `smoothstep`. */
+static GLfloat smooth_hermite(const GLfloat x) {
+	return x * x * x * (x * (x * 6.0f - 15.0f) + 10.0f);
+}
+
+////////// Angle updating
 
 // This does not include FOV, since FOV depends on a tick's speed, and speed is updated after this function is called
 static void update_camera_angles(Angles* const angles, const Event* const event) {
@@ -94,12 +58,6 @@ static void update_camera_angles(Angles* const angles, const Event* const event)
 	angles -> tilt = clamp_to_pos_neg_domain(tilt, constants.camera.limits.tilt_max);
 }
 
-/* From https://en.wikipedia.org/wiki/Smoothstep. This is
-Ken Perlin's improvement of the typical `smoothstep`. */
-static GLfloat smooth_hermite(const GLfloat x) {
-	return x * x * x * (x * (x * 6.0f - 15.0f) + 10.0f);
-}
-
 static void update_fov(Camera* const camera, const Event* const event) {
 	/* The time to reach the full FOV equals the time to reach the max X speed.
 	Since `v = v0 + at`, and `v0 = 0`, `v = at`, and `t = v / a`. The division
@@ -121,6 +79,8 @@ static void update_fov(Camera* const camera, const Event* const event) {
 	camera -> time_accum_for_full_fov = t;
 }
 
+////////// Physics + collision
+
 static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v,
 	const GLfloat curr_a, const GLfloat delta_time, const GLfloat max_v,
 	const bool moving_in_dir, const bool moving_in_opposite_dir) {
@@ -132,13 +92,12 @@ static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v,
 	return clamp_to_pos_neg_domain(v, max_v);
 }
 
-// Note: `x` and `y` are top-down here.
-static bool tile_exists_at_pos(const GLfloat x, const GLfloat y, const GLfloat foot_height,
+static bool tile_exists_at_pos(const GLfloat x, const GLfloat z, const GLfloat foot_height,
 	const byte* const heightmap, const byte map_width, const byte map_height) {
 
-	if (x < 0.0f || y < 0.0f || x >= map_width || y >= map_height) return 1;
+	if (x < 0.0f || z < 0.0f || x >= map_width || z >= map_height) return 1;
 
-	const byte floor_height = sample_map_point(heightmap, (byte) x, (byte) y, map_width);
+	const byte floor_height = sample_map_point(heightmap, (byte) x, (byte) z, map_width);
 	return (foot_height - floor_height) < -constants.almost_zero;
 }
 
@@ -160,8 +119,9 @@ static bool pos_collides_with_heightmap(const GLfloat foot_height,
 
 	for (byte i = 0; i < corners_per_quad; i++) {
 		const GLfloat* const aabb_corner = aabb_corners[i];
-		if (tile_exists_at_pos(aabb_corner[0], aabb_corner[1], foot_height, heightmap, map_width, map_height))
-			return true;
+
+		if (tile_exists_at_pos(aabb_corner[0], aabb_corner[1], foot_height,
+			heightmap, map_width, map_height)) return true;
 	}
 
 	return false;
@@ -239,6 +199,8 @@ static void update_pos_via_physics(const byte* const heightmap,
 	velocities[1] = speed_jump_per_sec;
 }
 
+////////// Pace
+
 /* This function models how a player's pace should behave given a time input. At time = 0, the pace is 0.
 The function output is always above 0. Period = width of one up-down pulsation, and amplitude = max height. */
 static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const GLfloat amplitude) {
@@ -265,6 +227,8 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 v
 	}
 }
 
+////////// Miscellaneous
+
 static void get_camera_directions(const Angles* const angles, vec2 dir_xz, vec3 dir, vec2 right_xz, vec3 right, vec3 up) {
 	const GLfloat hori_angle = angles -> hori, vert_angle = angles -> vert;
 
@@ -290,55 +254,121 @@ static void get_camera_directions(const Angles* const angles, vec2 dir_xz, vec3 
 	glm_vec3_cross(right, dir, up); // Outputs an up vector from the direction and right vectors
 }
 
+static void update_camera_pos(Camera* const camera, const Event* const event,
+	const byte* const heightmap, const byte map_size[2],
+	const vec2 dir_xz, const vec3 dir, const vec3 right) {
+
+	const GLfloat delta_time = event -> delta_time;
+	GLfloat* const pos = camera -> pos;
+
+	if (keys[KEY_FLY]) { // Forward, backward, left, right
+		const byte movement_bits = event -> movement_bits;
+		const GLfloat velocity = constants.speeds.xz_max * delta_time;
+
+		if (CHECK_BITMASK(movement_bits, BIT_MOVE_FORWARD)) glm_vec3_muladds((GLfloat*) dir, velocity, pos);
+		if (CHECK_BITMASK(movement_bits, BIT_MOVE_BACKWARD)) glm_vec3_muladds((GLfloat*) dir, -velocity, pos);
+		if (CHECK_BITMASK(movement_bits, BIT_STRAFE_LEFT)) glm_vec3_muladds((GLfloat*) right, -velocity, pos);
+		if (CHECK_BITMASK(movement_bits, BIT_STRAFE_RIGHT)) glm_vec3_muladds((GLfloat*) right, velocity, pos);
+	}
+	else {
+		GLfloat* const velocities = camera -> velocities;
+		update_pos_via_physics(heightmap, map_size, dir_xz, pos, velocities, camera -> pace, event);
+		update_pace(camera, pos + 1, velocities, delta_time);
+		update_fov(camera, event);
+	}
+}
+
+static void update_camera_matrices(Camera* const camera, const vec3 dir, const vec3 up, const vec3 right) {
+	const GLfloat* const pos = camera -> pos;
+	vec4* const view = camera -> view;
+
+	#define d(vector, sign) sign glm_dot((GLfloat*) pos, (GLfloat*) vector)
+
+	// Constructing the view matrix manually because I already have all of the vectors needed for it
+	glm_mat4_copy((mat4) {
+		{right[0], up[0], -dir[0], 0.0f},
+		{right[1], up[1], -dir[1], 0.0f},
+		{right[2], up[2], -dir[2], 0.0f},
+		{d(right, -), d(up, -), d(dir, ), 1.0f}
+	}, view);
+
+	#undef d
+
+	mat4 projection;
+	glm_perspective(camera -> angles.fov, camera -> aspect_ratio, constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
+	glm_mul(projection, view, camera -> view_projection);
+}
+
 void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]) {
+	////////// Updating the camera aspect ratio and angles
+
+	camera -> aspect_ratio = (GLfloat) event.screen_size[0] / event.screen_size[1];
+
 	Angles* const angles = &camera -> angles;
 	update_camera_angles(angles, &event);
 
 	////////// Defining vectors
 
 	vec2 dir_xz;
-	vec3 right, pos;
+	vec3 right;
 	GLfloat* const dir = camera -> dir, *const up = camera -> up;
 
 	get_camera_directions(angles, dir_xz, dir, camera -> right_xz, right, up);
-	glm_vec3_copy(camera -> pos, pos); // Copies the camera's position vector into a local variable
+	update_camera_pos(camera, &event, heightmap, map_size, dir_xz, dir, right); // Updates `pos`
 
-	////////// Moving according to those vectors
+	update_camera_matrices(camera, dir, up, right); // Updates `view` and `model_view_projection`
+	glm_frustum_planes(camera -> view_projection, camera -> frustum_planes);
 
-	if (keys[KEY_FLY]) { // Forward, backward, left, right
-		const GLfloat velocity = constants.speeds.xz_max * event.delta_time;
-		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_FORWARD)) glm_vec3_muladds(dir, velocity, pos);
-		if (CHECK_BITMASK(event.movement_bits, BIT_MOVE_BACKWARD)) glm_vec3_muladds(dir, -velocity, pos);
-		if (CHECK_BITMASK(event.movement_bits, BIT_STRAFE_LEFT)) glm_vec3_muladds(right, -velocity, pos);
-		if (CHECK_BITMASK(event.movement_bits, BIT_STRAFE_RIGHT)) glm_vec3_muladds(right, velocity, pos);
-	}
-	else {
-		GLfloat* const velocities = camera -> velocities;
-		update_pos_via_physics(heightmap, map_size, dir_xz, pos, velocities, camera -> pace, &event);
-		update_pace(camera, pos + 1, velocities, event.delta_time);
-		update_fov(camera, &event);
-	}
+	////////// Printing important vectors if needed
 
-	////////// Making some matrices and frustum planes from the new position and copying over the vectors from before
-
-	camera -> aspect_ratio = (GLfloat) event.screen_size[0] / event.screen_size[1];
-
-	mat4 projection;
-
-	glm_look(pos, dir, up, camera -> view);
-	glm_perspective(camera -> angles.fov, camera -> aspect_ratio,
-		constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
-
-	vec4* const view_projection = camera -> view_projection;
-	glm_mul(projection, camera -> view, view_projection);
-	glm_frustum_planes(view_projection, camera -> frustum_planes);
-
-	////////// Copying the local vectors to the camera, and printing important vectors if needed
-
-	glm_vec3_copy(pos, camera -> pos);
-
-	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(pos);
+	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
 	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);
+}
+
+Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist) {
+	Camera camera = {.angles = constants.camera.init, .far_clip_dist = far_clip_dist};
+	glm_vec3_copy((GLfloat*) init_pos, camera.pos);
+	return camera;
+}
+
+GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size[2]) {
+	/* The far clip distance, ideally, would be equal to the diameter of
+	the convex hull of all points in the heightmap. If I had more time,
+	I would implement that, but a simple method that works reasonably well is this:
+
+	- First, find the smallest and tallest points in the map.
+	- Then, the far clip distance equals the length of
+		the `<map_width, map_height, (tallest_point - smallest_point) + additional_camera_height>` vector.
+
+	To compute the maximum jump height, use the kinematics equation `v^2 = v0^2 + 2aΔy`.
+	Given that `v` equals 0, rearrange the equation like this:
+
+	0 = v0^2 + 2aΔy
+	-(v0^2) = 2aΔy
+	-(v0^2)/2a = Δy
+
+	And since downward acceleration is positive in `constants`, to not get a negative result,
+	remove the negative sign of the left term.
+
+	Then, `additional_camera_height` equals `max_jump_height + eye_height`. */
+
+	const byte map_size_x = map_size[0], map_size_z = map_size[1];
+
+	byte min_point_height = constants.max_byte_value, max_point_height = 0;
+
+	for (byte y = 0; y < map_size_z; y++) {
+		for (byte x = 0; x < map_size_x; x++) {
+			const byte height = sample_map_point(heightmap, x, y, map_size_x);
+			if (height < min_point_height) min_point_height = height;
+			if (height > max_point_height) max_point_height = height;
+		}
+	}
+
+	const GLfloat max_jump_height = (constants.speeds.jump * constants.speeds.jump) / (2.0f * constants.accel.g);
+	const GLfloat additional_camera_height = max_jump_height + constants.camera.eye_height;
+
+	const GLfloat max_z_difference = (max_point_height - min_point_height) + additional_camera_height;
+	return glm_vec3_norm((vec3) {map_size_x, map_size_z, max_z_difference});
 }
 
 #endif
