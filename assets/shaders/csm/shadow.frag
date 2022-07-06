@@ -55,7 +55,9 @@ float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_
 	return clamp(in_light_percentage, 0.0f, 1.0f);
 }
 
-float get_blended_csm_shadow(const uint layer_index, const uint depth_range_shift, const float world_depth_value, const vec3 fragment_pos_world_space) {
+float get_blended_csm_shadow(const uint layer_index, const uint depth_range_shift,
+	const float world_depth_value, const vec3 fragment_pos_world_space) {
+
 	// If the layer index equals 0, this makes the previous layer 0
 	uint prev_layer_index = max(int(layer_index) - 1, 0);
 
@@ -83,5 +85,5 @@ float get_csm_shadow(const float world_depth_value, const vec3 fragment_pos_worl
 		layer_index++;
 
 	bool on_last_split = layer_index == NUM_CASCADE_SPLITS;
-	return get_blended_csm_shadow(layer_index, int(on_last_split), world_depth_value, fragment_pos_world_space);
+	return get_blended_csm_shadow(layer_index, uint(on_last_split), world_depth_value, fragment_pos_world_space);
 }

@@ -150,7 +150,7 @@ void make_application(void (*const drawer) (void* const, const Event* const),
 
 //////////
 
-void define_vertex_spec_index(const bool is_instanced, const bool vertices_are_floats,
+void define_vertex_spec_index(const bool is_instanced, const bool treat_vertices_as_floats,
 	const byte index, const byte num_components, const buffer_size_t stride,
 	const buffer_size_t initial_offset, const GLenum typename);
 

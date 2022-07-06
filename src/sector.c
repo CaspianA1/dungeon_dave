@@ -264,7 +264,7 @@ SectorContext init_sector_context(const byte* const heightmap, const byte* const
 	enum {vpt = vertices_per_triangle};
 	const GLenum typename = FACE_MESH_COMPONENT_TYPENAME;
 
-	define_vertex_spec_index(false, false,  0, vpt, sizeof(face_vertex_t), 0, typename); // Position
+	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, typename); // Position
 	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), typename); // Face info
 
 	return sector_context;
