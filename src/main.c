@@ -115,7 +115,7 @@ static void* main_init(void) {
 
 	const GLfloat far_clip_dist = compute_world_far_clip_dist(heightmap, map_size);
 
-	const GLsizei num_cascades = 8; // 8 for palace, 12 for terrain
+	const GLsizei num_cascades = 8; // 8 for palace, 16 for terrain
 	specify_cascade_count_before_any_shader_compilation(num_cascades);
 
 	//////////
@@ -151,8 +151,8 @@ static void* main_init(void) {
 		.cascaded_shadow_context = init_shadow_context(
 			// Terrain:
 			/*
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.2f, 1.0f, 1.0f},
-			far_clip_dist, 0.2f, 2048, num_cascades
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.0f, 1.0f},
+			far_clip_dist, 0.4f, 1200, num_cascades
 			*/
 
 			// Palace:

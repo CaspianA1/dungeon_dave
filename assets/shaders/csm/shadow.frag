@@ -33,7 +33,7 @@ float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_
 
 	const float
 		esm_constant = 45.0f, layer_scaling_component = 1.0f; // Palace
-		// esm_constant = 80.0f, layer_scaling_component = 1.0f; // Terrain
+		// esm_constant = 80.0f, layer_scaling_component = 1.1f; // Terrain
 
 	/* (TODO) ESM scaling:
 	- Bigger depth range will be darker, so scale the exponent primarily on that
