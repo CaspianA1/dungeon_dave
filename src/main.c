@@ -115,7 +115,7 @@ static void* main_init(void) {
 
 	const GLfloat far_clip_dist = compute_world_far_clip_dist(heightmap, map_size);
 
-	const GLsizei num_cascades = 8; // 8 for palace, 6 for terrain
+	const GLsizei num_cascades = 8; // 8 for palace, 12 for terrain
 	specify_cascade_count_before_any_shader_compilation(num_cascades);
 
 	//////////
@@ -133,8 +133,7 @@ static void* main_init(void) {
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
 			true, init_texture_set(TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-				ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures, NULL
-			)
+			ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures, NULL)
 		),
 
 		.billboard_context = init_billboard_context(
@@ -152,13 +151,13 @@ static void* main_init(void) {
 		.cascaded_shadow_context = init_shadow_context(
 			// Terrain:
 			/*
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.5f, 1.5f, 10.0f},
-			far_clip_dist, 0.3f, (GLsizei[3]) {1024, 1024, num_cascades}
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.2f, 1.0f, 1.0f},
+			far_clip_dist, 0.2f, 2048, num_cascades
 			*/
 
 			// Palace:
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.5f, 1.5f, 5.0f},
-			far_clip_dist, 0.4f, (GLsizei[3]) {1024, 1024, num_cascades}
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.3f, 1.0f},
+			far_clip_dist, 0.4f, 1024, num_cascades
 		),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
@@ -199,15 +198,13 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	Camera* const camera = &scene_context -> camera;
 
 	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
+
 	update_billboards(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
 
-	//////////
-
-	draw_to_shadow_context(shadow_context, camera, event -> screen_size, draw_all_sectors_for_shadow_map, &sector_context -> draw_context);
-
 	////////// The main drawing code
 
+	draw_to_shadow_context(shadow_context, camera, event -> screen_size, draw_all_sectors_for_shadow_map, &sector_context -> draw_context);
 	draw_visible_sectors(sector_context, shadow_context, camera, curr_time_secs);
 	draw_visible_billboards(billboard_context, shadow_context, camera);
 

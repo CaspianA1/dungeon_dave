@@ -10,7 +10,7 @@
 https://learnopengl.com/Guest-Articles/2021/CSM
 
 For later on:
-- Texel snapping
+- Texel snapping through reprojection for more preserved resolution and less jittering artifacts
 - Merging the master branch with this one
 - A world-space approach to merging the AABB of the sub frustum box
 	with PSRs, instead of defining a scale factor for the frustum
@@ -18,8 +18,8 @@ For later on:
 
 ////////// This part concerns getting the light view projection matrix of a camera sub frustum
 
-static void get_camera_sub_frustum_corners_and_center(const Camera* const camera, const GLfloat near_clip_dist,
-	const GLfloat far_clip_dist, vec4 camera_sub_frustum_corners[corners_per_frustum], vec4 camera_sub_frustum_center) {
+static void get_camera_sub_frustum_corners(const Camera* const camera, const GLfloat near_clip_dist,
+	const GLfloat far_clip_dist, vec4 camera_sub_frustum_corners[corners_per_frustum]) {
 
 	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection;
 
@@ -28,90 +28,71 @@ static void get_camera_sub_frustum_corners_and_center(const Camera* const camera
 
 	glm_mul(camera_sub_frustum_projection, (vec4*) camera -> view, camera_sub_frustum_view_projection);
 	glm_mat4_inv(camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection);
-
 	glm_frustum_corners(inv_camera_sub_frustum_view_projection, camera_sub_frustum_corners);
-	glm_frustum_center(camera_sub_frustum_corners, camera_sub_frustum_center);
 }
 
-static void get_light_view(const vec4 camera_sub_frustum_center, const vec3 dir_to_light, mat4 light_view) {
+static void get_light_view_and_projection(const CascadedShadowContext* const shadow_context,
+	const vec4 camera_sub_frustum_corners[corners_per_frustum], mat4 light_view, mat4 light_projection) {
+
+	////////// Getting the sub frustum center from the sub frustum corners, and getting a light view from that
+
 	vec3 light_eye;
-	glm_vec3_add((GLfloat*) camera_sub_frustum_center, (GLfloat*) dir_to_light, light_eye);
-	glm_lookat(light_eye, (GLfloat*) camera_sub_frustum_center, GLM_YUP, light_view);
-}
+	vec4 camera_sub_frustum_center;
 
-static void get_light_projection(const vec4 camera_sub_frustum_corners[corners_per_frustum],
-	const vec3 light_view_frustum_box_scale, const mat4 light_view, mat4 light_projection) {
+	glm_frustum_center((vec4*) camera_sub_frustum_corners, camera_sub_frustum_center);
+	glm_vec3_add(camera_sub_frustum_center, (GLfloat*) shadow_context -> dir_to_light, light_eye);
+	glm_lookat(light_eye, camera_sub_frustum_center, GLM_YUP, light_view);
 
-	vec3 light_view_frustum_box[2];
-	glm_frustum_box((vec4*) camera_sub_frustum_corners, (vec4*) light_view, light_view_frustum_box);
+	////////// Getting an AABB from the sub frustum corners, and scaling it up
+
+	vec3 light_view_sub_frustum_box[2];
+	glm_frustum_box((vec4*) camera_sub_frustum_corners, (vec4*) light_view, light_view_sub_frustum_box);
+
+	const GLfloat* const light_view_sub_frustum_box_scale = shadow_context -> sub_frustum_scale;
 
 	for (byte i = 0; i < 3; i++) {
-		const GLfloat scale = light_view_frustum_box_scale[i];
+		const GLfloat scale = light_view_sub_frustum_box_scale[i];
 		const GLfloat one_over_scale = 1.0f / scale;
 
 		GLfloat
-			*const min = &light_view_frustum_box[0][i],
-			*const max = &light_view_frustum_box[1][i];
+			*const min = &light_view_sub_frustum_box[0][i],
+			*const max = &light_view_sub_frustum_box[1][i];
 
 		*min *= (*min < 0.0f) ? scale : one_over_scale;
 		*max *= (*max < 0.0f) ? one_over_scale : scale;
 	}
 
-	glm_ortho_aabb(light_view_frustum_box, light_projection);
-}
+	////////// Getting the AABB radius, and applying texel snapping to the light view based on that
 
+	const GLfloat radius = roundf(glm_aabb_radius(light_view_sub_frustum_box));
+	const GLfloat divisor = 2.0f * radius / shadow_context -> resolution;
 
-// This modifies `light_projection` to avoid shadow swimming
-static void apply_texel_snapping(const GLsizei resolution[2], const mat4 light_view_projection, mat4 light_projection) {
-	/*
-	- First tried https://www.junkship.net/News/2020/11/22/shadow-of-a-doubt-part-2
-	- Then settling with https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering for now (using bounding sphere, which doesn't match with mine)
-	- Perhaps try https://dev.theomader.com/stable-csm/ later (actually not, since its ortho matrix is in screen-space)
-	- Or https://www.gamedev.net/forums/topic/711114-minimizing-shadow-mapping-shimmer/5443275/?
+	GLfloat* const column = light_view[3];
+	for (byte i = 0; i < 3; i++) column[i] -= fmodf(column[i], divisor);
 
-	Second way only works for far-away shadows (shimmering for close ones over especially big terrains).
-	For far-away shadows, shimmering doesn't happen for movement, but it does for turning.
+	////////// Getting the light projection
 
-	- Check out this, maybe: https://www.gamedev.net/forums/topic/673197-cascaded-shadow-map-shimmering-effect/
-	- Or https://github.com/TheRealMJP/Shadows/blob/master/Shadows/MeshRenderer.cpp#L1492%E2%80%8B
-	- Or ask on Stackoverflow
-	*/
+	glm_ortho(-radius, radius, -radius, radius, -radius, radius, light_projection);
 
-	const vec2 half_resolution = {resolution[0] * 0.5f, resolution[1] * 0.5f};
-	vec2 shadow_origin, rounding_offset;
-
-	glm_vec2_mul((GLfloat*) light_view_projection[3], (GLfloat*) half_resolution, shadow_origin);
-	glm_vec2_sub((vec2) {roundf(shadow_origin[0]), roundf(shadow_origin[1])}, shadow_origin, rounding_offset);
-	glm_vec2_div(rounding_offset, (GLfloat*) half_resolution, rounding_offset);
-
-	GLfloat* const column = light_projection[3];
-	glm_vec2_add(column, rounding_offset, column);
 }
 
 static void get_sub_frustum_light_view_projection_matrix(const Camera* const camera,
 	const CascadedShadowContext* const shadow_context, const GLfloat near_clip_dist,
 	const GLfloat far_clip_dist, mat4 light_view_projection) {
 
-	vec4 camera_sub_frustum_corners[corners_per_frustum], camera_sub_frustum_center;
-
-	get_camera_sub_frustum_corners_and_center(camera, near_clip_dist,
-		far_clip_dist, camera_sub_frustum_corners, camera_sub_frustum_center);
+	vec4 camera_sub_frustum_corners[corners_per_frustum];
+	get_camera_sub_frustum_corners(camera, near_clip_dist, far_clip_dist, camera_sub_frustum_corners);
 
 	mat4 light_view, light_projection;
-
-	get_light_view(camera_sub_frustum_center, shadow_context -> dir_to_light, light_view);
-	get_light_projection(camera_sub_frustum_corners, shadow_context -> sub_frustum_scale, light_view, light_projection);
-
-	glm_mul(light_projection, light_view, light_view_projection);
-	apply_texel_snapping(shadow_context -> resolution, light_view_projection, light_projection);
+	get_light_view_and_projection(shadow_context, camera_sub_frustum_corners, light_view, light_projection);
 	glm_mul(light_projection, light_view, light_view_projection);
 }
 
 //////////
 
-static GLuint init_csm_depth_layers(const GLsizei resolution[3]) {
+static GLuint init_csm_depth_layers(const GLsizei resolution, const GLsizei num_cascades) {
 	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
-	glTexImage3D(TexSet, 0, OPENGL_SIZED_SHADOW_MAP_PIXEL_FORMAT, resolution[0], resolution[1], resolution[2], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage3D(TexSet, 0, OPENGL_SIZED_SHADOW_MAP_PIXEL_FORMAT, resolution, resolution, num_cascades, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	return depth_layers;
 }
 
@@ -132,7 +113,7 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 	return framebuffer;
 }
 
-/* For shaders, he number of cascades equals the value of the macro `NUM_CASCADES`
+/* For shaders, the number of cascades equals the value of the macro `NUM_CASCADES`
 in `num_cascades.geom`. This is a macro, and not a uniform, since the shadow
 geometry shader must clone the scene geometry a fixed number of times
 (specified at compile time). `cascade_split_distances` has a compile-time size
@@ -150,14 +131,14 @@ void specify_cascade_count_before_any_shader_compilation(const GLsizei num_casca
 	fclose(file);
 }
 
-CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 sub_frustum_scale,
-	const GLfloat far_clip_dist, const GLfloat linear_split_weight, const GLsizei resolution[3]) {
-
-	const GLsizei num_layers = resolution[2];
+CascadedShadowContext init_shadow_context(
+	const vec3 dir_to_light, const vec3 sub_frustum_scale,
+	const GLfloat far_clip_dist, const GLfloat linear_split_weight,
+	const GLsizei resolution, const GLsizei num_cascades) {
 
 	List
-		split_dists = init_list((buffer_size_t) num_layers - 1, GLfloat),
-		light_view_projection_matrices = init_list((buffer_size_t) num_layers, mat4);
+		split_dists = init_list((buffer_size_t) num_cascades - 1, GLfloat),
+		light_view_projection_matrices = init_list((buffer_size_t) num_cascades, mat4);
 
 	light_view_projection_matrices.length = light_view_projection_matrices.max_alloc;
 	split_dists.length = split_dists.max_alloc;
@@ -169,7 +150,7 @@ CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 su
 	//////////
 
 	for (buffer_size_t i = 0; i < split_dists.length; i++) {
-		const GLfloat layer_percent = (GLfloat) (i + 1) / num_layers;
+		const GLfloat layer_percent = (GLfloat) (i + 1) / num_cascades;
 
 		const GLfloat linear_dist = near_clip_dist + layer_percent * clip_dist_diff;
 		const GLfloat log_dist = near_clip_dist * powf(far_clip_dist / near_clip_dist, layer_percent);
@@ -179,7 +160,7 @@ CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 su
 
 	//////////
 
-	const GLuint depth_layers = init_csm_depth_layers(resolution);
+	const GLuint depth_layers = init_csm_depth_layers(resolution, num_cascades);
 
 	return (CascadedShadowContext) {
 		.depth_layers = depth_layers,
@@ -189,11 +170,13 @@ CascadedShadowContext init_shadow_context(const vec3 dir_to_light, const vec3 su
 			ASSET_PATH("shaders/csm/depth.geom"), ASSET_PATH("shaders/csm/depth.frag")
 		),
 
-		.resolution = {resolution[0], resolution[1]},
+		.resolution = resolution,
 
 		.dir_to_light = {dir_to_light[0], dir_to_light[1], dir_to_light[2]},
 		.sub_frustum_scale = {sub_frustum_scale[0], sub_frustum_scale[1], sub_frustum_scale[2]},
-		.split_dists = split_dists, .light_view_projection_matrices = light_view_projection_matrices
+
+		.split_dists = split_dists,
+		.light_view_projection_matrices = light_view_projection_matrices
 	};
 }
 
@@ -247,8 +230,8 @@ void draw_to_shadow_context(const CascadedShadowContext* const shadow_context, c
 
 	////////// Rendering to the cascades
 
-	const GLsizei* const resolution = shadow_context -> resolution;
-	glViewport(0, 0, resolution[0], resolution[1]);
+	const GLsizei resolution = shadow_context -> resolution;
+	glViewport(0, 0, resolution, resolution);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadow_context -> framebuffer);
 
 	glClear(GL_DEPTH_BUFFER_BIT);

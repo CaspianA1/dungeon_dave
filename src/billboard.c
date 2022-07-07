@@ -11,6 +11,8 @@
 2. Premultiply alpha
 3. Divide .rgb by .a (already doing) */
 
+// TODO: fix weird depth clamping errors when billboard intersect with the near plane
+
 // This just updates the billboard animation instances at the moment
 void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs) {
 	const List* const animation_instances = &billboard_context -> animation_instances;

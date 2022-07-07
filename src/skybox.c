@@ -6,6 +6,8 @@
 #include "headers/texture.h"
 #include "headers/buffer_defs.h"
 
+// TODO: make a SkyboxRenderer interface, instead of having unique vbos, vaos, and shaders for each skybox
+
 // https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
 static const GLbyte skybox_vertices[][vertices_per_triangle] = {
 	{-1, 1, 1}, {1, 1, 1}, {-1, -1, 1}, {1, -1, 1},
@@ -102,9 +104,6 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 }
 
 Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
-	/* TODO: when creating a new skybox, just switch out the texture,
-	instead of recreating the vertex buffer, spec, and shader. */
-
 	const buffer_size_t num_vertices = ARRAY_LENGTH(skybox_vertices);
 
 	return init_drawable(define_vertex_spec_for_skybox,
