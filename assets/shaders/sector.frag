@@ -90,6 +90,11 @@ vec3 retranslate_UV(const vec3 untranslated_UV) {
 
 void main(void) {
 	vec3 translated_UV = retranslate_UV(UV);
-	color = calculate_light(texture(texture_sampler, translated_UV).rgb, get_fragment_normal(translated_UV));
+
+	vec3
+		texture_color = texture(texture_sampler, translated_UV).rgb,
+		fragment_normal = get_fragment_normal(translated_UV);
+
+	color = calculate_light(texture_color, fragment_normal);
 	color = postprocess_light(translated_UV.xy, color);
 }
