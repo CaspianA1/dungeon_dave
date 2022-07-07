@@ -14,6 +14,7 @@ For later on:
 - Merging the master branch with this one
 - A world-space approach to merging the AABB of the sub frustum box
 	with PSRs, instead of defining a scale factor for the frustum
+- Pushing the weapon against walls puts it in shadow, which doesn't look right
 */
 
 ////////// This part concerns getting the light view projection matrix of a camera sub frustum
