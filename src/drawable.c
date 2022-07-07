@@ -27,7 +27,7 @@ Drawable init_drawable(
 Drawable init_drawable_without_vertices(const uniform_updater_t uniform_updater,
 	const GLenum triangle_mode, const GLuint shader, const GLuint diffuse_texture) {
 
-	return (Drawable) {triangle_mode, 0, 1, shader, diffuse_texture, uniform_updater};
+	return (Drawable) {triangle_mode, 0, 0, shader, diffuse_texture, uniform_updater};
 }
 
 void deinit_drawable(const Drawable drawable) {
