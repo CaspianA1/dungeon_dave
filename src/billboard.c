@@ -11,7 +11,20 @@
 2. Premultiply alpha
 3. Divide .rgb by .a (already doing) */
 
-// TODO: fix weird depth clamping errors when billboard intersect with the near plane
+/* TODO:
+- Fix weird depth clamping errors when billboard intersect with the near plane
+
+- Note: culling cannot be done for billboards for shadow mapping, for the same reason as with sectors
+
+New method (billboard shader is invariant):
+	- Update billboards on the CPU
+	- Keep a transform feedback buffer, and use transform feedback to write 4 corners for each into that
+	- Draw that transform feedback buffer in an instanced manner, so that 2 triangle strips exist per billboard
+	- Handle alpha in some way (I am not sure how to do that yet)
+
+	- Cull billboards into the billboard GPU buffer
+	- Draw them as normally, with glDrawArraysInstanced
+*/
 
 // This just updates the billboard animation instances at the moment
 void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs) {
