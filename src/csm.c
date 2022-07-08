@@ -15,19 +15,6 @@ For later on:
 - A world-space approach to merging the AABB of the sub frustum box
 	with PSRs, instead of defining a scale factor for the frustum
 - Pushing the weapon against walls puts it in shadow, which doesn't look right
-
-- A ShadowGeometryBuffer struct: sectors without face id + edge faces, the four corners of billboards, and a weapon unknown at the moment
-- After defining slices, call an allocation function that creates a buffer on the GPU
-- Map different slices of the buffer to different object categories, and then, update a buffer slice by giving a category index to it (slice ranges stored in struct)
-
-- Define mapped parts into two parts: immutable and mutable
-- Functions begin_object_remapping, and end_object_remapping (only remap mutable slices)
-- Perhaps for billboards, use transform feedback to generate 6 corners for each vertex
-- All byte interpetations are the same, just a list of unindexed positions; all 32-bit floats (only one draw call then)
-
-- Overall, a lot of space is wasted with this method; if I can fill the plain sector buffer with edge faces,
-	and I can find a way to generate shadows from billboards without a separate buffer, everything would be much more minimal
-- Perhaps a compromise: sectors in GL_STATIC_DRAW buffer without face info bits and edge values, and some other solution for billboards
 */
 
 ////////// This part concerns getting the light view projection matrix of a camera sub frustum

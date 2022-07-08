@@ -11,6 +11,40 @@
 #include "headers/constants.h"
 #include "headers/normal_map_generation.h"
 
+/* Drawing sectors to the shadow map:
+
+During initialization:
+	- Generate another sector buffer that contains all sectors, but without their face ids
+	- Additional faces for map edges are generated too
+	- Face pre-culling based on the face type could be done too, but that could be considered extra credit
+	- Keep that alternate mesh in a GL_STATIC_DRAW buffer
+	- Another vertex spec for that is then kept, since no skipping of positions to get the face id is needed
+
+	Advantages:
+		- No resubmitting of data to the plain sector buffer
+		- Map edges not drawn by the plain sector shader
+		- Rendering the shadow buffer should be faster with a GL_STATIC_DRAW buffer, and no face ids used
+	Disadvantages:
+		- One more vertex buffer and spec used
+
+Alternate method:
+	- Keep sector edge data in the same buffer
+	- Resubmit sector data each time
+	- Same vertex spec used
+
+	Advantages:
+		- Only one vertex buffer and spec for sectors
+	Disasvantages:
+		- GL_DYNAMIC_DRAW buffer may be slower
+		- Map edge faces will never be seen because they'll be backfacing
+
+Compromise:
+	- Keep the sector edge faces in the end of the sector GPU buffer
+	- Draw them when rendering the shadow map, and not when rendering culled faces otherwise
+	- For mapping the buffer for culling, make sure that the contents outside the range are preserved
+	- Generate null face ids for those edge faces, since they aren't used
+*/
+
 // Attributes here are height and texture id
 static byte point_matches_sector_attributes(const Sector* const sector,
 	const byte* const heightmap, const byte* const texture_id_map,

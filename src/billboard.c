@@ -16,7 +16,7 @@
 
 - Note: culling cannot be done for billboards for shadow mapping, for the same reason as with sectors
 
-New method (billboard shader is invariant):
+Drawing billboards to the shadow cascades:
 	- Update billboards on the CPU
 	- Keep a transform feedback buffer, and use transform feedback to write 4 corners for each into that
 	- Draw that transform feedback buffer in an instanced manner, so that 2 triangle strips exist per billboard
@@ -24,6 +24,11 @@ New method (billboard shader is invariant):
 
 	- Cull billboards into the billboard GPU buffer
 	- Draw them as normally, with glDrawArraysInstanced
+
+Other idea, with a tweaked shader (instanced + triangle strip + alpha to coverage):
+	- Vertex shader generates billboard vertices and a texture id for the fragment shader
+	- Geometry shader does nothing different
+	- Fragment shader discards fragments based on the billboard alpha value (done automatically, even if no color buffer exists?)
 */
 
 // This just updates the billboard animation instances at the moment
