@@ -27,6 +27,7 @@ For later on:
 
 - Overall, a lot of space is wasted with this method; if I can fill the plain sector buffer with edge faces,
 	and I can find a way to generate shadows from billboards without a separate buffer, everything would be much more minimal
+- Perhaps a compromise: sectors in GL_STATIC_DRAW buffer without face info bits and edge values, and some other solution for billboards
 */
 
 ////////// This part concerns getting the light view projection matrix of a camera sub frustum
