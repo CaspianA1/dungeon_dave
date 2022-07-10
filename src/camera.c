@@ -261,7 +261,7 @@ static void update_camera_pos(Camera* const camera, const Event* const event,
 	const GLfloat delta_time = event -> delta_time;
 	GLfloat* const pos = camera -> pos;
 
-	if (keys[KEY_FLY]) { // Forward, backward, left, right
+	if (event -> keys[KEY_FLY]) { // Forward, backward, left, right
 		const byte movement_bits = event -> movement_bits;
 		const GLfloat velocity = constants.speeds.xz_max * delta_time;
 
@@ -321,8 +321,8 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 
 	////////// Printing important vectors if needed
 
-	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
-	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);
+	if (event.keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
+	if (event.keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);
 }
 
 Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist) {

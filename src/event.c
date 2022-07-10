@@ -5,7 +5,7 @@
 #include "headers/constants.h"
 #include "headers/utils.h"
 
-Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_between_frames) {
+Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_between_frames, const Uint8* const keys) {
 	static GLint viewport_size[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_size);
 
@@ -40,7 +40,9 @@ Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_betwe
 		},
 
 		.curr_time_secs = curr_time_ms / constants.milliseconds_per_second,
-		.delta_time = secs_elapsed_between_frames
+		.delta_time = secs_elapsed_between_frames,
+
+		.keys = keys
 	};
 }
 

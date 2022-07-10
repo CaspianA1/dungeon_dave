@@ -8,8 +8,10 @@ typedef struct {
 	const GLint screen_size[2];
 
 	const GLfloat mouse_movement_percent[2], curr_time_secs, delta_time;
+
+	const Uint8* const keys;
 } Event;
 
-Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_between_frames);
+Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_between_frames, const Uint8* const keys);
 
 #endif

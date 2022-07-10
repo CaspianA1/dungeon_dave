@@ -137,11 +137,6 @@ static inline GLint safely_get_uniform(const GLuint shader, const GLchar* const 
 
 //////////
 
-extern const Uint8* keys;
-const Uint8* keys;
-
-//////////
-
 /* Excluded: init_screen, deinit_screen, resize_window_if_needed,
 set_triangle_fill_mode, application_should_exit, loop_application */
 

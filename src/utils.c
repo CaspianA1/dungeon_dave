@@ -10,6 +10,8 @@ typedef struct {
 	SDL_GLContext opengl_context;
 } Screen;
 
+//////////
+
 static Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
 	const byte depth_buffer_bits, const byte multisample_samples, const GLint window_size[2]) {
 
@@ -76,8 +78,6 @@ static Screen init_screen(const GLchar* const title, const byte opengl_major_min
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	#endif
 
-	keys = SDL_GetKeyboardState(NULL);
-
 	return screen;
 }
 
@@ -87,7 +87,9 @@ static void deinit_screen(const Screen* const screen) {
 	SDL_Quit();
 }
 
-static void resize_window_if_needed(SDL_Window* const window) {
+//////////
+
+static void resize_window_if_needed(SDL_Window* const window, const Uint8* const keys) {
 	static bool window_resized_last_tick = false, window_is_fullscreen = false;
 	static GLint desktop_width, desktop_height;
 
@@ -126,7 +128,7 @@ static void resize_window_if_needed(SDL_Window* const window) {
 	else if (!resize_attempt) window_resized_last_tick = false;
 }
 
-static void set_triangle_fill_mode(void) {
+static void set_triangle_fill_mode(const Uint8* const keys) {
 	static bool in_triangle_fill_mode = true, changed_mode_last_tick = false;
 
 	if (keys[KEY_TOGGLE_WIREFRAME_MODE]) {
@@ -140,7 +142,7 @@ static void set_triangle_fill_mode(void) {
 	else changed_mode_last_tick = false;
 }
 
-static bool application_should_exit(void) {
+static bool application_should_exit(const Uint8* const keys) {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT) return true;
@@ -159,12 +161,15 @@ static bool application_should_exit(void) {
 	return ctrl_key && activate_exit_key;
 }
 
+//////////
+
 static void loop_application(const Screen* const screen,
 	void (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const)) {
 
 	void* const app_context = init();
 	SDL_Window* const window = screen -> window;
+	const Uint8* const keys = SDL_GetKeyboardState(NULL);
 
 	////////// Timing-related variables
 
@@ -179,17 +184,17 @@ static void loop_application(const Screen* const screen,
 
 	//////////
 
-	while (!application_should_exit()) {
+	while (!application_should_exit(keys)) {
 		////////// Getting `time_before_tick_ms`, resizing the window, and setting the triangle fill mode
 
 		const Uint32 time_before_tick_ms = SDL_GetTicks();
 
-		resize_window_if_needed(window);
-		set_triangle_fill_mode();
+		resize_window_if_needed(window, keys);
+		set_triangle_fill_mode(keys);
 
 		////////// Getting the next event, drawing the screen, debugging errors, and swapping the framebuffer
 
-		const Event event = get_next_event(time_before_tick_ms, secs_elapsed_between_frames);
+		const Event event = get_next_event(time_before_tick_ms, secs_elapsed_between_frames, keys);
 
 		drawer(app_context, &event);
 
