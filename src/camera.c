@@ -27,7 +27,7 @@ static GLfloat get_percent_kept_from(const GLfloat magnitude, const GLfloat delt
 
 /* From https://en.wikipedia.org/wiki/Smoothstep. This is
 Ken Perlin's improvement of the typical `smoothstep`. */
-static GLfloat smooth_hermite(const GLfloat x) {
+static GLfloat smootherstep(const GLfloat x) {
 	return x * x * x * (x * (x * 6.0f - 15.0f) + 10.0f);
 }
 
@@ -74,7 +74,7 @@ static void update_fov(Camera* const camera, const Event* const event) {
 	GLfloat t = camera -> time_accum_for_full_fov;
 	t = accelerating ? fminf(t + delta_time, time_for_full_fov) : fmaxf(t - delta_time, 0.0f);
 
-	const GLfloat fov_percent = smooth_hermite(t / time_for_full_fov);
+	const GLfloat fov_percent = smootherstep(t / time_for_full_fov);
 	camera -> angles.fov = constants.camera.init.fov + constants.camera.limits.fov_change * fov_percent;
 	camera -> time_accum_for_full_fov = t;
 }

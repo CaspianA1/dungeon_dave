@@ -29,7 +29,7 @@ typedef struct {
 
 /* Excluded:
 
-Utils: clamp_to_pos_neg_domain, wrap_around_domain, get_percent_kept_from, smooth_hermite
+Utils: clamp_to_pos_neg_domain, wrap_around_domain, get_percent_kept_from, smootherstep
 Angle updating: update_camera_angles, update_fov
 Physics + collision: apply_velocity_in_xz_direction, tile_exists_at_pos, pos_collides_with_heightmap, update_pos_via_physics
 Pace: make_pace_function, update_pace
