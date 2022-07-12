@@ -45,6 +45,8 @@ Compromise:
 	- Generate null face ids for those edge faces, since they aren't used
 */
 
+// TODO: fix the bug where pushing oneself in a corner, and looking up and down with the right yaw clips a whole sector face
+
 // Attributes here are height and texture id
 static byte point_matches_sector_attributes(const Sector* const sector,
 	const byte* const heightmap, const byte* const texture_id_map,
