@@ -45,7 +45,15 @@ Compromise:
 	- Generate null face ids for those edge faces, since they aren't used
 */
 
-// TODO: fix the bug where pushing oneself in a corner, and looking up and down with the right yaw clips a whole sector face
+/*
+- TODO: fix the bug where pushing oneself in a corner, and looking up and down with the right yaw clips a whole sector face
+- To fix this whole depth clamping mess,
+	1. Use a different projection matrix for the weapon with a much nearer clip dist
+	2. Choose a reasonably near clip dist for the scene
+	3. Disable depth clamping
+
+Also, figure out why making the near clip dist smaller warps the weapon much more for rotations.
+*/
 
 // Attributes here are height and texture id
 static byte point_matches_sector_attributes(const Sector* const sector,
