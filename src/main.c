@@ -210,7 +210,6 @@ static void main_drawer(void* const app_context, const Event* const event) {
 
 	draw_to_shadow_context(shadow_context, camera, event -> screen_size, draw_all_sectors_for_shadow_map, &sector_context -> draw_context);
 	draw_visible_sectors(sector_context, shadow_context, camera, curr_time_secs);
-
 	draw_visible_billboards(billboard_context, shadow_context, camera);
 
 	WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE, // Not writing to the depth buffer for these
