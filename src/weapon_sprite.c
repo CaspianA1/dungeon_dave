@@ -271,7 +271,8 @@ void draw_weapon_sprite(
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
 		WITH_BINARY_RENDER_STATE(GL_BLEND,
 			/* Not using alpha to coverage here b/c blending is guaranteed
-			to be correct for the last-rendered weapon's closest z-depth (compared to other objects) */
+			to be correct for the weapon, since it is drawn closest to the
+			camera, compared to all other objects */
 
 			draw_drawable(ws -> drawable, corners_per_quad,
 				&(WeaponSpriteUniformUpdaterParams) {
