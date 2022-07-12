@@ -8,16 +8,14 @@ Levels:
 Final lighting model:
 - Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
 - Ambient, diffuse, specular (with procedural specular mapping), HDR, banding removal, light color - done
-- Ambient occlusion through an occlusion map, maybe
+- Ambient occlusion baked into vertices
 - Perhaps make the shadows contact-hardening
-- If ESM isn't good enough in the end, use EVSM with only the positive term (if it's fast enough): https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
-- And optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map
+- Optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map, maybe
 - For AO, if I instance the texture ID across a whole sector, I can get 256 different textures per level, and I can pre-bake ambient occlusion into sectors
 
 Shadow mapping:
 - The glDrawArrays call in shadow mapping uses around 30% of my GPU time mostly because of the shadow map size
 
-- After CSM, implement SDSM
 - ESM logarithmic space filtering: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
 - Rescale the ESM constant based on the distance between the occluder and the receiver, maybe
 - Filtering in exp(gl_FragCoord.z) may remove some shadow acne
@@ -36,26 +34,20 @@ Architectural/code design ideas:
 - Pass in texture parameters through a bitmask
 - Use CMake instead of Make for cross-platform compilation
 - Set up dependencies properly in the Makefile
-- Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame (housed in a TickContext struct - which also tells if a level was just initialized)
+- Tell if a level was just initialized through the Event struct
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit); or no macros at all
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if enough precision?)
-- Separate out context + window creation and utils
 - Define the constants in constants.h in constants.c, and make the constants.h struct extern
 - Three classes of settings: hardcoded in the `constants` struct, configurable via a level file, and configurable by the player
-- A LevelDescription struct that then a SceneState (or some other) struct uses to generate sectors, a shadow map, etc.
-	If levels come from C files, put those directly in files; otherwise, JSON will be turned into a LevelDescription.
-	The advantage to C files is that you don't have to parse a file for each level; the disadvantage is that map files
-	are then not easily editable
 - Perhaps use the alpha channels of the face texture set or normal map set for something interesting
 - Some library memory leaks; this should be fixed in some way, if possible
-- Make the sector context contain all context necessary
-- Use more of the cglm functions in `update_camera`, or make my own
+- Use more of the cglm functions in `update_camera`
 - Use Drawable for as many drawable things as possible
 - Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
 - Perhaps use just OpenGL + ImGUI for the editor
 - Make all static billboards to animated (to simplify the code), if complexity doesn't increase too much because of that
-- If using SDL_Mixer in the end for audio and not OpenAL, use a more compressed audio format, like FLAC or WAV
+- Use a compressed audio format in the end, instead of WAV (probably FLAC)
 - Make `map_size_t` an alias for `byte` or `GLubyte`, and make an alias for `map_value_t` too
 
 Miscellaneous problems:
@@ -92,7 +84,7 @@ Normal mapping:
 - Note: normal maps calculated via dFdx/y won't work because 1. derivatives are in screen space and 2. normals can then not be filtered
 
 A better shading model:
-- JSON file -> LightParams struct -> shared shader uniforms via uniform buffer objects (or no intermediate LightParams struct at all)
+- JSON file -> shared shader uniforms via uniform buffer objects
 - Possibility: instead of ambient, diffuse, and specular parameters per level, perhaps a material system (include normal map intensity in this; for the CPU only)
 - Those UBOs then can share a common fragment shading function that uses those params and takes in a surface normal
 
@@ -128,6 +120,6 @@ End components:
 - Billboards (unanimated and animated)
 - Skybox
 - Weapon
-- Particles from a projectile - billboards with a shared texture id
+- Billboard subbatches that all have the same texture id and size; intended for repeats like grass or particles
 - HUD
 - UI

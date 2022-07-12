@@ -6,11 +6,6 @@
 #include "headers/shader.h"
 #include "headers/constants.h"
 
-/* For accurate alpha, TODO:
-1. Use these blend settings:
-2. Premultiply alpha
-3. Divide .rgb by .a (already doing) */
-
 /* TODO:
 - Fix weird depth clamping errors when billboard intersect with the near plane
 

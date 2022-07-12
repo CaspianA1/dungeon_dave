@@ -12,5 +12,7 @@ uniform sampler2DArray texture_sampler;
 void main(void) {
 	color = texture(texture_sampler, UV);
 	color.rgb *= mix(ambient, 1.0f, get_csm_shadow(world_depth_value, fragment_pos_world_space));
-	color.rgb /= mix(color.a, 1.0f, color.a == 0.0f); // Avoiding division by zero
+
+	float alpha = mix(color.a, 1.0f, color.a == 0.0f); // Done to avoid a division by zero
+	color.rgb /= alpha; // Unassociating alpha from the rgb components (not a problem since alpha blending is not used)
 }

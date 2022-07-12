@@ -18,11 +18,6 @@ static GLint limit_int_to_domain(const GLint val, const GLint lower, const GLint
 	return int_min(int_max(val, lower), upper);
 }
 
-static void* read_surface_pixel(const SDL_Surface* const surface, const GLint x, const GLint y) {
-	sdl_pixel_component_t* const row = (sdl_pixel_component_t*) surface -> pixels + y * surface -> pitch;
-	return row + x * (GLint) sizeof(sdl_pixel_t);
-}
-
 static GLfloat sobel_sample(const SDL_Surface* const surface, const GLint x, const GLint y) {
 	const sdl_pixel_t pixel = *(sdl_pixel_t*) read_surface_pixel(surface, x, y);
 

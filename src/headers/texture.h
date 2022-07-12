@@ -50,7 +50,7 @@ And the biggest number possible with five bits is 31, so that gives you
 #define WEAPON_TEXTURE_UNIT 5
 #define TITLE_SCREEN_LOGO_TEXTURE_UNIT 6
 
-// Excluded: init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
+// Excluded: premultiply_surface_alpha, init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 
 #define set_current_texture glBindTexture
 
@@ -92,6 +92,7 @@ typedef Uint32 sdl_pixel_t;
 
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height, const SDL_PixelFormatEnum pixel_format_name);
 SDL_Surface* init_surface(const GLchar* const path);
+void* read_surface_pixel(const SDL_Surface* const surface, const GLint x, const GLint y);
 
 void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader, const byte texture_unit);
 
@@ -106,7 +107,8 @@ GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLint internal_format);
 
-GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
+GLuint init_texture_set(const bool premultiply_alpha,
+	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
 	const GLchar* const* const still_subtexture_paths, const AnimationLayout* const animation_layouts);

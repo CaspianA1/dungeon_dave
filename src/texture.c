@@ -4,7 +4,7 @@
 #include "headers/texture.h"
 #include "headers/constants.h"
 
-////////// Surface initialization
+////////// Surface initialization and alpha premultiplication
 
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height, const SDL_PixelFormatEnum pixel_format_name) {
 	SDL_Surface* const blank_surface = SDL_CreateRGBSurfaceWithFormat(
@@ -25,6 +25,39 @@ SDL_Surface* init_surface(const GLchar* const path) {
 		deinit_surface(surface);
 		return converted_surface;
 	}
+}
+
+void* read_surface_pixel(const SDL_Surface* const surface, const GLint x, const GLint y) {
+	sdl_pixel_component_t* const row = (sdl_pixel_component_t*) surface -> pixels + y * surface -> pitch;
+	return row + x * (GLint) sizeof(sdl_pixel_t);
+}
+
+static void premultiply_surface_alpha(SDL_Surface* const surface) {
+	const GLint w = surface -> w, h = surface -> h;
+	const SDL_PixelFormat* const format = surface -> format;
+
+	const GLfloat one_over_max_byte_value = 1.0f / constants.max_byte_value;
+	sdl_pixel_component_t r, g, b, a;
+
+	WITH_SURFACE_PIXEL_ACCESS(surface,
+		for (GLint y = 0; y < h; y++) {
+			sdl_pixel_t* const row = read_surface_pixel(surface, 0, y);
+
+			for (GLint x = 0; x < w; x++) {
+
+				sdl_pixel_t* const pixel = row + x;
+				SDL_GetRGBA(*pixel, format, &r, &g, &b, &a);
+
+				const GLfloat normalized_alpha = a * one_over_max_byte_value;
+
+				r = (sdl_pixel_component_t) (r * normalized_alpha);
+				g = (sdl_pixel_component_t) (g * normalized_alpha);
+				b = (sdl_pixel_component_t) (b * normalized_alpha);
+
+				*pixel = SDL_MapRGBA(format, r, g, b, a);
+			}
+		}
+	);
 }
 
 ////////// Texture state setting utilities
@@ -94,7 +127,8 @@ GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 	return texture;
 }
 
-static void init_still_subtextures_in_texture_set(const GLsizei num_still_subtextures,
+static void init_still_subtextures_in_texture_set(
+	const bool premultiply_alpha, const GLsizei num_still_subtextures,
 	const GLchar* const* const still_subtexture_paths, SDL_Surface* const rescaled_surface) {
 
 	const GLsizei correct_w = rescaled_surface -> w, correct_h = rescaled_surface -> h;
@@ -109,6 +143,8 @@ static void init_still_subtextures_in_texture_set(const GLsizei num_still_subtex
 		}
 		else surface_with_right_size = surface;
 
+		if (premultiply_alpha) premultiply_surface_alpha(surface_with_right_size);
+
 		WITH_SURFACE_PIXEL_ACCESS(surface_with_right_size,
 			glTexSubImage3D(TexSet, 0, 0, 0, i,
 				correct_w, correct_h, 1, OPENGL_INPUT_PIXEL_FORMAT,
@@ -119,7 +155,7 @@ static void init_still_subtextures_in_texture_set(const GLsizei num_still_subtex
 	}
 }
 
-static void init_animated_subtextures_in_texture_set(
+static void init_animated_subtextures_in_texture_set(const bool premultiply_alpha,
 	const GLsizei num_animated_frames, const GLsizei num_still_subtextures,
 	const AnimationLayout* const animation_layouts, SDL_Surface* const rescaled_surface) {
 
@@ -130,6 +166,8 @@ static void init_animated_subtextures_in_texture_set(
 
 		SDL_Surface* const spritesheet_surface = init_surface(animation_layout.spritesheet_path);
 		SDL_SetSurfaceBlendMode(spritesheet_surface, SDL_BLENDMODE_NONE);
+
+		if (premultiply_alpha) premultiply_surface_alpha(spritesheet_surface);
 
 		SDL_Rect spritesheet_frame_area = {
 			.w = spritesheet_surface -> w / animation_layout.frames_across,
@@ -153,7 +191,8 @@ static void init_animated_subtextures_in_texture_set(
 	}
 }
 
-GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
+GLuint init_texture_set(const bool premultiply_alpha,
+	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
 	const GLchar* const* const still_subtexture_paths, const AnimationLayout* const animation_layouts) {
@@ -175,8 +214,8 @@ GLuint init_texture_set(const TextureWrapMode wrap_mode, const TextureFilterMode
 
 	////////// Filling the texture set with the still and animated subtextures
 
-	init_still_subtextures_in_texture_set(num_still_subtextures, still_subtexture_paths, rescaled_surface);
-	init_animated_subtextures_in_texture_set(num_animated_frames, num_still_subtextures, animation_layouts, rescaled_surface);
+	init_still_subtextures_in_texture_set(premultiply_alpha, num_still_subtextures, still_subtexture_paths, rescaled_surface);
+	init_animated_subtextures_in_texture_set(premultiply_alpha, num_animated_frames, num_still_subtextures, animation_layouts, rescaled_surface);
 	glGenerateMipmap(TexSet);
 
 	////////// Deinitialization

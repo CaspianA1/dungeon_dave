@@ -125,20 +125,20 @@ static void* main_init(void) {
 
 		.weapon_sprite = init_weapon_sprite(
 			// 3.0f, 3.0f, 1.0f, 1.0f, 1.0f, (AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}
-			// 3.0f, 8.0f, 0.6f, 2.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
-			3.0f, 2.0f, 0.75f, 2.0f, 0.02f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}
+			3.0f, 8.0f, 0.6f, 2.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
+			// 3.0f, 2.0f, 0.75f, 2.0f, 0.02f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}
 			// 4.0f, 4.0f, 0.75f, 2.0f, 0.035f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}
 			// 2.0f, 2.0f, 0.8f, 1.0f, 0.04f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}
 		),
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
-			true, init_texture_set(TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+			true, init_texture_set(false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 			ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures, NULL)
 		),
 
 		.billboard_context = init_billboard_context(
 			init_texture_set(
-				TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+				true, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 				ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_layouts),
 				256, 256, still_billboard_texture_paths, billboard_animation_layouts
 			),
@@ -166,8 +166,12 @@ static void* main_init(void) {
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
 
+	/* This is for correct for when premultiplying alpha.
+	See https://www.realtimerendering.com/blog/gpus-prefer-premultiplication/. */
+	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+	glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
 	glDepthFunc(GL_LESS);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	/* Depth clamping is used for 1. shadow pancaking, 2. avoiding clipping with sectors when walking
 	against them, and 3. stopping too much upwards weapon pitch from going through the near plane */
@@ -206,6 +210,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 
 	draw_to_shadow_context(shadow_context, camera, event -> screen_size, draw_all_sectors_for_shadow_map, &sector_context -> draw_context);
 	draw_visible_sectors(sector_context, shadow_context, camera, curr_time_secs);
+
 	draw_visible_billboards(billboard_context, shadow_context, camera);
 
 	WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE, // Not writing to the depth buffer for these
