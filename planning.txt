@@ -120,6 +120,6 @@ End components:
 - Billboards (unanimated and animated)
 - Skybox
 - Weapon
-- Billboard subbatches that all have the same texture id and size; intended for repeats like grass or particles
+- Billboard subbatches that all have the same texture id and size; intended for repeats like grass or particles. Should they share a bounding box?
 - HUD
 - UI
