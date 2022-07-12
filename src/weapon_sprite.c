@@ -274,7 +274,10 @@ void draw_weapon_sprite(
 			to be correct for the last-rendered weapon's closest z-depth (compared to other objects) */
 
 			draw_drawable(ws -> drawable, corners_per_quad,
-				&(WeaponSpriteUniformUpdaterParams) {view_projection, ws, shadow_context});
+				&(WeaponSpriteUniformUpdaterParams) {
+					view_projection, ws, shadow_context
+				}
+			);
 		);
 	);
 }
