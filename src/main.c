@@ -209,8 +209,9 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	draw_visible_billboards(billboard_context, shadow_context, camera);
 
 	WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE, // Not writing to the depth buffer for these
-		draw_skybox(&scene_context -> skybox, camera -> view_projection);
-		draw_weapon_sprite(weapon_sprite, camera, shadow_context);
+		const vec4* const view_projection = camera -> view_projection;
+		draw_skybox(&scene_context -> skybox, view_projection);
+		draw_weapon_sprite(weapon_sprite, view_projection, shadow_context);
 	);
 }
 

@@ -148,7 +148,55 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 	glm_vec3_add(top_right, forward_pitch_offset, top_right);
 }
 
-//////////
+////////// This part is for the uniform updater param type and the uniform updater
+
+typedef struct {
+	const vec4* const view_projection;
+	const WeaponSprite* const weapon_sprite;
+	const CascadedShadowContext* const shadow_context;
+} WeaponSpriteUniformUpdaterParams;
+
+static void update_uniforms(const Drawable* const drawable, const void* const param) {
+	const WeaponSpriteUniformUpdaterParams* const typed_params = param;
+	const WeaponSprite* const weapon_sprite = typed_params -> weapon_sprite;
+	const CascadedShadowContext* const shadow_context = typed_params -> shadow_context;
+
+	static GLint
+		frame_index_id, world_corners_id,
+		view_projection_id, light_view_projection_matrices_id;
+
+	const GLuint shader = drawable -> shader;
+
+	ON_FIRST_CALL(
+		INIT_UNIFORM(frame_index, shader);
+		INIT_UNIFORM(world_corners, shader);
+		INIT_UNIFORM(view_projection, shader);
+		INIT_UNIFORM(light_view_projection_matrices, shader);
+
+		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
+
+		// `camera_view` and `cascade_split_distances` are not needed, since the layer will always be 0
+
+		use_texture(drawable -> diffuse_texture, shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
+		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
+	);
+
+	////////// Updating uniforms
+
+	UPDATE_UNIFORM(frame_index, 1ui, weapon_sprite -> animation_context.curr_frame);
+	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) weapon_sprite -> appearance_context.world_space.corners);
+	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, (GLfloat*) typed_params -> view_projection);
+
+	////////// This little part concerns CSM
+
+	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
+
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
+		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
+		light_view_projection_matrices -> data);
+}
+
+////////// Initialization, deinitialization, and rendering
 
 WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 	const GLfloat max_pitch_degrees, const GLfloat size,
@@ -156,8 +204,7 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 	const AnimationLayout animation_layout) {
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
-	and here, but this makes the code much more readable. TODO: perhaps
-	query data about the texture set to figure out the frame size, if possible. */
+	and here too, but this makes the code much more readable. */
 
 	SDL_Surface* const peek_surface = init_surface(animation_layout.spritesheet_path);
 
@@ -169,14 +216,17 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 	deinit_surface(peek_surface);
 
 	return (WeaponSprite) {
-		// TODO: for multiple weapons, share this shader
-		.shader = init_shader(ASSET_PATH("shaders/weapon.vert"), NULL, ASSET_PATH("shaders/weapon.frag")),
+		.drawable = init_drawable_without_vertices(
+			(uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP,
 
-		.texture = init_texture_set(TexNonRepeating,
-			OPENGL_WEAPON_MAG_FILTER, OPENGL_WEAPON_MIN_FILTER, 0, 1,
-			(GLsizei) (frame_size[0] * texture_rescale_factor),
-			(GLsizei) (frame_size[1] * texture_rescale_factor),
-			NULL, &animation_layout
+			init_shader(ASSET_PATH("shaders/weapon.vert"), NULL, ASSET_PATH("shaders/weapon.frag")),
+
+			init_texture_set(TexNonRepeating,
+				OPENGL_WEAPON_MAG_FILTER, OPENGL_WEAPON_MIN_FILTER, 0, 1,
+				(GLsizei) (frame_size[0] * texture_rescale_factor),
+				(GLsizei) (frame_size[1] * texture_rescale_factor),
+				NULL, &animation_layout
+			)
 		),
 
 		.animation_context = {
@@ -195,8 +245,7 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 }
 
 void deinit_weapon_sprite(const WeaponSprite* const ws) {
-	deinit_texture(ws -> texture);
-	deinit_shader(ws -> shader);
+	deinit_drawable(ws -> drawable);
 }
 
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event) {
@@ -214,52 +263,18 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 }
 
 void draw_weapon_sprite(
-	const WeaponSprite* const ws, const Camera* const camera,
+	const WeaponSprite* const ws,
+	const vec4* const view_projection,
 	const CascadedShadowContext* const shadow_context) {
-
-	const GLuint shader = ws -> shader;
-	use_shader(shader);
-
-	static GLint
-		frame_index_id, world_corners_id,
-		view_projection_id, light_view_projection_matrices_id;
-
-	ON_FIRST_CALL(
-		INIT_UNIFORM(frame_index, shader);
-		INIT_UNIFORM(world_corners, shader);
-		INIT_UNIFORM(view_projection, shader);
-		INIT_UNIFORM(light_view_projection_matrices, shader);
-
-		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
-
-		// `camera_view` and `cascade_split_distances` are not needed, since the layer will always be 0
-
-		use_texture(ws -> texture, shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
-		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
-	);
-
-	////////// Updating uniforms
-
-	UPDATE_UNIFORM(frame_index, 1ui, ws -> animation_context.curr_frame);
-	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) ws -> appearance_context.world_space.corners);
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, (GLfloat*) camera -> view_projection);
-
-	////////// This little part concerns CSM
-
-	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
-
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
-		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
-		light_view_projection_matrices -> data);
-
-	////////// Rendering
 
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
 		WITH_BINARY_RENDER_STATE(GL_BLEND,
 			/* Not using alpha to coverage here b/c blending is guaranteed
-			to be correct for the last-rendered weapon's z-depth of zero */
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, corners_per_quad);
+			to be correct for the last-rendered weapon's closest z-depth (compared to other objects) */
+
+			draw_drawable(ws -> drawable, corners_per_quad,
+				&(WeaponSpriteUniformUpdaterParams) {view_projection, ws, shadow_context});
 		);
 	);
 }
