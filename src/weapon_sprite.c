@@ -219,7 +219,7 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 		.drawable = init_drawable_without_vertices(
 			(uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP,
 
-			init_shader(ASSET_PATH("shaders/weapon.vert"), NULL, ASSET_PATH("shaders/weapon.frag")),
+			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/weapon_sprite.frag")),
 
 			init_texture_set(TexNonRepeating,
 				OPENGL_WEAPON_MAG_FILTER, OPENGL_WEAPON_MIN_FILTER, 0, 1,
