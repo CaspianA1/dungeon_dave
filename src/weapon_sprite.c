@@ -157,9 +157,7 @@ typedef struct {
 } WeaponSpriteUniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
-	const WeaponSpriteUniformUpdaterParams* const typed_params = param;
-	const WeaponSprite* const weapon_sprite = typed_params -> weapon_sprite;
-	const CascadedShadowContext* const shadow_context = typed_params -> shadow_context;
+	const WeaponSpriteUniformUpdaterParams typed_params = *(WeaponSpriteUniformUpdaterParams*) param;
 
 	static GLint
 		frame_index_id, world_corners_id,
@@ -178,18 +176,18 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		// `camera_view` and `cascade_split_distances` are not needed, since the layer will always be 0
 
 		use_texture(drawable -> diffuse_texture, shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
-		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
+		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
 	);
 
 	////////// Updating uniforms
 
-	UPDATE_UNIFORM(frame_index, 1ui, weapon_sprite -> animation_context.curr_frame);
-	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) weapon_sprite -> appearance_context.world_space.corners);
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, (GLfloat*) typed_params -> view_projection);
+	UPDATE_UNIFORM(frame_index, 1ui, typed_params.weapon_sprite -> animation_context.curr_frame);
+	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) typed_params.weapon_sprite -> appearance_context.world_space.corners);
+	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, (GLfloat*) typed_params.view_projection);
 
 	////////// This little part concerns CSM
 
-	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
+	const List* const light_view_projection_matrices = &typed_params.shadow_context -> light_view_projection_matrices;
 
 	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
 		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
