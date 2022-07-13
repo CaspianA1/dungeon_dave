@@ -4,8 +4,8 @@
 #include "camera.h"
 #include "list.h"
 
-/* This shadow mapping implementation employs cascaded shadow mapping
-with exponential shadow mapping in order to get soft shadows for large scenes. */
+/* This shadow mapping implementation employs cascaded shadow mapping with
+exponential shadow mapping in order to get soft shadows for large scenes. */
 
 typedef struct {
 	const GLuint depth_layers, framebuffer, depth_shader;
