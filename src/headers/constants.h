@@ -149,7 +149,7 @@ static const struct {
 
 typedef enum {
 	RefreshRate,
-	AnisotropicFilteringLevel
+	MaxAnisotropicFilteringLevel
 } RuntimeConstantName;
 
 GLfloat get_runtime_constant(const RuntimeConstantName runtime_constant_name);

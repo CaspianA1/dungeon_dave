@@ -99,8 +99,8 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	/* For anisotropic filtering to be enabled, 1. USE_ANISOTROPIC_FILTERING must be defined,
 	2. GLAD has to have loaded the extension successfully, and 3. it must not be force-disabled. */
 	if (GLAD_GL_EXT_texture_filter_anisotropic && !force_disable_anisotropic_filtering) {
-		const GLfloat aniso_filtering_level = get_runtime_constant(AnisotropicFilteringLevel);
-		glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso_filtering_level);
+		const GLfloat max_aniso_filtering_level = get_runtime_constant(MaxAnisotropicFilteringLevel);
+		glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_aniso_filtering_level);
 	}
 
 	#endif
