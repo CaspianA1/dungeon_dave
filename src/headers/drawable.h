@@ -37,6 +37,17 @@ Drawable init_drawable_without_vertices(const uniform_updater_t uniform_updater,
 	const GLenum triangle_mode, const GLuint shader, const GLuint diffuse_texture);
 
 void deinit_drawable(const Drawable drawable);
-void draw_drawable(const Drawable drawable, const buffer_size_t num_vertices_to_draw, const void* const uniform_updater_param);
+
+void draw_drawable(const Drawable drawable, const buffer_size_t num_vertices_to_draw,
+	const void* const uniform_updater_param, const bool avoid_binding_vertex_buffer_and_spec);
+
+/*
+- Calling this assumes that there is a vertex buffer and spec defined in the Drawable instance.
+- It does not bind the Drawable's shader, since it is expecting the shadow context shader to be bound.
+- It also allows a function to be injected and do various things before the draw call. If this function is null, it is not called.
+*/
+void draw_drawable_to_shadow_context(
+	const Drawable* const drawable, const buffer_size_t num_vertices_to_draw,
+	void (*const before_drawing) (const void* const), const void* const before_drawing_param);
 
 #endif

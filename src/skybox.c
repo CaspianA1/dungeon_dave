@@ -77,7 +77,7 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 	return skybox_texture;
 }
 
-static void define_vertex_spec_for_skybox(void) {
+static void define_vertex_spec(void) {
 	define_vertex_spec_index(false, false, 0, vertices_per_triangle, 0, 0, GL_BYTE);
 }
 
@@ -106,7 +106,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
 	const buffer_size_t num_vertices = ARRAY_LENGTH(skybox_vertices);
 
-	return init_drawable_with_vertices(define_vertex_spec_for_skybox,
+	return init_drawable_with_vertices(define_vertex_spec,
 		(uniform_updater_t) update_uniforms, GL_STATIC_DRAW, GL_TRIANGLE_STRIP,
 		(List) {(void*) skybox_vertices, sizeof(GLbyte[vertices_per_triangle]), num_vertices, num_vertices},
 
@@ -117,7 +117,7 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 
 void draw_skybox(const Skybox* const skybox, const mat4 view_projection) {
 	WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS, // Other depth testing mode for the skybox
-		draw_drawable(*skybox, ARRAY_LENGTH(skybox_vertices), view_projection);
+		draw_drawable(*skybox, ARRAY_LENGTH(skybox_vertices), view_projection, false);
 	);
 }
 

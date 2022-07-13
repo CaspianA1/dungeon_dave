@@ -6,28 +6,34 @@
 #include "headers/texture.h"
 #include "headers/shader.h"
 
-/*
-Details on weapon coordinate space transformations:
-- Certain parameters define how the weapon swings back and forth
+/* The weapon sprite code can be a bit hard to understand in the big picture.
+	Here's how it works over a game tick:
 
-- Screen-space coordinates are generated from those
-- Then, those coordinates are unprojected into world-space, tilted, and copied over to the vbo
-- In the fragment shader, the world-space coordinates are then reprojected to screen-space to get gl_Position
+1. The weapon sprite is updated during `update_weapon_sprite`.
+	Its current animation frame is first updated, and then its
+	world space corners are updated. It gets its world space corners like this:
 
-- This screen -> world -> screen process is done, instead of doing screen -> screen, for a few reasons:
-	1. World-space coordinates are needed for lighting calculations
-	2. Getting world coordinates, and then going to screen-space after that
-		(in the fragment shader), works better with the shadow mapping pipeline
-	3. Tilting can't be done in screen-space
-*/
+	A. First, based on some parameters related to the camera, it defines the screen-space
+		positions of the weapon sprite. It will sway back and forth more when the player
+		is running faster.
 
-/* TODO:
-Plan for getting cast shadows in weapon sprites:
+	B. Then, those screen-space coordinates are unprojected to world-space,
+		and then those world-space coordinates are rotated on various axes,
+		causing the weapon sprite to change its yaw and pitch depending on the camera's yaw and pitch.
 
-- Calculate world-space pos early on, and store it in the weapon sprite
-- When shadow casting, fill the weapon vbo with that, and bind that + the vao
-- When drawing normally, pass the world space corners as uniforms, and draw
-*/
+2. It is then drawn to the shadow context via `draw_weapon_sprite_to_shadow_context`.
+	Inside that function, it is drawn through `draw_drawable_to_shadow_context`.
+	A function is injected into that, which copies over its world-space corners on the CPU
+	to its vertex buffer which holds the vertices on the GPU. It is then drawn.
+	TODO: let alpha values in the weapon sprite's texture determine its visiblity.
+
+3. Finally, it is drawn to the default framebuffer in `draw_weapon_sprite`. No vertex buffer
+or spec are used for this; the four corners are simply passed in as a uniform. I figured that
+there wouldn't be much point of binding a vertex buffer and spec if the vertex count is known
+ahead of time, and is very small; so this should make the code a bit simpler and marginally faster. */
+
+/* TODO: make the ESM constant stronger for the sake of the weapon sprite, since the shadow
+is too light when the weapon sprite's formed occluder-receiver difference is too small. */
 
 //////////
 
@@ -194,7 +200,18 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		light_view_projection_matrices -> data);
 }
 
-////////// Initialization, deinitialization, and rendering
+////////// These are some private functions that exist for the sake of shadow mapping
+
+static void define_vertex_spec(void) {
+	define_vertex_spec_index(false, true, 0, 3, 0, 0, GL_FLOAT);
+}
+
+static void update_vertex_buffer_before_draw_call(const void* const param) {
+	const WeaponSprite* const ws = param;
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec3[corners_per_quad]), ws -> appearance_context.world_space.corners);
+}
+
+////////// Initialization, deinitialization, updating, and rendering
 
 WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 	const GLfloat max_pitch_degrees, const GLfloat size,
@@ -203,6 +220,8 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
 	and here too, but this makes the code much more readable. */
+
+	////////// Getting the frame size
 
 	SDL_Surface* const peek_surface = init_surface(animation_layout.spritesheet_path);
 
@@ -213,9 +232,12 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 
 	deinit_surface(peek_surface);
 
+	//////////
+
 	return (WeaponSprite) {
-		.drawable = init_drawable_without_vertices(
-			(uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP,
+		.drawable = init_drawable_with_vertices(
+			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW,
+			GL_TRIANGLE_STRIP, (List) {NULL, sizeof(vec3), corners_per_quad, corners_per_quad},
 
 			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/weapon_sprite.frag")),
 
@@ -260,6 +282,10 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	rotate_from_camera_movement(appearance_context, camera);
 }
 
+void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
+	draw_drawable_to_shadow_context(&ws -> drawable, corners_per_quad, update_vertex_buffer_before_draw_call, ws);
+}
+
 void draw_weapon_sprite(
 	const WeaponSprite* const ws,
 	const vec4* const view_projection,
@@ -268,15 +294,10 @@ void draw_weapon_sprite(
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
 		WITH_BINARY_RENDER_STATE(GL_BLEND,
-			/* Not using alpha to coverage here b/c blending is guaranteed
-			to be correct for the weapon, since it is drawn closest to the
-			camera, compared to all other objects */
-
-			draw_drawable(ws -> drawable, corners_per_quad,
-				&(WeaponSpriteUniformUpdaterParams) {
-					view_projection, ws, shadow_context
-				}
-			);
+			/* Not using alpha to coverage here b/c blending is guaranteed to be correct for
+			the weapon, since it is drawn closest to the camera, compared to all other objects */
+			const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view_projection, ws, shadow_context};
+			draw_drawable(ws -> drawable, corners_per_quad, &uniform_updater_params, true);
 		);
 	);
 }
