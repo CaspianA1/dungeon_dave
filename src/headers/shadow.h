@@ -1,5 +1,5 @@
-#ifndef CSM_H
-#define CSM_H
+#ifndef SHADOW_H
+#define SHADOW_H
 
 #include "camera.h"
 #include "list.h"

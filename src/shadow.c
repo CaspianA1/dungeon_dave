@@ -1,7 +1,7 @@
-#ifndef CSM_C
-#define CSM_C
+#ifndef SHADOW_C
+#define SHADOW_C
 
-#include "headers/csm.h"
+#include "headers/shadow.h"
 #include "headers/constants.h"
 #include "headers/shader.h"
 #include "headers/texture.h"

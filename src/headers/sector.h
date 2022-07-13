@@ -5,7 +5,7 @@
 #include "list.h"
 #include "camera.h"
 #include "batch_draw_context.h"
-#include "csm.h"
+#include "shadow.h"
 
 // Note: for batching sectors, extend Drawable by allowing an option to do a culling step modeled as dependency injection
 

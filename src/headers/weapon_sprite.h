@@ -6,7 +6,7 @@
 #include "drawable.h"
 #include "camera.h"
 #include "event.h"
-#include "csm.h"
+#include "shadow.h"
 
 typedef struct {
 	GLfloat cycle_base_time;

@@ -2,12 +2,11 @@
 #define MAIN_H
 
 #include "buffer_defs.h"
+#include "camera.h"
 #include "weapon_sprite.h"
 #include "sector.h"
 #include "billboard.h"
-#include "csm.h"
-#include "camera.h"
-#include "list.h"
+#include "shadow.h"
 #include "skybox.h"
 #include "title_screen.h"
 
