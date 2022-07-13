@@ -15,6 +15,7 @@ For later on:
 - A world-space approach to merging the AABB of the sub frustum box
 	with PSRs, instead of defining a scale factor for the frustum
 - Pushing the weapon against walls puts it in shadow, which doesn't look right (I need to keep it outside the wall)
+- Multisampling
 */
 
 ////////// This part concerns getting the light view projection matrix of a camera sub frustum
