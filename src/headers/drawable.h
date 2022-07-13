@@ -17,7 +17,16 @@ typedef struct {
 
 //////////
 
-Drawable init_drawable(
+/*
+Interface notes:
+- Use `init_drawable_with_vertices` when you want to initialize a `drawable` with a set of vertices beforehand.
+- If you do not want a vertex buffer or a vertex spec, use `init_drawable_without_vertices`.
+
+- For the vertex list in `init_drawable_with_vertices`, the vertices in the list may be null. If so, a vertex buffer
+	will be allocated for the vertices, but the vertex buffer will not have any elements inside it.
+*/
+
+Drawable init_drawable_with_vertices(
 	void (*const vertex_spec_definer) (void), const uniform_updater_t uniform_updater,
 	const GLenum vertex_buffer_access, const GLenum triangle_mode,
 	const List vertices, const GLuint shader, const GLuint diffuse_texture);

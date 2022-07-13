@@ -106,7 +106,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
 	const buffer_size_t num_vertices = ARRAY_LENGTH(skybox_vertices);
 
-	return init_drawable(define_vertex_spec_for_skybox,
+	return init_drawable_with_vertices(define_vertex_spec_for_skybox,
 		(uniform_updater_t) update_uniforms, GL_STATIC_DRAW, GL_TRIANGLE_STRIP,
 		(List) {(void*) skybox_vertices, sizeof(GLbyte[vertices_per_triangle]), num_vertices, num_vertices},
 

@@ -3,7 +3,7 @@
 
 #include "headers/drawable.h"
 
-Drawable init_drawable(
+Drawable init_drawable_with_vertices(
 	void (*const vertex_spec_definer) (void), const uniform_updater_t uniform_updater,
 	const GLenum vertex_buffer_access, const GLenum triangle_mode,
 	const List vertices, const GLuint shader, const GLuint diffuse_texture) {
