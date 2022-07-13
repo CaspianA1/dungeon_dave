@@ -38,16 +38,18 @@ void deinit_drawable(const Drawable drawable) {
 	glDeleteVertexArrays(1, &drawable.vertex_spec);
 }
 
-void draw_drawable(const Drawable drawable, const GLsizei num_vertices_to_draw, const void* const uniform_updater_param) {
-	glUseProgram(drawable.shader);
-	drawable.uniform_updater((struct Drawable*) &drawable, uniform_updater_param);
+void draw_drawable(const Drawable drawable, const buffer_size_t num_vertices_to_draw, const void* const uniform_updater_param) {
+	if (drawable.shader != 0 && drawable.uniform_updater != NULL) {
+		glUseProgram(drawable.shader);
+		drawable.uniform_updater((struct Drawable*) &drawable, uniform_updater_param);
+	}
 
 	if (drawable.vertex_buffer != 0 && drawable.vertex_spec != 0) {
 		glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer);
 		glBindVertexArray(drawable.vertex_spec);
 	}
 
-	glDrawArrays(drawable.triangle_mode, 0, num_vertices_to_draw);
+	glDrawArrays(drawable.triangle_mode, 0, (GLsizei) num_vertices_to_draw);
 }
 
 #endif

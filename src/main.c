@@ -232,6 +232,7 @@ static void main_deinit(void* const app_context) {
 	deinit_weapon_sprite(&scene_context -> weapon_sprite);
 	deinit_sector_context(&scene_context -> sector_context);
 	deinit_billboard_context(&scene_context -> billboard_context);
+
 	deinit_shadow_context(&scene_context -> cascaded_shadow_context);
 	deinit_title_screen(&scene_context -> title_screen);
 	deinit_skybox(scene_context -> skybox);

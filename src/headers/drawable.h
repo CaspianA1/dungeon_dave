@@ -24,6 +24,8 @@ Interface notes:
 
 - For the vertex list in `init_drawable_with_vertices`, the vertices in the list may be null. If so, a vertex buffer
 	will be allocated for the vertices, but the vertex buffer will not have any elements inside it.
+
+- If the uniform updater is null or the shader is zero, the shader will not be bound, and the uniform updater will not be called.
 */
 
 Drawable init_drawable_with_vertices(
@@ -35,6 +37,6 @@ Drawable init_drawable_without_vertices(const uniform_updater_t uniform_updater,
 	const GLenum triangle_mode, const GLuint shader, const GLuint diffuse_texture);
 
 void deinit_drawable(const Drawable drawable);
-void draw_drawable(const Drawable drawable, const GLsizei num_vertices_to_draw, const void* const uniform_updater_param);
+void draw_drawable(const Drawable drawable, const buffer_size_t num_vertices_to_draw, const void* const uniform_updater_param);
 
 #endif

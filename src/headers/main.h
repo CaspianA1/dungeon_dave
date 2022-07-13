@@ -23,13 +23,14 @@
 	Use that step for sectors now, and billboards and the weapon sprite later
 
 7. Make a definitive plan on how to render billboards to the shadow map, and then do so
-8. Make a sector mesh buffer optimized for the shadow map: back faces pre-culled,
+8. Draw sectors in an instanced manner: for each face, define a origin point, size, and face info bits (that encodes the texture id and face type)
+9. Make a sector mesh buffer optimized for the shadow map: back faces pre-culled,
 	face info bits removed, map edge faces added, and in a GL_STATIC_DRAW buffer
 
-9.  Make an R-tree implementation for static objects, namely sectors here
-10.  Make it so that the R-tree can be dynamic too, so for billboards
-11. Replace `cull_from_frustum_into_gpu_buffer` with this recursive culling -> GPU buffer method
-12. Allow frustum culling to act as a dependency injection step into Drawable, so that in the end,
+10.  Make an R-tree implementation for static objects, namely sectors here
+11.  Make it so that the R-tree can be dynamic too, so for billboards
+12. Replace `cull_from_frustum_into_gpu_buffer` with this recursive culling -> GPU buffer method
+13. Allow frustum culling to act as a dependency injection step into Drawable, so that in the end,
 	everything uses Drawable
 */
 
