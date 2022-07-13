@@ -190,9 +190,7 @@ void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
 	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
 }
 
-void draw_to_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera,
-	const GLint screen_size[2], void (*const drawer) (const void* const), const void* const drawer_param) {
-
+void enable_rendering_to_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera) {
 	const List
 		*const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices,
 		*const split_dists = &shadow_context -> split_dists;
@@ -230,16 +228,16 @@ void draw_to_shadow_context(const CascadedShadowContext* const shadow_context, c
 	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei)
 		num_cascades, GL_FALSE, light_view_projection_matrices -> data);
 
-	////////// Rendering to the cascades
+	////////// Preparing for cascade rendering
 
 	const GLsizei resolution = shadow_context -> resolution;
 	glViewport(0, 0, resolution, resolution);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadow_context -> framebuffer);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
+}
 
-	drawer(drawer_param);
-
+void disable_rendering_to_shadow_context(const GLint screen_size[2]) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, screen_size[0], screen_size[1]);
 }

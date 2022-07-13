@@ -25,7 +25,7 @@ typedef struct {
 /* Excluded: point_matches_sector_attributes, form_sector_area, generate_sectors_from_maps,
 draw_sectors, make_aabb, get_renderable_index_from_cullable, get_num_renderable_from_cullable */
 
-void draw_all_sectors_for_shadow_map(const void* const param);
+void draw_all_sectors_to_shadow_context(const BatchDrawContext* const sector_draw_context);
 
 void draw_visible_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,

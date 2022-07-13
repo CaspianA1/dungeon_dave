@@ -26,7 +26,7 @@ CascadedShadowContext init_shadow_context(
 
 void deinit_shadow_context(const CascadedShadowContext* const shadow_context);
 
-void draw_to_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera,
-	const GLint screen_size[2], void (*const drawer) (const void* const), const void* const drawer_param);
+void enable_rendering_to_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera);
+void disable_rendering_to_shadow_context(const GLint screen_size[2]);
 
 #endif

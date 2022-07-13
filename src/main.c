@@ -190,7 +190,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 
 	if (tick_title_screen(&scene_context -> title_screen, event)) return;
 
-	////////// Some variable initialization + object updating
+	////////// Some variable initialization
 
 	const GLfloat curr_time_secs = event -> curr_time_secs;
 
@@ -201,14 +201,21 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
 	Camera* const camera = &scene_context -> camera;
 
+	////////// Object updating
+
 	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
 
 	update_billboards(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
 
+	////////// Rendering to the shadow context
+
+	enable_rendering_to_shadow_context(shadow_context, camera);
+	draw_all_sectors_to_shadow_context(&sector_context -> draw_context);
+	disable_rendering_to_shadow_context(event -> screen_size);
+
 	////////// The main drawing code
 
-	draw_to_shadow_context(shadow_context, camera, event -> screen_size, draw_all_sectors_for_shadow_map, &sector_context -> draw_context);
 	draw_visible_sectors(sector_context, shadow_context, camera, curr_time_secs);
 	draw_visible_billboards(billboard_context, shadow_context, camera);
 

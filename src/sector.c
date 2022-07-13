@@ -142,9 +142,7 @@ static List generate_sectors_from_maps(const byte* const heightmap,
 }
 
 // Used in main.c
-void draw_all_sectors_for_shadow_map(const void* const param) {
-	const BatchDrawContext* const sector_draw_context = (BatchDrawContext*) param;
-
+void draw_all_sectors_to_shadow_context(const BatchDrawContext* const sector_draw_context) {
 	use_vertex_buffer(sector_draw_context -> buffers.gpu);
 	use_vertex_spec(sector_draw_context -> vertex_spec);
 
