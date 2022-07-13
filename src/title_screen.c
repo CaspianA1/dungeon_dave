@@ -15,7 +15,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	ON_FIRST_CALL(
 		const GLuint shader = drawable -> shader;
 		INIT_UNIFORM(brightness, shader);
-		use_texture(drawable -> diffuse_texture, shader, "texture_sampler", TexPlain, TITLE_SCREEN_LOGO_TEXTURE_UNIT);
+		use_texture(drawable -> diffuse_texture, shader, "texture_sampler", TexPlain, TU_TitleScreen);
 	);
 
 	const GLfloat curr_time_secs = *(GLfloat*) param;

@@ -41,14 +41,16 @@ And the biggest number possible with five bits is 31, so that gives you
 32 different possible texture ids. Also, this is just for wall textures. */
 #define MAX_NUM_SECTOR_SUBTEXTURES 32
 
-// TODO: make this to an enum
-#define SECTOR_FACE_TEXTURE_UNIT 0
-#define SECTOR_NORMAL_MAP_TEXTURE_UNIT 1
-#define CASCADED_SHADOW_MAP_TEXTURE_UNIT 2
-#define BILLBOARD_TEXTURE_UNIT 3
-#define SKYBOX_TEXTURE_UNIT 4
-#define WEAPON_TEXTURE_UNIT 5
-#define TITLE_SCREEN_LOGO_TEXTURE_UNIT 6
+// Each enum value is a texture unit id
+typedef enum {
+	TU_SectorFaceDiffuse,
+	TU_SectorFaceNormalMap,
+	TU_CascadedShadowMap,
+	TU_Billboard,
+	TU_Skybox,
+	TU_Weapon,
+	TU_TitleScreen
+} TextureUnit;
 
 // Excluded: premultiply_surface_alpha, init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 
@@ -94,10 +96,9 @@ SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height, const
 SDL_Surface* init_surface(const GLchar* const path);
 void* read_surface_pixel(const SDL_Surface* const surface, const GLint x, const GLint y);
 
-void set_sampler_texture_unit_for_shader(const GLchar* const sampler_name, const GLuint shader, const byte texture_unit);
-
-void use_texture(const GLuint texture, const GLuint shader,
-	const GLchar* const sampler_name, const TextureType type, const byte texture_unit);
+void use_texture(const GLuint texture,
+	const GLuint shader, const GLchar* const sampler_name,
+	const TextureType type, const TextureUnit texture_unit);
 
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	const TextureFilterMode mag_filter, const TextureFilterMode min_filter,

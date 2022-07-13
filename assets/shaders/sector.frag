@@ -12,7 +12,7 @@ uniform bool enable_tone_mapping;
 uniform float ambient, diffuse_strength, specular_strength, tone_mapping_max_white, noise_granularity;
 uniform vec2 specular_exponent_domain, UV_translation;
 uniform vec3 camera_pos_world_space, dir_to_light, light_color, UV_translation_area[2];
-uniform sampler2DArray texture_sampler, normal_map_sampler;
+uniform sampler2DArray diffuse_sampler, normal_map_sampler;
 
 float diffuse(const vec3 fragment_normal) {
 	float diffuse_amount = dot(fragment_normal, dir_to_light);
@@ -92,7 +92,7 @@ void main(void) {
 	vec3 translated_UV = retranslate_UV(UV);
 
 	vec3
-		texture_color = texture(texture_sampler, translated_UV).rgb,
+		texture_color = texture(diffuse_sampler, translated_UV).rgb,
 		fragment_normal = get_fragment_normal(translated_UV);
 
 	color = calculate_light(texture_color, fragment_normal);

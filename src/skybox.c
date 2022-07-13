@@ -88,7 +88,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(view_projection, shader);
-		use_texture(drawable -> diffuse_texture, shader, "texture_sampler", TexSkybox, SKYBOX_TEXTURE_UNIT);
+		use_texture(drawable -> diffuse_texture, shader, "texture_sampler", TexSkybox, TU_Skybox);
 	);
 
 	mat4 view_projection;

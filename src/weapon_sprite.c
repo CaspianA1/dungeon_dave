@@ -181,8 +181,8 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 		// `camera_view` and `cascade_split_distances` are not needed, since the layer will always be 0
 
-		use_texture(drawable -> diffuse_texture, shader, "frame_sampler", TexSet, WEAPON_TEXTURE_UNIT);
-		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, CASCADED_SHADOW_MAP_TEXTURE_UNIT);
+		use_texture(drawable -> diffuse_texture, shader, "frame_sampler", TexSet, TU_Weapon);
+		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);
 
 	////////// Updating uniforms
