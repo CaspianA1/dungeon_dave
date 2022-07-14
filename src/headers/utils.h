@@ -113,17 +113,13 @@ static inline GLint safely_get_uniform(const GLuint shader, const GLchar* const 
 
 //////////
 
-#define WITH_BINARY_RENDER_STATE(state, ...) do {\
-	glEnable((state)); __VA_ARGS__ glDisable((state));\
+#define WITH_GL_STATE(setter, unsetter, state, inverse_state, ...) do {\
+	setter((state)); __VA_ARGS__ unsetter((inverse_state));\
 } while (false)
 
-#define WITHOUT_BINARY_RENDER_STATE(state, ...) do {\
-	glDisable((state)); __VA_ARGS__ glEnable((state));\
-} while (false)
-
-#define WITH_RENDER_STATE(setter, state, inverse_state, ...) do {\
-	setter((state)); __VA_ARGS__ setter((inverse_state));\
-} while (false)
+#define WITH_BINARY_RENDER_STATE(state, ...) WITH_GL_STATE(glEnable, glDisable, state, state, __VA_ARGS__)
+#define WITHOUT_BINARY_RENDER_STATE(state, ...) WITH_GL_STATE(glDisable, glEnable, state, state, __VA_ARGS__)
+#define WITH_RENDER_STATE(setter, state, inverse_state, ...) WITH_GL_STATE(setter, setter, state, inverse_state, __VA_ARGS__)
 
 ////////// These macros pertain to window + rendering defaults
 
