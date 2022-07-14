@@ -13,17 +13,19 @@
 
 Drawing billboards to the shadow cascades:
 	- Update billboards on the CPU
+	- Sort billboards back-to-front, and output a list of sorted billboard indices
 	- Keep a transform feedback buffer, and use transform feedback to write 4 corners for each into that
-	- Draw that transform feedback buffer in an instanced manner, so that 2 triangle strips exist per billboard
-	- Handle alpha in some way (I am not sure how to do that yet)
+	- Draw that transform feedback buffer in an instanced manner by the indices, so that 2 triangle strips exist per billboard (to the cascades)
 
-	- Cull billboards into the billboard GPU buffer
+	- Cull billboards into the billboard GPU buffer, keeping the billboards sorted back-to-front
 	- Draw them as normally, with glDrawArraysInstanced
 
-Other idea, with a tweaked shader (instanced + triangle strip + alpha to coverage):
-	- Vertex shader generates billboard vertices and a texture id for the fragment shader
-	- Geometry shader does nothing different
-	- Fragment shader discards fragments based on the billboard alpha value (done automatically, even if no color buffer exists?)
+- All of that would use alpha blending, with depth buffer writes disabled, drawn between sector + skybox and weapon sprite
+- Write to a translucency buffer in the fragment shader, and during shadow tests, multiply the shadow strength by the translucency factor
+
+Other idea:
+	- Do the same thing, but change the depth shader so that it can generate billboard
+	corners in the vertex shader, instead of using a transform feedback buffer
 */
 
 // This just updates the billboard animation instances at the moment
