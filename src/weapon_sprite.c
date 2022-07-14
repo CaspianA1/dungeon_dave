@@ -247,7 +247,7 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/weapon_sprite.frag")),
 
 			init_texture_set(true, TexNonRepeating,
-				OPENGL_WEAPON_MAG_FILTER, OPENGL_WEAPON_MIN_FILTER, 0, 1,
+				OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, 0, 1,
 				(GLsizei) (frame_size[0] * texture_rescale_factor),
 				(GLsizei) (frame_size[1] * texture_rescale_factor),
 				NULL, &animation_layout
