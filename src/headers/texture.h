@@ -55,7 +55,6 @@ typedef enum {
 // Excluded: premultiply_surface_alpha, init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
 
 #define deinit_texture(t) glDeleteTextures(1, &(t))
-#define deinit_textures(length, ts) glDeleteTextures((length), (ts))
 #define deinit_surface SDL_FreeSurface
 
 #define WITH_SURFACE_PIXEL_ACCESS(surface, ...) do {\
