@@ -175,7 +175,7 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set, const bool
 
 	////////// Querying OpenGL for information about the texture set
 
-	set_current_texture(TexSet, texture_set);
+	glBindTexture(TexSet, texture_set);
 
 	GLint subtexture_w, subtexture_h, num_subtextures, wrap_mode, mag_filter, min_filter;
 	glGetTexLevelParameteriv(TexSet, 0, GL_TEXTURE_WIDTH, &subtexture_w);

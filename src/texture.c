@@ -68,7 +68,7 @@ void use_texture(const GLuint texture,
 
 	INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(sampler_name, shader, 1i, (GLint) texture_unit); // Sets the texture unit for the inputted shader
 	glActiveTexture(GL_TEXTURE0 + texture_unit); // Sets the current active texture unit
-	set_current_texture(type, texture); // Associates the input texture with the right texture unit
+	glBindTexture(type, texture); // Associates the input texture with the right texture unit
 }
 
 //////////
@@ -80,7 +80,7 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 
 	GLuint texture;
 	glGenTextures(1, &texture);
-	set_current_texture(type, texture);
+	glBindTexture(type, texture);
 
 	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, (GLint) mag_filter);
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, (GLint) min_filter);
