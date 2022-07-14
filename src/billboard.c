@@ -92,7 +92,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 	use_vertex_spec(draw_context -> vertex_spec);
 
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
-		/* Not using blending b/c it's not order independent
+		/* Not using blending b/c it's not order independent.
 		Not using raw alpha testing because of the aliasing involved. */
 		WITH_BINARY_RENDER_STATE(GL_SAMPLE_ALPHA_TO_COVERAGE,
 			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
