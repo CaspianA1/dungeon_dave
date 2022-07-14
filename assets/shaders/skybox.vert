@@ -7,7 +7,8 @@ out vec3 UV;
 uniform mat4 view_projection;
 
 void main(void) {
-	gl_Position = (view_projection * vec4(vertex_pos_world_space, 1.0f)).xyww; // With `.ww`, z is always set to 1.0f
+	// With `.ww`, z is always set to 1.0f, the farthest depth value
+	gl_Position = (view_projection * vec4(vertex_pos_world_space, 1.0f)).xyww;
 	UV = vertex_pos_world_space;
 	UV.x = -UV.x; // Without this, the x component of `UV` is reversed
 }
