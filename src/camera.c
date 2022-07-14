@@ -282,7 +282,7 @@ static void update_camera_matrices(Camera* const camera, const vec3 dir, const v
 	const GLfloat* const pos = camera -> pos;
 	vec4* const view = camera -> view;
 
-	#define d(vector, sign) sign glm_dot((GLfloat*) pos, (GLfloat*) vector)
+	#define d(vector, sign) sign glm_vec3_dot((GLfloat*) pos, (GLfloat*) vector)
 
 	// Constructing the view matrix manually because I already have all of the vectors needed for it
 	glm_mat4_copy((mat4) {
