@@ -2,17 +2,10 @@
 #define SHADER_C
 
 #include "headers/shader.h"
-#include "headers/utils.h"
 #include "headers/list.h"
+#include "headers/utils.h"
 
-typedef enum {
-	CompileVertexShader,
-	CompileGeoShader,
-	CompileFragmentShader,
-	LinkShaders
-} ShaderCompilationStep;
-
-enum {num_sub_shaders = 3};
+enum {num_sub_shaders = 3}; // Vertex, geometry, and fragment
 
 /* This is just here because `read_and_parse_includes_for_glsl`
 and `get_source_for_included_file` are mutually recursive */
@@ -21,8 +14,9 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 
 //////////
 
-static void fail_on_shader_creation_error(const GLuint object_id,
-	const ShaderCompilationStep compilation_step,
+static void fail_on_sub_shader_creation_error(
+	// `sub_shader_text` may be a file path, or a string indicating the linking step
+	const GLuint object_id, const GLchar* const sub_shader_text,
 	void (*const creation_action) (const GLuint),
 	void (*const log_length_getter) (const GLuint, const GLenum, GLint* const),
 	void (*const log_getter) (const GLuint, const GLsizei, GLsizei* const, GLchar* const)) {
@@ -41,51 +35,40 @@ static void fail_on_shader_creation_error(const GLuint object_id,
 			if (*c == '\n') *c = '\0';
 		}
 
-		#define STRING_CASE(enum_name, string) case enum_name: compilation_step_string = string; break
-
-		const GLchar* compilation_step_string;
-
-		switch (compilation_step) {
-			STRING_CASE(CompileVertexShader, "vertex shader compilation");
-			STRING_CASE(CompileGeoShader, "geometry shader compilation");
-			STRING_CASE(CompileFragmentShader, "fragment shader compilation");
-			STRING_CASE(LinkShaders, "linking");
-		}
-
-		#undef STRING_CASE
-
 		// Nothing else is freed anyways during `FAIL`, so it's fine if the `malloc` call is not freed
-		FAIL(CreateShader, "Error during %s: '%s'", compilation_step_string, error_message);
+		FAIL(CreateShader, "Error for '%s': '%s'", sub_shader_text, error_message);
 	}
 }
 
 static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], const GLchar* const sub_shader_paths[num_sub_shaders]) {
-	const GLenum sub_shader_types[num_sub_shaders] = {GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER};
+	static const GLenum sub_shader_types[num_sub_shaders] = {GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER};
+
 	GLuint sub_shaders[num_sub_shaders], shader = glCreateProgram();
 
-	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
-		if (sub_shader_paths[step] == NULL) continue;
+	for (byte i = 0; i < num_sub_shaders; i++) {
+		const GLchar* const sub_shader_path = sub_shader_paths[i];
+		if (sub_shader_path == NULL) continue;
 
-		const GLuint sub_shader = glCreateShader(sub_shader_types[step]);
+		const GLuint sub_shader = glCreateShader(sub_shader_types[i]);
 
-		const List* const sub_shader_code = shader_code + step;
+		const List* const sub_shader_code = shader_code + i;
 		glShaderSource(sub_shader, (GLsizei) sub_shader_code -> length, sub_shader_code -> data, NULL);
 
-		fail_on_shader_creation_error(sub_shader, step,
+		fail_on_sub_shader_creation_error(sub_shader, sub_shader_path,
 			glCompileShader, glGetShaderiv, glGetShaderInfoLog);
 
 		glAttachShader(shader, sub_shader);
 
-		sub_shaders[step] = sub_shader;
+		sub_shaders[i] = sub_shader;
 	}
 
-	fail_on_shader_creation_error(shader, LinkShaders,
+	fail_on_sub_shader_creation_error(shader, "linking",
 		glLinkProgram, glGetProgramiv, glGetProgramInfoLog);
 
-	for (ShaderCompilationStep step = CompileVertexShader; step < LinkShaders; step++) {
-		if (sub_shader_paths[step] == NULL) continue;
+	for (byte i = 0; i < num_sub_shaders; i++) {
+		if (sub_shader_paths[i] == NULL) continue;
 
-		const GLuint sub_shader = sub_shaders[step];
+		const GLuint sub_shader = sub_shaders[i];
 		glDetachShader(shader, sub_shader);
 		glDeleteShader(sub_shader);
 	}
