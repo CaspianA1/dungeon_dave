@@ -32,8 +32,13 @@ or spec are used for this; the four corners are simply passed in as a uniform. I
 there wouldn't be much point of binding a vertex buffer and spec if the vertex count is known
 ahead of time, and is very small; so this should make the code a bit simpler and marginally faster. */
 
-/* TODO: make the ESM constant stronger for the sake of the weapon sprite, since the shadow
-is too light when the weapon sprite's formed occluder-receiver difference is too small. */
+/* TODO: fix this:
+- When debugging and separating the weapon sprite from the position of the player (by not updating the corners), these two things can happen:
+	1. If the near clip dist is way too large, the parallax effect when moving away from the weapon becomes very incorrect.
+		Parallax when looking up and down goes away a lot too, and the weapon grows in size greatly.
+
+	2. If the near clip dist is way too small, the weapon appears warped, and disappears from sight too easily.
+*/
 
 //////////
 
@@ -181,7 +186,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 		// `camera_view` and `cascade_split_distances` are not needed, since the layer will always be 0
 
-		use_texture(drawable -> diffuse_texture, shader, "frame_sampler", TexSet, TU_Weapon);
+		use_texture(drawable -> diffuse_texture, shader, "frame_sampler", TexSet, TU_WeaponSprite);
 		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);
 

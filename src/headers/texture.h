@@ -48,7 +48,7 @@ typedef enum {
 	TU_CascadedShadowMap,
 	TU_Billboard,
 	TU_Skybox,
-	TU_Weapon,
+	TU_WeaponSprite,
 	TU_TitleScreen
 } TextureUnit;
 
