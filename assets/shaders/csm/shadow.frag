@@ -13,7 +13,7 @@ uniform sampler2DArray shadow_cascade_sampler;
 /* TODO: perhaps use Vogel disk or stratified Poisson sampling instead:
 - https://www.gamedev.net/tutorials/programming/graphics/contact-hardening-soft-shadows-made-fast-r4906/
 - http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/ */
-float get_average_occluder_depth(const vec2 UV, const uint layer_index, const int sample_radius) {
+float get_average_occluder_depth(const int sample_radius, const uint layer_index, const vec2 UV) {
 	float average_occluder_depth = 0.0f;
 	vec2 texel_size = 1.0f / textureSize(shadow_cascade_sampler, 0).xy;
 
@@ -29,7 +29,7 @@ float get_average_occluder_depth(const vec2 UV, const uint layer_index, const in
 }
 
 float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_world_space) {
-	const int sample_radius = 2;
+	const int sample_radius = 1;
 
 	const float
 		esm_constant = 45.0f, layer_scaling_component = 1.0f; // Palace
@@ -49,7 +49,7 @@ float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_
 
 	// TODO: base this on the overall layer percentage, rather than the layer index
 	float layer_scaled_esm_constant = esm_constant * pow(layer_index + 1u, layer_scaling_component);
-	float occluder_receiver_diff = get_average_occluder_depth(UV.xy, layer_index, sample_radius) - UV.z;
+	float occluder_receiver_diff = get_average_occluder_depth(sample_radius, layer_index, UV.xy) - UV.z;
 	float in_light_percentage = exp(layer_scaled_esm_constant * occluder_receiver_diff);
 	return clamp(in_light_percentage, 0.0f, 1.0f);
 }
