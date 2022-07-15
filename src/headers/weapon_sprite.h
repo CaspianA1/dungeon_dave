@@ -45,9 +45,8 @@ void deinit_weapon_sprite(const WeaponSprite* const ws);
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event);
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws);
 
-void draw_weapon_sprite(
-	const WeaponSprite* const ws,
-	const vec4* const view_projection,
-	const CascadedShadowContext* const shadow_context);
+void draw_weapon_sprite(const WeaponSprite* const ws,
+	const CascadedShadowContext* const shadow_context,
+	const vec4* const view_projection);
 
 #endif

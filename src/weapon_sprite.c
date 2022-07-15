@@ -291,16 +291,13 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	draw_drawable_to_shadow_context(&ws -> drawable, corners_per_quad, update_vertex_buffer_before_draw_call, ws);
 }
 
-void draw_weapon_sprite(
-	const WeaponSprite* const ws,
-	const vec4* const view_projection,
-	const CascadedShadowContext* const shadow_context) {
+void draw_weapon_sprite(const WeaponSprite* const ws,
+	const CascadedShadowContext* const shadow_context,
+	const vec4* const view_projection) {
 
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
 		WITH_BINARY_RENDER_STATE(GL_BLEND,
-			/* Not using alpha to coverage here b/c blending is guaranteed to be correct for
-			the weapon, since it is drawn closest to the camera, compared to all other objects */
 			const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view_projection, ws, shadow_context};
 			draw_drawable(ws -> drawable, corners_per_quad, &uniform_updater_params, true);
 		);
