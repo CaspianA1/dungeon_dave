@@ -15,6 +15,12 @@ For later on:
 - A world-space approach to merging the AABB of the sub frustum box
 	with PSRs, instead of defining a scale factor for the frustum
 - Pushing the weapon against walls puts it in shadow, which doesn't look right (I need to keep it outside the wall)
+- Try to avoid the use of a geometry shader for instancing if possible
+	(can probably offset vertices with normal instancing, but I don't know about changing `gl_Layer`)
+
+Revectorization:
+- https://www.gamedev.net/tutorials/programming/graphics/shadow-map-silhouette-revectorization-smsr-r3437/
+- https://graphicsinterface.org/wp-content/uploads/gi2016-10.pdf
 */
 
 ////////// This part concerns getting the light view projection matrix of a camera sub frustum
