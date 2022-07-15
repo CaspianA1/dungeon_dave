@@ -14,6 +14,7 @@ typedef struct {
 /* TODO:
 - Fix weird depth clamping errors when billboard intersect with the near plane
 - Note: culling cannot be done for billboards for shadow mapping, for the same reason as with sectors
+- Render the player body as a shadowed billboard that always has the same center as the camera
 
 Drawing billboards to the shadow cascades:
 	- Update billboards on the CPU
@@ -98,9 +99,9 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 
 	use_vertex_spec(billboard_context -> vertex_spec);
 
-	// WITH_BINARY_RENDER_STATE(GL_BLEND,
+	WITH_BINARY_RENDER_STATE(GL_BLEND,
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) billboard_context -> billboards.length);
-	// );
+	);
 }
 
 ////////// This part concerns the sorting of billboard indices from back to front
