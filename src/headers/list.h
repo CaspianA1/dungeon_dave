@@ -22,7 +22,7 @@ typedef struct {
 	\
 	for (byte* item_name = data + (initial_offset) * item_size; item_name < out_of_bounds_name; item_name += item_size)\
 		do {__VA_ARGS__} while (false);\
-} while (0)
+} while (false)
 
 List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size);
 void push_ptr_to_list(List* const list, const void* const item_ptr);
