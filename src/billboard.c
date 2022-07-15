@@ -6,9 +6,13 @@
 #include "headers/shader.h"
 #include "headers/constants.h"
 
+typedef struct {
+	billboard_index_t index;
+	GLfloat dist_to_camera;
+} BillboardDistanceSortRef;
+
 /* TODO:
 - Fix weird depth clamping errors when billboard intersect with the near plane
-
 - Note: culling cannot be done for billboards for shadow mapping, for the same reason as with sectors
 
 Drawing billboards to the shadow cascades:
@@ -20,13 +24,15 @@ Drawing billboards to the shadow cascades:
 	- Cull billboards into the billboard GPU buffer, keeping the billboards sorted back-to-front
 	- Draw them as normally, with glDrawArraysInstanced
 
-- All of that would use alpha blending, with depth buffer writes disabled, drawn between sector + skybox and weapon sprite
+- All of that uses alpha blending, with depth buffer writes disabled, drawn between sector + skybox and weapon sprite
 - Write to a translucency buffer in the fragment shader, and during shadow tests, multiply the shadow strength by the translucency factor
 
 Other idea:
 	- Do the same thing, but change the depth shader so that it can generate billboard
-	corners in the vertex shader, instead of using a transform feedback buffer
+		corners in the vertex shader, instead of using a transform feedback buffer
 */
+
+//////////
 
 // This just updates the billboard animation instances at the moment
 void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs) {
@@ -34,14 +40,14 @@ void update_billboards(const BillboardContext* const billboard_context, const GL
 
 	BillboardAnimationInstance* const animation_instance_data = animation_instances -> data;
 	const Animation* const animation_data = billboard_context -> animations.data;
-	Billboard* const billboard_data = billboard_context -> draw_context.buffers.cpu.data;
+	Billboard* const billboard_data = billboard_context -> billboards.data;
 
 	/* Billboard animations are constantly looping, so their
 	cycle base time is for when this function is first called */
 	static GLfloat cycle_base_time;
 	ON_FIRST_CALL(cycle_base_time = curr_time_secs;);
 
-	for (buffer_size_t i = 0; i < animation_instances -> length; i++) {
+	for (billboard_index_t i = 0; i < animation_instances -> length; i++) {
 		BillboardAnimationInstance* const animation_instance = animation_instance_data + i;
 
 		update_animation_information(
@@ -51,11 +57,10 @@ void update_billboards(const BillboardContext* const billboard_context, const GL
 	}
 }
 
-static void draw_billboards(const BatchDrawContext* const draw_context,
-	const CascadedShadowContext* const shadow_context, const Camera* const camera,
-	const buffer_size_t num_visible_billboards) {
+static void internal_draw_billboards(const BillboardContext* const billboard_context,
+	const CascadedShadowContext* const shadow_context, const Camera* const camera) {
 
-	const GLuint shader = draw_context -> shader;
+	const GLuint shader = billboard_context -> shader;
 	static GLint right_xz_world_space_id, view_projection_id, camera_view_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
@@ -71,7 +76,7 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 		const List* const split_dists = &shadow_context -> split_dists;
 		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
-		use_texture(draw_context -> texture_set, shader, "texture_sampler", TexSet, TU_Billboard);
+		use_texture(billboard_context -> diffuse_texture_set, shader, "texture_sampler", TexSet, TU_Billboard);
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);
 
@@ -91,87 +96,99 @@ static void draw_billboards(const BatchDrawContext* const draw_context,
 
 	//////////
 
-	use_vertex_spec(draw_context -> vertex_spec);
+	use_vertex_spec(billboard_context -> vertex_spec);
 
-	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
-		/* Not using blending b/c it's not order independent.
-		Not using raw alpha testing because of the aliasing involved. */
-		WITH_BINARY_RENDER_STATE(GL_SAMPLE_ALPHA_TO_COVERAGE,
-			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) num_visible_billboards);
-		);
-	);
+	// WITH_BINARY_RENDER_STATE(GL_BLEND,
+		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) billboard_context -> billboards.length);
+	// );
 }
 
-////////// These functions are for frustum culling
+////////// This part concerns the sorting of billboard indices from back to front
 
-static void make_aabb(const byte* const typeless_billboard, vec3 aabb[2]) {
-	const Billboard* const billboard = (Billboard*) typeless_billboard;
-	const GLfloat *const size = billboard -> size, *const pos = billboard -> pos;
+static int compare_billboard_sort_refs(const void* const a, const void* const b) {
+	const GLfloat
+		dist_a = ((BillboardDistanceSortRef*) a) -> dist_to_camera,
+		dist_b = ((BillboardDistanceSortRef*) b) -> dist_to_camera;
 
-	vec3 extents = {size[0], size[1], size[0]};
-
-	glm_vec3_scale(extents, 0.5f, extents);
-	glm_vec3_sub((GLfloat*) pos, extents, aabb[0]);
-	glm_vec3_add((GLfloat*) pos, extents, aabb[1]);
+	if (dist_a < dist_b) return 1;
+	else if (dist_a > dist_b) return -1;
+	else return 0;
 }
 
-static buffer_size_t get_renderable_index_from_cullable(const byte* const typeless_billboard, const byte* const typeless_first_billboard) {
-	return (buffer_size_t) ((Billboard*) typeless_billboard - (Billboard*) typeless_first_billboard);
-}
+static void sort_billboard_indices_by_dist_to_camera(BillboardContext* const billboard_context, const vec3 camera_pos) {
+	const List* const billboards = &billboard_context -> billboards;
 
-static buffer_size_t get_num_renderable_from_cullable(const byte* const typeless_billboard) {
-	(void) typeless_billboard;
-	return 1;
+	const Billboard* const billboard_data = billboards -> data;
+	BillboardDistanceSortRef* const sort_ref_data = billboard_context -> distance_sort_refs.data;
+
+	const billboard_index_t num_billboards = (billboard_index_t) billboards -> length;
+
+	for (billboard_index_t i = 0; i < num_billboards; i++)
+		sort_ref_data[i] = (BillboardDistanceSortRef) {
+			i, glm_vec3_distance((GLfloat*) camera_pos, (GLfloat*) billboard_data[i].pos)
+		};
+
+	/* Sorting from back to front by index (the actual billboards are not sorted, since that would require much more copying).
+	TODO: use the fact that the billboards will already be partially sorted for better sorting performance (i.e. using insertion sort). */
+	qsort(sort_ref_data, num_billboards, sizeof(BillboardDistanceSortRef), compare_billboard_sort_refs);
+
+	////////// Moving the billboards into their right positions in their GPU buffer
+
+	use_vertex_buffer(billboard_context -> vertex_buffer);
+
+	// TODO: add `GL_MAP_UNSYNCHRONIZED_BIT` with `glMapBufferRange` if possible (test on Chromebook)
+	Billboard* const billboards_gpu = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+	// TODO: do culling via an AABB tree later
+	for (billboard_index_t i = 0; i < num_billboards; i++)
+		billboards_gpu[i] = billboard_data[sort_ref_data[i].index];
+
+	glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
 //////////
 
 // This is just a utility function
-void draw_visible_billboards(const BillboardContext* const billboard_context,
+void draw_billboards(BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context, const Camera* const camera) {
 
-	const BatchDrawContext* const draw_context = &billboard_context -> draw_context;
-
-	const buffer_size_t num_visible_billboards = cull_from_frustum_into_gpu_buffer(
-		draw_context, draw_context -> buffers.cpu,
-		camera -> frustum_planes, make_aabb,
-		get_renderable_index_from_cullable,
-		get_num_renderable_from_cullable
-	);
-
-	if (num_visible_billboards != 0)
-		draw_billboards(draw_context, shadow_context, camera, num_visible_billboards);
+	sort_billboard_indices_by_dist_to_camera(billboard_context, camera -> pos);
+	internal_draw_billboards(billboard_context, shadow_context, camera);
 }
 
-//////////
-
 BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
-	const buffer_size_t num_billboards, const Billboard* const billboards,
-	const buffer_size_t num_billboard_animations, const Animation* const billboard_animations,
-	const buffer_size_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances) {
+	const billboard_index_t num_billboards, const Billboard* const billboards,
+	const billboard_index_t num_billboard_animations, const Animation* const billboard_animations,
+	const billboard_index_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances) {
 
 	BillboardContext billboard_context = {
-		.draw_context = {
-			.buffers.cpu = init_list(num_billboards, Billboard),
-			.vertex_spec = init_vertex_spec(),
-			.texture_set = diffuse_texture_set,
-			.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag"))
-		},
+		.vertex_buffer = init_gpu_buffer(),
+		.vertex_spec = init_vertex_spec(),
+		.diffuse_texture_set = diffuse_texture_set,
+		.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag")),
 
+		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),
+		.billboards = init_list(num_billboards, Billboard),
 		.animations = init_list(num_billboard_animations, Animation),
 		.animation_instances = init_list(num_billboard_animation_instances, BillboardAnimationInstance)
 	};
 
-	push_array_to_list(&billboard_context.draw_context.buffers.cpu, billboards, num_billboards);
-	init_batch_draw_context_gpu_buffer(&billboard_context.draw_context, num_billboards, sizeof(Billboard));
+	////////// Initializing the vertex buffer
 
-	use_vertex_spec(billboard_context.draw_context.vertex_spec);
+	use_vertex_buffer(billboard_context.vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, num_billboards * sizeof(Billboard), NULL, GL_DYNAMIC_DRAW);
+
+	////////// Initializing the vertex spec
+
+	use_vertex_spec(billboard_context.vertex_spec);
 	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), 0, BUFFER_SIZE_TYPENAME);
 	define_vertex_spec_index(true, true, 1, 2, sizeof(Billboard), offsetof(Billboard, size), BILLBOARD_VAR_COMPONENT_TYPENAME);
 	define_vertex_spec_index(true, true, 2, 3, sizeof(Billboard), offsetof(Billboard, pos), BILLBOARD_VAR_COMPONENT_TYPENAME);
 
-	//////////
+	////////// Initializing client-side lists
 
+	billboard_context.distance_sort_refs.length = num_billboards; // TODO: needed?
+	push_array_to_list(&billboard_context.billboards, billboards, num_billboards);
 	push_array_to_list(&billboard_context.animations, billboard_animations, num_billboard_animations);
 	push_array_to_list(&billboard_context.animation_instances, billboard_animation_instances, num_billboard_animation_instances);
 
@@ -179,9 +196,16 @@ BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
 }
 
 void deinit_billboard_context(const BillboardContext* const billboard_context) {
-	deinit_list(billboard_context -> animation_instances);
+	deinit_gpu_buffer(billboard_context -> vertex_buffer);
+	deinit_vertex_spec(billboard_context -> vertex_spec);
+
+	deinit_texture(billboard_context -> diffuse_texture_set);
+	deinit_shader(billboard_context -> shader);
+
+	deinit_list(billboard_context -> distance_sort_refs);
+	deinit_list(billboard_context -> billboards);
 	deinit_list(billboard_context -> animations);
-	deinit_batch_draw_context(&billboard_context -> draw_context);
+	deinit_list(billboard_context -> animation_instances);
 }
 
 #endif
