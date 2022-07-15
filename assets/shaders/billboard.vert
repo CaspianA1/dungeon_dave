@@ -22,6 +22,5 @@ void main(void) {
 
 	world_depth_value = get_world_depth_value(fragment_pos_world_space);
 	UV = vec3(get_quad_UV(), texture_id);
-
 	gl_Position = view_projection * vec4(fragment_pos_world_space, 1.0f);
 }
