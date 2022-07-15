@@ -29,7 +29,7 @@ float get_average_occluder_depth(const int sample_radius, const uint layer_index
 }
 
 float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_world_space) {
-	const int sample_radius = 1;
+	const int sample_radius = 2;
 
 	const float
 		esm_constant = 45.0f, layer_scaling_component = 1.0f; // Palace
