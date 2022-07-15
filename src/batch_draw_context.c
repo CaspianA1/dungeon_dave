@@ -27,14 +27,14 @@ void deinit_batch_draw_context(const BatchDrawContext* const draw_context) {
 static void* init_mapping_for_culled_batching(const BatchDrawContext* const draw_context) {
 	const List* const cpu_buffer = &draw_context -> buffers.cpu;
 	const GLsizeiptr num_bytes = cpu_buffer -> length * cpu_buffer -> item_size;
-	const GLbitfield flags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
+	const GLbitfield access_flags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
 
 	/* Flags, explained:
 	1. Write only (only writing from cpu to gpu buffer, no other operations).
 	2. Whole previous contents of buffer can be discarded, since the batch is written from scratch each time.
 	Note: GL_MAP_UNSYNCHRONIZED_BIT is not used because previous GPU commands may depend on the buffer contents. */
 
-	return glMapBufferRange(GL_ARRAY_BUFFER, 0, num_bytes, flags);
+	return glMapBufferRange(GL_ARRAY_BUFFER, 0, num_bytes, access_flags);
 }
 
 //////////
