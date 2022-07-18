@@ -4,6 +4,7 @@
 
 in float world_depth_value;
 in vec3 fragment_pos_world_space, UV;
+
 out vec4 color;
 
 uniform float ambient_strength;
