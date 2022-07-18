@@ -81,6 +81,7 @@ void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLui
 }
 
 void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer) {
+	glBindBuffer(GL_UNIFORM_BUFFER, buffer -> id);
 	buffer -> gpu_memory_mapping = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
 }
 

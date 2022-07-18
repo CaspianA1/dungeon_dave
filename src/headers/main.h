@@ -3,6 +3,7 @@
 
 #include "buffer_defs.h"
 #include "camera.h"
+#include "uniform_buffer.h"
 #include "weapon_sprite.h"
 #include "sector.h"
 #include "billboard.h"
@@ -42,6 +43,8 @@
 typedef struct {
 	Camera camera;
 
+	UniformBuffer shading_params;
+
 	WeaponSprite weapon_sprite;
 	const SectorContext sector_context;
 	BillboardContext billboard_context;
@@ -54,6 +57,6 @@ typedef struct {
 	const byte* const heightmap, map_size[2];
 } SceneContext;
 
-// Excluded: main_init, draw_all_objects_to_shadow_map, main_drawer, main_deinit
+// Excluded: init_static_shading_params, update_dynamic_shading_params, draw_all_objects_to_shadow_map, main_drawer, main_init, main_deinit
 
 #endif

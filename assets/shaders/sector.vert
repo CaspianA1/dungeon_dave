@@ -1,6 +1,7 @@
 #version 400 core
 
 #include "shadow/shadow.vert"
+#include "shading_params.frag"
 
 layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
@@ -8,8 +9,6 @@ layout(location = 1) in uint face_info_bits;
 flat out uint face_id;
 out float world_depth_value;
 out vec3 UV, fragment_pos_world_space;
-
-uniform mat4 view_projection;
 
 const struct FaceAttribute {
 	ivec2 uv_indices, uv_signs;
@@ -38,5 +37,6 @@ void main(void) {
 
 	world_depth_value = get_world_depth_value(vertex_pos_world_space);
 	fragment_pos_world_space = vertex_pos_world_space;
+
 	gl_Position = view_projection * vec4(vertex_pos_world_space, 1.0f);
 }

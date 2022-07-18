@@ -171,9 +171,7 @@ static void draw_sectors(
 
 	const GLuint shader = draw_context -> shader;
 
-	static GLint
-		camera_pos_world_space_id, view_projection_id, UV_translation_id,
-		camera_view_id, light_view_projection_matrices_id;
+	static GLint UV_translation_id, camera_view_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
 
@@ -181,23 +179,9 @@ static void draw_sectors(
 	#define ARRAY_LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, 1, constants.lighting.param)
 
 	ON_FIRST_CALL(
-		INIT_UNIFORM(camera_pos_world_space, shader);
-		INIT_UNIFORM(view_projection, shader);
 		INIT_UNIFORM(UV_translation, shader);
 		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
-
-		INIT_UNIFORM_VALUE(dir_to_light, shader, 3fv, 1, shadow_context -> dir_to_light);
-		INIT_UNIFORM_VALUE(enable_tone_mapping, shader, 1i, constants.lighting.tone_mapping.enabled);
-
-		LIGHTING_UNIFORM(ambient_strength, 1f);
-		LIGHTING_UNIFORM(diffuse_strength, 1f);
-		LIGHTING_UNIFORM(specular_strength, 1f);
-		ARRAY_LIGHTING_UNIFORM(specular_exponent_domain, 2fv);
-
-		INIT_UNIFORM_VALUE(tone_mapping_max_white, shader, 1f, constants.lighting.tone_mapping.max_white);
-		LIGHTING_UNIFORM(noise_granularity, 1f);
-		ARRAY_LIGHTING_UNIFORM(overall_scene_tone, 3fv);
 
 		const GLfloat epsilon = 0.005f;
 		INIT_UNIFORM_VALUE(UV_translation_area, shader, 3fv, 2, (GLfloat*) (vec3[2]) {
@@ -220,9 +204,6 @@ static void draw_sectors(
 
 	#undef LIGHTING_UNIFORM
 	#undef ARRAY_LIGHTING_UNIFORM
-
-	UPDATE_UNIFORM(camera_pos_world_space, 3fv, 1, camera -> pos);
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &camera -> view_projection[0][0]);
 
 	////////// This little part concerns CSM
 
