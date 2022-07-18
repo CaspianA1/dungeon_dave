@@ -41,7 +41,7 @@ Architectural/code design ideas:
 - Define the constants in constants.h in constants.c, and make the constants.h struct extern
 - Three classes of settings: hardcoded in the `constants` struct, configurable via a level file, and configurable by the player
 - Perhaps use the alpha channels of the face texture set or normal map set for something interesting
-- Some library memory leaks; this should be fixed in some way, if possible (figure out why `SDL_GetNumAllocations` is above zero after `deinit_screen`)
+- Some library memory leaks; this should be fixed in some way, if possible (figure out why `SDL_GetNumAllocations` is above zero after `deinit_screen`; even happens with a simple test app)
 - Use more of the cglm functions in `update_camera`
 - Use Drawable for as many drawable things as possible
 - Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
