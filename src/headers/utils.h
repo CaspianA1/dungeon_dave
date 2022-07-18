@@ -96,7 +96,7 @@ typedef enum {
 
 static inline GLint safely_get_uniform(const GLuint shader, const GLchar* const name) {
 	const GLint id = glGetUniformLocation(shader, name);
-	if (id == -1) FAIL(InitializeShaderUniform, "Uniform with name of %s was not found in shader", name);
+	if (id == -1) FAIL(InitializeShaderUniform, "Uniform with the name of '%s' was not found in shader", name);
 	return id;
 }
 
