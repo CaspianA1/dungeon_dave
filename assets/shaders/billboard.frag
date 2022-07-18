@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "csm/shadow.frag"
+#include "shadow/shadow.frag"
 
 in float world_depth_value;
 in vec3 fragment_pos_world_space, UV;

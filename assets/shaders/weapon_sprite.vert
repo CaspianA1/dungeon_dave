@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "csm/shadow.vert"
+#include "shadow/shadow.vert"
 #include "quad.vert"
 
 out vec3 fragment_pos_world_space, UV;

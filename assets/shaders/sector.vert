@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "csm/shadow.vert"
+#include "shadow/shadow.vert"
 
 layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;

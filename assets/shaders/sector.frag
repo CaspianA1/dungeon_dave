@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "csm/shadow.frag"
+#include "shadow/shadow.frag"
 
 flat in uint face_id;
 in float world_depth_value;

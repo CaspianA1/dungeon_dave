@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "csm/shadow.vert"
+#include "shadow/shadow.vert"
 #include "quad.vert"
 
 layout(location = 0) in uint texture_id;
