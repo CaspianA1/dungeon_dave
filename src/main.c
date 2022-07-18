@@ -305,7 +305,7 @@ static void* main_init(void) {
 		scene_context.sector_context.draw_context.shader,
 		static_subvar_names, ARRAY_LENGTH(static_subvar_names)
 	);
-j
+
 	init_static_shading_params(&shading_params, scene_context.cascaded_shadow_context.dir_to_light);
 	bind_uniform_buffer_to_shader(&shading_params, scene_context.sector_context.draw_context.shader);
 
