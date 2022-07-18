@@ -61,12 +61,11 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	const GLfloat curr_time_secs = event -> curr_time_secs;
 
 	const SectorContext* const sector_context = &scene_context -> sector_context;
-	BillboardContext* const billboard_context = &scene_context -> billboard_context;
 	const CascadedShadowContext* const shadow_context = &scene_context -> cascaded_shadow_context;
 
-	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
-
 	Camera* const camera = &scene_context -> camera;
+	BillboardContext* const billboard_context = &scene_context -> billboard_context;
+	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
 
 	////////// Object updating
 
