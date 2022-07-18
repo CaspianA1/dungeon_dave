@@ -6,6 +6,100 @@
 #include "headers/texture.h"
 #include "headers/event.h"
 
+static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const shadow_context,
+	const SectorContext* const sector_context, const WeaponSprite* const weapon_sprite) {
+
+	/* Curr problems with the weapon sprite shadow:
+	- Partial transparency (i.e. translucency); should I handle that?
+
+	- For binary transparency, how do I do it without aliasing?
+	- Perhaps with a filtered cutout texture: https://www.cs.rpi.edu/~cutler/classes/advancedgraphics/S17/final_projects/anthony_philip.pdf
+	- Since 1-bit textures don't exist in OpenGL, or in hardware, perhaps do a translucency map anyways (a separate texture map). It would be
+		a bit hard to implement, but it would be worth it for the sake of billboards later too.
+	- For a translucency map, I will need alpha blending, which requires ordered billboards, so I must sort my billboards front-to-back by their center
+	- This will make alpha results for billboards better, and it will allow shadows for the weapon sprite that have less aliasing
+
+	- Transparency code is sorta fragmented right now: alpha blending for the weapon,
+		normally, alpha testing for transparent objects, and alpha to coverage for billboards
+
+	- Integration with the depth shader is a bit messy; find a neat way to do that (this should go first in terms of priorities)
+	- The weapon sprite's shadow is way too light since it's close to the ground; find a way to resolve that */
+
+	const GLuint depth_shader = shadow_context -> depth_shader;
+
+	static GLint drawing_translucent_quads_id, frame_index_id;
+
+	ON_FIRST_CALL(
+		INIT_UNIFORM(drawing_translucent_quads, depth_shader);
+		INIT_UNIFORM(frame_index, depth_shader);
+		INIT_UNIFORM_VALUE(alpha_threshold, depth_shader, 1f, 0.2f);
+
+		use_texture(weapon_sprite -> drawable.diffuse_texture, depth_shader, "alpha_test_sampler", TexSet, TU_WeaponSprite);
+	);
+
+	// Opaque objects are drawn first
+
+	UPDATE_UNIFORM(drawing_translucent_quads, 1i, false);
+	draw_all_sectors_to_shadow_context(&sector_context -> draw_context);
+
+	// Then, translucent objects after
+
+	UPDATE_UNIFORM(drawing_translucent_quads, 1i, true);
+	UPDATE_UNIFORM(frame_index, 1ui, weapon_sprite -> animation_context.curr_frame);
+	draw_weapon_sprite_to_shadow_context(weapon_sprite);
+}
+
+static void main_drawer(void* const app_context, const Event* const event) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	SceneContext* const scene_context = (SceneContext*) app_context;
+
+	if (tick_title_screen(&scene_context -> title_screen, event)) return;
+
+	////////// Some variable initialization
+
+	const GLfloat curr_time_secs = event -> curr_time_secs;
+
+	const SectorContext* const sector_context = &scene_context -> sector_context;
+	BillboardContext* const billboard_context = &scene_context -> billboard_context;
+	const CascadedShadowContext* const shadow_context = &scene_context -> cascaded_shadow_context;
+
+	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
+
+	Camera* const camera = &scene_context -> camera;
+
+	////////// Object updating
+
+	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
+	update_billboards(billboard_context, curr_time_secs);
+	update_weapon_sprite(weapon_sprite, camera, event);
+
+	////////// Rendering to the shadow context
+
+	enable_rendering_to_shadow_context(shadow_context, camera);
+	draw_all_objects_to_shadow_map(shadow_context, sector_context, weapon_sprite);
+	disable_rendering_to_shadow_context(event -> screen_size);
+
+	////////// The main drawing code
+
+	draw_visible_sectors(sector_context, shadow_context, camera, curr_time_secs);
+
+	const vec4* const view_projection = camera -> view_projection;
+
+	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
+	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
+			draw_skybox(&scene_context -> skybox, view_projection); // Drawn before any translucent geometry
+
+			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
+				draw_billboards(billboard_context, shadow_context, camera);
+				draw_weapon_sprite(weapon_sprite, shadow_context, view_projection);
+			);
+		);
+	);
+
+}
+
 static void* main_init(void) {
 	////////// Defining a bunch of level data
 
@@ -64,7 +158,7 @@ static void* main_init(void) {
 		ASSET_PATH("objects/shabti.bmp")
 	},
 
-	*const still_face_textures[] = {
+	*const still_face_texture_paths[] = {
 		// Palace:
 		ASSET_PATH("walls/sand.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp"),
 		ASSET_PATH("walls/marble.bmp"), ASSET_PATH("walls/hieroglyph.bmp"),
@@ -125,7 +219,7 @@ static void* main_init(void) {
 
 		.weapon_sprite = init_weapon_sprite(
 			// 3.0f, 3.0f, 1.0f, 1.0f, 1.0f, (AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}
-			3.0f, 8.0f, 0.6f, 2.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
+			3.0f, 8.0f, 0.6f, 3.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
 			// 3.0f, 2.0f, 0.75f, 2.0f, 0.02f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}
 			// 4.0f, 4.0f, 0.75f, 2.0f, 0.035f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}
 			// 2.0f, 2.0f, 0.8f, 1.0f, 0.04f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}
@@ -133,7 +227,7 @@ static void* main_init(void) {
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
 			true, init_texture_set(false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-			ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures, NULL)
+			ARRAY_LENGTH(still_face_texture_paths), 0, 256, 256, still_face_texture_paths, NULL)
 		),
 
 		.billboard_context = init_billboard_context(
@@ -156,8 +250,8 @@ static void* main_init(void) {
 			*/
 
 			// Palace:
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.3f, 1.0f},
-			far_clip_dist, 0.4f, 1024, num_cascades
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.75f, 1.0f},
+			far_clip_dist, 0.3f, 1024, num_cascades
 		),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
@@ -181,49 +275,6 @@ static void* main_init(void) {
 	void* const app_context = malloc(sizeof(SceneContext));
 	memcpy(app_context, &scene_context, sizeof(SceneContext));
 	return app_context;
-}
-
-static void main_drawer(void* const app_context, const Event* const event) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	SceneContext* const scene_context = (SceneContext*) app_context;
-
-	if (tick_title_screen(&scene_context -> title_screen, event)) return;
-
-	////////// Some variable initialization
-
-	const GLfloat curr_time_secs = event -> curr_time_secs;
-
-	const SectorContext* const sector_context = &scene_context -> sector_context;
-	const BillboardContext* const billboard_context = &scene_context -> billboard_context;
-	const CascadedShadowContext* const shadow_context = &scene_context -> cascaded_shadow_context;
-
-	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
-	Camera* const camera = &scene_context -> camera;
-
-	////////// Object updating
-
-	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
-	update_billboards(billboard_context, curr_time_secs);
-	update_weapon_sprite(weapon_sprite, camera, event);
-
-	////////// Rendering to the shadow context
-
-	enable_rendering_to_shadow_context(shadow_context, camera);
-		draw_all_sectors_to_shadow_context(&sector_context -> draw_context);
-		draw_weapon_sprite_to_shadow_context(weapon_sprite);
-	disable_rendering_to_shadow_context(event -> screen_size);
-
-	////////// The main drawing code
-
-	draw_visible_sectors(sector_context, shadow_context, camera, curr_time_secs);
-	draw_visible_billboards(billboard_context, shadow_context, camera);
-
-	WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE, // Not writing to the depth buffer for these
-		const vec4* const view_projection = camera -> view_projection;
-		draw_skybox(&scene_context -> skybox, view_projection);
-		draw_weapon_sprite(weapon_sprite, view_projection, shadow_context);
-	);
 }
 
 static void main_deinit(void* const app_context) {

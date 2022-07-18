@@ -297,10 +297,8 @@ void draw_weapon_sprite(const WeaponSprite* const ws,
 
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
-		WITH_BINARY_RENDER_STATE(GL_BLEND,
-			const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view_projection, ws, shadow_context};
-			draw_drawable(ws -> drawable, corners_per_quad, &uniform_updater_params, true);
-		);
+		const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view_projection, ws, shadow_context};
+		draw_drawable(ws -> drawable, corners_per_quad, &uniform_updater_params, true);
 	);
 }
 

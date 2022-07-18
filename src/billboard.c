@@ -98,10 +98,7 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 	//////////
 
 	use_vertex_spec(billboard_context -> vertex_spec);
-
-	WITH_BINARY_RENDER_STATE(GL_BLEND,
-		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) billboard_context -> billboards.length);
-	);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) billboard_context -> billboards.length);
 }
 
 ////////// This part concerns the sorting of billboard indices from back to front

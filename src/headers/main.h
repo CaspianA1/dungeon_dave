@@ -18,6 +18,7 @@
 	Perhaps make some function in `shadow.c` that enables/disables alpha testing of a shadow
 	texture? If not, that texture could simply be set to a 1x1 texture, with a single alpha value of 1 (so all alpha tests pass).
 	That texture would be a texture array, where a frame is specified (current frame index of weapon would equal the frame there).
+	Note: the alpha test should not change the color of the shadow; it should only change the strength of it.
 
 4. Figure out how to render the weapon sprite to the shadow map
 5. If needed, render a flat character or 3D character model with it, so that the weapon isn't floating
@@ -43,7 +44,7 @@ typedef struct {
 
 	WeaponSprite weapon_sprite;
 	const SectorContext sector_context;
-	const BillboardContext billboard_context;
+	BillboardContext billboard_context;
 
 	CascadedShadowContext cascaded_shadow_context;
 
@@ -53,6 +54,6 @@ typedef struct {
 	const byte* const heightmap, map_size[2];
 } SceneContext;
 
-// Excluded: main_init, main_drawer, main_deinit
+// Excluded: main_init, draw_all_objects_to_shadow_map, main_drawer, main_deinit
 
 #endif
