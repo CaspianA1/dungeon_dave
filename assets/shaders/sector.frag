@@ -23,7 +23,10 @@ float diffuse(const vec3 fragment_normal) {
 
 vec3 specular(const vec3 texture_color, const vec3 fragment_normal) {
 	/* Brighter texture colors have more specularity, and stronger highlights.
-	Also, the specular calculation uses Blinn-Phong, rather than just Phong. */
+	Also, the specular calculation uses Blinn-Phong, rather than just Phong.
+	The specular strength is also multiplied by the corresponding value in an
+	environment map (which is actually just the skybox under the hood), in order
+	to factor in the general environment's light into this calculation. */
 
 	vec3 view_dir = normalize(camera_pos_world_space - fragment_pos_world_space);
 	vec3 halfway_dir = normalize(dir_to_light + view_dir);
