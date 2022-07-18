@@ -164,8 +164,8 @@ void draw_all_sectors_to_shadow_context(const BatchDrawContext* const sector_dra
 static void draw_sectors(
 	const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
-	const Camera* const camera, const buffer_size_t num_visible_faces,
-	const GLfloat curr_time_secs) {
+	const Skybox* const skybox, const Camera* const camera,
+	const buffer_size_t num_visible_faces, const GLfloat curr_time_secs) {
 
 	const BatchDrawContext* const draw_context = &sector_context -> draw_context;
 
@@ -190,14 +190,14 @@ static void draw_sectors(
 		INIT_UNIFORM_VALUE(dir_to_light, shader, 3fv, 1, shadow_context -> dir_to_light);
 		INIT_UNIFORM_VALUE(enable_tone_mapping, shader, 1i, constants.lighting.tone_mapping.enabled);
 
-		LIGHTING_UNIFORM(ambient, 1f);
+		LIGHTING_UNIFORM(ambient_strength, 1f);
 		LIGHTING_UNIFORM(diffuse_strength, 1f);
 		LIGHTING_UNIFORM(specular_strength, 1f);
 		ARRAY_LIGHTING_UNIFORM(specular_exponent_domain, 2fv);
 
 		INIT_UNIFORM_VALUE(tone_mapping_max_white, shader, 1f, constants.lighting.tone_mapping.max_white);
 		LIGHTING_UNIFORM(noise_granularity, 1f);
-		ARRAY_LIGHTING_UNIFORM(light_color, 3fv);
+		ARRAY_LIGHTING_UNIFORM(overall_scene_tone, 3fv);
 
 		const GLfloat epsilon = 0.005f;
 		INIT_UNIFORM_VALUE(UV_translation_area, shader, 3fv, 2, (GLfloat*) (vec3[2]) {
@@ -207,6 +207,7 @@ static void draw_sectors(
 		const List* const split_dists = &shadow_context -> split_dists;
 		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
+		use_texture(skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture(draw_context -> texture_set, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
 		use_texture(sector_context -> face_normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
@@ -269,7 +270,8 @@ static buffer_size_t get_num_renderable_from_cullable(const byte* const typeless
 // This is just a utility function
 void draw_visible_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
-	const Camera* const camera, const GLfloat curr_time_secs) {
+	const Skybox* const skybox, const Camera* const camera,
+	const GLfloat curr_time_secs) {
 
 	const buffer_size_t num_visible_faces = cull_from_frustum_into_gpu_buffer(
 		&sector_context -> draw_context, sector_context -> sectors, camera -> frustum_planes,
@@ -278,7 +280,7 @@ void draw_visible_sectors(const SectorContext* const sector_context,
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0) draw_sectors(sector_context,
-		shadow_context, camera, num_visible_faces, curr_time_secs);
+		shadow_context, skybox, camera, num_visible_faces, curr_time_secs);
 }
 
 ////////// Initialization and deinitialization

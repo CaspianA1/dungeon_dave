@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "batch_draw_context.h"
 #include "shadow.h"
+#include "skybox.h"
 
 // Note: for batching sectors, extend Drawable by allowing an option to do a culling step modeled as dependency injection
 
@@ -29,7 +30,8 @@ void draw_all_sectors_to_shadow_context(const BatchDrawContext* const sector_dra
 
 void draw_visible_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
-	const Camera* const camera, const GLfloat curr_time_secs);
+	const Skybox* const skybox, const Camera* const camera,
+	const GLfloat curr_time_secs);
 
 SectorContext init_sector_context(const byte* const heightmap, const byte* const texture_id_map,
 	const byte map_width, const byte map_height, const bool apply_normal_map_blur, const GLuint texture_set);

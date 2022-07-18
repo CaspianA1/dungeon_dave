@@ -72,7 +72,7 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
-		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
+		INIT_UNIFORM_VALUE(ambient_strength, shader, 1f, constants.lighting.ambient_strength);
 
 		const List* const split_dists = &shadow_context -> split_dists;
 		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);

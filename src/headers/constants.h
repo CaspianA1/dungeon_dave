@@ -51,12 +51,12 @@ static const struct {
 		/* Brighter texture colors get a stronger specular output,
 		and sharper specular highlights (their specular exponents are weighted
 		more towards the upper bound of the specular exponent domain).
-		Ambient also equals the amount of light in shadows. */
+		Ambient strength also equals the amount of light in shadows. */
 
 		const GLfloat
-			ambient, diffuse_strength,
+			ambient_strength, diffuse_strength,
 			specular_strength, specular_exponent_domain[2],
-			noise_granularity, light_color[3];
+			overall_scene_tone[3], noise_granularity;
 
 		const struct {
 			const bool enabled;
@@ -109,10 +109,10 @@ static const struct {
 	.title_screen = {.brightness_repeat_secs = 0.5f, .min_brightness = 0.7f},
 
 	.lighting = {
-		.ambient = 0.3f, .diffuse_strength = 0.8f, .specular_strength = 0.7f,
-		.specular_exponent_domain = {32.0f, 96.0f}, .noise_granularity = 0.2f / 255.0f,
-		.light_color = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
-		.tone_mapping = {.enabled = true, .max_white = 1.5f}
+		.ambient_strength = 0.3f, .diffuse_strength = 0.5f,
+		.specular_strength = 1.0f, .specular_exponent_domain = {32.0f, 96.0f},
+		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
+		.noise_granularity = 0.2f / 255.0f, .tone_mapping = {.enabled = true, .max_white = 1.5f}
 	},
 
 	.weapon_sprite = {.max_movement_magnitude = 0.2f, .time_for_half_movement_cycle = 0.5f},

@@ -82,14 +82,15 @@ static void main_drawer(void* const app_context, const Event* const event) {
 
 	////////// The main drawing code
 
-	draw_visible_sectors(sector_context, shadow_context, camera, curr_time_secs);
-
+	const Skybox* const skybox = &scene_context -> skybox;
 	const vec4* const view_projection = camera -> view_projection;
+
+	draw_visible_sectors(sector_context, shadow_context, skybox, camera, curr_time_secs);
 
 	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
-			draw_skybox(&scene_context -> skybox, view_projection); // Drawn before any translucent geometry
+			draw_skybox(skybox, view_projection); // Drawn before any translucent geometry
 
 			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
 				draw_billboards(billboard_context, shadow_context, camera);

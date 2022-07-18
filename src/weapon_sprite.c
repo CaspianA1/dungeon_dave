@@ -182,7 +182,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		INIT_UNIFORM(view_projection, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
-		INIT_UNIFORM_VALUE(ambient, shader, 1f, constants.lighting.ambient);
+		INIT_UNIFORM_VALUE(ambient_strength, shader, 1f, constants.lighting.ambient_strength);
 
 		// `camera_view` and `cascade_split_distances` are not needed, since the layer will always be 0
 
