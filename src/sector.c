@@ -178,7 +178,7 @@ static void draw_sectors(
 	#define LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, constants.lighting.param)
 	#define ARRAY_LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, 1, constants.lighting.param)
 
-	ON_FIRST_CALL(
+	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
 		INIT_UNIFORM(UV_translation, shader);
 		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
