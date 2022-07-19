@@ -308,6 +308,7 @@ static void* main_init(void) {
 
 	init_static_shading_params(&shading_params, scene_context.cascaded_shadow_context.dir_to_light);
 	bind_uniform_buffer_to_shader(&shading_params, scene_context.sector_context.draw_context.shader);
+	bind_uniform_buffer_to_shader(&shading_params, scene_context.billboard_context.shader);
 
 	// TODO: stop avoiding the type system's safety with this copy
 	memcpy(&scene_context.shading_params, &shading_params, sizeof(UniformBuffer));

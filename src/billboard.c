@@ -62,28 +62,31 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 	const CascadedShadowContext* const shadow_context, const Camera* const camera) {
 
 	const GLuint shader = billboard_context -> shader;
-	static GLint right_xz_world_space_id, view_projection_id, camera_view_id, light_view_projection_matrices_id;
+	static GLint right_xz_world_space_id, normal_id, camera_view_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(right_xz_world_space, shader);
-		INIT_UNIFORM(view_projection, shader);
+		INIT_UNIFORM(normal, shader);
 		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
-
-		INIT_UNIFORM_VALUE(ambient_strength, shader, 1f, constants.lighting.ambient_strength);
 
 		const List* const split_dists = &shadow_context -> split_dists;
 		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
-		use_texture(billboard_context -> diffuse_texture_set, shader, "texture_sampler", TexSet, TU_Billboard);
+		use_texture(billboard_context -> diffuse_texture_set, shader, "diffuse_sampler", TexSet, TU_Billboard);
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);
 
 	const GLfloat* const right_xz = camera -> right_xz;
 	UPDATE_UNIFORM(right_xz_world_space, 2f, right_xz[0], right_xz[1]);
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &camera -> view_projection[0][0]);
+
+	vec3 normal;
+	glm_vec3_cross(GLM_YUP, (vec3) {right_xz[0], 0.0f, right_xz[1]}, normal);
+	glm_vec3_negate(normal);
+
+	UPDATE_UNIFORM(normal, 3fv, 1, normal);
 
 	////////// This little part concerns CSM
 

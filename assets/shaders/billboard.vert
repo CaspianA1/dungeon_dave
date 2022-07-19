@@ -1,6 +1,7 @@
 #version 400 core
 
 #include "shadow/shadow.vert"
+#include "shading_params.frag"
 #include "quad.vert"
 
 layout(location = 0) in uint texture_id;
@@ -11,7 +12,6 @@ out float world_depth_value;
 out vec3 fragment_pos_world_space, UV;
 
 uniform vec2 right_xz_world_space;
-uniform mat4 view_projection;
 
 void main(void) {
 	vec2 vertex_pos_model_space = quad_corners[gl_VertexID] * 0.5f * billboard_size_world_space;
