@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "../quad.vert"
+#include "../quad_utils.vert"
 
 layout(location = 0) in vec3 vertex_pos_world_space;
 

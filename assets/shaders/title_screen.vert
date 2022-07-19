@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "quad.vert"
+#include "quad_utils.vert"
 
 noperspective out vec2 UV;
 

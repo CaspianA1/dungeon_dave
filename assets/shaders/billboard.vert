@@ -2,7 +2,7 @@
 
 #include "shadow/shadow.vert"
 #include "shading_params.frag"
-#include "quad.vert"
+#include "quad_utils.vert"
 
 layout(location = 0) in uint texture_id;
 layout(location = 1) in vec2 billboard_size_world_space;

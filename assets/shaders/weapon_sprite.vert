@@ -2,7 +2,7 @@
 
 #include "shadow/shadow.vert"
 #include "shading_params.frag"
-#include "quad.vert"
+#include "quad_utils.vert"
 
 out vec3 fragment_pos_world_space, UV;
 
