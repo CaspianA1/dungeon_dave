@@ -1,6 +1,5 @@
 #version 400 core
 
-#include "common/shadow/shadow.frag"
 #include "common/world_shading.frag"
 
 in vec3 UV;
