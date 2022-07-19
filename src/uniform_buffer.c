@@ -21,6 +21,7 @@ UniformBuffer init_uniform_buffer(
 
 	GLuint buffer_id;
 	glGenBuffers(1, &buffer_id);
+	glBindBuffer(GL_UNIFORM_BUFFER, buffer_id);
 	glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, buffer_id);
 
 	////////// First, getting the indices of the sub-vars
@@ -51,8 +52,7 @@ UniformBuffer init_uniform_buffer(
 		GL_UNIFORM_BLOCK_DATA_SIZE, &block_size_in_bytes
 	);
 
-	glBindBuffer(GL_UNIFORM_BUFFER, buffer_id);	
-	glBufferData(GL_UNIFORM_BUFFER, block_size_in_bytes, NULL, updated_often ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);	
+	glBufferData(GL_UNIFORM_BUFFER, block_size_in_bytes, NULL, updated_often ? GL_STREAM_DRAW : GL_STATIC_DRAW);
 
 	////////// And finally, allocating space on the heap for subvar names, and returning the block
 
