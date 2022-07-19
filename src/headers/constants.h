@@ -109,8 +109,8 @@ static const struct {
 	.title_screen = {.brightness_repeat_secs = 0.5f, .min_brightness = 0.7f},
 
 	.lighting = {
-		.ambient_strength = 0.3f, .diffuse_strength = 0.5f,
-		.specular_strength = 1.0f, .specular_exponent_domain = {32.0f, 96.0f},
+		.ambient_strength = 0.3f, .diffuse_strength = 0.6f,
+		.specular_strength = 0.9f, .specular_exponent_domain = {32.0f, 96.0f},
 		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
 		.noise_granularity = 0.2f / 255.0f, .tone_mapping = {.enabled = true, .max_white = 1.5f}
 	},
