@@ -114,18 +114,16 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	////////// The main drawing code
 
 	const Skybox* const skybox = &scene_context -> skybox;
-	const vec4* const view_projection = camera -> view_projection;
-
 	draw_visible_sectors(sector_context, shadow_context, skybox, camera, curr_time_secs);
 
 	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
-			draw_skybox(skybox, view_projection); // Drawn before any translucent geometry
+			draw_skybox(skybox, camera -> view_projection); // Drawn before any translucent geometry
 
 			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
 				draw_billboards(billboard_context, shadow_context, camera);
-				draw_weapon_sprite(weapon_sprite, shadow_context, view_projection);
+				draw_weapon_sprite(weapon_sprite, shadow_context, camera -> view);
 			);
 		);
 	);
@@ -312,6 +310,7 @@ static void* main_init(void) {
 	init_static_shading_params(&shading_params, scene_context.cascaded_shadow_context.dir_to_light);
 	bind_uniform_buffer_to_shader(&shading_params, scene_context.sector_context.draw_context.shader);
 	bind_uniform_buffer_to_shader(&shading_params, scene_context.billboard_context.shader);
+	bind_uniform_buffer_to_shader(&shading_params, scene_context.weapon_sprite.drawable.shader);
 
 	// TODO: stop avoiding the type system's safety with this copy
 	memcpy(&scene_context.shading_params, &shading_params, sizeof(UniformBuffer));

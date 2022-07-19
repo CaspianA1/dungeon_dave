@@ -162,41 +162,58 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 ////////// This part is for the uniform updater param type and the uniform updater
 
 typedef struct {
-	const vec4* const view_projection;
+	const vec4* const view;
 	const WeaponSprite* const weapon_sprite;
 	const CascadedShadowContext* const shadow_context;
 } WeaponSpriteUniformUpdaterParams;
+
+static void get_weapon_normal(const vec3 world_corners[corners_per_quad], vec3 normal) {
+	const GLfloat* const shared_corner = world_corners[1];
+
+	vec3 edge_0, edge_1;
+	glm_vec3_sub((GLfloat*) world_corners[0], (GLfloat*) shared_corner, edge_0);
+	glm_vec3_sub((GLfloat*) world_corners[2], (GLfloat*) shared_corner, edge_1);
+	glm_vec3_cross(edge_1, edge_0, normal);
+	glm_vec3_normalize(normal);
+}
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const WeaponSpriteUniformUpdaterParams typed_params = *(WeaponSpriteUniformUpdaterParams*) param;
 
 	static GLint
-		frame_index_id, world_corners_id,
-		view_projection_id, light_view_projection_matrices_id;
+		frame_index_id, normal_id, world_corners_id,
+		camera_view_id, light_view_projection_matrices_id;
 
 	const GLuint shader = drawable -> shader;
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(frame_index, shader);
 		INIT_UNIFORM(world_corners, shader);
-		INIT_UNIFORM(view_projection, shader);
+		INIT_UNIFORM(normal, shader);
+		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
-		INIT_UNIFORM_VALUE(ambient_strength, shader, 1f, constants.lighting.ambient_strength);
+		const List* const split_dists = &typed_params.shadow_context -> split_dists;
+		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
-		// `camera_view` and `cascade_split_distances` are not needed, since the layer will always be 0
-
-		use_texture(drawable -> diffuse_texture, shader, "frame_sampler", TexSet, TU_WeaponSprite);
+		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_WeaponSprite);
 		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);
 
 	////////// Updating uniforms
 
+	const vec3* const world_corners = typed_params.weapon_sprite -> appearance_context.world_space.corners;
+
+	vec3 normal;
+	get_weapon_normal(world_corners, normal);
+
+	UPDATE_UNIFORM(normal, 3fv, 1, normal);
 	UPDATE_UNIFORM(frame_index, 1ui, typed_params.weapon_sprite -> animation_context.curr_frame);
-	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) typed_params.weapon_sprite -> appearance_context.world_space.corners);
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, (GLfloat*) typed_params.view_projection);
+	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
 
 	////////// This little part concerns CSM
+
+	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &typed_params.view[0][0]);
 
 	const List* const light_view_projection_matrices = &typed_params.shadow_context -> light_view_projection_matrices;
 
@@ -291,13 +308,10 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	draw_drawable_to_shadow_context(&ws -> drawable, corners_per_quad, update_vertex_buffer_before_draw_call, ws);
 }
 
-void draw_weapon_sprite(const WeaponSprite* const ws,
-	const CascadedShadowContext* const shadow_context,
-	const vec4* const view_projection) {
-
+void draw_weapon_sprite(const WeaponSprite* const ws, const CascadedShadowContext* const shadow_context, const vec4* const view) {
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
-		const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view_projection, ws, shadow_context};
+		const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view, ws, shadow_context};
 		draw_drawable(ws -> drawable, corners_per_quad, &uniform_updater_params, true);
 	);
 }

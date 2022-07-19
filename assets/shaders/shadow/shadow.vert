@@ -1,5 +1,7 @@
 #version 400 core
 
+out float world_depth_value;
+
 uniform mat4 camera_view;
 
 float get_world_depth_value(const vec3 vertex_pos_world_space) {

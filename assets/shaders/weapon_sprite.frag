@@ -1,16 +1,20 @@
 #version 400 core
 
-#include "shadow/shadow.frag"
-
-in vec3 fragment_pos_world_space, UV;
+in vec3 UV;
 
 out vec4 color;
 
-uniform float ambient_strength;
-uniform sampler2DArray frame_sampler;
+uniform vec3 normal;
+uniform sampler2DArray diffuse_sampler;
 
-// TODO: use the full shading pipeline with shared uniforms for the weapon sprite too
+#include "shadow/shadow.frag"
+#include "world_shading.frag"
+
 void main(void) {
-	color = texture(frame_sampler, UV); // The weapon layer is always 0, so no need to call `get_csm_shadow`
-	color.rgb *= mix(ambient_strength, 1.0f, get_csm_shadow_from_layer(0u, fragment_pos_world_space));
+	vec4 texture_color = texture(diffuse_sampler, UV);
+
+	color = vec4(
+		postprocess_light(UV.xy, calculate_light(texture_color.rgb, normal)),
+		texture_color.a
+	);
 }

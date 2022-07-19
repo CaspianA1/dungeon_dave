@@ -33,8 +33,8 @@ typedef struct {
 
 /* Excluded:
 update_weapon_sprite_animation, circular_mapping_from_zero_to_one,
-get_sway, get_screen_corners_from_sway, get_world_corners_from_screen_corners,
-rotate_from_camera_movement, update_uniforms, define_vertex_spec, update_vertex_buffer_before_draw_call */
+get_sway, get_screen_corners_from_sway, get_world_corners_from_screen_corners, rotate_from_camera_movement,
+get_weapon_normal, update_uniforms, define_vertex_spec, update_vertex_buffer_before_draw_call */
 
 WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 	const GLfloat max_pitch_degrees, const GLfloat size,
@@ -45,8 +45,6 @@ void deinit_weapon_sprite(const WeaponSprite* const ws);
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event);
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws);
 
-void draw_weapon_sprite(const WeaponSprite* const ws,
-	const CascadedShadowContext* const shadow_context,
-	const vec4* const view_projection);
+void draw_weapon_sprite(const WeaponSprite* const ws, const CascadedShadowContext* const shadow_context, const vec4* const view);
 
 #endif
