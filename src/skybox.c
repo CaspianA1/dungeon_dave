@@ -93,12 +93,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 	mat4 view_projection;
 	glm_mat4_copy((vec4*) param, view_projection);
-
-	/* This clears X, Y, and W. Z (depth) not cleared
-	b/c it's always set to 1 in the vertex shader. */
-	view_projection[3][0] = 0.0f;
-	view_projection[3][1] = 0.0f;
-	view_projection[3][3] = 0.0f;
+	glm_vec4_zero(view_projection[3]); // This clears x, y, z, and w
 
 	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &view_projection[0][0]);
 }
