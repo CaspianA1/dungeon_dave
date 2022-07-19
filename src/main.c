@@ -244,6 +244,9 @@ static void* main_init(void) {
 	const GLsizei num_cascades = 8; // 8 for palace, 16 for terrain
 	specify_cascade_count_before_any_shader_compilation(num_cascades);
 
+	// 1024 for palace, 1200 for terrain
+	const struct {const GLsizei face, billboard, shadow_map;} texture_sizes = {256, 256, 1024};
+
 	//////////
 
 	SceneContext scene_context = {
@@ -259,14 +262,14 @@ static void* main_init(void) {
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
 			true, init_texture_set(false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-			ARRAY_LENGTH(still_face_texture_paths), 0, 256, 256, still_face_texture_paths, NULL)
+			ARRAY_LENGTH(still_face_texture_paths), 0, texture_sizes.face, texture_sizes.face, still_face_texture_paths, NULL)
 		),
 
 		.billboard_context = init_billboard_context(
 			init_texture_set(
 				true, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 				ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_layouts),
-				256, 256, still_billboard_texture_paths, billboard_animation_layouts
+				texture_sizes.billboard, texture_sizes.billboard, still_billboard_texture_paths, billboard_animation_layouts
 			),
 
 			ARRAY_LENGTH(billboards), billboards,
@@ -278,12 +281,12 @@ static void* main_init(void) {
 			// Terrain:
 			/*
 			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.0f, 1.0f},
-			far_clip_dist, 0.4f, 1200, num_cascades
+			far_clip_dist, 0.4f, texture_sizes.shadow_map, num_cascades
 			*/
 
 			// Palace:
 			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.75f, 1.0f},
-			far_clip_dist, 0.3f, 1024, num_cascades
+			far_clip_dist, 0.3f, texture_sizes.shadow_map, num_cascades
 		),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
