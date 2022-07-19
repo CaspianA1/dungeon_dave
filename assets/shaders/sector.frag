@@ -10,8 +10,8 @@ uniform vec3 UV_translation_area[2];
 
 uniform sampler2DArray diffuse_sampler, normal_map_sampler;
 
-#include "shadow/shadow.frag"
-#include "world_shading.frag"
+#include "common/shadow/shadow.frag"
+#include "common/world_shading.frag"
 
 /* Each level may have an area where sector UV
 coordinates are re-translated for artistic purposes */

@@ -1,8 +1,8 @@
 #version 400 core
 
-#include "shadow/shadow.vert"
-#include "shading_params.frag"
-#include "quad_utils.vert"
+#include "common/shadow/shadow.vert"
+#include "common/quad_utils.vert"
+#include "common/shared_params.glsl"
 
 out vec3 fragment_pos_world_space, UV;
 

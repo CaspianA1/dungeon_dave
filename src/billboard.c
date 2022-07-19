@@ -166,7 +166,7 @@ BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
 		.vertex_buffer = init_gpu_buffer(),
 		.vertex_spec = init_vertex_spec(),
 		.diffuse_texture_set = diffuse_texture_set,
-		.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag")),
+		.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/quad_with_one_normal.frag")),
 
 		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),
 		.billboards = init_list(num_billboards, Billboard),

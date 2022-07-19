@@ -1,7 +1,7 @@
 #version 400 core
 
-#include "shadow/shadow.vert"
-#include "shading_params.frag"
+#include "common/shadow/shadow.vert"
+#include "common/shared_params.glsl"
 
 layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
@@ -20,7 +20,7 @@ const struct FaceAttribute {
 );
 
 void main(void) {
- 	////////// Setting face_normal and UV
+	////////// Setting UV
 
 	face_id = face_info_bits & 7u; // Extracting the first 3 bits
 	FaceAttribute face_attribute = face_attributes[face_id];
@@ -36,6 +36,5 @@ void main(void) {
 
 	world_depth_value = get_world_depth_value(vertex_pos_world_space);
 	fragment_pos_world_space = vertex_pos_world_space;
-
 	gl_Position = view_projection * vec4(vertex_pos_world_space, 1.0f);
 }

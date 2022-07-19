@@ -1,8 +1,8 @@
 #version 400 core
 
-#include "shadow/shadow.vert"
-#include "shading_params.frag"
-#include "quad_utils.vert"
+#include "common/shadow/shadow.vert"
+#include "common/quad_utils.vert"
+#include "common/shared_params.glsl"
 
 layout(location = 0) in uint texture_id;
 layout(location = 1) in vec2 billboard_size_world_space;

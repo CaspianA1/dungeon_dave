@@ -4,7 +4,7 @@ uniform samplerCube environment_map_sampler;
 in float world_depth_value;
 in vec3 fragment_pos_world_space;
 
-#include "shading_params.frag"
+#include "shared_params.glsl"
 
 float diffuse(const vec3 fragment_normal) {
 	float diffuse_amount = dot(fragment_normal, dir_to_light);

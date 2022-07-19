@@ -261,7 +261,7 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW,
 			GL_TRIANGLE_STRIP, (List) {NULL, sizeof(vec3), corners_per_quad, corners_per_quad},
 
-			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/weapon_sprite.frag")),
+			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/quad_with_one_normal.frag")),
 
 			init_texture_set(true, TexNonRepeating,
 				OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, 0, 1,

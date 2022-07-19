@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "num_cascades.geom"
+#include "num_cascades.glsl"
 
 #define VERTICES_PER_TRIANGLE 3u
 

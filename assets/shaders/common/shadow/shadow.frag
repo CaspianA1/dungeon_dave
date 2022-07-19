@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "num_cascades.geom" // `num_cascades.geom` is written to by the CPU before any shader compilation
+#include "num_cascades.glsl" // `num_cascades.glsl` is written to by the CPU before any shader compilation
 
 const uint NUM_CASCADE_SPLITS = NUM_CASCADES - 1u;
 
