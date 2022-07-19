@@ -7,7 +7,7 @@
 out vec3 fragment_pos_world_space, UV;
 
 uniform uint frame_index;
-uniform vec3 world_corners[4];
+uniform vec3 world_corners[CORNERS_PER_QUAD];
 
 void main(void) {
 	fragment_pos_world_space = world_corners[gl_VertexID];

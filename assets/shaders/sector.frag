@@ -1,5 +1,8 @@
 #version 400 core
 
+#include "common/shadow/shadow.frag"
+#include "common/world_shading.frag"
+
 flat in uint face_id;
 in vec3 UV;
 
@@ -9,9 +12,6 @@ uniform vec2 UV_translation;
 uniform vec3 UV_translation_area[2];
 
 uniform sampler2DArray diffuse_sampler, normal_map_sampler;
-
-#include "common/shadow/shadow.frag"
-#include "common/world_shading.frag"
 
 /* Each level may have an area where sector UV
 coordinates are re-translated for artistic purposes */
