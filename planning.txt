@@ -52,6 +52,7 @@ Architectural/code design ideas:
 - Don't rebind vertex buffers each frame?
 - Alpha to coverage with the title screen becomes really glitchy
 - Texture compression as an option
+- Figure out how to make spherically distorted skyboxes in Blender from cube-like ones made in an image editor
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
