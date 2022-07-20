@@ -14,32 +14,64 @@ static GLuint safely_get_uniform_block_index(const GLuint shader, const GLchar* 
 	return block_index;
 }
 
+/* Given an array of strings, along with a string count, this copies that buffer like this:
+	1. It finds the total number of char bytes in the string array.
+	2. It creates a contiguous buffer to store all of those bytes.
+	3. It creates a pointer buffer that stores the beginning of each string in that buffer.
+	4. It fills up the character buffer and the character pointer buffer.
+
+To free this string array, you just have to 1. free the byte buffer by saying `free(*string_array)`,
+and then 2. saying `free(string_array)` to free the pointer buffer.  */
+static GLchar** copy_array_of_strings(const GLchar* const* const string_array, const buffer_size_t num_strings) {
+	buffer_size_t total_char_count = 0;
+
+	for (buffer_size_t i = 0; i < num_strings; i++)
+		total_char_count += strlen(string_array[i]) + 1; // 1 extra for the null terminator
+
+	GLchar
+		*const char_buffer = malloc(total_char_count * sizeof(GLchar)),
+		**const char_ptr_buffer = malloc(num_strings * sizeof(GLchar*));
+
+	GLchar* curr_dest = char_buffer;
+	for (buffer_size_t i = 0; i < num_strings; i++) {
+		const GLchar* const curr_string = string_array[i];
+
+		strcpy(curr_dest, curr_string);
+		char_ptr_buffer[i] = curr_dest;
+		curr_dest += strlen(curr_string) + 1;
+	}
+
+	return char_ptr_buffer;
+}
+
 UniformBuffer init_uniform_buffer(
 	const bool updated_often, const GLchar* const block_name,
-	const GLuint binding_point, const GLuint a_shader_using_the_uniform_block,
-	const GLchar* const* const subvar_names, const GLsizei num_subvar_names) {
+	const GLuint binding_point, const GLuint shader_using_uniform_block,
+	const GLchar* const* const subvar_names, const buffer_size_t num_subvars) {
 
 	GLuint buffer_id;
 	glGenBuffers(1, &buffer_id);
 	glBindBuffer(GL_UNIFORM_BUFFER, buffer_id);
 	glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, buffer_id);
 
-	////////// First, getting the indices of the sub-vars
+	////////// First, getting the subvar indices
 
-	GLuint* const subvar_indices = malloc((size_t) num_subvar_names * sizeof(GLuint));
-	glGetUniformIndices(a_shader_using_the_uniform_block, num_subvar_names, subvar_names, subvar_indices);
+	GLuint* const subvar_indices = malloc(num_subvars * sizeof(GLuint));
+	glGetUniformIndices(shader_using_uniform_block, (GLsizei) num_subvars, subvar_names, subvar_indices);
 
-	for (GLsizei i = 0; i < num_subvar_names; i++) {
+	for (buffer_size_t i = 0; i < num_subvars; i++) {
 		if (subvar_indices[i] == GL_INVALID_INDEX) FAIL(InitializeShaderUniform,
 			"Sub-variable '%s' in the uniform block '%s' is not present",
 			subvar_names[i], block_name
 		);
 	}
 
-	////////// Then, getting the byte offsets, and freeing the subvar indices
+	////////// Then, getting the byte offsets, the array stride, and the matrix stride, and freeing the subvar indices
 
-	GLint* const subvar_byte_offsets = malloc((size_t) num_subvar_names * sizeof(GLint));
-	glGetActiveUniformsiv(a_shader_using_the_uniform_block, num_subvar_names, subvar_indices, GL_UNIFORM_OFFSET, subvar_byte_offsets);
+	GLint* const subvar_gpu_byte_offsets = malloc(num_subvars * sizeof(GLint)), array_stride, matrix_stride;
+	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_OFFSET, subvar_gpu_byte_offsets);
+	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_ARRAY_STRIDE, &array_stride);
+	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_MATRIX_STRIDE, &matrix_stride);
 
 	free(subvar_indices);
 
@@ -47,24 +79,30 @@ UniformBuffer init_uniform_buffer(
 
 	GLint block_size_in_bytes;
 
-	glGetActiveUniformBlockiv(a_shader_using_the_uniform_block,
-		safely_get_uniform_block_index(a_shader_using_the_uniform_block, block_name),
-		GL_UNIFORM_BLOCK_DATA_SIZE, &block_size_in_bytes
-	);
+	glGetActiveUniformBlockiv(shader_using_uniform_block,
+		safely_get_uniform_block_index(shader_using_uniform_block, block_name),
+		GL_UNIFORM_BLOCK_DATA_SIZE, &block_size_in_bytes);
 
-	glBufferData(GL_UNIFORM_BUFFER, block_size_in_bytes, NULL, updated_often ? GL_STREAM_DRAW : GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, block_size_in_bytes, NULL, updated_often ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
 
-	////////// And finally, allocating space on the heap for subvar names, and returning the block
+	//////////
 
 	return (UniformBuffer) {
-		.id = buffer_id, .binding_point = binding_point, .num_subvars = num_subvar_names,
-		.block_name = block_name, .subvar_names = subvar_names, .subvar_byte_offsets = subvar_byte_offsets,
+		.id = buffer_id, .binding_point = binding_point,
+		.array_stride = array_stride, .matrix_stride = matrix_stride,
+		.num_subvars = num_subvars, .block_name = block_name,
+		.subvar_names = copy_array_of_strings(subvar_names, num_subvars),
+		.subvar_gpu_byte_offsets = subvar_gpu_byte_offsets,
 		.gpu_memory_mapping = NULL
 	};
 }
 
 void deinit_uniform_buffer(const UniformBuffer* const buffer) {
-	free(buffer -> subvar_byte_offsets);
+	GLchar** subvar_names = buffer -> subvar_names;
+	free(*subvar_names);
+	free(subvar_names);
+
+	free(buffer -> subvar_gpu_byte_offsets);
 	glDeleteBuffers(1, &buffer -> id);
 }
 
@@ -97,11 +135,12 @@ void write_to_uniform_buffer(const UniformBuffer* const buffer, const GLchar* co
 		"%s", "Cannot write to uniform buffer when writing batch is not enabled"
 	);
 
-	const GLint num_subvars = buffer -> num_subvars;
-	const GLchar* const* const subvar_names = buffer -> subvar_names;
-	for (GLint i = 0; i < num_subvars; i++) {
+	const buffer_size_t num_subvars = buffer -> num_subvars;
+	GLchar* const* const subvar_names = buffer -> subvar_names;
+
+	for (buffer_size_t i = 0; i < num_subvars; i++) {
 		if (!strcmp(subvar_name, subvar_names[i])) {
-			const GLint byte_offset = buffer -> subvar_byte_offsets[i];
+			const GLint byte_offset = buffer -> subvar_gpu_byte_offsets[i];
 			memcpy(gpu_memory_mapping + byte_offset, value, size);
 			return;
 		}

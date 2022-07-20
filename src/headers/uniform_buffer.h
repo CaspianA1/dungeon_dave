@@ -5,21 +5,22 @@
 
 typedef struct {
 	const GLuint id, binding_point;
-	const GLint num_subvars;
+	const GLint array_stride, matrix_stride;
+	const buffer_size_t num_subvars;
 
 	const GLchar* const block_name;
-	const GLchar* const* const subvar_names;
-	GLint* const subvar_byte_offsets;
+	GLchar** const subvar_names;
+	GLint* const subvar_gpu_byte_offsets;
 
 	byte* gpu_memory_mapping;
 } UniformBuffer;
 
-// Excluded: safely_get_uniform_block_index
+// Excluded: safely_get_uniform_block_index, copy_array_of_strings
 
 UniformBuffer init_uniform_buffer(
 	const bool updated_often, const GLchar* const block_name,
-	const GLuint binding_point, const GLuint a_shader_using_the_uniform_block,
-	const GLchar* const* const subvar_names, const GLsizei num_subvar_names);
+	const GLuint binding_point, const GLuint shader_using_uniform_block,
+	const GLchar* const* const subvar_names, const buffer_size_t num_subvars);
 
 void deinit_uniform_buffer(const UniformBuffer* const buffer);
 

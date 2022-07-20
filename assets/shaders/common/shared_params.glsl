@@ -1,6 +1,8 @@
 #version 400 core
 
 layout(shared) uniform StaticShadingParams {
+	vec3 bob[3];
+
 	float ambient_strength, diffuse_strength, specular_strength;
 	vec2 specular_exponent_domain;
 
@@ -10,7 +12,8 @@ layout(shared) uniform StaticShadingParams {
 
 	vec3 overall_scene_tone, dir_to_light;
 
-	// TODO: only bind a range for these
+	// TODO: only bind a range for these via glMapBufferRange
 	vec3 camera_pos_world_space;
 	mat4 view_projection;
+
 };

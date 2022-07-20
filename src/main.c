@@ -6,7 +6,7 @@
 #include "headers/texture.h"
 #include "headers/event.h"
 
-static void init_static_shading_params(UniformBuffer* const shading_params, const vec3 dir_to_light) {
+static void init_static_shading_params(UniformBuffer* const shading_params, const CascadedShadowContext* const shadow_context) {
 	enable_uniform_buffer_writing_batch(shading_params);
 
 	#define UBO_WRITE(name) write_to_uniform_buffer(shading_params, #name, &constants.lighting.name, sizeof(constants.lighting.name))
@@ -22,7 +22,42 @@ static void init_static_shading_params(UniformBuffer* const shading_params, cons
 
 	#undef UBO_WRITE
 
-	write_to_uniform_buffer(shading_params, "dir_to_light", dir_to_light, sizeof(vec3));
+	////////////
+
+	/*
+	- Awesome, this works now, mostly
+	- 1. Figure out how to handle bigger types, like structs, too (and arrays of matrices)
+	- 2. I can now write a function for arrays
+	- 3. Find out if the matrix padding is only for 4x4 matrices
+	- 3. Write a function for matrices too (`write_matrix_to_uniform_buffer`)
+	- 4. Write a function for an array of matrices
+
+	- For structs with possible sub-structs and matrices in them, the problem becomes infinitely complex
+	- Actually, with structs, it should be okay, since they're only filled in by their components
+	- Perhaps just return a pointer to the start of the memory, so that the client can copy over their data if needed
+	*/
+
+	/*
+	const vec3 data[] = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}};
+
+	byte* const gpu_data = shading_params -> gpu_memory_mapping;
+
+	const GLint array_stride = shading_params -> array_stride;
+	DEBUG(array_stride, d);
+
+	byte dest_offset = 0;
+	for (int i = 0; i < (int) ARRAY_LENGTH(data); i++) {
+		printf("Copying to dest byte offset of %u\n", dest_offset);
+		memcpy(gpu_data + dest_offset, data + i, sizeof(*data));
+		dest_offset += array_stride;
+	}
+	*/
+
+	// gpu_data[8] = 1; // This made it work
+
+	////////////
+
+	write_to_uniform_buffer(shading_params, "dir_to_light", shadow_context -> dir_to_light, sizeof(vec3));
 
 	disable_uniform_buffer_writing_batch(shading_params);
 }
@@ -127,7 +162,6 @@ static void main_drawer(void* const app_context, const Event* const event) {
 			);
 		);
 	);
-
 }
 
 static void* main_init(void) {
@@ -287,7 +321,7 @@ static void* main_init(void) {
 			far_clip_dist, 0.3f, texture_sizes.shadow_map, num_cascades
 		),
 
-		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
+		.skybox = init_skybox(ASSET_PATH("skyboxes/night.bmp"), 1.0f),
 		.title_screen = init_title_screen(ASSET_PATH("logo.bmp")),
 
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
@@ -295,8 +329,8 @@ static void* main_init(void) {
 
 	//////////
 
-	static const GLchar* const static_subvar_names[] = {
-		"ambient_strength", "diffuse_strength", "specular_strength",
+	const GLchar* const static_subvar_names[] = {
+		"bob", "ambient_strength", "diffuse_strength", "specular_strength",
 		"specular_exponent_domain", "tone_mapping.enabled", "tone_mapping.max_white",
 		"noise_granularity", "overall_scene_tone", "dir_to_light", "camera_pos_world_space", "view_projection"
 	};
@@ -307,13 +341,15 @@ static void* main_init(void) {
 		static_subvar_names, ARRAY_LENGTH(static_subvar_names)
 	);
 
-	init_static_shading_params(&shading_params, scene_context.cascaded_shadow_context.dir_to_light);
+	init_static_shading_params(&shading_params, &scene_context.cascaded_shadow_context);
 	bind_uniform_buffer_to_shader(&shading_params, scene_context.sector_context.draw_context.shader);
 	bind_uniform_buffer_to_shader(&shading_params, scene_context.billboard_context.shader);
 	bind_uniform_buffer_to_shader(&shading_params, scene_context.weapon_sprite.drawable.shader);
 
 	// TODO: stop avoiding the type system's safety with this copy
 	memcpy(&scene_context.shading_params, &shading_params, sizeof(UniformBuffer));
+
+	// TODO: try initing/writing to/deiniting another uniform buffer to test if state changes are encapsulated correctly
 
 	//////////
 
