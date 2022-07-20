@@ -293,7 +293,7 @@ static void* main_init(void) {
 
 	//////////
 
-	const GLchar* const static_subvar_names[] = {
+	static const GLchar* const static_subvar_names[] = {
 		"strengths.ambient", "strengths.diffuse", "strengths.specular",
 		"specular_exponent_domain", "tone_mapping.enabled", "tone_mapping.max_white",
 		"noise_granularity", "overall_scene_tone", "dir_to_light", "camera_pos_world_space", "view_projection"
