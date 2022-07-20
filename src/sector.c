@@ -178,8 +178,6 @@ static void draw_sectors(
 	#define LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, constants.lighting.param)
 	#define ARRAY_LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, 1, constants.lighting.param)
 
-	const GLsizei num_cascades = shadow_context -> num_cascades;
-
 	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
 		INIT_UNIFORM(UV_translation, shader);
 		INIT_UNIFORM(camera_view, shader);
@@ -190,7 +188,8 @@ static void draw_sectors(
 			{4.0f + epsilon, 0.0f, 0.0f}, {6.0f - epsilon, 3.0f, 3.0f + epsilon}
 		});
 
-		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, num_cascades - 1, shadow_context -> split_dists);
+		const List* const split_dists = &shadow_context -> split_dists;
+		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
 		use_texture(skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture(draw_context -> texture_set, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
@@ -209,7 +208,12 @@ static void draw_sectors(
 	////////// This little part concerns CSM
 
 	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &camera -> view[0][0]);
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, num_cascades, GL_FALSE, (GLfloat*) shadow_context -> light_view_projection_matrices);
+
+	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
+
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
+		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
+		light_view_projection_matrices -> data);
 
 	//////////
 

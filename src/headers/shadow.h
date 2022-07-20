@@ -1,8 +1,8 @@
 #ifndef SHADOW_H
 #define SHADOW_H
 
-#include "buffer_defs.h"
 #include "camera.h"
+#include "list.h"
 
 /* This shadow mapping implementation employs cascaded shadow mapping with
 exponential shadow mapping in order to get soft, filtered shadows for large scenes.
@@ -15,9 +15,7 @@ typedef struct {
 
 	const vec3 dir_to_light, sub_frustum_scale;
 
-	const GLsizei num_cascades; // There are `num_cascades - 1` split distances
-	GLfloat* const split_dists;
-	mat4* const light_view_projection_matrices;
+	const List split_dists, light_view_projection_matrices;
 } CascadedShadowContext;
 
 /* Excluded:

@@ -66,15 +66,14 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 
 	use_shader(shader);
 
-	const GLsizei num_cascades = shadow_context -> num_cascades;
-
 	ON_FIRST_CALL(
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(normal, shader);
 		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
-		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, num_cascades - 1, shadow_context -> split_dists);
+		const List* const split_dists = &shadow_context -> split_dists;
+		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
 		use_texture(billboard_context -> diffuse_texture_set, shader, "diffuse_sampler", TexSet, TU_Billboard);
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
@@ -92,7 +91,12 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 	////////// This little part concerns CSM
 
 	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &camera -> view[0][0]);
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, num_cascades, GL_FALSE, (GLfloat*) shadow_context -> light_view_projection_matrices);
+
+	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
+
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
+		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
+		light_view_projection_matrices -> data);
 
 	//////////
 

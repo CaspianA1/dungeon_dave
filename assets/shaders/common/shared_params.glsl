@@ -1,8 +1,6 @@
 #version 400 core
 
 layout(shared) uniform StaticShadingParams {
-	vec3 bob[3];
-
 	float ambient_strength, diffuse_strength, specular_strength;
 	vec2 specular_exponent_domain;
 

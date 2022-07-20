@@ -143,9 +143,12 @@ CascadedShadowContext init_shadow_context(
 	const GLfloat far_clip_dist, const GLfloat linear_split_weight,
 	const GLsizei resolution, const GLsizei num_cascades) {
 
-	const GLsizei num_split_dists = num_cascades - 1;
-	GLfloat* const split_dists = malloc((size_t) num_split_dists * sizeof(GLfloat));
-	mat4* const light_view_projection_matrices = malloc((size_t) num_cascades * sizeof(mat4));
+	List
+		split_dists = init_list((buffer_size_t) num_cascades - 1, GLfloat),
+		light_view_projection_matrices = init_list((buffer_size_t) num_cascades, mat4);
+
+	light_view_projection_matrices.length = light_view_projection_matrices.max_alloc;
+	split_dists.length = split_dists.max_alloc;
 
 	const GLfloat
 		near_clip_dist = constants.camera.near_clip_dist,
@@ -153,13 +156,13 @@ CascadedShadowContext init_shadow_context(
 
 	//////////
 
-	for (GLsizei i = 0; i < num_split_dists; i++) {
+	for (buffer_size_t i = 0; i < split_dists.length; i++) {
 		const GLfloat layer_percent = (GLfloat) (i + 1) / num_cascades;
 
 		const GLfloat linear_dist = near_clip_dist + layer_percent * clip_dist_diff;
 		const GLfloat log_dist = near_clip_dist * powf(far_clip_dist / near_clip_dist, layer_percent);
 
-		split_dists[i] = glm_lerp(log_dist, linear_dist, linear_split_weight);
+		((GLfloat*) split_dists.data)[i] = glm_lerp(log_dist, linear_dist, linear_split_weight);
 	}
 
 	//////////
@@ -179,42 +182,44 @@ CascadedShadowContext init_shadow_context(
 		.dir_to_light = {dir_to_light[0], dir_to_light[1], dir_to_light[2]},
 		.sub_frustum_scale = {sub_frustum_scale[0], sub_frustum_scale[1], sub_frustum_scale[2]},
 
-		.num_cascades = num_cascades, .split_dists = split_dists,
+		.split_dists = split_dists,
 		.light_view_projection_matrices = light_view_projection_matrices
 	};
 }
 
 void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
-	free(shadow_context -> split_dists);
-	free(shadow_context -> light_view_projection_matrices);
+	deinit_list(shadow_context -> split_dists);
+	deinit_list(shadow_context -> light_view_projection_matrices);
 	deinit_shader(shadow_context -> depth_shader);
 	deinit_texture(shadow_context -> depth_layers);
 	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
 }
 
 void enable_rendering_to_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera) {
-	const GLsizei num_cascades = shadow_context -> num_cascades;
-	const GLfloat* const split_dists = shadow_context -> split_dists;
-	mat4* const light_view_projection_matrices = shadow_context -> light_view_projection_matrices;
+	const List
+		*const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices,
+		*const split_dists = &shadow_context -> split_dists;
+
+	const buffer_size_t num_cascades = light_view_projection_matrices -> length;
 
 	const GLfloat far_clip_dist = camera -> far_clip_dist;
 
 	////////// Getting the matrices needed
 
-	for (GLsizei i = 0; i < num_cascades; i++) {
+	for (buffer_size_t i = 0; i < num_cascades; i++) {
 		GLfloat sub_near_clip, sub_far_clip;
 
 		if (i == 0) {
 			sub_near_clip = constants.camera.near_clip_dist;
-			sub_far_clip = split_dists[i];
+			sub_far_clip = value_at_list_index(split_dists, i, GLfloat);
 		}
 		else {
-			sub_near_clip = split_dists[i - 1];
-			sub_far_clip = (i == num_cascades - 1) ? far_clip_dist : split_dists[i];
+			sub_near_clip = value_at_list_index(split_dists, i - 1, GLfloat);
+			sub_far_clip = (i == num_cascades - 1) ? far_clip_dist : value_at_list_index(split_dists, i, GLfloat);
 		}
 
-		get_sub_frustum_light_view_projection_matrix(camera, shadow_context,
-			sub_near_clip, sub_far_clip, light_view_projection_matrices[i]);
+		vec4* const matrix = ptr_to_list_index(light_view_projection_matrices, i);
+		get_sub_frustum_light_view_projection_matrix(camera, shadow_context, sub_near_clip, sub_far_clip, matrix);
 	}
 
 	////////// Updating the light view projection matrices uniform
@@ -225,7 +230,8 @@ void enable_rendering_to_shadow_context(const CascadedShadowContext* const shado
 	static GLint light_view_projection_matrices_id;
 	ON_FIRST_CALL(INIT_UNIFORM(light_view_projection_matrices, depth_shader););
 
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei) num_cascades, GL_FALSE, (GLfloat*) light_view_projection_matrices);
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei)
+		num_cascades, GL_FALSE, light_view_projection_matrices -> data);
 
 	////////// Preparing for cascade rendering
 

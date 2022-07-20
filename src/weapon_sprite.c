@@ -186,8 +186,6 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 	const GLuint shader = drawable -> shader;
 
-	const GLsizei num_cascades = typed_params.shadow_context -> num_cascades;
-
 	ON_FIRST_CALL(
 		INIT_UNIFORM(frame_index, shader);
 		INIT_UNIFORM(world_corners, shader);
@@ -195,7 +193,8 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
-		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, num_cascades - 1, typed_params.shadow_context -> split_dists);
+		const List* const split_dists = &typed_params.shadow_context -> split_dists;
+		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
 
 		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_WeaponSprite);
 		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
@@ -215,8 +214,12 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	////////// This little part concerns CSM
 
 	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &typed_params.view[0][0]);
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, num_cascades,
-		GL_FALSE, (GLfloat*) typed_params.shadow_context -> light_view_projection_matrices);
+
+	const List* const light_view_projection_matrices = &typed_params.shadow_context -> light_view_projection_matrices;
+
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
+		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
+		light_view_projection_matrices -> data);
 }
 
 ////////// These are some private functions that exist for the sake of shadow mapping
@@ -226,8 +229,8 @@ static void define_vertex_spec(void) {
 }
 
 static void update_vertex_buffer_before_draw_call(const void* const param) {
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec3[corners_per_quad]),
-		((WeaponSprite*) param) -> appearance_context.world_space.corners);
+	const WeaponSprite* const ws = param;
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec3[corners_per_quad]), ws -> appearance_context.world_space.corners);
 }
 
 ////////// Initialization, deinitialization, updating, and rendering
