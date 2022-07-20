@@ -14,5 +14,5 @@ layout(shared) uniform StaticShadingParams {
 
 layout(shared) uniform DynamicShadingParams {
 	vec3 camera_pos_world_space;
-	mat4 view_projection;
+	mat4 view_projection, view;
 };

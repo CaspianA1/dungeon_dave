@@ -180,9 +180,7 @@ static void get_weapon_normal(const vec3 world_corners[corners_per_quad], vec3 n
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const WeaponSpriteUniformUpdaterParams typed_params = *(WeaponSpriteUniformUpdaterParams*) param;
 
-	static GLint
-		frame_index_id, normal_id, world_corners_id,
-		camera_view_id, light_view_projection_matrices_id;
+	static GLint frame_index_id, normal_id, world_corners_id, light_view_projection_matrices_id;
 
 	const GLuint shader = drawable -> shader;
 
@@ -190,7 +188,6 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		INIT_UNIFORM(frame_index, shader);
 		INIT_UNIFORM(world_corners, shader);
 		INIT_UNIFORM(normal, shader);
-		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
 		const List* const split_dists = &typed_params.shadow_context -> split_dists;
@@ -213,13 +210,8 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 	////////// This little part concerns CSM
 
-	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &typed_params.view[0][0]);
-
 	const List* const light_view_projection_matrices = &typed_params.shadow_context -> light_view_projection_matrices;
-
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
-		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
-		light_view_projection_matrices -> data);
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei) light_view_projection_matrices -> length, GL_FALSE, light_view_projection_matrices -> data);
 }
 
 ////////// These are some private functions that exist for the sake of shadow mapping

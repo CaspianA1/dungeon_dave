@@ -19,7 +19,7 @@ void main(void) {
 		+ vertex_pos_model_space.x * vec3(right_xz_world_space, 0.0f).xzy
 		+ vec3(0.0f, vertex_pos_model_space.y, 0.0f);
 
-	world_depth_value = get_world_depth_value(fragment_pos_world_space);
+	world_depth_value = get_world_depth_value(view, fragment_pos_world_space);
 	UV = vec3(get_quad_UV(), texture_id);
 	gl_Position = view_projection * vec4(fragment_pos_world_space, 1.0f);
 }

@@ -15,6 +15,7 @@ typedef struct {
 
 	const vec3 dir_to_light, sub_frustum_scale;
 
+	// TODO: make these no longer Lists
 	const List split_dists, light_view_projection_matrices;
 } CascadedShadowContext;
 

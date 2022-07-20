@@ -34,7 +34,7 @@ void main(void) {
 
 	////////// Setting world_depth_value, fragment_pos_world_space, and gl_Position
 
-	world_depth_value = get_world_depth_value(vertex_pos_world_space);
+	world_depth_value = get_world_depth_value(view, vertex_pos_world_space);
 	fragment_pos_world_space = vertex_pos_world_space;
 	gl_Position = view_projection * vec4(vertex_pos_world_space, 1.0f);
 }

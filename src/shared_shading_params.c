@@ -34,7 +34,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 		"noise_granularity", "overall_scene_tone", "dir_to_light"
 	};
 
-	static const GLchar* const dynamic_subvar_names[] = {"camera_pos_world_space", "view_projection"};
+	static const GLchar* const dynamic_subvar_names[] = {"camera_pos_world_space", "view_projection", "view"};
 
 	SharedShadingParams shared_shading_params = {
 		.constant = init_uniform_buffer(
@@ -69,6 +69,7 @@ void update_shared_shading_params(SharedShadingParams* const shared_shading_para
 	enable_uniform_buffer_writing_batch(dynamic_params);
 	write_primitive_to_uniform_buffer(dynamic_params, "camera_pos_world_space", camera -> pos, sizeof(vec3));
 	write_matrix_to_uniform_buffer(dynamic_params, "view_projection", (GLfloat*) camera -> view_projection, sizeof(vec4), 4);
+	write_matrix_to_uniform_buffer(dynamic_params, "view", (GLfloat*) camera -> view, sizeof(vec4), 4);
 	disable_uniform_buffer_writing_batch(dynamic_params);
 }
 

@@ -171,7 +171,7 @@ static void draw_sectors(
 
 	const GLuint shader = draw_context -> shader;
 
-	static GLint UV_translation_id, camera_view_id, light_view_projection_matrices_id;
+	static GLint UV_translation_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
 
@@ -180,7 +180,6 @@ static void draw_sectors(
 
 	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
 		INIT_UNIFORM(UV_translation, shader);
-		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
 		const GLfloat epsilon = 0.005f;
@@ -207,13 +206,8 @@ static void draw_sectors(
 
 	////////// This little part concerns CSM
 
-	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &camera -> view[0][0]);
-
 	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
-
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
-		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
-		light_view_projection_matrices -> data);
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei) light_view_projection_matrices -> length, GL_FALSE, light_view_projection_matrices -> data);
 
 	//////////
 

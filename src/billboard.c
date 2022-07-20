@@ -62,14 +62,13 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 	const CascadedShadowContext* const shadow_context, const Camera* const camera) {
 
 	const GLuint shader = billboard_context -> shader;
-	static GLint right_xz_world_space_id, normal_id, camera_view_id, light_view_projection_matrices_id;
+	static GLint right_xz_world_space_id, normal_id, light_view_projection_matrices_id;
 
 	use_shader(shader);
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(right_xz_world_space, shader);
 		INIT_UNIFORM(normal, shader);
-		INIT_UNIFORM(camera_view, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
 		const List* const split_dists = &shadow_context -> split_dists;
@@ -90,13 +89,8 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 
 	////////// This little part concerns CSM
 
-	UPDATE_UNIFORM(camera_view, Matrix4fv, 1, GL_FALSE, &camera -> view[0][0]);
-
 	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
-
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv,
-		(GLsizei) light_view_projection_matrices -> length, GL_FALSE,
-		light_view_projection_matrices -> data);
+	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei) light_view_projection_matrices -> length, GL_FALSE, light_view_projection_matrices -> data);
 
 	//////////
 
