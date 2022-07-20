@@ -40,7 +40,7 @@ static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const sh
 	// Opaque objects are drawn first
 
 	UPDATE_UNIFORM(drawing_translucent_quads, 1i, false);
-	draw_all_sectors_to_shadow_context(&sector_context -> draw_context);
+	draw_all_sectors_to_shadow_context(sector_context);
 
 	// Then, translucent objects after
 
@@ -286,7 +286,7 @@ static void* main_init(void) {
 	////////// Initializing shared shading params
 
 	const GLuint shaders_that_use_shared_params[] = {
-		scene_context.sector_context.draw_context.shader,
+		scene_context.sector_context.shader,
 		scene_context.billboard_context.shader,
 		scene_context.weapon_sprite.drawable.shader,
 		scene_context.shadow_context.depth_shader
