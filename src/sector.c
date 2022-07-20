@@ -263,7 +263,10 @@ SectorContext init_sector_context(const byte* const heightmap, const byte* const
 
 	List* const face_meshes_cpu = &sector_context.draw_context.buffers.cpu;
 	*face_meshes_cpu = init_face_meshes_from_sectors(&sector_context.sectors, heightmap, map_width, map_height);
-	init_batch_draw_context_gpu_buffer(&sector_context.draw_context, face_meshes_cpu -> length, sizeof(face_mesh_t));
+
+	sector_context.draw_context.buffers.gpu = init_gpu_buffer();
+	use_vertex_buffer(sector_context.draw_context.buffers.gpu);
+	glBufferData(GL_ARRAY_BUFFER, face_meshes_cpu -> length * sizeof(face_mesh_t), NULL, GL_DYNAMIC_DRAW);
 
 	enum {vpt = vertices_per_triangle};
 	const GLenum typename = FACE_MESH_COMPONENT_TYPENAME;

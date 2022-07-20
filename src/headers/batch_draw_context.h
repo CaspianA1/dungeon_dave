@@ -22,10 +22,6 @@ typedef buffer_size_t (*const num_renderable_getter_t) (const byte* const cullab
 
 ////////// Excluded: init_mapping_for_culled_batching
 
-// This does not initialize or fill the CPU buffer with data; that's the caller's responsibility
-void init_batch_draw_context_gpu_buffer(BatchDrawContext* const draw_context,
-	const buffer_size_t num_drawable_things, const buffer_size_t drawable_thing_size);
-
 void deinit_batch_draw_context(const BatchDrawContext* const draw_context);
 
 // This returns how many of the objects were visible. It also binds the draw context's vbo.
