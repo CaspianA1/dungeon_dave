@@ -3,6 +3,8 @@
 
 #include "buffer_defs.h"
 
+/* Users of List should not access `max_alloc`; it is
+irrelevant to the user, and should be considered private. */
 typedef struct {
 	void* data;
 	buffer_size_t item_size, length, max_alloc;

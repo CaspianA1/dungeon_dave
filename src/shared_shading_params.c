@@ -20,7 +20,13 @@ static void init_constant_shading_params(UniformBuffer* const shading_params, co
 	#undef UBO_WRITE
 
 	write_primitive_to_uniform_buffer(shading_params, "dir_to_light", shadow_context -> dir_to_light, sizeof(vec3));
-	write_array_of_primitives_to_uniform_buffer(shading_params, "cascade_split_distances", shadow_context -> split_dists);
+
+	write_array_of_primitives_to_uniform_buffer(shading_params, "cascade_split_distances", (List) {
+		.data = shadow_context -> split_dists,
+		.item_size = sizeof(GLfloat),
+		.length = (buffer_size_t) shadow_context -> num_cascades - 1
+	});
+
 	disable_uniform_buffer_writing_batch(shading_params);
 }
 
@@ -78,9 +84,10 @@ void update_shared_shading_params(SharedShadingParams* const shared_shading_para
 	write_matrix_to_uniform_buffer(dynamic_params, "view_projection", (GLfloat*) camera -> view_projection, sizeof(vec4), 4);
 	write_matrix_to_uniform_buffer(dynamic_params, "view", (GLfloat*) camera -> view, sizeof(vec4), 4);
 
-	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
 	write_array_of_matrices_to_uniform_buffer(dynamic_params, "light_view_projection_matrices",
-		light_view_projection_matrices -> data, light_view_projection_matrices -> length, sizeof(vec4), 4);
+		(const GLfloat**) shadow_context -> light_view_projection_matrices,
+		(buffer_size_t) shadow_context -> num_cascades, sizeof(vec4), 4
+	);
 
 	disable_uniform_buffer_writing_batch(dynamic_params);
 }

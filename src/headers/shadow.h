@@ -11,12 +11,13 @@ sample radius for the average occluder depth. */
 
 typedef struct {
 	const GLuint depth_layers, framebuffer, depth_shader;
-	const GLsizei resolution;
+	const GLsizei resolution, num_cascades;
 
 	const vec3 dir_to_light, sub_frustum_scale;
 
-	// TODO: make these no longer Lists
-	const List split_dists, light_view_projection_matrices;
+	// There are `num_cascades - 1` split dists
+	GLfloat* const split_dists;
+	mat4* const light_view_projection_matrices;
 } CascadedShadowContext;
 
 /* Excluded:
