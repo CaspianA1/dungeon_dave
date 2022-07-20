@@ -6,33 +6,6 @@
 #include "headers/texture.h"
 #include "headers/event.h"
 
-static void init_static_shading_params(UniformBuffer* const shading_params, const CascadedShadowContext* const shadow_context) {
-	enable_uniform_buffer_writing_batch(shading_params);
-
-	#define UBO_WRITE(name) write_primitive_to_uniform_buffer(shading_params, #name, &constants.lighting.name, sizeof(constants.lighting.name))
-
-	UBO_WRITE(strengths.ambient);
-	UBO_WRITE(strengths.diffuse);
-	UBO_WRITE(strengths.specular);
-	UBO_WRITE(specular_exponent_domain);
-	UBO_WRITE(tone_mapping.enabled);
-	UBO_WRITE(tone_mapping.max_white);
-	UBO_WRITE(noise_granularity);
-	UBO_WRITE(overall_scene_tone);
-
-	#undef UBO_WRITE
-
-	write_primitive_to_uniform_buffer(shading_params, "dir_to_light", shadow_context -> dir_to_light, sizeof(vec3));
-	disable_uniform_buffer_writing_batch(shading_params);
-}
-
-static void update_dynamic_shading_params(UniformBuffer* const shading_params, const Camera* const camera) {
-	enable_uniform_buffer_writing_batch(shading_params);
-	write_primitive_to_uniform_buffer(shading_params, "camera_pos_world_space", camera -> pos, sizeof(vec3));
-	write_matrix_to_uniform_buffer(shading_params, "view_projection", (GLfloat*) camera -> view_projection, sizeof(vec4), 4);
-	disable_uniform_buffer_writing_batch(shading_params);
-}
-
 static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const shadow_context,
 	const SectorContext* const sector_context, const WeaponSprite* const weapon_sprite) {
 
@@ -88,7 +61,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	const GLfloat curr_time_secs = event -> curr_time_secs;
 
 	const SectorContext* const sector_context = &scene_context -> sector_context;
-	const CascadedShadowContext* const shadow_context = &scene_context -> cascaded_shadow_context;
+	const CascadedShadowContext* const shadow_context = &scene_context -> shadow_context;
 
 	Camera* const camera = &scene_context -> camera;
 	BillboardContext* const billboard_context = &scene_context -> billboard_context;
@@ -97,7 +70,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	////////// Updating the camera and dynamic shading params
 
 	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
-	update_dynamic_shading_params(&scene_context -> shading_params, camera);
+	update_shared_shading_params(&scene_context -> shared_shading_params, camera);
 
 	////////// Object updating
 
@@ -273,7 +246,7 @@ static void* main_init(void) {
 			ARRAY_LENGTH(billboard_animation_instances), billboard_animation_instances
 		),
 
-		.cascaded_shadow_context = init_shadow_context(
+		.shadow_context = init_shadow_context(
 			// Terrain:
 			/*
 			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.0f, 1.0f},
@@ -291,31 +264,25 @@ static void* main_init(void) {
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
 
-	//////////
+	/*
+	////////// Initializing shared shading params
 
-	static const GLchar* const static_subvar_names[] = {
-		"strengths.ambient", "strengths.diffuse", "strengths.specular",
-		"specular_exponent_domain", "tone_mapping.enabled", "tone_mapping.max_white",
-		"noise_granularity", "overall_scene_tone", "dir_to_light", "camera_pos_world_space", "view_projection"
+	const GLuint shaders_that_use_shared_params[] = {
+		scene_context.sector_context.draw_context.shader,
+		scene_context.billboard_context.shader,
+		scene_context.weapon_sprite.drawable.shader
 	};
 
-	UniformBuffer shading_params = init_uniform_buffer(
-		false, "StaticShadingParams", 0,
-		scene_context.sector_context.draw_context.shader,
-		static_subvar_names, ARRAY_LENGTH(static_subvar_names)
+	SharedShadingParams shared_shading_params = init_shared_shading_params(
+		shaders_that_use_shared_params, ARRAY_LENGTH(shaders_that_use_shared_params),
+		&scene_context.shadow_context
 	);
 
-	init_static_shading_params(&shading_params, &scene_context.cascaded_shadow_context);
-	bind_uniform_buffer_to_shader(&shading_params, scene_context.sector_context.draw_context.shader);
-	bind_uniform_buffer_to_shader(&shading_params, scene_context.billboard_context.shader);
-	bind_uniform_buffer_to_shader(&shading_params, scene_context.weapon_sprite.drawable.shader);
+	// TODO: stop avoiding the type system's safety with this copy; or just make all the fields in `SharedShadingParams` mutable (or copy into the app context struct)
+	memcpy(&scene_context.shared_shading_params, &shared_shading_params, sizeof(SharedShadingParams));
+	*/
 
-	// TODO: stop avoiding the type system's safety with this copy
-	memcpy(&scene_context.shading_params, &shading_params, sizeof(UniformBuffer));
-
-	// TODO: try initing/writing to/deiniting another uniform buffer to test if state changes are encapsulated correctly
-
-	//////////
+	////////// Global state initialization
 
 	/* This is for correct for when premultiplying alpha.
 	See https://www.realtimerendering.com/blog/gpus-prefer-premultiplication/. */
@@ -329,21 +296,42 @@ static void* main_init(void) {
 	const GLenum states[] = {GL_DEPTH_TEST, GL_DEPTH_CLAMP, GL_CULL_FACE, GL_TEXTURE_CUBE_MAP_SEAMLESS};
 	for (byte i = 0; i < ARRAY_LENGTH(states); i++) glEnable(states[i]);
 
-	SceneContext* const app_context = malloc(sizeof(SceneContext));
-	memcpy(app_context, &scene_context, sizeof(SceneContext));
-	return app_context;
+	////////// Initializing an app context on the heap
+
+	SceneContext* const scene_context_on_heap = malloc(sizeof(SceneContext));
+	memcpy(scene_context_on_heap, &scene_context, sizeof(SceneContext));
+
+	////////// Initializing shared shading params
+
+	const GLuint shaders_that_use_shared_params[] = {
+		scene_context.sector_context.draw_context.shader,
+		scene_context.billboard_context.shader,
+		scene_context.weapon_sprite.drawable.shader
+	};
+
+	SharedShadingParams shared_shading_params = init_shared_shading_params(
+		shaders_that_use_shared_params, ARRAY_LENGTH(shaders_that_use_shared_params),
+		&scene_context.shadow_context
+	);
+
+	// I am bypassing the type system's const safety checks with this, but it's for the best
+	memcpy(&scene_context_on_heap -> shared_shading_params, &shared_shading_params, sizeof(SharedShadingParams));
+
+	//////////
+
+	return scene_context_on_heap;
 }
 
 static void main_deinit(void* const app_context) {
 	SceneContext* const scene_context = (SceneContext*) app_context;
 
-	deinit_uniform_buffer(&scene_context -> shading_params);
+	deinit_shared_shading_parsms(&scene_context -> shared_shading_params);
 
 	deinit_weapon_sprite(&scene_context -> weapon_sprite);
 	deinit_sector_context(&scene_context -> sector_context);
 	deinit_billboard_context(&scene_context -> billboard_context);
 
-	deinit_shadow_context(&scene_context -> cascaded_shadow_context);
+	deinit_shadow_context(&scene_context -> shadow_context);
 	deinit_title_screen(&scene_context -> title_screen);
 	deinit_skybox(scene_context -> skybox);
 

@@ -10,9 +10,9 @@ layout(shared) uniform StaticShadingParams {
 	float noise_granularity;
 
 	vec3 overall_scene_tone, dir_to_light;
+};
 
-	// TODO: only bind a range for these via glMapBufferRange
+layout(shared) uniform DynamicShadingParams {
 	vec3 camera_pos_world_space;
 	mat4 view_projection;
-
 };

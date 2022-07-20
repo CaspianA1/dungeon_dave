@@ -20,7 +20,7 @@ static GLuint safely_get_uniform_block_index(const GLuint shader, const GLchar* 
 }
 
 UniformBuffer init_uniform_buffer(
-	const bool updated_often, const GLchar* const block_name,
+	const GLenum usage, const GLchar* const block_name,
 	const GLuint binding_point, const GLuint shader_using_uniform_block,
 	const GLchar* const* const subvar_names, const buffer_size_t num_subvars) {
 
@@ -62,7 +62,7 @@ UniformBuffer init_uniform_buffer(
 		safely_get_uniform_block_index(shader_using_uniform_block, block_name),
 		GL_UNIFORM_BLOCK_DATA_SIZE, &block_size_in_bytes);
 
-	glBufferData(GL_UNIFORM_BUFFER, block_size_in_bytes, NULL, updated_often ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, block_size_in_bytes, NULL, usage);
 
 	////////// And finally, returning the uniform buffer
 
