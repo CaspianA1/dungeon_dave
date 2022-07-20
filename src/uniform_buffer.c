@@ -89,7 +89,8 @@ UniformBuffer init_uniform_buffer(
 
 	return (UniformBuffer) {
 		.id = buffer_id, .binding_point = binding_point,
-		.array_stride = array_stride, .matrix_stride = matrix_stride,
+		.array_stride = (buffer_size_t) array_stride,
+		.matrix_stride = (buffer_size_t) matrix_stride,
 		.num_subvars = num_subvars, .block_name = block_name,
 		.subvar_names = copy_array_of_strings(subvar_names, num_subvars),
 		.subvar_gpu_byte_offsets = subvar_gpu_byte_offsets,
@@ -128,28 +129,50 @@ void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer) {
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 }
 
-void write_to_uniform_buffer(const UniformBuffer* const buffer, const GLchar* const subvar_name, const void* const value, const size_t size) {
+static byte* get_base_pointer_for_subvar(const UniformBuffer* const buffer, const GLchar* const subvar_name) {
 	byte* const gpu_memory_mapping = buffer -> gpu_memory_mapping;
 
-	if (gpu_memory_mapping == NULL) FAIL(InitializeShaderUniform,
-		"%s", "Cannot write to uniform buffer when writing batch is not enabled"
+	if (gpu_memory_mapping == NULL) FAIL(InitializeShaderUniform, "Cannot write subvar '%s'"
+		" to uniform buffer because writing batch is not enabled", subvar_name
 	);
 
 	const buffer_size_t num_subvars = buffer -> num_subvars;
 	GLchar* const* const subvar_names = buffer -> subvar_names;
 
 	for (buffer_size_t i = 0; i < num_subvars; i++) {
-		if (!strcmp(subvar_name, subvar_names[i])) {
-			const GLint byte_offset = buffer -> subvar_gpu_byte_offsets[i];
-			memcpy(gpu_memory_mapping + byte_offset, value, size);
-			return;
-		}
+		if (!strcmp(subvar_name, subvar_names[i]))
+			return gpu_memory_mapping + buffer -> subvar_gpu_byte_offsets[i];
 	}
 
 	FAIL(InitializeShaderUniform,
-		"Could not locate sub-variable '%s' within uniform block '%s'",
+		"Could not locate subvar '%s' within uniform block '%s'",
 		subvar_name, buffer -> block_name
 	);
+}
+
+void write_primitive_to_uniform_buffer(const UniformBuffer* const buffer,
+	const GLchar* const subvar_name, const void* const value, const buffer_size_t size) {
+
+	if (size > sizeof(vec4)) FAIL(InitializeShaderUniform, "Sizes greater than the size of vec4 (which is %zu)"
+		" are not supported for `write_primitive_to_uniform_buffer`. The failing size was %u.", sizeof(vec4), size
+	);
+
+	memcpy(get_base_pointer_for_subvar(buffer, subvar_name), value, size);
+}
+
+void write_matrix_to_uniform_buffer(const UniformBuffer* const buffer, const GLchar* const subvar_name,
+	const GLfloat* const matrix, const buffer_size_t size_per_column, const buffer_size_t num_columns) {
+
+	const buffer_size_t stride = buffer -> matrix_stride;
+
+	byte *dest = get_base_pointer_for_subvar(buffer, subvar_name);
+	const byte* src = (byte*) matrix;
+
+	for (buffer_size_t i = 0; i < num_columns; i++) {
+		memcpy(dest, src, size_per_column);
+		dest += size_per_column + stride;
+		src += size_per_column;
+	}
 }
 
 #endif

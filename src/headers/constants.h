@@ -53,15 +53,9 @@ static const struct {
 		more towards the upper bound of the specular exponent domain).
 		Ambient strength also equals the amount of light in shadows. */
 
-		const GLfloat
-			ambient_strength, diffuse_strength,
-			specular_strength, specular_exponent_domain[2],
-			overall_scene_tone[3], noise_granularity;
-
-		const struct {
-			const bool enabled;
-			const GLfloat max_white;
-		} tone_mapping;
+		const struct {const GLfloat ambient, diffuse, specular;} strengths;
+		const GLfloat specular_exponent_domain[2], overall_scene_tone[3], noise_granularity;
+		const struct {const bool enabled;const GLfloat max_white;} tone_mapping;
 	} lighting;
 
 	const struct {
@@ -109,8 +103,8 @@ static const struct {
 	.title_screen = {.brightness_repeat_secs = 0.5f, .min_brightness = 0.7f},
 
 	.lighting = {
-		.ambient_strength = 0.3f, .diffuse_strength = 0.6f,
-		.specular_strength = 0.9f, .specular_exponent_domain = {32.0f, 96.0f},
+		.strengths = {.ambient = 0.3f, .diffuse = 0.6f, .specular = 0.9f},
+		.specular_exponent_domain = {32.0f, 96.0f},
 		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
 		.noise_granularity = 0.2f / 255.0f, .tone_mapping = {.enabled = true, .max_white = 1.5f}
 	},

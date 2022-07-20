@@ -1,7 +1,8 @@
 #version 400 core
 
 layout(shared) uniform StaticShadingParams {
-	float ambient_strength, diffuse_strength, specular_strength;
+	struct {float ambient, diffuse, specular;} strengths;
+
 	vec2 specular_exponent_domain;
 
 	struct {bool enabled; float max_white;} tone_mapping;

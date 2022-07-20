@@ -9,11 +9,11 @@
 static void init_static_shading_params(UniformBuffer* const shading_params, const CascadedShadowContext* const shadow_context) {
 	enable_uniform_buffer_writing_batch(shading_params);
 
-	#define UBO_WRITE(name) write_to_uniform_buffer(shading_params, #name, &constants.lighting.name, sizeof(constants.lighting.name))
+	#define UBO_WRITE(name) write_primitive_to_uniform_buffer(shading_params, #name, &constants.lighting.name, sizeof(constants.lighting.name))
 
-	UBO_WRITE(ambient_strength);
-	UBO_WRITE(diffuse_strength);
-	UBO_WRITE(specular_strength);
+	UBO_WRITE(strengths.ambient);
+	UBO_WRITE(strengths.diffuse);
+	UBO_WRITE(strengths.specular);
 	UBO_WRITE(specular_exponent_domain);
 	UBO_WRITE(tone_mapping.enabled);
 	UBO_WRITE(tone_mapping.max_white);
@@ -22,14 +22,14 @@ static void init_static_shading_params(UniformBuffer* const shading_params, cons
 
 	#undef UBO_WRITE
 
-	write_to_uniform_buffer(shading_params, "dir_to_light", shadow_context -> dir_to_light, sizeof(vec3));
+	write_primitive_to_uniform_buffer(shading_params, "dir_to_light", shadow_context -> dir_to_light, sizeof(vec3));
 	disable_uniform_buffer_writing_batch(shading_params);
 }
 
 static void update_dynamic_shading_params(UniformBuffer* const shading_params, const Camera* const camera) {
 	enable_uniform_buffer_writing_batch(shading_params);
-	write_to_uniform_buffer(shading_params, "camera_pos_world_space", camera -> pos, sizeof(vec3));
-	write_to_uniform_buffer(shading_params, "view_projection", camera -> view_projection, sizeof(mat4));
+	write_primitive_to_uniform_buffer(shading_params, "camera_pos_world_space", camera -> pos, sizeof(vec3));
+	write_matrix_to_uniform_buffer(shading_params, "view_projection", (GLfloat*) camera -> view_projection, sizeof(vec4), 4);
 	disable_uniform_buffer_writing_batch(shading_params);
 }
 
@@ -294,7 +294,7 @@ static void* main_init(void) {
 	//////////
 
 	const GLchar* const static_subvar_names[] = {
-		"ambient_strength", "diffuse_strength", "specular_strength",
+		"strengths.ambient", "strengths.diffuse", "strengths.specular",
 		"specular_exponent_domain", "tone_mapping.enabled", "tone_mapping.max_white",
 		"noise_granularity", "overall_scene_tone", "dir_to_light", "camera_pos_world_space", "view_projection"
 	};

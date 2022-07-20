@@ -5,8 +5,7 @@
 
 typedef struct {
 	const GLuint id, binding_point;
-	const GLint array_stride, matrix_stride;
-	const buffer_size_t num_subvars;
+	const buffer_size_t array_stride, matrix_stride, num_subvars;
 
 	const GLchar* const block_name;
 	GLchar** const subvar_names;
@@ -15,7 +14,7 @@ typedef struct {
 	byte* gpu_memory_mapping;
 } UniformBuffer;
 
-// Excluded: safely_get_uniform_block_index, copy_array_of_strings
+// Excluded: safely_get_uniform_block_index, copy_array_of_strings, get_base_pointer_for_subvar
 
 UniformBuffer init_uniform_buffer(
 	const bool updated_often, const GLchar* const block_name,
@@ -28,6 +27,11 @@ void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLui
 
 void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer);
 void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer);
-void write_to_uniform_buffer(const UniformBuffer* const buffer, const GLchar* const subvar_name, const void* const value, const size_t size);
+
+void write_primitive_to_uniform_buffer(const UniformBuffer* const buffer,
+	const GLchar* const subvar_name, const void* const value, const buffer_size_t size);
+
+void write_matrix_to_uniform_buffer(const UniformBuffer* const buffer, const GLchar* const subvar_name,
+	const GLfloat* const matrix, const buffer_size_t size_per_column, const buffer_size_t num_columns);
 
 #endif
