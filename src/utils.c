@@ -163,11 +163,7 @@ static bool application_should_exit(const Uint8* const keys) {
 
 //////////
 
-static void loop_application(const Screen* const screen,
-	void (*const drawer) (void* const, const Event* const),
-	void* (*const init) (void), void (*const deinit) (void* const)) {
-
-	void* const app_context = init();
+static void loop_application(const Screen* const screen, void* const app_context, void (*const drawer) (void* const, const Event* const)) {
 	SDL_Window* const window = screen -> window;
 	const Uint8* const keys = SDL_GetKeyboardState(NULL);
 
@@ -216,8 +212,6 @@ static void loop_application(const Screen* const screen,
 		if (wait_for_exact_fps > 0.0f) SDL_Delay((Uint32) wait_for_exact_fps);
 		#endif
 	}
-
-	deinit(app_context);
 }
 
 void make_application(void (*const drawer) (void* const, const Event* const),
@@ -230,7 +224,9 @@ void make_application(void (*const drawer) (void* const, const Event* const),
 	printf("vendor = %s\nrenderer = %s\nversion = %s\n---\n",
 		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 
-	loop_application(&screen, drawer, init, deinit);
+	void* const app_context = init();
+	loop_application(&screen, app_context, drawer);
+	deinit(app_context);
 	deinit_screen(&screen);
 }
 
