@@ -71,9 +71,6 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 		INIT_UNIFORM(normal, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
-		const List* const split_dists = &shadow_context -> split_dists;
-		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
-
 		use_texture(billboard_context -> diffuse_texture_set, shader, "diffuse_sampler", TexSet, TU_Billboard);
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);

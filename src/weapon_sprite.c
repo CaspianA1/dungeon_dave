@@ -190,9 +190,6 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		INIT_UNIFORM(normal, shader);
 		INIT_UNIFORM(light_view_projection_matrices, shader);
 
-		const List* const split_dists = &typed_params.shadow_context -> split_dists;
-		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
-
 		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_WeaponSprite);
 		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);

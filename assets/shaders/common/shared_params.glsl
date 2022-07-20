@@ -1,5 +1,7 @@
 #version 400 core
 
+#include "shadow/num_cascades.glsl"
+
 layout(shared) uniform StaticShadingParams {
 	struct {float ambient, diffuse, specular;} strengths;
 
@@ -10,6 +12,8 @@ layout(shared) uniform StaticShadingParams {
 	float noise_granularity;
 
 	vec3 overall_scene_tone, dir_to_light;
+
+	float cascade_split_distances[NUM_CASCADES - 1u]; // TODO: use the const variable name for this size
 };
 
 layout(shared) uniform DynamicShadingParams {

@@ -187,9 +187,6 @@ static void draw_sectors(
 			{4.0f + epsilon, 0.0f, 0.0f}, {6.0f - epsilon, 3.0f, 3.0f + epsilon}
 		});
 
-		const List* const split_dists = &shadow_context -> split_dists;
-		INIT_UNIFORM_VALUE(cascade_split_distances, shader, 1fv, (GLsizei) split_dists -> length, split_dists -> data);
-
 		use_texture(skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture(draw_context -> texture_set, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
 		use_texture(sector_context -> face_normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
