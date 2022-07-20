@@ -53,6 +53,7 @@ Architectural/code design ideas:
 - Alpha to coverage with the title screen becomes really glitchy
 - Texture compression as an option
 - Figure out how to make spherically distorted skyboxes in Blender from cube-like ones made in an image editor
+- On the first frame, there are no shadows (it's a bit hard to see; it's probably because `update_shared_shading_params` is called before `enable_rendering_to_shadow_context`)
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage

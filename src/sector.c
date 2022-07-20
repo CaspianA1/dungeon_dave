@@ -161,7 +161,7 @@ void draw_all_sectors_to_shadow_context(const BatchDrawContext* const sector_dra
 	glEnableVertexAttribArray(1);
 }
 
-static void draw_sectors(
+static void internal_draw_sectors(
 	const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
 	const Skybox* const skybox, const buffer_size_t num_visible_faces,
@@ -202,46 +202,76 @@ static void draw_sectors(
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
 }
 
-////////// These functions are for frustum culling
+//////////
 
-static void make_aabb(const byte* const typeless_sector, vec3 aabb[2]) {
-	const Sector sector = *(Sector*) typeless_sector;
+static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
+	const BatchDrawContext* const draw_context,
+	const List* const sectors, const vec4* const frustum_planes) {
 
-	GLfloat *const min = aabb[0], *const max = aabb[1];
+	use_vertex_buffer(draw_context -> buffers.gpu);
 
-	min[0] = sector.origin[0];
-	min[1] = sector.visible_heights.min;
-	min[2] = sector.origin[1];
+	const Sector* const sector_data = sectors -> data;
+	const Sector* const out_of_bounds_sector = sector_data + sectors -> length;
 
-	max[0] = min[0] + sector.size[0];
-	max[1] = min[1] + sector.visible_heights.max - sector.visible_heights.min;
-	max[2] = min[2] + sector.size[1];
-}
+	const List* const face_meshes_cpu = &draw_context -> buffers.cpu;
+	const face_mesh_t* const face_meshes_cpu_data = face_meshes_cpu -> data;
 
-static buffer_size_t get_renderable_index_from_cullable(const byte* const typeless_sector, const byte* const typeless_first_sector) {
-	(void) typeless_first_sector;
-	return ((Sector*) typeless_sector) -> face_range.start;
-}
+	face_mesh_t* const face_meshes_gpu = glMapBufferRange(GL_ARRAY_BUFFER,
+		0, draw_context -> buffers.cpu.length * sizeof(face_mesh_t),
+		GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT
+		/* Only writing, so no `GL_MAP_READ_BIT`. The previous buffer contents
+		don't matter, so I can invalidate the previous data in the array.
+		TODO: possibly add `GL_MAP_UNSYNCHRONIZED_BIT` later? */
+	);
 
-static buffer_size_t get_num_renderable_from_cullable(const byte* const typeless_sector) {
-	return ((Sector*) typeless_sector) -> face_range.length;
+	buffer_size_t num_visible_faces = 0;
+
+	for (const Sector* sector = sector_data; sector < out_of_bounds_sector; sector++) {
+		buffer_size_t num_visible_faces_in_group = 0;
+		const buffer_size_t cpu_buffer_start_index = sector -> face_range.start;
+
+		while (sector < out_of_bounds_sector) {
+			////////// Checking to see if the sector is visible
+
+			const byte *const origin = sector -> origin, *const size = sector -> size;
+
+			const vec3 aabb[2] = {
+				{origin[0], sector -> visible_heights.min, origin[1]},
+				{origin[0] + size[0], sector -> visible_heights.max, origin[1] + size[1]}
+			};
+
+			if (!glm_aabb_frustum((vec3*) aabb, (vec4*) frustum_planes)) break;
+
+			num_visible_faces_in_group += sector++ -> face_range.length;
+		}
+
+		if (num_visible_faces_in_group != 0) {
+			memcpy(face_meshes_gpu + num_visible_faces,
+				face_meshes_cpu_data + cpu_buffer_start_index,
+				num_visible_faces_in_group * sizeof(face_mesh_t));
+
+			num_visible_faces += num_visible_faces_in_group;
+		}
+	}
+
+	glUnmapBuffer(GL_ARRAY_BUFFER); // If looking out at the distance with no sectors, why do any state switching at all?
+	return num_visible_faces;
 }
 
 //////////
 
 // This is just a utility function
-void draw_visible_sectors(const SectorContext* const sector_context,
+void draw_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
 	const Skybox* const skybox, const Camera* const camera,
 	const GLfloat curr_time_secs) {
 
-	const buffer_size_t num_visible_faces = cull_from_frustum_into_gpu_buffer(
-		&sector_context -> draw_context, sector_context -> sectors, camera -> frustum_planes,
-		make_aabb, get_renderable_index_from_cullable, get_num_renderable_from_cullable
+	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(
+		&sector_context -> draw_context, &sector_context -> sectors, camera -> frustum_planes
 	);
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
-	if (num_visible_faces != 0) draw_sectors(sector_context,
+	if (num_visible_faces != 0) internal_draw_sectors(sector_context,
 		shadow_context, skybox, num_visible_faces, curr_time_secs);
 }
 

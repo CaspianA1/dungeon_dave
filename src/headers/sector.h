@@ -24,11 +24,11 @@ typedef struct {
 } SectorContext;
 
 /* Excluded: point_matches_sector_attributes, form_sector_area, generate_sectors_from_maps,
-draw_sectors, make_aabb, get_renderable_index_from_cullable, get_num_renderable_from_cullable */
+internal_draw_sectors, frustum_cull_sector_faces_into_gpu_buffer */
 
 void draw_all_sectors_to_shadow_context(const BatchDrawContext* const sector_draw_context);
 
-void draw_visible_sectors(const SectorContext* const sector_context,
+void draw_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
 	const Skybox* const skybox, const Camera* const camera,
 	const GLfloat curr_time_secs);

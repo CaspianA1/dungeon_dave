@@ -86,7 +86,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	////////// The main drawing code
 
 	const Skybox* const skybox = &scene_context -> skybox;
-	draw_visible_sectors(sector_context, shadow_context, skybox, camera, curr_time_secs);
+	draw_sectors(sector_context, shadow_context, skybox, camera, curr_time_secs);
 
 	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
