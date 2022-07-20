@@ -35,7 +35,10 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 		"noise_granularity", "overall_scene_tone", "dir_to_light", "cascade_split_distances"
 	};
 
-	static const GLchar* const dynamic_subvar_names[] = {"camera_pos_world_space", "view_projection", "view"};
+	static const GLchar* const dynamic_subvar_names[] = {
+		"camera_pos_world_space", "view_projection",
+		"view", "light_view_projection_matrices"
+	};
 
 	SharedShadingParams shared_shading_params = {
 		.constant = init_uniform_buffer(
@@ -64,7 +67,9 @@ void deinit_shared_shading_parsms(const SharedShadingParams* const shared_shadin
 	deinit_uniform_buffer(&shared_shading_params -> dynamic);
 }
 
-void update_shared_shading_params(SharedShadingParams* const shared_shading_params, const Camera* const camera) {
+void update_shared_shading_params(SharedShadingParams* const shared_shading_params,
+	const Camera* const camera, const CascadedShadowContext* const shadow_context) {
+
 	UniformBuffer* const dynamic_params = &shared_shading_params -> dynamic;
 
 	enable_uniform_buffer_writing_batch(dynamic_params);
@@ -72,6 +77,10 @@ void update_shared_shading_params(SharedShadingParams* const shared_shading_para
 	write_primitive_to_uniform_buffer(dynamic_params, "camera_pos_world_space", camera -> pos, sizeof(vec3));
 	write_matrix_to_uniform_buffer(dynamic_params, "view_projection", (GLfloat*) camera -> view_projection, sizeof(vec4), 4);
 	write_matrix_to_uniform_buffer(dynamic_params, "view", (GLfloat*) camera -> view, sizeof(vec4), 4);
+
+	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
+	write_array_of_matrices_to_uniform_buffer(dynamic_params, "light_view_projection_matrices",
+		light_view_projection_matrices -> data, light_view_projection_matrices -> length, sizeof(vec4), 4);
 
 	disable_uniform_buffer_writing_batch(dynamic_params);
 }

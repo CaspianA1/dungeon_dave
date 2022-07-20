@@ -5,9 +5,6 @@
 const uint NUM_CASCADE_SPLITS = NUM_CASCADES - 1u;
 
 // TODO: share `light_view_projection_matrices` with `depth.geom`
-
-// uniform float cascade_split_distances[NUM_CASCADE_SPLITS];
-uniform mat4 light_view_projection_matrices[NUM_CASCADES];
 uniform sampler2DArray shadow_cascade_sampler;
 
 /* TODO: perhaps use Vogel disk or stratified Poisson sampling instead:

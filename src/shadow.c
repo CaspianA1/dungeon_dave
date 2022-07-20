@@ -222,18 +222,9 @@ void enable_rendering_to_shadow_context(const CascadedShadowContext* const shado
 		get_sub_frustum_light_view_projection_matrix(camera, shadow_context, sub_near_clip, sub_far_clip, matrix);
 	}
 
-	////////// Updating the light view projection matrices uniform
-
-	const GLuint depth_shader = shadow_context -> depth_shader;
-	use_shader(depth_shader);
-
-	static GLint light_view_projection_matrices_id;
-	ON_FIRST_CALL(INIT_UNIFORM(light_view_projection_matrices, depth_shader););
-
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei)
-		num_cascades, GL_FALSE, light_view_projection_matrices -> data);
-
 	////////// Preparing for cascade rendering
+
+	use_shader(shadow_context -> depth_shader);
 
 	const GLsizei resolution = shadow_context -> resolution;
 	glViewport(0, 0, resolution, resolution);

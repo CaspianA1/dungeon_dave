@@ -110,10 +110,20 @@ static void check_primitive_size(const buffer_size_t size, const GLchar* const f
 	);
 }
 
-/* The user of this may not always need the stride, so if either the
-passed-in `strides` or `stride` are null, `stride` is not written to. */
+static void check_matrix_size(const buffer_size_t column_size,
+	const buffer_size_t num_columns, const GLchar* const function_name) {
+
+	check_primitive_size(column_size, function_name);
+
+	if (num_columns == 0 || num_columns > 4) FAIL(InitializeShaderUniform,
+		"A column count of %u when calling `%s` is not supported",
+		num_columns, function_name
+	);
+}
+
+// If either stride is null, it will not be written to.
 static void get_subvar_metadata(const UniformBuffer* const buffer, const GLchar* const subvar_name,
-	byte** const gpu_memory_dest, const GLint* const strides, GLint* const stride) {
+	byte** const gpu_memory_dest, GLint* const array_stride, GLint* const matrix_stride) {
 
 	byte* const gpu_memory_mapping = buffer -> gpu_memory_mapping;
 
@@ -128,7 +138,10 @@ static void get_subvar_metadata(const UniformBuffer* const buffer, const GLchar*
 		if (!strcmp(subvar_name, subvar_names[i])) {
 			// In some cases, need the gpu buffer ptr. Never need the actual index. Also need the _ in some cases.
 			*gpu_memory_dest = buffer -> gpu_memory_mapping + buffer -> subvar_gpu_byte_offsets[i];
-			if (strides != NULL && stride != NULL) *stride = strides[i];
+
+			if (array_stride != NULL) *array_stride = buffer -> array_strides[i];
+			if (matrix_stride != NULL) *matrix_stride = buffer -> matrix_strides[i];
+
 			return;
 		}
 	}
@@ -150,28 +163,20 @@ void write_primitive_to_uniform_buffer(const UniformBuffer* const buffer,
 }
 
 void write_matrix_to_uniform_buffer(const UniformBuffer* const buffer, const GLchar* const subvar_name,
-	const GLfloat* const matrix, const buffer_size_t size_per_column, const buffer_size_t num_columns) {
+	const GLfloat* const matrix, const buffer_size_t column_size, const buffer_size_t num_columns) {
 
-	const GLchar* const function_name = "write_matrix_to_uniform_buffer";
-
-	check_primitive_size(size_per_column, function_name);
-
-	if (num_columns == 0 || num_columns > 4) FAIL(InitializeShaderUniform,
-		"A column count of %u when calling `%s` is not supported",
-		num_columns, function_name
-	);
+	check_matrix_size(column_size, num_columns, "write_matrix_to_uniform_buffer");
 
 	byte* dest;
-	GLint stride;
-	get_subvar_metadata(buffer, subvar_name, &dest, buffer -> matrix_strides, &stride);
+	GLint matrix_stride;
+	get_subvar_metadata(buffer, subvar_name, &dest, NULL, &matrix_stride);
 
 	const byte* src = (byte*) matrix;
 
 	for (buffer_size_t i = 0; i < num_columns; i++) {
-		memcpy(dest, src, size_per_column);
-
-		dest += stride;
-		src += size_per_column;
+		memcpy(dest, src, column_size);
+		dest += matrix_stride;
+		src += column_size;
 	}
 }
 
@@ -181,15 +186,35 @@ void write_array_of_primitives_to_uniform_buffer(const UniformBuffer* const buff
 	check_primitive_size(primitives.item_size, "write_array_of_primitives_to_uniform_buffer");
 
 	byte* dest;
-	GLint stride;
-	get_subvar_metadata(buffer, subvar_name, &dest, buffer -> array_strides, &stride);
+	GLint array_stride;
+	get_subvar_metadata(buffer, subvar_name, &dest, &array_stride, NULL);
 
 	LIST_FOR_EACH(0, &primitives, primitive, _,
 		memcpy(dest, primitive, primitives.item_size);
-		dest += stride;
+		dest += array_stride;
 	);
 }
 
-// TODO: a function for an array of matrices
+void write_array_of_matrices_to_uniform_buffer(const UniformBuffer* const buffer,
+	const GLchar* const subvar_name, const GLfloat* const* const matrices,
+	const buffer_size_t num_matrices, const buffer_size_t column_size,
+	const buffer_size_t num_columns) {
+
+	check_matrix_size(column_size, num_columns, "write_matrix_to_uniform_buffer");
+
+	byte* dest;
+	GLint matrix_stride;
+	get_subvar_metadata(buffer, subvar_name, &dest, NULL, &matrix_stride);
+
+	const byte* src = (byte*) matrices;
+
+	for (buffer_size_t i = 0; i < num_matrices; i++) {
+		for (buffer_size_t i = 0; i < num_columns; i++) {
+			memcpy(dest, src, column_size);
+			dest += matrix_stride;
+			src += column_size;
+		}
+	}
+}
 
 #endif

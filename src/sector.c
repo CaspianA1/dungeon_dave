@@ -164,14 +164,12 @@ void draw_all_sectors_to_shadow_context(const BatchDrawContext* const sector_dra
 static void draw_sectors(
 	const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const Camera* const camera,
-	const buffer_size_t num_visible_faces, const GLfloat curr_time_secs) {
+	const Skybox* const skybox, const buffer_size_t num_visible_faces,
+	const GLfloat curr_time_secs) {
 
 	const BatchDrawContext* const draw_context = &sector_context -> draw_context;
-
 	const GLuint shader = draw_context -> shader;
-
-	static GLint UV_translation_id, light_view_projection_matrices_id;
+	static GLint UV_translation_id;
 
 	use_shader(shader);
 
@@ -180,7 +178,6 @@ static void draw_sectors(
 
 	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
 		INIT_UNIFORM(UV_translation, shader);
-		INIT_UNIFORM(light_view_projection_matrices, shader);
 
 		const GLfloat epsilon = 0.005f;
 		INIT_UNIFORM_VALUE(UV_translation_area, shader, 3fv, 2, (GLfloat*) (vec3[2]) {
@@ -200,13 +197,6 @@ static void draw_sectors(
 
 	#undef LIGHTING_UNIFORM
 	#undef ARRAY_LIGHTING_UNIFORM
-
-	////////// This little part concerns CSM
-
-	const List* const light_view_projection_matrices = &shadow_context -> light_view_projection_matrices;
-	UPDATE_UNIFORM(light_view_projection_matrices, Matrix4fv, (GLsizei) light_view_projection_matrices -> length, GL_FALSE, light_view_projection_matrices -> data);
-
-	//////////
 
 	use_vertex_spec(draw_context -> vertex_spec);
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
@@ -252,7 +242,7 @@ void draw_visible_sectors(const SectorContext* const sector_context,
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0) draw_sectors(sector_context,
-		shadow_context, skybox, camera, num_visible_faces, curr_time_secs);
+		shadow_context, skybox, num_visible_faces, curr_time_secs);
 }
 
 ////////// Initialization and deinitialization

@@ -15,6 +15,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 	const GLuint shader_count, const CascadedShadowContext* const shadow_context);
 
 void deinit_shared_shading_parsms(const SharedShadingParams* const shared_shading_params);
-void update_shared_shading_params(SharedShadingParams* const shared_shading_params, const Camera* const camera);
+void update_shared_shading_params(SharedShadingParams* const shared_shading_params,
+	const Camera* const camera, const CascadedShadowContext* const shadow_context);
 
 #endif

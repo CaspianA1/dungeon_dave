@@ -20,7 +20,7 @@ typedef struct {
 	byte* gpu_memory_mapping;
 } UniformBuffer;
 
-// Excluded: safely_get_uniform_block_index, check_primitive_size, get_subvar_metadata
+// Excluded: safely_get_uniform_block_index, check_primitive_size, check_matrix_size, get_subvar_metadata
 
 /* This expects that lifetime of `subvar_names` is longer than the lifetime of the
 uniform buffer (so the subvar names should be on the heap, or in static memory). */
@@ -40,9 +40,14 @@ void write_primitive_to_uniform_buffer(const UniformBuffer* const buffer,
 	const GLchar* const subvar_name, const void* const primitive, const buffer_size_t size);
 
 void write_matrix_to_uniform_buffer(const UniformBuffer* const buffer, const GLchar* const subvar_name,
-	const GLfloat* const matrix, const buffer_size_t size_per_column, const buffer_size_t num_columns);
+	const GLfloat* const matrix, const buffer_size_t column_size, const buffer_size_t num_columns);
 
 void write_array_of_primitives_to_uniform_buffer(const UniformBuffer* const buffer,
 	const GLchar* const subvar_name, const List primitives);
+
+void write_array_of_matrices_to_uniform_buffer(const UniformBuffer* const buffer,
+	const GLchar* const subvar_name, const GLfloat* const* const matrices,
+	const buffer_size_t num_matrices, const buffer_size_t column_size,
+	const buffer_size_t num_columns);
 
 #endif

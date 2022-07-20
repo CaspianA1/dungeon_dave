@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "num_cascades.glsl"
+#include "../shared_params.glsl"
 
 #define VERTICES_PER_TRIANGLE 3u
 
@@ -9,8 +9,6 @@ layout(triangle_strip, max_vertices = VERTICES_PER_TRIANGLE) out;
 
 in vec2 translucent_vertex_quad_UV[];
 out vec2 translucent_fragment_quad_UV;
-
-uniform mat4 light_view_projection_matrices[NUM_CASCADES];
 
 void main(void) {
 	mat4 light_view_projection_matrix = light_view_projection_matrices[gl_InvocationID];

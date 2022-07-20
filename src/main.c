@@ -67,10 +67,10 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	BillboardContext* const billboard_context = &scene_context -> billboard_context;
 	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
 
-	////////// Updating the camera and dynamic shading params
+	////////// Updating the camera, and the shared shading params
 
 	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
-	update_shared_shading_params(&scene_context -> shared_shading_params, camera);
+	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context);
 
 	////////// Object updating
 
@@ -288,7 +288,8 @@ static void* main_init(void) {
 	const GLuint shaders_that_use_shared_params[] = {
 		scene_context.sector_context.draw_context.shader,
 		scene_context.billboard_context.shader,
-		scene_context.weapon_sprite.drawable.shader
+		scene_context.weapon_sprite.drawable.shader,
+		scene_context.shadow_context.depth_shader
 	};
 
 	SharedShadingParams shared_shading_params = init_shared_shading_params(
