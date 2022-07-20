@@ -264,24 +264,6 @@ static void* main_init(void) {
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
 
-	/*
-	////////// Initializing shared shading params
-
-	const GLuint shaders_that_use_shared_params[] = {
-		scene_context.sector_context.draw_context.shader,
-		scene_context.billboard_context.shader,
-		scene_context.weapon_sprite.drawable.shader
-	};
-
-	SharedShadingParams shared_shading_params = init_shared_shading_params(
-		shaders_that_use_shared_params, ARRAY_LENGTH(shaders_that_use_shared_params),
-		&scene_context.shadow_context
-	);
-
-	// TODO: stop avoiding the type system's safety with this copy; or just make all the fields in `SharedShadingParams` mutable (or copy into the app context struct)
-	memcpy(&scene_context.shared_shading_params, &shared_shading_params, sizeof(SharedShadingParams));
-	*/
-
 	////////// Global state initialization
 
 	/* This is for correct for when premultiplying alpha.
