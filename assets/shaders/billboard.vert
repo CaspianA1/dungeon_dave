@@ -10,13 +10,13 @@ layout(location = 2) in vec3 billboard_center_world_space;
 
 out vec3 fragment_pos_world_space, UV;
 
-uniform vec2 right_xz_world_space;
+uniform vec2 right_xz;
 
 void main(void) {
 	vec2 vertex_pos_model_space = quad_corners[gl_VertexID] * 0.5f * billboard_size_world_space;
 
 	fragment_pos_world_space = billboard_center_world_space
-		+ vertex_pos_model_space.x * vec3(right_xz_world_space, 0.0f).xzy
+		+ vertex_pos_model_space.x * vec3(right_xz, 0.0f).xzy
 		+ vec3(0.0f, vertex_pos_model_space.y, 0.0f);
 
 	world_depth_value = get_world_depth_value(view, fragment_pos_world_space);

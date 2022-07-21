@@ -9,8 +9,6 @@ out vec4 color;
 uniform vec3 normal;
 uniform sampler2DArray diffuse_sampler;
 
-// `quad_with_one_normal` applies to billboards and the weapon sprite
-
 void main(void) {
 	vec4 texture_color = texture(diffuse_sampler, UV);
 

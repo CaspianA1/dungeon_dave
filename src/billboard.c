@@ -3,6 +3,7 @@
 
 #include "headers/billboard.h"
 #include "headers/texture.h"
+#include "headers/normal_map_generation.h"
 #include "headers/shader.h"
 #include "headers/constants.h"
 
@@ -62,30 +63,22 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 	const CascadedShadowContext* const shadow_context, const Camera* const camera) {
 
 	const GLuint shader = billboard_context -> shader;
-	static GLint right_xz_world_space_id, normal_id;
+	static GLint right_xz_id;
 
 	use_shader(shader);
 
 	ON_FIRST_CALL(
-		INIT_UNIFORM(right_xz_world_space, shader);
-		INIT_UNIFORM(normal, shader);
+		INIT_UNIFORM(right_xz, shader);
 
-		use_texture(billboard_context -> diffuse_texture_set, shader, "diffuse_sampler", TexSet, TU_Billboard);
+		use_texture(billboard_context -> diffuse_texture_set, shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
+		use_texture(billboard_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_BillboardNormalMap);
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);
 
 	////////// Uniform updating
 
 	const GLfloat* const right_xz = camera -> right_xz;
-	UPDATE_UNIFORM(right_xz_world_space, 2f, right_xz[0], right_xz[1]);
-
-	vec3 normal;
-	glm_vec3_cross(GLM_YUP, (vec3) {right_xz[0], 0.0f, right_xz[1]}, normal);
-	glm_vec3_negate(normal);
-
-	UPDATE_UNIFORM(normal, 3fv, 1, normal);
-
-	//////////
+	UPDATE_UNIFORM(right_xz, 2fv, 1, right_xz);
 
 	use_vertex_spec(billboard_context -> vertex_spec);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) billboard_context -> billboards.length);
@@ -153,7 +146,8 @@ BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
 		.vertex_buffer = init_gpu_buffer(),
 		.vertex_spec = init_vertex_spec(),
 		.diffuse_texture_set = diffuse_texture_set,
-		.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/quad_with_one_normal.frag")),
+		.normal_map_set = init_normal_map_from_diffuse_texture_set(diffuse_texture_set),
+		.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag")),
 
 		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),
 		.billboards = init_list(num_billboards, Billboard),
@@ -188,6 +182,7 @@ void deinit_billboard_context(const BillboardContext* const billboard_context) {
 	deinit_vertex_spec(billboard_context -> vertex_spec);
 
 	deinit_texture(billboard_context -> diffuse_texture_set);
+	deinit_texture(billboard_context -> normal_map_set);
 	deinit_shader(billboard_context -> shader);
 
 	deinit_list(billboard_context -> distance_sort_refs);

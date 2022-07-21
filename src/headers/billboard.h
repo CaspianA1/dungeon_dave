@@ -10,7 +10,7 @@
 // TODO: make sure that billboards never intersect, because that would break depth sorting
 
 typedef struct { // TODO: integrate this into Drawable
-	const GLuint vertex_buffer, vertex_spec, diffuse_texture_set, shader;
+	const GLuint vertex_buffer, vertex_spec, diffuse_texture_set, normal_map_set, shader;
 	List distance_sort_refs, billboards, animations, animation_instances;
 } BillboardContext;
 
