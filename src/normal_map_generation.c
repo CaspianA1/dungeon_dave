@@ -88,7 +88,6 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 
 ////////// This code concerns Gaussian blur (the normal map input is blurred to cut out high frequencies from the Sobel operator).
 
-// TODO: compute the radius from the std dev
 static GLfloat* compute_1D_gaussian_kernel(const signed_byte radius, const GLfloat std_dev) {
 	const signed_byte kernel_length = radius * 2 + 1;
 

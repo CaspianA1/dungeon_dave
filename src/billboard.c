@@ -137,10 +137,19 @@ void draw_billboards(BillboardContext* const billboard_context,
 }
 
 BillboardContext init_billboard_context(
-	const GLuint diffuse_texture_set, const NormalMapConfig* const normal_map_config,
+	const GLsizei texture_size, const NormalMapConfig* const normal_map_config,
+
+	const billboard_index_t num_still_textures, const GLchar* const* const still_texture_paths,
+	const billboard_index_t num_animation_layouts, const AnimationLayout* const animation_layouts,
+
 	const billboard_index_t num_billboards, const Billboard* const billboards,
 	const billboard_index_t num_billboard_animations, const Animation* const billboard_animations,
 	const billboard_index_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances) {
+
+	const GLuint diffuse_texture_set = init_texture_set(true, TexNonRepeating,
+		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+		num_still_textures, num_animation_layouts, texture_size, texture_size, still_texture_paths, animation_layouts
+	);
 
 	BillboardContext billboard_context = {
 		.vertex_buffer = init_gpu_buffer(),

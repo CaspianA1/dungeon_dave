@@ -4,7 +4,7 @@
 #include "headers/main.h"
 #include "headers/normal_map_generation.h"
 #include "headers/maps.h"
-#include "headers/texture.h"
+#include "headers/texture.h" // TODO: remove when I don't need to contain the alpha test logic in this file anymore
 #include "headers/event.h"
 
 static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const shadow_context,
@@ -237,18 +237,14 @@ static void* main_init(void) {
 		),
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
-			init_texture_set(
-				false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-				ARRAY_LENGTH(still_face_texture_paths), 0, texture_sizes.face, texture_sizes.face, still_face_texture_paths, NULL
-			), &sector_faces_normal_map_config
+			still_face_texture_paths, ARRAY_LENGTH(still_face_texture_paths), texture_sizes.face, &sector_faces_normal_map_config
 		),
 
 		.billboard_context = init_billboard_context(
-			init_texture_set(
-				true, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-				ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_layouts),
-				texture_sizes.billboard, texture_sizes.billboard, still_billboard_texture_paths, billboard_animation_layouts
-			), &billboards_normal_map_config,
+			texture_sizes.billboard, &billboards_normal_map_config,
+
+			ARRAY_LENGTH(still_billboard_texture_paths), still_billboard_texture_paths,
+			ARRAY_LENGTH(billboard_animation_layouts), billboard_animation_layouts,
 
 			ARRAY_LENGTH(billboards), billboards,
 			ARRAY_LENGTH(billboard_animations), billboard_animations,

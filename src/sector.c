@@ -272,12 +272,17 @@ void draw_sectors(const SectorContext* const sector_context,
 
 ////////// Initialization and deinitialization
 
-// TODO: pass in only texture paths to this
 SectorContext init_sector_context(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height,
-	const GLuint diffuse_texture_set, const NormalMapConfig* const normal_map_config) {
+	const GLchar* const* const texture_paths, const GLsizei num_textures,
+	const GLsizei texture_size, const NormalMapConfig* const normal_map_config) {
 
 	const List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
+
+	const GLuint diffuse_texture_set = init_texture_set(
+		false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+		num_textures, 0, texture_size, texture_size, texture_paths, NULL
+	);
 
 	SectorContext sector_context = {
 		.mesh_vertex_buffer = init_gpu_buffer(),
