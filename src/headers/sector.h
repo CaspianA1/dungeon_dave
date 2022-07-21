@@ -35,7 +35,7 @@ void draw_sectors(const SectorContext* const sector_context,
 	const GLfloat curr_time_secs);
 
 SectorContext init_sector_context(const byte* const heightmap, const byte* const texture_id_map,
-	const byte map_width, const byte map_height, const bool apply_normal_map_blur, const GLuint diffuse_texture_set);
+	const byte map_width, const byte map_height, const GLuint diffuse_texture_set);
 
 void deinit_sector_context(const SectorContext* const sector_context);
 

@@ -230,7 +230,7 @@ static void* main_init(void) {
 		),
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
-			true, init_texture_set(false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+			init_texture_set(false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 			ARRAY_LENGTH(still_face_texture_paths), 0, texture_sizes.face, texture_sizes.face, still_face_texture_paths, NULL)
 		),
 
@@ -286,10 +286,10 @@ static void* main_init(void) {
 	////////// Initializing shared shading params
 
 	const GLuint shaders_that_use_shared_params[] = {
+		scene_context.shadow_context.depth_shader,
 		scene_context.sector_context.shader,
 		scene_context.billboard_context.shader,
-		scene_context.weapon_sprite.drawable.shader,
-		scene_context.shadow_context.depth_shader
+		scene_context.weapon_sprite.drawable.shader
 	};
 
 	SharedShadingParams shared_shading_params = init_shared_shading_params(

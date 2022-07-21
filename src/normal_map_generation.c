@@ -160,7 +160,7 @@ static void do_separable_gaussian_blur_pass(
 	);
 }
 
-GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set, const bool apply_blur) {
+GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set) {
 	/* How this function works:
 
 	- First, query OpenGL about information about the texture set, like its dimensions, and its filters used.
@@ -203,7 +203,7 @@ GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set
 
 	////////// Blurring it (if needed), and then making a normal map
 
-	if (apply_blur) {
+	if (constants.normal_mapping.blur.apply) {
 		const GLint blur_radius = constants.normal_mapping.blur.radius;
 		GLfloat* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, constants.normal_mapping.blur.std_dev);
 

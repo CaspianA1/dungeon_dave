@@ -274,7 +274,7 @@ void draw_sectors(const SectorContext* const sector_context,
 ////////// Initialization and deinitialization
 
 SectorContext init_sector_context(const byte* const heightmap, const byte* const texture_id_map,
-	const byte map_width, const byte map_height, const bool apply_normal_map_blur, const GLuint diffuse_texture_set) {
+	const byte map_width, const byte map_height, const GLuint diffuse_texture_set) {
 
 	const List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
 
@@ -282,7 +282,7 @@ SectorContext init_sector_context(const byte* const heightmap, const byte* const
 		.mesh_vertex_buffer = init_gpu_buffer(),
 		.mesh_vertex_spec = init_vertex_spec(),
 		.diffuse_texture_set = diffuse_texture_set,
-		.normal_map_set = init_normal_map_from_diffuse_texture_set(diffuse_texture_set, apply_normal_map_blur),
+		.normal_map_set = init_normal_map_from_diffuse_texture_set(diffuse_texture_set),
 		.shader = init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag")),
 
 		.mesh_cpu = init_face_meshes_from_sectors(&sectors, heightmap, map_width, map_height),
