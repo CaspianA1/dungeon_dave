@@ -2,6 +2,7 @@
 #define MAIN_C
 
 #include "headers/main.h"
+#include "headers/normal_map_generation.h"
 #include "headers/maps.h"
 #include "headers/texture.h"
 #include "headers/event.h"
@@ -203,6 +204,12 @@ static void* main_init(void) {
 
 	//////////
 
+	const NormalMapConfig
+		sector_faces_normal_map_config = {.blur_radius = 2, .blur_std_dev = 1.0f, .intensity = 1.2f},
+		billboards_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 0.3f};
+
+	//////////
+
 	const byte
 		*const heightmap = (const byte*) palace_heightmap,
 		*const texture_id_map = (const byte*) palace_texture_id_map,
@@ -230,8 +237,10 @@ static void* main_init(void) {
 		),
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
-			init_texture_set(false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-			ARRAY_LENGTH(still_face_texture_paths), 0, texture_sizes.face, texture_sizes.face, still_face_texture_paths, NULL)
+			init_texture_set(
+				false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+				ARRAY_LENGTH(still_face_texture_paths), 0, texture_sizes.face, texture_sizes.face, still_face_texture_paths, NULL
+			), &sector_faces_normal_map_config
 		),
 
 		.billboard_context = init_billboard_context(
@@ -239,7 +248,7 @@ static void* main_init(void) {
 				true, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 				ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_layouts),
 				texture_sizes.billboard, texture_sizes.billboard, still_billboard_texture_paths, billboard_animation_layouts
-			),
+			), &billboards_normal_map_config,
 
 			ARRAY_LENGTH(billboards), billboards,
 			ARRAY_LENGTH(billboard_animations), billboard_animations,

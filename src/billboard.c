@@ -3,7 +3,6 @@
 
 #include "headers/billboard.h"
 #include "headers/texture.h"
-#include "headers/normal_map_generation.h"
 #include "headers/shader.h"
 #include "headers/constants.h"
 
@@ -137,7 +136,8 @@ void draw_billboards(BillboardContext* const billboard_context,
 	internal_draw_billboards(billboard_context, shadow_context, camera);
 }
 
-BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
+BillboardContext init_billboard_context(
+	const GLuint diffuse_texture_set, const NormalMapConfig* const normal_map_config,
 	const billboard_index_t num_billboards, const Billboard* const billboards,
 	const billboard_index_t num_billboard_animations, const Animation* const billboard_animations,
 	const billboard_index_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances) {
@@ -146,7 +146,7 @@ BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
 		.vertex_buffer = init_gpu_buffer(),
 		.vertex_spec = init_vertex_spec(),
 		.diffuse_texture_set = diffuse_texture_set,
-		.normal_map_set = init_normal_map_from_diffuse_texture_set(diffuse_texture_set),
+		.normal_map_set = init_normal_map_from_diffuse_texture_set(diffuse_texture_set, normal_map_config),
 		.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag")),
 
 		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),

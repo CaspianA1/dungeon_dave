@@ -2,7 +2,6 @@
 #define NORMAL_MAP_GENERATION_C
 
 #include "headers/normal_map_generation.h"
-#include "headers/buffer_defs.h"
 #include "headers/texture.h"
 #include "headers/constants.h"
 
@@ -89,6 +88,7 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 
 ////////// This code concerns Gaussian blur (the normal map input is blurred to cut out high frequencies from the Sobel operator).
 
+// TODO: compute the radius from the std dev
 static GLfloat* compute_1D_gaussian_kernel(const signed_byte radius, const GLfloat std_dev) {
 	const signed_byte kernel_length = radius * 2 + 1;
 
@@ -156,7 +156,7 @@ static void do_separable_gaussian_blur_pass(
 	);
 }
 
-GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set) {
+GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set, const NormalMapConfig* const config) {
 	/* How this function works:
 
 	- First, query OpenGL about information about the texture set, like its dimensions, and its filters used.
@@ -199,9 +199,10 @@ GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set
 
 	////////// Blurring it (if needed), and then making a normal map
 
-	if (constants.normal_mapping.blur.apply) {
-		const signed_byte blur_radius = constants.normal_mapping.blur.radius;
-		GLfloat* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, constants.normal_mapping.blur.std_dev);
+	const signed_byte blur_radius = config -> blur_radius;
+
+	if (blur_radius != 0) {
+		GLfloat* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, config -> blur_std_dev);
 
 		do_separable_gaussian_blur_pass( // Blurring #1 to #2 horizontally
 			general_purpose_surface_1, general_purpose_surface_2,
@@ -215,8 +216,7 @@ GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set
 	}
 
 	// Making a normal map of #1 to #2
-	generate_normal_map(general_purpose_surface_1, general_purpose_surface_2,
-		subtexture_h, constants.normal_mapping.intensity);
+	generate_normal_map(general_purpose_surface_1, general_purpose_surface_2, subtexture_h, config -> intensity);
 
 	////////// Making a new texture on the GPU, and then writing the normal map to that
 

@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "animation.h"
 #include "list.h"
+#include "normal_map_generation.h"
 
 // TODO: make sure that billboards never intersect, because that would break depth sorting
 
@@ -33,7 +34,8 @@ void update_billboards(const BillboardContext* const billboard_context, const GL
 void draw_billboards(BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context, const Camera* const camera);
 
-BillboardContext init_billboard_context(const GLuint diffuse_texture_set,
+BillboardContext init_billboard_context(
+	const GLuint diffuse_texture_set, const NormalMapConfig* const normal_map_config,
 	const billboard_index_t num_billboards, const Billboard* const billboards,
 	const billboard_index_t num_billboard_animations, const Animation* const billboard_animations,
 	const billboard_index_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances);
