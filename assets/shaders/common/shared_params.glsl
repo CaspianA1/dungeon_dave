@@ -2,7 +2,8 @@
 
 #include "shadow/num_cascades.glsl"
 
-layout(shared) uniform StaticShadingParams {
+// These are constant for a given scene
+layout(shared) uniform ConstantShadingParams {
 	struct {float ambient, diffuse, specular;} strengths;
 	vec2 specular_exponent_domain;
 

@@ -48,7 +48,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 
 	SharedShadingParams shared_shading_params = {
 		.constant = init_uniform_buffer(
-			GL_STATIC_DRAW, "StaticShadingParams", 0,
+			GL_STATIC_DRAW, "ConstantShadingParams", 0,
 			first_shader, constant_subvar_names, ARRAY_LENGTH(constant_subvar_names)
 		),
 		.dynamic = init_uniform_buffer(

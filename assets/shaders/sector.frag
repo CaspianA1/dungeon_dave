@@ -9,7 +9,6 @@ out vec3 color;
 
 uniform vec2 UV_translation;
 uniform vec3 UV_translation_area[2];
-
 uniform sampler2DArray diffuse_sampler, normal_map_sampler;
 
 /* Each level may have an area where sector UV
