@@ -63,7 +63,7 @@ static const struct {
 	} weapon_sprite;
 
 	const struct {
-		const struct {const bool apply; const byte radius; const GLfloat std_dev;} blur;
+		const struct {const bool apply; const signed_byte radius; const GLfloat std_dev;} blur;
 		const GLfloat intensity;
 	} normal_mapping;
 
@@ -110,7 +110,6 @@ static const struct {
 	},
 
 	.weapon_sprite = {.max_movement_magnitude = 0.2f, .time_for_half_movement_cycle = 0.5f},
-
 	.normal_mapping = {.blur = {.apply = true, .radius = 2, .std_dev = 0.8f}, .intensity = 1.1f /* 0.25f before */},
 
 	.camera = {

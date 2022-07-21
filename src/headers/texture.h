@@ -39,7 +39,8 @@ typedef enum {
 	TU_SectorFaceDiffuse,
 	TU_SectorFaceNormalMap,
 	TU_CascadedShadowMap,
-	TU_Billboard,
+	TU_BillboardDiffuse,
+	TU_BillboardNormalMap,
 	TU_Skybox,
 	TU_WeaponSprite,
 	TU_TitleScreen

@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include "../../include/glad/glad.h"
 
+typedef signed char signed_byte;
 typedef GLubyte byte;
 typedef GLubyte face_mesh_component_t;
 typedef GLuint buffer_size_t; // Max = 4294967295

@@ -38,20 +38,22 @@ to be the average of its three color components.
 It's assumed that `src` has the same size as `dest`. */
 static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest, const GLint subtexture_h, const GLfloat intensity) {
 	const GLint w = src -> w, h = src -> h;
-	const GLfloat one_over_intensity_on_rgb_scale = constants.max_byte_value / intensity;
+	const SDL_PixelFormat* const format = src -> format;
 
-	const SDL_PixelFormat* const dest_format = dest -> format;
+	const GLfloat
+		one_over_intensity_on_rgb_scale = constants.max_byte_value / intensity,
+		half_max_byte_value = 0.5f * constants.max_byte_value;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
 
 			for (GLint y = 0; y < h; y++) {
-				sdl_pixel_t* dest_pixel = read_surface_pixel(dest, 0, y);
+				sdl_pixel_t* const dest_pixel = read_surface_pixel(dest, 0, y);
 
 				const GLint subtexture_top = (y / subtexture_h) * subtexture_h;
 				const GLint subtexture_bottom = subtexture_top + subtexture_h - 1;
 
-				for (GLint x = 0; x < w; x++, dest_pixel++) {
+				for (GLint x = 0; x < w; x++) {
 					const GLint
 						left_x = int_max(x - 1, 0),             right_x = int_min(x + 1, w - 1),
 						top_y = int_max(y - 1, subtexture_top), bottom_y = int_min(y + 1, subtexture_bottom);
@@ -68,12 +70,13 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 						one_over_intensity_on_rgb_scale
 					};
 
+					/* This first normalizes the normal, and then converts
+					the normal from a range of (-1, 1) to (0, `max_byte_value`) */
 					glm_vec3_normalize(normal);
+					glm_vec3_scale(normal, half_max_byte_value, normal);
+					glm_vec3_adds(normal, half_max_byte_value, normal);
 
-					// Converting normal from range of (-1, 1) to (0, 1), and then to (0, `max_byte_value`)
-					for (byte i = 0; i < 3; i++) normal[i] = (normal[i] * 0.5f + 0.5f) * constants.max_byte_value;
-
-					*dest_pixel = SDL_MapRGB(dest_format,
+					dest_pixel[x] = SDL_MapRGB(format,
 						(sdl_pixel_component_t) normal[0],
 						(sdl_pixel_component_t) normal[1],
 						(sdl_pixel_component_t) normal[2]
@@ -86,70 +89,63 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 
 ////////// This code concerns Gaussian blur (the normal map input is blurred to cut out high frequencies from the Sobel operator).
 
-static GLfloat* compute_1D_gaussian_kernel(const GLint radius, const GLfloat std_dev) {
-	const GLint kernel_length = radius * 2 + 1;
+static GLfloat* compute_1D_gaussian_kernel(const signed_byte radius, const GLfloat std_dev) {
+	const signed_byte kernel_length = radius * 2 + 1;
 
 	GLfloat* const kernel = malloc((size_t) kernel_length * sizeof(GLfloat)), sum = 0.0f;
 	const GLfloat one_over_two_times_std_dev_squared = 1.0f / (2.0f * std_dev * std_dev);
 
-	for (GLint x = 0; x < kernel_length; x++) {
-		const GLint dx = x - radius;
+	for (signed_byte x = 0; x < kernel_length; x++) {
+		const signed_byte dx = x - radius;
 		const GLfloat weight = expf(-(dx * dx) * one_over_two_times_std_dev_squared);
 		kernel[x] = weight;
 		sum += weight;
 	}
 
 	const GLfloat one_over_sum = 1.0f / sum;
-	for (GLint i = 0; i < kernel_length; i++) kernel[i] *= one_over_sum;
+	for (signed_byte i = 0; i < kernel_length; i++) kernel[i] *= one_over_sum;
 
 	return kernel;
 }
 
-// It's assumed that `src` has the same size as `dest`.
+// It's assumed that `src` has the same size as `dest`, and that they both have the same format.
 static void do_separable_gaussian_blur_pass(
 	SDL_Surface* const src, SDL_Surface* const dest,
 	const GLfloat* const kernel, const GLint subtexture_h,
-	const GLint kernel_radius, const bool blur_is_vertical) {
+	const signed_byte kernel_radius, const bool blur_is_vertical) {
 
 	const GLint w = src -> w, h = src -> h;
 
-	const SDL_PixelFormat
-		*const src_format = src -> format,
-		*const dest_format = dest -> format;
+	const SDL_PixelFormat *const format = src -> format;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
 
 			for (GLint y = 0; y < h; y++) {
-				sdl_pixel_t* dest_pixel = read_surface_pixel(dest, 0, y);
+				sdl_pixel_t* const dest_pixel = read_surface_pixel(dest, 0, y);
 
 				const GLint subtexture_top = (y / subtexture_h) * subtexture_h;
 				const GLint subtexture_bottom = subtexture_top + subtexture_h - 1;
 
-				for (GLint x = 0; x < w; x++, dest_pixel++) {
-					GLfloat summed_channels[3] = {0.0f, 0.0f, 0.0f};
+				for (GLint x = 0; x < w; x++) {
+					vec3 summed_channels = GLM_VEC3_ZERO_INIT;
 
-					for (GLint i = -kernel_radius; i <= kernel_radius; i++) {
-						GLint filter_pos[2] = {x, y};
-						filter_pos[blur_is_vertical] += i; // If blur is vertical, `blur_is_vertical` equals 1; otherwise, 0
+					for (signed_byte i = -kernel_radius; i <= kernel_radius; i++) {
+						GLint fx = x, fy = y; // `f` = filter
+						if (blur_is_vertical) fy += i; else fx += i;
 
-						const GLint
-							clamped_filter_x = limit_int_to_domain(filter_pos[0], 0, w - 1),
-							clamped_filter_y = limit_int_to_domain(filter_pos[1], subtexture_top, subtexture_bottom);
-
-						const sdl_pixel_t src_pixel = *(sdl_pixel_t*) read_surface_pixel(
-							src, clamped_filter_x, clamped_filter_y);
+						const sdl_pixel_t src_pixel = *(sdl_pixel_t*) read_surface_pixel(src,
+							limit_int_to_domain(fx, 0, w - 1),
+							limit_int_to_domain(fy, subtexture_top, subtexture_bottom)
+						);
 
 						sdl_pixel_component_t r, g, b;
-						SDL_GetRGB(src_pixel, src_format, &r, &g, &b);
+						SDL_GetRGB(src_pixel, format, &r, &g, &b);
 
-						const GLfloat weight = kernel[i + kernel_radius];
-						summed_channels[0] += r * weight;
-						summed_channels[1] += g * weight;
-						summed_channels[2] += b * weight;
+						glm_vec3_muladds((vec3) {r, g, b}, kernel[i + kernel_radius], summed_channels);
 					}
 
-					*dest_pixel = SDL_MapRGB(dest_format,
+					dest_pixel[x] = SDL_MapRGB(format,
 						(sdl_pixel_component_t) summed_channels[0],
 						(sdl_pixel_component_t) summed_channels[1],
 						(sdl_pixel_component_t) summed_channels[2]
@@ -204,7 +200,7 @@ GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set
 	////////// Blurring it (if needed), and then making a normal map
 
 	if (constants.normal_mapping.blur.apply) {
-		const GLint blur_radius = constants.normal_mapping.blur.radius;
+		const signed_byte blur_radius = constants.normal_mapping.blur.radius;
 		GLfloat* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, constants.normal_mapping.blur.std_dev);
 
 		do_separable_gaussian_blur_pass( // Blurring #1 to #2 horizontally

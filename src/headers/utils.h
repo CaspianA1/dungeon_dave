@@ -82,6 +82,11 @@ typedef enum {
 	exit(failure_type + 1);\
 } while (false)
 
+#define TIME(...)\
+	const Uint32 before = SDL_GetTicks();\
+	__VA_ARGS__\
+	printf("Took %u milliseconds\n", SDL_GetTicks() - before);\
+
 ////////// These macros are for handy abstractions over OpenGL functions
 
 #define use_vertex_buffer(vertex_buffer) glBindBuffer(GL_ARRAY_BUFFER, (vertex_buffer))
