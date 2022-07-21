@@ -4,7 +4,7 @@
 #include "headers/main.h"
 #include "headers/normal_map_generation.h"
 #include "headers/maps.h"
-#include "headers/texture.h" // TODO: remove when I don't need to contain the alpha test logic in this file anymore
+#include "headers/texture.h" // TODO: remove this when I don't need to contain the alpha test logic in this file anymore
 #include "headers/event.h"
 
 static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const shadow_context,
