@@ -160,7 +160,7 @@ static void do_separable_gaussian_blur_pass(
 	);
 }
 
-GLuint init_normal_map_set_from_texture_set(const GLuint texture_set, const bool apply_blur) {
+GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set, const bool apply_blur) {
 	/* How this function works:
 
 	- First, query OpenGL about information about the texture set, like its dimensions, and its filters used.
@@ -175,7 +175,7 @@ GLuint init_normal_map_set_from_texture_set(const GLuint texture_set, const bool
 
 	////////// Querying OpenGL for information about the texture set
 
-	glBindTexture(TexSet, texture_set);
+	glBindTexture(TexSet, diffuse_texture_set);
 
 	GLint subtexture_w, subtexture_h, num_subtextures, wrap_mode, mag_filter, min_filter;
 	glGetTexLevelParameteriv(TexSet, 0, GL_TEXTURE_WIDTH, &subtexture_w);
