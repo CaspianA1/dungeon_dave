@@ -1,11 +1,11 @@
 #version 400 core
 
+in vec2 translucent_fragment_quad_UV;
+
 uniform bool drawing_translucent_quads;
 uniform uint frame_index;
 uniform float alpha_threshold;
 uniform sampler2DArray alpha_test_sampler;
-
-in vec2 translucent_fragment_quad_UV;
 
 void main(void) {
 	if (drawing_translucent_quads) {

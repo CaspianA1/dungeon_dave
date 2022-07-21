@@ -1,8 +1,9 @@
 #version 400 core
 
-uniform samplerCube environment_map_sampler;
 in float world_depth_value;
 in vec3 fragment_pos_world_space;
+
+uniform samplerCube environment_map_sampler;
 
 #include "shared_params.glsl"
 #include "shadow/shadow.frag"
