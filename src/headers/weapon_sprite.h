@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "event.h"
 #include "shadow.h"
+#include "skybox.h"
 
 typedef struct {
 	GLfloat cycle_base_time;
@@ -45,6 +46,8 @@ void deinit_weapon_sprite(const WeaponSprite* const ws);
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event);
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws);
 
-void draw_weapon_sprite(const WeaponSprite* const ws, const CascadedShadowContext* const shadow_context, const vec4* const view);
+void draw_weapon_sprite(const WeaponSprite* const ws,
+	const CascadedShadowContext* const shadow_context,
+	const Skybox* const skybox, const vec4* const view);
 
 #endif

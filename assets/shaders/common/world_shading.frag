@@ -3,7 +3,6 @@
 in float world_depth_value;
 in vec3 fragment_pos_world_space;
 
-// TODO: set this uniform for billboards and the weapon sprite too
 uniform samplerCube environment_map_sampler;
 
 #include "shared_params.glsl"

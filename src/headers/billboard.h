@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "animation.h"
 #include "list.h"
+#include "skybox.h"
 #include "normal_map_generation.h"
 
 // TODO: make sure that billboards never intersect, because that would break depth sorting
@@ -32,7 +33,8 @@ typedef struct {
 void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs);
 
 void draw_billboards(BillboardContext* const billboard_context,
-	const CascadedShadowContext* const shadow_context, const Camera* const camera);
+	const CascadedShadowContext* const shadow_context,
+	const Skybox* const skybox, const Camera* const camera);
 
 BillboardContext init_billboard_context(
 	const GLsizei texture_size, const NormalMapConfig* const normal_map_config,

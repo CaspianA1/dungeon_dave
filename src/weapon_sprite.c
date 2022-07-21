@@ -165,6 +165,7 @@ typedef struct {
 	const vec4* const view;
 	const WeaponSprite* const weapon_sprite;
 	const CascadedShadowContext* const shadow_context;
+	const Skybox* const skybox;
 } WeaponSpriteUniformUpdaterParams;
 
 static void get_weapon_normal(const vec3 world_corners[corners_per_quad], vec3 normal) {
@@ -189,6 +190,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		INIT_UNIFORM(world_corners, shader);
 		INIT_UNIFORM(normal, shader);
 
+		use_texture(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_WeaponSprite);
 		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);
@@ -291,10 +293,13 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	draw_drawable_to_shadow_context(&ws -> drawable, corners_per_quad, update_vertex_buffer_before_draw_call, ws);
 }
 
-void draw_weapon_sprite(const WeaponSprite* const ws, const CascadedShadowContext* const shadow_context, const vec4* const view) {
+void draw_weapon_sprite(const WeaponSprite* const ws,
+	const CascadedShadowContext* const shadow_context,
+	const Skybox* const skybox, const vec4* const view) {
+
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
-		const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view, ws, shadow_context};
+		const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view, ws, shadow_context, skybox};
 		draw_drawable(ws -> drawable, corners_per_quad, &uniform_updater_params, true);
 	);
 }

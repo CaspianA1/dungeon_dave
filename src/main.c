@@ -95,8 +95,8 @@ static void main_drawer(void* const app_context, const Event* const event) {
 			draw_skybox(skybox, camera -> view_projection); // Drawn before any translucent geometry
 
 			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
-				draw_billboards(billboard_context, shadow_context, camera);
-				draw_weapon_sprite(weapon_sprite, shadow_context, camera -> view);
+				draw_billboards(billboard_context, shadow_context, skybox, camera);
+				draw_weapon_sprite(weapon_sprite, shadow_context, skybox, camera -> view);
 			);
 		);
 	);

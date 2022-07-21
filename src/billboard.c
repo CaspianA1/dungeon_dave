@@ -58,8 +58,10 @@ void update_billboards(const BillboardContext* const billboard_context, const GL
 	}
 }
 
-static void internal_draw_billboards(const BillboardContext* const billboard_context,
-	const CascadedShadowContext* const shadow_context, const Camera* const camera) {
+static void internal_draw_billboards(
+	const BillboardContext* const billboard_context,
+	const CascadedShadowContext* const shadow_context,
+	const Skybox* const skybox, const Camera* const camera) {
 
 	const GLuint shader = billboard_context -> shader;
 	static GLint right_xz_id;
@@ -69,6 +71,7 @@ static void internal_draw_billboards(const BillboardContext* const billboard_con
 	ON_FIRST_CALL(
 		INIT_UNIFORM(right_xz, shader);
 
+		use_texture(skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture(billboard_context -> diffuse_texture_set, shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
 		use_texture(billboard_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_BillboardNormalMap);
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
@@ -130,10 +133,11 @@ static void sort_billboard_indices_by_dist_to_camera(BillboardContext* const bil
 
 // This is just a utility function
 void draw_billboards(BillboardContext* const billboard_context,
-	const CascadedShadowContext* const shadow_context, const Camera* const camera) {
+	const CascadedShadowContext* const shadow_context,
+	const Skybox* const skybox, const Camera* const camera) {
 
 	sort_billboard_indices_by_dist_to_camera(billboard_context, camera -> pos);
-	internal_draw_billboards(billboard_context, shadow_context, camera);
+	internal_draw_billboards(billboard_context, shadow_context, skybox, camera);
 }
 
 BillboardContext init_billboard_context(
