@@ -205,7 +205,7 @@ static void* main_init(void) {
 	//////////
 
 	const NormalMapConfig
-		sector_faces_normal_map_config = {.blur_radius = 2, .blur_std_dev = 1.0f, .intensity = 1.2f},
+		sector_faces_normal_map_config = {.blur_radius = 2, .blur_std_dev = 0.9f, .intensity = 1.3f},
 		billboards_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 0.3f};
 
 	//////////

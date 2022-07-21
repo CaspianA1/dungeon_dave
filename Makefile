@@ -4,7 +4,7 @@ CC = clang
 
 OPTIMIZE = -Ofast
 DEBUG = -O0 -g -fsanitize=address,undefined
-BUILD_TYPE = $(DEBUG)
+BUILD_TYPE = $(OPTIMIZE)
 
 CONVERSION_WARNINGS = -Wfloat-conversion -Wdouble-promotion -Wsign-conversion\
 	-Wimplicit-int-conversion -Wshorten-64-to-32 -Wincompatible-pointer-types
