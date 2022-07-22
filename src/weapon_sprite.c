@@ -38,6 +38,7 @@ ahead of time, and is very small; so this should make the code a bit simpler and
 		Parallax when looking up and down goes away a lot too, and the weapon grows in size greatly.
 
 	2. If the near clip dist is way too small, the weapon appears warped, and disappears from sight too easily.
+	3. The effect also seems to happen more (possibly exclusively) if the weapon sprite is inside or behind another polygon.
 */
 
 //////////
@@ -168,30 +169,51 @@ typedef struct {
 	const Skybox* const skybox;
 } WeaponSpriteUniformUpdaterParams;
 
-static void get_weapon_normal(const vec3 world_corners[corners_per_quad], vec3 normal) {
-	const GLfloat* const shared_corner = world_corners[1];
+static void get_normal_and_tangent(const vec3 world_corners[corners_per_quad], vec3 normal, vec3 tangent) {
+	const GLfloat
+		*const corner_bl = world_corners[0],
+		*const corner_br = world_corners[1],
+		*const corner_tl = world_corners[2];
 
-	vec3 edge_0, edge_1;
-	glm_vec3_sub((GLfloat*) world_corners[0], (GLfloat*) shared_corner, edge_0);
-	glm_vec3_sub((GLfloat*) world_corners[2], (GLfloat*) shared_corner, edge_1);
-	glm_vec3_cross(edge_1, edge_0, normal);
+	vec3 edge_bl_br, edge_tl_br;
+	glm_vec3_sub((GLfloat*) corner_bl, (GLfloat*) corner_br, edge_bl_br);
+	glm_vec3_sub((GLfloat*) corner_tl, (GLfloat*) corner_br, edge_tl_br);
+	glm_vec3_cross(edge_tl_br, edge_bl_br, normal);
 	glm_vec3_normalize(normal);
+
+	////////// The tangent calculation is from https://learnopengl.com/Advanced-Lighting/Normal-Mapping
+
+	/* The corner order is bottom left, bottom right, top left, top right.
+	These deltas are from bottom left -> bottom right, and bottom left -> top left. */
+	const vec2 delta_UV_1 = {1.0, 0.0}, delta_UV_2 = {0.0, -1.0};
+
+	vec3 edge_br_bl, edge_tl_bl;
+	glm_vec3_sub((GLfloat*) corner_br, (GLfloat*) corner_bl, edge_br_bl);
+	glm_vec3_sub((GLfloat*) corner_tl, (GLfloat*) corner_bl, edge_tl_bl);
+
+	const GLfloat f = -1.0f / (delta_UV_1[0] * delta_UV_2[1] - delta_UV_2[0] * delta_UV_1[1]);
+
+	tangent[0] = f * (delta_UV_2[1] * edge_br_bl[0] - delta_UV_1[1] * edge_tl_bl[0]);
+	tangent[1] = f * (delta_UV_2[1] * edge_br_bl[1] - delta_UV_1[1] * edge_tl_bl[1]);
+	tangent[2] = f * (delta_UV_2[1] * edge_br_bl[2] - delta_UV_1[1] * edge_tl_bl[2]);
 }
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const WeaponSpriteUniformUpdaterParams typed_params = *(WeaponSpriteUniformUpdaterParams*) param;
 
-	static GLint frame_index_id, normal_id, world_corners_id;
+	static GLint frame_index_id, face_normal_id, face_tangent_id, world_corners_id;
 
 	const GLuint shader = drawable -> shader;
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(frame_index, shader);
+		INIT_UNIFORM(face_normal, shader);
+		INIT_UNIFORM(face_tangent, shader);
 		INIT_UNIFORM(world_corners, shader);
-		INIT_UNIFORM(normal, shader);
 
 		use_texture(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
-		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_WeaponSprite);
+		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_WeaponSpriteDiffuse);
+		use_texture(typed_params.weapon_sprite -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_WeaponSpriteNormalMap);
 		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);
 
@@ -199,10 +221,11 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 	const vec3* const world_corners = typed_params.weapon_sprite -> appearance_context.world_space.corners;
 
-	vec3 normal;
-	get_weapon_normal(world_corners, normal);
+	vec3 face_normal, face_tangent;
+	get_normal_and_tangent(world_corners, face_normal, face_tangent);
 
-	UPDATE_UNIFORM(normal, 3fv, 1, normal);
+	UPDATE_UNIFORM(face_normal, 3fv, 1, face_normal);
+	UPDATE_UNIFORM(face_tangent, 3fv, 1, face_tangent);
 	UPDATE_UNIFORM(frame_index, 1ui, typed_params.weapon_sprite -> animation_context.curr_frame);
 	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
 }
@@ -220,24 +243,33 @@ static void update_vertex_buffer_before_draw_call(const void* const param) {
 
 ////////// Initialization, deinitialization, updating, and rendering
 
-WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
-	const GLfloat max_pitch_degrees, const GLfloat size,
-	const GLfloat texture_rescale_factor, const GLfloat secs_for_frame,
-	const AnimationLayout animation_layout) {
+WeaponSprite init_weapon_sprite(
+	const GLfloat max_yaw_degrees, const GLfloat max_pitch_degrees,
+	const GLfloat size, const GLfloat texture_rescale_factor,
+	const GLfloat secs_for_frame, const AnimationLayout* const animation_layout,
+	const NormalMapConfig* const normal_map_config) {
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
 	and here too, but this makes the code much more readable. */
 
-	////////// Getting the frame size
+	////////// Getting the frame size and a diffuse texture set
 
-	SDL_Surface* const peek_surface = init_surface(animation_layout.spritesheet_path);
+	SDL_Surface* const peek_surface = init_surface(animation_layout -> spritesheet_path);
 
 	const GLsizei frame_size[2] = {
-		peek_surface -> w / animation_layout.frames_across,
-		peek_surface -> h / animation_layout.frames_down
+		peek_surface -> w / animation_layout -> frames_across,
+		peek_surface -> h / animation_layout -> frames_down
 	};
 
 	deinit_surface(peek_surface);
+
+	const GLuint diffuse_texture_set = init_texture_set(
+		true, TexNonRepeating,
+		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, 0, 1,
+		(GLsizei) (frame_size[0] * texture_rescale_factor),
+		(GLsizei) (frame_size[1] * texture_rescale_factor),
+		NULL, animation_layout
+	);
 
 	//////////
 
@@ -247,19 +279,15 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 			GL_TRIANGLE_STRIP, (List) {NULL, sizeof(vec3), corners_per_quad, corners_per_quad},
 
 			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/weapon_sprite.frag")),
-
-			init_texture_set(true, TexNonRepeating,
-				OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, 0, 1,
-				(GLsizei) (frame_size[0] * texture_rescale_factor),
-				(GLsizei) (frame_size[1] * texture_rescale_factor),
-				NULL, &animation_layout
-			)
+			diffuse_texture_set
 		),
+
+		.normal_map_set = init_normal_map_from_diffuse_texture_set(diffuse_texture_set, normal_map_config),
 
 		.animation_context = {
 			.cycle_base_time = 0.0f, .curr_frame = 0,
 			.animation = {
-				.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout.total_frames},
+				.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout -> total_frames},
 				.secs_for_frame = secs_for_frame
 			}
 		},
@@ -273,6 +301,7 @@ WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
 
 void deinit_weapon_sprite(const WeaponSprite* const ws) {
 	deinit_drawable(ws -> drawable);
+	deinit_texture(ws -> normal_map_set);
 }
 
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event) {

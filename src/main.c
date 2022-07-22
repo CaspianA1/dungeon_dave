@@ -35,7 +35,7 @@ static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const sh
 		INIT_UNIFORM(frame_index, depth_shader);
 		INIT_UNIFORM_VALUE(alpha_threshold, depth_shader, 1f, 0.2f);
 
-		use_texture(weapon_sprite -> drawable.diffuse_texture, depth_shader, "alpha_test_sampler", TexSet, TU_WeaponSprite);
+		use_texture(weapon_sprite -> drawable.diffuse_texture, depth_shader, "alpha_test_sampler", TexSet, TU_WeaponSpriteDiffuse);
 	);
 
 	// Opaque objects are drawn first
@@ -206,7 +206,8 @@ static void* main_init(void) {
 
 	const NormalMapConfig
 		sector_faces_normal_map_config = {.blur_radius = 2, .blur_std_dev = 0.9f, .intensity = 1.3f},
-		billboards_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 0.3f};
+		billboards_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 0.3f},
+		weapon_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 1.5f}; // TODO: vary this per weapon sprite, if needed
 
 	//////////
 
@@ -225,15 +226,15 @@ static void* main_init(void) {
 
 	//////////
 
-	SceneContext scene_context = {
+	const SceneContext scene_context = {
 		.camera = init_camera((vec3) {1.5f, 0.5f, 1.5f}, far_clip_dist),
 
 		.weapon_sprite = init_weapon_sprite(
-			// 3.0f, 3.0f, 1.0f, 1.0f, 1.0f, (AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}
-			3.0f, 8.0f, 0.6f, 3.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
-			// 3.0f, 2.0f, 0.75f, 2.0f, 0.02f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}
-			// 4.0f, 4.0f, 0.75f, 2.0f, 0.035f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}
-			// 2.0f, 2.0f, 0.8f, 1.0f, 0.04f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}
+			// 3.0f, 3.0f, 1.0f, 2.0f, 1.0f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
+			3.0f, 8.0f, 0.6f, 3.0f, 0.07f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
+			// 3.0f, 2.0f, 0.75f, 2.0f, 0.02f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}, &weapon_normal_map_config
+			// 4.0f, 4.0f, 0.75f, 2.0f, 0.035f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}, &weapon_normal_map_config
+			// 2.0f, 2.0f, 0.8f, 1.0f, 0.04f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}, &weapon_normal_map_config
 		),
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],

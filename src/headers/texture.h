@@ -34,16 +34,13 @@ And the biggest number possible with five bits is 31, so that gives you
 32 different possible texture ids. Also, this is just for wall textures. */
 #define MAX_NUM_SECTOR_SUBTEXTURES 32
 
-// Each enum value is a texture unit id
+// Each enum value is a texture unit id.
 typedef enum {
-	TU_SectorFaceDiffuse,
-	TU_SectorFaceNormalMap,
 	TU_CascadedShadowMap,
-	TU_BillboardDiffuse,
-	TU_BillboardNormalMap,
-	TU_Skybox,
-	TU_WeaponSprite,
-	TU_TitleScreen
+	TU_SectorFaceDiffuse, TU_SectorFaceNormalMap,
+	TU_BillboardDiffuse, TU_BillboardNormalMap,
+	TU_WeaponSpriteDiffuse, TU_WeaponSpriteNormalMap,
+	TU_Skybox, TU_TitleScreen
 } TextureUnit;
 
 // Excluded: premultiply_surface_alpha, init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set

@@ -4,6 +4,7 @@
 #include "buffer_defs.h"
 #include "animation.h"
 #include "drawable.h"
+#include "normal_map_generation.h"
 #include "camera.h"
 #include "event.h"
 #include "shadow.h"
@@ -28,6 +29,7 @@ typedef struct {
 
 typedef struct {
 	const Drawable drawable;
+	const GLuint normal_map_set;
 	WeaponSpriteAnimationContext animation_context;
 	WeaponSpriteAppearanceContext appearance_context;
 } WeaponSprite;
@@ -35,12 +37,13 @@ typedef struct {
 /* Excluded:
 update_weapon_sprite_animation, circular_mapping_from_zero_to_one,
 get_sway, get_screen_corners_from_sway, get_world_corners_from_screen_corners, rotate_from_camera_movement,
-get_weapon_normal, update_uniforms, define_vertex_spec, update_vertex_buffer_before_draw_call */
+get_normal_and_tangent, update_uniforms, define_vertex_spec, update_vertex_buffer_before_draw_call */
 
-WeaponSprite init_weapon_sprite(const GLfloat max_yaw_degrees,
-	const GLfloat max_pitch_degrees, const GLfloat size,
-	const GLfloat texture_rescale_factor, const GLfloat secs_for_frame,
-	const AnimationLayout animation_layout);
+WeaponSprite init_weapon_sprite(
+	const GLfloat max_yaw_degrees, const GLfloat max_pitch_degrees,
+	const GLfloat size, const GLfloat texture_rescale_factor,
+	const GLfloat secs_for_frame, const AnimationLayout* const animation_layout,
+	const NormalMapConfig* const normal_map_config);
 
 void deinit_weapon_sprite(const WeaponSprite* const ws);
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event);
