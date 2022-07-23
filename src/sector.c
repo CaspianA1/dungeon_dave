@@ -214,13 +214,7 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
 	const face_mesh_t* const face_meshes_cpu_data = face_meshes_cpu -> data;
 
-	face_mesh_t* const face_meshes_gpu = glMapBufferRange(GL_ARRAY_BUFFER,
-		0, face_meshes_cpu -> length * sizeof(face_mesh_t),
-		GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT
-		/* Only writing, so no `GL_MAP_READ_BIT`. The previous buffer contents
-		don't matter, so I can invalidate the previous data in the array.
-		TODO: possibly add `GL_MAP_UNSYNCHRONIZED_BIT` later? */
-	);
+	face_mesh_t* const face_meshes_gpu = init_destructive_gpu_memory_mapping(GL_ARRAY_BUFFER, face_meshes_cpu -> length * sizeof(face_mesh_t));
 
 	buffer_size_t num_visible_faces = 0;
 
@@ -252,7 +246,7 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 		}
 	}
 
-	glUnmapBuffer(GL_ARRAY_BUFFER); // If looking out at the distance with no sectors, why do any state switching at all?
+	deinit_gpu_memory_mapping(GL_ARRAY_BUFFER);
 	return num_visible_faces;
 }
 

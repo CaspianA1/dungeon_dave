@@ -10,7 +10,7 @@ individual members, not by writing to the whole struct at once. */
 // ``subvar_gpu_byte_offsets`, `array_strides`, and `matrix_strides` are allocated on the heap by `init_uniform_buffer`.
 typedef struct {
 	const GLuint id, binding_point;
-	const buffer_size_t num_subvars;
+	const buffer_size_t num_subvars, block_size;
 
 	GLint *const subvar_gpu_byte_offsets, *const array_strides, *const matrix_strides;
 
@@ -33,6 +33,8 @@ void deinit_uniform_buffer(const UniformBuffer* const buffer);
 
 void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLuint shader);
 
+/* Calling this means that the previous contents of the buffer
+become undefined; so all uniforms must be written to. */
 void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer);
 void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer);
 

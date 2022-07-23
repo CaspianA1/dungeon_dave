@@ -119,14 +119,13 @@ static void sort_billboard_indices_by_dist_to_camera(BillboardContext* const bil
 
 	use_vertex_buffer(billboard_context -> vertex_buffer);
 
-	// TODO: add `GL_MAP_UNSYNCHRONIZED_BIT` with `glMapBufferRange` if possible (test on Chromebook)
-	Billboard* const billboards_gpu = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	Billboard* const billboards_gpu = init_destructive_gpu_memory_mapping(GL_ARRAY_BUFFER, num_billboards * sizeof(Billboard));
 
 	// TODO: do culling via an AABB tree later
 	for (billboard_index_t i = 0; i < num_billboards; i++)
 		billboards_gpu[i] = billboard_data[sort_ref_data[i].index];
 
-	glUnmapBuffer(GL_ARRAY_BUFFER);
+	deinit_gpu_memory_mapping(GL_ARRAY_BUFFER);
 }
 
 //////////

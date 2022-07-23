@@ -67,7 +67,8 @@ UniformBuffer init_uniform_buffer(
 	////////// And finally, returning the uniform buffer
 
 	return (UniformBuffer) {
-		.id = buffer_id, .binding_point = binding_point, .num_subvars = num_subvars,
+		.id = buffer_id, .binding_point = binding_point,
+		.num_subvars = num_subvars, .block_size = (buffer_size_t) block_size_in_bytes,
 
 		.subvar_gpu_byte_offsets = subvar_gpu_byte_offsets,
 		.array_strides = array_strides, .matrix_strides = matrix_strides,
@@ -90,12 +91,12 @@ void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLui
 
 void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer) {
 	glBindBuffer(GL_UNIFORM_BUFFER, buffer -> id);
-	buffer -> gpu_memory_mapping = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+	buffer -> gpu_memory_mapping = init_destructive_gpu_memory_mapping(GL_UNIFORM_BUFFER, buffer -> block_size);
 }
 
 void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer) {
 	buffer -> gpu_memory_mapping = NULL;
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	deinit_gpu_memory_mapping(GL_UNIFORM_BUFFER);
 }
 
 ////////// This part concerns writing data to the uniform buffer
