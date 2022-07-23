@@ -149,15 +149,15 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 
 	////////// This part controls the weapon's pitch, which scales with the camera's pitch.
 
-	const GLfloat downwards_pitch_percent = -camera -> angles.vert / constants.camera.limits.vert_max;
-	const GLfloat downwards_pitch_amount = downwards_pitch_percent * appearance_context -> world_space.max_pitch;
+	const GLfloat pitch_percent = -camera -> angles.vert / constants.camera.limits.vert_max;
+	const GLfloat pitch_amount = pitch_percent * appearance_context -> world_space.max_pitch;
 
-	vec3 forward_pitch_offset;
-	glm_vec3_scale((GLfloat*) dir, downwards_pitch_amount, forward_pitch_offset);
+	vec3 pitch_offset;
+	glm_vec3_scale((GLfloat*) dir, pitch_amount, pitch_offset);
 
 	GLfloat *const top_left = world_corners[2], *const top_right = world_corners[3];
-	glm_vec3_add(top_left, forward_pitch_offset, top_left);
-	glm_vec3_add(top_right, forward_pitch_offset, top_right);
+	glm_vec3_add(top_left, pitch_offset, top_left);
+	glm_vec3_add(top_right, pitch_offset, top_right);
 }
 
 ////////// This part is for the uniform updater param type and the uniform updater
