@@ -15,7 +15,7 @@ float get_average_occluder_depth(const int sample_radius, const uint layer_index
 
 	for (int y = -sample_radius; y <= sample_radius; y++) {
 		for (int x = -sample_radius; x <= sample_radius; x++) {
-			vec3 sample_UV = vec3(texel_size * vec2(x, y) + UV.xy, layer_index);
+			vec3 sample_UV = vec3(texel_size * vec2(x, y) + UV, layer_index);
 			average_occluder_depth += texture(shadow_cascade_sampler, sample_UV).r;
 		}
 	}
