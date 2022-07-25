@@ -1,5 +1,4 @@
-# This script assumes that the developer tools are installed.
-# That should include clang, make, and git.
+# This script assumes that brew and git are installed.
 
 # Params: usermame, project name
 get_from_github() {
@@ -13,7 +12,7 @@ install_cglm() {
 }
 
 main() {
-	brew install pkg-config sdl2 cmake
+	brew install pkg-config sdl2
 	install_cglm
 }
 
