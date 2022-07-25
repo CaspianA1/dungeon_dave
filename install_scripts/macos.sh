@@ -20,7 +20,6 @@ build_from_github() {
 main() {
 	brew install pkg-config sdl2 cmake
 	build_from_github recp cglm
-	build_from_github DaveGamble cJSON
 }
 
 main
