@@ -9,23 +9,28 @@ uniform sampler2DArray shadow_cascade_sampler;
 /* TODO: perhaps use Vogel disk or stratified Poisson sampling instead:
 - https://www.gamedev.net/tutorials/programming/graphics/contact-hardening-soft-shadows-made-fast-r4906/
 - http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/ */
-float get_average_occluder_depth(const int sample_radius, const uint layer_index, const vec2 UV) {
-	float average_occluder_depth = 0.0f;
+float get_average_occluder_depth(const uint sample_radius, const vec3 UV) {
 	vec2 texel_size = 1.0f / textureSize(shadow_cascade_sampler, 0).xy;
+	vec2 sample_extent = sample_radius * texel_size;
+	vec3 sample_UV = vec3(UV.xy - sample_extent, UV.z);
 
-	for (int y = -sample_radius; y <= sample_radius; y++) {
-		for (int x = -sample_radius; x <= sample_radius; x++) {
-			vec3 sample_UV = vec3(texel_size * vec2(x, y) + UV, layer_index);
+	float average_occluder_depth = 0.0f;
+	uint samples_per_row = (sample_radius << 1u) + 1u;
+
+	for (uint y = 0; y < samples_per_row; y++, sample_UV.y += texel_size.y) {
+		for (uint x = 0; x < samples_per_row; x++, sample_UV.x += texel_size.x)
 			average_occluder_depth += texture(shadow_cascade_sampler, sample_UV).r;
-		}
+
+		sample_UV.x = UV.x - sample_extent.x;
 	}
 
-	int samples_across = (sample_radius << 1) + 1;
-	return average_occluder_depth / (samples_across * samples_across);
+	return average_occluder_depth / (samples_per_row * samples_per_row);
 }
 
+//////////
+
 float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_world_space) {
-	const int sample_radius = 2;
+	const uint sample_radius = 2;
 
 	const float
 		esm_constant = 45.0f, layer_scaling_component = 1.0f; // Palace
@@ -34,18 +39,22 @@ float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_
 	/* (TODO) ESM scaling:
 	- Bigger depth range will be darker, so scale the exponent primarily on that
 	- Secondarily, depth values will be different b/c depth values are normalized
-		based on the cascade depth range, so also rescale also on the cascade */
+		based on the cascade depth range, so also rescale also on the cascade
+	- Also, perhaps scale the esm constant on the overall layer percentage,
+		rather than the layer index
+	*/
 
-	/////////// Getting UV
+	/////////// Getting the distance between the occluder and the receiver
 
-	vec4 fragment_pos_light_space = light_view_projection_matrices[layer_index] * vec4(fragment_pos_world_space, 1.0f);
-	vec3 UV = fragment_pos_light_space.xyz * 0.5f + 0.5f;
+	vec3 fragment_pos_light_space = (light_view_projection_matrices[layer_index]
+		* vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
+
+	float avg_occluder_depth = get_average_occluder_depth(sample_radius, vec3(fragment_pos_light_space.xy, layer_index));
+	float occluder_receiver_diff = avg_occluder_depth - fragment_pos_light_space.z;
 
 	/////////// Calculating the shadow strength
 
-	// TODO: base this on the overall layer percentage, rather than the layer index
 	float layer_scaled_esm_constant = esm_constant * pow(layer_index + 1u, layer_scaling_component);
-	float occluder_receiver_diff = get_average_occluder_depth(sample_radius, layer_index, UV.xy) - UV.z;
 	float in_light_percentage = exp(layer_scaled_esm_constant * occluder_receiver_diff);
 	return clamp(in_light_percentage, 0.0f, 1.0f);
 }
