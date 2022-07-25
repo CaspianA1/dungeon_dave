@@ -315,11 +315,9 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	const Drawable* const drawable = &ws -> drawable;
 
 	use_vertex_buffer(drawable -> vertex_buffer);
-	use_vertex_spec(drawable -> vertex_spec);
-
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec3[corners_per_quad]), ws -> appearance_context.world_space.corners);
 
-	draw_drawable(*drawable, corners_per_quad, NULL, OnlyDraw);
+	draw_drawable(*drawable, corners_per_quad, NULL, BindVertexSpec);
 }
 
 void draw_weapon_sprite(const WeaponSprite* const ws,
