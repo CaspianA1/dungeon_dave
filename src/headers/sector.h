@@ -37,8 +37,7 @@ void deinit_sector_context(const SectorContext* const sector_context);
 void draw_all_sectors_to_shadow_context(const SectorContext* const sector_context);
 
 void draw_sectors(const SectorContext* const sector_context,
-	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const Camera* const camera,
-	const GLfloat curr_time_secs);
+	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
+	const vec4 frustum_planes[planes_per_frustum], const GLfloat curr_time_secs);
 
 #endif

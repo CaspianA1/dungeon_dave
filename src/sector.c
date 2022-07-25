@@ -286,13 +286,10 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 }
 
 void draw_sectors(const SectorContext* const sector_context,
-	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const Camera* const camera,
-	const GLfloat curr_time_secs) {
+	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
+	const vec4 frustum_planes[planes_per_frustum], const GLfloat curr_time_secs) {
 
-	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(
-		sector_context, camera -> frustum_planes
-	);
+	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(sector_context, frustum_planes);
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0)
