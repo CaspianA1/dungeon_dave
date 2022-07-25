@@ -29,6 +29,8 @@ vec3 get_face_fragment_normal(const vec3 UV) {
 	// `ts` = tangent space.
 	vec3 ts = get_tangent_space_normal(UV);
 
+	// TODO: accomplish this same task using some swizzle and sign masks
+
 	// No matrix multiplication here! :)
 	vec3 rotated_vectors[5] = vec3[5](
 		vec3(ts.xz, -ts.y), // Flat
