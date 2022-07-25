@@ -24,7 +24,10 @@ static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const sh
 		normally, alpha testing for transparent objects, and alpha to coverage for billboards
 
 	- Integration with the depth shader is a bit messy; find a neat way to do that (this should go first in terms of priorities)
-	- The weapon sprite's shadow is way too light since it's close to the ground; find a way to resolve that */
+	- The weapon sprite's shadow is way too light since it's close to the ground; find a way to resolve that
+
+	- A note: one billboard takes up 24 bytes, and 4 vec3s take up 48 bytes (and adding a 16-bit texture id makes that 64)
+	*/
 
 	const GLuint depth_shader = shadow_context -> depth_shader;
 
