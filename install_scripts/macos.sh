@@ -1,25 +1,20 @@
 # This script assumes that the developer tools are installed.
 # That should include clang, make, and git.
 
-build_from_github() {
-	repo_name=$1
-	project_name=$2
+# Params: usermame, project name
+get_from_github() {
+	git clone git@github.com:$1/$2.git
+}
 
-	git clone git@github.com:$repo_name/$project_name.git
-
-	cd $project_name
-	mkdir build
-	cd build
-	cmake ..
-	make
-	sudo make install
-	cd ../..
-	sudo rm -r $project_name
+install_cglm() {
+	get_from_github recp cglm
+	cp -r cglm/include/cglm ../include/cglm
+	sudo rm -r cglm
 }
 
 main() {
 	brew install pkg-config sdl2 cmake
-	build_from_github recp cglm
+	install_cglm
 }
 
 main
