@@ -236,11 +236,6 @@ static void define_vertex_spec(void) {
 	define_vertex_spec_index(false, true, 0, 3, 0, 0, GL_FLOAT);
 }
 
-static void update_vertex_buffer_before_draw_call(const void* const param) {
-	const WeaponSprite* const ws = param;
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec3[corners_per_quad]), ws -> appearance_context.world_space.corners);
-}
-
 ////////// Initialization, deinitialization, updating, and rendering
 
 WeaponSprite init_weapon_sprite(
@@ -319,7 +314,13 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 }
 
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
-	draw_drawable_to_shadow_context(&ws -> drawable, corners_per_quad, update_vertex_buffer_before_draw_call, ws);
+	const Drawable* const drawable = &ws -> drawable;
+
+	use_vertex_buffer(drawable -> vertex_buffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec3[corners_per_quad]), ws -> appearance_context.world_space.corners);
+
+	use_vertex_spec(drawable -> vertex_spec);
+	draw_drawable(*drawable, corners_per_quad, NULL, OnlyDraw);
 }
 
 void draw_weapon_sprite(const WeaponSprite* const ws,
@@ -329,7 +330,7 @@ void draw_weapon_sprite(const WeaponSprite* const ws,
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
 		const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view, ws, shadow_context, skybox};
-		draw_drawable(ws -> drawable, corners_per_quad, &uniform_updater_params, true);
+		draw_drawable(ws -> drawable, corners_per_quad, &uniform_updater_params, UseShaderPipeline);
 	);
 }
 

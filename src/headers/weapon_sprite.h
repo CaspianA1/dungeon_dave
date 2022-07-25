@@ -37,7 +37,7 @@ typedef struct {
 /* Excluded:
 update_weapon_sprite_animation, circular_mapping_from_zero_to_one,
 get_sway, get_screen_corners_from_sway, get_world_corners_from_screen_corners, rotate_from_camera_movement,
-get_normal_and_tangent, update_uniforms, define_vertex_spec, update_vertex_buffer_before_draw_call */
+get_normal_and_tangent, update_uniforms, define_vertex_spec */
 
 WeaponSprite init_weapon_sprite(
 	const GLfloat max_yaw_degrees, const GLfloat max_pitch_degrees,

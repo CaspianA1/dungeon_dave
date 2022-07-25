@@ -34,31 +34,19 @@ void deinit_drawable(const Drawable drawable) {
 	glDeleteTextures(1, &drawable.diffuse_texture);
 	glDeleteProgram(drawable.shader);
 
-	glDeleteBuffers(1, &drawable.vertex_buffer);
-	glDeleteVertexArrays(1, &drawable.vertex_spec);
-}
-
-void draw_drawable_to_shadow_context(
-	const Drawable* const drawable, const buffer_size_t num_vertices_to_draw,
-	void (*const before_drawing) (const void* const), const void* const before_drawing_param) {
-
-	glBindBuffer(GL_ARRAY_BUFFER, drawable -> vertex_buffer);
-	glBindVertexArray(drawable -> vertex_spec);
-
-	if (before_drawing != NULL) before_drawing(before_drawing_param);
-
-	glDrawArrays(drawable -> triangle_mode, 0, (GLsizei) num_vertices_to_draw);
+	if (drawable.vertex_buffer != 0) glDeleteBuffers(1, &drawable.vertex_buffer);
+	if (drawable.vertex_spec != 0) glDeleteVertexArrays(1, &drawable.vertex_spec);
 }
 
 void draw_drawable(const Drawable drawable, const buffer_size_t num_vertices_to_draw,
-	const void* const uniform_updater_param, const bool avoid_binding_vertex_buffer_and_spec) {
+	const void* const uniform_updater_param, const byte invocation_params) {
 
-	glUseProgram(drawable.shader);
-	drawable.uniform_updater((struct Drawable*) &drawable, uniform_updater_param);
+	if (invocation_params & UseShaderPipeline) {
+		glUseProgram(drawable.shader);
+		drawable.uniform_updater((struct Drawable*) &drawable, uniform_updater_param);
+	}
 
-	const bool vertex_buffer_or_spec_is_null = drawable.vertex_buffer == 0 || drawable.vertex_spec == 0;
-
-	if (!vertex_buffer_or_spec_is_null && !avoid_binding_vertex_buffer_and_spec) {
+	if (invocation_params & BindVertexBufferAndSpec) {
 		glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer);
 		glBindVertexArray(drawable.vertex_spec);
 	}
