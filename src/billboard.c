@@ -181,7 +181,7 @@ BillboardContext init_billboard_context(
 
 	////////// Initializing client-side lists
 
-	billboard_context.distance_sort_refs.length = num_billboards; // TODO: needed?
+	billboard_context.distance_sort_refs.length = num_billboards;
 	push_array_to_list(&billboard_context.billboards, billboards, num_billboards);
 	push_array_to_list(&billboard_context.animations, billboard_animations, num_billboard_animations);
 	push_array_to_list(&billboard_context.animation_instances, billboard_animation_instances, num_billboard_animation_instances);
