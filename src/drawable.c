@@ -46,10 +46,8 @@ void draw_drawable(const Drawable drawable, const buffer_size_t num_vertices_to_
 		drawable.uniform_updater((struct Drawable*) &drawable, uniform_updater_param);
 	}
 
-	if (invocation_params & BindVertexBufferAndSpec) {
-		glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer);
-		glBindVertexArray(drawable.vertex_spec);
-	}
+	if (invocation_params & BindVertexBuffer) glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer);
+	if (invocation_params & BindVertexSpec) glBindVertexArray(drawable.vertex_spec);
 
 	glDrawArrays(drawable.triangle_mode, 0, (GLsizei) num_vertices_to_draw);
 }
