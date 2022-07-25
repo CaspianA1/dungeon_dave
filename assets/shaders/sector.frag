@@ -4,6 +4,7 @@
 #include "common/normal_utils.frag"
 
 flat in uint face_id;
+in float world_depth_value;
 in vec3 UV;
 
 out vec3 color;
@@ -47,6 +48,6 @@ void main(void) {
 		texture_color = texture(diffuse_sampler, translated_UV).rgb,
 		fragment_normal = get_face_fragment_normal(translated_UV);
 
-	color = calculate_light(texture_color, fragment_normal);
+	color = calculate_light(world_depth_value, texture_color, fragment_normal);
 	color = postprocess_light(translated_UV.xy, color);
 }

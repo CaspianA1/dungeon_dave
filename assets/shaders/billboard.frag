@@ -3,6 +3,7 @@
 #include "common/world_shading.frag"
 #include "common/normal_utils.frag"
 
+in float world_depth_value;
 in vec3 UV;
 
 out vec4 color;
@@ -22,9 +23,6 @@ vec3 get_billboard_normal(void) {
 
 void main(void) {
 	vec4 texture_color = texture(diffuse_sampler, UV);
-
-	color = vec4(
-		postprocess_light(UV.xy, calculate_light(texture_color.rgb, get_billboard_normal())),
-		texture_color.a
-	);
+	vec3 light = calculate_light(world_depth_value, texture_color.rgb, get_billboard_normal());
+	color = vec4(postprocess_light(UV.xy, light), texture_color.a);
 }
