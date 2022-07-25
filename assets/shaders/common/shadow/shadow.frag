@@ -81,6 +81,7 @@ float get_blended_csm_shadow(const uint layer_index, const uint depth_range_shif
 	);
 }
 
+// TODO: don't pass around `fragment_pos_world_space` so much
 float get_csm_shadow(const float world_depth_value, const vec3 fragment_pos_world_space) {
 	uint layer_index = 0;
 
