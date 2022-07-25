@@ -15,9 +15,7 @@ void main(void) {
 	vec3 normal = normalize(TBN * get_tangent_space_normal(UV));
 
 	float shadow = get_csm_shadow_from_layer(0u, fragment_pos_world_space);
+	vec3 light = calculate_light_with_provided_shadow(shadow, texture_color.rgb, normal);
 
-	color = vec4(
-		postprocess_light(UV.xy, calculate_light_with_provided_shadow(texture_color.rgb, normal, shadow)),
-		texture_color.a
-	);
+	color = vec4(postprocess_light(UV.xy, light), texture_color.a);
 }

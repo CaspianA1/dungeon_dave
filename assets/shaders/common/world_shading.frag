@@ -39,17 +39,15 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) {
 }
 
 // In shadow layer is already known (like for the weapon sprite), this can be useful to call
-vec3 calculate_light_with_provided_shadow(const vec3 texture_color, const vec3 fragment_normal, const float shadow) {
+vec3 calculate_light_with_provided_shadow(const float shadow, const vec3 texture_color, const vec3 fragment_normal) {
 	vec3 non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);
 	vec3 light_strength = non_ambient * shadow + strengths.ambient;
 	return light_strength * texture_color * overall_scene_tone;
 }
 
 vec3 calculate_light(const float world_depth_value, const vec3 texture_color, const vec3 fragment_normal) {
-	return calculate_light_with_provided_shadow(
-		texture_color, fragment_normal,
-		get_csm_shadow(world_depth_value, fragment_pos_world_space)
-	);
+	float shadow = get_csm_shadow(world_depth_value, fragment_pos_world_space);
+	return calculate_light_with_provided_shadow(shadow, texture_color, fragment_normal);
 }
 
 // https://64.github.io/tonemapping/ (Reinhard Extended Luminance)
