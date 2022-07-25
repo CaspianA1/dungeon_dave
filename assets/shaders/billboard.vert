@@ -15,9 +15,8 @@ uniform vec2 right_xz;
 void main(void) {
 	vec2 vertex_pos_model_space = quad_corners[gl_VertexID] * 0.5f * billboard_size_world_space;
 
-	fragment_pos_world_space = billboard_center_world_space
-		+ vertex_pos_model_space.x * vec3(right_xz, 0.0f).xzy
-		+ vec3(0.0f, vertex_pos_model_space.y, 0.0f);
+	fragment_pos_world_space = vertex_pos_model_space.x * vec3(right_xz, 0.0f).xzy + billboard_center_world_space;
+	fragment_pos_world_space.y += vertex_pos_model_space.y;
 
 	world_depth_value = get_world_depth_value(view, fragment_pos_world_space);
 	UV = vec3(get_quad_UV(), texture_id);
