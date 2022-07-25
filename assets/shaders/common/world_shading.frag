@@ -42,7 +42,7 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) {
 vec3 calculate_light(const vec3 texture_color, const vec3 fragment_normal) {
 	vec3 non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);
 	float shadow = get_csm_shadow(world_depth_value, fragment_pos_world_space);
-	vec3 light_strength = strengths.ambient + non_ambient * shadow;
+	vec3 light_strength = non_ambient * shadow + strengths.ambient;
 	return light_strength * texture_color * overall_scene_tone;
 }
 
