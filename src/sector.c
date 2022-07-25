@@ -2,11 +2,9 @@
 #define SECTOR_C
 
 #include "headers/sector.h"
-#include "headers/statemap.h"
-#include "headers/buffer_defs.h"
-#include "headers/list.h"
-#include "headers/texture.h"
 #include "headers/face.h"
+#include "headers/statemap.h"
+#include "headers/texture.h"
 #include "headers/shader.h"
 #include "headers/constants.h"
 
@@ -140,72 +138,10 @@ static List generate_sectors_from_maps(const byte* const heightmap,
 	return sectors;
 }
 
-// Used in main.c
-void draw_all_sectors_to_shadow_context(const SectorContext* const sector_context) {
-	use_vertex_buffer(sector_context -> mesh_vertex_buffer);
-	use_vertex_spec(sector_context -> mesh_vertex_spec);
-
-	glDisableVertexAttribArray(1); // Not using the face info bit attribute at index 1
-
-	//////////
-
-	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
-	const buffer_size_t num_face_meshes = face_meshes_cpu -> length;
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, num_face_meshes * sizeof(face_mesh_t), face_meshes_cpu -> data);
-	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_face_meshes * vertices_per_face));
-
-	//////////
-
-	glEnableVertexAttribArray(1);
-}
-
-static void internal_draw_sectors(
-	const SectorContext* const sector_context,
-	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const buffer_size_t num_visible_faces,
-	const GLfloat curr_time_secs) {
-
-	const GLuint shader = sector_context -> shader;
-	static GLint UV_translation_id;
-
-	use_shader(shader);
-
-	#define LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, constants.lighting.param)
-	#define ARRAY_LIGHTING_UNIFORM(param, prefix) INIT_UNIFORM_VALUE(param, shader, prefix, 1, constants.lighting.param)
-
-	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
-		INIT_UNIFORM(UV_translation, shader);
-
-		const GLfloat epsilon = 0.005f;
-		INIT_UNIFORM_VALUE(UV_translation_area, shader, 3fv, 2, (GLfloat*) (vec3[2]) {
-			{4.0f + epsilon, 0.0f, 0.0f}, {6.0f - epsilon, 3.0f, 3.0f + epsilon}
-		});
-
-		use_texture(skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
-		use_texture(sector_context -> diffuse_texture_set, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
-		use_texture(sector_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
-		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
-	);
-
-	const GLfloat t = curr_time_secs / 3.0f;
-	UPDATE_UNIFORM(UV_translation, 2f, cosf(t), tanf(t));
-
-	//////////
-
-	#undef LIGHTING_UNIFORM
-	#undef ARRAY_LIGHTING_UNIFORM
-
-	use_vertex_spec(sector_context -> mesh_vertex_spec);
-	glDrawArrays(GL_TRIANGLES, 0, (GLsizei) (num_visible_faces * vertices_per_face));
-}
-
-//////////
-
 static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	const SectorContext* const sector_context, const vec4* const frustum_planes) {
 
-	use_vertex_buffer(sector_context -> mesh_vertex_buffer);
+	use_vertex_buffer(sector_context -> drawable.vertex_buffer);
 
 	const List* const sectors = &sector_context -> sectors;
 	const Sector* const sector_data = sectors -> data;
@@ -252,21 +188,49 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	return num_visible_faces;
 }
 
-//////////
+////////// Uniform updating
 
-// This is just a utility function
-void draw_sectors(const SectorContext* const sector_context,
-	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const Camera* const camera,
-	const GLfloat curr_time_secs) {
+typedef struct {
+	const Skybox* const skybox;
+	const SectorContext* const sector_context;
+	const CascadedShadowContext* const shadow_context;
+	const GLfloat curr_time_secs;
+} SectorUniformUpdaterParams;
 
-	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(sector_context, camera -> frustum_planes);
+static void update_uniforms(const Drawable* const drawable, const void* const param) {
+	const SectorUniformUpdaterParams typed_params = *(SectorUniformUpdaterParams*) param;
 
-	// If looking out at the distance with no sectors, why do any state switching at all?
-	if (num_visible_faces != 0) internal_draw_sectors(sector_context, shadow_context, skybox, num_visible_faces, curr_time_secs);
+	const GLuint shader = drawable -> shader;
+
+	static GLint UV_translation_id;
+
+	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
+		INIT_UNIFORM(UV_translation, shader);
+
+		const GLfloat epsilon = 0.005f;
+		INIT_UNIFORM_VALUE(UV_translation_area, shader, 3fv, 2, (GLfloat*) (vec3[2]) {
+			{4.0f + epsilon, 0.0f, 0.0f}, {6.0f - epsilon, 3.0f, 3.0f + epsilon}
+		});
+
+		use_texture(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
+		use_texture(typed_params.sector_context -> drawable.diffuse_texture, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
+		use_texture(typed_params.sector_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
+		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
+	);
+
+	const GLfloat t = typed_params.curr_time_secs / 3.0f;
+	UPDATE_UNIFORM(UV_translation, 2f, cosf(t), tanf(t));
 }
 
-////////// Initialization and deinitialization
+static void define_vertex_spec(void) {
+	enum {vpt = vertices_per_triangle};
+	const GLenum typename = FACE_MESH_COMPONENT_TYPENAME;
+
+	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, typename); // Position
+	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), typename); // Face info
+}
+
+////////// Initialization, deinitialization, and rendering
 
 SectorContext init_sector_context(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height,
@@ -274,47 +238,68 @@ SectorContext init_sector_context(const byte* const heightmap,
 	const GLsizei texture_size, const NormalMapConfig* const normal_map_config) {
 
 	const List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
+	const List mesh_cpu = init_face_meshes_from_sectors(&sectors, heightmap, map_width, map_height);
 
 	const GLuint diffuse_texture_set = init_texture_set(
 		false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 		num_textures, 0, texture_size, texture_size, texture_paths, NULL
 	);
 
-	SectorContext sector_context = {
-		.mesh_vertex_buffer = init_gpu_buffer(),
-		.mesh_vertex_spec = init_vertex_spec(),
-		.diffuse_texture_set = diffuse_texture_set,
+	return (SectorContext) {
+		.drawable = init_drawable_with_vertices(
+			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW, GL_TRIANGLES,
+			(List) {.data = NULL, .item_size = sizeof(face_mesh_t), .length = mesh_cpu.length},
+			init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag")),
+			diffuse_texture_set
+		),
+
 		.normal_map_set = init_normal_map_from_diffuse_texture_set(diffuse_texture_set, normal_map_config),
-		.shader = init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag")),
-
-		.mesh_cpu = init_face_meshes_from_sectors(&sectors, heightmap, map_width, map_height),
-		.sectors = sectors
+		.mesh_cpu = mesh_cpu, .sectors = sectors
 	};
-
-	use_vertex_buffer(sector_context.mesh_vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sector_context.mesh_cpu.length * sizeof(face_mesh_t), NULL, GL_DYNAMIC_DRAW);
-
-	enum {vpt = vertices_per_triangle};
-	const GLenum typename = FACE_MESH_COMPONENT_TYPENAME;
-
-	use_vertex_spec(sector_context.mesh_vertex_spec);
-	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, typename); // Position
-	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), typename); // Face info
-
-	return sector_context;
 }
 
 void deinit_sector_context(const SectorContext* const sector_context) {
-	deinit_gpu_buffer(sector_context -> mesh_vertex_buffer);
-	deinit_vertex_spec(sector_context -> mesh_vertex_spec);
-
-	deinit_texture(sector_context -> diffuse_texture_set);
+	deinit_drawable(sector_context -> drawable);
 	deinit_texture(sector_context -> normal_map_set);
-
-	deinit_shader(sector_context -> shader);
-
 	deinit_list(sector_context -> mesh_cpu);
 	deinit_list(sector_context -> sectors);
+}
+
+// Used in main.c
+void draw_all_sectors_to_shadow_context(const SectorContext* const sector_context) {
+	const Drawable* const drawable = &sector_context -> drawable;
+
+	//////////
+
+	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
+	const buffer_size_t num_face_meshes = face_meshes_cpu -> length;
+
+	use_vertex_buffer(drawable -> vertex_buffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, num_face_meshes * sizeof(face_mesh_t), face_meshes_cpu -> data);
+
+	//////////
+
+	use_vertex_spec(drawable -> vertex_spec);
+	glDisableVertexAttribArray(1); // Not using the face info bit attribute at index 1
+	draw_drawable(*drawable, num_face_meshes * vertices_per_face, NULL, OnlyDraw);
+	glEnableVertexAttribArray(1);
+}
+
+void draw_sectors(const SectorContext* const sector_context,
+	const CascadedShadowContext* const shadow_context,
+	const Skybox* const skybox, const Camera* const camera,
+	const GLfloat curr_time_secs) {
+
+	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(
+		sector_context, camera -> frustum_planes
+	);
+
+	// If looking out at the distance with no sectors, why do any state switching at all?
+	if (num_visible_faces != 0)
+		draw_drawable(sector_context -> drawable, num_visible_faces * vertices_per_face,
+			&(SectorUniformUpdaterParams) {skybox, sector_context, shadow_context, curr_time_secs},
+			UseShaderPipeline | BindVertexSpec
+		);
 }
 
 #endif

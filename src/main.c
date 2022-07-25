@@ -296,7 +296,7 @@ static void* main_init(void) {
 
 	const GLuint shaders_that_use_shared_params[] = {
 		scene_context.shadow_context.depth_shader,
-		scene_context.sector_context.shader,
+		scene_context.sector_context.drawable.shader,
 		scene_context.billboard_context.shader,
 		scene_context.weapon_sprite.drawable.shader
 	};

@@ -230,13 +230,11 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
 }
 
-////////// These are some private functions that exist for the sake of shadow mapping
+////////// Initialization, deinitialization, updating, and rendering
 
 static void define_vertex_spec(void) {
 	define_vertex_spec_index(false, true, 0, 3, 0, 0, GL_FLOAT);
 }
-
-////////// Initialization, deinitialization, updating, and rendering
 
 WeaponSprite init_weapon_sprite(
 	const GLfloat max_yaw_degrees, const GLfloat max_pitch_degrees,
@@ -317,9 +315,10 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	const Drawable* const drawable = &ws -> drawable;
 
 	use_vertex_buffer(drawable -> vertex_buffer);
+	use_vertex_spec(drawable -> vertex_spec);
+
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec3[corners_per_quad]), ws -> appearance_context.world_space.corners);
 
-	use_vertex_spec(drawable -> vertex_spec);
 	draw_drawable(*drawable, corners_per_quad, NULL, OnlyDraw);
 }
 
