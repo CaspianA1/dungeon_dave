@@ -3,7 +3,7 @@
 CC = clang
 
 OPTIMIZE = -Ofast
-DEBUG = -O0 -g -fsanitize=address,undefined
+DEBUG = -O0 -g -fsanitize=address,undefined,float-divide-by-zero,unsigned-integer-overflow,implicit-conversion
 BUILD_TYPE = $(OPTIMIZE)
 
 CONVERSION_WARNINGS = -Wfloat-conversion -Wdouble-promotion -Wsign-conversion\
