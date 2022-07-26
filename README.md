@@ -1,4 +1,4 @@
-*Dungeon Dave*
+# Dungeon Dave!
 
 ### Dependencies
 
