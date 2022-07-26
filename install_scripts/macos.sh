@@ -17,5 +17,3 @@ main() {
 }
 
 main
-
-# After this, go to the `build` directory, and run `cmake .. && make && ./dungeon_dave.`
