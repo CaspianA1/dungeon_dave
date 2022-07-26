@@ -1,6 +1,3 @@
-#ifndef DRAWABLE_C
-#define DRAWABLE_C
-
 #include "drawable.h"
 
 Drawable init_drawable_with_vertices(
@@ -51,5 +48,3 @@ void draw_drawable(const Drawable drawable, const buffer_size_t num_vertices_to_
 
 	glDrawArrays(drawable.triangle_mode, 0, (GLsizei) num_vertices_to_draw);
 }
-
-#endif

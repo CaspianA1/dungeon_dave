@@ -1,6 +1,3 @@
-#ifndef ALLOC_C
-#define ALLOC_C
-
 #include "alloc.h"
 
 #ifdef TRACK_MEMORY
@@ -60,5 +57,4 @@ void dealloc(void* const memory) {
 	free(memory);
 }
 
-#endif
 #endif

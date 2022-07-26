@@ -1,6 +1,3 @@
-#ifndef SHARED_SHADING_PARAMS_C
-#define SHARED_SHADING_PARAMS_C
-
 #include "shared_shading_params.h"
 
 static void init_constant_shading_params(UniformBuffer* const shading_params, const CascadedShadowContext* const shadow_context) {
@@ -91,5 +88,3 @@ void update_shared_shading_params(SharedShadingParams* const shared_shading_para
 
 	disable_uniform_buffer_writing_batch(dynamic_params);
 }
-
-#endif

@@ -1,6 +1,3 @@
-#ifndef TITLE_SCREEN_C
-#define TITLE_SCREEN_C
-
 #include "title_screen.h"
 #include "list.h"
 #include "shader.h"
@@ -51,5 +48,3 @@ bool tick_title_screen(TitleScreen* const title_screen, const Event* const event
 	if (active) draw_drawable(title_screen -> drawable, corners_per_quad, &event -> curr_time_secs, UseShaderPipeline);
 	return active;
 }
-
-#endif

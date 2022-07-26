@@ -1,6 +1,3 @@
-#ifndef SHADOW_C
-#define SHADOW_C
-
 #include "shadow.h"
 #include "constants.h"
 #include "shader.h"
@@ -232,5 +229,3 @@ void disable_rendering_to_shadow_context(const GLint screen_size[2]) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, screen_size[0], screen_size[1]);
 }
-
-#endif

@@ -1,6 +1,3 @@
-#ifndef CONSTANTS_C
-#define CONSTANTS_C
-
 #include "constants.h"
 #include "utils.h"
 
@@ -24,5 +21,3 @@ GLfloat get_runtime_constant(const RuntimeConstantName runtime_constant_name) {
 		case MaxAnisotropicFilteringLevel: return max_aniso_filtering_level;
 	}
 }
-
-#endif

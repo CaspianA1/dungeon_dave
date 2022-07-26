@@ -1,6 +1,3 @@
-#ifndef UTILS_C
-#define UTILS_C
-
 #include "utils.h"
 #include "texture.h"
 #include "constants.h"
@@ -292,5 +289,3 @@ FILE* open_file_safely(const GLchar* const path, const GLchar* const mode) {
 	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);
 	return file;
 }
-
-#endif

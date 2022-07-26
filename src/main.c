@@ -1,6 +1,3 @@
-#ifndef MAIN_C
-#define MAIN_C
-
 #include "main.h"
 #include "normal_map_generation.h"
 #include "maps.h"
@@ -334,5 +331,3 @@ static void main_deinit(void* const app_context) {
 int main(void) {
 	make_application(main_drawer, main_init, main_deinit);
 }
-
-#endif

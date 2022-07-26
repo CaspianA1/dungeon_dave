@@ -1,6 +1,3 @@
-#ifndef FACE_C
-#define FACE_C
-
 #include "face.h"
 
 /*
@@ -206,5 +203,3 @@ List init_face_meshes_from_sectors(const List* const sectors,
 
 	return face_meshes;
 }
-
-#endif

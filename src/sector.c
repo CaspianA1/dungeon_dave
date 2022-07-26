@@ -1,6 +1,3 @@
-#ifndef SECTOR_C
-#define SECTOR_C
-
 #include "sector.h"
 #include "face.h"
 #include "statemap.h"
@@ -298,5 +295,3 @@ void draw_sectors(const SectorContext* const sector_context,
 			UseShaderPipeline | BindVertexSpec
 		);
 }
-
-#endif

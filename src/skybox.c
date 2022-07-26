@@ -1,6 +1,3 @@
-#ifndef SKYBOX_C
-#define SKYBOX_C
-
 #include "skybox.h"
 #include "shader.h"
 #include "texture.h"
@@ -116,5 +113,3 @@ void draw_skybox(const Skybox* const skybox, const mat4 view_projection) {
 		draw_drawable(*skybox, ARRAY_LENGTH(skybox_vertices), view_projection, flags);
 	);
 }
-
-#endif

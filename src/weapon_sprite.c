@@ -1,6 +1,3 @@
-#ifndef WEAPON_SPRITE_C
-#define WEAPON_SPRITE_C
-
 #include "weapon_sprite.h"
 #include "constants.h"
 #include "texture.h"
@@ -330,5 +327,3 @@ void draw_weapon_sprite(const WeaponSprite* const ws,
 		draw_drawable(ws -> drawable, corners_per_quad, &uniform_updater_params, UseShaderPipeline);
 	);
 }
-
-#endif

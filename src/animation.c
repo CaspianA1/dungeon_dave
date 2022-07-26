@@ -1,6 +1,3 @@
-#ifndef ANIMATION_C
-#define ANIMATION_C
-
 #include "animation.h"
 
 void update_animation_information(
@@ -13,5 +10,3 @@ void update_animation_information(
 	const buffer_size_t texture_id_range = animation.texture_id_range.end - animation.texture_id_range.start;
 	*texture_id = (frames_so_far % (texture_id_range + 1)) + animation.texture_id_range.start;
 }
-
-#endif

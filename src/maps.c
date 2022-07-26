@@ -1,6 +1,3 @@
-#ifndef MAPS_C
-#define MAPS_C
-
 #include "buffer_defs.h"
 #include "maps.h"
 
@@ -1092,5 +1089,3 @@ checker_heightmap[checker_height][checker_width] = {
 },
 
 checker_texture_id_map[checker_height][checker_width];
-
-#endif

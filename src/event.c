@@ -1,6 +1,3 @@
-#ifndef EVENT_C
-#define EVENT_C
-
 #include "event.h"
 #include "constants.h"
 #include "utils.h"
@@ -45,5 +42,3 @@ Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_betwe
 		.keys = keys
 	};
 }
-
-#endif

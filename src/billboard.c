@@ -1,6 +1,3 @@
-#ifndef BILLBOARD_C
-#define BILLBOARD_C
-
 #include "billboard.h"
 #include "texture.h"
 #include "shader.h"
@@ -202,5 +199,3 @@ void deinit_billboard_context(const BillboardContext* const billboard_context) {
 	deinit_list(billboard_context -> animations);
 	deinit_list(billboard_context -> animation_instances);
 }
-
-#endif

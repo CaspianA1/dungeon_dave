@@ -1,6 +1,3 @@
-#ifndef CAMERA_C
-#define CAMERA_C
-
 #include "camera.h"
 #include "constants.h"
 
@@ -370,5 +367,3 @@ GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_
 	const GLfloat max_z_difference = (max_point_height - min_point_height) + additional_camera_height;
 	return glm_vec3_norm((vec3) {map_size_x, map_size_z, max_z_difference});
 }
-
-#endif

@@ -1,6 +1,3 @@
-#ifndef NORMAL_MAP_GENERATION_C
-#define NORMAL_MAP_GENERATION_C
-
 #include "normal_map_generation.h"
 #include "texture.h"
 #include "constants.h"
@@ -241,5 +238,3 @@ GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set
 
 	return normal_map_set;
 }
-
-#endif

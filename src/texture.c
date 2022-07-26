@@ -1,6 +1,3 @@
-#ifndef TEXTURE_C
-#define TEXTURE_C
-
 #include "texture.h"
 #include "constants.h"
 
@@ -221,5 +218,3 @@ GLuint init_texture_set(const bool premultiply_alpha,
 
 	return texture;
 }
-
-#endif

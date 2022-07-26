@@ -1,6 +1,3 @@
-#ifndef LIST_C
-#define LIST_C
-
 #include "list.h"
 
 #define LIST_REALLOC_AMOUNT_FOR(curr_alloc) ((buffer_size_t) (ceilf((curr_alloc) * list_realloc_rate)))
@@ -50,5 +47,3 @@ void push_array_to_list(List* const list, const void* const items, const buffer_
 void* ptr_to_list_index(const List* const list, const buffer_size_t index) {
 	return ((byte*) list -> data) + index * list -> item_size;
 }
-
-#endif

@@ -1,6 +1,3 @@
-#ifndef SHADER_C
-#define SHADER_C
-
 #include "shader.h"
 #include "list.h"
 #include "utils.h"
@@ -253,5 +250,3 @@ GLuint init_shader(
 
 	return shader;
 }
-
-#endif

@@ -1,6 +1,3 @@
-#ifndef UNIFORM_BUFFER_C
-#define UNIFORM_BUFFER_C
-
 #include "uniform_buffer.h"
 #include "utils.h"
 #include "alloc.h"
@@ -217,5 +214,3 @@ void write_array_of_matrices_to_uniform_buffer(const UniformBuffer* const buffer
 		}
 	}
 }
-
-#endif
