@@ -1,0 +1,26 @@
+cmake_minimum_required(VERSION 3.0)
+
+project(DungeonDave)
+
+##########
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED TRUE)
+
+set(CONVERSION_WARNINGS_1 "-Wfloat-conversion -Wdouble-promotion -Wsign-conversion")
+set(CONVERSION_WARNINGS_2 "-Wimplicit-int-conversion -Wshorten-64-to-32 -Wincompatible-pointer-types")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Wformat ${CONVERSION_WARNINGS_1} ${CONVERSION_WARNINGS_2}")
+
+set(CMAKE_C_FLAGS_DEBUG "-g -fsanitize=address,undefined,float-divide-by-zero,unsigned-integer-overflow,implicit-conversion")
+set(CMAKE_C_FLAGS_RELEASE "-Ofast")
+
+##########
+
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS})
+
+file(GLOB_RECURSE SRC_FILES src/*.c)
+
+add_executable(dungeon_dave ${SRC_FILES})
+target_include_directories(dungeon_dave PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(dungeon_dave ${SDL2_LIBRARIES})

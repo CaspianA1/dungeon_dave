@@ -1,11 +1,11 @@
 #ifndef TITLE_SCREEN_C
 #define TITLE_SCREEN_C
 
-#include "headers/title_screen.h"
-#include "headers/list.h"
-#include "headers/shader.h"
-#include "headers/texture.h"
-#include "headers/constants.h"
+#include "title_screen.h"
+#include "list.h"
+#include "shader.h"
+#include "texture.h"
+#include "constants.h"
 
 // TODO: incorporate the palace city texture into this in some way
 

@@ -1,12 +1,12 @@
 #ifndef MAIN_C
 #define MAIN_C
 
-#include "headers/main.h"
-#include "headers/normal_map_generation.h"
-#include "headers/maps.h"
-#include "headers/texture.h" // TODO: remove this when I don't need to contain the alpha test logic in this file anymore
-#include "headers/event.h"
-#include "headers/alloc.h"
+#include "main.h"
+#include "normal_map_generation.h"
+#include "maps.h"
+#include "texture.h" // TODO: remove this when I don't need to contain the alpha test logic in this file anymore
+#include "event.h"
+#include "alloc.h"
 
 static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const shadow_context,
 	const SectorContext* const sector_context, const WeaponSprite* const weapon_sprite) {

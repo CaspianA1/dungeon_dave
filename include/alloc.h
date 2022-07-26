@@ -16,7 +16,9 @@ void dealloc(void* const memory);
 
 #else
 
-inline void* alloc(const size_t num_items, const size_t size) {return malloc(num_items * size);}
+static inline void* alloc(const size_t num_items, const size_t size) {
+    return malloc(num_items * size);
+}
 
 #define clearing_alloc calloc
 #define resize_alloc realloc

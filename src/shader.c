@@ -1,10 +1,10 @@
 #ifndef SHADER_C
 #define SHADER_C
 
-#include "headers/shader.h"
-#include "headers/list.h"
-#include "headers/utils.h"
-#include "headers/alloc.h"
+#include "shader.h"
+#include "list.h"
+#include "utils.h"
+#include "alloc.h"
 
 enum {num_sub_shaders = 3}; // Vertex, geometry, and fragment
 

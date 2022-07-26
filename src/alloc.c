@@ -1,7 +1,7 @@
 #ifndef ALLOC_C
 #define ALLOC_C
 
-#include "headers/alloc.h"
+#include "alloc.h"
 
 #ifdef TRACK_MEMORY
 

@@ -1,9 +1,9 @@
 #ifndef UTILS_C
 #define UTILS_C
 
-#include "headers/utils.h"
-#include "headers/texture.h"
-#include "headers/constants.h"
+#include "utils.h"
+#include "texture.h"
+#include "constants.h"
 
 typedef struct {
 	SDL_Window* const window;

@@ -1,10 +1,10 @@
 #ifndef BILLBOARD_C
 #define BILLBOARD_C
 
-#include "headers/billboard.h"
-#include "headers/texture.h"
-#include "headers/shader.h"
-#include "headers/constants.h"
+#include "billboard.h"
+#include "texture.h"
+#include "shader.h"
+#include "constants.h"
 
 typedef struct {
 	billboard_index_t index;

@@ -1,10 +1,10 @@
 #ifndef WEAPON_SPRITE_C
 #define WEAPON_SPRITE_C
 
-#include "headers/weapon_sprite.h"
-#include "headers/constants.h"
-#include "headers/texture.h"
-#include "headers/shader.h"
+#include "weapon_sprite.h"
+#include "constants.h"
+#include "texture.h"
+#include "shader.h"
 
 /* The weapon sprite code can be a bit hard to understand in the big picture.
 	Here's how it works over a game tick:

@@ -1,8 +1,8 @@
 #ifndef TEXTURE_C
 #define TEXTURE_C
 
-#include "headers/texture.h"
-#include "headers/constants.h"
+#include "texture.h"
+#include "constants.h"
 
 ////////// Surface initialization and alpha premultiplication
 

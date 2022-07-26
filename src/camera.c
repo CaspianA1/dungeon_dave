@@ -1,8 +1,8 @@
 #ifndef CAMERA_C
 #define CAMERA_C
 
-#include "headers/camera.h"
-#include "headers/constants.h"
+#include "camera.h"
+#include "constants.h"
 
 ////////// Small utility functions
 

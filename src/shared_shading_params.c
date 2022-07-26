@@ -1,7 +1,7 @@
 #ifndef SHARED_SHADING_PARAMS_C
 #define SHARED_SHADING_PARAMS_C
 
-#include "headers/shared_shading_params.h"
+#include "shared_shading_params.h"
 
 static void init_constant_shading_params(UniformBuffer* const shading_params, const CascadedShadowContext* const shadow_context) {
 	enable_uniform_buffer_writing_batch(shading_params);

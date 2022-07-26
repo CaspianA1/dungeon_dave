@@ -1,7 +1,7 @@
 #ifndef DRAWABLE_C
 #define DRAWABLE_C
 
-#include "headers/drawable.h"
+#include "drawable.h"
 
 Drawable init_drawable_with_vertices(
 	void (*const vertex_spec_definer) (void), const uniform_updater_t uniform_updater,

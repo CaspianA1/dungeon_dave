@@ -1,7 +1,7 @@
 #ifndef ANIMATION_C
 #define ANIMATION_C
 
-#include "headers/animation.h"
+#include "animation.h"
 
 void update_animation_information(
 	const GLfloat curr_time_secs, const GLfloat cycle_base_time,

@@ -1,8 +1,8 @@
 #ifndef MAPS_C
 #define MAPS_C
 
-#include "headers/buffer_defs.h"
-#include "headers/maps.h"
+#include "buffer_defs.h"
+#include "maps.h"
 
 const byte level_one_heightmap[level_one_height][level_one_width] = {
 	{5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},

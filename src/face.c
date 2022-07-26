@@ -1,7 +1,7 @@
 #ifndef FACE_C
 #define FACE_C
 
-#include "headers/face.h"
+#include "face.h"
 
 /*
 static void print_face(const Face face, const GLchar* const prefix_msg) {

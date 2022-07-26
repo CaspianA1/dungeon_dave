@@ -33,8 +33,6 @@ Architectural/code design ideas:
 - Catch more warnings with -Weverything
 - File paths may not work on Windows
 - Pass in texture parameters through a bitmask
-- Use CMake instead of Make for cross-platform compilation
-- Set up dependencies properly in the Makefile
 - Tell if a level was just initialized through the Event struct
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit); or no macros at all
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?

@@ -1,10 +1,10 @@
 #ifndef NORMAL_MAP_GENERATION_C
 #define NORMAL_MAP_GENERATION_C
 
-#include "headers/normal_map_generation.h"
-#include "headers/texture.h"
-#include "headers/constants.h"
-#include "headers/alloc.h"
+#include "normal_map_generation.h"
+#include "texture.h"
+#include "constants.h"
+#include "alloc.h"
 
 static GLint int_min(const GLint val, const GLint lower) {
 	return (val < lower) ? val : lower;

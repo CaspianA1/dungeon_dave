@@ -1,12 +1,12 @@
 #ifndef SECTOR_C
 #define SECTOR_C
 
-#include "headers/sector.h"
-#include "headers/face.h"
-#include "headers/statemap.h"
-#include "headers/texture.h"
-#include "headers/shader.h"
-#include "headers/constants.h"
+#include "sector.h"
+#include "face.h"
+#include "statemap.h"
+#include "texture.h"
+#include "shader.h"
+#include "constants.h"
 
 /* Drawing sectors to the shadow map:
 

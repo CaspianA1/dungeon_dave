@@ -1,10 +1,10 @@
 #ifndef SKYBOX_C
 #define SKYBOX_C
 
-#include "headers/skybox.h"
-#include "headers/shader.h"
-#include "headers/texture.h"
-#include "headers/buffer_defs.h"
+#include "skybox.h"
+#include "shader.h"
+#include "texture.h"
+#include "buffer_defs.h"
 
 // TODO: make a SkyboxRenderer interface, instead of having unique vbos, vaos, and shaders for each skybox
 

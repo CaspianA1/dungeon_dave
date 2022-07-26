@@ -2,7 +2,5 @@
 scrap_code.txt
 
 .vscode/
-bin/
-obj/
-
+build/
 include/cglm

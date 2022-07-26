@@ -12,8 +12,10 @@ install_cglm() {
 }
 
 main() {
-	brew install pkg-config sdl2
+	brew install pkg-config sdl2 cmake
 	install_cglm
 }
 
 main
+
+# After this, go to the `build` directory, and run `cmake .. && make && ./dungeon_dave.`

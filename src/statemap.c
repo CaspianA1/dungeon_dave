@@ -1,7 +1,7 @@
 #ifndef STATEMAP_C
 #define STATEMAP_C
 
-#include "headers/statemap.h"
+#include "statemap.h"
 #include <limits.h>
 
 static const byte bytes_per_chunk = sizeof(statemap_chunk_t);
