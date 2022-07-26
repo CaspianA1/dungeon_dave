@@ -3,7 +3,7 @@ build_type=$1
 case $build_type in
 	"debug") cmake_build_type="Debug";;
 	"release") cmake_build_type="Release";;
-	*) echo "Unrecognized build type: '$build_type'. Exiting." exit 1;;
+	*) echo "Unrecognized build type: '$build_type'. Exiting."; exit 1;;
 esac
 
 ##########
