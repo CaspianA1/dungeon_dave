@@ -4,6 +4,7 @@
 #include "headers/normal_map_generation.h"
 #include "headers/texture.h"
 #include "headers/constants.h"
+#include "headers/alloc.h"
 
 static GLint int_min(const GLint val, const GLint lower) {
 	return (val < lower) ? val : lower;
@@ -91,7 +92,7 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 static GLfloat* compute_1D_gaussian_kernel(const signed_byte radius, const GLfloat std_dev) {
 	const signed_byte kernel_length = radius * 2 + 1;
 
-	GLfloat* const kernel = malloc((size_t) kernel_length * sizeof(GLfloat)), sum = 0.0f;
+	GLfloat* const kernel = alloc((size_t) kernel_length, sizeof(GLfloat)), sum = 0.0f;
 	const GLfloat one_over_two_times_std_dev_squared = 1.0f / (2.0f * std_dev * std_dev);
 
 	for (signed_byte x = 0; x < kernel_length; x++) {
@@ -211,7 +212,7 @@ GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set
 			general_purpose_surface_2, general_purpose_surface_1,
 			blur_kernel, subtexture_h, blur_radius, true);
 
-		free(blur_kernel);
+		dealloc(blur_kernel);
 	}
 
 	// Making a normal map of #1 to #2

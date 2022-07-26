@@ -2,6 +2,7 @@
 #define STATEMAP_H
 
 #include "utils.h"
+#include "alloc.h"
 
 // This should not be signed
 typedef byte statemap_chunk_t;
@@ -13,7 +14,7 @@ typedef struct {
 
 // Excluded: get_statemap_chunk, get_mask_for_bit_index_in_chunk
 
-#define deinit_statemap(s) free(s.data)
+#define deinit_statemap(s) dealloc(s.data)
 
 StateMap init_statemap(const buffer_size_t bits_across, const buffer_size_t bits_down);
 void set_statemap_bit(const StateMap statemap, const buffer_size_t bits_x, const buffer_size_t bits_y);

@@ -3,6 +3,7 @@
 
 #include "headers/uniform_buffer.h"
 #include "headers/utils.h"
+#include "headers/alloc.h"
 
 static const GLchar* const max_primitive_size_name = "dvec4";
 static const size_t max_primitive_size = sizeof(GLdouble[4]); // The size of a dvec4
@@ -24,14 +25,13 @@ UniformBuffer init_uniform_buffer(
 	const GLuint binding_point, const GLuint shader_using_uniform_block,
 	const GLchar* const* const subvar_names, const buffer_size_t num_subvars) {
 
-	GLuint buffer_id;
-	glGenBuffers(1, &buffer_id);
+	const GLuint buffer_id = init_gpu_buffer();
 	glBindBuffer(GL_UNIFORM_BUFFER, buffer_id);
 	glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, buffer_id);
 
 	////////// First, getting the subvar indices
 
-	GLuint* const subvar_indices = malloc(num_subvars * sizeof(GLuint));
+	GLuint* const subvar_indices = alloc(num_subvars, sizeof(GLuint));
 	glGetUniformIndices(shader_using_uniform_block, (GLsizei) num_subvars, subvar_names, subvar_indices);
 
 	for (buffer_size_t i = 0; i < num_subvars; i++) {
@@ -44,15 +44,15 @@ UniformBuffer init_uniform_buffer(
 	////////// Then, getting the byte offsets, the array stride, and the matrix stride, and freeing the subvar indices
 
 	GLint
-		*const subvar_gpu_byte_offsets = malloc(num_subvars * sizeof(GLint)),
-		*const array_strides = malloc(num_subvars * sizeof(GLint)),
-		*const matrix_strides = malloc(num_subvars * sizeof(GLint));
+		*const subvar_gpu_byte_offsets = alloc(num_subvars, sizeof(GLint)),
+		*const array_strides = alloc(num_subvars, sizeof(GLint)),
+		*const matrix_strides = alloc(num_subvars, sizeof(GLint));
 
 	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_OFFSET, subvar_gpu_byte_offsets);
 	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_ARRAY_STRIDE, array_strides);
 	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_MATRIX_STRIDE, matrix_strides);
 
-	free(subvar_indices);
+	dealloc(subvar_indices);
 
 	////////// After that, getting the block size in bytes, and allocating contents for the uniform buffer
 
@@ -79,10 +79,10 @@ UniformBuffer init_uniform_buffer(
 }
 
 void deinit_uniform_buffer(const UniformBuffer* const buffer) {
-	free(buffer -> subvar_gpu_byte_offsets);
-	free(buffer -> array_strides);
-	free(buffer -> matrix_strides);
-	glDeleteBuffers(1, &buffer -> id);
+	dealloc(buffer -> subvar_gpu_byte_offsets);
+	dealloc(buffer -> array_strides);
+	dealloc(buffer -> matrix_strides);
+	deinit_gpu_buffer(buffer -> id);
 }
 
 void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLuint shader) {

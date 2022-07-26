@@ -4,6 +4,7 @@
 #include "headers/shader.h"
 #include "headers/list.h"
 #include "headers/utils.h"
+#include "headers/alloc.h"
 
 enum {num_sub_shaders = 3}; // Vertex, geometry, and fragment
 
@@ -27,7 +28,7 @@ static void fail_on_sub_shader_creation_error(
 	log_length_getter(object_id, GL_INFO_LOG_LENGTH, &log_length);
 
 	if (log_length > 0) {
-		GLchar* const error_message = malloc((size_t) log_length + 1);
+		GLchar* const error_message = alloc((size_t) log_length + 1, sizeof(char));
 		log_getter(object_id, log_length, NULL, error_message);
 
 		// No newlines in the error message!
@@ -35,7 +36,7 @@ static void fail_on_sub_shader_creation_error(
 			if (*c == '\n') *c = '\0';
 		}
 
-		// Nothing else is freed anyways during `FAIL`, so it's fine if the `malloc` call is not freed
+		// Nothing else is deallocated anyways during `FAIL`, so it's fine if the `alloc` call is not freed
 		FAIL(CreateShader, "Error for '%s': '%s'", sub_shader_text, error_message);
 	}
 }
@@ -76,7 +77,7 @@ static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], c
 	return shader;
 }
 
-static char* read_file_contents(const char* const path) {
+static GLchar* read_file_contents(const GLchar* const path) {
 	FILE* const file = open_file_safely(path, "r");
 
 	/* (TODO) Possible bug: if `ftell` fails, `num_bytes` will
@@ -86,7 +87,7 @@ static char* read_file_contents(const char* const path) {
 	const size_t num_bytes = (size_t) ftell(file);
 	fseek(file, 0l, SEEK_SET); // Rewind file position
 
-	char* const data = malloc(num_bytes + 1l);
+	GLchar* const data = alloc(num_bytes + 1l, sizeof(GLchar));
 	fread(data, num_bytes, 1, file); // Read file bytes
 	data[num_bytes] = '\0';
 
@@ -117,7 +118,7 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 	const size_t included_full_path_string_length = base_path_length + strlen(included_path);
 
 	// One more character for the null terminator
-	GLchar* const full_path_string_for_included = malloc(included_full_path_string_length + 1);
+	GLchar* const full_path_string_for_included = alloc(included_full_path_string_length + 1, sizeof(char));
 
 	memcpy(full_path_string_for_included, includer_path, base_path_length);
 	strcpy(full_path_string_for_included + base_path_length, included_path);
@@ -126,7 +127,7 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 
 	GLchar* const included_contents = read_file_contents(full_path_string_for_included);
 	while (read_and_parse_includes_for_glsl(dependency_list, included_contents, full_path_string_for_included));
-	free(full_path_string_for_included);
+	dealloc(full_path_string_for_included);
 
 	return included_contents;
 }
@@ -246,7 +247,7 @@ GLuint init_shader(
 		if (paths[i] == NULL) continue;
 
 		const List* const dependency_list = dependency_lists + i;
-		LIST_FOR_EACH(0, dependency_list, dependency_code, _, free(*(GLchar**) dependency_code););
+		LIST_FOR_EACH(0, dependency_list, dependency_code, _, dealloc(*(GLchar**) dependency_code););
 		deinit_list(*dependency_list);
 	}
 

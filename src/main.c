@@ -6,6 +6,7 @@
 #include "headers/maps.h"
 #include "headers/texture.h" // TODO: remove this when I don't need to contain the alpha test logic in this file anymore
 #include "headers/event.h"
+#include "headers/alloc.h"
 
 static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const shadow_context,
 	const SectorContext* const sector_context, const WeaponSprite* const weapon_sprite) {
@@ -289,7 +290,7 @@ static void* main_init(void) {
 
 	////////// Initializing an app context on the heap
 
-	SceneContext* const scene_context_on_heap = malloc(sizeof(SceneContext));
+	SceneContext* const scene_context_on_heap = alloc(1, sizeof(SceneContext));
 	memcpy(scene_context_on_heap, &scene_context, sizeof(SceneContext));
 
 	////////// Initializing shared shading params
@@ -327,7 +328,7 @@ static void main_deinit(void* const app_context) {
 	deinit_title_screen(&scene_context -> title_screen);
 	deinit_skybox(scene_context -> skybox);
 
-	free(scene_context);
+	dealloc(scene_context);
 }
 
 int main(void) {

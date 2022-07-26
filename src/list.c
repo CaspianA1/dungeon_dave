@@ -10,10 +10,7 @@ static const GLfloat list_realloc_rate = 2.0f;
 //////////
 
 List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size) {
-	return (List) {
-		malloc(init_alloc * item_size),
-		item_size, 0, init_alloc
-	};
+	return (List) {alloc(init_alloc, item_size), item_size, 0, init_alloc};
 }
 
 static void copy_to_list_end(List* const list, const void* const data, const buffer_size_t num_items) {
@@ -30,7 +27,7 @@ void push_ptr_to_list(List* const list, const void* const item_ptr) {
 
 	if (list -> length == max_alloc) {
 		max_alloc = LIST_REALLOC_AMOUNT_FOR(max_alloc);
-		list -> data = realloc(list -> data, max_alloc * list -> item_size);
+		list -> data = resize_alloc(list -> data, max_alloc * list -> item_size);
 		list -> max_alloc = max_alloc;
 	}
 
@@ -44,7 +41,7 @@ void push_array_to_list(List* const list, const void* const items, const buffer_
 		const buffer_size_t needed_alloc_and_some_more = LIST_REALLOC_AMOUNT_FOR(needed_alloc);
 
 		list -> max_alloc = needed_alloc_and_some_more;
-		list -> data = realloc(list -> data, needed_alloc_and_some_more * list -> item_size);
+		list -> data = resize_alloc(list -> data, needed_alloc_and_some_more * list -> item_size);
 	}
 
 	copy_to_list_end(list, items, num_items);

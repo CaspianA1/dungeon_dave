@@ -2,6 +2,7 @@
 #define LIST_H
 
 #include "buffer_defs.h"
+#include "alloc.h"
 
 /* Users of List should not access `max_alloc`; it is
 irrelevant to the user, and should be considered private. */
@@ -14,7 +15,7 @@ typedef struct {
 
 // Note: calling `init_list` with `init_alloc` equal to 0 results in undefined behavior.
 #define init_list(init_alloc, type) _init_list((init_alloc), sizeof(type))
-#define deinit_list(list) free((list).data)
+#define deinit_list(list) dealloc((list).data)
 #define value_at_list_index(list, index, type) ((type*) (list) -> data)[index]
 
 #define LIST_FOR_EACH(initial_offset, list, item_name, out_of_bounds_name, ...) do {\

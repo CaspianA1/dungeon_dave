@@ -144,8 +144,8 @@ CascadedShadowContext init_shadow_context(
 	const GLsizei resolution, const GLsizei num_cascades) {
 
 	const GLsizei num_split_dists = num_cascades - 1;
-	GLfloat* const split_dists = malloc((size_t) num_split_dists * sizeof(GLfloat*));
-	mat4* const light_view_projection_matrices = malloc((size_t) num_cascades * sizeof(mat4));
+	GLfloat* const split_dists = alloc((size_t) num_split_dists, sizeof(GLfloat));
+	mat4* const light_view_projection_matrices = alloc((size_t) num_cascades, sizeof(mat4));
 
 	const GLfloat
 		near_clip_dist = constants.camera.near_clip_dist,
@@ -185,8 +185,8 @@ CascadedShadowContext init_shadow_context(
 }
 
 void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
-	free(shadow_context -> split_dists);
-	free(shadow_context -> light_view_projection_matrices);
+	dealloc(shadow_context -> split_dists);
+	dealloc(shadow_context -> light_view_projection_matrices);
 	deinit_shader(shadow_context -> depth_shader);
 	deinit_texture(shadow_context -> depth_layers);
 	glDeleteFramebuffers(1, &shadow_context -> framebuffer);

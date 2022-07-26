@@ -100,7 +100,7 @@ typedef enum {
 
 ////////// Uniform-related macros
 
-static inline GLint safely_get_uniform(const GLuint shader, const GLchar* const name) {
+inline GLint safely_get_uniform(const GLuint shader, const GLchar* const name) {
 	const GLint id = glGetUniformLocation(shader, name);
 	if (id == -1) FAIL(InitializeShaderUniform, "Uniform with the name of '%s' was not found in shader", name);
 	return id;
@@ -136,6 +136,8 @@ static inline GLint safely_get_uniform(const GLuint shader, const GLchar* const 
 #define USE_POLYGON_ANTIALIASING
 
 #define USE_ANISOTROPIC_FILTERING
+
+// #define TRACK_MEMORY
 
 //////////
 

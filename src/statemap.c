@@ -21,7 +21,7 @@ StateMap init_statemap(const buffer_size_t bits_across, const buffer_size_t bits
 
 	return (StateMap) {
 		.chunks_across = chunks_across,
-		.data = calloc(chunks_across * bits_down, bytes_per_chunk)
+		.data = clearing_alloc(chunks_across * bits_down, bytes_per_chunk)
 	};
 }
 
