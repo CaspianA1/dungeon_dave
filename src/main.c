@@ -296,7 +296,7 @@ static void* main_init(void) {
 		scene_context.shadow_context.depth_shader,
 		scene_context.skybox.shader,
 		scene_context.sector_context.drawable.shader,
-		scene_context.billboard_context.shader,
+		scene_context.billboard_context.drawable.shader,
 		scene_context.weapon_sprite.drawable.shader
 	};
 

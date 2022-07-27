@@ -47,8 +47,6 @@ void draw_drawable(const Drawable drawable,
 	if (invocation_params & BindVertexBuffer) glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer);
 	if (invocation_params & BindVertexSpec) glBindVertexArray(drawable.vertex_spec);
 
-	if (num_instances == 0)
-		glDrawArrays(drawable.triangle_mode, 0, (GLsizei) num_vertices);
-	else
-		glDrawArraysInstanced(drawable.triangle_mode, 0, (GLsizei) num_vertices, (GLsizei) num_instances);
+	if (num_instances == 0) glDrawArrays(drawable.triangle_mode, 0, (GLsizei) num_vertices);
+	else glDrawArraysInstanced(drawable.triangle_mode, 0, (GLsizei) num_vertices, (GLsizei) num_instances);
 }

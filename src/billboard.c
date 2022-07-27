@@ -55,32 +55,7 @@ void update_billboards(const BillboardContext* const billboard_context, const GL
 	}
 }
 
-static void internal_draw_billboards(
-	const BillboardContext* const billboard_context,
-	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const vec2 right_xz) {
-
-	const GLuint shader = billboard_context -> shader;
-	static GLint right_xz_id;
-
-	use_shader(shader);
-
-	ON_FIRST_CALL(
-		INIT_UNIFORM(right_xz, shader);
-
-		use_texture(skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
-		use_texture(billboard_context -> diffuse_texture_set, shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
-		use_texture(billboard_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_BillboardNormalMap);
-		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
-	);
-
-	UPDATE_UNIFORM(right_xz, 2fv, 1, right_xz);
-
-	use_vertex_spec(billboard_context -> vertex_spec);
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, corners_per_quad, (GLsizei) billboard_context -> billboards.length);
-}
-
-////////// This part concerns the sorting of billboard indices from back to front
+////////// This part concerns the sorting of billboard indices from back to front, and rendering
 
 static int compare_billboard_sort_refs(const void* const a, const void* const b) {
 	const GLfloat
@@ -111,7 +86,7 @@ static void sort_billboard_indices_by_dist_to_camera(BillboardContext* const bil
 
 	////////// Moving the billboards into their right positions in their GPU buffer
 
-	use_vertex_buffer(billboard_context -> vertex_buffer);
+	use_vertex_buffer(billboard_context -> drawable.vertex_buffer);
 
 	Billboard* const billboards_gpu = init_gpu_memory_mapping(GL_ARRAY_BUFFER, num_billboards * sizeof(Billboard), true);
 
@@ -122,6 +97,33 @@ static void sort_billboard_indices_by_dist_to_camera(BillboardContext* const bil
 	deinit_gpu_memory_mapping(GL_ARRAY_BUFFER);
 }
 
+////////// This part concerns the updating of uniforms
+
+typedef struct {
+	const GLuint normal_map_set;
+	const CascadedShadowContext* const shadow_context;
+	const Skybox* const skybox;
+	const GLfloat* const right_xz;
+} BillboardUniformUpdaterParams;
+
+static void update_uniforms(const Drawable* const drawable, const void* const param) {
+	const GLuint shader = drawable -> shader;
+	const BillboardUniformUpdaterParams typed_params = *(BillboardUniformUpdaterParams*) param;
+
+	static GLint right_xz_id;
+
+	ON_FIRST_CALL(
+		INIT_UNIFORM(right_xz, shader);
+
+		use_texture(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
+		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
+		use_texture(typed_params.normal_map_set, shader, "normal_map_sampler", TexSet, TU_BillboardNormalMap);
+		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
+	);
+
+	UPDATE_UNIFORM(right_xz, 2fv, 1, typed_params.right_xz);
+}
+
 //////////
 
 // This is just a utility function
@@ -130,7 +132,20 @@ void draw_billboards(BillboardContext* const billboard_context,
 	const Skybox* const skybox, const Camera* const camera) {
 
 	sort_billboard_indices_by_dist_to_camera(billboard_context, camera -> pos);
-	internal_draw_billboards(billboard_context, shadow_context, skybox, camera -> right_xz);
+
+	draw_drawable(
+		billboard_context -> drawable, corners_per_quad, billboard_context -> billboards.length,
+		&(BillboardUniformUpdaterParams) {billboard_context -> normal_map_set, shadow_context, skybox, camera -> right_xz},
+		UseShaderPipeline | BindVertexSpec
+	);
+}
+
+////////// Initialization and deinitialization
+
+static void define_vertex_spec(void) {
+	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), 0, BUFFER_SIZE_TYPENAME);
+	define_vertex_spec_index(true, true, 1, 2, sizeof(Billboard), offsetof(Billboard, size), BILLBOARD_VAR_COMPONENT_TYPENAME);
+	define_vertex_spec_index(true, true, 2, 3, sizeof(Billboard), offsetof(Billboard, pos), BILLBOARD_VAR_COMPONENT_TYPENAME);
 }
 
 BillboardContext init_billboard_context(
@@ -149,47 +164,34 @@ BillboardContext init_billboard_context(
 	);
 
 	BillboardContext billboard_context = {
-		.vertex_buffer = init_gpu_buffer(),
-		.vertex_spec = init_vertex_spec(),
-		.diffuse_texture_set = diffuse_texture_set,
+		.drawable = init_drawable_with_vertices(
+			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW, GL_TRIANGLE_STRIP,
+			(List) {.data = NULL, .item_size = sizeof(Billboard), .length = num_billboards},
+
+			init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag")),
+			diffuse_texture_set
+		),
+
 		.normal_map_set = init_normal_map_from_diffuse_texture_set(diffuse_texture_set, normal_map_config),
-		.shader = init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag")),
 
 		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),
 		.billboards = init_list(num_billboards, Billboard),
-		.animations = init_list(num_billboard_animations, Animation),
-		.animation_instances = init_list(num_billboard_animation_instances, BillboardAnimationInstance)
+		.animation_instances = init_list(num_billboard_animation_instances, BillboardAnimationInstance),
+		.animations = init_list(num_billboard_animations, Animation)
 	};
-
-	////////// Initializing the vertex buffer
-
-	use_vertex_buffer(billboard_context.vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, num_billboards * sizeof(Billboard), NULL, GL_DYNAMIC_DRAW);
-
-	////////// Initializing the vertex spec
-
-	use_vertex_spec(billboard_context.vertex_spec);
-	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), 0, BUFFER_SIZE_TYPENAME);
-	define_vertex_spec_index(true, true, 1, 2, sizeof(Billboard), offsetof(Billboard, size), BILLBOARD_VAR_COMPONENT_TYPENAME);
-	define_vertex_spec_index(true, true, 2, 3, sizeof(Billboard), offsetof(Billboard, pos), BILLBOARD_VAR_COMPONENT_TYPENAME);
 
 	////////// Initializing client-side lists
 
-	billboard_context.distance_sort_refs.length = num_billboards;
 	push_array_to_list(&billboard_context.billboards, billboards, num_billboards);
-	push_array_to_list(&billboard_context.animations, billboard_animations, num_billboard_animations);
 	push_array_to_list(&billboard_context.animation_instances, billboard_animation_instances, num_billboard_animation_instances);
+	push_array_to_list(&billboard_context.animations, billboard_animations, num_billboard_animations);
 
 	return billboard_context;
 }
 
 void deinit_billboard_context(const BillboardContext* const billboard_context) {
-	deinit_gpu_buffer(billboard_context -> vertex_buffer);
-	deinit_vertex_spec(billboard_context -> vertex_spec);
-
-	deinit_texture(billboard_context -> diffuse_texture_set);
+	deinit_drawable(billboard_context -> drawable);
 	deinit_texture(billboard_context -> normal_map_set);
-	deinit_shader(billboard_context -> shader);
 
 	deinit_list(billboard_context -> distance_sort_refs);
 	deinit_list(billboard_context -> billboards);

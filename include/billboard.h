@@ -1,18 +1,20 @@
 #ifndef BILLBOARD_H
 #define BILLBOARD_H
 
+#include "drawable.h"
 #include "buffer_defs.h"
-#include "shadow.h"
-#include "camera.h"
-#include "animation.h"
 #include "list.h"
+#include "shadow.h"
 #include "skybox.h"
+#include "camera.h"
 #include "normal_map_generation.h"
+#include "animation.h"
 
 // TODO: make sure that billboards never intersect, because that would break depth sorting
 
-typedef struct { // TODO: integrate this into Drawable
-	const GLuint vertex_buffer, vertex_spec, diffuse_texture_set, normal_map_set, shader;
+typedef struct {
+	const Drawable drawable;
+	const GLuint normal_map_set;
 	List distance_sort_refs, billboards, animations, animation_instances;
 } BillboardContext;
 
@@ -28,7 +30,7 @@ typedef struct {
 	const struct {const billboard_index_t billboard, animation;} ids;
 } BillboardAnimationInstance;
 
-////////// Excluded: internal_draw_billboards, compare_billboard_sort_refs, sort_billboard_indices_by_dist_to_camera
+////////// Excluded: compare_billboard_sort_refs, sort_billboard_indices_by_dist_to_camera, update_uniforms, define_vertex_spec
 
 void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs);
 
