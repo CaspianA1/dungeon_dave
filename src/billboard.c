@@ -191,7 +191,7 @@ BillboardContext init_billboard_context(
 
 void deinit_billboard_context(const BillboardContext* const billboard_context) {
 	deinit_drawable(billboard_context -> drawable);
-	deinit_texture(billboard_context -> normal_map_set);
+	glDeleteTextures(1, &billboard_context -> normal_map_set);
 
 	deinit_list(billboard_context -> distance_sort_refs);
 	deinit_list(billboard_context -> billboards);

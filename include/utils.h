@@ -139,18 +139,6 @@ set_triangle_fill_mode, application_should_exit, loop_application */
 void make_application(void (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const));
 
-//////////
-
-void define_vertex_spec_index(const bool is_instanced, const bool treat_vertices_as_floats,
-	const byte index, const byte num_components, const buffer_size_t stride,
-	const buffer_size_t initial_offset, const GLenum typename);
-
-// This is only for writing, not reading
-void* init_gpu_memory_mapping(const GLenum target, const GLsizeiptr num_bytes, const bool discard_prev_contents);
-#define deinit_gpu_memory_mapping glUnmapBuffer
-
-void enable_all_culling(void);
-
 // Note: `x` and `y` are top-down here (making them technically `x` and `z`).
 byte sample_map_point(const byte* const map, const byte x, const byte y, const byte map_width);
 

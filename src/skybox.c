@@ -17,7 +17,7 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 			SDL_PIXEL_FORMAT);
 
 		SDL_BlitScaled(skybox_surface, NULL, rescaled_skybox_surface, NULL);
-		deinit_surface(skybox_surface);
+		SDL_FreeSurface(skybox_surface);
 
 		skybox_surface = rescaled_skybox_surface;
 	}
@@ -61,8 +61,8 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 
 	glGenerateMipmap(TexSkybox);
 
-	deinit_surface(face_surface);
-	deinit_surface(skybox_surface);
+	SDL_FreeSurface(face_surface);
+	SDL_FreeSurface(skybox_surface);
 
 	return skybox_texture;
 }

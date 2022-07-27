@@ -19,7 +19,7 @@ SDL_Surface* init_surface(const GLchar* const path) {
 		return surface; // Format is already correct
 	else {
 		SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
-		deinit_surface(surface);
+		SDL_FreeSurface(surface);
 		return converted_surface;
 	}
 }
@@ -116,7 +116,7 @@ GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 	);
 
 	glGenerateMipmap(TexPlain);
-	deinit_surface(surface);
+	SDL_FreeSurface(surface);
 
 	return texture;
 }
@@ -145,7 +145,7 @@ static void init_still_subtextures_in_texture_set(
 				OPENGL_COLOR_CHANNEL_TYPE, surface_with_right_size -> pixels);
 		);
 
-		deinit_surface(surface);
+		SDL_FreeSurface(surface);
 	}
 }
 
@@ -181,7 +181,7 @@ static void init_animated_subtextures_in_texture_set(const bool premultiply_alph
 					OPENGL_COLOR_CHANNEL_TYPE, rescaled_surface -> pixels);
 			);
 		}
-		deinit_surface(spritesheet_surface);
+		SDL_FreeSurface(spritesheet_surface);
 	}
 }
 
@@ -214,7 +214,7 @@ GLuint init_texture_set(const bool premultiply_alpha,
 
 	////////// Deinitialization
 
-	deinit_surface(rescaled_surface);
+	SDL_FreeSurface(rescaled_surface);
 
 	return texture;
 }

@@ -1,5 +1,31 @@
 #include "drawable.h"
 
+////////// Utils commonly used with Drawable
+
+void define_vertex_spec_index(const bool is_instanced, const bool treat_vertices_as_floats,
+	const byte index, const byte num_components, const buffer_size_t stride,
+	const buffer_size_t initial_offset, const GLenum typename) {
+
+	glEnableVertexAttribArray(index);
+	if (is_instanced) glVertexAttribDivisor(index, 1);
+
+	const GLsizei cast_stride = (GLsizei) stride;
+	const void* const cast_initial_offset = (void*) (size_t) initial_offset;
+
+	if (treat_vertices_as_floats) glVertexAttribPointer(index, num_components, typename, GL_FALSE, cast_stride, cast_initial_offset);
+	else glVertexAttribIPointer(index, num_components, typename, cast_stride, cast_initial_offset);
+}
+
+// TODO: possibly add `GL_MAP_UNSYNCHRONIZED_BIT`, if possible? Test on Chromebook.
+void* init_gpu_memory_mapping(const GLenum target, const GLsizeiptr num_bytes, const bool discard_prev_contents) {
+	const GLbitfield flags = GL_MAP_WRITE_BIT | (GL_MAP_INVALIDATE_BUFFER_BIT * discard_prev_contents);
+	void* const mapping = glMapBufferRange(target, 0, num_bytes, flags);
+	if (mapping == NULL) FAIL(InitializeGPUMemoryMapping, "%s", "Initializing a GPU memory mapping was not possible");
+	return mapping;
+}
+
+////////// The main Drawable functions
+
 Drawable init_drawable_with_vertices(
 	void (*const vertex_spec_definer) (void), const uniform_updater_t uniform_updater,
 	const GLenum vertex_buffer_access, const GLenum triangle_mode,

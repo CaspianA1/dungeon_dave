@@ -1,4 +1,3 @@
-#include "buffer_defs.h"
 #include "maps.h"
 
 const byte level_one_heightmap[level_one_height][level_one_width] = {

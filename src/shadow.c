@@ -184,8 +184,8 @@ CascadedShadowContext init_shadow_context(
 void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
 	dealloc(shadow_context -> split_dists);
 	dealloc(shadow_context -> light_view_projection_matrices);
-	deinit_shader(shadow_context -> depth_shader);
-	deinit_texture(shadow_context -> depth_layers);
+	glDeleteProgram(shadow_context -> depth_shader);
+	glDeleteTextures(1, &shadow_context -> depth_layers);
 	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
 }
 
@@ -216,7 +216,7 @@ void enable_rendering_to_shadow_context(const CascadedShadowContext* const shado
 
 	////////// Preparing for cascade rendering
 
-	use_shader(shadow_context -> depth_shader);
+	glUseProgram(shadow_context -> depth_shader);
 
 	const GLsizei resolution = shadow_context -> resolution;
 	glViewport(0, 0, resolution, resolution);

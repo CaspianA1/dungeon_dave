@@ -257,7 +257,7 @@ SectorContext init_sector_context(const byte* const heightmap,
 
 void deinit_sector_context(const SectorContext* const sector_context) {
 	deinit_drawable(sector_context -> drawable);
-	deinit_texture(sector_context -> normal_map_set);
+	glDeleteTextures(1, &sector_context -> normal_map_set);
 	deinit_list(sector_context -> mesh_cpu);
 	deinit_list(sector_context -> sectors);
 }

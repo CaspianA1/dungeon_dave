@@ -250,7 +250,7 @@ WeaponSprite init_weapon_sprite(
 		peek_surface -> h / animation_layout -> frames_down
 	};
 
-	deinit_surface(peek_surface);
+	SDL_FreeSurface(peek_surface);
 
 	const GLuint diffuse_texture_set = init_texture_set(
 		true, TexNonRepeating,
@@ -290,7 +290,7 @@ WeaponSprite init_weapon_sprite(
 
 void deinit_weapon_sprite(const WeaponSprite* const ws) {
 	deinit_drawable(ws -> drawable);
-	deinit_texture(ws -> normal_map_set);
+	glDeleteTextures(1, &ws -> normal_map_set);
 }
 
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event) {

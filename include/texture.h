@@ -1,8 +1,8 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "utils.h"
 #include "buffer_defs.h"
+#include "utils.h"
 #include "animation.h"
 
 // TODO: put these macros in the constants struct
@@ -44,9 +44,6 @@ typedef enum {
 } TextureUnit;
 
 // Excluded: premultiply_surface_alpha, init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set
-
-#define deinit_texture(t) glDeleteTextures(1, &(t))
-#define deinit_surface SDL_FreeSurface
 
 #define WITH_SURFACE_PIXEL_ACCESS(surface, ...) do {\
 	const bool must_lock = SDL_MUSTLOCK((surface));\

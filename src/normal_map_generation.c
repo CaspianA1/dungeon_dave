@@ -233,8 +233,8 @@ GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set
 
 	////////// Deinitialization
 
-	deinit_surface(general_purpose_surface_1);
-	deinit_surface(general_purpose_surface_2);
+	SDL_FreeSurface(general_purpose_surface_1);
+	SDL_FreeSurface(general_purpose_surface_2);
 
 	return normal_map_set;
 }

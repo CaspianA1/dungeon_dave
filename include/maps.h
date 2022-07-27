@@ -1,6 +1,8 @@
 #ifndef MAPS_H
 #define MAPS_H
 
+#include "buffer_defs.h"
+
 enum {
 	level_one_width = 25, level_one_height = 15,
 	architecture_width = 50, architecture_height = 50,
@@ -14,6 +16,8 @@ enum {
 	tiny_width = 7, tiny_height = 7,
 	checker_width = 255, checker_height = 255
 };
+
+// TODO: make a `MAP_DEF` macro
 
 extern const byte
 	level_one_heightmap[level_one_height][level_one_width],
