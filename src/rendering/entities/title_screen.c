@@ -35,7 +35,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 	// TODO: put these in the `constants` struct
 	const GLfloat
-		time_for_spin_cycle = 2.0f, logo_transitions_per_spin_cycle = 0.25f,
+		time_for_spin_cycle = 3.0f, logo_transitions_per_spin_cycle = 0.25f,
 		light_dist_from_title_screen_plane = 0.75f, time_for_palace_city_scroll_cycle = 10.0f;
 
 	const GLfloat spin_seed = typed_params.curr_time_secs * TWO_PI / time_for_spin_cycle;
