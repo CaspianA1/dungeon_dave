@@ -185,7 +185,7 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 	if (type == TexSet) glGetTexLevelParameteriv(target, level, GL_TEXTURE_DEPTH, &num_subtextures);
 	else num_subtextures = 1;
 
-	// Wrap mode for each axis is the same, so only for 'S' (or across) is fine
+	// The wrap mode for each axis is the same, so only for 'S' (or across) is fine
 	glGetTexParameteriv(target, GL_TEXTURE_WRAP_S, &wrap_mode);
 	glGetTexParameteriv(target, GL_TEXTURE_MAG_FILTER, &mag_filter);
 	glGetTexParameteriv(target, GL_TEXTURE_MIN_FILTER, &min_filter);
