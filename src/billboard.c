@@ -116,7 +116,7 @@ static void sort_billboard_indices_by_dist_to_camera(BillboardContext* const bil
 
 	use_vertex_buffer(billboard_context -> vertex_buffer);
 
-	Billboard* const billboards_gpu = init_destructive_gpu_memory_mapping(GL_ARRAY_BUFFER, num_billboards * sizeof(Billboard));
+	Billboard* const billboards_gpu = init_gpu_memory_mapping(GL_ARRAY_BUFFER, num_billboards * sizeof(Billboard), true);
 
 	// TODO: do culling via an AABB tree later
 	for (billboard_index_t i = 0; i < num_billboards; i++)

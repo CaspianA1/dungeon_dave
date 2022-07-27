@@ -35,7 +35,7 @@ void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLui
 
 /* Calling this means that the previous contents of the buffer
 become undefined; so all uniforms must be written to. */
-void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer);
+void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer, const bool discard_prev_contents);
 void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer);
 
 void write_primitive_to_uniform_buffer(const UniformBuffer* const buffer,

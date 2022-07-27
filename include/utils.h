@@ -156,9 +156,8 @@ void define_vertex_spec_index(const bool is_instanced, const bool treat_vertices
 GLuint init_vertex_spec(void);
 GLuint init_gpu_buffer(void);
 
-/* This is destructive in the sense that it leaves the previous contents
-of the buffer undefined.  This is only for writing, not for reading. */
-void* init_destructive_gpu_memory_mapping(const GLenum target, const GLsizeiptr num_bytes);
+// This is only for writing, not reading
+void* init_gpu_memory_mapping(const GLenum target, const GLsizeiptr num_bytes, const bool discard_prev_contents);
 #define deinit_gpu_memory_mapping glUnmapBuffer
 
 void enable_all_culling(void);

@@ -1,7 +1,7 @@
 #include "shared_shading_params.h"
 
 static void init_constant_shading_params(UniformBuffer* const shading_params, const CascadedShadowContext* const shadow_context) {
-	enable_uniform_buffer_writing_batch(shading_params);
+	enable_uniform_buffer_writing_batch(shading_params, true);
 
 	#define UBO_WRITE(name) write_primitive_to_uniform_buffer(shading_params, #name, &constants.lighting.name, sizeof(constants.lighting.name))
 
@@ -75,7 +75,7 @@ void update_shared_shading_params(SharedShadingParams* const shared_shading_para
 
 	UniformBuffer* const dynamic_params = &shared_shading_params -> dynamic;
 
-	enable_uniform_buffer_writing_batch(dynamic_params);
+	enable_uniform_buffer_writing_batch(dynamic_params, true);
 
 	write_primitive_to_uniform_buffer(dynamic_params, "camera_pos_world_space", camera -> pos, sizeof(vec3));
 	write_matrix_to_uniform_buffer(dynamic_params, "view_projection", (GLfloat*) camera -> view_projection, sizeof(vec4), 4);

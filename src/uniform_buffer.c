@@ -86,9 +86,9 @@ void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLui
 	glUniformBlockBinding(shader, safely_get_uniform_block_index(shader, buffer -> block_name), buffer -> binding_point);
 }
 
-void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer) {
+void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer, const bool discard_prev_contents) {
 	glBindBuffer(GL_UNIFORM_BUFFER, buffer -> id);
-	buffer -> gpu_memory_mapping = init_destructive_gpu_memory_mapping(GL_UNIFORM_BUFFER, buffer -> block_size);
+	buffer -> gpu_memory_mapping = init_gpu_memory_mapping(GL_UNIFORM_BUFFER, buffer -> block_size, discard_prev_contents);
 }
 
 void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer) {

@@ -257,8 +257,9 @@ GLuint init_gpu_buffer(void) {
 }
 
 // TODO: possibly add `GL_MAP_UNSYNCHRONIZED_BIT`, if possible? Test on Chromebook.
-void* init_destructive_gpu_memory_mapping(const GLenum target, const GLsizeiptr num_bytes) {
-	void* const mapping = glMapBufferRange(target, 0, num_bytes, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+void* init_gpu_memory_mapping(const GLenum target, const GLsizeiptr num_bytes, const bool discard_prev_contents) {
+	const GLbitfield flags = GL_MAP_WRITE_BIT | (GL_MAP_INVALIDATE_BUFFER_BIT * discard_prev_contents);
+	void* const mapping = glMapBufferRange(target, 0, num_bytes, flags);
 	if (mapping == NULL) FAIL(InitializeGPUMemoryMapping, "%s", "Initializing a GPU memory mapping was not possible");
 	return mapping;
 }

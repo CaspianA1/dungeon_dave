@@ -147,8 +147,8 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
 	const face_mesh_t* const face_meshes_cpu_data = face_meshes_cpu -> data;
 
-	face_mesh_t* const face_meshes_gpu = init_destructive_gpu_memory_mapping(
-		GL_ARRAY_BUFFER, face_meshes_cpu -> length * sizeof(face_mesh_t)
+	face_mesh_t* const face_meshes_gpu = init_gpu_memory_mapping(
+		GL_ARRAY_BUFFER, face_meshes_cpu -> length * sizeof(face_mesh_t), true
 	);
 
 	buffer_size_t num_visible_faces = 0;
