@@ -218,7 +218,7 @@ void make_application(void (*const drawer) (void* const, const Event* const),
 		constants.window.opengl_major_minor_version, constants.window.depth_buffer_bits,
 		constants.window.multisample_samples, constants.window.size);
 
-	printf("vendor = %s\nrenderer = %s\nversion = %s\n---\n",
+	printf("---\nvendor = %s\nrenderer = %s\nversion = %s\n---\n",
 		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 
 	void* const app_context = init();

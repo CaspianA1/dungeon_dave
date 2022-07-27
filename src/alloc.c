@@ -35,7 +35,7 @@ static void memory_report(void) {
 
 	printf("Memory report:\n"
 		"There were %u total allocs, %u allocs, and %u clearing allocs.\n"
-		"There were also %u resizing allocs and %u deallocs.\nFinal %s count: %u.\n" ,
+		"There were also %u resizing allocs and %u deallocs.\nFinal %s count: %u.\n---\n" ,
 		total_allocs, num_allocs, num_clearing_allocs, num_resizing_allocs, num_deallocs,
 		memory_status, memory_status_number
 	);
