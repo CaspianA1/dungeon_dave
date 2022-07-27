@@ -22,7 +22,8 @@ UniformBuffer init_uniform_buffer(
 	const GLuint binding_point, const GLuint shader_using_uniform_block,
 	const GLchar* const* const subvar_names, const buffer_size_t num_subvars) {
 
-	const GLuint buffer_id = init_gpu_buffer();
+	GLuint buffer_id;
+	glGenBuffers(1, &buffer_id);
 	glBindBuffer(GL_UNIFORM_BUFFER, buffer_id);
 	glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, buffer_id);
 

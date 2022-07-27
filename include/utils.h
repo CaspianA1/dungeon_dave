@@ -145,9 +145,6 @@ void define_vertex_spec_index(const bool is_instanced, const bool treat_vertices
 	const byte index, const byte num_components, const buffer_size_t stride,
 	const buffer_size_t initial_offset, const GLenum typename);
 
-GLuint init_vertex_spec(void);
-GLuint init_gpu_buffer(void);
-
 // This is only for writing, not reading
 void* init_gpu_memory_mapping(const GLenum target, const GLsizeiptr num_bytes, const bool discard_prev_contents);
 #define deinit_gpu_memory_mapping glUnmapBuffer

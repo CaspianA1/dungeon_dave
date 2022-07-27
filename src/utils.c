@@ -242,19 +242,6 @@ void define_vertex_spec_index(const bool is_instanced, const bool treat_vertices
 	else glVertexAttribIPointer(index, num_components, typename, cast_stride, cast_initial_offset);
 }
 
-// TODO: remove this once Drawable is done
-GLuint init_vertex_spec(void) {
-	GLuint vertex_spec;
-	glGenVertexArrays(1, &vertex_spec);
-	return vertex_spec;
-}
-
-// TODO: remove this too once Drawable is done
-GLuint init_gpu_buffer(void) {
-	GLuint gpu_buffer;
-	glGenBuffers(1, &gpu_buffer);
-	return gpu_buffer;
-}
 
 // TODO: possibly add `GL_MAP_UNSYNCHRONIZED_BIT`, if possible? Test on Chromebook.
 void* init_gpu_memory_mapping(const GLenum target, const GLsizeiptr num_bytes, const bool discard_prev_contents) {
