@@ -7,17 +7,20 @@ individual members, not by writing to the whole struct at once. */
 #include "buffer_defs.h"
 #include "list.h"
 
-// ``subvar_gpu_byte_offsets`, `array_strides`, and `matrix_strides` are allocated on the heap by `init_uniform_buffer`.
 typedef struct {
 	const GLuint id, binding_point;
-	const buffer_size_t num_subvars, block_size;
-
-	GLint *const subvar_gpu_byte_offsets, *const array_strides, *const matrix_strides;
-
-	const GLchar* const* const subvar_names;
-	const GLchar* const block_name;
-
 	byte* gpu_memory_mapping;
+
+	const struct {
+		const buffer_size_t size;
+		const GLchar* const name;
+	} block;
+
+	const struct {
+		const buffer_size_t count;
+		GLint *const byte_offsets, *const array_strides, *matrix_strides;
+		const GLchar* const* const names;
+	} subvars;
 } UniformBuffer;
 
 // Excluded: safely_get_uniform_block_index, check_primitive_size, check_matrix_size, get_subvar_metadata

@@ -59,6 +59,7 @@ Architectural/code design ideas:
 - On the first frame, there are no shadows (it's a bit hard to see; it's probably because `update_shared_shading_params`
 	is called before `enable_rendering_to_shadow_context`). Possible solution: update the mvp uniform after it's updated
 	in the shadow context, but before calling glUseProgram for the depth shader.
+- A shader cache
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage

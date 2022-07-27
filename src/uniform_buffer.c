@@ -33,21 +33,23 @@ UniformBuffer init_uniform_buffer(
 
 	for (buffer_size_t i = 0; i < num_subvars; i++) {
 		if (subvar_indices[i] == GL_INVALID_INDEX) FAIL(InitializeShaderUniform,
-			"Sub-variable '%s' in the uniform block '%s' is not present",
+			"Subvar '%s' in the uniform block '%s' is not present",
 			subvar_names[i], block_name
 		);
 	}
 
 	////////// Then, getting the byte offsets, the array stride, and the matrix stride, and freeing the subvar indices
 
-	GLint
-		*const subvar_gpu_byte_offsets = alloc(num_subvars, sizeof(GLint)),
-		*const array_strides = alloc(num_subvars, sizeof(GLint)),
-		*const matrix_strides = alloc(num_subvars, sizeof(GLint));
+	GLint* const subvar_metadata_buffer = alloc(num_subvars * 3, sizeof(GLint));
 
-	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_OFFSET, subvar_gpu_byte_offsets);
-	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_ARRAY_STRIDE, array_strides);
-	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_MATRIX_STRIDE, matrix_strides);
+	GLint
+		*const subvar_byte_offsets = subvar_metadata_buffer,
+		*const subvar_array_strides = subvar_metadata_buffer + num_subvars,
+		*const subvar_matrix_strides = subvar_metadata_buffer + (num_subvars << 1);
+
+	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_OFFSET, subvar_byte_offsets);
+	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_ARRAY_STRIDE, subvar_array_strides);
+	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_MATRIX_STRIDE, subvar_matrix_strides);
 
 	dealloc(subvar_indices);
 
@@ -65,30 +67,37 @@ UniformBuffer init_uniform_buffer(
 
 	return (UniformBuffer) {
 		.id = buffer_id, .binding_point = binding_point,
-		.num_subvars = num_subvars, .block_size = (buffer_size_t) block_size_in_bytes,
+		.gpu_memory_mapping = NULL,
 
-		.subvar_gpu_byte_offsets = subvar_gpu_byte_offsets,
-		.array_strides = array_strides, .matrix_strides = matrix_strides,
-		.subvar_names = subvar_names,
+		.block = {
+			.size = (buffer_size_t) block_size_in_bytes,
+			.name = block_name
+		},
 
-		.block_name = block_name, .gpu_memory_mapping = NULL
+		.subvars = {
+			.count = num_subvars,
+			.byte_offsets = subvar_byte_offsets,
+			.array_strides = subvar_array_strides,
+			.matrix_strides = subvar_matrix_strides,
+			.names = subvar_names
+		}
 	};
 }
 
 void deinit_uniform_buffer(const UniformBuffer* const buffer) {
-	dealloc(buffer -> subvar_gpu_byte_offsets);
-	dealloc(buffer -> array_strides);
-	dealloc(buffer -> matrix_strides);
+	/* The subvar metadata, which includes the byte offsets, and array and matrix strides, are all allocated
+	in one block together, so freeing the byte offsets (which is the beginning of the block) frees all of them. */
+	dealloc(buffer -> subvars.byte_offsets);
 	deinit_gpu_buffer(buffer -> id);
 }
 
 void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLuint shader) {
-	glUniformBlockBinding(shader, safely_get_uniform_block_index(shader, buffer -> block_name), buffer -> binding_point);
+	glUniformBlockBinding(shader, safely_get_uniform_block_index(shader, buffer -> block.name), buffer -> binding_point);
 }
 
 void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer, const bool discard_prev_contents) {
 	glBindBuffer(GL_UNIFORM_BUFFER, buffer -> id);
-	buffer -> gpu_memory_mapping = init_gpu_memory_mapping(GL_UNIFORM_BUFFER, buffer -> block_size, discard_prev_contents);
+	buffer -> gpu_memory_mapping = init_gpu_memory_mapping(GL_UNIFORM_BUFFER, buffer -> block.size, discard_prev_contents);
 }
 
 void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer) {
@@ -129,16 +138,16 @@ static void get_subvar_metadata(const UniformBuffer* const buffer, const GLchar*
 		" to uniform buffer because writing batch is not enabled", subvar_name
 	);
 
-	const buffer_size_t num_subvars = buffer -> num_subvars;
-	const GLchar* const* const subvar_names = buffer -> subvar_names;
+	const buffer_size_t num_subvars = buffer -> subvars.count;
+	const GLchar* const* const subvar_names = buffer -> subvars.names;
 
 	for (buffer_size_t i = 0; i < num_subvars; i++) {
 		if (!strcmp(subvar_name, subvar_names[i])) {
 			// In some cases, need the gpu buffer ptr. Never need the actual index. Also need the _ in some cases.
-			*gpu_memory_dest = buffer -> gpu_memory_mapping + buffer -> subvar_gpu_byte_offsets[i];
+			*gpu_memory_dest = buffer -> gpu_memory_mapping + buffer -> subvars.byte_offsets[i];
 
-			if (array_stride != NULL) *array_stride = buffer -> array_strides[i];
-			if (matrix_stride != NULL) *matrix_stride = buffer -> matrix_strides[i];
+			if (array_stride != NULL) *array_stride = buffer -> subvars.array_strides[i];
+			if (matrix_stride != NULL) *matrix_stride = buffer -> subvars.matrix_strides[i];
 
 			return;
 		}
@@ -146,7 +155,7 @@ static void get_subvar_metadata(const UniformBuffer* const buffer, const GLchar*
 
 	FAIL(InitializeShaderUniform,
 		"Could not locate subvar '%s' within uniform block '%s'",
-		subvar_name, buffer -> block_name
+		subvar_name, buffer -> block.name
 	);
 }
 
