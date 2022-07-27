@@ -55,10 +55,6 @@ Architectural/code design ideas:
 - Alpha to coverage with the title screen becomes really glitchy
 - Texture compression as an option
 - Figure out how to make spherically distorted skyboxes in Blender from cube-like ones made in an image editor
-- On the first frame, there are no shadows (it's a bit hard to see; it's probably because `update_shared_shading_params`
-	is called before `enable_rendering_to_shadow_context`). Possible solution: update the mvp uniform after it's updated
-	in the shadow context, but before calling glUseProgram for the depth shader. To do this, split the shadow step of the
-	rendering loop into an update_mvps and enable/disable rendering to shadow map part.
 - A shader cache
 - Specular antialiasing
 
@@ -72,7 +68,6 @@ Object rendering:
 - Up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - Some type of bridge object (perhaps not axis-aligned; just an arbitrary plane)
 - A sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
-- Billboard lighting that matches the sector lighting (share uniforms via a uniform buffer object)
 
 Random feature ideas:
 - A map editor. Read in a json file that has dimensions, a heightmap, a texture id map, and a texture list.

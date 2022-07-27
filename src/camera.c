@@ -299,6 +299,7 @@ static void update_camera_matrices(Camera* const camera, const vec3 dir, const v
 void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]) {
 	////////// Updating the camera aspect ratio and angles
 
+	// TODO: don't store the aspect ratio in the Camera struct
 	camera -> aspect_ratio = (GLfloat) event.screen_size[0] / event.screen_size[1];
 
 	Angles* const angles = &camera -> angles;

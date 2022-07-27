@@ -69,19 +69,17 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	BillboardContext* const billboard_context = &scene_context -> billboard_context;
 	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
 
-	////////// Updating the camera, and the shared shading params
+	////////// Scene updating
 
 	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
-	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context);
-
-	////////// Object updating
-
 	update_billboards(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
+	update_shadow_context(shadow_context, camera);
+	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context);
 
 	////////// Rendering to the shadow context
 
-	enable_rendering_to_shadow_context(shadow_context, camera);
+	enable_rendering_to_shadow_context(shadow_context);
 	draw_all_objects_to_shadow_map(shadow_context, sector_context, weapon_sprite);
 	disable_rendering_to_shadow_context(event -> screen_size);
 

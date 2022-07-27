@@ -189,7 +189,7 @@ void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
 	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
 }
 
-void enable_rendering_to_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera) {
+void update_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera) {
 	const GLfloat* const split_dists = shadow_context -> split_dists;
 	mat4* const light_view_projection_matrices = shadow_context -> light_view_projection_matrices;
 
@@ -213,9 +213,9 @@ void enable_rendering_to_shadow_context(const CascadedShadowContext* const shado
 		get_sub_frustum_light_view_projection_matrix(camera, shadow_context,
 			sub_near_clip, sub_far_clip, light_view_projection_matrices[i]);
 	}
+}
 
-	////////// Preparing for cascade rendering
-
+void enable_rendering_to_shadow_context(const CascadedShadowContext* const shadow_context) {
 	glUseProgram(shadow_context -> depth_shader);
 
 	const GLsizei resolution = shadow_context -> resolution;
