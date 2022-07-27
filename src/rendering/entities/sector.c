@@ -249,7 +249,7 @@ SectorContext init_sector_context(const byte* const heightmap,
 			diffuse_texture_set
 		),
 
-		.normal_map_set = init_normal_map_from_diffuse_texture_set(diffuse_texture_set, normal_map_config),
+		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, normal_map_config),
 		.mesh_cpu = mesh_cpu, .sectors = sectors
 	};
 }

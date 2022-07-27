@@ -13,6 +13,6 @@ typedef struct {
     const GLfloat blur_std_dev, intensity;
 } NormalMapConfig;
 
-GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set, const NormalMapConfig* const config);
+GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture, const NormalMapConfig* const config);
 
 #endif

@@ -158,8 +158,8 @@ BillboardContext init_billboard_context(
 	const billboard_index_t num_billboard_animations, const Animation* const billboard_animations,
 	const billboard_index_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances) {
 
-	const GLuint diffuse_texture_set = init_texture_set(true, TexNonRepeating,
-		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+	const GLuint diffuse_texture_set = init_texture_set(
+		true, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 		num_still_textures, num_animation_layouts, texture_size, texture_size, still_texture_paths, animation_layouts
 	);
 
@@ -172,7 +172,7 @@ BillboardContext init_billboard_context(
 			diffuse_texture_set
 		),
 
-		.normal_map_set = init_normal_map_from_diffuse_texture_set(diffuse_texture_set, normal_map_config),
+		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, normal_map_config),
 
 		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),
 		.billboards = init_list(num_billboards, Billboard),

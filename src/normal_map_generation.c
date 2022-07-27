@@ -153,7 +153,7 @@ static void do_separable_gaussian_blur_pass(
 	);
 }
 
-GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set, const NormalMapConfig* const config) {
+GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture, const NormalMapConfig* const config) {
 	/* How this function works:
 
 	- First, query OpenGL about information about the texture set, like its dimensions, and its filters used.
@@ -166,19 +166,23 @@ GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set
 	Note: normal maps are not interleaved with the texture set because if gamma correction is used,
 	the texture set will be in SRGB, and normal maps should be in a linear color space. */
 
+	// TODO: query the target
+	const GLenum target = TexSet;
+	const GLint level = 0;
+
 	////////// Querying OpenGL for information about the texture set
 
-	glBindTexture(TexSet, diffuse_texture_set);
+	glBindTexture(target, diffuse_texture);
 
 	GLint subtexture_w, subtexture_h, num_subtextures, wrap_mode, mag_filter, min_filter;
-	glGetTexLevelParameteriv(TexSet, 0, GL_TEXTURE_WIDTH, &subtexture_w);
-	glGetTexLevelParameteriv(TexSet, 0, GL_TEXTURE_HEIGHT, &subtexture_h);
-	glGetTexLevelParameteriv(TexSet, 0, GL_TEXTURE_DEPTH, &num_subtextures);
+	glGetTexLevelParameteriv(target, level, GL_TEXTURE_WIDTH, &subtexture_w);
+	glGetTexLevelParameteriv(target, level, GL_TEXTURE_HEIGHT, &subtexture_h);
+	glGetTexLevelParameteriv(target, level, GL_TEXTURE_DEPTH, &num_subtextures);
 
 	// Wrap mode for each axis is the same, so only for 'S' (or across) is fine
-	glGetTexParameteriv(TexSet, GL_TEXTURE_WRAP_S, &wrap_mode);
-	glGetTexParameteriv(TexSet, GL_TEXTURE_MAG_FILTER, &mag_filter);
-	glGetTexParameteriv(TexSet, GL_TEXTURE_MIN_FILTER, &min_filter);
+	glGetTexParameteriv(target, GL_TEXTURE_WRAP_S, &wrap_mode);
+	glGetTexParameteriv(target, GL_TEXTURE_MAG_FILTER, &mag_filter);
+	glGetTexParameteriv(target, GL_TEXTURE_MIN_FILTER, &min_filter);
 
 	////////// Uploading the texture to the CPU
 
@@ -190,7 +194,7 @@ GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set
 
 	// Copying the original texture set to #1
 	WITH_SURFACE_PIXEL_ACCESS(general_purpose_surface_1,
-		glGetTexImage(TexSet, 0, OPENGL_INPUT_PIXEL_FORMAT,
+		glGetTexImage(target, level, OPENGL_INPUT_PIXEL_FORMAT,
 			OPENGL_COLOR_CHANNEL_TYPE, general_purpose_surface_1 -> pixels);
 	);
 
@@ -217,19 +221,19 @@ GLuint init_normal_map_from_diffuse_texture_set(const GLuint diffuse_texture_set
 
 	////////// Making a new texture on the GPU, and then writing the normal map to that
 
-	const GLuint normal_map_set = preinit_texture(TexSet,
+	const GLuint normal_map_set = preinit_texture(target,
 		(TextureWrapMode) wrap_mode,
 		(TextureFilterMode) mag_filter,
 		(TextureFilterMode) min_filter, false);
 
 	// Copying #2 to a new texture on the GPU
 	WITH_SURFACE_PIXEL_ACCESS(general_purpose_surface_2,
-		glTexImage3D(TexSet, 0, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, subtexture_w,
+		glTexImage3D(target, level, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, subtexture_w,
 			subtexture_h, num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,
 			OPENGL_COLOR_CHANNEL_TYPE, general_purpose_surface_2 -> pixels);
 	);
 
-	glGenerateMipmap(TexSet);
+	glGenerateMipmap(target);
 
 	////////// Deinitialization
 
