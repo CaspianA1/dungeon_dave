@@ -104,11 +104,11 @@ typedef struct {
 	const CascadedShadowContext* const shadow_context;
 	const Skybox* const skybox;
 	const GLfloat* const right_xz;
-} BillboardUniformUpdaterParams;
+} UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
+	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
 	const GLuint shader = drawable -> shader;
-	const BillboardUniformUpdaterParams typed_params = *(BillboardUniformUpdaterParams*) param;
 
 	static GLint right_xz_id;
 
@@ -135,7 +135,7 @@ void draw_billboards(BillboardContext* const billboard_context,
 
 	draw_drawable(
 		billboard_context -> drawable, corners_per_quad, billboard_context -> billboards.length,
-		&(BillboardUniformUpdaterParams) {billboard_context -> normal_map_set, shadow_context, skybox, camera -> right_xz},
+		&(UniformUpdaterParams) {billboard_context -> normal_map_set, shadow_context, skybox, camera -> right_xz},
 		UseShaderPipeline | BindVertexSpec
 	);
 }

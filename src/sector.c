@@ -192,11 +192,10 @@ typedef struct {
 	const SectorContext* const sector_context;
 	const CascadedShadowContext* const shadow_context;
 	const GLfloat curr_time_secs;
-} SectorUniformUpdaterParams;
+} UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
-	const SectorUniformUpdaterParams typed_params = *(SectorUniformUpdaterParams*) param;
-
+	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
 	const GLuint shader = drawable -> shader;
 
 	static GLint UV_translation_id;
@@ -291,7 +290,7 @@ void draw_sectors(const SectorContext* const sector_context,
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0)
 		draw_drawable(sector_context -> drawable, num_visible_faces * vertices_per_face, 0,
-			&(SectorUniformUpdaterParams) {skybox, sector_context, shadow_context, curr_time_secs},
+			&(UniformUpdaterParams) {skybox, sector_context, shadow_context, curr_time_secs},
 			UseShaderPipeline | BindVertexSpec
 		);
 }

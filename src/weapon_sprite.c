@@ -159,11 +159,11 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 
 ////////// This part is for the uniform updater param type and the uniform updater
 
-typedef struct { // TODO: remove the `WeaponSprite` prefix from this (since it's private), and do the same thing for others too
+typedef struct {
 	const WeaponSprite* const weapon_sprite;
 	const CascadedShadowContext* const shadow_context;
 	const Skybox* const skybox;
-} WeaponSpriteUniformUpdaterParams;
+} UniformUpdaterParams;
 
 static void get_normal_and_tangent(const vec3 world_corners[corners_per_quad], vec3 normal, vec3 tangent) {
 	const GLfloat
@@ -195,11 +195,10 @@ static void get_normal_and_tangent(const vec3 world_corners[corners_per_quad], v
 }
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
-	const WeaponSpriteUniformUpdaterParams typed_params = *(WeaponSpriteUniformUpdaterParams*) param;
+	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
+	const GLuint shader = drawable -> shader;
 
 	static GLint frame_index_id, face_normal_id, face_tangent_id, world_corners_id;
-
-	const GLuint shader = drawable -> shader;
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(frame_index, shader);
@@ -319,6 +318,6 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 void draw_weapon_sprite(const WeaponSprite* const ws, const CascadedShadowContext* const shadow_context, const Skybox* const skybox) {
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
-		draw_drawable(ws -> drawable, corners_per_quad, 0, &(WeaponSpriteUniformUpdaterParams) {ws, shadow_context, skybox}, UseShaderPipeline);
+		draw_drawable(ws -> drawable, corners_per_quad, 0, &(UniformUpdaterParams) {ws, shadow_context, skybox}, UseShaderPipeline);
 	);
 }
