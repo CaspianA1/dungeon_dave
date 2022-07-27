@@ -8,7 +8,7 @@ esac
 
 ##########
 
-mkdir -p build/debug build/release
+mkdir -p build/$build_type
 cd build/$build_type
 
 cmake -DCMAKE_BUILD_TYPE=$cmake_build_type ../..
