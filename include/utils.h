@@ -65,8 +65,10 @@ typedef enum {
 
 ////////// These are some general-purpose macros
 
-#define CHECK_BITMASK(bits, mask) (!!((bits) & (mask)))
+#define use_vertex_buffer(vertex_buffer) glBindBuffer(GL_ARRAY_BUFFER, (vertex_buffer))
+#define ASSET_PATH(suffix) ("../assets/" suffix)
 
+#define CHECK_BITMASK(bits, mask) (!!((bits) & (mask)))
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof(*(array)))
 
 #define ON_FIRST_CALL(...) do {\
@@ -87,16 +89,6 @@ typedef enum {
 	const Uint32 before = SDL_GetTicks();\
 	__VA_ARGS__\
 	printf("Took %u milliseconds\n", SDL_GetTicks() - before);\
-
-////////// These macros are for handy abstractions over OpenGL functions
-
-#define use_vertex_buffer(vertex_buffer) glBindBuffer(GL_ARRAY_BUFFER, (vertex_buffer))
-#define deinit_gpu_buffer(gpu_buffer) glDeleteBuffers(1, &(gpu_buffer))
-
-#define use_vertex_spec glBindVertexArray
-#define deinit_vertex_spec(vertex_spec) glDeleteVertexArrays(1, &(vertex_spec))
-
-#define ASSET_PATH(suffix) ("../assets/" suffix)
 
 ////////// Uniform-related macros
 

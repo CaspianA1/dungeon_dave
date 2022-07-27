@@ -88,7 +88,7 @@ void deinit_uniform_buffer(const UniformBuffer* const buffer) {
 	/* The subvar metadata, which includes the byte offsets, and array and matrix strides, are all allocated
 	in one block together, so freeing the byte offsets (which is the beginning of the block) frees all of them. */
 	dealloc(buffer -> subvars.byte_offsets);
-	deinit_gpu_buffer(buffer -> id);
+	glDeleteBuffers(1, &buffer -> id);
 }
 
 void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLuint shader) {

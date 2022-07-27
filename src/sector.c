@@ -276,7 +276,7 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 
 	//////////
 
-	use_vertex_spec(drawable -> vertex_spec);
+	glBindVertexArray(drawable -> vertex_spec);
 	glDisableVertexAttribArray(1); // Not using the face info bit attribute at index 1
 	draw_drawable(*drawable, num_face_meshes * vertices_per_face, 0, NULL, OnlyDraw);
 	glEnableVertexAttribArray(1);
