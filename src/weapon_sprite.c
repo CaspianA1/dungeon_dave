@@ -159,7 +159,7 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 
 ////////// This part is for the uniform updater param type and the uniform updater
 
-typedef struct {
+typedef struct { // TODO: remove the `WeaponSprite` prefix from this (since it's private), and do the same thing for others too
 	const WeaponSprite* const weapon_sprite;
 	const CascadedShadowContext* const shadow_context;
 	const Skybox* const skybox;
