@@ -38,6 +38,7 @@ static void fail_on_sub_shader_creation_error(
 	}
 }
 
+// If a sub-shader path is null, the sub-shader code corresponding to that path will not be compiled into the final shader
 static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], const GLchar* const sub_shader_paths[num_sub_shaders]) {
 	static const GLenum sub_shader_types[num_sub_shaders] = {GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER};
 
