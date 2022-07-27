@@ -172,7 +172,7 @@ BillboardContext init_billboard_context(
 			diffuse_texture_set
 		),
 
-		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, normal_map_config),
+		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config),
 
 		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),
 		.billboards = init_list(num_billboards, Billboard),

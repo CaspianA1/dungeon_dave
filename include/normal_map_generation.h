@@ -2,6 +2,7 @@
 #define NORMAL_MAP_GENERATION_H
 
 #include "utils/buffer_defs.h"
+#include "utils/texture.h"
 
 /* Excluded:
 int_min, int_max, limit_int_to_domain, sobel_sample,
@@ -13,6 +14,7 @@ typedef struct {
     const GLfloat blur_std_dev, intensity;
 } NormalMapConfig;
 
-GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture, const NormalMapConfig* const config);
+GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
+	const TextureType type, const NormalMapConfig* const config);
 
 #endif

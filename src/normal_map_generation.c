@@ -1,5 +1,4 @@
 #include "normal_map_generation.h"
-#include "utils/texture.h"
 #include "data/constants.h"
 #include "utils/alloc.h"
 
@@ -153,7 +152,9 @@ static void do_separable_gaussian_blur_pass(
 	);
 }
 
-GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture, const NormalMapConfig* const config) {
+GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
+	const TextureType type, const NormalMapConfig* const config) {
+
 	/* How this function works:
 
 	- First, query OpenGL about information about the texture set, like its dimensions, and its filters used.
@@ -166,9 +167,8 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture, const 
 	Note: normal maps are not interleaved with the texture set because if gamma correction is used,
 	the texture set will be in SRGB, and normal maps should be in a linear color space. */
 
-	// TODO: query the target
-	const GLenum target = TexSet;
 	const GLint level = 0;
+	const GLenum target = type;
 
 	////////// Querying OpenGL for information about the texture set
 

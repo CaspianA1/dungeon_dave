@@ -271,7 +271,7 @@ WeaponSprite init_weapon_sprite(
 			diffuse_texture_set
 		),
 
-		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, normal_map_config),
+		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config),
 
 		.animation_context = {
 			.cycle_base_time = 0.0f, .curr_frame = 0,
