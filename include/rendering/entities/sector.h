@@ -9,8 +9,6 @@
 #include "rendering/entities/skybox.h"
 #include "normal_map_generation.h"
 
-// Note: for batching sectors, extend Drawable by allowing an option to do a culling step modeled as dependency injection
-
 typedef struct {
 	const byte texture_id, origin[2];
 	byte size[2]; // Top-down (X and Z); same for origin
