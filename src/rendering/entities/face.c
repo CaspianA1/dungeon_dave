@@ -1,4 +1,4 @@
-#include "face.h"
+#include "rendering/entities/face.h"
 
 /*
 static void print_face(const Face face, const GLchar* const prefix_msg) {

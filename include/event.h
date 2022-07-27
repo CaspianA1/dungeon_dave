@@ -1,7 +1,7 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include "buffer_defs.h"
+#include "utils/buffer_defs.h"
 
 typedef struct {
 	const byte movement_bits; // Forward, backward, left, right, jump, accelerate, click left

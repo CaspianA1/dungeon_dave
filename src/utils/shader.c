@@ -1,7 +1,7 @@
-#include "shader.h"
-#include "list.h"
-#include "utils.h"
-#include "alloc.h"
+#include "utils/shader.h"
+#include "utils/list.h"
+#include "utils/utils.h"
+#include "utils/alloc.h"
 
 enum {num_sub_shaders = 3}; // Vertex, geometry, and fragment
 

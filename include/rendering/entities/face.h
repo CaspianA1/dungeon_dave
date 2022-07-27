@@ -1,9 +1,9 @@
 #ifndef FACE_H
 #define FACE_H
 
-#include "buffer_defs.h"
-#include "sector.h"
-#include "list.h"
+#include "utils/buffer_defs.h"
+#include "rendering/entities/sector.h"
+#include "utils/list.h"
 
 /* NS = north-south, and EW = east-west.
 If a face is NS, its two ends lie on a vertical top-down axis;

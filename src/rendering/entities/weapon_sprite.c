@@ -1,7 +1,7 @@
-#include "weapon_sprite.h"
-#include "constants.h"
-#include "texture.h"
-#include "shader.h"
+#include "rendering/entities/weapon_sprite.h"
+#include "data/constants.h"
+#include "utils/texture.h"
+#include "utils/shader.h"
 
 /* The weapon sprite code can be a bit hard to understand in the big picture.
 	Here's how it works over a game tick:

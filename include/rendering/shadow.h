@@ -2,7 +2,7 @@
 #define SHADOW_H
 
 #include "camera.h"
-#include "list.h"
+#include "utils/list.h"
 
 /* This shadow mapping implementation employs cascaded shadow mapping with
 exponential shadow mapping in order to get soft, filtered shadows for large scenes.

@@ -1,8 +1,8 @@
 #ifndef TITLE_SCREEN_H
 #define TITLE_SCREEN_H
 
-#include "buffer_defs.h"
-#include "drawable.h"
+#include "utils/buffer_defs.h"
+#include "rendering/drawable.h"
 #include "event.h"
 
 typedef struct {

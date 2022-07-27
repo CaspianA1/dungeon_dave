@@ -1,7 +1,7 @@
-#include "shadow.h"
-#include "constants.h"
-#include "shader.h"
-#include "texture.h"
+#include "rendering/shadow.h"
+#include "data/constants.h"
+#include "utils/shader.h"
+#include "utils/texture.h"
 
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM

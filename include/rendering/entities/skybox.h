@@ -1,7 +1,7 @@
 #ifndef SKYBOX_H
 #define SKYBOX_H
 
-#include "drawable.h"
+#include "rendering/drawable.h"
 #include "camera.h"
 
 typedef Drawable Skybox;

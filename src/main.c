@@ -1,9 +1,9 @@
 #include "main.h"
 #include "normal_map_generation.h"
-#include "maps.h"
-#include "texture.h" // TODO: remove this when I don't need to contain the alpha test logic in this file anymore
+#include "data/maps.h"
+#include "utils/texture.h" // TODO: remove this when I don't need to contain the alpha test logic in this file anymore
 #include "event.h"
-#include "alloc.h"
+#include "utils/alloc.h"
 
 static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const shadow_context,
 	const SectorContext* const sector_context, const WeaponSprite* const weapon_sprite) {

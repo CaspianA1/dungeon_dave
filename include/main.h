@@ -1,15 +1,15 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "buffer_defs.h"
+#include "utils/buffer_defs.h"
 #include "camera.h"
 #include "shared_shading_params.h"
-#include "weapon_sprite.h"
-#include "sector.h"
-#include "billboard.h"
-#include "shadow.h"
-#include "skybox.h"
-#include "title_screen.h"
+#include "rendering/entities/weapon_sprite.h"
+#include "rendering/entities/sector.h"
+#include "rendering/entities/billboard.h"
+#include "rendering/shadow.h"
+#include "rendering/entities/skybox.h"
+#include "rendering/entities/title_screen.h"
 
 /* Drawing architecture change, plan:
 1. Allow BatchDrawContext to call glDrawArraysInstanced, if needed

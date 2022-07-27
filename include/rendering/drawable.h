@@ -1,8 +1,8 @@
 #ifndef DRAWABLE_H
 #define DRAWABLE_H
 
-#include "buffer_defs.h"
-#include "list.h"
+#include "utils/buffer_defs.h"
+#include "utils/list.h"
 
 // TOOD: once Drawable is used in more places, remove a lot of redundant #includes
 

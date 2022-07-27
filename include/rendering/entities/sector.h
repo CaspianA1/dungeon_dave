@@ -1,12 +1,12 @@
 #ifndef SECTOR_H
 #define SECTOR_H
 
-#include "buffer_defs.h"
-#include "drawable.h"
-#include "list.h"
+#include "utils/buffer_defs.h"
+#include "rendering/drawable.h"
+#include "utils/list.h"
 #include "camera.h"
-#include "shadow.h"
-#include "skybox.h"
+#include "rendering/shadow.h"
+#include "rendering/entities/skybox.h"
 #include "normal_map_generation.h"
 
 // Note: for batching sectors, extend Drawable by allowing an option to do a culling step modeled as dependency injection

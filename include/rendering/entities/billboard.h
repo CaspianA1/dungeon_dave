@@ -1,11 +1,11 @@
 #ifndef BILLBOARD_H
 #define BILLBOARD_H
 
-#include "drawable.h"
-#include "buffer_defs.h"
-#include "list.h"
-#include "shadow.h"
-#include "skybox.h"
+#include "rendering/drawable.h"
+#include "utils/buffer_defs.h"
+#include "utils/list.h"
+#include "rendering/shadow.h"
+#include "rendering/entities/skybox.h"
 #include "camera.h"
 #include "normal_map_generation.h"
 #include "animation.h"

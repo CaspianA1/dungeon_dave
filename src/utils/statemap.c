@@ -1,4 +1,4 @@
-#include "statemap.h"
+#include "utils/statemap.h"
 #include <limits.h>
 
 static const byte bytes_per_chunk = sizeof(statemap_chunk_t);

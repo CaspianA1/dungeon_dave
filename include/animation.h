@@ -1,7 +1,7 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-#include "buffer_defs.h"
+#include "utils/buffer_defs.h"
 
 typedef struct {
 	const struct {const buffer_size_t start, end;} texture_id_range;

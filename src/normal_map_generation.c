@@ -1,7 +1,7 @@
 #include "normal_map_generation.h"
-#include "texture.h"
-#include "constants.h"
-#include "alloc.h"
+#include "utils/texture.h"
+#include "data/constants.h"
+#include "utils/alloc.h"
 
 static GLint int_min(const GLint val, const GLint lower) {
 	return (val < lower) ? val : lower;

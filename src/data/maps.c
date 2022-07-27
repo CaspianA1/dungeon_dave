@@ -1,4 +1,4 @@
-#include "maps.h"
+#include "data/maps.h"
 
 const byte level_one_heightmap[level_one_height][level_one_width] = {
 	{5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},

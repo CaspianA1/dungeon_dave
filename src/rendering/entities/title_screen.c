@@ -1,8 +1,8 @@
-#include "title_screen.h"
-#include "list.h"
-#include "shader.h"
-#include "texture.h"
-#include "constants.h"
+#include "rendering/entities/title_screen.h"
+#include "utils/list.h"
+#include "utils/shader.h"
+#include "utils/texture.h"
+#include "data/constants.h"
 
 // TODO: incorporate the palace city texture into this in some way
 

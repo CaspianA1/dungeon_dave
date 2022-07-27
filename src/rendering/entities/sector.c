@@ -1,9 +1,9 @@
-#include "sector.h"
-#include "face.h"
-#include "statemap.h"
-#include "texture.h"
-#include "shader.h"
-#include "constants.h"
+#include "rendering/entities/sector.h"
+#include "rendering/entities/face.h"
+#include "utils/statemap.h"
+#include "utils/texture.h"
+#include "utils/shader.h"
+#include "data/constants.h"
 
 /* Drawing sectors to the shadow map:
 

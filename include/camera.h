@@ -1,9 +1,9 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "utils.h"
-#include "buffer_defs.h"
-#include "constants.h"
+#include "utils/utils.h"
+#include "utils/buffer_defs.h"
+#include "data/constants.h"
 #include "event.h"
 
 // TODO: use the yaw, pitch, and roll nomenclature

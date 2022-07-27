@@ -1,5 +1,5 @@
-#include "constants.h"
-#include "utils.h"
+#include "data/constants.h"
+#include "utils/utils.h"
 
 // The return type is GLfloat, in order to be flexible for both integers and floats
 GLfloat get_runtime_constant(const RuntimeConstantName runtime_constant_name) {

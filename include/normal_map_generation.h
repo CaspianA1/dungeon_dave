@@ -1,7 +1,7 @@
 #ifndef NORMAL_MAP_GENERATION_H
 #define NORMAL_MAP_GENERATION_H
 
-#include "buffer_defs.h"
+#include "utils/buffer_defs.h"
 
 /* Excluded:
 int_min, int_max, limit_int_to_domain, sobel_sample,

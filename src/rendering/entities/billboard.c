@@ -1,7 +1,7 @@
-#include "billboard.h"
-#include "texture.h"
-#include "shader.h"
-#include "constants.h"
+#include "rendering/entities/billboard.h"
+#include "utils/texture.h"
+#include "utils/shader.h"
+#include "data/constants.h"
 
 typedef struct {
 	billboard_index_t index;

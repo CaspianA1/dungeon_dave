@@ -1,9 +1,9 @@
 #ifndef SHARED_SHADING_PARAMS_H
 #define SHARED_SHADING_PARAMS_H
 
-#include "uniform_buffer.h"
-#include "list.h"
-#include "shadow.h"
+#include "utils/uniform_buffer.h"
+#include "utils/list.h"
+#include "rendering/shadow.h"
 #include "camera.h"
 
 // I would like to call `constant` here `static`, but that's a keyword

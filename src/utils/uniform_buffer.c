@@ -1,7 +1,7 @@
-#include "uniform_buffer.h"
-#include "alloc.h"
-#include "utils.h"
-#include "drawable.h"
+#include "utils/uniform_buffer.h"
+#include "utils/alloc.h"
+#include "utils/utils.h"
+#include "rendering/drawable.h"
 
 static const GLchar* const max_primitive_size_name = "dvec4";
 static const size_t max_primitive_size = sizeof(GLdouble[4]); // The size of a dvec4

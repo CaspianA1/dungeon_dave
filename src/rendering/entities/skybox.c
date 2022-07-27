@@ -1,7 +1,7 @@
-#include "skybox.h"
-#include "shader.h"
-#include "texture.h"
-#include "buffer_defs.h"
+#include "rendering/entities/skybox.h"
+#include "utils/shader.h"
+#include "utils/texture.h"
+#include "utils/buffer_defs.h"
 
 // TODO: have a SkyboxRenderer interface that allows swapping out skybox textures
 

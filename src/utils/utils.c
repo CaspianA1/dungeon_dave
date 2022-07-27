@@ -1,6 +1,6 @@
-#include "utils.h"
-#include "texture.h"
-#include "constants.h"
+#include "utils/utils.h"
+#include "utils/texture.h"
+#include "data/constants.h"
 
 typedef struct {
 	SDL_Window* const window;

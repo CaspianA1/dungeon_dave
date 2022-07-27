@@ -1,14 +1,14 @@
 #ifndef WEAPON_SPRITE_H
 #define WEAPON_SPRITE_H
 
-#include "buffer_defs.h"
+#include "utils/buffer_defs.h"
 #include "animation.h"
-#include "drawable.h"
+#include "rendering/drawable.h"
 #include "normal_map_generation.h"
 #include "camera.h"
 #include "event.h"
-#include "shadow.h"
-#include "skybox.h"
+#include "rendering/shadow.h"
+#include "rendering/entities/skybox.h"
 
 typedef struct {
 	GLfloat cycle_base_time;

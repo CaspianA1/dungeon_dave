@@ -1,5 +1,5 @@
-#include "texture.h"
-#include "constants.h"
+#include "utils/texture.h"
+#include "data/constants.h"
 
 ////////// Surface initialization and alpha premultiplication
 
