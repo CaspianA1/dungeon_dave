@@ -8,7 +8,7 @@ typedef Drawable Skybox;
 
 #define deinit_skybox deinit_drawable
 
-// Excluded: init_skybox_texture, define_vertex_spec, update_uniforms
+// Excluded: init_skybox_texture, update_uniforms
 
 Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor);
 void draw_skybox(const Skybox* const skybox, const mat4 view_projection);

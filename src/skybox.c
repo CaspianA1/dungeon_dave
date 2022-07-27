@@ -3,14 +3,7 @@
 #include "texture.h"
 #include "buffer_defs.h"
 
-// TODO: make a SkyboxRenderer interface, instead of having unique vbos, vaos, and shaders for each skybox
-
-// https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
-static const GLbyte skybox_vertices[][vertices_per_triangle] = {
-	{-1, 1, 1}, {1, 1, 1}, {-1, -1, 1}, {1, -1, 1},
-	{1, -1, -1}, {1, 1, 1}, {1, 1, -1}, {-1, 1, 1}, {-1, 1, -1},
-	{-1, -1, 1}, {-1, -1, -1}, {1, -1, -1}, {-1, 1, -1}, {1, 1, -1}
-};
+// TODO: have a SkyboxRenderer interface that allows swapping out skybox textures
 
 static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
 	SDL_Surface* skybox_surface = init_surface(cubemap_path);
@@ -74,10 +67,6 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 	return skybox_texture;
 }
 
-static void define_vertex_spec(void) {
-	define_vertex_spec_index(false, false, 0, vertices_per_triangle, 0, 0, GL_BYTE);
-}
-
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const GLuint shader = drawable -> shader;
 
@@ -96,12 +85,8 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 }
 
 Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
-	const buffer_size_t num_vertices = ARRAY_LENGTH(skybox_vertices);
-
-	return init_drawable_with_vertices(define_vertex_spec,
-		(uniform_updater_t) update_uniforms, GL_STATIC_DRAW, GL_TRIANGLE_STRIP,
-		(List) {(void*) skybox_vertices, sizeof(GLbyte[vertices_per_triangle]), num_vertices, num_vertices},
-
+	return init_drawable_without_vertices(
+		(uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP,
 		init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag")),
 		init_skybox_texture(cubemap_path, texture_rescale_factor)
 	);
@@ -109,7 +94,6 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 
 void draw_skybox(const Skybox* const skybox, const mat4 view_projection) {
 	WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS, // Other depth testing mode for the skybox
-		const byte flags = UseShaderPipeline | BindVertexBuffer | BindVertexSpec;
-		draw_drawable(*skybox, ARRAY_LENGTH(skybox_vertices), view_projection, flags);
+		draw_drawable(*skybox, vertices_per_skybox, view_projection, UseShaderPipeline);
 	);
 }
