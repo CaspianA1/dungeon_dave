@@ -24,7 +24,7 @@ void push_ptr_to_list(List* const list, const void* const item_ptr) {
 
 	if (list -> length == max_alloc) {
 		max_alloc = LIST_REALLOC_AMOUNT_FOR(max_alloc);
-		list -> data = resize_alloc(list -> data, max_alloc * list -> item_size);
+		list -> data = resizing_alloc(list -> data, max_alloc * list -> item_size);
 		list -> max_alloc = max_alloc;
 	}
 
@@ -38,7 +38,7 @@ void push_array_to_list(List* const list, const void* const items, const buffer_
 		const buffer_size_t needed_alloc_and_some_more = LIST_REALLOC_AMOUNT_FOR(needed_alloc);
 
 		list -> max_alloc = needed_alloc_and_some_more;
-		list -> data = resize_alloc(list -> data, needed_alloc_and_some_more * list -> item_size);
+		list -> data = resizing_alloc(list -> data, needed_alloc_and_some_more * list -> item_size);
 	}
 
 	copy_to_list_end(list, items, num_items);
