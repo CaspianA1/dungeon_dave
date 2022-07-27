@@ -70,7 +70,7 @@ void use_texture(const GLuint texture,
 
 //////////
 
-// This sets the current texture to be the returned texture
+// This sets the current texture to be the returned texture. TODO: allow different wrap modes for S and T.
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	const TextureFilterMode mag_filter, const TextureFilterMode min_filter,
 	const bool force_disable_anisotropic_filtering) {
