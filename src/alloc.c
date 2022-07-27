@@ -1,8 +1,8 @@
 #include "alloc.h"
 
-typedef uint32_t alloc_count_t;
-
 #ifdef TRACK_MEMORY
+
+typedef uint32_t alloc_count_t;
 
 static alloc_count_t
 	num_allocs = 0, num_clearing_allocs = 0,
