@@ -285,7 +285,7 @@ static void* main_init(void) {
 	const GLenum states[] = {GL_DEPTH_TEST, GL_DEPTH_CLAMP, GL_CULL_FACE, GL_TEXTURE_CUBE_MAP_SEAMLESS};
 	for (byte i = 0; i < ARRAY_LENGTH(states); i++) glEnable(states[i]);
 
-	////////// Initializing an app context on the heap
+	////////// Initializing a scene context on the heap
 
 	SceneContext* const scene_context_on_heap = alloc(1, sizeof(SceneContext));
 	memcpy(scene_context_on_heap, &scene_context, sizeof(SceneContext));
