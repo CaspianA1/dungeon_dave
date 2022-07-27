@@ -314,7 +314,7 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	use_vertex_buffer(drawable -> vertex_buffer);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec3[corners_per_quad]), ws -> appearance_context.world_space.corners);
 
-	draw_drawable(*drawable, corners_per_quad, NULL, BindVertexSpec);
+	draw_drawable(*drawable, corners_per_quad, 0, NULL, BindVertexSpec);
 }
 
 void draw_weapon_sprite(const WeaponSprite* const ws,
@@ -324,6 +324,6 @@ void draw_weapon_sprite(const WeaponSprite* const ws,
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
 		const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view, ws, shadow_context, skybox};
-		draw_drawable(ws -> drawable, corners_per_quad, &uniform_updater_params, UseShaderPipeline);
+		draw_drawable(ws -> drawable, corners_per_quad, 0, &uniform_updater_params, UseShaderPipeline);
 	);
 }

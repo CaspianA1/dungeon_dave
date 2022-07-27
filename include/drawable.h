@@ -45,7 +45,8 @@ Drawable init_drawable_without_vertices(const uniform_updater_t uniform_updater,
 
 void deinit_drawable(const Drawable drawable);
 
-void draw_drawable(const Drawable drawable, const buffer_size_t num_vertices_to_draw,
+void draw_drawable(const Drawable drawable,
+	const buffer_size_t num_vertices, const buffer_size_t num_instances,
 	const void* const uniform_updater_param, const byte invocation_params);
 
 #endif

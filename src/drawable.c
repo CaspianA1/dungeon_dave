@@ -35,7 +35,8 @@ void deinit_drawable(const Drawable drawable) {
 	if (drawable.vertex_spec != 0) glDeleteVertexArrays(1, &drawable.vertex_spec);
 }
 
-void draw_drawable(const Drawable drawable, const buffer_size_t num_vertices_to_draw,
+void draw_drawable(const Drawable drawable,
+	const buffer_size_t num_vertices, const buffer_size_t num_instances,
 	const void* const uniform_updater_param, const byte invocation_params) {
 
 	if (invocation_params & UseShaderPipeline) {
@@ -46,5 +47,8 @@ void draw_drawable(const Drawable drawable, const buffer_size_t num_vertices_to_
 	if (invocation_params & BindVertexBuffer) glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer);
 	if (invocation_params & BindVertexSpec) glBindVertexArray(drawable.vertex_spec);
 
-	glDrawArrays(drawable.triangle_mode, 0, (GLsizei) num_vertices_to_draw);
+	if (num_instances == 0)
+		glDrawArrays(drawable.triangle_mode, 0, (GLsizei) num_vertices);
+	else
+		glDrawArraysInstanced(drawable.triangle_mode, 0, (GLsizei) num_vertices, (GLsizei) num_instances);
 }

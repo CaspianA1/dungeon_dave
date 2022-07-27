@@ -278,7 +278,7 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 
 	use_vertex_spec(drawable -> vertex_spec);
 	glDisableVertexAttribArray(1); // Not using the face info bit attribute at index 1
-	draw_drawable(*drawable, num_face_meshes * vertices_per_face, NULL, OnlyDraw);
+	draw_drawable(*drawable, num_face_meshes * vertices_per_face, 0, NULL, OnlyDraw);
 	glEnableVertexAttribArray(1);
 }
 
@@ -290,7 +290,7 @@ void draw_sectors(const SectorContext* const sector_context,
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0)
-		draw_drawable(sector_context -> drawable, num_visible_faces * vertices_per_face,
+		draw_drawable(sector_context -> drawable, num_visible_faces * vertices_per_face, 0,
 			&(SectorUniformUpdaterParams) {skybox, sector_context, shadow_context, curr_time_secs},
 			UseShaderPipeline | BindVertexSpec
 		);

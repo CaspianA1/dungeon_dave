@@ -45,6 +45,6 @@ bool tick_title_screen(TitleScreen* const title_screen, const Event* const event
 		title_screen -> active = false;
 
 	const bool active = title_screen -> active;
-	if (active) draw_drawable(title_screen -> drawable, corners_per_quad, &event -> curr_time_secs, UseShaderPipeline);
+	if (active) draw_drawable(title_screen -> drawable, corners_per_quad, 0, &event -> curr_time_secs, UseShaderPipeline);
 	return active;
 }
