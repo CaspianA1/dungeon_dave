@@ -31,8 +31,6 @@ Interface notes:
 
 - For the vertex list in `init_drawable_with_vertices`, the vertices in the list may be null. If so, a vertex buffer
 	will be allocated for the vertices, but the vertex buffer will not have any elements inside it.
-
-- If the uniform updater is null or the shader is zero, the shader will not be bound, and the uniform updater will not be called.
 */
 
 Drawable init_drawable_with_vertices(
