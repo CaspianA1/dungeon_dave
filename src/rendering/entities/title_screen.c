@@ -33,8 +33,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		use_texture(typed_params.title_screen -> palace_city_normal_map, shader, "palace_city_normal_map_sampler", TexPlain, TU_TitleScreenPalaceCityNormalMap);
 	);
 
-	// TODO: put these in the `constants` struct
-	const GLfloat
+	const GLfloat // TODO: put these in the `constants` struct
 		time_for_spin_cycle = 3.0f, logo_transitions_per_spin_cycle = 0.25f,
 		light_dist_from_title_screen_plane = 0.75f, time_for_palace_city_scroll_cycle = 10.0f;
 
