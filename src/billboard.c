@@ -58,7 +58,7 @@ void update_billboards(const BillboardContext* const billboard_context, const GL
 static void internal_draw_billboards(
 	const BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const Camera* const camera) {
+	const Skybox* const skybox, const vec2 right_xz) {
 
 	const GLuint shader = billboard_context -> shader;
 	static GLint right_xz_id;
@@ -74,9 +74,6 @@ static void internal_draw_billboards(
 		use_texture(shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
 	);
 
-	////////// Uniform updating
-
-	const GLfloat* const right_xz = camera -> right_xz;
 	UPDATE_UNIFORM(right_xz, 2fv, 1, right_xz);
 
 	use_vertex_spec(billboard_context -> vertex_spec);
@@ -133,7 +130,7 @@ void draw_billboards(BillboardContext* const billboard_context,
 	const Skybox* const skybox, const Camera* const camera) {
 
 	sort_billboard_indices_by_dist_to_camera(billboard_context, camera -> pos);
-	internal_draw_billboards(billboard_context, shadow_context, skybox, camera);
+	internal_draw_billboards(billboard_context, shadow_context, skybox, camera -> right_xz);
 }
 
 BillboardContext init_billboard_context(

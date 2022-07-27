@@ -160,7 +160,6 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 ////////// This part is for the uniform updater param type and the uniform updater
 
 typedef struct {
-	const vec4* const view;
 	const WeaponSprite* const weapon_sprite;
 	const CascadedShadowContext* const shadow_context;
 	const Skybox* const skybox;
@@ -317,13 +316,9 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	draw_drawable(*drawable, corners_per_quad, 0, NULL, BindVertexSpec);
 }
 
-void draw_weapon_sprite(const WeaponSprite* const ws,
-	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const vec4* const view) {
-
+void draw_weapon_sprite(const WeaponSprite* const ws, const CascadedShadowContext* const shadow_context, const Skybox* const skybox) {
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
-		const WeaponSpriteUniformUpdaterParams uniform_updater_params = {view, ws, shadow_context, skybox};
-		draw_drawable(ws -> drawable, corners_per_quad, 0, &uniform_updater_params, UseShaderPipeline);
+		draw_drawable(ws -> drawable, corners_per_quad, 0, &(WeaponSpriteUniformUpdaterParams) {ws, shadow_context, skybox}, UseShaderPipeline);
 	);
 }

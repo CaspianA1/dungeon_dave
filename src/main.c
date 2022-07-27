@@ -97,7 +97,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 
 			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
 				draw_billboards(billboard_context, shadow_context, skybox, camera);
-				draw_weapon_sprite(weapon_sprite, shadow_context, skybox, camera -> view);
+				draw_weapon_sprite(weapon_sprite, shadow_context, skybox);
 			);
 		);
 	);
