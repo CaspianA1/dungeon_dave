@@ -61,6 +61,7 @@ Architectural/code design ideas:
 	in the shadow context, but before calling glUseProgram for the depth shader. To do this, split the shadow step of the
 	rendering loop into an update_mvps and enable/disable rendering to shadow map part.
 - A shader cache
+- Specular antialiasing
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
