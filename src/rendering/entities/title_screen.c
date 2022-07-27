@@ -18,11 +18,12 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
 	const GLuint shader = drawable -> shader;
 
-	static GLint texture_transition_weight_id, light_pos_tangent_space_id;
+	static GLint light_pos_tangent_space_id, texture_transition_weight_id;
 
 	ON_FIRST_CALL(
-		INIT_UNIFORM(texture_transition_weight, shader);
 		INIT_UNIFORM(light_pos_tangent_space, shader);
+		INIT_UNIFORM(texture_transition_weight, shader);
+		INIT_UNIFORM_VALUE(specular_exponent, shader, 1f, 8.0f);
 		use_texture(typed_params.title_screen -> logo_diffuse_texture, shader, "logo_diffuse_sampler", TexPlain, TU_TitleScreenLogoDiffuse);
 		use_texture(drawable -> diffuse_texture, shader, "palace_city_diffuse_sampler", TexPlain, TU_TitleScreenPalaceCityDiffuse);
 		use_texture(typed_params.title_screen -> palace_city_normal_map, shader, "palace_city_normal_map_sampler", TexPlain, TU_TitleScreenPalaceCityNormalMap);
@@ -34,8 +35,8 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	const GLfloat spin_seed = typed_params.curr_time_secs * TWO_PI / time_for_spin_cycle;
 	const GLfloat texture_transition_weight = cosf(spin_seed * logo_transitions_per_spin_cycle) * 0.5f + 0.5f;
 
-	UPDATE_UNIFORM(light_pos_tangent_space, 3fv, 1, (vec3) {sinf(spin_seed), cosf(spin_seed), light_dist_from_title_screen_plane});
 	UPDATE_UNIFORM(texture_transition_weight, 1f, texture_transition_weight);
+	UPDATE_UNIFORM(light_pos_tangent_space, 3fv, 1, (vec3) {sinf(spin_seed), cosf(spin_seed), light_dist_from_title_screen_plane});
 }
 
 ////////// Initialization, deinitialization, and rendering
