@@ -16,6 +16,5 @@ make || exit 3
 cd ..
 
 if [ "$2" == "run" ]; then
-	echo "\nLaunching application\n"
 	./$build_type/dungeon_dave
 fi

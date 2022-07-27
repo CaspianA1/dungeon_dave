@@ -22,15 +22,14 @@ Revectorization:
 
 ////////// This part concerns getting the light view projection matrix of a camera sub frustum
 
-static void get_camera_sub_frustum_corners(const Camera* const camera, const GLfloat near_clip_dist,
-	const GLfloat far_clip_dist, vec4 camera_sub_frustum_corners[corners_per_frustum]) {
+static void get_camera_sub_frustum_corners(const Camera* const camera, const GLfloat aspect_ratio,
+	const GLfloat near_clip_dist, const GLfloat far_clip_dist, vec4 camera_sub_frustum_corners[corners_per_frustum]) {
 
 	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection;
 
-	glm_perspective(camera -> angles.fov, camera -> aspect_ratio,
-		near_clip_dist, far_clip_dist, camera_sub_frustum_projection);
-
+	glm_perspective(camera -> angles.fov, aspect_ratio, near_clip_dist, far_clip_dist, camera_sub_frustum_projection);
 	glm_mul(camera_sub_frustum_projection, (vec4*) camera -> view, camera_sub_frustum_view_projection);
+
 	glm_mat4_inv(camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection);
 	glm_frustum_corners(inv_camera_sub_frustum_view_projection, camera_sub_frustum_corners);
 }
@@ -78,18 +77,6 @@ static void get_light_view_and_projection(const CascadedShadowContext* const sha
 
 	glm_ortho(-radius, radius, -radius, radius, -radius, radius, light_projection);
 
-}
-
-static void get_sub_frustum_light_view_projection_matrix(const Camera* const camera,
-	const CascadedShadowContext* const shadow_context, const GLfloat near_clip_dist,
-	const GLfloat far_clip_dist, mat4 light_view_projection) {
-
-	vec4 camera_sub_frustum_corners[corners_per_frustum];
-	get_camera_sub_frustum_corners(camera, near_clip_dist, far_clip_dist, camera_sub_frustum_corners);
-
-	mat4 light_view, light_projection;
-	get_light_view_and_projection(shadow_context, camera_sub_frustum_corners, light_view, light_projection);
-	glm_mul(light_projection, light_view, light_view_projection);
 }
 
 //////////
@@ -189,7 +176,7 @@ void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
 	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
 }
 
-void update_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera) {
+void update_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera, const GLfloat aspect_ratio) {
 	const GLfloat* const split_dists = shadow_context -> split_dists;
 	mat4* const light_view_projection_matrices = shadow_context -> light_view_projection_matrices;
 
@@ -197,6 +184,9 @@ void update_shadow_context(const CascadedShadowContext* const shadow_context, co
 	const GLfloat far_clip_dist = camera -> far_clip_dist;
 
 	////////// Getting the matrices needed
+
+	vec4 camera_sub_frustum_corners[corners_per_frustum];
+	mat4 light_view, light_projection;
 
 	for (GLsizei i = 0; i < num_cascades; i++) {
 		GLfloat sub_near_clip, sub_far_clip;
@@ -210,8 +200,9 @@ void update_shadow_context(const CascadedShadowContext* const shadow_context, co
 			sub_far_clip = (i == num_cascades - 1) ? far_clip_dist : split_dists[i];
 		}
 
-		get_sub_frustum_light_view_projection_matrix(camera, shadow_context,
-			sub_near_clip, sub_far_clip, light_view_projection_matrices[i]);
+		get_camera_sub_frustum_corners(camera, aspect_ratio, sub_near_clip, sub_far_clip, camera_sub_frustum_corners);
+		get_light_view_and_projection(shadow_context, camera_sub_frustum_corners, light_view, light_projection);
+		glm_mul(light_projection, light_view, light_view_projection_matrices[i]);
 	}
 }
 

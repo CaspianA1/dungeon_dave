@@ -5,9 +5,9 @@
 
 typedef struct {
 	const byte movement_bits; // Forward, backward, left, right, jump, accelerate, click left
-	const GLint screen_size[2];
 
-	const GLfloat mouse_movement_percent[2], curr_time_secs, delta_time;
+	const GLint screen_size[2];
+	const GLfloat aspect_ratio, mouse_movement_percent[2], curr_time_secs, delta_time;
 
 	const Uint8* const keys;
 } Event;

@@ -74,7 +74,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
 	update_billboards(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
-	update_shadow_context(shadow_context, camera);
+	update_shadow_context(shadow_context, camera, event -> aspect_ratio);
 	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context);
 
 	////////// Rendering to the shadow context

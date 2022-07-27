@@ -6,7 +6,7 @@
 #include "constants.h"
 #include "event.h"
 
-// TODO: use the yaw, pitch, roll nomenclature
+// TODO: use the yaw, pitch, and roll nomenclature
 
 //////////
 
@@ -18,7 +18,7 @@ typedef struct {
 	the percentage is smoothed out by a Hermite curve. */
 	GLfloat
 		pace, speed_xz_percent, time_since_jump,
-		time_accum_for_full_fov, far_clip_dist, aspect_ratio;
+		time_accum_for_full_fov, far_clip_dist;
 
 	vec2 right_xz; // This is used for billboards
 	vec3 pos, dir, up, velocities;

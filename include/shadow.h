@@ -22,7 +22,6 @@ typedef struct {
 
 /* Excluded:
 get_camera_sub_frustum_corners, get_light_view_and_projection,
-get_sub_frustum_light_view_projection_matrix,
 init_csm_depth_layers, init_csm_framebuffer */
 
 void specify_cascade_count_before_any_shader_compilation(const GLsizei num_cascades);
@@ -34,7 +33,7 @@ CascadedShadowContext init_shadow_context(
 
 void deinit_shadow_context(const CascadedShadowContext* const shadow_context);
 
-void update_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera);
+void update_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera, const GLfloat aspect_ratio);
 void enable_rendering_to_shadow_context(const CascadedShadowContext* const shadow_context);
 void disable_rendering_to_shadow_context(const GLint screen_size[2]);
 

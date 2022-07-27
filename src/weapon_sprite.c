@@ -88,7 +88,8 @@ static void get_sway(const GLfloat curr_time_secs, const GLfloat speed_xz_percen
 	sway[1] = (fabsf(sway[0]) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
 }
 
-static void get_screen_corners_from_sway(const WeaponSprite* const ws, const Camera* const camera,
+static void get_screen_corners_from_sway(
+	const WeaponSprite* const ws, const GLfloat aspect_ratio,
 	const GLfloat sway[2], vec2 screen_corners[corners_per_quad]) {
 
 	const WeaponSpriteAppearanceContext* const appearance_context = &ws -> appearance_context;
@@ -99,7 +100,7 @@ static void get_screen_corners_from_sway(const WeaponSprite* const ws, const Cam
 
 	const GLfloat
 		sway_across = sway[0], down_term = (screen_space_size - 1.0f) + sway[1],
-		across_term = screen_space_size * sprite_frame_width_over_height / camera -> aspect_ratio;
+		across_term = screen_space_size * sprite_frame_width_over_height / aspect_ratio;
 
 	screen_corners[0][0] = screen_corners[2][0] = sway_across - across_term;
 	screen_corners[1][0] = screen_corners[3][0] = sway_across + across_term;
@@ -299,7 +300,7 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	get_sway(event -> curr_time_secs, camera -> speed_xz_percent, sway);
 
 	vec2 screen_corners[corners_per_quad];
-	get_screen_corners_from_sway(ws, camera, sway, screen_corners);
+	get_screen_corners_from_sway(ws, event -> aspect_ratio, sway, screen_corners);
 
 	WeaponSpriteAppearanceContext* const appearance_context = &ws -> appearance_context;
 	get_world_corners_from_screen_corners(camera -> view_projection, screen_corners, appearance_context -> world_space.corners);

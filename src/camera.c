@@ -275,7 +275,7 @@ static void update_camera_pos(Camera* const camera, const Event* const event,
 	}
 }
 
-static void update_camera_matrices(Camera* const camera, const vec3 dir, const vec3 up, const vec3 right) {
+static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ratio, const vec3 dir, const vec3 up, const vec3 right) {
 	const GLfloat* const pos = camera -> pos;
 	vec4* const view = camera -> view;
 
@@ -292,15 +292,12 @@ static void update_camera_matrices(Camera* const camera, const vec3 dir, const v
 	#undef d
 
 	mat4 projection;
-	glm_perspective(camera -> angles.fov, camera -> aspect_ratio, constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
+	glm_perspective(camera -> angles.fov, aspect_ratio, constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
 	glm_mul(projection, view, camera -> view_projection);
 }
 
 void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]) {
-	////////// Updating the camera aspect ratio and angles
-
-	// TODO: don't store the aspect ratio in the Camera struct
-	camera -> aspect_ratio = (GLfloat) event.screen_size[0] / event.screen_size[1];
+	////////// Updating the camera angles
 
 	Angles* const angles = &camera -> angles;
 	update_camera_angles(angles, &event);
@@ -314,7 +311,7 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 	get_camera_directions(angles, dir_xz, dir, camera -> right_xz, right, up);
 	update_camera_pos(camera, &event, heightmap, map_size, dir_xz, dir, right); // Updates `pos`
 
-	update_camera_matrices(camera, dir, up, right); // Updates `view` and `model_view_projection`
+	update_camera_matrices(camera, event.aspect_ratio, dir, up, right); // Updates `view` and `model_view_projection`
 	glm_frustum_planes(camera -> view_projection, camera -> frustum_planes);
 
 	////////// Printing important vectors if needed
