@@ -16,6 +16,7 @@ typedef enum {
 	InitializeGPUMemoryMapping,
 	CreateFramebuffer,
 	CreateSkybox,
+	CreateNormalMap,
 	CreateBlankSurface,
 	TextureIDIsTooLarge
 } FailureType;

@@ -1,6 +1,7 @@
 #include "normal_map_generation.h"
 #include "data/constants.h"
 #include "utils/alloc.h"
+#include "utils/utils.h"
 
 static GLint int_min(const GLint val, const GLint lower) {
 	return (val < lower) ? val : lower;
@@ -167,6 +168,9 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 	Note: normal maps are not interleaved with the texture set because if gamma correction is used,
 	the texture set will be in SRGB, and normal maps should be in a linear color space. */
 
+	if (type != TexPlain && type != TexSet)
+		FAIL(CreateNormalMap, "%s", "Normal map creation failed: unsupported texture type");
+
 	const GLint level = 0;
 	const GLenum target = type;
 
@@ -177,7 +181,9 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 	GLint subtexture_w, subtexture_h, num_subtextures, wrap_mode, mag_filter, min_filter;
 	glGetTexLevelParameteriv(target, level, GL_TEXTURE_WIDTH, &subtexture_w);
 	glGetTexLevelParameteriv(target, level, GL_TEXTURE_HEIGHT, &subtexture_h);
-	glGetTexLevelParameteriv(target, level, GL_TEXTURE_DEPTH, &num_subtextures);
+
+	if (type == TexSet) glGetTexLevelParameteriv(target, level, GL_TEXTURE_DEPTH, &num_subtextures);
+	else num_subtextures = 1;
 
 	// Wrap mode for each axis is the same, so only for 'S' (or across) is fine
 	glGetTexParameteriv(target, GL_TEXTURE_WRAP_S, &wrap_mode);
@@ -228,9 +234,15 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 
 	// Copying #2 to a new texture on the GPU
 	WITH_SURFACE_PIXEL_ACCESS(general_purpose_surface_2,
-		glTexImage3D(target, level, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, subtexture_w,
-			subtexture_h, num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_COLOR_CHANNEL_TYPE, general_purpose_surface_2 -> pixels);
+		const GLint border = 0;
+		const void* const pixels = general_purpose_surface_2 -> pixels;
+
+		if (type == TexPlain)
+			glTexImage2D(target, level, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, subtexture_w,
+				subtexture_h, border, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, pixels);
+		else
+			glTexImage3D(target, level, OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, subtexture_w,
+				subtexture_h, num_subtextures, border, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, pixels);
 	);
 
 	glGenerateMipmap(target);
