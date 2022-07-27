@@ -17,30 +17,13 @@ enum {
 	checker_width = 255, checker_height = 255
 };
 
-// TODO: make a `MAP_DEF` macro
+#define MAP_DEF(prefix) prefix##_heightmap[prefix##_height][prefix##_width], prefix##_texture_id_map[prefix##_height][prefix##_width]
 
 extern const byte
-	level_one_heightmap[level_one_height][level_one_width],
-	level_one_texture_id_map[level_one_height][level_one_width],
-	architecture_heightmap[architecture_height][architecture_width],
-	architecture_texture_id_map[architecture_height][architecture_width],
-	fortress_heightmap[fortress_height][fortress_width],
-	fortress_texture_id_map[fortress_height][fortress_width],
-	palace_heightmap[palace_height][palace_width],
-	palace_texture_id_map[palace_height][palace_width],
-	tpt_heightmap[tpt_height][tpt_width],
-	tpt_texture_id_map[tpt_height][tpt_width],
-	pyramid_heightmap[pyramid_height][pyramid_width],
-	pyramid_texture_id_map[pyramid_height][pyramid_width],
-	maze_heightmap[maze_height][maze_width],
-	maze_texture_id_map[maze_height][maze_width],
-	test_heightmap[test_height][test_width],
-	test_texture_id_map[test_height][test_width],
-	terrain_heightmap[terrain_height][terrain_width],
-	terrain_texture_id_map[terrain_height][terrain_width],
-	tiny_heightmap[tiny_height][tiny_width],
-	tiny_texture_id_map[tiny_height][tiny_width],
-	checker_heightmap[checker_height][checker_width],
-	checker_texture_id_map[checker_height][checker_width];
+	MAP_DEF(level_one), MAP_DEF(architecture), MAP_DEF(fortress),
+	MAP_DEF(palace), MAP_DEF(tpt), MAP_DEF(pyramid), MAP_DEF(maze),
+	MAP_DEF(test), MAP_DEF(terrain), MAP_DEF(tiny), MAP_DEF(checker);
+
+#undef MAP_DEF
 
 #endif
