@@ -68,20 +68,8 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloa
 }
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
-	const GLuint shader = drawable -> shader;
-
-	static GLint view_projection_id;
-
-	ON_FIRST_CALL(
-		INIT_UNIFORM(view_projection, shader);
-		use_texture(drawable -> diffuse_texture, shader, "skybox_sampler", TexSkybox, TU_Skybox);
-	);
-
-	mat4 view_projection;
-	glm_mat4_copy((vec4*) param, view_projection);
-	glm_vec4_zero(view_projection[3]); // This clears x, y, z, and w
-
-	UPDATE_UNIFORM(view_projection, Matrix4fv, 1, GL_FALSE, &view_projection[0][0]);
+	(void) param;
+	ON_FIRST_CALL(use_texture(drawable -> diffuse_texture, drawable -> shader, "skybox_sampler", TexSkybox, TU_Skybox););
 }
 
 Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
@@ -92,8 +80,8 @@ Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_resca
 	);
 }
 
-void draw_skybox(const Skybox* const skybox, const mat4 view_projection) {
+void draw_skybox(const Skybox* const skybox) {
 	WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS, // Other depth testing mode for the skybox
-		draw_drawable(*skybox, vertices_per_skybox, view_projection, UseShaderPipeline);
+		draw_drawable(*skybox, vertices_per_skybox, NULL, UseShaderPipeline);
 	);
 }

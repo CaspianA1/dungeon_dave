@@ -93,7 +93,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
-			draw_skybox(skybox, camera -> view_projection); // Drawn before any translucent geometry
+			draw_skybox(skybox); // Drawn before any translucent geometry
 
 			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
 				draw_billboards(billboard_context, shadow_context, skybox, camera);
@@ -294,12 +294,13 @@ static void* main_init(void) {
 
 	const GLuint shaders_that_use_shared_params[] = {
 		scene_context.shadow_context.depth_shader,
+		scene_context.skybox.shader,
 		scene_context.sector_context.drawable.shader,
 		scene_context.billboard_context.shader,
 		scene_context.weapon_sprite.drawable.shader
 	};
 
-	SharedShadingParams shared_shading_params = init_shared_shading_params(
+	const SharedShadingParams shared_shading_params = init_shared_shading_params(
 		shaders_that_use_shared_params, ARRAY_LENGTH(shaders_that_use_shared_params),
 		&scene_context.shadow_context
 	);

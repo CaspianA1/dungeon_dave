@@ -1,8 +1,8 @@
 #version 400 core
 
-out vec3 UV;
+#include "common/shared_params.glsl"
 
-uniform mat4 view_projection; // TODO: share this in some way with the uniform buffer
+out vec3 UV;
 
 // https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
 const ivec3 vertices[] = ivec3[](
@@ -13,7 +13,8 @@ const ivec3 vertices[] = ivec3[](
 
 void main(void) {
 	vec3 vertex_pos_world_space = vertices[gl_VertexID];
-	gl_Position = view_projection * vec4(vertex_pos_world_space, 1.0f);
+	gl_Position = mat3x4(view_projection) * vertex_pos_world_space;
+
 	UV = vertex_pos_world_space;
 	UV.x = -UV.x; // Without this, the x component of `UV` is reversed
 }
