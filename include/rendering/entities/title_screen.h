@@ -8,11 +8,12 @@
 typedef struct {
 	bool active;
 	const Drawable drawable;
+	const GLuint palace_city_normal_map, logo_diffuse_texture;
 } TitleScreen;
 
 // Excluded: update_uniforms
 
-TitleScreen init_title_screen(const GLchar* const title_screen_path);
+TitleScreen init_title_screen(void);
 void deinit_title_screen(const TitleScreen* const title_screen);
 
 // This returns if the title screen is active

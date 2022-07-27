@@ -36,11 +36,13 @@ And the biggest number possible with five bits is 31, so that gives you
 
 // Each enum value is a texture unit id.
 typedef enum {
-	TU_CascadedShadowMap,
+	TU_CascadedShadowMap, TU_Skybox,
+
+	TU_TitleScreenLogoDiffuse, TU_TitleScreenPalaceCityDiffuse, TU_TitleScreenPalaceCityNormalMap,
+
 	TU_SectorFaceDiffuse, TU_SectorFaceNormalMap,
 	TU_BillboardDiffuse, TU_BillboardNormalMap,
-	TU_WeaponSpriteDiffuse, TU_WeaponSpriteNormalMap,
-	TU_Skybox, TU_TitleScreen
+	TU_WeaponSpriteDiffuse, TU_WeaponSpriteNormalMap
 } TextureUnit;
 
 // Excluded: premultiply_surface_alpha, init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set

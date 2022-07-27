@@ -264,7 +264,7 @@ static void* main_init(void) {
 		),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
-		.title_screen = init_title_screen(ASSET_PATH("logo.bmp")),
+		.title_screen = init_title_screen(),
 
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};

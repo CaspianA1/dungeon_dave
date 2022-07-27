@@ -4,7 +4,7 @@
 #include "utils/buffer_defs.h"
 #include "utils/list.h"
 
-// TOOD: once Drawable is used in more places, remove a lot of redundant #includes
+// TODO: incorporate an optional normal map into the type
 
 struct Drawable; // The Drawable's shader will be bound when the uniform updater is called
 typedef void (*const uniform_updater_t) (const struct Drawable* const drawable, const void* const param);
