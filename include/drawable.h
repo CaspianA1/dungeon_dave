@@ -6,7 +6,7 @@
 
 // TOOD: once Drawable is used in more places, remove a lot of redundant #includes
 
-struct Drawable; // The Drawable's shader will be bound when this is called
+struct Drawable; // The Drawable's shader will be bound when the uniform updater is called
 typedef void (*const uniform_updater_t) (const struct Drawable* const drawable, const void* const param);
 
 typedef struct {
