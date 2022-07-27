@@ -242,7 +242,6 @@ void define_vertex_spec_index(const bool is_instanced, const bool treat_vertices
 	else glVertexAttribIPointer(index, num_components, typename, cast_stride, cast_initial_offset);
 }
 
-
 // TODO: possibly add `GL_MAP_UNSYNCHRONIZED_BIT`, if possible? Test on Chromebook.
 void* init_gpu_memory_mapping(const GLenum target, const GLsizeiptr num_bytes, const bool discard_prev_contents) {
 	const GLbitfield flags = GL_MAP_WRITE_BIT | (GL_MAP_INVALIDATE_BUFFER_BIT * discard_prev_contents);
