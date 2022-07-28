@@ -12,6 +12,7 @@ static void init_constant_shading_params(UniformBuffer* const shading_params, co
 	UBO_WRITE(tone_mapping.enabled);
 	UBO_WRITE(tone_mapping.max_white);
 	UBO_WRITE(noise_granularity);
+	UBO_WRITE(bilinear_percent);
 	UBO_WRITE(overall_scene_tone);
 
 	#undef UBO_WRITE
@@ -35,7 +36,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 	const GLchar* const constant_subvar_names[] = {
 		"strengths.ambient", "strengths.diffuse", "strengths.specular",
 		"specular_exponent_domain", "tone_mapping.enabled", "tone_mapping.max_white",
-		"noise_granularity", "overall_scene_tone", "dir_to_light", "cascade_split_distances"
+		"noise_granularity", "bilinear_percent", "overall_scene_tone", "dir_to_light", "cascade_split_distances"
 	};
 
 	static const GLchar* const dynamic_subvar_names[] = {

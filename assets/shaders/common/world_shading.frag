@@ -44,14 +44,16 @@ vec2 adjust_UV_for_pixel_art_filtering(const vec2 UV) {
 	vec2 texture_size = textureSize(diffuse_sampler, 0).xy;
 	vec2 pixel = UV.xy * texture_size;
 
-	vec2 seam = floor(pixel + 0.5f), dudv = fwidth(pixel);
+	vec2
+		seam = floor(pixel + 0.5f),
+		dudv = mix(fwidth(pixel), vec2(1.0f), bilinear_percent);
+
 	pixel = seam + clamp((pixel - seam) / dudv, -0.5f, 0.5f);
 	return pixel / texture_size;
 }
 
 // In shadow layer is already known (like for the weapon sprite), this can be useful to call
 vec4 calculate_light_with_provided_shadow(const float shadow, const vec3 UV, const vec3 fragment_normal) {
-
 	vec3 adjusted_UV = vec3(adjust_UV_for_pixel_art_filtering(UV.xy), UV.z);
 	vec4 texture_color = texture(diffuse_sampler, adjusted_UV);
 
