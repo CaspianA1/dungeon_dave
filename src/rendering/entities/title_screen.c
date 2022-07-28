@@ -59,7 +59,7 @@ TitleScreen init_title_screen(void) {
 	//////////
 
 	// TODO: make this a constant or parameter somewhere
-	const NormalMapConfig normal_map_config = {.blur_radius = 8, .blur_std_dev = 1.5f, .intensity = 1.0f};
+	const NormalMapConfig normal_map_config = {.blur_radius = 8, .blur_std_dev = 1.5f, .intensity = 1.0f, .rescale_factor = 1.0f};
 
 	return (TitleScreen) {
 		.active = true,

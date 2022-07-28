@@ -8,14 +8,10 @@ in mat3 TBN;
 
 out vec4 color;
 
-uniform sampler2DArray diffuse_sampler;
-
 void main(void) {
-	vec4 texture_color = texture(diffuse_sampler, UV);
 	vec3 normal = normalize(TBN * get_tangent_space_normal(UV));
-
 	float shadow = get_csm_shadow_from_layer(0u, fragment_pos_world_space);
-	vec3 light = calculate_light_with_provided_shadow(shadow, texture_color.rgb, normal);
 
-	color = vec4(postprocess_light(UV.xy, light), texture_color.a);
+	color = calculate_light_with_provided_shadow(shadow, UV, normal);
+	color.rgb = postprocess_light(UV.xy, color.rgb);
 }

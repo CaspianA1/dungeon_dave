@@ -192,17 +192,38 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 
 	////////// Uploading the texture to the CPU
 
+	const GLfloat rescale_factor = config -> rescale_factor;
+	const bool rescaling = rescale_factor != 1.0f;
+	const GLint unscaled_subtexture_w = subtexture_w, unscaled_subtexture_h = subtexture_h;
+
+	if (rescaling) {
+		subtexture_w = (GLint) (subtexture_w * rescale_factor);
+		subtexture_h = (GLint) (subtexture_h * rescale_factor);
+	}
+
 	const GLint general_purpose_surfaces_h = subtexture_h * num_subtextures;
 
 	SDL_Surface
 		*const general_purpose_surface_1 = init_blank_surface(subtexture_w, general_purpose_surfaces_h, SDL_PIXEL_FORMAT),
 		*const general_purpose_surface_2 = init_blank_surface(subtexture_w, general_purpose_surfaces_h, SDL_PIXEL_FORMAT);
 
-	// Copying the original texture set to #1
-	WITH_SURFACE_PIXEL_ACCESS(general_purpose_surface_1,
-		glGetTexImage(target, level, OPENGL_INPUT_PIXEL_FORMAT,
+	if (rescaling) { // If rescaling, copy the texture on the GPU into a surface with the same size, and then upscale that surface to `general_purpose_surface_1`
+		SDL_Surface* const buffer_surface = init_blank_surface(unscaled_subtexture_w, unscaled_subtexture_h * num_subtextures, SDL_PIXEL_FORMAT);
+
+		WITH_SURFACE_PIXEL_ACCESS(buffer_surface,
+			glGetTexImage(target, level, OPENGL_INPUT_PIXEL_FORMAT,
+			OPENGL_COLOR_CHANNEL_TYPE, buffer_surface -> pixels);
+		);
+
+		SDL_BlitScaled(buffer_surface, NULL, general_purpose_surface_1, NULL);
+		SDL_FreeSurface(buffer_surface);
+	}
+	else { // Otherwise, copy the texture directly to `general_purpose_surface_1`
+		WITH_SURFACE_PIXEL_ACCESS(general_purpose_surface_1,
+			glGetTexImage(target, level, OPENGL_INPUT_PIXEL_FORMAT,
 			OPENGL_COLOR_CHANNEL_TYPE, general_purpose_surface_1 -> pixels);
-	);
+		);
+	}
 
 	////////// Blurring it (if needed), and then making a normal map
 

@@ -2,6 +2,7 @@
 
 in vec3 fragment_pos_world_space;
 
+uniform sampler2DArray diffuse_sampler;
 uniform samplerCube environment_map_sampler;
 
 #include "shared_params.glsl"
@@ -38,16 +39,30 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) {
 	return specular_value * env_map_value;
 }
 
-// In shadow layer is already known (like for the weapon sprite), this can be useful to call
-vec3 calculate_light_with_provided_shadow(const float shadow, const vec3 texture_color, const vec3 fragment_normal) {
-	vec3 non_ambient = diffuse(fragment_normal) + specular(texture_color, fragment_normal);
-	vec3 light_strength = non_ambient * shadow + strengths.ambient;
-	return light_strength * texture_color * overall_scene_tone;
+// https://jorenjoestar.github.io/post/pixel_art_filtering/, under 'Inigo Quilez'
+vec2 adjust_UV_for_pixel_art_filtering(const vec2 UV) {
+	vec2 texture_size = textureSize(diffuse_sampler, 0).xy;
+	vec2 pixel = UV.xy * texture_size;
+
+	vec2 seam = floor(pixel + 0.5f), dudv = fwidth(pixel);
+	pixel = seam + clamp((pixel - seam) / dudv, -0.5f, 0.5f);
+	return pixel / texture_size;
 }
 
-vec3 calculate_light(const float world_depth_value, const vec3 texture_color, const vec3 fragment_normal) {
+// In shadow layer is already known (like for the weapon sprite), this can be useful to call
+vec4 calculate_light_with_provided_shadow(const float shadow, const vec3 UV, const vec3 fragment_normal) {
+
+	vec3 adjusted_UV = vec3(adjust_UV_for_pixel_art_filtering(UV.xy), UV.z);
+	vec4 texture_color = texture(diffuse_sampler, adjusted_UV);
+
+	vec3 non_ambient = diffuse(fragment_normal) + specular(texture_color.rgb, fragment_normal);
+	vec3 light_strength = non_ambient * shadow + strengths.ambient;
+	return vec4(light_strength * texture_color.rgb * overall_scene_tone, texture_color.a);
+}
+
+vec4 calculate_light(const float world_depth_value, const vec3 UV, const vec3 fragment_normal) {
 	float shadow = get_csm_shadow(world_depth_value, fragment_pos_world_space);
-	return calculate_light_with_provided_shadow(shadow, texture_color, fragment_normal);
+	return calculate_light_with_provided_shadow(shadow, UV, fragment_normal);
 }
 
 // https://64.github.io/tonemapping/ (Reinhard Extended Luminance)

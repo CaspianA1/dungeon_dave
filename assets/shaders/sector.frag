@@ -11,7 +11,6 @@ out vec3 color;
 
 uniform vec2 UV_translation;
 uniform vec3 UV_translation_area[2];
-uniform sampler2DArray diffuse_sampler;
 
 /* Each level may have an area where sector UV
 coordinates are re-translated for artistic purposes */
@@ -43,11 +42,8 @@ vec3 get_face_fragment_normal(const vec3 UV) {
 
 void main(void) {
 	vec3 translated_UV = retranslate_UV(UV);
+	vec3 fragment_normal = get_face_fragment_normal(translated_UV);
 
-	vec3
-		texture_color = texture(diffuse_sampler, translated_UV).rgb,
-		fragment_normal = get_face_fragment_normal(translated_UV);
-
-	color = calculate_light(world_depth_value, texture_color, fragment_normal);
+	color = calculate_light(world_depth_value, translated_UV, fragment_normal).rgb;
 	color = postprocess_light(translated_UV.xy, color);
 }

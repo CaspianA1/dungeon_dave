@@ -52,7 +52,7 @@ static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const sh
 }
 
 static void main_drawer(void* const app_context, const Event* const event) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT); // No color buffer clearing needed
 
 	SceneContext* const scene_context = (SceneContext*) app_context;
 
@@ -204,9 +204,9 @@ static void* main_init(void) {
 	//////////
 
 	const NormalMapConfig
-		sector_faces_normal_map_config = {.blur_radius = 2, .blur_std_dev = 0.9f, .intensity = 1.3f},
-		billboards_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 0.3f},
-		weapon_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 1.5f}; // TODO: vary this per weapon sprite, if needed
+		sector_faces_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.2f, .intensity = 1.3f, .rescale_factor = 2.0f},
+		billboards_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 0.3f, .rescale_factor = 2.0f},
+		weapon_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.4f, .intensity = 1.5f, .rescale_factor = 3.0f}; // TODO: vary this per weapon sprite, if needed
 
 	//////////
 
@@ -221,7 +221,7 @@ static void* main_init(void) {
 	specify_cascade_count_before_any_shader_compilation(num_cascades);
 
 	// 1024 for palace, 1200 for terrain
-	const struct {const GLsizei face, billboard, shadow_map;} texture_sizes = {256, 256, 1024};
+	const struct {const GLsizei face, billboard, shadow_map;} texture_sizes = {128, 128, 1024};
 
 	//////////
 
@@ -230,7 +230,7 @@ static void* main_init(void) {
 
 		.weapon_sprite = init_weapon_sprite(
 			// 3.0f, 3.0f, 1.0f, 2.0f, 1.0f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
-			3.0f, 8.0f, 0.6f, 3.0f, 0.07f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
+			3.0f, 8.0f, 0.6f, 1.0f, 0.07f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
 			// 3.0f, 2.0f, 0.75f, 2.0f, 0.02f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}, &weapon_normal_map_config
 			// 4.0f, 4.0f, 0.75f, 2.0f, 0.035f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}, &weapon_normal_map_config
 			// 2.0f, 2.0f, 0.8f, 1.0f, 0.04f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}, &weapon_normal_map_config
@@ -314,7 +314,7 @@ static void* main_init(void) {
 static void main_deinit(void* const app_context) {
 	SceneContext* const scene_context = (SceneContext*) app_context;
 
-	deinit_shared_shading_parsms(&scene_context -> shared_shading_params);
+	deinit_shared_shading_params(&scene_context -> shared_shading_params);
 
 	deinit_weapon_sprite(&scene_context -> weapon_sprite);
 	deinit_sector_context(&scene_context -> sector_context);

@@ -11,7 +11,7 @@ do_separable_gaussian_blur_pass */
 
 typedef struct {
     const signed_byte blur_radius; // This can be zero. If so, no blurring happens.
-    const GLfloat blur_std_dev, intensity;
+    const GLfloat blur_std_dev, intensity, rescale_factor;
 } NormalMapConfig;
 
 GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
