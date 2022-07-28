@@ -1,7 +1,10 @@
 #include "rendering/shadow.h"
 #include "data/constants.h"
+#include "utils/utils.h"
 #include "utils/shader.h"
 #include "utils/texture.h"
+
+static const GLenum framebuffer_target = GL_DRAW_FRAMEBUFFER;
 
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
@@ -91,15 +94,14 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 	GLuint framebuffer;
 
 	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_layers, 0);
+	glBindFramebuffer(framebuffer_target, framebuffer);
+	glFramebufferTexture(framebuffer_target, GL_DEPTH_ATTACHMENT, depth_layers, 0);
 	glDrawBuffer(GL_NONE); // Not drawing into any color buffers
 	glReadBuffer(GL_NONE); // Not reading from any color buffers
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		FAIL(CreateFramebuffer, "OpenGL error is '%s'", get_GL_error());
+	check_framebuffer_completeness();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(framebuffer_target, 0);
 
 	return framebuffer;
 }
@@ -211,12 +213,12 @@ void enable_rendering_to_shadow_context(const CascadedShadowContext* const shado
 
 	const GLsizei resolution = shadow_context -> resolution;
 	glViewport(0, 0, resolution, resolution);
-	glBindFramebuffer(GL_FRAMEBUFFER, shadow_context -> framebuffer);
+	glBindFramebuffer(framebuffer_target, shadow_context -> framebuffer);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void disable_rendering_to_shadow_context(const GLint screen_size[2]) {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(framebuffer_target, 0);
 	glViewport(0, 0, screen_size[0], screen_size[1]);
 }

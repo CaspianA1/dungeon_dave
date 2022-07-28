@@ -250,6 +250,31 @@ const GLchar* get_GL_error(void) {
 	#undef ERROR_CASE
 }
 
+void check_framebuffer_completeness(void) {
+	const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status == GL_FRAMEBUFFER_COMPLETE) return;
+
+	const GLchar* status_string;
+
+	#define COMPLETENESS_CASE(status) case GL_##status: status_string = #status; break
+
+	switch (status) {
+		COMPLETENESS_CASE(FRAMEBUFFER_UNDEFINED);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_READ_BUFFER);
+		COMPLETENESS_CASE(FRAMEBUFFER_UNSUPPORTED);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS);
+		default: status_string = "Unknown framebuffer error";
+	}
+
+	FAIL(CreateFramebuffer, "Could not create a framebuffer for this reason: '%s'", status_string);
+
+	#undef COMPLETENESS_CASE
+}
+
 FILE* open_file_safely(const GLchar* const path, const GLchar* const mode) {
 	FILE* const file = fopen(path, mode);
 	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);

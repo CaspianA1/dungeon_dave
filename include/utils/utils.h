@@ -145,6 +145,8 @@ byte sample_map_point(const byte* const map, const byte x, const byte y, const b
 
 const GLchar* get_GL_error(void);
 
+void check_framebuffer_completeness(void);
+
 FILE* open_file_safely(const GLchar* const path, const GLchar* const mode);
 
 #endif
