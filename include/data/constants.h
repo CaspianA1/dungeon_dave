@@ -89,7 +89,7 @@ static const struct {
 	.window = {
 		.app_name = "Dungeon Dave",
 		.opengl_major_minor_version = {4, 0},
-		.default_fps = 60, .depth_buffer_bits = 24, .multisample_samples = 8,
+		.default_fps = 60, .depth_buffer_bits = 24, .multisample_samples = 4,
 		.size = {800, 600}
 	},
 
