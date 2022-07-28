@@ -125,6 +125,7 @@ static inline GLint safely_get_uniform(const GLuint shader, const GLchar* const 
 #define USE_VSYNC
 
 #define USE_GAMMA_CORRECTION
+
 #define USE_MULTISAMPLING
 #define USE_POLYGON_ANTIALIASING
 
