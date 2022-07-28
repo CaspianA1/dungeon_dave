@@ -29,6 +29,8 @@ static Screen init_screen(const GLchar* const title, const byte opengl_major_min
 	#ifdef USE_MULTISAMPLING
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisample_samples);
+	#else
+	(void) multisample_samples;
 	#endif
 
 	#ifdef FORCE_SOFTWARE_RENDERER
