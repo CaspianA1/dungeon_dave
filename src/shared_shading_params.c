@@ -65,7 +65,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 	return shared_shading_params;
 }
 
-void deinit_shared_shading_parsms(const SharedShadingParams* const shared_shading_params) {
+void deinit_shared_shading_params(const SharedShadingParams* const shared_shading_params) {
 	deinit_uniform_buffer(&shared_shading_params -> constant);
 	deinit_uniform_buffer(&shared_shading_params -> dynamic);
 }

@@ -14,7 +14,8 @@ typedef struct {UniformBuffer constant, dynamic;} SharedShadingParams;
 SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_share_params,
 	const GLuint shader_count, const CascadedShadowContext* const shadow_context);
 
-void deinit_shared_shading_parsms(const SharedShadingParams* const shared_shading_params);
+void deinit_shared_shading_params(const SharedShadingParams* const shared_shading_params);
+
 void update_shared_shading_params(SharedShadingParams* const shared_shading_params,
 	const Camera* const camera, const CascadedShadowContext* const shadow_context);
 
