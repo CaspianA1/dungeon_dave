@@ -96,8 +96,7 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(framebuffer_target, framebuffer);
 	glFramebufferTexture(framebuffer_target, GL_DEPTH_ATTACHMENT, depth_layers, 0);
-	glDrawBuffer(GL_NONE); // Not drawing into any color buffers
-	glReadBuffer(GL_NONE); // Not reading from any color buffers
+	glDrawBuffer(GL_NONE); glReadBuffer(GL_NONE); // Not drawing into or reading from any color buffers
 
 	check_framebuffer_completeness();
 
