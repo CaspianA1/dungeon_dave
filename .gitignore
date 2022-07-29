@@ -3,6 +3,6 @@ scrap_code.txt
 
 .cache/
 .vscode/
-
 build/
-include/cglm
+
+include/lib/cglm

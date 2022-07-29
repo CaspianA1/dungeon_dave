@@ -7,7 +7,7 @@ get_from_github() {
 
 install_cglm() {
 	get_from_github recp cglm
-	cp -r cglm/include/cglm ../include/cglm
+	cp -r cglm/include/cglm ../include/lib/cglm
 	sudo rm -r cglm
 }
 
