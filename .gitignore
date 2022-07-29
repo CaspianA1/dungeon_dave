@@ -6,3 +6,5 @@ scrap_code.txt
 build/
 
 include/lib/cglm
+include/lib/cJSON.h
+src/lib/cJSON.c
