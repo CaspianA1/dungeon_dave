@@ -204,7 +204,7 @@ static void* main_init(void) {
 	//////////
 
 	const NormalMapConfig
-		sector_faces_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.2f, .intensity = 1.3f, .rescale_factor = 2.0f},
+		sector_faces_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.1f, .intensity = 1.3f, .rescale_factor = 2.0f},
 		billboards_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 1.0f, .rescale_factor = 2.0f}, // This, with 2x scaling, uses about 100mb more memory
 		weapon_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.4f, .intensity = 1.5f, .rescale_factor = 3.0f}; // TODO: vary this per weapon sprite, if needed
 
