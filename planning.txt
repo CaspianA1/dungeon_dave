@@ -23,7 +23,7 @@ Shadow mapping:
 - ESM logarithmic space filtering: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
 - Rescale the ESM constant based on the distance between the occluder and the receiver, maybe
 - Filtering in exp(gl_FragCoord.z) may remove some shadow acne
-- Make the weapon and billboards cast shadows
+- Make the billboards + a 2D character sprite cast shadows
 
 Ideal CSM:
 	- Sector mesh optimization:
@@ -66,7 +66,8 @@ Miscellaneous problems:
 Object rendering:
 - Up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - Some type of bridge object (perhaps not axis-aligned; just an arbitrary plane)
-- A sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
+- A sector BVH, through metasector trees, also called binary r-trees (alloc through node pool).
+	Note: if these are also used for billboard frustum culling, they can be used for billboard collision detection as well.
 
 Random feature ideas:
 - A map editor. Read in a json file that has dimensions, a heightmap, a texture id map, and a texture list.
