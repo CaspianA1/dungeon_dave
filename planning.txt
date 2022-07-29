@@ -3,24 +3,27 @@ Levels:
 - A castle level that's crazy high in the sky, where you can look down really far; and a mountain level, like Mount Fuji - running along the mountainside
 - A level based on the Zhangjiajie region
 - A map like this one: https://www.planetminecraft.com/project/the-sultans-palace-3351849/ (can look up similar Sultan maps for Minecraft)
+- Maybe a level based in a lost city of gold
 
 Final lighting model:
 - Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
 - Ambient, diffuse, specular (with procedural specular mapping), HDR, banding removal, light color - done
-- Ambient occlusion through an occlusion map, maybe
 - Perhaps make the shadows contact-hardening
-- If ESM isn't good enough in the end, use EVSM with only the positive term (if it's fast enough): https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
-- And optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map
+- Optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map, maybe
 - For AO, if I instance the texture ID across a whole sector, I can get 256 different textures per level, and I can pre-bake ambient occlusion into sectors
+- Maybe do raytraced AO per each face vertex, and then merge sectors if their adjacent faces have the same AO value.
+	Or instead of that, perhaps make a 3D texture with raytraced brightness values that range from 0 to 255, that then points in world-space can read from.
+	Then, the max size of that texture will be 16,581,375 for a 255x255x255 level. This will act as high-quality raytraced ambient occlusion. Optimization
+	note: I can skip tracing from points that are under the heightmap. Also, I should only trace upwards around a hemisphere, only darkening a point if it
+	hits another map point.  I'll use DDA for this.
 
 Shadow mapping:
 - The glDrawArrays call in shadow mapping uses around 30% of my GPU time mostly because of the shadow map size
 
-- After CSM, implement SDSM
 - ESM logarithmic space filtering: https://advances.realtimerendering.com/s2009/SIGGRAPH%202009%20-%20Lighting%20Research%20at%20Bungie.pdf
 - Rescale the ESM constant based on the distance between the occluder and the receiver, maybe
 - Filtering in exp(gl_FragCoord.z) may remove some shadow acne
-- Make the weapon and billboards cast shadows
+- Make the billboards + a 2D character sprite cast shadows
 
 Ideal CSM:
 	- Sector mesh optimization:
@@ -33,45 +36,44 @@ Architectural/code design ideas:
 - Catch more warnings with -Weverything
 - File paths may not work on Windows
 - Pass in texture parameters through a bitmask
-- Use CMake instead of Make for cross-platform compilation
-- Set up dependencies properly in the Makefile
-- Call SDL_GetTicks or SDL_GetPerformanceCounter only once per frame
+- Tell if a level was just initialized through the Event struct
 - Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit); or no macros at all
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if enough precision?)
-- Separate out context + window creation and utils
 - Define the constants in constants.h in constants.c, and make the constants.h struct extern
 - Three classes of settings: hardcoded in the `constants` struct, configurable via a level file, and configurable by the player
-- A LevelDescription struct that then a SceneState (or some other) struct uses to generate sectors, a shadow map, etc.
-	If levels come from C files, put those directly in files; otherwise, JSON will be turned into a LevelDescription.
-	The advantage to C files is that you don't have to parse a file for each level; the disadvantage is that map files
-	are then not easily editable
 - Perhaps use the alpha channels of the face texture set or normal map set for something interesting
-- Some library memory leaks; this should be fixed in some way, if possible
-- Make sector and billboard contexts contain all context necessary, not just fragmented around the SceneState struct
-- Use more of the cglm functions in `update_camera`, or make my own
-- Instead of hardcoding the beginning of each asset path ("../assets/"), abstract it away with a macro that concatenates a simpler path with the base path
-- Some sort of common draw context, that when invoked, binds a shader, vertex buffer and vertex spec and draws
+- Some library memory leaks; this should be fixed in some way, if possible (figure out why `SDL_GetNumAllocations` is above zero after `deinit_screen`; even happens with a simple test app)
+- Use more of the cglm functions in `update_camera`
 - Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
 - Perhaps use just OpenGL + ImGUI for the editor
-- Make all static billboards to animated (to simplify the code)
+- Make all static billboards to animated (to simplify the code), if complexity doesn't increase too much because of that
+- Use a compressed audio format in the end, instead of WAV (probably FLAC)
+- Make `map_size_t` an alias for `byte` or `GLubyte`, and make an alias for `map_value_t` too
+- Don't rebind vertex buffers each frame?
+- Alpha to coverage with the title screen becomes really glitchy
+- Texture compression as an option
+- Figure out how to make spherically distorted skyboxes in Blender from cube-like ones made in an image editor
+- A shader cache
+- Specular antialiasing
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
 - The checker heightmap has faster pacing sometimes
+- On the bigger laptop, changing the screen size leads to the player's head tilting briefly
+- Changing the pyramid track `pyramid.wav` to any other filename removes its two stutters
 
 Object rendering:
 - Up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
 - Some type of bridge object (perhaps not axis-aligned; just an arbitrary plane)
-- A sector BVH, through metasector trees, also called binary r-trees (alloc through node pool)
-- Billboard lighting that matches the sector lighting (share uniforms via a uniform buffer object)
+- A sector BVH, through metasector trees, also called binary r-trees (alloc through node pool).
+	Note: if these are also used for billboard frustum culling, they can be used for billboard collision detection as well.
 
 Random feature ideas:
 - A map editor. Read in a json file that has dimensions, a heightmap, a texture id map, and a texture list.
 	Choose texture or height through number keys (done), draw/move/erase modes (done), line mode, save button,
 	zoom in/out, scroll with the mouse.
 - Can't use red cross for health since it's copyrighted
-- Find a way to have low-res textures that are not blurry or have a loss of detail (nearest = shimmery, and linear = blurry; perhaps more antialiasing for nearest?). This addresses nearest: https://gamedev.stackexchange.com/questions/93466/multisampled-nearest-filtering-in-ps-2-0-is-it-possible
 - Gauge the number of multisample samples based on a runtime constant
 - Find a tighter far plane distance by finding the diameter of the sector convex hull
 
@@ -81,14 +83,14 @@ Normal mapping:
 	(Generate mipmaps on the CPU, and verify that they can mipmap plain textures like glGenerateMipmap)
 - Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using a shadow method that needs pre-blurring)
 - Share some of the looping logic for the Gaussian blur and the normal map generation
-- Little rectangular bumps exist in high-resolution normal maps with already fine detail
+- Little odd rectangles exist in the marble texture (due to compression)? This shows up in the normal map
 - Vary the normal map generation parameters based on the output texture size
 - Define normal map settings for each wall texture (only useful at normal map generation time).
 	Choose a hash map or an array for association between path and settings
 - Note: normal maps calculated via dFdx/y won't work because 1. derivatives are in screen space and 2. normals can then not be filtered
 
 A better shading model:
-- JSON file -> LightParams struct -> shared shader uniforms via uniform buffer objects (or no intermediate LightParams struct at all)
+- JSON file -> shared shader uniforms via uniform buffer objects
 - Possibility: instead of ambient, diffuse, and specular parameters per level, perhaps a material system (include normal map intensity in this; for the CPU only)
 - Those UBOs then can share a common fragment shading function that uses those params and takes in a surface normal
 
@@ -114,6 +116,8 @@ Other:
 - Sultan or vizier?
 - Set up a little website for the game, with various video clips of gameplay
 - Perhaps the Shabti should blink
+- A 3D character model that casts a shadow (or a flat one, like the weapon - like paper Mario?)
+- Very short, but memorable little audio tracks that play for the cutscenes
 
 End components:
 - Static sectors
@@ -122,6 +126,6 @@ End components:
 - Billboards (unanimated and animated)
 - Skybox
 - Weapon
-- Particles from a projectile - billboards with a shared texture id
+- Billboard subbatches that all have the same texture id and size; intended for repeats like grass or particles. Should they share a bounding box?
 - HUD
 - UI

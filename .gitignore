@@ -1,6 +1,8 @@
 .DS_Store
 scrap_code.txt
 
+.cache/
 .vscode/
-bin/
-obj/
+
+build/
+include/cglm

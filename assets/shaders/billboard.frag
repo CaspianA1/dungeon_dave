@@ -1,15 +1,26 @@
 #version 400 core
 
-#include "csm/shadow.frag"
+#include "common/world_shading.frag"
+#include "common/normal_utils.frag"
 
 in float world_depth_value;
-in vec3 UV, fragment_pos_world_space;
+in vec3 UV;
+
 out vec4 color;
 
-uniform float ambient;
-uniform sampler2DArray texture_sampler;
+uniform vec2 right_xz;
+
+vec3 get_billboard_normal(void) {
+	vec3 ts_normal = get_tangent_space_normal(UV); // `ts` = tangent space
+
+	return vec3(
+		ts_normal.x * right_xz.x - ts_normal.z * right_xz.y,
+		ts_normal.y,
+		ts_normal.x * right_xz.y + ts_normal.z * right_xz.x
+	);
+}
 
 void main(void) {
-	color = texture(texture_sampler, UV);
-	color.rgb *= mix(ambient, 1.0f, in_csm_shadow(world_depth_value, fragment_pos_world_space));
+	color = calculate_light(world_depth_value, UV, get_billboard_normal());
+	color.rgb = postprocess_light(UV.xy, color.rgb);
 }

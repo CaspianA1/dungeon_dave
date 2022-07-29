@@ -1,17 +1,110 @@
-#ifndef MAIN_C
-#define MAIN_C
+#include "main.h"
+#include "normal_map_generation.h"
+#include "data/maps.h"
+#include "utils/texture.h" // TODO: remove this when I don't need to contain the alpha test logic in this file anymore
+#include "event.h"
+#include "utils/alloc.h"
 
-#include "headers/main.h"
-#include "headers/billboard.h"
-#include "headers/maps.h"
-#include "headers/sector.h"
-#include "headers/normal_map_generation.h"
+static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const shadow_context,
+	const SectorContext* const sector_context, const WeaponSprite* const weapon_sprite) {
+
+	/* Curr problems with the weapon sprite shadow:
+	- Partial transparency (i.e. translucency); should I handle that?
+
+	- For binary transparency, how do I do it without aliasing?
+	- Perhaps with a filtered cutout texture: https://www.cs.rpi.edu/~cutler/classes/advancedgraphics/S17/final_projects/anthony_philip.pdf
+	- Since 1-bit textures don't exist in OpenGL, or in hardware, perhaps do a translucency map anyways (a separate texture map). It would be
+		a bit hard to implement, but it would be worth it for the sake of billboards later too.
+	- For a translucency map, I will need alpha blending, which requires ordered billboards, so I must sort my billboards front-to-back by their center
+	- This will make alpha results for billboards better, and it will allow shadows for the weapon sprite that have less aliasing
+
+	- Transparency code is sorta fragmented right now: alpha blending for the weapon,
+		normally, alpha testing for transparent objects, and alpha to coverage for billboards
+
+	- Integration with the depth shader is a bit messy; find a neat way to do that (this should go first in terms of priorities)
+	- The weapon sprite's shadow is way too light since it's close to the ground; find a way to resolve that
+
+	- A note: one billboard takes up 24 bytes, and 4 vec3s take up 48 bytes (and adding a 16-bit texture id makes that 64)
+	*/
+
+	const GLuint depth_shader = shadow_context -> depth_shader;
+
+	static GLint drawing_translucent_quads_id, frame_index_id;
+
+	ON_FIRST_CALL(
+		INIT_UNIFORM(drawing_translucent_quads, depth_shader);
+		INIT_UNIFORM(frame_index, depth_shader);
+		INIT_UNIFORM_VALUE(alpha_threshold, depth_shader, 1f, 0.2f);
+
+		use_texture(weapon_sprite -> drawable.diffuse_texture, depth_shader, "alpha_test_sampler", TexSet, TU_WeaponSpriteDiffuse);
+	);
+
+	// Opaque objects are drawn first
+
+	UPDATE_UNIFORM(drawing_translucent_quads, 1i, false);
+	draw_all_sectors_to_shadow_context(sector_context);
+
+	// Then, translucent objects after
+
+	UPDATE_UNIFORM(drawing_translucent_quads, 1i, true);
+	UPDATE_UNIFORM(frame_index, 1ui, weapon_sprite -> animation_context.curr_frame);
+	draw_weapon_sprite_to_shadow_context(weapon_sprite);
+}
+
+static void main_drawer(void* const app_context, const Event* const event) {
+	glClear(GL_DEPTH_BUFFER_BIT); // No color buffer clearing needed
+
+	SceneContext* const scene_context = (SceneContext*) app_context;
+
+	if (tick_title_screen(&scene_context -> title_screen, event)) return;
+
+	////////// Some variable initialization
+
+	const GLfloat curr_time_secs = event -> curr_time_secs;
+
+	const SectorContext* const sector_context = &scene_context -> sector_context;
+	const CascadedShadowContext* const shadow_context = &scene_context -> shadow_context;
+
+	Camera* const camera = &scene_context -> camera;
+	BillboardContext* const billboard_context = &scene_context -> billboard_context;
+	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
+
+	////////// Scene updating
+
+	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
+	update_billboards(billboard_context, curr_time_secs);
+	update_weapon_sprite(weapon_sprite, camera, event);
+	update_shadow_context(shadow_context, camera, event -> aspect_ratio);
+	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context);
+
+	////////// Rendering to the shadow context
+
+	enable_rendering_to_shadow_context(shadow_context);
+	draw_all_objects_to_shadow_map(shadow_context, sector_context, weapon_sprite);
+	disable_rendering_to_shadow_context(event -> screen_size);
+
+	////////// The main drawing code
+
+	const Skybox* const skybox = &scene_context -> skybox;
+	draw_sectors(sector_context, shadow_context, skybox, camera -> frustum_planes, curr_time_secs);
+
+	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
+	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
+			draw_skybox(skybox); // Drawn before any translucent geometry
+
+			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
+				draw_billboards(billboard_context, shadow_context, skybox, camera);
+				draw_weapon_sprite(weapon_sprite, shadow_context, skybox);
+			);
+		);
+	);
+}
 
 static void* main_init(void) {
 	////////// Defining a bunch of level data
 
 	const AnimationLayout billboard_animation_layouts[] = {
-		// ASSET_PATH("spritesheets/_.bmp"),
 		{ASSET_PATH("spritesheets/flying_carpet.bmp"), 5, 10, 46},
 		{ASSET_PATH("spritesheets/torch_2.bmp"), 2, 3, 5},
 		{ASSET_PATH("spritesheets/eddie.bmp"), 23, 1, 23},
@@ -66,7 +159,7 @@ static void* main_init(void) {
 		ASSET_PATH("objects/shabti.bmp")
 	},
 
-	*const still_face_textures[] = {
+	*const still_face_texture_paths[] = {
 		// Palace:
 		ASSET_PATH("walls/sand.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp"),
 		ASSET_PATH("walls/marble.bmp"), ASSET_PATH("walls/hieroglyph.bmp"),
@@ -110,140 +203,130 @@ static void* main_init(void) {
 
 	//////////
 
-	SceneState scene_state = {
+	const NormalMapConfig
+		sector_faces_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.1f, .intensity = 1.3f, .rescale_factor = 2.0f},
+		billboards_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 1.0f, .rescale_factor = 2.0f}, // This, with 2x scaling, uses about 100mb more memory
+		weapon_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.4f, .intensity = 1.5f, .rescale_factor = 3.0f}; // TODO: vary this per weapon sprite, if needed
+
+	//////////
+
+	const byte
+		*const heightmap = (const byte*) palace_heightmap,
+		*const texture_id_map = (const byte*) palace_texture_id_map,
+		map_size[2] = {palace_width, palace_height};
+
+	const GLfloat far_clip_dist = compute_world_far_clip_dist(heightmap, map_size);
+
+	const GLsizei num_cascades = 8; // 8 for palace, 16 for terrain
+	specify_cascade_count_before_any_shader_compilation(num_cascades);
+
+	// 1024 for palace, 1200 for terrain
+	const struct {const GLsizei face, billboard, shadow_map;} texture_sizes = {128, 128, 1024};
+
+	//////////
+
+	const SceneContext scene_context = {
+		.camera = init_camera((vec3) {1.5f, 0.5f, 1.5f}, far_clip_dist),
+
 		.weapon_sprite = init_weapon_sprite(
-			0.6f, 2.0f, 0.07f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}
-			// 0.75f, 2.0f, 0.122f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22} // TODO: stop this from animating slowly
-			// 0.75f, 2.0f, 0.035f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}
-			// 0.8f, 1.0f, 0.04f, (AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}
+			// 3.0f, 3.0f, 1.0f, 2.0f, 1.0f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
+			3.0f, 8.0f, 0.6f, 1.0f, 0.07f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
+			// 3.0f, 2.0f, 0.75f, 1.0f, 0.02f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}, &weapon_normal_map_config
+			// 4.0f, 4.0f, 0.75f, 1.0f, 0.035f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}, &weapon_normal_map_config
+			// 2.0f, 2.0f, 0.8f, 1.0f, 0.04f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}, &weapon_normal_map_config
 		),
 
-		.billboard_animations = init_list(ARRAY_LENGTH(billboard_animations), Animation),
-		.billboard_animation_instances = init_list(ARRAY_LENGTH(billboard_animation_instances), BillboardAnimationInstance),
+		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
+			still_face_texture_paths, ARRAY_LENGTH(still_face_texture_paths), texture_sizes.face, &sector_faces_normal_map_config
+		),
+
+		.billboard_context = init_billboard_context(
+			texture_sizes.billboard, &billboards_normal_map_config,
+
+			ARRAY_LENGTH(still_billboard_texture_paths), still_billboard_texture_paths,
+			ARRAY_LENGTH(billboard_animation_layouts), billboard_animation_layouts,
+
+			ARRAY_LENGTH(billboards), billboards,
+			ARRAY_LENGTH(billboard_animations), billboard_animations,
+			ARRAY_LENGTH(billboard_animation_instances), billboard_animation_instances
+		),
+
+		.shadow_context = init_shadow_context(
+			// Terrain:
+			/*
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.0f, 1.0f},
+			far_clip_dist, 0.4f, texture_sizes.shadow_map, num_cascades
+			*/
+
+			// Palace:
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.75f, 1.0f},
+			far_clip_dist, 0.25f, texture_sizes.shadow_map, num_cascades
+		),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
 		.title_screen = init_title_screen(),
 
-		.heightmap = (const byte*) terrain_heightmap,
-		.texture_id_map = (const byte*) terrain_texture_id_map,
-		.map_size = {terrain_width, terrain_height}
+		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
 
-	push_array_to_list(&scene_state.billboard_animations,
-		billboard_animations, ARRAY_LENGTH(billboard_animations));
+	////////// Global state initialization
 
-	push_array_to_list(&scene_state.billboard_animation_instances,
-		billboard_animation_instances, ARRAY_LENGTH(billboard_animation_instances));
+	/* This is for correct for when premultiplying alpha.
+	See https://www.realtimerendering.com/blog/gpus-prefer-premultiplication/. */
+	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+	glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	init_sector_draw_context(&scene_state.sector_draw_context, &scene_state.sectors,
-		scene_state.heightmap, scene_state.texture_id_map, scene_state.map_size[0], scene_state.map_size[1]);
-
-	scene_state.billboard_draw_context = init_billboard_draw_context(ARRAY_LENGTH(billboards), billboards);
-
-	scene_state.billboard_draw_context.texture_set = init_texture_set(
-		TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		ARRAY_LENGTH(still_billboard_texture_paths), ARRAY_LENGTH(billboard_animation_layouts), 256, 256,
-		still_billboard_texture_paths, billboard_animation_layouts
-	);
-
-	//////////
-
-	scene_state.sector_draw_context.texture_set = init_texture_set(
-		TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
-		ARRAY_LENGTH(still_face_textures), 0, 256, 256, still_face_textures, NULL
-	);
-
-	scene_state.face_normal_map_set = init_normal_map_set_from_texture_set(scene_state.sector_draw_context.texture_set, true);
-
-	//////////
-
-	init_camera(&scene_state.camera, (vec3) {1.5f, 0.5f, 1.5f}, scene_state.heightmap, scene_state.map_size);
-
-	scene_state.cascaded_shadow_context = init_csm_context(
-		(vec3) {0.241236f, 0.930481f, -0.275698f}, 20.0f,
-		scene_state.camera.far_clip_dist, 0.1f, 1024, 1024, 5
-	);
-
-	//////////
-
-	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-	glFinish(); // Making sure that all initialization operations are finished
 
-	void* const app_context = malloc(sizeof(SceneState));
-	memcpy(app_context, &scene_state, sizeof(SceneState));
-	return app_context;
-}
+	/* Depth clamping is used for 1. shadow pancaking, 2. avoiding clipping with sectors when walking
+	against them, and 3. stopping too much upwards weapon pitch from going through the near plane */
+	const GLenum states[] = {GL_DEPTH_TEST, GL_DEPTH_CLAMP, GL_CULL_FACE, GL_TEXTURE_CUBE_MAP_SEAMLESS};
+	for (byte i = 0; i < ARRAY_LENGTH(states); i++) glEnable(states[i]);
 
-static void main_drawer(void* const app_context) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	////////// Initializing a scene context on the heap
 
-	SceneState* const scene_state = (SceneState*) app_context;
-	const Event event = get_next_event();
+	SceneContext* const scene_context_on_heap = alloc(1, sizeof(SceneContext));
+	memcpy(scene_context_on_heap, &scene_context, sizeof(SceneContext));
 
-	TitleScreen* const title_screen = &scene_state -> title_screen;
-	if (!title_screen_finished(title_screen, &event)) {
-		tick_title_screen(*title_screen);
-		return;
-	}
+	////////// Initializing shared shading params
 
-	////////// Some variable initialization + object updating
+	const GLuint shaders_that_use_shared_params[] = {
+		scene_context.shadow_context.depth_shader,
+		scene_context.skybox.shader,
+		scene_context.sector_context.drawable.shader,
+		scene_context.billboard_context.drawable.shader,
+		scene_context.weapon_sprite.drawable.shader
+	};
 
-	const BatchDrawContext* const sector_draw_context = &scene_state -> sector_draw_context;
-	const CascadedShadowContext* const csm_context = &scene_state -> cascaded_shadow_context;
-	Camera* const camera = &scene_state -> camera;
+	const SharedShadingParams shared_shading_params = init_shared_shading_params(
+		shaders_that_use_shared_params, ARRAY_LENGTH(shaders_that_use_shared_params),
+		&scene_context.shadow_context
+	);
 
-	update_camera(camera, event);
+	// I am bypassing the type system's const safety checks with this, but it's for the best
+	memcpy(&scene_context_on_heap -> shared_shading_params, &shared_shading_params, sizeof(SharedShadingParams));
 
 	//////////
 
-	update_billboard_animation_instances(
-		&scene_state -> billboard_animation_instances,
-		&scene_state -> billboard_animations,
-		&scene_state -> billboard_draw_context.buffers.cpu);
-
-	draw_to_csm_context(csm_context, camera, event.screen_size, draw_all_sectors_for_shadow_map, sector_draw_context);
-
-	////////// The main drawing code
-
-	draw_visible_sectors(sector_draw_context, csm_context, &scene_state -> sectors,
-		camera, scene_state -> face_normal_map_set, event.screen_size);
-
-	draw_visible_billboards(&scene_state -> billboard_draw_context, csm_context, camera);
-
-	/* Drawing the skybox after sectors and billboards because
-	most skybox fragments would unnecessarily be drawn otherwise */
-	draw_skybox(scene_state -> skybox, camera);
-
-	update_and_draw_weapon_sprite(&scene_state -> weapon_sprite, camera,
-		&event, csm_context, camera -> model_view_projection);
+	return scene_context_on_heap;
 }
 
 static void main_deinit(void* const app_context) {
-	SceneState* const scene_state = (SceneState*) app_context;
+	SceneContext* const scene_context = (SceneContext*) app_context;
 
-	deinit_weapon_sprite(&scene_state -> weapon_sprite);
+	deinit_shared_shading_params(&scene_context -> shared_shading_params);
 
-	deinit_batch_draw_context(&scene_state -> sector_draw_context);
-	deinit_batch_draw_context(&scene_state -> billboard_draw_context);
+	deinit_weapon_sprite(&scene_context -> weapon_sprite);
+	deinit_sector_context(&scene_context -> sector_context);
+	deinit_billboard_context(&scene_context -> billboard_context);
 
-	deinit_csm_context(&scene_state -> cascaded_shadow_context);
+	deinit_shadow_context(&scene_context -> shadow_context);
+	deinit_title_screen(&scene_context -> title_screen);
+	deinit_skybox(scene_context -> skybox);
 
-	deinit_list(scene_state -> sectors);
-	deinit_list(scene_state -> billboard_animations);
-	deinit_list(scene_state -> billboard_animation_instances);
-
-	deinit_title_screen(&scene_state -> title_screen);
-	deinit_skybox(scene_state -> skybox);
-	deinit_texture(scene_state -> face_normal_map_set);
-
-	free(scene_state);
+	dealloc(scene_context);
 }
 
 int main(void) {
 	make_application(main_drawer, main_init, main_deinit);
 }
-
-#endif

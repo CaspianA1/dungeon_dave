@@ -1,11 +1,11 @@
 #version 400 core
 
-in vec3 UV_3D;
+in vec3 UV;
 
 out vec3 color;
 
-uniform samplerCube texture_sampler;
+uniform samplerCube skybox_sampler;
 
 void main(void) {
-	color = texture(texture_sampler, UV_3D).rgb;
+	color = texture(skybox_sampler, UV).rgb;
 }

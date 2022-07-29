@@ -1,13 +1,20 @@
 #version 400 core
 
-layout(location = 0) in ivec3 vertex_pos_world_space;
+#include "common/shared_params.glsl"
 
-out vec3 UV_3D;
+out vec3 UV;
 
-uniform mat4 model_view_projection;
+// https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
+const ivec3 vertices[] = ivec3[](
+	ivec3(-1, 1, 1),  ivec3(1, 1, 1),    ivec3(-1, -1, 1), ivec3(1, -1, 1),
+	ivec3(1, -1, -1), ivec3(1, 1, 1),    ivec3(1, 1, -1),  ivec3(-1, 1, 1),  ivec3(-1, 1, -1),
+	ivec3(-1, -1, 1), ivec3(-1, -1, -1), ivec3(1, -1, -1), ivec3(-1, 1, -1), ivec3(1, 1, -1)
+);
 
 void main(void) {
-	gl_Position = (model_view_projection * vec4(vertex_pos_world_space, 1.0f)).xyww;
-	UV_3D = vertex_pos_world_space;
-	UV_3D.x = -UV_3D.x; // Without this, the X component of the UV is reversed
+	vec3 vertex_pos_world_space = vertices[gl_VertexID];
+	gl_Position = mat3x4(view_projection) * vertex_pos_world_space;
+
+	UV = vertex_pos_world_space;
+	UV.x = -UV.x; // Without this, the x component of `UV` is reversed
 }
