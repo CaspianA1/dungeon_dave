@@ -2,14 +2,14 @@
 #define BUFFER_DEFS_H
 
 #include <stdbool.h>
-#include "glad/glad.h"
+#include "lib/glad/glad.h"
 
 ////////// cglm and SDL2 have plenty of floating-point promotion errors, so this ignores them
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 
-#include "cglm/cglm.h"
+#include "lib/cglm/cglm.h"
 
 // If SDL2/SDL.h isn't found, try SDL.h
 #if __has_include("SDL2/SDL.h")
