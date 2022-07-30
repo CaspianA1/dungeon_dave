@@ -73,8 +73,8 @@ static Screen init_screen(const GLchar* const title, const byte opengl_major_min
 	#endif
 
 	#ifdef USE_POLYGON_ANTIALIASING
-	glEnable(GL_POLYGON_SMOOTH);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	glEnable(GL_POLYGON_SMOOTH); glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	glEnable(GL_LINE_SMOOTH); glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	#endif
 
 	return screen;
@@ -135,10 +135,11 @@ static void set_triangle_fill_mode(const Uint8* const keys) {
 			in_triangle_fill_mode = !in_triangle_fill_mode;
 			changed_mode_last_tick = true;
 			glPolygonMode(GL_FRONT_AND_BACK, in_triangle_fill_mode ? GL_FILL : GL_LINE);
-			glEnable(GL_LINE_SMOOTH);
 		}
 	}
 	else changed_mode_last_tick = false;
+
+	if (!in_triangle_fill_mode) glClear(GL_COLOR_BUFFER_BIT);
 }
 
 static bool application_should_exit(const Uint8* const keys) {
