@@ -67,7 +67,7 @@ static int compare_billboard_sort_refs(const void* const a, const void* const b)
 	else return 0;
 }
 
-static void sort_billboard_indices_by_dist_to_camera(BillboardContext* const billboard_context, const vec3 camera_pos) {
+static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_context, const vec3 camera_pos) {
 	const List* const billboards = &billboard_context -> billboards;
 
 	const Billboard* const billboard_data = billboards -> data;
@@ -131,7 +131,7 @@ void draw_billboards(BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context,
 	const Skybox* const skybox, const Camera* const camera) {
 
-	sort_billboard_indices_by_dist_to_camera(billboard_context, camera -> pos);
+	sort_billboards_by_dist_to_camera(billboard_context, camera -> pos);
 
 	draw_drawable(
 		billboard_context -> drawable, corners_per_quad, billboard_context -> billboards.length,

@@ -56,6 +56,7 @@ Architectural/code design ideas:
 - Figure out how to make spherically distorted skyboxes in Blender from cube-like ones made in an image editor
 - A shader cache
 - Specular antialiasing
+- Different bilinear percents for all object types
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage

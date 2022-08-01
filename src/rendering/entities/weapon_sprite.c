@@ -234,8 +234,8 @@ static void define_vertex_spec(void) {
 
 WeaponSprite init_weapon_sprite(
 	const GLfloat max_yaw_degrees, const GLfloat max_pitch_degrees,
-	const GLfloat size, const GLfloat texture_rescale_factor,
-	const GLfloat secs_for_frame, const AnimationLayout* const animation_layout,
+	const GLfloat size, const GLfloat secs_for_frame,
+	const AnimationLayout* const animation_layout,
 	const NormalMapConfig* const normal_map_config) {
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
@@ -255,9 +255,7 @@ WeaponSprite init_weapon_sprite(
 	const GLuint diffuse_texture_set = init_texture_set(
 		true, TexNonRepeating,
 		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, 0, 1,
-		(GLsizei) (frame_size[0] * texture_rescale_factor),
-		(GLsizei) (frame_size[1] * texture_rescale_factor),
-		NULL, animation_layout
+		frame_size[0], frame_size[1], NULL, animation_layout
 	);
 
 	//////////
