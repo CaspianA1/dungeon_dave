@@ -3,25 +3,13 @@
 #include "utils/texture.h"
 #include "utils/buffer_defs.h"
 
-// TODO: have a SkyboxRenderer interface that allows swapping out skybox textures
+/* TODO:
+- Have a SkyboxRenderer interface that allows swapping out skybox textures
+- Pixel art UV correction for skyboxes
+*/
 
-static GLuint init_skybox_texture(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
-	SDL_Surface* skybox_surface = init_surface(cubemap_path);
-
-	////////// Rescaling the skybox if needed
-
-	if (texture_rescale_factor != 1.0f) {
-		SDL_Surface* const rescaled_skybox_surface = init_blank_surface(
-			(GLsizei) (skybox_surface -> w * texture_rescale_factor),
-			(GLsizei) (skybox_surface -> h * texture_rescale_factor),
-			SDL_PIXEL_FORMAT);
-
-		SDL_BlitScaled(skybox_surface, NULL, rescaled_skybox_surface, NULL);
-		SDL_FreeSurface(skybox_surface);
-
-		skybox_surface = rescaled_skybox_surface;
-	}
-
+static GLuint init_skybox_texture(const GLchar* const cubemap_path) {
+	SDL_Surface* const skybox_surface = init_surface(cubemap_path);
 	const GLint skybox_w = skybox_surface -> w;
 
 	////////// Failing if the dimensions are not right
@@ -72,11 +60,11 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	ON_FIRST_CALL(use_texture(drawable -> diffuse_texture, drawable -> shader, "skybox_sampler", TexSkybox, TU_Skybox););
 }
 
-Skybox init_skybox(const GLchar* const cubemap_path, const GLfloat texture_rescale_factor) {
+Skybox init_skybox(const GLchar* const cubemap_path) {
 	return init_drawable_without_vertices(
 		(uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP,
 		init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag")),
-		init_skybox_texture(cubemap_path, texture_rescale_factor)
+		init_skybox_texture(cubemap_path)
 	);
 }
 

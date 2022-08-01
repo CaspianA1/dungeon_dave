@@ -229,11 +229,11 @@ static void* main_init(void) {
 		.camera = init_camera((vec3) {1.5f, 0.5f, 1.5f}, far_clip_dist),
 
 		.weapon_sprite = init_weapon_sprite(
-			// 3.0f, 3.0f, 1.0f, 2.0f, 1.0f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
-			3.0f, 8.0f, 0.6f, 1.0f, 0.07f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
-			// 3.0f, 2.0f, 0.75f, 1.0f, 0.02f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}, &weapon_normal_map_config
-			// 4.0f, 4.0f, 0.75f, 1.0f, 0.035f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}, &weapon_normal_map_config
-			// 2.0f, 2.0f, 0.8f, 1.0f, 0.04f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}, &weapon_normal_map_config
+			// 3.0f, 3.0f, 1.0f, 1.0f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
+			3.0f, 8.0f, 0.6f, 0.07f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
+			// 3.0f, 2.0f, 0.75f, 0.02f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}, &weapon_normal_map_config
+			// 4.0f, 4.0f, 0.75f, 0.035f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}, &weapon_normal_map_config
+			// 2.0f, 2.0f, 0.8f, 0.04f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}, &weapon_normal_map_config
 		),
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
@@ -263,7 +263,7 @@ static void* main_init(void) {
 			far_clip_dist, 0.25f, texture_sizes.shadow_map, num_cascades
 		),
 
-		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp"), 1.0f),
+		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp")),
 		.title_screen = init_title_screen(),
 
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}

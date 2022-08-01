@@ -41,8 +41,8 @@ get_normal_and_tangent, update_uniforms, define_vertex_spec */
 
 WeaponSprite init_weapon_sprite(
 	const GLfloat max_yaw_degrees, const GLfloat max_pitch_degrees,
-	const GLfloat size, const GLfloat texture_rescale_factor,
-	const GLfloat secs_for_frame, const AnimationLayout* const animation_layout,
+	const GLfloat size, const GLfloat secs_for_frame,
+	const AnimationLayout* const animation_layout,
 	const NormalMapConfig* const normal_map_config);
 
 void deinit_weapon_sprite(const WeaponSprite* const ws);

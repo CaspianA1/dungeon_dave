@@ -97,7 +97,8 @@ static const struct {
 		.strengths = {.ambient = 0.25f, .diffuse = 0.7f, .specular = 1.5f},
 		.specular_exponent_domain = {32.0f, 96.0f},
 		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
-		.noise_granularity = 0.2f / 255.0f, .bilinear_percent = 0.2f, .tone_mapping = {.enabled = true, .max_white = 1.5f}
+		.noise_granularity = 0.2f / 255.0f, .bilinear_percent = 0.2f,
+		.tone_mapping = {.enabled = true, .max_white = 1.5f}
 	},
 
 	.weapon_sprite = {.max_movement_magnitude = 0.2f, .time_for_half_movement_cycle = 0.5f},
