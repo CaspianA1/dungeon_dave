@@ -30,7 +30,7 @@ typedef struct {
 	const struct {const billboard_index_t billboard, animation;} ids;
 } BillboardAnimationInstance;
 
-////////// Excluded: compare_billboard_sort_refs, sort_billboard_indices_by_dist_to_camera, update_uniforms, define_vertex_spec
+////////// Excluded: compare_billboard_sort_refs, sort_billboards_by_dist_to_camera, update_uniforms, define_vertex_spec
 
 void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs);
 
