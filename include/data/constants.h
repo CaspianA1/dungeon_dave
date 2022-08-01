@@ -51,6 +51,7 @@ static const struct {
 		more towards the upper bound of the specular exponent domain).
 		Ambient strength also equals the amount of light in shadows. */
 
+		const byte aniso_filtering_level;
 		const struct {const GLfloat ambient, diffuse, specular;} strengths;
 		const GLfloat specular_exponent_domain[2], overall_scene_tone[3], noise_granularity, bilinear_percent;
 		const struct {const bool enabled; const GLfloat max_white;} tone_mapping;
@@ -94,6 +95,7 @@ static const struct {
 	},
 
 	.lighting = {
+		.aniso_filtering_level = 16,
 		.strengths = {.ambient = 0.25f, .diffuse = 0.7f, .specular = 1.5f},
 		.specular_exponent_domain = {32.0f, 96.0f},
 		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
@@ -133,7 +135,7 @@ static const struct {
 
 typedef enum {
 	RefreshRate,
-	MaxAnisotropicFilteringLevel
+	AnisotropicFilteringLevel
 } RuntimeConstantName;
 
 GLfloat get_runtime_constant(const RuntimeConstantName runtime_constant_name);
