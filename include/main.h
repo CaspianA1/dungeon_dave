@@ -8,6 +8,7 @@
 #include "rendering/entities/sector.h"
 #include "rendering/entities/billboard.h"
 #include "rendering/shadow.h"
+#include "rendering/ambient_occlusion.h"
 #include "rendering/entities/skybox.h"
 #include "rendering/entities/title_screen.h"
 
@@ -50,6 +51,7 @@ typedef struct {
 	BillboardContext billboard_context;
 
 	CascadedShadowContext shadow_context;
+	const AmbientOcclusionMap ao_map;
 
 	const Skybox skybox;
 	TitleScreen title_screen;

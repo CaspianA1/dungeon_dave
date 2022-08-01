@@ -3,6 +3,8 @@
 
 #include "utils/buffer_defs.h"
 
+void get_heightmap_min_and_max_point_heights(const byte* const heightmap, const byte map_size[2], byte min_and_max_point_heights[2]);
+
 enum {
 	level_one_width = 25, level_one_height = 15,
 	architecture_width = 50, architecture_height = 50,

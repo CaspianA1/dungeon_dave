@@ -215,7 +215,10 @@ static void* main_init(void) {
 		*const texture_id_map = (const byte*) palace_texture_id_map,
 		map_size[2] = {palace_width, palace_height};
 
-	const GLfloat far_clip_dist = compute_world_far_clip_dist(heightmap, map_size);
+	byte min_and_max_point_heights[2];
+	get_heightmap_min_and_max_point_heights(heightmap, map_size, min_and_max_point_heights);
+
+	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, min_and_max_point_heights);
 
 	const GLsizei num_cascades = 8; // 8 for palace, 16 for terrain
 	specify_cascade_count_before_any_shader_compilation(num_cascades);
@@ -262,6 +265,8 @@ static void* main_init(void) {
 			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.75f, 1.0f},
 			far_clip_dist, 0.25f, texture_sizes.shadow_map, num_cascades
 		),
+
+		.ao_map = init_ao_map(),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp")),
 		.title_screen = init_title_screen(),
@@ -320,6 +325,7 @@ static void main_deinit(void* const app_context) {
 	deinit_sector_context(&scene_context -> sector_context);
 	deinit_billboard_context(&scene_context -> billboard_context);
 
+	deinit_ao_map(scene_context -> ao_map);
 	deinit_shadow_context(&scene_context -> shadow_context);
 	deinit_title_screen(&scene_context -> title_screen);
 	deinit_skybox(scene_context -> skybox);

@@ -1,4 +1,23 @@
 #include "data/maps.h"
+#include "data/constants.h"
+#include "utils/utils.h"
+
+void get_heightmap_min_and_max_point_heights(const byte* const heightmap, const byte map_size[2], byte min_and_max_point_heights[2]) {
+	const byte map_width = map_size[0], map_height = map_size[1];
+
+	byte min = constants.max_byte_value, max = 0;
+
+	for (byte y = 0; y < map_height; y++) {
+		for (byte x = 0; x < map_width; x++) {
+			const byte height = sample_map_point(heightmap, x, y, map_width);
+			if (height < min) min = height;
+			if (height > max) max = height;
+		}
+	}
+
+	min_and_max_point_heights[0] = min;
+	min_and_max_point_heights[1] = max;
+}
 
 const byte level_one_heightmap[level_one_height][level_one_width] = {
 	{5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},

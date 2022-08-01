@@ -326,7 +326,7 @@ Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist) {
 	return camera;
 }
 
-GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_size[2]) {
+GLfloat compute_world_far_clip_dist(const byte map_size[2], const byte min_and_max_point_heights[2]) {
 	/* The far clip distance, ideally, would be equal to the diameter of
 	the convex hull of all points in the heightmap. If I had more time,
 	I would implement that, but a simple method that works reasonably well is this:
@@ -347,21 +347,9 @@ GLfloat compute_world_far_clip_dist(const byte* const heightmap, const byte map_
 
 	Then, `additional_camera_height` equals `max_jump_height + eye_height`. */
 
-	const byte map_size_x = map_size[0], map_size_z = map_size[1];
-
-	byte min_point_height = constants.max_byte_value, max_point_height = 0;
-
-	for (byte y = 0; y < map_size_z; y++) {
-		for (byte x = 0; x < map_size_x; x++) {
-			const byte height = sample_map_point(heightmap, x, y, map_size_x);
-			if (height < min_point_height) min_point_height = height;
-			if (height > max_point_height) max_point_height = height;
-		}
-	}
-
 	const GLfloat max_jump_height = (constants.speeds.jump * constants.speeds.jump) / (2.0f * constants.accel.g);
 	const GLfloat additional_camera_height = max_jump_height + constants.camera.eye_height;
 
-	const GLfloat max_z_difference = (max_point_height - min_point_height) + additional_camera_height;
-	return glm_vec3_norm((vec3) {map_size_x, map_size_z, max_z_difference});
+	const byte heightmap_z_difference = min_and_max_point_heights[1] - min_and_max_point_heights[0];
+	return glm_vec3_norm((vec3) {map_size[0], map_size[1], heightmap_z_difference + additional_camera_height});
 }
