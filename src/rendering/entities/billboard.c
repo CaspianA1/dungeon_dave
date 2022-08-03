@@ -12,6 +12,7 @@ typedef struct {
 - Fix weird depth clamping errors when billboard intersect with the near plane
 - Note: culling cannot be done for billboards for shadow mapping, for the same reason as with sectors
 - Render the player body as a shadowed billboard that always has the same center as the camera
+- Maybe render billboards as a 3D texture, so that smoother animations can happen (if no blending happens across sections)
 
 Drawing billboards to the shadow cascades:
 	- Update billboards on the CPU
