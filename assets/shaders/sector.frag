@@ -5,7 +5,6 @@
 
 flat in uint face_id;
 in float world_depth_value;
-in vec3 UV;
 
 out vec3 color;
 

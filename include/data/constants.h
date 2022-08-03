@@ -96,7 +96,7 @@ static const struct {
 
 	.lighting = {
 		.aniso_filtering_level = 16,
-		.strengths = {.ambient = 0.25f, .diffuse = 0.7f, .specular = 1.5f},
+		.strengths = {.ambient = 0.9f, .diffuse = 0.9f, .specular = 1.8f},
 		.specular_exponent_domain = {32.0f, 96.0f},
 		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
 		.noise_granularity = 0.2f / 255.0f, .bilinear_percent = 0.2f,

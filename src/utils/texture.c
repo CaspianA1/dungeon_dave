@@ -70,7 +70,7 @@ void use_texture(const GLuint texture,
 
 //////////
 
-// This sets the current texture to be the returned texture. TODO: allow different wrap modes for S and T.
+// This sets the current texture to be the returned texture. TODO: allow different wrap modes for S, T, and R.
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	const TextureFilterMode mag_filter, const TextureFilterMode min_filter,
 	const bool force_disable_anisotropic_filtering) {
@@ -86,7 +86,8 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	glTexParameteri(type, GL_TEXTURE_WRAP_S, cast_wrap_mode);
 	glTexParameteri(type, GL_TEXTURE_WRAP_T, cast_wrap_mode);
 
-	if (type == TexSkybox) glTexParameteri(type, GL_TEXTURE_WRAP_R, cast_wrap_mode);
+	if (type == TexVolumetric || type == TexSkybox)
+		glTexParameteri(type, GL_TEXTURE_WRAP_R, cast_wrap_mode);
 
 	#ifdef USE_ANISOTROPIC_FILTERING
 

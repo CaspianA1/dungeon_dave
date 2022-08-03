@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "rendering/shadow.h"
 #include "rendering/entities/skybox.h"
+#include "rendering/ambient_occlusion.h"
 #include "normal_map_generation.h"
 
 typedef struct {
@@ -36,6 +37,7 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 
 void draw_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
-	const vec4 frustum_planes[planes_per_frustum], const GLfloat curr_time_secs);
+	const vec4 frustum_planes[planes_per_frustum], const GLfloat curr_time_secs,
+	const AmbientOcclusionMap ao_map);
 
 #endif

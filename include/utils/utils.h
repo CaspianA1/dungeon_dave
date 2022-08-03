@@ -14,6 +14,7 @@ typedef enum {
 	ParseIncludeDirectiveInShader,
 	InitializeShaderUniform,
 	InitializeGPUMemoryMapping,
+	UseLevelHeightmap,
 	CreateFramebuffer,
 	CreateSkybox,
 	CreateNormalMap,

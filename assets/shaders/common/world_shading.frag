@@ -3,10 +3,11 @@
 #include "shared_params.glsl"
 #include "shadow/shadow.frag"
 
-in vec3 fragment_pos_world_space;
+in vec3 fragment_pos_world_space, UV, ambient_occlusion_UV;
 
 uniform samplerCube environment_map_sampler;
 uniform sampler2DArray diffuse_sampler;
+uniform sampler3D ambient_occlusion_sampler;
 
 float diffuse(const vec3 fragment_normal) {
 	float diffuse_amount = dot(fragment_normal, dir_to_light);
@@ -52,19 +53,21 @@ vec2 adjust_UV_for_pixel_art_filtering(const vec2 UV) {
 	return pixel / texture_size;
 }
 
-// In shadow layer is already known (like for the weapon sprite), this can be useful to call
-vec4 calculate_light_with_provided_shadow(const float shadow, const vec3 UV, const vec3 fragment_normal) {
+// When the shadow layer is already known (like for the weapon sprite), this can be useful to call
+vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, const vec3 UV, const vec3 fragment_normal) {
 	vec3 adjusted_UV = vec3(adjust_UV_for_pixel_art_filtering(UV.xy), UV.z);
 	vec4 texture_color = texture(diffuse_sampler, adjusted_UV);
+	float ao_strength = texture(ambient_occlusion_sampler, ambient_occlusion_UV).r;
 
 	vec3 non_ambient = diffuse(fragment_normal) + specular(texture_color.rgb, fragment_normal);
-	vec3 light_strength = non_ambient * shadow + strengths.ambient;
+	vec3 light_strength = (non_ambient * shadow_strength + strengths.ambient) * ao_strength;
+
 	return vec4(light_strength * texture_color.rgb * overall_scene_tone, texture_color.a);
 }
 
 vec4 calculate_light(const float world_depth_value, const vec3 UV, const vec3 fragment_normal) {
-	float shadow = get_csm_shadow(world_depth_value, fragment_pos_world_space);
-	return calculate_light_with_provided_shadow(shadow, UV, fragment_normal);
+	float shadow_strength = get_csm_shadow(world_depth_value, fragment_pos_world_space);
+	return calculate_light_with_provided_shadow_strength(shadow_strength, UV, fragment_normal);
 }
 
 // https://64.github.io/tonemapping/ (Reinhard Extended Luminance)

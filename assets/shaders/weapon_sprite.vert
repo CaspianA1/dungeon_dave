@@ -2,8 +2,8 @@
 
 #include "common/quad_utils.vert"
 #include "common/shared_params.glsl"
+#include "common/world_shading.vert"
 
-out vec3 fragment_pos_world_space, UV;
 out mat3 TBN;
 
 uniform uint frame_index;
@@ -13,6 +13,8 @@ void main(void) {
 	fragment_pos_world_space = world_corners[gl_VertexID];
 
 	UV = vec3(get_quad_UV(), frame_index);
-	TBN = mat3(face_tangent, cross(face_tangent, face_normal), face_normal);
+	ambient_occlusion_UV = get_ambient_occlusion_UV(fragment_pos_world_space);
+
+	TBN = mat3(face_tangent, cross(face_tangent, face_normal), face_normal); // TODO: make this a uniform for the fragment shader
 	gl_Position = view_projection * vec4(fragment_pos_world_space, 1.0f);
 }

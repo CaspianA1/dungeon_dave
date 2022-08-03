@@ -5,8 +5,6 @@
 #include "normal_map_generation.h"
 #include "data/constants.h"
 
-// TODO: incorporate the palace city texture into this in some way
-
 ////////// Uniform updating
 
 typedef struct {

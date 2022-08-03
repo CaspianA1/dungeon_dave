@@ -3,7 +3,8 @@
 
 #include "utils/buffer_defs.h"
 
-void get_heightmap_min_and_max_point_heights(const byte* const heightmap, const byte map_size[2], byte min_and_max_point_heights[2]);
+byte get_heightmap_max_point_height(const byte* const heightmap, const byte map_size[2]);
+GLfloat compute_world_far_clip_dist(const byte map_size[2], const byte max_point_height);
 
 enum {
 	level_one_width = 25, level_one_height = 15,

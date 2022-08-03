@@ -105,21 +105,23 @@ typedef struct {
 	const CascadedShadowContext* const shadow_context;
 	const Skybox* const skybox;
 	const GLfloat* const right_xz;
+	const AmbientOcclusionMap ao_map;
 } UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
-	const GLuint shader = drawable -> shader;
-
 	static GLint right_xz_id;
 
 	ON_FIRST_CALL(
+		const GLuint shader = drawable -> shader;
+
 		INIT_UNIFORM(right_xz, shader);
 
 		use_texture(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
 		use_texture(typed_params.normal_map_set, shader, "normal_map_sampler", TexSet, TU_BillboardNormalMap);
 		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
+		use_texture(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 
 	UPDATE_UNIFORM(right_xz, 2fv, 1, typed_params.right_xz);
@@ -130,13 +132,13 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 // This is just a utility function
 void draw_billboards(BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const Camera* const camera) {
+	const Skybox* const skybox, const Camera* const camera,
+	const AmbientOcclusionMap ao_map) {
 
 	sort_billboards_by_dist_to_camera(billboard_context, camera -> pos);
 
-	draw_drawable(
-		billboard_context -> drawable, corners_per_quad, billboard_context -> billboards.length,
-		&(UniformUpdaterParams) {billboard_context -> normal_map_set, shadow_context, skybox, camera -> right_xz},
+	draw_drawable(billboard_context -> drawable, corners_per_quad, billboard_context -> billboards.length,
+		&(UniformUpdaterParams) {billboard_context -> normal_map_set, shadow_context, skybox, camera -> right_xz, ao_map},
 		UseShaderPipeline | BindVertexSpec
 	);
 }

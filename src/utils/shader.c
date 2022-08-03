@@ -14,7 +14,9 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 
 static void fail_on_sub_shader_creation_error(
 	// `sub_shader_text` may be a file path, or a string indicating the linking step
-	const GLuint object_id, const GLchar* const sub_shader_text,
+	const GLuint object_id,
+	const GLchar* const sub_shader_path,
+	const GLchar* const creation_step,
 	void (*const creation_action) (const GLuint),
 	void (*const log_length_getter) (const GLuint, const GLenum, GLint* const),
 	void (*const log_getter) (const GLuint, const GLsizei, GLsizei* const, GLchar* const)) {
@@ -34,7 +36,7 @@ static void fail_on_sub_shader_creation_error(
 		}
 
 		// Nothing else is deallocated anyways during `FAIL`, so it's fine if the `alloc` call is not freed
-		FAIL(CreateShader, "Error for '%s': '%s'", sub_shader_text, error_message);
+		FAIL(CreateShader, "Error for '%s' during %s: '%s'", sub_shader_path, creation_step, error_message);
 	}
 }
 
@@ -53,16 +55,15 @@ static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], c
 		const List* const sub_shader_code = shader_code + i;
 		glShaderSource(sub_shader, (GLsizei) sub_shader_code -> length, sub_shader_code -> data, NULL);
 
-		fail_on_sub_shader_creation_error(sub_shader, sub_shader_path,
-			glCompileShader, glGetShaderiv, glGetShaderInfoLog);
+		fail_on_sub_shader_creation_error(sub_shader, sub_shader_path, "compilation", glCompileShader, glGetShaderiv, glGetShaderInfoLog);
 
 		glAttachShader(shader, sub_shader);
 
 		sub_shaders[i] = sub_shader;
 	}
 
-	fail_on_sub_shader_creation_error(shader, "linking",
-		glLinkProgram, glGetProgramiv, glGetProgramInfoLog);
+	// Picking an arbitrary sub-shader for this (as long as the author recognizes what sub-shader group is failing)
+	fail_on_sub_shader_creation_error(shader, sub_shader_paths[0], "linking", glLinkProgram, glGetProgramiv, glGetProgramInfoLog);
 
 	for (byte i = 0; i < num_sub_shaders; i++) {
 		if (sub_shader_paths[i] == NULL) continue;

@@ -36,9 +36,14 @@ And the biggest number possible with five bits is 31, so that gives you
 
 // Each enum value is a texture unit id.
 typedef enum {
-	TU_CascadedShadowMap, TU_Skybox,
+	TU_Skybox,
 
-	TU_TitleScreenLogoDiffuse, TU_TitleScreenPalaceCityDiffuse, TU_TitleScreenPalaceCityNormalMap,
+	TU_CascadedShadowMap,
+	TU_AmbientOcclusionMap,
+
+	TU_TitleScreenLogoDiffuse,
+	TU_TitleScreenPalaceCityDiffuse,
+	TU_TitleScreenPalaceCityNormalMap,
 
 	TU_SectorFaceDiffuse, TU_SectorFaceNormalMap,
 	TU_BillboardDiffuse, TU_BillboardNormalMap,
@@ -59,6 +64,7 @@ typedef enum {
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,
 	TexSet = GL_TEXTURE_2D_ARRAY,
+	TexVolumetric = GL_TEXTURE_3D,
 	TexSkybox = GL_TEXTURE_CUBE_MAP
 } TextureType;
 

@@ -1,6 +1,7 @@
 #version 400 core
 
-noperspective in vec2 UV, sliding_UV;
+noperspective in float sliding_UV_x;
+noperspective in vec2 UV;
 in vec3 pos_difference_from_light;
 
 out vec3 color;
@@ -19,6 +20,8 @@ vec3 blinn_phong(const sampler2D diffuse_sampler, const vec2 custom_UV, const ve
 }
 
 void main(void) {
+	vec2 sliding_UV = vec2(sliding_UV_x, UV.y);
+
 	vec3
 		dir_to_light = normalize(pos_difference_from_light),
 		fragment_normal = texture(palace_city_normal_map_sampler, sliding_UV).rgb * 2.0f - 1.0f;

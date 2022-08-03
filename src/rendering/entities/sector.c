@@ -192,6 +192,7 @@ typedef struct {
 	const SectorContext* const sector_context;
 	const CascadedShadowContext* const shadow_context;
 	const GLfloat curr_time_secs;
+	const AmbientOcclusionMap ao_map;
 } UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
@@ -212,6 +213,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		use_texture(typed_params.sector_context -> drawable.diffuse_texture, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
 		use_texture(typed_params.sector_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
 		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", TexSet, TU_CascadedShadowMap);
+		use_texture(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 
 	const GLfloat t = typed_params.curr_time_secs / 3.0f;
@@ -283,14 +285,15 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 
 void draw_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
-	const vec4 frustum_planes[planes_per_frustum], const GLfloat curr_time_secs) {
+	const vec4 frustum_planes[planes_per_frustum], const GLfloat curr_time_secs,
+	const AmbientOcclusionMap ao_map) {
 
 	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(sector_context, frustum_planes);
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0)
 		draw_drawable(sector_context -> drawable, num_visible_faces * vertices_per_face, 0,
-			&(UniformUpdaterParams) {skybox, sector_context, shadow_context, curr_time_secs},
+			&(UniformUpdaterParams) {skybox, sector_context, shadow_context, curr_time_secs, ao_map},
 			UseShaderPipeline | BindVertexSpec
 		);
 }

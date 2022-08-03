@@ -6,6 +6,7 @@
 #include "utils/list.h"
 #include "rendering/shadow.h"
 #include "rendering/entities/skybox.h"
+#include "rendering/ambient_occlusion.h"
 #include "camera.h"
 #include "normal_map_generation.h"
 #include "animation.h"
@@ -36,7 +37,8 @@ void update_billboards(const BillboardContext* const billboard_context, const GL
 
 void draw_billboards(BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const Camera* const camera);
+	const Skybox* const skybox, const Camera* const camera,
+	const AmbientOcclusionMap ao_map);
 
 BillboardContext init_billboard_context(
 	const GLsizei texture_size, const NormalMapConfig* const normal_map_config,

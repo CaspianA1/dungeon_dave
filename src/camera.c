@@ -325,31 +325,3 @@ Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist) {
 	glm_vec3_copy((GLfloat*) init_pos, camera.pos);
 	return camera;
 }
-
-GLfloat compute_world_far_clip_dist(const byte map_size[2], const byte min_and_max_point_heights[2]) {
-	/* The far clip distance, ideally, would be equal to the diameter of
-	the convex hull of all points in the heightmap. If I had more time,
-	I would implement that, but a simple method that works reasonably well is this:
-
-	- First, find the smallest and tallest points in the map.
-	- Then, the far clip distance equals the length of
-		the `<map_width, map_height, (tallest_point - smallest_point) + additional_camera_height>` vector.
-
-	To compute the maximum jump height, use the kinematics equation `v^2 = v0^2 + 2aΔy`.
-	Given that `v` equals 0, rearrange the equation like this:
-
-	0 = v0^2 + 2aΔy
-	-(v0^2) = 2aΔy
-	-(v0^2)/2a = Δy
-
-	And since downward acceleration is positive in `constants`, to not get a negative result,
-	remove the negative sign of the left term.
-
-	Then, `additional_camera_height` equals `max_jump_height + eye_height`. */
-
-	const GLfloat max_jump_height = (constants.speeds.jump * constants.speeds.jump) / (2.0f * constants.accel.g);
-	const GLfloat additional_camera_height = max_jump_height + constants.camera.eye_height;
-
-	const byte heightmap_z_difference = min_and_max_point_heights[1] - min_and_max_point_heights[0];
-	return glm_vec3_norm((vec3) {map_size[0], map_size[1], heightmap_z_difference + additional_camera_height});
-}

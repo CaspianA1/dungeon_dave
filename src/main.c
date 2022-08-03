@@ -68,6 +68,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	Camera* const camera = &scene_context -> camera;
 	BillboardContext* const billboard_context = &scene_context -> billboard_context;
 	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
+	const AmbientOcclusionMap ao_map = scene_context -> ao_map;
 
 	////////// Scene updating
 
@@ -86,7 +87,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	////////// The main drawing code
 
 	const Skybox* const skybox = &scene_context -> skybox;
-	draw_sectors(sector_context, shadow_context, skybox, camera -> frustum_planes, curr_time_secs);
+	draw_sectors(sector_context, shadow_context, skybox, camera -> frustum_planes, curr_time_secs, ao_map);
 
 	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
@@ -94,8 +95,8 @@ static void main_drawer(void* const app_context, const Event* const event) {
 			draw_skybox(skybox); // Drawn before any translucent geometry
 
 			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
-				draw_billboards(billboard_context, shadow_context, skybox, camera);
-				draw_weapon_sprite(weapon_sprite, shadow_context, skybox);
+				draw_billboards(billboard_context, shadow_context, skybox, camera, ao_map);
+				draw_weapon_sprite(weapon_sprite, shadow_context, skybox, ao_map);
 			);
 		);
 	);
@@ -211,14 +212,13 @@ static void* main_init(void) {
 	//////////
 
 	const byte
-		*const heightmap = (const byte*) palace_heightmap,
-		*const texture_id_map = (const byte*) palace_texture_id_map,
-		map_size[2] = {palace_width, palace_height};
+		*const heightmap = (const byte*) palace_heightmap, *const texture_id_map = (const byte*) palace_texture_id_map, map_size[2] = {palace_width, palace_height};
+		// *const heightmap = (const byte*) fortress_heightmap, *const texture_id_map = (const byte*) fortress_texture_id_map, map_size[2] = {fortress_width, fortress_height};
+		// *const heightmap = (const byte*) level_one_heightmap, *const texture_id_map = (const byte*) level_one_texture_id_map, map_size[2] = {level_one_width, level_one_height};
+		// *const heightmap = (const byte*) terrain_heightmap, *const texture_id_map = (const byte*) terrain_texture_id_map, map_size[2] = {terrain_width, terrain_height};
 
-	byte min_and_max_point_heights[2];
-	get_heightmap_min_and_max_point_heights(heightmap, map_size, min_and_max_point_heights);
-
-	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, min_and_max_point_heights);
+	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
+	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
 
 	const GLsizei num_cascades = 8; // 8 for palace, 16 for terrain
 	specify_cascade_count_before_any_shader_compilation(num_cascades);
@@ -266,7 +266,7 @@ static void* main_init(void) {
 			far_clip_dist, 0.25f, texture_sizes.shadow_map, num_cascades
 		),
 
-		.ao_map = init_ao_map(),
+		.ao_map = init_ao_map(heightmap, map_size, max_point_height),
 
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp")),
 		.title_screen = init_title_screen(),

@@ -2,12 +2,12 @@
 
 #include "common/shadow/shadow.vert"
 #include "common/shared_params.glsl"
+#include "common/world_shading.vert"
 
 layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
 
 flat out uint face_id;
-out vec3 UV, fragment_pos_world_space;
 
 const struct FaceAttribute {
 	ivec2 uv_indices, uv_signs;
@@ -32,8 +32,9 @@ void main(void) {
 
 	UV.z = face_info_bits >> 3u; // Shifting over to get the texture id
 
-	////////// Setting world_depth_value, fragment_pos_world_space, and gl_Position
+	////////// Setting ambient_occlusion_UV, world_depth_value, fragment_pos_world_space, and gl_Position
 
+	ambient_occlusion_UV = get_ambient_occlusion_UV(vertex_pos_world_space);
 	world_depth_value = get_world_depth_value(view, vertex_pos_world_space);
 	fragment_pos_world_space = vertex_pos_world_space;
 	gl_Position = view_projection * vec4(vertex_pos_world_space, 1.0f);
