@@ -47,7 +47,7 @@ vec2 adjust_UV_for_pixel_art_filtering(const vec2 UV) {
 
 	vec2
 		seam = floor(pixel + 0.5f),
-		dudv = mix(fwidth(pixel), vec2(1.0f), bilinear_percent);
+		dudv = mix(fwidth(pixel), vec2(1.0f), percents.bilinear);
 
 	pixel = seam + clamp((pixel - seam) / dudv, -0.5f, 0.5f);
 	return pixel / texture_size;
@@ -57,7 +57,8 @@ vec2 adjust_UV_for_pixel_art_filtering(const vec2 UV) {
 vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, const vec3 UV, const vec3 fragment_normal) {
 	vec3 adjusted_UV = vec3(adjust_UV_for_pixel_art_filtering(UV.xy), UV.z);
 	vec4 texture_color = texture(diffuse_sampler, adjusted_UV);
-	float ao_strength = texture(ambient_occlusion_sampler, ambient_occlusion_UV).r;
+
+	float ao_strength = mix(1.0f, texture(ambient_occlusion_sampler, ambient_occlusion_UV).r, percents.ao);
 
 	vec3 non_ambient = diffuse(fragment_normal) + specular(texture_color.rgb, fragment_normal);
 	vec3 light_strength = (non_ambient * shadow_strength + strengths.ambient) * ao_strength;

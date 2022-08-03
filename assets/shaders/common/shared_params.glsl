@@ -8,7 +8,8 @@ layout(shared) uniform ConstantShadingParams {
 	vec2 specular_exponent_domain;
 
 	struct {bool enabled; float max_white;} tone_mapping;
-	float noise_granularity, bilinear_percent;
+	float noise_granularity;
+	struct {float bilinear, ao;} percents;
 	vec3 overall_scene_tone, dir_to_light;
 
 	float cascade_split_distances[NUM_CASCADES - 1u]; // TODO: use the const variable name for this size

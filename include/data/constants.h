@@ -53,7 +53,8 @@ static const struct {
 
 		const byte aniso_filtering_level;
 		const struct {const GLfloat ambient, diffuse, specular;} strengths;
-		const GLfloat specular_exponent_domain[2], overall_scene_tone[3], noise_granularity, bilinear_percent;
+		const GLfloat specular_exponent_domain[2], overall_scene_tone[3], noise_granularity;
+		const struct {const GLfloat bilinear, ao;} percents;
 		const struct {const bool enabled; const GLfloat max_white;} tone_mapping;
 	} lighting;
 
@@ -99,7 +100,7 @@ static const struct {
 		.strengths = {.ambient = 0.9f, .diffuse = 0.9f, .specular = 1.8f},
 		.specular_exponent_domain = {32.0f, 96.0f},
 		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
-		.noise_granularity = 0.2f / 255.0f, .bilinear_percent = 0.2f,
+		.noise_granularity = 0.2f / 255.0f, .percents = {.bilinear = 0.2f, .ao = 1.0f},
 		.tone_mapping = {.enabled = true, .max_white = 1.5f}
 	},
 
