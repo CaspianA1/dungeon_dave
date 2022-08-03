@@ -167,46 +167,17 @@ typedef struct {
 	const AmbientOcclusionMap ao_map;
 } UniformUpdaterParams;
 
-static void get_normal_and_tangent(const vec3 world_corners[corners_per_quad], vec3 normal, vec3 tangent) {
-	const GLfloat
-		*const corner_bl = world_corners[0],
-		*const corner_br = world_corners[1],
-		*const corner_tl = world_corners[2];
-
-	vec3 edge_bl_br, edge_tl_br;
-	glm_vec3_sub((GLfloat*) corner_bl, (GLfloat*) corner_br, edge_bl_br);
-	glm_vec3_sub((GLfloat*) corner_tl, (GLfloat*) corner_br, edge_tl_br);
-	glm_vec3_cross(edge_tl_br, edge_bl_br, normal);
-	glm_vec3_normalize(normal);
-
-	////////// The tangent calculation is from https://learnopengl.com/Advanced-Lighting/Normal-Mapping
-
-	/* The corner order is bottom left, bottom right, top left, top right.
-	These deltas are from bottom left -> bottom right, and bottom left -> top left. */
-	const vec2 delta_UV_1 = {1.0, 0.0}, delta_UV_2 = {0.0, -1.0};
-
-	vec3 edge_br_bl, edge_tl_bl;
-	glm_vec3_sub((GLfloat*) corner_br, (GLfloat*) corner_bl, edge_br_bl);
-	glm_vec3_sub((GLfloat*) corner_tl, (GLfloat*) corner_bl, edge_tl_bl);
-
-	const GLfloat f = -1.0f / (delta_UV_1[0] * delta_UV_2[1] - delta_UV_2[0] * delta_UV_1[1]);
-
-	tangent[0] = f * (delta_UV_2[1] * edge_br_bl[0] - delta_UV_1[1] * edge_tl_bl[0]);
-	tangent[1] = f * (delta_UV_2[1] * edge_br_bl[1] - delta_UV_1[1] * edge_tl_bl[1]);
-	tangent[2] = f * (delta_UV_2[1] * edge_br_bl[2] - delta_UV_1[1] * edge_tl_bl[2]);
-}
-
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
-	const GLuint shader = drawable -> shader;
 
-	static GLint frame_index_id, face_normal_id, face_tangent_id, world_corners_id;
+	static GLint frame_index_id, world_corners_id, tbn_id;
 
 	ON_FIRST_CALL(
+		const GLuint shader = drawable -> shader;
+
 		INIT_UNIFORM(frame_index, shader);
-		INIT_UNIFORM(face_normal, shader);
-		INIT_UNIFORM(face_tangent, shader);
 		INIT_UNIFORM(world_corners, shader);
+		INIT_UNIFORM(tbn, shader);
 
 		use_texture(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_WeaponSpriteDiffuse);
@@ -215,17 +186,24 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		use_texture(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 
-	////////// Updating uniforms
+	////////// Getting the TBN matrix
+
+	mat3 tbn;
 
 	const vec3* const world_corners = typed_params.weapon_sprite -> appearance_context.world_space.corners;
+	GLfloat *const tangent = tbn[0], *const bitangent = tbn[1], *const normal = tbn[2];
+	const GLfloat* const bl_corner = world_corners[0];
 
-	vec3 face_normal, face_tangent;
-	get_normal_and_tangent(world_corners, face_normal, face_tangent);
+	// Flows along S, from bl to br
+	glm_vec3_sub((GLfloat*) world_corners[1], (GLfloat*) bl_corner, tangent); glm_vec3_normalize(tangent);
+	glm_vec3_sub((GLfloat*) world_corners[2], (GLfloat*) bl_corner, bitangent); glm_vec3_normalize(bitangent);
+	glm_vec3_cross(tangent, bitangent, normal); // This will also be normalized, as the tangent and bitangent are normalized
 
-	UPDATE_UNIFORM(face_normal, 3fv, 1, face_normal);
-	UPDATE_UNIFORM(face_tangent, 3fv, 1, face_tangent);
+	////////// Updating uniforms
+
 	UPDATE_UNIFORM(frame_index, 1ui, typed_params.weapon_sprite -> animation_context.curr_frame);
 	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
+	UPDATE_UNIFORM(tbn, Matrix3fv, 1, GL_FALSE, (GLfloat*) tbn);
 }
 
 ////////// Initialization, deinitialization, updating, and rendering

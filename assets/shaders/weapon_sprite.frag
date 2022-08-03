@@ -3,12 +3,13 @@
 #include "common/world_shading.frag"
 #include "common/normal_utils.frag"
 
-in mat3 TBN;
-
 out vec4 color;
 
+uniform mat3 tbn;
+
 void main(void) {
-	vec3 normal = normalize(TBN * get_tangent_space_normal(UV));
+	// No need to renormalize here, since the TBN matrix's components are already normalized
+	vec3 normal = tbn * get_tangent_space_normal(UV);
 	float shadow_strength = get_csm_shadow_from_layer(0u, fragment_pos_world_space);
 
 	color = calculate_light_with_provided_shadow_strength(shadow_strength, UV, normal);
