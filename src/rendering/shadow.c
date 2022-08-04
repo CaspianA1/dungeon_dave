@@ -86,7 +86,7 @@ static void get_light_view_and_projection(const CascadedShadowContext* const sha
 
 static GLuint init_csm_depth_layers(const GLsizei resolution, const GLsizei num_cascades) {
 	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
-	glTexImage3D(TexSet, 0, OPENGL_SIZED_SHADOW_MAP_PIXEL_FORMAT, resolution, resolution, num_cascades, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage3D(TexSet, 0, OPENGL_SIZED_SHADOW_MAP_PIXEL_FORMAT, resolution, resolution, num_cascades, 0, GL_DEPTH_COMPONENT, OPENGL_SHADOW_MAP_COLOR_CHANNEL_TYPE, NULL);
 	return depth_layers;
 }
 
