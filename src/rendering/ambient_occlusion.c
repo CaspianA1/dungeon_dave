@@ -121,7 +121,9 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 	GLint prev_unpack_alignment;
 	glGetIntegerv(GL_UNPACK_ALIGNMENT, &prev_unpack_alignment);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, sizeof(byte)); // TODO: specify the format in texture.h, and use sRGB
-	glTexImage3D(TexVolumetric, 0, GL_RED, map_size[0], map_size[1], max_y, 0, GL_RED, OPENGL_COLOR_CHANNEL_TYPE, ao_map);
+
+	init_texture_data(TexVolumetric, (GLsizei[]) {map_size[0], map_size[1], max_y}, GL_RED, GL_RED, OPENGL_COLOR_CHANNEL_TYPE, ao_map);
+
 	glPixelStorei(GL_UNPACK_ALIGNMENT, prev_unpack_alignment);
 	glGenerateMipmap(TexVolumetric);
 

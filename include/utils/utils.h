@@ -9,16 +9,19 @@
 typedef enum {
 	LoadSDL,
 	LoadOpenGL,
+
 	OpenFile,
+	CreateSurface,
+	CreateTexture,
+	CreateFramebuffer,
+
 	CreateShader,
 	ParseIncludeDirectiveInShader,
 	InitializeShaderUniform,
+
 	InitializeGPUMemoryMapping,
+
 	UseLevelHeightmap,
-	CreateFramebuffer,
-	CreateSkybox,
-	CreateNormalMap,
-	CreateBlankSurface,
 	TextureIDIsTooLarge
 } FailureType;
 

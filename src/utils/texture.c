@@ -3,17 +3,17 @@
 
 ////////// Surface initialization and alpha premultiplication
 
-SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height, const SDL_PixelFormatEnum pixel_format_name) {
+SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height) {
 	SDL_Surface* const blank_surface = SDL_CreateRGBSurfaceWithFormat(
-		0, width, height, SDL_BITSPERPIXEL(pixel_format_name), pixel_format_name);
+		0, width, height, SDL_BITSPERPIXEL(SDL_PIXEL_FORMAT), SDL_PIXEL_FORMAT);
 
-	if (blank_surface == NULL) FAIL(CreateBlankSurface, "%s", SDL_GetError());
+	if (blank_surface == NULL) FAIL(CreateSurface, "Could not create a blank surface: %s", SDL_GetError());
 	return blank_surface;
 }
 
 SDL_Surface* init_surface(const GLchar* const path) {
 	SDL_Surface* const surface = SDL_LoadBMP(path);
-	if (surface == NULL) FAIL(OpenFile, "%s", SDL_GetError());
+	if (surface == NULL) FAIL(OpenFile, "Could not create a surface from disk: %s", SDL_GetError());
 
 	if (surface -> format -> format == SDL_PIXEL_FORMAT)
 		return surface; // Format is already correct
@@ -101,23 +101,30 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	return texture;
 }
 
-GLuint init_plain_texture(const GLchar* const path, const TextureType type,
-	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
-	const TextureFilterMode min_filter, const GLint internal_format) {
+void init_texture_data(const TextureType type, const GLsizei* const size,
+	const GLenum input_format, const GLint internal_format, const GLenum color_channel_type,
+	const void* const pixels) {
 
-	const GLuint texture = preinit_texture(type, wrap_mode, mag_filter, min_filter, false);
-	SDL_Surface* const surface = init_surface(path);
+	const GLint level = 0, border = 0;
 
-	WITH_SURFACE_PIXEL_ACCESS(surface,
-		glTexImage2D(TexPlain, 0, internal_format, surface -> w,
-			surface -> h, 0, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
-	);
+	#define UPLOAD_CALL(target, dims, ...) glTexImage##dims##D(\
+		target, level, internal_format, __VA_ARGS__, border, input_format, color_channel_type, pixels\
+	); break
 
-	glGenerateMipmap(TexPlain);
-	SDL_FreeSurface(surface);
+	switch (type) {
+		case TexPlain: UPLOAD_CALL(type, 2, size[0], size[1]);
 
-	return texture;
+		case TexSkybox: {// If there's a skybox, the first two vars for size will be the width and height of a face, and the third number will be the face offset
+			const GLsizei face_size = size[0];
+			UPLOAD_CALL(GL_TEXTURE_CUBE_MAP_POSITIVE_X + (GLenum) size[1], 2, face_size, face_size);
+		}
+
+		case TexSet: case TexVolumetric: UPLOAD_CALL(type, 3, size[0], size[1], size[2]);
+
+		default: FAIL(CreateTexture, "%s", "Unrecognized texture type passed into `init_texture_data`");
+	}
+
+	#undef UPLOAD_CALL
 }
 
 static void init_still_subtextures_in_texture_set(
@@ -203,7 +210,7 @@ GLuint init_texture_set(const bool premultiply_alpha,
 		rescale_h, total_num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,
 		OPENGL_COLOR_CHANNEL_TYPE, NULL);
 
-	SDL_Surface* const rescaled_surface = init_blank_surface(rescale_w, rescale_h, SDL_PIXEL_FORMAT);
+	SDL_Surface* const rescaled_surface = init_blank_surface(rescale_w, rescale_h);
 
 	////////// Filling the texture set with the still and animated subtextures
 
@@ -214,6 +221,25 @@ GLuint init_texture_set(const bool premultiply_alpha,
 	////////// Deinitialization
 
 	SDL_FreeSurface(rescaled_surface);
+
+	return texture;
+}
+
+GLuint init_plain_texture(const GLchar* const path, const TextureType type,
+	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
+	const TextureFilterMode min_filter, const GLint internal_format) {
+
+	const GLuint texture = preinit_texture(type, wrap_mode, mag_filter, min_filter, false);
+	SDL_Surface* const surface = init_surface(path);
+
+	WITH_SURFACE_PIXEL_ACCESS(surface,
+		init_texture_data(TexPlain,
+			(GLsizei[]) {surface -> w, surface -> h}, OPENGL_INPUT_PIXEL_FORMAT,
+			internal_format, OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
+	);
+
+	glGenerateMipmap(TexPlain);
+	SDL_FreeSurface(surface);
 
 	return texture;
 }

@@ -65,9 +65,9 @@ typedef enum {
 
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,
+	TexSkybox = GL_TEXTURE_CUBE_MAP,
 	TexSet = GL_TEXTURE_2D_ARRAY,
-	TexVolumetric = GL_TEXTURE_3D,
-	TexSkybox = GL_TEXTURE_CUBE_MAP
+	TexVolumetric = GL_TEXTURE_3D
 } TextureType;
 
 typedef enum {
@@ -87,7 +87,7 @@ typedef Uint32 sdl_pixel_t;
 
 //////////
 
-SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height, const SDL_PixelFormatEnum pixel_format_name);
+SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);
 SDL_Surface* init_surface(const GLchar* const path);
 void* read_surface_pixel(const SDL_Surface* const surface, const GLint x, const GLint y);
 
@@ -99,14 +99,23 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	const TextureFilterMode mag_filter, const TextureFilterMode min_filter,
 	const bool force_disable_aniso_filtering);
 
-GLuint init_plain_texture(const GLchar* const path, const TextureType type,
-	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
-	const TextureFilterMode min_filter, const GLint internal_format);
+/* Size formats:
+Plain 2D textures: {width, height}
+Skyboxes: {width/height, face index}
+Texture sets/volumetric textures: {width, height, depth} */
+void init_texture_data(const TextureType type, const GLsizei* const size,
+	const GLenum input_format, const GLint internal_format, const GLenum color_channel_type,
+	const void* const pixels);
 
 GLuint init_texture_set(const bool premultiply_alpha,
 	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
 	const GLsizei num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
 	const GLchar* const* const still_subtexture_paths, const AnimationLayout* const animation_layouts);
+
+
+GLuint init_plain_texture(const GLchar* const path, const TextureType type,
+	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
+	const TextureFilterMode min_filter, const GLint internal_format);
 
 #endif

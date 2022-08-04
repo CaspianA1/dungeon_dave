@@ -15,7 +15,7 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path) {
 	////////// Failing if the dimensions are not right
 
 	if (skybox_w != (skybox_surface -> h << 2) / 3)
-		FAIL(CreateSkybox, "The skybox with path '%s' does not have "
+		FAIL(CreateTexture, "The skybox with path '%s' does not have "
 			"a width that equals 4/3 of its height", cubemap_path);
 
 	//////////
@@ -23,7 +23,7 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path) {
 	const GLint cube_size = skybox_w >> 2, twice_cube_size = skybox_w >> 1;
 	const GLuint skybox_texture = preinit_texture(TexSkybox, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, false);
 
-	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size, SDL_PIXEL_FORMAT);
+	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size);
 	void* const face_surface_pixels = face_surface -> pixels;
 
 	// Right, left, top, bottom, back, front
@@ -42,8 +42,8 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path) {
 
 			SDL_BlitSurface(skybox_surface, &(SDL_Rect) {src_origin[0], src_origin[1], cube_size, cube_size}, face_surface, NULL);
 
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT,
-				cube_size, cube_size, 0, OPENGL_INPUT_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, face_surface_pixels);
+			init_texture_data(TexSkybox, (GLsizei[]) {cube_size, i}, OPENGL_INPUT_PIXEL_FORMAT,
+				OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, face_surface_pixels);
 		}
 	);
 
