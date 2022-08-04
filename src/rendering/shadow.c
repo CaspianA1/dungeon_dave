@@ -17,6 +17,7 @@ For later on:
 - Pushing the weapon against walls puts it in shadow, which doesn't look right (I need to keep it outside the wall)
 - Try to avoid the use of a geometry shader for instancing if possible
 	(can probably offset vertices with normal instancing, but I don't know about changing `gl_Layer`)
+- A volumetric depth texture, for hardware-supported layer blending?
 
 Revectorization:
 - https://www.gamedev.net/tutorials/programming/graphics/shadow-map-silhouette-revectorization-smsr-r3437/
