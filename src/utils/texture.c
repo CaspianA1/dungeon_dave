@@ -202,13 +202,10 @@ GLuint init_texture_set(const bool premultiply_alpha,
 
 	////////// Defining the texture set, and a rescaled surface
 
-	const GLsizei total_num_subtextures = num_still_subtextures + num_animated_frames;
-
 	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter, false);
 
-	glTexImage3D(TexSet, 0, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, rescale_w,
-		rescale_h, total_num_subtextures, 0, OPENGL_INPUT_PIXEL_FORMAT,
-		OPENGL_COLOR_CHANNEL_TYPE, NULL);
+	init_texture_data(TexSet, (GLsizei[]) {rescale_w, rescale_h, num_still_subtextures + num_animated_frames},
+		OPENGL_INPUT_PIXEL_FORMAT, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);
 
 	SDL_Surface* const rescaled_surface = init_blank_surface(rescale_w, rescale_h);
 
