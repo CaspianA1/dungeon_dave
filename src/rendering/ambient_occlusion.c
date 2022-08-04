@@ -53,8 +53,8 @@ static bool ray_collides_with_heightmap(
 		ray_length_components[index_of_shortest] += unit_step_size[index_of_shortest];
 
 		if (curr_tile[1] > max_y || // TODO: only check the component that changed
-			curr_tile[0] == -1 || curr_tile[0] > max_x ||
-			curr_tile[2] == -1 || curr_tile[2] > max_z) return false;
+			curr_tile[0] == -1 || curr_tile[0] == max_x ||
+			curr_tile[2] == -1 || curr_tile[2] == max_z) return false;
 
 		const byte sample_height = sample_map_point(heightmap, (byte) curr_tile[0], (byte) curr_tile[2], max_x);
 		if (curr_tile[1] < sample_height || curr_tile[1] == -1) return true;
