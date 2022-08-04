@@ -70,7 +70,7 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 	- Compute the AO map through transform feedback; pass in 3D map points, and then pass back occlusion values
 	- Making an AO map for the terrain fails
 	- Put the AO map and the inv rand dirs on the heap
-	*/
+	- A weird stitch-type bug when looking at a surface at a sharp angle */
 
 	//////////
 
