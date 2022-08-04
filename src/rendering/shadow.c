@@ -1,8 +1,8 @@
 #include "rendering/shadow.h"
 #include "data/constants.h"
 #include "utils/utils.h"
+#include "utils/alloc.h"
 #include "utils/shader.h"
-#include "utils/texture.h"
 
 static const GLenum framebuffer_target = GL_DRAW_FRAMEBUFFER;
 
@@ -17,7 +17,8 @@ For later on:
 - Pushing the weapon against walls puts it in shadow, which doesn't look right (I need to keep it outside the wall)
 - Try to avoid the use of a geometry shader for instancing if possible
 	(can probably offset vertices with normal instancing, but I don't know about changing `gl_Layer`)
-- A volumetric depth texture, for hardware-supported layer blending?
+- Blend between layers in some way using hardware? Volume textures aren't usable for this, see
+	the bottom of https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage3D.xhtml
 
 Revectorization:
 - https://www.gamedev.net/tutorials/programming/graphics/shadow-map-silhouette-revectorization-smsr-r3437/
@@ -86,10 +87,10 @@ static void get_light_view_and_projection(const CascadedShadowContext* const sha
 //////////
 
 static GLuint init_csm_depth_layers(const GLsizei resolution, const GLsizei num_cascades) {
-	const GLuint depth_layers = preinit_texture(TexSet, TexNonRepeating, OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
+	const GLuint depth_layers = preinit_texture(shadow_map_texture_type, TexNonRepeating, OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
 
-	init_texture_data(TexSet, (GLsizei[]) {resolution, resolution, num_cascades}, GL_DEPTH_COMPONENT,
-		OPENGL_SIZED_SHADOW_MAP_PIXEL_FORMAT, OPENGL_SHADOW_MAP_COLOR_CHANNEL_TYPE, NULL);
+	init_texture_data(shadow_map_texture_type, (GLsizei[]) {resolution, resolution, num_cascades},
+		GL_DEPTH_COMPONENT, OPENGL_SIZED_SHADOW_MAP_PIXEL_FORMAT, OPENGL_SHADOW_MAP_COLOR_CHANNEL_TYPE, NULL);
 
 	return depth_layers;
 }

@@ -86,7 +86,7 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	glTexParameteri(type, GL_TEXTURE_WRAP_S, cast_wrap_mode);
 	glTexParameteri(type, GL_TEXTURE_WRAP_T, cast_wrap_mode);
 
-	if (type == TexVolumetric || type == TexSkybox)
+	if (type == TexSkybox || type == TexVolumetric)
 		glTexParameteri(type, GL_TEXTURE_WRAP_R, cast_wrap_mode);
 
 	#ifdef USE_ANISOTROPIC_FILTERING

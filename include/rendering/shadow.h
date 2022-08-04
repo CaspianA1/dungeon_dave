@@ -1,13 +1,15 @@
 #ifndef SHADOW_H
 #define SHADOW_H
 
+#include "utils/texture.h"
 #include "camera.h"
-#include "utils/list.h"
 
 /* This shadow mapping implementation employs cascaded shadow mapping with
 exponential shadow mapping in order to get soft, filtered shadows for large scenes.
 No mipmapping or summed area tables for filtering: just linear filtering medium-size
 sample radius for the average occluder depth. */
+
+static const TextureType shadow_map_texture_type = TexSet;
 
 typedef struct {
 	const GLuint depth_layers, framebuffer, depth_shader;
@@ -15,8 +17,7 @@ typedef struct {
 
 	const vec3 dir_to_light, sub_frustum_scale;
 
-	// There are `num_cascades - 1` split dists
-	GLfloat* const split_dists;
+	GLfloat* const split_dists; // There are `num_cascades - 1` split dists
 	mat4* const light_view_projection_matrices;
 } CascadedShadowContext;
 
