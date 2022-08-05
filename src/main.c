@@ -280,7 +280,6 @@ static void* main_init(void) {
 	See https://www.realtimerendering.com/blog/gpus-prefer-premultiplication/. */
 	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
 	glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
 	glDepthFunc(GL_LESS);
 
 	/* Depth clamping is used for 1. shadow pancaking, 2. avoiding clipping with sectors when walking
