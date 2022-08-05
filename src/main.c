@@ -121,14 +121,14 @@ static void* main_init(void) {
 	};
 
 	const BillboardAnimationInstance billboard_animation_instances[] = {
-		{.ids = {.billboard = 10, .animation = 0}}, // Flying carpet
-		{.ids = {.billboard = 11, .animation = 1}}, // Torch
+		{.billboard_id = 10, .animation_id = 0}, // Flying carpet
+		{.billboard_id = 11, .animation_id = 1}, // Torch
 
-		{.ids = {.billboard = 12, .animation = 2}}, // Eddies
-		{.ids = {.billboard = 13, .animation = 2}},
+		{.billboard_id = 12, .animation_id = 2}, // Eddies
+		{.billboard_id = 13, .animation_id = 2},
 
-		{.ids = {.billboard = 14, .animation = 3}}, // Troopers
-		{.ids = {.billboard = 15, .animation = 3}}
+		{.billboard_id = 14, .animation_id = 3}, // Troopers
+		{.billboard_id = 15, .animation_id = 3}
 	};
 
 	const Billboard billboards[] = {

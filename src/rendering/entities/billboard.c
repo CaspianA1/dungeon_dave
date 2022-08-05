@@ -51,8 +51,8 @@ void update_billboards(const BillboardContext* const billboard_context, const GL
 
 		update_animation_information(
 			curr_time_secs, cycle_base_time,
-			animation_data[animation_instance -> ids.animation],
-			&billboard_data[animation_instance -> ids.billboard].texture_id);
+			animation_data[animation_instance -> animation_id],
+			&billboard_data[animation_instance -> billboard_id].texture_id);
 	}
 }
 

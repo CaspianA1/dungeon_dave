@@ -28,7 +28,7 @@ typedef struct { // This struct is perfectly aligned
 typedef struct {
 	/* The billboard ID is associated with a BillboardAnimationInstance
 	and not an Animation because there's one animation instance per billboard. */
-	const struct {const billboard_index_t billboard, animation;} ids;
+	const billboard_index_t billboard_id, animation_id;
 } BillboardAnimationInstance;
 
 ////////// Excluded: compare_billboard_sort_refs, sort_billboards_by_dist_to_camera, update_uniforms, define_vertex_spec
