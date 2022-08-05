@@ -25,6 +25,7 @@ static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const sh
 	- The weapon sprite's shadow is way too light since it's close to the ground; find a way to resolve that
 
 	- A note: one billboard takes up 24 bytes, and 4 vec3s take up 48 bytes (and adding a 16-bit texture id makes that 64)
+	- Perhaps define billboards + the weapon sprite through 1. center pos, 2. face normal, and 3. size?
 	*/
 
 	const GLuint depth_shader = shadow_context -> depth_shader;
