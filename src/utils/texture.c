@@ -120,8 +120,6 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 		}
 
 		case TexSet: case TexVolumetric: UPLOAD_CALL(type, 3, size[0], size[1], size[2]);
-
-		default: FAIL(CreateTexture, "%s", "Unrecognized texture type passed into `init_texture_data`");
 	}
 
 	#undef UPLOAD_CALL
