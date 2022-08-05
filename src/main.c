@@ -106,6 +106,12 @@ static void main_drawer(void* const app_context, const Event* const event) {
 static void* main_init(void) {
 	////////// Defining a bunch of level data
 
+	const GLchar *const still_billboard_texture_paths[] = {
+		ASSET_PATH("objects/health_kit.bmp"),
+		ASSET_PATH("objects/teleporter.bmp"),
+		ASSET_PATH("objects/shabti.bmp")
+	};
+
 	const AnimationLayout billboard_animation_layouts[] = {
 		{ASSET_PATH("spritesheets/flying_carpet.bmp"), 5, 10, 46},
 		{ASSET_PATH("spritesheets/torch_2.bmp"), 2, 3, 5},
@@ -145,23 +151,17 @@ static void* main_init(void) {
 		{2, {2.0f, 2.0f}, {25.5f, 3.0f, 31.0f}},
 		{2, {4.0f, 4.0f}, {36.0f, 18.0f, 4.0f}},
 
-		{3, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
-		{49, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
+		{billboard_animations[0].texture_id_range.start, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
+		{billboard_animations[1].texture_id_range.start, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
 
-		{62, {1.0f, 1.0f}, {6.5f, 0.5f, 21.5f}}, // Eddies
-		{62, {1.0f, 1.0f}, {3.5f, 0.5f, 24.5f}},
+		{billboard_animations[2].texture_id_range.start, {1.0f, 1.0f}, {6.5f, 0.5f, 21.5f}}, // Eddies
+		{billboard_animations[2].texture_id_range.start, {1.0f, 1.0f}, {3.5f, 0.5f, 24.5f}},
 
-		{77, {1.0f, 1.0f}, {3.0f, 1.5f, 9.5f}}, // Troopers
-		{77, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
+		{billboard_animations[3].texture_id_range.start, {1.0f, 1.0f}, {3.0f, 1.5f, 9.5f}}, // Troopers
+		{billboard_animations[3].texture_id_range.start, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
 	};
 
-	const GLchar *const still_billboard_texture_paths[] = {
-		ASSET_PATH("objects/health_kit.bmp"),
-		ASSET_PATH("objects/teleporter.bmp"),
-		ASSET_PATH("objects/shabti.bmp")
-	},
-
-	*const still_face_texture_paths[] = {
+	const GLchar* const still_face_texture_paths[] = {
 		// Palace:
 		ASSET_PATH("walls/sand.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp"),
 		ASSET_PATH("walls/marble.bmp"), ASSET_PATH("walls/hieroglyph.bmp"),
