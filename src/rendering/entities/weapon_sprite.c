@@ -158,6 +158,19 @@ static void rotate_from_camera_movement(WeaponSpriteAppearanceContext* const app
 	glm_vec3_add(top_right, pitch_offset, top_right);
 }
 
+static void get_quad_tbn_matrix(const vec3* const quad_corners, mat3 tbn) {
+	   GLfloat *const tangent = tbn[0], *const bitangent = tbn[1], *const normal = tbn[2];
+	   const GLfloat* const bl_corner = quad_corners[0];
+
+	   glm_vec3_sub((GLfloat*) quad_corners[1], (GLfloat*) bl_corner, tangent);
+	   glm_vec3_normalize(tangent); // Flows along S, from bl to br
+
+	   glm_vec3_sub((GLfloat*) quad_corners[2], (GLfloat*) bl_corner, bitangent);
+	   glm_vec3_normalize(bitangent); // Flows along T, from bl to tl
+
+	   glm_vec3_cross(tangent, bitangent, normal); // This will also be normalized, as the tangent and bitangent are normalized
+}
+
 ////////// This part is for the uniform updater param type and the uniform updater
 
 typedef struct {
@@ -186,20 +199,12 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		use_texture(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 
-	////////// Getting the TBN matrix
-
-	mat3 tbn;
+	////////// Updating uniforms
 
 	const vec3* const world_corners = typed_params.weapon_sprite -> appearance_context.world_space.corners;
-	GLfloat *const tangent = tbn[0], *const bitangent = tbn[1], *const normal = tbn[2];
-	const GLfloat* const bl_corner = world_corners[0];
 
-	// Flows along S, from bl to br
-	glm_vec3_sub((GLfloat*) world_corners[1], (GLfloat*) bl_corner, tangent); glm_vec3_normalize(tangent);
-	glm_vec3_sub((GLfloat*) world_corners[2], (GLfloat*) bl_corner, bitangent); glm_vec3_normalize(bitangent);
-	glm_vec3_cross(tangent, bitangent, normal); // This will also be normalized, as the tangent and bitangent are normalized
-
-	////////// Updating uniforms
+	mat3 tbn;
+	get_quad_tbn_matrix(world_corners, tbn);
 
 	UPDATE_UNIFORM(frame_index, 1ui, typed_params.weapon_sprite -> animation_context.curr_frame);
 	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
