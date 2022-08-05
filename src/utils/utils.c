@@ -191,7 +191,6 @@ static void loop_application(const Screen* const screen, void* const app_context
 		////////// Getting the next event, drawing the screen, debugging errors, and swapping the framebuffer
 
 		const Event event = get_next_event(time_before_tick_ms, secs_elapsed_between_frames, keys);
-
 		drawer(app_context, &event);
 
 		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
