@@ -114,7 +114,7 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 	switch (type) {
 		case TexPlain: UPLOAD_CALL(type, 2, size[0], size[1]);
 
-		case TexSkybox: {// If there's a skybox, the first two vars for size will be the width and height of a face, and the third number will be the face offset
+		case TexSkybox: {
 			const GLsizei face_size = size[0];
 			UPLOAD_CALL(GL_TEXTURE_CUBE_MAP_POSITIVE_X + (GLenum) size[1], 2, face_size, face_size);
 		}
