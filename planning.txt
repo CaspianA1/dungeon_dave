@@ -57,6 +57,7 @@ Architectural/code design ideas:
 - A shader cache
 - Specular antialiasing
 - Different bilinear percents for all object types
+- Use the smaller version of the palace city texture (not upscaled)
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
