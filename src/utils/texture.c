@@ -41,7 +41,6 @@ static void premultiply_surface_alpha(SDL_Surface* const surface) {
 			sdl_pixel_t* const row = read_surface_pixel(surface, 0, y);
 
 			for (GLint x = 0; x < w; x++) {
-
 				sdl_pixel_t* const pixel = row + x;
 				SDL_GetRGBA(*pixel, format, &r, &g, &b, &a);
 
