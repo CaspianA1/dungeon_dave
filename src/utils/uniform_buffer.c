@@ -18,10 +18,12 @@ static GLuint safely_get_uniform_block_index(const GLuint shader, const GLchar* 
 	return block_index;
 }
 
-UniformBuffer init_uniform_buffer(
-	const GLenum usage, const GLchar* const block_name,
-	const GLuint binding_point, const GLuint shader_using_uniform_block,
+UniformBuffer init_uniform_buffer(const GLenum usage,
+	const GLchar* const block_name, const GLuint shader_using_uniform_block,
 	const GLchar* const* const subvar_names, const buffer_size_t num_subvars) {
+
+	static GLuint next_binding_point = 0;
+	const GLuint binding_point = next_binding_point++;
 
 	GLuint buffer_id;
 	glGenBuffers(1, &buffer_id);

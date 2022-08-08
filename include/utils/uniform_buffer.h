@@ -27,9 +27,8 @@ typedef struct {
 
 /* This expects that lifetime of `subvar_names` is longer than the lifetime of the
 uniform buffer (so the subvar names should be on the heap, or in static memory). */
-UniformBuffer init_uniform_buffer(
-	const GLenum usage, const GLchar* const block_name,
-	const GLuint binding_point, const GLuint shader_using_uniform_block,
+UniformBuffer init_uniform_buffer(const GLenum usage,
+	const GLchar* const block_name, const GLuint shader_using_uniform_block,
 	const GLchar* const* const subvar_names, const buffer_size_t num_subvars);
 
 void deinit_uniform_buffer(const UniformBuffer* const buffer);
