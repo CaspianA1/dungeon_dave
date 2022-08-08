@@ -96,7 +96,10 @@ static List generate_sectors_from_maps(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
 	// `>> 3` = `/ 8`. Works pretty well for my maps. TODO: make this a constant somewhere.
-	const buffer_size_t sector_amount_guess = (map_width * map_height) >> 3;
+	buffer_size_t sector_amount_guess = (map_width * map_height) >> 3;
+	// If the map size is small enough, an incorrect guess of zero can happen
+	if (sector_amount_guess == 0) sector_amount_guess = 1;
+
 	List sectors = init_list(sector_amount_guess, Sector);
 
 	/* StateMap used instead of a heightmap with null map points, because 1. less
