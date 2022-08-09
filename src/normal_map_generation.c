@@ -38,8 +38,8 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 	const SDL_PixelFormat* const format = src -> format;
 
 	const GLfloat
-		one_over_intensity_on_rgb_scale = constants.max_byte_value / intensity,
-		half_max_byte_value = 0.5f * constants.max_byte_value;
+		half_max_rgb_value = 0.5f * constants.max_byte_value,
+		one_over_intensity_on_rgb_scale = constants.max_byte_value / intensity;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
@@ -67,11 +67,9 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 						one_over_intensity_on_rgb_scale
 					};
 
-					/* This first normalizes the normal, and then converts
-					the normal from a range of (-1, 1) to (0, `max_byte_value`) */
 					glm_vec3_normalize(normal);
-					glm_vec3_scale(normal, half_max_byte_value, normal);
-					glm_vec3_adds(normal, half_max_byte_value, normal);
+					glm_vec3_scale(normal, half_max_rgb_value, normal);
+					glm_vec3_adds(normal, half_max_rgb_value, normal);
 
 					dest_pixel[x] = SDL_MapRGB(format,
 						(sdl_pixel_component_t) normal[0],
@@ -142,6 +140,7 @@ static void do_separable_gaussian_blur_pass(
 						glm_vec3_muladds((vec3) {r, g, b}, kernel[i + kernel_radius], summed_channels);
 					}
 
+					// Alpha is not preserved here since the alpha channel isn't needed for the normal map
 					dest_pixel[x] = SDL_MapRGB(format,
 						(sdl_pixel_component_t) summed_channels[0],
 						(sdl_pixel_component_t) summed_channels[1],
@@ -151,6 +150,26 @@ static void do_separable_gaussian_blur_pass(
 			}
 		);
 	);
+}
+
+static void get_texture_metadata(
+	const TextureType type,
+	GLint* const subtexture_w, GLint* const subtexture_h,
+	GLint* const num_subtextures, GLint* const wrap_mode,
+	GLint mag_min_filter[2]) {
+
+	const GLint level = 0;
+
+	glGetTexLevelParameteriv(type, level, GL_TEXTURE_WIDTH, subtexture_w);
+	glGetTexLevelParameteriv(type, level, GL_TEXTURE_HEIGHT, subtexture_h);
+
+	if (type == TexSet) glGetTexLevelParameteriv(type, level, GL_TEXTURE_DEPTH, num_subtextures);
+	else *num_subtextures = 1;
+
+	// The wrap mode for each axis is the same, so only for 'S' (or across) is fine
+	glGetTexParameteriv(type, GL_TEXTURE_WRAP_S, wrap_mode);
+	glGetTexParameteriv(type, GL_TEXTURE_MAG_FILTER, mag_min_filter);
+	glGetTexParameteriv(type, GL_TEXTURE_MIN_FILTER, mag_min_filter + 1);
 }
 
 GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
@@ -171,29 +190,19 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 	if (type != TexPlain && type != TexSet)
 		FAIL(CreateTexture, "%s", "Normal map creation failed: unsupported texture type");
 
-	const GLint level = 0;
 
 	////////// Querying OpenGL for information about the texture set
 
+	GLint subtexture_w, subtexture_h, num_subtextures, wrap_mode, mag_min_filter[2];
+
 	glBindTexture(type, diffuse_texture);
-
-	GLint subtexture_w, subtexture_h, num_subtextures, wrap_mode, mag_filter, min_filter;
-	glGetTexLevelParameteriv(type, level, GL_TEXTURE_WIDTH, &subtexture_w);
-	glGetTexLevelParameteriv(type, level, GL_TEXTURE_HEIGHT, &subtexture_h);
-
-	if (type == TexSet) glGetTexLevelParameteriv(type, level, GL_TEXTURE_DEPTH, &num_subtextures);
-	else num_subtextures = 1;
-
-	// The wrap mode for each axis is the same, so only for 'S' (or across) is fine
-	glGetTexParameteriv(type, GL_TEXTURE_WRAP_S, &wrap_mode);
-	glGetTexParameteriv(type, GL_TEXTURE_MAG_FILTER, &mag_filter);
-	glGetTexParameteriv(type, GL_TEXTURE_MIN_FILTER, &min_filter);
+	get_texture_metadata(type, &subtexture_w, &subtexture_h, &num_subtextures, &wrap_mode, mag_min_filter);
 
 	////////// Uploading the texture to the CPU
 
 	const GLfloat rescale_factor = config -> rescale_factor;
 	const bool rescaling = rescale_factor != 1.0f;
-	const GLint unscaled_subtexture_w = subtexture_w, unscaled_subtexture_h = subtexture_h;
+	const GLint unscaled_subtexture_w = subtexture_w, unscaled_subtexture_h = subtexture_h, level = 0;
 
 	if (rescaling) {
 		subtexture_w = (GLint) (subtexture_w * rescale_factor);
@@ -247,10 +256,8 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 
 	////////// Making a new texture on the GPU, and then writing the normal map to that
 
-	const GLuint normal_map_set = preinit_texture(type,
-		(TextureWrapMode) wrap_mode,
-		(TextureFilterMode) mag_filter,
-		(TextureFilterMode) min_filter, false);
+	const TextureFilterMode min_filter = (TextureFilterMode) mag_min_filter[1];
+	const GLuint normal_map_set = preinit_texture(type, (TextureWrapMode) wrap_mode, (TextureFilterMode) mag_min_filter[0], min_filter, false);
 
 	// Copying #2 to a new texture on the GPU
 	WITH_SURFACE_PIXEL_ACCESS(general_purpose_surface_2,
@@ -258,7 +265,7 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 			OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, general_purpose_surface_2 -> pixels);
 	);
 
-	glGenerateMipmap(type);
+	if (min_filter == TexLinearMipmapped || min_filter == TexTrilinear) glGenerateMipmap(type);
 
 	////////// Deinitialization
 
