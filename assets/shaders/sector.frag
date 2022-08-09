@@ -40,7 +40,6 @@ vec3 get_face_fragment_normal(const vec3 UV) {
 
 void main(void) {
 	vec3 translated_UV = vec3(retranslate_UV(UV.xy), UV.z);
-
 	vec3 fragment_normal = get_face_fragment_normal(translated_UV);
 
 	color = calculate_light(world_depth_value, translated_UV, fragment_normal).rgb;
