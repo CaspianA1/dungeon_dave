@@ -160,8 +160,9 @@ CascadedShadowContext init_shadow_context(
 		.depth_layers = depth_layers,
 		.framebuffer = init_csm_framebuffer(depth_layers),
 
-		.depth_shader = init_shader(ASSET_PATH("shaders/common/shadow/depth.vert"),
-			ASSET_PATH("shaders/common/shadow/depth.geom"), ASSET_PATH("shaders/common/shadow/depth.frag")
+		.depth_shader = init_shader(
+			ASSET_PATH("shaders/common/shadow/depth.vert"), ASSET_PATH("shaders/common/shadow/depth.geom"),
+			ASSET_PATH("shaders/common/shadow/depth.frag"), NULL
 		),
 
 		.resolution = resolution, .num_cascades = num_cascades,

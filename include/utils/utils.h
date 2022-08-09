@@ -136,6 +136,7 @@ static inline GLint safely_get_uniform(const GLuint shader, const GLchar* const 
 #define USE_ANISOTROPIC_FILTERING
 
 // #define TRACK_MEMORY
+// #define PRINT_SHADER_VALIDATION_LOG
 
 //////////
 

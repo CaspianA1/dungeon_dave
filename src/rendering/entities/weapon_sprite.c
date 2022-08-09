@@ -250,7 +250,7 @@ WeaponSprite init_weapon_sprite(
 			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW,
 			GL_TRIANGLE_STRIP, (List) {NULL, sizeof(vec3), corners_per_quad, corners_per_quad},
 
-			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/weapon_sprite.frag")),
+			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/weapon_sprite.frag"), NULL),
 			diffuse_texture_set
 		),
 
@@ -295,7 +295,6 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 
 	use_vertex_buffer(drawable -> vertex_buffer);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec3[corners_per_quad]), ws -> appearance_context.world_space.corners);
-
 	draw_drawable(*drawable, corners_per_quad, 0, NULL, BindVertexSpec);
 }
 

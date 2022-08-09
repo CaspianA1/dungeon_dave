@@ -62,7 +62,7 @@ TitleScreen init_title_screen(void) {
 	return (TitleScreen) {
 		.active = true,
 		.drawable = init_drawable_without_vertices((uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP,
-			init_shader(ASSET_PATH("shaders/title_screen.vert"), NULL, ASSET_PATH("shaders/title_screen.frag")),
+			init_shader(ASSET_PATH("shaders/title_screen.vert"), NULL, ASSET_PATH("shaders/title_screen.frag"), NULL),
 			palace_city_texture
 		),
 

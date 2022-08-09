@@ -250,7 +250,7 @@ SectorContext init_sector_context(const byte* const heightmap,
 		.drawable = init_drawable_with_vertices(
 			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW, GL_TRIANGLES,
 			(List) {.data = NULL, .item_size = sizeof(face_mesh_t), .length = mesh_cpu.length},
-			init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag")),
+			init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag"), NULL),
 			diffuse_texture_set
 		),
 
@@ -284,6 +284,20 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 	glDisableVertexAttribArray(1); // Not using the face info bit attribute at index 1
 	draw_drawable(*drawable, num_face_meshes * vertices_per_face, 0, NULL, OnlyDraw);
 	glEnableVertexAttribArray(1);
+}
+
+static void report_shader_validation_error(const GLuint shader, const GLchar* const shader_path) {
+	glValidateProgram(shader);
+
+	GLint log_length;
+	glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &log_length);
+
+	if (log_length > 0) {
+		GLchar* const info_log = alloc((size_t) (log_length + 1), sizeof(GLchar));
+		glGetProgramInfoLog(shader, log_length, NULL, info_log);
+		printf("Problem for shader of path '%s':\n%s\n---\n", shader_path, info_log);
+		free(info_log);
+	}
 }
 
 void draw_sectors(const SectorContext* const sector_context,

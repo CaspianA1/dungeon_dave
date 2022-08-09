@@ -12,23 +12,22 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 
 //////////
 
-static void fail_on_sub_shader_creation_error(
-	// `sub_shader_text` may be a file path, or a string indicating the linking step
-	const GLuint object_id,
+static void report_shader_creation_error(
+	const GLuint object,
 	const GLchar* const sub_shader_path,
 	const GLchar* const creation_step,
 	void (*const creation_action) (const GLuint),
 	void (*const log_length_getter) (const GLuint, const GLenum, GLint* const),
 	void (*const log_getter) (const GLuint, const GLsizei, GLsizei* const, GLchar* const)) {
 
-	creation_action(object_id);
+	creation_action(object);
 
 	GLint log_length;
-	log_length_getter(object_id, GL_INFO_LOG_LENGTH, &log_length);
+	log_length_getter(object, GL_INFO_LOG_LENGTH, &log_length);
 
 	if (log_length > 0) {
-		GLchar* const error_message = alloc((size_t) log_length + 1, sizeof(char));
-		log_getter(object_id, log_length, NULL, error_message);
+		GLchar* const error_message = alloc((size_t) log_length + 1, sizeof(GLchar));
+		log_getter(object, log_length, NULL, error_message);
 
 		// No newlines in the error message!
 		for (GLchar* c = error_message; *c != '\0'; c++) {
@@ -40,8 +39,30 @@ static void fail_on_sub_shader_creation_error(
 	}
 }
 
+#ifdef PRINT_SHADER_VALIDATION_LOG
+
+static void report_shader_validation_error(const GLuint shader, const GLchar* const shader_path) {
+	glValidateProgram(shader);
+
+	GLint log_length;
+	glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &log_length);
+
+	if (log_length > 0) {
+		GLchar* const info_log = alloc((size_t) (log_length + 1), sizeof(GLchar));
+		glGetProgramInfoLog(shader, log_length, NULL, info_log);
+		printf("Problem for shader of path '%s':\n%s\n---\n", shader_path, info_log);
+		free(info_log);
+	}
+}
+
+#endif
+
 // If a sub-shader path is null, the sub-shader code corresponding to that path will not be compiled into the final shader
-static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], const GLchar* const sub_shader_paths[num_sub_shaders]) {
+static GLuint init_shader_from_source(
+	const List shader_code[num_sub_shaders],
+	const GLchar* const sub_shader_paths[num_sub_shaders],
+	void (*const hook_before_linking) (const GLuint shader)) {
+
 	static const GLenum sub_shader_types[num_sub_shaders] = {GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER};
 
 	GLuint sub_shaders[num_sub_shaders], shader = glCreateProgram();
@@ -51,19 +72,20 @@ static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], c
 		if (sub_shader_path == NULL) continue;
 
 		const GLuint sub_shader = glCreateShader(sub_shader_types[i]);
-
 		const List* const sub_shader_code = shader_code + i;
-		glShaderSource(sub_shader, (GLsizei) sub_shader_code -> length, sub_shader_code -> data, NULL);
 
-		fail_on_sub_shader_creation_error(sub_shader, sub_shader_path, "compilation", glCompileShader, glGetShaderiv, glGetShaderInfoLog);
+		glShaderSource(sub_shader, (GLsizei) sub_shader_code -> length, sub_shader_code -> data, NULL);
+		report_shader_creation_error(sub_shader, sub_shader_path, "compilation", glCompileShader, glGetShaderiv, glGetShaderInfoLog);
 
 		glAttachShader(shader, sub_shader);
-
 		sub_shaders[i] = sub_shader;
 	}
 
+	if (hook_before_linking != NULL) hook_before_linking(shader);
+
 	// Picking an arbitrary sub-shader for this (as long as the author recognizes what sub-shader group is failing)
-	fail_on_sub_shader_creation_error(shader, sub_shader_paths[0], "linking", glLinkProgram, glGetProgramiv, glGetProgramInfoLog);
+	const GLchar* const vertex_sub_shader = sub_shader_paths[0];
+	report_shader_creation_error(shader, vertex_sub_shader, "linking", glLinkProgram, glGetProgramiv, glGetProgramInfoLog);
 
 	for (byte i = 0; i < num_sub_shaders; i++) {
 		if (sub_shader_paths[i] == NULL) continue;
@@ -72,6 +94,10 @@ static GLuint init_shader_from_source(const List shader_code[num_sub_shaders], c
 		glDetachShader(shader, sub_shader);
 		glDeleteShader(sub_shader);
 	}
+
+	#ifdef PRINT_SHADER_VALIDATION_LOG
+	report_shader_validation_error(shader, vertex_sub_shader);
+	#endif
 
 	return shader;
 }
@@ -216,7 +242,8 @@ static void erase_version_strings_from_dependency_list(const List* const depende
 GLuint init_shader(
 	const GLchar* const vertex_shader_path,
 	const GLchar* const geo_shader_path,
-	const GLchar* const fragment_shader_path) {
+	const GLchar* const fragment_shader_path,
+	void (*const hook_before_linking) (const GLuint shader)) {
 
 	const GLchar* const paths[num_sub_shaders] = {vertex_shader_path, geo_shader_path, fragment_shader_path};
 
@@ -236,11 +263,11 @@ GLuint init_shader(
 
 		push_ptr_to_list(dependency_list, &code);
 
-		// This blanks out #version lines for all included files
+		// This blanks out `#version` lines for all included files
 		erase_version_strings_from_dependency_list(dependency_list);
 	}
 
-	const GLuint shader = init_shader_from_source(dependency_lists, paths);
+	const GLuint shader = init_shader_from_source(dependency_lists, paths, hook_before_linking);
 
 	for (byte i = 0; i < num_sub_shaders; i++) {
 		if (paths[i] == NULL) continue;

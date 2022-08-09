@@ -171,7 +171,7 @@ BillboardContext init_billboard_context(
 			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW, GL_TRIANGLE_STRIP,
 			(List) {.data = NULL, .item_size = sizeof(Billboard), .length = num_billboards},
 
-			init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag")),
+			init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag"), NULL),
 			diffuse_texture_set
 		),
 
