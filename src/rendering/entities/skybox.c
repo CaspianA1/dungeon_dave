@@ -63,7 +63,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 Skybox init_skybox(const GLchar* const cubemap_path) {
 	return init_drawable_without_vertices(
 		(uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP,
-		init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag")),
+		init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag"), NULL),
 		init_skybox_texture(cubemap_path)
 	);
 }
