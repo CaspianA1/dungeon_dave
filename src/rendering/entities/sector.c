@@ -286,20 +286,6 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 	glEnableVertexAttribArray(1);
 }
 
-static void report_shader_validation_error(const GLuint shader, const GLchar* const shader_path) {
-	glValidateProgram(shader);
-
-	GLint log_length;
-	glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &log_length);
-
-	if (log_length > 0) {
-		GLchar* const info_log = alloc((size_t) (log_length + 1), sizeof(GLchar));
-		glGetProgramInfoLog(shader, log_length, NULL, info_log);
-		printf("Problem for shader of path '%s':\n%s\n---\n", shader_path, info_log);
-		free(info_log);
-	}
-}
-
 void draw_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
 	const vec4 frustum_planes[planes_per_frustum], const GLfloat curr_time_secs,
