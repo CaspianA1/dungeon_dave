@@ -262,10 +262,16 @@ static void update_camera_pos(Camera* const camera, const Event* const event,
 		const byte movement_bits = event -> movement_bits;
 		const GLfloat velocity = constants.speeds.xz_max * delta_time;
 
-		if (CHECK_BITMASK(movement_bits, BIT_MOVE_FORWARD)) glm_vec3_muladds((GLfloat*) dir, velocity, pos);
-		if (CHECK_BITMASK(movement_bits, BIT_MOVE_BACKWARD)) glm_vec3_muladds((GLfloat*) dir, -velocity, pos);
-		if (CHECK_BITMASK(movement_bits, BIT_STRAFE_LEFT)) glm_vec3_muladds((GLfloat*) right, -velocity, pos);
-		if (CHECK_BITMASK(movement_bits, BIT_STRAFE_RIGHT)) glm_vec3_muladds((GLfloat*) right, velocity, pos);
+		#define MOVE(mask, direction, sign)\
+			if CHECK_BITMASK(movement_bits, BIT_##mask)\
+				glm_vec3_muladds((GLfloat*) direction, sign velocity, pos)
+
+		MOVE(MOVE_FORWARD, dir, );
+		MOVE(MOVE_BACKWARD, dir, -);
+		MOVE(STRAFE_LEFT, right, -);
+		MOVE(STRAFE_RIGHT, right, );
+
+		#undef MOVE
 	}
 	else {
 		GLfloat* const velocities = camera -> velocities;
@@ -279,17 +285,17 @@ static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ra
 	const GLfloat* const pos = camera -> pos;
 	vec4* const view = camera -> view;
 
-	#define d(vector, sign) sign glm_vec3_dot((GLfloat*) pos, (GLfloat*) vector)
+	#define D(vector, sign) sign glm_vec3_dot((GLfloat*) pos, (GLfloat*) vector)
 
 	// Constructing the view matrix manually because I already have all of the vectors needed for it
 	glm_mat4_copy((mat4) {
 		{right[0], up[0], -dir[0], 0.0f},
 		{right[1], up[1], -dir[1], 0.0f},
 		{right[2], up[2], -dir[2], 0.0f},
-		{d(right, -), d(up, -), d(dir, ), 1.0f}
+		{D(right, -), D(up, -), D(dir, ), 1.0f}
 	}, view);
 
-	#undef d
+	#undef D
 
 	mat4 projection;
 	glm_perspective(camera -> angles.fov, aspect_ratio, constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
