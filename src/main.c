@@ -119,11 +119,14 @@ static void* main_init(void) {
 		{ASSET_PATH("spritesheets/trooper.bmp"), 33, 1, 33}
 	};
 
+	// TODO: make these texture id ranges relative to each animation layout
 	const Animation billboard_animations[] = {
 		{.texture_id_range = {3, 48}, .secs_for_frame = 0.02f}, // Flying carpet
 		{.texture_id_range = {49, 53}, .secs_for_frame = 0.15f}, // Torch
 		{.texture_id_range = {62, 64}, .secs_for_frame = 0.08f}, // Eddie, attacking
-		{.texture_id_range = {77, 80}, .secs_for_frame = 0.07f} // Trooper, idle
+		{.texture_id_range = {77, 81}, .secs_for_frame = 0.07f}, // Trooper, idle
+		{.texture_id_range = {82, 88}, .secs_for_frame = 0.07f}, // Trooper, chase
+		{.texture_id_range = {89, 98}, .secs_for_frame = 0.07f}, // Trooper, attacking
 	};
 
 	const BillboardAnimationInstance billboard_animation_instances[] = {
@@ -134,7 +137,8 @@ static void* main_init(void) {
 		{.billboard_id = 13, .animation_id = 2},
 
 		{.billboard_id = 14, .animation_id = 3}, // Troopers
-		{.billboard_id = 15, .animation_id = 3}
+		{.billboard_id = 15, .animation_id = 4},
+		{.billboard_id = 16, .animation_id = 5}
 	};
 
 	const Billboard billboards[] = {
@@ -158,7 +162,8 @@ static void* main_init(void) {
 		{billboard_animations[2].texture_id_range.start, {1.0f, 1.0f}, {3.5f, 0.5f, 24.5f}},
 
 		{billboard_animations[3].texture_id_range.start, {1.0f, 1.0f}, {3.0f, 1.5f, 9.5f}}, // Troopers
-		{billboard_animations[3].texture_id_range.start, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
+		{billboard_animations[4].texture_id_range.start, {1.0f, 1.0f}, {9.5f, 6.5f, 13.5f}},
+		{billboard_animations[5].texture_id_range.start, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
 	};
 
 	const GLchar* const still_face_texture_paths[] = {
@@ -213,6 +218,7 @@ static void* main_init(void) {
 	//////////
 
 	const byte
+		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_heightmap, map_size[2] = {blank_width, blank_height};
 		*const heightmap = (const byte*) palace_heightmap, *const texture_id_map = (const byte*) palace_texture_id_map, map_size[2] = {palace_width, palace_height};
 		// *const heightmap = (const byte*) fortress_heightmap, *const texture_id_map = (const byte*) fortress_texture_id_map, map_size[2] = {fortress_width, fortress_height};
 		// *const heightmap = (const byte*) level_one_heightmap, *const texture_id_map = (const byte*) level_one_texture_id_map, map_size[2] = {level_one_width, level_one_height};
@@ -227,10 +233,12 @@ static void* main_init(void) {
 	// 1024 for palace, 1200 for terrain
 	const struct {const GLsizei face, billboard, shadow_map;} texture_sizes = {128, 128, 1024};
 
+	const vec3 init_pos = {0.5f, 0.0f, 0.5f}; // {1.5f, 0.5f, 1.5f};
+
 	//////////
 
 	const SceneContext scene_context = {
-		.camera = init_camera((vec3) {1.5f, 0.5f, 1.5f}, far_clip_dist),
+		.camera = init_camera(init_pos, far_clip_dist),
 
 		.weapon_sprite = init_weapon_sprite(
 			// 3.0f, 3.0f, 1.0f, 1.0f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
