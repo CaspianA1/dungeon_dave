@@ -38,6 +38,8 @@ And the biggest number possible with five bits is 31, so that gives you
 
 // Each enum value is a texture unit id.
 typedef enum {
+	TU_Temporary = 0, // This can be reused for various purposes
+
 	TU_Skybox,
 
 	TU_CascadedShadowMap,
