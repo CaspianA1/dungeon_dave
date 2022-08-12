@@ -38,10 +38,10 @@ typedef enum {
 #define KEY_PRINT_SDL_ERROR SDL_SCANCODE_6
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", (var))
-#define DEBUG_FLOAT(var) printf(#var " = %ff\n", (double) (var))
-#define DEBUG_VEC2(v) printf(#v " = {%ff, %ff}\n", (double) (v)[0], (double) (v)[1])
-#define DEBUG_VEC3(v) printf(#v " = {%ff, %ff, %ff}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2])
-#define DEBUG_VEC4(v) printf(#v " = {%ff, %ff, %ff, %ff}\n", (double) (v)[0], (double) (v)[1], (double) (v)[2], (double) (v)[3]);
+#define DEBUG_FLOAT(var) printf(#var " = %ff\n", (GLdouble) (var))
+#define DEBUG_VEC2(v) printf(#v " = {%ff, %ff}\n", (GLdouble) (v)[0], (GLdouble) (v)[1])
+#define DEBUG_VEC3(v) printf(#v " = {%ff, %ff, %ff}\n", (GLdouble) (v)[0], (GLdouble) (v)[1], (GLdouble) (v)[2])
+#define DEBUG_VEC4(v) printf(#v " = {%ff, %ff, %ff, %ff}\n", (GLdouble) (v)[0], (GLdouble) (v)[1], (GLdouble) (v)[2], (GLdouble) (v)[3]);
 #define DEBUG_RECT(r) printf(#r " = {%d, %d, %d, %d}\n", (r).x, (r).y, (r).w, (r).h)
 
 #define DEBUG_BITS(num) do {\
