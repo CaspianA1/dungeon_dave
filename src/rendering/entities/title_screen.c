@@ -33,7 +33,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 	const GLfloat // TODO: put these in the `constants` struct
 		time_for_spin_cycle = 3.0f, logo_transitions_per_spin_cycle = 0.25f,
-		light_dist_from_title_screen_plane = 0.75f, time_for_palace_city_scroll_cycle = 10.0f;
+		light_dist_from_title_screen_plane = 0.4f, time_for_palace_city_scroll_cycle = 10.0f;
 
 	const GLfloat spin_seed = typed_params.curr_time_secs * TWO_PI / time_for_spin_cycle;
 	const GLfloat texture_transition_weight = cosf(spin_seed * logo_transitions_per_spin_cycle) * 0.5f + 0.5f;
@@ -57,7 +57,7 @@ TitleScreen init_title_screen(void) {
 	//////////
 
 	// TODO: make this a constant or parameter somewhere (or just define a general title screen config)
-	const NormalMapConfig normal_map_config = {.blur_radius = 8, .blur_std_dev = 1.5f, .intensity = 1.0f, .rescale_factor = 1.0f};
+	const NormalMapConfig normal_map_config = {.blur_radius = 2, .blur_std_dev = 1.5f, .intensity = 0.5f, .rescale_factor = 1.0f};
 
 	return (TitleScreen) {
 		.active = true,
