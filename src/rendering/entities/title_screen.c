@@ -35,7 +35,10 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 ////////// Initialization, deinitialization, and rendering
 
-TitleScreen init_title_screen(const TitleScreenTextureConfig* const texture_config, const TitleScreenRenderingConfig* const rendering_config) {
+TitleScreen init_title_screen(
+	const TitleScreenTextureConfig* const texture_config,
+	const TitleScreenRenderingConfig* const rendering_config) {
+
 	const TextureType texture_type = TexPlain;
 
 	const GLuint scrolling_diffuse_texture = init_plain_texture(texture_config -> paths.scrolling, texture_type,

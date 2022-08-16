@@ -32,7 +32,10 @@ typedef struct {
 
 // Excluded: update_uniforms
 
-TitleScreen init_title_screen(const TitleScreenTextureConfig* const texture_config, const TitleScreenRenderingConfig* const rendering_config);
+TitleScreen init_title_screen(
+	const TitleScreenTextureConfig* const texture_config,
+	const TitleScreenRenderingConfig* const rendering_config);
+
 void deinit_title_screen(const TitleScreen* const title_screen);
 
 // This returns if the title screen is active
