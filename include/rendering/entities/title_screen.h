@@ -14,6 +14,8 @@ typedef struct {
 } TitleScreenTextureConfig;
 
 typedef struct {
+	const byte texture_transition_immediacy_factor;
+
 	const GLfloat
 		scrolling_vert_squish_ratio, specular_exponent,
 		light_dist_from_screen_plane, secs_per_scroll_cycle;

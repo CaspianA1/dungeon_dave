@@ -13,14 +13,14 @@ typedef struct {
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
 
-	static GLint light_pos_tangent_space_id, scroll_texture_weight_id, scroll_factor_id;
+	static GLint light_pos_tangent_space_id, texture_transition_weight_id, scroll_factor_id;
 	static GLfloat base_time_secs;
 
 	ON_FIRST_CALL(
 		const GLuint shader = drawable -> shader;
 
 		INIT_UNIFORM(light_pos_tangent_space, shader);
-		INIT_UNIFORM(scroll_texture_weight, shader);
+		INIT_UNIFORM(texture_transition_weight, shader);
 		INIT_UNIFORM(scroll_factor, shader);
 
 		base_time_secs = typed_params.curr_time_secs;
@@ -32,10 +32,11 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		palace_city_hori_scroll = relative_time_secs / typed_params.config -> secs_per_scroll_cycle,
 		spin_seed = relative_time_secs * TWO_PI / typed_params.config -> light_spin_cycle.secs_per;
 
-	const GLfloat scroll_texture_weight = cosf(spin_seed * typed_params.config -> light_spin_cycle.logo_transitions_per) * 0.5f + 0.5f;
+	GLfloat texture_transition_weight = cosf(spin_seed * typed_params.config -> light_spin_cycle.logo_transitions_per) * 0.5f + 0.5f;
+	for (byte i = 0; i < typed_params.config -> texture_transition_immediacy_factor; i++) texture_transition_weight = glm_smooth(texture_transition_weight);
 
 	UPDATE_UNIFORM(light_pos_tangent_space, 3fv, 1, (vec3) {sinf(spin_seed), cosf(spin_seed), typed_params.config -> light_dist_from_screen_plane});
-	UPDATE_UNIFORM(scroll_texture_weight, 1f, scroll_texture_weight);
+	UPDATE_UNIFORM(texture_transition_weight, 1f, texture_transition_weight);
 	UPDATE_UNIFORM(scroll_factor, 1f, palace_city_hori_scroll);
 }
 
