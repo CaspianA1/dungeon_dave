@@ -249,10 +249,10 @@ static void* main_init(void) {
 
 		.rendering = {
 			.scrolling_vert_squish_ratio = 0.35f,
-			.specular_exponent = 8.0f,
+			.specular_exponent = 16.0f,
 			.light_dist_from_screen_plane = 0.4f,
-			.secs_per_scroll_cycle = 10.0f,
-			.light_spin_cycle = {.secs_per = 3.0f, .logo_transitions_per = 0.25f}
+			.secs_per_scroll_cycle = 7.0f,
+			.light_spin_cycle = {.secs_per = 2.5f, .logo_transitions_per = 0.5f}
 		}
 	};
 
