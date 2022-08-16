@@ -2,15 +2,15 @@
 
 #include "common/normal_utils.frag"
 
-noperspective in float sliding_UV_x;
+noperspective in float scrolling_UV_x;
 noperspective in vec2 UV;
 in vec3 fragment_pos_tangent_space;
 
 out vec3 color;
 
-uniform float texture_transition_weight, specular_exponent;
+uniform float scroll_texture_weight, specular_exponent;
 uniform vec3 light_pos_tangent_space;
-uniform sampler2D logo_diffuse_sampler, palace_city_diffuse_sampler, palace_city_normal_map_sampler;
+uniform sampler2D still_diffuse_sampler, scrolling_diffuse_sampler, scrolling_normal_map_sampler;
 
 vec3 blinn_phong(const sampler2D diffuse_sampler, const vec2 custom_UV,
 	const vec3 fragment_normal, const vec3 dir_to_light, const vec3 halfway_dir) {
@@ -27,18 +27,18 @@ vec3 blinn_phong(const sampler2D diffuse_sampler, const vec2 custom_UV,
 void main(void) {
 	const vec3 camera_pos_tangent_space = vec3(0.0f, 0.0f, 1.0f);
 
-	vec2 sliding_UV = vec2(sliding_UV_x, UV.y);
+	vec2 scrolling_UV = vec2(scrolling_UV_x, UV.y);
 
 	vec3
-		fragment_normal = get_tangent_space_normal_2D(palace_city_normal_map_sampler, sliding_UV),
+		fragment_normal = get_tangent_space_normal_2D(scrolling_normal_map_sampler, scrolling_UV),
 		dir_to_light = normalize(light_pos_tangent_space - fragment_pos_tangent_space),
 		view_dir = normalize(camera_pos_tangent_space - fragment_pos_tangent_space);
 
 	vec3 halfway_dir = normalize(dir_to_light + view_dir);
 
-	color = mix(
-		blinn_phong(logo_diffuse_sampler, UV, vec3(0.0f, 0.0f, 1.0f), dir_to_light, halfway_dir),
-		blinn_phong(palace_city_diffuse_sampler, sliding_UV, fragment_normal, dir_to_light, halfway_dir),
-		texture_transition_weight
-	);
+	vec3
+		still_base = blinn_phong(still_diffuse_sampler, UV, vec3(0.0f, 0.0f, 1.0f), dir_to_light, halfway_dir),
+		scroll_base = blinn_phong(scrolling_diffuse_sampler, scrolling_UV, fragment_normal, dir_to_light, halfway_dir);
+
+	color = mix(still_base * scroll_base, still_base + scroll_base, scroll_texture_weight);
 }

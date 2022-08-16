@@ -45,9 +45,9 @@ typedef enum {
 	TU_CascadedShadowMap,
 	TU_AmbientOcclusionMap,
 
-	TU_TitleScreenLogoDiffuse,
-	TU_TitleScreenPalaceCityDiffuse,
-	TU_TitleScreenPalaceCityNormalMap,
+	TU_TitleScreenStillDiffuse,
+	TU_TitleScreenScrollingDiffuse,
+	TU_TitleScreenScrollingNormalMap,
 
 	TU_SectorFaceDiffuse, TU_SectorFaceNormalMap,
 	TU_BillboardDiffuse, TU_BillboardNormalMap,

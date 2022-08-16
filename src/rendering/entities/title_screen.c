@@ -1,14 +1,12 @@
 #include "rendering/entities/title_screen.h"
 #include "utils/list.h"
 #include "utils/shader.h"
-#include "utils/texture.h"
-#include "normal_map_generation.h"
 #include "data/constants.h"
 
 ////////// Uniform updating
 
 typedef struct {
-	const TitleScreen* const title_screen;
+	const TitleScreenRenderingConfig* const config;
 	const GLfloat curr_time_secs;
 } UniformUpdaterParams;
 
@@ -16,67 +14,71 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
 	const GLuint shader = drawable -> shader;
 
-	static GLint light_pos_tangent_space_id, texture_transition_weight_id, palace_city_hori_scroll_id;
+	static GLint light_pos_tangent_space_id, scroll_texture_weight_id, scroll_factor_id;
 
 	ON_FIRST_CALL(
 		INIT_UNIFORM(light_pos_tangent_space, shader);
-		INIT_UNIFORM(texture_transition_weight, shader);
-		INIT_UNIFORM(palace_city_hori_scroll, shader);
-
-		INIT_UNIFORM_VALUE(specular_exponent, shader, 1f, 8.0f);
-		INIT_UNIFORM_VALUE(palace_city_vert_squish_ratio, shader, 1f, 0.35f);
-
-		use_texture(typed_params.title_screen -> logo_diffuse_texture, shader, "logo_diffuse_sampler", TexPlain, TU_TitleScreenLogoDiffuse);
-		use_texture(drawable -> diffuse_texture, shader, "palace_city_diffuse_sampler", TexPlain, TU_TitleScreenPalaceCityDiffuse);
-		use_texture(typed_params.title_screen -> palace_city_normal_map, shader, "palace_city_normal_map_sampler", TexPlain, TU_TitleScreenPalaceCityNormalMap);
+		INIT_UNIFORM(scroll_texture_weight, shader);
+		INIT_UNIFORM(scroll_factor, shader);
 	);
 
-	const GLfloat // TODO: put these in the `constants` struct
-		time_for_spin_cycle = 3.0f, logo_transitions_per_spin_cycle = 0.25f,
-		light_dist_from_title_screen_plane = 0.4f, time_for_palace_city_scroll_cycle = 10.0f;
+	const GLfloat
+		palace_city_hori_scroll = typed_params.curr_time_secs / typed_params.config -> secs_per_scroll_cycle,
+		spin_seed = typed_params.curr_time_secs * TWO_PI / typed_params.config -> light_spin_cycle.secs_per;
 
-	const GLfloat spin_seed = typed_params.curr_time_secs * TWO_PI / time_for_spin_cycle;
-	const GLfloat texture_transition_weight = cosf(spin_seed * logo_transitions_per_spin_cycle) * 0.5f + 0.5f;
-	const GLfloat palace_city_hori_scroll = typed_params.curr_time_secs / time_for_palace_city_scroll_cycle;
+	const GLfloat scroll_texture_weight = cosf(spin_seed * typed_params.config -> light_spin_cycle.logo_transitions_per) * 0.5f + 0.5f;
 
-	UPDATE_UNIFORM(light_pos_tangent_space, 3fv, 1, (vec3) {sinf(spin_seed), cosf(spin_seed), light_dist_from_title_screen_plane});
-	UPDATE_UNIFORM(texture_transition_weight, 1f, texture_transition_weight);
-	UPDATE_UNIFORM(palace_city_hori_scroll, 1f, palace_city_hori_scroll);
+	UPDATE_UNIFORM(light_pos_tangent_space, 3fv, 1, (vec3) {sinf(spin_seed), cosf(spin_seed), typed_params.config -> light_dist_from_screen_plane});
+	UPDATE_UNIFORM(scroll_texture_weight, 1f, scroll_texture_weight);
+	UPDATE_UNIFORM(scroll_factor, 1f, palace_city_hori_scroll);
 }
 
 ////////// Initialization, deinitialization, and rendering
 
-TitleScreen init_title_screen(void) {
-	const GLuint palace_city_texture = init_plain_texture(ASSET_PATH("palace_city.bmp"), TexPlain,
-		TexRepeating, TexLinear, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT
-	);
+TitleScreen init_title_screen(const TitleScreenTextureConfig* const texture_config, const TitleScreenRenderingConfig* const rendering_config) {
+	const TextureType texture_type = TexPlain;
+
+	const GLuint scrolling_diffuse_texture = init_plain_texture(texture_config -> paths.scrolling, texture_type,
+		TexRepeating, texture_config -> mag_filters.scrolling, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
 	// Overwriting the vertical wrap through a dumb hack
-	glTexParameteri(TexPlain, GL_TEXTURE_WRAP_T, TexNonRepeating);
+	glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, TexNonRepeating);
+
+	const GLuint
+		scrolling_normal_map = init_normal_map_from_diffuse_texture(scrolling_diffuse_texture,
+			texture_type, &texture_config -> scrolling_normal_map_config),
+
+		still_diffuse_texture = init_plain_texture(texture_config -> paths.still, texture_type, TexNonRepeating,
+				texture_config -> mag_filters.still, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
 	//////////
 
-	// TODO: make this a constant or parameter somewhere (or just define a general title screen config)
-	const NormalMapConfig normal_map_config = {.blur_radius = 2, .blur_std_dev = 1.5f, .intensity = 0.5f, .rescale_factor = 1.0f};
+	const GLuint shader = init_shader(ASSET_PATH("shaders/title_screen.vert"), NULL, ASSET_PATH("shaders/title_screen.frag"), NULL);
+	glUseProgram(shader);
+
+	INIT_UNIFORM_VALUE(scrolling_texture_vert_squish_ratio, shader, 1f, rendering_config -> scrolling_vert_squish_ratio);
+	INIT_UNIFORM_VALUE(specular_exponent, shader, 1f, rendering_config -> specular_exponent);
+
+	use_texture(still_diffuse_texture, shader, "still_diffuse_sampler", TexPlain, TU_TitleScreenStillDiffuse);
+	use_texture(scrolling_diffuse_texture, shader, "scrolling_diffuse_sampler", TexPlain, TU_TitleScreenScrollingDiffuse);
+	use_texture(scrolling_normal_map, shader, "scrolling_normal_map_sampler", TexPlain, TU_TitleScreenScrollingNormalMap);
+
+	//////////
 
 	return (TitleScreen) {
 		.active = true,
-		.drawable = init_drawable_without_vertices((uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP,
-			init_shader(ASSET_PATH("shaders/title_screen.vert"), NULL, ASSET_PATH("shaders/title_screen.frag"), NULL),
-			palace_city_texture
-		),
-
-		.palace_city_normal_map = init_normal_map_from_diffuse_texture(palace_city_texture, TexPlain, &normal_map_config),
-
-		.logo_diffuse_texture = init_plain_texture(ASSET_PATH("logo.bmp"), TexPlain,
-			TexNonRepeating, TexNearest, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT
-		)
+		.drawable = init_drawable_without_vertices((uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP, shader, still_diffuse_texture),
+		.scrolling_diffuse_texture = scrolling_diffuse_texture,
+		.scrolling_normal_map = scrolling_normal_map,
+		.rendering_config = *rendering_config
 	};
 }
 
 void deinit_title_screen(const TitleScreen* const title_screen) {
 	deinit_drawable(title_screen -> drawable);
-	glDeleteTextures(2, (GLuint[2]) {title_screen -> palace_city_normal_map, title_screen -> logo_diffuse_texture});
+
+	const GLuint scrolling_textures[] = {title_screen -> scrolling_diffuse_texture, title_screen -> scrolling_normal_map};
+	glDeleteTextures(ARRAY_LENGTH(scrolling_textures), scrolling_textures);
 }
 
 bool tick_title_screen(TitleScreen* const title_screen, const Event* const event) {
@@ -86,7 +88,7 @@ bool tick_title_screen(TitleScreen* const title_screen, const Event* const event
 	const bool active = title_screen -> active;
 
 	if (active) {
-		const UniformUpdaterParams uniform_updater_params = {title_screen, event -> curr_time_secs};
+		const UniformUpdaterParams uniform_updater_params = {&title_screen -> rendering_config, event -> curr_time_secs};
 		draw_drawable(title_screen -> drawable, corners_per_quad, 0, &uniform_updater_params, UseShaderPipeline);
 	}
 

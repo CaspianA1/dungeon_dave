@@ -237,6 +237,27 @@ static void* main_init(void) {
 
 	//////////
 
+	const struct {
+		const TitleScreenTextureConfig texture;
+		const TitleScreenRenderingConfig rendering;
+	} title_screen_config = {
+		.texture = {
+			.paths = {.still = ASSET_PATH("logo.bmp"), .scrolling = ASSET_PATH("palace_city.bmp")},
+			.mag_filters = {.still = TexNearest, .scrolling = TexLinear},
+			.scrolling_normal_map_config = {.blur_radius = 2, .blur_std_dev = 1.5f, .intensity = 0.5f, .rescale_factor = 1.0f}
+		},
+
+		.rendering = {
+			.scrolling_vert_squish_ratio = 0.35f,
+			.specular_exponent = 8.0f,
+			.light_dist_from_screen_plane = 0.4f,
+			.secs_per_scroll_cycle = 10.0f,
+			.light_spin_cycle = {.secs_per = 3.0f, .logo_transitions_per = 0.25f}
+		}
+	};
+
+	//////////
+
 	const SceneContext scene_context = {
 		.camera = init_camera(init_pos, far_clip_dist),
 
@@ -276,10 +297,8 @@ static void* main_init(void) {
 		),
 
 		.ao_map = init_ao_map(heightmap, map_size, max_point_height),
-
 		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp")),
-		.title_screen = init_title_screen(),
-
+		.title_screen = init_title_screen(&title_screen_config.texture, &title_screen_config.rendering),
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
 
