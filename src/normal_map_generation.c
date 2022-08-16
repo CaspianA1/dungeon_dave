@@ -209,27 +209,27 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 		subtexture_h = (GLint) (subtexture_h * rescale_factor);
 	}
 
-	const GLint general_purpose_surfaces_h = subtexture_h * num_subtextures;
+	const GLint cpu_buffers_h = subtexture_h * num_subtextures;
 
 	SDL_Surface
-		*const general_purpose_surface_1 = init_blank_surface(subtexture_w, general_purpose_surfaces_h),
-		*const general_purpose_surface_2 = init_blank_surface(subtexture_w, general_purpose_surfaces_h);
+		*const buffer_1 = init_blank_surface(subtexture_w, cpu_buffers_h),
+		*const buffer_2 = init_blank_surface(subtexture_w, cpu_buffers_h);
 
-	if (rescaling) { // If rescaling, copy the texture on the GPU into a surface with the same size, and then upscale that surface to `general_purpose_surface_1`
+	if (rescaling) { // If rescaling, copy the texture on the GPU into a surface with the same size, and then upscale that surface to `buffer_1`
 		SDL_Surface* const surface_with_src_size = init_blank_surface(unscaled_subtexture_w, unscaled_subtexture_h * num_subtextures);
 
 		WITH_SURFACE_PIXEL_ACCESS(surface_with_src_size,
 			glGetTexImage(type, level, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_COLOR_CHANNEL_TYPE, surface_with_src_size -> pixels);
+				OPENGL_COLOR_CHANNEL_TYPE, surface_with_src_size -> pixels);
 		);
 
-		SDL_BlitScaled(surface_with_src_size, NULL, general_purpose_surface_1, NULL);
+		SDL_BlitScaled(surface_with_src_size, NULL, buffer_1, NULL);
 		SDL_FreeSurface(surface_with_src_size);
 	}
-	else { // Otherwise, copy the texture directly to `general_purpose_surface_1`
-		WITH_SURFACE_PIXEL_ACCESS(general_purpose_surface_1,
+	else { // Otherwise, copy the texture directly to `buffer_1`
+		WITH_SURFACE_PIXEL_ACCESS(buffer_1,
 			glGetTexImage(type, level, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_COLOR_CHANNEL_TYPE, general_purpose_surface_1 -> pixels);
+				OPENGL_COLOR_CHANNEL_TYPE, buffer_1 -> pixels);
 		);
 	}
 
@@ -241,18 +241,18 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 		GLfloat* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, config -> blur_std_dev);
 
 		do_separable_gaussian_blur_pass( // Blurring #1 to #2 horizontally
-			general_purpose_surface_1, general_purpose_surface_2,
+			buffer_1, buffer_2,
 			blur_kernel, subtexture_h, blur_radius, false);
 
 		do_separable_gaussian_blur_pass( // Blurring #2 to #1 vertically
-			general_purpose_surface_2, general_purpose_surface_1,
+			buffer_2, buffer_1,
 			blur_kernel, subtexture_h, blur_radius, true);
 
 		dealloc(blur_kernel);
 	}
 
 	// Making a normal map of #1 to #2
-	generate_normal_map(general_purpose_surface_1, general_purpose_surface_2, subtexture_h, config -> intensity);
+	generate_normal_map(buffer_1, buffer_2, subtexture_h, config -> intensity);
 
 	////////// Making a new texture on the GPU, and then writing the normal map to that
 
@@ -260,17 +260,17 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 	const GLuint normal_map_set = preinit_texture(type, (TextureWrapMode) wrap_mode, (TextureFilterMode) mag_min_filter[0], min_filter, false);
 
 	// Copying #2 to a new texture on the GPU
-	WITH_SURFACE_PIXEL_ACCESS(general_purpose_surface_2,
+	WITH_SURFACE_PIXEL_ACCESS(buffer_2,
 		init_texture_data(type, (GLsizei[]) {subtexture_w, subtexture_h, num_subtextures}, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, general_purpose_surface_2 -> pixels);
+			OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, buffer_2 -> pixels);
 	);
 
 	if (min_filter == TexLinearMipmapped || min_filter == TexTrilinear) glGenerateMipmap(type);
 
 	////////// Deinitialization
 
-	SDL_FreeSurface(general_purpose_surface_1);
-	SDL_FreeSurface(general_purpose_surface_2);
+	SDL_FreeSurface(buffer_1);
+	SDL_FreeSurface(buffer_2);
 
 	return normal_map_set;
 }
