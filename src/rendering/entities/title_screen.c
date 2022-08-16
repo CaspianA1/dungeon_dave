@@ -12,19 +12,25 @@ typedef struct {
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
-	const GLuint shader = drawable -> shader;
 
 	static GLint light_pos_tangent_space_id, scroll_texture_weight_id, scroll_factor_id;
+	static GLfloat base_time_secs;
 
 	ON_FIRST_CALL(
+		const GLuint shader = drawable -> shader;
+
 		INIT_UNIFORM(light_pos_tangent_space, shader);
 		INIT_UNIFORM(scroll_texture_weight, shader);
 		INIT_UNIFORM(scroll_factor, shader);
+
+		base_time_secs = typed_params.curr_time_secs;
 	);
 
+	const GLfloat relative_time_secs = typed_params.curr_time_secs - base_time_secs;
+
 	const GLfloat
-		palace_city_hori_scroll = typed_params.curr_time_secs / typed_params.config -> secs_per_scroll_cycle,
-		spin_seed = typed_params.curr_time_secs * TWO_PI / typed_params.config -> light_spin_cycle.secs_per;
+		palace_city_hori_scroll = relative_time_secs / typed_params.config -> secs_per_scroll_cycle,
+		spin_seed = relative_time_secs * TWO_PI / typed_params.config -> light_spin_cycle.secs_per;
 
 	const GLfloat scroll_texture_weight = cosf(spin_seed * typed_params.config -> light_spin_cycle.logo_transitions_per) * 0.5f + 0.5f;
 
