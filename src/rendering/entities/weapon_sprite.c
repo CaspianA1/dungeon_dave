@@ -77,12 +77,14 @@ static GLfloat circular_mapping_from_zero_to_one(const GLfloat x) {
 	return sqrtf(1.0f - x_minus_one * x_minus_one);
 }
 
-static void get_sway(const GLfloat curr_time_secs, const GLfloat speed_xz_percent, GLfloat sway[2]) {
+static void get_sway(const GLfloat curr_time_secs, const GLfloat speed_xz_percent,
+	const GLfloat half_movement_cycles_per_sec, const GLfloat max_movement_magnitude, GLfloat sway[2]) {
+
 	const GLfloat smooth_speed_xz_percent = circular_mapping_from_zero_to_one(speed_xz_percent);
 
 	const GLfloat
-		time_pace = sinf(curr_time_secs * PI / constants.weapon_sprite.time_for_half_movement_cycle),
-		weapon_movement_magnitude = constants.weapon_sprite.max_movement_magnitude * smooth_speed_xz_percent;
+		time_pace = sinf(curr_time_secs * PI * half_movement_cycles_per_sec),
+		weapon_movement_magnitude = max_movement_magnitude * smooth_speed_xz_percent;
 
 	sway[0] = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2.0f to magnitude / 2.0f
 	sway[1] = (fabsf(sway[0]) - weapon_movement_magnitude) * smooth_speed_xz_percent; // From 0.0f to -magnitude
@@ -219,7 +221,9 @@ static void define_vertex_spec(void) {
 
 WeaponSprite init_weapon_sprite(
 	const GLfloat max_yaw_degrees, const GLfloat max_pitch_degrees,
-	const GLfloat size, const GLfloat secs_for_frame,
+	const GLfloat size, const GLfloat secs_per_frame,
+	const GLfloat secs_per_movement_cycle,
+	const GLfloat max_movement_magnitude,
 	const AnimationLayout* const animation_layout,
 	const NormalMapConfig* const normal_map_config) {
 
@@ -260,12 +264,18 @@ WeaponSprite init_weapon_sprite(
 			.cycle_base_time = 0.0f, .curr_frame = 0,
 			.animation = {
 				.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout -> total_frames},
-				.secs_for_frame = secs_for_frame
+				.secs_for_frame = secs_per_frame
 			}
 		},
 
 		.appearance_context = {
-			.screen_space = {.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1], .size = size},
+			.screen_space = {
+				.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
+				.max_movement_magnitude = max_movement_magnitude,
+				.half_movement_cycles_per_sec = 1.0f / (secs_per_movement_cycle * 0.5f),
+				.size = size
+			},
+
 			.world_space = {.max_yaw = glm_rad(max_yaw_degrees), .max_pitch = glm_rad(max_pitch_degrees)}
 		}
 	};
@@ -279,13 +289,18 @@ void deinit_weapon_sprite(const WeaponSprite* const ws) {
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event) {
 	update_weapon_sprite_animation(&ws -> animation_context, event);
 
+	WeaponSpriteAppearanceContext* const appearance_context = &ws -> appearance_context;
+
 	GLfloat sway[2];
-	get_sway(event -> curr_time_secs, camera -> speed_xz_percent, sway);
+
+	get_sway(event -> curr_time_secs, camera -> speed_xz_percent,
+		appearance_context -> screen_space.half_movement_cycles_per_sec,
+		appearance_context -> screen_space.max_movement_magnitude,
+		sway);
 
 	vec2 screen_corners[corners_per_quad];
 	get_screen_corners_from_sway(ws, event -> aspect_ratio, sway, screen_corners);
 
-	WeaponSpriteAppearanceContext* const appearance_context = &ws -> appearance_context;
 	get_world_corners_from_screen_corners(camera -> view_projection, screen_corners, appearance_context -> world_space.corners);
 	rotate_from_camera_movement(appearance_context, camera);
 }

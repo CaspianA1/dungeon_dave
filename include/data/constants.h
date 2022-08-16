@@ -58,10 +58,6 @@ static const struct {
 		const struct {const bool enabled; const GLfloat max_white;} tone_mapping;
 	} lighting;
 
-	const struct {
-		const GLfloat max_movement_magnitude, time_for_half_movement_cycle;
-	} weapon_sprite;
-
 	const struct { // All angles are in radians
 		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, friction;
 		const struct {const GLfloat period, max_amplitude;} pace;
@@ -97,14 +93,12 @@ static const struct {
 
 	.lighting = {
 		.aniso_filtering_level = 16,
-		.strengths = {.ambient = 0.9f, .diffuse = 0.9f, .specular = 1.8f},
+		.strengths = {.ambient = 0.9f, .diffuse = 0.9f, .specular = 1.5f},
 		.specular_exponent_domain = {32.0f, 96.0f},
 		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
 		.noise_granularity = 0.2f / 255.0f, .percents = {.bilinear = 0.2f, .ao = 1.0f},
 		.tone_mapping = {.enabled = true, .max_white = 1.5f}
 	},
-
-	.weapon_sprite = {.max_movement_magnitude = 0.2f, .time_for_half_movement_cycle = 0.5f},
 
 	.camera = {
 		.near_clip_dist = 0.25f, .eye_height = 0.5f, .aabb_collision_box_size = 0.2f,

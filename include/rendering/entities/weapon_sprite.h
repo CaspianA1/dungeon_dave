@@ -19,7 +19,9 @@ typedef struct {
 
 typedef struct {
 	const struct {
-		const GLfloat frame_width_over_height, size;
+		const GLfloat
+			frame_width_over_height, max_movement_magnitude,
+			half_movement_cycles_per_sec, size;
 	} screen_space;
 
 	struct {
@@ -42,7 +44,9 @@ get_quad_tbn_matrix, update_uniforms, define_vertex_spec */
 
 WeaponSprite init_weapon_sprite(
 	const GLfloat max_yaw_degrees, const GLfloat max_pitch_degrees,
-	const GLfloat size, const GLfloat secs_for_frame,
+	const GLfloat size, const GLfloat secs_per_frame,
+	const GLfloat secs_per_movement_cycle,
+	const GLfloat max_movement_magnitude,
 	const AnimationLayout* const animation_layout,
 	const NormalMapConfig* const normal_map_config);
 
