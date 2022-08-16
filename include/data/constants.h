@@ -91,6 +91,7 @@ static const struct {
 		.size = {800, 600}
 	},
 
+	// TODO: remove this from this struct in some way
 	.lighting = {
 		.aniso_filtering_level = 16,
 		.strengths = {.ambient = 0.9f, .diffuse = 0.9f, .specular = 1.5f},
