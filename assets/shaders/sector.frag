@@ -24,7 +24,7 @@ vec2 retranslate_UV(const vec2 untranslated_UV) {
 }
 
 vec3 get_face_fragment_normal(const vec3 UV) {
-	vec3 ts = get_tangent_space_normal(UV); // `ts` = tangent space
+	vec3 ts = get_tangent_space_normal_3D(normal_map_sampler, UV); // `ts` = tangent space
 
 	// No matrix multiplication here! :)
 	vec3 rotated_vectors[5] = vec3[5](

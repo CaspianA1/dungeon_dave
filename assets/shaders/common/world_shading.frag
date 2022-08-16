@@ -6,7 +6,7 @@
 in vec3 fragment_pos_world_space, UV, ambient_occlusion_UV;
 
 uniform samplerCube environment_map_sampler;
-uniform sampler2DArray diffuse_sampler;
+uniform sampler2DArray diffuse_sampler, normal_map_sampler;
 uniform sampler3D ambient_occlusion_sampler;
 
 float diffuse(const vec3 fragment_normal) {
@@ -59,6 +59,9 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 	vec4 texture_color = texture(diffuse_sampler, adjusted_UV);
 
 	float ao_strength = mix(1.0f, texture(ambient_occlusion_sampler, ambient_occlusion_UV).r, percents.ao);
+
+	// return vec4(vec3(ao_strength), 1.0f);
+	// ao_strength = 1.0f;
 
 	vec3 non_ambient = diffuse(fragment_normal) + specular(texture_color.rgb, fragment_normal);
 	vec3 light_strength = (non_ambient * shadow_strength + strengths.ambient) * ao_strength;

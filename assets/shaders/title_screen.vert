@@ -4,7 +4,7 @@
 
 noperspective out float sliding_UV_x;
 noperspective out vec2 UV;
-out vec3 pos_difference_from_light;
+out vec3 fragment_pos_tangent_space;
 
 uniform float palace_city_hori_scroll, palace_city_vert_squish_ratio;
 uniform vec3 light_pos_tangent_space;
@@ -20,5 +20,5 @@ void main(void) {
 	sliding_UV_x += palace_city_hori_scroll;
 
 	gl_Position = vec4(quad_corners[gl_VertexID], 0.0f, 1.0f);
-	pos_difference_from_light = vec3(light_pos_tangent_space.xy - gl_Position.xy, light_pos_tangent_space.z);
+	fragment_pos_tangent_space = vec3(gl_Position.xy, 0.0f);
 }

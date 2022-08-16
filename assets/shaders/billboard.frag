@@ -10,7 +10,7 @@ out vec4 color;
 uniform vec2 right_xz;
 
 vec3 get_billboard_normal(void) {
-	vec3 ts_normal = get_tangent_space_normal(UV); // `ts` = tangent space
+	vec3 ts_normal = get_tangent_space_normal_3D(normal_map_sampler, UV); // `ts` = tangent space
 
 	return vec3(
 		ts_normal.x * right_xz.x - ts_normal.z * right_xz.y,
