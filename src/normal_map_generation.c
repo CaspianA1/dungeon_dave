@@ -15,14 +15,12 @@ static GLint limit_int_to_domain(const GLint val, const GLint lower, const GLint
 	return int_min(int_max(val, lower), upper);
 }
 
-static GLfloat sobel_sample(const SDL_Surface* const surface, const GLint x, const GLint y) {
+static sdl_pixel_component_t sobel_sample(const SDL_Surface* const surface, const GLint x, const GLint y) {
 	const sdl_pixel_t pixel = *(sdl_pixel_t*) read_surface_pixel(surface, x, y);
 
 	sdl_pixel_component_t r, g, b;
 	SDL_GetRGB(pixel, surface -> format, &r, &g, &b);
-
-	static const GLfloat one_third = 1.0f / 3.0f;
-	return (r + g + b) * one_third;
+	return (r + g + b) / 3;
 }
 
 /* This function is based on these sources:
@@ -55,15 +53,18 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 						left_x = int_max(x - 1, 0),             right_x = int_min(x + 1, w - 1),
 						top_y = int_max(y - 1, subtexture_top), bottom_y = int_min(y + 1, subtexture_bottom);
 
-					const GLfloat // These samples are in a range from 0 to `constants.max_byte_value`
+					const sdl_pixel_component_t // These samples are in a range from 0 to `constants.max_byte_value`
 						tl = sobel_sample(src, left_x, top_y),  tm = sobel_sample(src, x, top_y),
 						tr = sobel_sample(src, right_x, top_y), ml = sobel_sample(src, left_x, y),
 						mr = sobel_sample(src, right_x, y),     bl = sobel_sample(src, left_x, bottom_y),
 						bm = sobel_sample(src, x, bottom_y),    br = sobel_sample(src, right_x, bottom_y);
 
-					vec3 normal = { // The x and y components of this are the result of the Sobel operator
-						(-tl - ml * 2.0f - bl) + (tr + mr * 2.0f + br),
-						(-tl - tm * 2.0f - tr) + (bl + bm * 2.0f + br),
+					/*The x and y components of this are the result of the Sobel operator.
+					Byte overflow will not happen with the components, since they are promoted to ints.  */
+
+					vec3 normal = {
+						(-bl - (ml << 1) - tl) + (tr + (mr << 1) + br),
+						(-tr - (tm << 1) - tl) + (bl + (bm << 1) + br),
 						one_over_intensity_on_rgb_scale
 					};
 
