@@ -272,7 +272,7 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
 	const buffer_size_t num_face_meshes = face_meshes_cpu -> length;
 
-	use_vertex_buffer(drawable -> vertex_buffer);
+	use_vertex_buffer(drawable -> vertex_buffer); // TODO: don't resubmit this data every frame
 	reinit_vertex_buffer_data(num_face_meshes, sizeof(face_mesh_t), face_meshes_cpu -> data);
 	use_vertex_spec(drawable -> vertex_spec);
 
