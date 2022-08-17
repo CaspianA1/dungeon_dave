@@ -16,19 +16,10 @@ typedef struct {
 
 Drawing billboards to the shadow cascades:
 	- Update billboards on the CPU
-	- Sort billboards back-to-front, and output a list of sorted billboard indices
-	- Keep a transform feedback buffer, and use transform feedback to write 4 corners for each into that
-	- Draw that transform feedback buffer in an instanced manner by the indices, so that 2 triangle strips exist per billboard (to the cascades)
-
-	- Cull billboards into the billboard GPU buffer, keeping the billboards sorted back-to-front
-	- Draw them as normally, with glDrawArraysInstanced
-
-- All of that uses alpha blending, with depth buffer writes disabled, drawn between sector + skybox and weapon sprite
-- Write to a translucency buffer in the fragment shader, and during shadow tests, multiply the shadow strength by the translucency factor
-
-Other idea:
-	- Do the same thing, but change the depth shader so that it can generate billboard
-		corners in the vertex shader, instead of using a transform feedback buffer
+	- Sort billboards back-to-front
+	- Enable blending
+	- Draw them with a special depth shader that gets billboard vertices, and outputs to a 8-bit alpha texture
+	- Then, when drawing entities that use the world shading fragment shader, multiply the shadow value by the alpha value
 */
 
 //////////
