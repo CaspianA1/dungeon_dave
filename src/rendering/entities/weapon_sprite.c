@@ -2,6 +2,7 @@
 #include "data/constants.h"
 #include "utils/texture.h"
 #include "utils/shader.h"
+#include "utils/opengl_wrappers.h"
 
 /* The weapon sprite code can be a bit hard to understand in the big picture.
 	Here's how it works over a game tick:
@@ -194,11 +195,11 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		INIT_UNIFORM(world_corners, shader);
 		INIT_UNIFORM(tbn, shader);
 
-		use_texture(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
-		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_WeaponSpriteDiffuse);
-		use_texture(typed_params.weapon_sprite -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_WeaponSpriteNormalMap);
-		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
-		use_texture(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
+		use_texture_in_shader(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
+		use_texture_in_shader(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_WeaponSpriteDiffuse);
+		use_texture_in_shader(typed_params.weapon_sprite -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_WeaponSpriteNormalMap);
+		use_texture_in_shader(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
+		use_texture_in_shader(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 
 	////////// Updating uniforms
@@ -239,7 +240,7 @@ WeaponSprite init_weapon_sprite(
 		peek_surface -> h / animation_layout -> frames_down
 	};
 
-	SDL_FreeSurface(peek_surface);
+	deinit_surface(peek_surface);
 
 	const GLuint diffuse_texture_set = init_texture_set(
 		true, TexNonRepeating,
@@ -283,7 +284,7 @@ WeaponSprite init_weapon_sprite(
 
 void deinit_weapon_sprite(const WeaponSprite* const ws) {
 	deinit_drawable(ws -> drawable);
-	glDeleteTextures(1, &ws -> normal_map_set);
+	deinit_texture(ws -> normal_map_set);
 }
 
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event) {
@@ -309,7 +310,7 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	const Drawable* const drawable = &ws -> drawable;
 
 	use_vertex_buffer(drawable -> vertex_buffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec3[corners_per_quad]), ws -> appearance_context.world_space.corners);
+	reinit_vertex_buffer_data(corners_per_quad, sizeof(vec3), ws -> appearance_context.world_space.corners);
 	draw_drawable(*drawable, corners_per_quad, 0, NULL, BindVertexSpec);
 }
 

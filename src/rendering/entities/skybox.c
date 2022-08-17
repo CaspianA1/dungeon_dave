@@ -1,6 +1,7 @@
 #include "rendering/entities/skybox.h"
 #include "utils/shader.h"
 #include "utils/texture.h"
+#include "utils/opengl_wrappers.h"
 #include "utils/buffer_defs.h"
 
 /* TODO:
@@ -47,25 +48,23 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path) {
 		}
 	);
 
-	glGenerateMipmap(TexSkybox);
+	init_texture_mipmap(TexSkybox);
 
-	SDL_FreeSurface(face_surface);
-	SDL_FreeSurface(skybox_surface);
+	deinit_surface(face_surface);
+	deinit_surface(skybox_surface);
 
 	return skybox_texture;
 }
 
-static void update_uniforms(const Drawable* const drawable, const void* const param) {
-	(void) param;
-	ON_FIRST_CALL(use_texture(drawable -> diffuse_texture, drawable -> shader, "skybox_sampler", TexSkybox, TU_Skybox););
-}
-
 Skybox init_skybox(const GLchar* const cubemap_path) {
-	return init_drawable_without_vertices(
-		(uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP,
-		init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag"), NULL),
-		init_skybox_texture(cubemap_path)
-	);
+	const GLuint
+		shader = init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag"), NULL),
+		diffuse_texture = init_skybox_texture(cubemap_path);
+
+	use_shader(shader);
+	use_texture_in_shader(diffuse_texture, shader, "skybox_sampler", TexSkybox, TU_Skybox);
+
+	return init_drawable_without_vertices(NULL, GL_TRIANGLE_STRIP, shader, diffuse_texture);
 }
 
 void draw_skybox(const Skybox* const skybox) {

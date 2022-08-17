@@ -31,19 +31,9 @@ Interface notes:
 
 - For the vertex list in `init_drawable_with_vertices`, the vertices in the list may be null. If so, a vertex buffer
 	will be allocated for the vertices, but the vertex buffer will not have any elements inside it.
+
+- If the uniform updater is null, it will not be invoked.
 */
-
-////////// These are some utils that are commonly used with Drawable
-
-void define_vertex_spec_index(const bool is_instanced, const bool treat_vertices_as_floats,
-	const byte index, const byte num_components, const buffer_size_t stride,
-	const buffer_size_t initial_offset, const GLenum typename);
-
-// This is only for writing, not reading
-void* init_gpu_memory_mapping(const GLenum target, const GLsizeiptr num_bytes, const bool discard_prev_contents);
-#define deinit_gpu_memory_mapping glUnmapBuffer
-
-////////// And these are the main Drawable functions
 
 Drawable init_drawable_with_vertices(
 	void (*const vertex_spec_definer) (void), const uniform_updater_t uniform_updater,

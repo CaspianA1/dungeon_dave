@@ -32,11 +32,7 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 	const GLchar* const* const subvar_names, const buffer_size_t num_subvars);
 
 void deinit_uniform_buffer(const UniformBuffer* const buffer);
-
 void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLuint shader);
-
-/* Calling this means that the previous contents of the buffer
-become undefined; so all uniforms must be written to. */
 void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer, const bool discard_prev_contents);
 void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer);
 

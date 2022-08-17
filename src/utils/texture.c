@@ -1,5 +1,6 @@
 #include "utils/texture.h"
 #include "data/constants.h"
+#include "utils/opengl_wrappers.h"
 
 ////////// Surface initialization and alpha premultiplication
 
@@ -19,7 +20,7 @@ SDL_Surface* init_surface(const GLchar* const path) {
 		return surface; // Format is already correct
 	else {
 		SDL_Surface* const converted_surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXEL_FORMAT, 0);
-		SDL_FreeSurface(surface);
+		deinit_surface(surface);
 		return converted_surface;
 	}
 }
@@ -58,13 +59,13 @@ static void premultiply_surface_alpha(SDL_Surface* const surface) {
 
 ////////// Texture state setting utilities
 
-void use_texture(const GLuint texture,
+void use_texture_in_shader(const GLuint texture,
 	const GLuint shader, const GLchar* const sampler_name,
 	const TextureType type, const TextureUnit texture_unit) {
 
-	INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(sampler_name, shader, 1i, (GLint) texture_unit); // Sets the texture unit for the inputted shader
+	glUniform1i(safely_get_uniform(shader, sampler_name), (GLint) texture_unit); // Sets the texture unit for the inputted shader
 	glActiveTexture(GL_TEXTURE0 + texture_unit); // Sets the current active texture unit
-	glBindTexture(type, texture); // Associates the input texture with the right texture unit
+	use_texture(type, texture); // Associates the input texture with the right texture unit
 }
 
 //////////
@@ -76,7 +77,7 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 
 	GLuint texture;
 	glGenTextures(1, &texture);
-	glBindTexture(type, texture);
+	use_texture(type, texture);
 
 	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, (GLint) mag_filter);
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, (GLint) min_filter);
@@ -148,7 +149,7 @@ static void init_still_subtextures_in_texture_set(
 				OPENGL_COLOR_CHANNEL_TYPE, surface_with_right_size -> pixels);
 		);
 
-		SDL_FreeSurface(surface);
+		deinit_surface(surface);
 	}
 }
 
@@ -184,7 +185,7 @@ static void init_animated_subtextures_in_texture_set(const bool premultiply_alph
 					OPENGL_COLOR_CHANNEL_TYPE, rescaled_surface -> pixels);
 			);
 		}
-		SDL_FreeSurface(spritesheet_surface);
+		deinit_surface(spritesheet_surface);
 	}
 }
 
@@ -206,15 +207,12 @@ GLuint init_texture_set(const bool premultiply_alpha,
 
 	SDL_Surface* const rescaled_surface = init_blank_surface(rescale_w, rescale_h);
 
-	////////// Filling the texture set with the still and animated subtextures
+	////////// Filling the texture set with the still and animated subtextures, deiniting the rescaled surface, and returning
 
 	init_still_subtextures_in_texture_set(premultiply_alpha, num_still_subtextures, still_subtexture_paths, rescaled_surface);
 	init_animated_subtextures_in_texture_set(premultiply_alpha, num_animated_frames, num_still_subtextures, animation_layouts, rescaled_surface);
-	glGenerateMipmap(TexSet);
-
-	////////// Deinitialization
-
-	SDL_FreeSurface(rescaled_surface);
+	init_texture_mipmap(TexSet);
+	deinit_surface(rescaled_surface);
 
 	return texture;
 }
@@ -232,8 +230,8 @@ GLuint init_plain_texture(const GLchar* const path, const TextureType type,
 			internal_format, OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
 	);
 
-	glGenerateMipmap(TexPlain);
-	SDL_FreeSurface(surface);
+	init_texture_mipmap(TexPlain);
+	deinit_surface(surface);
 
 	return texture;
 }

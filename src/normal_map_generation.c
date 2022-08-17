@@ -2,6 +2,7 @@
 #include "data/constants.h"
 #include "utils/alloc.h"
 #include "utils/utils.h"
+#include "utils/opengl_wrappers.h"
 
 static GLint int_min(const GLint val, const GLint lower) {
 	return (val < lower) ? val : lower;
@@ -196,7 +197,7 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 
 	GLint subtexture_w, subtexture_h, num_subtextures, wrap_mode, mag_min_filter[2];
 
-	glBindTexture(type, diffuse_texture);
+	use_texture(type, diffuse_texture);
 	get_texture_metadata(type, &subtexture_w, &subtexture_h, &num_subtextures, &wrap_mode, mag_min_filter);
 
 	////////// Uploading the texture to the CPU
@@ -225,7 +226,7 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 		);
 
 		SDL_BlitScaled(surface_with_src_size, NULL, buffer_1, NULL);
-		SDL_FreeSurface(surface_with_src_size);
+		deinit_surface(surface_with_src_size);
 	}
 	else { // Otherwise, copy the texture directly to `buffer_1`
 		WITH_SURFACE_PIXEL_ACCESS(buffer_1,
@@ -266,12 +267,12 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 			OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, buffer_2 -> pixels);
 	);
 
-	if (min_filter == TexLinearMipmapped || min_filter == TexTrilinear) glGenerateMipmap(type);
+	if (min_filter == TexLinearMipmapped || min_filter == TexTrilinear) init_texture_mipmap(type);
 
 	////////// Deinitialization
 
-	SDL_FreeSurface(buffer_1);
-	SDL_FreeSurface(buffer_2);
+	deinit_surface(buffer_1);
+	deinit_surface(buffer_2);
 
 	return normal_map_set;
 }

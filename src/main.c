@@ -4,6 +4,7 @@
 #include "utils/texture.h" // TODO: remove this when I don't need to contain the alpha test logic in this file anymore
 #include "event.h"
 #include "utils/alloc.h"
+#include "utils/opengl_wrappers.h"
 
 static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const shadow_context,
 	const SectorContext* const sector_context, const WeaponSprite* const weapon_sprite) {
@@ -37,7 +38,7 @@ static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const sh
 		INIT_UNIFORM(frame_index, depth_shader);
 		INIT_UNIFORM_VALUE(alpha_threshold, depth_shader, 1f, 0.2f);
 
-		use_texture(weapon_sprite -> drawable.diffuse_texture, depth_shader, "alpha_test_sampler", TexSet, TU_WeaponSpriteDiffuse);
+		use_texture_in_shader(weapon_sprite -> drawable.diffuse_texture, depth_shader, "alpha_test_sampler", TexSet, TU_WeaponSpriteDiffuse);
 	);
 
 	// Opaque objects are drawn first

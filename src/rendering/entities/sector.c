@@ -3,6 +3,7 @@
 #include "utils/statemap.h"
 #include "utils/texture.h"
 #include "utils/shader.h"
+#include "utils/opengl_wrappers.h"
 #include "data/constants.h"
 
 /* Drawing sectors to the shadow map:
@@ -141,8 +142,6 @@ static List generate_sectors_from_maps(const byte* const heightmap,
 static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	const SectorContext* const sector_context, const vec4* const frustum_planes) {
 
-	use_vertex_buffer(sector_context -> drawable.vertex_buffer);
-
 	const List* const sectors = &sector_context -> sectors;
 	const Sector* const sector_data = sectors -> data;
 	const Sector* const out_of_bounds_sector = sector_data + sectors -> length;
@@ -150,8 +149,9 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
 	const face_mesh_t* const face_meshes_cpu_data = face_meshes_cpu -> data;
 
-	face_mesh_t* const face_meshes_gpu = init_gpu_memory_mapping(
-		GL_ARRAY_BUFFER, face_meshes_cpu -> length * sizeof(face_mesh_t), true
+	face_mesh_t* const face_meshes_gpu = init_vertex_buffer_memory_mapping(
+		sector_context -> drawable.vertex_buffer,
+		face_meshes_cpu -> length * sizeof(face_mesh_t), true
 	);
 
 	buffer_size_t num_visible_faces = 0;
@@ -184,7 +184,7 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 		}
 	}
 
-	deinit_gpu_memory_mapping(GL_ARRAY_BUFFER);
+	deinit_vertex_buffer_memory_mapping();
 	return num_visible_faces;
 }
 
@@ -212,11 +212,11 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 			{4.0f + epsilon, 0.0f, 0.0f}, {6.0f - epsilon, 3.0f, 3.0f + epsilon}
 		});
 
-		use_texture(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
-		use_texture(typed_params.sector_context -> drawable.diffuse_texture, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
-		use_texture(typed_params.sector_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
-		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
-		use_texture(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
+		use_texture_in_shader(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
+		use_texture_in_shader(typed_params.sector_context -> drawable.diffuse_texture, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
+		use_texture_in_shader(typed_params.sector_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
+		use_texture_in_shader(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
+		use_texture_in_shader(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 
 	const GLfloat t = typed_params.curr_time_secs / 3.0f;
@@ -261,7 +261,7 @@ SectorContext init_sector_context(const byte* const heightmap,
 
 void deinit_sector_context(const SectorContext* const sector_context) {
 	deinit_drawable(sector_context -> drawable);
-	glDeleteTextures(1, &sector_context -> normal_map_set);
+	deinit_texture(sector_context -> normal_map_set);
 	deinit_list(sector_context -> mesh_cpu);
 	deinit_list(sector_context -> sectors);
 }
@@ -269,21 +269,16 @@ void deinit_sector_context(const SectorContext* const sector_context) {
 // Used in main.c
 void draw_all_sectors_to_shadow_context(const SectorContext* const sector_context) {
 	const Drawable* const drawable = &sector_context -> drawable;
-
-	//////////
-
 	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
 	const buffer_size_t num_face_meshes = face_meshes_cpu -> length;
 
 	use_vertex_buffer(drawable -> vertex_buffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, num_face_meshes * sizeof(face_mesh_t), face_meshes_cpu -> data);
+	reinit_vertex_buffer_data(num_face_meshes, sizeof(face_mesh_t), face_meshes_cpu -> data);
+	use_vertex_spec(drawable -> vertex_spec);
 
-	//////////
-
-	glBindVertexArray(drawable -> vertex_spec);
-	glDisableVertexAttribArray(1); // Not using the face info bit attribute at index 1
-	draw_drawable(*drawable, num_face_meshes * vertices_per_face, 0, NULL, OnlyDraw);
-	glEnableVertexAttribArray(1);
+	WITHOUT_VERTEX_SPEC_INDEX(1, // Not using the face info bit attribute
+		draw_drawable(*drawable, num_face_meshes * vertices_per_face, 0, NULL, OnlyDraw);
+	);
 }
 
 void draw_sectors(const SectorContext* const sector_context,
@@ -297,6 +292,5 @@ void draw_sectors(const SectorContext* const sector_context,
 	if (num_visible_faces != 0)
 		draw_drawable(sector_context -> drawable, num_visible_faces * vertices_per_face, 0,
 			&(UniformUpdaterParams) {skybox, sector_context, shadow_context, curr_time_secs, ao_map},
-			UseShaderPipeline | BindVertexSpec
-		);
+			UseShaderPipeline | BindVertexSpec);
 }

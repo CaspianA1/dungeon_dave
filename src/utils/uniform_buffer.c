@@ -1,8 +1,9 @@
 #include "utils/uniform_buffer.h"
 #include "utils/alloc.h"
 #include "utils/utils.h"
-#include "rendering/drawable.h"
+#include "utils/opengl_wrappers.h"
 
+static const GLenum uniform_buffer_target = GL_UNIFORM_BUFFER;
 static const GLchar* const max_primitive_size_name = "dvec4";
 static const size_t max_primitive_size = sizeof(GLdouble[4]); // The size of a dvec4
 
@@ -24,11 +25,6 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 
 	static GLuint next_binding_point = 0;
 	const GLuint binding_point = next_binding_point++;
-
-	GLuint buffer_id;
-	glGenBuffers(1, &buffer_id);
-	glBindBuffer(GL_UNIFORM_BUFFER, buffer_id);
-	glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, buffer_id);
 
 	////////// First, getting the subvar indices
 
@@ -57,7 +53,7 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 
 	dealloc(subvar_indices);
 
-	////////// After that, getting the block size in bytes, and allocating contents for the uniform buffer
+	////////// After that, getting the block size in bytes, and defining the the uniform buffer
 
 	GLint block_size_in_bytes;
 
@@ -65,12 +61,15 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 		safely_get_uniform_block_index(shader_using_uniform_block, block_name),
 		GL_UNIFORM_BLOCK_DATA_SIZE, &block_size_in_bytes);
 
-	glBufferData(GL_UNIFORM_BUFFER, block_size_in_bytes, NULL, usage);
+	const GLuint buffer = init_gpu_buffer();
+	use_gpu_buffer(uniform_buffer_target, buffer);
+	init_gpu_buffer_data(uniform_buffer_target, 1, block_size_in_bytes, NULL, usage);
+	glBindBufferBase(uniform_buffer_target, binding_point, buffer);
 
 	////////// And finally, returning the uniform buffer
 
 	return (UniformBuffer) {
-		.id = buffer_id, .binding_point = binding_point,
+		.id = buffer, .binding_point = binding_point,
 		.gpu_memory_mapping = NULL,
 
 		.block = {
@@ -92,7 +91,7 @@ void deinit_uniform_buffer(const UniformBuffer* const buffer) {
 	/* The subvar metadata, which includes the byte offsets, and array and matrix strides, are all allocated
 	in one block together, so freeing the byte offsets (which is the beginning of the block) frees all of them. */
 	dealloc(buffer -> subvars.byte_offsets);
-	glDeleteBuffers(1, &buffer -> id);
+	deinit_gpu_buffer(buffer -> id);
 }
 
 void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLuint shader) {
@@ -100,13 +99,19 @@ void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLui
 }
 
 void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer, const bool discard_prev_contents) {
-	glBindBuffer(GL_UNIFORM_BUFFER, buffer -> id);
-	buffer -> gpu_memory_mapping = init_gpu_memory_mapping(GL_UNIFORM_BUFFER, buffer -> block.size, discard_prev_contents);
+
+	byte** const gpu_memory_mapping = &buffer -> gpu_memory_mapping;
+
+	if (*gpu_memory_mapping != NULL)
+		FAIL(InitializeShaderUniform, "Cannot enable writing batch for uniform "
+			"block '%s' when the batch is already enabled", buffer -> block.name);
+
+	*gpu_memory_mapping = init_gpu_buffer_memory_mapping(buffer -> id, uniform_buffer_target, buffer -> block.size, discard_prev_contents);
 }
 
 void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer) {
+	deinit_gpu_buffer_memory_mapping(uniform_buffer_target);
 	buffer -> gpu_memory_mapping = NULL;
-	deinit_gpu_memory_mapping(GL_UNIFORM_BUFFER);
 }
 
 ////////// This part concerns writing data to the uniform buffer

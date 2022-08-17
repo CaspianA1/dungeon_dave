@@ -1,6 +1,7 @@
 #include "rendering/entities/billboard.h"
 #include "utils/texture.h"
 #include "utils/shader.h"
+#include "utils/opengl_wrappers.h"
 #include "data/constants.h"
 
 typedef struct {
@@ -78,15 +79,15 @@ static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_
 
 	////////// Moving the billboards into their right positions in their GPU buffer
 
-	use_vertex_buffer(billboard_context -> drawable.vertex_buffer);
-
-	Billboard* const billboards_gpu = init_gpu_memory_mapping(GL_ARRAY_BUFFER, num_billboards * sizeof(Billboard), true);
+	Billboard* const billboards_gpu = init_vertex_buffer_memory_mapping(
+		billboard_context -> drawable.vertex_buffer, num_billboards * sizeof(Billboard), true
+	);
 
 	// TODO: do culling via an AABB tree later
 	for (billboard_index_t i = 0; i < num_billboards; i++)
 		billboards_gpu[i] = billboard_data[sort_ref_data[i].index];
 
-	deinit_gpu_memory_mapping(GL_ARRAY_BUFFER);
+	deinit_vertex_buffer_memory_mapping();
 }
 
 ////////// This part concerns the updating of uniforms
@@ -108,11 +109,11 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 		INIT_UNIFORM(right_xz, shader);
 
-		use_texture(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
-		use_texture(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
-		use_texture(typed_params.normal_map_set, shader, "normal_map_sampler", TexSet, TU_BillboardNormalMap);
-		use_texture(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
-		use_texture(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
+		use_texture_in_shader(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
+		use_texture_in_shader(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
+		use_texture_in_shader(typed_params.normal_map_set, shader, "normal_map_sampler", TexSet, TU_BillboardNormalMap);
+		use_texture_in_shader(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
+		use_texture_in_shader(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 
 	UPDATE_UNIFORM(right_xz, 2fv, 1, typed_params.right_xz);
@@ -185,7 +186,7 @@ BillboardContext init_billboard_context(
 
 void deinit_billboard_context(const BillboardContext* const billboard_context) {
 	deinit_drawable(billboard_context -> drawable);
-	glDeleteTextures(1, &billboard_context -> normal_map_set);
+	deinit_texture(billboard_context -> normal_map_set);
 
 	deinit_list(billboard_context -> distance_sort_refs);
 	deinit_list(billboard_context -> billboards);

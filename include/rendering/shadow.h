@@ -2,6 +2,7 @@
 #define SHADOW_H
 
 #include "utils/texture.h"
+#include "utils/buffer_defs.h"
 #include "camera.h"
 
 /* This shadow mapping implementation employs cascaded shadow mapping with

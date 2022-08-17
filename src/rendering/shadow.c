@@ -1,8 +1,8 @@
 #include "rendering/shadow.h"
 #include "data/constants.h"
-#include "utils/utils.h"
 #include "utils/alloc.h"
 #include "utils/shader.h"
+#include "utils/opengl_wrappers.h"
 
 static const GLenum framebuffer_target = GL_DRAW_FRAMEBUFFER;
 
@@ -87,7 +87,8 @@ static void get_light_view_and_projection(const CascadedShadowContext* const sha
 //////////
 
 static GLuint init_csm_depth_layers(const GLsizei resolution, const GLsizei num_cascades) {
-	const GLuint depth_layers = preinit_texture(shadow_map_texture_type, TexNonRepeating, OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
+	const GLuint depth_layers = preinit_texture(shadow_map_texture_type, TexNonRepeating,
+		OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
 
 	init_texture_data(shadow_map_texture_type, (GLsizei[]) {resolution, resolution, num_cascades},
 		GL_DEPTH_COMPONENT, OPENGL_SIZED_SHADOW_MAP_PIXEL_FORMAT, OPENGL_SHADOW_MAP_COLOR_CHANNEL_TYPE, NULL);
@@ -161,7 +162,8 @@ CascadedShadowContext init_shadow_context(
 		.framebuffer = init_csm_framebuffer(depth_layers),
 
 		.depth_shader = init_shader(
-			ASSET_PATH("shaders/common/shadow/depth.vert"), ASSET_PATH("shaders/common/shadow/depth.geom"),
+			ASSET_PATH("shaders/common/shadow/depth.vert"),
+			ASSET_PATH("shaders/common/shadow/depth.geom"),
 			ASSET_PATH("shaders/common/shadow/depth.frag"), NULL
 		),
 
@@ -178,8 +180,8 @@ CascadedShadowContext init_shadow_context(
 void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
 	dealloc(shadow_context -> split_dists);
 	dealloc(shadow_context -> light_view_projection_matrices);
-	glDeleteProgram(shadow_context -> depth_shader);
-	glDeleteTextures(1, &shadow_context -> depth_layers);
+	deinit_shader(shadow_context -> depth_shader);
+	deinit_texture(shadow_context -> depth_layers);
 	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
 }
 
@@ -214,12 +216,11 @@ void update_shadow_context(const CascadedShadowContext* const shadow_context, co
 }
 
 void enable_rendering_to_shadow_context(const CascadedShadowContext* const shadow_context) {
-	glUseProgram(shadow_context -> depth_shader);
+	use_shader(shadow_context -> depth_shader);
 
 	const GLsizei resolution = shadow_context -> resolution;
 	glViewport(0, 0, resolution, resolution);
 	glBindFramebuffer(framebuffer_target, shadow_context -> framebuffer);
-
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
 

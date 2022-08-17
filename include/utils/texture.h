@@ -93,7 +93,7 @@ SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);
 SDL_Surface* init_surface(const GLchar* const path);
 void* read_surface_pixel(const SDL_Surface* const surface, const GLint x, const GLint y);
 
-void use_texture(const GLuint texture,
+void use_texture_in_shader(const GLuint texture,
 	const GLuint shader, const GLchar* const sampler_name,
 	const TextureType type, const TextureUnit texture_unit);
 

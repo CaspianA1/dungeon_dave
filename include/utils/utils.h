@@ -66,11 +66,8 @@ typedef enum {
 		if (incr || decr || reset) DEBUG_FLOAT(value_name);\
 	} while (false)
 
-#define INIT_SHADER_BRANCH(shader, name, key) INIT_UNIFORM_VALUE(name, (shader), 1i, keys[SDL_SCANCODE_##key])
-
 ////////// These are some general-purpose macros
 
-#define use_vertex_buffer(vertex_buffer) glBindBuffer(GL_ARRAY_BUFFER, (vertex_buffer))
 #define ASSET_PATH(suffix) ("../assets/" suffix)
 
 #define CHECK_BITMASK(bits, mask) (!!((bits) & (mask)))
@@ -94,35 +91,6 @@ typedef enum {
 	const Uint32 before = SDL_GetTicks();\
 	__VA_ARGS__\
 	printf("Took %u milliseconds\n", SDL_GetTicks() - before);\
-
-////////// Uniform-related macros
-
-static inline GLint safely_get_uniform(const GLuint shader, const GLchar* const name) {
-	const GLint id = glGetUniformLocation(shader, name);
-	if (id == -1) FAIL(InitializeShaderUniform, "Uniform with the name of '%s' was not found in shader", name);
-	return id;
-}
-
-#define INIT_UNIFORM(name, shader) name##_id = safely_get_uniform((shader), #name)
-
-#define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
-	glUniform##type_prefix(safely_get_uniform((shader), #name), __VA_ARGS__)
-
-// TODO: try to remove this
-#define INIT_UNIFORM_VALUE_FROM_VARIABLE_NAME(name, shader, type_prefix, ...)\
-	glUniform##type_prefix(safely_get_uniform((shader), (name)), __VA_ARGS__)
-
-#define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
-
-//////////
-
-#define GENERIC_WITH_RENDER_STATE(setter, unsetter, state, inverse_state, ...) do {\
-	setter((state)); __VA_ARGS__ unsetter((inverse_state));\
-} while (false)
-
-#define WITH_BINARY_RENDER_STATE(state, ...) GENERIC_WITH_RENDER_STATE(glEnable, glDisable, state, state, __VA_ARGS__)
-#define WITHOUT_BINARY_RENDER_STATE(state, ...) GENERIC_WITH_RENDER_STATE(glDisable, glEnable, state, state, __VA_ARGS__)
-#define WITH_RENDER_STATE(setter, state, inverse_state, ...) GENERIC_WITH_RENDER_STATE(setter, setter, state, inverse_state, __VA_ARGS__)
 
 ////////// These macros pertain to window + rendering defaults
 

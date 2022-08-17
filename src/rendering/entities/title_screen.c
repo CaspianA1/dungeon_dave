@@ -1,6 +1,7 @@
 #include "rendering/entities/title_screen.h"
 #include "utils/list.h"
 #include "utils/shader.h"
+#include "utils/opengl_wrappers.h"
 #include "data/constants.h"
 
 ////////// Uniform updating
@@ -64,14 +65,14 @@ TitleScreen init_title_screen(
 	//////////
 
 	const GLuint shader = init_shader(ASSET_PATH("shaders/title_screen.vert"), NULL, ASSET_PATH("shaders/title_screen.frag"), NULL);
-	glUseProgram(shader);
+	use_shader(shader);
 
 	INIT_UNIFORM_VALUE(scrolling_texture_vert_squish_ratio, shader, 1f, rendering_config -> scrolling_vert_squish_ratio);
 	INIT_UNIFORM_VALUE(specular_exponent, shader, 1f, rendering_config -> specular_exponent);
 
-	use_texture(still_diffuse_texture, shader, "still_diffuse_sampler", TexPlain, TU_TitleScreenStillDiffuse);
-	use_texture(scrolling_diffuse_texture, shader, "scrolling_diffuse_sampler", TexPlain, TU_TitleScreenScrollingDiffuse);
-	use_texture(scrolling_normal_map, shader, "scrolling_normal_map_sampler", TexPlain, TU_TitleScreenScrollingNormalMap);
+	use_texture_in_shader(still_diffuse_texture, shader, "still_diffuse_sampler", TexPlain, TU_TitleScreenStillDiffuse);
+	use_texture_in_shader(scrolling_diffuse_texture, shader, "scrolling_diffuse_sampler", TexPlain, TU_TitleScreenScrollingDiffuse);
+	use_texture_in_shader(scrolling_normal_map, shader, "scrolling_normal_map_sampler", TexPlain, TU_TitleScreenScrollingNormalMap);
 
 	//////////
 
@@ -86,9 +87,8 @@ TitleScreen init_title_screen(
 
 void deinit_title_screen(const TitleScreen* const title_screen) {
 	deinit_drawable(title_screen -> drawable);
-
-	const GLuint scrolling_textures[] = {title_screen -> scrolling_diffuse_texture, title_screen -> scrolling_normal_map};
-	glDeleteTextures(ARRAY_LENGTH(scrolling_textures), scrolling_textures);
+	deinit_texture(title_screen -> scrolling_diffuse_texture);
+	deinit_texture(title_screen -> scrolling_normal_map);
 }
 
 bool tick_title_screen(TitleScreen* const title_screen, const Event* const event) {
