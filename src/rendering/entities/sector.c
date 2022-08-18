@@ -38,6 +38,9 @@ Compromise:
 	- Draw them when rendering the shadow map, and not when rendering culled faces otherwise
 	- For mapping the buffer for culling, make sure that the contents outside the range are preserved
 	- Generate null face ids for those edge faces, since they aren't used
+
+- For dynamic sectors, perhaps have a 2D floating-point map that represents the displacement height of vertices,
+	so that sectors can be pulled up or down from the ground
 */
 
 /*
