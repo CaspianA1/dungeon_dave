@@ -242,6 +242,7 @@ static void* main_init(void) {
 		const TitleScreenTextureConfig texture;
 		const TitleScreenRenderingConfig rendering;
 	} title_screen_config = {
+
 		.texture = {
 			.paths = {.still = ASSET_PATH("logo.bmp"), .scrolling = ASSET_PATH("palace_city.bmp")},
 			.mag_filters = {.still = TexNearest, .scrolling = TexLinear},
