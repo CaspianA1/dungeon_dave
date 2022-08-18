@@ -207,9 +207,8 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
 		INIT_UNIFORM(UV_translation, shader);
 
-		const GLfloat epsilon = 0.005f;
 		INIT_UNIFORM_VALUE(UV_translation_area, shader, 3fv, 2, (GLfloat*) (vec3[2]) {
-			{4.0f + epsilon, 0.0f, 0.0f}, {6.0f - epsilon, 3.0f, 3.0f + epsilon}
+			{4.0f, 0.0f, 0.0f}, {6.0f, 3.0f, 3.0f}
 		});
 
 		use_texture_in_shader(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
