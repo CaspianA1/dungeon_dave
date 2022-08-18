@@ -18,7 +18,7 @@ vec2 retranslate_UV(const vec2 untranslated_UV) { // TODO: antialias this
 		in_top_left_extent = bvec3(step(UV_translation_area[0], fragment_pos_world_space)),
 		in_bottom_right_extent = bvec3(step(fragment_pos_world_space, UV_translation_area[1]));
 
-	bool in_translation_area = in_top_left_extent == in_bottom_right_extent == true;
+	bool in_translation_area = in_top_left_extent == in_bottom_right_extent;
 
 	return UV_translation * float(in_translation_area) + untranslated_UV;
 }
