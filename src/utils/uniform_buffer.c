@@ -144,7 +144,7 @@ static void get_subvar_metadata(const UniformBuffer* const buffer, const GLchar*
 	byte* const gpu_memory_mapping = buffer -> gpu_memory_mapping;
 
 	if (gpu_memory_mapping == NULL) FAIL(InitializeShaderUniform, "Cannot write subvar '%s'"
-		" to uniform buffer because writing batch is not enabled", subvar_name
+		" to uniform buffer because a writing batch is not enabled", subvar_name
 	);
 
 	const buffer_size_t num_subvars = buffer -> subvars.count;
