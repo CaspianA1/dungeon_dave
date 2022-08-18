@@ -15,8 +15,8 @@ uniform vec3 UV_translation_area[2];
 coordinates are re-translated for artistic purposes */
 vec2 retranslate_UV(const vec2 untranslated_UV) { // TODO: antialias this
 	bvec3
-		in_top_left_extent = bvec3(step(UV_translation_area[0], fragment_pos_world_space)),
-		in_bottom_right_extent = bvec3(step(fragment_pos_world_space, UV_translation_area[1]));
+		in_top_left_extent = lessThanEqual(UV_translation_area[0], fragment_pos_world_space),
+		in_bottom_right_extent = lessThanEqual(fragment_pos_world_space, UV_translation_area[1]);
 
 	bool in_translation_area = in_top_left_extent == in_bottom_right_extent;
 
