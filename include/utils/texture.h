@@ -34,7 +34,7 @@
 /* There's five bits to store a texture id in a face mesh's face info byte,
 And the biggest number possible with five bits is 31, so that gives you
 32 different possible texture ids. Also, this is just for wall textures. */
-#define MAX_NUM_SECTOR_SUBTEXTURES 32
+#define MAX_NUM_SECTOR_SUBTEXTURES ((byte) 32u)
 
 // Each enum value is a texture unit id.
 typedef enum {
