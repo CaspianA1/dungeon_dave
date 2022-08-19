@@ -44,7 +44,7 @@ Compromise:
 - For dynamic sectors, perhaps have a 2D floating-point map that represents the displacement height of vertices,
 	so that sectors can be pulled up or down from the ground
 
-- Steep parallax mapping, or another technique under that umbrella
+- Steep parallax mapping, parallax occlusion mapping, or another technique under that umbrella
 */
 
 /*
