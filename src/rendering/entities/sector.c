@@ -198,31 +198,19 @@ typedef struct {
 	const SectorContext* const sector_context;
 	const CascadedShadowContext* const shadow_context;
 	const AmbientOcclusionMap ao_map;
-	const GLfloat curr_time_secs;
 } UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
 	const GLuint shader = drawable -> shader;
 
-	static GLint UV_translation_id;
-
 	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
-		INIT_UNIFORM(UV_translation, shader);
-
-		INIT_UNIFORM_VALUE(UV_translation_area, shader, 3fv, 2, (GLfloat*) (vec3[2]) {
-			{4.0f, 0.0f, 0.0f}, {6.0f, 3.0f, 3.0f}
-		});
-
 		use_texture_in_shader(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture_in_shader(typed_params.sector_context -> drawable.diffuse_texture, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
 		use_texture_in_shader(typed_params.sector_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
 		use_texture_in_shader(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
 		use_texture_in_shader(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
-
-	const GLfloat t = typed_params.curr_time_secs / 3.0f;
-	UPDATE_UNIFORM(UV_translation, 2f, cosf(t), tanf(t));
 }
 
 static void define_vertex_spec(void) {
@@ -285,14 +273,13 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 
 void draw_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
-	const vec4 frustum_planes[planes_per_frustum], const GLfloat curr_time_secs,
-	const AmbientOcclusionMap ao_map) {
+	const vec4 frustum_planes[planes_per_frustum], const AmbientOcclusionMap ao_map) {
 
 	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(sector_context, frustum_planes);
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0)
 		draw_drawable(sector_context -> drawable, num_visible_faces * vertices_per_face, 0,
-			&(UniformUpdaterParams) {skybox, sector_context, shadow_context, ao_map, curr_time_secs},
+			&(UniformUpdaterParams) {skybox, sector_context, shadow_context, ao_map},
 			UseShaderPipeline | BindVertexSpec);
 }
