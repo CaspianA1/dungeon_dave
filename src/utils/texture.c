@@ -112,7 +112,7 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 	); break
 
 	switch (type) {
-		case TexPlain: UPLOAD_CALL(type, 2, size[0], size[1]);
+		case TexPlain: case TexPlainRect: UPLOAD_CALL(type, 2, size[0], size[1]);
 
 		case TexSkybox: {
 			const GLsizei face_size = size[0];

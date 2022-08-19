@@ -62,7 +62,8 @@ static void add_face_mesh_to_list(const Face face, const byte sector_max_visible
 		2 = bottom vert EW,
 		3 = left vert NS,
 		4 = top vert EW.
-	Bits 3-7, five bits -> texture id. */
+	Bits 3-6, four bits -> texture id.
+	Bit 7 -> set if the sector is dynamic or not. */
 
 	// `u` suffixes used to reduce the chance of undefined behavior with signed bitwise operations
 	byte face_id = (byte) (side << 2u) | (byte) face.type;

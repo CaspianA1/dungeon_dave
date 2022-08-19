@@ -11,6 +11,11 @@
 #include "normal_map_generation.h"
 
 typedef struct {
+	const byte origin[2], size[2];
+	const GLfloat amount;
+} SectorDisplacementArea;
+
+typedef struct {
 	const byte texture_id, origin[2];
 	byte size[2]; // Top-down (X and Z); same for origin
 	struct {byte min; const byte max;} visible_heights;
@@ -21,10 +26,16 @@ typedef struct {
 	const Drawable drawable;
 	const GLuint normal_map_set;
 	const List mesh_cpu, sectors;
+
+	const struct {
+		GLfloat* const cpu;
+		const GLuint gpu;
+	} y_displacement_map;
 } SectorContext;
 
 /* Excluded: point_matches_sector_attributes, form_sector_area, generate_sectors_from_maps,
-frustum_cull_sector_faces_into_gpu_buffer, update_uniforms, define_vertex_spec */
+frustum_cull_sector_faces_into_gpu_buffer, update_uniforms, define_vertex_spec,
+validate_sector_displacement_area, write_area_to_displacement_map */
 
 SectorContext init_sector_context(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height,
@@ -37,7 +48,6 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 
 void draw_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
-	const vec4 frustum_planes[planes_per_frustum], const GLfloat curr_time_secs,
-	const AmbientOcclusionMap ao_map);
+	const vec4 frustum_planes[planes_per_frustum], const AmbientOcclusionMap ao_map);
 
 #endif

@@ -24,12 +24,12 @@
 
 typedef signed char signed_byte;
 typedef GLubyte byte;
-typedef GLubyte face_mesh_component_t;
+typedef GLubyte face_component_t;
 typedef GLuint buffer_size_t; // Max = 4294967295
 typedef GLfloat billboard_var_component_t;
 typedef GLushort billboard_index_t; // Max = 65535
 
-#define FACE_MESH_COMPONENT_TYPENAME GL_UNSIGNED_BYTE
+#define FACE_COMPONENT_TYPENAME GL_UNSIGNED_BYTE
 #define BUFFER_SIZE_TYPENAME GL_UNSIGNED_INT
 #define BILLBOARD_VAR_COMPONENT_TYPENAME GL_FLOAT
 

@@ -32,9 +32,9 @@
 #define OPENGL_SHADOW_MAP_MIN_FILTER TexLinear
 
 /* There's five bits to store a texture id in a face mesh's face info byte,
-And the biggest number possible with five bits is 31, so that gives you
-32 different possible texture ids. Also, this is just for wall textures. */
-#define MAX_NUM_SECTOR_SUBTEXTURES 32
+And the biggest number possible with five bits is 15, so that gives you
+16 different possible texture ids. Also, this is just for wall textures. */
+#define MAX_NUM_SECTOR_SUBTEXTURES ((byte) 16u)
 
 // Each enum value is a texture unit id.
 typedef enum {
@@ -44,6 +44,7 @@ typedef enum {
 
 	TU_CascadedShadowMap,
 	TU_AmbientOcclusionMap,
+	TU_Y_DisplacementMap,
 
 	TU_TitleScreenStillDiffuse,
 	TU_TitleScreenScrollingDiffuse,
@@ -67,6 +68,7 @@ typedef enum {
 
 typedef enum {
 	TexPlain = GL_TEXTURE_2D,
+	TexPlainRect = GL_TEXTURE_RECTANGLE,
 	TexSkybox = GL_TEXTURE_CUBE_MAP,
 	TexSet = GL_TEXTURE_2D_ARRAY,
 	TexVolumetric = GL_TEXTURE_3D

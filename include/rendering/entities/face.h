@@ -18,7 +18,7 @@ typedef struct {
 	byte origin[2], size[2];
 } Face;
 
-typedef face_mesh_component_t face_vertex_t[components_per_face_vertex];
+typedef face_component_t face_vertex_t[components_per_face_vertex];
 typedef face_vertex_t face_mesh_t[vertices_per_face];
 
 ////////// Excluded: print_face, get_next_face, add_face_mesh_to_list, init_vert_faces.

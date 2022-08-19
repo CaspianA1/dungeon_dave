@@ -6,6 +6,8 @@
 #include "utils/opengl_wrappers.h"
 #include "data/constants.h"
 
+static const TextureType displacement_map_texture_type = TexPlainRect;
+
 /* Drawing sectors to the shadow map:
 
 During initialization:
@@ -41,6 +43,8 @@ Compromise:
 
 - For dynamic sectors, perhaps have a 2D floating-point map that represents the displacement height of vertices,
 	so that sectors can be pulled up or down from the ground
+
+- Steep parallax mapping, or another technique under that umbrella
 */
 
 /*
@@ -118,8 +122,8 @@ static List generate_sectors_from_maps(const byte* const heightmap,
 			const byte texture_id = sample_map_point(texture_id_map, x, y, map_width);
 
 			if (texture_id >= MAX_NUM_SECTOR_SUBTEXTURES)
-				FAIL(TextureIDIsTooLarge, "Could not create a sector at map position {%u, %u} because the texture "
-					"ID %u exceeds the maximum, which is %u", x, y, texture_id, MAX_NUM_SECTOR_SUBTEXTURES);
+				FAIL(TextureIDIsTooLarge, "Could not create a sector at map position {%hhu, %hhu} because the texture "
+					"ID %hhu exceeds the maximum, which is %hhu", x, y, texture_id, MAX_NUM_SECTOR_SUBTEXTURES);
 
 			const Sector seed_sector = {
 				.texture_id = texture_id, .origin = {x, y}, .size = {0, 0},
@@ -166,6 +170,9 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 		while (sector < out_of_bounds_sector) {
 			////////// Checking to see if the sector is visible
 
+			(void) frustum_planes;
+			// TODO: add this back, but accounting for displaced sector heights
+			/*
 			const byte *const origin = sector -> origin, *const size = sector -> size;
 
 			const vec3 aabb[2] = {
@@ -174,6 +181,7 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 			};
 
 			if (!glm_aabb_frustum((vec3*) aabb, (vec4*) frustum_planes)) break;
+			*/
 
 			num_visible_faces_in_group += sector++ -> face_range.length;
 		}
@@ -194,43 +202,108 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 ////////// Uniform updating
 
 typedef struct {
-	const Skybox* const skybox;
 	const SectorContext* const sector_context;
+	const Skybox* const skybox;
 	const CascadedShadowContext* const shadow_context;
 	const AmbientOcclusionMap ao_map;
-	const GLfloat curr_time_secs;
 } UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
 	const GLuint shader = drawable -> shader;
 
-	static GLint UV_translation_id;
-
 	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
-		INIT_UNIFORM(UV_translation, shader);
-
-		INIT_UNIFORM_VALUE(UV_translation_area, shader, 3fv, 2, (GLfloat*) (vec3[2]) {
-			{4.0f, 0.0f, 0.0f}, {6.0f, 3.0f, 3.0f}
-		});
-
 		use_texture_in_shader(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture_in_shader(typed_params.sector_context -> drawable.diffuse_texture, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
 		use_texture_in_shader(typed_params.sector_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
 		use_texture_in_shader(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
 		use_texture_in_shader(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
+		use_texture_in_shader(typed_params.sector_context -> y_displacement_map.gpu, shader, "y_displacement_sampler", displacement_map_texture_type, TU_Y_DisplacementMap);
 	);
-
-	const GLfloat t = typed_params.curr_time_secs / 3.0f;
-	UPDATE_UNIFORM(UV_translation, 2f, cosf(t), tanf(t));
 }
 
 static void define_vertex_spec(void) {
 	enum {vpt = vertices_per_triangle};
-	const GLenum typename = FACE_MESH_COMPONENT_TYPENAME;
+	const GLenum typename = FACE_COMPONENT_TYPENAME;
 
 	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, typename); // Position
-	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), typename); // Face info
+	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_component_t[vpt]), typename); // Face info
+}
+
+//////////
+
+static void validate_sector_displacement_area(const List* const sectors,
+	List* const mesh_cpu, const SectorDisplacementArea* const area) {
+
+	////////// Checking that the area covers a valid sector
+
+	const byte *const origin = area -> origin, *const size = area -> size;
+
+	const byte
+		origin_x = origin[0], origin_z = origin[1],
+		size_x = size[0], size_z = size[1];
+
+	const Sector* matching_sector = NULL;
+
+	#define BASE_FAILURE_STRING "Could not find a sector that matches "\
+			"the area of origin {%hhu, %hhu}, and size {%hhu, %hhu}"
+
+	// TODO: allow multi-sector coverage
+	LIST_FOR_EACH(0, sectors, untyped_sector, _,
+		const Sector* const sector = (Sector*) untyped_sector;
+		const byte *const sector_origin = sector -> origin, *const sector_size = sector -> size;
+
+		const bool origin_matches = sector_origin[0] == origin_x && sector_origin[1] == origin_z;
+
+		if (origin_matches) {
+			const byte sector_width = sector_size[0], sector_height = sector_size[1];
+
+			if (sector_width == size_x && sector_height == size_z) { // Each sector has its own origin
+				matching_sector = sector;
+				break;
+			}
+			else
+				/* Failure is appropriate here since no other sector will have the
+				requested origin, so this is as close as you can get to the requested area */
+				FAIL(DisplaceHeightmapPortion, BASE_FAILURE_STRING
+					" The origin did match, though; and the sector size was {%hhu, %hhu}",
+					origin_x, origin_z, size_x, size_z, sector_width, sector_height);
+		}
+	);
+
+	if (matching_sector == NULL) FAIL(DisplaceHeightmapPortion, BASE_FAILURE_STRING, origin_x, origin_z, size_x, size_z);
+
+	#undef BASE_FAILURE_STRING
+
+	//////////
+
+	const byte mask_for_dynamic_sector = 1u << 7u;
+
+	const buffer_size_t mesh_cpu_start = matching_sector -> face_range.start;
+	const buffer_size_t mesh_cpu_end = mesh_cpu_start + matching_sector -> face_range.length;
+
+	face_mesh_t* const face_meshes = mesh_cpu -> data;
+
+	for (buffer_size_t mesh_index = mesh_cpu_start; mesh_index < mesh_cpu_end; mesh_index++) {
+		face_vertex_t* const face_mesh = face_meshes[mesh_index];
+
+		for (byte rel_vertex_index = 0; rel_vertex_index < vertices_per_face; rel_vertex_index++)
+			face_mesh[rel_vertex_index][3] |= mask_for_dynamic_sector;
+	}
+}
+
+static void write_area_to_displacement_map(const SectorDisplacementArea area,
+	GLfloat* const displacement_map, const byte map_width) {
+
+	const byte
+		origin_x = area.origin[0], origin_z = area.origin[1],
+		size_x = area.size[0], size_z = area.size[1];
+
+	for (byte z = origin_z; z < origin_z + size_z; z++) {
+		GLfloat* const row = displacement_map + z * map_width;
+		for (byte x = origin_x; x < origin_x + size_x; x++)
+			row[x] = area.amount;
+	}
 }
 
 ////////// Initialization, deinitialization, and rendering
@@ -241,7 +314,29 @@ SectorContext init_sector_context(const byte* const heightmap,
 	const GLsizei texture_size, const NormalMapConfig* const normal_map_config) {
 
 	const List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
-	const List mesh_cpu = init_face_meshes_from_sectors(&sectors, heightmap, map_width, map_height);
+	List mesh_cpu = init_face_meshes_from_sectors(&sectors, heightmap, map_width, map_height);
+
+	//////////
+
+	GLfloat* const displacement_map = clearing_alloc(map_width * map_height, sizeof(GLfloat));
+
+	const SectorDisplacementArea areas[] = {
+		{{4, 1}, {2, 2}, 0.5f},
+		{{21, 30}, {8, 2}, 1.0f},
+		{{15, 30}, {1, 1}, 0.5f}
+	};
+
+	for (buffer_size_t i = 0; i < ARRAY_LENGTH(areas); i++) {
+		const SectorDisplacementArea* const area = areas + i;
+
+		validate_sector_displacement_area(&sectors, &mesh_cpu, area);
+		write_area_to_displacement_map(*area, displacement_map, map_width);
+	}
+
+	const GLuint displacement_texture = preinit_texture(displacement_map_texture_type, TexNonRepeating, TexNearest, TexNearest, true);
+	init_texture_data(displacement_map_texture_type, (GLsizei[]) {map_width, map_height}, GL_RED, GL_R32F, GL_FLOAT, displacement_map); // TODO: lower this bit depth, if needed
+
+	//////////
 
 	const GLuint diffuse_texture_set = init_texture_set(
 		false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
@@ -257,15 +352,20 @@ SectorContext init_sector_context(const byte* const heightmap,
 		),
 
 		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config),
-		.mesh_cpu = mesh_cpu, .sectors = sectors
+		.mesh_cpu = mesh_cpu, .sectors = sectors,
+
+		.y_displacement_map = {.cpu = displacement_map, .gpu = displacement_texture}
 	};
 }
 
 void deinit_sector_context(const SectorContext* const sector_context) {
-	deinit_drawable(sector_context -> drawable);
-	deinit_texture(sector_context -> normal_map_set);
+	dealloc(sector_context -> y_displacement_map.cpu);
+	deinit_texture(sector_context -> y_displacement_map.gpu);
+
 	deinit_list(sector_context -> mesh_cpu);
 	deinit_list(sector_context -> sectors);
+	deinit_drawable(sector_context -> drawable);
+	deinit_texture(sector_context -> normal_map_set);
 }
 
 // Used in main.c
@@ -285,14 +385,13 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 
 void draw_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
-	const vec4 frustum_planes[planes_per_frustum], const GLfloat curr_time_secs,
-	const AmbientOcclusionMap ao_map) {
+	const vec4 frustum_planes[planes_per_frustum], const AmbientOcclusionMap ao_map) {
 
 	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(sector_context, frustum_planes);
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0)
 		draw_drawable(sector_context -> drawable, num_visible_faces * vertices_per_face, 0,
-			&(UniformUpdaterParams) {skybox, sector_context, shadow_context, ao_map, curr_time_secs},
+			&(UniformUpdaterParams) {sector_context, skybox, shadow_context, ao_map},
 			UseShaderPipeline | BindVertexSpec);
 }

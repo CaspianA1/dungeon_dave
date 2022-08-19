@@ -15,8 +15,6 @@ static void main_drawer(void* const app_context, const Event* const event) {
 
 	////////// Some variable initialization
 
-	const GLfloat curr_time_secs = event -> curr_time_secs;
-
 	const SectorContext* const sector_context = &scene_context -> sector_context;
 	const CascadedShadowContext* const shadow_context = &scene_context -> shadow_context;
 
@@ -27,8 +25,10 @@ static void main_drawer(void* const app_context, const Event* const event) {
 
 	////////// Scene updating
 
-	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
-	update_billboards(billboard_context, curr_time_secs);
+	update_camera(camera, *event, &(CollisionMapContext) {scene_context -> heightmap,
+		sector_context -> y_displacement_map.cpu, scene_context -> map_size});
+
+	update_billboards(billboard_context, event -> curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
 	update_shadow_context(shadow_context, camera, event -> aspect_ratio);
 	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context);
@@ -42,7 +42,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	////////// The main drawing code
 
 	const Skybox* const skybox = &scene_context -> skybox;
-	draw_sectors(sector_context, shadow_context, skybox, camera -> frustum_planes, curr_time_secs, ao_map);
+	draw_sectors(sector_context, shadow_context, skybox, camera -> frustum_planes, ao_map);
 
 	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,

@@ -22,6 +22,7 @@ typedef enum {
 	InitializeGPUMemoryMapping,
 
 	UseLevelHeightmap,
+	DisplaceHeightmapPortion,
 	TextureIDIsTooLarge
 } FailureType;
 

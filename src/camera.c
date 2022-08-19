@@ -89,22 +89,34 @@ static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v,
 	return clamp_to_pos_neg_domain(v, max_v);
 }
 
-static bool tile_exists_at_pos(const GLfloat x, const GLfloat z, const GLfloat foot_height,
-	const byte* const heightmap, const byte map_width, const byte map_height) {
+static GLfloat get_height_from_collision_map_context(
+	const CollisionMapContext* const context,
+	const GLfloat x, const GLfloat z) {
 
-	if (x < 0.0f || z < 0.0f || x >= map_width || z >= map_height) return 1;
+	const byte floor_x = (byte) x, floor_z = (byte) z;
 
-	const byte floor_height = sample_map_point(heightmap, (byte) x, (byte) z, map_width);
+	const byte map_width = context -> map_size[0];
+	return sample_map_point(context -> heightmap, floor_x, floor_z, map_width)
+		+ context -> y_displacement_map[floor_z * map_width + floor_x];
+}
+
+static bool tile_exists_at_pos(
+	const GLfloat x, const GLfloat z, const GLfloat foot_height,
+	const CollisionMapContext* const collision_map_context) {
+
+	const byte* const map_size = collision_map_context -> map_size;
+	if (x < 0.0f || z < 0.0f || x >= map_size[0] || z >= map_size[1]) return 1;
+
+	const GLfloat floor_height = get_height_from_collision_map_context(collision_map_context, x, z);
 	return (foot_height - floor_height) < -constants.almost_zero;
 }
 
 static bool pos_collides_with_heightmap(const GLfloat foot_height,
-	const vec2 pos_xz, const byte* const heightmap, const byte map_size[2]) {
+	const vec2 pos_xz, const CollisionMapContext* const collision_map_context) {
 
-	const byte map_width = map_size[0], map_height = map_size[1];
-	const GLfloat half_border = constants.camera.aabb_collision_box_size * 0.5f;
-
-	const GLfloat pos_x = pos_xz[0], pos_z = pos_xz[1];
+	const GLfloat
+		pos_x = pos_xz[0], pos_z = pos_xz[1],
+		half_border = constants.camera.aabb_collision_box_size * 0.5f;
 
 	// Top left, top right, bottom left, bottom right
 	const vec2 aabb_corners[corners_per_quad] = {
@@ -118,15 +130,15 @@ static bool pos_collides_with_heightmap(const GLfloat foot_height,
 		const GLfloat* const aabb_corner = aabb_corners[i];
 
 		if (tile_exists_at_pos(aabb_corner[0], aabb_corner[1], foot_height,
-			heightmap, map_width, map_height)) return true;
+			collision_map_context)) return true;
 	}
 
 	return false;
 }
 
-static void update_pos_via_physics(const byte* const heightmap,
-	const byte map_size[2], const vec2 dir_xz, vec3 pos,
-	vec3 velocities, const GLfloat pace, const Event* const event) {
+static void update_pos_via_physics(
+	const CollisionMapContext* const collision_map_context, const vec2 dir_xz,
+	vec3 pos, vec3 velocities, const GLfloat pace, const Event* const event) {
 
 	const byte movement_bits = event -> movement_bits;
 	const GLfloat delta_time = event -> delta_time;
@@ -167,10 +179,10 @@ static void update_pos_via_physics(const byte* const heightmap,
 	vec2 pos_xz = {pos[0], pos[2]};
 
 	pos_xz[0] = pos[0] + velocity_forward_back * dir_xz[0] - velocity_strafe * -dir_xz[1];
-	if (pos_collides_with_heightmap(foot_height, pos_xz, heightmap, map_size)) pos_xz[0] = pos[0];
+	if (pos_collides_with_heightmap(foot_height, pos_xz, collision_map_context)) pos_xz[0] = pos[0];
 
 	pos_xz[1] = pos[2] + velocity_forward_back * dir_xz[1] - velocity_strafe * dir_xz[0];
-	if (pos_collides_with_heightmap(foot_height, pos_xz, heightmap, map_size)) pos_xz[1] = pos[2];
+	if (pos_collides_with_heightmap(foot_height, pos_xz, collision_map_context)) pos_xz[1] = pos[2];
 
 	pos[0] = pos_xz[0];
 	pos[2] = pos_xz[1];
@@ -183,7 +195,8 @@ static void update_pos_via_physics(const byte* const heightmap,
 	else speed_jump_per_sec -= constants.accel.g * delta_time;
 
 	foot_height += speed_jump_per_sec * delta_time;
-	const byte base_height = sample_map_point(heightmap, (byte) pos[0], (byte) pos[2], map_size[0]);
+
+	const GLfloat base_height = get_height_from_collision_map_context(collision_map_context, pos[0], pos[2]);
 
 	if (foot_height > base_height)
 		pos[1] = foot_height + pace;
@@ -251,8 +264,9 @@ static void get_camera_directions(const Angles* const angles, vec2 dir_xz, vec3 
 	glm_vec3_cross(right, dir, up); // Outputs an up vector from the direction and right vectors
 }
 
-static void update_camera_pos(Camera* const camera, const Event* const event,
-	const byte* const heightmap, const byte map_size[2],
+static void update_camera_pos(
+	Camera* const camera, const Event* const event,
+	const CollisionMapContext* const collision_map_context,
 	const vec2 dir_xz, const vec3 dir, const vec3 right) {
 
 	const GLfloat delta_time = event -> delta_time;
@@ -275,7 +289,7 @@ static void update_camera_pos(Camera* const camera, const Event* const event,
 	}
 	else {
 		GLfloat* const velocities = camera -> velocities;
-		update_pos_via_physics(heightmap, map_size, dir_xz, pos, velocities, camera -> pace, event);
+		update_pos_via_physics(collision_map_context, dir_xz, pos, velocities, camera -> pace, event);
 		update_pace(camera, pos + 1, velocities, delta_time);
 		update_fov(camera, event);
 	}
@@ -302,7 +316,9 @@ static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ra
 	glm_mul(projection, view, camera -> view_projection);
 }
 
-void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]) {
+void update_camera(Camera* const camera, const Event event,
+	const CollisionMapContext* const collision_map_context) {
+
 	////////// Updating the camera angles
 
 	Angles* const angles = &camera -> angles;
@@ -315,7 +331,7 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 	GLfloat* const dir = camera -> dir, *const up = camera -> up;
 
 	get_camera_directions(angles, dir_xz, dir, camera -> right_xz, right, up);
-	update_camera_pos(camera, &event, heightmap, map_size, dir_xz, dir, right); // Updates `pos`
+	update_camera_pos(camera, &event, collision_map_context, dir_xz, dir, right);
 
 	update_camera_matrices(camera, event.aspect_ratio, dir, up, right); // Updates `view` and `model_view_projection`
 	glm_frustum_planes(camera -> view_projection, camera -> frustum_planes);
