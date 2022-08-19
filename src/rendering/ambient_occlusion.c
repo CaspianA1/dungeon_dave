@@ -156,7 +156,7 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 		- First, generate rays around a hemisphere in an outer loop
 		- Then, for each vertex, find a face normal which defines the angle range/vector area.
 		- Only generate rand vals within a hemisphere, and then rotate each one to fit within the surface normal's hemisphere
-		- Or perhaps pre-rotate rand value sets for each hemisphere orientation, if needed?
+		- For each hemisphere orientation, generate a rotation matrix, and then select one based on the vertex normal
 
 	- Implement the DDA version on the GPU
 	*/
