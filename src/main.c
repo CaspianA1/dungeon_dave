@@ -204,7 +204,7 @@ static void* main_init(void) {
 
 		.rendering = {
 			.texture_transition_immediacy_factor = 2,
-			.scrolling_vert_squish_ratio = 0.35f,
+			.scrolling_vert_squish_ratio = 0.5f,
 			.specular_exponent = 16.0f,
 			.light_dist_from_screen_plane = 0.4f,
 			.secs_per_scroll_cycle = 7.0f,
