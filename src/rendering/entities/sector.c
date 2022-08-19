@@ -203,10 +203,10 @@ typedef struct {
 } UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
-	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
-	const GLuint shader = drawable -> shader;
-
 	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
+		const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
+		const GLuint shader = drawable -> shader;
+
 		use_texture_in_shader(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture_in_shader(typed_params.sector_context -> drawable.diffuse_texture, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
 		use_texture_in_shader(typed_params.sector_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
