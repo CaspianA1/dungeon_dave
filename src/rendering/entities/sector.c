@@ -215,10 +215,10 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 static void define_vertex_spec(void) {
 	enum {vpt = vertices_per_triangle};
-	const GLenum typename = FACE_MESH_COMPONENT_TYPENAME;
+	const GLenum typename = FACE_COMPONENT_TYPENAME;
 
 	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, typename); // Position
-	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_mesh_component_t[vpt]), typename); // Face info
+	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_component_t[vpt]), typename); // Face info
 }
 
 ////////// Initialization, deinitialization, and rendering
