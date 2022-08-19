@@ -7180,4 +7180,3 @@ void main(void) {
 #undef VERTICES_PER_TRIANGLE
 
 _____
-
