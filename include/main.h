@@ -59,6 +59,6 @@ typedef struct {
 	const byte* const heightmap, map_size[2];
 } SceneContext;
 
-// Excluded: draw_all_objects_to_shadow_map, main_drawer, main_init, main_deinit
+// Excluded: main_drawer, main_init, main_deinit
 
 #endif

@@ -6,53 +6,6 @@
 #include "utils/alloc.h"
 #include "utils/opengl_wrappers.h"
 
-static void draw_all_objects_to_shadow_map(const CascadedShadowContext* const shadow_context,
-	const SectorContext* const sector_context, const WeaponSprite* const weapon_sprite) {
-
-	/* Curr problems with the weapon sprite shadow:
-	- Partial transparency (i.e. translucency); should I handle that?
-
-	- For binary transparency, how do I do it without aliasing?
-	- Perhaps with a filtered cutout texture: https://www.cs.rpi.edu/~cutler/classes/advancedgraphics/S17/final_projects/anthony_philip.pdf
-	- Since 1-bit textures don't exist in OpenGL, or in hardware, perhaps do a translucency map anyways (a separate texture map). It would be
-		a bit hard to implement, but it would be worth it for the sake of billboards later too.
-	- For a translucency map, I will need alpha blending, which requires ordered billboards, so I must sort my billboards front-to-back by their center
-	- This will make alpha results for billboards better, and it will allow shadows for the weapon sprite that have less aliasing
-
-	- Transparency code is sorta fragmented right now: alpha blending for the weapon,
-		normally, alpha testing for transparent objects, and alpha to coverage for billboards
-
-	- Integration with the depth shader is a bit messy; find a neat way to do that (this should go first in terms of priorities)
-	- The weapon sprite's shadow is way too light since it's close to the ground; find a way to resolve that
-
-	- A note: one billboard takes up 24 bytes, and 4 vec3s take up 48 bytes (and adding a 16-bit texture id makes that 64)
-	- Perhaps define billboards + the weapon sprite through 1. center pos, 2. face normal, and 3. size?
-	*/
-
-	const GLuint depth_shader = shadow_context -> depth_shader;
-
-	static GLint drawing_translucent_quads_id, frame_index_id;
-
-	ON_FIRST_CALL(
-		INIT_UNIFORM(drawing_translucent_quads, depth_shader);
-		INIT_UNIFORM(frame_index, depth_shader);
-		INIT_UNIFORM_VALUE(alpha_threshold, depth_shader, 1f, 0.2f);
-
-		use_texture_in_shader(weapon_sprite -> drawable.diffuse_texture, depth_shader, "alpha_test_sampler", TexSet, TU_WeaponSpriteDiffuse);
-	);
-
-	// Opaque objects are drawn first
-
-	UPDATE_UNIFORM(drawing_translucent_quads, 1i, false);
-	draw_all_sectors_to_shadow_context(sector_context);
-
-	// Then, translucent objects after
-
-	UPDATE_UNIFORM(drawing_translucent_quads, 1i, true);
-	UPDATE_UNIFORM(frame_index, 1ui, weapon_sprite -> animation_context.curr_frame);
-	draw_weapon_sprite_to_shadow_context(weapon_sprite);
-}
-
 static void main_drawer(void* const app_context, const Event* const event) {
 	glClear(GL_DEPTH_BUFFER_BIT); // No color buffer clearing needed
 
@@ -83,7 +36,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	////////// Rendering to the shadow context
 
 	enable_rendering_to_shadow_context(shadow_context);
-	draw_all_objects_to_shadow_map(shadow_context, sector_context, weapon_sprite);
+	draw_all_sectors_to_shadow_context(sector_context);
 	disable_rendering_to_shadow_context(event -> screen_size);
 
 	////////// The main drawing code
