@@ -205,9 +205,6 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 		}
 	}
 
-	dealloc(ao_map);
-	dealloc(inv_rand_dirs);
-
 	const GLuint texture = preinit_texture(TexVolumetric, TexNonRepeating, TexLinear, TexTrilinear, false);
 
 	GLint standard_unpack_alignment;
@@ -218,6 +215,9 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, standard_unpack_alignment);
 	init_texture_mipmap(TexVolumetric);
+
+	dealloc(ao_map);
+	dealloc(inv_rand_dirs);
 
 	return texture;
 }
