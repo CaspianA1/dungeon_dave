@@ -132,7 +132,7 @@ static void normal_inference_unit_test(void) {
 	get_normal_at((const byte*) heightmap, map_width, chosen_pos[0], chosen_pos[1], chosen_pos[2], normal);
 	// DEBUG_VEC3(normal);
 
-	// TODO: render the normals here to see that they are correct
+	// TODO: render the normals here to see that they are correct, but first test them + rotate each random normal
 }
 
 AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size[2], const byte max_point_height) {
