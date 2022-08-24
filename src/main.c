@@ -197,7 +197,7 @@ static void* main_init(void) {
 		.texture = {
 			.paths = {.still = ASSET_PATH("logo.bmp"), .scrolling = ASSET_PATH("palace_city.bmp")},
 			.mag_filters = {.still = TexNearest, .scrolling = TexLinear},
-			.scrolling_normal_map_config = {.blur_radius = 2, .blur_std_dev = 1.5f, .intensity = 0.5f, .rescale_factor = 1.0f}
+			.scrolling_normal_map_config = {.blur_radius = 1, .blur_std_dev = 1.0f, .intensity = 0.75f, .rescale_factor = 2.0f}
 		},
 
 		.rendering = {

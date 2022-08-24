@@ -1,6 +1,7 @@
 #version 400 core
 
 #include "common/normal_utils.frag"
+#include "common/UV_utils.frag"
 
 noperspective in float scrolling_UV_x;
 noperspective in vec2 UV;
@@ -21,7 +22,10 @@ vec3 blinn_phong(const sampler2D diffuse_sampler, const vec2 custom_UV,
 
 	float specular = pow(cos_angle_of_incidence, specular_exponent);
 
-	return texture(diffuse_sampler, custom_UV).rgb * (diffuse + specular);
+	vec2 pixel_art_UV = custom_UV;
+	adjust_UV_for_pixel_art_filtering(0.0f, textureSize(diffuse_sampler, 0), pixel_art_UV);
+
+	return texture(diffuse_sampler, pixel_art_UV).rgb * (diffuse + specular);
 }
 
 void main(void) {

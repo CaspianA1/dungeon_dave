@@ -1,6 +1,7 @@
 #version 400 core
 
 #include "shared_params.glsl"
+#include "UV_utils.frag"
 #include "shadow/shadow.frag"
 
 in vec3 fragment_pos_world_space, UV, ambient_occlusion_UV;
@@ -40,22 +41,11 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) {
 	return specular_value * env_map_value;
 }
 
-// https://jorenjoestar.github.io/post/pixel_art_filtering/, under 'Inigo Quilez'
-vec3 adjust_UV_for_pixel_art_filtering(const vec3 UV) {
-	vec2 texture_size = textureSize(diffuse_sampler, 0).xy;
-	vec2 pixel = UV.xy * texture_size;
-
-	vec2
-		seam = floor(pixel + 0.5f),
-		dudv = mix(fwidth(pixel), vec2(1.0f), percents.bilinear);
-
-	pixel = seam + clamp((pixel - seam) / dudv, -0.5f, 0.5f);
-	return vec3(pixel / texture_size, UV.z);
-}
-
 // When the shadow layer is already known (like for the weapon sprite), this can be useful to call
 vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, const vec3 UV, const vec3 fragment_normal) {
-	vec3 adjusted_UV = adjust_UV_for_pixel_art_filtering(UV);
+	vec3 adjusted_UV = UV;
+	adjust_UV_for_pixel_art_filtering(percents.bilinear, textureSize(diffuse_sampler, 0).xy, adjusted_UV.xy);
+
 	vec4 texture_color = texture(diffuse_sampler, adjusted_UV);
 
 	float ao_strength = mix(1.0f, texture(ambient_occlusion_sampler, ambient_occlusion_UV).r, percents.ao);
