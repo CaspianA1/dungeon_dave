@@ -9,7 +9,7 @@ in vec3 fragment_pos_tangent_space;
 
 out vec3 color;
 
-uniform float texture_transition_weight, specular_exponent;
+uniform float texture_transition_weight, specular_exponent, scrolling_bilinear_percent;
 uniform vec3 light_pos_tangent_space;
 uniform sampler2D still_diffuse_sampler, scrolling_diffuse_sampler, scrolling_normal_map_sampler;
 
@@ -23,7 +23,7 @@ vec3 blinn_phong(const sampler2D diffuse_sampler, const vec2 custom_UV,
 	float specular = pow(cos_angle_of_incidence, specular_exponent);
 
 	vec2 pixel_art_UV = custom_UV;
-	adjust_UV_for_pixel_art_filtering(0.0f, textureSize(diffuse_sampler, 0), pixel_art_UV);
+	adjust_UV_for_pixel_art_filtering(scrolling_bilinear_percent, textureSize(diffuse_sampler, 0), pixel_art_UV);
 
 	return texture(diffuse_sampler, pixel_art_UV).rgb * (diffuse + specular);
 }

@@ -204,6 +204,7 @@ static void* main_init(void) {
 			.texture_transition_immediacy_factor = 2,
 			.scrolling_vert_squish_ratio = 0.5f,
 			.specular_exponent = 16.0f,
+			.scrolling_bilinear_percent = 0.1f,
 			.light_dist_from_screen_plane = 0.4f,
 			.secs_per_scroll_cycle = 7.0f,
 			.light_spin_cycle = {.secs_per = 2.5f, .logo_transitions_per = 0.5f}
