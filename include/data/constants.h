@@ -49,13 +49,16 @@ static const struct {
 		/* Brighter texture colors get a stronger specular output,
 		and sharper specular highlights (their specular exponents are weighted
 		more towards the upper bound of the specular exponent domain).
-		Ambient strength also equals the amount of light in shadows. */
+		Ambient strength also equals the strongest amount of light in shadows. */
 
 		const byte aniso_filtering_level;
-		const struct {const GLfloat ambient, diffuse, specular;} strengths;
-		const GLfloat specular_exponent_domain[2], overall_scene_tone[3], noise_granularity;
+
 		const struct {const GLfloat bilinear, ao;} percents;
-		const struct {const bool enabled; const GLfloat max_white;} tone_mapping;
+		const struct {const GLfloat ambient, diffuse, specular;} strengths;
+
+		const GLfloat
+			specular_exponent_domain[2], tone_mapping_max_white,
+			noise_granularity, overall_scene_tone[3];
 	} lighting;
 
 	const struct { // All angles are in radians
@@ -94,11 +97,14 @@ static const struct {
 	// TODO: remove this from this struct in some way
 	.lighting = {
 		.aniso_filtering_level = 16,
+
+		.percents = {.bilinear = 0.2f, .ao = 1.0f},
 		.strengths = {.ambient = 0.9f, .diffuse = 0.9f, .specular = 1.5f},
 		.specular_exponent_domain = {32.0f, 96.0f},
-		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
-		.noise_granularity = 0.2f / 255.0f, .percents = {.bilinear = 0.2f, .ao = 1.0f},
-		.tone_mapping = {.enabled = true, .max_white = 1.5f}
+
+		.tone_mapping_max_white = 1.5f,
+		.noise_granularity = 0.2f / 255.0f,
+		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f}
 	},
 
 	.camera = {

@@ -78,7 +78,6 @@ vec3 noise_for_banding_removal(const vec2 seed, const vec3 color) {
 }
 
 vec3 postprocess_light(const vec2 UV, const vec3 color) {
-	vec3 tone_mapped_color = apply_tone_mapping(color, tone_mapping.max_white);
-	tone_mapped_color = mix(color, tone_mapped_color, float(tone_mapping.enabled));
+	vec3 tone_mapped_color = apply_tone_mapping(color, tone_mapping_max_white);
 	return noise_for_banding_removal(UV, tone_mapped_color);
 }
