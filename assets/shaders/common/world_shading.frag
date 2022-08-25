@@ -41,6 +41,11 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) {
 	return specular_value * env_map_value;
 }
 
+float get_ao_strength(void) {
+	float unmodulated_ao_strength = texture(ambient_occlusion_sampler, ambient_occlusion_UV).r;
+	return mix(1.0f, unmodulated_ao_strength, percents.ao);
+}
+
 // When the shadow layer is already known (like for the weapon sprite), this can be useful to call
 vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, const vec3 UV, const vec3 fragment_normal) {
 	vec3 adjusted_UV = UV;
@@ -48,7 +53,7 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 
 	vec4 texture_color = texture(diffuse_sampler, adjusted_UV);
 
-	float ao_strength = mix(1.0f, texture(ambient_occlusion_sampler, ambient_occlusion_UV).r, percents.ao);
+	float ao_strength = get_ao_strength();
 
 	// return vec4(vec3(ao_strength), 1.0f);
 	// ao_strength = 1.0f;

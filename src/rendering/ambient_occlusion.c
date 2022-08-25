@@ -66,6 +66,9 @@ static bool ray_collides_with_heightmap(
 
 	int16_t curr_tile[3] = {origin_x, origin_y, origin_z};
 
+	byte component_change_bits = 0;
+	const byte mask_for_all_changed_components = 7u; // = 0b111
+
 	while (true) {
 		// Will yield 1 if x >= y, and 0 if x < y (so this gives the index of the smallest among x and y)
 		const byte x_and_y_min_index = ray_length_components[0] >= ray_length_components[1];
@@ -74,28 +77,40 @@ static bool ray_collides_with_heightmap(
 		curr_tile[index_of_shortest] += tile_steps[index_of_shortest];
 		ray_length_components[index_of_shortest] += unit_step_size[index_of_shortest];
 
+		component_change_bits |= (1 << index_of_shortest); // Setting the right bit indicating a component change
+
 		//////////
 
 		if (curr_tile[1] > max_y || // TODO: only check the component that changed
 			curr_tile[0] == -1 || curr_tile[0] == max_x ||
 			curr_tile[2] == -1 || curr_tile[2] == max_z) return false;
 
-		else if (curr_tile[1] < sample_map_point(heightmap, (byte) curr_tile[0], (byte) curr_tile[2], max_x))
-			return true;
+		else if (curr_tile[1] < (int16_t) sample_map_point(heightmap, (byte) curr_tile[0], (byte) curr_tile[2], max_x)) {
+			if (component_change_bits == mask_for_all_changed_components) return true;
+		}
 	}
 }
 
-// TODO: remove
+// TODO: make this functional
 // https://stackoverflow.com/questions/33736199/calculating-normals-for-a-height-map
-static void get_normal_at(const byte* const heightmap, const byte map_width, const byte x, const byte y, const byte z, vec3 normal) {
-	// TODO: eventually, when not doing things that touch the heightmap directly, compute the heights around the center as relative to the center
+static void get_normal_at(
+	const byte* const heightmap,
+	const byte map_width, const byte map_height,
+	const byte x, const byte y, const byte z, vec3 normal) {
+
+	/* TODO: eventually, when not doing things that touch the heightmap directly,
+	compute the heights around the center as relative to the center */
+
+	const byte
+		left_x = (x == 0) ? 0 : (x - 1), right_x = (x == map_width - 1) ? x : (x + 1),
+		top_z = (z == 0) ? 0 : (z - 1), bottom_z = (z == map_height - 1) ? z : (z + 1);
 
 	const byte
 		h_center = sample_map_point(heightmap, x, z, map_width),
-		h_above = sample_map_point(heightmap, x, z - 1, map_width),
-		h_below = sample_map_point(heightmap, x, z + 1, map_width),
-		h_left = sample_map_point(heightmap, x - 1, z, map_width),
-		h_right = sample_map_point(heightmap, x + 1, z, map_width);
+		h_above = sample_map_point(heightmap, x, top_z, map_width),
+		h_below = sample_map_point(heightmap, x, bottom_z, map_width),
+		h_left = sample_map_point(heightmap, left_x, z, map_width),
+		h_right = sample_map_point(heightmap, right_x, z, map_width);
 
 	#define s_diff(a, b) glm_signf((GLfloat) (a) - (GLfloat) (b))
 
@@ -129,10 +144,11 @@ static void normal_inference_unit_test(void) {
 	const byte chosen_pos[3] = {1, 0, 2};
 
 	vec3 normal;
-	get_normal_at((const byte*) heightmap, map_width, chosen_pos[0], chosen_pos[1], chosen_pos[2], normal);
-	// DEBUG_VEC3(normal);
 
-	// TODO: render the normals here to see that they are correct, but first test them + rotate each random normal
+	get_normal_at((const byte*) heightmap, map_width, map_height,
+		chosen_pos[0], chosen_pos[1], chosen_pos[2], normal);
+
+	DEBUG_VEC3(normal);
 }
 
 AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size[2], const byte max_point_height) {
@@ -148,8 +164,7 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 		and then add little bits and pieces one at a time until something doesn't line up
 	- Trace in the opposite direction - from the sky into the world?
 	- Note: there will be no occlusion leaking once this hemisphere stuff is figured out
-	- Use the Sobel operator to find out the face normal? Only consider higher-than/less-than heights;
-		then only sample in front of the plane defined by the normal
+	- It doesn't seem dark enough inside blocks
 
 	Immediate plan:
 		- For a given vertex, find a hemisphere in which rays will be cast outwards from
@@ -179,26 +194,24 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 
 	const GLfloat collision_term_scaler = (GLfloat) constants.max_byte_value / num_trace_iters;
 
-	//////////
-
-	normal_inference_unit_test();
-
-	//////////
+	(void) normal_inference_unit_test;
+	// normal_inference_unit_test(); // TODO: make this correct
 
 	for (byte* dest = ao_map, y = 0; y < max_y; y++) { // For each posible height
 		for (byte z = 0; z < max_z; z++) { // For each map row
 			for (byte x = 0; x < max_x; x++, dest++) { // For each map point
 
-				// Once the hemisphere stuff is figured out, this should not be here
-				if (y < sample_map_point(heightmap, x, z, max_x)) {
-					*dest = 0;
-					continue;
-				}
+				vec3 normal;
+				get_normal_at(heightmap, max_x, max_z, x, y, z, normal);
 
 				byte num_collisions = 0;
 
-				for (byte i = 0; i < num_trace_iters; i++)
-					num_collisions += ray_collides_with_heightmap(inv_rand_dirs[i], heightmap, x, y, z, max_x, max_y, max_z);
+				for (byte i = 0; i < num_trace_iters; i++) {
+					GLfloat* const inv_rand_dir = inv_rand_dirs[i];
+					if (glm_vec3_dot(normal, inv_rand_dir) < 0.0f) glm_vec3_negate(inv_rand_dir);
+
+					num_collisions += ray_collides_with_heightmap(inv_rand_dir, heightmap, x, y, z, max_x, max_y, max_z);
+				}
 
 				*dest = constants.max_byte_value - (byte) (num_collisions * collision_term_scaler);
 			}

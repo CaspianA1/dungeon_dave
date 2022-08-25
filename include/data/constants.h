@@ -99,7 +99,7 @@ static const struct {
 		.aniso_filtering_level = 16,
 
 		.percents = {.bilinear = 0.2f, .ao = 1.0f},
-		.strengths = {.ambient = 0.9f, .diffuse = 0.9f, .specular = 1.5f},
+		.strengths = {.ambient = 0.5f, .diffuse = 0.7f, .specular = 1.0f},
 		.specular_exponent_domain = {32.0f, 96.0f},
 
 		.tone_mapping_max_white = 1.5f,
