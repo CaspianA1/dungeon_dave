@@ -153,7 +153,7 @@ static void normal_inference_unit_test(void) {
 
 AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size[2], const byte max_point_height) {
 	/* TODO:
-	- Eliminate any bilinear filtering artifacts
+	- Eliminate any bilinear filtering artifacts through correct raycasting + bicubic filtering (ask on Stackoverflow)
 	- Some map boundary edges are fully light
 	- Compute the AO map through transform feedback; pass in 3D map points, and then pass back occlusion values
 	- Making an AO map for the terrain fails
