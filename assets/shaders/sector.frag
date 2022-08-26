@@ -23,16 +23,18 @@ vec3 get_parallax_UV(void) {
 	- Texture scrolling
 	- Apply to all world entities
 	- Make the parallax parameters part of the uniform block
-	- The lod blending looks a bit rough
+	- The lod blending looks a bit rough (it's because there's a lot of fragments at lod 0;
+		make it distance-based instead, perhaps? Or blend for magnified fragments instead?)
+	- Note: clamping UV in the main loop doesn't work for fixing scrolling
 	- See here: github.com/Rabbid76/graphics-snippets/blob/master/documentation/normal_parallax_relief.md
 	*/
 
 	const float
 		min_layers = 32.0f, max_layers = 64.0f,
-		height_scale = 0.03f, lod_threshold = 0.2f;
+		height_scale = 0.03f, lod_threshold = 0.5f;
 
 	float lod = textureQueryLod(diffuse_sampler, UV.xy).y;
-	if (lod > lod_threshold) return UV;
+	if (lod >= lod_threshold) return UV;
 
 	//////////
 
