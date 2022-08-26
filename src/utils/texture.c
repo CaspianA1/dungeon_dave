@@ -96,6 +96,10 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	if (GLAD_GL_EXT_texture_filter_anisotropic && !force_disable_anisotropic_filtering)
 		glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, get_runtime_constant(AnisotropicFilteringLevel));
 
+	#else
+
+	(void) force_disable_anisotropic_filtering;
+
 	#endif
 
 	return texture;
