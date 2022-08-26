@@ -19,12 +19,13 @@ float sample_heightmap(const vec3 UV) {
 vec3 get_parallax_UV(void) {
 	/* TODO:
 	- Aliasing
-	- Very slow at times
+	- Very slow at times (fix this + aliasing through relief mapping?)
 	- Texture scrolling
 	- Apply to all world entities
+	- See here: github.com/Rabbid76/graphics-snippets/blob/master/documentation/normal_parallax_relief.md
 	*/
 
-	const float min_layers = 8.0f, max_layers = 48.0f, height_scale = 0.03f;
+	const float min_layers = 2.0f, max_layers = 48.0f, height_scale = 0.03f;
 
 	//////////
 
