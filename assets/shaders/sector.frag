@@ -63,7 +63,7 @@ vec3 get_parallax_UV(void) {
 	vec3 parallax_UV = vec3(mix(curr_UV.xy, prev_UV.xy, weight), UV.z);
 
 	// Blending between the parallax UV and non-parallax UV for a smoother lod transition
-	return mix(parallax_UV, UV, ldo / lod_threshold);
+	return mix(parallax_UV, UV, lod / lod_threshold);
 }
 
 vec3 get_face_fragment_normal(const vec3 UV) { // TODO: use the tbn instead?
