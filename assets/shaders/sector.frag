@@ -22,10 +22,15 @@ vec3 get_parallax_UV(void) {
 	- Very slow at times (fix this + aliasing through relief mapping?)
 	- Texture scrolling
 	- Apply to all world entities
+	- Make the LOD threshold transition smoother (for the first LOD, blend between the parallaxed and non-parallaxed layers)
 	- See here: github.com/Rabbid76/graphics-snippets/blob/master/documentation/normal_parallax_relief.md
 	*/
 
-	const float min_layers = 2.0f, max_layers = 48.0f, height_scale = 0.03f;
+	const float
+		min_layers = 64.0f, max_layers = 128.0f,
+		height_scale = 0.03f, lod_threshold = 0.0f;
+
+	if (textureQueryLod(diffuse_sampler, UV.xy).y > lod_threshold) return UV;
 
 	//////////
 
