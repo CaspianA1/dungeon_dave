@@ -8,19 +8,39 @@ layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
 
 flat out uint face_id;
+out vec3 camera_fragment_delta_tangent_space;
 
 const struct FaceAttribute {
-	ivec2 uv_indices, uv_signs;
+	ivec2 uv_indices, uv_signs; mat3 tbn;
 } face_attributes[5] = FaceAttribute[5](
-	FaceAttribute(ivec2(0, 2), ivec2(1, 1)),
-	FaceAttribute(ivec2(2, 1), ivec2(-1, -1)),
-	FaceAttribute(ivec2(0, 1), ivec2(1, -1)),
-	FaceAttribute(ivec2(2, 1), ivec2(1, -1)),
-	FaceAttribute(ivec2(0, 1), ivec2(-1, -1))
+	FaceAttribute(ivec2(0, 2), ivec2(1, 1),
+		mat3(1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f)),
+
+	FaceAttribute(ivec2(2, 1), ivec2(-1, -1),
+		mat3(0.0f, 0.0f, -1.0f,
+			0.0f, 1.0f, 0.0f,
+			1.0f, 0.0f, 0.0f)),
+
+	FaceAttribute(ivec2(0, 1), ivec2(1, -1),
+		mat3(1.0f, 0.0f, 0.0f,
+			0.0f, -1.0f, 0.0f,
+			0.0f, 0.0f, 1.0f)),
+
+	FaceAttribute(ivec2(2, 1), ivec2(1, -1),
+		mat3(0.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f,
+			-1.0f, 0.0f, 0.0f)),
+
+	FaceAttribute(ivec2(0, 1), ivec2(-1, -1),
+		mat3(-1.0f, 0.0f, 0.0f,
+			0.0f, -1.0f, 0.0f,
+			0.0f, 0.0f, -1.0f))
 );
 
 void main(void) {
-	////////// Setting UV
+	////////// Setting UV and camera_fragment_delta_tangent_space
 
 	face_id = face_info_bits & 7u; // Extracting the first 3 bits
 	FaceAttribute face_attribute = face_attributes[face_id];
@@ -31,6 +51,8 @@ void main(void) {
 	);
 
 	UV.z = face_info_bits >> 3u; // Shifting over to get the texture id
+
+	camera_fragment_delta_tangent_space = face_attribute.tbn * (camera_pos_world_space - vertex_pos_world_space);
 
 	////////// Setting ambient_occlusion_UV, world_depth_value, fragment_pos_world_space, and gl_Position
 

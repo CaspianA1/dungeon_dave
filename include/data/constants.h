@@ -96,9 +96,9 @@ static const struct {
 
 	// TODO: remove this from this struct in some way
 	.lighting = {
-		.aniso_filtering_level = 16,
+		.aniso_filtering_level = 8,
 
-		.percents = {.bilinear = 0.2f, .ao = 1.0f},
+		.percents = {.bilinear = 0.75f, .ao = 1.0f},
 		.strengths = {.ambient = 0.5f, .diffuse = 0.7f, .specular = 1.0f},
 		.specular_exponent_domain = {32.0f, 96.0f},
 
