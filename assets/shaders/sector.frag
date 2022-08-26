@@ -23,15 +23,16 @@ vec3 get_parallax_UV(void) {
 	- Texture scrolling
 	- Apply to all world entities
 	- Make the parallax parameters part of the uniform block
-	- Make the LOD threshold transition smoother (for the first LOD, blend between the parallaxed and non-parallaxed layers)
+	- The lod blending looks a bit rough
 	- See here: github.com/Rabbid76/graphics-snippets/blob/master/documentation/normal_parallax_relief.md
 	*/
 
 	const float
-		min_layers = 64.0f, max_layers = 128.0f,
-		height_scale = 0.03f, lod_threshold = 0.0f;
+		min_layers = 32.0f, max_layers = 64.0f,
+		height_scale = 0.03f, lod_threshold = 0.2f;
 
-	if (textureQueryLod(diffuse_sampler, UV.xy).y > lod_threshold) return UV;
+	float lod = textureQueryLod(diffuse_sampler, UV.xy).y;
+	if (lod > lod_threshold) return UV;
 
 	//////////
 
@@ -59,7 +60,10 @@ vec3 get_parallax_UV(void) {
 
 	float weight = depth_after / (depth_after - depth_before);
 
-	return vec3(mix(curr_UV.xy, prev_UV.xy, weight), UV.z);
+	vec3 parallax_UV = vec3(mix(curr_UV.xy, prev_UV.xy, weight), UV.z);
+
+	// Blending between the parallax UV and non-parallax UV for a smoother lod transition
+	return mix(parallax_UV, UV, ldo / lod_threshold);
 }
 
 vec3 get_face_fragment_normal(const vec3 UV) { // TODO: use the tbn instead?
