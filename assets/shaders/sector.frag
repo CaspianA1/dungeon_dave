@@ -10,10 +10,10 @@ in vec3 camera_fragment_delta_tangent_space;
 out vec3 color;
 
 float sample_heightmap(const vec3 UV) {
-	const float one_third = 1.0f / 3.0f;
+	const float neg_one_third = -1.0f / 3.0f;
 
 	vec3 diffuse = texture(diffuse_sampler, UV).rgb;
-	return 1.0f - ((diffuse.r + diffuse.g + diffuse.b) * one_third);
+	return (diffuse.r + diffuse.g + diffuse.b) * neg_one_third + 1.0f;
 }
 
 vec3 get_parallax_UV(void) {
@@ -22,6 +22,7 @@ vec3 get_parallax_UV(void) {
 	- Very slow at times (fix this + aliasing through relief mapping?)
 	- Texture scrolling
 	- Apply to all world entities
+	- Make the parallax parameters part of the uniform block
 	- Make the LOD threshold transition smoother (for the first LOD, blend between the parallaxed and non-parallaxed layers)
 	- See here: github.com/Rabbid76/graphics-snippets/blob/master/documentation/normal_parallax_relief.md
 	*/
