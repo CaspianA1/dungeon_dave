@@ -37,7 +37,6 @@ Architectural/code design ideas:
 - File paths may not work on Windows
 - Pass in texture parameters through a bitmask
 - Tell if a level was just initialized through the Event struct
-- Macros for common initialization and deinitalization of OpenGL objects (like gl_init, gl_use, and gl_deinit); or no macros at all
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if enough precision?)
 - Define the constants in constants.h in constants.c, and make the constants.h struct extern
@@ -57,6 +56,7 @@ Architectural/code design ideas:
 - A shader cache
 - Specular antialiasing
 - Different bilinear percents for all object types
+- Make compilation faster by not constantly including cglm/cglm.h everywhere it isn't needed (or in general, less unnecessary #includes)
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
