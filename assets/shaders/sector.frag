@@ -16,29 +16,46 @@ float sample_heightmap(const vec3 UV) {
 	return (diffuse.r + diffuse.g + diffuse.b) * neg_one_third + 1.0f;
 }
 
+/* This code was developed from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping.
+The LOD system that transitions between the plain and parallax UV was based on section 5.4.3 from
+	https://advances.realtimerendering.com/s2006/Chapter5-Parallax_Occlusion_Mapping_for_detailed_surface_rendering.pdf. */
 vec3 get_parallax_UV(void) {
 	/* TODO:
 	- Aliasing
-	- Very slow at times (fix this + aliasing through relief mapping?)
-	- Texture scrolling
+	- Very slow at times
+	- Texture scrolling (note: clamping UV to [0.0f, 1.0f] anywhere doesn't fix this)
+
 	- Apply to all world entities
 	- Make the parallax parameters part of the uniform block
-	- The lod blending looks a bit rough (it's because there's a lot of fragments at lod 0;
-		make it distance-based instead, perhaps? Or blend for magnified fragments instead?)
-	- Note: clamping UV in the main loop doesn't work for fixing scrolling
 	- See here: github.com/Rabbid76/graphics-snippets/blob/master/documentation/normal_parallax_relief.md
 	*/
 
 	const float
-		min_layers = 32.0f, max_layers = 64.0f,
-		height_scale = 0.03f, lod_threshold = 0.5f;
+		min_layers = 1.0f, max_layers = 64.0f,
+		height_scale = 0.03f, lod_cutoff = 1.5f;
 
-	float lod = textureQueryLod(diffuse_sampler, UV.xy).y;
-	if (lod >= lod_threshold) return UV;
+	////////// LOD calculations
 
-	//////////
+	float lod = textureQueryLod(diffuse_sampler, UV.xy).x;
+
+	/* For all LOD values above `lod_cutoff`, the
+	plain UV is used, skipping a lot of work */
+	if (lod > lod_cutoff) return UV;
+
+	/* For LODs between `lod_cutoff - lod_blend_range` to `lod_cutoff`,
+	blending occurs between the parallax and plain UV */
+	const float lod_blend_range = (lod_cutoff < 1.0f) ? lod_cutoff : 1.0f;
+	const float min_lod_for_blending = lod_cutoff - lod_blend_range;
+
+	/* If full, unblended parallax mapping is used, this will be below 0,
+	so the `max` stops the blend weight from being negative */
+	float lod_weight = max(lod - min_lod_for_blending, 0.0f);
+
+	////////// Tracing a ray against the diffuse color texture, which is interpreted as a heightmap
 
 	vec3 view_dir = normalize(camera_fragment_delta_tangent_space);
+
+	// More layers will be rendered if the view direction is steeper
 	float num_layers = mix(max_layers, min_layers, max(view_dir.z, 0.0f));
 
 	float
@@ -60,12 +77,13 @@ vec3 get_parallax_UV(void) {
 		depth_before = sample_heightmap(prev_UV) - curr_layer_depth + layer_depth,
 		depth_after = curr_depth_map_value - curr_layer_depth;
 
-	float weight = depth_after / (depth_after - depth_before);
+	float UV_weight = depth_after / (depth_after - depth_before);
 
-	vec3 parallax_UV = vec3(mix(curr_UV.xy, prev_UV.xy, weight), UV.z);
+	////////// Getting the parallax UV
 
-	// Blending between the parallax UV and non-parallax UV for a smoother lod transition
-	return mix(parallax_UV, UV, lod / lod_threshold);
+	vec2 parallax_UV = mix(curr_UV.xy, prev_UV.xy, UV_weight);
+	vec2 lod_parallax_UV = mix(parallax_UV, UV.xy, lod_weight);
+	return vec3(lod_parallax_UV, UV.z);
 }
 
 vec3 get_face_fragment_normal(const vec3 UV) { // TODO: use the tbn instead?
