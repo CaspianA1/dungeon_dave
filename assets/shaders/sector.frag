@@ -31,7 +31,7 @@ vec3 get_parallax_UV(void) {
 	*/
 
 	const float
-		min_layers = 1.0f, max_layers = 64.0f,
+		min_layers = 16.0f, max_layers = 64.0f,
 		height_scale = 0.03f, lod_cutoff = 1.5f;
 
 	////////// LOD calculations
@@ -55,7 +55,10 @@ vec3 get_parallax_UV(void) {
 
 	vec3 view_dir = normalize(camera_fragment_delta_tangent_space);
 
-	// More layers will be rendered if the view direction is steeper
+	/* More layers will be rendered if the view direction is steeper. I'm not using the lod to determine
+	the number of layers because while a higher mip level may be used for steep angles with anisotropic
+	filtering, the mip level also increases for far-away objects, and the number of layers should only
+	be dependent on how steep the view angle is. */
 	float num_layers = mix(max_layers, min_layers, max(view_dir.z, 0.0f));
 
 	float
