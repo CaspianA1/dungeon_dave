@@ -171,7 +171,8 @@ static void get_quad_tbn_matrix(const vec3* const quad_corners, mat3 tbn) {
 	glm_vec3_sub((GLfloat*) quad_corners[2], (GLfloat*) bl_corner, bitangent);
 	glm_vec3_normalize(bitangent); // Flows along T, from bl to tl
 
-	glm_vec3_cross(tangent, bitangent, normal); // This will also be normalized, as the tangent and bitangent are normalized
+	// This will also be normalized, as the tangent and bitangent are normalized
+	glm_vec3_cross(tangent, bitangent, normal);
 }
 
 ////////// This part is for the uniform updater param type and the uniform updater
