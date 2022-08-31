@@ -25,7 +25,7 @@ vec3 get_parallax_UV(void) {
 	- Very slow at times
 	- Texture scrolling (note: clamping UV to [0.0f, 1.0f] anywhere doesn't fix this)
 
-	- Apply to all world entities
+	- Apply to all world entities + the title screen
 	- Make the parallax parameters part of the uniform block
 	- See here: github.com/Rabbid76/graphics-snippets/blob/master/documentation/normal_parallax_relief.md
 	*/
