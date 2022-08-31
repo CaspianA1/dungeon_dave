@@ -3,12 +3,12 @@
 #include "common/shadow/shadow.vert"
 #include "common/shared_params.glsl"
 #include "common/world_shading.vert"
+#include "common/parallax_mapping.vert"
 
 layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
 
 flat out uint face_id;
-out vec3 camera_fragment_delta_tangent_space;
 
 const struct FaceAttribute {
 	ivec2 uv_indices, uv_signs; mat3 tbn;
@@ -52,7 +52,9 @@ void main(void) {
 
 	UV.z = face_info_bits >> 3u; // Shifting over to get the texture id
 
-	camera_fragment_delta_tangent_space = face_attribute.tbn * (camera_pos_world_space - vertex_pos_world_space);
+	camera_to_fragment_tangent_space = get_camera_to_fragment_vector_tangent_space(
+		camera_pos_world_space, vertex_pos_world_space, face_attribute.tbn
+	);
 
 	////////// Setting ambient_occlusion_UV, world_depth_value, fragment_pos_world_space, and gl_Position
 
