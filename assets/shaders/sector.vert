@@ -52,7 +52,7 @@ void main(void) {
 
 	UV.z = face_info_bits >> 3u; // Shifting over to get the texture id
 
-	camera_to_fragment_tangent_space = get_camera_to_fragment_vector_tangent_space(
+	camera_to_fragment_tangent_space = get_vector_to_vertex_in_tangent_space(
 		camera_pos_world_space, vertex_pos_world_space, face_attribute.tbn
 	);
 
