@@ -12,7 +12,7 @@ float sample_heightmap(const sampler2DArray diffuse_sampler, const vec3 UV) {
 /* This code was developed from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping.
 The LOD system that transitions between the plain and parallax UV was based on section 5.4.3 from
 https://advances.realtimerendering.com/s2006/Chapter5-Parallax_Occlusion_Mapping_for_detailed_surface_rendering.pdf. */
-vec3 get_parallax_UV(const sampler2DArray diffuse_sampler) {
+vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 	/* TODO:
 	- Aliasing
 	- Very slow at times

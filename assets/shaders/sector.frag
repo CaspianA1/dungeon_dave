@@ -25,7 +25,7 @@ vec3 get_face_fragment_normal(const vec3 UV) { // TODO: use the tbn instead?
 }
 
 void main(void) {
-	vec3 parallax_UV = get_parallax_UV(diffuse_sampler);
+	vec3 parallax_UV = get_parallax_UV(UV, diffuse_sampler);
 	vec3 fragment_normal = get_face_fragment_normal(parallax_UV);
 
 	color = calculate_light(world_depth_value, parallax_UV, fragment_normal).rgb;
