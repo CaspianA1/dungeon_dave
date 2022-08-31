@@ -16,7 +16,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 	/* TODO:
 	- Aliasing
 	- Very slow at times
-	- Texture scrolling (note: clamping UV to [0.0f, 1.0f] anywhere doesn't fix this)
+	- Texture scrolling (note: clamping UV to [0.0f, 1.0f] anywhere doesn't fix this); perhaps try TexNonRepeating + discard?
 
 	- Apply to all world entities + the title screen
 	- Make the parallax parameters part of the uniform block
