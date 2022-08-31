@@ -102,12 +102,12 @@ typedef struct {
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
-	static GLint right_xz_id;
+	static GLint tbn_id;
 
 	ON_FIRST_CALL(
 		const GLuint shader = drawable -> shader;
 
-		INIT_UNIFORM(right_xz, shader);
+		INIT_UNIFORM(tbn, shader);
 
 		use_texture_in_shader(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture_in_shader(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
@@ -116,7 +116,15 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		use_texture_in_shader(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 
-	UPDATE_UNIFORM(right_xz, 2fv, 1, typed_params.right_xz);
+	//////////
+
+	const GLfloat right_xz_x = typed_params.right_xz[0], right_xz_z = typed_params.right_xz[1];
+
+	UPDATE_UNIFORM(tbn, Matrix3fv, 1, GL_FALSE, (GLfloat*) (mat3) {
+		{right_xz_x, 0.0f, -right_xz_z},
+		{0.0f, -1.0f, 0.0f},
+		{right_xz_z, 0.0f, right_xz_x}
+	});
 }
 
 //////////
