@@ -57,6 +57,7 @@ Architectural/code design ideas:
 - Specular antialiasing
 - Different bilinear percents for all object types
 - Make compilation faster by not constantly including cglm/cglm.h everywhere it isn't needed (or in general, less unnecessary #includes)
+- Use a rotation matrix for the weapon rotations, instead of doing the rotations without any trig functions
 
 Miscellaneous problems:
 - Having an idle window with vsync on leads to high CPU and GPU usage
