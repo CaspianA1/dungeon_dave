@@ -303,7 +303,9 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	vec2 screen_corners[corners_per_quad];
 	get_screen_corners_from_sway(ws, event -> aspect_ratio, sway, screen_corners);
 
-	get_world_corners_from_screen_corners(camera -> view_projection, screen_corners, appearance_context -> world_space.corners);
+	vec3* const world_corners = appearance_context -> world_space.corners;
+	get_world_corners_from_screen_corners(camera -> view_projection, screen_corners, world_corners);
+
 	rotate_from_camera_movement(appearance_context, camera);
 }
 
