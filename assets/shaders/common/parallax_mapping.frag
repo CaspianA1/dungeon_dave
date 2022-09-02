@@ -26,7 +26,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 	*/
 
 	const float
-		min_layers = 16.0f, max_layers = 64.0f,
+		min_layers = 2.0f, max_layers = 40.0f,
 		height_scale = 0.03f, lod_cutoff = 1.5f;
 
 	////////// LOD calculations
