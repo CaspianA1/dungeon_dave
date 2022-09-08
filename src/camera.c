@@ -4,9 +4,7 @@
 ////////// Small utility functions
 
 static GLfloat clamp_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
-	if (val > limit) return limit;
-	else if (val < -limit) return -limit;
-	else return val;
+	return glm_clamp(val, -limit, limit);
 }
 
 // If a value is smaller or larger than an edge of the domain, it is wrapped around to the other side.
