@@ -83,12 +83,23 @@ static void get_light_view_and_projection(const CascadedShadowContext* const sha
 
 //////////
 
-static GLuint init_csm_depth_layers(const GLsizei resolution, const GLsizei num_cascades) {
+static GLuint init_csm_depth_layers(const GLsizei resolution, const GLsizei num_cascades, const GLsizei num_depth_buffer_bits) {
 	const GLuint depth_layers = preinit_texture(shadow_map_texture_type, TexNonRepeating,
 		OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
 
+	GLint internal_format;
+
+	switch (num_depth_buffer_bits) {
+		case 16: internal_format = GL_DEPTH_COMPONENT16; break;
+		case 24: internal_format = GL_DEPTH_COMPONENT24; break;
+		case 32: internal_format = GL_DEPTH_COMPONENT32; break;
+		default:
+			FAIL(CreateTexture, "Could not create a shadow map texture, because the number "
+				"of depth buffer bits must be 16, 24, or 32, not %d", num_depth_buffer_bits);
+	}
+
 	init_texture_data(shadow_map_texture_type, (GLsizei[]) {resolution, resolution, num_cascades},
-		GL_DEPTH_COMPONENT, OPENGL_SIZED_SHADOW_MAP_PIXEL_FORMAT, OPENGL_SHADOW_MAP_COLOR_CHANNEL_TYPE, NULL);
+		GL_DEPTH_COMPONENT, internal_format, OPENGL_SHADOW_MAP_COLOR_CHANNEL_TYPE, NULL);
 
 	return depth_layers;
 }
@@ -150,7 +161,8 @@ void specify_cascade_count_before_any_shader_compilation(const GLsizei num_casca
 CascadedShadowContext init_shadow_context(
 	const vec3 dir_to_light, const vec3 sub_frustum_scale,
 	const GLfloat far_clip_dist, const GLfloat linear_split_weight,
-	const GLsizei resolution, const GLsizei num_cascades) {
+	const GLsizei resolution, const GLsizei num_cascades,
+	const GLsizei num_depth_buffer_bits) {
 
 	const GLsizei num_split_dists = num_cascades - 1;
 	GLfloat* const split_dists = alloc((size_t) num_split_dists, sizeof(GLfloat));
@@ -173,7 +185,7 @@ CascadedShadowContext init_shadow_context(
 
 	//////////
 
-	const GLuint depth_layers = init_csm_depth_layers(resolution, num_cascades);
+	const GLuint depth_layers = init_csm_depth_layers(resolution, num_cascades, num_depth_buffer_bits);
 
 	return (CascadedShadowContext) {
 		.depth_layers = depth_layers,

@@ -31,7 +31,8 @@ void specify_cascade_count_before_any_shader_compilation(const GLsizei num_casca
 CascadedShadowContext init_shadow_context(
 	const vec3 dir_to_light, const vec3 sub_frustum_scale,
 	const GLfloat far_clip_dist, const GLfloat linear_split_weight,
-	const GLsizei resolution, const GLsizei num_cascades);
+	const GLsizei resolution, const GLsizei num_cascades,
+	const GLsizei num_depth_buffer_bits);
 
 void deinit_shadow_context(const CascadedShadowContext* const shadow_context);
 
