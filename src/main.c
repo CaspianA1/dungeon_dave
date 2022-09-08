@@ -1,7 +1,6 @@
 #include "main.h"
 #include "normal_map_generation.h"
 #include "data/maps.h"
-#include "utils/texture.h" // TODO: remove this when I don't need to contain the alpha test logic in this file anymore
 #include "event.h"
 #include "utils/alloc.h"
 #include "utils/opengl_wrappers.h"
@@ -21,6 +20,7 @@ static void main_drawer(void* const app_context, const Event* const event) {
 	Camera* const camera = &scene_context -> camera;
 	BillboardContext* const billboard_context = &scene_context -> billboard_context;
 	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
+	const Skybox* const skybox = &scene_context -> skybox;
 	const AmbientOcclusionMap ao_map = scene_context -> ao_map;
 
 	////////// Scene updating
@@ -39,7 +39,6 @@ static void main_drawer(void* const app_context, const Event* const event) {
 
 	////////// The main drawing code
 
-	const Skybox* const skybox = &scene_context -> skybox;
 	draw_sectors(sector_context, shadow_context, skybox, camera -> frustum_planes, ao_map);
 
 	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
@@ -243,12 +242,12 @@ static void* main_init(void) {
 			// Terrain:
 			/*
 			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.0f, 1.0f},
-			far_clip_dist, 0.4f, texture_sizes.shadow_map, num_cascades
+			far_clip_dist, 0.4f, texture_sizes.shadow_map, num_cascades, 16
 			*/
 
 			// Palace:
 			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.75f, 1.0f},
-			far_clip_dist, 0.25f, texture_sizes.shadow_map, num_cascades
+			far_clip_dist, 0.25f, texture_sizes.shadow_map, num_cascades, 16
 		),
 
 		.ao_map = init_ao_map(heightmap, map_size, max_point_height),
