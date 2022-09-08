@@ -70,7 +70,7 @@ static void get_light_view_and_projection(const CascadedShadowContext* const sha
 		*max *= (*max < 0.0f) ? one_over_scale : scale;
 	}
 
-	////////// Getting the AABB radius, and applying texel snapping to the light view based on that
+	////////// Getting the AABB radius, applying texel snapping to the light view, and getting the light projection
 
 	const GLfloat radius = roundf(glm_aabb_radius(light_view_sub_frustum_box));
 	const GLfloat divisor = 2.0f * radius / shadow_context -> resolution;
@@ -78,10 +78,7 @@ static void get_light_view_and_projection(const CascadedShadowContext* const sha
 	GLfloat* const column = light_view[3];
 	for (byte i = 0; i < 3; i++) column[i] -= fmodf(column[i], divisor);
 
-	////////// Getting the light projection
-
 	glm_ortho(-radius, radius, -radius, radius, -radius, radius, light_projection);
-
 }
 
 //////////
