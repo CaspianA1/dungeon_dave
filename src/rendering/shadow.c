@@ -101,11 +101,32 @@ static GLuint init_csm_framebuffer(const GLuint depth_layers) {
 	glFramebufferTexture(framebuffer_target, GL_DEPTH_ATTACHMENT, depth_layers, 0);
 	glDrawBuffer(GL_NONE); glReadBuffer(GL_NONE); // Not drawing into or reading from any color buffers
 
-	check_framebuffer_completeness();
+	//////////
 
-	glBindFramebuffer(framebuffer_target, 0);
+	const GLchar* status_string;
 
-	return framebuffer;
+	switch (glCheckFramebufferStatus(framebuffer_target)) {
+		case GL_FRAMEBUFFER_COMPLETE:
+			glBindFramebuffer(framebuffer_target, 0);
+			return framebuffer;
+
+		#define COMPLETENESS_CASE(status) case GL_##status: status_string = #status; break
+
+		COMPLETENESS_CASE(FRAMEBUFFER_UNDEFINED);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_READ_BUFFER);
+		COMPLETENESS_CASE(FRAMEBUFFER_UNSUPPORTED);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS);
+
+		#undef COMPLETENESS_CASE
+
+		default: status_string = "Unknown framebuffer error";
+	}
+
+	FAIL(CreateFramebuffer, "Could not create a framebuffer for this reason: '%s'", status_string);
 }
 
 /* For shaders, the number of cascades equals the value of the macro `NUM_CASCADES`

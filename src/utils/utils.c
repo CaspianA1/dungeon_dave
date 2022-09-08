@@ -235,44 +235,20 @@ byte sample_map_point(const byte* const map, const byte x, const byte y, const b
 }
 
 const GLchar* get_GL_error(void) {
-	#define ERROR_CASE(error) case GL_##error: return #error;
-
 	switch (glGetError()) {
+		#define ERROR_CASE(error) case GL_##error: return #error;
+
 		ERROR_CASE(NO_ERROR);
 		ERROR_CASE(INVALID_ENUM);
 		ERROR_CASE(INVALID_VALUE);
 		ERROR_CASE(INVALID_OPERATION);
 		ERROR_CASE(INVALID_FRAMEBUFFER_OPERATION);
 		ERROR_CASE(OUT_OF_MEMORY);
+
+		#undef ERROR_CASE
+
 		default: return "Unknown error";
 	}
-
-	#undef ERROR_CASE
-}
-
-void check_framebuffer_completeness(void) {
-	const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (status == GL_FRAMEBUFFER_COMPLETE) return;
-
-	const GLchar* status_string;
-
-	#define COMPLETENESS_CASE(status) case GL_##status: status_string = #status; break
-
-	switch (status) {
-		COMPLETENESS_CASE(FRAMEBUFFER_UNDEFINED);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_READ_BUFFER);
-		COMPLETENESS_CASE(FRAMEBUFFER_UNSUPPORTED);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS);
-		default: status_string = "Unknown framebuffer error";
-	}
-
-	FAIL(CreateFramebuffer, "Could not create a framebuffer for this reason: '%s'", status_string);
-
-	#undef COMPLETENESS_CASE
 }
 
 FILE* open_file_safely(const GLchar* const path, const GLchar* const mode) {
