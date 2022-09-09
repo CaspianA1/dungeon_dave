@@ -46,4 +46,7 @@ enum { // `enum` is used to make these values compile-time constants
 	vertices_per_skybox = 14
 };
 
+typedef face_component_t face_vertex_t[components_per_face_vertex];
+typedef face_vertex_t face_mesh_t[vertices_per_face];
+
 #endif

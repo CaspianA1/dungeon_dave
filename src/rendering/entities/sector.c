@@ -58,59 +58,67 @@ Also, figure out why making the near clip dist smaller warps the weapon much mor
 // Attributes here are height and texture id
 static byte point_matches_sector_attributes(const Sector* const sector,
 	const byte* const heightmap, const byte* const texture_id_map,
-	const byte x, const byte y, const byte map_width) {
+	const byte x, const byte y, const byte map_width, const byte texture_id) {
 
 	return
 		sample_map_point(heightmap, x, y, map_width) == sector -> visible_heights.max &&
-		sample_map_point(texture_id_map, x, y, map_width) == sector -> texture_id;
+		sample_map_point(texture_id_map, x, y, map_width) == texture_id;
 }
 
 // Gets length across, and then adds to area size y until out of map or length across not eq
-static Sector form_sector_area(Sector sector, const StateMap traversed_points,
+static void form_sector_area(Sector* const sector, const StateMap traversed_points,
 	const byte* const heightmap, const byte* const texture_id_map,
-	const byte map_width, const byte map_height) {
+	const byte map_width, const byte map_height, const byte texture_id) {
 
-	byte top_right_corner_x = sector.origin[0];
-	const byte origin_y = sector.origin[1];
+	const byte* const origin = sector -> origin;
+	byte* const size = sector -> size;
 
-	while (top_right_corner_x < map_width &&
-		!statemap_bit_is_set(traversed_points, top_right_corner_x, origin_y) &&
-		point_matches_sector_attributes(&sector, heightmap, texture_id_map, top_right_corner_x, origin_y, map_width)) {
+	byte top_x = origin[0];
+	const byte origin_y = origin[1];
 
-		sector.size[0]++;
-		top_right_corner_x++;
+	while (top_x < map_width && !statemap_bit_is_set(traversed_points, top_x, origin_y) &&
+		point_matches_sector_attributes(sector, heightmap, texture_id_map, top_x, origin_y, map_width, texture_id)) {
+
+		size[0]++;
+		top_x++;
 	}
 
 	// Now, `sector.size[0]` equals the first horizontal span length where equal attributes were found
-	for (byte y = origin_y; y < map_height; y++, sector.size[1]++) {
-		for (byte x = sector.origin[0]; x < top_right_corner_x; x++) {
-			if (!point_matches_sector_attributes(&sector, heightmap, texture_id_map, x, y, map_width))
+	for (byte y = origin_y; y < map_height; y++, size[1]++) {
+		for (byte x = origin[0]; x < top_x; x++) { // Here, `top_x` equals the top right corner
+			if (!point_matches_sector_attributes(sector, heightmap, texture_id_map, x, y, map_width, texture_id))
 				goto done;
 		}
 	}
 
 	done:
 
-	set_statemap_area(traversed_points, (buffer_size_t[4]) {
-		sector.origin[0], sector.origin[1], sector.size[0], sector.size[1]
-	});
-
-	return sector;
+	set_statemap_area(traversed_points, (buffer_size_t[4]) {origin[0], origin[1], size[0], size[1]});
 }
 
-static List generate_sectors_from_maps(const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_width, const byte map_height) {
+// static List generate_sectors_from_maps(const byte* const heightmap,
+static void generate_sectors_and_face_meshes_from_maps(
+	List* const sectors, List* const face_meshes,
+	const byte* const heightmap, const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
-	// `>> 3` = `/ 8`. Works pretty well for my maps. TODO: make this a constant somewhere.
+	//////////
+
+	/* `>> 3` = `/ 8`. Works pretty well for my maps. TODO: make to a constant.
+	If the map size is small enough, an incorrect guess of zero can happen. */
 	buffer_size_t sector_amount_guess = (map_width * map_height) >> 3;
-	// If the map size is small enough, an incorrect guess of zero can happen
 	if (sector_amount_guess == 0) sector_amount_guess = 1;
+	*sectors = init_list(sector_amount_guess, Sector);
 
-	List sectors = init_list(sector_amount_guess, Sector);
+	//////////
 
-	/* StateMap used instead of a heightmap with null map points, because 1. less
+	/* This contains the actual data for faces. `num_sectors * 3` gives a good
+	guess for the face/sector ratio. TODO: make this a constant somewhere. */
+	*face_meshes = init_list(sector_amount_guess * 3, face_mesh_t);
+
+	//////////
+
+	/* A StateMap is used instead of a heightmap with null map points, because 1. less
 	bytes used and 2. for forming faces, the original heightmap will need to be unmodified. */
-
 	const StateMap traversed_points = init_statemap(map_width, map_height);
 
 	for (byte y = 0; y < map_height; y++) {
@@ -123,16 +131,27 @@ static List generate_sectors_from_maps(const byte* const heightmap,
 				FAIL(TextureIDIsTooLarge, "Could not create a sector at map position {%hhu, %hhu} because the texture "
 					"ID %hhu exceeds the maximum, which is %hhu", x, y, texture_id, (byte) (MAX_NUM_SECTOR_SUBTEXTURES - 1u));
 
-			const Sector seed_sector = {
-				.texture_id = texture_id, .origin = {x, y}, .size = {0, 0},
+			Sector sector = {
+				.origin = {x, y}, .size = {0, 0},
 				.visible_heights = {.min = 0, .max = sample_map_point(heightmap, x, y, map_width)},
 				.face_range = {.start = 0, .length = 0}
 			};
 
-			const Sector sector = form_sector_area(seed_sector, traversed_points,
-				heightmap, texture_id_map, map_width, map_height);
+			form_sector_area(&sector, traversed_points, heightmap, texture_id_map, map_width, map_height, texture_id);
 
-			push_ptr_to_list(&sectors, &sector);
+			////////// Setting face mesh metadata + initing sector faces
+
+			sector.face_range.start = face_meshes -> length;
+
+			byte biggest_face_height;
+			init_mesh_for_sector(&sector, face_meshes, &biggest_face_height, heightmap, map_width, map_height, texture_id);
+
+			sector.visible_heights.min = sector.visible_heights.max - biggest_face_height;
+			sector.face_range.length = face_meshes -> length - sector.face_range.start;
+
+			//////////
+
+			push_ptr_to_list(sectors, &sector);
 
 			/* This is a simple optimization; the next `sector_width - 1`
 			tiles will already be marked traversed, so this just skips those. */
@@ -141,7 +160,6 @@ static List generate_sectors_from_maps(const byte* const heightmap,
 	}
 
 	deinit_statemap(traversed_points);
-	return sectors;
 }
 
 static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
@@ -230,8 +248,8 @@ SectorContext init_sector_context(const byte* const heightmap,
 	const GLchar* const* const texture_paths, const GLsizei num_textures,
 	const GLsizei texture_size, const NormalMapConfig* const normal_map_config) {
 
-	const List sectors = generate_sectors_from_maps(heightmap, texture_id_map, map_width, map_height);
-	const List mesh_cpu = init_face_meshes_from_sectors(&sectors, heightmap, map_width, map_height);
+	List sectors, face_meshes;
+	generate_sectors_and_face_meshes_from_maps(&sectors, &face_meshes, heightmap, texture_id_map, map_width, map_height);
 
 	const GLuint diffuse_texture_set = init_texture_set(
 		false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
@@ -241,13 +259,13 @@ SectorContext init_sector_context(const byte* const heightmap,
 	return (SectorContext) {
 		.drawable = init_drawable_with_vertices(
 			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW, GL_TRIANGLES,
-			(List) {.data = NULL, .item_size = mesh_cpu.item_size, .length = mesh_cpu.length},
+			(List) {.data = NULL, .item_size = face_meshes.item_size, .length = face_meshes.length},
 			init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag"), NULL),
 			diffuse_texture_set
 		),
 
 		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config),
-		.mesh_cpu = mesh_cpu, .sectors = sectors
+		.mesh_cpu = face_meshes, .sectors = sectors
 	};
 }
 

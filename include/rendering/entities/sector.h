@@ -11,7 +11,7 @@
 #include "normal_map_generation.h"
 
 typedef struct {
-	const byte texture_id, origin[2];
+	const byte origin[2];
 	byte size[2]; // Top-down (X and Z); same for origin
 	struct {byte min; const byte max;} visible_heights;
 	struct {buffer_size_t start, length;} face_range; // Face domain that defines sector's faces; used for batching
