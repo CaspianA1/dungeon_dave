@@ -19,7 +19,7 @@ Drawing billboards to the shadow cascades:
 	- Update billboards on the CPU
 	- Sort billboards back-to-front
 	- Enable blending
-	- Draw them with a special depth shader that gets billboard vertices, and outputs to a 8-bit alpha texture
+	- Draw them with a special depth shader that gets billboard vertices, and outputs to a 8-bit alpha texture (perhaps at half-res, for less memory usage?)
 	- Then, when drawing entities that use the world shading fragment shader, multiply the shadow value by the alpha value
 */
 
