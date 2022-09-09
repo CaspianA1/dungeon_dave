@@ -6,6 +6,7 @@
 
 in vec3 fragment_pos_world_space, UV, ambient_occlusion_UV;
 
+// TODO: set these uniforms through a shared fn for world-shaded objects
 uniform samplerCube environment_map_sampler;
 uniform sampler2DArray diffuse_sampler, normal_map_sampler;
 uniform sampler3D ambient_occlusion_sampler;
