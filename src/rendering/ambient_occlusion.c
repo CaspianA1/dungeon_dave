@@ -232,5 +232,9 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 	dealloc(ao_map);
 	dealloc(inv_rand_dirs);
 
-	return texture;
+	return (AmbientOcclusionMap) {texture};
+}
+
+void deinit_ao_map(const AmbientOcclusionMap* const ao_map) {
+	deinit_texture(ao_map -> texture);
 }

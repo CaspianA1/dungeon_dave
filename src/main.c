@@ -21,7 +21,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	BillboardContext* const billboard_context = &scene_context -> billboard_context;
 	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
 	const Skybox* const skybox = &scene_context -> skybox;
-	const AmbientOcclusionMap ao_map = scene_context -> ao_map;
+	const AmbientOcclusionMap* const ao_map = &scene_context -> ao_map;
 
 	////////// Scene updating
 
@@ -309,7 +309,7 @@ static void main_deinit(void* const app_context) {
 	deinit_sector_context(&scene_context -> sector_context);
 	deinit_billboard_context(&scene_context -> billboard_context);
 
-	deinit_ao_map(scene_context -> ao_map);
+	deinit_ao_map(&scene_context -> ao_map);
 	deinit_shadow_context(&scene_context -> shadow_context);
 	deinit_title_screen(&scene_context -> title_screen);
 	deinit_skybox(scene_context -> skybox);

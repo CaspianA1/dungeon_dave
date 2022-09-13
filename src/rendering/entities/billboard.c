@@ -99,7 +99,7 @@ typedef struct {
 	const CascadedShadowContext* const shadow_context;
 	const Skybox* const skybox;
 	const GLfloat* const right_xz;
-	const AmbientOcclusionMap ao_map;
+	const AmbientOcclusionMap* const ao_map;
 } UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
@@ -115,7 +115,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		use_texture_in_shader(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
 		use_texture_in_shader(typed_params.normal_map_set, shader, "normal_map_sampler", TexSet, TU_BillboardNormalMap);
 		use_texture_in_shader(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
-		use_texture_in_shader(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
+		use_texture_in_shader(typed_params.ao_map -> texture, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 
 	//////////
@@ -135,7 +135,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 void draw_billboards(BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context,
 	const Skybox* const skybox, const Camera* const camera,
-	const AmbientOcclusionMap ao_map) {
+	const AmbientOcclusionMap* const ao_map) {
 
 	sort_billboards_by_dist_to_camera(billboard_context, camera -> pos);
 

@@ -56,6 +56,6 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws);
 
 void draw_weapon_sprite(const WeaponSprite* const ws,
 	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const AmbientOcclusionMap ao_map);
+	const Skybox* const skybox, const AmbientOcclusionMap* const ao_map);
 
 #endif

@@ -181,7 +181,7 @@ typedef struct {
 	const WeaponSprite* const weapon_sprite;
 	const CascadedShadowContext* const shadow_context;
 	const Skybox* const skybox;
-	const AmbientOcclusionMap ao_map;
+	const AmbientOcclusionMap* const ao_map;
 } UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
@@ -200,7 +200,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		use_texture_in_shader(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_WeaponSpriteDiffuse);
 		use_texture_in_shader(typed_params.weapon_sprite -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_WeaponSpriteNormalMap);
 		use_texture_in_shader(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
-		use_texture_in_shader(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
+		use_texture_in_shader(typed_params.ao_map -> texture, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 
 	////////// Updating uniforms
@@ -319,7 +319,7 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 
 void draw_weapon_sprite(const WeaponSprite* const ws,
 	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const AmbientOcclusionMap ao_map) {
+	const Skybox* const skybox, const AmbientOcclusionMap* const ao_map) {
 
 	// No depth testing b/c depth values from sectors or billboards may intersect
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,

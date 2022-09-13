@@ -38,7 +38,7 @@ void update_billboards(const BillboardContext* const billboard_context, const GL
 void draw_billboards(BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context,
 	const Skybox* const skybox, const Camera* const camera,
-	const AmbientOcclusionMap ao_map);
+	const AmbientOcclusionMap* const ao_map);
 
 BillboardContext init_billboard_context(
 	const GLsizei texture_size, const NormalMapConfig* const normal_map_config,

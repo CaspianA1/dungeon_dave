@@ -217,7 +217,7 @@ typedef struct {
 	const Skybox* const skybox;
 	const SectorContext* const sector_context;
 	const CascadedShadowContext* const shadow_context;
-	const AmbientOcclusionMap ao_map;
+	const AmbientOcclusionMap* const ao_map;
 } UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
@@ -229,7 +229,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		use_texture_in_shader(typed_params.sector_context -> drawable.diffuse_texture, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
 		use_texture_in_shader(typed_params.sector_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
 		use_texture_in_shader(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
-		use_texture_in_shader(typed_params.ao_map, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
+		use_texture_in_shader(typed_params.ao_map -> texture, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 	);
 }
 
@@ -293,7 +293,7 @@ void draw_all_sectors_to_shadow_context(const SectorContext* const sector_contex
 
 void draw_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
-	const vec4 frustum_planes[planes_per_frustum], const AmbientOcclusionMap ao_map) {
+	const vec4 frustum_planes[planes_per_frustum], const AmbientOcclusionMap* const ao_map) {
 
 	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(sector_context, frustum_planes);
 

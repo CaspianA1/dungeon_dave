@@ -7,11 +7,13 @@ in the heightmap (from the lowest to the highest point) intersect with any scene
 #include "utils/buffer_defs.h"
 #include "utils/opengl_wrappers.h"
 
-typedef GLuint AmbientOcclusionMap;
+typedef struct {
+    const GLuint texture;
+} AmbientOcclusionMap;
 
 // Excluded: generate_rand_number_within_range, generate_random_dir, ray_collides_with_heightmap
 
 AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size[2], const byte max_point_height);
-#define deinit_ao_map deinit_texture
+void deinit_ao_map(const AmbientOcclusionMap* const ao_map);
 
 #endif
