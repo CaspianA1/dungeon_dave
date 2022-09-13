@@ -51,8 +51,6 @@ static Screen init_screen(const GLchar* const title, const byte opengl_major_min
 	if (screen.opengl_context == NULL) FAIL(LoadOpenGL, "Could not load an OpenGL context: '%s'", SDL_GetError());
 	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
 
-	SDL_SetRelativeMouseMode(SDL_TRUE);
-	SDL_WarpMouseInWindow(screen.window, window_w >> 1, window_h >> 1);
 
 	SDL_GL_SetSwapInterval(
 		#ifdef USE_VSYNC
@@ -163,7 +161,7 @@ static bool application_should_exit(const Uint8* const keys) {
 
 //////////
 
-static void loop_application(const Screen* const screen, void* const app_context, void (*const drawer) (void* const, const Event* const)) {
+static void loop_application(const Screen* const screen, void* const app_context, bool (*const drawer) (void* const, const Event* const)) {
 	SDL_Window* const window = screen -> window;
 	const Uint8* const keys = SDL_GetKeyboardState(NULL);
 
@@ -178,6 +176,8 @@ static void loop_application(const Screen* const screen, void* const app_context
 	GLfloat secs_elapsed_between_frames = 0.0f;
 	Uint64 time_counter_for_last_frame = SDL_GetPerformanceCounter();
 
+	bool mouse_is_currently_visible = true;
+
 	//////////
 
 	while (!application_should_exit(keys)) {
@@ -191,7 +191,12 @@ static void loop_application(const Screen* const screen, void* const app_context
 		////////// Getting the next event, drawing the screen, debugging errors, and swapping the framebuffer
 
 		const Event event = get_next_event(time_before_tick_ms, secs_elapsed_between_frames, keys);
-		drawer(app_context, &event);
+		const bool mouse_should_be_visible = drawer(app_context, &event);
+
+		if (mouse_should_be_visible != mouse_is_currently_visible) {
+			mouse_is_currently_visible = mouse_should_be_visible;
+			SDL_SetRelativeMouseMode(mouse_should_be_visible ? SDL_FALSE : SDL_TRUE);
+		}
 
 		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
 		if (keys[KEY_PRINT_SDL_ERROR]) SDL_ERR_CHECK;
@@ -213,7 +218,7 @@ static void loop_application(const Screen* const screen, void* const app_context
 	}
 }
 
-void make_application(void (*const drawer) (void* const, const Event* const),
+void make_application(bool (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const)) {
 
 	const Screen screen = init_screen(constants.window.app_name,

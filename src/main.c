@@ -5,12 +5,12 @@
 #include "utils/alloc.h"
 #include "utils/opengl_wrappers.h"
 
-static void main_drawer(void* const app_context, const Event* const event) {
+static bool main_drawer(void* const app_context, const Event* const event) {
 	glClear(GL_DEPTH_BUFFER_BIT); // No color buffer clearing needed
 
 	SceneContext* const scene_context = (SceneContext*) app_context;
 
-	if (tick_title_screen(&scene_context -> title_screen, event)) return;
+	if (tick_title_screen(&scene_context -> title_screen, event)) return true;
 
 	////////// Some variable initialization
 
@@ -52,6 +52,8 @@ static void main_drawer(void* const app_context, const Event* const event) {
 			);
 		);
 	);
+
+	return false;
 }
 
 static void* main_init(void) {
@@ -169,6 +171,7 @@ static void* main_init(void) {
 	//////////
 
 	const byte
+		// *const heightmap = (const byte*) checker_heightmap, *const texture_id_map = (const byte*) checker_texture_id_map, map_size[2] = {checker_width, checker_height};
 		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_heightmap, map_size[2] = {blank_width, blank_height};
 		*const heightmap = (const byte*) palace_heightmap, *const texture_id_map = (const byte*) palace_texture_id_map, map_size[2] = {palace_width, palace_height};
 		// *const heightmap = (const byte*) fortress_heightmap, *const texture_id_map = (const byte*) fortress_texture_id_map, map_size[2] = {fortress_width, fortress_height};

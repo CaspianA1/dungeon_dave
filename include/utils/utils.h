@@ -113,7 +113,8 @@ typedef enum {
 /* Excluded: init_screen, deinit_screen, resize_window_if_needed,
 set_triangle_fill_mode, application_should_exit, loop_application */
 
-void make_application(void (*const drawer) (void* const, const Event* const),
+// Note: the drawer returns if the mouse should be visible.
+void make_application(bool (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const));
 
 // Note: `x` and `y` are top-down here (making them technically `x` and `z`).
