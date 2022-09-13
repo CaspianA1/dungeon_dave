@@ -37,6 +37,9 @@ ahead of time, and is very small; so this should make the code a bit simpler and
 
 	2. If the near clip dist is way too small, the weapon appears warped, and disappears from sight too easily.
 	3. The effect also seems to happen more (possibly exclusively) if the weapon sprite is inside or behind another polygon.
+
+- Note: if I do weapon rotation by a rotation matrix later, treat the top corners as bottom corners that are offsetted by `rotation_factor * vertical_size`
+- So for that, only unproject the bottom points (but ignore that at first)
 */
 
 //////////
