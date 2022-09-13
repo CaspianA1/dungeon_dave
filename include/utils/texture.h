@@ -73,7 +73,8 @@ typedef enum {
 
 typedef enum {
 	TexRepeating = GL_REPEAT,
-	TexNonRepeating = GL_CLAMP_TO_EDGE
+	TexNonRepeating = GL_CLAMP_TO_EDGE,
+	TexBordered = GL_CLAMP_TO_BORDER
 } TextureWrapMode;
 
 typedef enum {
