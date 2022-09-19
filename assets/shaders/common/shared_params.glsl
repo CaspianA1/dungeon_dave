@@ -9,9 +9,9 @@ layout(shared) uniform ConstantShadingParams {
 
 	struct {float bilinear, ao;} percents;
 	struct {float ambient, diffuse, specular;} strengths;
-	vec2 specular_exponent_domain;
 
 	float
+		specular_exponent,
 		cascade_split_distances[NUM_CASCADES - 1u], // TODO: use the const variable name for this size
 		tone_mapping_max_white, noise_granularity;
 

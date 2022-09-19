@@ -57,7 +57,7 @@ static const struct {
 		const struct {const GLfloat ambient, diffuse, specular;} strengths;
 
 		const GLfloat
-			specular_exponent_domain[2], tone_mapping_max_white,
+			specular_exponent, tone_mapping_max_white,
 			noise_granularity, overall_scene_tone[3];
 	} lighting;
 
@@ -100,7 +100,7 @@ static const struct {
 
 		.percents = {.bilinear = 0.75f, .ao = 1.0f},
 		.strengths = {.ambient = 0.5f, .diffuse = 0.7f, .specular = 1.0f},
-		.specular_exponent_domain = {32.0f, 96.0f},
+		.specular_exponent = 32.0f,
 
 		.tone_mapping_max_white = 1.5f,
 		.noise_granularity = 0.2f / 255.0f,

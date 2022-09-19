@@ -10,7 +10,7 @@ static void init_constant_shading_params(UniformBuffer* const shading_params, co
 	UBO_WRITE(percents.bilinear); UBO_WRITE(percents.ao);
 
 	UBO_WRITE(strengths.ambient); UBO_WRITE(strengths.diffuse);
-	UBO_WRITE(strengths.specular); UBO_WRITE(specular_exponent_domain);
+	UBO_WRITE(strengths.specular); UBO_WRITE(specular_exponent);
 
 	write_array_of_primitives_to_uniform_buffer(shading_params, "cascade_split_distances", (List) {
 		.data = shadow_context -> split_dists,
@@ -37,7 +37,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 		"percents.bilinear", "percents.ao",
 		"strengths.ambient", "strengths.diffuse", "strengths.specular",
 
-		"specular_exponent_domain", "cascade_split_distances",
+		"specular_exponent", "cascade_split_distances",
 
 		"tone_mapping_max_white", "noise_granularity", "overall_scene_tone"
 	};

@@ -31,8 +31,9 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) {
 
 	const float one_third = 1.0f / 3.0f;
 	float texture_color_strength = (texture_color.r + texture_color.g + texture_color.b) * one_third;
-	float specular_exponent = mix(specular_exponent_domain.x, specular_exponent_domain.y, texture_color_strength);
 	float specular_value = strengths.specular * pow(cos_angle_of_incidence, specular_exponent);
+
+	// TODO: estimate roughness by the fwidth of the color?
 
 	//////////
 
