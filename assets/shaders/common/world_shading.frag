@@ -29,17 +29,19 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) {
 
 	//////////
 
-	const float one_third = 1.0f / 3.0f;
-	float texture_color_strength = (texture_color.r + texture_color.g + texture_color.b) * one_third;
+	float roughness = length(fwidth(texture_color)); // Greater texture color change -> more local roughness
+	float specular_exponent = mix(specular_exponents.matte, specular_exponents.rough, roughness);
 	float specular_value = strengths.specular * pow(cos_angle_of_incidence, specular_exponent);
-
-	// TODO: estimate roughness by the fwidth of the color?
 
 	//////////
 
 	vec3 reflection_dir = reflect(-view_dir, fragment_normal);
 	reflection_dir.x = -reflection_dir.x;
 	vec3 env_map_value = texture(environment_map_sampler, reflection_dir).rgb;
+
+	const float one_third = 1.0f / 3.0f; // Brighter surfaces reflect more of the environment map
+	float texture_brightness = (texture_color.r + texture_color.g + texture_color.b) * one_third;
+	env_map_value = mix(vec3(1.0f), env_map_value, texture_brightness);
 
 	return specular_value * env_map_value;
 }

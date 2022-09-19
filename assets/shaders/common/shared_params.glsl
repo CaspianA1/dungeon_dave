@@ -9,6 +9,7 @@ layout(shared) uniform ConstantShadingParams {
 
 	struct {float bilinear, ao;} percents;
 	struct {float ambient, diffuse, specular;} strengths;
+	struct {float matte, rough;} specular_exponents;
 
 	float
 		specular_exponent,
