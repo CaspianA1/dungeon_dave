@@ -52,11 +52,9 @@ float get_ao_strength(void) {
 }
 
 // When the shadow layer is already known (like for the weapon sprite), this can be useful to call
-vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, const vec3 UV, const vec3 fragment_normal) {
-	vec3 adjusted_UV = UV;
-	adjust_UV_for_pixel_art_filtering(percents.bilinear, textureSize(diffuse_sampler, 0).xy, adjusted_UV.xy);
-
-	vec4 texture_color = texture(diffuse_sampler, adjusted_UV);
+vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, vec3 UV, const vec3 fragment_normal) {
+	adjust_UV_for_pixel_art_filtering(percents.bilinear, textureSize(diffuse_sampler, 0).xy, UV.xy);
+	vec4 texture_color = texture(diffuse_sampler, UV);
 
 	float ao_strength = get_ao_strength();
 
