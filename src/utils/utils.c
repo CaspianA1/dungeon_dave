@@ -234,11 +234,6 @@ void make_application(bool (*const drawer) (void* const, const Event* const),
 	deinit_screen(&screen);
 }
 
-// `x` and `y` are top-down
-byte sample_map_point(const byte* const map, const byte x, const byte y, const byte map_width) {
-	return map[y * map_width + x];
-}
-
 const GLchar* get_GL_error(void) {
 	switch (glGetError()) {
 		#define ERROR_CASE(error) case GL_##error: return #error;

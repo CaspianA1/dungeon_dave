@@ -118,7 +118,9 @@ void make_application(bool (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const));
 
 // Note: `x` and `y` are top-down here (making them technically `x` and `z`).
-byte sample_map_point(const byte* const map, const byte x, const byte y, const byte map_width);
+static inline byte sample_map_point(const byte* const map, const byte x, const byte z, const byte map_width) {
+	return map[z * map_width + x];
+}
 
 const GLchar* get_GL_error(void);
 
