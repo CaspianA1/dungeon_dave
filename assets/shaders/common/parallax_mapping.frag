@@ -83,5 +83,6 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 
 	vec2 parallax_UV = mix(curr_UV.xy, prev_UV.xy, UV_weight);
 	vec2 lod_parallax_UV = mix(parallax_UV, UV.xy, lod_weight);
+
 	return vec3(lod_parallax_UV, UV.z);
 }
