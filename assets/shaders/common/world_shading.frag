@@ -11,18 +11,12 @@ uniform samplerCube environment_map_sampler;
 uniform sampler2DArray diffuse_sampler, normal_map_sampler;
 uniform sampler3D ambient_occlusion_sampler;
 
-float diffuse(const vec3 fragment_normal) {
+float diffuse(const vec3 fragment_normal) { // Lambert
 	float diffuse_amount = dot(fragment_normal, dir_to_light);
 	return strengths.diffuse * max(diffuse_amount, 0.0f);
 }
 
-vec3 specular(const vec3 texture_color, const vec3 fragment_normal) {
-	/* Brighter texture colors have more specularity, and stronger highlights.
-	Also, the specular calculation uses Blinn-Phong, rather than just Phong.
-	The specular strength is also multiplied by the corresponding value in an
-	environment map (which is actually just the skybox under the hood), in order
-	to factor in the general environment's light into this calculation. */
-
+vec3 specular(const vec3 texture_color, const vec3 fragment_normal) { // Blinn-Phong
 	vec3 view_dir = normalize(camera_pos_world_space - fragment_pos_world_space);
 	vec3 halfway_dir = normalize(dir_to_light + view_dir);
 	float cos_angle_of_incidence = max(dot(fragment_normal, halfway_dir), 0.0f);
@@ -41,7 +35,9 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) {
 
 	const float one_third = 1.0f / 3.0f; // Brighter surfaces reflect more of the environment map
 	float texture_brightness = (texture_color.r + texture_color.g + texture_color.b) * one_third;
-	env_map_value = mix(vec3(1.0f), env_map_value, texture_brightness);
+	env_map_value = mix(vec3(1.0f), env_map_value, texture_brightness); // TODO: use Fresnel here instead
+
+	//////////
 
 	return specular_value * env_map_value;
 }
