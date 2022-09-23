@@ -43,8 +43,11 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) { // Blinn-P
 }
 
 float get_ao_strength(void) {
-	float unmodulated_ao_strength = texture(ambient_occlusion_sampler, ambient_occlusion_UV).r;
-	return mix(1.0f, unmodulated_ao_strength, percents.ao);
+	float raw_ao_strength = texture(ambient_occlusion_sampler, ambient_occlusion_UV).r;
+
+	/* Remapping the AO color to a linear colorspace, since the AO texture
+	can't be stored as SRGB (there are no 8-bit, 1-channel SRGB texture formats) */
+	return mix(1.0f, pow(raw_ao_strength, 2.2f), percents.ao);
 }
 
 // When the shadow layer is already known (like for the weapon sprite), this can be useful to call
@@ -52,13 +55,8 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 	adjust_UV_for_pixel_art_filtering(percents.bilinear, textureSize(diffuse_sampler, 0).xy, UV.xy);
 	vec4 texture_color = texture(diffuse_sampler, UV);
 
-	float ao_strength = get_ao_strength();
-
-	// return vec4(vec3(ao_strength), 1.0f);
-	// ao_strength = 1.0f;
-
 	vec3 non_ambient = diffuse(fragment_normal) + specular(texture_color.rgb, fragment_normal);
-	vec3 light_strength = (non_ambient * shadow_strength + strengths.ambient) * ao_strength;
+	vec3 light_strength = non_ambient * shadow_strength + strengths.ambient * get_ao_strength();
 
 	return vec4(light_strength * texture_color.rgb * overall_scene_tone, texture_color.a);
 }
