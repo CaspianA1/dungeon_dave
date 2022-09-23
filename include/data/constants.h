@@ -103,7 +103,7 @@ static const struct {
 		.strengths = {.ambient = 0.5f, .diffuse = 0.7f, .specular = 1.0f},
 		.specular_exponents = {.matte = 8.0f, .rough = 128.0f},
 
-		.tone_mapping_max_white = 1.5f,
+		.tone_mapping_max_white = 1.0f,
 		.noise_granularity = 0.2f / 255.0f,
 		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f}
 	},
