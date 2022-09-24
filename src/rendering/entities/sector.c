@@ -187,10 +187,11 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 			////////// Checking to see if the sector is visible
 
 			const byte *const origin = sector -> origin, *const size = sector -> size;
+			const byte origin_x = origin[0], origin_z = origin[1];
 
 			const vec3 aabb[2] = {
-				{origin[0], sector -> visible_heights.min, origin[1]},
-				{origin[0] + size[0], sector -> visible_heights.max, origin[1] + size[1]}
+				{origin_x, sector -> visible_heights.min, origin_z},
+				{origin_x + size[0], sector -> visible_heights.max, origin_z + size[1]}
 			};
 
 			if (!glm_aabb_frustum((vec3*) aabb, (vec4*) frustum_planes)) break;
