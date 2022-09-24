@@ -122,10 +122,10 @@ static inline byte sample_map_point(const byte* const map, const byte x, const b
 	return map[z * map_width + x];
 }
 
-static inline bool pos_out_of_overhead_map_bounds(const int16_t x,
-	const int16_t z, const byte map_width, const byte map_height) {
+static inline bool pos_out_of_overhead_map_bounds(const GLfloat x,
+	const GLfloat z, const byte map_width, const byte map_height) {
 
-	return (x < 0) || (z < 0) || (x >= (int16_t) map_width) || (z >= (int16_t) map_height);
+	return (x < 0.0f) || (z < 0.0f) || (x >= map_width) || (z >= map_height);
 }
 
 const GLchar* get_GL_error(void);
