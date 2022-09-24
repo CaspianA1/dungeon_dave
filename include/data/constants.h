@@ -31,7 +31,7 @@ typedef struct {
 } AngleLimits;
 
 static const struct {
-	const GLfloat almost_zero, milliseconds_per_second;
+	const GLfloat milliseconds_per_second;
 	const byte max_byte_value;
 
 	const struct {
@@ -84,7 +84,6 @@ static const struct {
 	} keys;
 
 } constants = {
-	.almost_zero = 0.001f,
 	.milliseconds_per_second = 1000.0f,
 	.max_byte_value = 255,
 

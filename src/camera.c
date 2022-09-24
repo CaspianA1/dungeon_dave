@@ -93,7 +93,7 @@ static bool tile_exists_at_pos(const GLfloat x, const GLfloat z, const GLfloat f
 	if (pos_out_of_overhead_map_bounds((int16_t) x, (int16_t) z, map_width, map_height)) return true;
 
 	const byte floor_height = sample_map_point(heightmap, (byte) x, (byte) z, map_width);
-	return (foot_height - floor_height) < -constants.almost_zero;
+	return (foot_height - floor_height) < -(GLfloat) GLM_FLT_EPSILON;
 }
 
 static bool pos_collides_with_heightmap(const GLfloat foot_height,
