@@ -70,11 +70,6 @@ static Screen init_screen(const GLchar* const title, const byte opengl_major_min
 	glEnable(GL_MULTISAMPLE);
 	#endif
 
-	#ifdef USE_POLYGON_ANTIALIASING
-	glEnable(GL_POLYGON_SMOOTH); glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	glEnable(GL_LINE_SMOOTH); glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	#endif
-
 	return screen;
 }
 
