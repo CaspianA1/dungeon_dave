@@ -51,7 +51,6 @@ static Screen init_screen(const GLchar* const title, const byte opengl_major_min
 	if (screen.opengl_context == NULL) FAIL(LoadOpenGL, "Could not load an OpenGL context: '%s'", SDL_GetError());
 	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
 
-
 	SDL_GL_SetSwapInterval(
 		#ifdef USE_VSYNC
 		1
