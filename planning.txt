@@ -79,6 +79,7 @@ Random feature ideas:
 - Can't use red cross for health since it's copyrighted
 - Gauge the number of multisample samples based on a runtime constant
 - Find a tighter far plane distance by finding the diameter of the sector convex hull
+- The map editor should be called Dungeon Painter
 
 Normal mapping:
 - Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
