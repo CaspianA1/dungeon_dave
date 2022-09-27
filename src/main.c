@@ -166,7 +166,7 @@ static void* main_init(void) {
 	const NormalMapConfig
 		sector_faces_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.1f, .intensity = 1.3f, .rescale_factor = 2.0f},
 		billboards_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 1.0f, .rescale_factor = 2.0f}, // This, with 2x scaling, uses about 100mb more memory
-		weapon_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.4f, .intensity = 1.5f, .rescale_factor = 3.0f}; // TODO: vary this per weapon sprite, if needed
+		weapon_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.4f, .intensity = 1.5f, .rescale_factor = 3.0f}; // TODO: vary this per weapon sprite
 
 	//////////
 
@@ -219,11 +219,11 @@ static void* main_init(void) {
 		.camera = init_camera(init_pos, far_clip_dist),
 
 		.weapon_sprite = init_weapon_sprite(
-			// 3.0f, 3.0f, 1.0f, 1.0f, 1.0f, 0.4f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
-			// 3.0f, 8.0f, 0.6f, 0.07f, 1.0f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
-			3.0f, 4.0f, 0.75f, 0.02f, 0.9f, 0.25f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}, &weapon_normal_map_config
-			// 4.0f, 4.0f, 0.75f, 0.035f, 0.9f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}, &weapon_normal_map_config
-			// 2.0f, 2.0f, 0.8f, 0.04f, 1.0f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}, &weapon_normal_map_config
+			// 30.0f, 120.0f, 1.0f, 1.0f, 1.0f, 0.4f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
+			// 20.0f, 130.0f, 0.7f, 0.07f, 1.0f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
+			15.0f, 120.0f, 0.75f, 0.02f, 0.9f, 0.25f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}, &weapon_normal_map_config
+			// 30.0f, 90.0f, 0.75f, 0.035f, 0.9f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}, &weapon_normal_map_config
+			// 25.0f, 90.0f, 0.8f, 0.04f, 1.0f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}, &weapon_normal_map_config
 		),
 
 		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
