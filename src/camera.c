@@ -309,8 +309,7 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 	////////// Defining vectors
 
 	vec2 dir_xz;
-	vec3 right;
-	GLfloat *const dir = camera -> dir, *const up = camera -> up;
+	GLfloat *const dir = camera -> dir, *const right = camera -> right, *const up = camera -> up;
 
 	get_camera_directions(angles, dir_xz, dir, camera -> right_xz, right, up);
 	update_camera_pos(camera, &event, heightmap, map_size, dir_xz, dir, right); // Updates `pos`

@@ -21,7 +21,7 @@ typedef struct {
 		time_accum_for_full_fov, far_clip_dist;
 
 	vec2 right_xz; // This is used for billboards
-	vec3 pos, dir, up, velocities;
+	vec3 pos, dir, right, up, velocities;
 
 	mat4 view, view_projection;
 	vec4 frustum_planes[planes_per_frustum];
