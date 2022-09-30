@@ -25,6 +25,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 	- Make the parallax parameters part of the uniform block
 	- See here: github.com/Rabbid76/graphics-snippets/blob/master/documentation/normal_parallax_relief.md
 	- Interval mapping instead? https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.5935&rep=rep1&type=pdf
+	- Allow parallax mapping to be enabled or disabled (this will be a user setting eventually)
 	*/
 
 	const float
