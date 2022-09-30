@@ -4,6 +4,8 @@
 #include "utils/opengl_wrappers.h"
 #include "data/constants.h"
 
+// TODO: let the mouse position equal or influence the light position
+
 ////////// Uniform updating
 
 typedef struct {
