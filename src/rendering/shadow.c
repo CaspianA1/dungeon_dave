@@ -191,12 +191,6 @@ CascadedShadowContext init_shadow_context(
 		.depth_layers = depth_layers,
 		.framebuffer = init_csm_framebuffer(depth_layers),
 
-		.depth_shader = init_shader(
-			ASSET_PATH("shaders/shadow/depth.vert"),
-			ASSET_PATH("shaders/shadow/depth.geom"),
-			ASSET_PATH("shaders/shadow/depth.frag"), NULL
-		),
-
 		.resolution = resolution, .num_cascades = num_cascades,
 
 		.dir_to_light = {dir_to_light[0], dir_to_light[1], dir_to_light[2]},
@@ -210,7 +204,6 @@ CascadedShadowContext init_shadow_context(
 void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
 	dealloc(shadow_context -> split_dists);
 	dealloc(shadow_context -> light_view_projection_matrices);
-	deinit_shader(shadow_context -> depth_shader);
 	deinit_texture(shadow_context -> depth_layers);
 	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
 }
@@ -246,8 +239,6 @@ void update_shadow_context(const CascadedShadowContext* const shadow_context, co
 }
 
 void enable_rendering_to_shadow_context(const CascadedShadowContext* const shadow_context) {
-	use_shader(shadow_context -> depth_shader);
-
 	const GLsizei resolution = shadow_context -> resolution;
 	glViewport(0, 0, resolution, resolution);
 	glBindFramebuffer(framebuffer_target, shadow_context -> framebuffer);

@@ -2,13 +2,9 @@
 
 #include "shadow/shadow.vert"
 #include "common/shared_params.glsl"
-#include "common/quad_utils.vert"
 #include "common/world_shading.vert"
 #include "common/parallax_mapping.vert"
-
-layout(location = 0) in uint texture_id;
-layout(location = 1) in vec2 billboard_size_world_space;
-layout(location = 2) in vec3 billboard_center_world_space;
+#include "common/billboard_transform.vert"
 
 uniform mat3 tbn;
 
@@ -16,9 +12,7 @@ void main(void) {
 	vec3 right = tbn[0];
 	right.z = -right.z;
 
-	vec2 vertex_pos_model_space = quad_corners[gl_VertexID] * 0.5f * billboard_size_world_space;
-	fragment_pos_world_space = vertex_pos_model_space.x * right + billboard_center_world_space;
-	fragment_pos_world_space.y += vertex_pos_model_space.y;
+	fragment_pos_world_space = get_billboard_vertex(right);
 
 	world_depth_value = get_world_depth_value(view, fragment_pos_world_space);
 

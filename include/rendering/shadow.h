@@ -13,7 +13,7 @@ sample radius for the average occluder depth. */
 static const TextureType shadow_map_texture_type = TexSet;
 
 typedef struct {
-	const GLuint depth_layers, framebuffer, depth_shader;
+	const GLuint depth_layers, framebuffer;
 	const GLsizei resolution, num_cascades;
 
 	const vec3 dir_to_light, sub_frustum_scale;

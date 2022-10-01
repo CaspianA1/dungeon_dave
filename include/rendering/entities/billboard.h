@@ -16,6 +16,12 @@
 typedef struct {
 	const Drawable drawable;
 	const GLuint normal_map_set;
+
+	const struct {
+		const GLuint depth_shader;
+		const GLfloat alpha_threshold;
+	} shadow_mapping;
+
 	List distance_sort_refs, billboards, animations, animation_instances;
 } BillboardContext;
 
@@ -35,12 +41,15 @@ typedef struct {
 
 void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs);
 
+void draw_billboards_to_shadow_context(const BillboardContext* const billboard_context, const vec2 right_xz);
+
 void draw_billboards(BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context,
 	const Skybox* const skybox, const Camera* const camera,
 	const AmbientOcclusionMap* const ao_map);
 
 BillboardContext init_billboard_context(
+	const GLfloat shadow_mapping_alpha_threshold,
 	const GLsizei texture_size, const NormalMapConfig* const normal_map_config,
 
 	const billboard_index_t num_still_textures, const GLchar* const* const still_texture_paths,

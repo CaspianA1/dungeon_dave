@@ -34,7 +34,8 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	////////// Rendering to the shadow context
 
 	enable_rendering_to_shadow_context(shadow_context);
-	draw_sectors_to_shadow_context(sector_context);
+		draw_sectors_to_shadow_context(sector_context);
+		draw_billboards_to_shadow_context(billboard_context, camera -> right_xz);
 	disable_rendering_to_shadow_context(event -> screen_size);
 
 	////////// The main drawing code
@@ -177,6 +178,7 @@ static void* main_init(void) {
 		// *const heightmap = (const byte*) fortress_heightmap, *const texture_id_map = (const byte*) fortress_texture_id_map, map_size[2] = {fortress_width, fortress_height};
 		// *const heightmap = (const byte*) level_one_heightmap, *const texture_id_map = (const byte*) level_one_texture_id_map, map_size[2] = {level_one_width, level_one_height};
 		// *const heightmap = (const byte*) terrain_heightmap, *const texture_id_map = (const byte*) terrain_texture_id_map, map_size[2] = {terrain_width, terrain_height};
+		// *const heightmap = (const byte*) terrain_2_heightmap, *const texture_id_map = (const byte*) terrain_2_texture_id_map, map_size[2] = {terrain_2_width, terrain_2_height};
 
 	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
 	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
@@ -219,6 +221,7 @@ static void* main_init(void) {
 		.camera = init_camera(init_pos, far_clip_dist),
 
 		.weapon_sprite = init_weapon_sprite(
+			// 10.0f, 180.0f, 2.0f, 0.05f, 1.5f, 0.1f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/sceptre.bmp"), 1, 2, 2}, &weapon_normal_map_config
 			// 30.0f, 120.0f, 1.0f, 1.0f, 1.0f, 0.4f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
 			// 20.0f, 130.0f, 0.7f, 0.07f, 1.0f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
 			15.0f, 120.0f, 0.75f, 0.02f, 0.9f, 0.25f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}, &weapon_normal_map_config
@@ -231,7 +234,7 @@ static void* main_init(void) {
 		),
 
 		.billboard_context = init_billboard_context(
-			texture_sizes.billboard, &billboards_normal_map_config,
+			0.99f, texture_sizes.billboard, &billboards_normal_map_config,
 
 			ARRAY_LENGTH(still_billboard_texture_paths), still_billboard_texture_paths,
 			ARRAY_LENGTH(billboard_animation_layouts), billboard_animation_layouts,
@@ -242,15 +245,15 @@ static void* main_init(void) {
 		),
 
 		.shadow_context = init_shadow_context(
+			// Palace:
+			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.75f, 1.0f},
+			far_clip_dist, 0.25f, texture_sizes.shadow_map, num_cascades, 16
+
 			// Terrain:
 			/*
 			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.0f, 1.0f},
 			far_clip_dist, 0.4f, texture_sizes.shadow_map, num_cascades, 16
 			*/
-
-			// Palace:
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.75f, 1.0f},
-			far_clip_dist, 0.25f, texture_sizes.shadow_map, num_cascades, 16
 		),
 
 		.ao_map = init_ao_map(heightmap, map_size, max_point_height),
@@ -261,7 +264,7 @@ static void* main_init(void) {
 
 	////////// Global state initialization
 
-	/* This is for correct for when premultiplying alpha.
+	/* This is correct for when premultiplying alpha.
 	See https://www.realtimerendering.com/blog/gpus-prefer-premultiplication/. */
 	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
 	glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -280,7 +283,9 @@ static void* main_init(void) {
 	////////// Initializing shared shading params
 
 	const GLuint shaders_that_use_shared_params[] = {
-		scene_context.shadow_context.depth_shader,
+		scene_context.sector_context.depth_shader,
+		scene_context.billboard_context.shadow_mapping.depth_shader,
+
 		scene_context.skybox.shader,
 		scene_context.sector_context.drawable.shader,
 		scene_context.billboard_context.drawable.shader,

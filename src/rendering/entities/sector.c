@@ -266,6 +266,13 @@ SectorContext init_sector_context(const byte* const heightmap,
 		),
 
 		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config),
+
+		.depth_shader = init_shader(
+			ASSET_PATH("shaders/shadow/sector_depth.vert"),
+			ASSET_PATH("shaders/shadow/sector_depth.geom"),
+			ASSET_PATH("shaders/shadow/sector_depth.frag"), NULL
+		),
+
 		.mesh_cpu = face_meshes, .sectors = sectors
 	};
 }
@@ -273,6 +280,7 @@ SectorContext init_sector_context(const byte* const heightmap,
 void deinit_sector_context(const SectorContext* const sector_context) {
 	deinit_drawable(sector_context -> drawable);
 	deinit_texture(sector_context -> normal_map_set);
+	deinit_shader(sector_context -> depth_shader);
 	deinit_list(sector_context -> mesh_cpu);
 	deinit_list(sector_context -> sectors);
 }
@@ -283,6 +291,7 @@ void draw_sectors_to_shadow_context(const SectorContext* const sector_context) {
 	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
 	const buffer_size_t num_face_meshes = face_meshes_cpu -> length;
 
+	use_shader(sector_context -> depth_shader);
 	use_vertex_buffer(drawable -> vertex_buffer); // TODO: don't resubmit this data every frame
 	reinit_vertex_buffer_data(num_face_meshes, sizeof(face_mesh_t), face_meshes_cpu -> data);
 	use_vertex_spec(drawable -> vertex_spec);

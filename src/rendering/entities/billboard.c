@@ -131,6 +131,32 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 //////////
 
+void draw_billboards_to_shadow_context(const BillboardContext* const billboard_context, const vec2 right_xz) {
+	const GLuint depth_shader = billboard_context -> shadow_mapping.depth_shader;
+	const Drawable* const drawable = &billboard_context -> drawable;
+	static GLint right_xz_id;
+
+	use_shader(depth_shader);
+
+	ON_FIRST_CALL(
+		INIT_UNIFORM(right_xz, depth_shader);
+
+		INIT_UNIFORM_VALUE(alpha_threshold, depth_shader, 1f,
+			billboard_context -> shadow_mapping.alpha_threshold);
+
+		use_texture_in_shader(drawable -> diffuse_texture,
+			depth_shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
+	);
+
+	UPDATE_UNIFORM(right_xz, 2fv, 1, right_xz);
+
+	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+		draw_drawable(*drawable, corners_per_quad,
+			billboard_context -> billboards.length, NULL, BindVertexBuffer | BindVertexSpec
+		);
+	);
+}
+
 // This is just a utility function
 void draw_billboards(BillboardContext* const billboard_context,
 	const CascadedShadowContext* const shadow_context,
@@ -154,6 +180,7 @@ static void define_vertex_spec(void) {
 }
 
 BillboardContext init_billboard_context(
+	const GLfloat shadow_mapping_alpha_threshold,
 	const GLsizei texture_size, const NormalMapConfig* const normal_map_config,
 
 	const billboard_index_t num_still_textures, const GLchar* const* const still_texture_paths,
@@ -179,6 +206,16 @@ BillboardContext init_billboard_context(
 
 		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config),
 
+		.shadow_mapping = {
+			.depth_shader = init_shader(
+				ASSET_PATH("shaders/shadow/billboard_depth.vert"),
+				ASSET_PATH("shaders/shadow/billboard_depth.geom"),
+				ASSET_PATH("shaders/shadow/billboard_depth.frag"), NULL
+			),
+
+			.alpha_threshold = shadow_mapping_alpha_threshold
+		},
+
 		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),
 		.billboards = init_list(num_billboards, Billboard),
 		.animation_instances = init_list(num_billboard_animation_instances, BillboardAnimationInstance),
@@ -197,6 +234,7 @@ BillboardContext init_billboard_context(
 void deinit_billboard_context(const BillboardContext* const billboard_context) {
 	deinit_drawable(billboard_context -> drawable);
 	deinit_texture(billboard_context -> normal_map_set);
+	deinit_shader(billboard_context -> shadow_mapping.depth_shader);
 
 	deinit_list(billboard_context -> distance_sort_refs);
 	deinit_list(billboard_context -> billboards);

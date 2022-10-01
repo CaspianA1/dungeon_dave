@@ -19,7 +19,7 @@ typedef struct {
 
 typedef struct {
 	const Drawable drawable;
-	const GLuint normal_map_set;
+	const GLuint normal_map_set, depth_shader;
 	const List mesh_cpu, sectors;
 } SectorContext;
 
