@@ -147,7 +147,7 @@ geometry shader must clone the scene geometry a fixed number of times
 as well. So, before all shader compilation, this function writes the number of
 cascades to `num_cascades.geom.` */
 void specify_cascade_count_before_any_shader_compilation(const GLsizei num_cascades) {
-	FILE* const file = open_file_safely(ASSET_PATH("shaders/common/shadow/num_cascades.glsl"), "w");
+	FILE* const file = open_file_safely(ASSET_PATH("shaders/shadow/num_cascades.glsl"), "w");
 
 	const byte* const opengl_version = constants.window.opengl_major_minor_version;
 	const GLchar* const file_description = "This file is written to before any other shaders include it";
@@ -192,9 +192,9 @@ CascadedShadowContext init_shadow_context(
 		.framebuffer = init_csm_framebuffer(depth_layers),
 
 		.depth_shader = init_shader(
-			ASSET_PATH("shaders/common/shadow/depth.vert"),
-			ASSET_PATH("shaders/common/shadow/depth.geom"),
-			ASSET_PATH("shaders/common/shadow/depth.frag"), NULL
+			ASSET_PATH("shaders/shadow/depth.vert"),
+			ASSET_PATH("shaders/shadow/depth.geom"),
+			ASSET_PATH("shaders/shadow/depth.frag"), NULL
 		),
 
 		.resolution = resolution, .num_cascades = num_cascades,

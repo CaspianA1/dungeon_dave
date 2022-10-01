@@ -1,8 +1,8 @@
 #version 400 core
 
-#include "common/quad_utils.vert"
-#include "common/shadow/shadow.vert"
+#include "shadow/shadow.vert"
 #include "common/shared_params.glsl"
+#include "common/quad_utils.vert"
 #include "common/world_shading.vert"
 #include "common/parallax_mapping.vert"
 

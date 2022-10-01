@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "shadow/num_cascades.glsl"
+#include "../shadow/num_cascades.glsl"
 
 /* These are constant for a given level.
 They are ordered in terms of the stages of rendering. */

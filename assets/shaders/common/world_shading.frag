@@ -2,7 +2,7 @@
 
 #include "shared_params.glsl"
 #include "UV_utils.frag"
-#include "shadow/shadow.frag"
+#include "../shadow/shadow.frag"
 
 in vec3 fragment_pos_world_space, UV, ambient_occlusion_UV;
 

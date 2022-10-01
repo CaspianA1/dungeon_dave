@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "../shared_params.glsl"
+#include "../common/shared_params.glsl"
 
 #define VERTICES_PER_TRIANGLE 3u
 

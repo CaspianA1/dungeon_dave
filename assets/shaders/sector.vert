@@ -1,6 +1,6 @@
 #version 400 core
 
-#include "common/shadow/shadow.vert"
+#include "shadow/shadow.vert"
 #include "common/shared_params.glsl"
 #include "common/world_shading.vert"
 #include "common/parallax_mapping.vert"
