@@ -33,7 +33,7 @@ SectorContext init_sector_context(const byte* const heightmap,
 
 void deinit_sector_context(const SectorContext* const sector_context);
 
-void draw_all_sectors_to_shadow_context(const SectorContext* const sector_context);
+void draw_sectors_to_shadow_context(const SectorContext* const sector_context);
 
 void draw_sectors(const SectorContext* const sector_context,
 	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,

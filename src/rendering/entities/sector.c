@@ -278,7 +278,7 @@ void deinit_sector_context(const SectorContext* const sector_context) {
 }
 
 // Used in main.c
-void draw_all_sectors_to_shadow_context(const SectorContext* const sector_context) {
+void draw_sectors_to_shadow_context(const SectorContext* const sector_context) {
 	const Drawable* const drawable = &sector_context -> drawable;
 	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
 	const buffer_size_t num_face_meshes = face_meshes_cpu -> length;

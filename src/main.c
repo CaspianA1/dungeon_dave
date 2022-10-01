@@ -34,7 +34,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	////////// Rendering to the shadow context
 
 	enable_rendering_to_shadow_context(shadow_context);
-	draw_all_sectors_to_shadow_context(sector_context);
+	draw_sectors_to_shadow_context(sector_context);
 	disable_rendering_to_shadow_context(event -> screen_size);
 
 	////////// The main drawing code
