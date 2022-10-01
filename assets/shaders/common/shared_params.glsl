@@ -5,8 +5,6 @@
 /* These are constant for a given level.
 They are ordered in terms of the stages of rendering. */
 layout(shared) uniform ConstantShadingParams {
-	vec3 dir_to_light;
-
 	struct {float bilinear, ao;} percents;
 	struct {float ambient, diffuse, specular;} strengths;
 	struct {float matte, rough;} specular_exponents;
@@ -20,6 +18,6 @@ layout(shared) uniform ConstantShadingParams {
 };
 
 layout(shared) uniform DynamicShadingParams {
-	vec3 camera_pos_world_space;
+	vec3 dir_to_light, camera_pos_world_space;
 	mat4 view_projection, view, light_view_projection_matrices[NUM_CASCADES];
 };
