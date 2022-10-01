@@ -80,6 +80,7 @@ Random feature ideas:
 - Gauge the number of multisample samples based on a runtime constant
 - Find a tighter far plane distance by finding the diameter of the sector convex hull
 - The map editor should be called Dungeon Painter
+- Perhaps build levels on top of cool terrain heightmaps, for a good surrounding environment + a level path through the terrain
 
 Normal mapping:
 - Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
