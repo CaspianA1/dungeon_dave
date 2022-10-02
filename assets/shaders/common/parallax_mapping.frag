@@ -3,10 +3,8 @@
 in vec3 camera_to_fragment_tangent_space;
 
 float sample_heightmap(const sampler2DArray diffuse_sampler, const vec3 UV) {
-	const float neg_one_third = -1.0f / 3.0f;
-
 	vec3 diffuse = texture(diffuse_sampler, UV).rgb;
-	return (diffuse.r + diffuse.g + diffuse.b) * neg_one_third + 1.0f;
+	return (diffuse.r + diffuse.g + diffuse.b) / 3.0f;
 }
 
 /* This code was developed from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping.
@@ -28,8 +26,11 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 	- Allow parallax mapping to be enabled or disabled (this will be a user setting eventually)
 	*/
 
+	/* TODO: why does the heightmap flatten itself much more now?
+	Also, why are some areas incorrectly occluded? e.g. the Saqqara nose. */
+
 	const float
-		min_layers = 2.0f, max_layers = 40.0f,
+		min_layers = 4.0f, max_layers = 40.0f,
 		height_scale = 0.03f, lod_cutoff = 1.5f;
 
 	////////// LOD calculations
@@ -84,6 +85,5 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 
 	vec2 parallax_UV = mix(curr_UV.xy, prev_UV.xy, UV_weight);
 	vec2 lod_parallax_UV = mix(parallax_UV, UV.xy, lod_weight);
-
 	return vec3(lod_parallax_UV, UV.z);
 }

@@ -182,10 +182,10 @@ static void get_quad_tbn_matrix(const vec3* const quad_corners, mat3 tbn) {
 	GLfloat *const tangent = tbn[0], *const bitangent = tbn[1], *const normal = tbn[2];
 	const GLfloat* const bl_corner = quad_corners[0];
 
-	glm_vec3_sub((GLfloat*) quad_corners[1], (GLfloat*) bl_corner, tangent);
+	glm_vec3_sub((GLfloat*) bl_corner, (GLfloat*) quad_corners[1], tangent);
 	glm_vec3_normalize(tangent); // Flows along S, from bl to br
 
-	glm_vec3_sub((GLfloat*) quad_corners[2], (GLfloat*) bl_corner, bitangent);
+	glm_vec3_sub((GLfloat*) bl_corner, (GLfloat*) quad_corners[2], bitangent);
 	glm_vec3_normalize(bitangent); // Flows along T, from bl to tl
 
 	// This will also be normalized, as the tangent and bitangent are normalized

@@ -123,9 +123,9 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	const GLfloat right_xz_x = typed_params.right_xz[0], right_xz_z = typed_params.right_xz[1];
 
 	UPDATE_UNIFORM(tbn, Matrix3fv, 1, GL_FALSE, (GLfloat*) (mat3) {
-		{right_xz_x, 0.0f, -right_xz_z},
-		{0.0f, -1.0f, 0.0f},
-		{right_xz_z, 0.0f, right_xz_x}
+		{-right_xz_x, 0.0f, -right_xz_z},
+		{0.0f, 1.0f, 0.0f},
+		{-right_xz_z, 0.0f, right_xz_x}
 	});
 }
 

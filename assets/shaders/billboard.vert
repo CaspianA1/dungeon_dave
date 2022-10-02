@@ -8,11 +8,9 @@
 
 uniform mat3 tbn;
 
+// TODO: billboards are not correctly lit when looking at them from behind
 void main(void) {
-	vec3 right = tbn[0];
-	right.z = -right.z;
-
-	fragment_pos_world_space = get_billboard_vertex(right);
+	fragment_pos_world_space = get_billboard_vertex(-tbn[0]);
 
 	world_depth_value = get_world_depth_value(view, fragment_pos_world_space);
 
