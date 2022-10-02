@@ -11,6 +11,8 @@ https://learnopengl.com/Guest-Articles/2021/CSM
 
 For later on:
 - Texel snapping through reprojection for more preserved resolution and less jittering artifacts
+	- See here for that? https://lxjk.github.io/2017/04/15/Calculate-Minimal-Bounding-Sphere-of-Frustum.html
+	- Note: a constant radius per sub-frustum gives stabilization (but finding that radius is the tricky part)
 - Merging the master branch with this one
 - A world-space approach to merging the AABB of the sub frustum box
 	with PSRs, instead of defining a scale factor for the frustum
@@ -76,7 +78,8 @@ static void get_light_view_and_projection(const CascadedShadowContext* const sha
 	const GLfloat divisor = 2.0f * radius / shadow_context -> resolution;
 
 	GLfloat* const column = light_view[3];
-	for (byte i = 0; i < 3; i++) column[i] -= fmodf(column[i], divisor);
+	column[0] -= fmodf(column[0], divisor);
+	column[1] -= fmodf(column[1], divisor);
 
 	glm_ortho(-radius, radius, -radius, radius, -radius, radius, light_projection);
 }
