@@ -55,16 +55,16 @@ float get_ao_strength(void) {
 }
 
 // https://64.github.io/tonemapping/ (Reinhard Extended Luminance)
-vec3 apply_tone_mapping(const vec3 color, const float max_white) {
+void apply_tone_mapping(const float max_white, inout vec3 color) {
 	float old_luminance = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
 	float numerator = old_luminance * (1.0f + (old_luminance / (max_white * max_white)));
 	float new_luminance = numerator / (1.0f + old_luminance);
-	return color * (new_luminance / old_luminance);
+	color *= (new_luminance / old_luminance);
 }
 
-vec3 noise_for_banding_removal(const vec2 seed, const vec3 color) {
+void noise_for_banding_removal(const vec2 seed, inout vec3 color) {
 	float random_value = fract(sin(dot(seed, vec2(12.9898f, 78.233f))) * 43758.5453f);
-	return color + mix(-noise_granularity, noise_granularity, random_value);
+	color += mix(-noise_granularity, noise_granularity, random_value);
 }
 
 // When the shadow layer is already known (like for the weapon sprite), this can be useful to call
@@ -84,8 +84,8 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 
 	vec4 color = vec4(light_strength * texture_color.rgb * overall_scene_tone, texture_color.a);
 
-	color.rgb = apply_tone_mapping(color.rgb, tone_mapping_max_white);
-	color.rgb = noise_for_banding_removal(parallax_UV.xy, color.rgb);
+	apply_tone_mapping(tone_mapping_max_white, color.rgb);
+	noise_for_banding_removal(parallax_UV.xy, color.rgb);
 
 	return color;
 }
