@@ -62,7 +62,7 @@ void apply_tone_mapping(const float max_white, inout vec3 color) {
 	color *= (new_luminance / old_luminance);
 }
 
-void noise_for_banding_removal(const vec2 seed, inout vec3 color) {
+void apply_noise_for_banding_removal(const vec2 seed, inout vec3 color) {
 	float random_value = fract(sin(dot(seed, vec2(12.9898f, 78.233f))) * 43758.5453f);
 	color += mix(-noise_granularity, noise_granularity, random_value);
 }
@@ -85,7 +85,7 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 	vec4 color = vec4(light_strength * texture_color.rgb * overall_scene_tone, texture_color.a);
 
 	apply_tone_mapping(tone_mapping_max_white, color.rgb);
-	noise_for_banding_removal(parallax_UV.xy, color.rgb);
+	apply_noise_for_banding_removal(parallax_UV.xy, color.rgb);
 
 	return color;
 }
