@@ -65,6 +65,7 @@ Miscellaneous problems:
 - On the bigger laptop, changing the screen size leads to the player's head tilting briefly
 - Changing the pyramid track `pyramid.wav` to any other filename removes its two stutters
 - Using the raytraced AO map results in odd sudden color changes in textures, and little white flickering dots
+	(the color changes come from using the banding noise removal function with the AO value)
 
 Object rendering:
 - Up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
