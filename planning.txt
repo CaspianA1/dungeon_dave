@@ -15,7 +15,7 @@ Final lighting model:
 	Or instead of that, perhaps make a 3D texture with raytraced brightness values that range from 0 to 255, that then points in world-space can read from.
 	Then, the max size of that texture will be 16,581,375 for a 255x255x255 level. This will act as high-quality raytraced ambient occlusion. Optimization
 	note: I can skip tracing from points that are under the heightmap. Also, I should only trace upwards around a hemisphere, only darkening a point if it
-	hits another map point.  I'll use DDA for this.
+	hits another map point. I'll use DDA for this.
 
 Shadow mapping:
 - The glDrawArrays call in shadow mapping uses around 30% of my GPU time mostly because of the shadow map size
