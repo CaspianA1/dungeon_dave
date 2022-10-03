@@ -64,7 +64,6 @@ Miscellaneous problems:
 - The checker heightmap has faster pacing sometimes
 - On the bigger laptop, changing the screen size leads to the player's head tilting briefly
 - Changing the pyramid track `pyramid.wav` to any other filename removes its two stutters
-- On the Intel Mac, fullscreen + wait results in blackened ambient occlusion
 
 Object rendering:
 - Up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
