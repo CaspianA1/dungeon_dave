@@ -5,9 +5,6 @@
 #include "rendering/drawable.h"
 #include "utils/list.h"
 #include "camera.h"
-#include "rendering/shadow.h"
-#include "rendering/entities/skybox.h"
-#include "rendering/ambient_occlusion.h"
 #include "normal_map_generation.h"
 
 typedef struct {
