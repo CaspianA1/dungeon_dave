@@ -191,8 +191,8 @@ CascadedShadowContext init_shadow_context(
 	const GLuint depth_layers = init_csm_depth_layers(resolution, num_cascades, num_depth_buffer_bits);
 
 	return (CascadedShadowContext) {
-		.depth_layers = depth_layers,
 		.framebuffer = init_csm_framebuffer(depth_layers),
+		.depth_layers = depth_layers,
 
 		.resolution = resolution, .num_cascades = num_cascades,
 
