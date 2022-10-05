@@ -4,7 +4,7 @@ in vec3 camera_to_fragment_tangent_space;
 
 float sample_heightmap(const sampler2DArray diffuse_sampler, const vec3 UV) {
 	vec3 diffuse = texture(diffuse_sampler, UV).rgb;
-	return (diffuse.r + diffuse.g + diffuse.b) / 3.0f;
+	return 1.0f - (diffuse.r + diffuse.g + diffuse.b) / 3.0f;
 }
 
 /* This code was developed from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping.
@@ -25,9 +25,6 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 	- Interval mapping instead? https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.5935&rep=rep1&type=pdf
 	- Allow parallax mapping to be enabled or disabled (this will be a user setting eventually)
 	*/
-
-	/* TODO: why does the heightmap flatten itself much more now?
-	Also, why are some areas incorrectly occluded? e.g. the Saqqara nose. */
 
 	const float
 		min_layers = 4.0f, max_layers = 40.0f,
@@ -53,6 +50,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 	////////// Tracing a ray against the diffuse color texture, which is interpreted as a heightmap
 
 	vec3 view_dir = normalize(camera_to_fragment_tangent_space);
+	view_dir.xy = -view_dir.xy;
 
 	/* More layers will be rendered if the view direction is steeper. I'm not using the lod to determine
 	the number of layers because while steep angles may yield higher mip levels when using anisotropic
