@@ -11,7 +11,7 @@ typedef void (*const uniform_updater_t) (const struct Drawable* const drawable, 
 
 typedef struct {
 	const GLenum triangle_mode;
-	const GLuint vertex_spec, vertex_buffer, shader, diffuse_texture;
+	const GLuint vertex_spec, vertex_buffer, shader, diffuse_texture, normal_map;
 	const uniform_updater_t uniform_updater;
 } Drawable;
 
@@ -33,15 +33,18 @@ Interface notes:
 	will be allocated for the vertices, but the vertex buffer will not have any elements inside it.
 
 - If the uniform updater is null, it will not be invoked.
+- And if the normal map set supplied to any constructor is 0, `glDeleteTextures` will not delete it.
 */
 
 Drawable init_drawable_with_vertices(
 	void (*const vertex_spec_definer) (void), const uniform_updater_t uniform_updater,
 	const GLenum vertex_buffer_access, const GLenum triangle_mode,
-	const List vertices, const GLuint shader, const GLuint diffuse_texture);
+	const List vertices, const GLuint shader, const GLuint diffuse_texture,
+	const GLuint normal_map);
 
 Drawable init_drawable_without_vertices(const uniform_updater_t uniform_updater,
-	const GLenum triangle_mode, const GLuint shader, const GLuint diffuse_texture);
+	const GLenum triangle_mode, const GLuint shader, const GLuint diffuse_texture,
+	const GLuint normal_map);
 
 void deinit_drawable(const Drawable drawable);
 

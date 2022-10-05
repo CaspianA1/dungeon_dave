@@ -1,4 +1,5 @@
 #include "shared_shading_params.h"
+#include "utils/opengl_wrappers.h"
 
 static void init_constant_shading_params(UniformBuffer* const shading_params, const CascadedShadowContext* const shadow_context) {
 	enable_uniform_buffer_writing_batch(shading_params, true);
@@ -27,7 +28,7 @@ static void init_constant_shading_params(UniformBuffer* const shading_params, co
 }
 
 SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_share_params,
-	const buffer_size_t shader_count, const CascadedShadowContext* const shadow_context) {
+	const buffer_size_t num_shaders, const CascadedShadowContext* const shadow_context) {
 	
 	const GLuint first_shader = shaders_that_share_params[0];
 
@@ -60,7 +61,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 
 	init_constant_shading_params(&shared_shading_params.constant, shadow_context);
 
-	for (buffer_size_t i = 0; i < shader_count; i++) {
+	for (buffer_size_t i = 0; i < num_shaders; i++) {
 		const GLuint shader = shaders_that_share_params[i];
 		bind_uniform_buffer_to_shader(&shared_shading_params.constant, shader);
 		bind_uniform_buffer_to_shader(&shared_shading_params.dynamic, shader);
@@ -92,4 +93,31 @@ void update_shared_shading_params(SharedShadingParams* const shared_shading_para
 	);
 
 	disable_uniform_buffer_writing_batch(dynamic_params);
+}
+
+//////////
+
+void init_shared_textures_for_world_shaded_objects(
+	const WorldShadedObject* const world_shaded_objects,
+	const byte num_world_shaded_objects, const Skybox* const skybox,
+	const CascadedShadowContext* const shadow_context,
+	const AmbientOcclusionMap* const ao_map) {
+
+	const GLuint
+		skybox_diffuse_texture = skybox -> diffuse_texture,
+		shadow_depth_layers = shadow_context -> depth_layers,
+		ao_map_texture = ao_map -> texture;
+
+	for (byte i = 0; i < num_world_shaded_objects; i++) {
+		const WorldShadedObject wso = world_shaded_objects[i];
+		const GLuint shader = wso.drawable -> shader;
+
+		use_shader(shader);
+
+		use_texture_in_shader(skybox_diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
+		use_texture_in_shader(wso.drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, wso.texture_units.diffuse);
+		use_texture_in_shader(wso.drawable -> normal_map, shader, "normal_map_sampler", TexSet, wso.texture_units.normal_map);
+		use_texture_in_shader(shadow_depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
+		use_texture_in_shader(ao_map_texture, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
+	}
 }

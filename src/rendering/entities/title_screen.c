@@ -81,17 +81,22 @@ TitleScreen init_title_screen(
 
 	return (TitleScreen) {
 		.active = true,
-		.drawable = init_drawable_without_vertices((uniform_updater_t) update_uniforms, GL_TRIANGLE_STRIP, shader, still_diffuse_texture),
-		.scrolling_diffuse_texture = scrolling_diffuse_texture,
-		.scrolling_normal_map = scrolling_normal_map,
+
+		.drawable = init_drawable_without_vertices(
+			(uniform_updater_t) update_uniforms,
+			GL_TRIANGLE_STRIP, shader, scrolling_diffuse_texture,
+			scrolling_normal_map
+		),
+
+		.still_diffuse_texture = still_diffuse_texture,
+
 		.rendering_config = *rendering_config
 	};
 }
 
 void deinit_title_screen(const TitleScreen* const title_screen) {
 	deinit_drawable(title_screen -> drawable);
-	deinit_texture(title_screen -> scrolling_diffuse_texture);
-	deinit_texture(title_screen -> scrolling_normal_map);
+	deinit_texture(title_screen -> still_diffuse_texture);
 }
 
 bool tick_title_screen(TitleScreen* const title_screen, const Event* const event) {

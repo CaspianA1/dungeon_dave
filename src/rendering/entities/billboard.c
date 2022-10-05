@@ -94,29 +94,13 @@ static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_
 
 ////////// This part concerns the updating of uniforms
 
-typedef struct {
-	const GLuint normal_map_set;
-	const CascadedShadowContext* const shadow_context;
-	const Skybox* const skybox;
-	const GLfloat* const right_xz;
-	const AmbientOcclusionMap* const ao_map;
-} UniformUpdaterParams;
+typedef struct {const GLfloat* const right_xz;} UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
 	static GLint tbn_id;
 
-	ON_FIRST_CALL(
-		const GLuint shader = drawable -> shader;
-
-		INIT_UNIFORM(tbn, shader);
-
-		use_texture_in_shader(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
-		use_texture_in_shader(drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
-		use_texture_in_shader(typed_params.normal_map_set, shader, "normal_map_sampler", TexSet, TU_BillboardNormalMap);
-		use_texture_in_shader(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
-		use_texture_in_shader(typed_params.ao_map -> texture, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
-	);
+	ON_FIRST_CALL(INIT_UNIFORM(tbn, drawable -> shader););
 
 	//////////
 
@@ -158,15 +142,11 @@ void draw_billboards_to_shadow_context(const BillboardContext* const billboard_c
 }
 
 // This is just a utility function
-void draw_billboards(BillboardContext* const billboard_context,
-	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const Camera* const camera,
-	const AmbientOcclusionMap* const ao_map) {
-
+void draw_billboards(BillboardContext* const billboard_context, const Camera* const camera) {
 	sort_billboards_by_dist_to_camera(billboard_context, camera -> pos);
 
 	draw_drawable(billboard_context -> drawable, corners_per_quad, billboard_context -> billboards.length,
-		&(UniformUpdaterParams) {billboard_context -> normal_map_set, shadow_context, skybox, camera -> right_xz, ao_map},
+		&(UniformUpdaterParams) {camera -> right_xz},
 		UseShaderPipeline | BindVertexSpec
 	);
 }
@@ -201,10 +181,9 @@ BillboardContext init_billboard_context(
 			(List) {.data = NULL, .item_size = sizeof(Billboard), .length = num_billboards},
 
 			init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/billboard.frag"), NULL),
-			diffuse_texture_set
+			diffuse_texture_set,
+			init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config)
 		),
-
-		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config),
 
 		.shadow_mapping = {
 			.depth_shader = init_shader(
@@ -233,7 +212,6 @@ BillboardContext init_billboard_context(
 
 void deinit_billboard_context(const BillboardContext* const billboard_context) {
 	deinit_drawable(billboard_context -> drawable);
-	deinit_texture(billboard_context -> normal_map_set);
 	deinit_shader(billboard_context -> shadow_mapping.depth_shader);
 
 	deinit_list(billboard_context -> distance_sort_refs);

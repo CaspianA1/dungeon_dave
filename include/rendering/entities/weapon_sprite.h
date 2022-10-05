@@ -33,7 +33,6 @@ typedef struct {
 
 typedef struct {
 	const Drawable drawable;
-	const GLuint normal_map_set;
 	WeaponSpriteAnimationContext animation_context;
 	WeaponSpriteAppearanceContext appearance_context;
 } WeaponSprite;
@@ -50,12 +49,10 @@ WeaponSprite init_weapon_sprite(
 	const AnimationLayout* const animation_layout,
 	const NormalMapConfig* const normal_map_config);
 
-void deinit_weapon_sprite(const WeaponSprite* const ws);
+#define deinit_weapon_sprite(ws) deinit_drawable((ws) -> drawable)
+
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event);
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws);
-
-void draw_weapon_sprite(const WeaponSprite* const ws,
-	const CascadedShadowContext* const shadow_context,
-	const Skybox* const skybox, const AmbientOcclusionMap* const ao_map);
+void draw_weapon_sprite(const WeaponSprite* const ws);
 
 #endif

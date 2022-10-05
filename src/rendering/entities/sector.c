@@ -212,28 +212,6 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	return num_visible_faces;
 }
 
-////////// Uniform updating
-
-typedef struct {
-	const Skybox* const skybox;
-	const SectorContext* const sector_context;
-	const CascadedShadowContext* const shadow_context;
-	const AmbientOcclusionMap* const ao_map;
-} UniformUpdaterParams;
-
-static void update_uniforms(const Drawable* const drawable, const void* const param) {
-	ON_FIRST_CALL( // TODO: remove this `ON_FIRST_CALL` block when possible
-		const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
-		const GLuint shader = drawable -> shader;
-
-		use_texture_in_shader(typed_params.skybox -> diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
-		use_texture_in_shader(typed_params.sector_context -> drawable.diffuse_texture, shader, "diffuse_sampler", TexSet, TU_SectorFaceDiffuse);
-		use_texture_in_shader(typed_params.sector_context -> normal_map_set, shader, "normal_map_sampler", TexSet, TU_SectorFaceNormalMap);
-		use_texture_in_shader(typed_params.shadow_context -> depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
-		use_texture_in_shader(typed_params.ao_map -> texture, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
-	);
-}
-
 static void define_vertex_spec(void) {
 	enum {vpt = vertices_per_triangle};
 	const GLenum typename = FACE_COMPONENT_TYPENAME;
@@ -259,13 +237,11 @@ SectorContext init_sector_context(const byte* const heightmap,
 
 	return (SectorContext) {
 		.drawable = init_drawable_with_vertices(
-			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW, GL_TRIANGLES,
+			define_vertex_spec, NULL, GL_DYNAMIC_DRAW, GL_TRIANGLES,
 			(List) {.data = NULL, .item_size = face_meshes.item_size, .length = face_meshes.length},
 			init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag"), NULL),
-			diffuse_texture_set
+			diffuse_texture_set, init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config)
 		),
-
-		.normal_map_set = init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config),
 
 		.depth_shader = init_shader(
 			ASSET_PATH("shaders/shadow/sector_depth.vert"),
@@ -279,7 +255,6 @@ SectorContext init_sector_context(const byte* const heightmap,
 
 void deinit_sector_context(const SectorContext* const sector_context) {
 	deinit_drawable(sector_context -> drawable);
-	deinit_texture(sector_context -> normal_map_set);
 	deinit_shader(sector_context -> depth_shader);
 	deinit_list(sector_context -> mesh_cpu);
 	deinit_list(sector_context -> sectors);
@@ -301,15 +276,13 @@ void draw_sectors_to_shadow_context(const SectorContext* const sector_context) {
 	);
 }
 
-void draw_sectors(const SectorContext* const sector_context,
-	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
-	const vec4 frustum_planes[planes_per_frustum], const AmbientOcclusionMap* const ao_map) {
-
+void draw_sectors(const SectorContext* const sector_context, const vec4 frustum_planes[planes_per_frustum]) {
 	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(sector_context, frustum_planes);
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
 	if (num_visible_faces != 0)
-		draw_drawable(sector_context -> drawable, num_visible_faces * vertices_per_face, 0,
-			&(UniformUpdaterParams) {skybox, sector_context, shadow_context, ao_map},
-			UseShaderPipeline | BindVertexSpec);
+		draw_drawable(sector_context -> drawable,
+			num_visible_faces * vertices_per_face, 0,
+			NULL, UseShaderPipeline | BindVertexSpec
+		);
 }

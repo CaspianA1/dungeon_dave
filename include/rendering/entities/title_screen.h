@@ -29,7 +29,7 @@ typedef struct {
 typedef struct {
 	bool active;
 	const Drawable drawable;
-	const GLuint scrolling_diffuse_texture, scrolling_normal_map;
+	const GLuint still_diffuse_texture;
 	const TitleScreenRenderingConfig rendering_config;
 } TitleScreen;
 

@@ -40,7 +40,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 
 	////////// The main drawing code
 
-	draw_sectors(sector_context, shadow_context, skybox, camera -> frustum_planes, ao_map);
+	draw_sectors(sector_context, camera -> frustum_planes);
 
 	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
@@ -48,8 +48,8 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 			draw_skybox(skybox); // Drawn before any translucent geometry
 
 			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
-				draw_billboards(billboard_context, shadow_context, skybox, camera, ao_map);
-				draw_weapon_sprite(weapon_sprite, shadow_context, skybox, ao_map);
+				draw_billboards(billboard_context, camera);
+				draw_weapon_sprite(weapon_sprite);
 			);
 		);
 	);
@@ -261,6 +261,17 @@ static void* main_init(void) {
 		.title_screen = init_title_screen(&title_screen_config.texture, &title_screen_config.rendering),
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
+
+	//////////
+
+	const WorldShadedObject world_shaded_objects[] = {
+		{&scene_context.sector_context.drawable, {TU_SectorFaceDiffuse, TU_SectorFaceNormalMap}},
+		{&scene_context.billboard_context.drawable, {TU_BillboardDiffuse, TU_BillboardNormalMap}},
+		{&scene_context.weapon_sprite.drawable, {TU_WeaponSpriteDiffuse, TU_WeaponSpriteNormalMap}}
+	};
+
+	init_shared_textures_for_world_shaded_objects(world_shaded_objects, ARRAY_LENGTH(world_shaded_objects),
+		&scene_context.skybox, &scene_context.shadow_context, &scene_context.ao_map);
 
 	////////// Global state initialization
 

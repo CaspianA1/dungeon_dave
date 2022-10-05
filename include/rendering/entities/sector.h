@@ -19,12 +19,12 @@ typedef struct {
 
 typedef struct {
 	const Drawable drawable;
-	const GLuint normal_map_set, depth_shader;
+	const GLuint depth_shader;
 	const List mesh_cpu, sectors;
 } SectorContext;
 
 /* Excluded: point_matches_sector_attributes, form_sector_area, generate_sectors_from_maps,
-frustum_cull_sector_faces_into_gpu_buffer, update_uniforms, define_vertex_spec */
+frustum_cull_sector_faces_into_gpu_buffer, define_vertex_spec */
 
 SectorContext init_sector_context(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height,
@@ -34,9 +34,6 @@ SectorContext init_sector_context(const byte* const heightmap,
 void deinit_sector_context(const SectorContext* const sector_context);
 
 void draw_sectors_to_shadow_context(const SectorContext* const sector_context);
-
-void draw_sectors(const SectorContext* const sector_context,
-	const CascadedShadowContext* const shadow_context, const Skybox* const skybox,
-	const vec4 frustum_planes[planes_per_frustum], const AmbientOcclusionMap* const ao_map);
+void draw_sectors(const SectorContext* const sector_context, const vec4 frustum_planes[planes_per_frustum]);
 
 #endif

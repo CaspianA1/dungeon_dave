@@ -64,7 +64,7 @@ Skybox init_skybox(const GLchar* const cubemap_path) {
 	use_shader(shader);
 	use_texture_in_shader(diffuse_texture, shader, "skybox_sampler", TexSkybox, TU_Skybox);
 
-	return init_drawable_without_vertices(NULL, GL_TRIANGLE_STRIP, shader, diffuse_texture);
+	return init_drawable_without_vertices(NULL, GL_TRIANGLE_STRIP, shader, diffuse_texture, 0);
 }
 
 void draw_skybox(const Skybox* const skybox) {
