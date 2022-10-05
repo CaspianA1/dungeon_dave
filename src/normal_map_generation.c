@@ -60,8 +60,8 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 						mr = sobel_sample(src, right_x, y),     bl = sobel_sample(src, left_x, bottom_y),
 						bm = sobel_sample(src, x, bottom_y),    br = sobel_sample(src, right_x, bottom_y);
 
-					/*The x and y components of this are the result of the Sobel operator.
-					Byte overflow will not happen with the components, since they are promoted to ints.  */
+					/* The x and y components of this are the result of the Sobel operator.
+					Byte overflow will not happen with the components, since they are promoted to ints. */
 
 					vec3 normal = {
 						(-bl - (ml << 1) - tl) + (tr + (mr << 1) + br),
