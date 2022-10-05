@@ -50,7 +50,6 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 	////////// Tracing a ray against the diffuse color texture, which is interpreted as a heightmap
 
 	vec3 view_dir = normalize(camera_to_fragment_tangent_space);
-	view_dir.xy = -view_dir.xy;
 
 	/* More layers will be rendered if the view direction is steeper. I'm not using the lod to determine
 	the number of layers because while steep angles may yield higher mip levels when using anisotropic
