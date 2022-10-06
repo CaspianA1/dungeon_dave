@@ -3,8 +3,10 @@
 in vec3 camera_to_fragment_tangent_space;
 
 float sample_heightmap(const sampler2DArray diffuse_sampler, const vec3 UV) {
+	const float neg_one_third = -1.0f / 3.0f;
+
 	vec3 diffuse = texture(diffuse_sampler, UV).rgb;
-	return 1.0f - (diffuse.r + diffuse.g + diffuse.b) / 3.0f;
+	return (diffuse.r + diffuse.g + diffuse.b) * neg_one_third + 1.0f;
 }
 
 /* This code was developed from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping.
