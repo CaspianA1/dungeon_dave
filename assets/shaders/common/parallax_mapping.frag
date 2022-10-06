@@ -12,7 +12,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	- Texture scrolling (note: clamping UV to [0.0f, 1.0f] anywhere doesn't fix this); perhaps try TexNonRepeating + discard?
 	- Note: scrolling called texture swimming here: https://casual-effects.com/research/McGuire2005Parallax/index.html
 	- Skip zero-alpha areas as an optimization, without weird alpha stitch problems? Check for zero alpha + a zero fwidth of alpha?
-	- The weapon parallax doesn't seem to work correctly when looking upwards (you can see this more clearly with the sceptre)
+	- Some weapon sprite parallax looks a bit odd when out of bounds; e.g. the snazzy shotgun or the reload pistol
 
 	- Apply to the title screen
 	- Make the parallax parameters part of the uniform block
