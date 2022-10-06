@@ -21,10 +21,7 @@ static Screen init_screen(const GLchar* const title, const byte opengl_major_min
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depth_buffer_bits);
-
-	#ifdef USE_GAMMA_CORRECTION
 	SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
-	#endif
 
 	#ifdef USE_MULTISAMPLING
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
@@ -61,9 +58,7 @@ static Screen init_screen(const GLchar* const title, const byte opengl_major_min
 
 	if (!gladLoadGL()) FAIL(LoadOpenGL, "%s", "GLAD could not load for some reason");
 
-	#ifdef USE_GAMMA_CORRECTION
 	glEnable(GL_FRAMEBUFFER_SRGB);
-	#endif
 
 	#ifdef USE_MULTISAMPLING
 	glEnable(GL_MULTISAMPLE);

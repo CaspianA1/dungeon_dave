@@ -97,7 +97,6 @@ typedef enum {
 ////////// These macros pertain to window + rendering defaults
 
 #define USE_VSYNC
-#define USE_GAMMA_CORRECTION
 #define USE_MULTISAMPLING
 #define USE_ANISOTROPIC_FILTERING
 
