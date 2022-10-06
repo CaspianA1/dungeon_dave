@@ -98,15 +98,15 @@ typedef struct {const GLfloat* const right_xz;} UniformUpdaterParams;
 
 static void update_uniforms(const Drawable* const drawable, const void* const param) {
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
-	static GLint tbn_id;
+	static GLint front_facing_tbn_id;
 
-	ON_FIRST_CALL(INIT_UNIFORM(tbn, drawable -> shader););
+	ON_FIRST_CALL(INIT_UNIFORM(front_facing_tbn, drawable -> shader););
 
 	//////////
 
 	const GLfloat right_xz_x = typed_params.right_xz[0], right_xz_z = typed_params.right_xz[1];
 
-	UPDATE_UNIFORM(tbn, Matrix3fv, 1, GL_FALSE, (GLfloat*) (mat3) {
+	UPDATE_UNIFORM(front_facing_tbn, Matrix3fv, 1, GL_FALSE, (GLfloat*) (mat3) {
 		{-right_xz_x, 0.0f, -right_xz_z},
 		{0.0f, 1.0f, 0.0f},
 		{-right_xz_z, 0.0f, right_xz_x}

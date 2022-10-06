@@ -6,7 +6,7 @@ in float world_depth_value;
 
 out vec4 color;
 
-uniform mat3 tbn;
+flat in mat3 tbn;
 
 void main(void) {
 	color = calculate_light(world_depth_value, UV, tbn);

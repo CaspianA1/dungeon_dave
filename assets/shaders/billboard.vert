@@ -6,10 +6,18 @@
 #include "common/parallax_mapping.vert"
 #include "common/billboard_transform.vert"
 
-uniform mat3 tbn;
+uniform mat3 front_facing_tbn;
+flat out mat3 tbn;
 
-// TODO: billboards are not correctly lit when looking at them from behind
 void main(void) {
+	vec3 front_facing_normal = front_facing_tbn[2];
+	bool is_on_backside = dot(front_facing_normal, billboard_center_world_space - camera_pos_world_space) > 0.0f;
+
+	tbn = front_facing_tbn;
+	tbn[2] = is_on_backside ? -front_facing_normal : front_facing_normal;
+
+	//////////
+
 	fragment_pos_world_space = get_billboard_vertex(-tbn[0]);
 
 	world_depth_value = get_world_depth_value(view, fragment_pos_world_space);
