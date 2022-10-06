@@ -76,7 +76,7 @@ void apply_noise_for_banding_removal(const vec2 seed, inout vec3 color) {
 }
 
 // When the shadow layer is already known (like for the weapon sprite), this can be useful to call
-vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, vec3 UV, const mat3 tbn) {
+vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, const vec3 UV, const mat3 tbn) {
 	vec3 parallax_UV_for_diffuse = get_parallax_UV(UV, normal_map_sampler);
 	vec3 parallax_UV_for_normal = parallax_UV_for_diffuse;
 
