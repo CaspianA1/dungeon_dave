@@ -9,7 +9,11 @@ in vec3 fragment_pos_tangent_space;
 
 out vec3 color;
 
-uniform float texture_transition_weight, specular_exponent, scrolling_bilinear_percent;
+uniform float
+	texture_transition_weight, specular_exponent,
+	scrolling_bilinear_diffuse_percent,
+	scrolling_bilinear_normal_percent;
+
 uniform vec3 light_pos_tangent_space;
 uniform sampler2D still_diffuse_sampler, scrolling_diffuse_sampler, scrolling_normal_map_sampler;
 
@@ -23,7 +27,7 @@ vec3 blinn_phong(const sampler2D diffuse_sampler, const vec2 custom_UV,
 	float specular = pow(cos_angle_of_incidence, specular_exponent);
 
 	vec2 pixel_art_UV = custom_UV;
-	adjust_UV_for_pixel_art_filtering(scrolling_bilinear_percent, textureSize(diffuse_sampler, 0), pixel_art_UV);
+	adjust_UV_for_pixel_art_filtering(scrolling_bilinear_diffuse_percent, textureSize(diffuse_sampler, 0), pixel_art_UV);
 
 	return texture(diffuse_sampler, pixel_art_UV).rgb * (diffuse + specular);
 }
@@ -35,8 +39,12 @@ void main(void) {
 
 	vec2 scrolling_UV = vec2(scrolling_UV_x, UV.y);
 
+	vec2 scrolling_UV_for_normal = scrolling_UV;
+	adjust_UV_for_pixel_art_filtering(scrolling_bilinear_normal_percent,
+		textureSize(scrolling_normal_map_sampler, 0), scrolling_UV_for_normal);
+
 	vec3
-		fragment_normal = get_tangent_space_normal_2D(scrolling_normal_map_sampler, scrolling_UV),
+		fragment_normal = get_tangent_space_normal_2D(scrolling_normal_map_sampler, scrolling_UV_for_normal),
 		dir_to_light = normalize(light_pos_tangent_space - fragment_pos_tangent_space),
 		view_dir = normalize(camera_pos_tangent_space - fragment_pos_tangent_space);
 

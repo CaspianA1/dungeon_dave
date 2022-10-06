@@ -53,7 +53,7 @@ static const struct {
 
 		const byte aniso_filtering_level;
 
-		const struct {const GLfloat bilinear, ao;} percents;
+		const struct {const GLfloat bilinear_diffuse, bilinear_normal, ao;} percents;
 		const struct {const GLfloat ambient, diffuse, specular;} strengths;
 		const struct {const GLfloat matte, rough;} specular_exponents;
 
@@ -98,7 +98,7 @@ static const struct {
 	.lighting = {
 		.aniso_filtering_level = 8,
 
-		.percents = {.bilinear = 0.6f, .ao = 1.0f},
+		.percents = {.bilinear_diffuse = 0.5f, .bilinear_normal = 0.4f, .ao = 1.0f},
 		.strengths = {.ambient = 0.7f, .diffuse = 0.6f, .specular = 0.6f},
 		.specular_exponents = {.matte = 8.0f, .rough = 128.0f},
 

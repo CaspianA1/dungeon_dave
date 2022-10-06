@@ -165,9 +165,9 @@ static void* main_init(void) {
 	//////////
 
 	const NormalMapConfig
-		sector_faces_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.1f, .intensity = 1.3f, .rescale_factor = 2.0f},
-		billboards_normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .intensity = 1.0f, .rescale_factor = 2.0f}, // This, with 2x scaling, uses about 100mb more memory
-		weapon_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.4f, .intensity = 1.5f, .rescale_factor = 3.0f}; // TODO: vary this per weapon sprite
+		sector_faces_normal_map_config = {.blur_radius = 2, .blur_std_dev = 0.6f, .intensity = 1.3f, .rescale_factor = 2.0f},
+		billboards_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.1f, .intensity = 1.0f, .rescale_factor = 2.0f}, // This, with 2x scaling, uses about 100mb more memory
+		weapon_normal_map_config = {.blur_radius = 2, .blur_std_dev = 0.4f, .intensity = 1.5f, .rescale_factor = 3.0f}; // TODO: vary this per weapon sprite
 
 	//////////
 
@@ -208,7 +208,8 @@ static void* main_init(void) {
 			.texture_transition_immediacy_factor = 2,
 			.scrolling_vert_squish_ratio = 0.5f,
 			.specular_exponent = 16.0f,
-			.scrolling_bilinear_percent = 0.1f,
+			.scrolling_bilinear_diffuse_percent = 0.1f,
+			.scrolling_bilinear_normal_percent = 0.75f,
 			.light_dist_from_screen_plane = 0.4f,
 			.secs_per_scroll_cycle = 7.0f,
 			.light_spin_cycle = {.secs_per = 2.5f, .logo_transitions_per = 0.5f}

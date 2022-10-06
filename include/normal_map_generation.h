@@ -14,6 +14,7 @@ typedef struct {
     const GLfloat blur_std_dev, intensity, rescale_factor;
 } NormalMapConfig;
 
+// This bakes an inverted heightmap into the alpha channel of the normal map too, for use with parallax mapping
 GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 	const TextureType type, const NormalMapConfig* const config);
 

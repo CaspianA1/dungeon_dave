@@ -17,8 +17,8 @@ typedef struct {
 	const byte texture_transition_immediacy_factor;
 
 	const GLfloat
-		scrolling_vert_squish_ratio,
-		specular_exponent, scrolling_bilinear_percent,
+		scrolling_vert_squish_ratio, specular_exponent,
+		scrolling_bilinear_diffuse_percent, scrolling_bilinear_normal_percent,
 		light_dist_from_screen_plane, secs_per_scroll_cycle;
 
 	const struct {const GLfloat secs_per, logo_transitions_per;} light_spin_cycle;

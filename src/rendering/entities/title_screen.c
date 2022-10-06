@@ -71,7 +71,8 @@ TitleScreen init_title_screen(
 
 	INIT_UNIFORM_VALUE(scrolling_texture_vert_squish_ratio, shader, 1f, rendering_config -> scrolling_vert_squish_ratio);
 	INIT_UNIFORM_VALUE(specular_exponent, shader, 1f, rendering_config -> specular_exponent);
-	INIT_UNIFORM_VALUE(scrolling_bilinear_percent, shader, 1f, rendering_config -> scrolling_bilinear_percent);
+	INIT_UNIFORM_VALUE(scrolling_bilinear_diffuse_percent, shader, 1f, rendering_config -> scrolling_bilinear_diffuse_percent);
+	INIT_UNIFORM_VALUE(scrolling_bilinear_normal_percent, shader, 1f, rendering_config -> scrolling_bilinear_normal_percent);
 
 	use_texture_in_shader(still_diffuse_texture, shader, "still_diffuse_sampler", TexPlain, TU_TitleScreenStillDiffuse);
 	use_texture_in_shader(scrolling_diffuse_texture, shader, "scrolling_diffuse_sampler", TexPlain, TU_TitleScreenScrollingDiffuse);

@@ -73,10 +73,11 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 					glm_vec3_scale(normal, half_max_rgb_value, normal);
 					glm_vec3_adds(normal, half_max_rgb_value, normal);
 
-					dest_pixel[x] = SDL_MapRGB(format,
+					dest_pixel[x] = SDL_MapRGBA(format,
 						(sdl_pixel_component_t) normal[0],
 						(sdl_pixel_component_t) normal[1],
-						(sdl_pixel_component_t) normal[2]
+						(sdl_pixel_component_t) normal[2],
+						constants.max_byte_value - sobel_sample(src, x, y) // Inverse height value
 					);
 				}
 			}

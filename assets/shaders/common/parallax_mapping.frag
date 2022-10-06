@@ -2,25 +2,19 @@
 
 in vec3 camera_to_fragment_tangent_space;
 
-float sample_heightmap(const sampler2DArray diffuse_sampler, const vec3 UV) {
-	const float neg_one_third = -1.0f / 3.0f;
-
-	vec3 diffuse = texture(diffuse_sampler, UV).rgb;
-	return (diffuse.r + diffuse.g + diffuse.b) * neg_one_third + 1.0f;
-}
-
 /* This code was developed from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping.
 The LOD system that transitions between the plain and parallax UV was based on section 5.4.3 from
 https://advances.realtimerendering.com/s2006/Chapter5-Parallax_Occlusion_Mapping_for_detailed_surface_rendering.pdf. */
-vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
+vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	/* TODO:
 	- Aliasing
 	- Very slow at times
 	- Texture scrolling (note: clamping UV to [0.0f, 1.0f] anywhere doesn't fix this); perhaps try TexNonRepeating + discard?
 	- Note: scrolling called texture swimming here: https://casual-effects.com/research/McGuire2005Parallax/index.html
 	- Skip zero-alpha areas as an optimization, without weird alpha stitch problems? Check for zero alpha + a zero fwidth of alpha?
+	- The weapon parallax doesn't seem to work correctly when looking upwards
 
-	- Apply to all world entities + the title screen
+	- Apply to the title screen
 	- Make the parallax parameters part of the uniform block
 	- See here: github.com/Rabbid76/graphics-snippets/blob/master/documentation/normal_parallax_relief.md
 	- Interval mapping instead? https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.5935&rep=rep1&type=pdf
@@ -33,7 +27,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 
 	////////// LOD calculations
 
-	float lod = textureQueryLod(diffuse_sampler, UV.xy).x;
+	float lod = textureQueryLod(normal_map_sampler, UV.xy).x;
 
 	/* For all LOD values above `lod_cutoff`, the
 	plain UV is used, skipping a lot of work */
@@ -48,7 +42,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 	so the `max` stops the blend weight from being negative */
 	float lod_weight = max(lod - min_lod_for_blending, 0.0f);
 
-	////////// Tracing a ray against the diffuse color texture, which is interpreted as a heightmap
+	////////// Tracing a ray against the alpha channel of the normal map, which is a heightmap (TODO: inverted?)
 
 	vec3 view_dir = normalize(camera_to_fragment_tangent_space);
 
@@ -60,21 +54,21 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray diffuse_sampler) {
 
 	float
 		layer_depth = 1.0f / num_layers, curr_layer_depth = 0.0f,
-		curr_depth_map_value = sample_heightmap(diffuse_sampler, UV);
+		curr_depth_map_value = texture(normal_map_sampler, UV).a;
 
 	vec2 delta_UV = (view_dir.xy / view_dir.z) * (height_scale / num_layers);
 	vec3 curr_UV = UV;
 
 	while (curr_layer_depth < curr_depth_map_value) {
 		curr_UV.xy -= delta_UV;
-		curr_depth_map_value = sample_heightmap(diffuse_sampler, curr_UV);
+		curr_depth_map_value = texture(normal_map_sampler, curr_UV).a;
 		curr_layer_depth += layer_depth;
 	}
 
 	vec3 prev_UV = vec3(curr_UV.xy + delta_UV, UV.z);
 
 	float
-		depth_before = sample_heightmap(diffuse_sampler, prev_UV) - curr_layer_depth + layer_depth,
+		depth_before = texture(normal_map_sampler, prev_UV).a - curr_layer_depth + layer_depth,
 		depth_after = curr_depth_map_value - curr_layer_depth;
 
 	float UV_weight = depth_after / (depth_after - depth_before);

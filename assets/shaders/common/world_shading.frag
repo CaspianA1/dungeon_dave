@@ -35,6 +35,7 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) { // Blinn-P
 	reflection_dir.x = -reflection_dir.x;
 	vec3 env_map_value = texture(environment_map_sampler, reflection_dir).rgb;
 
+	// Not reading from the heightmap for this because texture brightness and normals should technically be decoupled
 	const float one_third = 1.0f / 3.0f; // Brighter surfaces reflect more of the environment map
 	float texture_brightness = (texture_color.r + texture_color.g + texture_color.b) * one_third;
 	env_map_value = mix(vec3(1.0f), env_map_value, texture_brightness); // TODO: use Fresnel here instead
@@ -47,11 +48,18 @@ vec3 specular(const vec3 texture_color, const vec3 fragment_normal) { // Blinn-P
 float get_ao_strength(void) {
 	float raw_ao_strength = texture(ambient_occlusion_sampler, ambient_occlusion_UV).r;
 
-	// return raw_ao_strength;
+	/* The sRGB -> linear mapping is based on function from the bottom of here:
+	https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml.
+	It's done manually because there are no sRGB formats for 8-bit textures.
+	TODO: move this calculation to the CPU. */
 
-	/* Remapping the AO color to a linear colorspace, since the AO texture
-	can't be stored as SRGB (there are no 8-bit, 1-channel SRGB texture formats) */
-	return mix(1.0f, pow(raw_ao_strength, 2.2f), percents.ao);
+	float
+		linear_for_below = raw_ao_strength / 12.92f,
+		linear_for_above = pow((raw_ao_strength + 0.055f) / 1.055f, 2.5f);
+
+	float linear_ao_strength = mix(linear_for_above, linear_for_below, float(raw_ao_strength <= 0.04045f));
+
+	return mix(1.0f, linear_ao_strength, percents.ao);
 }
 
 // https://64.github.io/tonemapping/ (Reinhard Extended Luminance)
@@ -69,15 +77,19 @@ void apply_noise_for_banding_removal(const vec2 seed, inout vec3 color) {
 
 // When the shadow layer is already known (like for the weapon sprite), this can be useful to call
 vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, vec3 UV, const mat3 tbn) {
-	vec3 parallax_UV = get_parallax_UV(UV, diffuse_sampler);
-	adjust_UV_for_pixel_art_filtering(percents.bilinear, textureSize(diffuse_sampler, 0).xy, parallax_UV.xy);
+	vec3 parallax_UV_for_diffuse = get_parallax_UV(UV, normal_map_sampler);
+	vec3 parallax_UV_for_normal = parallax_UV_for_diffuse;
 
-	vec4 texture_color = texture(diffuse_sampler, parallax_UV);
+	// Parallax UVs for diffuse and normal have different bilinear percents, so this adjusts those individually
+	adjust_UV_for_pixel_art_filtering(percents.bilinear_diffuse, textureSize(diffuse_sampler, 0).xy, parallax_UV_for_diffuse.xy);
+	adjust_UV_for_pixel_art_filtering(percents.bilinear_normal, textureSize(normal_map_sampler, 0).xy, parallax_UV_for_normal.xy);
+
+	vec4 texture_color = texture(diffuse_sampler, parallax_UV_for_diffuse);
 
 	// return vec4(vec3(get_ao_strength()), 1.0f);
 	// return vec4(vec3(diffuse(fragment_normal)), 1.0f);
 
-	vec3 fragment_normal = tbn * get_tangent_space_normal_3D(normal_map_sampler, parallax_UV);
+	vec3 fragment_normal = tbn * get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
 
 	vec3 non_ambient = diffuse(fragment_normal) + specular(texture_color.rgb, fragment_normal);
 	vec3 light_strength = non_ambient * shadow_strength + strengths.ambient * get_ao_strength();
@@ -85,7 +97,7 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 	vec4 color = vec4(light_strength * texture_color.rgb * overall_scene_tone, texture_color.a);
 
 	apply_tone_mapping(tone_mapping_max_white, color.rgb);
-	apply_noise_for_banding_removal(parallax_UV.xy, color.rgb);
+	apply_noise_for_banding_removal(parallax_UV_for_diffuse.xy, color.rgb);
 
 	return color;
 }
