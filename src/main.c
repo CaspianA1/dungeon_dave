@@ -262,23 +262,9 @@ static void* main_init(void) {
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
 
-	//////////
-
-	const WorldShadedObject world_shaded_objects[] = {
-		{&scene_context.sector_context.drawable, {TU_SectorFaceDiffuse, TU_SectorFaceNormalMap}},
-		{&scene_context.billboard_context.drawable, {TU_BillboardDiffuse, TU_BillboardNormalMap}},
-		{&scene_context.weapon_sprite.drawable, {TU_WeaponSpriteDiffuse, TU_WeaponSpriteNormalMap}}
-	};
-
-	init_shared_textures_for_world_shaded_objects(world_shaded_objects, ARRAY_LENGTH(world_shaded_objects),
-		&scene_context.skybox, &scene_context.shadow_context, &scene_context.ao_map);
-
 	////////// Global state initialization
 
-	/* This is correct for when premultiplying alpha.
-	See https://www.realtimerendering.com/blog/gpus-prefer-premultiplication/. */
-	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-	glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // This is correct for alpha premultiplication
 	glDepthFunc(GL_LESS);
 
 	/* Depth clamping is used for 1. shadow pancaking, 2. avoiding clipping with sectors when walking
@@ -290,6 +276,17 @@ static void* main_init(void) {
 
 	SceneContext* const scene_context_on_heap = alloc(1, sizeof(SceneContext));
 	memcpy(scene_context_on_heap, &scene_context, sizeof(SceneContext));
+
+	////////// Initializing shared textures
+
+	const WorldShadedObject world_shaded_objects[] = {
+		{&scene_context.sector_context.drawable, {TU_SectorFaceDiffuse, TU_SectorFaceNormalMap}},
+		{&scene_context.billboard_context.drawable, {TU_BillboardDiffuse, TU_BillboardNormalMap}},
+		{&scene_context.weapon_sprite.drawable, {TU_WeaponSpriteDiffuse, TU_WeaponSpriteNormalMap}}
+	};
+
+	init_shared_textures_for_world_shaded_objects(world_shaded_objects, ARRAY_LENGTH(world_shaded_objects),
+		&scene_context.skybox, &scene_context.shadow_context, &scene_context.ao_map);
 
 	////////// Initializing shared shading params
 
