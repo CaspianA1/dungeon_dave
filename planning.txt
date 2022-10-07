@@ -124,6 +124,7 @@ Other:
 - Perhaps the Shabti should blink
 - A 3D character model that casts a shadow (or a flat one, like the weapon - like paper Mario?)
 - Very short, but memorable little audio tracks that play for the cutscenes
+- The player's shadow billboard should have idle, run, jump, and attack animations
 
 End components:
 - Static sectors
