@@ -44,7 +44,7 @@ void main(void) {
 		textureSize(scrolling_normal_map_sampler, 0), scrolling_UV_for_normal);
 
 	vec3
-		fragment_normal = get_tangent_space_normal_2D(scrolling_normal_map_sampler, scrolling_UV_for_normal),
+		fragment_normal = get_tangent_space_normal_2D(scrolling_normal_map_sampler, scrolling_UV_for_normal).xyz,
 		dir_to_light = normalize(light_pos_tangent_space - fragment_pos_tangent_space),
 		view_dir = normalize(camera_pos_tangent_space - fragment_pos_tangent_space);
 

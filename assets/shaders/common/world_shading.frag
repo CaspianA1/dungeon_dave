@@ -18,20 +18,20 @@ float diffuse(const vec3 fragment_normal) { // Lambert
 	return strengths.diffuse * max(diffuse_amount, 0.0f);
 }
 
-vec3 specular(const vec3 texture_color, const vec3 fragment_normal) { // Blinn-Phong
+vec3 specular(const vec3 texture_color, const vec4 normal_and_inv_height) { // Blinn-Phong
 	vec3 view_dir = normalize(camera_pos_world_space - fragment_pos_world_space);
 	vec3 halfway_dir = normalize(dir_to_light + view_dir);
-	float cos_angle_of_incidence = max(dot(fragment_normal, halfway_dir), 0.0f);
+	float cos_angle_of_incidence = max(dot(normal_and_inv_height.xyz, halfway_dir), 0.0f);
 
 	//////////
 
-	float roughness = length(fwidth(texture_color)); // Greater texture color change -> more local roughness
+	float roughness = fwidth(normal_and_inv_height.a); // Greater texture color change -> more local roughness
 	float specular_exponent = mix(specular_exponents.matte, specular_exponents.rough, roughness);
 	float specular_value = strengths.specular * pow(cos_angle_of_incidence, specular_exponent);
 
 	//////////
 
-	vec3 reflection_dir = reflect(-view_dir, fragment_normal);
+	vec3 reflection_dir = reflect(-view_dir, normal_and_inv_height.xyz);
 	reflection_dir.x = -reflection_dir.x;
 	vec3 env_map_value = texture(environment_map_sampler, reflection_dir).rgb;
 
@@ -89,9 +89,12 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 	// return vec4(vec3(get_ao_strength()), 1.0f);
 	// return vec4(vec3(diffuse(fragment_normal)), 1.0f);
 
-	vec3 fragment_normal = tbn * get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
+	vec4 normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
+	normal_and_inv_height.xyz = tbn * normal_and_inv_height.xyz;
 
-	vec3 non_ambient = diffuse(fragment_normal) + specular(texture_color.rgb, fragment_normal);
+	return vec4(specular(texture_color.rgb, normal_and_inv_height), 1.0f);
+
+	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(texture_color.rgb, normal_and_inv_height);
 	vec3 light_strength = non_ambient * shadow_strength + strengths.ambient * get_ao_strength();
 
 	vec4 color = vec4(light_strength * texture_color.rgb * overall_scene_tone, texture_color.a);
