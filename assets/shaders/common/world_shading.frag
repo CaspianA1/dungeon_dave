@@ -92,8 +92,6 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 	vec4 normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
 	normal_and_inv_height.xyz = tbn * normal_and_inv_height.xyz;
 
-	return vec4(specular(texture_color.rgb, normal_and_inv_height), 1.0f);
-
 	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(texture_color.rgb, normal_and_inv_height);
 	vec3 light_strength = non_ambient * shadow_strength + strengths.ambient * get_ao_strength();
 
