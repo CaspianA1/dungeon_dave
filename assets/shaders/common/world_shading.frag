@@ -84,13 +84,14 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 	adjust_UV_for_pixel_art_filtering(percents.bilinear_diffuse, textureSize(diffuse_sampler, 0).xy, parallax_UV_for_diffuse.xy);
 	adjust_UV_for_pixel_art_filtering(percents.bilinear_normal, textureSize(normal_map_sampler, 0).xy, parallax_UV_for_normal.xy);
 
-	vec4 texture_color = texture(diffuse_sampler, parallax_UV_for_diffuse);
+	vec4
+		texture_color = texture(diffuse_sampler, parallax_UV_for_diffuse),
+		normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
+
+	normal_and_inv_height.xyz = tbn * normal_and_inv_height.xyz;
 
 	// return vec4(vec3(get_ao_strength()), 1.0f);
-	// return vec4(vec3(diffuse(fragment_normal)), 1.0f);
-
-	vec4 normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
-	normal_and_inv_height.xyz = tbn * normal_and_inv_height.xyz;
+	// return vec4(vec3(diffuse(normal_and_inv_height.xyz)), 1.0f);
 
 	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(texture_color.rgb, normal_and_inv_height);
 	vec3 light_strength = non_ambient * shadow_strength + strengths.ambient * get_ao_strength();
