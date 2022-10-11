@@ -95,10 +95,10 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(texture_color.rgb, normal_and_inv_height);
 	vec3 light_strength = non_ambient * shadow_strength + strengths.ambient * get_ao_strength();
 
-	vec4 color = vec4(light_strength * texture_color.rgb * overall_scene_tone, texture_color.a);
+	vec4 color = vec4(texture_color.rgb * light_strength * overall_scene_tone, texture_color.a);
 
 	apply_tone_mapping(tone_mapping_max_white, color.rgb);
-	apply_noise_for_banding_removal(parallax_UV_for_diffuse.xy, color.rgb);
+	apply_noise_for_banding_removal(UV.xy, color.rgb);
 
 	return color;
 }
