@@ -17,6 +17,7 @@ uniform float
 uniform vec3 light_pos_tangent_space;
 uniform sampler2D still_diffuse_sampler, scrolling_diffuse_sampler, scrolling_normal_map_sampler;
 
+// TODO: use the world shading functions instead of this one, if possible
 vec3 blinn_phong(const sampler2D diffuse_sampler, const vec2 custom_UV,
 	const vec3 fragment_normal, const vec3 dir_to_light, const vec3 halfway_dir) {
 
