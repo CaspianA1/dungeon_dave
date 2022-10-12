@@ -261,7 +261,7 @@ WeaponSprite init_weapon_sprite(
 			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW,
 			GL_TRIANGLE_STRIP, (List) {NULL, sizeof(vec3), corners_per_quad, corners_per_quad},
 
-			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/weapon_sprite.frag"), NULL),
+			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),
 			diffuse_texture_set, init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config)
 		),
 

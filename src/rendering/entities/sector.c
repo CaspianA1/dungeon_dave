@@ -239,7 +239,7 @@ SectorContext init_sector_context(const byte* const heightmap,
 		.drawable = init_drawable_with_vertices(
 			define_vertex_spec, NULL, GL_DYNAMIC_DRAW, GL_TRIANGLES,
 			(List) {.data = NULL, .item_size = face_meshes.item_size, .length = face_meshes.length},
-			init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/sector.frag"), NULL),
+			init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),
 			diffuse_texture_set, init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config)
 		),
 
