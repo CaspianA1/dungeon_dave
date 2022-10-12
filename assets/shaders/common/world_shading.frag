@@ -4,14 +4,15 @@
 #include "UV_utils.frag"
 #include "normal_utils.frag"
 #include "parallax_mapping.frag"
+#include "ambient_occlusion.frag"
 #include "../shadow/shadow.frag"
 
-in vec3 fragment_pos_world_space, UV, ambient_occlusion_UV;
+in vec3 fragment_pos_world_space, UV;
+flat in mat3 fragment_tbn;
 
 // These are set through a shared fn for world-shaded objects
 uniform samplerCube environment_map_sampler;
 uniform sampler2DArray diffuse_sampler, normal_map_sampler;
-uniform sampler3D ambient_occlusion_sampler;
 
 float diffuse(const vec3 fragment_normal) { // Lambert
 	float diffuse_amount = dot(fragment_normal, dir_to_light);
@@ -45,23 +46,6 @@ vec3 specular(const vec3 texture_color, const vec4 normal_and_inv_height) { // B
 	return specular_value * env_map_value;
 }
 
-float get_ao_strength(void) {
-	float raw_ao_strength = texture(ambient_occlusion_sampler, ambient_occlusion_UV).r;
-
-	/* The sRGB -> linear mapping is based on function from the bottom of here:
-	https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml.
-	It's done manually because there are no sRGB formats for 8-bit textures.
-	TODO: move this calculation to the CPU. */
-
-	float
-		linear_for_below = raw_ao_strength / 12.92f,
-		linear_for_above = pow((raw_ao_strength + 0.055f) / 1.055f, 2.5f);
-
-	float linear_ao_strength = mix(linear_for_above, linear_for_below, float(raw_ao_strength <= 0.04045f));
-
-	return mix(1.0f, linear_ao_strength, percents.ao);
-}
-
 // https://64.github.io/tonemapping/ (Reinhard Extended Luminance)
 void apply_tone_mapping(const float max_white, inout vec3 color) {
 	float old_luminance = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
@@ -75,8 +59,8 @@ void apply_noise_for_banding_removal(const vec2 seed, inout vec3 color) {
 	color += mix(-noise_granularity, noise_granularity, random_value);
 }
 
-// When the shadow layer is already known (like for the weapon sprite), this can be useful to call
-vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, const vec3 UV, const mat3 tbn) {
+// When the shadow layer is already known (like for the weapon sprite), this can be useful to call. TODO: remove this fn.
+vec4 calculate_light(void) {
 	vec3 parallax_UV_for_diffuse = get_parallax_UV(UV, normal_map_sampler);
 	vec3 parallax_UV_for_normal = parallax_UV_for_diffuse;
 
@@ -88,13 +72,13 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 		texture_color = texture(diffuse_sampler, parallax_UV_for_diffuse),
 		normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
 
-	normal_and_inv_height.xyz = tbn * normal_and_inv_height.xyz;
+	normal_and_inv_height.xyz = fragment_tbn * normal_and_inv_height.xyz;
 
 	// return vec4(vec3(get_ao_strength()), 1.0f);
 	// return vec4(vec3(diffuse(normal_and_inv_height.xyz)), 1.0f);
 
 	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(texture_color.rgb, normal_and_inv_height);
-	vec3 light_strength = non_ambient * shadow_strength + strengths.ambient * get_ao_strength();
+	vec3 light_strength = non_ambient * get_csm_shadow(fragment_pos_world_space) + strengths.ambient * get_ao_strength();
 
 	vec4 color = vec4(texture_color.rgb * light_strength * overall_scene_tone, texture_color.a);
 
@@ -102,9 +86,4 @@ vec4 calculate_light_with_provided_shadow_strength(const float shadow_strength, 
 	apply_noise_for_banding_removal(UV.xy, color.rgb);
 
 	return color;
-}
-
-vec4 calculate_light(const float world_depth_value, const vec3 UV, const mat3 tbn) {
-	float shadow_strength = get_csm_shadow(world_depth_value, fragment_pos_world_space);
-	return calculate_light_with_provided_shadow_strength(shadow_strength, UV, tbn);
 }

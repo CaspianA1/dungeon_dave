@@ -1,14 +1,9 @@
 #version 400 core
 
-#include "shadow/shadow.vert"
-#include "common/shared_params.glsl"
 #include "common/world_shading.vert"
-#include "common/parallax_mapping.vert"
 
 layout(location = 0) in vec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
-
-flat out mat3 tbn;
 
 const struct FaceAttribute {
 	ivec2 uv_indices, uv_signs;
@@ -34,20 +29,11 @@ void main(void) {
 
 	UV.z = face_info_bits >> 3u; // Shifting over to get the texture id
 
-	tbn = mat3(
+	mat3 tbn = mat3(
 		face_attribute.tangent,
 		cross(face_attribute.tangent, face_attribute.normal),
 		face_attribute.normal
 	);
 
-	camera_to_fragment_tangent_space = get_vector_to_vertex_in_tangent_space(
-		camera_pos_world_space, vertex_pos_world_space, tbn
-	);
-
-	////////// Setting ambient_occlusion_UV, world_depth_value, fragment_pos_world_space, and gl_Position
-
-	ambient_occlusion_UV = get_ambient_occlusion_UV(vertex_pos_world_space);
-	world_depth_value = get_world_depth_value(view, vertex_pos_world_space);
-	fragment_pos_world_space = vertex_pos_world_space;
-	gl_Position = view_projection * vec4(vertex_pos_world_space, 1.0f);
+	set_common_outputs(vertex_pos_world_space, tbn);
 }

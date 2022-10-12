@@ -4,6 +4,8 @@
 
 const uint NUM_CASCADE_SPLITS = NUM_CASCADES - 1u;
 
+in float world_depth_value;
+
 uniform sampler2DArray shadow_cascade_sampler;
 
 /* TODO: perhaps use Vogel disk or stratified Poisson sampling instead:
@@ -59,9 +61,7 @@ float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_
 	return clamp(in_light_percentage, 0.0f, 1.0f);
 }
 
-float get_blended_csm_shadow(const uint layer_index, const uint depth_range_shift,
-	const float world_depth_value, const vec3 fragment_pos_world_space) {
-
+float get_blended_csm_shadow(const uint layer_index, const uint depth_range_shift, const vec3 fragment_pos_world_space) {
 	// If the layer index equals 0, this makes the previous layer 0 too
 	uint prev_layer_index = max(int(layer_index) - 1, 0);
 
@@ -82,7 +82,7 @@ float get_blended_csm_shadow(const uint layer_index, const uint depth_range_shif
 }
 
 // TODO: don't pass around `fragment_pos_world_space` so much
-float get_csm_shadow(const float world_depth_value, const vec3 fragment_pos_world_space) {
+float get_csm_shadow(const vec3 fragment_pos_world_space) {
 	uint layer_index = 0;
 
 	while (layer_index < NUM_CASCADE_SPLITS
@@ -90,5 +90,5 @@ float get_csm_shadow(const float world_depth_value, const vec3 fragment_pos_worl
 		layer_index++;
 
 	bool on_last_split = layer_index == NUM_CASCADE_SPLITS;
-	return get_blended_csm_shadow(layer_index, uint(on_last_split), world_depth_value, fragment_pos_world_space);
+	return get_blended_csm_shadow(layer_index, uint(on_last_split), fragment_pos_world_space);
 }
