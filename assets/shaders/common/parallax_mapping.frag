@@ -2,6 +2,8 @@
 
 in vec3 camera_to_fragment_tangent_space;
 
+float s;
+
 /* This code was developed from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping.
 The LOD system that transitions between the plain and parallax UV was based on section 5.4.3 from
 https://advances.realtimerendering.com/s2006/Chapter5-Parallax_Occlusion_Mapping_for_detailed_surface_rendering.pdf. */
@@ -22,8 +24,8 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	*/
 
 	const float
-		min_layers = 4.0f, max_layers = 64.0f,
-		height_scale = 0.03f, lod_cutoff = 1.5f;
+		min_layers = 4.0f, max_layers = 48.0f,
+		height_scale = 0.02f, lod_cutoff = 1.5f;
 
 	////////// LOD calculations
 
