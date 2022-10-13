@@ -247,12 +247,12 @@ static void* main_init(void) {
 
 		.shadow_context = init_shadow_context(
 			// Palace:
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.75f, 1.0f},
+			(vec3) {-0.186405f, 0.922874f, 0.336981f}, (vec3) {1.0f, 1.75f, 1.0f},
 			far_clip_dist, 0.25f, texture_sizes.shadow_map, num_cascades, 16
 
 			// Terrain:
 			/*
-			(vec3) {0.241236f, 0.930481f, -0.275698f}, (vec3) {1.0f, 1.0f, 1.0f},
+			(vec3) {-0.186405f, 0.922874f, 0.336981f}, (vec3) {1.0f, 1.0f, 1.0f},
 			far_clip_dist, 0.4f, texture_sizes.shadow_map, num_cascades, 16
 			*/
 		),
