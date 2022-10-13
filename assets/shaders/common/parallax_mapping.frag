@@ -22,7 +22,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	*/
 
 	const float
-		min_layers = 4.0f, max_layers = 40.0f,
+		min_layers = 4.0f, max_layers = 64.0f,
 		height_scale = 0.03f, lod_cutoff = 1.5f;
 
 	////////// LOD calculations
@@ -60,12 +60,12 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	vec3 curr_UV = UV;
 
 	while (curr_layer_depth < curr_depth_map_value) {
-		curr_UV.xy -= delta_UV;
+		curr_UV.xy += delta_UV;
 		curr_depth_map_value = texture(normal_map_sampler, curr_UV).a;
 		curr_layer_depth += layer_depth;
 	}
 
-	vec3 prev_UV = vec3(curr_UV.xy + delta_UV, UV.z);
+	vec3 prev_UV = vec3(curr_UV.xy - delta_UV, UV.z);
 
 	float
 		depth_before = texture(normal_map_sampler, prev_UV).a - curr_layer_depth + layer_depth,
