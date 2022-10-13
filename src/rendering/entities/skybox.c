@@ -27,26 +27,45 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path) {
 	SDL_Surface* const face_surface = init_blank_surface(cube_size, cube_size);
 	void* const face_surface_pixels = face_surface -> pixels;
 
-	// Right, left, top, bottom, back, front
+	// Order: pos x, neg x, pos y, neg y, pos z, neg z
 	const ivec2 src_origins[faces_per_cubemap] = {
 		{twice_cube_size, cube_size},
 		{0, cube_size},
 		{cube_size, 0},
 		{cube_size, twice_cube_size},
-		{cube_size, cube_size},
-		{twice_cube_size + cube_size, cube_size}
+		{twice_cube_size + cube_size, cube_size},
+		{cube_size, cube_size}
 	};
 
-	WITH_SURFACE_PIXEL_ACCESS(face_surface,
-		for (byte i = 0; i < faces_per_cubemap; i++) {
-			const GLint* const src_origin = src_origins[i];
+	for (byte i = 0; i < faces_per_cubemap; i++) {
+		const GLint* const src_origin = src_origins[i];
 
-			SDL_BlitSurface(skybox_surface, &(SDL_Rect) {src_origin[0], src_origin[1], cube_size, cube_size}, face_surface, NULL);
+		SDL_BlitSurface(skybox_surface, &(SDL_Rect) {src_origin[0], src_origin[1], cube_size, cube_size}, face_surface, NULL);
+
+		WITH_SURFACE_PIXEL_ACCESS(face_surface,
+			// Flipping vertically for positive and negative y
+			const bool flipping_vertically = (i == 2) || (i == 3);
+
+			// Going by half of the cubemap size on the y axis if flipping vertically, and vice versa for x
+			for (GLint y = 0; y < cube_size >> flipping_vertically; y++) {
+				for (GLint x = 0; x < cube_size >> !flipping_vertically; x++) {
+					sdl_pixel_t* const pixel = read_surface_pixel(face_surface, x, y);
+
+					sdl_pixel_t* const to_swap = read_surface_pixel(face_surface,
+						flipping_vertically ? x : (cube_size - x - 1),
+						flipping_vertically ? (cube_size - y - 1) : y
+					);
+
+					const sdl_pixel_t temp = *pixel;
+					*pixel = *to_swap;
+					*to_swap = temp;
+				}
+			}
 
 			init_texture_data(TexSkybox, (GLsizei[]) {cube_size, i}, OPENGL_INPUT_PIXEL_FORMAT,
 				OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, face_surface_pixels);
-		}
-	);
+		);
+	}
 
 	init_texture_mipmap(TexSkybox);
 

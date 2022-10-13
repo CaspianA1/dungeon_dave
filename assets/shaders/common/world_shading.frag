@@ -33,7 +33,6 @@ vec3 specular(const vec3 texture_color, const vec4 normal_and_inv_height) { // B
 	//////////
 
 	vec3 reflection_dir = reflect(-view_dir, normal_and_inv_height.xyz);
-	reflection_dir.x = -reflection_dir.x;
 	vec3 env_map_value = texture(environment_map_sampler, reflection_dir).rgb;
 
 	// Not reading from the heightmap for this because texture brightness and normals should technically be decoupled
@@ -74,6 +73,7 @@ vec4 calculate_light(void) {
 
 	normal_and_inv_height.xyz = fragment_tbn * normal_and_inv_height.xyz;
 
+	// return vec4(specular(texture_color.rgb, normal_and_inv_height), 1.0f);
 	// return vec4(vec3(get_ao_strength()), 1.0f);
 	// return vec4(vec3(diffuse(normal_and_inv_height.xyz)), 1.0f);
 
