@@ -26,8 +26,8 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 	vec3 texel_size = 1.0f / texture_size;
 
 	vec3 upscaled_UV = UV * texture_size - 0.5f;
-	vec3 fxyz = fract(upscaled_UV);
-	upscaled_UV -= fxyz; // Flooring it
+	vec3 UV_fraction = fract(upscaled_UV);
+	upscaled_UV -= UV_fraction; // Flooring it
 
 	//////////
 
@@ -37,7 +37,7 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 
 	//////////
 
-	vec4 xcubic = cubic(fxyz.x), ycubic = cubic(fxyz.y), zcubic = cubic(fxyz.z);
+	vec4 xcubic = cubic(UV_fraction.x), ycubic = cubic(UV_fraction.y), zcubic = cubic(UV_fraction.z);
 	vec4 s = vec4(xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw);
 	vec2 s_extra = zcubic.xz + zcubic.yw;
 
