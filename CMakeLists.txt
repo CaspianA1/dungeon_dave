@@ -2,16 +2,6 @@ cmake_minimum_required(VERSION 3.0)
 
 project(DungeonDave)
 
-########## Exporting CMake's compile commands, so that Vim's YouCompleteMe can find any project headers.
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
-
-# On the first build, this file will not exist yet, so this avoids a failing shell command.
-# This moves the file one directory outwards, so that YouCompleteMe can find it.
-if (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json")
-	execute_process(COMMAND sh -c "mv compile_commands.json ..")
-endif()
-
 ########## Setting the C standard, warning flags, and debug/release flags.
 
 set(CMAKE_C_STANDARD 99)
