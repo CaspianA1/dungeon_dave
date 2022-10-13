@@ -80,6 +80,7 @@ Random feature ideas:
 - Find a tighter far plane distance by finding the diameter of the sector convex hull
 - The map editor should be called Dungeon Painter
 - Perhaps build levels on top of cool terrain heightmaps, for a good surrounding environment + a level path through the terrain
+- God rays
 
 Normal mapping:
 - Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
@@ -94,10 +95,9 @@ Normal mapping:
 - Note: normal maps calculated via dFdx/y won't work because 1. derivatives are in screen space and 2. normals can then not be filtered
 
 A better shading model:
-- JSON file -> shared shader uniforms via uniform buffer objects
+- JSON file -> UBO
 - Possibility: instead of ambient, diffuse, and specular parameters per level, perhaps a material system + PBR (include normal map intensity in this; for the CPU only)
 		(note: can specify smoothness per material by lerping the a pointing-out vector with each local surface normal, by a smoothness factor)
-- Those UBOs then can share a common fragment shading function that uses those params and takes in a surface normal
 
 Physics:
 	Features:
