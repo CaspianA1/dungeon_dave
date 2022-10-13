@@ -96,6 +96,7 @@ Normal mapping:
 A better shading model:
 - JSON file -> shared shader uniforms via uniform buffer objects
 - Possibility: instead of ambient, diffuse, and specular parameters per level, perhaps a material system + PBR (include normal map intensity in this; for the CPU only)
+		(note: can specify smoothness per material by lerping the a pointing-out vector with each local surface normal, by a smoothness factor)
 - Those UBOs then can share a common fragment shading function that uses those params and takes in a surface normal
 
 Physics:
