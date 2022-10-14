@@ -23,7 +23,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	- Allow parallax mapping to be enabled or disabled (this will be a user setting eventually)
 	*/
 
-	const float
+	const float // TODO: put these in the shared params
 		min_layers = 4.0f, max_layers = 48.0f,
 		height_scale = 0.02f, lod_cutoff = 1.5f;
 

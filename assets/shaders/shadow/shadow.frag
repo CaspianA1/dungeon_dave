@@ -32,11 +32,10 @@ float get_average_occluder_depth(const uint sample_radius, const vec3 UV) {
 //////////
 
 float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_world_space) {
+	// TODO: put these in the shared params
 	const uint sample_radius = 2;
-
-	const float
-		esm_constant = 45.0f, layer_scaling_component = 1.0f; // Palace
-		// esm_constant = 80.0f, layer_scaling_component = 1.1f; // Terrain
+	const float esm_constant = 45.0f, layer_scaling_component = 1.8f; // Palace
+	// esm_constant = 80.0f, layer_scaling_component = 1.1f; // Terrain
 
 	/* (TODO) ESM scaling:
 	- Bigger depth range will be darker, so scale the exponent primarily on that
