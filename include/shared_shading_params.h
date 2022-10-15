@@ -23,7 +23,8 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 void deinit_shared_shading_params(const SharedShadingParams* const shared_shading_params);
 
 void update_shared_shading_params(SharedShadingParams* const shared_shading_params,
-	const Camera* const camera, const CascadedShadowContext* const shadow_context);
+	const Camera* const camera, const CascadedShadowContext* const shadow_context,
+	const vec3 dir_to_light);
 
 //////////
 

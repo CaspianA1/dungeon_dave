@@ -7,6 +7,7 @@
 #include "rendering/entities/weapon_sprite.h"
 #include "rendering/entities/sector.h"
 #include "rendering/entities/billboard.h"
+#include "rendering/dynamic_light.h"
 #include "rendering/shadow.h"
 #include "rendering/ambient_occlusion.h"
 #include "rendering/entities/skybox.h"
@@ -50,6 +51,7 @@ typedef struct {
 	const SectorContext sector_context;
 	BillboardContext billboard_context;
 
+	DynamicLight dynamic_light;
 	CascadedShadowContext shadow_context;
 	const AmbientOcclusionMap ao_map;
 

@@ -10,78 +10,86 @@ static const GLenum framebuffer_target = GL_DRAW_FRAMEBUFFER;
 https://learnopengl.com/Guest-Articles/2021/CSM
 
 For later on:
-- Texel snapping through reprojection for more preserved resolution and less jittering artifacts
-	- See here for that? https://lxjk.github.io/2017/04/15/Calculate-Minimal-Bounding-Sphere-of-Frustum.html
-	- Note: a constant radius per sub-frustum gives stabilization (but finding that radius is the tricky part)
-- Merging the master branch with this one
-- A world-space approach to merging the AABB of the sub frustum box
-	with PSRs, instead of defining a scale factor for the frustum
+- A constant projection radius, for no jitter when increasing or decreasing the FOV
 - Pushing the weapon against walls puts it in shadow, which doesn't look right (I need to keep it outside the wall)
 - Try to avoid the use of a geometry shader for instancing if possible
 	(can probably offset vertices with normal instancing, but I don't know about changing `gl_Layer`)
 - Blend between layers in some way using hardware? Volume textures aren't usable for this, see
-	the bottom of https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage3D.xhtml
+	the bottom of https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage3D.xhtml.
 
 Revectorization:
 - https://www.gamedev.net/tutorials/programming/graphics/shadow-map-silhouette-revectorization-smsr-r3437/
 - https://graphicsinterface.org/wp-content/uploads/gi2016-10.pdf
+
+Stabilization things:
+https://lxjk.github.io/2017/04/15/Calculate-Minimal-Bounding-Sphere-of-Frustum.html
+https://stackoverflow.com/questions/29557752/stable-shadow-mapping
+https://web.archive.org/web/20210723225508/http://dev.theomader.com/stable-csm/
+https://www.junkship.net/News/2020/11/22/shadow-of-a-doubt-part-2
+https://www.gamedev.net/forums/topic/673197-cascaded-shadow-map-shimmering-effect/5262338/
+https://gamedev.stackexchange.com/questions/34782/shadows-shimmer-when-camera-moves
+https://chetanjags.wordpress.com/2015/02/05/real-time-shadows-cascaded-shadow-maps/
+http://www.diva-portal.org/smash/get/diva2:1056408/FULLTEXT01.pdf
 */
 
-////////// This part concerns getting the light view projection matrix of a camera sub frustum
+static void get_light_view_projection(
+	const CascadedShadowContext* const shadow_context,
+	const Camera* const camera, const vec3 dir_to_light,
+	const GLfloat near_clip_dist, const GLfloat far_clip_dist,
+	const GLfloat aspect_ratio, mat4 light_view_projection) {
 
-static void get_camera_sub_frustum_corners(const Camera* const camera, const GLfloat aspect_ratio,
-	const GLfloat near_clip_dist, const GLfloat far_clip_dist, vec4 camera_sub_frustum_corners[corners_per_frustum]) {
+	////////// Getting the camera sub frustum center
 
 	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection;
-
 	glm_perspective(camera -> angles.fov, aspect_ratio, near_clip_dist, far_clip_dist, camera_sub_frustum_projection);
 	glm_mul(camera_sub_frustum_projection, (vec4*) camera -> view, camera_sub_frustum_view_projection);
-
 	glm_mat4_inv(camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection);
+
+	vec4 camera_sub_frustum_corners[corners_per_frustum], camera_sub_frustum_center;
 	glm_frustum_corners(inv_camera_sub_frustum_view_projection, camera_sub_frustum_corners);
-}
+	glm_frustum_center(camera_sub_frustum_corners, camera_sub_frustum_center);
 
-static void get_light_view_and_projection(const CascadedShadowContext* const shadow_context,
-	const vec4 camera_sub_frustum_corners[corners_per_frustum], mat4 light_view, mat4 light_projection) {
-
-	////////// Getting the sub frustum center from the sub frustum corners, and getting a light view from that
+	////////// Getting the light view
 
 	vec3 light_eye;
-	vec4 camera_sub_frustum_center;
+	glm_vec3_add(camera_sub_frustum_center, (GLfloat*) dir_to_light, light_eye);
 
-	glm_frustum_center((vec4*) camera_sub_frustum_corners, camera_sub_frustum_center);
-	glm_vec3_add(camera_sub_frustum_center, (GLfloat*) shadow_context -> dir_to_light, light_eye);
+	mat4 light_view;
 	glm_lookat(light_eye, camera_sub_frustum_center, GLM_YUP, light_view);
 
-	////////// Getting an AABB from the sub frustum corners, and scaling it up
+	////////// Texel snapping (used https://lxjk.github.io/2017/04/15/Calculate-Minimal-Bounding-Sphere-of-Frustum.html)
 
-	vec3 light_view_sub_frustum_box[2];
-	glm_frustum_box((vec4*) camera_sub_frustum_corners, (vec4*) light_view, light_view_sub_frustum_box);
+	/* When the camera FOV changes, each sub frustum gets wider, and this results in texel snapping not working.
+	So, the FOV for each sub frustum is the average of the initial camera FOV and the max FOV, in order to best
+	accomodate both FOVs. */
+	const GLfloat fov_for_sub_frustum = constants.camera.init.fov + constants.camera.limits.fov_change * 0.5f;
 
-	const GLfloat* const light_view_sub_frustum_box_scale = shadow_context -> sub_frustum_scale;
+	const GLfloat // TODO: precompute k
+		far_clip_minus_near_clip = far_clip_dist - near_clip_dist,
+		far_clip_plus_near_clip = far_clip_dist + near_clip_dist,
+		k = sqrtf(1.0f + powf(1.0f / aspect_ratio, 2)) * tanf(fov_for_sub_frustum * 0.5f);
 
-	for (byte i = 0; i < 3; i++) {
-		const GLfloat scale = light_view_sub_frustum_box_scale[i];
-		const GLfloat one_over_scale = 1.0f / scale;
+	const GLfloat k_squared = k * k;
 
-		GLfloat
-			*const min = &light_view_sub_frustum_box[0][i],
-			*const max = &light_view_sub_frustum_box[1][i];
+	const GLfloat radius = shadow_context -> sub_frustum_scale * 0.5f * sqrtf(
+		far_clip_minus_near_clip * far_clip_minus_near_clip
+		+
+		2.0f * (far_clip_dist * far_clip_dist + near_clip_dist * near_clip_dist) * k_squared
+		+
+		(far_clip_plus_near_clip * far_clip_plus_near_clip) * (k_squared * k_squared)
+	);
 
-		*min *= (*min < 0.0f) ? scale : one_over_scale;
-		*max *= (*max < 0.0f) ? one_over_scale : scale;
-	}
+	//////////
 
-	////////// Getting the AABB radius, applying texel snapping to the light view, and getting the light projection
-
-	const GLfloat radius = roundf(glm_aabb_radius(light_view_sub_frustum_box));
 	const GLfloat divisor = 2.0f * radius / shadow_context -> resolution;
 
-	GLfloat* const column = light_view[3];
-	column[0] -= fmodf(column[0], divisor);
-	column[1] -= fmodf(column[1], divisor);
+	GLfloat* const projected_center = light_view[3];
+	projected_center[0] -= remainderf(projected_center[0], divisor);
+	projected_center[1] -= remainderf(projected_center[1], divisor);
 
+	mat4 light_projection;
 	glm_ortho(-radius, radius, -radius, radius, -radius, radius, light_projection);
+	glm_mat4_mul(light_projection, light_view, light_view_projection);
 }
 
 //////////
@@ -162,10 +170,9 @@ void specify_cascade_count_before_any_shader_compilation(const GLsizei num_casca
 }
 
 CascadedShadowContext init_shadow_context(
-	const vec3 dir_to_light, const vec3 sub_frustum_scale,
-	const GLfloat far_clip_dist, const GLfloat linear_split_weight,
-	const GLsizei resolution, const GLsizei num_cascades,
-	const GLsizei num_depth_buffer_bits) {
+	const GLfloat sub_frustum_scale, const GLfloat far_clip_dist,
+	const GLfloat linear_split_weight, const GLsizei resolution,
+	const GLsizei num_cascades, const GLsizei num_depth_buffer_bits) {
 
 	const GLsizei num_split_dists = num_cascades - 1;
 	GLfloat* const split_dists = alloc((size_t) num_split_dists, sizeof(GLfloat));
@@ -195,9 +202,7 @@ CascadedShadowContext init_shadow_context(
 		.depth_layers = depth_layers,
 
 		.resolution = resolution, .num_cascades = num_cascades,
-
-		.dir_to_light = {dir_to_light[0], dir_to_light[1], dir_to_light[2]},
-		.sub_frustum_scale = {sub_frustum_scale[0], sub_frustum_scale[1], sub_frustum_scale[2]},
+		.sub_frustum_scale = sub_frustum_scale,
 
 		.split_dists = split_dists,
 		.light_view_projection_matrices = light_view_projection_matrices
@@ -211,7 +216,9 @@ void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
 	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
 }
 
-void update_shadow_context(const CascadedShadowContext* const shadow_context, const Camera* const camera, const GLfloat aspect_ratio) {
+void update_shadow_context(const CascadedShadowContext* const shadow_context,
+	const Camera* const camera, const vec3 dir_to_light, const GLfloat aspect_ratio) {
+
 	const GLfloat* const split_dists = shadow_context -> split_dists;
 	mat4* const light_view_projection_matrices = shadow_context -> light_view_projection_matrices;
 
@@ -219,9 +226,6 @@ void update_shadow_context(const CascadedShadowContext* const shadow_context, co
 	const GLfloat far_clip_dist = camera -> far_clip_dist;
 
 	////////// Getting the matrices needed
-
-	vec4 camera_sub_frustum_corners[corners_per_frustum];
-	mat4 light_view, light_projection;
 
 	for (GLsizei i = 0; i < num_cascades; i++) {
 		GLfloat sub_near_clip, sub_far_clip;
@@ -235,9 +239,8 @@ void update_shadow_context(const CascadedShadowContext* const shadow_context, co
 			sub_far_clip = (i == num_cascades - 1) ? far_clip_dist : split_dists[i];
 		}
 
-		get_camera_sub_frustum_corners(camera, aspect_ratio, sub_near_clip, sub_far_clip, camera_sub_frustum_corners);
-		get_light_view_and_projection(shadow_context, camera_sub_frustum_corners, light_view, light_projection);
-		glm_mul(light_projection, light_view, light_view_projection_matrices[i]);
+		get_light_view_projection(shadow_context, camera, dir_to_light, sub_near_clip,
+			sub_far_clip, aspect_ratio, light_view_projection_matrices[i]);
 	}
 }
 

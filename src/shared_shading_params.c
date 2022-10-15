@@ -76,13 +76,14 @@ void deinit_shared_shading_params(const SharedShadingParams* const shared_shadin
 }
 
 void update_shared_shading_params(SharedShadingParams* const shared_shading_params,
-	const Camera* const camera, const CascadedShadowContext* const shadow_context) {
+	const Camera* const camera, const CascadedShadowContext* const shadow_context,
+	const vec3 dir_to_light) {
 
 	UniformBuffer* const dynamic_params = &shared_shading_params -> dynamic;
 
 	enable_uniform_buffer_writing_batch(dynamic_params, true);
 
-	write_primitive_to_uniform_buffer(dynamic_params, "dir_to_light", shadow_context -> dir_to_light, sizeof(vec3));
+	write_primitive_to_uniform_buffer(dynamic_params, "dir_to_light", dir_to_light, sizeof(vec3));
 	write_primitive_to_uniform_buffer(dynamic_params, "camera_pos_world_space", camera -> pos, sizeof(vec3));
 	write_matrix_to_uniform_buffer(dynamic_params, "view_projection", (GLfloat*) camera -> view_projection, sizeof(vec4), 4);
 	write_matrix_to_uniform_buffer(dynamic_params, "view", (GLfloat*) camera -> view, sizeof(vec4), 4);

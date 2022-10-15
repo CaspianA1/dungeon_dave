@@ -23,13 +23,18 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	const Skybox* const skybox = &scene_context -> skybox;
 	const AmbientOcclusionMap* const ao_map = &scene_context -> ao_map;
 
+	DynamicLight* const dynamic_light = &scene_context -> dynamic_light;
+	const GLfloat *const dir_to_light = dynamic_light -> curr_dir, curr_time_secs = event -> curr_time_secs;
+
 	////////// Scene updating
 
 	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
-	update_billboards(billboard_context, event -> curr_time_secs);
+
+	update_billboards(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
-	update_shadow_context(shadow_context, camera, event -> aspect_ratio);
-	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context);
+	update_dynamic_light(dynamic_light, curr_time_secs);
+	update_shadow_context(shadow_context, camera, dir_to_light, event -> aspect_ratio);
+	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context, dir_to_light);
 
 	////////// Rendering to the shadow context
 
@@ -183,7 +188,7 @@ static void* main_init(void) {
 	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
 	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
 
-	const GLsizei num_cascades = 8; // 8 for palace, 16 for terrain
+	const GLsizei num_cascades = 4; // 4 for palace, 16 for terrain
 	specify_cascade_count_before_any_shader_compilation(num_cascades);
 
 	// 1024 for palace, 1200 for terrain
@@ -245,16 +250,19 @@ static void* main_init(void) {
 			ARRAY_LENGTH(billboard_animation_instances), billboard_animation_instances
 		),
 
+		.dynamic_light = init_dynamic_light(
+			2.5f,
+			(vec3) {3.0f, 50.0f, 36.0f},
+			(vec3) {24.0f, 2.5f, 20.0f},
+			(vec3) {28.0f, 2.5f, 17.5f}
+		),
+
 		.shadow_context = init_shadow_context(
 			// Palace:
-			(vec3) {-0.186405f, 0.922874f, 0.336981f}, (vec3) {1.0f, 1.75f, 1.0f},
-			far_clip_dist, 0.25f, texture_sizes.shadow_map, num_cascades, 16
+			1.25f, far_clip_dist, 0.5f, texture_sizes.shadow_map, num_cascades, 16
 
 			// Terrain:
-			/*
-			(vec3) {-0.186405f, 0.922874f, 0.336981f}, (vec3) {1.0f, 1.0f, 1.0f},
-			far_clip_dist, 0.4f, texture_sizes.shadow_map, num_cascades, 16
-			*/
+			// 1.0f, far_clip_dist, 0.4f, texture_sizes.shadow_map, num_cascades, 16
 		),
 
 		.ao_map = init_ao_map(heightmap, map_size, max_point_height),
