@@ -10,7 +10,6 @@ layout(shared) uniform ConstantShadingParams {
 	struct {float matte, rough;} specular_exponents;
 
 	float
-		specular_exponent,
 		cascade_split_distances[NUM_CASCADE_SPLITS],
 		tone_mapping_max_white, noise_granularity;
 
