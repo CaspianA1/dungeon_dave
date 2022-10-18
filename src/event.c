@@ -30,7 +30,6 @@ Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_betwe
 		),
 
 		.screen_size = {screen_width, screen_height},
-
 		.aspect_ratio = (GLfloat) screen_width / screen_height,
 
 		.mouse_movement_percent = {
