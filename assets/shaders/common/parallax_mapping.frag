@@ -2,8 +2,6 @@
 
 in vec3 camera_to_fragment_tangent_space;
 
-float s;
-
 /* This code was developed from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping.
 The LOD system that transitions between the plain and parallax UV was based on section 5.4.3 from
 https://advances.realtimerendering.com/s2006/Chapter5-Parallax_Occlusion_Mapping_for_detailed_surface_rendering.pdf. */
