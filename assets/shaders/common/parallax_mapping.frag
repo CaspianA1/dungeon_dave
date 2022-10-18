@@ -21,9 +21,11 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	- Allow parallax mapping to be enabled or disabled (this will be a user setting eventually)
 	*/
 
+	/*
 	const float // TODO: put these in the shared params
 		min_layers = 4.0f, max_layers = 48.0f,
 		height_scale = 0.02f, lod_cutoff = 1.5f;
+	*/
 
 	////////// LOD calculations
 
@@ -31,12 +33,12 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 
 	/* For all LOD values above `lod_cutoff`, the
 	plain UV is used, skipping a lot of work */
-	if (lod > lod_cutoff) return UV;
+	if (lod > parallax_mapping.lod_cutoff) return UV;
 
 	/* For LODs between `lod_cutoff - lod_blend_range` to `lod_cutoff`,
 	blending occurs between the parallax and plain UV */
-	const float lod_blend_range = (lod_cutoff < 1.0f) ? lod_cutoff : 1.0f;
-	const float min_lod_for_blending = lod_cutoff - lod_blend_range;
+	float lod_blend_range = (parallax_mapping.lod_cutoff < 1.0f) ? parallax_mapping.lod_cutoff : 1.0f;
+	float min_lod_for_blending = parallax_mapping.lod_cutoff - lod_blend_range;
 
 	/* If full, unblended parallax mapping is used, this will be below 0,
 	so the `max` stops the blend weight from being negative */
@@ -50,7 +52,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	the number of layers because while steep angles may yield higher mip levels when using anisotropic
 	filtering, the mip level also increases for far-away objects, and the number of layers should only
 	be dependent on how steep the view angle is. */
-	float num_layers = mix(max_layers, min_layers, max(view_dir.z, 0.0f));
+	float num_layers = mix(parallax_mapping.max_layers, parallax_mapping.min_layers, max(view_dir.z, 0.0f));
 
 	#define PARALLAX_SAMPLE(UV) texture(normal_map_sampler, UV).a
 
@@ -58,7 +60,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 		layer_depth = 1.0f / num_layers, curr_layer_depth = 0.0f,
 		curr_depth_map_value = PARALLAX_SAMPLE(UV);
 
-	vec2 delta_UV = (view_dir.xy / view_dir.z) * (height_scale / num_layers);
+	vec2 delta_UV = (view_dir.xy / view_dir.z) * (parallax_mapping.height_scale / num_layers);
 	vec3 curr_UV = UV;
 
 	while (curr_layer_depth < curr_depth_map_value) {

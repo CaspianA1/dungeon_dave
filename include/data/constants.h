@@ -53,13 +53,13 @@ static const struct {
 
 		const byte aniso_filtering_level;
 
+		const struct {const GLfloat min_layers, max_layers, height_scale, lod_cutoff;} parallax_mapping;
 		const struct {const GLfloat bilinear_diffuse, bilinear_normal, ao;} percents;
 		const struct {const GLfloat ambient, diffuse, specular;} strengths;
 		const struct {const GLfloat matte, rough;} specular_exponents;
 
-		const GLfloat
-			specular_exponent, tone_mapping_max_white,
-			noise_granularity, overall_scene_tone[3];
+		const GLfloat specular_exponent, tone_mapping_max_white, noise_granularity;
+		const vec3 overall_scene_tone;
 	} lighting;
 
 	const struct { // All angles are in radians
@@ -98,6 +98,7 @@ static const struct {
 	.lighting = {
 		.aniso_filtering_level = 8,
 
+		.parallax_mapping = {.min_layers = 4.0f, .max_layers = 48.0f, .height_scale = 0.02f, .lod_cutoff = 1.5f},
 		.percents = {.bilinear_diffuse = 0.75f, .bilinear_normal = 0.9f, .ao = 1.0f},
 		.strengths = {.ambient = 0.7f, .diffuse = 0.6f, .specular = 0.6f},
 		.specular_exponents = {.matte = 8.0f, .rough = 128.0f},

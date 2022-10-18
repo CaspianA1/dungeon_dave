@@ -6,6 +6,9 @@ static void init_constant_shading_params(UniformBuffer* const shading_params, co
 
 	#define UBO_WRITE(name) write_primitive_to_uniform_buffer(shading_params, #name, &constants.lighting.name, sizeof(constants.lighting.name))
 
+	UBO_WRITE(parallax_mapping.min_layers); UBO_WRITE(parallax_mapping.max_layers);
+	UBO_WRITE(parallax_mapping.height_scale); UBO_WRITE(parallax_mapping.lod_cutoff);
+
 	UBO_WRITE(percents.bilinear_diffuse); UBO_WRITE(percents.bilinear_normal); UBO_WRITE(percents.ao);
 
 	UBO_WRITE(strengths.ambient); UBO_WRITE(strengths.diffuse);
@@ -33,6 +36,9 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 	const GLuint first_shader = shaders_that_share_params[0];
 
 	const GLchar* const constant_subvar_names[] = {
+		"parallax_mapping.min_layers", "parallax_mapping.max_layers",
+		"parallax_mapping.height_scale", "parallax_mapping.lod_cutoff",
+
 		"percents.bilinear_diffuse", "percents.bilinear_normal", "percents.ao",
 		"strengths.ambient", "strengths.diffuse", "strengths.specular",
 

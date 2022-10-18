@@ -5,6 +5,8 @@
 /* These are constant for a given level.
 They are ordered in terms of the stages of rendering. */
 layout(shared) uniform ConstantShadingParams {
+	struct {float min_layers, max_layers, height_scale, lod_cutoff;} parallax_mapping;
+
 	struct {float bilinear_diffuse, bilinear_normal, ao;} percents;
 	struct {float ambient, diffuse, specular;} strengths;
 	struct {float matte, rough;} specular_exponents;
