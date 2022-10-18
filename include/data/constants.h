@@ -112,8 +112,8 @@ static const struct {
 			.esm_exponent_layer_scale_factor = 1.8f
 		},
 
-		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
-		.tone_mapping_max_white = 1.5f, .noise_granularity = 0.2f / 255.0f
+		.overall_scene_tone = {0.968627f, 0.878431f, 0.823529f},
+		.tone_mapping_max_white = 1.5f, .noise_granularity = 0.001f
 	},
 
 	.camera = {
