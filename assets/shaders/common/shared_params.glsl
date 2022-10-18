@@ -11,7 +11,7 @@ layout(shared) uniform ConstantShadingParams {
 
 	float
 		specular_exponent,
-		cascade_split_distances[NUM_CASCADES - 1u], // TODO: use the const variable name for this size
+		cascade_split_distances[NUM_CASCADE_SPLITS],
 		tone_mapping_max_white, noise_granularity;
 
 	vec3 overall_scene_tone;

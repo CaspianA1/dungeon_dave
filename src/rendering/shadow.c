@@ -163,8 +163,13 @@ void specify_cascade_count_before_any_shader_compilation(const GLsizei num_casca
 	const byte* const opengl_version = constants.window.opengl_major_minor_version;
 	const GLchar* const file_description = "This file is written to before any other shaders include it";
 
-	fprintf(file, "#version %u%u0 core\n\n// %s\n#define NUM_CASCADES %uu\n",
-		opengl_version[0], opengl_version[1], file_description, num_cascades);
+	fprintf(file,
+		"#version %u%u0 core\n\n// %s\n"
+		"#define NUM_CASCADES %uu\n"
+		"#define NUM_CASCADE_SPLITS %uu\n",
+
+		opengl_version[0], opengl_version[1], file_description,
+		num_cascades, num_cascades - 1);
 
 	fclose(file);
 }

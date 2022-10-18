@@ -1,9 +1,5 @@
 #version 400 core
 
-#include "num_cascades.glsl" // `num_cascades.glsl` is written to by the CPU before any shader compilation
-
-const uint NUM_CASCADE_SPLITS = NUM_CASCADES - 1u;
-
 in float world_depth_value;
 
 uniform sampler2DArray shadow_cascade_sampler;
