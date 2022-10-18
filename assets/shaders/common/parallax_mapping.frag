@@ -52,23 +52,25 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	be dependent on how steep the view angle is. */
 	float num_layers = mix(max_layers, min_layers, max(view_dir.z, 0.0f));
 
+	#define PARALLAX_SAMPLE(UV) texture(normal_map_sampler, UV).a
+
 	float
 		layer_depth = 1.0f / num_layers, curr_layer_depth = 0.0f,
-		curr_depth_map_value = texture(normal_map_sampler, UV).a;
+		curr_depth_map_value = PARALLAX_SAMPLE(UV);
 
 	vec2 delta_UV = (view_dir.xy / view_dir.z) * (height_scale / num_layers);
 	vec3 curr_UV = UV;
 
 	while (curr_layer_depth < curr_depth_map_value) {
 		curr_UV.xy += delta_UV;
-		curr_depth_map_value = texture(normal_map_sampler, curr_UV).a;
+		curr_depth_map_value = PARALLAX_SAMPLE(curr_UV);
 		curr_layer_depth += layer_depth;
 	}
 
 	vec3 prev_UV = vec3(curr_UV.xy - delta_UV, UV.z);
 
 	float
-		depth_before = texture(normal_map_sampler, prev_UV).a - curr_layer_depth + layer_depth,
+		depth_before = PARALLAX_SAMPLE(prev_UV) - curr_layer_depth + layer_depth,
 		depth_after = curr_depth_map_value - curr_layer_depth;
 
 	float UV_weight = depth_after / (depth_after - depth_before);
@@ -78,4 +80,6 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	vec2 parallax_UV = mix(curr_UV.xy, prev_UV.xy, UV_weight);
 	vec2 lod_parallax_UV = mix(parallax_UV, UV.xy, lod_weight);
 	return vec3(lod_parallax_UV, UV.z);
+
+	#undef PARALLAX_SAMPLE
 }
