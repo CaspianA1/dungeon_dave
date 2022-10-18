@@ -6,15 +6,17 @@
 They are ordered in terms of the stages of rendering. */
 layout(shared) uniform ConstantShadingParams {
 	struct {float min_layers, max_layers, height_scale, lod_cutoff;} parallax_mapping;
-	struct {float bilinear_diffuse, bilinear_normal, ao;} percents;
+	struct {float diffuse, normal;} bilinear_percents;
 	struct {float ambient, diffuse, specular;} strengths;
 	struct {float matte, rough;} specular_exponents;
 
-	float
-		cascade_split_distances[NUM_CASCADE_SPLITS],
-		tone_mapping_max_white, noise_granularity;
+	struct {
+		uint sample_radius, esm_exponent;
+		float esm_exponent_layer_scale_factor, cascade_split_distances[NUM_CASCADE_SPLITS];
+	} shadow_mapping;
 
 	vec3 overall_scene_tone;
+	float tone_mapping_max_white, noise_granularity;
 };
 
 layout(shared) uniform DynamicShadingParams {

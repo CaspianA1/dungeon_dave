@@ -212,7 +212,7 @@ void make_application(bool (*const drawer) (void* const, const Event* const),
 
 	const Screen screen = init_screen(constants.window.app_name,
 		constants.window.opengl_major_minor_version, constants.window.depth_buffer_bits,
-		constants.window.multisample_samples, constants.window.size);
+		constants.lighting.multisample_samples, constants.window.size);
 
 	printf("---\nvendor = %s\nrenderer = %s\nversion = %s\n---\n",
 		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));

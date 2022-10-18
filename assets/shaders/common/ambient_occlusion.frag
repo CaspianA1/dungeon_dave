@@ -7,7 +7,6 @@ uniform sampler3D ambient_occlusion_sampler;
 /* The tricubic filtering code is based on the bicubic filtering code from here:
 https://stackoverflow.com/questions/13501081/efficient-bicubic-filtering-code-in-glsl. */
 
-// TODO: try different cubic functions
 vec4 cubic(const float v) {
 	vec4 n = vec4(1.0f, 2.0f, 3.0f, 4.0f) - v;
 	vec4 s = n * n * n;
@@ -82,7 +81,5 @@ float get_ao_strength(void) {
 		linear_for_below = raw_ao_strength / 12.92f,
 		linear_for_above = pow((raw_ao_strength + 0.055f) / 1.055f, 2.5f);
 
-	float linear_ao_strength = mix(linear_for_above, linear_for_below, float(raw_ao_strength <= 0.04045f));
-
-	return mix(1.0f, linear_ao_strength, percents.ao);
+	return mix(linear_for_above, linear_for_below, float(raw_ao_strength <= 0.04045f));
 }

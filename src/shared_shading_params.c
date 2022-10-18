@@ -9,21 +9,27 @@ static void init_constant_shading_params(UniformBuffer* const shading_params, co
 	UBO_WRITE(parallax_mapping.min_layers); UBO_WRITE(parallax_mapping.max_layers);
 	UBO_WRITE(parallax_mapping.height_scale); UBO_WRITE(parallax_mapping.lod_cutoff);
 
-	UBO_WRITE(percents.bilinear_diffuse); UBO_WRITE(percents.bilinear_normal); UBO_WRITE(percents.ao);
+	UBO_WRITE(bilinear_percents.diffuse); UBO_WRITE(bilinear_percents.normal);
 
 	UBO_WRITE(strengths.ambient); UBO_WRITE(strengths.diffuse);
 	UBO_WRITE(strengths.specular); UBO_WRITE(specular_exponents.matte);
 	UBO_WRITE(specular_exponents.rough);
 
-	write_array_of_primitives_to_uniform_buffer(shading_params, "cascade_split_distances", (List) {
-		.data = shadow_context -> split_dists,
-		.item_size = sizeof(GLfloat),
-		.length = (buffer_size_t) shadow_context -> num_cascades - 1
-	});
+	UBO_WRITE(shadow_mapping.sample_radius);
+	UBO_WRITE(shadow_mapping.esm_exponent);
+	UBO_WRITE(shadow_mapping.esm_exponent_layer_scale_factor);
 
+	write_array_of_primitives_to_uniform_buffer(shading_params,
+		"shadow_mapping.cascade_split_distances", (List) {
+			.data = shadow_context -> split_dists,
+			.item_size = sizeof(GLfloat),
+			.length = (buffer_size_t) shadow_context -> num_cascades - 1
+		}
+	);
+
+	UBO_WRITE(overall_scene_tone);
 	UBO_WRITE(tone_mapping_max_white);
 	UBO_WRITE(noise_granularity);
-	UBO_WRITE(overall_scene_tone);
 
 	#undef UBO_WRITE
 
@@ -39,14 +45,15 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 		"parallax_mapping.min_layers", "parallax_mapping.max_layers",
 		"parallax_mapping.height_scale", "parallax_mapping.lod_cutoff",
 
-		"percents.bilinear_diffuse", "percents.bilinear_normal", "percents.ao",
+		"bilinear_percents.diffuse", "bilinear_percents.normal",
 		"strengths.ambient", "strengths.diffuse", "strengths.specular",
-
 		"specular_exponents.matte", "specular_exponents.rough",
 
-		"cascade_split_distances",
+		"shadow_mapping.sample_radius", "shadow_mapping.esm_exponent",
+		"shadow_mapping.esm_exponent_layer_scale_factor",
+		"shadow_mapping.cascade_split_distances",
 
-		"tone_mapping_max_white", "noise_granularity", "overall_scene_tone"
+		"overall_scene_tone", "tone_mapping_max_white", "noise_granularity"
 	};
 
 	static const GLchar* const dynamic_subvar_names[] = {

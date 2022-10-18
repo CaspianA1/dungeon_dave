@@ -58,14 +58,13 @@ void apply_noise_for_banding_removal(const vec2 seed, inout vec3 color) {
 	color += mix(-noise_granularity, noise_granularity, random_value);
 }
 
-// When the shadow layer is already known (like for the weapon sprite), this can be useful to call. TODO: remove this fn.
 vec4 calculate_light(void) {
 	vec3 parallax_UV_for_diffuse = get_parallax_UV(UV, normal_map_sampler);
 	vec3 parallax_UV_for_normal = parallax_UV_for_diffuse;
 
 	// Parallax UVs for diffuse and normal have different bilinear percents, so this adjusts those individually
-	adjust_UV_for_pixel_art_filtering(percents.bilinear_diffuse, textureSize(diffuse_sampler, 0).xy, parallax_UV_for_diffuse.xy);
-	adjust_UV_for_pixel_art_filtering(percents.bilinear_normal, textureSize(normal_map_sampler, 0).xy, parallax_UV_for_normal.xy);
+	adjust_UV_for_pixel_art_filtering(bilinear_percents.diffuse, textureSize(diffuse_sampler, 0).xy, parallax_UV_for_diffuse.xy);
+	adjust_UV_for_pixel_art_filtering(bilinear_percents.normal, textureSize(normal_map_sampler, 0).xy, parallax_UV_for_normal.xy);
 
 	vec4
 		texture_color = texture(diffuse_sampler, parallax_UV_for_diffuse),

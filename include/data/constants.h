@@ -39,8 +39,7 @@ static const struct {
 
 		const byte
 			opengl_major_minor_version[2],
-			default_fps, depth_buffer_bits,
-			multisample_samples;
+			default_fps, depth_buffer_bits;
 
 		const GLint size[2];
 	} window;
@@ -51,15 +50,20 @@ static const struct {
 		more towards the upper bound of the specular exponent domain).
 		Ambient strength also equals the strongest amount of light in shadows. */
 
-		const byte aniso_filtering_level;
+		const byte aniso_filtering_level, multisample_samples;
 
 		const struct {const GLfloat min_layers, max_layers, height_scale, lod_cutoff;} parallax_mapping;
-		const struct {const GLfloat bilinear_diffuse, bilinear_normal, ao;} percents;
+		const struct {const GLfloat diffuse, normal;} bilinear_percents;
 		const struct {const GLfloat ambient, diffuse, specular;} strengths;
 		const struct {const GLfloat matte, rough;} specular_exponents;
 
-		const GLfloat specular_exponent, tone_mapping_max_white, noise_granularity;
+		const struct {
+			const GLuint sample_radius, esm_exponent;
+			const GLfloat esm_exponent_layer_scale_factor;
+		} shadow_mapping;
+
 		const vec3 overall_scene_tone;
+		const GLfloat specular_exponent, tone_mapping_max_white, noise_granularity;
 	} lighting;
 
 	const struct { // All angles are in radians
@@ -90,22 +94,26 @@ static const struct {
 	.window = {
 		.app_name = "Dungeon Dave",
 		.opengl_major_minor_version = {4, 0},
-		.default_fps = 60, .depth_buffer_bits = 24, .multisample_samples = 4,
+		.default_fps = 60, .depth_buffer_bits = 24,
 		.size = {800, 600}
 	},
 
 	// TODO: remove this from this struct in some way
 	.lighting = {
-		.aniso_filtering_level = 8,
+		.aniso_filtering_level = 8, .multisample_samples = 4,
 
 		.parallax_mapping = {.min_layers = 4.0f, .max_layers = 48.0f, .height_scale = 0.02f, .lod_cutoff = 1.5f},
-		.percents = {.bilinear_diffuse = 0.75f, .bilinear_normal = 0.9f, .ao = 1.0f},
+		.bilinear_percents = {.diffuse = 0.75f, .normal = 0.9f},
 		.strengths = {.ambient = 0.7f, .diffuse = 0.6f, .specular = 0.6f},
 		.specular_exponents = {.matte = 8.0f, .rough = 128.0f},
 
-		.tone_mapping_max_white = 1.5f,
-		.noise_granularity = 0.2f / 255.0f,
-		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f}
+		.shadow_mapping = {
+			.sample_radius = 2, .esm_exponent = 45,
+			.esm_exponent_layer_scale_factor = 1.8f
+		},
+
+		.overall_scene_tone = {247.0f / 255.0f, 224.0f / 255.0f, 210.0f / 255.0f},
+		.tone_mapping_max_white = 1.5f, .noise_granularity = 0.2f / 255.0f
 	},
 
 	.camera = {

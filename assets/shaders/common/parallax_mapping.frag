@@ -44,7 +44,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	so the `max` stops the blend weight from being negative */
 	float lod_weight = max(lod - min_lod_for_blending, 0.0f);
 
-	////////// Tracing a ray against the alpha channel of the normal map, which is a heightmap (TODO: inverted?)
+	////////// Tracing a ray against the alpha channel of the normal map, which is an inverted heightmap.
 
 	vec3 view_dir = normalize(camera_to_fragment_tangent_space);
 
