@@ -136,7 +136,7 @@ void draw_billboards_to_shadow_context(const BillboardContext* const billboard_c
 
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		draw_drawable(*drawable, corners_per_quad,
-			billboard_context -> billboards.length, NULL, BindVertexBuffer | BindVertexSpec
+			billboard_context -> billboards.length, NULL, BindVertexSpec
 		);
 	);
 }

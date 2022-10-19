@@ -18,8 +18,7 @@ typedef struct {
 typedef enum {
 	OnlyDraw = 0,
 	UseShaderPipeline = 1,
-	BindVertexBuffer = 2,
-	BindVertexSpec = 4
+	BindVertexSpec = 2
 } DrawInvocationParam;
 
 //////////

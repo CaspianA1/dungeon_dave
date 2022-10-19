@@ -50,7 +50,6 @@ void draw_drawable(const Drawable drawable,
 			drawable.uniform_updater((struct Drawable*) &drawable, uniform_updater_param);
 	}
 
-	if (invocation_params & BindVertexBuffer) use_vertex_buffer(drawable.vertex_buffer);
 	if (invocation_params & BindVertexSpec) use_vertex_spec(drawable.vertex_spec);
 
 	if (num_instances == 0) draw_primitives(drawable.triangle_mode, (GLsizei) num_vertices);
