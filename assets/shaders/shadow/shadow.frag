@@ -14,6 +14,8 @@ ESM scaling:
 - Secondarily, depth values will be different b/c depth values are normalized
 	based on the cascade depth range, so also rescale also on the cascade
 - Also, perhaps scale the esm exponent based on the overal layer depth range and percentage, rather than the layer index
+
+Note: shadows are the major bottleneck with the terrain 2 level
 */
 
 vec2 get_csm_shadows_from_layers(const uint prev_layer_index, const uint curr_layer_index, const vec3 fragment_pos_world_space) {
