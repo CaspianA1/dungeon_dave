@@ -259,7 +259,7 @@ static void* main_init(void) {
 
 		.shadow_context = init_shadow_context(
 			// Palace:
-			1.25f, far_clip_dist, 0.5f, texture_sizes.shadow_map, num_cascades, 16
+			1.5f, far_clip_dist, 0.3f, texture_sizes.shadow_map, num_cascades, 16
 
 			// Terrain:
 			// 1.0f, far_clip_dist, 0.4f, texture_sizes.shadow_map, num_cascades, 16
