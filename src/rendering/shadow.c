@@ -242,7 +242,7 @@ void update_shadow_context(const CascadedShadowContext* const shadow_context,
 
 		if (i == 0) {
 			sub_near_clip = constants.camera.near_clip_dist;
-			sub_far_clip = split_dists[i];
+			sub_far_clip = split_dists[0];
 		}
 		else {
 			sub_near_clip = split_dists[i - 1];
