@@ -16,6 +16,8 @@ For later on:
 	(can probably offset vertices with normal instancing, but I don't know about changing `gl_Layer`)
 - Blend between layers in some way using hardware? Volume textures aren't usable for this, see
 	the bottom of https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage3D.xhtml.
+- Sometimes, shadows disappear from the view frustum when the shouldn't (the min of the 2 blended shadow values,
+	or some modification of that?)
 
 Revectorization:
 - https://www.gamedev.net/tutorials/programming/graphics/shadow-map-silhouette-revectorization-smsr-r3437/
