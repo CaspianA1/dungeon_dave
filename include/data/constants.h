@@ -108,7 +108,7 @@ static const struct {
 
 		.parallax_mapping = {
 			.enabled = true,
-			.min_layers = 4.0f, .max_layers = 48.0f,
+			.min_layers = 4.0f, .max_layers = 32.0f,
 			.height_scale = 0.02f, .lod_cutoff = 1.5f
 		},
 
