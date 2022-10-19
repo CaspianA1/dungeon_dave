@@ -103,9 +103,12 @@ static GLuint init_csm_depth_layers(const GLsizei resolution, const GLsizei num_
 	GLint internal_format;
 
 	switch (num_depth_buffer_bits) {
-		case 16: internal_format = GL_DEPTH_COMPONENT16; break;
-		case 24: internal_format = GL_DEPTH_COMPONENT24; break;
-		case 32: internal_format = GL_DEPTH_COMPONENT32; break;
+		#define INTERNAL_FORMAT_CASE(num_bits) case num_bits: internal_format = GL_DEPTH_COMPONENT##num_bits; break
+
+		INTERNAL_FORMAT_CASE(16); INTERNAL_FORMAT_CASE(24); INTERNAL_FORMAT_CASE(32);
+
+		#undef INTERNAL_FORMAT_CASE
+
 		default:
 			FAIL(CreateTexture, "Could not create a shadow map texture, because the number "
 				"of depth buffer bits must be 16, 24, or 32, not %d", num_depth_buffer_bits);
