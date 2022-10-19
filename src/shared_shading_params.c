@@ -6,6 +6,7 @@ static void init_constant_shading_params(UniformBuffer* const shading_params, co
 
 	#define UBO_WRITE(name) write_primitive_to_uniform_buffer(shading_params, #name, &constants.lighting.name, sizeof(constants.lighting.name))
 
+	UBO_WRITE(parallax_mapping.enabled); // TODO: write a 32-bit number instead?
 	UBO_WRITE(parallax_mapping.min_layers); UBO_WRITE(parallax_mapping.max_layers);
 	UBO_WRITE(parallax_mapping.height_scale); UBO_WRITE(parallax_mapping.lod_cutoff);
 
@@ -42,6 +43,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 	const GLuint first_shader = shaders_that_share_params[0];
 
 	const GLchar* const constant_subvar_names[] = {
+		"parallax_mapping.enabled",
 		"parallax_mapping.min_layers", "parallax_mapping.max_layers",
 		"parallax_mapping.height_scale", "parallax_mapping.lod_cutoff",
 

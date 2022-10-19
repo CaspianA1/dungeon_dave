@@ -52,7 +52,11 @@ static const struct {
 
 		const byte aniso_filtering_level, multisample_samples;
 
-		const struct {const GLfloat min_layers, max_layers, height_scale, lod_cutoff;} parallax_mapping;
+		const struct {
+			const bool enabled;
+			const GLfloat min_layers, max_layers, height_scale, lod_cutoff;
+		} parallax_mapping;
+
 		const struct {const GLfloat diffuse, normal;} bilinear_percents;
 		const struct {const GLfloat ambient, diffuse, specular;} strengths;
 		const struct {const GLfloat matte, rough;} specular_exponents;
@@ -102,7 +106,12 @@ static const struct {
 	.lighting = {
 		.aniso_filtering_level = 8, .multisample_samples = 4,
 
-		.parallax_mapping = {.min_layers = 4.0f, .max_layers = 48.0f, .height_scale = 0.02f, .lod_cutoff = 1.5f},
+		.parallax_mapping = {
+			.enabled = true,
+			.min_layers = 4.0f, .max_layers = 48.0f,
+			.height_scale = 0.02f, .lod_cutoff = 1.5f
+		},
+
 		.bilinear_percents = {.diffuse = 0.75f, .normal = 0.9f},
 		.strengths = {.ambient = 0.7f, .diffuse = 0.6f, .specular = 0.6f},
 		.specular_exponents = {.matte = 8.0f, .rough = 128.0f},
