@@ -64,7 +64,7 @@ float get_blended_csm_shadow(const uint layer_index, const uint depth_range_shif
 	it may be over 1. This clamps the blend factor between 0 and 1 for when that happens. */
 	float percent_between = clamp(dist_ahead_of_last_split / depth_range, 0.0f, 1.0f);
 
-	return mix(
+	return mix( // TODO: parallelize some of the computations between these calls
 		get_csm_shadow_from_layer(prev_layer_index, fragment_pos_world_space),
 		get_csm_shadow_from_layer(layer_index, fragment_pos_world_space),
 		percent_between
