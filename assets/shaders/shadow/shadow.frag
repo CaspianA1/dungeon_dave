@@ -44,10 +44,10 @@ float get_csm_shadow_from_layer(const uint layer_index, const vec3 fragment_pos_
 
 	/////////// Calculating the shadow strength
 
-	float layer_scaled_esm_constant = shadow_mapping.esm_exponent *
+	float layer_scaled_esm_exponent = shadow_mapping.esm_exponent *
 		pow(layer_index + 1u, shadow_mapping.esm_exponent_layer_scale_factor);
 
-	float in_light_percentage = exp(layer_scaled_esm_constant * occluder_receiver_diff);
+	float in_light_percentage = exp(layer_scaled_esm_exponent * occluder_receiver_diff);
 	return clamp(in_light_percentage, 0.0f, 1.0f);
 }
 
