@@ -34,6 +34,9 @@ ahead of time, and is very small; so this should make the code a bit simpler and
 - When debugging and separating the weapon sprite from the position of the player (by not updating the corners), these two things can happen:
 	1. If the near clip dist is way too large, the weapon grows in size a ton.
 	2. If the near clip dist is way too small, the weapon appears warped, and disappears from sight too easily.
+
+TODO: do a depth prepass for the weapon sprite to discard some on-screen fragments,
+	if that helps performance on the terrain 2 level
 */
 
 //////////
