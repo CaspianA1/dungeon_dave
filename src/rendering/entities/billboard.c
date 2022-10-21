@@ -128,8 +128,9 @@ void draw_billboards_to_shadow_context(const BillboardContext* const billboard_c
 		INIT_UNIFORM_VALUE(alpha_threshold, depth_shader, 1f,
 			billboard_context -> shadow_mapping.alpha_threshold);
 
-		use_texture_in_shader(drawable -> diffuse_texture,
-			depth_shader, "diffuse_sampler", TexSet, TU_BillboardDiffuse);
+		// For alpha-tested shadows
+		use_texture_in_shader(drawable -> diffuse_texture, depth_shader,
+			"diffuse_sampler", TexSet, TU_BillboardDiffuse);
 	);
 
 	UPDATE_UNIFORM(right_xz, 2fv, 1, right_xz);
