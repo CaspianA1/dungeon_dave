@@ -17,7 +17,7 @@ For later on:
 - Blend between layers in some way using hardware? Volume textures aren't usable for this, see
 	the bottom of https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage3D.xhtml.
 - Sometimes, shadows disappear from the view frustum when the shouldn't (the min of the 2 blended shadow values,
-	or some modification of that?)
+	or some modification of that?) (Or maybe because it's because the shadow frustum is fit around a too big FOV?)
 
 Revectorization:
 - https://www.gamedev.net/tutorials/programming/graphics/shadow-map-silhouette-revectorization-smsr-r3437/
