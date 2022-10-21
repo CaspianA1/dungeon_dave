@@ -19,15 +19,17 @@ float diffuse(const vec3 fragment_normal) { // Lambert
 	return strengths.diffuse * max(diffuse_amount, 0.0f);
 }
 
-vec3 specular(const vec3 texture_color, const vec4 normal_and_inv_height) { // Blinn-Phong
+vec3 specular(const vec4 normal_and_inv_height) { // Blinn-Phong
 	vec3 view_dir = normalize(camera_pos_world_space - fragment_pos_world_space);
 	vec3 halfway_dir = normalize(dir_to_light + view_dir);
 	float cos_angle_of_incidence = max(dot(normal_and_inv_height.xyz, halfway_dir), 0.0f);
 
 	//////////
 
-	float roughness = fwidth(normal_and_inv_height.a); // Greater texture color change -> more local roughness
-	float specular_exponent = mix(specular_exponents.matte, specular_exponents.rough, roughness);
+	float local_roughness = fwidth(normal_and_inv_height.a); // Greater heightmap change -> more local roughness
+
+	// TOOD: add a specular exponent strength param per object instance
+	float specular_exponent = mix(specular_exponents.matte, specular_exponents.rough, local_roughness);
 	float specular_value = strengths.specular * pow(cos_angle_of_incidence, specular_exponent);
 
 	//////////
@@ -35,10 +37,8 @@ vec3 specular(const vec3 texture_color, const vec4 normal_and_inv_height) { // B
 	vec3 reflection_dir = reflect(-view_dir, normal_and_inv_height.xyz);
 	vec3 env_map_value = texture(environment_map_sampler, reflection_dir).rgb;
 
-	// Not reading from the heightmap for this because texture brightness and normals should technically be decoupled
-	const float one_third = 1.0f / 3.0f; // Brighter surfaces reflect more of the environment map
-	float texture_brightness = (texture_color.r + texture_color.g + texture_color.b) * one_third;
-	env_map_value = mix(vec3(1.0f), env_map_value, texture_brightness); // TODO: use Fresnel here instead
+	// More of the environment map will be reflected for less rough surfaces
+	env_map_value = mix(env_map_value, vec3(1.0f), local_roughness);
 
 	//////////
 
@@ -66,19 +66,17 @@ vec4 calculate_light(void) {
 	adjust_UV_for_pixel_art_filtering(bilinear_percents.diffuse, textureSize(diffuse_sampler, 0).xy, parallax_UV_for_diffuse.xy);
 	adjust_UV_for_pixel_art_filtering(bilinear_percents.normal, textureSize(normal_map_sampler, 0).xy, parallax_UV_for_normal.xy);
 
-	vec4
-		texture_color = texture(diffuse_sampler, parallax_UV_for_diffuse),
-		normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
-
+	vec4 normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
 	normal_and_inv_height.xyz = fragment_tbn * normal_and_inv_height.xyz;
 
-	// return vec4(specular(texture_color.rgb, normal_and_inv_height), 1.0f);
+	// return vec4(specular(normal_and_inv_height), 1.0f);
 	// return vec4(vec3(get_ao_strength()), 1.0f);
 	// return vec4(vec3(diffuse(normal_and_inv_height.xyz)), 1.0f);
 
-	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(texture_color.rgb, normal_and_inv_height);
+	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(normal_and_inv_height);
 	vec3 light_strength = non_ambient * get_csm_shadow(fragment_pos_world_space) + strengths.ambient * get_ao_strength();
 
+	vec4 texture_color = texture(diffuse_sampler, parallax_UV_for_diffuse);
 	vec4 color = vec4(texture_color.rgb * light_strength * overall_scene_tone, texture_color.a);
 
 	apply_tone_mapping(tone_mapping_max_white, color.rgb);
