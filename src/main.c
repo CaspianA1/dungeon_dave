@@ -240,7 +240,7 @@ static void* main_init(void) {
 		),
 
 		.billboard_context = init_billboard_context(
-			0.99f, texture_sizes.billboard, &billboards_normal_map_config,
+			0.2f, texture_sizes.billboard, &billboards_normal_map_config,
 
 			ARRAY_LENGTH(still_billboard_texture_paths), still_billboard_texture_paths,
 			ARRAY_LENGTH(billboard_animation_layouts), billboard_animation_layouts,
