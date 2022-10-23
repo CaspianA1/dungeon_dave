@@ -45,11 +45,6 @@ static const struct {
 	} window;
 
 	const struct {
-		/* Brighter texture colors get a stronger specular output,
-		and sharper specular highlights (their specular exponents are weighted
-		more towards the upper bound of the specular exponent domain).
-		Ambient strength also equals the strongest amount of light in shadows. */
-
 		const byte aniso_filtering_level, multisample_samples;
 
 		const struct {
