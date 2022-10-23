@@ -80,7 +80,7 @@ Random feature ideas:
 - Find a tighter far plane distance by finding the diameter of the sector convex hull
 - The map editor should be called Dungeon Painter
 - Perhaps build levels on top of cool terrain heightmaps, for a good surrounding environment + a level path through the terrain
-- God rays
+- God rays (render one big shadow map over the whole scene as the last cascade for that)
 
 Normal mapping:
 - Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
