@@ -20,14 +20,12 @@
 		causing the weapon sprite to change its yaw and pitch depending on the camera's roll and pitch.
 
 2. It is then drawn to the shadow context via `draw_weapon_sprite_to_shadow_context`.
-	Inside that function, it is drawn through `draw_drawable_to_shadow_context`.
-	A function is injected into that, which copies over its world-space corners on the CPU
-	to its vertex buffer which holds the vertices on the GPU. It is then drawn.
-	TODO: let alpha values in the weapon sprite's texture determine its visiblity.
+	In that, the world-space corners on the CPU are copied over to a vertex buffer on the GPU.
+	It is then drawn. TODO: let alpha values in the weapon sprite's texture determine its visiblity.
 
 3. Finally, it is drawn to the default framebuffer in `draw_weapon_sprite`. No vertex buffer
 or spec are used for this; the four corners are simply passed in as a uniform. I figured that
-there wouldn't be much point of binding a vertex buffer and spec if the vertex count is known
+there wouldn't be much point of binding a vertex spec if the vertex count is known
 ahead of time, and is very small; so this should make the code a bit simpler and marginally faster. */
 
 /* TODO: fix this:
