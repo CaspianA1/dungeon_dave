@@ -35,8 +35,8 @@ ahead of time, and is very small; so this should make the code a bit simpler and
 	1. If the near clip dist is way too large, the weapon grows in size a ton.
 	2. If the near clip dist is way too small, the weapon appears warped, and disappears from sight too easily.
 
-TODO: do a depth prepass for the weapon sprite to discard some on-screen fragments,
-	if that helps performance on the terrain 2 level (only do it for fragments with an alpha of 1)
+TODO: do a depth prepass for the weapon sprite (and perhaps the rest of the geometry too) to discard
+	some on-screen fragments, if that helps performance on the terrain 2 level (only do it for fragments with an alpha of 1)
 */
 
 //////////
