@@ -22,5 +22,5 @@ void main(void) {
 	scrolling_UV_x += scroll_factor;
 
 	gl_Position = vec4(quad_corners[gl_VertexID], 0.0f, 1.0f);
-	fragment_pos_tangent_space = vec3(gl_Position.xy, 0.0f);
+	fragment_pos_tangent_space = vec3(-gl_Position.x, gl_Position.y, 0.0f);
 }

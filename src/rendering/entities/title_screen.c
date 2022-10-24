@@ -4,8 +4,6 @@
 #include "utils/opengl_wrappers.h"
 #include "data/constants.h"
 
-// TODO: let the mouse position equal or influence the light position
-
 ////////// Uniform updating
 
 typedef struct {
@@ -29,6 +27,8 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		base_time_secs = typed_params.curr_time_secs;
 	);
 
+	//////////
+
 	const GLfloat relative_time_secs = typed_params.curr_time_secs - base_time_secs;
 
 	const GLfloat
@@ -38,7 +38,13 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	GLfloat texture_transition_weight = cosf(spin_seed * typed_params.config -> light_spin_cycle.logo_transitions_per) * 0.5f + 0.5f;
 	for (byte i = 0; i < typed_params.config -> texture_transition_immediacy_factor; i++) texture_transition_weight = glm_smooth(texture_transition_weight);
 
-	UPDATE_UNIFORM(light_pos_tangent_space, 3fv, 1, (vec3) {sinf(spin_seed), cosf(spin_seed), typed_params.config -> light_dist_from_screen_plane});
+	//////////
+
+	UPDATE_UNIFORM(light_pos_tangent_space, 3fv, 1, (vec3) {
+		sinf(spin_seed), cosf(spin_seed),
+		typed_params.config -> light_dist_from_screen_plane
+	});
+
 	UPDATE_UNIFORM(texture_transition_weight, 1f, texture_transition_weight);
 	UPDATE_UNIFORM(scroll_factor, 1f, palace_city_hori_scroll);
 }

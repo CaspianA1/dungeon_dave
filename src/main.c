@@ -206,7 +206,7 @@ static void* main_init(void) {
 		.texture = {
 			.paths = {.still = ASSET_PATH("logo.bmp"), .scrolling = ASSET_PATH("palace_city.bmp")},
 			.mag_filters = {.still = TexNearest, .scrolling = TexLinear},
-			.scrolling_normal_map_config = {.blur_radius = 1, .blur_std_dev = 1.0f, .intensity = 0.75f, .rescale_factor = 2.0f}
+			.scrolling_normal_map_config = {.blur_radius = 5, .blur_std_dev = 0.25f, .intensity = 0.25f, .rescale_factor = 2.0f}
 		},
 
 		.rendering = {
@@ -215,7 +215,7 @@ static void* main_init(void) {
 			.specular_exponent = 16.0f,
 			.scrolling_bilinear_diffuse_percent = 0.1f,
 			.scrolling_bilinear_normal_percent = 0.75f,
-			.light_dist_from_screen_plane = 0.4f,
+			.light_dist_from_screen_plane = 0.3f,
 			.secs_per_scroll_cycle = 7.0f,
 			.light_spin_cycle = {.secs_per = 2.5f, .logo_transitions_per = 0.5f}
 		}
