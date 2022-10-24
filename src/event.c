@@ -3,10 +3,10 @@
 #include "utils/utils.h"
 
 Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_between_frames, const Uint8* const keys) {
-	static GLint viewport_size[4];
-	glGetIntegerv(GL_VIEWPORT, viewport_size);
+	GLint viewport_bounds[4];
+	glGetIntegerv(GL_VIEWPORT, viewport_bounds);
 
-	const GLint screen_width = viewport_size[2], screen_height = viewport_size[3];
+	const GLint screen_width = viewport_bounds[2], screen_height = viewport_bounds[3];
 
 	int mouse_movement[2]; // Not GLint b/c `SDL_GetRelativeMouseState` is expecting ints
 
