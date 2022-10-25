@@ -30,17 +30,18 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 
 	//////////
 
-	vec2 c_texel_offset = vec2(-0.5f, 1.5f);
+	const vec2 c_texel_offset = vec2(-0.5f, 1.5f);
 	vec4 c = upscaled_UV.xxyy + vec4(c_texel_offset, c_texel_offset);
 	vec2 c_extra = upscaled_UV.zz + c_texel_offset;
 
 	//////////
 
 	vec4 x_cubic = cubic(UV_fraction.x), y_cubic = cubic(UV_fraction.y), z_cubic = cubic(UV_fraction.z);
-	vec4 s = vec4(x_cubic.xz + x_cubic.yw, y_cubic.xz + y_cubic.yw);
-	vec2 s_extra = z_cubic.xz + z_cubic.yw;
 
+	vec4 s = vec4(x_cubic.xz + x_cubic.yw, y_cubic.xz + y_cubic.yw);
 	vec4 sample_offset = (c + vec4(x_cubic.yw, y_cubic.yw) / s) * texel_size.xxyy;
+
+	vec2 s_extra = z_cubic.xz + z_cubic.yw;
 	vec2 sample_offset_extra = (c_extra + vec2(z_cubic.yw) / s_extra) * texel_size.zz;
 
 	//////////
@@ -53,7 +54,7 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 	
 	#undef SAMPLE
 	
-	vec3 w = vec3( // Interpolation weights
+	vec3 lerp_weights = vec3(
 		s.x / (s.x + s.y),
 		s.z / (s.z + s.w),
 		s_extra.x / (s_extra.x + s_extra.y)
@@ -62,11 +63,11 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 	vec4 lerped_x = mix(
 		vec4(lower_samples.wy, higher_samples.wy),
 		vec4(lower_samples.zx, higher_samples.zx),
-		w.x
+		lerp_weights.x
 	);
 
-	vec2 lerped_y = mix(lerped_x.xz, lerped_x.yw, w.y);
-	return mix(lerped_y.y, lerped_y.x, w.z);
+	vec2 lerped_y = mix(lerped_x.xz, lerped_x.yw, lerp_weights.y);
+	return mix(lerped_y.y, lerped_y.x, lerp_weights.z);
 }
 
 float get_ao_strength(void) {
