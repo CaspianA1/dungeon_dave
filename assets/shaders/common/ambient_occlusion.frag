@@ -36,12 +36,12 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 
 	//////////
 
-	vec4 xcubic = cubic(UV_fraction.x), ycubic = cubic(UV_fraction.y), zcubic = cubic(UV_fraction.z);
-	vec4 s = vec4(xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw);
-	vec2 s_extra = zcubic.xz + zcubic.yw;
+	vec4 x_cubic = cubic(UV_fraction.x), y_cubic = cubic(UV_fraction.y), z_cubic = cubic(UV_fraction.z);
+	vec4 s = vec4(x_cubic.xz + x_cubic.yw, y_cubic.xz + y_cubic.yw);
+	vec2 s_extra = z_cubic.xz + z_cubic.yw;
 
-	vec4 sample_offset = (c + vec4(xcubic.yw, ycubic.yw) / s) * texel_size.xxyy;
-	vec2 sample_offset_extra = (c_extra + vec2(zcubic.yw) / s_extra) * texel_size.zz;
+	vec4 sample_offset = (c + vec4(x_cubic.yw, y_cubic.yw) / s) * texel_size.xxyy;
+	vec2 sample_offset_extra = (c_extra + vec2(z_cubic.yw) / s_extra) * texel_size.zz;
 
 	//////////
 
