@@ -49,8 +49,8 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	filtering, the mip level also increases for far-away objects, and the number of layers should only
 	be dependent on how steep the view angle is.
 
-	TODO: would snapping the number of layers to some regularly repeated integer, like 4, 8, 12, ... decrease
-	fragment shader divergence and increase performance? Not sure. */
+	TODO: would snapping the number of layers to some regularly repeated integer, like
+	4, 8, 12, ... decrease fragment shader divergence and increase performance? Not sure. */
 	float num_layers = mix(parallax_mapping.max_layers, parallax_mapping.min_layers, max(view_dir.z, 0.0f));
 
 	#define PARALLAX_SAMPLE(UV) texture(normal_map_sampler, UV).a
