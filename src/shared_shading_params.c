@@ -60,6 +60,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 
 	static const GLchar* const dynamic_subvar_names[] = {
 		"dir_to_light", "camera_pos_world_space",
+		"billboard_front_facing_tbn",
 		"view_projection", "view", "light_view_projection_matrices"
 	};
 
@@ -96,10 +97,20 @@ void update_shared_shading_params(SharedShadingParams* const shared_shading_para
 
 	UniformBuffer* const dynamic_params = &shared_shading_params -> dynamic;
 
+	const GLfloat* const right_xz = camera -> right_xz;
+	const GLfloat right_xz_x = right_xz[0], right_xz_z = right_xz[1];
+
+	//////////
+
 	enable_uniform_buffer_writing_batch(dynamic_params, true);
 
 	write_primitive_to_uniform_buffer(dynamic_params, "dir_to_light", dir_to_light, sizeof(vec3));
 	write_primitive_to_uniform_buffer(dynamic_params, "camera_pos_world_space", camera -> pos, sizeof(vec3));
+
+	write_matrix_to_uniform_buffer(dynamic_params, "billboard_front_facing_tbn", (GLfloat*) (mat3) {
+		{-right_xz_x, 0.0f, -right_xz_z}, {0.0f, 1.0f, 0.0f}, {-right_xz_z, 0.0f, right_xz_x}
+	}, sizeof(vec3), 3);
+
 	write_matrix_to_uniform_buffer(dynamic_params, "view_projection", (GLfloat*) camera -> view_projection, sizeof(vec4), 4);
 	write_matrix_to_uniform_buffer(dynamic_params, "view", (GLfloat*) camera -> view, sizeof(vec4), 4);
 
@@ -121,8 +132,10 @@ void init_shared_textures_for_world_shaded_objects(
 
 	const GLuint
 		skybox_diffuse_texture = skybox -> diffuse_texture,
+		ao_map_texture = ao_map -> texture,
 		shadow_depth_layers = shadow_context -> depth_layers,
-		ao_map_texture = ao_map -> texture;
+		shadow_depth_sampler = shadow_context -> plain_depth_sampler,
+		shadow_depth_comparison_sampler = shadow_context -> depth_comparison_sampler;
 
 	for (byte i = 0; i < num_world_shaded_objects; i++) {
 		const WorldShadedObject wso = world_shaded_objects[i];
@@ -133,7 +146,12 @@ void init_shared_textures_for_world_shaded_objects(
 		use_texture_in_shader(skybox_diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
 		use_texture_in_shader(wso.drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, wso.texture_units.diffuse);
 		use_texture_in_shader(wso.drawable -> normal_map, shader, "normal_map_sampler", TexSet, wso.texture_units.normal_map);
-		use_texture_in_shader(shadow_depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMap);
 		use_texture_in_shader(ao_map_texture, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
+
+		use_texture_in_shader(shadow_depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMapPlain);
+		glBindSampler(TU_CascadedShadowMapPlain, shadow_depth_sampler);
+
+		use_texture_in_shader(shadow_depth_layers, shader, "shadow_cascade_sampler_depth_comparison", shadow_map_texture_type, TU_CascadedShadowMapDepthComparison);
+		glBindSampler(TU_CascadedShadowMapDepthComparison, shadow_depth_comparison_sampler);
 	}
 }

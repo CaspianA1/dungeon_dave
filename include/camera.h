@@ -36,7 +36,7 @@ Pace: make_pace_function, update_pace
 Miscellaneous: get_camera_directions, update_camera_pos, update_camera_matrices
 */
 
-void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]);
+void update_camera(Camera* const camera, const Event* const event, const byte* const heightmap, const byte map_size[2]);
 Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist);
 
 #endif

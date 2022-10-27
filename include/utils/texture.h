@@ -21,9 +21,6 @@
 #define OPENGL_SCENE_MAG_FILTER TexLinear
 #define OPENGL_SCENE_MIN_FILTER TexTrilinear
 
-#define OPENGL_SHADOW_MAP_MAG_FILTER TexLinear
-#define OPENGL_SHADOW_MAP_MIN_FILTER TexLinear
-
 /* There's five bits to store a texture id in a face mesh's face info byte,
 And the biggest number possible with five bits is 31, so that gives you
 32 different possible texture ids. Also, this is just for wall textures. */
@@ -35,16 +32,17 @@ typedef enum {
 
 	TU_Skybox,
 
-	TU_CascadedShadowMap,
 	TU_AmbientOcclusionMap,
-
-	TU_TitleScreenStillDiffuse,
-	TU_TitleScreenScrollingDiffuse,
-	TU_TitleScreenScrollingNormalMap,
+	TU_CascadedShadowMapPlain,
+	TU_CascadedShadowMapDepthComparison,
 
 	TU_SectorFaceDiffuse, TU_SectorFaceNormalMap,
 	TU_BillboardDiffuse, TU_BillboardNormalMap,
-	TU_WeaponSpriteDiffuse, TU_WeaponSpriteNormalMap
+	TU_WeaponSpriteDiffuse, TU_WeaponSpriteNormalMap,
+
+	TU_TitleScreenStillDiffuse,
+	TU_TitleScreenScrollingDiffuse,
+	TU_TitleScreenScrollingNormalMap
 } TextureUnit;
 
 // Excluded: premultiply_surface_alpha, init_still_subtextures_in_texture_set, init_animated_subtextures_in_texture_set

@@ -7,7 +7,7 @@
 #include "ambient_occlusion.frag"
 #include "../shadow/shadow.frag"
 
-in vec3 fragment_pos_world_space, UV;
+in vec3 fragment_pos_world_space, UV, camera_to_fragment_world_space;
 flat in mat3 fragment_tbn;
 
 // These are set through a shared fn for world-shaded objects
@@ -19,13 +19,13 @@ float diffuse(const vec3 fragment_normal) { // Lambert
 	return strengths.diffuse * max(diffuse_amount, 0.0f);
 }
 
-vec3 specular(const vec4 normal_and_inv_height) { // Blinn-Phong
-	vec3 view_dir = normalize(camera_pos_world_space - fragment_pos_world_space);
+vec3 specular(const vec4 normal_and_inv_height, const vec3 view_dir) { // Blinn-Phong
 	vec3 halfway_dir = normalize(dir_to_light + view_dir);
 	float cos_angle_of_incidence = max(dot(normal_and_inv_height.xyz, halfway_dir), 0.0f);
 
 	//////////
 
+	// TODO: scale this by a fragment pos delta in order to put the local roughness in world-space
 	float local_roughness = fwidth(normal_and_inv_height.a); // Greater heightmap change -> more local roughness
 
 	// TOOD: add a specular exponent strength param per object instance
@@ -69,18 +69,22 @@ vec4 calculate_light(void) {
 	vec4 normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
 	normal_and_inv_height.xyz = fragment_tbn * normal_and_inv_height.xyz;
 
-	// return vec4(specular(normal_and_inv_height), 1.0f);
+	vec3 view_dir = normalize(camera_to_fragment_world_space);
+
 	// return vec4(vec3(get_ao_strength()), 1.0f);
 	// return vec4(vec3(diffuse(normal_and_inv_height.xyz)), 1.0f);
+	// return vec4(specular(normal_and_inv_height, view_dir), 1.0f);
 
-	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(normal_and_inv_height);
-	vec3 light_strength = non_ambient * get_csm_shadow(fragment_pos_world_space) + strengths.ambient * get_ao_strength();
+	vec2 shadow_and_volumetric_light = get_csm_shadow_and_volumetric_light(fragment_pos_world_space, view_dir);
+
+	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(normal_and_inv_height, view_dir);
+	vec3 light_strength = non_ambient * shadow_and_volumetric_light.x + strengths.ambient * get_ao_strength();
 
 	vec4 texture_color = texture(diffuse_sampler, parallax_UV_for_diffuse);
-	vec4 color = vec4(texture_color.rgb * light_strength * overall_scene_tone, texture_color.a);
+	vec3 color = mix(texture_color.rgb * light_strength, overall_scene_tone, shadow_and_volumetric_light.y * texture_color.a);
 
-	apply_tone_mapping(tone_mapping_max_white, color.rgb);
-	apply_noise_for_banding_removal(UV.xy, color.rgb);
+	apply_tone_mapping(tone_mapping_max_white, color);
+	apply_noise_for_banding_removal(UV.xy, color);
 
-	return color;
+	return vec4(color, texture_color.a);
 }

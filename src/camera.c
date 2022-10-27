@@ -300,11 +300,11 @@ static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ra
 	glm_mul(projection, view, camera -> view_projection);
 }
 
-void update_camera(Camera* const camera, const Event event, const byte* const heightmap, const byte map_size[2]) {
+void update_camera(Camera* const camera, const Event* const event, const byte* const heightmap, const byte map_size[2]) {
 	////////// Updating the camera angles
 
 	Angles* const angles = &camera -> angles;
-	update_camera_angles(angles, &event);
+	update_camera_angles(angles, event);
 
 	////////// Defining vectors
 
@@ -312,15 +312,16 @@ void update_camera(Camera* const camera, const Event event, const byte* const he
 	GLfloat *const dir = camera -> dir, *const right = camera -> right, *const up = camera -> up;
 
 	get_camera_directions(angles, dir_xz, dir, camera -> right_xz, right, up);
-	update_camera_pos(camera, &event, heightmap, map_size, dir_xz, dir, right); // Updates `pos`
+	update_camera_pos(camera, event, heightmap, map_size, dir_xz, dir, right); // Updates `pos`
 
-	update_camera_matrices(camera, event.aspect_ratio, dir, up, right); // Updates `view` and `model_view_projection`
+	update_camera_matrices(camera, event -> aspect_ratio, dir, up, right); // Updates `view` and `model_view_projection`
 	glm_frustum_planes(camera -> view_projection, camera -> frustum_planes);
 
 	////////// Printing important vectors if needed
 
-	if (event.keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
-	if (event.keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);
+	const Uint8* const keys = event -> keys;
+	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
+	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);
 }
 
 Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist) {

@@ -28,7 +28,7 @@ Drawing billboards to the shadow cascades:
 //////////
 
 // This just updates the billboard animation instances at the moment
-void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs) {
+void update_billboard_context(const BillboardContext* const billboard_context, const GLfloat curr_time_secs) {
 	const List* const animation_instances = &billboard_context -> animation_instances;
 
 	BillboardAnimationInstance* const animation_instance_data = animation_instances -> data;
@@ -92,39 +92,15 @@ static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_
 	deinit_vertex_buffer_memory_mapping();
 }
 
-////////// This part concerns the updating of uniforms
-
-typedef struct {const GLfloat* const right_xz;} UniformUpdaterParams;
-
-static void update_uniforms(const Drawable* const drawable, const void* const param) {
-	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
-	static GLint front_facing_tbn_id;
-
-	ON_FIRST_CALL(INIT_UNIFORM(front_facing_tbn, drawable -> shader););
-
-	//////////
-
-	const GLfloat right_xz_x = typed_params.right_xz[0], right_xz_z = typed_params.right_xz[1];
-
-	UPDATE_UNIFORM(front_facing_tbn, Matrix3fv, 1, GL_FALSE, (GLfloat*) (mat3) {
-		{-right_xz_x, 0.0f, -right_xz_z},
-		{0.0f, 1.0f, 0.0f},
-		{-right_xz_z, 0.0f, right_xz_x}
-	});
-}
-
 //////////
 
-void draw_billboards_to_shadow_context(const BillboardContext* const billboard_context, const vec2 right_xz) {
+void draw_billboards_to_shadow_context(const BillboardContext* const billboard_context) {
 	const GLuint depth_shader = billboard_context -> shadow_mapping.depth_shader;
 	const Drawable* const drawable = &billboard_context -> drawable;
-	static GLint right_xz_id;
 
 	use_shader(depth_shader);
 
 	ON_FIRST_CALL(
-		INIT_UNIFORM(right_xz, depth_shader);
-
 		INIT_UNIFORM_VALUE(alpha_threshold, depth_shader, 1f,
 			billboard_context -> shadow_mapping.alpha_threshold);
 
@@ -132,8 +108,6 @@ void draw_billboards_to_shadow_context(const BillboardContext* const billboard_c
 		use_texture_in_shader(drawable -> diffuse_texture, depth_shader,
 			"diffuse_sampler", TexSet, TU_BillboardDiffuse);
 	);
-
-	UPDATE_UNIFORM(right_xz, 2fv, 1, right_xz);
 
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		draw_drawable(*drawable, corners_per_quad,
@@ -147,8 +121,7 @@ void draw_billboards(BillboardContext* const billboard_context, const Camera* co
 	sort_billboards_by_dist_to_camera(billboard_context, camera -> pos);
 
 	draw_drawable(billboard_context -> drawable, corners_per_quad, billboard_context -> billboards.length,
-		&(UniformUpdaterParams) {camera -> right_xz},
-		UseShaderPipeline | BindVertexSpec
+		NULL, UseShaderPipeline | BindVertexSpec
 	);
 }
 
@@ -178,7 +151,7 @@ BillboardContext init_billboard_context(
 
 	BillboardContext billboard_context = {
 		.drawable = init_drawable_with_vertices(
-			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW, GL_TRIANGLE_STRIP,
+			define_vertex_spec, NULL, GL_DYNAMIC_DRAW, GL_TRIANGLE_STRIP,
 			(List) {.data = NULL, .item_size = sizeof(Billboard), .length = num_billboards},
 
 			init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),

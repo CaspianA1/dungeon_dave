@@ -28,9 +28,8 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 
 	////////// Scene updating
 
-	update_camera(camera, *event, scene_context -> heightmap, scene_context -> map_size);
-
-	update_billboards(billboard_context, curr_time_secs);
+	update_camera(camera, event, scene_context -> heightmap, scene_context -> map_size);
+	update_billboard_context(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
 	update_dynamic_light(dynamic_light, curr_time_secs);
 	update_shadow_context(shadow_context, camera, dir_to_light, event -> aspect_ratio);
@@ -40,7 +39,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 
 	enable_rendering_to_shadow_context(shadow_context);
 		draw_sectors_to_shadow_context(sector_context);
-		draw_billboards_to_shadow_context(billboard_context, camera -> right_xz);
+		draw_billboards_to_shadow_context(billboard_context);
 	disable_rendering_to_shadow_context(event -> screen_size);
 
 	////////// The main drawing code
@@ -227,7 +226,6 @@ static void* main_init(void) {
 		.camera = init_camera(init_pos, far_clip_dist),
 
 		.weapon_sprite = init_weapon_sprite(
-			// 10.0f, 180.0f, 2.0f, 0.05f, 1.5f, 0.1f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/sceptre.bmp"), 1, 2, 2}, &weapon_normal_map_config
 			// 30.0f, 120.0f, 1.0f, 1.0f, 1.0f, 0.4f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
 			// 20.0f, 130.0f, 0.7f, 0.07f, 1.0f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
 			15.0f, 120.0f, 0.75f, 0.02f, 0.9f, 0.25f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}, &weapon_normal_map_config
@@ -239,8 +237,8 @@ static void* main_init(void) {
 			still_face_texture_paths, ARRAY_LENGTH(still_face_texture_paths), texture_sizes.face, &sector_faces_normal_map_config
 		),
 
-		.billboard_context = init_billboard_context(
-			0.2f, texture_sizes.billboard, &billboards_normal_map_config,
+		.billboard_context = init_billboard_context( // 0.2f before for the alpha threshold
+			0.99f, texture_sizes.billboard, &billboards_normal_map_config,
 
 			ARRAY_LENGTH(still_billboard_texture_paths), still_billboard_texture_paths,
 			ARRAY_LENGTH(billboard_animation_layouts), billboard_animation_layouts,
@@ -300,9 +298,11 @@ static void* main_init(void) {
 	////////// Initializing shared shading params
 
 	const GLuint shaders_that_use_shared_params[] = {
+		// Depth shaders
 		scene_context.sector_context.depth_shader,
 		scene_context.billboard_context.shadow_mapping.depth_shader,
 
+		// Plain shaders
 		scene_context.skybox.shader,
 		scene_context.sector_context.drawable.shader,
 		scene_context.billboard_context.drawable.shader,

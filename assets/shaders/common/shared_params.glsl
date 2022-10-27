@@ -25,5 +25,6 @@ layout(shared) uniform ConstantShadingParams {
 
 layout(shared) uniform DynamicShadingParams {
 	vec3 dir_to_light, camera_pos_world_space;
+	mat3 billboard_front_facing_tbn;
 	mat4 view_projection, view, light_view_projection_matrices[NUM_CASCADES];
 };

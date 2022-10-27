@@ -96,72 +96,11 @@ static void get_light_view_projection(
 
 //////////
 
-static GLuint init_csm_depth_layers(const GLsizei resolution, const GLsizei num_cascades, const GLsizei num_depth_buffer_bits) {
-	const GLuint depth_layers = preinit_texture(shadow_map_texture_type, TexNonRepeating,
-		OPENGL_SHADOW_MAP_MAG_FILTER, OPENGL_SHADOW_MAP_MIN_FILTER, true);
-
-	GLint internal_format;
-
-	switch (num_depth_buffer_bits) {
-		#define INTERNAL_FORMAT_CASE(num_bits) case num_bits: internal_format = GL_DEPTH_COMPONENT##num_bits; break
-
-		INTERNAL_FORMAT_CASE(16); INTERNAL_FORMAT_CASE(24); INTERNAL_FORMAT_CASE(32);
-
-		#undef INTERNAL_FORMAT_CASE
-
-		default:
-			FAIL(CreateTexture, "Could not create a shadow map texture, because the number "
-				"of depth buffer bits must be 16, 24, or 32, not %d", num_depth_buffer_bits);
-	}
-
-	init_texture_data(shadow_map_texture_type, (GLsizei[]) {resolution, resolution, num_cascades},
-		GL_DEPTH_COMPONENT, internal_format, OPENGL_SHADOW_MAP_COLOR_CHANNEL_TYPE, NULL);
-
-	return depth_layers;
-}
-
-static GLuint init_csm_framebuffer(const GLuint depth_layers) {
-	GLuint framebuffer;
-
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(framebuffer_target, framebuffer);
-	glFramebufferTexture(framebuffer_target, GL_DEPTH_ATTACHMENT, depth_layers, 0);
-	glDrawBuffer(GL_NONE); glReadBuffer(GL_NONE); // Not drawing into or reading from any color buffers
-
-	//////////
-
-	const GLchar* status_string;
-
-	switch (glCheckFramebufferStatus(framebuffer_target)) {
-		case GL_FRAMEBUFFER_COMPLETE:
-			glBindFramebuffer(framebuffer_target, 0);
-			return framebuffer;
-
-		#define COMPLETENESS_CASE(status) case GL_##status: status_string = #status; break
-
-		COMPLETENESS_CASE(FRAMEBUFFER_UNDEFINED);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_READ_BUFFER);
-		COMPLETENESS_CASE(FRAMEBUFFER_UNSUPPORTED);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS);
-
-		#undef COMPLETENESS_CASE
-
-		default: status_string = "Unknown framebuffer error";
-	}
-
-	FAIL(CreateFramebuffer, "Could not create a framebuffer for this reason: '%s'", status_string);
-}
-
 /* For shaders, the number of cascades equals the value of the macro `NUM_CASCADES`
 in `num_cascades.geom`. This is a macro, and not a uniform, since the shadow
 geometry shader must clone the scene geometry a fixed number of times
-(specified at compile time). `cascade_split_distances` has a compile-time size
-as well. So, before all shader compilation, this function writes the number of
-cascades to `num_cascades.geom.` */
+(specified at compile time) for different layered rendering passes per each sub-frustum.
+So, before all shader compilation, this function writes the number of cascades to `num_cascades.geom.` */
 void specify_cascade_count_before_any_shader_compilation(const GLsizei num_cascades) {
 	FILE* const file = open_file_safely(ASSET_PATH("shaders/shadow/num_cascades.glsl"), "w");
 
@@ -184,6 +123,8 @@ CascadedShadowContext init_shadow_context(
 	const GLfloat linear_split_weight, const GLsizei resolution,
 	const GLsizei num_cascades, const GLsizei num_depth_buffer_bits) {
 
+	////////// Creating the split dists
+
 	const GLsizei num_split_dists = num_cascades - 1;
 	GLfloat* const split_dists = alloc((size_t) num_split_dists, sizeof(GLfloat));
 	mat4* const light_view_projection_matrices = alloc((size_t) num_cascades, sizeof(mat4));
@@ -191,8 +132,6 @@ CascadedShadowContext init_shadow_context(
 	const GLfloat
 		near_clip_dist = constants.camera.near_clip_dist,
 		clip_dist_diff = far_clip_dist - constants.camera.near_clip_dist;
-
-	//////////
 
 	for (GLsizei i = 0; i < num_split_dists; i++) {
 		const GLfloat layer_percent = (GLfloat) (i + 1) / num_cascades;
@@ -203,13 +142,89 @@ CascadedShadowContext init_shadow_context(
 		split_dists[i] = glm_lerp(log_dist, linear_dist, linear_split_weight);
 	}
 
+	////////// Creating the depth layers
+
+	GLuint depth_layers;
+	glGenTextures(1, &depth_layers);
+	use_texture(shadow_map_texture_type, depth_layers);
+
+	GLint internal_format;
+
+	switch (num_depth_buffer_bits) {
+		#define INTERNAL_FORMAT_CASE(num_bits) case num_bits: internal_format = GL_DEPTH_COMPONENT##num_bits; break
+
+		INTERNAL_FORMAT_CASE(16); INTERNAL_FORMAT_CASE(24); INTERNAL_FORMAT_CASE(32);
+
+		#undef INTERNAL_FORMAT_CASE
+
+		default: FAIL(CreateTexture, "Could not create a shadow map texture, because the number "
+			"of depth buffer bits must be 16, 24, or 32, not %d", num_depth_buffer_bits);
+	}
+
+	init_texture_data(shadow_map_texture_type, (GLsizei[]) {resolution, resolution, num_cascades},
+		GL_DEPTH_COMPONENT, internal_format, OPENGL_SHADOW_MAP_COLOR_CHANNEL_TYPE, NULL);
+
+	////////// Creating the framebuffer
+
+	GLuint framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(framebuffer_target, framebuffer);
+	glFramebufferTexture(framebuffer_target, GL_DEPTH_ATTACHMENT, depth_layers, 0);
+	glDrawBuffer(GL_NONE); glReadBuffer(GL_NONE); // Not drawing into or reading from any color buffers
+
+	const GLchar* status_string;
+
+	switch (glCheckFramebufferStatus(framebuffer_target)) {
+		case GL_FRAMEBUFFER_COMPLETE:
+			status_string = NULL;
+			glBindFramebuffer(framebuffer_target, 0);
+			break;
+
+		#define COMPLETENESS_CASE(status) case GL_##status: status_string = #status; break
+
+		COMPLETENESS_CASE(FRAMEBUFFER_UNDEFINED);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_READ_BUFFER);
+		COMPLETENESS_CASE(FRAMEBUFFER_UNSUPPORTED);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
+		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS);
+
+		#undef COMPLETENESS_CASE
+
+		default: status_string = "Unknown framebuffer error";
+	}
+
+	if (status_string != NULL)
+		FAIL(CreateFramebuffer, "Could not create a framebuffer for this reason: '%s'", status_string);
+
+	////////// Creating the depth samplers
+
+	GLuint depth_samplers[2];
+	glGenSamplers(2, depth_samplers);
+
+	const GLuint plain_depth_sampler = depth_samplers[0];
+	glSamplerParameteri(plain_depth_sampler, GL_TEXTURE_WRAP_S, TexNonRepeating);
+	glSamplerParameteri(plain_depth_sampler, GL_TEXTURE_WRAP_T, TexNonRepeating);
+	glSamplerParameteri(plain_depth_sampler, GL_TEXTURE_MAG_FILTER, OPENGL_SCENE_MAG_FILTER);
+	glSamplerParameteri(plain_depth_sampler, GL_TEXTURE_MIN_FILTER, OPENGL_SCENE_MAG_FILTER);
+
+	const GLuint depth_comparison_sampler = depth_samplers[1];
+	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_WRAP_S, TexNonRepeating);
+	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_WRAP_T, TexNonRepeating);
+	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_MAG_FILTER, OPENGL_SCENE_MAG_FILTER);
+	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_MIN_FILTER, OPENGL_SCENE_MAG_FILTER);
+	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+
 	//////////
 
-	const GLuint depth_layers = init_csm_depth_layers(resolution, num_cascades, num_depth_buffer_bits);
-
 	return (CascadedShadowContext) {
-		.framebuffer = init_csm_framebuffer(depth_layers),
+		.framebuffer = framebuffer,
 		.depth_layers = depth_layers,
+		.plain_depth_sampler = plain_depth_sampler,
+		.depth_comparison_sampler = depth_comparison_sampler,
 
 		.resolution = resolution, .num_cascades = num_cascades,
 		.sub_frustum_scale = sub_frustum_scale,
@@ -224,6 +239,7 @@ void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
 	dealloc(shadow_context -> light_view_projection_matrices);
 	deinit_texture(shadow_context -> depth_layers);
 	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
+	glDeleteSamplers(2, (GLuint[]) {shadow_context -> plain_depth_sampler, shadow_context -> depth_comparison_sampler});
 }
 
 void update_shadow_context(const CascadedShadowContext* const shadow_context,

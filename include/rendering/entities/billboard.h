@@ -33,11 +33,11 @@ typedef struct {
 	const billboard_index_t billboard_id, animation_id;
 } BillboardAnimationInstance;
 
-////////// Excluded: compare_billboard_sort_refs, sort_billboards_by_dist_to_camera, update_uniforms, define_vertex_spec
+////////// Excluded: compare_billboard_sort_refs, sort_billboards_by_dist_to_camera, define_vertex_spec
 
-void update_billboards(const BillboardContext* const billboard_context, const GLfloat curr_time_secs);
+void update_billboard_context(const BillboardContext* const billboard_context, const GLfloat curr_time_secs);
 
-void draw_billboards_to_shadow_context(const BillboardContext* const billboard_context, const vec2 right_xz);
+void draw_billboards_to_shadow_context(const BillboardContext* const billboard_context);
 void draw_billboards(BillboardContext* const billboard_context, const Camera* const camera);
 
 BillboardContext init_billboard_context(
