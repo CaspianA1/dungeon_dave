@@ -8,7 +8,7 @@
 out vec3 fragment_pos_world_space, UV;
 flat out mat3 fragment_tbn;
 
-// Note: each vertex shader is expected to set `UV` and `tbn` independently.
+// Note: each vertex shader is expected to set `UV` independently.
 void set_common_outputs(const vec3 vertex_pos_world_space, const mat3 tbn) {
     fragment_pos_world_space = vertex_pos_world_space;
 
