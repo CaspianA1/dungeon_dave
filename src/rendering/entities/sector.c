@@ -212,12 +212,15 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	return num_visible_faces;
 }
 
-static void define_vertex_spec(void) {
-	enum {vpt = vertices_per_triangle};
-	const GLenum typename = FACE_COMPONENT_TYPENAME;
+static void define_vertex_spec_for_position(void) {
+	define_vertex_spec_index(false, true, 0, vertices_per_triangle, sizeof(face_vertex_t), 0, FACE_COMPONENT_TYPENAME);
+}
 
-	define_vertex_spec_index(false, true, 0, vpt, sizeof(face_vertex_t), 0, typename); // Position
-	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), sizeof(face_component_t[vpt]), typename); // Face info
+static void define_vertex_spec(void) {
+	define_vertex_spec_for_position();
+
+	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), // Face info
+		sizeof(face_component_t[vertices_per_triangle]), FACE_COMPONENT_TYPENAME);
 }
 
 ////////// Initialization, deinitialization, and rendering
@@ -229,6 +232,20 @@ SectorContext init_sector_context(const byte* const heightmap,
 
 	List sectors, face_meshes;
 	generate_sectors_and_face_meshes_from_maps(&sectors, &face_meshes, heightmap, texture_id_map, map_width, map_height);
+
+	////////// TODO: add map edges to this vertex buffer too
+
+	const GLuint
+		vertex_buffer_for_shadow_mapping = init_gpu_buffer(),
+		vertex_spec_for_shadow_mapping = init_vertex_spec();
+
+	use_vertex_buffer(vertex_buffer_for_shadow_mapping);
+	init_vertex_buffer_data(face_meshes.length, face_meshes.item_size, face_meshes.data, GL_STATIC_DRAW);
+
+	use_vertex_spec(vertex_buffer_for_shadow_mapping);
+	define_vertex_spec_for_position();
+
+	//////////
 
 	const GLuint diffuse_texture_set = init_texture_set(
 		false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
@@ -243,11 +260,16 @@ SectorContext init_sector_context(const byte* const heightmap,
 			diffuse_texture_set, init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config)
 		),
 
-		.depth_shader = init_shader(
-			ASSET_PATH("shaders/shadow/sector_depth.vert"),
-			ASSET_PATH("shaders/shadow/sector_depth.geom"),
-			ASSET_PATH("shaders/shadow/sector_depth.frag"), NULL
-		),
+		.shadow_mapping = {
+			.vertex_buffer = vertex_buffer_for_shadow_mapping,
+			.vertex_spec = vertex_spec_for_shadow_mapping,
+
+			.depth_shader = init_shader(
+				ASSET_PATH("shaders/shadow/sector_depth.vert"),
+				ASSET_PATH("shaders/shadow/sector_depth.geom"),
+				ASSET_PATH("shaders/shadow/sector_depth.frag"), NULL
+			)
+		},
 
 		.mesh_cpu = face_meshes, .sectors = sectors
 	};
@@ -255,7 +277,11 @@ SectorContext init_sector_context(const byte* const heightmap,
 
 void deinit_sector_context(const SectorContext* const sector_context) {
 	deinit_drawable(sector_context -> drawable);
-	deinit_shader(sector_context -> depth_shader);
+
+	deinit_gpu_buffer(sector_context -> shadow_mapping.vertex_buffer);
+	deinit_vertex_spec(sector_context -> shadow_mapping.vertex_spec);
+	deinit_shader(sector_context -> shadow_mapping.depth_shader);
+
 	deinit_list(sector_context -> mesh_cpu);
 	deinit_list(sector_context -> sectors);
 }
@@ -266,14 +292,9 @@ void draw_sectors_to_shadow_context(const SectorContext* const sector_context) {
 	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
 	const buffer_size_t num_face_meshes = face_meshes_cpu -> length;
 
-	use_shader(sector_context -> depth_shader);
-	use_vertex_buffer(drawable -> vertex_buffer); // TODO: don't resubmit this data every frame
-	reinit_vertex_buffer_data(num_face_meshes, sizeof(face_mesh_t), face_meshes_cpu -> data);
-	use_vertex_spec(drawable -> vertex_spec);
-
-	WITHOUT_VERTEX_SPEC_INDEX(1, // Not using the face info bit attribute
-		draw_drawable(*drawable, num_face_meshes * vertices_per_face, 0, NULL, OnlyDraw);
-	);
+	use_shader(sector_context -> shadow_mapping.depth_shader);
+	use_vertex_spec(sector_context -> shadow_mapping.vertex_spec);
+	draw_primitives(drawable -> triangle_mode, (GLsizei) (num_face_meshes * vertices_per_face));
 }
 
 void draw_sectors(const SectorContext* const sector_context, const vec4 frustum_planes[planes_per_frustum]) {

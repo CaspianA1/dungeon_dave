@@ -299,7 +299,7 @@ static void* main_init(void) {
 
 	const GLuint shaders_that_use_shared_params[] = {
 		// Depth shaders
-		scene_context.sector_context.depth_shader,
+		scene_context.sector_context.shadow_mapping.depth_shader,
 		scene_context.billboard_context.shadow_mapping.depth_shader,
 
 		// Plain shaders
