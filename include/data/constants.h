@@ -116,7 +116,7 @@ static const struct {
 			.esm_exponent_layer_scale_factor = 1.8f
 		},
 
-		.overall_scene_tone = {0.968627f, 0.878431f, 0.823529f},
+		.overall_scene_tone = {0.960784f, 0.835294f, 0.631373f},
 		.tone_mapping_max_white = 1.5f, .noise_granularity = 0.001f
 	},
 
