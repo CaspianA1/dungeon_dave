@@ -38,7 +38,7 @@ void main(void) {
 		camera_pos_tangent_space = vec3(0.0f, 0.0f, 1.0f),
 		face_normal_tangent_space = vec3(0.0f, 0.0f, 1.0f);
 
-	//////////
+	////////// Pixel art UV correction
 
 	vec2 scrolling_UV_for_diffuse = vec2(scrolling_UV_x, UV.y);
 	vec2 scrolling_UV_for_normal = scrolling_UV_for_diffuse;
@@ -49,16 +49,16 @@ void main(void) {
 	adjust_UV_for_pixel_art_filtering(scrolling_bilinear_normal_percent,
 		textureSize(scrolling_normal_map_sampler, 0), scrolling_UV_for_normal);
 
-	//////////
+	////////// Getting the normal, dir to light, and halfway dir
 
 	vec3
-		scrolling_fragment_normal = get_tangent_space_normal_2D(scrolling_normal_map_sampler, scrolling_UV_for_normal).xyz,
-		dir_to_light = normalize(light_pos_tangent_space - fragment_pos_tangent_space),
-		view_dir = normalize(camera_pos_tangent_space - fragment_pos_tangent_space);
+		scrolling_fragment_normal = get_tangent_space_normal_2D(scrolling_normal_map_sampler, scrolling_UV_for_normal).rgb,
+		view_dir = normalize(camera_pos_tangent_space - fragment_pos_tangent_space),
+		dir_to_light = normalize(light_pos_tangent_space - fragment_pos_tangent_space);
 
 	vec3 halfway_dir = normalize(dir_to_light + view_dir);
 
-	//////////
+	////////// Getting the colors for both layers, and then mixing them
 
 	vec3
 		still_base = blinn_phong(still_diffuse_sampler, UV, face_normal_tangent_space, dir_to_light, halfway_dir),
