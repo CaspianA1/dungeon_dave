@@ -287,13 +287,11 @@ void deinit_sector_context(const SectorContext* const sector_context) {
 
 // Used in main.c
 void draw_sectors_to_shadow_context(const SectorContext* const sector_context) {
-	const Drawable* const drawable = &sector_context -> drawable;
-	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
-	const buffer_size_t num_face_meshes = face_meshes_cpu -> length;
-
 	use_shader(sector_context -> shadow_mapping.depth_shader);
 	use_vertex_spec(sector_context -> shadow_mapping.vertex_spec);
-	draw_primitives(drawable -> triangle_mode, (GLsizei) (num_face_meshes * vertices_per_face));
+
+	draw_primitives(sector_context -> drawable.triangle_mode,
+		(GLsizei) (sector_context -> mesh_cpu.length * vertices_per_face));
 }
 
 void draw_sectors(const SectorContext* const sector_context, const vec4 frustum_planes[planes_per_frustum]) {
