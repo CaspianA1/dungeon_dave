@@ -245,12 +245,10 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 		GLfloat* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, blur_std_dev);
 
 		do_separable_gaussian_blur_pass( // Blurring #1 to #2 horizontally
-			buffer_1, buffer_2,
-			blur_kernel, subtexture_h, blur_radius, false);
+			buffer_1, buffer_2, blur_kernel, subtexture_h, blur_radius, false);
 
 		do_separable_gaussian_blur_pass( // Blurring #2 to #1 vertically
-			buffer_2, buffer_1,
-			blur_kernel, subtexture_h, blur_radius, true);
+			buffer_2, buffer_1, blur_kernel, subtexture_h, blur_radius, true);
 
 		dealloc(blur_kernel);
 	}
