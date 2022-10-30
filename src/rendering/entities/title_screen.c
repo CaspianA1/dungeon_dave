@@ -31,8 +31,8 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 	const GLfloat relative_time_secs = typed_params.curr_time_secs - base_time_secs;
 
-	const GLfloat
-		palace_city_hori_scroll = relative_time_secs / typed_params.config -> secs_per_scroll_cycle,
+	const GLfloat // Modding the hori scroll with 1 to avoid floating-point imprecision errors for large time values
+		palace_city_hori_scroll = fmodf(relative_time_secs / typed_params.config -> secs_per_scroll_cycle, 1.0f),
 		spin_seed = relative_time_secs * TWO_PI / typed_params.config -> light_spin_cycle.secs_per;
 
 	GLfloat texture_transition_weight = cosf(spin_seed * typed_params.config -> light_spin_cycle.logo_transitions_per) * 0.5f + 0.5f;
