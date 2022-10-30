@@ -65,6 +65,7 @@ Miscellaneous problems:
 - Changing the pyramid track `pyramid.wav` to any other filename removes its two stutters
 - Using the raytraced AO map results in little white flickering dots
 - It's slow up close for many objects like sectors and billboards (even without parallax mapping)
+- See if a Z-prepass could lead to an increase in speed by rendering just one face at full resolution, up close
 
 Object rendering:
 - Up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
@@ -87,7 +88,7 @@ Normal mapping:
 - Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
 - Mipmaps of normal maps are not normalized, and they disappear at lower mip levels
 	(Generate mipmaps on the CPU, and verify that they can mipmap plain textures like glGenerateMipmap)
-- Perhaps blur the surfaces on the GPU - that way, only one blurrer between shadow maps and normal maps (only if using a shadow method that needs pre-blurring)
+- Perhaps blur the surfaces on the GPU
 - Share some of the looping logic for the Gaussian blur and the normal map generation
 - Little odd rectangles exist in the marble texture (due to compression)? This shows up in the normal map
 - Vary the normal map generation parameters based on the output texture size
