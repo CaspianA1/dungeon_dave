@@ -13,14 +13,16 @@ uniform sampler2D scrolling_diffuse_sampler;
 
 void main(void) {
 	UV = get_quad_UV();
-
 	scrolling_UV_x = UV.x;
+
 	ivec2 scrolling_texture_size = textureSize(scrolling_diffuse_sampler, 0);
 	float scrolling_aspect_ratio = float(scrolling_texture_size.x) / scrolling_texture_size.y;
 
-	scrolling_UV_x /= scrolling_aspect_ratio * scrolling_texture_vert_squish_ratio; // Making the texture aspect ratio correct
+	// Making the texture aspect ratio correct
+	scrolling_UV_x /= scrolling_aspect_ratio * scrolling_texture_vert_squish_ratio;
 	scrolling_UV_x += scroll_factor;
 
 	gl_Position = vec4(quad_corners[gl_VertexID], 0.0f, 1.0f);
 	fragment_pos_tangent_space = vec3(-gl_Position.x, gl_Position.y, 0.0f);
+
 }
