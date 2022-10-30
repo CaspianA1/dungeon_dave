@@ -112,7 +112,6 @@ set_triangle_fill_mode, application_should_exit, loop_application */
 void make_application(bool (*const drawer) (void* const, const Event* const),
 	void* (*const init) (void), void (*const deinit) (void* const));
 
-// Note: `x` and `y` are top-down here (making them technically `x` and `z`).
 static inline byte sample_map_point(const byte* const map, const byte x, const byte z, const byte map_width) {
 	return map[z * map_width + x];
 }
