@@ -27,9 +27,10 @@ static void print_face(const Face face, const GLchar* const prefix_msg) {
 */
 
 // Returns if there is another face to get
-static bool get_next_face(const Sector* const sector, const byte varying_axis,
-	const byte adjacent_side_val, const byte map_width,
-	const byte* const heightmap, Face* const face) {
+static bool get_next_face(
+	const byte varying_axis, const byte adjacent_side_val,
+	const byte map_width, const byte* const heightmap,
+	const Sector* const sector, Face* const face) {
 	
 	byte
 		*const face_size = face -> size,
@@ -195,15 +196,15 @@ void init_mesh_for_sector(
 			if (side) { // `side` is a top or left of the top-down sector
 				const byte unvarying_axis_origin = next_face.origin[unvarying_axis];
 				if (unvarying_axis_origin == 0) continue;
-				adjacent_side_val = unvarying_axis_origin - 1;
+				else adjacent_side_val = unvarying_axis_origin - 1;
 			}
 			else {
 				byte* const unvarying_axis_origin = next_face.origin + unvarying_axis;
 				if ((*unvarying_axis_origin += size_xz[unvarying_axis]) == dimensions[unvarying_axis]) continue;
-				adjacent_side_val = *unvarying_axis_origin;
+				else adjacent_side_val = *unvarying_axis_origin;
 			}
 
-			while (get_next_face(sector, !unvarying_axis, adjacent_side_val, map_width, heightmap, &next_face)) {
+			while (get_next_face(!unvarying_axis, adjacent_side_val, map_width, heightmap, sector, &next_face)) {
 				add_to_face_meshes(face_meshes, next_face, max_visible_height, side, texture_id);
 
 				const byte face_height = next_face.size[1];
