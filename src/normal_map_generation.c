@@ -239,9 +239,10 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 	////////// Blurring it (if needed), and then making a normal map
 
 	const signed_byte blur_radius = config -> blur_radius;
+	const GLfloat blur_std_dev = config -> blur_std_dev;
 
-	if (blur_radius != 0) {
-		GLfloat* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, config -> blur_std_dev);
+	if (blur_radius != 0 && blur_std_dev != 0.0f) {
+		GLfloat* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, blur_std_dev);
 
 		do_separable_gaussian_blur_pass( // Blurring #1 to #2 horizontally
 			buffer_1, buffer_2,
