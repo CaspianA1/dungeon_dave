@@ -74,7 +74,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 		depth_before = PARALLAX_SAMPLE(prev_UV) - curr_layer_depth + layer_depth,
 		depth_after = curr_depth_map_value - curr_layer_depth;
 
-	float UV_weight = depth_after / (depth_after - depth_before);
+	float UV_weight = clamp(depth_after / (depth_after - depth_before), 0.0f, 1.0f);
 
 	////////// Getting the parallax UV
 
