@@ -97,8 +97,7 @@ static void form_sector_area(Sector* const sector, const StateMap traversed_poin
 }
 
 // static List generate_sectors_from_maps(const byte* const heightmap,
-static void generate_sectors_and_face_meshes_from_maps(
-	List* const sectors, List* const face_meshes,
+static void generate_sectors_and_face_meshes_from_maps(List* const sectors, List* const face_meshes,
 	const byte* const heightmap, const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
 	//////////
