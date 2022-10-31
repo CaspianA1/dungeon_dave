@@ -4,7 +4,7 @@
 
 noperspective out float scrolling_UV_x;
 noperspective out vec2 UV;
-out vec3 fragment_pos_tangent_space;
+noperspective out vec3 fragment_pos_tangent_space;
 
 uniform float scroll_factor, scrolling_texture_vert_squish_ratio;
 uniform vec3 light_pos_tangent_space;

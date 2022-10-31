@@ -5,8 +5,7 @@
 
 noperspective in float scrolling_UV_x;
 noperspective in vec2 UV;
-
-in vec3 fragment_pos_tangent_space; // TODO: make flat
+noperspective in vec3 fragment_pos_tangent_space;
 
 out vec3 color;
 
