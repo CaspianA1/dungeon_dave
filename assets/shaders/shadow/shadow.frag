@@ -121,10 +121,12 @@ float get_volumetric_light_from_layer( const uint layer_index, const vec3 fragme
 		decay = 0.9f,
 		decay_weight = 0.7f,
 		sample_density = 1.0f,
-		opacity = 0.015f,
+		opacity = 0.015f;
 
+		/*
 		max_poisson_texel_range = 0.75f,
 		noise_scale = 10.0f;
+		*/
 
 	const uint num_samples = 25;
 	const bool enabled = true;
@@ -133,6 +135,7 @@ float get_volumetric_light_from_layer( const uint layer_index, const vec3 fragme
 
 	////////// Poisson disk setup
 
+	/*
 	const vec2 poisson_disk[] = vec2[](
 		vec2(-0.94201624f, -0.39906216f),
 		vec2(0.94558609f, -0.76890725f),
@@ -151,6 +154,7 @@ float get_volumetric_light_from_layer( const uint layer_index, const vec3 fragme
 		vec2(0.19984126f, 0.78641367f),
 		vec2(0.14383161f, -0.1410079f)
 	);
+	*/
 
 	/* If the camera less aligned towards a shadow map
 	texel (which is projected in the direction of the light),
@@ -158,10 +162,11 @@ float get_volumetric_light_from_layer( const uint layer_index, const vec3 fragme
 	the jitter range for the Poisson disk will be greater, which trades noise for banding. */
 
 	// TODO: don't recalculate
+	/*
 	float projective_error = 1.0f - abs(dot(view_dir, dir_to_light));
-
 	vec2 texel_size = 1.0f / textureSize(shadow_cascade_sampler, 0).xy;
 	vec2 poisson_jitter_range = texel_size * (max_poisson_texel_range * projective_error);
+	*/
 
 	//////////
 
@@ -187,21 +192,24 @@ float get_volumetric_light_from_layer( const uint layer_index, const vec3 fragme
 		////////// Jittering that UV
 
 		// TODO: make this seed account for 3 dimensions in a better way (a 3D rand function, probably)
+		/*
 		vec2 rand_seed = curr_pos_cascade_space.xy + curr_pos_cascade_space.z;
 		float rand_val = fract(sin(dot(rand_seed, vec2(12.9898f, 78.233f))) * 43758.5453f);
 
 		// The bitwise `and` is valid since the length of the array is a power of 2
 		uint index = uint(rand_val * noise_scale) & uint(poisson_disk.length() - 1u);
+		*/
 
 		/* The jitter range is not baked into the Poisson disk array for a somewhat technical reason.
 		If I do so, each local array will be different, which means that it will be stored within each thread's
 		local registers. I then run out of local registers fairly quickly, which is a big slowdown (at least on my system). */
-		vec2 jittered_pos_cascade_space = poisson_disk[index] * poisson_jitter_range + curr_pos_cascade_space.xy;
+		// vec2 jittered_pos_cascade_space = poisson_disk[index] * poisson_jitter_range + curr_pos_cascade_space.xy;
 
 		//////////
 
 		float depth_test = texture(shadow_cascade_sampler_depth_comparison,
-			vec4(jittered_pos_cascade_space, layer_index, curr_pos_cascade_space.z)
+			// vec4(jittered_pos_cascade_space, layer_index, curr_pos_cascade_space.z)
+			vec4(curr_pos_cascade_space.xy, layer_index, curr_pos_cascade_space.z)
 		);
 
 		volumetric_light_strength += depth_test * curr_decay;
