@@ -120,7 +120,7 @@ float get_volumetric_light_from_layer( const uint layer_index, const vec3 fragme
 	const float
 		decay = 0.9f,
 		decay_weight = 0.7f,
-		sample_density = 1.0f,
+		sample_density = 0.5f,
 		opacity = 0.015f;
 
 		/*
