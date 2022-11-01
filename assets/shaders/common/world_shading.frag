@@ -71,10 +71,6 @@ vec4 calculate_light(void) {
 
 	vec3 view_dir = normalize(camera_to_fragment_world_space);
 
-	// return vec4(vec3(get_ao_strength()), 1.0f);
-	// return vec4(vec3(diffuse(normal_and_inv_height.xyz)), 1.0f);
-	// return vec4(specular(normal_and_inv_height, view_dir), 1.0f);
-
 	vec2 shadow_and_volumetric_light = get_csm_shadow_and_volumetric_light(fragment_pos_world_space, view_dir);
 
 	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(normal_and_inv_height, view_dir);
@@ -85,6 +81,11 @@ vec4 calculate_light(void) {
 
 	apply_tone_mapping(tone_mapping_max_white, color);
 	apply_noise_for_banding_removal(UV.xy, color);
+
+	// return vec4(vec3(get_ao_strength()), 1.0f);
+	// return vec4(vec3(diffuse(normal_and_inv_height.xyz)), 1.0f);
+	// return vec4(specular(normal_and_inv_height, view_dir), 1.0f);
+	// return vec4(vec3(shadow_and_volumetric_light.y * texture_color.a), texture_color.a);
 
 	return vec4(color, texture_color.a);
 }
