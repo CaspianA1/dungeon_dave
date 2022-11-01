@@ -80,9 +80,9 @@ TitleScreen init_title_screen(
 	INIT_UNIFORM_VALUE(scrolling_bilinear_diffuse_percent, shader, 1f, rendering_config -> scrolling_bilinear_diffuse_percent);
 	INIT_UNIFORM_VALUE(scrolling_bilinear_normal_percent, shader, 1f, rendering_config -> scrolling_bilinear_normal_percent);
 
-	use_texture_in_shader(still_diffuse_texture, shader, "still_diffuse_sampler", TexPlain, TU_TitleScreenStillDiffuse);
-	use_texture_in_shader(scrolling_diffuse_texture, shader, "scrolling_diffuse_sampler", TexPlain, TU_TitleScreenScrollingDiffuse);
-	use_texture_in_shader(scrolling_normal_map, shader, "scrolling_normal_map_sampler", TexPlain, TU_TitleScreenScrollingNormalMap);
+	use_texture_in_shader(still_diffuse_texture, shader, "still_diffuse_sampler", texture_type, TU_TitleScreenStillDiffuse);
+	use_texture_in_shader(scrolling_diffuse_texture, shader, "scrolling_diffuse_sampler", texture_type, TU_TitleScreenScrollingDiffuse);
+	use_texture_in_shader(scrolling_normal_map, shader, "scrolling_normal_map_sampler", texture_type, TU_TitleScreenScrollingNormalMap);
 
 	//////////
 
