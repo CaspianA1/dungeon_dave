@@ -24,6 +24,6 @@ void update_dynamic_light(DynamicLight* const dl, const GLfloat curr_time_secs) 
 	const GLfloat weight = sinf(curr_time_secs / dl -> time_for_cycle * TWO_PI) * 0.5f + 0.5f;
 
 	GLfloat* const curr_dir = dl -> curr_dir;
-	glm_vec3_lerp((GLfloat*) dl -> dir_1, (GLfloat*) dl -> dir_2, weight, curr_dir);
+	glm_vec3_lerp((GLfloat*) dl -> dir_2, (GLfloat*) dl -> dir_1, weight, curr_dir);
 	glm_vec3_normalize(curr_dir);
 }
