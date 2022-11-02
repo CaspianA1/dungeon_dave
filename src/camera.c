@@ -312,7 +312,6 @@ void update_camera(Camera* const camera, const Event* const event, const byte* c
 	GLfloat *const dir = camera -> dir, *const right = camera -> right, *const up = camera -> up;
 
 	get_camera_directions(angles, dir_xz, dir, camera -> right_xz, right, up);
-
 	update_camera_pos(camera, event, heightmap, map_size, dir_xz, dir, right);
 	update_fov(camera, event);
 
