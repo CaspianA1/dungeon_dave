@@ -2,7 +2,7 @@
 
 #include "common/world_shading.vert"
 
-layout(location = 0) in vec3 vertex_pos_world_space;
+layout(location = 0) in ivec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
 
 uniform bool branch;

@@ -6,53 +6,15 @@
 #include "utils/opengl_wrappers.h"
 #include "data/constants.h"
 
-/* Drawing sectors to the shadow map:
+/* TODO:
+- For dynamic sectors, perhaps have a 2D floating-point map that represents the displacement
+height of vertices, so that sectors can be pulled up or down from the ground
 
-During initialization:
-	- Generate another sector buffer that contains all sectors, but without their face ids
-	- Additional faces for map edges are generated too
-	- Face pre-culling based on the face type could be done too, but that could be considered extra credit
-	- Keep that alternate mesh in a GL_STATIC_DRAW buffer
-	- Another vertex spec for that is then kept, since no skipping of positions to get the face id is needed
-
-	Advantages:
-		- No resubmitting of data to the plain sector buffer
-		- Map edges not drawn by the plain sector shader
-		- Rendering the shadow buffer should be faster with a GL_STATIC_DRAW buffer, and no face ids used
-	Disadvantages:
-		- One more vertex buffer and spec used
-
-Alternate method:
-	- Keep sector edge data in the same buffer
-	- Resubmit sector data each time
-	- Same vertex spec used
-
-	Advantages:
-		- Only one vertex buffer and spec for sectors
-	Disasvantages:
-		- GL_DYNAMIC_DRAW buffer may be slower
-		- Map edge faces will never be seen because they'll be backfacing
-
-Compromise:
-	- Keep the sector edge faces in the end of the sector GPU buffer
-	- Draw them when rendering the shadow map, and not when rendering culled faces otherwise
-	- For mapping the buffer for culling, make sure that the contents outside the range are preserved
-	- Generate null face ids for those edge faces, since they aren't used
-
-- For dynamic sectors, perhaps have a 2D floating-point map that represents the displacement height of vertices,
-	so that sectors can be pulled up or down from the ground
-
-- Steep parallax mapping, parallax occlusion mapping, or another technique under that umbrella
-*/
-
-/*
-- TODO: fix the bug where pushing oneself in a corner, and looking up and down with the right yaw clips a whole sector face
+- Fix the bug where pushing oneself in a corner, and looking up and down with the right yaw clips a whole sector face
 - To fix this whole depth clamping mess,
 	1. Use a different projection matrix for the weapon with a much nearer clip dist
 	2. Choose a reasonably near clip dist for the scene
 	3. Disable depth clamping
-
-Also, figure out why making the near clip dist smaller warps the weapon much more for rotations.
 */
 
 // Attributes here are height and texture id
@@ -93,11 +55,10 @@ static void form_sector_area(Sector* const sector, const StateMap traversed_poin
 
 	done:
 
-	set_statemap_area(traversed_points, (buffer_size_t[4]) {origin[0], origin[1], size[0], size[1]});
+	set_statemap_area(traversed_points, (buffer_size_t[4]) {origin[0], origin_y, size[0], size[1]});
 }
 
-// static List generate_sectors_from_maps(const byte* const heightmap,
-static void generate_sectors_and_face_meshes_from_maps(List* const sectors, List* const face_meshes,
+static void generate_sectors_and_face_mesh_from_maps(List* const sectors, List* const face_mesh,
 	const byte* const heightmap, const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
 	//////////
@@ -112,7 +73,7 @@ static void generate_sectors_and_face_meshes_from_maps(List* const sectors, List
 
 	/* This contains the actual data for faces. `num_sectors * 3` gives a good
 	guess for the face/sector ratio. TODO: make this a constant somewhere. */
-	*face_meshes = init_list(sector_amount_guess * 3, face_mesh_t);
+	*face_mesh = init_list(sector_amount_guess * 3, face_mesh_t);
 
 	//////////
 
@@ -140,13 +101,13 @@ static void generate_sectors_and_face_meshes_from_maps(List* const sectors, List
 
 			////////// Setting face mesh metadata + initing sector faces
 
-			sector.face_range.start = face_meshes -> length;
+			sector.face_range.start = face_mesh -> length;
 
 			byte biggest_face_height;
-			init_mesh_for_sector(&sector, face_meshes, &biggest_face_height, heightmap, map_width, map_height, texture_id);
+			init_mesh_for_sector(&sector, face_mesh, &biggest_face_height, heightmap, map_width, map_height, texture_id);
 
 			sector.visible_heights.min = sector.visible_heights.max - biggest_face_height;
-			sector.face_range.length = face_meshes -> length - sector.face_range.start;
+			sector.face_range.length = face_mesh -> length - sector.face_range.start;
 
 			//////////
 
@@ -161,6 +122,77 @@ static void generate_sectors_and_face_meshes_from_maps(List* const sectors, List
 	deinit_statemap(traversed_points);
 }
 
+/* This function generates a modified version of the plain face mesh used
+for rendering sectors. Here's why a separate mesh is used for shadow mapping:
+
+Note that a separate face mesh is used for rendering shadows because the other vertex buffer
+used to store the face mesh changes every frame due to frustum culling, so if I were to use that one,
+
+1. It includes map edge geometry. Normally, this geometry is not generated
+	because the player will never see it, but this adds that geometry in.
+
+2. It trims the face info byte, so that this version of the mesh used for shadow mapping
+	will only take up 75% of its needed space.
+
+3. The other vertex buffer used to store the face mesh changes every frame due to frustum culling.
+	If I were to use that one for shadow mapping, I would then have to resubmit the whole face mesh
+	to that vertex buffer every frame for rendering. This mesh is static and stays in fast memory,
+	so it should be faster to render with this separate one.
+
+TODO: perhaps pre-cull (frustum and backface culling) face meshes outside of the camera-light view frustum? */
+static void init_trimmed_face_mesh_for_shadow_mapping(
+	const byte map_width, const byte map_height, const byte* const heightmap, const List* const face_mesh,
+	GLsizei* const num_vertices, GLuint* const vertex_buffer, GLuint* const vertex_spec) {
+
+	////////// Making a map edge mesh + vertex buffer for it
+
+	List map_edge_mesh = init_map_edge_mesh(heightmap, map_width, map_height);
+
+	const GLuint local_vertex_buffer = init_gpu_buffer();
+	use_vertex_buffer(local_vertex_buffer);
+
+	const buffer_size_t local_num_vertices = vertices_per_face * (face_mesh -> length + map_edge_mesh.length);
+
+	typedef face_component_t trimmed_face_vertex_t[3];
+	init_vertex_buffer_data(local_num_vertices, sizeof(trimmed_face_vertex_t), NULL, GL_STATIC_DRAW);
+
+	////////// Writing the plain and edge geometry to the buffer
+
+	face_component_t* buffer_mapping = init_vertex_buffer_memory_mapping(local_vertex_buffer,
+		local_num_vertices * sizeof(trimmed_face_vertex_t), true);
+
+	const List* const face_mesh_lists[2] = {face_mesh, &map_edge_mesh};
+
+	for (byte i = 0; i < ARRAY_LENGTH(face_mesh_lists); i++) {
+		const List* const face_mesh_list = face_mesh_lists[i];
+
+		LIST_FOR_EACH(0, face_mesh_list, untyped_face_submesh, _,
+			const face_vertex_t* const face_submesh = (face_vertex_t*) untyped_face_submesh;
+
+			for (byte j = 0; j < vertices_per_face; j++) {
+				const face_component_t* const vertex = face_submesh[j];
+
+				*(buffer_mapping++) = vertex[0];
+				*(buffer_mapping++) = vertex[1];
+				*(buffer_mapping++) = vertex[2];
+			}
+		);
+	}
+
+	////////// Some deiniting
+
+	deinit_vertex_buffer_memory_mapping();
+	deinit_list(map_edge_mesh);
+
+	////////// Writing to some output variables + defining the vertex spec
+
+	*num_vertices = (GLsizei) local_num_vertices;
+	*vertex_buffer = local_vertex_buffer;
+
+	use_vertex_spec(*vertex_spec = init_vertex_spec());
+	define_vertex_spec_index(false, false, 0, vertices_per_triangle, 0, 0, FACE_COMPONENT_TYPENAME);
+}
+
 static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	const SectorContext* const sector_context, const vec4* const frustum_planes) {
 
@@ -168,12 +200,12 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	const Sector* const sector_data = sectors -> data;
 	const Sector* const out_of_bounds_sector = sector_data + sectors -> length;
 
-	const List* const face_meshes_cpu = &sector_context -> mesh_cpu;
-	const face_mesh_t* const face_meshes_cpu_data = face_meshes_cpu -> data;
+	const List* const face_mesh_cpu = &sector_context -> mesh_cpu;
+	const face_mesh_t* const face_mesh_cpu_data = face_mesh_cpu -> data;
 
-	face_mesh_t* const face_meshes_gpu = init_vertex_buffer_memory_mapping(
+	face_mesh_t* const face_mesh_gpu = init_vertex_buffer_memory_mapping(
 		sector_context -> drawable.vertex_buffer,
-		face_meshes_cpu -> length * sizeof(face_mesh_t), true
+		face_mesh_cpu -> length * sizeof(face_mesh_t), true
 	);
 
 	buffer_size_t num_visible_faces = 0;
@@ -199,8 +231,8 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 		}
 
 		if (num_visible_faces_in_group != 0) {
-			memcpy(face_meshes_gpu + num_visible_faces,
-				face_meshes_cpu_data + cpu_buffer_start_index,
+			memcpy(face_mesh_gpu + num_visible_faces,
+				face_mesh_cpu_data + cpu_buffer_start_index,
 				num_visible_faces_in_group * sizeof(face_mesh_t));
 
 			num_visible_faces += num_visible_faces_in_group;
@@ -211,12 +243,8 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	return num_visible_faces;
 }
 
-static void define_vertex_spec_for_position(void) {
-	define_vertex_spec_index(false, true, 0, vertices_per_triangle, sizeof(face_vertex_t), 0, FACE_COMPONENT_TYPENAME);
-}
-
 static void define_vertex_spec(void) {
-	define_vertex_spec_for_position();
+	define_vertex_spec_index(false, false, 0, vertices_per_triangle, sizeof(face_vertex_t), 0, FACE_COMPONENT_TYPENAME);
 
 	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), // Face info
 		sizeof(face_component_t[vertices_per_triangle]), FACE_COMPONENT_TYPENAME);
@@ -229,20 +257,17 @@ SectorContext init_sector_context(const byte* const heightmap,
 	const GLchar* const* const texture_paths, const GLsizei num_textures,
 	const GLsizei texture_size, const NormalMapConfig* const normal_map_config) {
 
-	List sectors, face_meshes;
-	generate_sectors_and_face_meshes_from_maps(&sectors, &face_meshes, heightmap, texture_id_map, map_width, map_height);
+	List sectors, face_mesh;
+	generate_sectors_and_face_mesh_from_maps(&sectors, &face_mesh, heightmap, texture_id_map, map_width, map_height);
 
-	////////// TODO: add map edges to this vertex buffer too
+	//////////
 
-	const GLuint
-		vertex_buffer_for_shadow_mapping = init_gpu_buffer(),
-		vertex_spec_for_shadow_mapping = init_vertex_spec();
+	GLsizei num_vertices_for_shadow_mapping;
+	GLuint vertex_buffer_for_shadow_mapping, vertex_spec_for_shadow_mapping;
 
-	use_vertex_buffer(vertex_buffer_for_shadow_mapping);
-	init_vertex_buffer_data(face_meshes.length, face_meshes.item_size, face_meshes.data, GL_STATIC_DRAW);
-
-	use_vertex_spec(vertex_buffer_for_shadow_mapping);
-	define_vertex_spec_for_position();
+	init_trimmed_face_mesh_for_shadow_mapping(map_width, map_height,
+		heightmap, &face_mesh, &num_vertices_for_shadow_mapping,
+		&vertex_buffer_for_shadow_mapping, &vertex_spec_for_shadow_mapping);
 
 	//////////
 
@@ -254,23 +279,26 @@ SectorContext init_sector_context(const byte* const heightmap,
 	return (SectorContext) {
 		.drawable = init_drawable_with_vertices(
 			define_vertex_spec, NULL, GL_DYNAMIC_DRAW, GL_TRIANGLES,
-			(List) {.data = NULL, .item_size = face_meshes.item_size, .length = face_meshes.length},
+			(List) {.data = NULL, .item_size = face_mesh.item_size, .length = face_mesh.length},
 			init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),
 			diffuse_texture_set, init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config)
 		),
 
 		.shadow_mapping = {
+			.num_vertices = num_vertices_for_shadow_mapping,
+
 			.vertex_buffer = vertex_buffer_for_shadow_mapping,
 			.vertex_spec = vertex_spec_for_shadow_mapping,
 
 			.depth_shader = init_shader(
 				ASSET_PATH("shaders/shadow/sector_depth.vert"),
 				ASSET_PATH("shaders/shadow/sector_depth.geom"),
-				ASSET_PATH("shaders/shadow/sector_depth.frag"), NULL
+				ASSET_PATH("shaders/shadow/sector_depth.frag"),
+				NULL
 			)
 		},
 
-		.mesh_cpu = face_meshes, .sectors = sectors
+		.mesh_cpu = face_mesh, .sectors = sectors
 	};
 }
 
@@ -285,13 +313,10 @@ void deinit_sector_context(const SectorContext* const sector_context) {
 	deinit_list(sector_context -> sectors);
 }
 
-// Used in main.c
 void draw_sectors_to_shadow_context(const SectorContext* const sector_context) {
 	use_shader(sector_context -> shadow_mapping.depth_shader);
 	use_vertex_spec(sector_context -> shadow_mapping.vertex_spec);
-
-	draw_primitives(sector_context -> drawable.triangle_mode,
-		(GLsizei) (sector_context -> mesh_cpu.length * vertices_per_face));
+	draw_primitives(sector_context -> drawable.triangle_mode, sector_context -> shadow_mapping.num_vertices);
 }
 
 void draw_sectors(const SectorContext* const sector_context, const vec4 frustum_planes[planes_per_frustum]) {

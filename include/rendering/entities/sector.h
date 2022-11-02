@@ -17,20 +17,20 @@ typedef struct {
 typedef struct {
 	const Drawable drawable;
 
-	/* A separate copy of the sector meshes is kept in a vertex buffer here.
-	That's because the other one contained within the `Drawable` struct
-	is changed every frame due to frustum culling, and so to avoid having
-	to retransfer all sector meshes from the CPU to the GPU every frame to that
-	buffer again, a copy lives in fast memory here. */
+	/* There's info on why there's a separate vertex buffer + spec in the
+	comment above `init_trimmed_face_mesh_for_shadow_mapping`. */
 	const struct {
+		const GLsizei num_vertices;
 		const GLuint vertex_buffer, vertex_spec, depth_shader;
 	} shadow_mapping;
 
 	const List mesh_cpu, sectors;
 } SectorContext;
 
-/* Excluded: point_matches_sector_attributes, form_sector_area, generate_sectors_from_maps,
-frustum_cull_sector_faces_into_gpu_buffer, define_vertex_spec_for_position, define_vertex_spec */
+/* Excluded:
+point_matches_sector_attributes, form_sector_area,
+generate_sectors_and_face_mesh_from_maps, init_trimmed_face_mesh_for_shadow_mapping,
+frustum_cull_sector_faces_into_gpu_buffer, define_vertex_spec */
 
 SectorContext init_sector_context(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height,
