@@ -202,7 +202,9 @@ static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const G
 	return 0.5f * amplitude * (sinf(x * (TWO_PI / period) + THREE_HALVES_PI) + 1.0f);
 }
 
-static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 velocities, const GLfloat delta_time) {
+static void update_pace(Camera* const camera, const GLfloat delta_time) {
+	const GLfloat* const velocities = camera -> velocities;
+
 	const GLfloat combined_speed_xz_amount = fminf(constants.speeds.xz_max,
 		glm_vec2_norm((vec2) {velocities[0], velocities[2]}));
 
@@ -213,7 +215,7 @@ static void update_pace(Camera* const camera, GLfloat* const pos_y, const vec3 v
 			camera -> time_since_jump, constants.camera.pace.period,
 			constants.camera.pace.max_amplitude * camera -> speed_xz_percent);
 
-		*pos_y += camera -> pace;
+		camera -> pos[1] += camera -> pace;
 		camera -> time_since_jump += delta_time;
 	}
 	else {
@@ -271,12 +273,7 @@ static void update_camera_pos(Camera* const camera, const Event* const event,
 
 		#undef MOVE
 	}
-	else {
-		GLfloat* const velocities = camera -> velocities;
-		update_pos_via_physics(heightmap, map_size, dir_xz, pos, velocities, camera -> pace, event);
-		update_pace(camera, pos + 1, velocities, delta_time);
-		update_fov(camera, event);
-	}
+	else update_pos_via_physics(heightmap, map_size, dir_xz, pos, camera -> velocities, camera -> pace, event);
 }
 
 static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ratio, const vec3 dir, const vec3 up, const vec3 right) {
@@ -312,9 +309,12 @@ void update_camera(Camera* const camera, const Event* const event, const byte* c
 	GLfloat *const dir = camera -> dir, *const right = camera -> right, *const up = camera -> up;
 
 	get_camera_directions(angles, dir_xz, dir, camera -> right_xz, right, up);
-	update_camera_pos(camera, event, heightmap, map_size, dir_xz, dir, right); // Updates `pos`
 
-	update_camera_matrices(camera, event -> aspect_ratio, dir, up, right); // Updates `view` and `model_view_projection`
+	update_camera_pos(camera, event, heightmap, map_size, dir_xz, dir, right);
+	update_pace(camera, event -> delta_time);
+	update_fov(camera, event);
+
+	update_camera_matrices(camera, event -> aspect_ratio, dir, up, right);
 	glm_frustum_planes(camera -> view_projection, camera -> frustum_planes);
 
 	////////// Printing important vectors if needed
