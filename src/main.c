@@ -20,8 +20,6 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	Camera* const camera = &scene_context -> camera;
 	BillboardContext* const billboard_context = &scene_context -> billboard_context;
 	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
-	const Skybox* const skybox = &scene_context -> skybox;
-	const AmbientOcclusionMap* const ao_map = &scene_context -> ao_map;
 
 	DynamicLight* const dynamic_light = &scene_context -> dynamic_light;
 	const GLfloat *const dir_to_light = dynamic_light -> curr_dir, curr_time_secs = event -> curr_time_secs;
@@ -49,7 +47,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
-			draw_skybox(skybox); // Drawn before any translucent geometry
+			draw_skybox(&scene_context -> skybox); // Drawn before any translucent geometry
 
 			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
 				draw_billboards(billboard_context, camera);
