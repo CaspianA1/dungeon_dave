@@ -273,7 +273,10 @@ static void update_camera_pos(Camera* const camera, const Event* const event,
 
 		#undef MOVE
 	}
-	else update_pos_via_physics(heightmap, map_size, dir_xz, pos, camera -> velocities, camera -> pace, event);
+	else {
+		update_pos_via_physics(heightmap, map_size, dir_xz, pos, camera -> velocities, camera -> pace, event);
+		update_pace(camera, event -> delta_time);
+	}
 }
 
 static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ratio, const vec3 dir, const vec3 up, const vec3 right) {
@@ -311,7 +314,6 @@ void update_camera(Camera* const camera, const Event* const event, const byte* c
 	get_camera_directions(angles, dir_xz, dir, camera -> right_xz, right, up);
 
 	update_camera_pos(camera, event, heightmap, map_size, dir_xz, dir, right);
-	update_pace(camera, event -> delta_time);
 	update_fov(camera, event);
 
 	update_camera_matrices(camera, event -> aspect_ratio, dir, up, right);
