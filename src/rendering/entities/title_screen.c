@@ -68,7 +68,7 @@ TitleScreen init_title_screen(
 			texture_type, &texture_config -> scrolling_normal_map_config),
 
 		still_diffuse_texture = init_plain_texture(texture_config -> paths.still, TexNonRepeating,
-				texture_config -> mag_filters.still, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
+			texture_config -> mag_filters.still, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
 	//////////
 
@@ -96,7 +96,6 @@ TitleScreen init_title_screen(
 		),
 
 		.still_diffuse_texture = still_diffuse_texture,
-
 		.rendering_config = *rendering_config
 	};
 }
