@@ -5,8 +5,8 @@
 
 void main(void) {
 	mat3 tbn = billboard_front_facing_tbn;
-	bool is_on_frontside = dot(tbn[2], billboard_center_world_space - camera_pos_world_space) < 0.0f;
-	tbn[2] *= float(is_on_frontside) * 2.0f - 1.0f; // Multiplying the normal by -1 if needed
+	float side_sign = sign(dot(tbn[2], camera_pos_world_space - billboard_center_world_space));
+	tbn[2] *= side_sign; // Flipping the normal if needed
 
 	set_common_outputs(get_billboard_vertex(-tbn[0]), tbn);
 
