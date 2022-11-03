@@ -107,8 +107,7 @@ GLuint init_texture_set(const bool premultiply_alpha,
 	const GLsizei num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
 	const GLchar* const* const still_subtexture_paths, const AnimationLayout* const animation_layouts);
 
-
-GLuint init_plain_texture(const GLchar* const path, const TextureType type,
+GLuint init_plain_texture(const GLchar* const path,
 	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLint internal_format);
 

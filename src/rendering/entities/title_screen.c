@@ -57,7 +57,7 @@ TitleScreen init_title_screen(
 
 	const TextureType texture_type = TexPlain;
 
-	const GLuint scrolling_diffuse_texture = init_plain_texture(texture_config -> paths.scrolling, texture_type,
+	const GLuint scrolling_diffuse_texture = init_plain_texture(texture_config -> paths.scrolling,
 		TexRepeating, texture_config -> mag_filters.scrolling, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
 	// Overwriting the vertical wrap through a dumb hack
@@ -67,7 +67,7 @@ TitleScreen init_title_screen(
 		scrolling_normal_map = init_normal_map_from_diffuse_texture(scrolling_diffuse_texture,
 			texture_type, &texture_config -> scrolling_normal_map_config),
 
-		still_diffuse_texture = init_plain_texture(texture_config -> paths.still, texture_type, TexNonRepeating,
+		still_diffuse_texture = init_plain_texture(texture_config -> paths.still, TexNonRepeating,
 				texture_config -> mag_filters.still, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
 	//////////

@@ -221,20 +221,22 @@ GLuint init_texture_set(const bool premultiply_alpha,
 	return texture;
 }
 
-GLuint init_plain_texture(const GLchar* const path, const TextureType type,
+GLuint init_plain_texture(const GLchar* const path,
 	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
 	const TextureFilterMode min_filter, const GLint internal_format) {
+
+	const TextureType type = TexPlain;
 
 	const GLuint texture = preinit_texture(type, wrap_mode, mag_filter, min_filter, false);
 	SDL_Surface* const surface = init_surface(path);
 
 	WITH_SURFACE_PIXEL_ACCESS(surface,
-		init_texture_data(TexPlain,
+		init_texture_data(type,
 			(GLsizei[]) {surface -> w, surface -> h}, OPENGL_INPUT_PIXEL_FORMAT,
 			internal_format, OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
 	);
 
-	init_texture_mipmap(TexPlain);
+	init_texture_mipmap(type);
 	deinit_surface(surface);
 
 	return texture;
