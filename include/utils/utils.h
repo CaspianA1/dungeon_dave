@@ -101,6 +101,9 @@ typedef enum {
 #define USE_ANISOTROPIC_FILTERING
 
 // #define TRACK_MEMORY
+
+/* Note: printing the shader validation log will trigger
+a memory leak, since the program exits under failure. */
 // #define PRINT_SHADER_VALIDATION_LOG
 
 //////////
