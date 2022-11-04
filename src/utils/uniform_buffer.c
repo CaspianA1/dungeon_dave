@@ -23,6 +23,7 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 	const GLchar* const block_name, const GLuint shader_using_uniform_block,
 	const GLchar* const* const subvar_names, const buffer_size_t num_subvars) {
 
+	// TODO: reset this when starting a new level
 	static GLuint next_binding_point = 0;
 	const GLuint binding_point = next_binding_point++;
 
@@ -99,7 +100,6 @@ void bind_uniform_buffer_to_shader(const UniformBuffer* const buffer, const GLui
 }
 
 void enable_uniform_buffer_writing_batch(UniformBuffer* const buffer, const bool discard_prev_contents) {
-
 	byte** const gpu_memory_mapping = &buffer -> gpu_memory_mapping;
 
 	if (*gpu_memory_mapping != NULL)
@@ -117,12 +117,10 @@ void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer) {
 ////////// This part concerns writing data to the uniform buffer
 
 static void check_primitive_size(const buffer_size_t size, const GLchar* const function_name) {
-	if (size == 0) FAIL(InitializeShaderUniform, "A primitive size of 0 when calling `%s` is not supported", function_name);
-
-	else if (size > max_primitive_size) FAIL(InitializeShaderUniform,
-		"Sizes greater than the size of %s (which is %zu) are not supported"
-		" for `%s`. The failing size was %u", max_primitive_size_name,
-		max_primitive_size, function_name, size
+	if (size == 0 || size > max_primitive_size) FAIL(InitializeShaderUniform,
+		"Primitive sizes equal to 0 or larger than %zu (which is the size of %s) "
+		"are not supported for `%s`. The failing size was %u", max_primitive_size,
+		max_primitive_size_name, function_name, size
 	);
 }
 
@@ -132,7 +130,7 @@ static void check_matrix_size(const buffer_size_t column_size,
 	check_primitive_size(column_size, function_name);
 
 	if (num_columns == 0 || num_columns > 4) FAIL(InitializeShaderUniform,
-		"A column count of %u when calling `%s` is not supported",
+		"A matrix column count of %u when calling `%s` is not supported",
 		num_columns, function_name
 	);
 }
