@@ -169,6 +169,8 @@ static void get_subvar_metadata(const UniformBuffer* const buffer, const GLchar*
 void write_primitive_to_uniform_buffer(const UniformBuffer* const buffer,
 	const GLchar* const subvar_name, const void* const primitive, const buffer_size_t size) {
 
+	// TODO: check that the primitive size equals the size of the type that shall be written
+
 	check_primitive_size(size, "write_primitive_to_uniform_buffer");
 
 	byte* dest;
