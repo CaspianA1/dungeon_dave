@@ -62,7 +62,7 @@ static const struct {
 		} shadow_mapping;
 
 		const vec3 overall_scene_tone;
-		const GLfloat specular_exponent, tone_mapping_max_white, noise_granularity;
+		const GLfloat tone_mapping_max_white, noise_granularity;
 	} lighting;
 
 	const struct { // All angles are in radians
