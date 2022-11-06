@@ -13,8 +13,7 @@ flat out mat3 fragment_tbn;
 
 // Note: each vertex shader is expected to set `UV` independently.
 void set_common_outputs(const vec3 vertex_pos_world_space, const mat3 tbn) {
-	fragment_pos_world_space = vertex_pos_world_space;
-
+	fragment_pos_world_space = vertex_pos_world_space; // For the fragment shader
 	camera_to_fragment_world_space = camera_pos_world_space - vertex_pos_world_space; // For specular and volumetric lighting
 	camera_to_fragment_tangent_space = transpose(tbn) * camera_to_fragment_world_space; // For parallax mapping
 	fragment_tbn = tbn; // For lighting and parallax mapping
