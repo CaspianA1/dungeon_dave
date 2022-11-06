@@ -13,6 +13,8 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	- Note: scrolling called texture swimming here: https://casual-effects.com/research/McGuire2005Parallax/index.html
 	- Skip zero-alpha areas as an optimization, without weird alpha stitch problems? Check for zero alpha + a zero fwidth of alpha?
 	- Some weapon sprite parallax looks a bit odd when out of bounds; e.g. the snazzy shotgun or the reload pistol
+	- When doing LOD, decrease the height scale too for a smoother transition (after the cutoff, return the normal UV,
+		otherwise keep or scale the height scale)
 
 	- Apply to the title screen
 	- Make the parallax parameters part of the uniform block
