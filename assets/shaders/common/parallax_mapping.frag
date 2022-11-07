@@ -29,18 +29,12 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 
 	float lod = textureQueryLod(normal_map_sampler, UV.xy).x;
 
-	/* For all LOD values above `lod_cutoff`, the
-	plain UV is used, skipping a lot of work */
+	/* For all LOD values above `lod_cutoff`, the plain UV is used, skipping a lot
+	of work.  Anything below the cutoff gets a progressively smaller height scale. */
 	if (lod > parallax_mapping.lod_cutoff) return UV;
 
-	/* For LODs between `lod_cutoff - lod_blend_range` to `lod_cutoff`,
-	blending occurs between the parallax and plain UV */
-	float lod_blend_range = (parallax_mapping.lod_cutoff < 1.0f) ? parallax_mapping.lod_cutoff : 1.0f;
-	float min_lod_for_blending = parallax_mapping.lod_cutoff - lod_blend_range;
-
-	/* If full, unblended parallax mapping is used, this will be below 0,
-	so the `max` stops the blend weight from being negative */
-	float lod_weight = max(lod - min_lod_for_blending, 0.0f);
+	float lod_percent = min(lod / parallax_mapping.lod_cutoff, 1.0f);
+	float lod_height_scale = parallax_mapping.height_scale * (1.0f - lod_percent);
 
 	////////// Tracing a ray against the alpha channel of the normal map, which is an inverted heightmap.
 
@@ -61,7 +55,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 		layer_depth = 1.0f / num_layers, curr_layer_depth = 0.0f,
 		curr_depth_map_value = PARALLAX_SAMPLE(UV);
 
-	vec2 delta_UV = (view_dir.xy / view_dir.z) * (parallax_mapping.height_scale / num_layers);
+	vec2 delta_UV = (view_dir.xy / view_dir.z) * (lod_height_scale / num_layers);
 	vec3 curr_UV = UV;
 
 	while (curr_layer_depth < curr_depth_map_value) {
@@ -80,9 +74,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 
 	////////// Getting the parallax UV
 
-	vec2 parallax_UV = mix(curr_UV.xy, prev_UV.xy, UV_weight);
-	vec2 lod_parallax_UV = mix(parallax_UV, UV.xy, lod_weight);
-	return vec3(lod_parallax_UV, UV.z);
+	return vec3(mix(curr_UV.xy, prev_UV.xy, UV_weight), UV.z);
 
 	#undef PARALLAX_SAMPLE
 }
