@@ -5,7 +5,7 @@
 #include "utils.h"
 #include "animation.h"
 
-// TODO: put these macros in the constants struct
+// TODO: put these macros in the `constants` struct
 
 #define SDL_PIXEL_FORMAT SDL_PIXELFORMAT_BGRA32
 #define OPENGL_INPUT_PIXEL_FORMAT GL_BGRA
@@ -83,6 +83,7 @@ typedef Uint32 sdl_pixel_t;
 
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);
 SDL_Surface* init_surface(const GLchar* const path);
+
 void* read_surface_pixel(const SDL_Surface* const surface, const GLint x, const GLint y);
 
 void use_texture_in_shader(const GLuint texture,
