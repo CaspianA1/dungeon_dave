@@ -11,6 +11,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	- Very slow at times
 	- Texture scrolling (note: clamping UV to [0.0f, 1.0f] anywhere doesn't fix this); perhaps try TexNonRepeating + discard?
 	- Note: scrolling called texture swimming here: https://casual-effects.com/research/McGuire2005Parallax/index.html
+	- A possible swimming fix: https://gamedev.net/forums/topic/664276-solved-detail-mapping-parallax-texture-swimming/5201186/
 	- Skip zero-alpha areas as an optimization, without weird alpha stitch problems? Check for zero alpha + a zero fwidth of alpha?
 	- Some weapon sprite parallax looks a bit odd when out of bounds; e.g. the snazzy shotgun or the reload pistol
 	- When doing LOD, decrease the height scale too for a smoother transition (after the cutoff, return the normal UV,
