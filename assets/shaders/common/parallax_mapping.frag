@@ -31,7 +31,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	float lod = textureQueryLod(normal_map_sampler, UV.xy).x;
 
 	/* For all LOD values above `lod_cutoff`, the plain UV is used, skipping a lot
-	of work.  Anything below the cutoff gets a progressively smaller height scale. */
+	of work. Anything below the cutoff gets a progressively smaller height scale. */
 	if (lod > parallax_mapping.lod_cutoff) return UV;
 
 	float lod_percent = min(lod / parallax_mapping.lod_cutoff, 1.0f);
