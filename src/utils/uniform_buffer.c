@@ -41,13 +41,17 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 
 	////////// Then, getting the byte offsets, the array stride, and the matrix stride, and freeing the subvar indices
 
-	GLint* const subvar_metadata_buffer = alloc(num_subvars * 3, sizeof(GLint));
+	const buffer_size_t twice_num_subvars = num_subvars << 1;
+
+	GLint* const subvar_metadata_buffer = alloc(twice_num_subvars << 1, sizeof(GLint));
 
 	GLint
-		*const subvar_byte_offsets = subvar_metadata_buffer,
-		*const subvar_array_strides = subvar_metadata_buffer + num_subvars,
-		*const subvar_matrix_strides = subvar_metadata_buffer + (num_subvars << 1);
+		*const subvar_sizes = subvar_metadata_buffer,
+		*const subvar_byte_offsets = subvar_metadata_buffer + num_subvars,
+		*const subvar_array_strides = subvar_metadata_buffer + twice_num_subvars,
+		*const subvar_matrix_strides = subvar_metadata_buffer + twice_num_subvars + num_subvars;
 
+	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_SIZE, subvar_sizes);
 	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_OFFSET, subvar_byte_offsets);
 	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_ARRAY_STRIDE, subvar_array_strides);
 	glGetActiveUniformsiv(shader_using_uniform_block, (GLsizei) num_subvars, subvar_indices, GL_UNIFORM_MATRIX_STRIDE, subvar_matrix_strides);
@@ -80,6 +84,7 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 
 		.subvars = {
 			.count = num_subvars,
+			.sizes = subvar_sizes,
 			.byte_offsets = subvar_byte_offsets,
 			.array_strides = subvar_array_strides,
 			.matrix_strides = subvar_matrix_strides,
@@ -89,9 +94,9 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 }
 
 void deinit_uniform_buffer(const UniformBuffer* const buffer) {
-	/* The subvar metadata, which includes the byte offsets, and array and matrix strides, are all allocated
-	in one block together, so freeing the byte offsets (which is the beginning of the block) frees all of them. */
-	dealloc(buffer -> subvars.byte_offsets);
+	/* The subvar metadata, which includes the sizes, byte offsets, and array and matrix strides, are all allocated
+	in one block together, so freeing the sizes (which is the beginning of the block) frees all of them. */
+	dealloc(buffer -> subvars.sizes);
 	deinit_gpu_buffer(buffer -> id);
 }
 
@@ -116,6 +121,17 @@ void disable_uniform_buffer_writing_batch(UniformBuffer* const buffer) {
 
 ////////// This part concerns writing data to the uniform buffer
 
+static void check_if_is_array(const bool expecting_array, const GLint array_length, const GLchar* const subvar_name) {
+	/* Primitives are considered to have an array length of one. This
+	means that arrays with a length of one are not possible. */
+	if (expecting_array && array_length == 1)
+		FAIL(InitializeShaderUniform, "Subvar `%s` is not an array, but "
+			"writing to it as if it were one", subvar_name);
+	else if (!expecting_array && array_length != 1)
+		FAIL(InitializeShaderUniform, "Subvar `%s` is an array, but "
+			"writing to it as if it were not one", subvar_name);
+}
+
 static void check_primitive_size(const buffer_size_t size, const GLchar* const function_name) {
 	if (size == 0 || size > max_primitive_size) FAIL(InitializeShaderUniform,
 		"Primitive sizes equal to 0 or larger than %zu (which is the size of %s) "
@@ -135,9 +151,24 @@ static void check_matrix_size(const buffer_size_t column_size,
 	);
 }
 
+static void check_array_length(const buffer_size_t expected_length, const GLint array_length,
+	const GLchar* const block_name, const GLchar* const subvar_name, const GLchar* const function_name) {
+
+	// TODO: check for an exact size match
+	if (expected_length > (buffer_size_t) array_length) {
+		const buffer_size_t overshoot_amount = expected_length - (buffer_size_t) array_length;
+
+		FAIL(InitializeShaderUniform,
+			"When initializing the array `%s` in `%s` for uniform block `%s`, "
+				"the array length was %u item%s too long", subvar_name, function_name,
+				block_name, overshoot_amount, (overshoot_amount == 1) ? "" : "s"
+		);
+	}
+}
+
 // If either stride is null, it will not be written to.
 static void get_subvar_metadata(const UniformBuffer* const buffer, const GLchar* const subvar_name,
-	byte** const gpu_memory_dest, GLint* const array_stride, GLint* const matrix_stride) {
+	byte** const gpu_memory_dest, GLint* const array_length, GLint* const array_stride, GLint* const matrix_stride) {
 
 	byte* const gpu_memory_mapping = buffer -> gpu_memory_mapping;
 
@@ -150,9 +181,14 @@ static void get_subvar_metadata(const UniformBuffer* const buffer, const GLchar*
 
 	for (buffer_size_t i = 0; i < num_subvars; i++) {
 		if (!strcmp(subvar_name, subvar_names[i])) {
-			// In some cases, need the gpu buffer ptr. Never need the actual index. Also need the _ in some cases.
+			// In some cases, need the gpu buffer ptr. Never need the actual index. Also need some strides in some cases.
 			*gpu_memory_dest = buffer -> gpu_memory_mapping + buffer -> subvars.byte_offsets[i];
 
+			const bool expecting_array = array_length != NULL;
+			const GLint array_length_copy = buffer -> subvars.sizes[i];
+			check_if_is_array(expecting_array, array_length_copy, subvar_name);
+
+			if (expecting_array) *array_length = array_length_copy;
 			if (array_stride != NULL) *array_stride = buffer -> subvars.array_strides[i];
 			if (matrix_stride != NULL) *matrix_stride = buffer -> subvars.matrix_strides[i];
 
@@ -169,12 +205,10 @@ static void get_subvar_metadata(const UniformBuffer* const buffer, const GLchar*
 void write_primitive_to_uniform_buffer(const UniformBuffer* const buffer,
 	const GLchar* const subvar_name, const void* const primitive, const buffer_size_t size) {
 
-	// TODO: check that the primitive size equals the size of the type that shall be written
-
 	check_primitive_size(size, "write_primitive_to_uniform_buffer");
 
 	byte* dest;
-	get_subvar_metadata(buffer, subvar_name, &dest, NULL, NULL);
+	get_subvar_metadata(buffer, subvar_name, &dest, NULL, NULL, NULL);
 	memcpy(dest, primitive, size);
 }
 
@@ -185,7 +219,7 @@ void write_matrix_to_uniform_buffer(const UniformBuffer* const buffer, const GLc
 
 	byte* dest;
 	GLint matrix_stride;
-	get_subvar_metadata(buffer, subvar_name, &dest, NULL, &matrix_stride);
+	get_subvar_metadata(buffer, subvar_name, &dest, NULL, NULL, &matrix_stride);
 
 	const byte* src = (byte*) matrix;
 
@@ -199,11 +233,13 @@ void write_matrix_to_uniform_buffer(const UniformBuffer* const buffer, const GLc
 void write_array_of_primitives_to_uniform_buffer(const UniformBuffer* const buffer,
 	const GLchar* const subvar_name, const List primitives) {
 
-	check_primitive_size(primitives.item_size, "write_array_of_primitives_to_uniform_buffer");
+	const GLchar* const function_name = "write_array_of_primitives_to_uniform_buffer";
+	check_primitive_size(primitives.item_size, function_name);
 
 	byte* dest;
-	GLint array_stride;
-	get_subvar_metadata(buffer, subvar_name, &dest, &array_stride, NULL);
+	GLint array_stride, array_length;
+	get_subvar_metadata(buffer, subvar_name, &dest, &array_length, &array_stride, NULL);
+	check_array_length(primitives.length, array_length, buffer -> block.name, subvar_name, function_name);
 
 	LIST_FOR_EACH(0, &primitives, primitive, _,
 		memcpy(dest, primitive, primitives.item_size);
@@ -216,11 +252,13 @@ void write_array_of_matrices_to_uniform_buffer(const UniformBuffer* const buffer
 	const buffer_size_t num_matrices, const buffer_size_t column_size,
 	const buffer_size_t num_columns) {
 
-	check_matrix_size(column_size, num_columns, "write_matrix_to_uniform_buffer");
+	const GLchar* const function_name = "write_matrix_to_uniform_buffer";
+	check_matrix_size(column_size, num_columns, function_name);
 
 	byte* dest;
-	GLint matrix_stride;
-	get_subvar_metadata(buffer, subvar_name, &dest, NULL, &matrix_stride);
+	GLint matrix_stride, array_length;
+	get_subvar_metadata(buffer, subvar_name, &dest, &array_length, NULL, &matrix_stride);
+	check_array_length(num_matrices, array_length, buffer -> block.name, subvar_name, function_name);
 
 	const byte* src = (byte*) matrices;
 

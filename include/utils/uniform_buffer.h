@@ -18,12 +18,13 @@ typedef struct {
 
 	const struct {
 		const buffer_size_t count;
-		GLint *const byte_offsets, *const array_strides, *matrix_strides;
+		GLint *const sizes, *const byte_offsets, *const array_strides, *const matrix_strides;
 		const GLchar* const* const names;
 	} subvars;
 } UniformBuffer;
 
-// Excluded: safely_get_uniform_block_index, check_primitive_size, check_matrix_size, get_subvar_metadata
+/* Excluded: safely_get_uniform_block_index, check_if_is_array,
+check_primitive_size, check_matrix_size, check_array_length, get_subvar_metadata */
 
 /* This expects that lifetime of `subvar_names` is longer than the lifetime of the
 uniform buffer (so the subvar names should be on the heap, or in static memory). */
