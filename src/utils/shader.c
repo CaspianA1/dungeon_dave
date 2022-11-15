@@ -258,7 +258,7 @@ GLuint init_shader(
 
 		GLchar* const code = read_file_contents(path);
 
-		// `get_include_snippet_in_glsl_code` blanks out #include lines and recursively adds to the dependency list
+		// `read_and_parse_includes_for_glsl` blanks out #include lines and recursively adds to the dependency list
 		while (read_and_parse_includes_for_glsl(dependency_list, code, path));
 
 		push_ptr_to_list(dependency_list, &code);
