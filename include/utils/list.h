@@ -30,6 +30,10 @@ typedef struct {
 List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size);
 void push_ptr_to_list(List* const list, const void* const item_ptr);
 void push_array_to_list(List* const list, const void* const items, const buffer_size_t num_items);
-void* ptr_to_list_index(const List* const list, const buffer_size_t index);
+
+// TODO: remove if not used anywhere
+static inline void* ptr_to_list_index(const List* const list, const buffer_size_t index) {
+	return ((byte*) list -> data) + index * list -> item_size;
+}
 
 #endif

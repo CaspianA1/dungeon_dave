@@ -43,7 +43,3 @@ void push_array_to_list(List* const list, const void* const items, const buffer_
 
 	copy_to_list_end(list, items, num_items);
 }
-
-void* ptr_to_list_index(const List* const list, const buffer_size_t index) {
-	return ((byte*) list -> data) + index * list -> item_size;
-}
