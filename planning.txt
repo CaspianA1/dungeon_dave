@@ -50,7 +50,7 @@ Architectural/code design ideas:
 - Use a compressed audio format in the end, instead of WAV (probably FLAC)
 - Make `map_size_t` an alias for `byte` or `GLubyte`, and make an alias for `map_value_t` too
 - Don't rebind vertex buffers each frame?
-- Alpha to coverage with the title screen becomes really glitchy
+- Alpha to coverage with the title screen becomes really glitchy (perhaps need a VAO bound?)
 - Texture compression as an option
 - Figure out how to make spherically distorted skyboxes in Blender from cube-like ones made in an image editor
 - A shader cache
