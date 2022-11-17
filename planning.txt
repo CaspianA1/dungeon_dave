@@ -49,8 +49,8 @@ Architectural/code design ideas:
 - Make all static billboards to animated (to simplify the code), if complexity doesn't increase too much because of that
 - Use a compressed audio format in the end, instead of WAV (probably FLAC)
 - Make `map_size_t` an alias for `byte` or `GLubyte`, and make an alias for `map_value_t` too
-- Don't rebind vertex buffers each frame?
 - Alpha to coverage with the title screen becomes really glitchy (perhaps need a VAO bound?)
+- Jump heights with a lower framerate seems to be framerate-dependent (sometimes can jump a ton, and other times not so much)
 - Texture compression as an option
 - Figure out how to make spherically distorted skyboxes in Blender from cube-like ones made in an image editor
 - A shader cache
