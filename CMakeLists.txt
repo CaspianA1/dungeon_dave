@@ -20,12 +20,11 @@ set(CMAKE_C_FLAGS_RELEASE "-Ofast")
 ########## Declaring SDL2 as a package, and other standard CMake boilerplate.
 
 find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
 
 file(GLOB_RECURSE SRC_FILES src/*.c)
 
 add_executable(dungeon_dave ${SRC_FILES})
-target_include_directories(dungeon_dave PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(dungeon_dave PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${SDL2_INCLUDE_DIRS})
 target_link_libraries(dungeon_dave ${SDL2_LIBRARIES})
 
 ##########
