@@ -1,6 +1,6 @@
 #version 400 core
 
-// https://jorenjoestar.github.io/post/pixel_art_filtering/, under 'Inigo Quilez'
+// From https://jorenjoestar.github.io/post/pixel_art_filtering/, under 'Inigo Quilez'
 void adjust_UV_for_pixel_art_filtering(const float bilinear_percent, const vec2 texture_size, inout vec2 UV) {
 	vec2 pixel_pos = UV * texture_size;
 
