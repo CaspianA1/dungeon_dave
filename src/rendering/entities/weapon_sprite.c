@@ -1,8 +1,7 @@
 #include "rendering/entities/weapon_sprite.h"
-#include "data/constants.h"
-#include "utils/texture.h"
-#include "utils/shader.h"
-#include "utils/opengl_wrappers.h"
+#include "utils/macro_utils.h" // For `CHECK_BITMASK`
+#include "utils/opengl_wrappers.h" // For `INIT_UNIFORM_VALUE`, `INIT_UNIFORM_VALUE`, and `UPDATE_UNIFORM`
+#include "utils/shader.h" // For `init_shader`
 
 /* The weapon sprite code can be a bit hard to understand in the big picture.
 	Here's how it works over a game tick:
@@ -40,7 +39,7 @@ TODO: do a depth prepass for the weapon sprite (and perhaps the rest of the geom
 //////////
 
 static void update_weapon_sprite_animation(WeaponSpriteAnimationContext* const animation_context, const Event* const event) {
-	buffer_size_t curr_frame = animation_context -> curr_frame;
+	texture_id_t curr_frame = animation_context -> curr_frame;
 	const GLfloat curr_time_secs = event -> curr_time_secs;
 
 	if (curr_frame == 0) {
@@ -90,7 +89,7 @@ static void get_screen_corners(const WeaponSprite* const ws,
 		max_movement_magnitude = appearance_context -> screen_space.max_movement_magnitude;
 
 	const GLfloat
-		time_pace = sinf(event -> curr_time_secs * PI * half_movement_cycles_per_sec),
+		time_pace = sinf(event -> curr_time_secs * GLM_PIf * half_movement_cycles_per_sec),
 		weapon_movement_magnitude = max_movement_magnitude * smooth_speed_xz_percent;
 
 	const GLfloat sway_x = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2 to magnitude / 2
@@ -189,7 +188,7 @@ static void get_quad_tbn_matrix(const vec3* const quad_corners, mat3 tbn) {
 	glm_vec3_sub((GLfloat*) quad_corners[2], (GLfloat*) bl_corner, bitangent);
 	glm_vec3_normalize(bitangent); // Flows along T
 
-	// Since the tangent and bitangent are normalized, this will also be normalized
+	// Since the tangent and bitangent are orthogonal and normalized, this will also be normalized
 	glm_vec3_cross(bitangent, tangent, normal);
 }
 
@@ -204,6 +203,9 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 	ON_FIRST_CALL(
 		const GLuint shader = drawable -> shader;
+
+		INIT_UNIFORM_VALUE(weapon_sprite_material_index, shader, 1ui,
+			typed_params.weapon_sprite -> animation_context.material_index);
 
 		INIT_UNIFORM(frame_index, shader);
 		INIT_UNIFORM(world_corners, shader);
@@ -228,28 +230,23 @@ static void define_vertex_spec(void) {
 	define_vertex_spec_index(false, true, 0, 3, 0, 0, GL_FLOAT);
 }
 
-WeaponSprite init_weapon_sprite(
-	const GLfloat max_yaw_degrees, const GLfloat max_pitch_degrees,
-	const GLfloat screen_space_size, const GLfloat secs_per_frame,
-	const GLfloat secs_per_movement_cycle,
-	const GLfloat max_movement_magnitude,
-	const AnimationLayout* const animation_layout,
-	const NormalMapConfig* const normal_map_config) {
+WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const material_index_t material_index) {
+	////////// Getting the frame size and an albedo texture set
 
-	////////// Getting the frame size and a diffuse texture set
+	const AnimationLayout* const animation_layout = &config -> animation_layout;
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
 	and here too, but this makes the code much more readable. */
 	SDL_Surface* const peek_surface = init_surface(animation_layout -> spritesheet_path);
 
 	const GLsizei frame_size[2] = {
-		peek_surface -> w / animation_layout -> frames_across,
-		peek_surface -> h / animation_layout -> frames_down
+		peek_surface -> w / (GLsizei) animation_layout -> frames_across,
+		peek_surface -> h / (GLsizei) animation_layout -> frames_down
 	};
 
 	deinit_surface(peek_surface);
 
-	const GLuint diffuse_texture_set = init_texture_set(
+	const GLuint albedo_texture_set = init_texture_set(
 		true, TexNonRepeating,
 		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, 0, 1,
 		frame_size[0], frame_size[1], NULL, animation_layout
@@ -263,26 +260,31 @@ WeaponSprite init_weapon_sprite(
 			GL_TRIANGLE_STRIP, (List) {NULL, sizeof(vec3), corners_per_quad, corners_per_quad},
 
 			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),
-			diffuse_texture_set, init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config)
+			albedo_texture_set, init_normal_map_from_albedo_texture(albedo_texture_set,
+				TexSet, &config -> shared_material_properties.normal_map_config
+			)
 		),
 
 		.animation_context = {
-			.cycle_base_time = 0.0f, .curr_frame = 0,
+			.cycle_base_time = 0.0f, .material_index = material_index, .curr_frame = 0,
 			.animation = {
-				.texture_id_range = {.start = 0, .end = (buffer_size_t) animation_layout -> total_frames},
-				.secs_for_frame = secs_per_frame
+				.texture_id_range = {.start = 0, .end = animation_layout -> total_frames},
+				.secs_for_frame = config -> secs_per.frame
 			}
 		},
 
 		.appearance_context = {
 			.screen_space = {
 				.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
-				.size = screen_space_size,
-				.max_movement_magnitude = max_movement_magnitude,
-				.half_movement_cycles_per_sec = 1.0f / (secs_per_movement_cycle * 0.5f)
+				.size = config -> screen_space_size,
+				.max_movement_magnitude = config -> max_movement_magnitude,
+				.half_movement_cycles_per_sec = 1.0f / (config -> secs_per.movement_cycle * 0.5f)
 			},
 
-			.world_space = {.max_yaw = glm_rad(max_yaw_degrees), .max_pitch = glm_rad(max_pitch_degrees)}
+			.world_space = {
+				.max_yaw = glm_rad(config -> max_degrees.yaw),
+				.max_pitch = glm_rad(config -> max_degrees.pitch)
+			}
 		}
 	};
 }

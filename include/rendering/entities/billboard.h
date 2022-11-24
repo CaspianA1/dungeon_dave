@@ -1,14 +1,19 @@
 #ifndef BILLBOARD_H
 #define BILLBOARD_H
 
-#include "rendering/drawable.h"
-#include "utils/buffer_defs.h"
-#include "utils/list.h"
-#include "camera.h"
-#include "normal_map_generation.h"
-#include "animation.h"
+#include "rendering/drawable.h" // For `Drawable`
+#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/list.h" // For `List`
+#include "utils/cglm_include.h" // For `vec2` and `vec3`
+#include "camera.h" // For `Camera`
+#include "level_config.h" // For `MaterialPropertiesPerObjectType`
+#include "animation.h" // For `Animation`
 
-// TODO: make sure that billboards never intersect, because that would break depth sorting
+/* TODO:
+- Make sure that billboards never intersect, because that would break depth sorting
+- Instead of providing a size for billboards, only provide a scale factor for them, and then
+	determine their size by the aspect ratio of a frame in their spritesheet
+*/
 
 typedef struct {
 	const Drawable drawable;
@@ -21,16 +26,17 @@ typedef struct {
 	List distance_sort_refs, billboards, animations, animation_instances;
 } BillboardContext;
 
-typedef struct { // This struct is perfectly aligned
-	buffer_size_t texture_id;
-	billboard_var_component_t size[2];
-	billboard_var_component_t pos[3];
+typedef struct {
+	material_index_t material_index;
+	texture_id_t texture_id;
+	vec2 size;
+	vec3 pos;
 } Billboard;
 
 typedef struct {
 	/* The billboard ID is associated with a BillboardAnimationInstance
-	and not an Animation because there's one animation instance per billboard. */
-	const billboard_index_t billboard_id, animation_id;
+	and not an Animation because there's one animation instance per animated billboard. */
+	const billboard_index_t billboard_index, animation_index;
 } BillboardAnimationInstance;
 
 ////////// Excluded: compare_billboard_sort_refs, sort_billboards_by_dist_to_camera, define_vertex_spec
@@ -42,11 +48,11 @@ void draw_billboards(BillboardContext* const billboard_context, const Camera* co
 
 BillboardContext init_billboard_context(
 	const GLfloat shadow_mapping_alpha_threshold,
-	const GLsizei texture_size, const NormalMapConfig* const normal_map_config,
+	const MaterialPropertiesPerObjectType* const shared_material_properties,
+
+	const texture_id_t num_animation_layouts, const AnimationLayout* const animation_layouts,
 
 	const billboard_index_t num_still_textures, const GLchar* const* const still_texture_paths,
-	const billboard_index_t num_animation_layouts, const AnimationLayout* const animation_layouts,
-
 	const billboard_index_t num_billboards, const Billboard* const billboards,
 	const billboard_index_t num_billboard_animations, const Animation* const billboard_animations,
 	const billboard_index_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances);

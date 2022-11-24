@@ -1,6 +1,8 @@
-#include "utils/utils.h"
-#include "utils/texture.h"
-#include "data/constants.h"
+#include "utils/window.h"
+#include "utils/failure.h" // For `FAIL`
+#include "utils/texture.h" // For `global_anisotropic_filtering_level`
+#include "data/constants.h" // For various constants
+#include "utils/macro_utils.h" // For `ON_FIRST_CALL`
 
 typedef struct {
 	SDL_Window* const window;
@@ -9,10 +11,10 @@ typedef struct {
 
 //////////
 
-static Screen init_screen(const GLchar* const title, const byte opengl_major_minor_version[2],
-	const byte depth_buffer_bits, const byte multisample_samples, const GLint window_size[2]) {
-
+static Screen init_screen(const WindowConfig* const config) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) FAIL(LoadSDL, "SDL loading failed: '%s'", SDL_GetError());
+
+	const byte* const opengl_major_minor_version = config -> opengl_major_minor_version;
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, opengl_major_minor_version[0]);
@@ -20,24 +22,22 @@ static Screen init_screen(const GLchar* const title, const byte opengl_major_min
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depth_buffer_bits);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, config -> depth_buffer_bits);
 	SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 
-	#ifdef USE_MULTISAMPLING
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisample_samples);
-	#else
-	(void) multisample_samples;
-	#endif
+	if (config -> enabled.multisampling) {
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, config -> multisample_samples);
+	}
 
-	#ifdef FORCE_SOFTWARE_RENDERER
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 0);
-	#endif
+	if (config -> enabled.software_renderer)
+		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 0);
 
+	const GLint* const window_size = config -> window_size;
 	const GLint window_w = window_size[0], window_h = window_size[1];
 
 	Screen screen = {
-		.window = SDL_CreateWindow(title,
+		.window = SDL_CreateWindow(config -> app_name,
 			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 			window_w, window_h, SDL_WINDOW_OPENGL)
 	};
@@ -48,21 +48,25 @@ static Screen init_screen(const GLchar* const title, const byte opengl_major_min
 	if (screen.opengl_context == NULL) FAIL(LoadOpenGL, "Could not load an OpenGL context: '%s'", SDL_GetError());
 	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
 
-	SDL_GL_SetSwapInterval(
-		#ifdef USE_VSYNC
-		1
-		#else
-		0
-		#endif
-	);
+	SDL_GL_SetSwapInterval(config -> enabled.vsync ? 1 : 0);
+
+	//////////
 
 	if (!gladLoadGL()) FAIL(LoadOpenGL, "%s", "GLAD could not load for some reason");
 
-	glEnable(GL_FRAMEBUFFER_SRGB);
+	// Disabling anisotropic filtering globally
+	if (!config -> enabled.aniso_filtering)
+		GLAD_GL_EXT_texture_filter_anisotropic = 0;
+	else {
+		GLfloat max_anisotropic; // Otherwise, setting the global anisotropic filtering level
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropic);
+		global_anisotropic_filtering_level = fminf(max_anisotropic, config -> aniso_filtering_level);
+	}
 
-	#ifdef USE_MULTISAMPLING
-	glEnable(GL_MULTISAMPLE);
-	#endif
+	//////////
+
+	glEnable(GL_FRAMEBUFFER_SRGB);
+	if (config -> enabled.multisampling) glEnable(GL_MULTISAMPLE);
 
 	return screen;
 }
@@ -75,7 +79,7 @@ static void deinit_screen(const Screen* const screen) {
 
 //////////
 
-static void resize_window_if_needed(SDL_Window* const window, const Uint8* const keys) {
+static void resize_window_if_needed(SDL_Window* const window, const WindowConfig* const config, const Uint8* const keys) {
 	static bool window_resized_last_tick = false, window_is_fullscreen = false;
 	static GLint desktop_width, desktop_height;
 
@@ -102,7 +106,8 @@ static void resize_window_if_needed(SDL_Window* const window, const Uint8* const
 			glViewport(0, 0, desktop_width, desktop_height);
 		}
 		else {
-			const GLint window_w = constants.window.size[0], window_h = constants.window.size[1];
+			const GLint* const window_size = config -> window_size;
+			const GLint window_w = window_size[0], window_h = window_size[1];
 
 			SDL_SetWindowFullscreen(window, 0);
 			SDL_SetWindowSize(window, window_w, window_h);
@@ -150,21 +155,29 @@ static bool application_should_exit(const Uint8* const keys) {
 
 //////////
 
-static void loop_application(const Screen* const screen, void* const app_context, bool (*const drawer) (void* const, const Event* const)) {
+static void loop_application(const Screen* const screen, const WindowConfig* const config,
+	void* const app_context, bool (*const drawer) (void* const, const Event* const)) {
+
 	SDL_Window* const window = screen -> window;
 	const Uint8* const keys = SDL_GetKeyboardState(NULL);
 
+	////////// Finding the refresh rate
+
+	SDL_DisplayMode display_mode;
+	SDL_GetCurrentDisplayMode(0, &display_mode);
+
+	// If the display mode refresh rate is 0, it is considered not available
+	const byte refresh_rate = (display_mode.refresh_rate == 0 || !config -> enabled.vsync)
+		? config -> default_fps : (byte) display_mode.refresh_rate;
+
 	////////// Timing-related variables
 
-	#ifndef USE_VSYNC
-	const GLfloat max_delay = constants.milliseconds_per_second / get_runtime_constant(RefreshRate);
-	#endif
-
+	const GLfloat max_delay = constants.milliseconds_per_second / (GLfloat) refresh_rate;
 	const GLfloat one_over_time_frequency = 1.0f / SDL_GetPerformanceFrequency();
+	const bool vsync_is_enabled = config -> enabled.vsync;
 
 	GLfloat secs_elapsed_between_frames = 0.0f;
 	Uint64 time_counter_for_last_frame = SDL_GetPerformanceCounter();
-
 	bool mouse_is_currently_visible = true;
 
 	//////////
@@ -174,10 +187,10 @@ static void loop_application(const Screen* const screen, void* const app_context
 
 		const Uint32 time_before_tick_ms = SDL_GetTicks();
 
-		resize_window_if_needed(window, keys);
+		resize_window_if_needed(window, config, keys);
 		set_triangle_fill_mode(keys);
 
-		////////// Getting the next event, drawing the screen, debugging errors, and swapping the framebuffer
+		////////// Getting the next event, drawing the screen, and swapping the framebuffer
 
 		const Event event = get_next_event(time_before_tick_ms, secs_elapsed_between_frames, keys);
 		const bool mouse_should_be_visible = drawer(app_context, &event);
@@ -186,9 +199,6 @@ static void loop_application(const Screen* const screen, void* const app_context
 			mouse_is_currently_visible = mouse_should_be_visible;
 			SDL_SetRelativeMouseMode(mouse_should_be_visible ? SDL_FALSE : SDL_TRUE);
 		}
-
-		if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
-		if (keys[KEY_PRINT_SDL_ERROR]) SDL_ERR_CHECK;
 
 		SDL_GL_SwapWindow(window);
 
@@ -200,48 +210,27 @@ static void loop_application(const Screen* const screen, void* const app_context
 		secs_elapsed_between_frames = (GLfloat) time_counter_delta * one_over_time_frequency;
 		time_counter_for_last_frame = time_counter_for_curr_frame;
 
-		#ifndef USE_VSYNC
-		const GLfloat wait_for_exact_fps = max_delay - secs_elapsed_between_frames * constants.milliseconds_per_second;
-		if (wait_for_exact_fps > 0.0f) SDL_Delay((Uint32) wait_for_exact_fps);
-		#endif
+		if (!vsync_is_enabled) {
+			const GLfloat wait_for_exact_fps = max_delay - secs_elapsed_between_frames * constants.milliseconds_per_second;
+			if (wait_for_exact_fps > 0.0f) SDL_Delay((Uint32) wait_for_exact_fps);
+		}
 	}
 }
 
-void make_application(bool (*const drawer) (void* const, const Event* const),
-	void* (*const init) (void), void (*const deinit) (void* const)) {
+void make_application(
+	const WindowConfig* const config,
+	bool (*const drawer) (void* const, const Event* const),
+	void* (*const init) (const WindowConfig* const),
+	void (*const deinit) (void* const)) {
 
-	const Screen screen = init_screen(constants.window.app_name,
-		constants.window.opengl_major_minor_version, constants.window.depth_buffer_bits,
-		constants.lighting.multisample_samples, constants.window.size);
+	const Screen screen = init_screen(config);
 
 	printf("---\nvendor = %s\nrenderer = %s\nversion = %s\n---\n",
 		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 
-	void* const app_context = init();
-	loop_application(&screen, app_context, drawer);
+	void* const app_context = init(config);
+
+	loop_application(&screen, config, app_context, drawer);
 	deinit(app_context);
 	deinit_screen(&screen);
-}
-
-const GLchar* get_GL_error(void) {
-	switch (glGetError()) {
-		#define ERROR_CASE(error) case GL_##error: return #error;
-
-		ERROR_CASE(NO_ERROR);
-		ERROR_CASE(INVALID_ENUM);
-		ERROR_CASE(INVALID_VALUE);
-		ERROR_CASE(INVALID_OPERATION);
-		ERROR_CASE(INVALID_FRAMEBUFFER_OPERATION);
-		ERROR_CASE(OUT_OF_MEMORY);
-
-		#undef ERROR_CASE
-
-		default: return "Unknown error";
-	}
-}
-
-FILE* open_file_safely(const GLchar* const path, const GLchar* const mode) {
-	FILE* const file = fopen(path, mode);
-	if (file == NULL) FAIL(OpenFile, "could not open a file with the path of '%s'", path);
-	return file;
 }

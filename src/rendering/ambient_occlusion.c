@@ -1,31 +1,24 @@
 #include "rendering/ambient_occlusion.h"
-#include "utils/uniform_buffer.h"
-#include "data/constants.h"
-#include "utils/shader.h"
-#include "utils/texture.h"
+#include "utils/cglm_include.h" // For various cglm defs
+#include "data/constants.h" // For TWO_PI, and `max_byte_value`
+#include "utils/map_utils.h" // For `pos_out_of_overhead_map_bounds`, and `sample_map_point`
+#include "utils/list.h" // For various `List`-related defs
+#include "utils/macro_utils.h" // For `ARRAY_LENGTH`
+#include "utils/texture.h" // For various texture creation utils
+#include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 
-/* TODO:
-- Define these in the `constants` struct
-- Possibly make the number of trace iters correspond directly to `constants.max_byte_value` */
-static const byte num_trace_iters = 255, rand_seed = 85;
+typedef uint16_t trace_count_t;
+// TODO: define these in the `constants` struct, or make them parameters
+static const trace_count_t num_trace_iters = 200;
 
 //////////
 
-static GLfloat generate_rand_number_within_range(const GLfloat min, const GLfloat max) {
-	static const GLfloat one_over_rand_max = 1.0f / RAND_MAX;
+static void generate_rand_dir(vec3 v) {
+	static const GLfloat two_pi_over_rand_max = TWO_PI / RAND_MAX;
 
-	// `https://stackoverflow.com/questions/13408990/how-to-generate-random-float-number-in-c`, under baz's answer
-	const GLfloat scale = rand() * one_over_rand_max;
-	return scale * (max - min) + min;
-}
-
-static void generate_random_dir(vec3 v) {
-	const GLfloat h_min = 0.0f, h_max = TWO_PI, v_min = 0.0f, v_max = TWO_PI; // Sphere
-	// const GLfloat h_min = 0.0f, h_max = TWO_PI, v_min = 0.0f, v_max = PI; // Flat hemisphere
-
-	const GLfloat
-		hori_angle = generate_rand_number_within_range(h_min, h_max),
-		vert_angle = generate_rand_number_within_range(v_min, v_max);
+	const GLfloat // Within a unit sphere
+		hori_angle = rand() * two_pi_over_rand_max,
+		vert_angle = rand() * two_pi_over_rand_max;
 
 	const GLfloat cos_vert = cosf(vert_angle);
 
@@ -40,177 +33,217 @@ static void generate_random_dir(vec3 v) {
 	}
 }
 
+//////////
+
 static bool ray_collides_with_heightmap(
-	const vec3 inv_dir, const byte* const heightmap,
+	const vec3 dir, const byte* const heightmap,
 	const byte origin_x, const byte origin_y, const byte origin_z,
-	const byte max_x, const byte max_y, const byte max_z) {
+	const byte max_x, const byte max_y, const byte max_z,
+	const bool is_dual_normal, const signed_byte flow[3]) {
 
-	////////// https://github.com/cgyurgyik/fast-voxel-traversal-algorithm/
+	////////// https://www.shadertoy.com/view/3sKXDK
 
-	vec3 unit_step_size;
-	glm_vec3_abs((GLfloat*) inv_dir, unit_step_size);
+	signed_byte actual_flow[3];
 
-	vec3 ray_length_components = {
-		(inv_dir[0] > 0.0f) ? inv_dir[0] : 0.0f,
-		(inv_dir[1] > 0.0f) ? inv_dir[1] : 0.0f,
-		(inv_dir[2] > 0.0f) ? inv_dir[2] : 0.0f
+	const signed_byte step_signs[3] = {
+		(signed_byte) glm_signf(dir[0]),
+		(signed_byte) glm_signf(dir[1]),
+		(signed_byte) glm_signf(dir[2])
 	};
 
-	const signed_byte tile_steps[3] = {
-		(signed_byte) glm_signf(inv_dir[0]),
-		(signed_byte) glm_signf(inv_dir[1]),
-		(signed_byte) glm_signf(inv_dir[2])
+	memcpy(actual_flow, is_dual_normal ? step_signs : flow, sizeof(signed_byte[3]));
+
+	vec3 floating_origin = {origin_x, origin_y, origin_z};
+
+	if (actual_flow[0] == -1) floating_origin[0] -= GLM_FLT_EPSILON;
+	if (actual_flow[2] == -1) floating_origin[2] -= GLM_FLT_EPSILON;
+
+	const int16_t start_pos[3] = {
+		(int16_t) floorf(floating_origin[0]),
+		(int16_t) floorf(floating_origin[1]),
+		(int16_t) floorf(floating_origin[2])
 	};
 
 	//////////
 
-	int16_t curr_tile[3] = {origin_x, origin_y, origin_z};
+	vec3 unit_step_size;
+	glm_vec3_div(GLM_VEC3_ONE, (GLfloat*) dir, unit_step_size);
+	glm_vec3_abs(unit_step_size, unit_step_size);
 
-	byte component_change_bits = 0;
-	const byte mask_for_all_changed_components = 7u; // = 0b111
+	vec3 ray_length_components = {
+		(step_signs[0] == 1) ? (start_pos[0] + 1.0f - floating_origin[0]) : (floating_origin[0] - start_pos[0]),
+		(step_signs[1] == 1) ? (start_pos[1] + 1.0f - floating_origin[1]) : (floating_origin[1] - start_pos[1]),
+		(step_signs[2] == 1) ? (start_pos[2] + 1.0f - floating_origin[2]) : (floating_origin[2] - start_pos[2])
+	};
+
+	glm_vec3_mul(ray_length_components, unit_step_size, ray_length_components);
+
+	int16_t curr_tile[3] = {start_pos[0], start_pos[1], start_pos[2]};
+
+	//////////
 
 	while (true) {
-		// Will yield 1 if x >= y, and 0 if x < y (so this gives the index of the smallest among x and y)
-		const byte x_and_y_min_index = ray_length_components[0] >= ray_length_components[1];
-		const byte index_of_shortest = (ray_length_components[x_and_y_min_index] < ray_length_components[2]) ? x_and_y_min_index : 2;
+		// Will yield 1 if x > y, and 0 if x <= y (so this gives the index of the smallest among x and y)
+		const byte x_and_y_min_index = ray_length_components[0] > ray_length_components[1];
+		const byte index_of_shortest = (ray_length_components[x_and_y_min_index] > ray_length_components[2]) ? 2 : x_and_y_min_index;
 
-		curr_tile[index_of_shortest] += tile_steps[index_of_shortest];
+		curr_tile[index_of_shortest] += step_signs[index_of_shortest];
 		ray_length_components[index_of_shortest] += unit_step_size[index_of_shortest];
-
-		component_change_bits |= (1 << index_of_shortest); // Setting the right bit indicating a component change
 
 		//////////
 
-		if (curr_tile[1] > max_y || // TODO: only check the component that changed
-			curr_tile[0] == -1 || curr_tile[0] == max_x ||
-			curr_tile[2] == -1 || curr_tile[2] == max_z) return false;
+		// TODO: Why are none of these ever negative?
+		const int16_t cx = curr_tile[0], cy = curr_tile[1], cz = curr_tile[2]; // `c` = current
 
-		else if (curr_tile[1] < (int16_t) sample_map_point(heightmap, (byte) curr_tile[0], (byte) curr_tile[2], max_x)) {
-			if (component_change_bits == mask_for_all_changed_components) return true;
-		}
+		// TODO: only check the component that changed
+		if (cy > max_y || pos_out_of_overhead_map_bounds(cx, cz, max_x, max_z))
+			return false;
+
+		else if (cy < (int16_t) sample_map_point(heightmap, (byte) cx, (byte) cz, max_x))
+			return true;
 	}
 }
 
-// TODO: make this functional
-// https://stackoverflow.com/questions/33736199/calculating-normals-for-a-height-map
-static void get_normal_at(
-	const byte* const heightmap,
-	const byte map_width, const byte map_height,
-	const byte x, const byte y, const byte z, vec3 normal) {
+//////////
 
-	/* TODO: eventually, when not doing things that touch the heightmap directly,
-	compute the heights around the center as relative to the center */
-
-	const byte
-		left_x = (x == 0) ? 0 : (x - 1), right_x = (x == map_width - 1) ? x : (x + 1),
-		top_z = (z == 0) ? 0 : (z - 1), bottom_z = (z == map_height - 1) ? z : (z + 1);
-
-	const byte
-		h_center = sample_map_point(heightmap, x, z, map_width),
-		h_above = sample_map_point(heightmap, x, top_z, map_width),
-		h_below = sample_map_point(heightmap, x, bottom_z, map_width),
-		h_left = sample_map_point(heightmap, left_x, z, map_width),
-		h_right = sample_map_point(heightmap, right_x, z, map_width);
-
-	#define s_diff(a, b) glm_signf((GLfloat) (a) - (GLfloat) (b))
-
-	const GLfloat
-		sign_horizontal = s_diff(s_diff(h_left, h_center), s_diff(h_right, h_center)),
-		sign_vertical = s_diff(s_diff(h_above, h_center), s_diff(h_below, h_center));
-
-	#undef s_diff
-
-	normal[0] = sign_horizontal;
-	normal[1] = y == h_center;
-	normal[2] = sign_vertical;
-
-	glm_vec3_normalize(normal);
+static signed_byte sign_between_bytes(const byte a, const byte b) {
+	if (a > b) return 1;
+	else if (a < b) return -1;
+	else return 0;
 }
 
-// TODO: remove
-static void normal_inference_unit_test(void) {
-	enum {map_height = 5, map_width = 5};
+static signed_byte clamp_signed_byte_to_directional_range(const signed_byte x) {
+	if (x > 1) return 1;
+	else if (x < -1) return -1;
+	else return x;
+}
 
-	const byte F = 0;
+typedef struct {
+	const vec3 normal;
+	const signed_byte flow[3];
+	const enum {OnMap, DualNormal, AboveMap, BelowMap} location_status;
+} SurfaceNormalData;
 
-	const byte heightmap[map_height][map_width] = {
-		{0, 0, 0, 0, 0},
-		{2, 2, 2, 0, 0},
-		{2, F, 2, 0, 0},
-		{2, 2, 2, 0, 0},
-		{0, 0, 0, 0, 0}
+SurfaceNormalData get_normal_data(const byte* const heightmap,
+	const byte map_width, const byte x, const byte y, const byte z) {
+
+	const byte left_x = (x == 0) ? 0 : (x - 1), top_z = (z == 0) ? 0 : (z - 1);
+
+	const struct {const signed_byte tl, tr, bl, br;} diffs = {
+		sign_between_bytes(sample_map_point(heightmap, left_x, top_z, map_width), y),
+		sign_between_bytes(sample_map_point(heightmap, x, top_z, map_width), y),
+		sign_between_bytes(sample_map_point(heightmap, left_x, z, map_width), y),
+		sign_between_bytes(sample_map_point(heightmap, x, z, map_width), y)
 	};
 
-	const byte chosen_pos[3] = {1, 0, 2};
+	//////////
 
-	vec3 normal;
+	const signed_byte
+		fx = clamp_signed_byte_to_directional_range((diffs.bl - diffs.br) + (diffs.tl - diffs.tr)),
+		fy = !diffs.tl || !diffs.tr || !diffs.bl || !diffs.br,
+		fz = clamp_signed_byte_to_directional_range((diffs.tl - diffs.bl) + (diffs.tr - diffs.br));
 
-	get_normal_at((const byte*) heightmap, map_width, map_height,
-		chosen_pos[0], chosen_pos[1], chosen_pos[2], normal);
+	if (fx == 0 && fy == 0 && fz == 0) {
+		// Handling dual normals
+		if (diffs.tl < diffs.bl || diffs.tr < diffs.tl)
+			return (SurfaceNormalData) {GLM_VEC3_ZERO_INIT, {0, 0, 0}, DualNormal};
 
-	DEBUG_VEC3(normal);
+		////////// Above or below the map
+
+		return (SurfaceNormalData) {
+			GLM_VEC3_ZERO_INIT, {0, 0, 0},
+			(diffs.tl == 1) ? BelowMap : AboveMap
+		};
+	}
+
+	//////////
+
+	vec3 normal = {fx, fy, fz};
+	glm_vec3_normalize(normal);
+
+	return (SurfaceNormalData) {{normal[0], normal[1], normal[2]}, {fx, fy, fz}, OnMap};
 }
+
+//////////
 
 AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size[2], const byte max_point_height) {
 	/* TODO:
-	- Eliminate any bilinear filtering artifacts through correct raycasting + bicubic filtering (ask on Stackoverflow)
-	- Some map boundary edges are fully light
+	- While debugging, use trilinear filtering to spot AO errors more easily
 	- Compute the AO map through transform feedback; pass in 3D map points, and then pass back occlusion values
-	- Making an AO map for the terrain fails
-	- A weird stitch-type bug when looking at a surface at a sharp angle
-	- Extend max x and z to 1+ on each
-	- For the GPU version, height level 0 is too bright
-	- To find the difference between the CPU and GPU raytracers, perhaps remove everything from each respective function,
-		and then add little bits and pieces one at a time until something doesn't line up
-	- Trace in the opposite direction - from the sky into the world?
-	- Note: there will be no occlusion leaking once this hemisphere stuff is figured out
-	- It doesn't seem dark enough inside blocks
 
-	Immediate plan:
-		- For a given vertex, find a hemisphere in which rays will be cast outwards from
-		- First, generate rays around a hemisphere in an outer loop
-		- Then, for each vertex, find a face normal which defines the angle range/vector area.
-		- Only generate rand vals within a hemisphere, and then rotate each one to fit within the surface normal's hemisphere
-		- For each hemisphere orientation, generate a rotation matrix, and then select one based on the vertex normal
+	- Give dual normals two sampling passes
+	- Weight the collision result based on the distance that the ray traveled, or discard rays if they are too long
 
-	- Implement the DDA version on the GPU
+	- Implement the DDA version on the GPU (perhaps do separate raytraces per
+		GPU thread for even more speed; but more memory consumed that way as well - perhaps define
+		a trace iter split factor; some traces at some points are split up a bit into a few sub-passes?)
+
+	- A little thought: rendering the scene from the point's perspective, with the direction of the normal,
+		and then getting the fraction of the rendered thing covered by sky, would get the ambient occlusion term quite accurately
+
+	- Later on, if it turns out that computing the AO map on the GPU is too slow, perhaps cache the AO map on disk
+		(either computed at the first time that that level starts, or made by another program not tied to the game executable)
+
+	- Maybe add a default value for above the map if high enough above all surrounding points?
+
+	Order of resolution:
+		- Some areas in a hemisphere or sphere go unsampled (normals are distributed well, but not rays that are cast, it seems)
+		- Mip level bleed from black under-map values (oddly enough, giving a `constants.max_byte_value` value when under makes little difference)
+		- Maybe the edge cases for DDA vs naive
+		- Make tricubic less dark (it reads under the heightmap; to fix this, perhaps make the first layer
+			of under-map values equal to the values above (but what about map sides then?))
+		- Note: the tricubic darkness comes from its inherent overshoot; perhaps do a Lanzcos filter instead?
+		- Either fix the overshoot by clamping in the fragment shader, changing the interpolation type, or making in-map values
+			equal to the averages of the surrounding values outside
+		- GPU
 	*/
 
 	//////////
 
-	const byte max_x = map_size[0], max_z = map_size[1], max_y = max_point_height + 1;
-	// printf("size = {%hhu, %hhu, %hhu}\n", max_x, max_y, max_z);
-
+	const byte max_x = map_size[0], max_z = map_size[1], max_y = max_point_height;
 	byte* const ao_map = alloc(max_x * max_y * max_z, sizeof(byte));
-	vec3* const inv_rand_dirs = alloc(num_trace_iters, sizeof(vec3));
 
-	srand(rand_seed);
+	//////////
 
-	for (byte i = 0; i < num_trace_iters; i++) {
-		GLfloat* const v = inv_rand_dirs[i];
-		generate_random_dir(v);
-		glm_vec3_div(GLM_VEC3_ONE, v, v);
-	}
+	srand((unsigned) time(NULL));
+
+	vec3* const rand_dirs = alloc(num_trace_iters, sizeof(vec3));
+	for (trace_count_t i = 0; i < num_trace_iters; i++) generate_rand_dir(rand_dirs[i]);
+
+	//////////
 
 	const GLfloat collision_term_scaler = (GLfloat) constants.max_byte_value / num_trace_iters;
-
-	(void) normal_inference_unit_test;
-	// normal_inference_unit_test(); // TODO: make this correct
 
 	for (byte* dest = ao_map, y = 0; y < max_y; y++) { // For each posible height
 		for (byte z = 0; z < max_z; z++) { // For each map row
 			for (byte x = 0; x < max_x; x++, dest++) { // For each map point
+				const SurfaceNormalData normal_data = get_normal_data(heightmap, max_x, x, y, z);
 
-				vec3 normal;
-				get_normal_at(heightmap, max_x, max_z, x, y, z, normal);
+				if (normal_data.location_status == BelowMap) {
+					*dest = 0;
+					continue;
+				}
 
-				byte num_collisions = 0;
+				//////////
 
-				for (byte i = 0; i < num_trace_iters; i++) {
-					GLfloat* const inv_rand_dir = inv_rand_dirs[i];
-					if (glm_vec3_dot(normal, inv_rand_dir) < 0.0f) glm_vec3_negate(inv_rand_dir);
+				const bool
+					has_valid_normal = normal_data.location_status == OnMap,
+					is_dual_normal = normal_data.location_status == DualNormal;
 
-					num_collisions += ray_collides_with_heightmap(inv_rand_dir, heightmap, x, y, z, max_x, max_y, max_z);
+				trace_count_t num_collisions = 0;
+
+				for (trace_count_t i = 0; i < num_trace_iters; i++) {
+					vec3 aligned_rand_dir;
+					glm_vec3_copy(rand_dirs[i], aligned_rand_dir);
+
+					// TODO: for dual normals, do spherical sampling, or average the results of 2 sampling passes
+
+					// If above the map, no negation based on normal needed, since sampling in a unit circle
+					if (has_valid_normal && glm_vec3_dot((GLfloat*) normal_data.normal, aligned_rand_dir) < 0.0f)
+						glm_vec3_negate(aligned_rand_dir);
+
+					num_collisions += ray_collides_with_heightmap(aligned_rand_dir, heightmap, x, y, z,
+						max_x, max_y, max_z, is_dual_normal, normal_data.flow);
 				}
 
 				*dest = constants.max_byte_value - (byte) (num_collisions * collision_term_scaler);
@@ -218,19 +251,21 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 		}
 	}
 
-	const GLuint texture = preinit_texture(TexVolumetric, TexNonRepeating, TexLinear, TexTrilinear, false);
+	const GLuint texture = preinit_texture(TexVolumetric, TexNonRepeating, TexLinear, TexTrilinear, true);
 
-	GLint standard_unpack_alignment;
-	glGetIntegerv(GL_UNPACK_ALIGNMENT, &standard_unpack_alignment);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, sizeof(byte)); // TODO: specify the format in texture.h, and use sRGB
+	GLint prev_unpack_alignment;
+	glGetIntegerv(GL_UNPACK_ALIGNMENT, &prev_unpack_alignment);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, sizeof(byte));
 
-	init_texture_data(TexVolumetric, (GLsizei[]) {map_size[0], map_size[1], max_y}, GL_RED, GL_RED, OPENGL_COLOR_CHANNEL_TYPE, ao_map);
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, standard_unpack_alignment);
+	// TODO: specify the format in texture.h
+	init_texture_data(TexVolumetric, (GLsizei[]) {max_x, max_z, max_y}, GL_RED, GL_R8, OPENGL_COLOR_CHANNEL_TYPE, ao_map);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, prev_unpack_alignment);
 	init_texture_mipmap(TexVolumetric);
 
 	dealloc(ao_map);
-	dealloc(inv_rand_dirs);
+	dealloc(rand_dirs);
+
+	//////////
 
 	return (AmbientOcclusionMap) {texture};
 }

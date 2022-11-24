@@ -1,10 +1,10 @@
 #include "rendering/entities/sector.h"
-#include "rendering/entities/face.h"
-#include "utils/statemap.h"
-#include "utils/texture.h"
-#include "utils/shader.h"
-#include "utils/opengl_wrappers.h"
-#include "data/constants.h"
+#include "utils/map_utils.h" // For `sample_map_point`
+#include "utils/statemap.h" // // For various `StateMap`-related defs
+#include "rendering/entities/face.h" // For `init_mesh_for_sector`, and `init_map_edge_mesh`
+#include "utils/opengl_wrappers.h" // For various OpenGL wrappers
+#include "utils/macro_utils.h" // For `ARRAY_LENGTH`, and `ASSET_PATH`
+#include "utils/shader.h" // For `init_shader`
 
 /* TODO:
 - For dynamic sectors, perhaps have a 2D floating-point map that represents the displacement
@@ -88,7 +88,7 @@ static void generate_sectors_and_face_mesh_from_maps(List* const sectors, List* 
 			const byte texture_id = sample_map_point(texture_id_map, x, y, map_width);
 
 			if (texture_id >= MAX_NUM_SECTOR_SUBTEXTURES)
-				FAIL(TextureIDIsTooLarge, "Could not create a sector at map position {%hhu, %hhu} because the texture "
+				FAIL(InvalidTextureID, "Could not create a sector at map position {%hhu, %hhu} because the texture "
 					"ID %hhu exceeds the maximum, which is %hhu", x, y, texture_id, (byte) (MAX_NUM_SECTOR_SUBTEXTURES - 1u));
 
 			Sector sector = {
@@ -166,7 +166,7 @@ static void init_trimmed_face_mesh_for_shadow_mapping(
 	for (byte i = 0; i < ARRAY_LENGTH(face_mesh_lists); i++) {
 		const List* const face_mesh_list = face_mesh_lists[i];
 
-		LIST_FOR_EACH(0, face_mesh_list, untyped_face_submesh, _,
+		LIST_FOR_EACH(0, face_mesh_list, untyped_face_submesh,
 			const face_vertex_t* const face_submesh = (face_vertex_t*) untyped_face_submesh;
 
 			for (byte j = 0; j < vertices_per_face; j++) {
@@ -190,11 +190,13 @@ static void init_trimmed_face_mesh_for_shadow_mapping(
 	*vertex_buffer = local_vertex_buffer;
 
 	use_vertex_spec(*vertex_spec = init_vertex_spec());
-	define_vertex_spec_index(false, false, 0, vertices_per_triangle, 0, 0, FACE_COMPONENT_TYPENAME);
+	define_vertex_spec_index(false, false, 0, components_per_face_vertex_pos, 0, 0, FACE_COMPONENT_TYPENAME);
 }
 
-static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
-	const SectorContext* const sector_context, const vec4* const frustum_planes) {
+static void frustum_cull_sector_faces_into_gpu_buffer(
+	const SectorContext* const sector_context, const Camera* const camera,
+	buffer_size_t* const first_face_index_ref, buffer_size_t* const num_visible_faces_ref) {
+	// The output variable indices are in regards to the `glDrawArrays` call.
 
 	const List* const sectors = &sector_context -> sectors;
 	const Sector* const sector_data = sectors -> data;
@@ -202,20 +204,33 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 
 	const List* const face_mesh_cpu = &sector_context -> mesh_cpu;
 	const face_mesh_t* const face_mesh_cpu_data = face_mesh_cpu -> data;
+	const buffer_size_t num_total_faces = face_mesh_cpu -> length;
 
 	face_mesh_t* const face_mesh_gpu = init_vertex_buffer_memory_mapping(
 		sector_context -> drawable.vertex_buffer,
-		face_mesh_cpu -> length * sizeof(face_mesh_t), true
+		num_total_faces * sizeof(face_mesh_t), true
 	);
 
+	const vec4* const frustum_planes = camera -> frustum_planes;
 	buffer_size_t num_visible_faces = 0;
 
+	/* Sectors are stored first sorted by their X coordinate, and then by their Z coordinate
+	(because that's the order of their creation by the heightmap sector mesher). This is then
+	the standard order of the sector sub-meshes in the sector face GPU buffer.
+
+	When looking in the negative Z direction, there's a lot of overdraw. To avoid this, when looking
+	in that direction, face meshes are copied into the back of the GPU buffer (rather than the front),
+	and filled in right-to-left in memory, so that face meshes that have a larger Z coordinate go before those
+	with a smaller Z coordinate in the buffer. This leads to less overdraw, and much better performance overall. */
+	const bool order_face_meshes_backwards = camera -> dir[2] < 0.0f;
+
+	// TODO: fill in sectors in the opposite direction if the player is facing the other way (for less overdraw)
 	for (const Sector* sector = sector_data; sector < out_of_bounds_sector; sector++) {
 		buffer_size_t num_visible_faces_in_group = 0;
 		const buffer_size_t cpu_buffer_start_index = sector -> face_range.start;
 
 		while (sector < out_of_bounds_sector) {
-			////////// Checking to see if the sector is visible
+			// Checking to see if the sector is visible
 
 			const byte *const origin = sector -> origin, *const size = sector -> size;
 			const byte origin_x = origin[0], origin_z = origin[1];
@@ -231,7 +246,11 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 		}
 
 		if (num_visible_faces_in_group != 0) {
-			memcpy(face_mesh_gpu + num_visible_faces,
+			face_mesh_t* const gpu_buffer_dest = face_mesh_gpu + (order_face_meshes_backwards
+				? (num_total_faces - num_visible_faces - num_visible_faces_in_group)
+				: num_visible_faces);
+
+			memcpy(gpu_buffer_dest,
 				face_mesh_cpu_data + cpu_buffer_start_index,
 				num_visible_faces_in_group * sizeof(face_mesh_t));
 
@@ -240,22 +259,24 @@ static buffer_size_t frustum_cull_sector_faces_into_gpu_buffer(
 	}
 
 	deinit_vertex_buffer_memory_mapping();
-	return num_visible_faces;
+
+	*num_visible_faces_ref = num_visible_faces;
+	*first_face_index_ref = order_face_meshes_backwards ? (face_mesh_cpu -> length - num_visible_faces) : 0u;
 }
 
 static void define_vertex_spec(void) {
-	define_vertex_spec_index(false, false, 0, vertices_per_triangle, sizeof(face_vertex_t), 0, FACE_COMPONENT_TYPENAME);
+	define_vertex_spec_index(false, false, 0, components_per_face_vertex_pos, sizeof(face_vertex_t), 0, FACE_COMPONENT_TYPENAME); // Pos
 
 	define_vertex_spec_index(false, false, 1, 1, sizeof(face_vertex_t), // Face info
-		sizeof(face_component_t[vertices_per_triangle]), FACE_COMPONENT_TYPENAME);
+		sizeof(face_component_t[components_per_face_vertex_pos]), FACE_COMPONENT_TYPENAME);
 }
 
 ////////// Initialization, deinitialization, and rendering
 
 SectorContext init_sector_context(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height,
-	const GLchar* const* const texture_paths, const GLsizei num_textures,
-	const GLsizei texture_size, const NormalMapConfig* const normal_map_config) {
+	const GLchar* const* const texture_paths, const byte num_textures,
+	const MaterialPropertiesPerObjectType* const shared_material_properties) {
 
 	List sectors, face_mesh;
 	generate_sectors_and_face_mesh_from_maps(&sectors, &face_mesh, heightmap, texture_id_map, map_width, map_height);
@@ -271,7 +292,9 @@ SectorContext init_sector_context(const byte* const heightmap,
 
 	//////////
 
-	const GLuint diffuse_texture_set = init_texture_set(
+	const GLsizei texture_size = shared_material_properties -> texture_rescale_size;
+
+	const GLuint albedo_texture_set = init_texture_set(
 		false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 		num_textures, 0, texture_size, texture_size, texture_paths, NULL
 	);
@@ -281,7 +304,9 @@ SectorContext init_sector_context(const byte* const heightmap,
 			define_vertex_spec, NULL, GL_DYNAMIC_DRAW, GL_TRIANGLES,
 			(List) {.data = NULL, .item_size = face_mesh.item_size, .length = face_mesh.length},
 			init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),
-			diffuse_texture_set, init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config)
+			albedo_texture_set, init_normal_map_from_albedo_texture(
+				albedo_texture_set, TexSet, &shared_material_properties -> normal_map_config
+			)
 		),
 
 		.shadow_mapping = {
@@ -319,13 +344,20 @@ void draw_sectors_to_shadow_context(const SectorContext* const sector_context) {
 	draw_primitives(sector_context -> drawable.triangle_mode, sector_context -> shadow_mapping.num_vertices);
 }
 
-void draw_sectors(const SectorContext* const sector_context, const vec4 frustum_planes[planes_per_frustum]) {
-	const buffer_size_t num_visible_faces = frustum_cull_sector_faces_into_gpu_buffer(sector_context, frustum_planes);
+void draw_sectors(const SectorContext* const sector_context, const Camera* const camera) {
+	buffer_size_t first_face_index, num_visible_faces;
+	frustum_cull_sector_faces_into_gpu_buffer(sector_context, camera, &first_face_index, &num_visible_faces);
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
-	if (num_visible_faces != 0)
-		draw_drawable(sector_context -> drawable,
-			num_visible_faces * vertices_per_face, 0,
-			NULL, UseShaderPipeline | BindVertexSpec
-		);
+	if (num_visible_faces != 0) {
+		// TODO: call `draw_drawable` here instead
+		const Drawable* const drawable = &sector_context -> drawable;
+
+		const GLint start_vertex = (GLint) (first_face_index * vertices_per_face);
+		const GLsizei num_vertices = (GLsizei) (num_visible_faces * vertices_per_face);
+
+		use_vertex_spec(drawable -> vertex_spec);
+		use_shader(drawable -> shader);
+		glDrawArrays(GL_TRIANGLES, start_vertex, num_vertices);
+	}
 }

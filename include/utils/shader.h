@@ -1,7 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "buffer_defs.h"
+#include "lib/glad/glad.h" // For OpenGL defs
 
 /* Excluded: report_shader_creation_error, report_shader_validation_error,
 init_shader_from_source, read_file_contents, get_source_for_included_file,

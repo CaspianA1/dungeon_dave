@@ -1,8 +1,7 @@
 #include "rendering/entities/billboard.h"
-#include "utils/texture.h"
-#include "utils/shader.h"
-#include "utils/opengl_wrappers.h"
-#include "data/constants.h"
+#include "utils/macro_utils.h" // For `ON_FIRST_CALL`
+#include "utils/opengl_wrappers.h" // For various OpenGL wrappers
+#include "utils/shader.h" // For `init_shader`
 
 typedef struct {
 	billboard_index_t index;
@@ -15,7 +14,7 @@ typedef struct {
 - Render the player body as a shadowed billboard that always has the same center as the camera
 - Maybe render billboards as a 3D texture, so that smoother animations can happen (if no blending happens across sections)
 
-Drawing billboards to the shadow cascades:
+Drawing billboards to the shadow cascades (an ideal version):
 	- Update billboards on the CPU
 	- Sort billboards back-to-front
 	- Enable blending
@@ -45,8 +44,8 @@ void update_billboard_context(const BillboardContext* const billboard_context, c
 
 		update_animation_information(
 			curr_time_secs, cycle_base_time,
-			animation_data[animation_instance -> animation_id],
-			&billboard_data[animation_instance -> billboard_id].texture_id);
+			animation_data[animation_instance -> animation_index],
+			&billboard_data[animation_instance -> billboard_index].texture_id);
 	}
 }
 
@@ -105,8 +104,8 @@ void draw_billboards_to_shadow_context(const BillboardContext* const billboard_c
 			billboard_context -> shadow_mapping.alpha_threshold);
 
 		// For alpha-tested shadows
-		use_texture_in_shader(drawable -> diffuse_texture, depth_shader,
-			"diffuse_sampler", TexSet, TU_BillboardDiffuse);
+		use_texture_in_shader(drawable -> albedo_texture, depth_shader,
+			"albedo_sampler", TexSet, TU_BillboardAlbedo);
 	);
 
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
@@ -128,23 +127,26 @@ void draw_billboards(BillboardContext* const billboard_context, const Camera* co
 ////////// Initialization and deinitialization
 
 static void define_vertex_spec(void) {
-	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), 0, BUFFER_SIZE_TYPENAME);
-	define_vertex_spec_index(true, true, 1, 2, sizeof(Billboard), offsetof(Billboard, size), BILLBOARD_VAR_COMPONENT_TYPENAME);
-	define_vertex_spec_index(true, true, 2, 3, sizeof(Billboard), offsetof(Billboard, pos), BILLBOARD_VAR_COMPONENT_TYPENAME);
+	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), offsetof(Billboard, material_index), MATERIAL_INDEX_TYPENAME);
+	define_vertex_spec_index(true, false, 1, 1, sizeof(Billboard), offsetof(Billboard, texture_id), TEXTURE_ID_TYPENAME);
+	define_vertex_spec_index(true, true, 2, 2, sizeof(Billboard), offsetof(Billboard, size), GL_FLOAT);
+	define_vertex_spec_index(true, true, 3, 3, sizeof(Billboard), offsetof(Billboard, pos), GL_FLOAT);
 }
 
 BillboardContext init_billboard_context(
 	const GLfloat shadow_mapping_alpha_threshold,
-	const GLsizei texture_size, const NormalMapConfig* const normal_map_config,
+	const MaterialPropertiesPerObjectType* const shared_material_properties,
+
+	const texture_id_t num_animation_layouts, const AnimationLayout* const animation_layouts,
 
 	const billboard_index_t num_still_textures, const GLchar* const* const still_texture_paths,
-	const billboard_index_t num_animation_layouts, const AnimationLayout* const animation_layouts,
-
 	const billboard_index_t num_billboards, const Billboard* const billboards,
 	const billboard_index_t num_billboard_animations, const Animation* const billboard_animations,
 	const billboard_index_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances) {
 
-	const GLuint diffuse_texture_set = init_texture_set(
+	const GLsizei texture_size = shared_material_properties -> texture_rescale_size;
+
+	const GLuint albedo_texture_set = init_texture_set(
 		true, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 		num_still_textures, num_animation_layouts, texture_size, texture_size, still_texture_paths, animation_layouts
 	);
@@ -155,7 +157,9 @@ BillboardContext init_billboard_context(
 			(List) {.data = NULL, .item_size = sizeof(Billboard), .length = num_billboards},
 
 			init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),
-			diffuse_texture_set, init_normal_map_from_diffuse_texture(diffuse_texture_set, TexSet, normal_map_config)
+			albedo_texture_set, init_normal_map_from_albedo_texture(albedo_texture_set,
+				TexSet, &shared_material_properties -> normal_map_config
+			)
 		),
 
 		.shadow_mapping = {

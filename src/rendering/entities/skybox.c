@@ -1,23 +1,26 @@
 #include "rendering/entities/skybox.h"
-#include "utils/shader.h"
-#include "utils/texture.h"
-#include "utils/opengl_wrappers.h"
-#include "utils/buffer_defs.h"
+#include "utils/texture.h" // For various texture creation utils
+#include "utils/failure.h" // For `FAIL`
+#include "utils/cglm_include.h" // For `ivec2`
+#include "data/constants.h" // For `faces_per_cubemap`, and `vertices_per_skybox`
+#include "utils/opengl_wrappers.h" // For various OpenGL wrappers
+#include "utils/shader.h" // For `init_shader`
+#include "utils/macro_utils.h" // For `ASSET_PATH`
 
 /* TODO:
 - Have a SkyboxRenderer interface that allows swapping out skybox textures
 - Pixel art UV correction for skyboxes
 */
 
-static GLuint init_skybox_texture(const GLchar* const cubemap_path) {
-	SDL_Surface* const skybox_surface = init_surface(cubemap_path);
+static GLuint init_skybox_texture(const GLchar* const texture_path) {
+	SDL_Surface* const skybox_surface = init_surface(texture_path);
 	const GLint skybox_w = skybox_surface -> w;
 
 	////////// Failing if the dimensions are not right
 
 	if (skybox_w != (skybox_surface -> h << 2) / 3)
 		FAIL(CreateTexture, "The skybox with path '%s' does not have "
-			"a width that equals 4/3 of its height", cubemap_path);
+			"a width that equals 4/3 of its height", texture_path);
 
 	//////////
 
@@ -75,15 +78,15 @@ static GLuint init_skybox_texture(const GLchar* const cubemap_path) {
 	return skybox_texture;
 }
 
-Skybox init_skybox(const GLchar* const cubemap_path) {
+Skybox init_skybox(const GLchar* const texture_path) {
 	const GLuint
 		shader = init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag"), NULL),
-		diffuse_texture = init_skybox_texture(cubemap_path);
+		albedo_texture = init_skybox_texture(texture_path);
 
 	use_shader(shader);
-	use_texture_in_shader(diffuse_texture, shader, "skybox_sampler", TexSkybox, TU_Skybox);
+	use_texture_in_shader(albedo_texture, shader, "skybox_sampler", TexSkybox, TU_Skybox);
 
-	return init_drawable_without_vertices(NULL, GL_TRIANGLE_STRIP, shader, diffuse_texture, 0);
+	return init_drawable_without_vertices(NULL, GL_TRIANGLE_STRIP, shader, albedo_texture, 0);
 }
 
 void draw_skybox(const Skybox* const skybox) {

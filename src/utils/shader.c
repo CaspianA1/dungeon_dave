@@ -1,7 +1,10 @@
 #include "utils/shader.h"
-#include "utils/list.h"
-#include "utils/utils.h"
-#include "utils/alloc.h"
+#include <stdbool.h> // For `bool`
+#include "utils/list.h" // For various `List`-related defs
+#include "utils/failure.h" // For `FAIL`
+#include "data/constants.h" // For `PRINT_SHADER_VALIDATION_LOG`
+#include "utils/safe_io.h" // For `open_file_safely`
+#include <string.h> // For `strrchr`, `strlen`, `memcpy`, `strcpy`, `strstr`, and `memset`
 
 enum {num_sub_shaders = 3}; // Vertex, geometry, and fragment
 
@@ -51,13 +54,14 @@ static void report_shader_validation_error(const GLuint shader, const GLchar* co
 		GLchar* const info_log = alloc((size_t) (log_length + 1), sizeof(GLchar));
 		glGetProgramInfoLog(shader, log_length, NULL, info_log);
 		printf("Problem for shader of path '%s':\n%s\n---\n", shader_path, info_log);
-		free(info_log);
+		dealloc(info_log);
 	}
 }
 
 #endif
 
-// If a sub-shader path is null, the sub-shader code corresponding to that path will not be compiled into the final shader
+/* If a sub-shader path is null, the sub-shader code corresponding
+to that path will not be compiled into the final shader */
 static GLuint init_shader_from_source(
 	const List shader_code[num_sub_shaders],
 	const GLchar* const sub_shader_paths[num_sub_shaders],
@@ -232,7 +236,7 @@ static void erase_version_strings_from_dependency_list(const List* const depende
 	const GLsizei full_version_string_length = strlen(full_version_string);
 
 	// Not erasing the version string from the first one because it's the only one that should keep #version in it
-	LIST_FOR_EACH(1, dependency_list, untyped_dependency, _,
+	LIST_FOR_EACH(1, dependency_list, untyped_dependency,
 		const GLchar* const dependency = *((GLchar**) untyped_dependency);
 		GLchar* const version_string_pos = strstr(dependency, base_version_string);
 		if (version_string_pos != NULL) memset(version_string_pos, ' ', full_version_string_length);
@@ -273,7 +277,7 @@ GLuint init_shader(
 		if (paths[i] == NULL) continue;
 
 		const List* const dependency_list = dependency_lists + i;
-		LIST_FOR_EACH(0, dependency_list, dependency_code, _, dealloc(*(GLchar**) dependency_code););
+		LIST_FOR_EACH(0, dependency_list, dependency_code, dealloc(*(GLchar**) dependency_code););
 		deinit_list(*dependency_list);
 	}
 

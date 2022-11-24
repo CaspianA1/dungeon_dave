@@ -1,7 +1,5 @@
 #version 400 core
 
-#include "../common/quad_utils.vert"
-
 layout(location = 0) in ivec3 vertex_pos_world_space;
 
 void main(void) {

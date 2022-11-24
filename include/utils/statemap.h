@@ -1,11 +1,11 @@
 #ifndef STATEMAP_H
 #define STATEMAP_H
 
-#include "utils.h"
-#include "alloc.h"
+#include "utils/typedefs.h" // For `byte` and `buffer_size_t`
+#include "utils/alloc.h" // For `dealloc`
+#include <stdbool.h> // For `bool`
 
-// This should not be signed
-typedef byte statemap_chunk_t;
+typedef byte statemap_chunk_t; // This should not be signed
 
 typedef struct {
 	const buffer_size_t chunks_across;

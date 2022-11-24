@@ -1,5 +1,6 @@
 #include "camera.h"
-#include "data/constants.h"
+#include "utils/macro_utils.h" // For `CHECK_BITMASK`
+#include "utils/map_utils.h" // For `sample_map_point`, and `pos_out_of_overhead_map_bounds`
 
 ////////// Small utility functions
 
@@ -54,15 +55,9 @@ static void update_camera_angles(Angles* const angles, const Event* const event)
 }
 
 static void update_fov(Camera* const camera, const Event* const event) {
-	/* The time to reach the full FOV equals the time to reach the max X speed.
-	Since `v = v0 + at`, and `v0 = 0`, `v = at`, and `t = v / a`. The division
-	by the FPS (or the refresh rate) converts the time from being in terms of ticks to seconds. */
-
 	const GLfloat
 		delta_time = event -> delta_time,
-		time_for_full_fov = constants.speeds.xz_max
-			/ constants.accel.forward_back
-			/ get_runtime_constant(RefreshRate);
+		time_for_full_fov = constants.speeds.xz_max / constants.accel.forward_back;
 
 	const bool accelerating = CHECK_BITMASK(event -> movement_bits, BIT_ACCELERATE);
 
@@ -70,21 +65,24 @@ static void update_fov(Camera* const camera, const Event* const event) {
 	t = accelerating ? fminf(t + delta_time, time_for_full_fov) : fmaxf(t - delta_time, 0.0f);
 
 	const GLfloat fov_percent = smootherstep(t / time_for_full_fov);
-	camera -> angles.fov = constants.camera.init.fov + constants.camera.limits.fov_change * fov_percent;
+	camera -> fov = constants.camera.init_fov + constants.camera.limits.fov_change * fov_percent;
 	camera -> time_accum_for_full_fov = t;
 }
 
 ////////// Physics + collision
 
-static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v,
-	const GLfloat curr_a, const GLfloat delta_time, const GLfloat max_v,
+static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v_per_tick,
+	const GLfloat curr_a_per_tick, const GLfloat delta_time, const GLfloat max_v_per_tick,
 	const bool moving_in_dir, const bool moving_in_opposite_dir) {
 
-	GLfloat v = curr_v + curr_a * moving_in_dir - curr_a * moving_in_opposite_dir;
+	const GLfloat delta_v_per_tick = curr_a_per_tick * delta_time;
+	GLfloat v_per_tick = curr_v_per_tick + (delta_v_per_tick * moving_in_dir) - (delta_v_per_tick * moving_in_opposite_dir);
 
 	// If 0 or 2 directions are being moved in; `^` maps to 1 if only 1 input is true
-	if (!(moving_in_dir ^ moving_in_opposite_dir)) v *= get_percent_kept_from(constants.camera.friction, delta_time);
-	return clamp_to_pos_neg_domain(v, max_v);
+	if (!(moving_in_dir ^ moving_in_opposite_dir))
+		v_per_tick *= get_percent_kept_from(constants.camera.friction, delta_time);
+
+	return clamp_to_pos_neg_domain(v_per_tick, max_v_per_tick);
 }
 
 static bool tile_exists_at_pos(const GLfloat x, const GLfloat z, const GLfloat foot_height,
@@ -132,42 +130,43 @@ static void update_pos_via_physics(const byte* const heightmap,
 	////////// Declaring a lot of shared vars
 
 	GLfloat accel_forward_back_per_sec = constants.accel.forward_back;
-
-	if (CHECK_BITMASK(movement_bits, BIT_ACCELERATE))
-		accel_forward_back_per_sec += constants.accel.additional_forward_back;
+	if (CHECK_BITMASK(movement_bits, BIT_ACCELERATE)) accel_forward_back_per_sec += constants.accel.additional_forward_back;
 
 	const GLfloat // The `* delta_time` exprs get a per-tick version of each multiplicand
-		accel_forward_back = accel_forward_back_per_sec * delta_time,
-		accel_strafe = constants.accel.strafe * delta_time,
-		max_speed_xz = constants.speeds.xz_max * delta_time;
+		accel_forward_back_per_tick = accel_forward_back_per_sec * delta_time,
+		accel_strafe_per_tick = constants.accel.strafe * delta_time,
+		max_speed_xz_per_tick = constants.speeds.xz_max * delta_time;
 
 	GLfloat
-		velocity_forward_back = velocities[0] * delta_time,
-		velocity_strafe = velocities[2] * delta_time,
-		foot_height = pos[1] - constants.camera.eye_height - pace;
+		velocity_forward_back_per_tick = velocities[0] * delta_time,
+		velocity_strafe_per_tick = velocities[2] * delta_time;
 
 	////////// Updating velocity
 
-	velocity_forward_back = apply_velocity_in_xz_direction(velocity_forward_back, accel_forward_back,
-		delta_time, max_speed_xz, CHECK_BITMASK(movement_bits, BIT_MOVE_FORWARD),
+	velocity_forward_back_per_tick = apply_velocity_in_xz_direction(
+		velocity_forward_back_per_tick, accel_forward_back_per_tick, delta_time,
+		max_speed_xz_per_tick, CHECK_BITMASK(movement_bits, BIT_MOVE_FORWARD),
 		CHECK_BITMASK(movement_bits, BIT_MOVE_BACKWARD));
 
-	velocity_strafe = apply_velocity_in_xz_direction(velocity_strafe, accel_strafe,
-		delta_time, max_speed_xz, CHECK_BITMASK(movement_bits, BIT_STRAFE_LEFT),
+	velocity_strafe_per_tick = apply_velocity_in_xz_direction(
+		velocity_strafe_per_tick, accel_strafe_per_tick, delta_time,
+		max_speed_xz_per_tick, CHECK_BITMASK(movement_bits, BIT_STRAFE_LEFT),
 		CHECK_BITMASK(movement_bits, BIT_STRAFE_RIGHT));
 
 	const GLfloat one_over_delta_time = 1.0f / delta_time;
-	velocities[0] = velocity_forward_back * one_over_delta_time;
-	velocities[2] = velocity_strafe * one_over_delta_time;
+
+	velocities[0] = velocity_forward_back_per_tick * one_over_delta_time;
+	velocities[2] = velocity_strafe_per_tick * one_over_delta_time;
 
 	////////// X and Z collision detection + setting new xz positions
 
+	GLfloat foot_height = pos[1] - constants.camera.eye_height - pace;
 	vec2 pos_xz = {pos[0], pos[2]};
 
-	pos_xz[0] = pos[0] + velocity_forward_back * dir_xz[0] - velocity_strafe * -dir_xz[1];
+	pos_xz[0] = pos[0] + velocity_forward_back_per_tick * dir_xz[0] + velocity_strafe_per_tick * dir_xz[1];
 	if (pos_collides_with_heightmap(foot_height, pos_xz, heightmap, map_size)) pos_xz[0] = pos[0];
 
-	pos_xz[1] = pos[2] + velocity_forward_back * dir_xz[1] - velocity_strafe * dir_xz[0];
+	pos_xz[1] = pos[2] + velocity_forward_back_per_tick * dir_xz[1] - velocity_strafe_per_tick * dir_xz[0];
 	if (pos_collides_with_heightmap(foot_height, pos_xz, heightmap, map_size)) pos_xz[1] = pos[2];
 
 	pos[0] = pos_xz[0];
@@ -176,9 +175,11 @@ static void update_pos_via_physics(const byte* const heightmap,
 	////////// Y collision detection + setting new y position and speed
 
 	GLfloat speed_jump_per_sec = velocities[1];
+
 	if (speed_jump_per_sec == 0.0f && CHECK_BITMASK(movement_bits, BIT_JUMP))
 		speed_jump_per_sec = constants.speeds.jump;
-	else speed_jump_per_sec -= constants.accel.g * delta_time;
+	else
+		speed_jump_per_sec -= constants.accel.g * delta_time;
 
 	foot_height += speed_jump_per_sec * delta_time;
 	const byte base_height = sample_map_point(heightmap, (byte) pos[0], (byte) pos[2], map_size[0]);
@@ -275,11 +276,13 @@ static void update_camera_pos(Camera* const camera, const Event* const event,
 	}
 	else {
 		update_pos_via_physics(heightmap, map_size, dir_xz, pos, camera -> velocities, camera -> pace, event);
-		update_pace(camera, event -> delta_time);
+		update_pace(camera, delta_time);
 	}
 }
 
-static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ratio, const vec3 dir, const vec3 up, const vec3 right) {
+static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ratio,
+	const vec3 dir, const vec3 right, const vec3 up) {
+
 	const GLfloat* const pos = camera -> pos;
 	vec4* const view = camera -> view;
 
@@ -296,7 +299,7 @@ static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ra
 	#undef D
 
 	mat4 projection;
-	glm_perspective(camera -> angles.fov, aspect_ratio, constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
+	glm_perspective(camera -> fov, aspect_ratio, constants.camera.near_clip_dist, camera -> far_clip_dist, projection);
 	glm_mul(projection, view, camera -> view_projection);
 }
 
@@ -315,18 +318,15 @@ void update_camera(Camera* const camera, const Event* const event, const byte* c
 	update_camera_pos(camera, event, heightmap, map_size, dir_xz, dir, right);
 	update_fov(camera, event);
 
-	update_camera_matrices(camera, event -> aspect_ratio, dir, up, right);
+	update_camera_matrices(camera, event -> aspect_ratio, dir, right, up);
 	glm_frustum_planes(camera -> view_projection, camera -> frustum_planes);
-
-	////////// Printing important vectors if needed
-
-	const Uint8* const keys = event -> keys;
-	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
-	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(dir);
 }
 
-Camera init_camera(const vec3 init_pos, const GLfloat far_clip_dist) {
-	Camera camera = {.angles = constants.camera.init, .far_clip_dist = far_clip_dist};
-	glm_vec3_copy((GLfloat*) init_pos, camera.pos);
-	return camera;
+Camera init_camera(const CameraConfig* const config, const GLfloat far_clip_dist) {
+	const GLfloat* const init_pos = config -> init_pos;
+
+	return (Camera) {
+		.angles = config -> angles, .far_clip_dist = far_clip_dist,
+		.pos = {init_pos[0], init_pos[1], init_pos[2]}
+	};
 }

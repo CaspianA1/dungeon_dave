@@ -1,7 +1,7 @@
 #include "utils/uniform_buffer.h"
-#include "utils/alloc.h"
-#include "utils/utils.h"
-#include "utils/opengl_wrappers.h"
+#include "utils/failure.h" // For `FAIL`
+#include "utils/opengl_wrappers.h" // For various OpenGL wrappers
+#include <string.h> // For `strcmp`, and `memcpy`
 
 static const GLenum uniform_buffer_target = GL_UNIFORM_BUFFER;
 static const GLchar* const max_primitive_size_name = "dvec4";
@@ -154,14 +154,11 @@ static void check_matrix_size(const buffer_size_t column_size,
 static void check_array_length(const buffer_size_t expected_length, const GLint array_length,
 	const GLchar* const block_name, const GLchar* const subvar_name, const GLchar* const function_name) {
 
-	// TODO: check for an exact size match
-	if (expected_length > (buffer_size_t) array_length) {
-		const buffer_size_t overshoot_amount = expected_length - (buffer_size_t) array_length;
-
+	if (expected_length != (buffer_size_t) array_length) {
 		FAIL(InitializeShaderUniform,
 			"When initializing the array `%s` in `%s` for uniform block `%s`, "
-				"the array length was %u item%s too long", subvar_name, function_name,
-				block_name, overshoot_amount, (overshoot_amount == 1) ? "" : "s"
+				"the input array length was %u items long, when it should have been %u",
+				subvar_name, function_name, block_name, (buffer_size_t) array_length, expected_length
 		);
 	}
 }
@@ -241,7 +238,7 @@ void write_array_of_primitives_to_uniform_buffer(const UniformBuffer* const buff
 	get_subvar_metadata(buffer, subvar_name, &dest, &array_length, &array_stride, NULL);
 	check_array_length(primitives.length, array_length, buffer -> block.name, subvar_name, function_name);
 
-	LIST_FOR_EACH(0, &primitives, primitive, _,
+	LIST_FOR_EACH(0, &primitives, primitive,
 		memcpy(dest, primitive, primitives.item_size);
 		dest += array_stride;
 	);

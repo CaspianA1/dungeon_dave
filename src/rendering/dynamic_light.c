@@ -1,29 +1,34 @@
 #include "rendering/dynamic_light.h"
-#include "data/constants.h"
+#include "data/constants.h" // For `TWO_PI`
 
-DynamicLight init_dynamic_light(const GLfloat time_for_cycle,
-	const vec3 pos, const vec3 looking_at_1, const vec3 looking_at_2) {
+DynamicLight init_dynamic_light(const DynamicLightConfig* const config) {
+	const GLfloat* const pos = config -> pos;
 
-	vec3 dir_1, dir_2;
+	vec3 from, to;
 
-	glm_vec3_sub((GLfloat*) pos, (GLfloat*) looking_at_1, dir_1);
-	glm_vec3_normalize(dir_1);
+	glm_vec3_sub((GLfloat*) pos, (GLfloat*) config -> looking_at.origin, from);
+	glm_vec3_normalize(from);
 
-	glm_vec3_sub((GLfloat*) pos, (GLfloat*) looking_at_2, dir_2);
-	glm_vec3_normalize(dir_2);
+	glm_vec3_sub((GLfloat*) pos, (GLfloat*) config -> looking_at.dest, to);
+	glm_vec3_normalize(to);
+
+	vec3 axis;
+	glm_vec3_cross((GLfloat*) from, (GLfloat*) to, axis);
+	glm_vec3_normalize(axis);
 
 	return (DynamicLight) {
-		time_for_cycle,
-		{dir_1[0], dir_1[1], dir_1[2]},
-		{dir_2[0], dir_2[1], dir_2[2]},
-		{dir_2[0], dir_2[1], dir_2[2]} // The initial dir equals `dir_1`
+		config -> time_for_cycle, glm_vec3_angle(from, to),
+		{axis[0], axis[1], axis[2]},
+		{from[0], from[1], from[2]},
+		{from[0], from[1], from[2]} // The initial dir equals `from`
 	};
 }
+
 
 void update_dynamic_light(DynamicLight* const dl, const GLfloat curr_time_secs) {
 	const GLfloat weight = sinf(curr_time_secs / dl -> time_for_cycle * TWO_PI) * 0.5f + 0.5f;
 
-	GLfloat* const curr_dir = dl -> curr_dir;
-	glm_vec3_lerp((GLfloat*) dl -> dir_2, (GLfloat*) dl -> dir_1, weight, curr_dir);
-	glm_vec3_normalize(curr_dir);
+	versor rotation; // SLERP code based on https://www.gamedev.net/forums/topic/523136-slerping-two-vectors/523136/
+	glm_quatv(rotation, dl -> angle_between * weight, (GLfloat*) dl -> axis);
+	glm_quat_rotatev(rotation, (GLfloat*) dl -> from, dl -> curr_dir);
 }

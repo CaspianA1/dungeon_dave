@@ -1,19 +1,25 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "buffer_defs.h"
-#include "utils.h"
-#include "animation.h"
+#include "utils/sdl_include.h" // For various things from the SDL namespace
+#include "lib/glad/glad.h" // For OpenGL defs
+#include <stdbool.h> // For `bool`
+#include "animation.h" // For `AnimationLayout`
 
-// TODO: put these macros in the `constants` struct
+//////////
+
+// This is written to by `window_creation.h`. TODO: remove this ugly global write.
+extern GLfloat global_anisotropic_filtering_level;
+
+////////// TODO: put these macros in the `constants` struct
 
 #define SDL_PIXEL_FORMAT SDL_PIXELFORMAT_BGRA32
 #define OPENGL_INPUT_PIXEL_FORMAT GL_BGRA
 
+#define OPENGL_MATERIALS_MAP_INTERNAL_PIXEL_FORMAT GL_RGBA
 #define OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT GL_RGBA
 #define OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT GL_SRGB8_ALPHA8
 
-#define OPENGL_SHADOW_MAP_COLOR_CHANNEL_TYPE GL_FLOAT
 #define OPENGL_COLOR_CHANNEL_TYPE GL_UNSIGNED_BYTE
 
 //////////
@@ -36,12 +42,13 @@ typedef enum {
 	TU_CascadedShadowMapPlain,
 	TU_CascadedShadowMapDepthComparison,
 
-	TU_SectorFaceDiffuse, TU_SectorFaceNormalMap,
-	TU_BillboardDiffuse, TU_BillboardNormalMap,
-	TU_WeaponSpriteDiffuse, TU_WeaponSpriteNormalMap,
+	TU_Materials,
+	TU_SectorFaceAlbedo, TU_SectorFaceNormalMap,
+	TU_BillboardAlbedo, TU_BillboardNormalMap,
+	TU_WeaponSpriteAlbedo, TU_WeaponSpriteNormalMap,
 
-	TU_TitleScreenStillDiffuse,
-	TU_TitleScreenScrollingDiffuse,
+	TU_TitleScreenStillAlbedo,
+	TU_TitleScreenScrollingAlbedo,
 	TU_TitleScreenScrollingNormalMap
 } TextureUnit;
 
@@ -57,6 +64,7 @@ typedef enum {
 //////////
 
 typedef enum {
+	TexPlain1D = GL_TEXTURE_1D,
 	TexPlain = GL_TEXTURE_2D,
 	TexSkybox = GL_TEXTURE_CUBE_MAP,
 	TexSet = GL_TEXTURE_2D_ARRAY,
@@ -82,6 +90,7 @@ typedef Uint32 sdl_pixel_t;
 //////////
 
 SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height);
+SDL_Surface* init_blank_grayscale_surface(const GLsizei width, const GLsizei height);
 SDL_Surface* init_surface(const GLchar* const path);
 
 void* read_surface_pixel(const SDL_Surface* const surface, const GLint x, const GLint y);
@@ -92,9 +101,10 @@ void use_texture_in_shader(const GLuint texture,
 
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	const TextureFilterMode mag_filter, const TextureFilterMode min_filter,
-	const bool force_disable_aniso_filtering);
+	const bool use_anisotropic_filtering);
 
 /* Size formats:
+Plain 1D textures: {width}
 Plain 2D textures: {width, height}
 Skyboxes: {width/height, face index}
 Texture sets/volumetric textures: {width, height, depth} */
@@ -104,8 +114,8 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 
 GLuint init_texture_set(const bool premultiply_alpha,
 	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
-	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
-	const GLsizei num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
+	const TextureFilterMode min_filter, const texture_id_t num_still_subtextures,
+	const texture_id_t num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
 	const GLchar* const* const still_subtexture_paths, const AnimationLayout* const animation_layouts);
 
 GLuint init_plain_texture(const GLchar* const path,

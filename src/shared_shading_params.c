@@ -1,24 +1,37 @@
 #include "shared_shading_params.h"
-#include "utils/opengl_wrappers.h"
+#include "utils/macro_utils.h" // For `ARRAY_LENGTH`
+#include "utils/opengl_wrappers.h" // For `use_shader`
 
-static void init_constant_shading_params(UniformBuffer* const shading_params, const CascadedShadowContext* const shadow_context) {
+static void init_constant_shading_params(UniformBuffer* const shading_params,
+	const LevelRenderingConfig* const level_rendering_config,
+	const vec2 all_bilinear_percents[num_unique_object_types],
+	const CascadedShadowContext* const shadow_context) {
+
 	enable_uniform_buffer_writing_batch(shading_params, true);
 
-	#define UBO_WRITE(name) write_primitive_to_uniform_buffer(shading_params, #name, &constants.lighting.name, sizeof(constants.lighting.name))
+	// `UBO` = uniform buffer object
+	#define UBO_WRITE(name) write_primitive_to_uniform_buffer(shading_params,\
+		#name, &level_rendering_config -> name, sizeof(level_rendering_config -> name))
 
-	UBO_WRITE(parallax_mapping.enabled); // TODO: write a 32-bit number instead?
+	write_array_of_primitives_to_uniform_buffer(shading_params,
+		"all_bilinear_percents", (List) {
+			.data = (void*) all_bilinear_percents,
+			.item_size = sizeof(vec2),
+			.length = num_unique_object_types
+		}
+	);
+
+	UBO_WRITE(parallax_mapping.enabled); // TODO: write a 32-bit number instead? (Same for `tricubic_filtering_enabled`?)
 	UBO_WRITE(parallax_mapping.min_layers); UBO_WRITE(parallax_mapping.max_layers);
 	UBO_WRITE(parallax_mapping.height_scale); UBO_WRITE(parallax_mapping.lod_cutoff);
-
-	UBO_WRITE(bilinear_percents.diffuse); UBO_WRITE(bilinear_percents.normal);
-
-	UBO_WRITE(strengths.ambient); UBO_WRITE(strengths.diffuse);
-	UBO_WRITE(strengths.specular); UBO_WRITE(specular_exponents.matte);
-	UBO_WRITE(specular_exponents.rough);
 
 	UBO_WRITE(shadow_mapping.sample_radius);
 	UBO_WRITE(shadow_mapping.esm_exponent);
 	UBO_WRITE(shadow_mapping.esm_exponent_layer_scale_factor);
+
+	UBO_WRITE(volumetric_lighting.enabled); UBO_WRITE(volumetric_lighting.num_samples);
+	UBO_WRITE(volumetric_lighting.decay); UBO_WRITE(volumetric_lighting.decay_weight);
+	UBO_WRITE(volumetric_lighting.sample_density); UBO_WRITE(volumetric_lighting.opacity);
 
 	write_array_of_primitives_to_uniform_buffer(shading_params,
 		"shadow_mapping.cascade_split_distances", (List) {
@@ -28,7 +41,10 @@ static void init_constant_shading_params(UniformBuffer* const shading_params, co
 		}
 	);
 
-	UBO_WRITE(overall_scene_tone);
+	UBO_WRITE(ambient_occlusion.tricubic_filtering_enabled);
+	UBO_WRITE(ambient_occlusion.strength);
+
+	UBO_WRITE(light_color);
 	UBO_WRITE(tone_mapping_max_white);
 	UBO_WRITE(noise_granularity);
 
@@ -38,31 +54,41 @@ static void init_constant_shading_params(UniformBuffer* const shading_params, co
 }
 
 SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_share_params,
-	const buffer_size_t num_shaders, const CascadedShadowContext* const shadow_context) {
+	const GLuint num_shaders, const LevelRenderingConfig* const level_rendering_config,
+	const vec2 all_bilinear_percents[num_unique_object_types],
+	const CascadedShadowContext* const shadow_context) {
 	
+	static const GLchar
+		*const constant_subvar_names[] = {
+			"all_bilinear_percents",
+
+			"parallax_mapping.enabled",
+			"parallax_mapping.min_layers", "parallax_mapping.max_layers",
+			"parallax_mapping.height_scale", "parallax_mapping.lod_cutoff",
+
+			"shadow_mapping.sample_radius", "shadow_mapping.esm_exponent",
+			"shadow_mapping.esm_exponent_layer_scale_factor",
+			"shadow_mapping.cascade_split_distances",
+
+			"volumetric_lighting.enabled", "volumetric_lighting.num_samples",
+			"volumetric_lighting.decay", "volumetric_lighting.decay_weight",
+			"volumetric_lighting.sample_density", "volumetric_lighting.opacity",
+
+			"ambient_occlusion.tricubic_filtering_enabled",
+			"ambient_occlusion.strength",
+
+			"light_color", "tone_mapping_max_white", "noise_granularity"
+		},
+
+		*const dynamic_subvar_names[] = {
+			"dir_to_light", "camera_pos_world_space",
+			"billboard_front_facing_tbn",
+			"view_projection", "view", "light_view_projection_matrices"
+		};
+
+	//////////
+
 	const GLuint first_shader = shaders_that_share_params[0];
-
-	const GLchar* const constant_subvar_names[] = {
-		"parallax_mapping.enabled",
-		"parallax_mapping.min_layers", "parallax_mapping.max_layers",
-		"parallax_mapping.height_scale", "parallax_mapping.lod_cutoff",
-
-		"bilinear_percents.diffuse", "bilinear_percents.normal",
-		"strengths.ambient", "strengths.diffuse", "strengths.specular",
-		"specular_exponents.matte", "specular_exponents.rough",
-
-		"shadow_mapping.sample_radius", "shadow_mapping.esm_exponent",
-		"shadow_mapping.esm_exponent_layer_scale_factor",
-		"shadow_mapping.cascade_split_distances",
-
-		"overall_scene_tone", "tone_mapping_max_white", "noise_granularity"
-	};
-
-	static const GLchar* const dynamic_subvar_names[] = {
-		"dir_to_light", "camera_pos_world_space",
-		"billboard_front_facing_tbn",
-		"view_projection", "view", "light_view_projection_matrices"
-	};
 
 	SharedShadingParams shared_shading_params = {
 		.constant = init_uniform_buffer(
@@ -75,9 +101,10 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 		)
 	};
 
-	init_constant_shading_params(&shared_shading_params.constant, shadow_context);
+	init_constant_shading_params(&shared_shading_params.constant,
+		level_rendering_config, all_bilinear_percents, shadow_context);
 
-	for (buffer_size_t i = 0; i < num_shaders; i++) {
+	for (GLuint i = 0; i < num_shaders; i++) {
 		const GLuint shader = shaders_that_share_params[i];
 		bind_uniform_buffer_to_shader(&shared_shading_params.constant, shader);
 		bind_uniform_buffer_to_shader(&shared_shading_params.dynamic, shader);
@@ -126,12 +153,12 @@ void update_shared_shading_params(SharedShadingParams* const shared_shading_para
 
 void init_shared_textures_for_world_shaded_objects(
 	const WorldShadedObject* const world_shaded_objects,
-	const byte num_world_shaded_objects, const Skybox* const skybox,
+	const byte num_world_shaded_objects,
 	const CascadedShadowContext* const shadow_context,
-	const AmbientOcclusionMap* const ao_map) {
+	const AmbientOcclusionMap* const ao_map,
+	const GLuint materials_texture) {
 
 	const GLuint
-		skybox_diffuse_texture = skybox -> diffuse_texture,
 		ao_map_texture = ao_map -> texture,
 		shadow_depth_layers = shadow_context -> depth_layers,
 		shadow_depth_sampler = shadow_context -> plain_depth_sampler,
@@ -143,8 +170,8 @@ void init_shared_textures_for_world_shaded_objects(
 
 		use_shader(shader);
 
-		use_texture_in_shader(skybox_diffuse_texture, shader, "environment_map_sampler", TexSkybox, TU_Skybox);
-		use_texture_in_shader(wso.drawable -> diffuse_texture, shader, "diffuse_sampler", TexSet, wso.texture_units.diffuse);
+		use_texture_in_shader(materials_texture, shader, "materials_sampler", TexPlain1D, TU_Materials);
+		use_texture_in_shader(wso.drawable -> albedo_texture, shader, "albedo_sampler", TexSet, wso.texture_units.albedo);
 		use_texture_in_shader(wso.drawable -> normal_map, shader, "normal_map_sampler", TexSet, wso.texture_units.normal_map);
 		use_texture_in_shader(ao_map_texture, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 

@@ -11,16 +11,16 @@ out vec3 color;
 
 uniform float
 	texture_transition_weight, specular_exponent,
-	scrolling_bilinear_diffuse_percent,
+	scrolling_bilinear_albedo_percent,
 	scrolling_bilinear_normal_percent;
 
 uniform vec3 light_pos_tangent_space;
-uniform sampler2D still_diffuse_sampler, scrolling_diffuse_sampler, scrolling_normal_map_sampler;
+uniform sampler2D still_albedo_sampler, scrolling_albedo_sampler, scrolling_normal_map_sampler;
 
 //////////
 
 // TODO: use the world shading functions instead of this one, if possible
-vec3 blinn_phong(const sampler2D diffuse_sampler, const vec2 diffuse_UV,
+vec3 blinn_phong(const sampler2D albedo_sampler, const vec2 albedo_UV,
 	const vec3 fragment_normal, const vec3 dir_to_light, const vec3 halfway_dir) {
 
 	float
@@ -29,7 +29,7 @@ vec3 blinn_phong(const sampler2D diffuse_sampler, const vec2 diffuse_UV,
 
 	float specular = pow(cos_angle_of_incidence, specular_exponent);
 
-	return texture(diffuse_sampler, diffuse_UV).rgb * (diffuse + specular);
+	return texture(albedo_sampler, albedo_UV).rgb * (diffuse + specular);
 }
 
 void main(void) {
@@ -39,11 +39,11 @@ void main(void) {
 
 	////////// Pixel art UV correction
 
-	vec2 scrolling_UV_for_diffuse = vec2(scrolling_UV_x, UV.y);
-	vec2 scrolling_UV_for_normal = scrolling_UV_for_diffuse;
+	vec2 scrolling_UV_for_albedo = vec2(scrolling_UV_x, UV.y);
+	vec2 scrolling_UV_for_normal = scrolling_UV_for_albedo;
 
-	adjust_UV_for_pixel_art_filtering(scrolling_bilinear_diffuse_percent,
-		textureSize(scrolling_diffuse_sampler, 0), scrolling_UV_for_diffuse);
+	adjust_UV_for_pixel_art_filtering(scrolling_bilinear_albedo_percent,
+		textureSize(scrolling_albedo_sampler, 0), scrolling_UV_for_albedo);
 
 	adjust_UV_for_pixel_art_filtering(scrolling_bilinear_normal_percent,
 		textureSize(scrolling_normal_map_sampler, 0), scrolling_UV_for_normal);
@@ -60,8 +60,8 @@ void main(void) {
 	////////// Getting the colors for both layers, and then mixing them
 
 	vec3
-		still_base = blinn_phong(still_diffuse_sampler, UV, face_normal_tangent_space, dir_to_light, halfway_dir),
-		scroll_base = blinn_phong(scrolling_diffuse_sampler, scrolling_UV_for_diffuse, scrolling_fragment_normal, dir_to_light, halfway_dir);
+		still_base = blinn_phong(still_albedo_sampler, UV, face_normal_tangent_space, dir_to_light, halfway_dir),
+		scroll_base = blinn_phong(scrolling_albedo_sampler, scrolling_UV_for_albedo, scrolling_fragment_normal, dir_to_light, halfway_dir);
 
 	color = mix(still_base * scroll_base, still_base + scroll_base, texture_transition_weight);
 }

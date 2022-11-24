@@ -1,4 +1,6 @@
 #include "utils/list.h"
+#include <string.h> // For `memcpy`
+#include <math.h> // For `ceilf`
 
 #define LIST_REALLOC_AMOUNT_FOR(curr_alloc) ((buffer_size_t) (ceilf((curr_alloc) * list_realloc_rate)))
 

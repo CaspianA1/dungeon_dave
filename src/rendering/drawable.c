@@ -1,12 +1,12 @@
 #include "rendering/drawable.h"
-#include "utils/opengl_wrappers.h"
+#include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 
 ////////// The main Drawable functions
 
 Drawable init_drawable_with_vertices(
 	void (*const vertex_spec_definer) (void), const uniform_updater_t uniform_updater,
 	const GLenum vertex_buffer_access, const GLenum triangle_mode,
-	const List vertices, const GLuint shader, const GLuint diffuse_texture,
+	const List vertices, const GLuint shader, const GLuint albedo_texture,
 	const GLuint normal_map) {
 
 	const GLuint vertex_buffer = init_gpu_buffer(), vertex_spec = init_vertex_spec();
@@ -19,20 +19,20 @@ Drawable init_drawable_with_vertices(
 
 	return (Drawable) {
 		triangle_mode, vertex_spec, vertex_buffer,
-		shader, diffuse_texture, normal_map, uniform_updater
+		shader, albedo_texture, normal_map, uniform_updater
 	};
 }
 
 Drawable init_drawable_without_vertices(const uniform_updater_t uniform_updater,
-	const GLenum triangle_mode, const GLuint shader, const GLuint diffuse_texture,
+	const GLenum triangle_mode, const GLuint shader, const GLuint albedo_texture,
 	const GLuint normal_map) {
 
-	return (Drawable) {triangle_mode, 0, 0, shader, diffuse_texture, normal_map, uniform_updater};
+	return (Drawable) {triangle_mode, 0, 0, shader, albedo_texture, normal_map, uniform_updater};
 }
 
 void deinit_drawable(const Drawable drawable) {
 	deinit_shader(drawable.shader);
-	deinit_texture(drawable.diffuse_texture);
+	deinit_texture(drawable.albedo_texture);
 
 	if (drawable.normal_map != 0) deinit_texture(drawable.normal_map);
 	if (drawable.vertex_buffer != 0) deinit_gpu_buffer(drawable.vertex_buffer);

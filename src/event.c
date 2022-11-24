@@ -1,6 +1,6 @@
 #include "event.h"
-#include "data/constants.h"
-#include "utils/utils.h"
+#include "data/constants.h" // For `keys`, and `milliseconds_per_second`
+#include "utils/macro_utils.h" // For `CHECK_BITMASK`
 
 // TODO: avoid all repeated base time logic by making the curr time in secs relative to startup time
 Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_between_frames, const Uint8* const keys) {

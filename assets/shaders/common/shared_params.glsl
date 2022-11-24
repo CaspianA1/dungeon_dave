@@ -5,21 +5,30 @@
 /* These are constant for a given level.
 They are ordered in terms of the stages of rendering. */
 layout(shared) uniform ConstantShadingParams {
+	vec2 all_bilinear_percents[3u]; // TODO: make the `3u` an input macro
+
 	struct {
 		bool enabled;
 		float min_layers, max_layers, height_scale, lod_cutoff;
 	} parallax_mapping;
-
-	struct {float diffuse, normal;} bilinear_percents;
-	struct {float ambient, diffuse, specular;} strengths;
-	struct {float matte, rough;} specular_exponents;
 
 	struct {
 		uint sample_radius, esm_exponent;
 		float esm_exponent_layer_scale_factor, cascade_split_distances[NUM_CASCADE_SPLITS];
 	} shadow_mapping;
 
-	vec3 overall_scene_tone;
+	struct {
+		bool enabled;
+		uint num_samples;
+		float decay, decay_weight, sample_density, opacity;
+	} volumetric_lighting;
+
+	struct {
+		bool tricubic_filtering_enabled;
+		float strength;
+	} ambient_occlusion;
+
+	vec3 light_color;
 	float tone_mapping_max_white, noise_granularity;
 };
 

@@ -1,17 +1,15 @@
 #ifndef DRAWABLE_H
 #define DRAWABLE_H
 
-#include "utils/buffer_defs.h"
-#include "utils/list.h"
-
-// TODO: incorporate an optional normal map into the type
+#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/list.h" // For `List`
 
 struct Drawable; // The Drawable's shader will be bound when the uniform updater is called
 typedef void (*const uniform_updater_t) (const struct Drawable* const drawable, const void* const param);
 
 typedef struct {
 	const GLenum triangle_mode;
-	const GLuint vertex_spec, vertex_buffer, shader, diffuse_texture, normal_map;
+	const GLuint vertex_spec, vertex_buffer, shader, albedo_texture, normal_map;
 	const uniform_updater_t uniform_updater;
 } Drawable;
 
@@ -38,11 +36,11 @@ Interface notes:
 Drawable init_drawable_with_vertices(
 	void (*const vertex_spec_definer) (void), const uniform_updater_t uniform_updater,
 	const GLenum vertex_buffer_access, const GLenum triangle_mode,
-	const List vertices, const GLuint shader, const GLuint diffuse_texture,
+	const List vertices, const GLuint shader, const GLuint albedo_texture,
 	const GLuint normal_map);
 
 Drawable init_drawable_without_vertices(const uniform_updater_t uniform_updater,
-	const GLenum triangle_mode, const GLuint shader, const GLuint diffuse_texture,
+	const GLenum triangle_mode, const GLuint shader, const GLuint albedo_texture,
 	const GLuint normal_map);
 
 void deinit_drawable(const Drawable drawable);

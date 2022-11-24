@@ -70,8 +70,12 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 	return mix(lerped_y.y, lerped_y.x, lerp_weights.z);
 }
 
-float get_ao_strength(void) {
-	float raw_ao_strength = texture_tricubic_single_channel(ambient_occlusion_sampler, ambient_occlusion_UV);
+float get_ambient_strength(void) {
+	float raw_ao_amount = ambient_occlusion.tricubic_filtering_enabled
+		? texture_tricubic_single_channel(ambient_occlusion_sampler, ambient_occlusion_UV)
+		: texture(ambient_occlusion_sampler, ambient_occlusion_UV).r;
+
+	float raw_ao_strength = ambient_occlusion.strength * raw_ao_amount;
 
 	/* The sRGB -> linear mapping is based on function from the bottom of here:
 	https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml.

@@ -1,6 +1,14 @@
 #include "utils/texture.h"
-#include "data/constants.h"
-#include "utils/opengl_wrappers.h"
+#include "utils/failure.h" // For `FAIL`
+#include <limits.h> // For `CHAR_BIT`
+#include "utils/macro_utils.h" // For `ON_FIRST_CALL`
+#include "data/constants.h" // For `engine.enabled.anisotropic_filtering`, and `max_byte_value`
+#include "utils/opengl_wrappers.h" // For various OpenGL wrappers
+
+//////////
+
+// This is written to by `window_creation.h`.
+GLfloat global_anisotropic_filtering_level;
 
 ////////// Surface initialization and alpha premultiplication
 
@@ -9,6 +17,25 @@ SDL_Surface* init_blank_surface(const GLsizei width, const GLsizei height) {
 		0, width, height, SDL_BITSPERPIXEL(SDL_PIXEL_FORMAT), SDL_PIXEL_FORMAT);
 
 	if (blank_surface == NULL) FAIL(CreateSurface, "Could not create a blank surface: %s", SDL_GetError());
+	return blank_surface;
+}
+
+SDL_Surface* init_blank_grayscale_surface(const GLsizei width, const GLsizei height) {
+	SDL_Surface* const blank_surface = SDL_CreateRGBSurface(0, width, height, CHAR_BIT, 0, 0, 0, 0);
+	if (blank_surface == NULL) FAIL(CreateSurface, "Could not create a blank grayscale surface: %s", SDL_GetError());
+
+	static const uint16_t num_palette_colors = SDL_MAX_UINT8 + 1u;
+	static SDL_Color palette_colors[num_palette_colors];
+
+	ON_FIRST_CALL(
+		for (uint16_t i = 0; i < num_palette_colors; i++) {
+			SDL_Color* const color = palette_colors + i;
+			color -> r = color -> g = color -> b = (Uint8) i;
+			color -> a = constants.max_byte_value;
+		}
+	);
+
+	SDL_SetPaletteColors(blank_surface -> format -> palette, palette_colors, 0, num_palette_colors);
 	return blank_surface;
 }
 
@@ -73,7 +100,7 @@ void use_texture_in_shader(const GLuint texture,
 // This sets the current texture to be the returned texture. TODO: allow different wrap modes for S, T, and R.
 GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	const TextureFilterMode mag_filter, const TextureFilterMode min_filter,
-	const bool force_disable_anisotropic_filtering) {
+	const bool use_anisotropic_filtering) {
 
 	GLuint texture;
 	glGenTextures(1, &texture);
@@ -84,23 +111,12 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 
 	const GLint cast_wrap_mode = (GLint) wrap_mode;
 	glTexParameteri(type, GL_TEXTURE_WRAP_S, cast_wrap_mode);
-	glTexParameteri(type, GL_TEXTURE_WRAP_T, cast_wrap_mode);
 
-	if (type == TexSkybox || type == TexVolumetric)
-		glTexParameteri(type, GL_TEXTURE_WRAP_R, cast_wrap_mode);
+	if (type != TexPlain1D) glTexParameteri(type, GL_TEXTURE_WRAP_T, cast_wrap_mode);
+	if (type == TexSkybox || type == TexVolumetric) glTexParameteri(type, GL_TEXTURE_WRAP_R, cast_wrap_mode);
 
-	#ifdef USE_ANISOTROPIC_FILTERING
-
-	/* For anisotropic filtering to be enabled, 1. USE_ANISOTROPIC_FILTERING must be defined,
-	2. GLAD has to have loaded the extension successfully, and 3. it must not be force-disabled. */
-	if (GLAD_GL_EXT_texture_filter_anisotropic && !force_disable_anisotropic_filtering)
-		glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, get_runtime_constant(AnisotropicFilteringLevel));
-
-	#else
-
-	(void) force_disable_anisotropic_filtering;
-
-	#endif
+	if (use_anisotropic_filtering && GLAD_GL_EXT_texture_filter_anisotropic)
+		glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, global_anisotropic_filtering_level);
 
 	return texture;
 }
@@ -116,6 +132,7 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 	); break
 
 	switch (type) {
+		case TexPlain1D: UPLOAD_CALL(type, 1, size[0]);
 		case TexPlain: UPLOAD_CALL(type, 2, size[0], size[1]);
 
 		case TexSkybox: {
@@ -130,7 +147,7 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 }
 
 static void init_still_subtextures_in_texture_set(
-	const bool premultiply_alpha, const GLsizei num_still_subtextures,
+	const bool premultiply_alpha, const texture_id_t num_still_subtextures,
 	const GLchar* const* const still_subtexture_paths, SDL_Surface* const rescaled_surface) {
 
 	const GLsizei correct_w = rescaled_surface -> w, correct_h = rescaled_surface -> h;
@@ -158,10 +175,10 @@ static void init_still_subtextures_in_texture_set(
 }
 
 static void init_animated_subtextures_in_texture_set(const bool premultiply_alpha,
-	const GLsizei num_animated_frames, const GLsizei num_still_subtextures,
+	const texture_id_t num_animated_frames, const texture_id_t num_still_subtextures,
 	const AnimationLayout* const animation_layouts, SDL_Surface* const rescaled_surface) {
 
-	for (GLsizei animation_layout_index = 0, animation_frame_index = num_still_subtextures;
+	for (texture_id_t animation_layout_index = 0, animation_frame_index = num_still_subtextures;
 		animation_frame_index < num_animated_frames; animation_layout_index++) {
 
 		const AnimationLayout animation_layout = animation_layouts[animation_layout_index];
@@ -176,8 +193,8 @@ static void init_animated_subtextures_in_texture_set(const bool premultiply_alph
 			.h = spritesheet_surface -> h / animation_layout.frames_down
 		};
 
-		for (GLsizei frame_index = 0; frame_index < animation_layout.total_frames; frame_index++, animation_frame_index++) {
-			const div_t frame_indices_across_and_down = div(frame_index, animation_layout.frames_across);
+		for (texture_id_t frame_index = 0; frame_index < animation_layout.total_frames; frame_index++, animation_frame_index++) {
+			const div_t frame_indices_across_and_down = div((int) frame_index, (int) animation_layout.frames_across);
 			spritesheet_frame_area.x = frame_indices_across_and_down.rem * spritesheet_frame_area.w;
 			spritesheet_frame_area.y = frame_indices_across_and_down.quot * spritesheet_frame_area.h;
 
@@ -195,16 +212,16 @@ static void init_animated_subtextures_in_texture_set(const bool premultiply_alph
 
 GLuint init_texture_set(const bool premultiply_alpha,
 	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
-	const TextureFilterMode min_filter, const GLsizei num_still_subtextures,
-	const GLsizei num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
+	const TextureFilterMode min_filter, const texture_id_t num_still_subtextures,
+	const texture_id_t num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
 	const GLchar* const* const still_subtexture_paths, const AnimationLayout* const animation_layouts) {
 
-	GLsizei num_animated_frames = 0; // A frame is a subtexture
-	for (GLsizei i = 0; i < num_animation_layouts; i++) num_animated_frames += animation_layouts[i].total_frames;
+	texture_id_t num_animated_frames = 0; // A frame is a subtexture
+	for (texture_id_t i = 0; i < num_animation_layouts; i++) num_animated_frames += animation_layouts[i].total_frames;
 
 	////////// Defining the texture set, and a rescaled surface
 
-	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter, false);
+	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter, true);
 
 	init_texture_data(TexSet, (GLsizei[]) {rescale_w, rescale_h, num_still_subtextures + num_animated_frames},
 		OPENGL_INPUT_PIXEL_FORMAT, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);

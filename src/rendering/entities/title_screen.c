@@ -1,8 +1,8 @@
 #include "rendering/entities/title_screen.h"
-#include "utils/list.h"
-#include "utils/shader.h"
-#include "utils/opengl_wrappers.h"
-#include "data/constants.h"
+#include "utils/macro_utils.h" // For `ON_FIRST_CALL`
+#include "utils/opengl_wrappers.h" // For `INIT_UNIFORM`, and `UPDATE_UNIFORM`
+#include "data/constants.h" // For `TWO_PI`
+#include "utils/shader.h" // For `init_shader`
 
 ////////// Uniform updating
 
@@ -57,17 +57,17 @@ TitleScreen init_title_screen(
 
 	const TextureType texture_type = TexPlain;
 
-	const GLuint scrolling_diffuse_texture = init_plain_texture(texture_config -> paths.scrolling,
+	const GLuint scrolling_albedo_texture = init_plain_texture(texture_config -> paths.scrolling,
 		TexRepeating, texture_config -> mag_filters.scrolling, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
 	// Overwriting the vertical wrap through a dumb hack
 	glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, TexNonRepeating);
 
 	const GLuint
-		scrolling_normal_map = init_normal_map_from_diffuse_texture(scrolling_diffuse_texture,
+		scrolling_normal_map = init_normal_map_from_albedo_texture(scrolling_albedo_texture,
 			texture_type, &texture_config -> scrolling_normal_map_config),
 
-		still_diffuse_texture = init_plain_texture(texture_config -> paths.still, TexNonRepeating,
+		still_albedo_texture = init_plain_texture(texture_config -> paths.still, TexNonRepeating,
 			texture_config -> mag_filters.still, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
 	//////////
@@ -77,11 +77,11 @@ TitleScreen init_title_screen(
 
 	INIT_UNIFORM_VALUE(scrolling_texture_vert_squish_ratio, shader, 1f, rendering_config -> scrolling_vert_squish_ratio);
 	INIT_UNIFORM_VALUE(specular_exponent, shader, 1f, rendering_config -> specular_exponent);
-	INIT_UNIFORM_VALUE(scrolling_bilinear_diffuse_percent, shader, 1f, rendering_config -> scrolling_bilinear_diffuse_percent);
+	INIT_UNIFORM_VALUE(scrolling_bilinear_albedo_percent, shader, 1f, rendering_config -> scrolling_bilinear_albedo_percent);
 	INIT_UNIFORM_VALUE(scrolling_bilinear_normal_percent, shader, 1f, rendering_config -> scrolling_bilinear_normal_percent);
 
-	use_texture_in_shader(still_diffuse_texture, shader, "still_diffuse_sampler", texture_type, TU_TitleScreenStillDiffuse);
-	use_texture_in_shader(scrolling_diffuse_texture, shader, "scrolling_diffuse_sampler", texture_type, TU_TitleScreenScrollingDiffuse);
+	use_texture_in_shader(still_albedo_texture, shader, "still_albedo_sampler", texture_type, TU_TitleScreenStillAlbedo);
+	use_texture_in_shader(scrolling_albedo_texture, shader, "scrolling_albedo_sampler", texture_type, TU_TitleScreenScrollingAlbedo);
 	use_texture_in_shader(scrolling_normal_map, shader, "scrolling_normal_map_sampler", texture_type, TU_TitleScreenScrollingNormalMap);
 
 	//////////
@@ -91,18 +91,18 @@ TitleScreen init_title_screen(
 
 		.drawable = init_drawable_without_vertices(
 			(uniform_updater_t) update_uniforms,
-			GL_TRIANGLE_STRIP, shader, scrolling_diffuse_texture,
+			GL_TRIANGLE_STRIP, shader, scrolling_albedo_texture,
 			scrolling_normal_map
 		),
 
-		.still_diffuse_texture = still_diffuse_texture,
+		.still_albedo_texture = still_albedo_texture,
 		.rendering_config = *rendering_config
 	};
 }
 
 void deinit_title_screen(const TitleScreen* const title_screen) {
 	deinit_drawable(title_screen -> drawable);
-	deinit_texture(title_screen -> still_diffuse_texture);
+	deinit_texture(title_screen -> still_albedo_texture);
 }
 
 bool tick_title_screen(TitleScreen* const title_screen, const Event* const event) {

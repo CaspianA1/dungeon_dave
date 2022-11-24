@@ -1,11 +1,12 @@
 #ifndef TITLE_SCREEN_H
 #define TITLE_SCREEN_H
 
-#include "utils/texture.h"
-#include "normal_map_generation.h"
-#include "utils/buffer_defs.h"
-#include "rendering/drawable.h"
-#include "event.h"
+#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/texture.h" // For `TextureFilterMode`
+#include "utils/normal_map_generation.h" // For `NormalMapConfig`
+#include <stdbool.h> // For `bool`
+#include "rendering/drawable.h" // For `Drawable`
+#include "event.h" // For `Event`
 
 typedef struct {
 	const struct {const GLchar *const still, *const scrolling;} paths;
@@ -18,7 +19,7 @@ typedef struct {
 
 	const GLfloat
 		scrolling_vert_squish_ratio, specular_exponent,
-		scrolling_bilinear_diffuse_percent, scrolling_bilinear_normal_percent,
+		scrolling_bilinear_albedo_percent, scrolling_bilinear_normal_percent,
 		light_dist_from_screen_plane, secs_per_scroll_cycle;
 
 	const struct {const GLfloat secs_per, logo_transitions_per;} light_spin_cycle;
@@ -29,7 +30,7 @@ typedef struct {
 typedef struct {
 	bool active;
 	const Drawable drawable;
-	const GLuint still_diffuse_texture;
+	const GLuint still_albedo_texture;
 	const TitleScreenRenderingConfig rendering_config;
 } TitleScreen;
 

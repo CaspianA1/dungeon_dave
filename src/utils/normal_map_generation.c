@@ -1,8 +1,37 @@
-#include "normal_map_generation.h"
-#include "data/constants.h"
-#include "utils/alloc.h"
-#include "utils/utils.h"
-#include "utils/opengl_wrappers.h"
+#include "utils/normal_map_generation.h"
+#include "utils/cglm_include.h" // For various cglm defs
+#include "data/constants.h" // For `max_byte_value`
+#include "utils/alloc.h" // For `alloc`, and `dealloc`
+#include "utils/failure.h" // For `FAIL`
+#include "utils/opengl_wrappers.h" // For various OpenGL wrappers
+
+////////// This code concerns heightmap creation.
+
+static void generate_heightmap(SDL_Surface* const src, SDL_Surface* const dest, const GLfloat heightmap_scale) {
+	const GLint w = dest -> w, h = dest -> h;
+
+	WITH_SURFACE_PIXEL_ACCESS(src,
+		WITH_SURFACE_PIXEL_ACCESS(dest,
+
+			for (GLint y = 0; y < h; y++) {
+				sdl_pixel_component_t* const dest_pixel = read_surface_pixel(dest, 0, y);
+
+				for (GLint x = 0; x < w; x++) {
+					const sdl_pixel_t pixel = *(sdl_pixel_t*) read_surface_pixel(src, x, y);
+
+					sdl_pixel_component_t r, g, b;
+					SDL_GetRGB(pixel, src -> format, &r, &g, &b);
+
+					const sdl_pixel_component_t height = (r + g + b) / 3;
+					const GLfloat upscaled_height = glm_min(height * heightmap_scale, constants.max_byte_value);
+					dest_pixel[x] = (sdl_pixel_component_t) upscaled_height;
+				}
+			}
+		);
+	);
+}
+
+////////// This code concerns normal map creation.
 
 static GLint int_min(const GLint val, const GLint lower) {
 	return (val < lower) ? val : lower;
@@ -17,28 +46,21 @@ static GLint limit_int_to_domain(const GLint val, const GLint lower, const GLint
 }
 
 static sdl_pixel_component_t sobel_sample(const SDL_Surface* const surface, const GLint x, const GLint y) {
-	const sdl_pixel_t pixel = *(sdl_pixel_t*) read_surface_pixel(surface, x, y);
-
-	sdl_pixel_component_t r, g, b;
-	SDL_GetRGB(pixel, surface -> format, &r, &g, &b);
-	return (r + g + b) / 3;
+	return *(sdl_pixel_component_t*) read_surface_pixel(surface, x, y);
 }
 
 /* This function is based on these sources:
 - https://en.wikipedia.org/wiki/Sobel_operator
 - https://www.shadertoy.com/view/Xtd3DS
 
-The strength of a pixel's color is considered
-to be the average of its three color components.
-
 It's assumed that `src` has the same size as `dest`. */
-static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest, const GLint subtexture_h, const GLfloat intensity) {
-	const GLint w = src -> w, h = src -> h;
-	const SDL_PixelFormat* const format = src -> format;
+static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest, const GLint subtexture_h) {
+	const GLint w = dest -> w, h = dest -> h;
+	const SDL_PixelFormat* const format = dest -> format;
 
 	const GLfloat
-		half_max_rgb_value = 0.5f * constants.max_byte_value,
-		one_over_intensity_on_rgb_scale = constants.max_byte_value / intensity;
+		one_over_max_rgb_value = 1.0f / constants.max_byte_value,
+		half_max_rgb_value = 0.5f * constants.max_byte_value;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
@@ -65,9 +87,14 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 
 					vec3 normal = {
 						(-bl - (ml << 1) - tl) + (tr + (mr << 1) + br),
-						(-tr - (tm << 1) - tl) + (bl + (bm << 1) + br),
-						one_over_intensity_on_rgb_scale
+						(-tr - (tm << 1) - tl) + (bl + (bm << 1) + br)
 					};
+
+					const GLfloat // These are in a range of 0 to 1
+						gx = normal[0] * one_over_max_rgb_value,
+						gy = normal[1] * one_over_max_rgb_value;
+
+					normal[2] = sqrtf(fabsf(1.0f - (gx * gx + gy * gy))) * constants.max_byte_value;
 
 					glm_vec3_normalize(normal);
 					glm_vec3_scale(normal, half_max_rgb_value, normal);
@@ -77,7 +104,9 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 						(sdl_pixel_component_t) normal[0],
 						(sdl_pixel_component_t) normal[1],
 						(sdl_pixel_component_t) normal[2],
-						constants.max_byte_value - sobel_sample(src, x, y) // Inverse height value
+
+						// Inverse height value for parallax mapping
+						constants.max_byte_value - sobel_sample(src, x, y)
 					);
 				}
 			}
@@ -112,43 +141,34 @@ static void do_separable_gaussian_blur_pass(
 	const GLfloat* const kernel, const GLint subtexture_h,
 	const signed_byte kernel_radius, const bool blur_is_vertical) {
 
-	const GLint w = src -> w, h = src -> h;
-
-	const SDL_PixelFormat *const format = src -> format;
+	const GLint w = dest -> w, h = dest -> h;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
 
 			for (GLint y = 0; y < h; y++) {
-				sdl_pixel_t* const dest_pixel = read_surface_pixel(dest, 0, y);
+				sdl_pixel_component_t* const dest_pixel = read_surface_pixel(dest, 0, y);
 
 				const GLint subtexture_top = (y / subtexture_h) * subtexture_h;
 				const GLint subtexture_bottom = subtexture_top + subtexture_h - 1;
 
 				for (GLint x = 0; x < w; x++) {
-					vec3 summed_channels = GLM_VEC3_ZERO_INIT;
+					GLuint blurred_pixel = 0.0f;
 
 					for (signed_byte i = -kernel_radius; i <= kernel_radius; i++) {
 						GLint fx = x, fy = y; // `f` = filter
 						if (blur_is_vertical) fy += i; else fx += i;
 
-						const sdl_pixel_t src_pixel = *(sdl_pixel_t*) read_surface_pixel(src,
-							limit_int_to_domain(fx, 0, w - 1),
-							limit_int_to_domain(fy, subtexture_top, subtexture_bottom)
-						);
+						const sdl_pixel_component_t src_pixel = *(sdl_pixel_component_t*)
+							read_surface_pixel(src,
+								limit_int_to_domain(fx, 0, w - 1),
+								limit_int_to_domain(fy, subtexture_top, subtexture_bottom)
+							);
 
-						sdl_pixel_component_t r, g, b;
-						SDL_GetRGB(src_pixel, format, &r, &g, &b);
-
-						glm_vec3_muladds((vec3) {r, g, b}, kernel[i + kernel_radius], summed_channels);
+						blurred_pixel += (sdl_pixel_component_t) (src_pixel * kernel[i + kernel_radius]);
 					}
 
-					// Alpha is not preserved here since the alpha channel isn't needed for the normal map
-					dest_pixel[x] = SDL_MapRGB(format,
-						(sdl_pixel_component_t) summed_channels[0],
-						(sdl_pixel_component_t) summed_channels[1],
-						(sdl_pixel_component_t) summed_channels[2]
-					);
+					dest_pixel[x] = (sdl_pixel_component_t) blurred_pixel;
 				}
 			}
 		);
@@ -175,17 +195,19 @@ static void get_texture_metadata(
 	glGetTexParameteriv(type, GL_TEXTURE_MIN_FILTER, mag_min_filter + 1);
 }
 
-GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
+GLuint init_normal_map_from_albedo_texture(const GLuint albedo_texture,
 	const TextureType type, const NormalMapConfig* const config) {
 
 	/* How this function works:
 
 	- First, query OpenGL about information about the texture set, like its dimensions, and its filters used.
-	- Then, define two general purpose surfaces, #1 and #2.
-	- Copy the texture contents into surface #1.
-	- Blur #1 horizontally to #2, and blur #2 vertically to #1.
-	- Generate a normal map of #1 to #2.
-	- After that, reupload #2 to the GPU as a texture set of normal maps.
+	- Then, define two grayscale surfaces, #1 and #2, and one RGBA surface.
+	- Copy the surface in from disk into the RGBA surface.
+	- Make a heightmap of the RGBA surface to #1.
+	- Blur #1 horizontally to #2.
+	- Blur #2 vertically to #1.
+	- Generate a normal map of #1 to the RGBA surface.
+	- Upload the RGBA surface to the GPU as a texture set of normal maps.
 
 	Note: normal maps are not interleaved with the texture set because if gamma correction is used,
 	the texture set will be in SRGB, and normal maps should be in a linear color space. */
@@ -198,7 +220,7 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 
 	GLint subtexture_w, subtexture_h, num_subtextures, wrap_mode, mag_min_filter[2];
 
-	use_texture(type, diffuse_texture);
+	use_texture(type, albedo_texture);
 	get_texture_metadata(type, &subtexture_w, &subtexture_h, &num_subtextures, &wrap_mode, mag_min_filter);
 
 	////////// Uploading the texture to the CPU
@@ -215,26 +237,35 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 	const GLint cpu_buffers_h = subtexture_h * num_subtextures;
 
 	SDL_Surface
-		*const buffer_1 = init_blank_surface(subtexture_w, cpu_buffers_h),
-		*const buffer_2 = init_blank_surface(subtexture_w, cpu_buffers_h);
+		*const rgba_surface = init_blank_surface(subtexture_w, cpu_buffers_h),
+		*const grayscale_buffer_1 = init_blank_grayscale_surface(subtexture_w, cpu_buffers_h),
+		*const grayscale_buffer_2 = init_blank_grayscale_surface(subtexture_w, cpu_buffers_h);
 
-	if (rescaling) { // If rescaling, copy the texture on the GPU into a surface with the same size, and then upscale that surface to `buffer_1`
-		SDL_Surface* const surface_with_src_size = init_blank_surface(unscaled_subtexture_w, unscaled_subtexture_h * num_subtextures);
+	//////////
+
+	if (rescaling) { // If rescaling, copying the texture on the GPU into a surface with the same size, and then upscaling that surface to `rgba_surface`
+		SDL_Surface* const surface_with_src_size = init_blank_surface(
+			unscaled_subtexture_w, unscaled_subtexture_h * num_subtextures);
 
 		WITH_SURFACE_PIXEL_ACCESS(surface_with_src_size,
 			glGetTexImage(type, level, OPENGL_INPUT_PIXEL_FORMAT,
 				OPENGL_COLOR_CHANNEL_TYPE, surface_with_src_size -> pixels);
 		);
 
-		SDL_BlitScaled(surface_with_src_size, NULL, buffer_1, NULL);
+		SDL_BlitScaled(surface_with_src_size, NULL, rgba_surface, NULL);
 		deinit_surface(surface_with_src_size);
 	}
-	else { // Otherwise, copy the texture directly to `buffer_1`
-		WITH_SURFACE_PIXEL_ACCESS(buffer_1,
+	else { // Otherwise, copy the texture directly to `rgba_surface`
+		WITH_SURFACE_PIXEL_ACCESS(rgba_surface,
 			glGetTexImage(type, level, OPENGL_INPUT_PIXEL_FORMAT,
-				OPENGL_COLOR_CHANNEL_TYPE, buffer_1 -> pixels);
+				OPENGL_COLOR_CHANNEL_TYPE, rgba_surface -> pixels);
 		);
 	}
+
+	////////// Making a heightmap
+
+	// TODO: optimize if the scale is 0
+	generate_heightmap(rgba_surface, grayscale_buffer_1, config -> heightmap_scale);
 
 	////////// Blurring it (if needed), and then making a normal map
 
@@ -245,34 +276,35 @@ GLuint init_normal_map_from_diffuse_texture(const GLuint diffuse_texture,
 		GLfloat* const blur_kernel = compute_1D_gaussian_kernel(blur_radius, blur_std_dev);
 
 		do_separable_gaussian_blur_pass( // Blurring #1 to #2 horizontally
-			buffer_1, buffer_2, blur_kernel, subtexture_h, blur_radius, false);
+			grayscale_buffer_1, grayscale_buffer_2, blur_kernel, subtexture_h, blur_radius, false);
 
 		do_separable_gaussian_blur_pass( // Blurring #2 to #1 vertically
-			buffer_2, buffer_1, blur_kernel, subtexture_h, blur_radius, true);
+			grayscale_buffer_2, grayscale_buffer_1, blur_kernel, subtexture_h, blur_radius, true);
 
 		dealloc(blur_kernel);
 	}
 
-	// Making a normal map of #1 to #2
-	generate_normal_map(buffer_1, buffer_2, subtexture_h, config -> intensity);
+	// Making a normal map of #1 to `rgba_surface`
+	generate_normal_map(grayscale_buffer_1, rgba_surface, subtexture_h);
 
-	////////// Making a new texture on the GPU, and then writing the normal map to that
+	////////// Putting the normal map in GPU memory
 
 	const TextureFilterMode min_filter = (TextureFilterMode) mag_min_filter[1];
-	const GLuint normal_map_set = preinit_texture(type, (TextureWrapMode) wrap_mode, (TextureFilterMode) mag_min_filter[0], min_filter, false);
+	const GLuint normal_map_set = preinit_texture(type, (TextureWrapMode) wrap_mode,
+		(TextureFilterMode) mag_min_filter[0], min_filter, config -> use_anisotropic_filtering);
 
-	// Copying #2 to a new texture on the GPU
-	WITH_SURFACE_PIXEL_ACCESS(buffer_2,
+	WITH_SURFACE_PIXEL_ACCESS(rgba_surface, // Copying `rgba_surface` to a new texture on the GPU
 		init_texture_data(type, (GLsizei[]) {subtexture_w, subtexture_h, num_subtextures}, OPENGL_INPUT_PIXEL_FORMAT,
-			OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, buffer_2 -> pixels);
+			OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, rgba_surface -> pixels);
 	);
 
 	if (min_filter == TexLinearMipmapped || min_filter == TexTrilinear) init_texture_mipmap(type);
 
 	////////// Deinitialization
 
-	deinit_surface(buffer_1);
-	deinit_surface(buffer_2);
+	deinit_surface(grayscale_buffer_1);
+	deinit_surface(grayscale_buffer_2);
+	deinit_surface(rgba_surface);
 
 	return normal_map_set;
 }

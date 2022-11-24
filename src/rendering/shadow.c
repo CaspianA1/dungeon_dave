@@ -1,8 +1,9 @@
 #include "rendering/shadow.h"
-#include "data/constants.h"
-#include "utils/alloc.h"
-#include "utils/shader.h"
-#include "utils/opengl_wrappers.h"
+#include "utils/safe_io.h" // For `open_file_safely`
+#include "utils/macro_utils.h" // For `ASSET_PATH`
+#include "utils/alloc.h" // For `alloc`, and `dealloc`
+#include "utils/texture.h" // For `init_texture_data`
+#include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 
 static const GLenum framebuffer_target = GL_DRAW_FRAMEBUFFER;
 
@@ -43,7 +44,7 @@ static void get_light_view_projection(
 	////////// Getting the camera sub frustum center
 
 	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection;
-	glm_perspective(camera -> angles.fov, aspect_ratio, near_clip_dist, far_clip_dist, camera_sub_frustum_projection);
+	glm_perspective(camera -> fov, aspect_ratio, near_clip_dist, far_clip_dist, camera_sub_frustum_projection);
 	glm_mul(camera_sub_frustum_projection, (vec4*) camera -> view, camera_sub_frustum_view_projection);
 	glm_mat4_inv(camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection);
 
@@ -64,7 +65,7 @@ static void get_light_view_projection(
 	/* When the camera FOV changes, each sub frustum gets wider, and this results in texel snapping not working.
 	So, the FOV for each sub frustum is the average of the initial camera FOV and the max FOV, in order to best
 	accomodate both FOVs. */
-	const GLfloat fov_for_sub_frustum = constants.camera.init.fov + constants.camera.limits.fov_change * 0.5f;
+	const GLfloat fov_for_sub_frustum = constants.camera.init_fov + constants.camera.limits.fov_change * 0.5f;
 
 	const GLfloat // TODO: precompute k
 		far_clip_minus_near_clip = far_clip_dist - near_clip_dist,
@@ -101,39 +102,40 @@ in `num_cascades.geom`. This is a macro, and not a uniform, since the shadow
 geometry shader must clone the scene geometry a fixed number of times
 (specified at compile time) for different layered rendering passes per each sub-frustum.
 So, before all shader compilation, this function writes the number of cascades to `num_cascades.geom.` */
-void specify_cascade_count_before_any_shader_compilation(const GLsizei num_cascades) {
+void specify_cascade_count_before_any_shader_compilation(
+	const byte opengl_major_minor_version[2], const byte num_cascades) {
+
 	FILE* const file = open_file_safely(ASSET_PATH("shaders/shadow/num_cascades.glsl"), "w");
 
-	const byte* const opengl_version = constants.window.opengl_major_minor_version;
 	const GLchar* const file_description = "This file is written to before any other shaders include it";
 
 	fprintf(file,
-		"#version %u%u0 core\n\n// %s\n"
-		"#define NUM_CASCADES %uu\n"
+		"#version %hhu%hhu0 core\n\n// %s\n"
+		"#define NUM_CASCADES %hhuu\n"
 		"#define NUM_CASCADE_SPLITS %uu\n",
 
-		opengl_version[0], opengl_version[1], file_description,
+		opengl_major_minor_version[0],
+		opengl_major_minor_version[1], file_description,
 		num_cascades, num_cascades - 1);
 
 	fclose(file);
 }
 
-CascadedShadowContext init_shadow_context(
-	const GLfloat sub_frustum_scale, const GLfloat far_clip_dist,
-	const GLfloat linear_split_weight, const GLsizei resolution,
-	const GLsizei num_cascades, const GLsizei num_depth_buffer_bits) {
-
+CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* const config, const GLfloat far_clip_dist) {
 	////////// Creating the split dists
 
-	const GLsizei num_split_dists = num_cascades - 1;
+	const byte num_cascades = config -> num_cascades;
+
+	const byte num_split_dists = num_cascades - 1;
 	GLfloat* const split_dists = alloc((size_t) num_split_dists, sizeof(GLfloat));
 	mat4* const light_view_projection_matrices = alloc((size_t) num_cascades, sizeof(mat4));
 
 	const GLfloat
 		near_clip_dist = constants.camera.near_clip_dist,
-		clip_dist_diff = far_clip_dist - constants.camera.near_clip_dist;
+		clip_dist_diff = far_clip_dist - constants.camera.near_clip_dist,
+		linear_split_weight = config -> linear_split_weight;
 
-	for (GLsizei i = 0; i < num_split_dists; i++) {
+	for (byte i = 0; i < num_split_dists; i++) {
 		const GLfloat layer_percent = (GLfloat) (i + 1) / num_cascades;
 
 		const GLfloat linear_dist = near_clip_dist + layer_percent * clip_dist_diff;
@@ -150,10 +152,14 @@ CascadedShadowContext init_shadow_context(
 
 	GLint internal_format;
 
+	const byte num_depth_buffer_bits = config -> num_depth_buffer_bits;
+
 	switch (num_depth_buffer_bits) {
 		#define INTERNAL_FORMAT_CASE(num_bits) case num_bits: internal_format = GL_DEPTH_COMPONENT##num_bits; break
 
-		INTERNAL_FORMAT_CASE(16); INTERNAL_FORMAT_CASE(24); INTERNAL_FORMAT_CASE(32);
+		INTERNAL_FORMAT_CASE(16);
+		INTERNAL_FORMAT_CASE(24);
+		INTERNAL_FORMAT_CASE(32);
 
 		#undef INTERNAL_FORMAT_CASE
 
@@ -161,8 +167,9 @@ CascadedShadowContext init_shadow_context(
 			"of depth buffer bits must be 16, 24, or 32, not %d", num_depth_buffer_bits);
 	}
 
+	const GLsizei resolution = config -> resolution;
 	init_texture_data(shadow_map_texture_type, (GLsizei[]) {resolution, resolution, num_cascades},
-		GL_DEPTH_COMPONENT, internal_format, OPENGL_SHADOW_MAP_COLOR_CHANNEL_TYPE, NULL);
+		GL_DEPTH_COMPONENT, internal_format, OPENGL_COLOR_CHANNEL_TYPE, NULL);
 
 	////////// Creating the framebuffer
 
@@ -227,7 +234,7 @@ CascadedShadowContext init_shadow_context(
 		.depth_comparison_sampler = depth_comparison_sampler,
 
 		.resolution = resolution, .num_cascades = num_cascades,
-		.sub_frustum_scale = sub_frustum_scale,
+		.sub_frustum_scale = config -> sub_frustum_scale,
 
 		.split_dists = split_dists,
 		.light_view_projection_matrices = light_view_projection_matrices

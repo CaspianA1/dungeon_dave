@@ -1,8 +1,8 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include "buffer_defs.h"
-#include "alloc.h"
+#include "utils/typedefs.h" // For `buffer_size_t` and `byte`
+#include "utils/alloc.h" // For `dealloc`
 
 /* Users of List should not access `max_alloc`; it is
 irrelevant to the user, and should be considered private. */
@@ -18,13 +18,12 @@ typedef struct {
 #define deinit_list(list) dealloc((list).data)
 #define value_at_list_index(list, index, type) ((type*) (list) -> data)[index]
 
-#define LIST_FOR_EACH(initial_offset, list, item_name, out_of_bounds_name, ...) do {\
+#define LIST_FOR_EACH(initial_offset, list, item_name, ...) do {\
 	const buffer_size_t length = (list) -> length, item_size = (list) -> item_size;\
 	byte* const data = (byte*) (list) -> data;\
-	byte* const out_of_bounds_name = data + length * item_size;\
+	byte* const out_of_bounds = data + length * item_size;\
 	\
-	for (byte* item_name = data + (initial_offset) * item_size; item_name < out_of_bounds_name; item_name += item_size)\
-		do {__VA_ARGS__} while (false);\
+	for (byte* item_name = data + (initial_offset) * item_size; item_name < out_of_bounds; item_name += item_size) {__VA_ARGS__}\
 } while (false)
 
 List _init_list(const buffer_size_t init_alloc, const buffer_size_t item_size);

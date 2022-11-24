@@ -1,7 +1,8 @@
 #ifndef OPENGL_WRAPPERS_H
 #define OPENGL_WRAPPERS_H
 
-#include "utils/utils.h"
+#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/failure.h" // For `FAIL`
 
 ////////// Some init/use/deinit functions
 
@@ -98,6 +99,23 @@ static inline void* init_gpu_buffer_memory_mapping(const GLuint buffer, const GL
 	use_gpu_buffer(target, buffer);
 	const GLbitfield range_invalidation_flag = discard_prev_contents ? GL_MAP_INVALIDATE_RANGE_BIT : 0;
 	return glMapBufferRange(target, 0, num_bytes, GL_MAP_WRITE_BIT | range_invalidation_flag);
+}
+
+static inline const GLchar* get_GL_error(void) {
+	switch (glGetError()) {
+		#define ERROR_CASE(error) case GL_##error: return #error;
+
+		ERROR_CASE(NO_ERROR);
+		ERROR_CASE(INVALID_ENUM);
+		ERROR_CASE(INVALID_VALUE);
+		ERROR_CASE(INVALID_OPERATION);
+		ERROR_CASE(INVALID_FRAMEBUFFER_OPERATION);
+		ERROR_CASE(OUT_OF_MEMORY);
+
+		#undef ERROR_CASE
+
+		default: return "Unknown error";
+	}
 }
 
 #endif

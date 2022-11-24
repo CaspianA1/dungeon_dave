@@ -7,43 +7,13 @@
 #include "ambient_occlusion.frag"
 #include "../shadow/shadow.frag"
 
-in vec3 fragment_pos_world_space, UV, camera_to_fragment_world_space;
+flat in uint material_index, bilinear_percents_index;
+in vec3 UV, fragment_pos_world_space, camera_to_fragment_world_space;
 flat in mat3 fragment_tbn;
 
 // These are set through a shared fn for world-shaded objects
-uniform samplerCube environment_map_sampler;
-uniform sampler2DArray diffuse_sampler, normal_map_sampler;
-
-float diffuse(const vec3 fragment_normal) { // Lambert
-	float diffuse_amount = dot(fragment_normal, dir_to_light);
-	return strengths.diffuse * max(diffuse_amount, 0.0f);
-}
-
-vec3 specular(const vec4 normal_and_inv_height, const vec3 view_dir) { // Blinn-Phong
-	vec3 halfway_dir = normalize(dir_to_light + view_dir);
-	float cos_angle_of_incidence = max(dot(normal_and_inv_height.xyz, halfway_dir), 0.0f);
-
-	//////////
-
-	// TODO: scale this by a fragment pos delta in order to put the local roughness in world-space
-	float local_roughness = fwidth(normal_and_inv_height.a); // Greater heightmap change -> more local roughness
-
-	// TOOD: add a specular exponent strength param per object instance
-	float specular_exponent = mix(specular_exponents.matte, specular_exponents.rough, local_roughness);
-	float specular_value = strengths.specular * pow(cos_angle_of_incidence, specular_exponent);
-
-	//////////
-
-	vec3 reflection_dir = reflect(-view_dir, normal_and_inv_height.xyz);
-	vec3 env_map_value = texture(environment_map_sampler, reflection_dir).rgb;
-
-	// More of the environment map will be reflected for less rough surfaces
-	env_map_value = mix(env_map_value, vec3(1.0f), local_roughness);
-
-	//////////
-
-	return specular_value * env_map_value;
-}
+uniform sampler1D materials_sampler;
+uniform sampler2DArray albedo_sampler, normal_map_sampler;
 
 // https://64.github.io/tonemapping/ (Reinhard Extended Luminance)
 void apply_tone_mapping(const float max_white, inout vec3 color) {
@@ -58,34 +28,112 @@ void apply_noise_for_banding_removal(const vec2 seed, inout vec3 color) {
 	color += mix(-noise_granularity, noise_granularity, random_value);
 }
 
-vec4 calculate_light(void) {
-	vec3 parallax_UV_for_diffuse = get_parallax_UV(UV, normal_map_sampler);
-	vec3 parallax_UV_for_normal = parallax_UV_for_diffuse;
+/////////////////////////////////////////////////// PBR
 
-	// Parallax UVs for diffuse and normal have different bilinear percents, so this adjusts those individually
-	adjust_UV_for_pixel_art_filtering(bilinear_percents.diffuse, textureSize(diffuse_sampler, 0).xy, parallax_UV_for_diffuse.xy);
-	adjust_UV_for_pixel_art_filtering(bilinear_percents.normal, textureSize(normal_map_sampler, 0).xy, parallax_UV_for_normal.xy);
+const float PI = 3.14159265359f;
+const float ONE_OVER_PI = 1.0f / PI;
 
-	vec4 normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
-	normal_and_inv_height.xyz = fragment_tbn * normal_and_inv_height.xyz;
+// Fresnel-Schlick; an approximation to the Fresnel effect.
+vec3 fresnel_schlick(const float h_dot_v, const vec3 F0) {
+	return F0 + (1.0f - F0) * pow(1.0f - h_dot_v, 5.0f);
+}
 
-	vec3 view_dir = normalize(camera_to_fragment_world_space);
+// Trowbridge-Reitz GGX normal distribution function.
+float normal_distribution(const float roughness, const float n_dot_h) {
+	float alpha = roughness * roughness;
+	float alpha_squared = alpha * alpha;
+	float denominator = (n_dot_h * n_dot_h) * (alpha_squared - 1.0f) + 1.0f;
+
+	denominator = PI * (denominator * denominator);
+	return alpha_squared / denominator;
+}
+
+// Smith's function gives an estimation to how many local microfacets are self-shadowing.
+float geometry_smith(const float roughness, const float n_dot_v, const float n_dot_l) {
+	float r = roughness + 1.0f;
+	float k = (r * r) / 8.0f;
+	float one_minus_k = 1.0f - k;
+
+	// Using the Schlick-GGX geometry function
+	vec2 dots = vec2(n_dot_v, n_dot_l);
+	vec2 ggx_results = dots / (dots * one_minus_k + k);
+
+	return ggx_results.x * ggx_results.y;
+}
+
+vec4 calculate_light() {
+	const float almost_zero = 0.0001f;
+	const vec3 dielectric_F0 = vec3(0.04f);
+
+	vec3 lighting_properties = texelFetch(materials_sampler, int(material_index), 0).rgb;
+	vec2 bilinear_percents = all_bilinear_percents[bilinear_percents_index];
+
+	float
+		metallicity = lighting_properties[0],
+		min_roughness = lighting_properties[1],
+		max_roughness = lighting_properties[2],
+		albedo_bilinear_percent = bilinear_percents[0],
+		normal_bilinear_percent = bilinear_percents[1];
+
+	//////////
+
+	vec3 parallax_UV_for_albedo = get_parallax_UV(UV, normal_map_sampler);
+	vec3 parallax_UV_for_normal = parallax_UV_for_albedo;
+
+	/* Parallax UVs for albedo and normal have different bilinear percents, so this adjusts
+	those individually. Note that the bilinear percent for the parallax heightmap is always 1. */
+	adjust_UV_for_pixel_art_filtering(albedo_bilinear_percent, textureSize(albedo_sampler, 0).xy, parallax_UV_for_albedo.xy);
+	adjust_UV_for_pixel_art_filtering(normal_bilinear_percent, textureSize(normal_map_sampler, 0).xy, parallax_UV_for_normal.xy);
+
+	vec4
+		albedo = texture(albedo_sampler, parallax_UV_for_albedo),
+		normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
+
+	/* If an object's heightmap (built from its albedo texture) has steeper height changes,
+	its surface normals will be more slanted, and so the Z components of those normals
+	will be more aligned with the plane. So here, I am interpolating between the max and min
+	roughness, based on the magnitude of the local height change on the normal map. */
+	float roughness = mix(max_roughness, min_roughness, normal_and_inv_height.z);
+
+	////////// https://learnopengl.com/PBR/Lighting and https://www.youtube.com/watch?v=5p0e7YNONr8
+
+	vec3
+		fragment_normal = fragment_tbn * normal_and_inv_height.xyz,
+		view_dir = normalize(camera_to_fragment_world_space);
+
+	vec3 halfway_dir = normalize(dir_to_light + view_dir);
+
+	float
+		n_dot_v = max(dot(fragment_normal, view_dir), almost_zero),
+		n_dot_l = max(dot(fragment_normal, dir_to_light), almost_zero),
+		h_dot_v = max(dot(halfway_dir, view_dir), 0.0f),
+		n_dot_h = max(dot(fragment_normal, halfway_dir), 0.0f);
+
+	////////// See more PBR sub-algorithms here: https://www.jordanstevenstechart.com/physically-based-rendering
+
+	float
+		D = normal_distribution(roughness, n_dot_h),
+		G = geometry_smith(roughness, n_dot_v, n_dot_l);
+
+	vec3 F0 = mix(dielectric_F0, albedo.rgb, metallicity);
+	vec3 F = fresnel_schlick(h_dot_v, F0);
+
+	vec3
+		specular = (D * G * F) / (4.0f * n_dot_v * n_dot_l),
+		diffuse = (1.0f - F) * (1.0f - metallicity);
 
 	vec2 shadow_and_volumetric_light = get_csm_shadow_and_volumetric_light(fragment_pos_world_space, view_dir);
 
-	vec3 non_ambient = diffuse(normal_and_inv_height.xyz) + specular(normal_and_inv_height, view_dir);
-	vec3 light_strength = non_ambient * shadow_and_volumetric_light.x + strengths.ambient * get_ao_strength();
+	//////////
 
-	vec4 texture_color = texture(diffuse_sampler, parallax_UV_for_diffuse);
-	vec3 color = mix(texture_color.rgb * light_strength, overall_scene_tone, shadow_and_volumetric_light.y * texture_color.a);
+	vec3 radiance = light_color; // TODO: do some variant of IBL to add the environment map sampler back in
+	vec3 Lo = (diffuse * albedo.rgb * ONE_OVER_PI + specular) * radiance * n_dot_l * shadow_and_volumetric_light.x;
+
+	vec3 ambient = get_ambient_strength() * albedo.rgb;
+	vec3 color = mix(ambient + Lo, light_color, shadow_and_volumetric_light.y) * albedo.a;
 
 	apply_tone_mapping(tone_mapping_max_white, color);
 	apply_noise_for_banding_removal(UV.xy, color);
 
-	// return vec4(vec3(get_ao_strength()), 1.0f);
-	// return vec4(vec3(diffuse(normal_and_inv_height.xyz)), 1.0f);
-	// return vec4(specular(normal_and_inv_height, view_dir), 1.0f);
-	// return vec4(vec3(shadow_and_volumetric_light.y * texture_color.a), texture_color.a);
-
-	return vec4(color, texture_color.a);
+	return vec4(color, albedo.a);
 }

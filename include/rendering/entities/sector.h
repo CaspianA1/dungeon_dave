@@ -1,11 +1,15 @@
 #ifndef SECTOR_H
 #define SECTOR_H
 
-#include "utils/buffer_defs.h"
-#include "rendering/drawable.h"
-#include "utils/list.h"
-#include "camera.h"
-#include "normal_map_generation.h"
+#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "rendering/drawable.h" // For `Drawable`
+#include "utils/list.h" // For `List`
+#include "camera.h" // For `Camera`
+#include "level_config.h" // For `MaterialPropertiesPerObjectType`
+
+// These definitions are in the header so that face.c can use them too
+typedef face_component_t face_vertex_t[components_per_face_vertex];
+typedef face_vertex_t face_mesh_t[vertices_per_face];
 
 typedef struct {
 	const byte origin[2];
@@ -34,12 +38,12 @@ frustum_cull_sector_faces_into_gpu_buffer, define_vertex_spec */
 
 SectorContext init_sector_context(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height,
-	const GLchar* const* const texture_paths, const GLsizei num_textures,
-	const GLsizei texture_size, const NormalMapConfig* const normal_map_config);
+	const GLchar* const* const texture_paths, const byte num_textures,
+	const MaterialPropertiesPerObjectType* const shared_material_properties);
 
 void deinit_sector_context(const SectorContext* const sector_context);
 
 void draw_sectors_to_shadow_context(const SectorContext* const sector_context);
-void draw_sectors(const SectorContext* const sector_context, const vec4 frustum_planes[planes_per_frustum]);
+void draw_sectors(const SectorContext* const sector_context, const Camera* const camera);
 
 #endif

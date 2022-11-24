@@ -1,4 +1,5 @@
 #include "rendering/entities/face.h"
+#include "utils/map_utils.h" // For `sample_map_point`
 
 /* For the face type, NS = north-south, and EW = east-west.
 If a face is NS, its two ends lie on a vertical top-down axis;
@@ -216,7 +217,7 @@ void init_mesh_for_sector(
 
 List init_map_edge_mesh(const byte* const heightmap, const byte map_width, const byte map_height) {
 	// TODO: make this a constant somewhere
-	buffer_size_t submesh_amount_guess = ((map_width + map_height)) / 6;
+	buffer_size_t submesh_amount_guess = (map_width + map_height) / 6;
 	if (submesh_amount_guess == 0) submesh_amount_guess = 1;
 
 	List edge_mesh = init_list(submesh_amount_guess, face_mesh_t);

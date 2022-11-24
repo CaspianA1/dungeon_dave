@@ -5,8 +5,6 @@
 layout(location = 0) in ivec3 vertex_pos_world_space;
 layout(location = 1) in uint face_info_bits;
 
-uniform bool branch;
-
 const struct FaceAttribute {
 	vec3 tangent, normal;
 } face_attributes[5] = FaceAttribute[5]( // Flat, right, bottom, left, top
@@ -18,7 +16,7 @@ const struct FaceAttribute {
 );
 
 void main(void) {
-	////////// Setting UV and camera_fragment_delta_tangent_space
+	////////// Setting `material_index`, UV and camera_fragment_delta_tangent_space
 
 	uint face_id = face_info_bits & 7u; // Extracting the first 3 bits
 	FaceAttribute face_attribute = face_attributes[face_id];
@@ -29,9 +27,12 @@ void main(void) {
 		face_attribute.normal
 	);
 
+	material_index = face_info_bits >> 3u; // Shifting over to get the material index/texture id
+	bilinear_percents_index = 0u;
+
 	UV = vec3(
 		-vertex_pos_world_space * mat2x3(tbn),
-		face_info_bits >> 3u // Shifting over to get the texture id
+		material_index
 	);
 
 	set_common_outputs(vertex_pos_world_space, tbn);

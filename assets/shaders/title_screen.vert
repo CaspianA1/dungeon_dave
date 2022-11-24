@@ -9,13 +9,13 @@ noperspective out vec3 fragment_pos_tangent_space;
 uniform float scroll_factor, scrolling_texture_vert_squish_ratio;
 uniform vec3 light_pos_tangent_space;
 
-uniform sampler2D scrolling_diffuse_sampler;
+uniform sampler2D scrolling_albedo_sampler;
 
 void main(void) {
 	UV = get_quad_UV();
 	scrolling_UV_x = UV.x;
 
-	ivec2 scrolling_texture_size = textureSize(scrolling_diffuse_sampler, 0);
+	ivec2 scrolling_texture_size = textureSize(scrolling_albedo_sampler, 0);
 	float scrolling_aspect_ratio = float(scrolling_texture_size.x) / scrolling_texture_size.y;
 
 	// Making the texture aspect ratio correct

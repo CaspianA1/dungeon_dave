@@ -1,12 +1,9 @@
 #ifndef MAPS_H
 #define MAPS_H
 
-#include "utils/buffer_defs.h"
+#include "utils/typedefs.h" // For `byte`
 
-byte get_heightmap_max_point_height(const byte* const heightmap, const byte map_size[2]);
-GLfloat compute_world_far_clip_dist(const byte map_size[2], const byte max_point_height);
-
-enum {
+enum { // These are enums so that they can define compile-time constant arrays
 	level_one_width = 25, level_one_height = 15,
 	architecture_width = 50, architecture_height = 50,
 	fortress_width = 50, fortress_height = 50,

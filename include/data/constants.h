@@ -1,16 +1,16 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include "utils/buffer_defs.h"
+#include "utils/typedefs.h" // For OpenGL types + `byte`
+#include "utils/sdl_include.h" // For `SDL_Scancode`
+#include "utils/cglm_include.h" // For pi variants + `vec2`
 
-/* These are defined because M_PI and M_PI_2 are not standard C. They are macros
-and not in the `constants` struct b/c other values in that struct depend on them. */
-#define TWO_PI 6.28318530717958647692528676655900576f
-#define THREE_HALVES_PI 4.71238898038468985769396507491925432f
-#define PI 3.14159265358979323846264338327950288f
-#define TWO_THIRDS_PI 2.09439510239319562184441962594041856f
-#define HALF_PI 1.57079632679489661923132169163975144f
-#define FOURTH_PI 0.785398163397448309615660845819875721f
+static const GLfloat
+	TWO_PI = GLM_PIf * 2.0f,
+	TWO_THIRDS_PI = GLM_PIf * 2.0f / 3.0f,
+	THREE_HALVES_PI = GLM_PIf * 3.0f / 2.0f;
+
+//////////
 
 #define BIT_MOVE_FORWARD 1
 #define BIT_MOVE_BACKWARD 2
@@ -22,62 +22,57 @@ and not in the `constants` struct b/c other values in that struct depend on them
 #define BIT_CLICK_LEFT 64
 #define BIT_USE_WEAPON BIT_CLICK_LEFT
 
-typedef struct { // These are the Euler angles + FOV
-	GLfloat fov, hori, vert, tilt;
-} Angles;
+//////////
 
-typedef struct {
-	const GLfloat fov_change, hori_wrap_around, vert_max, tilt_max;
-} AngleLimits;
+#define KEY_FLY SDL_SCANCODE_1
+#define KEY_TOGGLE_WIREFRAME_MODE SDL_SCANCODE_2
+#define KEY_PRINT_POSITION SDL_SCANCODE_3
+#define KEY_PRINT_DIRECTION SDL_SCANCODE_4
+#define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_5
+#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_6
+
+////////// TODO: put these in the struct below
+
+// #define TRACK_MEMORY
+// #define PRINT_SHADER_VALIDATION_LOG
+
+//////////
+
+enum { // `enum` is used to make these values compile-time constants
+	components_per_face_vertex_pos = 3,
+	components_per_face_vertex = 4,
+	vertices_per_face = 6,
+
+	vertices_per_triangle = 3,
+	corners_per_quad = 4,
+	corners_per_frustum = 8,
+	planes_per_frustum = 6,
+	faces_per_cubemap = 6,
+	vertices_per_skybox = 14,
+
+	num_unique_object_types = 3 // Sector face, billboard, and weapon sprite
+};
+
+//////////
 
 static const struct {
 	const GLfloat milliseconds_per_second;
 	const byte max_byte_value;
 
-	const struct {
-		const GLchar* const app_name;
-
-		const byte
-			opengl_major_minor_version[2],
-			default_fps, depth_buffer_bits;
-
-		const GLint size[2];
-	} window;
-
-	const struct {
-		const byte aniso_filtering_level, multisample_samples;
-
-		const struct {
-			const bool enabled;
-			const GLfloat min_layers, max_layers, height_scale, lod_cutoff;
-		} parallax_mapping;
-
-		const struct {const GLfloat diffuse, normal;} bilinear_percents;
-		const struct {const GLfloat ambient, diffuse, specular;} strengths;
-		const struct {const GLfloat matte, rough;} specular_exponents;
-
-		const struct {
-			const GLuint sample_radius, esm_exponent;
-			const GLfloat esm_exponent_layer_scale_factor;
-		} shadow_mapping;
-
-		const vec3 overall_scene_tone;
-		const GLfloat tone_mapping_max_white, noise_granularity;
-	} lighting;
-
 	const struct { // All angles are in radians
-		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, friction;
+		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, friction, init_fov;
 		const struct {const GLfloat period, max_amplitude;} pace;
-
-		const Angles init;
-		const AngleLimits limits;
+		const struct {const GLfloat fov_change, hori_wrap_around, vert_max, tilt_max;} limits;
 	} camera;
 
-	const struct {const GLfloat forward_back, additional_forward_back, strafe, xz_decel, g;} accel;
+	const struct {const GLfloat forward_back, additional_forward_back, strafe, g;} accel;
 
 	/* The `look` constant indicate the angles that shall be turned by
 	for a full mouse cycle across a screen axis. [0] = hori, [1] = vert. */
-	const struct {const GLfloat xz_max, jump, look[2];} speeds;
+	const struct {
+		const GLfloat xz_max, jump;
+		const vec2 look;
+	} speeds;
 
 	const struct {
 		const SDL_Scancode
@@ -90,51 +85,22 @@ static const struct {
 	.milliseconds_per_second = 1000.0f,
 	.max_byte_value = 255,
 
-	.window = {
-		.app_name = "Dungeon Dave",
-		.opengl_major_minor_version = {4, 0},
-		.default_fps = 60, .depth_buffer_bits = 24,
-		.size = {800, 600}
-	},
-
-	// TODO: remove this from this struct in some way
-	.lighting = {
-		.aniso_filtering_level = 8, .multisample_samples = 4,
-
-		.parallax_mapping = {
-			.enabled = true,
-			.min_layers = 4.0f, .max_layers = 32.0f,
-			.height_scale = 0.02f, .lod_cutoff = 1.5f
-		},
-
-		.bilinear_percents = {.diffuse = 0.75f, .normal = 0.9f},
-		.strengths = {.ambient = 0.7f, .diffuse = 0.6f, .specular = 0.6f},
-		.specular_exponents = {.matte = 8.0f, .rough = 128.0f},
-
-		.shadow_mapping = {
-			.sample_radius = 2, .esm_exponent = 45,
-			.esm_exponent_layer_scale_factor = 1.8f
-		},
-
-		.overall_scene_tone = {0.960784f, 0.835294f, 0.631373f},
-		.tone_mapping_max_white = 1.5f, .noise_granularity = 0.001f
-	},
-
 	.camera = {
 		.near_clip_dist = 0.25f, .eye_height = 0.5f, .aabb_collision_box_size = 0.2f,
 		.tilt_correction_rate = 11.0f, .friction = 7.5f,
+		.init_fov = GLM_PI_2f,
 
 		.pace = {.period = 0.7f, .max_amplitude = 0.2f},
-		.init = {.fov = HALF_PI, .hori = FOURTH_PI, .vert = 0.0f, .tilt = 0.0f},
-		.limits = {.fov_change = PI / 18.0f, .hori_wrap_around = TWO_PI, .vert_max = HALF_PI, .tilt_max = 0.2f}
+		.limits = {.fov_change = GLM_PIf / 18.0f, .hori_wrap_around = TWO_PI, .vert_max = GLM_PI_2f, .tilt_max = 0.2f}
 	},
 
 	.accel = {
-		.forward_back = 0.15f, .additional_forward_back = 0.05f,
-		.strafe = 0.2f, .xz_decel = 0.87f, .g = 13.0f
+		.forward_back = 6.0f,
+		.additional_forward_back = 2.5f,
+		.strafe = 5.5f, .g = 13.0f
 	},
 
-	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look = {TWO_THIRDS_PI, HALF_PI}},
+	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look = {TWO_THIRDS_PI, GLM_PI_2f}},
 
 	.keys = {
 		.forward = SDL_SCANCODE_W, .backward = SDL_SCANCODE_S, .left = SDL_SCANCODE_A,
@@ -145,14 +111,5 @@ static const struct {
 		.activate_exit = {SDL_SCANCODE_W, SDL_SCANCODE_Q}
 	}
 };
-
-//////////
-
-typedef enum {
-	RefreshRate,
-	AnisotropicFilteringLevel
-} RuntimeConstantName;
-
-GLfloat get_runtime_constant(const RuntimeConstantName runtime_constant_name);
 
 #endif

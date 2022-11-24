@@ -1,7 +1,8 @@
-#ifndef EVENT_H
-#define EVENT_H
+#ifndef EVENTS_H
+#define EVENTS_H
 
-#include "utils/buffer_defs.h"
+#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/sdl_include.h" // For `Uint8`
 
 typedef struct {
 	const byte movement_bits; // Forward, backward, left, right, jump, accelerate, click left

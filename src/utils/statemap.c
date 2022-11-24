@@ -1,5 +1,7 @@
 #include "utils/statemap.h"
-#include <limits.h>
+#include <limits.h> // For `CHAR_BIT`
+#include <math.h> // For `ceilf`
+#include "utils/macro_utils.h" // For `CHECK_BITMASK`
 
 static const byte bytes_per_chunk = sizeof(statemap_chunk_t);
 static const byte bits_per_chunk = CHAR_BIT * bytes_per_chunk;

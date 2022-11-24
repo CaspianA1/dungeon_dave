@@ -1,9 +1,9 @@
 #ifndef FACE_H
 #define FACE_H
 
-#include "utils/buffer_defs.h"
-#include "rendering/entities/sector.h"
-#include "utils/list.h"
+#include "rendering/entities/sector.h" // For `Sector`, and the face component + vertex typedefs
+#include "utils/list.h" // For `List`
+#include "utils/typedefs.h" // For `byte`
 
 ////////// Excluded: print_face, get_next_face, add_to_face_mesh, init_map_edge_mesh
 

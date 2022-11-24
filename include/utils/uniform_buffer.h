@@ -1,11 +1,9 @@
 #ifndef UNIFORM_BUFFER_H
 #define UNIFORM_BUFFER_H
 
-/* Note: structs can be written to by referring to their
-individual members, not by writing to the whole struct at once. */
-
-#include "buffer_defs.h"
-#include "list.h"
+#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "list.h" // For `List`
+#include <stdbool.h> // For `bool`
 
 typedef struct {
 	const GLuint id, binding_point;

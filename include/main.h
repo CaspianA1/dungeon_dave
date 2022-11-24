@@ -1,17 +1,17 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "utils/buffer_defs.h"
-#include "camera.h"
-#include "shared_shading_params.h"
-#include "rendering/entities/weapon_sprite.h"
-#include "rendering/entities/sector.h"
-#include "rendering/entities/billboard.h"
-#include "rendering/dynamic_light.h"
-#include "rendering/shadow.h"
-#include "rendering/ambient_occlusion.h"
-#include "rendering/entities/skybox.h"
-#include "rendering/entities/title_screen.h"
+#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "camera.h" // For `Camera`
+#include "shared_shading_params.h" // For `SharedShadingParams`
+#include "rendering/entities/weapon_sprite.h" // For `WeaponSprite`
+#include "rendering/entities/sector.h" // For `SectorContext`
+#include "rendering/entities/billboard.h" // For `BillboardContext`
+#include "rendering/dynamic_light.h" // For `DynamicLight`
+#include "rendering/shadow.h" // For `CascadedShadowContext`
+#include "rendering/ambient_occlusion.h" // For `AmbientOcclusionMap`
+#include "rendering/entities/skybox.h" // For `Skybox`
+#include "rendering/entities/title_screen.h" // For `TitleScreen`
 
 /* Drawing architecture change, plan:
 1. Allow BatchDrawContext to call glDrawArraysInstanced, if needed
@@ -46,6 +46,7 @@ typedef struct {
 	Camera camera;
 
 	SharedShadingParams shared_shading_params;
+	const GLuint materials_texture;
 
 	WeaponSprite weapon_sprite;
 	const SectorContext sector_context;

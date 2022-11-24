@@ -1,9 +1,12 @@
 #include "main.h"
-#include "normal_map_generation.h"
-#include "data/maps.h"
-#include "event.h"
-#include "utils/alloc.h"
-#include "utils/opengl_wrappers.h"
+#include "utils/opengl_wrappers.h" // For OpenGL defs + wrappers
+#include "utils/macro_utils.h" // For `ASSET_PATH`, and `ARRAY_LENGTH`
+#include "data/constants.h" // For `num_unique_object_types`
+#include "data/maps.h" // For various heightmaps and texture id maps
+#include "utils/map_utils.h" // For `get_heightmap_max_point_height` and `compute_world_far_clip_dist`
+#include "utils/alloc.h" // For `alloc`, and `dealloc`, and `WindowConfig`
+#include "utils/window.h" // For `make_application`
+#include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
 static bool main_drawer(void* const app_context, const Event* const event) {
 	glClear(GL_DEPTH_BUFFER_BIT); // No color buffer clearing needed
@@ -33,6 +36,13 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	update_shadow_context(shadow_context, camera, dir_to_light, event -> aspect_ratio);
 	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context, dir_to_light);
 
+	////////// Some key camera debugging
+
+	const Uint8* const keys = event -> keys;
+
+	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
+	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(camera -> dir);
+
 	////////// Rendering to the shadow context
 
 	enable_rendering_to_shadow_context(shadow_context);
@@ -42,7 +52,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 
 	////////// The main drawing code
 
-	draw_sectors(sector_context, camera -> frustum_planes);
+	draw_sectors(sector_context, camera);
 
 	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
@@ -56,73 +66,109 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 		);
 	);
 
+	if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
+	if (keys[KEY_PRINT_SDL_ERROR]) SDL_ERR_CHECK;
+
 	return false;
 }
 
-static void* main_init(void) {
+static void* main_init(const WindowConfig* const window_config) {
 	////////// Defining a bunch of level data
 
-	const GLchar *const still_billboard_texture_paths[] = {
-		ASSET_PATH("objects/health_kit.bmp"),
-		ASSET_PATH("objects/teleporter.bmp"),
-		ASSET_PATH("objects/shabti.bmp")
+	const LevelRenderingConfig level_rendering_config = {
+		// TODO: put more level rendering params in here
+
+		.parallax_mapping = {
+			.enabled = true,
+			.min_layers = 4.0f, .max_layers = 32.0f,
+			.height_scale = 0.02f, .lod_cutoff = 1.5f
+		},
+
+		.shadow_mapping = {
+			.sample_radius = 1, .esm_exponent = 80,
+			.esm_exponent_layer_scale_factor = 1.8f,
+			.billboard_alpha_threshold = 0.8f,
+
+			.shadow_context_config = {
+				4, 16, 1024, 1.5f, 0.3f // Palace
+				// 16, 16, 1200, 1.0f, 0.4f // Terrain
+			}
+		},
+
+		.volumetric_lighting = {
+			.enabled = true,
+
+			.num_samples = 25,
+			.decay = 0.95f, .decay_weight = 1.0f,
+			.sample_density = 1.0f, .opacity = 0.025f
+		},
+
+		.ambient_occlusion = {
+			.tricubic_filtering_enabled = true,
+			.strength = 0.9f
+		},
+
+		.dynamic_light_config = {
+			.time_for_cycle = 2.5f,
+			.pos = {3.0f, 50.0f, 36.0f},
+
+			.looking_at = {
+				.origin = {24.0f, 2.5f, 20.0f},
+				.dest = {28.0f, 2.5f, 17.5f}
+			}
+		},
+
+		.skybox_path = ASSET_PATH("skyboxes/desert.bmp"),
+
+		.light_color = {0.960784f, 0.835294f, 0.631373f},
+		.tone_mapping_max_white = 0.75f, .noise_granularity = 0.001f
 	};
 
-	const AnimationLayout billboard_animation_layouts[] = {
-		{ASSET_PATH("spritesheets/flying_carpet.bmp"), 5, 10, 46},
-		{ASSET_PATH("spritesheets/torch_2.bmp"), 2, 3, 5},
-		{ASSET_PATH("spritesheets/eddie.bmp"), 23, 1, 23},
-		{ASSET_PATH("spritesheets/trooper.bmp"), 33, 1, 33}
+	// This array has no specific order. Materials for sectors, billboards, and weapon sprites can go anywhere.
+	static const MaterialPropertiesPerObjectInstance all_materials[] = {
+		{ASSET_PATH("walls/sand.bmp"),				{0.01f, 0.5f, 0.6f}}, // Done
+		{ASSET_PATH("walls/cobblestone_2.bmp"),		{0.0f, 0.0f, 0.0f}},
+		{ASSET_PATH("walls/cobblestone_3.bmp"),		{0.4f, 0.4f, 0.5f}}, // Done
+		{ASSET_PATH("walls/stone_2.bmp"),			{0.0f, 0.0f, 0.0f}},
+		{ASSET_PATH("walls/pyramid_bricks_3.bmp"),  {0.05f, 0.2f, 0.5f}}, // Done
+		{ASSET_PATH("walls/hieroglyphics.bmp"),		{0.4f, 0.7f, 0.8f}}, // Done
+		{ASSET_PATH("walls/desert_snake.bmp"),		{0.5f, 0.7f, 0.8f}}, // Done
+		{ASSET_PATH("walls/colorstone.bmp"),		{0.05f, 0.6f, 0.8f}}, // Done
+		{ASSET_PATH("walls/pyramid_bricks_4.bmp"),	{0.8f, 0.75f, 0.85f}}, // Done
+		{ASSET_PATH("walls/marble.bmp"),			{0.3f, 0.25f, 0.5f}}, // Done
+		{ASSET_PATH("walls/hieroglyph.bmp"),		{0.0f, 0.7f, 0.8f}}, // Done
+		{ASSET_PATH("walls/alkadhib.bmp"),			{0.5f, 0.5f, 0.6f}}, // Done
+		{ASSET_PATH("walls/saqqara.bmp"),			{0.4f, 0.45f, 0.6f}}, // Done
+		{ASSET_PATH("walls/sandstone.bmp"),			{0.2f, 0.6f, 0.9f}}, // Done
+		{ASSET_PATH("walls/rug_3.bmp"),				{0.5f, 0.4f, 0.8f}}, // Done
+		{ASSET_PATH("walls/mesa.bmp"),				{0.0f, 0.7f, 0.8f}}, // Done
+		{ASSET_PATH("walls/arthouse_bricks.bmp"),	{0.0f, 0.45f, 0.6f}}, // Done
+		{ASSET_PATH("walls/eye_of_evil.bmp"),		{0.9f, 0.45f, 0.6f}}, // Done
+		{ASSET_PATH("walls/rough_marble.bmp"),		{0.3f, 0.5f, 0.7f}}, // Done
+		{ASSET_PATH("walls/mosaic.bmp"),			{0.2f, 0.4f, 0.5f}}, // Done
+		{ASSET_PATH("walls/aquamarine_tiles.bmp"),	{0.5f, 0.4f, 0.5f}}, // Done
+		{ASSET_PATH("walls/greece.bmp"),			{0.0f, 0.0f, 0.0f}},
+		{ASSET_PATH("walls/viney_bricks.bmp"),		{0.0f, 0.0f, 0.0f}},
+		{ASSET_PATH("walls/vines.bmp"),				{0.8f, 0.6f, 0.9f}}, // Done
+		{ASSET_PATH("walls/gold.bmp"),				{0.0f, 0.0f, 0.0f}},
+
+		{ASSET_PATH("objects/health_kit.bmp"),			{1.0f, 0.5f, 0.6f}}, // Done
+		{ASSET_PATH("objects/teleporter.bmp"),			{0.6f, 0.4f, 0.6f}}, // Done
+		{ASSET_PATH("objects/shabti.bmp"),				{0.1f, 0.9f, 1.0f}}, // Done
+		{ASSET_PATH("spritesheets/flying_carpet.bmp"),	{0.2f, 0.8f, 1.0f}}, // Done
+		{ASSET_PATH("spritesheets/torch_2.bmp"),		{1.0f, 0.75f, 1.0f}}, // Done
+		{ASSET_PATH("spritesheets/eddie.bmp"),			{0.5f, 0.7f, 1.0f}}, // Done
+		{ASSET_PATH("spritesheets/trooper.bmp"),		{0.3f, 0.7f, 1.0f}}, // Done
+		{ASSET_PATH("spritesheets/fireball_travel.bmp"), {0.4f, 0.4f, 0.7f}}, // Done
+
+		{ASSET_PATH("walls/simple_squares.bmp"),				{0.8f, 0.2f, 0.5f}}, // Done
+		{ASSET_PATH("spritesheets/weapons/desecrator.bmp"),		{0.5f, 0.4f, 0.6f}}, // Done
+		{ASSET_PATH("spritesheets/weapons/whip.bmp"),			{0.4f, 0.6f, 0.7f}}, // Done
+		{ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"),	{0.2f, 0.5f, 0.7f}}, // Done
+		{ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"),	{0.4f, 0.6f, 0.7f}} // Done
 	};
 
-	// TODO: make these texture id ranges relative to each animation layout
-	const Animation billboard_animations[] = {
-		{.texture_id_range = {3, 48}, .secs_for_frame = 0.02f}, // Flying carpet
-		{.texture_id_range = {49, 53}, .secs_for_frame = 0.15f}, // Torch
-		{.texture_id_range = {62, 64}, .secs_for_frame = 0.08f}, // Eddie, attacking
-		{.texture_id_range = {77, 81}, .secs_for_frame = 0.07f}, // Trooper, idle
-		{.texture_id_range = {82, 88}, .secs_for_frame = 0.07f}, // Trooper, chase
-		{.texture_id_range = {89, 98}, .secs_for_frame = 0.07f}, // Trooper, attacking
-	};
-
-	const BillboardAnimationInstance billboard_animation_instances[] = {
-		{.billboard_id = 10, .animation_id = 0}, // Flying carpet
-		{.billboard_id = 11, .animation_id = 1}, // Torch
-
-		{.billboard_id = 12, .animation_id = 2}, // Eddies
-		{.billboard_id = 13, .animation_id = 2},
-
-		{.billboard_id = 14, .animation_id = 3}, // Troopers
-		{.billboard_id = 15, .animation_id = 4},
-		{.billboard_id = 16, .animation_id = 5}
-	};
-
-	const Billboard billboards[] = {
-		{0, {1.0f, 1.0f}, {28.0f, 2.5f, 31.0f}}, // Health kits
-		{0, {1.0f, 1.0f}, {5.0f, 0.5f, 22.5f}},
-		{0, {1.0f, 1.0f}, {31.5f, 0.5f, 10.5f}},
-
-		{1, {1.0f, 1.0f}, {12.5f, 0.5f, 38.5f}}, // Teleporters
-		{1, {1.0f, 1.0f}, {8.5f, 0.5f, 25.5f}},
-		{1, {1.0f, 1.0f}, {32.5f, 2.5f, 7.5f}},
-
-		{2, {2.0f, 2.0f}, {4.5f, 4.0f, 12.5f}}, // Shabtis
-		{2, {2.0f, 2.0f}, {10.5f, 1.0f, 25.0f}},
-		{2, {2.0f, 2.0f}, {25.5f, 3.0f, 31.0f}},
-		{2, {4.0f, 4.0f}, {36.0f, 18.0f, 4.0f}},
-
-		{billboard_animations[0].texture_id_range.start, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
-		{billboard_animations[1].texture_id_range.start, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
-
-		{billboard_animations[2].texture_id_range.start, {1.0f, 1.0f}, {6.5f, 0.5f, 21.5f}}, // Eddies
-		{billboard_animations[2].texture_id_range.start, {1.0f, 1.0f}, {3.5f, 0.5f, 24.5f}},
-
-		{billboard_animations[3].texture_id_range.start, {1.0f, 1.0f}, {3.0f, 1.5f, 9.5f}}, // Troopers
-		{billboard_animations[4].texture_id_range.start, {1.0f, 1.0f}, {9.5f, 6.5f, 13.5f}},
-		{billboard_animations[5].texture_id_range.start, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
-	};
-
-	const GLchar* const still_face_texture_paths[] = {
+	static const GLchar* const sector_face_texture_paths[] = {
 		// Palace:
 		ASSET_PATH("walls/sand.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp"),
 		ASSET_PATH("walls/marble.bmp"), ASSET_PATH("walls/hieroglyph.bmp"),
@@ -164,16 +210,230 @@ static void* main_init(void) {
 		*/
 	};
 
+	static const GLchar *const still_billboard_texture_paths[] = {
+		ASSET_PATH("objects/health_kit.bmp"),
+		ASSET_PATH("objects/teleporter.bmp"),
+		ASSET_PATH("objects/shabti.bmp")
+	};
+
+	static const AnimationLayout billboard_animation_layouts[] = {
+		{ASSET_PATH("spritesheets/flying_carpet.bmp"), 5, 10, 46},
+		{ASSET_PATH("spritesheets/torch_2.bmp"), 2, 3, 5},
+		{ASSET_PATH("spritesheets/eddie.bmp"), 23, 1, 23},
+		{ASSET_PATH("spritesheets/trooper.bmp"), 33, 1, 33},
+		{ASSET_PATH("spritesheets/fireball_travel.bmp"), 12, 1, 12}
+	};
+
+	/* TODO:
+	- Make these texture id ranges relative to each animation layout
+	- Perhaps only apply one texture id looping construct per animation layout
+		(sub-animations provided as different animation layouts) */
+	static const Animation billboard_animations[] = {
+		{.texture_id_range = {3, 48}, .secs_for_frame = 0.02f}, // Flying carpet
+		{.texture_id_range = {49, 53}, .secs_for_frame = 0.15f}, // Torch
+		{.texture_id_range = {62, 64}, .secs_for_frame = 0.08f}, // Eddie, attacking
+		{.texture_id_range = {77, 81}, .secs_for_frame = 0.07f}, // Trooper, idle
+		{.texture_id_range = {82, 88}, .secs_for_frame = 0.07f}, // Trooper, chasing
+		{.texture_id_range = {89, 98}, .secs_for_frame = 0.07f}, // Trooper, attacking
+		{.texture_id_range = {110, 121}, .secs_for_frame = 0.08f} // Traveling fireball
+	};
+
+	static const BillboardAnimationInstance billboard_animation_instances[] = {
+		{.billboard_index = 10, .animation_index = 0}, // Flying carpet
+		{.billboard_index = 11, .animation_index = 1}, // Torch
+
+		{.billboard_index = 12, .animation_index = 2}, // Eddies
+		{.billboard_index = 13, .animation_index = 2},
+
+		{.billboard_index = 14, .animation_index = 3}, // Troopers
+		{.billboard_index = 15, .animation_index = 4},
+		{.billboard_index = 16, .animation_index = 5},
+
+		{.billboard_index = 17, .animation_index = 6} // Traveling fireball
+	};
+
+	/* Still and animated billboards can be in any order (it's just easier to impose an order here).
+	The material ids all start out as 0 (they are assigned in) `init_material_lighting_properties`.
+	The animated billboard texture ids are assigned in the loop below the declaration of this array. */
+	static Billboard billboards[] = {
+		////////// Still billboards
+
+		{0, 0, {1.0f, 1.0f}, {28.0f, 2.5f, 31.0f}}, // Health kits
+		{0, 0, {1.0f, 1.0f}, {5.0f, 0.5f, 22.5f}},
+		{0, 0, {1.0f, 1.0f}, {31.5f, 0.5f, 10.5f}},
+
+		{0, 1, {1.0f, 1.0f}, {12.5f, 0.5f, 38.5f}}, // Teleporters
+		{0, 1, {1.0f, 1.0f}, {8.5f, 0.5f, 25.5f}},
+		{0, 1, {1.0f, 1.0f}, {32.5f, 2.5f, 7.5f}},
+
+		{0, 2, {2.0f, 2.0f}, {4.5f, 4.0f, 12.5f}}, // Shabtis
+		{0, 2, {2.0f, 2.0f}, {10.5f, 1.0f, 25.0f}},
+		{0, 2, {2.0f, 2.0f}, {25.5f, 3.0f, 31.0f}},
+		{0, 2, {4.0f, 4.0f}, {36.0f, 18.0f, 4.0f}},
+
+		////////// Animated billboards
+
+		{0, 0, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
+		{0, 0, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
+
+		{0, 0, {1.0f, 1.0f}, {6.5f, 0.5f, 21.5f}}, // Eddies
+		{0, 0, {1.0f, 1.0f}, {3.5f, 0.5f, 24.5f}},
+
+		{0, 0, {1.0f, 1.0f}, {3.0f, 1.5f, 9.5f}}, // Troopers
+		{0, 0, {1.0f, 1.0f}, {9.5f, 6.5f, 13.5f}},
+		{0, 0, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}},
+
+		{0, 0, {5.0f, 4.0f}, {22.5f, 15.0f, 8.5}} // Traveling fireball
+	};
+
+	////////// Assigning initial texture ids to animated billboards
+
+	for (billboard_index_t i = 0; i < ARRAY_LENGTH(billboard_animation_instances); i++) {
+		const BillboardAnimationInstance* const animation_instance = billboard_animation_instances + i;
+
+		billboards[animation_instance -> billboard_index].texture_id = billboard_animations[
+			animation_instance -> animation_index].texture_id_range.start;
+	}
+
 	//////////
 
-	const NormalMapConfig
-		sector_faces_normal_map_config = {.blur_radius = 3, .blur_std_dev = 0.8f, .intensity = 2.0f, .rescale_factor = 2.0f},
-		billboards_normal_map_config = {.blur_radius = 1, .blur_std_dev = 0.1f, .intensity = 1.0f, .rescale_factor = 2.0f}, // This, with 2x scaling, uses about 100mb more memory
-		weapon_normal_map_config = {.blur_radius = 2, .blur_std_dev = 0.4f, .intensity = 1.5f, .rescale_factor = 3.0f}; // TODO: vary this per weapon sprite
+	// Note: the rescale size isn't used in `shared_material_properties`.
+	const WeaponSpriteConfig weapon_sprite_config = {
+		// Simple squares
+		/*
+		.max_degrees = {.yaw = 30.0f, .pitch = 120.0f},
+		.secs_per = {.frame = 1.0f, .movement_cycle = 1.0f},
+		.screen_space_size = 1.0f, .max_movement_magnitude = 0.4f,
+		.animation_layout = {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1},
+
+		.shared_material_properties = {
+			.bilinear_percents = {.albedo = 1.0f, .normal = 0.75f},
+			.normal_map_config = {.blur_radius = 1, .blur_std_dev = 1.0f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f}
+		}
+		*/
+
+		// Desecrator
+		/*
+		.max_degrees = {.yaw = 20.0f, .pitch = 130.0f},
+		.secs_per = {.frame = 0.07f, .movement_cycle = 1.0f},
+		.screen_space_size = 0.7f, .max_movement_magnitude = 0.2f,
+		.animation_layout = {ASSET_PATH("spritesheets/weapons/desecrator.bmp"), 1, 8, 8},
+
+		.shared_material_properties = {
+			.bilinear_percents = {.albedo = 0.5f, .normal = 0.5f},
+			.normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .heightmap_scale = 1.0f, .rescale_factor = 3.0f}
+		}
+		*/
+
+		// Whip
+		.max_degrees = {.yaw = 15.0f, .pitch = 120.0f},
+		.secs_per = {.frame = 0.02f, .movement_cycle = 0.9f},
+		.screen_space_size = 0.75f, .max_movement_magnitude = 0.25f,
+		.animation_layout = {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22},
+
+		.shared_material_properties = {
+			.bilinear_percents = {.albedo = 1.0f, .normal = 1.0f},
+			.normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f}
+		}
+
+		// Snazzy shotgun
+		/*
+		.max_degrees = {.yaw = 30.0f, .pitch = 90.0f},
+		.secs_per = {.frame = 0.035f, .movement_cycle = 0.9f},
+		.screen_space_size = 0.75f, .max_movement_magnitude = 0.2f,
+		.animation_layout = {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59},
+
+		.shared_material_properties = {
+			.bilinear_percents = {.albedo = 0.0f, .normal = 0.0f},
+			.normal_map_config = {.blur_radius = 4, .blur_std_dev = 1.5f, .heightmap_scale = 2.0f, .rescale_factor = 2.0f}
+		}
+		*/
+
+		// Reload pistol
+		/*
+		.max_degrees = {.yaw = 25.0f, .pitch = 90.0f},
+		.secs_per = {.frame = 0.04f, .movement_cycle = 1.0f},
+		.screen_space_size = 0.8f, .max_movement_magnitude = 0.2f,
+		.animation_layout =  {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28},
+
+		.shared_material_properties = {
+			.bilinear_percents = {.albedo = 0.5f, .normal = 1.0f},
+			.normal_map_config = {.blur_radius = 2, .blur_std_dev = 1.0f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f}
+		}
+		*/
+	};
+
+	/* `material_lighting_properties` is a list of lighting properties for the current level.
+	Note that calling this also sets the material indices of billboards, and gets the weapon
+	sprite material index too. */
+
+	material_index_t weapon_sprite_material_index;
+
+	const List all_materials_as_list = {(void*) all_materials, sizeof(*all_materials), ARRAY_LENGTH(all_materials), 0};
+	validate_all_materials(&all_materials_as_list);
+
+	const GLuint materials_texture = init_materials_texture(
+		&all_materials_as_list,
+		&(List) {(void*) sector_face_texture_paths, 	sizeof(*sector_face_texture_paths), ARRAY_LENGTH(sector_face_texture_paths), 0},
+		&(List) {(void*) still_billboard_texture_paths, sizeof(*still_billboard_texture_paths), ARRAY_LENGTH(still_billboard_texture_paths), 0},
+		&(List) {(void*) billboard_animation_layouts, 	sizeof(*billboard_animation_layouts), ARRAY_LENGTH(billboard_animation_layouts), 0},
+		&(List) {(void*) billboards, 					sizeof(*billboards), ARRAY_LENGTH(billboards), 0},
+		&weapon_sprite_config.animation_layout, &weapon_sprite_material_index
+	);
+
+	const MaterialPropertiesPerObjectType
+		sector_face_shared_material_properties = {
+			.texture_rescale_size = 128,
+			.bilinear_percents = {.albedo = 0.8f, .normal = 0.6f},
+
+			.normal_map_config = {
+				.use_anisotropic_filtering = true, .blur_radius = 3,
+				.blur_std_dev = 0.8f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f
+			}
+		},
+
+		billboard_shared_material_properties = {
+			.texture_rescale_size = 128,
+			.bilinear_percents = {.albedo = 0.8f, .normal = 0.6f},
+
+			.normal_map_config = {
+				.use_anisotropic_filtering = true, .blur_radius = 1,
+				.blur_std_dev = 0.1f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f
+			} // This, with 2x scaling, uses about 100mb more memory
+		};
+
+	////////// Making an array of all bilinear percents
+
+	vec2 all_bilinear_percents[num_unique_object_types];
+
+	const MaterialPropertiesPerObjectType* const all_shared_material_properties[num_unique_object_types] = {
+		&sector_face_shared_material_properties,
+		&billboard_shared_material_properties,
+		&weapon_sprite_config.shared_material_properties
+	};
+
+	for (byte i = 0; i < num_unique_object_types; i++) {
+		GLfloat* const bilinear_percents = all_bilinear_percents[i];
+		const MaterialPropertiesPerObjectType* const shared_material_properties = all_shared_material_properties[i];
+
+		bilinear_percents[0] = shared_material_properties -> bilinear_percents.albedo;
+		bilinear_percents[1] = shared_material_properties -> bilinear_percents.normal;
+	}
 
 	//////////
+
+	specify_cascade_count_before_any_shader_compilation(
+		window_config -> opengl_major_minor_version,
+		level_rendering_config.shadow_mapping.shadow_context_config.num_cascades);
+
+	const CameraConfig camera_config = {
+		.init_pos = {1.5f, 0.5f, 1.5f}, // {0.5f, 0.0f, 0.5f},
+		.angles = {.hori = GLM_PI_4f, .vert = 0.0f, .tilt = 0.0f}
+	};
 
 	const byte
+		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_texture_id_map, map_size[2] = {blank_width, blank_height};
+		// *const heightmap = (const byte*) tiny_heightmap, *const texture_id_map = (const byte*) tiny_texture_id_map, map_size[2] = {tiny_width, tiny_height};
 		// *const heightmap = (const byte*) checker_heightmap, *const texture_id_map = (const byte*) checker_texture_id_map, map_size[2] = {checker_width, checker_height};
 		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_heightmap, map_size[2] = {blank_width, blank_height};
 		*const heightmap = (const byte*) palace_heightmap, *const texture_id_map = (const byte*) palace_texture_id_map, map_size[2] = {palace_width, palace_height};
@@ -185,14 +445,6 @@ static void* main_init(void) {
 	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
 	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
 
-	const GLsizei num_cascades = 4; // 4 for palace, 16 for terrain
-	specify_cascade_count_before_any_shader_compilation(num_cascades);
-
-	// 1024 for palace, 1200 for terrain
-	const struct {const GLsizei face, billboard, shadow_map;} texture_sizes = {128, 128, 1024};
-
-	const vec3 init_pos = {0.5f, 0.0f, 0.5f}; // {1.5f, 0.5f, 1.5f};
-
 	//////////
 
 	const struct {
@@ -203,14 +455,14 @@ static void* main_init(void) {
 		.texture = {
 			.paths = {.still = ASSET_PATH("logo.bmp"), .scrolling = ASSET_PATH("palace_city.bmp")},
 			.mag_filters = {.still = TexNearest, .scrolling = TexLinear},
-			.scrolling_normal_map_config = {.blur_radius = 5, .blur_std_dev = 0.25f, .intensity = 0.25f, .rescale_factor = 2.0f}
+			.scrolling_normal_map_config = {.blur_radius = 5, .blur_std_dev = 0.25f, .heightmap_scale = 0.3f, .rescale_factor = 2.0f}
 		},
 
 		.rendering = {
 			.texture_transition_immediacy_factor = 2,
 			.scrolling_vert_squish_ratio = 0.5f,
 			.specular_exponent = 16.0f,
-			.scrolling_bilinear_diffuse_percent = 0.1f,
+			.scrolling_bilinear_albedo_percent = 0.1f,
 			.scrolling_bilinear_normal_percent = 0.75f,
 			.light_dist_from_screen_plane = 0.3f,
 			.secs_per_scroll_cycle = 7.0f,
@@ -221,48 +473,33 @@ static void* main_init(void) {
 	//////////
 
 	const SceneContext scene_context = {
-		.camera = init_camera(init_pos, far_clip_dist),
+		.camera = init_camera(&camera_config, far_clip_dist),
 
-		.weapon_sprite = init_weapon_sprite(
-			// 30.0f, 120.0f, 1.0f, 1.0f, 1.0f, 0.4f, &(AnimationLayout) {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1}, &weapon_normal_map_config
-			// 20.0f, 130.0f, 0.7f, 0.07f, 1.0f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/desecrator_cropped.bmp"), 1, 8, 8}, &weapon_normal_map_config
-			15.0f, 120.0f, 0.75f, 0.02f, 0.9f, 0.25f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22}, &weapon_normal_map_config
-			// 30.0f, 90.0f, 0.75f, 0.035f, 0.9f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59}, &weapon_normal_map_config
-			// 25.0f, 90.0f, 0.8f, 0.04f, 1.0f, 0.2f, &(AnimationLayout) {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28}, &weapon_normal_map_config
-		),
+		.materials_texture = materials_texture,
 
-		.sector_context = init_sector_context(heightmap, texture_id_map, map_size[0], map_size[1],
-			still_face_texture_paths, ARRAY_LENGTH(still_face_texture_paths), texture_sizes.face, &sector_faces_normal_map_config
+		.weapon_sprite = init_weapon_sprite(&weapon_sprite_config, weapon_sprite_material_index),
+
+		.sector_context = init_sector_context(heightmap, texture_id_map,
+			map_size[0], map_size[1], sector_face_texture_paths,
+			ARRAY_LENGTH(sector_face_texture_paths), &sector_face_shared_material_properties
 		),
 
 		.billboard_context = init_billboard_context( // 0.2f before for the alpha threshold
-			0.99f, texture_sizes.billboard, &billboards_normal_map_config,
+			level_rendering_config.shadow_mapping.billboard_alpha_threshold, &billboard_shared_material_properties,
 
-			ARRAY_LENGTH(still_billboard_texture_paths), still_billboard_texture_paths,
 			ARRAY_LENGTH(billboard_animation_layouts), billboard_animation_layouts,
 
+			ARRAY_LENGTH(still_billboard_texture_paths), still_billboard_texture_paths,
 			ARRAY_LENGTH(billboards), billboards,
 			ARRAY_LENGTH(billboard_animations), billboard_animations,
 			ARRAY_LENGTH(billboard_animation_instances), billboard_animation_instances
 		),
 
-		.dynamic_light = init_dynamic_light(
-			2.5f,
-			(vec3) {3.0f, 50.0f, 36.0f},
-			(vec3) {24.0f, 2.5f, 20.0f},
-			(vec3) {28.0f, 2.5f, 17.5f}
-		),
-
-		.shadow_context = init_shadow_context(
-			// Palace:
-			1.5f, far_clip_dist, 0.3f, texture_sizes.shadow_map, num_cascades, 16
-
-			// Terrain:
-			// 1.0f, far_clip_dist, 0.4f, texture_sizes.shadow_map, num_cascades, 16
-		),
+		.dynamic_light = init_dynamic_light(&level_rendering_config.dynamic_light_config),
+		.shadow_context = init_shadow_context(&level_rendering_config.shadow_mapping.shadow_context_config, far_clip_dist),
 
 		.ao_map = init_ao_map(heightmap, map_size, max_point_height),
-		.skybox = init_skybox(ASSET_PATH("skyboxes/desert.bmp")),
+		.skybox = init_skybox(level_rendering_config.skybox_path),
 		.title_screen = init_title_screen(&title_screen_config.texture, &title_screen_config.rendering),
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
@@ -285,13 +522,15 @@ static void* main_init(void) {
 	////////// Initializing shared textures
 
 	const WorldShadedObject world_shaded_objects[] = {
-		{&scene_context.sector_context.drawable, {TU_SectorFaceDiffuse, TU_SectorFaceNormalMap}},
-		{&scene_context.billboard_context.drawable, {TU_BillboardDiffuse, TU_BillboardNormalMap}},
-		{&scene_context.weapon_sprite.drawable, {TU_WeaponSpriteDiffuse, TU_WeaponSpriteNormalMap}}
+		{&scene_context.sector_context.drawable, {TU_SectorFaceAlbedo, TU_SectorFaceNormalMap}},
+		{&scene_context.billboard_context.drawable, {TU_BillboardAlbedo, TU_BillboardNormalMap}},
+		{&scene_context.weapon_sprite.drawable, {TU_WeaponSpriteAlbedo, TU_WeaponSpriteNormalMap}}
 	};
 
-	init_shared_textures_for_world_shaded_objects(world_shaded_objects, ARRAY_LENGTH(world_shaded_objects),
-		&scene_context.skybox, &scene_context.shadow_context, &scene_context.ao_map);
+	init_shared_textures_for_world_shaded_objects(world_shaded_objects,
+		ARRAY_LENGTH(world_shaded_objects), &scene_context.shadow_context,
+		&scene_context.ao_map, materials_texture
+	);
 
 	////////// Initializing shared shading params
 
@@ -309,7 +548,7 @@ static void* main_init(void) {
 
 	const SharedShadingParams shared_shading_params = init_shared_shading_params(
 		shaders_that_use_shared_params, ARRAY_LENGTH(shaders_that_use_shared_params),
-		&scene_context.shadow_context
+		&level_rendering_config, all_bilinear_percents, &scene_context.shadow_context
 	);
 
 	// I am bypassing the type system's const safety checks with this, but it's for the best
@@ -324,6 +563,7 @@ static void main_deinit(void* const app_context) {
 	SceneContext* const scene_context = (SceneContext*) app_context;
 
 	deinit_shared_shading_params(&scene_context -> shared_shading_params);
+	deinit_texture(scene_context -> materials_texture);
 
 	deinit_weapon_sprite(&scene_context -> weapon_sprite);
 	deinit_sector_context(&scene_context -> sector_context);
@@ -338,5 +578,22 @@ static void main_deinit(void* const app_context) {
 }
 
 int main(void) {
-	make_application(main_drawer, main_init, main_deinit);
+	const WindowConfig window_config = {
+		.app_name = "Dungeon Dave",
+
+		.enabled = {
+			.vsync = true,
+			.aniso_filtering = true,
+			.multisampling = true,
+			.software_renderer = false
+		},
+
+		.aniso_filtering_level = 8, .multisample_samples = 4,
+		.default_fps = 60, .depth_buffer_bits = 24,
+		.opengl_major_minor_version = {4, 0},
+
+		.window_size = {800, 600}
+	};
+
+	make_application(&window_config, main_drawer, main_init, main_deinit);
 }
