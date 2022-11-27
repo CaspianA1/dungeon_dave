@@ -158,19 +158,18 @@ static void update_pos_via_physics(const byte* const heightmap,
 	velocities[0] = velocity_forward_back_per_tick * one_over_delta_time;
 	velocities[2] = velocity_strafe_per_tick * one_over_delta_time;
 
-	////////// X and Z collision detection + setting new xz positions
+	////////// X and Z movement + collision detection
 
 	GLfloat foot_height = pos[1] - constants.camera.eye_height - pace;
-	vec2 pos_xz = {pos[0], pos[2]};
 
-	pos_xz[0] = pos[0] + velocity_forward_back_per_tick * dir_xz[0] + velocity_strafe_per_tick * dir_xz[1];
-	if (pos_collides_with_heightmap(foot_height, pos_xz, heightmap, map_size)) pos_xz[0] = pos[0];
+	vec2 next_pos_xz = {
+		pos[0] + velocity_forward_back_per_tick * dir_xz[0] + velocity_strafe_per_tick * dir_xz[1],
+		pos[2] + velocity_forward_back_per_tick * dir_xz[1] - velocity_strafe_per_tick * dir_xz[0]
+	};
 
-	pos_xz[1] = pos[2] + velocity_forward_back_per_tick * dir_xz[1] - velocity_strafe_per_tick * dir_xz[0];
-	if (pos_collides_with_heightmap(foot_height, pos_xz, heightmap, map_size)) pos_xz[1] = pos[2];
-
-	pos[0] = pos_xz[0];
-	pos[2] = pos_xz[1];
+	// Testing with a changed x, and then a changed z after
+	if (!pos_collides_with_heightmap(foot_height, (vec2) {next_pos_xz[0], pos[2]}, heightmap, map_size)) pos[0] = next_pos_xz[0];
+	if (!pos_collides_with_heightmap(foot_height, (vec2) {pos[0], next_pos_xz[1]}, heightmap, map_size)) pos[2] = next_pos_xz[1];
 
 	////////// Y collision detection + setting new y position and speed
 
