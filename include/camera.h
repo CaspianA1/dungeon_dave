@@ -6,7 +6,7 @@
 #include "utils/cglm_include.h" // For `vec2, `vec3, `mat4`, and `vec4`
 #include "event.h" // For `Event`
 
-// TODO: use the yaw, pitch, and roll nomenclature
+// TODO: make direction switching harder
 
 //////////
 
@@ -25,8 +25,8 @@ typedef struct {
 	The speed xz percent is not the true speed percent; rather,
 	the percentage is smoothed out by a Hermite curve. */
 	GLfloat
-		fov, pace, speed_xz_percent, time_since_jump,
-		time_accum_for_full_fov, far_clip_dist;
+		fov, pace, speed_xz_percent, last_tick_wall_alignment_percent,
+		time_since_jump, time_accum_for_full_fov, far_clip_dist;
 
 	vec2 right_xz; // This is used for billboards
 	vec3 pos, dir, right, up, velocities;
@@ -38,7 +38,7 @@ typedef struct {
 /* Excluded:
 Utils: clamp_to_pos_neg_domain, wrap_around_domain, get_percent_kept_from, smootherstep
 Angle updating: update_camera_angles, update_fov
-Physics + collision: apply_velocity_in_xz_direction, get_pos_collision_info, get_aabb_collision_info, update_pos_via_physics
+Physics + collision: apply_velocity_in_xz_direction, get_pos_collision_info, get_aabb_collision_info, update_velocities_and_pos
 Pace: make_pace_function, update_pace
 Miscellaneous: get_camera_directions, update_camera_pos, update_camera_matrices */
 

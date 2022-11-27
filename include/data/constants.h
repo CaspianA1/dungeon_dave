@@ -10,6 +10,7 @@ static const GLfloat
 	TWO_PI = GLM_PIf * 2.0f,
 	TWO_THIRDS_PI = GLM_PIf * 2.0f / 3.0f,
 	THREE_HALVES_PI = GLM_PIf * 3.0f / 2.0f,
+	HALF_PI = GLM_PI_2f,
 	ONE_FOURTH_PI = GLM_PI_4f;
 
 //////////
@@ -62,7 +63,8 @@ static const struct {
 	const byte max_byte_value;
 
 	const struct { // All angles are in radians
-		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, friction, init_fov;
+		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, init_fov;
+		const struct {const GLfloat floor, wall;} frictions;
 		const struct {const GLfloat period, max_amplitude;} pace;
 		const struct {const GLfloat fov_change, hori_wrap_around, vert_max, tilt_max;} limits;
 	} camera;
@@ -89,11 +91,11 @@ static const struct {
 
 	.camera = {
 		.near_clip_dist = 0.25f, .eye_height = 0.5f, .aabb_collision_box_size = 0.2f,
-		.tilt_correction_rate = 11.0f, .friction = 7.5f,
-		.init_fov = GLM_PI_2f,
+		.tilt_correction_rate = 11.0f, .init_fov = HALF_PI,
 
+		.frictions = {.floor = 7.5f, .wall = 6.0f},
 		.pace = {.period = 0.7f, .max_amplitude = 0.2f},
-		.limits = {.fov_change = GLM_PIf / 18.0f, .hori_wrap_around = TWO_PI, .vert_max = GLM_PI_2f, .tilt_max = 0.2f}
+		.limits = {.fov_change = PI / 18.0f, .hori_wrap_around = TWO_PI, .vert_max = HALF_PI, .tilt_max = 0.2f}
 	},
 
 	.accel = {
@@ -102,7 +104,7 @@ static const struct {
 		.strafe = 5.5f, .g = 13.0f
 	},
 
-	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look = {TWO_THIRDS_PI, GLM_PI_2f}},
+	.speeds = {.xz_max = 4.0f, .jump = 5.5f, .look = {TWO_THIRDS_PI, HALF_PI}},
 
 	.keys = {
 		.forward = SDL_SCANCODE_W, .backward = SDL_SCANCODE_S, .left = SDL_SCANCODE_A,
