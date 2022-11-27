@@ -428,7 +428,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	const CameraConfig camera_config = {
 		.init_pos = {1.5f, 0.5f, 1.5f}, // {0.5f, 0.0f, 0.5f},
-		.angles = {.hori = GLM_PI_4f, .vert = 0.0f, .tilt = 0.0f}
+		.angles = {.hori = ONE_FOURTH_PI, .vert = 0.0f, .tilt = 0.0f}
 	};
 
 	const byte

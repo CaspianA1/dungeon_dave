@@ -6,9 +6,11 @@
 #include "utils/cglm_include.h" // For pi variants + `vec2`
 
 static const GLfloat
+	PI = GLM_PIf,
 	TWO_PI = GLM_PIf * 2.0f,
 	TWO_THIRDS_PI = GLM_PIf * 2.0f / 3.0f,
-	THREE_HALVES_PI = GLM_PIf * 3.0f / 2.0f;
+	THREE_HALVES_PI = GLM_PIf * 3.0f / 2.0f,
+	ONE_FOURTH_PI = GLM_PI_4f;
 
 //////////
 

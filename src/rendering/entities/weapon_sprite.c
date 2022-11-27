@@ -89,7 +89,7 @@ static void get_screen_corners(const WeaponSprite* const ws,
 		max_movement_magnitude = appearance_context -> screen_space.max_movement_magnitude;
 
 	const GLfloat
-		time_pace = sinf(event -> curr_time_secs * GLM_PIf * half_movement_cycles_per_sec),
+		time_pace = sinf(event -> curr_time_secs * PI * half_movement_cycles_per_sec),
 		weapon_movement_magnitude = max_movement_magnitude * smooth_speed_xz_percent;
 
 	const GLfloat sway_x = time_pace * weapon_movement_magnitude * 0.5f * smooth_speed_xz_percent; // From -magnitude / 2 to magnitude / 2
