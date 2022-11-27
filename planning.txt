@@ -9,10 +9,8 @@ Final lighting model:
 - Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
 - Ambient, diffuse, specular (with procedural specular mapping), HDR, banding removal, light color - done
 - Perhaps make the shadows contact-hardening
-- Optimized copying: face mesh in a VBO, and then selectively copy to a second VBO for culling. First VBO then used for dry rendering for shadow map, maybe
-- For AO, if I instance the texture ID across a whole sector, I can get 256 different textures per level, and I can pre-bake ambient occlusion into sectors
-- Maybe do raytraced AO per each face vertex, and then merge sectors if their adjacent faces have the same AO value.
-	Or instead of that, perhaps make a 3D texture with raytraced brightness values that range from 0 to 255, that then points in world-space can read from.
+- If I instance the texture ID across a whole sector, I can get 256 different textures per level
+-	A 3D texture with raytraced brightness values that range from 0 to 255, that then points in world-space can read from.
 	Then, the max size of that texture will be 16,581,375 for a 255x255x255 level. This will act as high-quality raytraced ambient occlusion. Optimization
 	note: I can skip tracing from points that are under the heightmap. Also, I should only trace upwards around a hemisphere, only darkening a point if it
 	hits another map point. I'll use DDA for this.
@@ -25,9 +23,7 @@ Shadow mapping:
 - Filtering in exp(gl_FragCoord.z) may remove some shadow acne
 - Make the billboards + a 2D character sprite cast shadows
 
-Ideal CSM:
-	- Sector mesh optimization:
-		1. In high-speed memory. 2. Front faces pre-culled (result is half the size?).
+Ideal CSM: - Sector mesh optimization: 1. In high-speed memory. 2. Front faces pre-culled (result is half the size?).
 		3. Face info bits removed. 4. Additional faces added for external map edges.
 	- A technique like ESM or EVSM.
 
@@ -37,11 +33,10 @@ Architectural/code design ideas:
 - File paths may not work on Windows
 - Pass in texture parameters through a bitmask
 - Tell if a level was just initialized through the Event struct
-- Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that?
+- Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that? Perhaps store its texture id there?
 - Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if enough precision?)
 - Define the constants in constants.h in constants.c, and make the constants.h struct extern
 - Three classes of settings: hardcoded in the `constants` struct, configurable via a level file, and configurable by the player
-- Perhaps use the alpha channels of the face texture set or normal map set for something interesting
 - Some library memory leaks; this should be fixed in some way, if possible (figure out why `SDL_GetNumAllocations` is above zero after `deinit_screen`; even happens with a simple test app)
 - Use more of the cglm functions in `update_camera`
 - Possibly in the end, map representations: heightmap + texture id map, cpu mesh, gpu mesh, and culled mesh for shadow map
@@ -55,12 +50,8 @@ Architectural/code design ideas:
 - Figure out how to make spherically distorted skyboxes in Blender from cube-like ones made in an image editor
 - A shader cache
 - Specular antialiasing
-- Different bilinear percents for all object types
-- Make compilation faster by not constantly including cglm/cglm.h everywhere it isn't needed (or in general, less unnecessary #includes)
-- A FrozenList type
 
 Miscellaneous problems:
-- Having an idle window with vsync on leads to high CPU and GPU usage
 - The checker heightmap has faster pacing sometimes
 - On the bigger laptop, changing the screen size leads to the player's head tilting briefly
 - Changing the pyramid track `pyramid.wav` to any other filename removes its two stutters
@@ -75,15 +66,12 @@ Object rendering:
 	Note: if these are also used for billboard frustum culling, they can be used for billboard collision detection as well.
 
 Random feature ideas:
-- A map editor. Read in a json file that has dimensions, a heightmap, a texture id map, and a texture list.
-	Choose texture or height through number keys (done), draw/move/erase modes (done), line mode, save button,
-	zoom in/out, scroll with the mouse.
+- A map editor that reads in a level file
+	Choose texture or height through number keys (done), draw/move/erase modes (done), line mode, save button, zoom in/out, scroll with the mouse.
 - Can't use red cross for health since it's copyrighted
-- Gauge the number of multisample samples based on a runtime constant
 - Find a tighter far plane distance by finding the diameter of the sector convex hull
 - The map editor should be called Dungeon Painter
 - Perhaps build levels on top of cool terrain heightmaps, for a good surrounding environment + a level path through the terrain
-- God rays (render one big shadow map over the whole scene as the last cascade for that)
 
 Normal mapping:
 - Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
@@ -96,11 +84,7 @@ Normal mapping:
 - Define normal map settings for each wall texture (only useful at normal map generation time).
 	Choose a hash map or an array for association between path and settings
 - Note: normal maps calculated via dFdx/y won't work because 1. derivatives are in screen space and 2. normals can then not be filtered
-
-A better shading model:
-- JSON file -> UBO
-- Possibility: instead of ambient, diffuse, and specular parameters per level, perhaps a material system + PBR (include normal map intensity in this; for the CPU only)
-		(note: can specify smoothness per material by lerping the a pointing-out vector with each local surface normal, by a smoothness factor)
+- Test a Minecraft parallax mapping shader, and see if it has any swimming - if not, then figure out what they're doing
 
 Physics:
 	Features:
