@@ -79,7 +79,7 @@ static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v_per_tick,
 	GLfloat v_per_tick = curr_v_per_tick + (delta_v_per_tick * moving_in_dir) - (delta_v_per_tick * moving_in_opposite_dir);
 
 	// If 0 or 2 directions are being moved in; `^` maps to 1 if only 1 input is true
-	if (!(moving_in_dir ^ moving_in_opposite_dir)) // Floor friction
+	if (!(moving_in_dir ^ moving_in_opposite_dir))
 		v_per_tick *= get_percent_kept_from(constants.camera.frictions.floor, delta_time);
 
 	const GLfloat wall_friction = constants.camera.frictions.wall * wall_alignment_percent;
