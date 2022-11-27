@@ -85,16 +85,28 @@ static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v_per_tick,
 	return clamp_to_pos_neg_domain(v_per_tick, max_v_per_tick);
 }
 
-static bool tile_exists_at_pos(const GLfloat x, const GLfloat z, const GLfloat foot_height,
-	const byte* const heightmap, const byte map_width, const byte map_height) {
+//////////
 
-	if (pos_out_of_overhead_map_bounds(x, z, map_width, map_height)) return true;
+typedef struct {
+	const bool colliding;
+	const byte base_height;
+} CollisionInfo;
 
-	const byte floor_height = sample_map_point(heightmap, (byte) x, (byte) z, map_width);
-	return (foot_height - floor_height) < -(GLfloat) GLM_FLT_EPSILON;
+static CollisionInfo get_pos_collision_info(
+	const GLfloat x, const GLfloat z,
+	const GLfloat foot_height, const byte* const heightmap,
+	const byte map_width, const byte map_height) {
+
+	if (pos_out_of_overhead_map_bounds(x, z, map_width, map_height))
+		return (CollisionInfo) {true, 0}; // No valid colliding height if out of bounds
+
+	const byte base_height = sample_map_point(heightmap, (byte) x, (byte) z, map_width);
+	const bool colliding = (foot_height - base_height) < -(GLfloat) GLM_FLT_EPSILON;
+
+	return (CollisionInfo) {colliding, base_height};
 }
 
-static bool pos_collides_with_heightmap(const GLfloat foot_height,
+static CollisionInfo get_aabb_collision_info(const GLfloat foot_height,
 	const vec2 pos_xz, const byte* const heightmap, const byte map_size[2]) {
 
 	const byte map_width = map_size[0], map_height = map_size[1];
@@ -113,12 +125,17 @@ static bool pos_collides_with_heightmap(const GLfloat foot_height,
 	for (byte i = 0; i < corners_per_quad; i++) {
 		const GLfloat* const aabb_corner = aabb_corners[i];
 
-		if (tile_exists_at_pos(aabb_corner[0], aabb_corner[1], foot_height,
-			heightmap, map_width, map_height)) return true;
+		const CollisionInfo collision_info = get_pos_collision_info(
+			aabb_corner[0], aabb_corner[1], foot_height, heightmap, map_width, map_height
+		);
+
+		if (collision_info.colliding) return collision_info;
 	}
 
-	return false;
+	return (CollisionInfo) {false, sample_map_point(heightmap, (byte) pos_x, (byte) pos_z, map_width)};
 }
+
+//////////
 
 static void update_pos_via_physics(const byte* const heightmap,
 	const byte map_size[2], const vec2 dir_xz, vec3 pos,
@@ -167,11 +184,14 @@ static void update_pos_via_physics(const byte* const heightmap,
 		pos[2] + velocity_forward_back_per_tick * dir_xz[1] - velocity_strafe_per_tick * dir_xz[0]
 	};
 
-	// Testing with a changed x, and then a changed z after
-	if (!pos_collides_with_heightmap(foot_height, (vec2) {next_pos_xz[0], pos[2]}, heightmap, map_size)) pos[0] = next_pos_xz[0];
-	if (!pos_collides_with_heightmap(foot_height, (vec2) {pos[0], next_pos_xz[1]}, heightmap, map_size)) pos[2] = next_pos_xz[1];
+	if (!get_aabb_collision_info(foot_height, (vec2) {next_pos_xz[0], pos[2]}, heightmap, map_size).colliding)
+		pos[0] = next_pos_xz[0];
 
-	////////// Y collision detection + setting new y position and speed
+	if (!get_aabb_collision_info(foot_height, (vec2) {pos[0], next_pos_xz[1]}, heightmap, map_size).colliding)
+		pos[2] = next_pos_xz[1];
+
+
+	////////// Getting the jump speed per second, and updating the foot height
 
 	GLfloat speed_jump_per_sec = velocities[1];
 
@@ -180,12 +200,20 @@ static void update_pos_via_physics(const byte* const heightmap,
 	else
 		speed_jump_per_sec -= constants.accel.g * delta_time;
 
+	/* Note: the foot height is updated before getting the base height. This is because then,
+	the foot height will be partially pressed into the ground, so that a valid AABB collision
+	can be found, which leads to an accurate base height being found. */
 	foot_height += speed_jump_per_sec * delta_time;
-	const byte base_height = sample_map_point(heightmap, (byte) pos[0], (byte) pos[2], map_size[0]);
 
-	if (foot_height > base_height)
+	////////// Setting the new y position and speed
+
+	const byte base_height = get_aabb_collision_info(foot_height,
+		(vec2) {pos[0], pos[2]}, heightmap, map_size).base_height;
+
+	if (foot_height > base_height) // Continuing jump or fall
 		pos[1] = foot_height + pace;
-	else {
+
+	else { // Resetting jump
 		speed_jump_per_sec = 0.0f;
 		pos[1] = base_height;
 	}
