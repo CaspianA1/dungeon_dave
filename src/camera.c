@@ -190,7 +190,6 @@ static void update_pos_via_physics(const byte* const heightmap,
 	if (!get_aabb_collision_info(foot_height, (vec2) {pos[0], next_pos_xz[1]}, heightmap, map_size).colliding)
 		pos[2] = next_pos_xz[1];
 
-
 	////////// Getting the jump speed per second, and updating the foot height
 
 	GLfloat speed_jump_per_sec = velocities[1];
