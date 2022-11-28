@@ -64,7 +64,7 @@ vec2 get_csm_shadows_from_layers(const uint prev_layer_index, const uint curr_la
 		vec2(shadow_mapping.esm_exponent_layer_scale_factor)
 	);
 
-	vec2 in_light_percentages = exp(shadow_mapping.esm_exponent * occluder_receiver_diffs);
+	vec2 in_light_percentages = exp(layer_scaled_esm_exponents * occluder_receiver_diffs);
 
 	/////////// Doing a sub-frustum bounds check
 
