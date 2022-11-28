@@ -85,7 +85,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		},
 
 		.shadow_mapping = {
-			.sample_radius = 1, .esm_exponent = 80,
+			.sample_radius = 1, .esm_exponent = 50,
 			.esm_exponent_layer_scale_factor = 1.8f,
 			.billboard_alpha_threshold = 0.8f,
 
