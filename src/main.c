@@ -81,7 +81,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		.parallax_mapping = {
 			.enabled = true,
 			.min_layers = 4.0f, .max_layers = 32.0f,
-			.height_scale = 0.02f, .lod_cutoff = 1.5f
+			.height_scale = 0.04f, .lod_cutoff = 1.5f
 		},
 
 		.shadow_mapping = {
@@ -119,7 +119,6 @@ static void* main_init(const WindowConfig* const window_config) {
 		},
 
 		.skybox_path = ASSET_PATH("skyboxes/desert.bmp"),
-
 		.light_color = {0.960784f, 0.835294f, 0.631373f},
 		.tone_mapping_max_white = 0.75f, .noise_granularity = 0.001f
 	};
@@ -384,7 +383,7 @@ static void* main_init(const WindowConfig* const window_config) {
 	const MaterialPropertiesPerObjectType
 		sector_face_shared_material_properties = {
 			.texture_rescale_size = 128,
-			.bilinear_percents = {.albedo = 0.8f, .normal = 0.6f},
+			.bilinear_percents = {.albedo = 0.8f, .normal = 0.9f},
 
 			.normal_map_config = {
 				.use_anisotropic_filtering = true, .blur_radius = 3,
