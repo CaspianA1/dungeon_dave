@@ -12,7 +12,8 @@ typedef struct {
 //////////
 
 static Screen init_screen(const WindowConfig* const config) {
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) FAIL(LoadSDL, "SDL loading failed: '%s'", SDL_GetError());
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
+		FAIL(LoadSDL, "SDL loading failed: '%s'", SDL_GetError());
 
 	const byte* const opengl_major_minor_version = config -> opengl_major_minor_version;
 
