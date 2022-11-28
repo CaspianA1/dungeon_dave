@@ -6,7 +6,7 @@
 #include "utils/cglm_include.h" // For `vec2, `vec3, `mat4`, and `vec4`
 #include "event.h" // For `Event`
 
-// TODO: make direction switching harder
+// TODO: make direction switching harder, and apply wall alignment slowdown for corners
 
 //////////
 
