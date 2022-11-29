@@ -41,7 +41,7 @@ SDL_Surface* init_blank_grayscale_surface(const GLsizei width, const GLsizei hei
 
 SDL_Surface* init_surface(const GLchar* const path) {
 	SDL_Surface* const surface = SDL_LoadBMP(path);
-	if (surface == NULL) FAIL(OpenFile, "Could not load a surface from disk: %s", SDL_GetError());
+	if (surface == NULL) FAIL(OpenFile, "Could not load '%s': %s", path, SDL_GetError());
 
 	if (surface -> format -> format == SDL_PIXEL_FORMAT)
 		return surface; // Format is already correct
