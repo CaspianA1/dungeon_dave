@@ -225,10 +225,6 @@ void make_application(
 	void (*const deinit) (void* const)) {
 
 	const Screen screen = init_screen(config);
-
-	printf("---\nvendor = %s\nrenderer = %s\nversion = %s\n---\n",
-		glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
-
 	void* const app_context = init(config);
 
 	loop_application(&screen, config, app_context, drawer);
