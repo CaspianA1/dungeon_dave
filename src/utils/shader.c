@@ -109,7 +109,7 @@ static GLuint init_shader_from_source(
 static GLchar* read_file_contents(const GLchar* const path) {
 	FILE* const file = open_file_safely(path, "r");
 
-	/* (TODO) Possible bug: if `ftell` fails, `num_bytes` will
+	/* TODO (possible bug): if `ftell` fails, `num_bytes` will
 	underflow, and too much data will be allocated. */
 
 	fseek(file, 0l, SEEK_END); // Set file position to end
