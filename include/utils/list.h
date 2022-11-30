@@ -18,6 +18,7 @@ typedef struct {
 #define deinit_list(list) dealloc((list).data)
 #define value_at_list_index(list, index, type) ((type*) (list) -> data)[index]
 
+// TODO: make this typed
 #define LIST_FOR_EACH(initial_offset, list, item_name, ...) do {\
 	const buffer_size_t length = (list) -> length, item_size = (list) -> item_size;\
 	byte* const data = (byte*) (list) -> data;\
