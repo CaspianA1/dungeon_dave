@@ -12,7 +12,7 @@
 /* TODO:
 - Make sure that billboards never intersect, because that would break depth sorting
 - Instead of providing a size for billboards, only provide a scale factor for them, and then
-	determine their size by the aspect ratio of a frame in their spritesheet (just provide a BillboardConfig struct
+	determine their size by the aspect ratio of a frame in their spritesheet (just provide a `BillboardConfig` struct
 	for each billboard)
 */
 
