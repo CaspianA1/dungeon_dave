@@ -12,7 +12,8 @@
 /* TODO:
 - Make sure that billboards never intersect, because that would break depth sorting
 - Instead of providing a size for billboards, only provide a scale factor for them, and then
-	determine their size by the aspect ratio of a frame in their spritesheet
+	determine their size by the aspect ratio of a frame in their spritesheet (just provide a BillboardConfig struct
+	for each billboard)
 */
 
 typedef struct {
@@ -29,7 +30,7 @@ typedef struct {
 typedef struct {
 	material_index_t material_index;
 	texture_id_t texture_id;
-	vec2 size; // TODO: only specify a scale (determine the size ratio by the input texture size)
+	vec2 size;
 	vec3 pos;
 } Billboard;
 
