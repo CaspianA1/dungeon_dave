@@ -1,6 +1,6 @@
 #include "rendering/entities/sector.h"
 #include "utils/map_utils.h" // For `sample_map_point`
-#include "utils/statemap.h" // // For various `StateMap`-related defs
+#include "utils/bitarray.h" // // For various `BitArray`-related defs
 #include "rendering/entities/face.h" // For `init_mesh_for_sector`, and `init_map_edge_mesh`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 #include "utils/macro_utils.h" // For `ARRAY_LENGTH`, and `ASSET_PATH`
@@ -28,7 +28,7 @@ static byte point_matches_sector_attributes(const Sector* const sector,
 }
 
 // Gets length across, and then adds to area size y until out of map or length across not eq
-static void form_sector_area(Sector* const sector, const StateMap traversed_points,
+static void form_sector_area(Sector* const sector, const BitArray traversed_points,
 	const byte* const heightmap, const byte* const texture_id_map,
 	const byte map_width, const byte map_height, const byte texture_id) {
 
@@ -38,7 +38,7 @@ static void form_sector_area(Sector* const sector, const StateMap traversed_poin
 	byte top_x = origin[0];
 	const byte origin_y = origin[1];
 
-	while (top_x < map_width && !statemap_bit_is_set(traversed_points, top_x, origin_y) &&
+	while (top_x < map_width && !bitarray_bit_is_set(traversed_points, origin_y * map_width + top_x) &&
 		point_matches_sector_attributes(sector, heightmap, texture_id_map, top_x, origin_y, map_width, texture_id)) {
 
 		size[0]++;
@@ -55,7 +55,13 @@ static void form_sector_area(Sector* const sector, const StateMap traversed_poin
 
 	done:
 
-	set_statemap_area(traversed_points, (buffer_size_t[4]) {origin[0], origin_y, size[0], size[1]});
+	// TODO: set many bits at once, if possible
+	for (buffer_size_t y = origin_y; y < origin_y + size[1]; y++) {
+		const buffer_size_t traversed_points_base_index = y * map_width;
+
+		for (buffer_size_t x = origin[0]; x < origin[0] + size[0]; x++)
+			set_bit_in_bitarray(traversed_points, traversed_points_base_index + x);
+	}
 }
 
 static void generate_sectors_and_face_mesh_from_maps(List* const sectors, List* const face_mesh,
@@ -79,11 +85,17 @@ static void generate_sectors_and_face_mesh_from_maps(List* const sectors, List* 
 
 	/* A StateMap is used instead of a heightmap with null map points, because 1. less
 	bytes used and 2. for forming faces, the original heightmap will need to be unmodified. */
-	const StateMap traversed_points = init_statemap(map_width, map_height);
+	// const StateMap traversed_points = init_statemap(map_width, map_height);
+
+	/* This is used to keep track of traversed points. To perform some action on a traversed point
+	at position <x, y>, the bit index will be `y * map_width + x`.
+	*/
+	const BitArray traversed_points = init_bitarray(map_width * map_height);
 
 	for (byte y = 0; y < map_height; y++) {
+		const buffer_size_t traversed_points_base_index = y * map_width;
 		for (byte x = 0; x < map_width; x++) {
-			if (statemap_bit_is_set(traversed_points, x, y)) continue;
+			if (bitarray_bit_is_set(traversed_points, traversed_points_base_index + x)) continue;
 
 			const byte texture_id = sample_map_point(texture_id_map, x, y, map_width);
 
@@ -119,7 +131,7 @@ static void generate_sectors_and_face_mesh_from_maps(List* const sectors, List* 
 		}
 	}
 
-	deinit_statemap(traversed_points);
+	deinit_bitarray(traversed_points);
 }
 
 /* This function generates a modified version of the plain face mesh used
