@@ -29,7 +29,7 @@ typedef struct {
 typedef struct {
 	material_index_t material_index;
 	texture_id_t texture_id;
-	vec2 size;
+	vec2 size; // TODO: only specify a scale (determine the size ratio by the input texture size)
 	vec3 pos;
 } Billboard;
 
