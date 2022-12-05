@@ -1,7 +1,7 @@
 #ifndef STATEMAP_H
 #define STATEMAP_H
 
-#include "utils/typedefs.h" // For `byte` and `buffer_size_t`
+#include "utils/typedefs.h" // For `byte`, and `buffer_size_t`
 #include "utils/alloc.h" // For `dealloc`
 #include <stdbool.h> // For `bool`
 
