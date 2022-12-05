@@ -2,6 +2,9 @@
 #include "utils/alloc.h" // For `clearing_alloc`, and `dealloc`
 #include "utils/macro_utils.h" // For `CHECK_BITMASK`
 
+static const byte bytes_per_chunk = sizeof(bitarray_chunk_t);
+static const byte bits_per_chunk = bytes_per_chunk * CHAR_BIT;
+
 ////////// Init and deinit
 
 BitArray init_bitarray(const buffer_size_t num_bits) {
