@@ -5,7 +5,7 @@
 
 typedef struct {
 	billboard_index_t index;
-	GLfloat dist_to_camera;
+	GLfloat dist_to_camera_squared;
 } BillboardDistanceSortRef;
 
 /* TODO:
@@ -51,14 +51,24 @@ void update_billboard_context(const BillboardContext* const billboard_context, c
 
 ////////// This part concerns the sorting of billboard indices from back to front, and rendering
 
-static int compare_billboard_sort_refs(const void* const a, const void* const b) {
-	const GLfloat
-		dist_a = ((BillboardDistanceSortRef*) a) -> dist_to_camera,
-		dist_b = ((BillboardDistanceSortRef*) b) -> dist_to_camera;
+// Using insertion sort because the data is already partially sorted
+static void sort_billboard_refs_backwards(BillboardDistanceSortRef* const sort_refs,
+	const billboard_index_t num_billboards) {
 
-	if (dist_a < dist_b) return 1;
-	else if (dist_a > dist_b) return -1;
-	else return 0;
+	for (billboard_index_t i = 1; i < num_billboards; i++) {
+		const BillboardDistanceSortRef sort_ref = sort_refs[i];
+
+		/* J may become smaller than 0, so using a type
+		that fits `billboard_index_t` that's signed */
+		int32_t j = i - 1;
+
+		while (j >= 0 && sort_refs[j].dist_to_camera_squared < sort_ref.dist_to_camera_squared) {
+			sort_refs[j + 1] = sort_refs[j];
+			j--;
+		}
+
+		sort_refs[j + 1] = sort_ref;
+	}
 }
 
 static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_context, const vec3 camera_pos) {
@@ -69,14 +79,18 @@ static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_
 
 	const billboard_index_t num_billboards = (billboard_index_t) billboards -> length;
 
-	for (billboard_index_t i = 0; i < num_billboards; i++)
-		sort_ref_data[i] = (BillboardDistanceSortRef) {
-			i, glm_vec3_distance((GLfloat*) camera_pos, (GLfloat*) billboard_data[i].pos)
-		};
+	////////// Reinitializing the sort ref distances to the camera, and sorting the billboards
 
-	/* Sorting from back to front by index (the actual billboards are not sorted, since that would require much more copying).
-	TODO: use the fact that the billboards will already be partially sorted for better sorting performance (i.e. using insertion sort). */
-	qsort(sort_ref_data, num_billboards, sizeof(BillboardDistanceSortRef), compare_billboard_sort_refs);
+	for (billboard_index_t i = 0; i < num_billboards; i++) {
+		BillboardDistanceSortRef* const sort_ref = sort_ref_data + i;
+
+		sort_ref -> dist_to_camera_squared = glm_vec3_distance2(
+			(GLfloat*) camera_pos,
+			(GLfloat*) billboard_data[sort_ref -> index].pos
+		);
+	}
+
+	sort_billboard_refs_backwards(sort_ref_data, num_billboards);
 
 	////////// Moving the billboards into their right positions in their GPU buffer
 
@@ -87,6 +101,7 @@ static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_
 	// TODO: do culling via an AABB tree later
 	for (billboard_index_t i = 0; i < num_billboards; i++)
 		billboards_gpu[i] = billboard_data[sort_ref_data[i].index];
+
 
 	deinit_vertex_buffer_memory_mapping();
 }
@@ -179,6 +194,11 @@ BillboardContext init_billboard_context(
 	};
 
 	////////// Initializing client-side lists
+
+	billboard_context.distance_sort_refs.length = num_billboards;
+
+	for (billboard_index_t i = 0; i < num_billboards; i++)
+		((BillboardDistanceSortRef*) billboard_context.distance_sort_refs.data)[i].index = i;
 
 	push_array_to_list(&billboard_context.billboards, billboards, num_billboards);
 	push_array_to_list(&billboard_context.animation_instances, billboard_animation_instances, num_billboard_animation_instances);

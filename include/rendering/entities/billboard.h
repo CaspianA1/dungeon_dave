@@ -35,12 +35,12 @@ typedef struct {
 } Billboard;
 
 typedef struct {
-	/* The billboard ID is associated with a BillboardAnimationInstance
+	/* The billboard index is associated with a BillboardAnimationInstance
 	and not an Animation because there's one animation instance per animated billboard. */
 	const billboard_index_t billboard_index, animation_index;
 } BillboardAnimationInstance;
 
-////////// Excluded: compare_billboard_sort_refs, sort_billboards_by_dist_to_camera, define_vertex_spec
+////////// Excluded: compare_billboard_sort_refs, sort_billboard_refs_backwards, sort_billboards_by_dist_to_camera, define_vertex_spec
 
 void update_billboard_context(const BillboardContext* const billboard_context, const GLfloat curr_time_secs);
 
