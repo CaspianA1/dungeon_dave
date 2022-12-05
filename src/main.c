@@ -75,6 +75,8 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 }
 
 static void* main_init(const WindowConfig* const window_config) {
+	////////// Printing library info
+
 	#define PRINT_LIBRARY_INFO(suffix_lowercase, suffix_uppercase, start, end)\
 		printf("\n%s Open%s:\nVendor: %s\nRenderer: %s\nVersion: %s\n%s",\
 			start,\
