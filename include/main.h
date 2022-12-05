@@ -1,6 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include "audio.h" // For `AudioContext`
 #include "utils/typedefs.h" // For OpenGL types + other typedefs
 #include "camera.h" // For `Camera`
 #include "shared_shading_params.h" // For `SharedShadingParams`
@@ -43,6 +44,8 @@
 
 // TODO: add more const qualifiers where I can
 typedef struct {
+	AudioContext audio_context;
+
 	Camera camera;
 
 	SharedShadingParams shared_shading_params;

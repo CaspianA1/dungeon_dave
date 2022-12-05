@@ -8,6 +8,7 @@
 typedef enum {
 	LoadSDL,
 	LoadOpenGL,
+	LoadOpenAL,
 
 	InvalidTextureID,
 	InitializeMaterial,
@@ -16,6 +17,9 @@ typedef enum {
 	CreateSurface,
 	CreateTexture,
 	CreateFramebuffer,
+	CreateAudioBuffer,
+	CreateAudioSource,
+	UseAudioSource,
 
 	CreateShader,
 	ParseIncludeDirectiveInShader,
@@ -27,8 +31,8 @@ typedef enum {
 } FailureType;
 
 #define FAIL(failure_type, format, ...) do {\
-	fprintf(stderr, "Failed with error type '%s'. Reason: '"\
-		format "'.\n", #failure_type, __VA_ARGS__);\
+	fprintf(stderr, "Failed with error type '%s' in source file '%s' on line %d. Reason: '"\
+		format "'.\n", #failure_type, __FILE__, __LINE__, __VA_ARGS__);\
 	exit(failure_type + 1);\
 } while (false)
 

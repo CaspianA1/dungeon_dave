@@ -238,7 +238,7 @@ void write_array_of_primitives_to_uniform_buffer(const UniformBuffer* const buff
 	get_subvar_metadata(buffer, subvar_name, &dest, &array_length, &array_stride, NULL);
 	check_array_length(primitives.length, array_length, buffer -> block.name, subvar_name, function_name);
 
-	LIST_FOR_EACH(0, &primitives, primitive,
+	UNTYPED_LIST_FOR_EACH(&primitives, primitive,
 		memcpy(dest, primitive, primitives.item_size);
 		dest += array_stride;
 	);

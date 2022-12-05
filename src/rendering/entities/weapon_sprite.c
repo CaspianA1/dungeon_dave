@@ -32,7 +32,7 @@ ahead of time, and is very small; so this should make the code a bit simpler and
 	1. If the near clip dist is way too large, the weapon grows in size a ton.
 	2. If the near clip dist is way too small, the weapon appears warped, and disappears from sight too easily.
 
-TODO: do a depth prepass for the weapon sprite (and perhaps the rest of the geometry too) to discard
+TODO: do a depth prepass for the weapon sprite (and perhaps the rest of the geometry too), to discard
 	some on-screen fragments, if that helps performance on the terrain 2 level (only do it for fragments with an alpha of 1)
 */
 
@@ -42,12 +42,16 @@ static void update_weapon_sprite_animation(WeaponSpriteAnimationContext* const a
 	texture_id_t curr_frame = animation_context -> curr_frame;
 	const GLfloat curr_time_secs = event -> curr_time_secs;
 
+	animation_context -> activated_weapon_this_tick = false;
+
 	if (curr_frame == 0) {
 		if (CHECK_BITMASK(event -> movement_bits, BIT_USE_WEAPON)) {
 			animation_context -> cycle_base_time = curr_time_secs;
+			animation_context -> activated_weapon_this_tick = true;
 			curr_frame++;
 		}
 	}
+
 	else update_animation_information(
 		curr_time_secs,
 		animation_context -> cycle_base_time,
@@ -289,14 +293,45 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 	};
 }
 
-void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event) {
-	update_weapon_sprite_animation(&ws -> animation_context, event);
+//////////
 
-	WeaponSpriteAppearanceContext* const appearance_context = &ws -> appearance_context;
+// The sound emitting pos is in the middle of the top edge of the weapon
+static void get_sound_emitting_pos(const vec3* const world_corners, vec3 sound_emitting_pos) {
+	glm_vec3_add((GLfloat*) world_corners[2], (GLfloat*) world_corners[3], sound_emitting_pos);
+	glm_vec3_scale(sound_emitting_pos, 0.5f, sound_emitting_pos);
+}
+
+void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event) {
+	////////// Getting the previous sound emitting pos
+
+	const vec3* const world_corners = ws -> appearance_context.world_space.corners;
+	vec3 last_sound_emitting_pos;
+	get_sound_emitting_pos(world_corners, last_sound_emitting_pos);
+
+	////////// Updating the animation, and then getting new screen and world corners
+
+	update_weapon_sprite_animation(&ws -> animation_context, event);
 
 	vec2 screen_corners[corners_per_quad];
 	get_screen_corners(ws, event, camera -> speed_xz_percent, screen_corners);
-	get_world_corners(screen_corners, camera, appearance_context);
+	get_world_corners(screen_corners, camera, &ws -> appearance_context);
+
+	////////// Getting the current sound emitting pos, and the velocity from that
+
+	GLfloat* const curr_sound_emitting_pos = ws -> curr_sound_emitting_pos, *const velocity = ws -> velocity;
+	get_sound_emitting_pos(world_corners, curr_sound_emitting_pos);
+
+	// TODO: use an `ON_FIRST_CALL` block here instead, and after that, don't use such a block altogether
+	static bool first_call = true;
+
+	if (first_call) {
+		glm_vec3_zero(velocity);
+		first_call = false;
+	}
+	else {
+		glm_vec3_sub(curr_sound_emitting_pos, last_sound_emitting_pos, velocity);
+		glm_vec3_scale(velocity, 1.0f / event -> delta_time, velocity);
+	}
 }
 
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
@@ -314,4 +349,26 @@ void draw_weapon_sprite(const WeaponSprite* const ws) {
 			&(UniformUpdaterParams) {ws}, UseShaderPipeline
 		);
 	);
+}
+
+////////// Sound functions
+
+bool weapon_sound_activator(const void* const data) {
+	// TODO: put the `started_this_tick` thing in the `Animation` struct
+	return ((WeaponSprite*) data) -> animation_context.activated_weapon_this_tick;
+}
+
+void weapon_sound_updater(const void* const data, const ALuint al_source) {
+	const WeaponSprite* const ws = data;
+
+	const vec3* const world_corners = ws -> appearance_context.world_space.corners;
+	const GLfloat *const bl = world_corners[0], *const tl = world_corners[2];
+
+	vec3 dir; // The dir on the left will be the same as the dir on the right
+	glm_vec3_sub((GLfloat*) tl, (GLfloat*) bl, dir);
+	glm_vec3_normalize(dir);
+
+	alSourcefv(al_source, AL_POSITION, ws -> curr_sound_emitting_pos);
+	alSourcefv(al_source, AL_VELOCITY, ws -> velocity);
+	alSourcefv(al_source, AL_DIRECTION, dir);
 }

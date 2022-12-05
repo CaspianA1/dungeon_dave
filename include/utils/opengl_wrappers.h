@@ -101,6 +101,7 @@ static inline void* init_gpu_buffer_memory_mapping(const GLuint buffer, const GL
 	return glMapBufferRange(target, 0, num_bytes, GL_MAP_WRITE_BIT | range_invalidation_flag);
 }
 
+// TODO: remove
 static inline const GLchar* get_GL_error(void) {
 	switch (glGetError()) {
 		#define ERROR_CASE(error) case GL_##error: return #error;
@@ -113,9 +114,8 @@ static inline const GLchar* get_GL_error(void) {
 		ERROR_CASE(OUT_OF_MEMORY);
 
 		#undef ERROR_CASE
-
-		default: return "Unknown error";
 	}
+	return "Unknown error";
 }
 
 #endif

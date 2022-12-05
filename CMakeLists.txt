@@ -17,14 +17,16 @@ set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Wformat ${CONVERSION_WARNINGS_1} ${
 set(CMAKE_C_FLAGS_DEBUG "-g -fsanitize=address,undefined,float-divide-by-zero,unsigned-integer-overflow,implicit-conversion")
 set(CMAKE_C_FLAGS_RELEASE "-Ofast")
 
-########## Declaring SDL2 as a package, and other standard CMake boilerplate.
+########## Declaring SDL2 and OpenAL as packages, and other standard CMake boilerplate.
 
 find_package(SDL2 REQUIRED)
+find_package(OpenAL REQUIRED)
 
 file(GLOB_RECURSE SRC_FILES src/*.c)
 
 add_executable(dungeon_dave ${SRC_FILES})
-target_include_directories(dungeon_dave PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${SDL2_INCLUDE_DIRS})
-target_link_libraries(dungeon_dave ${SDL2_LIBRARIES})
+
+target_include_directories(dungeon_dave PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${SDL2_INCLUDE_DIRS} ${OPENAL_INCLUDE_DIR})
+target_link_libraries(dungeon_dave ${SDL2_LIBRARIES} ${OPENAL_LIBRARY})
 
 ##########

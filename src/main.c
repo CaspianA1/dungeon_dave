@@ -5,7 +5,7 @@
 #include "data/maps.h" // For various heightmaps and texture id maps
 #include "utils/map_utils.h" // For `get_heightmap_max_point_height` and `compute_world_far_clip_dist`
 #include "utils/alloc.h" // For `alloc`, and `dealloc`, and `WindowConfig`
-#include "utils/window.h" // For `make_application`
+#include "window.h" // For `make_application`
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
 static bool main_drawer(void* const app_context, const Event* const event) {
@@ -23,6 +23,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	Camera* const camera = &scene_context -> camera;
 	BillboardContext* const billboard_context = &scene_context -> billboard_context;
 	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
+	const AudioContext* const audio_context = &scene_context -> audio_context;
 
 	DynamicLight* const dynamic_light = &scene_context -> dynamic_light;
 	const GLfloat *const dir_to_light = dynamic_light -> curr_dir, curr_time_secs = event -> curr_time_secs;
@@ -35,6 +36,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	update_dynamic_light(dynamic_light, curr_time_secs);
 	update_shadow_context(shadow_context, camera, dir_to_light, event -> aspect_ratio);
 	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context, dir_to_light);
+	update_audio_context(audio_context, camera);
 
 	////////// Some key camera debugging
 
@@ -73,6 +75,20 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 }
 
 static void* main_init(const WindowConfig* const window_config) {
+	#define PRINT_LIBRARY_INFO(suffix_lowercase, suffix_uppercase, start, end)\
+		printf("\n%s Open%s:\nVendor: %s\nRenderer: %s\nVersion: %s\n%s",\
+			start,\
+			#suffix_uppercase,\
+			suffix_lowercase##GetString(suffix_uppercase##_VENDOR),\
+			suffix_lowercase##GetString(suffix_uppercase##_RENDERER),\
+			suffix_lowercase##GetString(suffix_uppercase##_VERSION),\
+			end)
+
+	PRINT_LIBRARY_INFO(gl, GL, "---", "");
+	PRINT_LIBRARY_INFO(al, AL, "---", "---\n\n");
+
+	#undef PRINT_LIBRARY_INFO
+
 	////////// Defining a bunch of level data
 
 	const LevelRenderingConfig level_rendering_config = {
@@ -90,7 +106,7 @@ static void* main_init(const WindowConfig* const window_config) {
 			.billboard_alpha_threshold = 0.8f,
 
 			.shadow_context_config = {
-				4, 16, 1024, 1.5f, 0.3f // Palace
+				4, 16, 1024, 1.5f, 0.1f // Palace
 				// 16, 16, 1200, 1.0f, 0.4f // Terrain
 			}
 		},
@@ -124,6 +140,7 @@ static void* main_init(const WindowConfig* const window_config) {
 	};
 
 	// This array has no specific order. Materials for sectors, billboards, and weapon sprites can go anywhere.
+	// TODO: use a hash table for this instead.
 	static const MaterialPropertiesPerObjectInstance all_materials[] = {
 		{ASSET_PATH("walls/sand.bmp"),				{0.01f, 0.5f, 0.6f}}, // Done
 		{ASSET_PATH("walls/cobblestone_2.bmp"),		{0.0f, 0.0f, 0.0f}},
@@ -308,7 +325,9 @@ static void* main_init(const WindowConfig* const window_config) {
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 1.0f, .normal = 0.75f},
 			.normal_map_config = {.blur_radius = 1, .blur_std_dev = 1.0f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f}
-		}
+		},
+
+		.sound_path = ASSET_PATH("audio/sound_effects/health_increase.wav")
 		*/
 
 		// Desecrator
@@ -321,7 +340,9 @@ static void* main_init(const WindowConfig* const window_config) {
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 0.5f, .normal = 0.5f},
 			.normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .heightmap_scale = 1.0f, .rescale_factor = 3.0f}
-		}
+		},
+
+		.sound_path = ASSET_PATH("audio/sound_effects/rocket_explosion.wav")
 		*/
 
 		// Whip
@@ -333,7 +354,9 @@ static void* main_init(const WindowConfig* const window_config) {
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 1.0f, .normal = 1.0f},
 			.normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f}
-		}
+		},
+
+		.sound_path = ASSET_PATH("audio/sound_effects/whip_crack.wav")
 
 		// Snazzy shotgun
 		/*
@@ -345,7 +368,9 @@ static void* main_init(const WindowConfig* const window_config) {
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 0.0f, .normal = 0.0f},
 			.normal_map_config = {.blur_radius = 4, .blur_std_dev = 1.5f, .heightmap_scale = 2.0f, .rescale_factor = 2.0f}
-		}
+		},
+
+		.sound_path = ASSET_PATH("audio/sound_effects/shotgun.wav")
 		*/
 
 		// Reload pistol
@@ -358,7 +383,9 @@ static void* main_init(const WindowConfig* const window_config) {
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 0.5f, .normal = 1.0f},
 			.normal_map_config = {.blur_radius = 2, .blur_std_dev = 1.0f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f}
-		}
+		},
+
+		.sound_path = ASSET_PATH("audio/sound_effects/scrape.wav")
 		*/
 	};
 
@@ -425,10 +452,13 @@ static void* main_init(const WindowConfig* const window_config) {
 		window_config -> opengl_major_minor_version,
 		level_rendering_config.shadow_mapping.shadow_context_config.num_cascades);
 
+	// TODO: make a `LevelConfig` struct that includes all level data
 	const CameraConfig camera_config = {
 		.init_pos = {1.5f, 0.5f, 1.5f}, // {0.5f, 0.0f, 0.5f},
 		.angles = {.hori = ONE_FOURTH_PI, .vert = 0.0f, .tilt = 0.0f}
 	};
+
+	const ALchar* const level_soundtrack_path = ASSET_PATH("audio/themes/new/mountain.wav");
 
 	const byte
 		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_texture_id_map, map_size[2] = {blank_width, blank_height};
@@ -473,9 +503,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	const SceneContext scene_context = {
 		.camera = init_camera(&camera_config, far_clip_dist),
-
 		.materials_texture = materials_texture,
-
 		.weapon_sprite = init_weapon_sprite(&weapon_sprite_config, weapon_sprite_material_index),
 
 		.sector_context = init_sector_context(heightmap, texture_id_map,
@@ -517,6 +545,25 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	SceneContext* const scene_context_on_heap = alloc(1, sizeof(SceneContext));
 	memcpy(scene_context_on_heap, &scene_context, sizeof(SceneContext));
+
+	////////// Audio setup
+
+	// TODO: put this in its struct
+
+	AudioContext audio_context = init_audio_context();
+
+	// TODO: return clip indices from these, that can be used to find the right audio source
+	add_audio_clip_to_audio_context(&audio_context, weapon_sprite_config.sound_path, AudioIsPositional);
+	add_audio_clip_to_audio_context(&audio_context, level_soundtrack_path, AudioLoops);
+
+	add_positional_audio_source_to_audio_context(&audio_context, &(PositionalAudioSourceMetadata)
+		{&scene_context_on_heap -> weapon_sprite, weapon_sprite_config.sound_path, weapon_sound_activator, weapon_sound_updater});
+
+	// TODO: return source indices from this, that can be used to select a clip to play
+	add_nonpositional_audio_source_to_audio_context(&audio_context, level_soundtrack_path);
+	play_nonpositional_audio_source(&audio_context, level_soundtrack_path);
+
+	memcpy(&scene_context_on_heap -> audio_context, &audio_context, sizeof(AudioContext));
 
 	////////// Initializing shared textures
 
@@ -572,6 +619,7 @@ static void main_deinit(void* const app_context) {
 	deinit_shadow_context(&scene_context -> shadow_context);
 	deinit_title_screen(&scene_context -> title_screen);
 	deinit_skybox(scene_context -> skybox);
+	deinit_audio_context(&scene_context -> audio_context);
 
 	dealloc(scene_context);
 }

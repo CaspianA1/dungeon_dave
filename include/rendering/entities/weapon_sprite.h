@@ -2,11 +2,13 @@
 #define WEAPON_SPRITE_H
 
 #include "utils/typedefs.h" // For OpenGL types + other typedefs
-#include "animation.h" // For `Animation` and `AnimationLayout`
+#include "animation.h" // For `Animation`, and `AnimationLayout`
 #include "utils/cglm_include.h" // For `vec3`
 #include "data/constants.h" // For `corners_per_quad`
 #include "level_config.h" // For `MaterialPropertiesPerObjectType`
+#include "utils/al_include.h" // For `ALchar`
 #include "rendering/drawable.h" // For `Drawable`
+#include "audio.h" // For `audio_source_activator_t`, and `audio_source_metadata_updater_t`
 #include "camera.h" // For `Camera`
 #include "event.h" // For `Event`
 
@@ -14,6 +16,7 @@ typedef struct {
 	GLfloat cycle_base_time;
 	const material_index_t material_index;
 	texture_id_t curr_frame;
+	bool activated_weapon_this_tick;
 	const Animation animation;
 } WeaponSpriteAnimationContext;
 
@@ -40,18 +43,23 @@ typedef struct {
 	const GLfloat screen_space_size, max_movement_magnitude;
 	const AnimationLayout animation_layout;
 	const MaterialPropertiesPerObjectType shared_material_properties;
+	const ALchar* const sound_path;
 } WeaponSpriteConfig;
 
 typedef struct {
 	const Drawable drawable;
 	WeaponSpriteAnimationContext animation_context;
 	WeaponSpriteAppearanceContext appearance_context;
+	vec3 curr_sound_emitting_pos, velocity; // These are used for OpenAL
 } WeaponSprite;
 
 //////////
 
 /* Excluded: update_weapon_sprite_animation, circular_mapping_from_zero_to_one,
-get_screen_corners, get_world_corners, get_quad_tbn_matrix, update_uniforms, define_vertex_spec */
+get_screen_corners, get_world_corners, get_quad_tbn_matrix, update_uniforms,
+define_vertex_spec, get_sound_emitting_pos */
+
+////////// Drawing functions
 
 WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const material_index_t material_index);
 #define deinit_weapon_sprite(ws) deinit_drawable((ws) -> drawable)
@@ -59,5 +67,10 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event);
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws);
 void draw_weapon_sprite(const WeaponSprite* const ws);
+
+////////// Sound functions
+
+bool weapon_sound_activator(const void* const data);
+void weapon_sound_updater(const void* const data, const ALuint al_source);
 
 #endif

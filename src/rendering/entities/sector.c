@@ -140,6 +140,7 @@ used to store the face mesh changes every frame due to frustum culling, so if I 
 	so it should be faster to render with this separate one.
 
 TODO: perhaps pre-cull (frustum and backface culling) face meshes outside of the camera-light view frustum? */
+
 static void init_trimmed_face_mesh_for_shadow_mapping(
 	const byte map_width, const byte map_height, const byte* const heightmap, const List* const face_mesh,
 	GLsizei* const num_vertices, GLuint* const vertex_buffer, GLuint* const vertex_spec) {
@@ -166,11 +167,9 @@ static void init_trimmed_face_mesh_for_shadow_mapping(
 	for (byte i = 0; i < ARRAY_LENGTH(face_mesh_lists); i++) {
 		const List* const face_mesh_list = face_mesh_lists[i];
 
-		LIST_FOR_EACH(0, face_mesh_list, untyped_face_submesh,
-			const face_vertex_t* const face_submesh = (face_vertex_t*) untyped_face_submesh;
-
+		LIST_FOR_EACH(face_mesh_list, face_mesh_t, face_submesh,
 			for (byte j = 0; j < vertices_per_face; j++) {
-				const face_component_t* const vertex = face_submesh[j];
+				face_component_t* vertex = ((face_vertex_t*) face_submesh)[j];
 
 				*(buffer_mapping++) = vertex[0];
 				*(buffer_mapping++) = vertex[1];

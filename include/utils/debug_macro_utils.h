@@ -6,9 +6,44 @@
 #include <stdio.h> // For IO functions
 #include <stdbool.h> // For `bool`
 #include "utils/opengl_wrappers.h" // For OpenGL types + `get_GL_error`
+#include "utils/al_include.h" // For `alGetError`, `alcGetError`, and various OpenAL #defines
 #include "utils/sdl_include.h" // For `SDL_Scancode` values, `Uint32`, and `SDL_GetTicks`
 
+static inline const GLchar* get_AL_error(void) {
+	switch (alGetError()) {
+		#define ERROR_CASE(error) case AL_##error: return #error;
+
+		ERROR_CASE(NO_ERROR);
+		ERROR_CASE(INVALID_NAME);
+		ERROR_CASE(INVALID_ENUM);
+		ERROR_CASE(INVALID_VALUE);
+		ERROR_CASE(INVALID_OPERATION);
+		ERROR_CASE(OUT_OF_MEMORY);
+
+		#undef ERROR_CASE
+	}
+	return "Unknown error";
+}
+
+static inline const GLchar* get_ALC_error(ALCdevice* const device) {
+	switch (alcGetError(device)) {
+		#define ERROR_CASE(error) case ALC_##error: return #error;
+
+		ERROR_CASE(NO_ERROR);
+		ERROR_CASE(INVALID_DEVICE);
+		ERROR_CASE(INVALID_CONTEXT);
+		ERROR_CASE(INVALID_ENUM);
+		ERROR_CASE(INVALID_VALUE);
+		ERROR_CASE(OUT_OF_MEMORY);
+
+		#undef ERROR_CASE
+	}
+	return "Unknown error";
+}
+
 #define GL_ERR_CHECK printf("GL error check: %s\n", get_GL_error());
+#define AL_ERR_CHECK printf("AL error check: %s\n", get_AL_error());
+#define ALC_ERR_CHECK(device) printf("ALC error check: %s\n", get_ALC_error(device));
 #define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
 
 #define KEY_FLY SDL_SCANCODE_1

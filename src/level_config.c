@@ -13,9 +13,8 @@ void validate_all_materials(const List* const all_materials) {
 				(GLdouble) material.lighting.property);\
 	} while (false)
 
-	LIST_FOR_EACH(0, all_materials, untyped_material,
-		const MaterialPropertiesPerObjectInstance material =
-			*(MaterialPropertiesPerObjectInstance*) untyped_material;	
+	LIST_FOR_EACH(all_materials, MaterialPropertiesPerObjectInstance, material_ref,
+		const MaterialPropertiesPerObjectInstance material = *material_ref;
 
 		VALIDATE_MATERIAL_PROPERTY_RANGE(metallicity);
 		VALIDATE_MATERIAL_PROPERTY_RANGE(min_roughness);
@@ -36,10 +35,7 @@ static void copy_matching_material_to_dest_materials(const GLchar* const texture
 	#define SET_TO_RGB_PIXEL(index, property) dest[index] = (sdl_pixel_component_t)\
 		(material -> lighting.property * constants.max_byte_value)
 
-	LIST_FOR_EACH(0, all_materials, untyped_material,
-		const MaterialPropertiesPerObjectInstance* const material =
-			(MaterialPropertiesPerObjectInstance*) untyped_material;
-
+	LIST_FOR_EACH(all_materials, MaterialPropertiesPerObjectInstance, material,
 		if (!strcmp(texture_path, material -> albedo_texture_path)) {
 			sdl_pixel_component_t* const dest = ptr_to_list_index(dest_materials, dest_index);
 
@@ -52,7 +48,6 @@ static void copy_matching_material_to_dest_materials(const GLchar* const texture
 	);
 
 	#undef SET_TO_RGB_PIXEL
-
 	FAIL(InitializeMaterial, "No material definition found for texture path %s", texture_path);
 }
 
@@ -110,8 +105,7 @@ GLuint init_materials_texture(const List* const all_materials, const List* const
 	material_index_t last_dest_material_index = 0u;
 	const Billboard* const first_billboard = billboards -> data;
 
-	LIST_FOR_EACH(0, billboards, untyped_billboard,
-		Billboard* const billboard = (Billboard*) untyped_billboard;
+	LIST_FOR_EACH(billboards, Billboard, billboard,
 		const texture_id_t billboard_texture_id = billboard -> texture_id; // TODO: rename `texture_id` to `texture_index`
 
 		////////// Finding the texture path and the dest material index (for the output list) for the current billboard
@@ -131,8 +125,7 @@ GLuint init_materials_texture(const List* const all_materials, const List* const
 
 			/* The animation layout array is naturally ordered because it also specifies an order
 			of which textures will be placed into their set - so this frame index math is valid. */
-			LIST_FOR_EACH(0, billboard_animation_layouts, untyped_animation_layout,
-				const AnimationLayout* const animation_layout = (AnimationLayout*) untyped_animation_layout;
+			LIST_FOR_EACH(billboard_animation_layouts, AnimationLayout, animation_layout,
 				const texture_id_t next_frame_index_start = frame_index_start + animation_layout -> total_frames;
 
 				if (billboard_texture_id >= frame_index_start && billboard_texture_id < next_frame_index_start) {

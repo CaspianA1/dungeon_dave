@@ -1,4 +1,4 @@
-#include "utils/window.h"
+#include "window.h"
 #include "utils/failure.h" // For `FAIL`
 #include "utils/texture.h" // For `global_anisotropic_filtering_level`
 #include "data/constants.h" // For various constants

@@ -37,6 +37,8 @@ static void init_constant_shading_params(UniformBuffer* const shading_params,
 		"shadow_mapping.cascade_split_distances", (List) {
 			.data = shadow_context -> split_dists,
 			.item_size = sizeof(GLfloat),
+			/* TODO: make some macro somewhere to get the number of split dists,
+			given the number of cascades (this logic is just hardcoded in at the moment) */
 			.length = (buffer_size_t) shadow_context -> num_cascades - 1
 		}
 	);

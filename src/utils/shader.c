@@ -147,7 +147,7 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 	const size_t included_full_path_string_length = base_path_length + strlen(included_path);
 
 	// One more character for the null terminator
-	GLchar* const full_path_string_for_included = alloc(included_full_path_string_length + 1, sizeof(char));
+	GLchar* const full_path_string_for_included = alloc(included_full_path_string_length + 1, sizeof(GLchar));
 
 	memcpy(full_path_string_for_included, includer_path, base_path_length);
 	strcpy(full_path_string_for_included + base_path_length, included_path);
@@ -185,6 +185,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	3. Correct line numbers for errors when including files
 	*/
 
+	// TODO: make the error call a goto to an error spot instead
 	#define NO_PATH_STRING_ERROR() FAIL(ParseIncludeDirectiveInShader,\
 		"Path string expected after #include for '%s'", sub_shader_path)
 
@@ -235,11 +236,16 @@ static void erase_version_strings_from_dependency_list(const List* const depende
 	const GLchar *const base_version_string = "#version", *const full_version_string = "#version ___ core";
 	const GLsizei full_version_string_length = strlen(full_version_string);
 
-	// Not erasing the version string from the first one because it's the only one that should keep #version in it
-	LIST_FOR_EACH(1, dependency_list, untyped_dependency,
-		const GLchar* const dependency = *((GLchar**) untyped_dependency);
-		GLchar* const version_string_pos = strstr(dependency, base_version_string);
+	const void* const first_dependency = dependency_list -> data;
+
+	LIST_FOR_EACH(dependency_list, GLchar*, dependency_ref,
+		/* Not erasing the version string from the first one
+		because it's the only one that should keep #version in it */
+		if (dependency_ref == first_dependency) continue;
+
+		GLchar* const version_string_pos = strstr(*dependency_ref, base_version_string);
 		if (version_string_pos != NULL) memset(version_string_pos, ' ', full_version_string_length);
+		// TODO: fail here if no version string, printing the included file path
 	);
 }
 
@@ -277,7 +283,7 @@ GLuint init_shader(
 		if (paths[i] == NULL) continue;
 
 		const List* const dependency_list = dependency_lists + i;
-		LIST_FOR_EACH(0, dependency_list, dependency_code, dealloc(*(GLchar**) dependency_code););
+		LIST_FOR_EACH(dependency_list, GLchar*, dependency_ref, dealloc(*dependency_ref););
 		deinit_list(*dependency_list);
 	}
 

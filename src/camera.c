@@ -8,6 +8,10 @@ static GLfloat clamp_to_pos_neg_domain(const GLfloat val, const GLfloat limit) {
 	return glm_clamp(val, -limit, limit);
 }
 
+static void clamp_vec2_to_pos_neg_domain(vec2 val, const GLfloat limit) {
+	glm_vec2_clamp(val, -limit, limit);
+}
+
 // If a value is smaller or larger than an edge of the domain, it is wrapped around to the other side.
 static GLfloat wrap_around_domain(const GLfloat val, const GLfloat lower, const GLfloat upper) {
 	if (val < lower) return upper;
@@ -31,13 +35,14 @@ static GLfloat smootherstep(const GLfloat x) {
 
 // This does not include FOV, since FOV depends on a tick's speed, and speed is updated after this function is called
 static void update_camera_angles(Angles* const angles, const Event* const event) {
+	////////// Vert and hori
+
 	const GLfloat* const mouse_movement_percent = event -> mouse_movement_percent;
 
 	const GLfloat delta_vert = mouse_movement_percent[1] * constants.speeds.look[1];
 	angles -> vert = clamp_to_pos_neg_domain(angles -> vert + delta_vert, constants.camera.limits.vert_max);
 
 	const GLfloat hori_mouse_movement_percent = mouse_movement_percent[0];
-
 	const GLfloat delta_hori = hori_mouse_movement_percent * constants.speeds.look[0];
 	angles -> hori = wrap_around_domain(angles -> hori + delta_hori, 0.0f, constants.camera.limits.hori_wrap_around);
 
@@ -69,25 +74,6 @@ static void update_fov(Camera* const camera, const Event* const event) {
 	camera -> time_accum_for_full_fov = t;
 }
 
-////////// Velocity
-
-static GLfloat apply_velocity_in_xz_direction(const GLfloat curr_v_per_tick,
-	const GLfloat curr_a_per_tick, const GLfloat delta_time, const GLfloat max_v_per_tick,
-	const GLfloat wall_alignment_percent, const bool moving_in_dir, const bool moving_in_opposite_dir) {
-
-	const GLfloat delta_v_per_tick = curr_a_per_tick * delta_time;
-	GLfloat v_per_tick = curr_v_per_tick + (delta_v_per_tick * moving_in_dir) - (delta_v_per_tick * moving_in_opposite_dir);
-
-	// If 0 or 2 directions are being moved in; `^` maps to 1 if only 1 input is true
-	if (!(moving_in_dir ^ moving_in_opposite_dir))
-		v_per_tick *= get_percent_kept_from(constants.camera.frictions.floor, delta_time);
-
-	const GLfloat wall_friction = constants.camera.frictions.wall * wall_alignment_percent;
-	v_per_tick *= get_percent_kept_from(wall_friction, delta_time);
-
-	return clamp_to_pos_neg_domain(v_per_tick, max_v_per_tick);
-}
-
 ////////// Collision
 
 typedef struct {
@@ -96,9 +82,10 @@ typedef struct {
 } CollisionInfo;
 
 static CollisionInfo get_pos_collision_info(
-	const GLfloat x, const GLfloat z,
-	const GLfloat foot_height, const byte* const heightmap,
-	const byte map_width, const byte map_height) {
+	const GLfloat foot_height, const GLfloat* const xz,
+	const byte* const heightmap, const byte map_width, const byte map_height) {
+
+	const GLfloat x = xz[0], z = xz[1];
 
 	if (pos_out_of_overhead_map_bounds(x, z, map_width, map_height))
 		return (CollisionInfo) {true, 0}; // No valid colliding height if out of bounds
@@ -126,10 +113,8 @@ static CollisionInfo get_aabb_collision_info(const GLfloat foot_height,
 	};
 
 	for (byte i = 0; i < corners_per_quad; i++) {
-		const GLfloat* const aabb_corner = aabb_corners[i];
-
 		const CollisionInfo collision_info = get_pos_collision_info(
-			aabb_corner[0], aabb_corner[1], foot_height, heightmap, map_width, map_height
+			foot_height, aabb_corners[i], heightmap, map_width, map_height
 		);
 
 		if (collision_info.colliding) return collision_info;
@@ -140,14 +125,15 @@ static CollisionInfo get_aabb_collision_info(const GLfloat foot_height,
 
 //////////
 
-static void update_velocities_and_pos(const byte* const heightmap,
-	const byte map_size[2], const vec2 dir_xz, vec3 pos,
-	vec3 velocities, GLfloat* const last_tick_wall_alignment_percent,
-	const GLfloat pace, const Event* const event) {
+static void update_pos(Camera* const camera,
+	const byte* const heightmap, const byte map_size[2],
+	const vec2 dir_xz, const vec3 pos_before, const Event* const event) {
 
 	////////// Declaring a lot of shared vars
 
-	const vec2 pos_before_xz = {pos[0], pos[2]};
+	GLfloat // A float, vec2, and vec3
+		*const last_tick_wall_alignment_percent_ref = &camera -> last_tick_wall_alignment_percent,
+		*const velocity_xz_view_space = camera -> velocity_xz_view_space, *const pos = camera -> pos;
 
 	const byte movement_bits = event -> movement_bits;
 	const GLfloat delta_time = event -> delta_time;
@@ -160,64 +146,77 @@ static void update_velocities_and_pos(const byte* const heightmap,
 		accel_strafe_per_tick = constants.accel.strafe * delta_time,
 		max_speed_xz_per_tick = constants.speeds.xz_max * delta_time;
 
-	GLfloat
-		velocity_forward_back_per_tick = velocities[0] * delta_time,
-		velocity_strafe_per_tick = velocities[2] * delta_time;
+	////////// Making a view-space velocity per tick
 
-	////////// Updating velocity
+	const GLfloat last_tick_wall_alignment_percent = *last_tick_wall_alignment_percent_ref;
 
-	const GLfloat wall_alignment_percent = *last_tick_wall_alignment_percent;
+	const bool
+		moving_forward = CHECK_BITMASK(movement_bits, BIT_MOVE_FORWARD),
+		moving_backward = CHECK_BITMASK(movement_bits, BIT_MOVE_BACKWARD),
+		moving_left = CHECK_BITMASK(movement_bits, BIT_STRAFE_LEFT),
+		moving_right = CHECK_BITMASK(movement_bits, BIT_STRAFE_RIGHT);
 
-	velocity_forward_back_per_tick = apply_velocity_in_xz_direction(
-		velocity_forward_back_per_tick, accel_forward_back_per_tick, delta_time,
-		max_speed_xz_per_tick, wall_alignment_percent,
-		CHECK_BITMASK(movement_bits, BIT_MOVE_FORWARD),
-		CHECK_BITMASK(movement_bits, BIT_MOVE_BACKWARD));
+	vec2 accel_per_tick = {accel_forward_back_per_tick, accel_strafe_per_tick};
+	glm_vec2_scale(accel_per_tick, delta_time, accel_per_tick);
 
-	velocity_strafe_per_tick = apply_velocity_in_xz_direction(
-		velocity_strafe_per_tick, accel_strafe_per_tick, delta_time,
-		max_speed_xz_per_tick, wall_alignment_percent,
-		CHECK_BITMASK(movement_bits, BIT_STRAFE_LEFT),
-		CHECK_BITMASK(movement_bits, BIT_STRAFE_RIGHT));
+	vec2 vvs_per_tick; // Note: `vvs` = velocity view-space (just for xz)
+	glm_vec2_scale(velocity_xz_view_space, delta_time, vvs_per_tick);
+	glm_vec2_add(vvs_per_tick, (vec2) {accel_per_tick[0] * moving_forward, accel_per_tick[1] * moving_left}, vvs_per_tick);
+	glm_vec2_sub(vvs_per_tick, (vec2) {accel_per_tick[0] * moving_backward, accel_per_tick[1] * moving_right}, vvs_per_tick);
 
-	const GLfloat one_over_delta_time = 1.0f / delta_time;
+	////////// Applying floor and wall friction to that
 
-	velocities[0] = velocity_forward_back_per_tick * one_over_delta_time;
-	velocities[2] = velocity_strafe_per_tick * one_over_delta_time;
+	const GLfloat wall_friction = constants.camera.frictions.wall * last_tick_wall_alignment_percent;;
+
+	const GLfloat
+		floor_friction_percentage = get_percent_kept_from(constants.camera.frictions.floor, delta_time),
+		wall_friction_percentage = get_percent_kept_from(wall_friction, delta_time);
+
+	if (moving_forward == moving_backward) vvs_per_tick[0] *= floor_friction_percentage;
+	if (moving_left == moving_right) vvs_per_tick[1] *= floor_friction_percentage;
+
+	glm_vec2_scale(vvs_per_tick, wall_friction_percentage, vvs_per_tick);
+
+	// Clamping it, and then scaling it to be in terms of seconds
+	clamp_vec2_to_pos_neg_domain(vvs_per_tick, max_speed_xz_per_tick);
+	glm_vec2_scale(vvs_per_tick, 1.0f / delta_time, velocity_xz_view_space);
 
 	////////// X and Z movement + collision detection
 
+	const GLfloat pace = camera -> pace;
 	GLfloat foot_height = pos[1] - constants.camera.eye_height - pace;
 
-	const vec2 next_pos_xz = {
-		pos[0] + velocity_forward_back_per_tick * dir_xz[0] + velocity_strafe_per_tick * dir_xz[1],
-		pos[2] + velocity_forward_back_per_tick * dir_xz[1] - velocity_strafe_per_tick * dir_xz[0]
+	const vec2 pos_xz_next = {
+		pos[0] + vvs_per_tick[0] * dir_xz[0] + vvs_per_tick[1] * dir_xz[1],
+		pos[2] + vvs_per_tick[0] * dir_xz[1] - vvs_per_tick[1] * dir_xz[0]
 	};
 
-	if (!get_aabb_collision_info(foot_height, (vec2) {next_pos_xz[0], pos[2]}, heightmap, map_size).colliding)
-		pos[0] = next_pos_xz[0];
+	if (!get_aabb_collision_info(foot_height, (vec2) {pos_xz_next[0], pos[2]}, heightmap, map_size).colliding)
+		pos[0] = pos_xz_next[0];
 
-	if (!get_aabb_collision_info(foot_height, (vec2) {pos[0], next_pos_xz[1]}, heightmap, map_size).colliding)
-		pos[2] = next_pos_xz[1];
+	if (!get_aabb_collision_info(foot_height, (vec2) {pos[0], pos_xz_next[1]}, heightmap, map_size).colliding)
+		pos[2] = pos_xz_next[1];
 
 	////////// Setting the last tick's wall alignment percent
+
+	const vec2 pos_xz_before = {pos_before[0], pos_before[2]};
 
 	/* Note that these movement dirs are different from `dir_xz`, since
 	that's just a direction, but these are directions of movement */
 
 	vec2 movement_dir_xz;
-	glm_vec2_sub((vec2) {pos[0], pos[2]}, (GLfloat*) pos_before_xz, movement_dir_xz);
+	glm_vec2_sub((vec2) {pos[0], pos[2]}, (GLfloat*) pos_xz_before, movement_dir_xz);
 	glm_vec2_normalize(movement_dir_xz);
 
 	vec2 aspired_movement_dir_xz;
-	glm_vec2_sub((GLfloat*) next_pos_xz, (GLfloat*) pos_before_xz, aspired_movement_dir_xz);
+	glm_vec2_sub((GLfloat*) pos_xz_next, (GLfloat*) pos_xz_before, aspired_movement_dir_xz);
 	glm_vec2_normalize(aspired_movement_dir_xz);
 
-	*last_tick_wall_alignment_percent = fabsf(glm_vec2_cross(movement_dir_xz, aspired_movement_dir_xz));
+	*last_tick_wall_alignment_percent_ref = fabsf(glm_vec2_cross(movement_dir_xz, aspired_movement_dir_xz));
 
-	////////// Getting the jump speed per second, and updating the foot height
+	////////// Updating the jump/fall velocity, and updating the foot height
 
-	GLfloat speed_jump_per_sec = velocities[1];
+	GLfloat speed_jump_per_sec = camera -> jump_fall_velocity;
 
 	if (speed_jump_per_sec == 0.0f && CHECK_BITMASK(movement_bits, BIT_JUMP))
 		speed_jump_per_sec = constants.speeds.jump;
@@ -243,7 +242,7 @@ static void update_velocities_and_pos(const byte* const heightmap,
 	}
 
 	pos[1] += constants.camera.eye_height;
-	velocities[1] = speed_jump_per_sec;
+	camera -> jump_fall_velocity = speed_jump_per_sec;
 }
 
 ////////// Pace
@@ -255,14 +254,12 @@ static GLfloat make_pace_function(const GLfloat x, const GLfloat period, const G
 }
 
 static void update_pace(Camera* const camera, const GLfloat delta_time) {
-	const GLfloat* const velocities = camera -> velocities;
-
 	const GLfloat combined_speed_xz_amount = fminf(constants.speeds.xz_max,
-		glm_vec2_norm((vec2) {velocities[0], velocities[2]}));
+		glm_vec2_norm(camera -> velocity_xz_view_space));
 
 	camera -> speed_xz_percent = combined_speed_xz_amount / constants.speeds.xz_max;
 
-	if (velocities[1] == 0.0f) {
+	if (camera -> jump_fall_velocity == 0.0f) {
 		camera -> pace = make_pace_function(
 			camera -> time_since_jump, constants.camera.pace.period,
 			constants.camera.pace.max_amplitude * camera -> speed_xz_percent);
@@ -304,15 +301,17 @@ static void get_camera_directions(const Angles* const angles, vec2 dir_xz, vec3 
 }
 
 static void update_camera_pos(Camera* const camera, const Event* const event,
-	const byte* const heightmap, const byte map_size[2],
-	const vec2 dir_xz, const vec3 dir, const vec3 right) {
+	const byte* const heightmap, const byte map_size[2], const vec2 dir_xz) {
 
 	const GLfloat delta_time = event -> delta_time;
 	GLfloat* const pos = camera -> pos;
 
 	if (event -> keys[KEY_FLY]) { // Forward, backward, left, right
 		const byte movement_bits = event -> movement_bits;
-		const GLfloat velocity = constants.speeds.xz_max * delta_time;
+
+		const GLfloat
+			velocity = constants.speeds.xz_max * delta_time,
+			*const dir = camera -> dir, *const right = camera -> right;
 
 		#define MOVE(mask, direction, sign)\
 			if CHECK_BITMASK(movement_bits, BIT_##mask)\
@@ -326,17 +325,23 @@ static void update_camera_pos(Camera* const camera, const Event* const event,
 		#undef MOVE
 	}
 	else {
-		update_velocities_and_pos(heightmap, map_size, dir_xz, pos,
-			camera -> velocities, &camera -> last_tick_wall_alignment_percent, camera -> pace, event);
+		vec3 pos_before;
+		glm_vec3_copy(pos, pos_before);
 
+		update_pos(camera, heightmap, map_size, dir_xz, pos_before, event);
 		update_pace(camera, delta_time);
+
+		GLfloat* const velocity_world_space = camera -> velocity_world_space;
+		glm_vec3_sub(pos, pos_before, velocity_world_space);
+		glm_vec3_scale(velocity_world_space, 1.0f / delta_time, velocity_world_space);
 	}
 }
 
-static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ratio,
-	const vec3 dir, const vec3 right, const vec3 up) {
+static void update_camera_matrices(Camera* const camera, const GLfloat aspect_ratio) {
+	const GLfloat
+		*const pos = camera -> pos, *const dir = camera -> dir,
+		*const right = camera -> right, *const up = camera -> up;
 
-	const GLfloat* const pos = camera -> pos;
 	vec4* const view = camera -> view;
 
 	#define D(vector, sign) sign glm_vec3_dot((GLfloat*) pos, (GLfloat*) vector)
@@ -367,11 +372,13 @@ void update_camera(Camera* const camera, const Event* const event, const byte* c
 	vec2 dir_xz;
 	GLfloat *const dir = camera -> dir, *const right = camera -> right, *const up = camera -> up;
 
+	////////// Updating directions, velocity, pos, fov, camera matrices, and frustum planes
+
 	get_camera_directions(angles, dir_xz, dir, camera -> right_xz, right, up);
-	update_camera_pos(camera, event, heightmap, map_size, dir_xz, dir, right);
+	update_camera_pos(camera, event, heightmap, map_size, dir_xz);
 	update_fov(camera, event);
 
-	update_camera_matrices(camera, event -> aspect_ratio, dir, right, up);
+	update_camera_matrices(camera, event -> aspect_ratio);
 	glm_frustum_planes(camera -> view_projection, camera -> frustum_planes);
 }
 
