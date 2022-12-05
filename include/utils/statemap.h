@@ -9,7 +9,7 @@ typedef byte statemap_chunk_t; // This should not be signed
 
 typedef struct {
 	const buffer_size_t chunks_across;
-	statemap_chunk_t* data;
+	statemap_chunk_t* const data;
 } StateMap;
 
 // Excluded: get_statemap_chunk, get_mask_for_bit_index_in_chunk
