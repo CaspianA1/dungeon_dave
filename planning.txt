@@ -51,6 +51,8 @@ Architectural/code design ideas:
 - A shader cache
 - Specular antialiasing
 - Allow for usage of a debug output context, if desired
+- For constants in the `constants` struct, perhaps test their validity through some static assertions?
+	Or is that too much - checks for limits, which are used for checks for runtime constants?
 
 Miscellaneous problems:
 - The checker heightmap has faster pacing sometimes
