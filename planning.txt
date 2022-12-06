@@ -50,6 +50,7 @@ Architectural/code design ideas:
 - Figure out how to make spherically distorted skyboxes in Blender from cube-like ones made in an image editor
 - A shader cache
 - Specular antialiasing
+- Allow for usage of a debug output context, if desired
 
 Miscellaneous problems:
 - The checker heightmap has faster pacing sometimes
