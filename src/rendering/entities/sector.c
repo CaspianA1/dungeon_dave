@@ -210,8 +210,7 @@ static void frustum_cull_sector_faces_into_gpu_buffer(
 	// The output variable indices are in regards to the `glDrawArrays` call.
 
 	const List* const sectors = &sector_context -> sectors;
-	const Sector* const sector_data = sectors -> data;
-	const Sector* const out_of_bounds_sector = sector_data + sectors -> length;
+	const Sector* const out_of_bounds_sector = (Sector*) sectors -> data + sectors -> length;
 
 	const List* const face_mesh_cpu = &sector_context -> mesh_cpu;
 	const face_mesh_t* const face_mesh_cpu_data = face_mesh_cpu -> data;
@@ -232,17 +231,17 @@ static void frustum_cull_sector_faces_into_gpu_buffer(
 	When looking in the negative Z direction, there's a lot of overdraw. To avoid this, when looking
 	in that direction, face meshes are copied into the back of the GPU buffer (rather than the front),
 	and filled in right-to-left in memory, so that face meshes that have a larger Z coordinate go before those
-	with a smaller Z coordinate in the buffer. This leads to less overdraw, and much better performance overall. */
+	with a smaller Z coordinate in the buffer. This leads to less overdraw, and much better performance overall.
+
+	TODO: apply this process to the X-axis too. */
 	const bool order_face_meshes_backwards = camera -> dir[2] < 0.0f;
 
-	// TODO: fill in sectors in the opposite direction if the player is facing the other way (for less overdraw)
-	for (const Sector* sector = sector_data; sector < out_of_bounds_sector; sector++) {
+	LIST_FOR_EACH(sectors, Sector, sector,
 		buffer_size_t num_visible_faces_in_group = 0;
 		const buffer_size_t cpu_buffer_start_index = sector -> face_range.start;
 
+		// Checking to see how many sectors forward are visible
 		while (sector < out_of_bounds_sector) {
-			// Checking to see if the sector is visible
-
 			const byte *const origin = sector -> origin, *const size = sector -> size;
 			const byte origin_x = origin[0], origin_z = origin[1];
 
@@ -267,7 +266,7 @@ static void frustum_cull_sector_faces_into_gpu_buffer(
 
 			num_visible_faces += num_visible_faces_in_group;
 		}
-	}
+	);
 
 	deinit_vertex_buffer_memory_mapping();
 
