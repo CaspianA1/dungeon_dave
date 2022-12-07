@@ -20,19 +20,17 @@ typedef struct {
 
 // TODO: perhaps do a subtype size assertion?
 #define LIST_FOR_EACH(list, subtype_t, item_name, ...) do {\
-	const buffer_size_t length = (list) -> length;\
 	subtype_t* const data = (list) -> data;\
-	subtype_t* const out_of_bounds = data + length;\
-	\
+	subtype_t* const out_of_bounds = data + (list) -> length;\
 	for (subtype_t* item_name = data; item_name < out_of_bounds; item_name++) {__VA_ARGS__}\
 } while (false)
 
 /* For cases where the subtype isn't known, this
 iterates based on the item size stored in the list. */
 #define UNTYPED_LIST_FOR_EACH(list, item_name, ...) do {\
-	const buffer_size_t length = (list) -> length, item_size = (list) -> item_size;\
+	const buffer_size_t item_size = (list) -> item_size;\
 	byte* const data = (byte*) (list) -> data;\
-	byte* const out_of_bounds = data + length * item_size;\
+	byte* const out_of_bounds = data + (list) -> length * item_size;\
 	\
 	for (byte* item_name = data; item_name < out_of_bounds; item_name += item_size) {__VA_ARGS__}\
 } while (false)
