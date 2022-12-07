@@ -108,8 +108,15 @@ static void* main_init(const WindowConfig* const window_config) {
 			.billboard_alpha_threshold = 0.8f,
 
 			.shadow_context_config = {
-				4, 16, 1024, 1.5f, 0.1f // Palace
-				// 16, 16, 1200, 1.0f, 0.4f // Terrain
+				// Palace
+				.num_cascades = 4, .num_depth_buffer_bits = 16,
+				.resolution = 1024, .sub_frustum_scale = 1.5f, .linear_split_weight = 0.1f
+
+				// Terrain
+				/*
+				.num_cascades = 16, .num_depth_buffer_bits = 16,
+				.resolution = 1200, .sub_frustum_scale = 1.0f, .linear_split_weight = 0.4f
+				*/
 			}
 		},
 
