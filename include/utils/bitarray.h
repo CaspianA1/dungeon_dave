@@ -42,7 +42,6 @@ static inline void deinit_bitarray(const BitArray bitarray) {
 static inline void set_bit_in_bitarray(const BitArray bitarray, const buffer_size_t bit_index) {
 	*get_bitarray_chunk(bitarray, bit_index) |= get_mask_for_bit_index_in_chunk(bit_index);
 }
-#include "utils/debug_macro_utils.h"
 
 static inline bool bitarray_bit_is_set(const BitArray bitarray, const buffer_size_t bit_index) {
 	return !!(*get_bitarray_chunk(bitarray, bit_index) & get_mask_for_bit_index_in_chunk(bit_index));
