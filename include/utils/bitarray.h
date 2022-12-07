@@ -43,9 +43,13 @@ static inline void set_bit_in_bitarray(const BitArray bitarray, const buffer_siz
 	*get_bitarray_chunk(bitarray, bit_index) |= get_mask_for_bit_index_in_chunk(bit_index);
 }
 
+// TODO: improve this via bit-level parallelism
+static inline void set_bit_range_in_bitarray(const BitArray bitarray, const buffer_size_t start, const buffer_size_t end) {
+	for (buffer_size_t i = start; i < end; i++) set_bit_in_bitarray(bitarray, i);
+}
+
 static inline bool bitarray_bit_is_set(const BitArray bitarray, const buffer_size_t bit_index) {
 	return !!(*get_bitarray_chunk(bitarray, bit_index) & get_mask_for_bit_index_in_chunk(bit_index));
 }
-
 
 #endif

@@ -55,12 +55,13 @@ static void form_sector_area(Sector* const sector, const BitArray traversed_poin
 
 	done:
 
-	// TODO: set many bits at once, if possible
 	for (buffer_size_t y = origin_y; y < origin_y + size[1]; y++) {
-		const buffer_size_t traversed_points_base_index = y * map_width;
+		const buffer_size_t traversed_points_base_index = y * map_width + origin[0];
 
-		for (buffer_size_t x = origin[0]; x < origin[0] + size[0]; x++)
-			set_bit_in_bitarray(traversed_points, traversed_points_base_index + x);
+		set_bit_range_in_bitarray(traversed_points,
+			traversed_points_base_index,
+			traversed_points_base_index + size[0]
+		);
 	}
 }
 
