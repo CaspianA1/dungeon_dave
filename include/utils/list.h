@@ -29,9 +29,8 @@ typedef struct {
 iterates based on the item size stored in the list. */
 #define UNTYPED_LIST_FOR_EACH(list, item_name, ...) do {\
 	const buffer_size_t item_size = (list) -> item_size;\
-	byte* const data = (byte*) (list) -> data;\
+	byte* const data = (list) -> data;\
 	byte* const out_of_bounds = data + (list) -> length * item_size;\
-	\
 	for (byte* item_name = data; item_name < out_of_bounds; item_name += item_size) {__VA_ARGS__}\
 } while (false)
 
