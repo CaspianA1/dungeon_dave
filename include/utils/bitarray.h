@@ -46,11 +46,12 @@ static inline bitarray_chunk_t get_mask_for_bit_index_in_chunk(const buffer_size
 ////////// Public utils
 
 static inline bool bitarray_bit_is_set(const BitArray bitarray, const buffer_size_t bit_index) {
+	// `&`-ing the given chunk by the mask for the given bit index, and getting 0 or 1 from that
 	return !!(*get_bitarray_chunk(bitarray, bit_index) & get_mask_for_bit_index_in_chunk(bit_index));
 }
 
 static inline void set_bit_in_bitarray(const BitArray bitarray, const buffer_size_t bit_index) {
-	// `&`-ing the given chunk by the mask for the given bit index
+	// `|`-ing the given chunk by the mask for the given bit index
 	*get_bitarray_chunk(bitarray, bit_index) |= get_mask_for_bit_index_in_chunk(bit_index);
 }
 
@@ -64,10 +65,10 @@ static inline void set_bit_range_in_bitarray(const BitArray bitarray, const buff
 		start_bit_index_for_chunk = start & bits_per_chunk_minus_one,
 		end_bit_index_for_chunk = end & bits_per_chunk_minus_one;
 
-	// TODO: find some way to get rid of the UB warnings that come up with Clang's sanitizer
+	// TODO: find some way to get rid of the UB warnings that come up with Clang's sanitizer (alt. formula w/ no overflow)
 	if (first_chunk == last_chunk)
 		// Formula is from `https://stackoverflow.com/questions/42591377/bit-manipulation-in-a-range`, from 'Falk Hüffner'
-		*first_chunk |= (((1u << end_bit_index_for_chunk) << 1) - (1u << start_bit_index_for_chunk));
+		*first_chunk |= ((1u << end_bit_index_for_chunk) << 1u) - (1u << start_bit_index_for_chunk);
 	else {
 		*first_chunk |= (bitarray_chunk_t) (~0u << start_bit_index_for_chunk),
 		*last_chunk |= (bitarray_chunk_t) (~(~1u << end_bit_index_for_chunk));
@@ -83,7 +84,6 @@ static inline BitArray init_bitarray(const buffer_size_t num_bits) {
 	/* Uses the equation for integer ceiling division, but right-
 	shifting by the log2 of the divisor, instead of dividing */
 	const buffer_size_t num_chunks = ((num_bits - 1u) >> log2_bits_per_chunk) + 1u;
-
 	return (BitArray) {clearing_alloc(num_chunks, sizeof(bitarray_chunk_t))};
 }
 
