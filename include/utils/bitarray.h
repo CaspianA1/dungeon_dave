@@ -12,18 +12,21 @@
 - A chunk is a unit of addressable data in the bitarray.
 - The type for the chunk must be unsigned.
 - The number of bits per chunk must be a power of 2.
-- The chunk size must not exceed 32 bits. (TODO: add 64-bit support.)
+- The chunk size must be in the range of 8 to 64 bits (inclusive on both ends).
 */
 
-typedef uint32_t bitarray_chunk_t;
+typedef uint64_t bitarray_chunk_t;
+
+static const bitarray_chunk_t chunk_with_all_bits_set = (bitarray_chunk_t) ~(bitarray_chunk_t) 0u;
 
 static const byte
 	log2_bits_per_chunk =
 		(sizeof(bitarray_chunk_t) >= sizeof(uint8_t)) +
 		(sizeof(bitarray_chunk_t) >= sizeof(uint16_t)) +
-		(sizeof(bitarray_chunk_t) >= sizeof(uint32_t)) + 2;
+		(sizeof(bitarray_chunk_t) >= sizeof(uint32_t)) +
+		(sizeof(bitarray_chunk_t) >= sizeof(uint64_t)) + 2u;
 
-static const byte bits_per_chunk_minus_one = sizeof(bitarray_chunk_t) * CHAR_BIT - 1;
+static const byte bits_per_chunk_minus_one =  sizeof(bitarray_chunk_t) * CHAR_BIT - 1u;
 
 //////////
 
@@ -61,20 +64,22 @@ static inline void set_bit_range_in_bitarray(const BitArray bitarray, const buff
 		*const first_chunk = get_bitarray_chunk(bitarray, start),
 		*const last_chunk = get_bitarray_chunk(bitarray, end);
 
-	const byte
-		start_bit_index_for_chunk = start & bits_per_chunk_minus_one,
-		end_bit_index_for_chunk = end & bits_per_chunk_minus_one;
+	static const bitarray_chunk_t chunk_all_bits_set_except_for_first = (bitarray_chunk_t) ~(bitarray_chunk_t) 1u;
 
-	// TODO: find some way to get rid of the UB warnings that come up with Clang's sanitizer (alt. formula w/ no overflow)
+	const bitarray_chunk_t
+		first_mask = (bitarray_chunk_t) (chunk_with_all_bits_set << (start & bits_per_chunk_minus_one)),
+		last_mask = (bitarray_chunk_t) ~(chunk_all_bits_set_except_for_first << (end & bits_per_chunk_minus_one));
+
+	//////////
+
 	if (first_chunk == last_chunk)
-		// Formula is from `https://stackoverflow.com/questions/42591377/bit-manipulation-in-a-range`, from 'Falk Hüffner'
-		*first_chunk |= ((1u << end_bit_index_for_chunk) << 1u) - (1u << start_bit_index_for_chunk);
+		*first_chunk |= first_mask & last_mask;
 	else {
-		*first_chunk |= (bitarray_chunk_t) (~0u << start_bit_index_for_chunk),
-		*last_chunk |= (bitarray_chunk_t) (~(~1u << end_bit_index_for_chunk));
+		*first_chunk |= first_mask;
+		*last_chunk |= last_mask;
 
-		const bitarray_chunk_t fully_set_mask = (bitarray_chunk_t) ~0u;
-		for (bitarray_chunk_t* chunk = first_chunk + 1; chunk < last_chunk; chunk++) *chunk = fully_set_mask;
+		for (bitarray_chunk_t* chunk = first_chunk + 1; chunk < last_chunk; chunk++)
+			*chunk = chunk_with_all_bits_set;
 	}
 }
 
