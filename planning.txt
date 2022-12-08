@@ -23,18 +23,19 @@ Shadow mapping:
 - Filtering in exp(gl_FragCoord.z) may remove some shadow acne
 - Make the billboards + a 2D character sprite cast shadows
 
-Ideal CSM: - Sector mesh optimization: 1. In high-speed memory. 2. Front faces pre-culled (result is half the size?).
+Ideal CSM:
+	- Sector mesh optimization:
+		1. In high-speed memory. 2. Front faces pre-culled (result is half the size?).
 		3. Face info bits removed. 4. Additional faces added for external map edges.
-	- A technique like ESM or EVSM.
+	- ESM.
 
 Architectural/code design ideas:
-- More efficiently set statemap bit ranges, maybe
 - Catch more warnings with -Weverything
 - File paths may not work on Windows
 - Pass in texture parameters through a bitmask
 - Tell if a level was just initialized through the Event struct
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that? Perhaps store its texture id there?
-- Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if enough precision?)
+- Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if there's enough precision?)
 - Define the constants in constants.h in constants.c, and make the constants.h struct extern
 - Three classes of settings: hardcoded in the `constants` struct, configurable via a level file, and configurable by the player
 - Some library memory leaks; this should be fixed in some way, if possible (figure out why `SDL_GetNumAllocations` is above zero after `deinit_screen`; even happens with a simple test app)

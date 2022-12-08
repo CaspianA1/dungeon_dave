@@ -53,15 +53,17 @@ static void form_sector_area(Sector* const sector, const BitArray traversed_poin
 		}
 	}
 
-	done:
+	done: {
+		const byte base_x_index_for_map = origin[0], max_x_index_for_map = size[0] - 1;
 
-	for (buffer_size_t y = origin_y; y < origin_y + size[1]; y++) {
-		const buffer_size_t traversed_points_base_index = y * map_width + origin[0];
+		for (buffer_size_t y = origin_y; y < origin_y + size[1]; y++) {
+			const buffer_size_t traversed_points_base_index = y * map_width + base_x_index_for_map;
 
-		set_bit_range_in_bitarray(traversed_points,
-			traversed_points_base_index,
-			traversed_points_base_index + size[0]
-		);
+			set_bit_range_in_bitarray(traversed_points,
+				traversed_points_base_index,
+				traversed_points_base_index + max_x_index_for_map
+			);
+		}
 	}
 }
 
@@ -84,13 +86,8 @@ static void generate_sectors_and_face_mesh_from_maps(List* const sectors, List* 
 
 	//////////
 
-	/* A StateMap is used instead of a heightmap with null map points, because 1. less
-	bytes used and 2. for forming faces, the original heightmap will need to be unmodified. */
-	// const StateMap traversed_points = init_statemap(map_width, map_height);
-
 	/* This is used to keep track of traversed points. To perform some action on a traversed point
-	at position <x, y>, the bit index will be `y * map_width + x`.
-	*/
+	at position <x, y>, the bit index will be `y * map_width + x`. */
 	const BitArray traversed_points = init_bitarray(map_width * map_height);
 
 	for (byte y = 0; y < map_height; y++) {
@@ -234,7 +231,7 @@ static void frustum_cull_sector_faces_into_gpu_buffer(
 	and filled in right-to-left in memory, so that face meshes that have a larger Z coordinate go before those
 	with a smaller Z coordinate in the buffer. This leads to less overdraw, and much better performance overall.
 
-	TODO: apply this process to the X-axis too. */
+	TODO: apply this process to the X-axis too, if possible. */
 	const bool order_face_meshes_backwards = camera -> dir[2] < 0.0f;
 
 	LIST_FOR_EACH(sectors, Sector, sector,
