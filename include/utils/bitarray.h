@@ -28,7 +28,7 @@ static const byte bits_per_chunk_minus_one = sizeof(bitarray_chunk_t) * CHAR_BIT
 //////////
 
 typedef struct {
-	bitarray_chunk_t* chunks;
+	bitarray_chunk_t* const chunks;
 } BitArray;
 
 ////////// Private utils
@@ -64,6 +64,7 @@ static inline void set_bit_range_in_bitarray(const BitArray bitarray, const buff
 		start_bit_index_for_chunk = start & bits_per_chunk_minus_one,
 		end_bit_index_for_chunk = end & bits_per_chunk_minus_one;
 
+	// TODO: find some way to get rid of the UB warnings that come up with Clang's sanitizer
 	if (first_chunk == last_chunk)
 		// Formula is from `https://stackoverflow.com/questions/42591377/bit-manipulation-in-a-range`, from 'Falk Hüffner'
 		*first_chunk |= (((1u << end_bit_index_for_chunk) << 1) - (1u << start_bit_index_for_chunk));
