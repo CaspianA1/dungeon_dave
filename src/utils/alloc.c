@@ -10,6 +10,8 @@ static alloc_count_t
 
 static bool registered_memory_report = false;
 
+//////////
+
 static void memory_report(void) {
 	const alloc_count_t total_allocs = num_allocs + num_clearing_allocs;
 
