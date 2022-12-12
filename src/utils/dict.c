@@ -11,7 +11,7 @@ void print_dict(const Dict* const dict) {
 	const BitArray containment_states = dict -> containment_states;
 	const DictEntry* const entries = dict -> entries;
 
-	static const char* const format_strings[] = {"%lldi", "%lluu", "'%s'"};
+	static const char* const format_strings[] = {"%di", "%uu", "'%s'"};
 
 	for (buffer_size_t i = 0; i < num_entry_slots; i++) {
 		if (bitarray_bit_is_set(containment_states, i)) {
@@ -37,7 +37,7 @@ static buffer_size_t get_key_index(const Dict* const dict, DictVar key) {
 	switch (dict -> key_type) {
 		// TODO: perhaps transform into an unsigned, and hash from there
 		case DV_SignedInt:
-			goto error;
+			puts("Unsupported hash"); exit(1);
 
 		case DV_UnsignedInt:
 			hash = key.unsigned_int;
@@ -59,7 +59,6 @@ static buffer_size_t get_key_index(const Dict* const dict, DictVar key) {
 	}
 
 	return hash % dict -> num_entry_slots;
-	error: puts("Unsupported hash"); exit(1);
 }
 
 static bool keys_are_equal(const DictVar key_1, const DictVar key_2, const DictVarType type) {
