@@ -47,8 +47,8 @@ typedef struct {
 		const CascadedShadowContextConfig shadow_context_config;
 	} shadow_mapping;
 
+	// Note: if the opacity is 0, volumetric lighting is not computed
 	const struct {
-		const bool enabled;
 		const GLuint num_samples;
 		const GLfloat sample_density, opacity;
 	} volumetric_lighting;

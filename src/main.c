@@ -138,7 +138,6 @@ static void* main_init(const WindowConfig* const window_config) {
 		},
 
 		.volumetric_lighting = {
-			.enabled = true,
 			.num_samples = 50,
 			.sample_density = 1.0f, .opacity = 0.1f
 		},

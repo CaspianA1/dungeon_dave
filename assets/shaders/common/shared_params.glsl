@@ -18,7 +18,6 @@ layout(shared) uniform ConstantShadingParams {
 	} shadow_mapping;
 
 	struct {
-		bool enabled;
 		uint num_samples;
 		float sample_density, opacity;
 	} volumetric_lighting;

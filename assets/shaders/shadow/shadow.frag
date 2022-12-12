@@ -138,7 +138,7 @@ float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragmen
 	- Higher sample densities (e.g. 4.0) leads to god rays being shown that should be occluded
 	*/
 
-	if (!volumetric_lighting.enabled) return 0.0f;
+	if (volumetric_lighting.opacity == 0.0f) return 0.0f;
 
 	mat4 light_view_projection_matrix = light_view_projection_matrices[layer_index];
 
