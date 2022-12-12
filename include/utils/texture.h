@@ -11,7 +11,7 @@
 // This is written to by `window_creation.h`. TODO: remove this ugly global write.
 extern GLfloat global_anisotropic_filtering_level;
 
-////////// TODO: put these macros in the `constants` struct
+////////// TODO: put these macros, and `MAX_NUM_SECTOR_SUBTEXTURES`, in the `constants` struct
 
 #define SDL_PIXEL_FORMAT SDL_PIXELFORMAT_BGRA32
 #define OPENGL_INPUT_PIXEL_FORMAT GL_BGRA
