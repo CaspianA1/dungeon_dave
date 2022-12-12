@@ -12,7 +12,6 @@
 - Pass in a shared audio context config to `init_audio_context`
 - Perhaps base billboard sounds on their orientation
 - Make a sound occlusion model (through reverb)
-- Stop the crackle in some way for the weapon sprite
 - Add a unique track for the title screen
 - Use audio initers/updaters for nonpositional audio sources? Menu button clicks, for example
 */
