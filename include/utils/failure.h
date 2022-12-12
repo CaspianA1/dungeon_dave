@@ -19,7 +19,8 @@ typedef enum {
 	CreateFramebuffer,
 	CreateAudioBuffer,
 	CreateAudioSource,
-	UseAudioSource,
+
+	ReadFromDict,
 
 	CreateShader,
 	ParseIncludeDirectiveInShader,
@@ -30,10 +31,12 @@ typedef enum {
 	UseLevelHeightmap
 } FailureType;
 
-#define FAIL(failure_type, format, ...) do {\
-	fprintf(stderr, "Failed with error type '%s' in source file '%s' on line %d. Reason: '"\
-		format "'.\n", #failure_type, __FILE__, __LINE__, __VA_ARGS__);\
-	exit(failure_type + 1);\
+void print_failure_message(const char* const failure_type_string,
+	const char* const format_string, const char* const filename, const int line_number, ...);
+
+#define FAIL(failure_type, format_string, ...) do {\
+	print_failure_message(#failure_type, format_string, __FILE__, __LINE__, __VA_ARGS__);\
+	exit((int) failure_type + 1);\
 } while (false)
 
 #endif

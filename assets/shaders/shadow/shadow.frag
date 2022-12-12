@@ -146,28 +146,38 @@ float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragmen
 		camera_pos_cascade_space = (light_view_projection_matrix * vec4(camera_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f,
 		fragment_pos_cascade_space = (light_view_projection_matrix * vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
 
-	float sample_density_over_sample_count = volumetric_lighting.sample_density / volumetric_lighting.num_samples;
+	float one_over_num_samples = 1.0f / volumetric_lighting.num_samples;
+	float sample_density_over_sample_count = volumetric_lighting.sample_density * one_over_num_samples;
 
-	vec3
+	vec3 // TODO: apply biasing by adding a small offset based on a light-space surface normal
 		delta_UV = (camera_pos_cascade_space - fragment_pos_cascade_space) * sample_density_over_sample_count,
-		curr_pos_cascade_space = camera_pos_cascade_space;
+		curr_pos_cascade_space = fragment_pos_cascade_space;
 
-	float curr_decay = volumetric_lighting.decay_weight, volumetric_light_strength = 0.0f;
+	float volumetric_light_sum = 0.0f;
 
 	//////////
 
-	for (uint i = 0; i < volumetric_lighting.num_samples; i++) {
-		curr_pos_cascade_space -= delta_UV;
+	/* TODO:
+	- Add some minor attenuation
+	- Figure out a way to make the god rays weaker when closer to the viewer
+	- Stop the ground from being so bright
+	- See here: https://bartwronski.files.wordpress.com/2014/08/bwronski_volumetric_fog_siggraph2014.pdf
+	Note: the results turn out weird sometimes because the opacity is outside of the [0, 1] domain
+	*/
 
-		float depth_test = texture(shadow_cascade_sampler_depth_comparison,
+	// TODO: figure out a way to make the god rays become weaker when closer to the viewer
+	for (uint i = 0; i < volumetric_lighting.num_samples; i++) {
+		curr_pos_cascade_space += delta_UV;
+
+		float light_percent_visiblity = texture(shadow_cascade_sampler_depth_comparison,
 			vec4(curr_pos_cascade_space.xy, layer_index, curr_pos_cascade_space.z)
 		);
 
-		volumetric_light_strength += depth_test * curr_decay;
-		curr_decay *= volumetric_lighting.decay;
+		volumetric_light_sum += light_percent_visiblity;
 	}
 
-	return volumetric_lighting.opacity * min(volumetric_light_strength, 1.0f);
+	float base_volumetric_light_strength = volumetric_light_sum * one_over_num_samples;
+	return base_volumetric_light_strength * volumetric_lighting.opacity;
 }
 
 // The first component of the return value equals the shadow strength, and the second one equals the volumetric light value.
@@ -182,8 +192,8 @@ vec2 get_csm_shadow_and_volumetric_light(const vec3 fragment_pos_world_space, co
 
 	//////////
 
-	return vec2( // Volumetric lighting looks better with the prev layer, rather than the curr one. Odd!
+	return vec2( // TODO: perhaps pick a layer index based on the percent between?
 		get_csm_shadow_from_layers(prev_layer_index, layer_index, fragment_pos_world_space),
-		get_volumetric_light_from_layer(prev_layer_index, fragment_pos_world_space, view_dir)
+		get_volumetric_light_from_layer(layer_index, fragment_pos_world_space, view_dir)
 	);
 }

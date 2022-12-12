@@ -50,7 +50,7 @@ typedef struct {
 	const struct {
 		const bool enabled;
 		const GLuint num_samples;
-		const GLfloat decay, decay_weight, sample_density, opacity;
+		const GLfloat sample_density, opacity;
 	} volumetric_lighting;
 
 	const struct {

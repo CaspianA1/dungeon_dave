@@ -30,7 +30,6 @@ static void init_constant_shading_params(UniformBuffer* const shading_params,
 	UBO_WRITE(shadow_mapping.esm_exponent_layer_scale_factor);
 
 	UBO_WRITE(volumetric_lighting.enabled); UBO_WRITE(volumetric_lighting.num_samples);
-	UBO_WRITE(volumetric_lighting.decay); UBO_WRITE(volumetric_lighting.decay_weight);
 	UBO_WRITE(volumetric_lighting.sample_density); UBO_WRITE(volumetric_lighting.opacity);
 
 	write_array_of_primitives_to_uniform_buffer(shading_params,
@@ -73,7 +72,6 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 			"shadow_mapping.cascade_split_distances",
 
 			"volumetric_lighting.enabled", "volumetric_lighting.num_samples",
-			"volumetric_lighting.decay", "volumetric_lighting.decay_weight",
 			"volumetric_lighting.sample_density", "volumetric_lighting.opacity",
 
 			"ambient_occlusion.tricubic_filtering_enabled",

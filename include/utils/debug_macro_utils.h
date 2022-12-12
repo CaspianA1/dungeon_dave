@@ -6,7 +6,8 @@
 #include <stdio.h> // For IO functions
 #include <stdbool.h> // For `bool`
 #include "utils/opengl_wrappers.h" // For OpenGL types + `get_GL_error`
-#include "utils/al_include.h" // For `alGetError`, `alcGetError`, and various OpenAL #defines
+#include "openal/al.h" // For `alGetError`, and various OpenAL #defines
+#include "openal/alc.h" // For `alcGetError`, and various ALC #defines
 #include "utils/sdl_include.h" // For `SDL_Scancode` values, `Uint32`, and `SDL_GetTicks`
 
 static inline const GLchar* get_AL_error(void) {
@@ -41,17 +42,26 @@ static inline const GLchar* get_ALC_error(ALCdevice* const device) {
 	return "Unknown error";
 }
 
-#define GL_ERR_CHECK printf("GL error check: %s\n", get_GL_error());
-#define AL_ERR_CHECK printf("AL error check: %s\n", get_AL_error());
-#define ALC_ERR_CHECK(device) printf("ALC error check: %s\n", get_ALC_error(device));
-#define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
+//////////
 
 #define KEY_FLY SDL_SCANCODE_1
 #define KEY_TOGGLE_WIREFRAME_MODE SDL_SCANCODE_2
 #define KEY_PRINT_POSITION SDL_SCANCODE_3
 #define KEY_PRINT_DIRECTION SDL_SCANCODE_4
-#define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_5
-#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_6
+
+#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_5
+#define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_6
+#define KEY_PRINT_AL_ERROR SDL_SCANCODE_7
+#define KEY_PRINT_ALC_ERROR SDL_SCANCODE_8
+
+//////////
+
+#define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
+#define GL_ERR_CHECK printf("GL error check: %s\n", get_GL_error());
+#define AL_ERR_CHECK printf("AL error check: %s\n", get_AL_error());
+#define ALC_ERR_CHECK(device) printf("ALC error check: %s\n", get_ALC_error(device));
+
+//////////
 
 #define DEBUG(var, format) printf(#var " = %" #format "\n", (var))
 #define DEBUG_FLOAT(var) printf(#var " = %ff\n", (GLdouble) (var))

@@ -9,10 +9,25 @@
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
 static bool main_drawer(void* const app_context, const Event* const event) {
-	glClear(GL_DEPTH_BUFFER_BIT); // No color buffer clearing needed
+	////////// Setting the wireframe mode
+
+	const Uint8* const keys = event -> keys;
+
+	static bool in_wireframe_mode = false, already_pressing_wireframe_mode_key = false;
+
+	if (keys[KEY_TOGGLE_WIREFRAME_MODE]) {
+		if (!already_pressing_wireframe_mode_key) {
+			already_pressing_wireframe_mode_key = true;
+			glPolygonMode(GL_FRONT_AND_BACK, (in_wireframe_mode = !in_wireframe_mode) ? GL_LINE : GL_FILL);
+		}
+	}
+	else already_pressing_wireframe_mode_key = false;
+
+	glClear(GL_DEPTH_BUFFER_BIT | (in_wireframe_mode * GL_COLOR_BUFFER_BIT));
+
+	//////////
 
 	SceneContext* const scene_context = (SceneContext*) app_context;
-
 	if (tick_title_screen(&scene_context -> title_screen, event)) return true;
 
 	////////// Some variable initialization
@@ -26,7 +41,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	const AudioContext* const audio_context = &scene_context -> audio_context;
 
 	DynamicLight* const dynamic_light = &scene_context -> dynamic_light;
-	const GLfloat *const dir_to_light = dynamic_light -> curr_dir, curr_time_secs = event -> curr_time_secs;
+	const GLfloat* const dir_to_light = dynamic_light -> curr_dir, curr_time_secs = event -> curr_time_secs;
 
 	////////// Scene updating
 
@@ -37,13 +52,6 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	update_shadow_context(shadow_context, camera, dir_to_light, event -> aspect_ratio);
 	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context, dir_to_light);
 	update_audio_context(audio_context, camera);
-
-	////////// Some key camera debugging
-
-	const Uint8* const keys = event -> keys;
-
-	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
-	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(camera -> dir);
 
 	////////// Rendering to the shadow context
 
@@ -68,14 +76,23 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 		);
 	);
 
-	if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
+	////////// Some debugging
+
+	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
+	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(camera -> dir);
+
 	if (keys[KEY_PRINT_SDL_ERROR]) SDL_ERR_CHECK;
+	if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
+	if (keys[KEY_PRINT_AL_ERROR]) AL_ERR_CHECK;
+	if (keys[KEY_PRINT_ALC_ERROR]) ALC_ERR_CHECK(audio_context -> device);
 
 	return false;
 }
 
 static void* main_init(const WindowConfig* const window_config) {
 	////////// Printing library info
+
+	AudioContext audio_context = init_audio_context();
 
 	#define PRINT_LIBRARY_INFO(suffix_lowercase, suffix_uppercase, start, end)\
 		printf("\n%s Open%s:\nVendor: %s\nRenderer: %s\nVersion: %s\n%s",\
@@ -122,10 +139,8 @@ static void* main_init(const WindowConfig* const window_config) {
 
 		.volumetric_lighting = {
 			.enabled = true,
-
-			.num_samples = 25,
-			.decay = 0.95f, .decay_weight = 1.0f,
-			.sample_density = 1.0f, .opacity = 0.025f
+			.num_samples = 50,
+			.sample_density = 1.0f, .opacity = 0.1f
 		},
 
 		.ambient_occlusion = {
@@ -144,7 +159,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		},
 
 		.skybox_path = ASSET_PATH("skyboxes/desert.bmp"),
-		.light_color = {0.960784f, 0.835294f, 0.631373f},
+		.light_color = {0.96078f, 0.83529f, 0.63137f},
 		.tone_mapping_max_white = 0.75f, .noise_granularity = 0.001f
 	};
 
@@ -557,19 +572,33 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Audio setup
 
-	// TODO: put this in its struct
-
-	AudioContext audio_context = init_audio_context();
+	const ALchar
+		*const jump_up_sound_path = ASSET_PATH("audio/sound_effects/jump_up.wav"),
+		*const jump_land_sound_path = ASSET_PATH("audio/sound_effects/jump_land.wav");
 
 	// TODO: return clip indices from these, that can be used to find the right audio source
-	add_audio_clip_to_audio_context(&audio_context, weapon_sprite_config.sound_path, AudioIsPositional);
-	add_audio_clip_to_audio_context(&audio_context, level_soundtrack_path, AudioLoops);
+	add_audio_clip_to_audio_context(&audio_context, weapon_sprite_config.sound_path, true);
+	add_audio_clip_to_audio_context(&audio_context, jump_up_sound_path, true);
+	add_audio_clip_to_audio_context(&audio_context, jump_land_sound_path, true);
+	add_audio_clip_to_audio_context(&audio_context, level_soundtrack_path, false);
 
-	add_positional_audio_source_to_audio_context(&audio_context, &(PositionalAudioSourceMetadata)
-		{&scene_context_on_heap -> weapon_sprite, weapon_sprite_config.sound_path, weapon_sound_activator, weapon_sound_updater});
+	// TODO: add a running sound
+	const PositionalAudioSourceMetadata positional_audio_source_metadata[] = {
+		{weapon_sprite_config.sound_path, &scene_context_on_heap -> weapon_sprite,
+		weapon_sound_activator, weapon_sound_updater},
 
-	// TODO: return source indices from this, that can be used to select a clip to play
-	add_nonpositional_audio_source_to_audio_context(&audio_context, level_soundtrack_path);
+		{jump_up_sound_path, &scene_context_on_heap -> camera,
+		jump_up_sound_activator, jump_up_sound_updater},
+
+		{jump_land_sound_path, &scene_context_on_heap -> camera,
+		jump_land_sound_activator, jump_land_sound_updater}
+	};
+
+	for (byte i = 0; i < ARRAY_LENGTH(positional_audio_source_metadata); i++)
+		add_positional_audio_source_to_audio_context(&audio_context, positional_audio_source_metadata + i, false);
+
+	// TODO: perhaps return source indices from this, that can be used to select a source to play
+	add_nonpositional_audio_source_to_audio_context(&audio_context, level_soundtrack_path, true);
 	play_nonpositional_audio_source(&audio_context, level_soundtrack_path);
 
 	memcpy(&scene_context_on_heap -> audio_context, &audio_context, sizeof(AudioContext));

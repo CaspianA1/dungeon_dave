@@ -1,6 +1,7 @@
 #include "camera.h"
 #include "utils/macro_utils.h" // For `CHECK_BITMASK`
 #include "utils/map_utils.h" // For `sample_map_point`, and `pos_out_of_overhead_map_bounds`
+#include "utils/debug_macro_utils.h" // For `KEY_FLY` (TODO: remove)
 
 ////////// Small utility functions
 
@@ -218,10 +219,8 @@ static void update_pos(Camera* const camera,
 
 	GLfloat speed_jump_per_sec = camera -> jump_fall_velocity;
 
-	if (speed_jump_per_sec == 0.0f && CHECK_BITMASK(movement_bits, BIT_JUMP))
-		speed_jump_per_sec = constants.speeds.jump;
-	else
-		speed_jump_per_sec -= constants.accel.g * delta_time;
+	if (speed_jump_per_sec == 0.0f && CHECK_BITMASK(movement_bits, BIT_JUMP)) speed_jump_per_sec = constants.speeds.jump;
+	else speed_jump_per_sec -= constants.accel.g * delta_time;
 
 	/* Note: the foot height is updated before getting the base height. This is because then,
 	the foot height will be partially pressed into the ground, so that a valid AABB collision
@@ -233,15 +232,18 @@ static void update_pos(Camera* const camera,
 	const byte base_height = get_aabb_collision_info(foot_height,
 		(vec2) {pos[0], pos[2]}, heightmap, map_size).base_height;
 
-	if (foot_height > base_height) // Continuing jump or fall
-		pos[1] = foot_height + pace;
+	const bool continuing_jump_or_fall = foot_height > base_height;
 
-	else { // Resetting jump
+
+	if (continuing_jump_or_fall)
+		pos[1] = foot_height + pace;
+	else {
 		speed_jump_per_sec = 0.0f;
 		pos[1] = base_height;
 	}
 
 	pos[1] += constants.camera.eye_height;
+	camera -> landed_jump_in_this_tick = !(continuing_jump_or_fall || camera -> jump_fall_velocity == 0.0f);
 	camera -> jump_fall_velocity = speed_jump_per_sec;
 }
 
@@ -389,4 +391,45 @@ Camera init_camera(const CameraConfig* const config, const GLfloat far_clip_dist
 		.angles = config -> angles, .far_clip_dist = far_clip_dist,
 		.pos = {init_pos[0], init_pos[1], init_pos[2]}
 	};
+}
+
+////////// Sound functions
+
+bool jump_up_sound_activator(const void* const data) {
+	return ((Camera*) data) -> jump_fall_velocity == constants.speeds.jump;
+}
+
+void jump_up_sound_updater(const void* const data, const ALuint al_source) {
+	const Camera* const camera = data;
+
+	/* The jump-up sound has a grunt from the mouth, and a stomp from the feet.
+	In order to account for both sounds, I'm averaging the eye and foot pos
+	to get a camera center pos that is just between both sound sources.
+
+	TODO: average the pos, dirs, and velocity (they all have different ones). */
+
+	vec3 sound_pos;
+	glm_vec3_copy((GLfloat*) camera -> pos, sound_pos);
+	sound_pos[1] -= constants.camera.eye_height * 0.5f + camera -> pace;
+
+	alSourcefv(al_source, AL_POSITION, sound_pos);
+	alSourcefv(al_source, AL_DIRECTION, camera -> dir);
+	alSourcefv(al_source, AL_VELOCITY, camera -> velocity_world_space);
+}
+
+bool jump_land_sound_activator(const void* const data) {
+	return ((Camera*) data) -> landed_jump_in_this_tick;
+}
+
+// TODO: make this sound louder for higher heights (scale the volume percent by a max loudness height)
+void jump_land_sound_updater(const void* const data, const ALuint al_source) {
+	const Camera* const camera = data;
+
+	vec3 sound_pos;
+	glm_vec3_copy((GLfloat*) camera -> pos, sound_pos);
+	sound_pos[1] -= constants.camera.eye_height + camera -> pace;
+
+	alSourcefv(al_source, AL_POSITION, sound_pos);
+	alSourcefv(al_source, AL_DIRECTION, camera -> dir); // TODO: what should this direction be?
+	alSourcefv(al_source, AL_VELOCITY, camera -> velocity_world_space);
 }

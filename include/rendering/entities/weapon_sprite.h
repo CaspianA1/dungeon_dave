@@ -6,11 +6,10 @@
 #include "utils/cglm_include.h" // For `vec3`
 #include "data/constants.h" // For `corners_per_quad`
 #include "level_config.h" // For `MaterialPropertiesPerObjectType`
-#include "utils/al_include.h" // For `ALchar`
 #include "rendering/drawable.h" // For `Drawable`
-#include "audio.h" // For `audio_source_activator_t`, and `audio_source_metadata_updater_t`
 #include "camera.h" // For `Camera`
 #include "event.h" // For `Event`
+#include "openal/al.h" // For various OpenAL defs
 
 typedef struct {
 	GLfloat cycle_base_time;

@@ -5,6 +5,5 @@ scrap_code.txt
 .vscode/
 build/
 
-include/lib/cglm
-include/lib/cJSON.h
-src/lib/cJSON.c
+lib/cglm
+lib/openal

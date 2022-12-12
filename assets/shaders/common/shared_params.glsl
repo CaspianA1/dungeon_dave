@@ -20,7 +20,7 @@ layout(shared) uniform ConstantShadingParams {
 	struct {
 		bool enabled;
 		uint num_samples;
-		float decay, decay_weight, sample_density, opacity;
+		float sample_density, opacity;
 	} volumetric_lighting;
 
 	struct {

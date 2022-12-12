@@ -1,7 +1,7 @@
 #ifndef BUFFER_DEFS_H
 #define BUFFER_DEFS_H
 
-#include "lib/glad/glad.h" // For OpenGL defs
+#include "glad/glad.h" // For OpenGL defs
 
 //////////
 

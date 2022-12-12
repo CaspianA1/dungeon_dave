@@ -6,7 +6,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 
-#include "lib/cglm/cglm.h"
+#include "cglm/cglm.h"
 
 #pragma clang diagnostic pop
 

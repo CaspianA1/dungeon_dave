@@ -1,7 +1,7 @@
 #ifndef DYNAMIC_LIGHT_H
 #define DYNAMIC_LIGHT_H
 
-#include "lib/glad/glad.h" // For OpenGL defs
+#include "glad/glad.h" // For OpenGL defs
 #include "utils/cglm_include.h" // For `vec3`
 
 typedef struct {

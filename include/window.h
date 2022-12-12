@@ -5,7 +5,7 @@
 #include "event.h" // For `Event`
 
 typedef struct {
-	const GLchar* const app_name;
+	const char* const app_name;
 
 	const struct {
 		const bool
@@ -18,12 +18,9 @@ typedef struct {
 		default_fps, depth_buffer_bits, opengl_major_minor_version[2];
 
 	const GLint window_size[2];
-
-	// TODO: put the scene mag and min filters in here too
 } WindowConfig;
 
-/* Excluded: init_screen, deinit_screen, resize_window_if_needed,
-set_triangle_fill_mode, application_should_exit, loop_application */
+// Excluded: init_screen, deinit_screen, resize_window_if_needed, application_should_exit, loop_application
 
 void make_application(
 	const WindowConfig* const config,

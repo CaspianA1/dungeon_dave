@@ -120,21 +120,6 @@ static void resize_window_if_needed(SDL_Window* const window, const WindowConfig
 	else if (!resize_attempt) window_resized_last_tick = false;
 }
 
-static void set_triangle_fill_mode(const Uint8* const keys) {
-	static bool in_triangle_fill_mode = true, changed_mode_last_tick = false;
-
-	if (keys[KEY_TOGGLE_WIREFRAME_MODE]) {
-		if (!changed_mode_last_tick) {
-			in_triangle_fill_mode = !in_triangle_fill_mode;
-			changed_mode_last_tick = true;
-			glPolygonMode(GL_FRONT_AND_BACK, in_triangle_fill_mode ? GL_FILL : GL_LINE);
-		}
-	}
-	else changed_mode_last_tick = false;
-
-	if (!in_triangle_fill_mode) glClear(GL_COLOR_BUFFER_BIT);
-}
-
 static bool application_should_exit(const Uint8* const keys) {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
@@ -147,7 +132,7 @@ static bool application_should_exit(const Uint8* const keys) {
 	Since exiting doesn't work normally, a ctrl key followed by an exit activation key
 	serves as a manual workaround to this problem. */
 
-	const bool // On Ubuntu, SDL_QUIT is not caught by SDL_PollEvent, so this circumvents that
+	const bool // On Ubuntu, `SDL_QUIT` is not caught by `SDL_PollEvent`, so this circumvents that
 		ctrl_key = keys[constants.keys.ctrl[0]] || keys[constants.keys.ctrl[1]],
 		activate_exit_key = keys[constants.keys.activate_exit[0]] || keys[constants.keys.activate_exit[1]];
 
@@ -187,9 +172,7 @@ static void loop_application(const Screen* const screen, const WindowConfig* con
 		////////// Getting `time_before_tick_ms`, resizing the window, and setting the triangle fill mode
 
 		const Uint32 time_before_tick_ms = SDL_GetTicks();
-
 		resize_window_if_needed(window, config, keys);
-		set_triangle_fill_mode(keys);
 
 		////////// Getting the next event, drawing the screen, and swapping the framebuffer
 
