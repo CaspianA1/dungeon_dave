@@ -168,7 +168,7 @@ DictVar read_from_dict(const Dict* const dict, const DictVar key) {
 
 	while (true) { // Stop if entry is valid and matching key found
 		if (bitarray_bit_is_set(containment_states, index) && keys_are_equal(key, entries[index].key, key_type))
-			return entries[index].value;
+			break;
 
 		if (++index == num_entry_slots) index = 0; // Wrapping around the index
 		if (index == orig_index) {
