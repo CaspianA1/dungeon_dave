@@ -20,6 +20,9 @@ Further sector mesh optimization for shadow mapping:
 	- Pre-cull backfacing faces, based on the light direction
 	- Perhaps also cull if they are outside of the camera view frustum
 	- Merge faces with the same texture id (not that big of an advantage to that, really)
+A non shadow mapping optimization:
+	- For frustum visibility checks, merge adjacent sectors that have the same texture id
+	- So then, many sub-sub-face meshes may belong to a single sector
 */
 
 // Attributes here are height and texture id
