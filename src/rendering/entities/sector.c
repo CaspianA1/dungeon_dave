@@ -17,8 +17,9 @@ height of vertices, so that sectors can be pulled up or down from the ground
 	3. Disable depth clamping
 
 Further sector mesh optimization for shadow mapping:
-	- Pre-cull faces, based on the light direction
-	- Merge faces with the same texture id
+	- Pre-cull backfacing faces, based on the light direction
+	- Perhaps also cull if they are outside of the camera view frustum
+	- Merge faces with the same texture id (not that big of an advantage to that, really)
 */
 
 // Attributes here are height and texture id
@@ -74,12 +75,11 @@ static void form_sector_area(Sector* const sector, const BitArray traversed_poin
 static void generate_sectors_and_face_mesh_from_maps(List* const sectors, List* const face_mesh,
 	const byte* const heightmap, const byte* const texture_id_map, const byte map_width, const byte map_height) {
 
-	//////////
-
 	/* `>> 3` = `/ 8`. Works pretty well for my maps. TODO: make to a constant.
 	If the map size is small enough, an incorrect guess of zero can happen. */
 	buffer_size_t sector_amount_guess = (map_width * map_height) >> 3;
 	if (sector_amount_guess == 0) sector_amount_guess = 1;
+
 	*sectors = init_list(sector_amount_guess, Sector);
 
 	//////////
@@ -99,11 +99,15 @@ static void generate_sectors_and_face_mesh_from_maps(List* const sectors, List* 
 		for (byte x = 0; x < map_width; x++) {
 			if (bitarray_bit_is_set(traversed_points, traversed_points_base_index + x)) continue;
 
+			////////// Finding a texture id
+
 			const byte texture_id = sample_map_point(texture_id_map, x, y, map_width);
 
 			if (texture_id >= MAX_NUM_SECTOR_SUBTEXTURES)
 				FAIL(InvalidTextureID, "Could not create a sector at map position {%hhu, %hhu} because the texture "
 					"ID %hhu exceeds the maximum, which is %hhu", x, y, texture_id, (byte) (MAX_NUM_SECTOR_SUBTEXTURES - 1u));
+
+			////////// Forming a sector
 
 			Sector sector = {
 				.origin = {x, y}, .size = {0, 0},
@@ -122,10 +126,9 @@ static void generate_sectors_and_face_mesh_from_maps(List* const sectors, List* 
 
 			sector.visible_heights.min = sector.visible_heights.max - biggest_face_height;
 			sector.face_range.length = face_mesh -> length - sector.face_range.start;
+			push_ptr_to_list(sectors, &sector);
 
 			//////////
-
-			push_ptr_to_list(sectors, &sector);
 
 			/* This is a simple optimization; the next `sector_width - 1`
 			tiles will already be marked traversed, so this just skips those. */
@@ -152,8 +155,7 @@ used to store the face mesh changes every frame due to frustum culling, so if I 
 	If I were to use that one for shadow mapping, I would then have to resubmit the whole face mesh
 	to that vertex buffer every frame for rendering. This mesh is static and stays in fast memory,
 	so it should be faster to render with this separate one.
-
-TODO: perhaps pre-cull (frustum and backface culling) face meshes outside of the camera-light view frustum? */
+*/
 
 static void init_trimmed_face_mesh_for_shadow_mapping(
 	const byte map_width, const byte map_height, const byte* const heightmap, const List* const face_mesh,
