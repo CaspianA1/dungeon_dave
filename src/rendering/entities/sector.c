@@ -15,6 +15,10 @@ height of vertices, so that sectors can be pulled up or down from the ground
 	1. Use a different projection matrix for the weapon with a much nearer clip dist
 	2. Choose a reasonably near clip dist for the scene
 	3. Disable depth clamping
+
+Further sector mesh optimization for shadow mapping:
+	- Pre-cull faces, based on the light direction
+	- Merge faces with the same texture id
 */
 
 // Attributes here are height and texture id
