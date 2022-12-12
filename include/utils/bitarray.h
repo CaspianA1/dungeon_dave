@@ -31,7 +31,7 @@ static const byte bits_per_chunk_minus_one =  sizeof(bitarray_chunk_t) * CHAR_BI
 //////////
 
 typedef struct {
-	bitarray_chunk_t* const chunks;
+	bitarray_chunk_t* chunks;
 } BitArray;
 
 ////////// Private utils

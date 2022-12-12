@@ -75,16 +75,17 @@ typedef struct {
 	buffer_size_t num_entry_slots, num_entries;
 } Dict;
 
-// Excluded: get_key_index, keys_are_equal, init_dict_with_load_factor, read_from_dict
+// Excluded: get_key_index, keys_are_equal, init_dict_with_load_factor, get_ptr_to_value_in_dict
 
 //////////
 
-// TODO: remove the arrows
 #define DICT_FOR_EACH(dict, item_name, ...) do {\
-	const BitArray containment_states = dict -> containment_states;\
-	for (buffer_size_t i = 0; i < dict -> num_entry_slots; i++) {\
+	const BitArray containment_states = (dict) -> containment_states;\
+	DictEntry* const entries = (dict) -> entries;\
+	const buffer_size_t num_entry_slots = (dict) -> num_entry_slots;\
+	for (buffer_size_t i = 0; i < num_entry_slots; i++) {\
 		if (!bitarray_bit_is_set(containment_states, i)) continue;\
-		const DictEntry* const item_name = dict -> entries + i;\
+		DictEntry* const item_name = entries + i;\
 		__VA_ARGS__\
 	}\
 } while (false)
@@ -106,7 +107,11 @@ void deinit_dict(const Dict* const dict);
 #define typed_read_from_dict(dict, literal_key, key_field, value_field)\
 	read_from_dict(dict, (DictVar) {.key_field = literal_key}).value_field
 
+#define typed_key_exists_in_dict(dict, literal_key, key_field)\
+	key_exists_in_dict(dict, (DictVar) {.key_field = literal_key})
+
 void insert_into_dict(Dict* const dict, const DictVar key, const DictVar value);
 DictVar read_from_dict(const Dict* const dict, const DictVar key);
+bool key_exists_in_dict(const Dict* const dict, const DictVar key);
 
 #endif
