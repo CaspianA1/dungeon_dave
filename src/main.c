@@ -249,7 +249,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		*/
 	};
 
-	static const GLchar *const still_billboard_texture_paths[] = {
+	static const GLchar* const still_billboard_texture_paths[] = {
 		ASSET_PATH("objects/health_kit.bmp"),
 		ASSET_PATH("objects/teleporter.bmp"),
 		ASSET_PATH("objects/shabti.bmp")
