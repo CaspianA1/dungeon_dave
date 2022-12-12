@@ -292,7 +292,7 @@ static void* main_init(const WindowConfig* const window_config) {
 	};
 
 	/* Still and animated billboards can be in any order (it's just easier to impose an order here).
-	The material ids all start out as 0 (they are assigned in) `init_material_lighting_properties`.
+	The material indices all start out as 0 (they are assigned in `init_materials_texture`).
 	The animated billboard texture ids are assigned in the loop below the declaration of this array. */
 	static Billboard billboards[] = {
 		////////// Still billboards
