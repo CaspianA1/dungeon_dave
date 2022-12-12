@@ -1,4 +1,4 @@
-# This script assumes that brew and git are installed.
+# This script assumes that brew, make, and git are installed.
 
 # Params: usermame, project name
 get_from_github() {
