@@ -209,7 +209,7 @@ AudioContext init_audio_context(void) {
 	ALCcontext* const context = alcCreateContext(device, NULL);
 
 	if (!alcMakeContextCurrent(context))
-		FAIL(LoadOpenAL, "Could not load OpenAL (at `alcMakeContextCurrent`). Reason: %s", get_ALC_error(device));
+		FAIL(LoadOpenAL, "Could not load OpenAL (at `alcMakeContextCurrent`). Reason: %s", get_ALC_error());
 
 	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 

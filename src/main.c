@@ -84,7 +84,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	if (keys[KEY_PRINT_SDL_ERROR]) SDL_ERR_CHECK;
 	if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
 	if (keys[KEY_PRINT_AL_ERROR]) AL_ERR_CHECK;
-	if (keys[KEY_PRINT_ALC_ERROR]) ALC_ERR_CHECK(audio_context -> device);
+	if (keys[KEY_PRINT_ALC_ERROR]) ALC_ERR_CHECK;
 
 	return false;
 }

@@ -26,7 +26,10 @@ static inline const GLchar* get_AL_error(void) {
 	return "Unknown error";
 }
 
-static inline const GLchar* get_ALC_error(ALCdevice* const device) {
+static inline const GLchar* get_ALC_error(void) {
+	ALCcontext* const context = alcGetCurrentContext();
+	ALCdevice* const device = alcGetContextsDevice(context);
+
 	switch (alcGetError(device)) {
 		#define ERROR_CASE(error) case ALC_##error: return #error;
 
@@ -59,7 +62,7 @@ static inline const GLchar* get_ALC_error(ALCdevice* const device) {
 #define SDL_ERR_CHECK printf("SDL error check: '%s'\n", SDL_GetError());
 #define GL_ERR_CHECK printf("GL error check: %s\n", get_GL_error());
 #define AL_ERR_CHECK printf("AL error check: %s\n", get_AL_error());
-#define ALC_ERR_CHECK(device) printf("ALC error check: %s\n", get_ALC_error(device));
+#define ALC_ERR_CHECK printf("ALC error check: %s\n", get_ALC_error());
 
 //////////
 
