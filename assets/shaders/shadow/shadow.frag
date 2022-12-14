@@ -106,6 +106,7 @@ float get_csm_shadow_from_layers(const uint prev_layer_index, const uint curr_la
 			1.0f
 		)
 
+		// TODO: account for out-of-frustum fragments in this branch
 		return in_light_percentage;
 	}
 }
