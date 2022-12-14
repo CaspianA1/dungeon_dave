@@ -136,6 +136,7 @@ float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragmen
 	- An interesting presentation about volumetric rendering: https://www.ea.com/frostbite/news/physically-based-unified-volumetric-rendering-in-frostbite
 
 	- Higher sample densities (e.g. 4.0) leads to god rays being shown that should be occluded
+	- For god rays that are shown over the skybox, perhaps go from screen-space to light-space
 	*/
 
 	if (volumetric_lighting.opacity == 0.0f) return 0.0f;
