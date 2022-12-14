@@ -114,7 +114,7 @@ float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragmen
 	/* TODO:
 	- Find a way to make this lighting scheme work with my current lighting equation
 		- The question: given a light source, and a light color, how do we use an illumination
-			equation to fit the god ray term in.
+			equation to fit the god ray term in. Perhaps just consider it to be a blended medium?
 		- Idea for that: multiply the ambient term by the god ray term? Hm, doesn't quite work.
 		- A good reference point for nice looking volumetric lighting chould be Quake 2 RTX.
 		- See this video on volumetric lighting: https://www.youtube.com/watch?v=G0sYTrX3VHI
