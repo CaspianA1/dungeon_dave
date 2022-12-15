@@ -19,6 +19,7 @@ typedef struct {
 
 //////////
 
+// TODO: verify that the dynamic light never points upwards
 DynamicLight init_dynamic_light(const DynamicLightConfig* const config);
 void update_dynamic_light(DynamicLight* const dl, const GLfloat curr_time_secs);
 
