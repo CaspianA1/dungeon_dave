@@ -55,6 +55,7 @@ Architectural/code design ideas:
 - For constants in the `constants` struct, perhaps test their validity through some static assertions?
 	Or is that too much - checks for limits, which are used for checks for runtime constants?
 	- Perhaps build a level file system like this: a program that compiles a level json file into a binary file, that can then be cast as a pointer to a struct directly
+- After the title screen init, there's some slowdown (much more with debug mode on)
 
 Miscellaneous problems:
 - The checker heightmap has faster pacing sometimes
