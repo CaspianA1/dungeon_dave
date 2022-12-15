@@ -61,7 +61,6 @@ static void premultiply_surface_alpha(SDL_Surface* const surface) {
 	const GLint w = surface -> w, h = surface -> h;
 	const SDL_PixelFormat* const format = surface -> format;
 
-	const GLfloat one_over_max_byte_value = 1.0f / constants.max_byte_value;
 	sdl_pixel_component_t r, g, b, a;
 
 	WITH_SURFACE_PIXEL_ACCESS(surface,
@@ -72,7 +71,7 @@ static void premultiply_surface_alpha(SDL_Surface* const surface) {
 				sdl_pixel_t* const pixel = row + x;
 				SDL_GetRGBA(*pixel, format, &r, &g, &b, &a);
 
-				const GLfloat normalized_alpha = a * one_over_max_byte_value;
+				const GLfloat normalized_alpha = a * constants.one_over_max_byte_value;
 
 				r = (sdl_pixel_component_t) (r * normalized_alpha);
 				g = (sdl_pixel_component_t) (g * normalized_alpha);

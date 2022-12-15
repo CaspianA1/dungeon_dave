@@ -16,6 +16,9 @@ texture IDs, since those are bytes. */
 typedef GLushort material_index_t;
 typedef GLushort texture_id_t; // Max = 65535
 typedef GLushort billboard_index_t; 
+
+// Must always exceed the size of `face_component_t`, and be signed
+typedef GLshort signed_face_component_t;
 typedef GLubyte face_component_t;
 
 //////////

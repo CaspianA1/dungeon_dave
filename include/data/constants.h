@@ -50,7 +50,7 @@ enum { // `enum` is used to make these values compile-time constants
 //////////
 
 static const struct {
-	const GLfloat list_realloc_rate, milliseconds_per_second;
+	const GLfloat list_realloc_rate, milliseconds_per_second, one_over_max_byte_value;
 	const byte max_byte_value;
 
 	const struct { // All angles are in radians
@@ -79,6 +79,7 @@ static const struct {
 } constants = {
 	.list_realloc_rate = 2.0f,
 	.milliseconds_per_second = 1000.0f,
+	.one_over_max_byte_value = 1.0f / 255.0f,
 	.max_byte_value = 255,
 
 	.camera = {

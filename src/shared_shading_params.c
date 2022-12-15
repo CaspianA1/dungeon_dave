@@ -46,7 +46,10 @@ static void init_constant_shading_params(UniformBuffer* const shading_params,
 	UBO_WRITE(ambient_occlusion.tricubic_filtering_enabled);
 	UBO_WRITE(ambient_occlusion.strength);
 
-	UBO_WRITE(light_color);
+	const sdl_pixel_component_t* const rgb_light_color = level_rendering_config -> rgb_light_color;
+	const vec3 light_color = {rgb_light_color[0] / 255.0, rgb_light_color[1] / 255.0, rgb_light_color[2] / 255.0};
+	write_primitive_to_uniform_buffer(shading_params, "light_color", light_color, sizeof(vec3));
+
 	UBO_WRITE(tone_mapping_max_white);
 	UBO_WRITE(noise_granularity);
 

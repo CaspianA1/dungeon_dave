@@ -58,9 +58,7 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 	const GLint w = dest -> w, h = dest -> h;
 	const SDL_PixelFormat* const format = dest -> format;
 
-	const GLfloat
-		one_over_max_rgb_value = 1.0f / constants.max_byte_value,
-		half_max_rgb_value = 0.5f * constants.max_byte_value;
+	const GLfloat half_max_byte_value = 0.5f * constants.max_byte_value;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
@@ -91,14 +89,14 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 					};
 
 					const GLfloat // These are in a range of 0 to 1
-						gx = normal[0] * one_over_max_rgb_value,
-						gy = normal[1] * one_over_max_rgb_value;
+						gx = normal[0] * constants.one_over_max_byte_value,
+						gy = normal[1] * constants.one_over_max_byte_value;
 
 					normal[2] = sqrtf(fabsf(1.0f - (gx * gx + gy * gy))) * constants.max_byte_value;
 
 					glm_vec3_normalize(normal);
-					glm_vec3_scale(normal, half_max_rgb_value, normal);
-					glm_vec3_adds(normal, half_max_rgb_value, normal);
+					glm_vec3_scale(normal, half_max_byte_value, normal);
+					glm_vec3_adds(normal, half_max_byte_value, normal);
 
 					dest_pixel[x] = SDL_MapRGBA(format,
 						(sdl_pixel_component_t) normal[0],

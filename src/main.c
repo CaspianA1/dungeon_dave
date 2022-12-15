@@ -56,8 +56,11 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	////////// Rendering to the shadow context
 
 	enable_rendering_to_shadow_context(shadow_context);
-		draw_sectors_to_shadow_context(sector_context);
-		draw_billboards_to_shadow_context(billboard_context);
+		// TODO: still enable face culling for sectors?
+		WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+			draw_sectors_to_shadow_context(sector_context);
+			draw_billboards_to_shadow_context(billboard_context);
+		);
 	disable_rendering_to_shadow_context(event -> screen_size);
 
 	////////// The main drawing code
@@ -147,6 +150,7 @@ static void* main_init(const WindowConfig* const window_config) {
 			.strength = 0.9f
 		},
 
+		// Palace
 		.dynamic_light_config = {
 			.time_for_cycle = 2.5f,
 			.pos = {3.0f, 50.0f, 36.0f},
@@ -158,12 +162,28 @@ static void* main_init(const WindowConfig* const window_config) {
 		},
 
 		.skybox_path = ASSET_PATH("skyboxes/desert.bmp"),
-		.light_color = {0.96078f, 0.83529f, 0.63137f},
-		.tone_mapping_max_white = 0.75f, .noise_granularity = 0.001f
+
+		// Fortress
+		/*
+		.dynamic_light_config = {
+			.time_for_cycle = 1.0f,
+			.pos = {22.0f, 17.0f, 31.0f},
+
+			.looking_at = {
+				.origin = {2.0f, 0.0f, 1.0f},
+				.dest = {2.0f, 0.0f, 1.0f}
+			}
+		},
+
+		.skybox_path = ASSET_PATH("skyboxes/sky_3.bmp"),
+		*/
+
+		.rgb_light_color = {245, 213, 161},
+		.tone_mapping_max_white = 1.0f, .noise_granularity = 0.001f
 	};
 
-	// This array has no specific order. Materials for sectors, billboards, and weapon sprites can go anywhere.
-	// TODO: use a hash table for this instead.
+	/* This array has no specific order. Materials for sectors, billboards, and weapon sprites can go anywhere.
+	TODO: put this into a hash table (values will be 32-bit unsigned ints). */
 	static const MaterialPropertiesPerObjectInstance all_materials[] = {
 		{ASSET_PATH("walls/sand.bmp"),				{0.01f, 0.5f, 0.6f}}, // Done
 		{ASSET_PATH("walls/cobblestone_2.bmp"),		{0.0f, 0.0f, 0.0f}},
@@ -503,7 +523,6 @@ static void* main_init(const WindowConfig* const window_config) {
 		const TitleScreenTextureConfig texture;
 		const TitleScreenRenderingConfig rendering;
 	} title_screen_config = {
-
 		.texture = {
 			.paths = {.still = ASSET_PATH("logo.bmp"), .scrolling = ASSET_PATH("palace_city.bmp")},
 			.mag_filters = {.still = TexNearest, .scrolling = TexLinear},
@@ -531,11 +550,13 @@ static void* main_init(const WindowConfig* const window_config) {
 
 		.sector_context = init_sector_context(heightmap, texture_id_map,
 			map_size[0], map_size[1], sector_face_texture_paths,
-			ARRAY_LENGTH(sector_face_texture_paths), &sector_face_shared_material_properties
+			ARRAY_LENGTH(sector_face_texture_paths), &sector_face_shared_material_properties,
+			&level_rendering_config.dynamic_light_config
 		),
 
 		.billboard_context = init_billboard_context( // 0.2f before for the alpha threshold
-			level_rendering_config.shadow_mapping.billboard_alpha_threshold, &billboard_shared_material_properties,
+			level_rendering_config.shadow_mapping.billboard_alpha_threshold,
+			&billboard_shared_material_properties,
 
 			ARRAY_LENGTH(billboard_animation_layouts), billboard_animation_layouts,
 

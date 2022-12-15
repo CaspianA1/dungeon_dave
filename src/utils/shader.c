@@ -146,7 +146,7 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 
 	const size_t included_full_path_string_length = base_path_length + strlen(included_path);
 
-	// One more character for the null terminator
+	// One more character for the null terminator (TODO: avoid this alloc in some way?)
 	GLchar* const full_path_string_for_included = alloc(included_full_path_string_length + 1, sizeof(GLchar));
 
 	memcpy(full_path_string_for_included, includer_path, base_path_length);
@@ -156,6 +156,7 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 
 	GLchar* const included_contents = read_file_contents(full_path_string_for_included);
 	while (read_and_parse_includes_for_glsl(dependency_list, included_contents, full_path_string_for_included));
+
 	dealloc(full_path_string_for_included);
 
 	return included_contents;
@@ -185,11 +186,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	3. Correct line numbers for errors when including files
 	*/
 
-	// TODO: make the error call a goto to an error spot instead
-	#define NO_PATH_STRING_ERROR() FAIL(ParseIncludeDirectiveInShader,\
-		"Path string expected after #include for '%s'", sub_shader_path)
-
-	const GLchar *const include_directive = "#include";
+	const GLchar* const include_directive = "#include";
 
 	//////////
 
@@ -200,7 +197,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 
 	GLchar* after_include_string = include_string + strlen(include_directive);
 	for (GLchar c = *after_include_string; c == ' ' || c == '\t'; c = *(++after_include_string));
-	if (*after_include_string != '\"') NO_PATH_STRING_ERROR(); // Other character or EOF
+	if (*after_include_string != '\"') goto error; // Other character or EOF
 
 	////////// Finding a righthand quote, failing if a newline is reached
 
@@ -210,9 +207,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	for (GLchar c = *curr_path_substring; !found_right_quote; c = *(++curr_path_substring)) {
 		switch (c) {
 			case '\0': case '\r': case '\n':
-				NO_PATH_STRING_ERROR();
-				break;
-
+				goto error;
 			case '\"':
 				// Putting a null terminator here so that the path can be read as its own string
 				*curr_path_substring = '\0';
@@ -220,16 +215,21 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 		}
 	}
 
-	#undef NO_PATH_STRING_ERROR
+	////////// Fetching the included code
 
-	////////// Fetching the included code, and replacing the #include region with whitespace
-
-	GLchar* const included_code = get_source_for_included_file(dependency_list, sub_shader_path, after_include_string + 1);
+	const GLchar* const included_path = after_include_string + 1;
+	GLchar* const included_code = get_source_for_included_file(dependency_list, sub_shader_path, included_path);
 	push_ptr_to_list(dependency_list, &included_code); // The included code is freed by `init_shader`
 
+	//////////
+
+	// Replacing the #include region with whitespace (thus removing the null terminator)
 	memset(include_string, ' ', (size_t) (curr_path_substring - include_string));
 
 	return true;
+
+	error: FAIL(ParseIncludeDirectiveInShader, "Path string "
+			"expected after #include for '%s'", sub_shader_path);
 }
 
 static void erase_version_strings_from_dependency_list(const List* const dependency_list) {
@@ -256,7 +256,6 @@ GLuint init_shader(
 	void (*const hook_before_linking) (const GLuint shader)) {
 
 	const GLchar* const paths[num_sub_shaders] = {vertex_shader_path, geo_shader_path, fragment_shader_path};
-
 	List dependency_lists[num_sub_shaders];
 
 	for (byte i = 0; i < num_sub_shaders; i++) {

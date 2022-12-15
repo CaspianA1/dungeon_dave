@@ -6,6 +6,7 @@
 #include "utils/list.h" // For `List`
 #include "camera.h" // For `Camera`
 #include "level_config.h" // For `MaterialPropertiesPerObjectType`
+#include "rendering/dynamic_light.h" // For `DynamicLightConfig`
 
 // These definitions are in the header so that face.c can use them too
 typedef face_component_t face_vertex_t[components_per_face_vertex];
@@ -39,7 +40,8 @@ frustum_cull_sector_faces_into_gpu_buffer, define_vertex_spec */
 SectorContext init_sector_context(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height,
 	const GLchar* const* const texture_paths, const byte num_textures,
-	const MaterialPropertiesPerObjectType* const shared_material_properties);
+	const MaterialPropertiesPerObjectType* const shared_material_properties,
+	const DynamicLightConfig* const dynamic_light_config);
 
 void deinit_sector_context(const SectorContext* const sector_context);
 
