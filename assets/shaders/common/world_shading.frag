@@ -129,8 +129,8 @@ vec4 calculate_light() {
 	vec3 radiance = light_color; // TODO: do some variant of IBL to add the environment map sampler back in
 	vec3 Lo = (diffuse * albedo.rgb * ONE_OVER_PI + specular) * radiance * n_dot_l * shadow_and_volumetric_light.x;
 
-	vec3 ambient = get_ambient_strength() * albedo.rgb; // TODO: use an alpha blending equation here instead
-	vec3 color = mix(ambient + Lo, light_color, shadow_and_volumetric_light.y) * albedo.a;
+	vec3 ambient = get_ambient_strength() * albedo.rgb;
+	vec3 color = ((ambient + Lo) + (light_color * shadow_and_volumetric_light.y)) * albedo.a;
 
 	apply_tone_mapping(tone_mapping_max_white, color);
 	apply_noise_for_banding_removal(UV.xy, color);
