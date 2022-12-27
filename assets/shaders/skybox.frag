@@ -16,6 +16,7 @@ https://www.reddit.com/r/gamedev/comments/crxcu8/how_does_one_make_a_seamless_cu
 https://plumetutorials.wordpress.com/2013/10/09/3d-tutorial-making-a-skybox/
 https://blog.google/products/google-ar-vr/bringing-pixels-front-and-center-vr-video/
 The first comment for this video: https://www.youtube.com/watch?v=-ZutidNYVRE
+This video (uses Photoshop): https://www.youtube.com/watch?v=XZmr-XYRw3w
 
 The thumbnail to this: https://onlinelibrary.wiley.com/doi/10.1111/cgf.13843
 is this: https://onlinelibrary.wiley.com/cms/asset/a86e9106-591f-4d4c-9edb-2adde15de666/cgf13843-fig-0001-m.jpg
