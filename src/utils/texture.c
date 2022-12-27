@@ -126,20 +126,70 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 
 	const GLint level = 0, border = 0;
 
-	#define UPLOAD_CALL(target, dims, ...) glTexImage##dims##D(\
-		target, level, internal_format, __VA_ARGS__, border, input_format, color_channel_type, pixels\
-	); break
+	////////// Setting up a max size
+
+	GLint max_plain_size;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_plain_size);
+
+	/* The size of this array accomodates for the max number of overall dimensions.
+	Also, some of the cases below rewrite some of the values in this array. */
+	GLsizei max_size[3] = {max_plain_size, max_plain_size, max_plain_size};
+
+	////////// Defining a variable for the dimension count + a macro to upload texture data
+
+	byte num_dimensions;
+
+	#define UPLOAD_CALL(target, num_dims_literal, size, ...)\
+		num_dimensions = num_dims_literal;\
+		glTexImage##num_dims_literal##D(target, level, internal_format, __VA_ARGS__, border, input_format, color_channel_type, pixels);\
+		break;
+
+	//////////
 
 	switch (type) {
-		case TexPlain1D: UPLOAD_CALL(type, 1, size[0]);
-		case TexPlain: UPLOAD_CALL(type, 2, size[0], size[1]);
+		case TexPlain1D: UPLOAD_CALL(type, 1, size, size[0]);
+		case TexPlain: UPLOAD_CALL(type, 2, size, size[0], size[1]);
 
 		case TexSkybox: {
 			const GLsizei face_size = size[0];
-			UPLOAD_CALL(GL_TEXTURE_CUBE_MAP_POSITIVE_X + (GLenum) size[1], 2, face_size, face_size);
+			UPLOAD_CALL(GL_TEXTURE_CUBE_MAP_POSITIVE_X + (GLenum) size[1], 2, size, face_size, face_size);
 		}
 
-		case TexSet: case TexVolumetric: UPLOAD_CALL(type, 3, size[0], size[1], size[2]);
+		case TexSet:
+			// The max z-size here is the max number of layers
+			glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, max_size + 2);
+			UPLOAD_CALL(type, 3, size, size[0], size[1], size[2]);
+
+		case TexVolumetric:
+			/* Setting the max x-size to the max 3D texture size,
+			and then setting the rest to that value too */
+			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, max_size);
+			max_size[2] = max_size[1] = max_size[0];
+
+			UPLOAD_CALL(type, 3, size, size[0], size[1], size[2]);
+	}
+
+	////////// Checking that all of the axes have an appropriate size
+
+	for (byte i = 0; i < num_dimensions; i++) {
+		const GLsizei sub_size = size[i], sub_max_size = max_size[i];
+
+		if (sub_size > sub_max_size) {
+			const GLchar* type_string = NULL;
+
+			switch (type) {
+				#define STRING_CASE(t) case t: type_string = #t; break;
+
+				STRING_CASE(TexPlain1D); STRING_CASE(TexPlain);
+				STRING_CASE(TexSkybox); STRING_CASE(TexSet);
+				STRING_CASE(TexVolumetric);
+
+				#undef STRING_CASE
+			}
+
+			FAIL(CreateTexture, "Texture with enum type of '%s' has a size of %d on the %c-axis "
+				"that exceeds the maximum size of %d", type_string, sub_size, 'x' + i, sub_max_size);
+		}
 	}
 
 	#undef UPLOAD_CALL
