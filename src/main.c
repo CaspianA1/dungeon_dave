@@ -55,13 +55,13 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 
 	////////// Rendering to the shadow context
 
-	enable_rendering_to_shadow_context(shadow_context);
-		// TODO: still enable face culling for sectors?
-		WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+	// TODO: still enable face culling for sectors?
+	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+		enable_rendering_to_shadow_context(shadow_context);
 			draw_sectors_to_shadow_context(sector_context);
 			draw_billboards_to_shadow_context(billboard_context);
-		);
-	disable_rendering_to_shadow_context(event -> screen_size);
+		disable_rendering_to_shadow_context(event -> screen_size);
+	);
 
 	////////// The main drawing code
 

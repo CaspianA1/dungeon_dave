@@ -279,6 +279,7 @@ void update_shadow_context(const CascadedShadowContext* const shadow_context,
 
 void enable_rendering_to_shadow_context(const CascadedShadowContext* const shadow_context) {
 	const GLsizei resolution = shadow_context -> resolution;
+
 	glViewport(0, 0, resolution, resolution);
 	glBindFramebuffer(framebuffer_target, shadow_context -> framebuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
