@@ -10,10 +10,13 @@
 /* TODO:
 - Have a SkyboxRenderer interface that allows swapping out skybox textures
 - Pixel art UV correction for skyboxes
+- A panorama -> skybox tool, where one can either cut off parts of the panorama,
+	or insert the panorama as the middle of the skybox, and fill in outlines for the rest
 */
 
 static GLuint init_skybox_texture(const GLchar* const texture_path) {
 	SDL_Surface* const skybox_surface = init_surface(texture_path);
+
 	const GLint skybox_w = skybox_surface -> w;
 
 	////////// Failing if the dimensions are not right
@@ -43,7 +46,8 @@ static GLuint init_skybox_texture(const GLchar* const texture_path) {
 	for (byte i = 0; i < faces_per_cubemap; i++) {
 		const GLint* const src_origin = src_origins[i];
 
-		SDL_BlitSurface(skybox_surface, &(SDL_Rect) {src_origin[0], src_origin[1], cube_size, cube_size}, face_surface, NULL);
+		SDL_BlitSurface(skybox_surface, &(SDL_Rect) {src_origin[0], src_origin[1],
+			cube_size, cube_size}, face_surface, NULL);
 
 		WITH_SURFACE_PIXEL_ACCESS(face_surface,
 			// Flipping vertically for positive and negative y
@@ -78,13 +82,14 @@ static GLuint init_skybox_texture(const GLchar* const texture_path) {
 	return skybox_texture;
 }
 
-Skybox init_skybox(const GLchar* const texture_path) {
+Skybox init_skybox(const SkyboxConfig* const config) {
 	const GLuint
 		shader = init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag"), NULL),
-		albedo_texture = init_skybox_texture(texture_path);
+		albedo_texture = init_skybox_texture(config -> texture_path);
 
 	use_shader(shader);
 	use_texture_in_shader(albedo_texture, shader, "skybox_sampler", TexSkybox, TU_Skybox);
+	INIT_UNIFORM_VALUE(map_cube_to_sphere, shader, 1ui, config -> map_cube_to_sphere);
 
 	return init_drawable_without_vertices(NULL, GL_TRIANGLE_STRIP, shader, albedo_texture, 0);
 }

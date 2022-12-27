@@ -8,6 +8,7 @@
 #include <stdbool.h> // For `bool`
 #include "rendering/shadow.h" // For `CascadedShadowContextConfig`
 #include "rendering/dynamic_light.h" // For `DynamicLightConfig`
+#include "rendering/entities/skybox.h" // For `SkyboxConfig`
 #include "utils/texture.h" // For `sdl_pixel_component_t`
 
 //////////
@@ -60,7 +61,7 @@ typedef struct {
 	} ambient_occlusion;
 
 	const DynamicLightConfig dynamic_light_config;
-	const GLchar* const skybox_path;
+	const SkyboxConfig skybox_config;
 
 	const sdl_pixel_component_t rgb_light_color[3];
 	const GLfloat ambient_strength, tone_mapping_max_white, noise_granularity;

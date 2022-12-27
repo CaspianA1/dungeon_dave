@@ -2,7 +2,7 @@
 
 #include "common/shared_params.glsl"
 
-out vec3 UV;
+out vec3 cube_edge;
 
 // https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
 const ivec3 vertices[] = ivec3[](
@@ -12,6 +12,6 @@ const ivec3 vertices[] = ivec3[](
 );
 
 void main(void) {
-	UV = vertices[gl_VertexID];
-	gl_Position = (mat3x4(view_projection) * UV).xyww;
+	cube_edge = vertices[gl_VertexID];
+	gl_Position = (mat3x4(view_projection) * cube_edge).xyww;
 }

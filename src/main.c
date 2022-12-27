@@ -161,7 +161,10 @@ static void* main_init(const WindowConfig* const window_config) {
 			}
 		},
 
-		.skybox_path = ASSET_PATH("skyboxes/desert.bmp"),
+		.skybox_config = {
+			.texture_path = ASSET_PATH("skyboxes/desert.bmp"),
+			.map_cube_to_sphere = false
+		},
 
 		// Fortress
 		/*
@@ -175,7 +178,10 @@ static void* main_init(const WindowConfig* const window_config) {
 			}
 		},
 
-		.skybox_path = ASSET_PATH("skyboxes/sky_3.bmp"),
+		.skybox_config = {
+			.texture_path = ASSET_PATH("skyboxes/sky_3.bmp"),
+			.map_cube_to_sphere = false
+		},
 		*/
 
 		.rgb_light_color = {245, 213, 161},
@@ -570,7 +576,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		.shadow_context = init_shadow_context(&level_rendering_config.shadow_mapping.shadow_context_config, far_clip_dist),
 
 		.ao_map = init_ao_map(heightmap, map_size, max_point_height),
-		.skybox = init_skybox(level_rendering_config.skybox_path),
+		.skybox = init_skybox(&level_rendering_config.skybox_config),
 		.title_screen = init_title_screen(&title_screen_config.texture, &title_screen_config.rendering),
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
