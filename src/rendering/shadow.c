@@ -168,8 +168,11 @@ CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* con
 	}
 
 	const GLsizei resolution = config -> resolution;
+
 	init_texture_data(shadow_map_texture_type, (GLsizei[]) {resolution, resolution, num_cascades},
 		GL_DEPTH_COMPONENT, internal_format, OPENGL_COLOR_CHANNEL_TYPE, NULL);
+
+	// TODO: check that the number of cascades does not exceed the max size for `gl_Layer`
 
 	////////// Creating the framebuffer
 
