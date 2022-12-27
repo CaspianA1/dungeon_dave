@@ -7,8 +7,8 @@
 void validate_all_materials(const List* const all_materials) {
 	#define VALIDATE_MATERIAL_PROPERTY_RANGE(property) do {\
 		if (material.lighting.property < 0.0f || material.lighting.property > 1.0f)\
-			FAIL(InitializeMaterial,\
-				"Material property '" #property "' for texture path '%s' "\
+			\
+			FAIL(InitializeMaterial, "Material property '" #property "' for texture path '%s' "\
 				"is %g, and outside of the expected 0-1 range", material.albedo_texture_path,\
 				(GLdouble) material.lighting.property);\
 	} while (false)
