@@ -3,7 +3,7 @@
 
 #include "utils/typedefs.h" // For OpenGL types + `byte`
 #include "utils/sdl_include.h" // For `SDL_Scancode`
-#include "utils/cglm_include.h" // For pi variants + `vec2`
+#include "cglm/cglm.h" // For pi variants + `vec2`
 
 static const GLfloat
 	PI = GLM_PIf,

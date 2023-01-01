@@ -3,7 +3,7 @@
 
 #include "data/constants.h" // For various constant defs
 #include "utils/typedefs.h" // For OpenGL types + other typedefs
-#include "utils/cglm_include.h" // For `vec2, `vec3, `mat4`, and `vec4`
+#include "cglm/cglm.h" // For `vec2, `vec3, `mat4`, and `vec4`
 #include "event.h" // For `Event`
 #include "openal/al.h" // For various OpenAL defs
 

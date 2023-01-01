@@ -3,7 +3,7 @@
 
 #include "utils/typedefs.h" // For OpenGL types + other typedefs
 #include "utils/texture.h" // For `TextureType`
-#include "utils/cglm_include.h" // For `mat4`
+#include "cglm/cglm.h" // For `mat4`
 #include "camera.h" // For `Camera`
 
 /* This shadow mapping implementation employs cascaded shadow mapping with

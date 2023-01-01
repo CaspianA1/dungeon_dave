@@ -1,7 +1,7 @@
 #include "rendering/entities/skybox.h"
 #include "utils/texture.h" // For various texture creation utils
 #include "utils/failure.h" // For `FAIL`
-#include "utils/cglm_include.h" // For `ivec2`
+#include "cglm/cglm.h" // For `ivec2`
 #include "data/constants.h" // For `faces_per_cubemap`, and `vertices_per_skybox`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 #include "utils/shader.h" // For `init_shader`

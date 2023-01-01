@@ -1,5 +1,5 @@
 #include "rendering/ambient_occlusion.h"
-#include "utils/cglm_include.h" // For various cglm defs
+#include "cglm/cglm.h" // For various cglm defs
 #include "data/constants.h" // For TWO_PI, and `max_byte_value`
 #include "utils/map_utils.h" // For `pos_out_of_overhead_map_bounds`, and `sample_map_point`
 #include "utils/list.h" // For various `List`-related defs

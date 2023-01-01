@@ -3,7 +3,7 @@
 
 #include "utils/typedefs.h" // For OpenGL types + other typedefs
 #include "animation.h" // For `Animation`, and `AnimationLayout`
-#include "utils/cglm_include.h" // For `vec3`
+#include "cglm/cglm.h" // For `vec3`
 #include "data/constants.h" // For `corners_per_quad`
 #include "level_config.h" // For `MaterialPropertiesPerObjectType`
 #include "rendering/drawable.h" // For `Drawable`

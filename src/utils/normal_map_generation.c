@@ -1,5 +1,5 @@
 #include "utils/normal_map_generation.h"
-#include "utils/cglm_include.h" // For various cglm defs
+#include "cglm/cglm.h" // For various cglm defs
 #include "data/constants.h" // For `max_byte_value`
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "utils/failure.h" // For `FAIL`

@@ -2,7 +2,7 @@
 #define DYNAMIC_LIGHT_H
 
 #include "glad/glad.h" // For OpenGL defs
-#include "utils/cglm_include.h" // For `vec3`
+#include "cglm/cglm.h" // For `vec3`
 
 typedef struct {
 	const GLfloat time_for_cycle;

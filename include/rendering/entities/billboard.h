@@ -4,7 +4,7 @@
 #include "rendering/drawable.h" // For `Drawable`
 #include "utils/typedefs.h" // For OpenGL types + other typedefs
 #include "utils/list.h" // For `List`
-#include "utils/cglm_include.h" // For `vec2` and `vec3`
+#include "cglm/cglm.h" // For `vec2` and `vec3`
 #include "camera.h" // For `Camera`
 #include "level_config.h" // For `MaterialPropertiesPerObjectType`
 #include "animation.h" // For `Animation`
