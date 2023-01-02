@@ -29,6 +29,8 @@ install_openal_soft() {
 main() { # TODO: install SDL locally
 	brew install pkg-config sdl2 cmake
 
+	# TODO: remove the cglm and openal directories beforehand, if needed
+
 	cd ../lib
 	install_cglm
 	install_openal_soft
