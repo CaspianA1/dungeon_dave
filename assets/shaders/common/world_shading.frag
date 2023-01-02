@@ -122,7 +122,7 @@ vec4 calculate_light() {
 		specular = (D * G * F) / (4.0f * n_dot_v * n_dot_l),
 		diffuse = (1.0f - F) * (1.0f - metallicity);
 
-	vec2 shadow_and_volumetric_light = get_csm_shadow_and_volumetric_light(fragment_pos_world_space, view_dir);
+	vec2 shadow_and_volumetric_light = get_csm_shadow_and_volumetric_light(fragment_pos_world_space);
 
 	//////////
 

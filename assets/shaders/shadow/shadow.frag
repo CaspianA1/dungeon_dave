@@ -19,16 +19,16 @@ ESM scaling:
 Note: shadows are the major bottleneck with the terrain 2 level
 */
 
-float get_csm_shadow_from_layers(const uint prev_layer_index, const uint curr_layer_index, const vec3 fragment_pos_world_space) {
+float get_csm_shadow_from_layers(const uint prev_layer_index,
+	const uint curr_layer_index, const vec3 fragment_pos_world_space,
+	const vec3 curr_fragment_pos_cascade_space) {
+
 	/////////// Defining some shared vars
 
 	vec2 texel_size = 1.0f / textureSize(shadow_cascade_sampler, 0).xy;
 	vec2 sample_extent = shadow_mapping.sample_radius * texel_size;
 	uint samples_per_row = (shadow_mapping.sample_radius << 1u) + 1u;
 	float one_over_samples_per_kernel = 1.0f / (samples_per_row * samples_per_row);
-
-	vec3 curr_fragment_pos_cascade_space = (light_view_projection_matrices[curr_layer_index]
-		* vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
 
 	vec3 curr_sample_UV = vec3(curr_fragment_pos_cascade_space.xy - sample_extent, curr_layer_index);
 
@@ -111,7 +111,7 @@ float get_csm_shadow_from_layers(const uint prev_layer_index, const uint curr_la
 	}
 }
 
-float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragment_pos_world_space, const vec3 view_dir) {
+float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragment_pos_cascade_space) {
 	/* TODO:
 	- Find a way to make this lighting scheme work with my current lighting equation
 		- The question: given a light source, and a light color, how do we use an illumination
@@ -142,11 +142,8 @@ float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragmen
 
 	if (volumetric_lighting.opacity == 0.0f) return 0.0f;
 
-	mat4 light_view_projection_matrix = light_view_projection_matrices[layer_index];
-
-	vec3 // TODO: don't recalculate `fragment_pos_cascade_space`
-		camera_pos_cascade_space = (light_view_projection_matrix * vec4(camera_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f,
-		fragment_pos_cascade_space = (light_view_projection_matrix * vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
+	vec3 camera_pos_cascade_space = (light_view_projection_matrices[layer_index]
+		* vec4(camera_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
 
 	float one_over_num_samples = 1.0f / volumetric_lighting.num_samples;
 	float sample_density_over_sample_count = volumetric_lighting.sample_density * one_over_num_samples;
@@ -163,8 +160,9 @@ float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragmen
 	- Add some minor attenuation
 	- Figure out a way to make the god rays weaker when closer to the viewer
 	- Stop the ground from being so bright
+	- Most of this can be fixed through attenuating based on the dist between the screen-space fragment and light pos
 	- See here: https://bartwronski.files.wordpress.com/2014/08/bwronski_volumetric_fog_siggraph2014.pdf
-	Note: the results turn out weird sometimes because the opacity is outside of the [0, 1] domain
+	Note: the results may turn out weird if the opacity is outside of the [0, 1] domain
 	*/
 
 	// TODO: figure out a way to make the god rays become weaker when closer to the viewer
@@ -183,7 +181,7 @@ float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragmen
 }
 
 // The first component of the return value equals the shadow strength, and the second one equals the volumetric light value.
-vec2 get_csm_shadow_and_volumetric_light(const vec3 fragment_pos_world_space, const vec3 view_dir) {
+vec2 get_csm_shadow_and_volumetric_light(const vec3 fragment_pos_world_space) {
 	uint layer_index = 0u; // TODO: calculate this in the vertex shader in some way - and just move more calculations to there
 
 	while (layer_index < NUM_CASCADE_SPLITS
@@ -192,10 +190,13 @@ vec2 get_csm_shadow_and_volumetric_light(const vec3 fragment_pos_world_space, co
 
 	uint prev_layer_index = max(int(layer_index) - 1, 0);
 
+	vec3 fragment_pos_cascade_space = (light_view_projection_matrices[layer_index]
+		* vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
+
 	//////////
 
 	return vec2( // TODO: perhaps pick a layer index based on the percent between?
-		get_csm_shadow_from_layers(prev_layer_index, layer_index, fragment_pos_world_space),
-		get_volumetric_light_from_layer(layer_index, fragment_pos_world_space, view_dir)
+		get_csm_shadow_from_layers(prev_layer_index, layer_index, fragment_pos_world_space, fragment_pos_cascade_space),
+		get_volumetric_light_from_layer(layer_index, fragment_pos_cascade_space)
 	);
 }
