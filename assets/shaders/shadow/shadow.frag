@@ -27,15 +27,15 @@ float get_csm_shadow_from_layers(const uint prev_layer_index, const uint curr_la
 	uint samples_per_row = (shadow_mapping.sample_radius << 1u) + 1u;
 	float one_over_samples_per_kernel = 1.0f / (samples_per_row * samples_per_row);
 
-	vec3 curr_fragment_pos_light_space = (light_view_projection_matrices[curr_layer_index]
+	vec3 curr_fragment_pos_cascade_space = (light_view_projection_matrices[curr_layer_index]
 		* vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
 
-	vec3 curr_sample_UV = vec3(curr_fragment_pos_light_space.xy - sample_extent, curr_layer_index);
+	vec3 curr_sample_UV = vec3(curr_fragment_pos_cascade_space.xy - sample_extent, curr_layer_index);
 
 	/////////// A shadow-computing macro
 
 	#define COMPUTE_SHADOW(type_t, UPDATE_Y, UPDATE_X, TEXTURE_SAMPLES,\
-		SAMPLE_UV_RESET, FRAGMENT_POSITIONS_LIGHT_SPACE, ESM_EXPONENT_SCALING)\
+		SAMPLE_UV_RESET, FRAGMENT_POSITIONS_CASCADE_SPACE, ESM_EXPONENT_SCALING)\
 		\
 		type_t occluder_depth_sum = type_t(0.0f);\
 		for (uint y = 0; y < samples_per_row; y++, UPDATE_Y) {\
@@ -43,17 +43,17 @@ float get_csm_shadow_from_layers(const uint prev_layer_index, const uint curr_la
 				occluder_depth_sum += type_t TEXTURE_SAMPLES;\
 			SAMPLE_UV_RESET\
 		}\
-		type_t occluder_receiver_diff = occluder_depth_sum * one_over_samples_per_kernel - type_t FRAGMENT_POSITIONS_LIGHT_SPACE;\
+		type_t occluder_receiver_diff = occluder_depth_sum * one_over_samples_per_kernel - type_t FRAGMENT_POSITIONS_CASCADE_SPACE;\
 		type_t layer_scaled_esm_exponent = shadow_mapping.esm_exponent * ESM_EXPONENT_SCALING;\
 		type_t in_light_percentage = clamp(exp(layer_scaled_esm_exponent * occluder_receiver_diff), 0.0f, 1.0f);
 
 	/////////// If the current layer index is non-zero, we should blend the curr and last layer's shadows
 
 	if (curr_layer_index != 0u) {
-		vec3 prev_fragment_pos_light_space = (light_view_projection_matrices[prev_layer_index]
+		vec3 prev_fragment_pos_cascade_space = (light_view_projection_matrices[prev_layer_index]
 			* vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
 
-		vec3 prev_sample_UV = vec3(prev_fragment_pos_light_space.xy - sample_extent, prev_layer_index);
+		vec3 prev_sample_UV = vec3(prev_fragment_pos_cascade_space.xy - sample_extent, prev_layer_index);
 
 		COMPUTE_SHADOW(vec2,
 			(prev_sample_UV.y += texel_size.y, curr_sample_UV.y += texel_size.y),
@@ -61,18 +61,18 @@ float get_csm_shadow_from_layers(const uint prev_layer_index, const uint curr_la
 
 			(texture(shadow_cascade_sampler, prev_sample_UV).r, texture(shadow_cascade_sampler, curr_sample_UV).r),
 
-			prev_sample_UV.x = prev_fragment_pos_light_space.x - sample_extent.x;
-			curr_sample_UV.x = curr_fragment_pos_light_space.x - sample_extent.x;,
+			prev_sample_UV.x = prev_fragment_pos_cascade_space.x - sample_extent.x;
+			curr_sample_UV.x = curr_fragment_pos_cascade_space.x - sample_extent.x;,
 
-			(prev_fragment_pos_light_space.z, curr_fragment_pos_light_space.z),
+			(prev_fragment_pos_cascade_space.z, curr_fragment_pos_cascade_space.z),
 			pow(vec2(prev_layer_index, curr_layer_index) + 1.0f, vec2(shadow_mapping.esm_exponent_layer_scale_factor))
 		)
 
 		////////// Making layer blending useless if it shouldn't be used
 
 		bool no_layer_blending = // Don't blend if the prev UV is out of range, and the curr one is in range
-			prev_fragment_pos_light_space != clamp(prev_fragment_pos_light_space, 0.0f, 1.0f) &&
-			curr_fragment_pos_light_space == clamp(curr_fragment_pos_light_space, 0.0f, 1.0f);
+			prev_fragment_pos_cascade_space != clamp(prev_fragment_pos_cascade_space, 0.0f, 1.0f) &&
+			curr_fragment_pos_cascade_space == clamp(curr_fragment_pos_cascade_space, 0.0f, 1.0f);
 
 		in_light_percentage.x = no_layer_blending ? in_light_percentage.y : in_light_percentage.x;
 
@@ -100,9 +100,9 @@ float get_csm_shadow_from_layers(const uint prev_layer_index, const uint curr_la
 
 			(texture(shadow_cascade_sampler, curr_sample_UV).r),
 
-			curr_sample_UV.x = curr_fragment_pos_light_space.x - sample_extent.x;,
+			curr_sample_UV.x = curr_fragment_pos_cascade_space.x - sample_extent.x;,
 
-			(curr_fragment_pos_light_space.z),
+			(curr_fragment_pos_cascade_space.z),
 			1.0f
 		)
 
