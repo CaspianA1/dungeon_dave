@@ -17,9 +17,9 @@ static Screen init_screen(const WindowConfig* const config) {
 
 	const byte* const opengl_major_minor_version = config -> opengl_major_minor_version;
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, opengl_major_minor_version[0]);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, opengl_major_minor_version[1]);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -31,8 +31,7 @@ static Screen init_screen(const WindowConfig* const config) {
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, config -> multisample_samples);
 	}
 
-	if (config -> enabled.software_renderer)
-		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 0);
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, !config -> enabled.software_renderer);
 
 	const GLint* const window_size = config -> window_size;
 	const GLint window_w = window_size[0], window_h = window_size[1];
@@ -47,8 +46,8 @@ static Screen init_screen(const WindowConfig* const config) {
 
 	screen.opengl_context = SDL_GL_CreateContext(screen.window);
 	if (screen.opengl_context == NULL) FAIL(LoadOpenGL, "Could not load an OpenGL context: '%s'", SDL_GetError());
-	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
 
+	SDL_GL_MakeCurrent(screen.window, screen.opengl_context);
 	SDL_GL_SetSwapInterval(config -> enabled.vsync ? 1 : 0);
 
 	//////////
