@@ -12,7 +12,7 @@ in vec3 UV, fragment_pos_world_space, camera_to_fragment_world_space;
 flat in mat3 fragment_tbn;
 
 // These are set through a shared fn for world-shaded objects
-uniform sampler1D materials_sampler;
+uniform samplerBuffer materials_sampler;
 uniform sampler2DArray albedo_sampler, normal_map_sampler;
 
 // https://64.github.io/tonemapping/ (Reinhard Extended Luminance)
@@ -65,7 +65,7 @@ vec4 calculate_light() {
 	const float almost_zero = 0.0001f;
 	const vec3 dielectric_F0 = vec3(0.04f);
 
-	vec3 lighting_properties = texelFetch(materials_sampler, int(material_index), 0).rgb;
+	vec3 lighting_properties = texelFetch(materials_sampler, int(material_index)).rgb;
 	vec2 bilinear_percents = all_bilinear_percents[bilinear_percents_index];
 
 	float

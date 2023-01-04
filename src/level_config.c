@@ -3,6 +3,7 @@
 #include "utils/texture.h" // For texture creation utils
 #include "data/constants.h" // For `max_byte_value`
 #include "rendering/entities/billboard.h" // For `Billboard`
+#include "utils/opengl_wrappers.h" // For `deinit_texture`
 
 void validate_all_materials(const List* const all_materials) {
 	#define VALIDATE_MATERIAL_PROPERTY_RANGE(property) do {\
@@ -29,15 +30,20 @@ void validate_all_materials(const List* const all_materials) {
 	#undef VALIDATE_MATERIAL_PROPERTY_RANGE
 }
 
+//////////
+
+typedef sdl_pixel_component_t raw_material_lighting_properties_t[4]; // The last component isn't used yet
+
 static void copy_matching_material_to_dest_materials(const GLchar* const texture_path,
-	const List* const all_materials, List* const dest_materials, const material_index_t dest_index) {
+	const List* const all_materials, raw_material_lighting_properties_t* const dest_material_properties,
+	const material_index_t dest_index) {
 
 	#define SET_TO_RGB_PIXEL(index, property) dest[index] = (sdl_pixel_component_t)\
 		(material -> lighting.property * constants.max_byte_value)
 
 	LIST_FOR_EACH(all_materials, MaterialPropertiesPerObjectInstance, material,
 		if (!strcmp(texture_path, material -> albedo_texture_path)) {
-			sdl_pixel_component_t* const dest = ptr_to_list_index(dest_materials, dest_index);
+			sdl_pixel_component_t* const dest = dest_material_properties[dest_index];
 
 			SET_TO_RGB_PIXEL(0, metallicity);
 			SET_TO_RGB_PIXEL(1, min_roughness);
@@ -61,7 +67,7 @@ static void copy_matching_material_to_dest_materials(const GLchar* const texture
 
 Note: this mutates the billboard list by setting each billboard's material index.
 
-This function returns a 1D texture of material lighting properties (each property is a `sdl_pixel_component_t[3]`).
+This function returns a 1D texture of material lighting properties (each property is a `raw_material_lighting_properties_t`).
 This texture is indexed by a material index when shading world-shaded objects.
 
 - For a sector face texture, its material index = its texture id.
@@ -75,7 +81,7 @@ Let S = the number of sector face textures,
 	If the billboard is animated, its material index = S + B + its animation layout id.
 
 - For a weapon sprite, the material index equals S + B + V + its animation layout id among the other weapon sprites. */
-GLuint init_materials_texture(const List* const all_materials, const List* const sector_face_texture_paths,
+MaterialsTexture init_materials_texture(const List* const all_materials, const List* const sector_face_texture_paths,
 	const List* const still_billboard_texture_paths, const List* const billboard_animation_layouts,
 	List* const billboards, const AnimationLayout* const weapon_sprite_animation_layout,
 	material_index_t* const weapon_sprite_material_index) {
@@ -88,9 +94,14 @@ GLuint init_materials_texture(const List* const all_materials, const List* const
 	const texture_id_t num_material_lighting_properties = (texture_id_t) (num_sector_face_textures +
 		num_still_billboard_texture_paths + billboard_animation_layouts -> length) + 1u; // 1 more for the weapon sprite
 
-	// Lighting properties are stored as 3 pixel components (just 24 bytes each)
-	List material_lighting_properties = init_list(num_material_lighting_properties, sdl_pixel_component_t[3]);
-	material_lighting_properties.length = num_material_lighting_properties;
+	////////// Making a GPU buffer of material lighting properties
+
+	const GLuint material_properties_buffer = init_gpu_buffer();
+	use_gpu_buffer(TexBuffer, material_properties_buffer);
+	init_gpu_buffer_data(TexBuffer, num_material_lighting_properties, sizeof(raw_material_lighting_properties_t), NULL, GL_STATIC_DRAW);
+
+	raw_material_lighting_properties_t* const material_properties_mapping = init_gpu_buffer_memory_mapping(material_properties_buffer, TexBuffer,
+		num_material_lighting_properties * sizeof(raw_material_lighting_properties_t), true);
 
 	////////// First, inserting still face lighting properties
 
@@ -98,7 +109,7 @@ GLuint init_materials_texture(const List* const all_materials, const List* const
 
 	for (byte i = 0; i < num_sector_face_textures; i++)
 		copy_matching_material_to_dest_materials(typed_sector_face_texture_paths[i],
-			all_materials, &material_lighting_properties, i);
+			all_materials, material_properties_mapping, i);
 
 	////////// Then, inserting billboard lighting properties
 
@@ -154,7 +165,7 @@ GLuint init_materials_texture(const List* const all_materials, const List* const
 
 		if (!skipping_material_lookup_and_copy) {
 			copy_matching_material_to_dest_materials(texture_path, all_materials,
-				&material_lighting_properties, dest_material_index);
+				material_properties_mapping, dest_material_index);
 
 			last_dest_material_index = dest_material_index;
 		}
@@ -165,19 +176,24 @@ GLuint init_materials_texture(const List* const all_materials, const List* const
 	*weapon_sprite_material_index = num_material_lighting_properties - 1u;
 
 	copy_matching_material_to_dest_materials(weapon_sprite_animation_layout -> spritesheet_path,
-		all_materials, &material_lighting_properties, *weapon_sprite_material_index);
+		all_materials, material_properties_mapping, *weapon_sprite_material_index);
 	
-	////////// Making the materials texture
+	////////// Making the materials texture buffer
 
-	const GLuint materials_texture = preinit_texture(TexPlain1D, TexNonRepeating, TexNearest, TexNearest, false);
+	deinit_gpu_buffer_memory_mapping(TexBuffer);
 
-	init_texture_data(TexPlain1D, (GLsizei[]) {num_material_lighting_properties},
-		GL_RGB, OPENGL_MATERIALS_MAP_INTERNAL_PIXEL_FORMAT,
-		OPENGL_COLOR_CHANNEL_TYPE, material_lighting_properties.data);
+	GLuint materials_texture;
+	glGenTextures(1, &materials_texture);
+	use_texture(TexBuffer, materials_texture);
+	glTexBuffer(TexBuffer, OPENGL_MATERIALS_MAP_INTERNAL_PIXEL_FORMAT, material_properties_buffer);
 
 	//////////
 
-	deinit_list(material_lighting_properties);
 
-	return materials_texture;
+	return (MaterialsTexture) {material_properties_buffer, materials_texture};
+}
+
+void deinit_materials_texture(const MaterialsTexture* const materials_texture) {
+	deinit_texture(materials_texture -> buffer_texture);
+	deinit_gpu_buffer(materials_texture -> material_properties_buffer);
 }

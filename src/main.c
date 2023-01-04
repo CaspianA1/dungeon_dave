@@ -447,7 +447,7 @@ static void* main_init(const WindowConfig* const window_config) {
 	const List all_materials_as_list = {(void*) all_materials, sizeof(*all_materials), ARRAY_LENGTH(all_materials), 0};
 	validate_all_materials(&all_materials_as_list);
 
-	const GLuint materials_texture = init_materials_texture(
+	const MaterialsTexture materials_texture = init_materials_texture(
 		&all_materials_as_list,
 		&(List) {(void*) sector_face_texture_paths, 	sizeof(*sector_face_texture_paths), ARRAY_LENGTH(sector_face_texture_paths), 0},
 		&(List) {(void*) still_billboard_texture_paths, sizeof(*still_billboard_texture_paths), ARRAY_LENGTH(still_billboard_texture_paths), 0},
@@ -639,7 +639,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	init_shared_textures_for_world_shaded_objects(world_shaded_objects,
 		ARRAY_LENGTH(world_shaded_objects), &scene_context.shadow_context,
-		&scene_context.ao_map, materials_texture
+		&scene_context.ao_map, materials_texture.buffer_texture
 	);
 
 	////////// Initializing shared shading params
@@ -673,7 +673,7 @@ static void main_deinit(void* const app_context) {
 	SceneContext* const scene_context = (SceneContext*) app_context;
 
 	deinit_shared_shading_params(&scene_context -> shared_shading_params);
-	deinit_texture(scene_context -> materials_texture);
+	deinit_materials_texture(&scene_context -> materials_texture);
 
 	deinit_weapon_sprite(&scene_context -> weapon_sprite);
 	deinit_sector_context(&scene_context -> sector_context);

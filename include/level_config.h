@@ -14,20 +14,26 @@
 //////////
 
 typedef struct {
-	const GLchar* const albedo_texture_path; // TODO: put the heightmap scale in here
-	const struct {const GLfloat metallicity, min_roughness, max_roughness;} lighting;
-} MaterialPropertiesPerObjectInstance;
+	GLuint material_properties_buffer, buffer_texture;
+} MaterialsTexture;
 
 // Excluded: copy_matching_material_to_dest_materials
 
 void validate_all_materials(const List* const all_materials);
 
-GLuint init_materials_texture(const List* const all_materials, const List* const sector_face_texture_paths,
+MaterialsTexture init_materials_texture(const List* const all_materials, const List* const sector_face_texture_paths,
 	const List* const still_billboard_texture_paths, const List* const billboard_animation_layouts,
 	List* const billboards, const AnimationLayout* const weapon_sprite_animation_layout,
 	material_index_t* const weapon_sprite_material_index);
 
+void deinit_materials_texture(const MaterialsTexture* const materials_texture);
+
 //////////
+
+typedef struct {
+	const GLchar* const albedo_texture_path; // TODO: put the heightmap scale in here
+	const struct {const GLfloat metallicity, min_roughness, max_roughness;} lighting;
+} MaterialPropertiesPerObjectInstance;
 
 typedef struct {
 	const GLsizei texture_rescale_size;

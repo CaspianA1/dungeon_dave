@@ -147,6 +147,9 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 	//////////
 
 	switch (type) {
+		case TexBuffer:
+			FAIL(CreateTexture, "%s", "Texture buffers are not supported for `init_texture_data`");
+
 		case TexPlain1D: UPLOAD_CALL(type, 1, size, size[0]);
 		case TexPlain: UPLOAD_CALL(type, 2, size, size[0], size[1]);
 
@@ -178,6 +181,8 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 			const GLchar* type_string = NULL;
 
 			switch (type) {
+				case TexBuffer: break; // This case should never be reached
+
 				#define STRING_CASE(t) case t: type_string = #t; break;
 
 				STRING_CASE(TexPlain1D); STRING_CASE(TexPlain);

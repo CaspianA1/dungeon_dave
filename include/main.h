@@ -5,6 +5,7 @@
 #include "utils/typedefs.h" // For OpenGL types + other typedefs
 #include "camera.h" // For `Camera`
 #include "shared_shading_params.h" // For `SharedShadingParams`
+#include "level_config.h" // For `MaterialsTexture`
 #include "rendering/entities/weapon_sprite.h" // For `WeaponSprite`
 #include "rendering/entities/sector.h" // For `SectorContext`
 #include "rendering/entities/billboard.h" // For `BillboardContext`
@@ -49,7 +50,7 @@ typedef struct {
 	Camera camera;
 
 	SharedShadingParams shared_shading_params;
-	const GLuint materials_texture;
+	const MaterialsTexture materials_texture;
 
 	WeaponSprite weapon_sprite;
 	const SectorContext sector_context;
