@@ -17,7 +17,7 @@ cd ..
 
 if [ "$2" == "run" ]; then
 	./$build_type/dungeon_dave
-else
+elif [ "$2" != "" ]; then
 	echo "The second parameter may only be 'run', or nothing at all. Exiting."
 	exit 4
 fi
