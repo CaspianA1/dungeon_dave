@@ -3,7 +3,7 @@
 #include "utils/list.h" // For various `List`-related defs
 #include "utils/failure.h" // For `FAIL`
 #include "data/constants.h" // For `PRINT_SHADER_VALIDATION_LOG`
-#include "utils/safe_io.h" // For `open_file_safely`
+#include "utils/safe_io.h" // For `read_file_contents`
 #include <string.h> // For `strrchr`, `strlen`, `memcpy`, `strcpy`, `strstr`, and `memset`
 
 enum {num_sub_shaders = 3}; // Vertex, geometry, and fragment
@@ -104,25 +104,6 @@ static GLuint init_shader_from_source(
 	#endif
 
 	return shader;
-}
-
-static GLchar* read_file_contents(const GLchar* const path) {
-	FILE* const file = open_file_safely(path, "r");
-
-	/* TODO (possible bug): if `ftell` fails, `num_bytes` will
-	underflow, and too much data will be allocated. */
-
-	fseek(file, 0l, SEEK_END); // Set file position to end
-	const size_t num_bytes = (size_t) ftell(file);
-	fseek(file, 0l, SEEK_SET); // Rewind file position
-
-	GLchar* const data = alloc(num_bytes + 1l, sizeof(GLchar));
-	fread(data, num_bytes, 1, file); // Read file bytes
-	data[num_bytes] = '\0';
-
-	fclose(file);
-
-	return data;
 }
 
 static GLchar* get_source_for_included_file(List* const dependency_list,
