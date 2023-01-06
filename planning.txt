@@ -56,6 +56,7 @@ Architectural/code design ideas:
 	Or is that too much - checks for limits, which are used for checks for runtime constants?
 	- Perhaps build a level file system like this: a program that compiles a level json file into a binary file, that can then be cast as a pointer to a struct directly
 - After the title screen init, there's some slowdown (much more with debug mode on)
+- Perhaps some level file versions for different rendering quality settings
 
 Miscellaneous problems:
 - The checker heightmap has faster pacing sometimes
