@@ -13,3 +13,9 @@
 
 Simply run `build.sh`, passing the build type as the first argument (`debug` or `release`).
 If you wish to run the project as well, you can specify the second argument to be `run`.
+
+![Screenshot 2023-01-07 at 14 40 57](https://user-images.githubusercontent.com/41955769/211393863-fac34033-8377-4559-989e-6f2f726d44de.png)
+
+<img width="1440" alt="Screenshot 2022-12-14 at 01 05 02" src="https://user-images.githubusercontent.com/41955769/211393898-6750e749-dbda-4547-b651-a633f4665d5c.png">
+
+<img width="1440" alt="Screenshot 2022-12-14 at 00 46 17" src="https://user-images.githubusercontent.com/41955769/211393912-fadcdc3e-531c-4dba-adee-b0cea7dabb25.png">
