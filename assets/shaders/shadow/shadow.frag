@@ -70,11 +70,9 @@ float get_csm_shadow_from_layers(const uint prev_layer_index,
 
 		////////// Making layer blending useless if it shouldn't be used
 
-		bool no_layer_blending = // Don't blend if the prev UV is out of range, and the curr one is in range
-			prev_fragment_pos_cascade_space != clamp(prev_fragment_pos_cascade_space, 0.0f, 1.0f) &&
-			curr_fragment_pos_cascade_space == clamp(curr_fragment_pos_cascade_space, 0.0f, 1.0f);
-
-		in_light_percentage.x = no_layer_blending ? in_light_percentage.y : in_light_percentage.x;
+		in_light_percentage.x =
+			(prev_fragment_pos_cascade_space != clamp(prev_fragment_pos_cascade_space, 0.0f, 1.0f))
+			? in_light_percentage.y : in_light_percentage.x;
 
 		////////// Getting the percent between cascades, and using that to get a blended shadow value
 
