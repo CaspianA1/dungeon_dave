@@ -128,11 +128,10 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 
 	////////// Setting up a max size
 
-	GLint max_plain_size;
+	GLint max_plain_size; // Getting the default max size
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_plain_size);
 
-	/* The size of this array accomodates for the max number of overall dimensions.
-	Also, some of the cases below rewrite some of the values in this array. */
+	// Some sizes on some axes may be overwritten below. Not all dimensions are used either.
 	GLsizei max_size[3] = {max_plain_size, max_plain_size, max_plain_size};
 
 	////////// Defining a variable for the dimension count + a macro to upload texture data
@@ -154,6 +153,9 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 		case TexPlain: UPLOAD_CALL(type, 2, size, size[0], size[1]);
 
 		case TexSkybox: {
+			glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, max_size); // Getting the max x size
+			max_size[1] = max_size[0]; // Max y size = max x size
+
 			const GLsizei face_size = size[0];
 			UPLOAD_CALL(GL_TEXTURE_CUBE_MAP_POSITIVE_X + (GLenum) size[1], 2, size, face_size, face_size);
 		}
@@ -164,10 +166,8 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 			UPLOAD_CALL(type, 3, size, size[0], size[1], size[2]);
 
 		case TexVolumetric:
-			/* Setting the max x-size to the max 3D texture size,
-			and then setting the rest to that value too */
-			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, max_size);
-			max_size[2] = max_size[1] = max_size[0];
+			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, max_size); // Getting the max x size
+			max_size[2] = max_size[1] = max_size[0]; // All sizes = the max x size
 
 			UPLOAD_CALL(type, 3, size, size[0], size[1], size[2]);
 	}
