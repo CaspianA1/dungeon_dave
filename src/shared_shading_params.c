@@ -47,7 +47,8 @@ static void init_constant_shading_params(UniformBuffer* const shading_params,
 	UBO_WRITE(ambient_occlusion.strength);
 
 	const sdl_pixel_component_t* const rgb_light_color = level_rendering_config -> rgb_light_color;
-	const vec3 light_color = {rgb_light_color[0] / 255.0, rgb_light_color[1] / 255.0, rgb_light_color[2] / 255.0};
+	vec3 light_color = {rgb_light_color[0], rgb_light_color[1], rgb_light_color[2]};
+	glm_vec3_scale(light_color, constants.one_over_max_byte_value, light_color);
 	write_primitive_to_uniform_buffer(shading_params, "light_color", light_color, sizeof(vec3));
 
 	UBO_WRITE(tone_mapping_max_white);
