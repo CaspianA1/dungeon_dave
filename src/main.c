@@ -531,9 +531,13 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	//////////
 
+	cJSON* const non_lighting_json = read_json_subobj(level_json, "non_lighting_data");
+
 	specify_cascade_count_before_any_shader_compilation(
 		window_config -> opengl_major_minor_version,
 		level_rendering_config.shadow_mapping.shadow_context_config.num_cascades);
+
+	//////////
 
 	// TODO: make a `LevelConfig` struct that includes all level data
 	const CameraConfig camera_config = {
@@ -541,7 +545,9 @@ static void* main_init(const WindowConfig* const window_config) {
 		.angles = {.hori = ONE_FOURTH_PI, .vert = 0.0f, .tilt = 0.0f}
 	};
 
-	const ALchar* const level_soundtrack_path = ASSET_PATH("audio/themes/new/pyramid.wav");
+	const ALchar* const level_soundtrack_path = get_string_from_json(read_json_subobj(non_lighting_json, "soundtrack_path"));
+
+	//////////
 
 	const byte
 		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_texture_id_map, map_size[2] = {blank_width, blank_height};
@@ -700,6 +706,8 @@ static void* main_init(const WindowConfig* const window_config) {
 	memcpy(&scene_context_on_heap -> shared_shading_params, &shared_shading_params, sizeof(SharedShadingParams));
 
 	//////////
+
+	deinit_json(level_json);
 
 	return scene_context_on_heap;
 }

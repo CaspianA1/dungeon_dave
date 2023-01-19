@@ -36,5 +36,9 @@
 	"rgb_light_color": [245, 213, 161],
 
 	"tone_mapping_max_white": 1.0,
-	"noise_granularity": 0.001
+	"noise_granularity": 0.001,
+
+	"non_lighting_data": {
+		"soundtrack_path": "../assets/audio/themes/new/pyramid.wav"
+	}
 }
