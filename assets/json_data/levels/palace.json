@@ -29,8 +29,8 @@
 	},
 
 	"skybox": {
-		"texture_path": "../assets/skyboxes/upscaled.bmp",
-		"map_cube_to_sphere": true
+		"texture_path": "../assets/skyboxes/desert.bmp",
+		"map_cube_to_sphere": false
 	},
 
 	"rgb_light_color": [245, 213, 161],
