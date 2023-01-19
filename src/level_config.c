@@ -5,27 +5,28 @@
 #include "rendering/entities/billboard.h" // For `Billboard`
 #include "utils/opengl_wrappers.h" // For `deinit_texture`
 
-void validate_all_materials(const List* const all_materials) {
+// TODO: to included
+void validate_material(const MaterialPropertiesPerObjectInstance material) {
 	#define VALIDATE_MATERIAL_PROPERTY_RANGE(property) do {\
 		if (material.lighting.property < 0.0f || material.lighting.property > 1.0f)\
 			\
 			FAIL(InitializeMaterial, "Material property '" #property "' for texture path '%s' "\
-				"is %g, and outside of the expected 0-1 range", material.albedo_texture_path,\
+				"is %g, and outside of the expected [0, 1] domain", material.albedo_texture_path,\
 				(GLdouble) material.lighting.property);\
 	} while (false)
 
-	LIST_FOR_EACH(all_materials, MaterialPropertiesPerObjectInstance, material_ref,
-		const MaterialPropertiesPerObjectInstance material = *material_ref;
+	//////////
 
-		VALIDATE_MATERIAL_PROPERTY_RANGE(metallicity);
-		VALIDATE_MATERIAL_PROPERTY_RANGE(min_roughness);
-		VALIDATE_MATERIAL_PROPERTY_RANGE(max_roughness);
+	VALIDATE_MATERIAL_PROPERTY_RANGE(metallicity);
+	VALIDATE_MATERIAL_PROPERTY_RANGE(min_roughness);
+	VALIDATE_MATERIAL_PROPERTY_RANGE(max_roughness);
 
-		if (material.lighting.min_roughness > material.lighting.max_roughness) FAIL(InitializeMaterial,
-			"The min roughness for the material with texture path '%s' exceeds its max roughness (%g > %g)",
-			material.albedo_texture_path, (GLdouble) material.lighting.min_roughness, (GLdouble) material.lighting.max_roughness
-		);
+	if (material.lighting.min_roughness > material.lighting.max_roughness) FAIL(InitializeMaterial,
+		"The min roughness for the material with texture path '%s' exceeds its max roughness (%g > %g)",
+		material.albedo_texture_path, (GLdouble) material.lighting.min_roughness, (GLdouble) material.lighting.max_roughness
 	);
+
+	//////////
 
 	#undef VALIDATE_MATERIAL_PROPERTY_RANGE
 }

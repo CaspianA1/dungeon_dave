@@ -29,6 +29,8 @@ typedef struct {
 		const GLuint vertex_buffer, vertex_spec, depth_shader;
 	} shadow_mapping;
 
+	const GLuint depth_prepass_shader;
+
 	const List mesh_cpu, sectors;
 } SectorContext;
 

@@ -7,6 +7,7 @@
 #include "utils/alloc.h" // For `alloc`, and `dealloc`, and `WindowConfig`
 #include "window.h" // For `make_application`
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
+#include "utils/json.h" // For various json defs
 
 static bool main_drawer(void* const app_context, const Event* const event) {
 	////////// Setting the wireframe mode
@@ -46,6 +47,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	////////// Scene updating
 
 	update_camera(camera, event, scene_context -> heightmap, scene_context -> map_size);
+
 	update_billboard_context(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
 	update_dynamic_light(dynamic_light, curr_time_secs);
@@ -67,7 +69,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 
 	draw_sectors(sector_context, camera);
 
-	// No backface culling or depth buffer writes for billboards, the skybox, or the weapon sprite
+	// No backface culling or depth buffer writes for the skybox, billboards, or the weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
 			draw_skybox(&scene_context -> skybox); // Drawn before any translucent geometry
@@ -113,15 +115,39 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Defining a bunch of level data
 
+	cJSON* const level_json = init_json_from_file(ASSET_PATH("json_data/levels/palace.json"));
+
+	cJSON
+		*const parallax_json = read_json_subobj(level_json, "parallax_mapping"),
+		*const vol_lighting_json =  read_json_subobj(level_json, "volumetric_lighting"),
+		*const ao_json = read_json_subobj(level_json, "ambient_occlusion"),
+		*const dyn_light_json = read_json_subobj(level_json, "dynamic_light"),
+		*const skybox_json = read_json_subobj(level_json, "skybox");
+
+	cJSON *const dyn_light_looking_at_json = read_json_subobj(dyn_light_json, "looking_at");
+
+	vec3 dyn_light_pos, dyn_light_looking_at_origin, dyn_light_looking_at_dest;
+	read_floats_from_json_array(read_json_subobj(dyn_light_json, "pos"), 3, dyn_light_pos);
+	read_floats_from_json_array(read_json_subobj(dyn_light_looking_at_json, "origin"), 3, dyn_light_looking_at_origin);
+	read_floats_from_json_array(read_json_subobj(dyn_light_looking_at_json, "dest"), 3, dyn_light_looking_at_dest);
+
+	sdl_pixel_component_t rgb_light_color[3];
+	read_u8s_from_json_array(read_json_subobj(level_json, "rgb_light_color"), 3, rgb_light_color);
+
+	//////////
+
 	const LevelRenderingConfig level_rendering_config = {
 		// TODO: put more level rendering params in here
 
 		.parallax_mapping = {
-			.enabled = true,
-			.min_layers = 4.0f, .max_layers = 32.0f,
-			.height_scale = 0.04f, .lod_cutoff = 1.5f
+			JSON_TO_FIELD(parallax_json, enabled, bool),
+			JSON_TO_FIELD(parallax_json, min_layers, float),
+			JSON_TO_FIELD(parallax_json, max_layers, float),
+			JSON_TO_FIELD(parallax_json, height_scale, float),
+			JSON_TO_FIELD(parallax_json, lod_cutoff, float)
 		},
 
+		// TODO: fill in these
 		.shadow_mapping = {
 			.sample_radius = 1, .esm_exponent = 50,
 			.esm_exponent_layer_scale_factor = 1.8f,
@@ -141,29 +167,40 @@ static void* main_init(const WindowConfig* const window_config) {
 		},
 
 		.volumetric_lighting = {
-			.num_samples = 50,
-			.sample_density = 1.0f, .opacity = 0.1f
+			JSON_TO_FIELD(vol_lighting_json, num_samples, u8),
+			JSON_TO_FIELD(vol_lighting_json, sample_density, float),
+			JSON_TO_FIELD(vol_lighting_json, opacity, float)
 		},
 
 		.ambient_occlusion = {
-			.tricubic_filtering_enabled = true,
-			.strength = 0.9f
+			JSON_TO_FIELD(ao_json, tricubic_filtering_enabled, bool),
+			JSON_TO_FIELD(ao_json, strength, float)
 		},
 
 		// Palace
 		.dynamic_light_config = {
-			.time_for_cycle = 2.5f,
-			.pos = {3.0f, 50.0f, 36.0f},
+			JSON_TO_FIELD(dyn_light_json, time_for_cycle, float),
+
+			.pos = {dyn_light_pos[0], dyn_light_pos[1], dyn_light_pos[2]},
 
 			.looking_at = {
-				.origin = {24.0f, 2.5f, 20.0f},
-				.dest = {28.0f, 2.5f, 17.5f}
+				.origin = {
+					dyn_light_looking_at_origin[0],
+					dyn_light_looking_at_origin[1],
+					dyn_light_looking_at_origin[2]
+				},
+
+				.dest = {
+					dyn_light_looking_at_dest[0],
+					dyn_light_looking_at_dest[1],
+					dyn_light_looking_at_dest[2]
+				}
 			}
 		},
 
 		.skybox_config = {
-			.texture_path = ASSET_PATH("skyboxes/desert.bmp"),
-			.map_cube_to_sphere = false
+			JSON_TO_FIELD(skybox_json, texture_path, string),
+			JSON_TO_FIELD(skybox_json, map_cube_to_sphere, bool)
 		},
 
 		// Fortress
@@ -184,55 +221,15 @@ static void* main_init(const WindowConfig* const window_config) {
 		},
 		*/
 
-		.rgb_light_color = {245, 213, 161},
-		.tone_mapping_max_white = 1.0f, .noise_granularity = 0.001f
+		.rgb_light_color = {rgb_light_color[0], rgb_light_color[1], rgb_light_color[2]},
+
+		JSON_TO_FIELD(level_json, tone_mapping_max_white, float),
+		JSON_TO_FIELD(level_json, noise_granularity, float)
 	};
 
-	/* This array has no specific order. Materials for sectors, billboards, and weapon sprites can go anywhere.
-	TODO: put this into a hash table (values will be 32-bit unsigned ints). */
-	static const MaterialPropertiesPerObjectInstance all_materials[] = {
-		{ASSET_PATH("walls/sand.bmp"),				{0.01f, 0.5f, 0.6f}}, // Done
-		{ASSET_PATH("walls/cobblestone_2.bmp"),		{0.0f, 0.0f, 0.0f}},
-		{ASSET_PATH("walls/cobblestone_3.bmp"),		{0.4f, 0.4f, 0.5f}}, // Done
-		{ASSET_PATH("walls/stone_2.bmp"),			{0.0f, 0.0f, 0.0f}},
-		{ASSET_PATH("walls/pyramid_bricks_3.bmp"),  {0.05f, 0.2f, 0.5f}}, // Done
-		{ASSET_PATH("walls/hieroglyphics.bmp"),		{0.4f, 0.7f, 0.8f}}, // Done
-		{ASSET_PATH("walls/desert_snake.bmp"),		{0.5f, 0.7f, 0.8f}}, // Done
-		{ASSET_PATH("walls/colorstone.bmp"),		{0.05f, 0.6f, 0.8f}}, // Done
-		{ASSET_PATH("walls/pyramid_bricks_4.bmp"),	{0.8f, 0.75f, 0.85f}}, // Done
-		{ASSET_PATH("walls/marble.bmp"),			{0.3f, 0.25f, 0.5f}}, // Done
-		{ASSET_PATH("walls/hieroglyph.bmp"),		{0.0f, 0.7f, 0.8f}}, // Done
-		{ASSET_PATH("walls/alkadhib.bmp"),			{0.5f, 0.5f, 0.6f}}, // Done
-		{ASSET_PATH("walls/saqqara.bmp"),			{0.4f, 0.45f, 0.6f}}, // Done
-		{ASSET_PATH("walls/sandstone.bmp"),			{0.2f, 0.6f, 0.9f}}, // Done
-		{ASSET_PATH("walls/rug_3.bmp"),				{0.5f, 0.4f, 0.8f}}, // Done
-		{ASSET_PATH("walls/mesa.bmp"),				{0.0f, 0.7f, 0.8f}}, // Done
-		{ASSET_PATH("walls/arthouse_bricks.bmp"),	{0.0f, 0.45f, 0.6f}}, // Done
-		{ASSET_PATH("walls/eye_of_evil.bmp"),		{0.9f, 0.45f, 0.6f}}, // Done
-		{ASSET_PATH("walls/rough_marble.bmp"),		{0.3f, 0.5f, 0.7f}}, // Done
-		{ASSET_PATH("walls/mosaic.bmp"),			{0.2f, 0.4f, 0.5f}}, // Done
-		{ASSET_PATH("walls/aquamarine_tiles.bmp"),	{0.5f, 0.4f, 0.5f}}, // Done
-		{ASSET_PATH("walls/greece.bmp"),			{0.0f, 0.0f, 0.0f}},
-		{ASSET_PATH("walls/viney_bricks.bmp"),		{0.0f, 0.0f, 0.0f}},
-		{ASSET_PATH("walls/vines.bmp"),				{0.8f, 0.6f, 0.9f}}, // Done
-		{ASSET_PATH("walls/gold.bmp"),				{0.0f, 0.0f, 0.0f}},
+	//////////
 
-		{ASSET_PATH("objects/health_kit.bmp"),			{1.0f, 0.5f, 0.6f}}, // Done
-		{ASSET_PATH("objects/teleporter.bmp"),			{0.6f, 0.4f, 0.6f}}, // Done
-		{ASSET_PATH("objects/shabti.bmp"),				{0.1f, 0.9f, 1.0f}}, // Done
-		{ASSET_PATH("spritesheets/flying_carpet.bmp"),	{0.2f, 0.8f, 1.0f}}, // Done
-		{ASSET_PATH("spritesheets/torch_2.bmp"),		{1.0f, 0.75f, 1.0f}}, // Done
-		{ASSET_PATH("spritesheets/eddie.bmp"),			{0.5f, 0.7f, 1.0f}}, // Done
-		{ASSET_PATH("spritesheets/trooper.bmp"),		{0.3f, 0.7f, 1.0f}}, // Done
-		{ASSET_PATH("spritesheets/fireball_travel.bmp"), {0.4f, 0.4f, 0.7f}}, // Done
-
-		{ASSET_PATH("walls/simple_squares.bmp"),				{0.8f, 0.2f, 0.5f}}, // Done
-		{ASSET_PATH("spritesheets/weapons/desecrator.bmp"),		{0.5f, 0.4f, 0.6f}}, // Done
-		{ASSET_PATH("spritesheets/weapons/whip.bmp"),			{0.4f, 0.6f, 0.7f}}, // Done
-		{ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"),	{0.2f, 0.5f, 0.7f}}, // Done
-		{ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"),	{0.4f, 0.6f, 0.7f}} // Done
-	};
-
+	// TODO: put these in the JSON level file next
 	static const GLchar* const sector_face_texture_paths[] = {
 		// Palace:
 		ASSET_PATH("walls/sand.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp"),
@@ -438,23 +435,60 @@ static void* main_init(const WindowConfig* const window_config) {
 		*/
 	};
 
+	////////// Reading in all materials
+
+	const char* const materials_file_path = ASSET_PATH("json_data/materials.json");
+	cJSON* const materials_json = init_json_from_file(materials_file_path);
+
+	if (!cJSON_IsObject(materials_json)) FAIL(ReadFromJSON,
+		"Expected outermost JSON for materials file '%s' to be an object",
+		materials_file_path
+	);
+
+	const cJSON* json_material;
+
+	List all_materials = init_list((buffer_size_t) cJSON_GetArraySize(materials_json), MaterialPropertiesPerObjectInstance);
+
+	cJSON_ArrayForEach(json_material, materials_json) {
+		vec3 lighting_props;
+		read_floats_from_json_array(json_material, 3, lighting_props);
+
+		const MaterialPropertiesPerObjectInstance material = {
+			.albedo_texture_path = json_material -> string,
+
+			.lighting = {
+				.metallicity = lighting_props[0],
+				.min_roughness = lighting_props[1],
+				.max_roughness = lighting_props[2]
+			}
+		};
+
+		validate_material(material);
+
+		push_ptr_to_list(&all_materials, &material);
+	}
+
+	////////// Making a materials texture
+
 	/* `material_lighting_properties` is a list of lighting properties for the current level.
 	Note that calling this also sets the material indices of billboards, and gets the weapon
 	sprite material index too. */
 
 	material_index_t weapon_sprite_material_index;
 
-	const List all_materials_as_list = {(void*) all_materials, sizeof(*all_materials), ARRAY_LENGTH(all_materials), 0};
-	validate_all_materials(&all_materials_as_list);
-
 	const MaterialsTexture materials_texture = init_materials_texture(
-		&all_materials_as_list,
+		&all_materials,
 		&(List) {(void*) sector_face_texture_paths, 	sizeof(*sector_face_texture_paths), ARRAY_LENGTH(sector_face_texture_paths), 0},
 		&(List) {(void*) still_billboard_texture_paths, sizeof(*still_billboard_texture_paths), ARRAY_LENGTH(still_billboard_texture_paths), 0},
 		&(List) {(void*) billboard_animation_layouts, 	sizeof(*billboard_animation_layouts), ARRAY_LENGTH(billboard_animation_layouts), 0},
 		&(List) {(void*) billboards, 					sizeof(*billboards), ARRAY_LENGTH(billboards), 0},
 		&weapon_sprite_config.animation_layout, &weapon_sprite_material_index
 	);
+
+	deinit_list(all_materials);
+	deinit_json(materials_json);
+
+	//////////
 
 	const MaterialPropertiesPerObjectType
 		sector_face_shared_material_properties = {
@@ -507,7 +541,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		.angles = {.hori = ONE_FOURTH_PI, .vert = 0.0f, .tilt = 0.0f}
 	};
 
-	const ALchar* const level_soundtrack_path = ASSET_PATH("audio/themes/new/mountain.wav");
+	const ALchar* const level_soundtrack_path = ASSET_PATH("audio/themes/new/pyramid.wav");
 
 	const byte
 		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_texture_id_map, map_size[2] = {blank_width, blank_height};
@@ -646,6 +680,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	const GLuint shaders_that_use_shared_params[] = {
 		// Depth shaders
+		scene_context.sector_context.depth_prepass_shader,
 		scene_context.sector_context.shadow_mapping.depth_shader,
 		scene_context.billboard_context.shadow_mapping.depth_shader,
 

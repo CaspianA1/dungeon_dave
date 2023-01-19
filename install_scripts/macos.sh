@@ -5,6 +5,18 @@ get_from_github() {
 	git clone git@github.com:$1/$2.git
 }
 
+install_cjson() {
+	get_from_github DaveGamble cjson
+
+	cd cjson
+	mkdir ../temp
+	mv cJSON.h cJSON.c ../temp
+
+	cd ..
+	sudo rm -r cjson
+	mv temp cjson
+}
+
 install_cglm() {
 	get_from_github recp cglm
 	mv cglm/include/cglm temp
@@ -32,6 +44,7 @@ main() { # TODO: install SDL locally
 	# TODO: remove the cglm and openal directories beforehand, if needed
 
 	cd ../lib
+	install_cjson
 	install_cglm
 	install_openal_soft
 }

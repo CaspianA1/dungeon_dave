@@ -21,6 +21,8 @@ typedef enum {
 	CreateAudioSource,
 
 	ReadFromDict,
+	ParseJSON,
+	ReadFromJSON,
 
 	CreateShader,
 	ParseIncludeDirectiveInShader,

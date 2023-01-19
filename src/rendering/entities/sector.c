@@ -384,6 +384,13 @@ SectorContext init_sector_context(const byte* const heightmap,
 			)
 		},
 
+		.depth_prepass_shader = init_shader(
+			ASSET_PATH("shaders/sector_depth_prepass.vert"),
+			NULL,
+			ASSET_PATH("shaders/shadow/sector_depth.frag"),
+			NULL
+		),
+
 		.mesh_cpu = face_mesh, .sectors = sectors
 	};
 }
@@ -394,6 +401,8 @@ void deinit_sector_context(const SectorContext* const sector_context) {
 	deinit_gpu_buffer(sector_context -> shadow_mapping.vertex_buffer);
 	deinit_vertex_spec(sector_context -> shadow_mapping.vertex_spec);
 	deinit_shader(sector_context -> shadow_mapping.depth_shader);
+
+	deinit_shader(sector_context -> depth_prepass_shader);
 
 	deinit_list(sector_context -> mesh_cpu);
 	deinit_list(sector_context -> sectors);
@@ -418,7 +427,17 @@ void draw_sectors(const SectorContext* const sector_context, const Camera* const
 		const GLsizei num_vertices = (GLsizei) (num_visible_faces * vertices_per_face);
 
 		use_vertex_spec(drawable -> vertex_spec);
-		use_shader(drawable -> shader);
+
+		// Running a depth prepass
+		use_shader(sector_context -> depth_prepass_shader);
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // No color buffer writes
 		glDrawArrays(GL_TRIANGLES, start_vertex, num_vertices);
+
+		// Only passing fragments with the same depth value
+		WITH_RENDER_STATE(glDepthFunc, GL_EQUAL, GL_LESS,
+			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+			use_shader(drawable -> shader);
+			glDrawArrays(GL_TRIANGLES, start_vertex, num_vertices);
+		);
 	}
 }
