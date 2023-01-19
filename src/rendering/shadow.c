@@ -5,8 +5,6 @@
 #include "utils/texture.h" // For `init_texture_data`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 
-static const GLenum framebuffer_target = GL_DRAW_FRAMEBUFFER;
-
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
 
@@ -172,42 +170,20 @@ CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* con
 	init_texture_data(shadow_map_texture_type, (GLsizei[]) {resolution, resolution, num_cascades},
 		GL_DEPTH_COMPONENT, internal_format, OPENGL_COLOR_CHANNEL_TYPE, NULL);
 
-	// TODO: check that the number of cascades does not exceed the max size for `gl_Layer`, and check for a minimum split count too
+	/* TODO: check that the number of cascades does not exceed the max size for `gl_Layer`
+	(see the bottom of https://www.khronos.org/opengl/wiki/Geometry_Shader for more info),
+	and check for a minimum split count too */
 
 	////////// Creating the framebuffer
 
-	GLuint framebuffer;
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(framebuffer_target, framebuffer);
+	GLuint framebuffer = init_framebuffer();
+	use_framebuffer(framebuffer_target, framebuffer);
+
 	glFramebufferTexture(framebuffer_target, GL_DEPTH_ATTACHMENT, depth_layers, 0);
 	glDrawBuffer(GL_NONE); glReadBuffer(GL_NONE); // Not drawing into or reading from any color buffers
+	check_framebuffer_completeness();
 
-	const GLchar* status_string;
-
-	switch (glCheckFramebufferStatus(framebuffer_target)) {
-		case GL_FRAMEBUFFER_COMPLETE:
-			status_string = NULL;
-			glBindFramebuffer(framebuffer_target, 0);
-			break;
-
-		#define COMPLETENESS_CASE(status) case GL_##status: status_string = #status; break
-
-		COMPLETENESS_CASE(FRAMEBUFFER_UNDEFINED);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_READ_BUFFER);
-		COMPLETENESS_CASE(FRAMEBUFFER_UNSUPPORTED);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
-		COMPLETENESS_CASE(FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS);
-
-		#undef COMPLETENESS_CASE
-
-		default: status_string = "Unknown framebuffer error";
-	}
-
-	if (status_string != NULL)
-		FAIL(CreateFramebuffer, "Could not create a framebuffer for this reason: '%s'", status_string);
+	use_framebuffer(framebuffer_target, 0);
 
 	////////// Creating the depth samplers
 
@@ -248,7 +224,7 @@ void deinit_shadow_context(const CascadedShadowContext* const shadow_context) {
 	dealloc(shadow_context -> split_dists);
 	dealloc(shadow_context -> light_view_projection_matrices);
 	deinit_texture(shadow_context -> depth_layers);
-	glDeleteFramebuffers(1, &shadow_context -> framebuffer);
+	deinit_framebuffer(shadow_context -> framebuffer);
 	glDeleteSamplers(2, (GLuint[]) {shadow_context -> plain_depth_sampler, shadow_context -> depth_comparison_sampler});
 }
 
@@ -284,11 +260,11 @@ void enable_rendering_to_shadow_context(const CascadedShadowContext* const shado
 	const GLsizei resolution = shadow_context -> resolution;
 
 	glViewport(0, 0, resolution, resolution);
-	glBindFramebuffer(framebuffer_target, shadow_context -> framebuffer);
+	use_framebuffer(framebuffer_target, shadow_context -> framebuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void disable_rendering_to_shadow_context(const GLint screen_size[2]) {
-	glBindFramebuffer(framebuffer_target, 0);
+	use_framebuffer(framebuffer_target, 0);
 	glViewport(0, 0, screen_size[0], screen_size[1]);
 }
