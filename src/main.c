@@ -124,7 +124,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		*const dyn_light_json = read_json_subobj(level_json, "dynamic_light"),
 		*const skybox_json = read_json_subobj(level_json, "skybox");
 
-	cJSON *const dyn_light_looking_at_json = read_json_subobj(dyn_light_json, "looking_at");
+	cJSON* const dyn_light_looking_at_json = read_json_subobj(dyn_light_json, "looking_at");
 
 	vec3 dyn_light_pos, dyn_light_looking_at_origin, dyn_light_looking_at_dest;
 	read_floats_from_json_array(read_json_subobj(dyn_light_json, "pos"), 3, dyn_light_pos);
