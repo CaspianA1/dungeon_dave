@@ -12,7 +12,7 @@ typedef struct {
 
 typedef Drawable Skybox;
 
-// Excluded: init_skybox_texture
+// Excluded: init_skybox_texture, define_vertex_spec
 
 #define deinit_skybox deinit_drawable
 
