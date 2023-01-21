@@ -50,14 +50,15 @@ typedef struct {
 	} parallax_mapping;
 
 	const struct {
-		const GLuint sample_radius, esm_exponent;
+		const byte sample_radius, esm_exponent;
+
 		const GLfloat esm_exponent_layer_scale_factor, billboard_alpha_threshold;
-		const CascadedShadowContextConfig shadow_context_config;
+		const CascadedShadowContextConfig cascaded_shadow_config;
 	} shadow_mapping;
 
 	// Note: if the opacity is 0, volumetric lighting is not computed
 	const struct {
-		const GLuint num_samples;
+		const byte num_samples;
 		const GLfloat sample_density, opacity;
 	} volumetric_lighting;
 

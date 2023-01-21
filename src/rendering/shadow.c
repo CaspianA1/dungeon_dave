@@ -165,7 +165,7 @@ CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* con
 			"of depth buffer bits must be 16, 24, or 32, not %d", num_depth_buffer_bits);
 	}
 
-	const GLsizei resolution = config -> resolution;
+	const uint16_t resolution = config -> resolution;
 
 	init_texture_data(shadow_map_texture_type, (GLsizei[]) {resolution, resolution, num_cascades},
 		GL_DEPTH_COMPONENT, internal_format, OPENGL_COLOR_CHANNEL_TYPE, NULL);

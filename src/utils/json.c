@@ -35,12 +35,26 @@ bool get_bool_from_json(const cJSON* const json) {
 	return (bool) json -> valueint;
 }
 
+#include "utils/debug_macro_utils.h"
+
 uint8_t get_u8_from_json(const cJSON* const json) {
-	if (!cJSON_IsNumber(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be a number", json -> string);
+	const char* const name = json -> string;
+
+	if (!cJSON_IsNumber(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be a number", name);
 
 	const int value = json -> valueint;
-	if (value < 0 || value > UINT8_MAX) FAIL(ReadFromJSON, "Expected JSON object '%s' to be in the size range of [0, %hhu]", UINT8_MAX);
+	if (value < 0 || value > UINT8_MAX) FAIL(ReadFromJSON, "Expected JSON object '%s' to be in the size range of [0, %hhu]", name, UINT8_MAX);
 	return (uint8_t) value;
+}
+
+uint16_t get_u16_from_json(const cJSON* const json) {
+	const char* const name = json -> string;
+
+	if (!cJSON_IsNumber(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be a number", name);
+
+	const int value = json -> valueint;
+	if (value < 0 || value > UINT16_MAX) FAIL(ReadFromJSON, "Expected JSON object '%s' to be in the size range of [0, %hu]", name, UINT16_MAX);
+	return (uint16_t) value;
 }
 
 float get_float_from_json(const cJSON* const json) {

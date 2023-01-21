@@ -117,14 +117,17 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	cJSON* const level_json = init_json_from_file(ASSET_PATH("json_data/levels/palace.json"));
 
-	cJSON
+	cJSON // TODO: genericize this naming thing here via a macro
 		*const parallax_json = read_json_subobj(level_json, "parallax_mapping"),
+		*const shadow_mapping_json = read_json_subobj(level_json, "shadow_mapping"),
 		*const vol_lighting_json =  read_json_subobj(level_json, "volumetric_lighting"),
 		*const ao_json = read_json_subobj(level_json, "ambient_occlusion"),
 		*const dyn_light_json = read_json_subobj(level_json, "dynamic_light"),
 		*const skybox_json = read_json_subobj(level_json, "skybox");
 
-	cJSON* const dyn_light_looking_at_json = read_json_subobj(dyn_light_json, "looking_at");
+	cJSON
+		*const dyn_light_looking_at_json = read_json_subobj(dyn_light_json, "looking_at"),
+		*const cascaded_shadow_json = read_json_subobj(shadow_mapping_json, "cascades");
 
 	vec3 dyn_light_pos, dyn_light_looking_at_origin, dyn_light_looking_at_dest;
 	read_floats_from_json_array(read_json_subobj(dyn_light_json, "pos"), 3, dyn_light_pos);
@@ -147,19 +150,21 @@ static void* main_init(const WindowConfig* const window_config) {
 			JSON_TO_FIELD(parallax_json, lod_cutoff, float)
 		},
 
-		// TODO: fill in these
 		.shadow_mapping = {
-			.sample_radius = 1, .esm_exponent = 50,
-			.esm_exponent_layer_scale_factor = 1.8f,
-			.billboard_alpha_threshold = 0.8f,
+			JSON_TO_FIELD(shadow_mapping_json, sample_radius, u8),
+			JSON_TO_FIELD(shadow_mapping_json, esm_exponent, u8),
 
-			.shadow_context_config = {
-				// Palace
-				.num_cascades = 4, .num_depth_buffer_bits = 16,
-				.resolution = 1024, .sub_frustum_scale = 1.5f, .linear_split_weight = 0.1f
+			JSON_TO_FIELD(shadow_mapping_json, esm_exponent_layer_scale_factor, float),
+			JSON_TO_FIELD(shadow_mapping_json, billboard_alpha_threshold, float),
 
-				// Terrain
-				/*
+			.cascaded_shadow_config = {
+				JSON_TO_FIELD(cascaded_shadow_json, num_cascades, u8),
+				JSON_TO_FIELD(cascaded_shadow_json, num_depth_buffer_bits, u8),
+				JSON_TO_FIELD(cascaded_shadow_json, resolution, u16),
+				JSON_TO_FIELD(cascaded_shadow_json, sub_frustum_scale, float),
+				JSON_TO_FIELD(cascaded_shadow_json, linear_split_weight, float)
+
+				/* // Terrain
 				.num_cascades = 16, .num_depth_buffer_bits = 16,
 				.resolution = 1200, .sub_frustum_scale = 1.0f, .linear_split_weight = 0.4f
 				*/
@@ -535,7 +540,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	specify_cascade_count_before_any_shader_compilation(
 		window_config -> opengl_major_minor_version,
-		level_rendering_config.shadow_mapping.shadow_context_config.num_cascades);
+		level_rendering_config.shadow_mapping.cascaded_shadow_config.num_cascades);
 
 	//////////
 
@@ -613,7 +618,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		),
 
 		.dynamic_light = init_dynamic_light(&level_rendering_config.dynamic_light_config),
-		.shadow_context = init_shadow_context(&level_rendering_config.shadow_mapping.shadow_context_config, far_clip_dist),
+		.shadow_context = init_shadow_context(&level_rendering_config.shadow_mapping.cascaded_shadow_config, far_clip_dist),
 
 		.ao_map = init_ao_map(heightmap, map_size, max_point_height),
 		.skybox = init_skybox(&level_rendering_config.skybox_config),

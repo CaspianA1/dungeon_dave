@@ -20,6 +20,7 @@ cJSON* read_json_subobj(const cJSON* const json, const char* const key);
 
 bool get_bool_from_json(const cJSON* const json);
 uint8_t get_u8_from_json(const cJSON* const json);
+uint16_t get_u16_from_json(const cJSON* const json);
 float get_float_from_json(const cJSON* const json);
 const char* get_string_from_json(const cJSON* const json);
 

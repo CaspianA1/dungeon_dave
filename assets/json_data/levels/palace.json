@@ -7,6 +7,21 @@
 		"lod_cutoff": 1.5
 	},
 
+	"shadow_mapping": {
+		"sample_radius": 1,
+		"esm_exponent": 35,
+		"esm_exponent_layer_scale_factor": 1.8,
+		"billboard_alpha_threshold": 0.8,
+
+		"cascades": {
+			"num_cascades": 4,
+			"num_depth_buffer_bits": 16,
+			"resolution": 1024,
+			"sub_frustum_scale": 1.5,
+			"linear_split_weight": 0.1
+		}
+	},
+
 	"volumetric_lighting": {
 		"num_samples": 50,
 		"sample_density": 1.0,

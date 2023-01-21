@@ -24,7 +24,7 @@ static const TextureType shadow_map_texture_type = TexSet;
 
 typedef struct {
 	const byte num_cascades, num_depth_buffer_bits;
-	const GLsizei resolution;
+	const uint16_t resolution;
 	const GLfloat sub_frustum_scale, linear_split_weight;
 } CascadedShadowContextConfig;
 
@@ -33,7 +33,7 @@ typedef struct {
 		framebuffer, depth_layers,
 		plain_depth_sampler, depth_comparison_sampler;
 
-	const GLsizei resolution;
+	const uint16_t resolution;
 	const byte num_cascades;
 	const GLfloat sub_frustum_scale;
 
