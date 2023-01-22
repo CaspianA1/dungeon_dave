@@ -164,7 +164,8 @@ static void* main_init(const WindowConfig* const window_config) {
 				JSON_TO_FIELD(cascaded_shadow_json, sub_frustum_scale, float),
 				JSON_TO_FIELD(cascaded_shadow_json, linear_split_weight, float)
 
-				/* // Terrain
+				// Terrain
+				/*
 				.num_cascades = 16, .num_depth_buffer_bits = 16,
 				.resolution = 1200, .sub_frustum_scale = 1.0f, .linear_split_weight = 0.4f
 				*/
