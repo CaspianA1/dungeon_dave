@@ -545,7 +545,6 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	//////////
 
-	// TODO: make a `LevelConfig` struct that includes all level data
 	const CameraConfig camera_config = {
 		.init_pos = {1.5f, 0.5f, 1.5f}, // {0.5f, 0.0f, 0.5f},
 		.angles = {.hori = ONE_FOURTH_PI, .vert = 0.0f, .tilt = 0.0f}
