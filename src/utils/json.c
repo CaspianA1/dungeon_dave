@@ -13,6 +13,11 @@ cJSON* init_json_from_file(const char* const path) {
 		path, cJSON_GetErrorPtr()
 	);
 
+	if (!cJSON_IsObject(json)) FAIL(ParseJSON,
+		"Expected outermost JSON type from the file "
+		"with the path '%s' to be an object", path
+	);
+
 	dealloc(contents);
 	return json;
 }
@@ -95,6 +100,7 @@ static void validate_json_array(const cJSON* const json, const int expected_leng
 	}
 
 JSON_ARRAY_READING_FN(uint8_t, u8)
+JSON_ARRAY_READING_FN(uint16_t, u16)
 JSON_ARRAY_READING_FN(float, float)
 
 #undef JSON_ARRAY_READING_FN

@@ -33,8 +33,8 @@ static Screen init_screen(const WindowConfig* const config) {
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, !config -> enabled.software_renderer);
 
-	const GLint* const window_size = config -> window_size;
-	const GLint window_w = window_size[0], window_h = window_size[1];
+	const uint16_t* const window_size = config -> window_size;
+	const uint16_t window_w = window_size[0], window_h = window_size[1];
 
 	Screen screen = {
 		.window = SDL_CreateWindow(config -> app_name,
@@ -106,8 +106,8 @@ static void resize_window_if_needed(SDL_Window* const window, const WindowConfig
 			glViewport(0, 0, desktop_width, desktop_height);
 		}
 		else {
-			const GLint* const window_size = config -> window_size;
-			const GLint window_w = window_size[0], window_h = window_size[1];
+			const uint16_t* const window_size = config -> window_size;
+			const uint16_t window_w = window_size[0], window_h = window_size[1];
 
 			SDL_SetWindowFullscreen(window, 0);
 			SDL_SetWindowSize(window, window_w, window_h);

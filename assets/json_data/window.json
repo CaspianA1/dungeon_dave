@@ -1,0 +1,19 @@
+{
+	"app_name": "Dungeon Dave",
+
+	"enabled": {
+		"vsync": true,
+		"aniso_filtering": true,
+		"multisampling": true,
+		"software_renderer": false
+	},
+
+	"aniso_filtering_level": 8,
+	"multisample_samples": 4,
+	"default_fps": 60,
+	"depth_buffer_bits": 24,
+
+	"opengl_major_minor_version": [4, 0],
+
+	"window_size": [800, 600]
+}

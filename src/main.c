@@ -130,12 +130,12 @@ static void* main_init(const WindowConfig* const window_config) {
 		*const cascaded_shadow_json = read_json_subobj(shadow_mapping_json, "cascades");
 
 	vec3 dyn_light_pos, dyn_light_looking_at_origin, dyn_light_looking_at_dest;
-	read_floats_from_json_array(read_json_subobj(dyn_light_json, "pos"), 3, dyn_light_pos);
-	read_floats_from_json_array(read_json_subobj(dyn_light_looking_at_json, "origin"), 3, dyn_light_looking_at_origin);
-	read_floats_from_json_array(read_json_subobj(dyn_light_looking_at_json, "dest"), 3, dyn_light_looking_at_dest);
-
 	sdl_pixel_component_t rgb_light_color[3];
-	read_u8s_from_json_array(read_json_subobj(level_json, "rgb_light_color"), 3, rgb_light_color);
+
+	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_json, dyn_light_pos, pos, float);
+	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_origin, origin, float);
+	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_dest, dest, float);
+	GET_ARRAY_VALUES_FROM_JSON_KEY(level_json, rgb_light_color, rgb_light_color, u8);
 
 	//////////
 
@@ -456,7 +456,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	cJSON_ArrayForEach(json_material, materials_json) {
 		vec3 lighting_props;
-		read_floats_from_json_array(json_material, 3, lighting_props);
+		read_floats_from_json_array(json_material, ARRAY_LENGTH(lighting_props), lighting_props);
 
 		const MaterialPropertiesPerObjectInstance material = {
 			.albedo_texture_path = json_material -> string,
@@ -737,22 +737,42 @@ static void main_deinit(void* const app_context) {
 }
 
 int main(void) {
+	cJSON* const window_config_json = init_json_from_file(ASSET_PATH("json_data/window.json"));
+	cJSON* const enabled_json = read_json_subobj(window_config_json, "enabled");
+
+	//////////
+
+	uint8_t opengl_major_minor_version[2];
+	uint16_t window_size[2];
+
+	GET_ARRAY_VALUES_FROM_JSON_KEY(window_config_json, opengl_major_minor_version, opengl_major_minor_version, u8);
+	GET_ARRAY_VALUES_FROM_JSON_KEY(window_config_json, window_size, window_size, u16);
+
+	//////////
+
 	const WindowConfig window_config = {
-		.app_name = "Dungeon Dave",
+		JSON_TO_FIELD(window_config_json, app_name, string),
 
 		.enabled = {
-			.vsync = true,
-			.aniso_filtering = true,
-			.multisampling = true,
-			.software_renderer = false
+			JSON_TO_FIELD(enabled_json, vsync, bool),
+			JSON_TO_FIELD(enabled_json, aniso_filtering, bool),
+			JSON_TO_FIELD(enabled_json, multisampling, bool),
+			JSON_TO_FIELD(enabled_json, software_renderer, bool)
 		},
 
-		.aniso_filtering_level = 8, .multisample_samples = 4,
-		.default_fps = 60, .depth_buffer_bits = 24,
-		.opengl_major_minor_version = {4, 0},
+		JSON_TO_FIELD(window_config_json, aniso_filtering_level, u8),
+		JSON_TO_FIELD(window_config_json, multisample_samples, u8),
+		JSON_TO_FIELD(window_config_json, default_fps, u8),
+		JSON_TO_FIELD(window_config_json, depth_buffer_bits, u8),
 
-		.window_size = {800, 600}
+		.opengl_major_minor_version = {
+			opengl_major_minor_version[0],
+			opengl_major_minor_version[1]
+		},
+
+		.window_size = {window_size[0], window_size[1]}
 	};
 
 	make_application(&window_config, main_drawer, main_init, main_deinit);
+	deinit_json(window_config_json);
 }

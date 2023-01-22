@@ -17,7 +17,7 @@ typedef struct {
 		aniso_filtering_level, multisample_samples,
 		default_fps, depth_buffer_bits, opengl_major_minor_version[2];
 
-	const GLint window_size[2];
+	const uint16_t window_size[2];
 } WindowConfig;
 
 // Excluded: init_screen, deinit_screen, resize_window_if_needed, application_should_exit, loop_application
