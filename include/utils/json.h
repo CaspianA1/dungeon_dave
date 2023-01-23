@@ -24,10 +24,12 @@ bool get_bool_from_json(const cJSON* const json);
 float get_float_from_json(const cJSON* const json);
 const char* get_string_from_json(const cJSON* const json);
 
-uint8_t get_u8_from_json(const cJSON* const json);
-uint16_t get_u16_from_json(const cJSON* const json);
+#define JSON_UNSIGNED_INT_READING_DEF(num_bits) uint##num_bits##_t get_u##num_bits##_from_json(const cJSON* const json);
 
-#undef JSON_READING_DEF
+JSON_UNSIGNED_INT_READING_DEF(8)
+JSON_UNSIGNED_INT_READING_DEF(16)
+
+#undef JSON_UNSIGNED_INT_READING_DEF
 
 ////////// Array readers
 
