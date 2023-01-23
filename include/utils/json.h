@@ -6,7 +6,7 @@
 #include <stdbool.h> // For `bool`
 #include <stdint.h> // For sized ints
 
-// Excluded: validate_json_array
+// Excluded: get_validated_json_int, validate_json_array
 
 ////////// Some general fns
 
@@ -18,13 +18,14 @@ cJSON* init_json_from_file(const char* const path);
 
 cJSON* read_json_subobj(const cJSON* const json, const char* const key);
 
-////////// Value readers
+////////// Primitive readers
 
 bool get_bool_from_json(const cJSON* const json);
-uint8_t get_u8_from_json(const cJSON* const json);
-uint16_t get_u16_from_json(const cJSON* const json);
 float get_float_from_json(const cJSON* const json);
 const char* get_string_from_json(const cJSON* const json);
+
+uint8_t get_u8_from_json(const cJSON* const json);
+uint16_t get_u16_from_json(const cJSON* const json);
 
 #undef JSON_READING_DEF
 

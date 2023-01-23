@@ -40,26 +40,6 @@ bool get_bool_from_json(const cJSON* const json) {
 	return (bool) json -> valueint;
 }
 
-uint8_t get_u8_from_json(const cJSON* const json) {
-	const char* const name = json -> string;
-
-	if (!cJSON_IsNumber(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be a number", name);
-
-	const int value = json -> valueint;
-	if (value < 0 || value > UINT8_MAX) FAIL(ReadFromJSON, "Expected JSON object '%s' to be in the size range of [0, %hhu]", name, UINT8_MAX);
-	return (uint8_t) value;
-}
-
-uint16_t get_u16_from_json(const cJSON* const json) {
-	const char* const name = json -> string;
-
-	if (!cJSON_IsNumber(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be a number", name);
-
-	const int value = json -> valueint;
-	if (value < 0 || value > UINT16_MAX) FAIL(ReadFromJSON, "Expected JSON object '%s' to be in the size range of [0, %hu]", name, UINT16_MAX);
-	return (uint16_t) value;
-}
-
 float get_float_from_json(const cJSON* const json) {
 	if (!cJSON_IsNumber(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be a number", json -> string);
 
@@ -71,6 +51,31 @@ float get_float_from_json(const cJSON* const json) {
 const char* get_string_from_json(const cJSON* const json) {
 	if (!cJSON_IsString(json)) FAIL(ReadFromJSON, "JSON key '%s' expected to be a string", json -> string);
 	return json -> valuestring;
+}
+
+////////// Unsigned int primitive readers
+
+static int get_validated_json_int(const cJSON* const json, const uint16_t max) {
+	const char* const name = json -> string;
+
+	if (!cJSON_IsNumber(json)) FAIL(ReadFromJSON, "Expected JSON object to be a number", name);
+
+	const int value = json -> valueint;
+
+	if (value < 0 || value > max) FAIL(ReadFromJSON,
+		"Expected JSON number %d to be in the size range of [0, %llu]",
+		value, max
+	);
+
+	return value;
+}
+
+uint8_t get_u8_from_json(const cJSON* const json) {
+	return (uint8_t) get_validated_json_int(json, UINT8_MAX);
+}
+
+uint16_t get_u16_from_json(const cJSON* const json) {
+	return (uint16_t) get_validated_json_int(json, UINT16_MAX);
 }
 
 ////////// Array readers
