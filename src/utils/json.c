@@ -40,8 +40,6 @@ bool get_bool_from_json(const cJSON* const json) {
 	return (bool) json -> valueint;
 }
 
-#include "utils/debug_macro_utils.h"
-
 uint8_t get_u8_from_json(const cJSON* const json) {
 	const char* const name = json -> string;
 
