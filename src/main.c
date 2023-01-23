@@ -446,11 +446,6 @@ static void* main_init(const WindowConfig* const window_config) {
 	const char* const materials_file_path = ASSET_PATH("json_data/materials.json");
 	cJSON* const materials_json = init_json_from_file(materials_file_path);
 
-	if (!cJSON_IsObject(materials_json)) FAIL(ReadFromJSON,
-		"Expected outermost JSON for materials file '%s' to be an object",
-		materials_file_path
-	);
-
 	const cJSON* json_material;
 
 	List all_materials = init_list((buffer_size_t) cJSON_GetArraySize(materials_json), MaterialPropertiesPerObjectInstance);
