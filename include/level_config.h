@@ -2,6 +2,7 @@
 #define LEVEL_CONFIG_H
 
 #include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/dict.h" // For `Dict`
 #include "utils/list.h" // For `List`
 #include "animation.h" // For `AnimationLayout`
 #include "utils/normal_map_generation.h" // For `NormalMapConfig`
@@ -26,7 +27,7 @@ typedef struct {
 
 // Excluded: copy_matching_material_to_dest_materials
 
-MaterialsTexture init_materials_texture(const List* const all_materials, const List* const sector_face_texture_paths,
+MaterialsTexture init_materials_texture(const Dict* const all_materials, const List* const sector_face_texture_paths,
 	const List* const still_billboard_texture_paths, const List* const billboard_animation_layouts,
 	List* const billboards, const AnimationLayout* const weapon_sprite_animation_layout,
 	material_index_t* const weapon_sprite_material_index);

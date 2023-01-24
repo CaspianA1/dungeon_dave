@@ -447,7 +447,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	const cJSON* json_material;
 
-	List all_materials = init_list((buffer_size_t) cJSON_GetArraySize(materials_json), MaterialPropertiesPerObjectInstance);
+	Dict all_materials = init_dict((buffer_size_t) cJSON_GetArraySize(materials_json), DV_String, DV_UnsignedInt);
 
 	cJSON_ArrayForEach(json_material, materials_json) {
 		vec3 normalized_properties;
@@ -481,7 +481,7 @@ static void* main_init(const WindowConfig* const window_config) {
 			)
 		};
 
-		push_ptr_to_list(&all_materials, &material);
+		typed_insert_into_dict(&all_materials, albedo_texture_path, material.properties, string, unsigned_int);
 	}
 
 	////////// Making a materials texture
@@ -501,7 +501,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		&weapon_sprite_config.animation_layout, &weapon_sprite_material_index
 	);
 
-	deinit_list(all_materials);
+	deinit_dict(&all_materials);
 	deinit_json(materials_json);
 
 	//////////

@@ -1,24 +1,16 @@
 #include "level_config.h"
 #include "utils/failure.h" // For `FAIL`
 #include "utils/texture.h" // For texture creation utils
-#include "data/constants.h" // For `max_byte_value`
 #include "rendering/entities/billboard.h" // For `Billboard`
 #include "utils/opengl_wrappers.h" // For `deinit_texture`
 
 //////////
 
 static void copy_matching_material_to_dest_materials(const GLchar* const texture_path,
-	const List* const all_materials, packed_material_properties_t* const dest_material_properties,
+	const Dict* const all_materials, packed_material_properties_t* const dest_material_properties,
 	const material_index_t dest_index) {
 
-	LIST_FOR_EACH(all_materials, MaterialPropertiesPerObjectInstance, material,
-		if (!strcmp(texture_path, material -> albedo_texture_path)) {
-			dest_material_properties[dest_index] = material -> properties;
-			return;
-		}
-	);
-
-	FAIL(InitializeMaterial, "No material definition found for texture path %s", texture_path);
+	dest_material_properties[dest_index] = typed_read_from_dict(all_materials, texture_path, string, unsigned_int);
 }
 
 //////////
@@ -45,7 +37,7 @@ Let S = the number of sector face textures,
 	If the billboard is animated, its material index = S + B + its animation layout id.
 
 - For a weapon sprite, the material index equals S + B + V + its animation layout id among the other weapon sprites. */
-MaterialsTexture init_materials_texture(const List* const all_materials, const List* const sector_face_texture_paths,
+MaterialsTexture init_materials_texture(const Dict* const all_materials, const List* const sector_face_texture_paths,
 	const List* const still_billboard_texture_paths, const List* const billboard_animation_layouts,
 	List* const billboards, const AnimationLayout* const weapon_sprite_animation_layout,
 	material_index_t* const weapon_sprite_material_index) {
