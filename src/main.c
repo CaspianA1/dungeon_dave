@@ -450,20 +450,36 @@ static void* main_init(const WindowConfig* const window_config) {
 	List all_materials = init_list((buffer_size_t) cJSON_GetArraySize(materials_json), MaterialPropertiesPerObjectInstance);
 
 	cJSON_ArrayForEach(json_material, materials_json) {
-		vec3 lighting_props;
-		read_floats_from_json_array(json_material, ARRAY_LENGTH(lighting_props), lighting_props);
+		vec3 normalized_properties;
+		const byte num_normalized_properties = ARRAY_LENGTH(normalized_properties);
+
+		read_floats_from_json_array(json_material, num_normalized_properties, normalized_properties);
+
+		const GLchar
+			*const property_names[] = {"metallicity", "min_roughness", "max_roughness"},
+			*const albedo_texture_path = json_material -> string;
+
+		for (byte i = 0; i < num_normalized_properties; i++) {
+			const GLfloat normalized_property = normalized_properties[i];
+
+			if (normalized_property < 0.0f || normalized_property > 1.0f)
+				FAIL(InitializeMaterial, "Material property '%s' for texture path '%s' "\
+					"is %g, and outside of the expected [0, 1] domain",
+					property_names[i], albedo_texture_path, (GLdouble) normalized_property
+				);
+		}
+
+		//////////
 
 		const MaterialPropertiesPerObjectInstance material = {
-			.albedo_texture_path = json_material -> string,
+			albedo_texture_path,
 
-			.lighting = {
-				.metallicity = lighting_props[0],
-				.min_roughness = lighting_props[1],
-				.max_roughness = lighting_props[2]
-			}
+			(packed_material_properties_t) (
+				((byte) (normalized_properties[0] * constants.max_byte_value)) |
+				(((byte) (normalized_properties[1] * constants.max_byte_value)) << 8u) |
+				(((byte) (normalized_properties[2] * constants.max_byte_value)) << 16u)
+			)
 		};
-
-		validate_material(material);
 
 		push_ptr_to_list(&all_materials, &material);
 	}

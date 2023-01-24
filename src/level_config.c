@@ -5,55 +5,19 @@
 #include "rendering/entities/billboard.h" // For `Billboard`
 #include "utils/opengl_wrappers.h" // For `deinit_texture`
 
-void validate_material(const MaterialPropertiesPerObjectInstance material) {
-	#define VALIDATE_MATERIAL_PROPERTY_RANGE(property) do {\
-		if (material.lighting.property < 0.0f || material.lighting.property > 1.0f)\
-			\
-			FAIL(InitializeMaterial, "Material property '" #property "' for texture path '%s' "\
-				"is %g, and outside of the expected [0, 1] domain", material.albedo_texture_path,\
-				(GLdouble) material.lighting.property);\
-	} while (false)
-
-	//////////
-
-	VALIDATE_MATERIAL_PROPERTY_RANGE(metallicity);
-	VALIDATE_MATERIAL_PROPERTY_RANGE(min_roughness);
-	VALIDATE_MATERIAL_PROPERTY_RANGE(max_roughness);
-
-	if (material.lighting.min_roughness > material.lighting.max_roughness) FAIL(InitializeMaterial,
-		"The min roughness for the material with texture path '%s' exceeds its max roughness (%g > %g)",
-		material.albedo_texture_path, (GLdouble) material.lighting.min_roughness, (GLdouble) material.lighting.max_roughness
-	);
-
-	//////////
-
-	#undef VALIDATE_MATERIAL_PROPERTY_RANGE
-}
-
 //////////
 
-typedef sdl_pixel_component_t raw_material_lighting_properties_t[4]; // The last component isn't used yet
-
 static void copy_matching_material_to_dest_materials(const GLchar* const texture_path,
-	const List* const all_materials, raw_material_lighting_properties_t* const dest_material_properties,
+	const List* const all_materials, packed_material_properties_t* const dest_material_properties,
 	const material_index_t dest_index) {
-
-	#define SET_TO_RGB_PIXEL(index, property) dest[index] = (sdl_pixel_component_t)\
-		(material -> lighting.property * constants.max_byte_value)
 
 	LIST_FOR_EACH(all_materials, MaterialPropertiesPerObjectInstance, material,
 		if (!strcmp(texture_path, material -> albedo_texture_path)) {
-			sdl_pixel_component_t* const dest = dest_material_properties[dest_index];
-
-			SET_TO_RGB_PIXEL(0, metallicity);
-			SET_TO_RGB_PIXEL(1, min_roughness);
-			SET_TO_RGB_PIXEL(2, max_roughness);
-
+			dest_material_properties[dest_index] = material -> properties;
 			return;
 		}
 	);
 
-	#undef SET_TO_RGB_PIXEL
 	FAIL(InitializeMaterial, "No material definition found for texture path %s", texture_path);
 }
 
@@ -67,7 +31,7 @@ static void copy_matching_material_to_dest_materials(const GLchar* const texture
 
 Note: this mutates the billboard list by setting each billboard's material index.
 
-This function returns a 1D texture of material lighting properties (each property is a `raw_material_lighting_properties_t`).
+This function returns a 1D texture of material lighting properties (each property is a `packed_material_lighting_properties_t`).
 This texture is indexed by a material index when shading world-shaded objects.
 
 - For a sector face texture, its material index = its texture id.
@@ -91,17 +55,17 @@ MaterialsTexture init_materials_texture(const List* const all_materials, const L
 	const byte num_sector_face_textures = (byte) sector_face_texture_paths -> length;
 	const texture_id_t num_still_billboard_texture_paths = (texture_id_t) still_billboard_texture_paths -> length;
 
-	const texture_id_t num_material_lighting_properties = (texture_id_t) (num_sector_face_textures +
+	const texture_id_t num_material_properties = (texture_id_t) (num_sector_face_textures +
 		num_still_billboard_texture_paths + billboard_animation_layouts -> length) + 1u; // 1 more for the weapon sprite
 
 	////////// Making a GPU buffer of material lighting properties
 
 	const GLuint material_properties_buffer = init_gpu_buffer();
 	use_gpu_buffer(TexBuffer, material_properties_buffer);
-	init_gpu_buffer_data(TexBuffer, num_material_lighting_properties, sizeof(raw_material_lighting_properties_t), NULL, GL_STATIC_DRAW);
+	init_gpu_buffer_data(TexBuffer, num_material_properties, sizeof(packed_material_properties_t), NULL, GL_STATIC_DRAW);
 
-	raw_material_lighting_properties_t* const material_properties_mapping = init_gpu_buffer_memory_mapping(
-		material_properties_buffer, TexBuffer, num_material_lighting_properties * sizeof(raw_material_lighting_properties_t), true
+	packed_material_properties_t* const material_properties_mapping = init_gpu_buffer_memory_mapping(
+		material_properties_buffer, TexBuffer, num_material_properties * sizeof(packed_material_properties_t), true
 	);
 
 	////////// First, inserting still face lighting properties
@@ -174,7 +138,7 @@ MaterialsTexture init_materials_texture(const List* const all_materials, const L
 
 	////////// Then, inserting weapon sprite lighting properties
 
-	*weapon_sprite_material_index = num_material_lighting_properties - 1u;
+	*weapon_sprite_material_index = num_material_properties - 1u;
 
 	copy_matching_material_to_dest_materials(weapon_sprite_animation_layout -> spritesheet_path,
 		all_materials, material_properties_mapping, *weapon_sprite_material_index);
