@@ -553,7 +553,6 @@ static void* main_init(const WindowConfig* const window_config) {
 		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_texture_id_map, map_size[2] = {blank_width, blank_height};
 		// *const heightmap = (const byte*) tiny_heightmap, *const texture_id_map = (const byte*) tiny_texture_id_map, map_size[2] = {tiny_width, tiny_height};
 		// *const heightmap = (const byte*) checker_heightmap, *const texture_id_map = (const byte*) checker_texture_id_map, map_size[2] = {checker_width, checker_height};
-		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_heightmap, map_size[2] = {blank_width, blank_height};
 		*const heightmap = (const byte*) palace_heightmap, *const texture_id_map = (const byte*) palace_texture_id_map, map_size[2] = {palace_width, palace_height};
 		// *const heightmap = (const byte*) fortress_heightmap, *const texture_id_map = (const byte*) fortress_texture_id_map, map_size[2] = {fortress_width, fortress_height};
 		// *const heightmap = (const byte*) level_one_heightmap, *const texture_id_map = (const byte*) level_one_texture_id_map, map_size[2] = {level_one_width, level_one_height};
