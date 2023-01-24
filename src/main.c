@@ -2,12 +2,11 @@
 #include "utils/opengl_wrappers.h" // For OpenGL defs + wrappers
 #include "utils/macro_utils.h" // For `ASSET_PATH`, and `ARRAY_LENGTH`
 #include "data/constants.h" // For `num_unique_object_types`
-#include "data/maps.h" // For various heightmaps and texture id maps
-#include "utils/map_utils.h" // For `get_heightmap_max_point_height` and `compute_world_far_clip_dist`
+#include "utils/map_utils.h" // For `get_heightmap_max_point_height,` and `compute_world_far_clip_dist`
 #include "utils/alloc.h" // For `alloc`, and `dealloc`, and `WindowConfig`
 #include "window.h" // For `make_application`
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
-#include "utils/json.h" // For various json defs
+#include "utils/json.h" // For various JSON defs
 
 static bool main_drawer(void* const app_context, const Event* const event) {
 	////////// Setting the wireframe mode
@@ -547,20 +546,40 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	const ALchar* const level_soundtrack_path = get_string_from_json(read_json_subobj(non_lighting_json, "soundtrack_path"));
 
+	////////// Loading in the heightmap and texture id map, validating them, and extracting data from them
+
+	byte map_size[2], cmp_map_size[2];
+
+	byte
+		*const heightmap = make_2D_map_from_json(read_json_subobj(non_lighting_json, "heightmap"), map_size),
+		*const texture_id_map = make_2D_map_from_json(read_json_subobj(non_lighting_json, "texture_id_map"), cmp_map_size);
+
+	for (byte i = 0; i < ARRAY_LENGTH(map_size); i++) {
+		const byte size_component = map_size[i], cmp_size_component = cmp_map_size[i];
+
+		const GLchar* const axis_name = (i == 0) ? "width" : "height";
+
+		if (size_component != cmp_size_component) FAIL(
+			UseLevelHeightmap, "Cannot use the level heightmap "
+			"because its %s is %hhu, while the texture id map's %s is %hhu",
+			axis_name, size_component, axis_name, cmp_size_component);
+	}
+
+	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
+	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
+
 	//////////
 
-	const byte
+	// const byte
+		// *const heightmap = (const byte*) map, *const texture_id_map = (const byte*) tidmap, map_size[2] = {size[0], size[1]};
 		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_texture_id_map, map_size[2] = {blank_width, blank_height};
 		// *const heightmap = (const byte*) tiny_heightmap, *const texture_id_map = (const byte*) tiny_texture_id_map, map_size[2] = {tiny_width, tiny_height};
 		// *const heightmap = (const byte*) checker_heightmap, *const texture_id_map = (const byte*) checker_texture_id_map, map_size[2] = {checker_width, checker_height};
-		*const heightmap = (const byte*) palace_heightmap, *const texture_id_map = (const byte*) palace_texture_id_map, map_size[2] = {palace_width, palace_height};
+		// *const heightmap = (const byte*) palace_heightmap, *const texture_id_map = (const byte*) palace_texture_id_map, map_size[2] = {palace_width, palace_height};
 		// *const heightmap = (const byte*) fortress_heightmap, *const texture_id_map = (const byte*) fortress_texture_id_map, map_size[2] = {fortress_width, fortress_height};
 		// *const heightmap = (const byte*) level_one_heightmap, *const texture_id_map = (const byte*) level_one_texture_id_map, map_size[2] = {level_one_width, level_one_height};
 		// *const heightmap = (const byte*) terrain_heightmap, *const texture_id_map = (const byte*) terrain_texture_id_map, map_size[2] = {terrain_width, terrain_height};
 		// *const heightmap = (const byte*) terrain_2_heightmap, *const texture_id_map = (const byte*) terrain_2_texture_id_map, map_size[2] = {terrain_2_width, terrain_2_height};
-
-	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
-	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
 
 	//////////
 
@@ -599,7 +618,7 @@ static void* main_init(const WindowConfig* const window_config) {
 			&level_rendering_config.dynamic_light_config
 		),
 
-		.billboard_context = init_billboard_context( // 0.2f before for the alpha threshold
+		.billboard_context = init_billboard_context(
 			level_rendering_config.shadow_mapping.billboard_alpha_threshold,
 			&billboard_shared_material_properties,
 
@@ -704,8 +723,9 @@ static void* main_init(const WindowConfig* const window_config) {
 	// I am bypassing the type system's const safety checks with this, but it's for the best
 	memcpy(&scene_context_on_heap -> shared_shading_params, &shared_shading_params, sizeof(SharedShadingParams));
 
-	//////////
+	////////// Some random deinit
 
+	dealloc(texture_id_map);
 	deinit_json(level_json);
 
 	return scene_context_on_heap;
@@ -713,6 +733,8 @@ static void* main_init(const WindowConfig* const window_config) {
 
 static void main_deinit(void* const app_context) {
 	SceneContext* const scene_context = (SceneContext*) app_context;
+
+	dealloc(scene_context -> heightmap);
 
 	deinit_shared_shading_params(&scene_context -> shared_shading_params);
 	deinit_materials_texture(&scene_context -> materials_texture);

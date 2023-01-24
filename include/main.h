@@ -63,7 +63,8 @@ typedef struct {
 	const Skybox skybox;
 	TitleScreen title_screen;
 
-	const byte* const heightmap, map_size[2];
+	byte* const heightmap;
+	const byte map_size[2];
 } SceneContext;
 
 // Excluded: main_drawer, main_init, main_deinit

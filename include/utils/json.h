@@ -6,7 +6,7 @@
 #include <stdbool.h> // For `bool`
 #include <stdint.h> // For sized ints
 
-// Excluded: get_validated_json_int, validate_json_array
+// Excluded: check_size_of_unsigned_int, get_validated_json_unsigned_int, validate_json_array
 
 ////////// Some general fns
 
@@ -43,3 +43,8 @@ JSON_ARRAY_READING_DEF(float, float)
 #undef JSON_ARRAY_READING_DEF
 
 #endif
+
+////////// Vector readers
+
+// Note: the returned map should be freed via `dealloc`. `size` is an output variable as well.
+uint8_t* make_2D_map_from_json(const cJSON* const json, uint8_t size[2]);
