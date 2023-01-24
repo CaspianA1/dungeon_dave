@@ -100,8 +100,9 @@ MaterialsTexture init_materials_texture(const List* const all_materials, const L
 	use_gpu_buffer(TexBuffer, material_properties_buffer);
 	init_gpu_buffer_data(TexBuffer, num_material_lighting_properties, sizeof(raw_material_lighting_properties_t), NULL, GL_STATIC_DRAW);
 
-	raw_material_lighting_properties_t* const material_properties_mapping = init_gpu_buffer_memory_mapping(material_properties_buffer, TexBuffer,
-		num_material_lighting_properties * sizeof(raw_material_lighting_properties_t), true);
+	raw_material_lighting_properties_t* const material_properties_mapping = init_gpu_buffer_memory_mapping(
+		material_properties_buffer, TexBuffer, num_material_lighting_properties * sizeof(raw_material_lighting_properties_t), true
+	);
 
 	////////// First, inserting still face lighting properties
 
