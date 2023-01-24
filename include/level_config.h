@@ -14,7 +14,7 @@
 //////////
 
 typedef struct {
-	GLuint material_properties_buffer, buffer_texture;
+	const GLuint material_properties_buffer, buffer_texture;
 } MaterialsTexture;
 
 typedef struct {

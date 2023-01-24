@@ -5,7 +5,6 @@
 #include "rendering/entities/billboard.h" // For `Billboard`
 #include "utils/opengl_wrappers.h" // For `deinit_texture`
 
-// TODO: to included
 void validate_material(const MaterialPropertiesPerObjectInstance material) {
 	#define VALIDATE_MATERIAL_PROPERTY_RANGE(property) do {\
 		if (material.lighting.property < 0.0f || material.lighting.property > 1.0f)\
