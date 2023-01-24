@@ -571,7 +571,6 @@ static void* main_init(const WindowConfig* const window_config) {
 	//////////
 
 	// const byte
-		// *const heightmap = (const byte*) map, *const texture_id_map = (const byte*) tidmap, map_size[2] = {size[0], size[1]};
 		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_texture_id_map, map_size[2] = {blank_width, blank_height};
 		// *const heightmap = (const byte*) tiny_heightmap, *const texture_id_map = (const byte*) tiny_texture_id_map, map_size[2] = {tiny_width, tiny_height};
 		// *const heightmap = (const byte*) checker_heightmap, *const texture_id_map = (const byte*) checker_texture_id_map, map_size[2] = {checker_width, checker_height};
