@@ -18,7 +18,7 @@ but this method uses the scene's shadow map, instead of a screen-space depth map
 Because volumetric lighting requires a series of depth comparisons for good results,
 instead of setting sampling parameters for the depth layers, the sampling parameters
 are split into two different sampler objects; one that fetches raw depth values, and one
-that fetches four averaged bilinear depth comparisons.  */
+that fetches four averaged bilinear depth comparisons. */
 
 static const TextureType shadow_map_texture_type = TexSet;
 
