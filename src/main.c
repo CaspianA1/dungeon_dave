@@ -156,6 +156,9 @@ static void* main_init(const WindowConfig* const window_config) {
 			JSON_TO_FIELD(shadow_mapping_json, esm_exponent_layer_scale_factor, float),
 			JSON_TO_FIELD(shadow_mapping_json, billboard_alpha_threshold, float),
 
+			// TODO: check that this is never equal to 0
+			JSON_TO_FIELD(shadow_mapping_json, inter_cascade_blend_threshold, float),
+
 			.cascaded_shadow_config = {
 				JSON_TO_FIELD(cascaded_shadow_json, num_cascades, u8),
 				JSON_TO_FIELD(cascaded_shadow_json, num_depth_buffer_bits, u8),

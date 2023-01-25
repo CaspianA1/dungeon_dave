@@ -12,13 +12,14 @@
 		"esm_exponent": 35,
 		"esm_exponent_layer_scale_factor": 1.8,
 		"billboard_alpha_threshold": 0.8,
+		"inter_cascade_blend_threshold": 0.3,
 
 		"cascades": {
-			"num_cascades": 4,
+			"num_cascades": 6,
 			"num_depth_buffer_bits": 16,
 			"resolution": 1024,
-			"sub_frustum_scale": 1.5,
-			"linear_split_weight": 0.1
+			"sub_frustum_scale": 1.2,
+			"linear_split_weight": 0.2
 		}
 	},
 

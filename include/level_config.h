@@ -53,7 +53,7 @@ typedef struct {
 	const struct {
 		const byte sample_radius, esm_exponent;
 
-		const GLfloat esm_exponent_layer_scale_factor, billboard_alpha_threshold;
+		const GLfloat esm_exponent_layer_scale_factor, billboard_alpha_threshold, inter_cascade_blend_threshold;
 		const CascadedShadowContextConfig cascaded_shadow_config;
 	} shadow_mapping;
 

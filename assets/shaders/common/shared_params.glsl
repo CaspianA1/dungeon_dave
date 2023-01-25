@@ -14,7 +14,10 @@ layout(shared) uniform ConstantShadingParams {
 
 	struct {
 		uint sample_radius, esm_exponent;
-		float esm_exponent_layer_scale_factor, cascade_split_distances[NUM_CASCADE_SPLITS];
+
+		float
+			esm_exponent_layer_scale_factor, inter_cascade_blend_threshold,
+			cascade_split_distances[NUM_CASCADE_SPLITS];
 	} shadow_mapping;
 
 	struct {

@@ -21,7 +21,7 @@ Note: shadows are the major bottleneck with the terrain 2 level
 
 float get_csm_shadow_from_layers(const uint prev_layer_index,
 	const uint curr_layer_index, const vec3 fragment_pos_world_space,
-	const vec3 curr_fragment_pos_cascade_space) {
+	vec3 curr_fragment_pos_cascade_space) {
 
 	/////////// Defining some shared vars
 
@@ -68,13 +68,7 @@ float get_csm_shadow_from_layers(const uint prev_layer_index,
 			pow(vec2(prev_layer_index, curr_layer_index) + 1.0f, vec2(shadow_mapping.esm_exponent_layer_scale_factor))
 		)
 
-		////////// Making layer blending useless if it shouldn't be used
-
-		in_light_percentage.x =
-			(prev_fragment_pos_cascade_space != clamp(prev_fragment_pos_cascade_space, 0.0f, 1.0f))
-			? in_light_percentage.y : in_light_percentage.x;
-
-		////////// Getting the percent between cascades, and using that to get a blended shadow value
+		////////// Getting the percent between cascades
 
 		uint depth_range_shift = uint(curr_layer_index == NUM_CASCADE_SPLITS);
 
@@ -83,9 +77,17 @@ float get_csm_shadow_from_layers(const uint prev_layer_index,
 			depth_range = shadow_mapping.cascade_split_distances[curr_layer_index - depth_range_shift] -
 				shadow_mapping.cascade_split_distances[prev_layer_index - depth_range_shift];
 
-		// If it's the last layer index, `percent_between` may be more than 1
-		float percent_between = min(dist_ahead_of_last_split / depth_range, 1.0f);
-		return mix(in_light_percentage.x, in_light_percentage.y, percent_between);
+		////////// Modifying the percent beteween to account for the blend threshold
+
+		float // If it's the last layer index, `percent_between` may be more than 1
+			percent_between = min(dist_ahead_of_last_split / depth_range, 1.0f),
+			blend_threshold = shadow_mapping.inter_cascade_blend_threshold;
+
+		float blended_in_light_percentage = mix(in_light_percentage.x,
+			in_light_percentage.y, percent_between / blend_threshold);
+
+		// Only using the blended in-light percentage when the percent between is less than the blend threshold
+		return mix(in_light_percentage.y, blended_in_light_percentage, float(percent_between <= blend_threshold));
 	}
 	else {
 		/* If we're only in the first layer, only compute shadows for that one.
@@ -104,7 +106,6 @@ float get_csm_shadow_from_layers(const uint prev_layer_index,
 			1.0f
 		)
 
-		// TODO: account for out-of-frustum fragments in this branch
 		return in_light_percentage;
 	}
 }

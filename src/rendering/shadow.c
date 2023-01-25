@@ -37,7 +37,7 @@ static void get_light_view_projection(
 	const CascadedShadowContext* const shadow_context,
 	const Camera* const camera, const vec3 dir_to_light,
 	const GLfloat near_clip_dist, const GLfloat far_clip_dist,
-	const GLfloat aspect_ratio, mat4 light_view_projection) {
+	GLfloat aspect_ratio, mat4 light_view_projection) {
 
 	////////// Getting the camera sub frustum center
 
@@ -63,13 +63,14 @@ static void get_light_view_projection(
 	/* When the camera FOV changes, each sub frustum gets wider, and this results in texel snapping not working.
 	So, the FOV for each sub frustum is the average of the initial camera FOV and the max FOV, in order to best
 	accomodate both FOVs. */
-	const GLfloat fov_for_sub_frustum = constants.camera.init_fov + constants.camera.limits.fov_change * 0.5f;
 
-	const GLfloat // TODO: precompute k
+	const GLfloat
+		fov_for_sub_frustum = constants.camera.init_fov + constants.camera.limits.fov_change * 0.5f,
 		far_clip_minus_near_clip = far_clip_dist - near_clip_dist,
-		far_clip_plus_near_clip = far_clip_dist + near_clip_dist,
-		k = sqrtf(1.0f + powf(1.0f / aspect_ratio, 2)) * tanf(fov_for_sub_frustum * 0.5f);
+		far_clip_plus_near_clip = far_clip_dist + near_clip_dist;
 
+	// TODO: precompute k, and why does the inverse aspect ratio (like in the article) not work?
+	const GLfloat k = sqrtf(1.0f + aspect_ratio * aspect_ratio) * tanf(fov_for_sub_frustum * 0.5f);
 	const GLfloat k_squared = k * k;
 
 	const GLfloat radius = shadow_context -> sub_frustum_scale * 0.5f * sqrtf(
@@ -82,9 +83,10 @@ static void get_light_view_projection(
 
 	//////////
 
+	// Note: the frustum has the camera's aspect ratio, but it's drawn to a square render target
 	const GLfloat divisor = 2.0f * radius / shadow_context -> resolution;
-
 	GLfloat* const projected_center = light_view[3];
+
 	projected_center[0] -= remainderf(projected_center[0], divisor);
 	projected_center[1] -= remainderf(projected_center[1], divisor);
 
@@ -257,7 +259,7 @@ void update_shadow_context(const CascadedShadowContext* const shadow_context,
 }
 
 void enable_rendering_to_shadow_context(const CascadedShadowContext* const shadow_context) {
-	const GLsizei resolution = shadow_context -> resolution;
+	const uint16_t resolution = shadow_context -> resolution;
 
 	glViewport(0, 0, resolution, resolution);
 	use_framebuffer(framebuffer_target, shadow_context -> framebuffer);

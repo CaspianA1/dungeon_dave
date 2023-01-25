@@ -30,6 +30,7 @@ static void init_constant_shading_params(UniformBuffer* const shading_params,
 	UBO_WRITE(shadow_mapping.sample_radius);
 	UBO_WRITE(shadow_mapping.esm_exponent);
 	UBO_WRITE(shadow_mapping.esm_exponent_layer_scale_factor);
+	UBO_WRITE(shadow_mapping.inter_cascade_blend_threshold);
 
 	UBO_WRITE(volumetric_lighting.num_samples);
 	UBO_WRITE(volumetric_lighting.sample_density);
@@ -76,6 +77,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 
 			"shadow_mapping.sample_radius", "shadow_mapping.esm_exponent",
 			"shadow_mapping.esm_exponent_layer_scale_factor",
+			"shadow_mapping.inter_cascade_blend_threshold",
 			"shadow_mapping.cascade_split_distances",
 
 			"volumetric_lighting.num_samples",
