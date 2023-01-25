@@ -88,7 +88,9 @@ static int validate_json_array(const cJSON* const json, const int expected_lengt
 
 	const int length = cJSON_GetArraySize(json);
 
-	if ((expected_length != -1) && (length != expected_length)) FAIL(ReadFromJSON,
+	if (length == 0) FAIL(ReadFromJSON, "%s", "JSON arrays cannot have size-zero lengths");
+
+	else if ((expected_length != -1) && (length != expected_length)) FAIL(ReadFromJSON,
 		"Expected JSON array '%s' to have a length of %d, but the length was %d",
 		array_name, expected_length, length
 	);
@@ -115,9 +117,6 @@ JSON_ARRAY_READING_FN(float, float)
 ////////// Vector readers
 
 uint8_t* make_2D_map_from_json(const cJSON* const json, uint8_t size[2]) {
-	(void) size;
-
-	// TODO: check for a non-zero map width and height
 	const int map_height = validate_json_array(json, -1);
 	check_size_of_unsigned_int(map_height, UINT8_MAX);
 
