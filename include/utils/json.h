@@ -46,5 +46,8 @@ JSON_ARRAY_READING_DEF(float, float)
 
 ////////// Vector readers
 
+// Note: the strings in this array belong to the input JSON.
+const char** make_string_vector_from_json(const cJSON* const json, uint8_t* const size);
+
 // Note: the returned map should be freed via `dealloc`. `size` is an output variable as well.
 uint8_t* make_2D_map_from_json(const cJSON* const json, uint8_t size[2]);

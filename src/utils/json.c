@@ -50,7 +50,7 @@ float get_float_from_json(const cJSON* const json) {
 }
 
 const char* get_string_from_json(const cJSON* const json) {
-	if (!cJSON_IsString(json)) FAIL(ReadFromJSON, "JSON key '%s' expected to be a string", json -> string);
+	if (!cJSON_IsString(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be a string", json -> string);
 	return json -> valuestring;
 }
 
@@ -115,6 +115,22 @@ JSON_ARRAY_READING_FN(float, float)
 #undef JSON_ARRAY_READING_FN
 
 ////////// Vector readers
+
+const char** make_string_vector_from_json(const cJSON* const json, uint8_t* const length) {
+	const int int_length = validate_json_array(json, -1);
+	check_size_of_unsigned_int(int_length, UINT8_MAX);
+
+	*length = (uint8_t) int_length;
+	const char** const strings = alloc(*length, sizeof(char*));
+
+	const cJSON* string;
+	int i = 0;
+
+	cJSON_ArrayForEach(string, json)
+		strings[i++] = get_string_from_json(string);
+
+	return strings;
+}
 
 uint8_t* make_2D_map_from_json(const cJSON* const json, uint8_t size[2]) {
 	const int map_height = validate_json_array(json, -1);

@@ -237,9 +237,15 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	//////////
 
-	// TODO: put these in the JSON level file next
-	static const GLchar* const sector_face_texture_paths[] = {
+	cJSON* const non_lighting_json = read_json_subobj(level_json, "non_lighting_data");
+	byte num_sector_face_texture_paths;
+
+	const char** const sector_face_texture_paths = make_string_vector_from_json(
+		read_json_subobj(non_lighting_json, "sector_face_texture_paths"), &num_sector_face_texture_paths);
+
+	// static const GLchar* const sector_face_texture_paths[] = {
 		// Palace:
+		/*
 		ASSET_PATH("walls/sand.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp"),
 		ASSET_PATH("walls/marble.bmp"), ASSET_PATH("walls/hieroglyph.bmp"),
 		ASSET_PATH("walls/alkadhib.bmp"), ASSET_PATH("walls/saqqara.bmp"),
@@ -248,6 +254,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		ASSET_PATH("walls/arthouse_bricks.bmp"), ASSET_PATH("walls/eye_of_evil.bmp"),
 		ASSET_PATH("walls/rough_marble.bmp"), ASSET_PATH("walls/mosaic.bmp"),
 		ASSET_PATH("walls/aquamarine_tiles.bmp")
+		*/
 
 		// Pyramid:
 		/*
@@ -278,7 +285,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		ASSET_PATH("walls/marble.bmp"), ASSET_PATH("walls/gold.bmp"),
 		ASSET_PATH("walls/greece.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp")
 		*/
-	};
+	// };
 
 	static const GLchar* const still_billboard_texture_paths[] = {
 		ASSET_PATH("objects/health_kit.bmp"),
@@ -497,7 +504,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	const MaterialsTexture materials_texture = init_materials_texture(
 		&all_materials,
-		&(List) {(void*) sector_face_texture_paths, 	sizeof(*sector_face_texture_paths), ARRAY_LENGTH(sector_face_texture_paths), 0},
+		&(List) {(void*) sector_face_texture_paths, 	sizeof(*sector_face_texture_paths), num_sector_face_texture_paths, 0},
 		&(List) {(void*) still_billboard_texture_paths, sizeof(*still_billboard_texture_paths), ARRAY_LENGTH(still_billboard_texture_paths), 0},
 		&(List) {(void*) billboard_animation_layouts, 	sizeof(*billboard_animation_layouts), ARRAY_LENGTH(billboard_animation_layouts), 0},
 		&(List) {(void*) billboards, 					sizeof(*billboards), ARRAY_LENGTH(billboards), 0},
@@ -549,8 +556,6 @@ static void* main_init(const WindowConfig* const window_config) {
 	}
 
 	//////////
-
-	cJSON* const non_lighting_json = read_json_subobj(level_json, "non_lighting_data");
 
 	specify_cascade_count_before_any_shader_compilation(
 		window_config -> opengl_major_minor_version,
@@ -632,7 +637,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 		.sector_context = init_sector_context(heightmap, texture_id_map,
 			map_size[0], map_size[1], sector_face_texture_paths,
-			ARRAY_LENGTH(sector_face_texture_paths), &sector_face_shared_material_properties,
+			num_sector_face_texture_paths, &sector_face_shared_material_properties,
 			&level_rendering_config.dynamic_light_config
 		),
 
@@ -743,6 +748,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Some random deinit
 
+	dealloc(sector_face_texture_paths);
 	dealloc(texture_id_map);
 	deinit_json(level_json);
 

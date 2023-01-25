@@ -57,6 +57,24 @@
 	"non_lighting_data": {
 		"soundtrack_path": "../assets/audio/themes/new/pyramid.wav",
 
+		"sector_face_texture_paths": [
+			"../assets/walls/sand.bmp",
+			"../assets/walls/pyramid_bricks_4.bmp",
+			"../assets/walls/marble.bmp",
+			"../assets/walls/hieroglyph.bmp",
+			"../assets/walls/alkadhib.bmp",
+			"../assets/walls/saqqara.bmp",
+			"../assets/walls/sandstone.bmp",
+			"../assets/walls/cobblestone_3.bmp",
+			"../assets/walls/rug_3.bmp",
+			"../assets/walls/mesa.bmp",
+			"../assets/walls/arthouse_bricks.bmp",
+			"../assets/walls/eye_of_evil.bmp",
+			"../assets/walls/rough_marble.bmp",
+			"../assets/walls/mosaic.bmp",
+			"../assets/walls/aquamarine_tiles.bmp"
+		],
+
 		"heightmap": [
 			[3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
 			[3, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 14,14,14,14,14,14,5],
