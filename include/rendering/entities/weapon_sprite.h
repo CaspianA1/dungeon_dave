@@ -37,7 +37,7 @@ typedef struct {
 
 typedef struct {
 	const struct {const GLfloat yaw, pitch;} max_degrees;
-	const struct {const GLfloat frame, movement_cycle;} secs_per;
+	const GLfloat secs_per_movement_cycle;
 
 	const GLfloat screen_space_size, max_movement_magnitude;
 	const AnimationLayout animation_layout;

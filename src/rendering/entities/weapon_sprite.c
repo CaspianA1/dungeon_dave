@@ -273,7 +273,7 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 			.cycle_base_time = 0.0f, .material_index = material_index, .curr_frame = 0,
 			.animation = {
 				.texture_id_range = {.start = 0, .end = animation_layout -> total_frames},
-				.secs_for_frame = config -> secs_per.frame
+				.secs_for_frame = animation_layout -> secs_for_frame
 			}
 		},
 
@@ -282,7 +282,7 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 				.frame_width_over_height = (GLfloat) frame_size[0] / frame_size[1],
 				.size = config -> screen_space_size,
 				.max_movement_magnitude = config -> max_movement_magnitude,
-				.half_movement_cycles_per_sec = 1.0f / (config -> secs_per.movement_cycle * 0.5f)
+				.half_movement_cycles_per_sec = 1.0f / (config -> secs_per_movement_cycle * 0.5f)
 			},
 
 			.world_space = {

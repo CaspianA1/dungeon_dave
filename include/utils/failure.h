@@ -24,6 +24,8 @@ typedef enum {
 	ParseJSON,
 	ReadFromJSON,
 
+	MakeBillboard,
+
 	CreateShader,
 	ParseIncludeDirectiveInShader,
 	InitializeShaderUniform,

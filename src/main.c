@@ -5,8 +5,8 @@
 #include "utils/map_utils.h" // For `get_heightmap_max_point_height,` and `compute_world_far_clip_dist`
 #include "utils/alloc.h" // For `alloc`, and `dealloc`, and `WindowConfig`
 #include "window.h" // For `make_application`
-#include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 #include "utils/json.h" // For various JSON defs
+#include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
 static bool main_drawer(void* const app_context, const Event* const event) {
 	////////// Setting the wireframe mode
@@ -287,6 +287,9 @@ static void* main_init(const WindowConfig* const window_config) {
 		*/
 	// };
 
+	////////// Various billboard data
+
+	// TODO: in the JSON struct, define the still texture paths and animation layouts in the same array
 	static const GLchar* const still_billboard_texture_paths[] = {
 		ASSET_PATH("objects/health_kit.bmp"),
 		ASSET_PATH("objects/teleporter.bmp"),
@@ -294,39 +297,28 @@ static void* main_init(const WindowConfig* const window_config) {
 	};
 
 	static const AnimationLayout billboard_animation_layouts[] = {
-		{ASSET_PATH("spritesheets/flying_carpet.bmp"), 5, 10, 46},
-		{ASSET_PATH("spritesheets/torch_2.bmp"), 2, 3, 5},
-		{ASSET_PATH("spritesheets/eddie.bmp"), 23, 1, 23},
-		{ASSET_PATH("spritesheets/trooper.bmp"), 33, 1, 33},
-		{ASSET_PATH("spritesheets/fireball_travel.bmp"), 12, 1, 12}
+		{ASSET_PATH("spritesheets/flying_carpet.bmp"), 5, 10, 46, 0.02f},
+		{ASSET_PATH("spritesheets/torch_2.bmp"), 2, 3, 5, 0.15f},
+		{ASSET_PATH("spritesheets/fireball_travel.bmp"), 12, 1, 12, 0.08f},
+
+		{ASSET_PATH("spritesheets/enemies/eddie_attack.bmp"), 1, 3, 3, 0.08f},
+		{ASSET_PATH("spritesheets/enemies/trooper_idle.bmp"), 1, 4, 4, 0.07f},
+		{ASSET_PATH("spritesheets/enemies/trooper_chase.bmp"), 1, 7, 7, 0.07f},
+		{ASSET_PATH("spritesheets/enemies/trooper_attack.bmp"), 1, 11, 11, 0.07f}
 	};
 
-	/* TODO:
-	- Make these texture id ranges relative to each animation layout
-	- Perhaps only apply one texture id looping construct per animation layout
-		(sub-animations provided as different animation layouts) */
-	static const Animation billboard_animations[] = {
-		{.texture_id_range = {3, 48}, .secs_for_frame = 0.02f}, // Flying carpet
-		{.texture_id_range = {49, 53}, .secs_for_frame = 0.15f}, // Torch
-		{.texture_id_range = {62, 64}, .secs_for_frame = 0.08f}, // Eddie, attacking
-		{.texture_id_range = {77, 81}, .secs_for_frame = 0.07f}, // Trooper, idle
-		{.texture_id_range = {82, 88}, .secs_for_frame = 0.07f}, // Trooper, chasing
-		{.texture_id_range = {89, 98}, .secs_for_frame = 0.07f}, // Trooper, attacking
-		{.texture_id_range = {110, 121}, .secs_for_frame = 0.08f} // Traveling fireball
-	};
-
+	// TODO: in the JSON struct, define these as optional extensions to each billboard struct
 	static const BillboardAnimationInstance billboard_animation_instances[] = {
 		{.billboard_index = 10, .animation_index = 0}, // Flying carpet
 		{.billboard_index = 11, .animation_index = 1}, // Torch
+		{.billboard_index = 12, .animation_index = 2}, // Traveling fireball
 
-		{.billboard_index = 12, .animation_index = 2}, // Eddies
-		{.billboard_index = 13, .animation_index = 2},
+		{.billboard_index = 13, .animation_index = 3}, // Eddies
+		{.billboard_index = 14, .animation_index = 3},
 
-		{.billboard_index = 14, .animation_index = 3}, // Troopers
-		{.billboard_index = 15, .animation_index = 4},
+		{.billboard_index = 15, .animation_index = 4}, // Troopers
 		{.billboard_index = 16, .animation_index = 5},
-
-		{.billboard_index = 17, .animation_index = 6} // Traveling fireball
+		{.billboard_index = 17, .animation_index = 6}
 	};
 
 	/* Still and animated billboards can be in any order (it's just easier to impose an order here).
@@ -352,24 +344,49 @@ static void* main_init(const WindowConfig* const window_config) {
 
 		{0, 0, {1.0f, 1.0f}, {5.0f, 0.5f, 2.0f}}, // Flying carpet
 		{0, 0, {1.0f, 1.0f}, {7.5f, 0.5f, 12.5f}}, // Torch
+		{0, 0, {5.0f, 4.0f}, {22.5f, 15.0f, 8.5}}, // Traveling fireball
 
 		{0, 0, {1.0f, 1.0f}, {6.5f, 0.5f, 21.5f}}, // Eddies
 		{0, 0, {1.0f, 1.0f}, {3.5f, 0.5f, 24.5f}},
 
 		{0, 0, {1.0f, 1.0f}, {3.0f, 1.5f, 9.5f}}, // Troopers
 		{0, 0, {1.0f, 1.0f}, {9.5f, 6.5f, 13.5f}},
-		{0, 0, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}},
-
-		{0, 0, {5.0f, 4.0f}, {22.5f, 15.0f, 8.5}} // Traveling fireball
+		{0, 0, {1.0f, 1.0f}, {21.5f, 0.5f, 24.5f}}
 	};
+
+	////////// Making a series of billboard animations from the billboard animation layouts
+
+	static Animation billboard_animations[ARRAY_LENGTH(billboard_animation_layouts)];
+	texture_id_t next_animated_frame_start = ARRAY_LENGTH(still_billboard_texture_paths);
+
+	for (billboard_index_t i = 0; i < ARRAY_LENGTH(billboard_animations); i++) {
+		const AnimationLayout* const layout = billboard_animation_layouts + i;
+		const texture_id_t total_frames = layout -> total_frames;
+
+		billboard_animations[i] = (Animation) {
+			.texture_id_range = {next_animated_frame_start, next_animated_frame_start + total_frames - 1},
+			.secs_for_frame = layout -> secs_for_frame
+		};
+
+		next_animated_frame_start += total_frames;
+	}
 
 	////////// Assigning initial texture ids to animated billboards
 
 	for (billboard_index_t i = 0; i < ARRAY_LENGTH(billboard_animation_instances); i++) {
 		const BillboardAnimationInstance* const animation_instance = billboard_animation_instances + i;
 
-		billboards[animation_instance -> billboard_index].texture_id = billboard_animations[
-			animation_instance -> animation_index].texture_id_range.start;
+		const billboard_index_t
+			billboard_index = animation_instance -> billboard_index,
+			animation_index = animation_instance -> animation_index;
+
+		if (billboard_index >= ARRAY_LENGTH(billboards)) FAIL(MakeBillboard, "Billboard animation instance at "
+			"index %hu refers to an invalid billboard of index %hu", i, billboard_index);
+
+		else if (animation_index >= ARRAY_LENGTH(billboard_animations)) FAIL(MakeBillboard, "Billboard animation instance at "
+			"index %hu refers to an invalid billboard animation of index %hu", i, animation_index);
+
+		billboards[billboard_index].texture_id = billboard_animations[animation_index].texture_id_range.start;
 	}
 
 	//////////
@@ -379,9 +396,8 @@ static void* main_init(const WindowConfig* const window_config) {
 		// Simple squares
 		/*
 		.max_degrees = {.yaw = 30.0f, .pitch = 120.0f},
-		.secs_per = {.frame = 1.0f, .movement_cycle = 1.0f},
-		.screen_space_size = 1.0f, .max_movement_magnitude = 0.4f,
-		.animation_layout = {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1},
+		.secs_per_movement_cycle = 1.0f, .screen_space_size = 1.0f, .max_movement_magnitude = 0.4f,
+		.animation_layout = {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1, 1.0f},
 
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 1.0f, .normal = 0.75f},
@@ -394,9 +410,8 @@ static void* main_init(const WindowConfig* const window_config) {
 		// Desecrator
 		/*
 		.max_degrees = {.yaw = 20.0f, .pitch = 130.0f},
-		.secs_per = {.frame = 0.07f, .movement_cycle = 1.0f},
-		.screen_space_size = 0.7f, .max_movement_magnitude = 0.2f,
-		.animation_layout = {ASSET_PATH("spritesheets/weapons/desecrator.bmp"), 1, 8, 8},
+		.secs_per_movement_cycle = 1.0f, .screen_space_size = 0.7f, .max_movement_magnitude = 0.2f,
+		.animation_layout = {ASSET_PATH("spritesheets/weapons/desecrator.bmp"), 1, 8, 8, 0.07f},
 
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 0.5f, .normal = 0.5f},
@@ -408,9 +423,8 @@ static void* main_init(const WindowConfig* const window_config) {
 
 		// Whip
 		.max_degrees = {.yaw = 15.0f, .pitch = 120.0f},
-		.secs_per = {.frame = 0.02f, .movement_cycle = 0.9f},
-		.screen_space_size = 0.75f, .max_movement_magnitude = 0.25f,
-		.animation_layout = {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22},
+		.secs_per_movement_cycle = 0.9f, .screen_space_size = 0.75f, .max_movement_magnitude = 0.25f,
+		.animation_layout = {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22, 0.02f},
 
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 1.0f, .normal = 1.0f},
@@ -422,9 +436,8 @@ static void* main_init(const WindowConfig* const window_config) {
 		// Snazzy shotgun
 		/*
 		.max_degrees = {.yaw = 30.0f, .pitch = 90.0f},
-		.secs_per = {.frame = 0.035f, .movement_cycle = 0.9f},
-		.screen_space_size = 0.75f, .max_movement_magnitude = 0.2f,
-		.animation_layout = {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59},
+		.secs_per_movement_cycle = 0.9f, .screen_space_size = 0.75f, .max_movement_magnitude = 0.2f,
+		.animation_layout = {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59, 0.035f},
 
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 0.0f, .normal = 0.0f},
@@ -437,9 +450,8 @@ static void* main_init(const WindowConfig* const window_config) {
 		// Reload pistol
 		/*
 		.max_degrees = {.yaw = 25.0f, .pitch = 90.0f},
-		.secs_per = {.frame = 0.04f, .movement_cycle = 1.0f},
-		.screen_space_size = 0.8f, .max_movement_magnitude = 0.2f,
-		.animation_layout =  {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28},
+		.secs_per_movement_cycle = 1.0f, .screen_space_size = 0.8f, .max_movement_magnitude = 0.2f,
+		.animation_layout =  {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28, 0.04f},
 
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 0.5f, .normal = 1.0f},
@@ -452,7 +464,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Reading in all materials
 
-	const char* const materials_file_path = ASSET_PATH("json_data/materials.json");
+	const GLchar* const materials_file_path = ASSET_PATH("json_data/materials.json");
 	cJSON* const materials_json = init_json_from_file(materials_file_path);
 
 	const cJSON* json_material;
