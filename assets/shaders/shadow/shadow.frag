@@ -86,8 +86,13 @@ float get_csm_shadow_from_layers(const uint prev_layer_index,
 		float blended_in_light_percentage = mix(in_light_percentage.x,
 			in_light_percentage.y, percent_between / blend_threshold);
 
+		bool prereqs_for_using_blended =
+			(percent_between <= blend_threshold)
+			&& prev_fragment_pos_cascade_space == clamp(prev_fragment_pos_cascade_space, 0.0f, 1.0f);
+
+		// TODO: also only use the blended percentage when the prev fragment is within bounds
 		// Only using the blended in-light percentage when the percent between is less than the blend threshold
-		return mix(in_light_percentage.y, blended_in_light_percentage, float(percent_between <= blend_threshold));
+		return mix(in_light_percentage.y, blended_in_light_percentage, float(prereqs_for_using_blended));
 	}
 	else {
 		/* If we're only in the first layer, only compute shadows for that one.
