@@ -85,10 +85,10 @@ static void get_light_view_projection(
 
 	// Note: the frustum has the camera's aspect ratio, but it's drawn to a square render target
 	const GLfloat divisor = 2.0f * radius / shadow_context -> resolution;
-	GLfloat* const projected_center = light_view[3];
+	GLfloat* const translation = light_view[3];
 
-	projected_center[0] -= remainderf(projected_center[0], divisor);
-	projected_center[1] -= remainderf(projected_center[1], divisor);
+	translation[0] -= remainderf(translation[0], divisor);
+	translation[1] -= remainderf(translation[1], divisor);
 
 	mat4 light_projection;
 	glm_ortho(-radius, radius, -radius, radius, -radius, radius, light_projection);
