@@ -335,14 +335,22 @@ static void define_vertex_spec(void) {
 
 SectorContext init_sector_context(const byte* const heightmap,
 	const byte* const texture_id_map, const byte map_width, const byte map_height,
-	const GLchar* const* const texture_paths, const byte num_textures,
+	const GLchar* const* const texture_paths, const texture_id_t num_textures,
 	const MaterialPropertiesPerObjectType* const shared_material_properties,
 	const DynamicLightConfig* const dynamic_light_config) {
+
+	////////// Checking that there's not too many sector face textures
+
+	// TODO: also check that the max texture id in the heightmap doesn't exceed the maximum from here
+	if (num_textures > MAX_NUM_SECTOR_SUBTEXTURES) FAIL(ReadFromJSON, "Number of sector face texture paths "
+		"exceeds the maximum (%hhu > %hhu)", num_textures, MAX_NUM_SECTOR_SUBTEXTURES);
+
+	////////// Making a list of sectors, and a face mesh
 
 	List sectors, face_mesh;
 	generate_sectors_and_face_mesh_from_maps(&sectors, &face_mesh, heightmap, texture_id_map, map_width, map_height);
 
-	//////////
+	////////// Making a trimmed face mesh for shadow mapping
 
 	GLsizei num_vertices_for_shadow_mapping;
 	GLuint vertex_buffer_for_shadow_mapping, vertex_spec_for_shadow_mapping;
@@ -351,7 +359,7 @@ SectorContext init_sector_context(const byte* const heightmap,
 		heightmap, &face_mesh, dynamic_light_config, &num_vertices_for_shadow_mapping,
 		&vertex_buffer_for_shadow_mapping, &vertex_spec_for_shadow_mapping);
 
-	//////////
+	////////// Making an albedo texture set
 
 	const GLsizei texture_size = shared_material_properties -> texture_rescale_size;
 
@@ -359,6 +367,8 @@ SectorContext init_sector_context(const byte* const heightmap,
 		false, TexRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
 		num_textures, 0, texture_size, texture_size, texture_paths, NULL
 	);
+
+	////////// Making a sector context
 
 	return (SectorContext) {
 		.drawable = init_drawable_with_vertices(

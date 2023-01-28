@@ -14,12 +14,8 @@
 
 //////////
 
+// Metallicity, min roughness, and max roughness
 typedef uint32_t packed_material_properties_t;
-
-typedef struct {
-	const GLchar* const albedo_texture_path; // TODO: put the heightmap scale in the properties
-	const packed_material_properties_t properties; // Metallicity, min roughness, and max roughness
-} MaterialPropertiesPerObjectInstance;
 
 typedef struct {
 	const GLuint material_properties_buffer, buffer_texture;

@@ -4,10 +4,10 @@
 #include "utils/typedefs.h" // For OpenGL types + other typedefs
 
 // `secs_for_frame` here are written into each animation
-typedef struct {
-	const GLchar* const spritesheet_path;
-	const texture_id_t frames_across, frames_down, total_frames;
-	const GLfloat secs_for_frame;
+typedef struct { // TODO: add back the const qualifiers, if possible
+	const GLchar* spritesheet_path;
+	texture_id_t frames_across, frames_down, total_frames;
+	GLfloat secs_for_frame;
 } AnimationLayout;
 
 typedef struct { // Note: the texture id range is inclusive.

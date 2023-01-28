@@ -22,15 +22,8 @@ extern GLfloat global_anisotropic_filtering_level;
 
 #define OPENGL_COLOR_CHANNEL_TYPE GL_UNSIGNED_BYTE
 
-//////////
-
 #define OPENGL_SCENE_MAG_FILTER TexLinear
 #define OPENGL_SCENE_MIN_FILTER TexTrilinear
-
-/* There's five bits to store a texture id in a face mesh's face info byte,
-And the biggest number possible with five bits is 31, so that gives you
-32 different possible texture ids. Also, this is just for wall textures. */
-#define MAX_NUM_SECTOR_SUBTEXTURES ((byte) 32u)
 
 // Each enum value is a texture unit id.
 typedef enum {

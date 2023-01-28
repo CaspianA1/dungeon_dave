@@ -10,15 +10,15 @@
 	"shadow_mapping": {
 		"sample_radius": 1,
 		"esm_exponent": 35,
-		"esm_exponent_layer_scale_factor": 1.8,
-		"billboard_alpha_threshold": 0.8,
-		"inter_cascade_blend_threshold": 0.3,
+		"esm_exponent_layer_scale_factor": 1.5,
+		"billboard_alpha_threshold": 0.75,
+		"inter_cascade_blend_threshold": 0.5,
 
 		"cascades": {
-			"num_cascades": 6,
+			"num_cascades": 4,
 			"num_depth_buffer_bits": 16,
 			"resolution": 1024,
-			"sub_frustum_scale": 1.2,
+			"sub_frustum_scale": 1.0,
 			"linear_split_weight": 0.2
 		}
 	},
@@ -74,6 +74,24 @@
 			"../assets/walls/mosaic.bmp",
 			"../assets/walls/aquamarine_tiles.bmp"
 		],
+
+		"billboard_data": {
+			"still_billboard_textures": [
+				"../assets/objects/health_kit.bmp",
+				"../assets/objects/teleporter.bmp",
+				"../assets/objects/shabti.bmp"
+			],
+
+			"animated_billboard_textures": [
+				["../assets/spritesheets/flying_carpet.bmp", 5, 10, 46, 0.02],
+				["../assets/spritesheets/torch_2.bmp", 2, 3, 5, 0.15],
+				["../assets/spritesheets/fireball_travel.bmp", 12, 1, 12, 0.08],
+				["../assets/spritesheets/enemies/eddie_attack.bmp", 1, 3, 3, 0.08],
+				["../assets/spritesheets/enemies/trooper_idle.bmp", 1, 4, 4, 0.07],
+				["../assets/spritesheets/enemies/trooper_chase.bmp", 1, 7, 7, 0.07],
+				["../assets/spritesheets/enemies/trooper_attack.bmp", 1, 11, 11, 0.07]
+			]
+		},
 
 		"heightmap": [
 			[3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],

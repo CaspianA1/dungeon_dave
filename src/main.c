@@ -3,8 +3,8 @@
 #include "utils/macro_utils.h" // For `ASSET_PATH`, and `ARRAY_LENGTH`
 #include "data/constants.h" // For `num_unique_object_types`
 #include "utils/map_utils.h" // For `get_heightmap_max_point_height,` and `compute_world_far_clip_dist`
-#include "utils/alloc.h" // For `alloc`, and `dealloc`, and `WindowConfig`
-#include "window.h" // For `make_application`
+#include "utils/alloc.h" // For `alloc`, and `dealloc`
+#include "window.h" // For `make_application`, and `WindowConfig`
 #include "utils/json.h" // For various JSON defs
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
@@ -238,9 +238,9 @@ static void* main_init(const WindowConfig* const window_config) {
 	//////////
 
 	cJSON* const non_lighting_json = read_json_subobj(level_json, "non_lighting_data");
-	byte num_sector_face_texture_paths;
+	texture_id_t num_sector_face_texture_paths;
 
-	const char** const sector_face_texture_paths = make_string_vector_from_json(
+	const GLchar** const sector_face_texture_paths = read_string_vector_from_json(
 		read_json_subobj(non_lighting_json, "sector_face_texture_paths"), &num_sector_face_texture_paths);
 
 	// static const GLchar* const sector_face_texture_paths[] = {
@@ -287,25 +287,48 @@ static void* main_init(const WindowConfig* const window_config) {
 		*/
 	// };
 
-	////////// Various billboard data
+	////////// Reading in the still billboard texture paths
 
-	// TODO: in the JSON struct, define the still texture paths and animation layouts in the same array
-	static const GLchar* const still_billboard_texture_paths[] = {
-		ASSET_PATH("objects/health_kit.bmp"),
-		ASSET_PATH("objects/teleporter.bmp"),
-		ASSET_PATH("objects/shabti.bmp")
-	};
+	// TODO: perhaps make a series of fns that init a certain context from just JSON (would that be in each context's src file? Or all in another parsing file?)
 
-	static const AnimationLayout billboard_animation_layouts[] = {
-		{ASSET_PATH("spritesheets/flying_carpet.bmp"), 5, 10, 46, 0.02f},
-		{ASSET_PATH("spritesheets/torch_2.bmp"), 2, 3, 5, 0.15f},
-		{ASSET_PATH("spritesheets/fireball_travel.bmp"), 12, 1, 12, 0.08f},
+	cJSON* const billboard_data_json = read_json_subobj(non_lighting_json, "billboard_data");
+	cJSON* const still_billboard_texture_paths_json = read_json_subobj(billboard_data_json, "still_billboard_textures");
 
-		{ASSET_PATH("spritesheets/enemies/eddie_attack.bmp"), 1, 3, 3, 0.08f},
-		{ASSET_PATH("spritesheets/enemies/trooper_idle.bmp"), 1, 4, 4, 0.07f},
-		{ASSET_PATH("spritesheets/enemies/trooper_chase.bmp"), 1, 7, 7, 0.07f},
-		{ASSET_PATH("spritesheets/enemies/trooper_attack.bmp"), 1, 11, 11, 0.07f}
-	};
+	texture_id_t num_still_billboard_texture_paths;
+	const GLchar** const still_billboard_texture_paths = read_string_vector_from_json(still_billboard_texture_paths_json, &num_still_billboard_texture_paths);
+
+	////////// Reading in the billboard animation layouts
+
+	cJSON* const billboard_animation_layouts_json = read_json_subobj(billboard_data_json, "animated_billboard_textures");
+	const int int_num_billboard_animation_layouts = validate_json_array(billboard_animation_layouts_json, -1);
+	check_size_of_unsigned_int(int_num_billboard_animation_layouts, UINT16_MAX); // TODO: define a max size for `billboard_index_t`
+	const billboard_index_t num_billboard_animation_layouts = (billboard_index_t) int_num_billboard_animation_layouts;
+
+	// TODO: for the other arrays passed into `init_billboard_context` (not this one), take ownership there
+	AnimationLayout* const billboard_animation_layouts = alloc(num_billboard_animation_layouts, sizeof(AnimationLayout));
+
+	#define ANIMATION_LAYOUT_FIELD_CASE(index, field, type_t)\
+		case index: billboard_animation_layout -> field = get_##type_t##_from_json(item_in_layout_json); break;
+
+	JSON_FOR_EACH(i, billboard_animation_layout_json, billboard_animation_layouts_json,
+		const byte num_fields_per_animation_layout = 5;
+		validate_json_array(billboard_animation_layout_json, num_fields_per_animation_layout);
+		AnimationLayout* const billboard_animation_layout = billboard_animation_layouts + i;
+
+		JSON_FOR_EACH(j, item_in_layout_json, billboard_animation_layout_json,
+			switch (j) {
+				ANIMATION_LAYOUT_FIELD_CASE(0, spritesheet_path, string)
+				ANIMATION_LAYOUT_FIELD_CASE(1, frames_across, u16)
+				ANIMATION_LAYOUT_FIELD_CASE(2, frames_down, u16)
+				ANIMATION_LAYOUT_FIELD_CASE(3, total_frames, u16)
+				ANIMATION_LAYOUT_FIELD_CASE(4, secs_for_frame, float)
+			}
+		);
+	);
+
+	#undef ANIMATION_LAYOUT_FIELD_CASE
+
+	////////// Defining the billboard animation instances, and billboards
 
 	// TODO: in the JSON struct, define these as optional extensions to each billboard struct
 	static const BillboardAnimationInstance billboard_animation_instances[] = {
@@ -356,8 +379,8 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Making a series of billboard animations from the billboard animation layouts
 
-	static Animation billboard_animations[ARRAY_LENGTH(billboard_animation_layouts)];
-	texture_id_t next_animated_frame_start = ARRAY_LENGTH(still_billboard_texture_paths);
+	Animation billboard_animations[num_billboard_animation_layouts]; // TODO: don't use a VLA
+	texture_id_t next_animated_frame_start = num_still_billboard_texture_paths;
 
 	for (billboard_index_t i = 0; i < ARRAY_LENGTH(billboard_animations); i++) {
 		const AnimationLayout* const layout = billboard_animation_layouts + i;
@@ -467,11 +490,9 @@ static void* main_init(const WindowConfig* const window_config) {
 	const GLchar* const materials_file_path = ASSET_PATH("json_data/materials.json");
 	cJSON* const materials_json = init_json_from_file(materials_file_path);
 
-	const cJSON* json_material;
-
 	Dict all_materials = init_dict((buffer_size_t) cJSON_GetArraySize(materials_json), DV_String, DV_UnsignedInt);
 
-	cJSON_ArrayForEach(json_material, materials_json) {
+	JSON_FOR_EACH(_, json_material, materials_json,
 		vec3 normalized_properties;
 		const byte num_normalized_properties = ARRAY_LENGTH(normalized_properties);
 
@@ -493,18 +514,14 @@ static void* main_init(const WindowConfig* const window_config) {
 
 		//////////
 
-		const MaterialPropertiesPerObjectInstance material = {
-			albedo_texture_path,
+		const packed_material_properties_t properties = (packed_material_properties_t) (
+			((byte) (normalized_properties[0] * constants.max_byte_value)) |
+			(((byte) (normalized_properties[1] * constants.max_byte_value)) << 8u) |
+			(((byte) (normalized_properties[2] * constants.max_byte_value)) << 16u)
+		);
 
-			(packed_material_properties_t) (
-				((byte) (normalized_properties[0] * constants.max_byte_value)) |
-				(((byte) (normalized_properties[1] * constants.max_byte_value)) << 8u) |
-				(((byte) (normalized_properties[2] * constants.max_byte_value)) << 16u)
-			)
-		};
-
-		typed_insert_into_dict(&all_materials, albedo_texture_path, material.properties, string, unsigned_int);
-	}
+		typed_insert_into_dict(&all_materials, albedo_texture_path, properties, string, unsigned_int);
+	);
 
 	////////// Making a materials texture
 
@@ -517,8 +534,8 @@ static void* main_init(const WindowConfig* const window_config) {
 	const MaterialsTexture materials_texture = init_materials_texture(
 		&all_materials,
 		&(List) {(void*) sector_face_texture_paths, 	sizeof(*sector_face_texture_paths), num_sector_face_texture_paths, 0},
-		&(List) {(void*) still_billboard_texture_paths, sizeof(*still_billboard_texture_paths), ARRAY_LENGTH(still_billboard_texture_paths), 0},
-		&(List) {(void*) billboard_animation_layouts, 	sizeof(*billboard_animation_layouts), ARRAY_LENGTH(billboard_animation_layouts), 0},
+		&(List) {(void*) still_billboard_texture_paths, sizeof(*still_billboard_texture_paths), num_still_billboard_texture_paths, 0},
+		&(List) {(void*) billboard_animation_layouts, 	sizeof(*billboard_animation_layouts), num_billboard_animation_layouts, 0},
 		&(List) {(void*) billboards, 					sizeof(*billboards), ARRAY_LENGTH(billboards), 0},
 		&weapon_sprite_config.animation_layout, &weapon_sprite_material_index
 	);
@@ -587,8 +604,8 @@ static void* main_init(const WindowConfig* const window_config) {
 	byte map_size[2], cmp_map_size[2];
 
 	byte
-		*const heightmap = make_2D_map_from_json(read_json_subobj(non_lighting_json, "heightmap"), map_size),
-		*const texture_id_map = make_2D_map_from_json(read_json_subobj(non_lighting_json, "texture_id_map"), cmp_map_size);
+		*const heightmap = read_2D_map_from_json(read_json_subobj(non_lighting_json, "heightmap"), map_size),
+		*const texture_id_map = read_2D_map_from_json(read_json_subobj(non_lighting_json, "texture_id_map"), cmp_map_size);
 
 	for (byte i = 0; i < ARRAY_LENGTH(map_size); i++) {
 		const byte size_component = map_size[i], cmp_size_component = cmp_map_size[i];
@@ -657,11 +674,11 @@ static void* main_init(const WindowConfig* const window_config) {
 			level_rendering_config.shadow_mapping.billboard_alpha_threshold,
 			&billboard_shared_material_properties,
 
-			ARRAY_LENGTH(billboard_animation_layouts), billboard_animation_layouts,
+			num_billboard_animation_layouts, billboard_animation_layouts,
 
-			ARRAY_LENGTH(still_billboard_texture_paths), still_billboard_texture_paths,
+			num_still_billboard_texture_paths, still_billboard_texture_paths,
 			ARRAY_LENGTH(billboards), billboards,
-			ARRAY_LENGTH(billboard_animations), billboard_animations,
+			num_billboard_animation_layouts, billboard_animations,
 			ARRAY_LENGTH(billboard_animation_instances), billboard_animation_instances
 		),
 
@@ -760,6 +777,8 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Some random deinit
 
+	dealloc(billboard_animation_layouts);
+	dealloc(still_billboard_texture_paths);
 	dealloc(sector_face_texture_paths);
 	dealloc(texture_id_map);
 	deinit_json(level_json);
