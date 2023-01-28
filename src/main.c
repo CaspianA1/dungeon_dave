@@ -332,16 +332,16 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	// TODO: in the JSON struct, define these as optional extensions to each billboard struct
 	static const BillboardAnimationInstance billboard_animation_instances[] = {
-		{.billboard_index = 10, .animation_index = 0}, // Flying carpet
-		{.billboard_index = 11, .animation_index = 1}, // Torch
-		{.billboard_index = 12, .animation_index = 2}, // Traveling fireball
+		{.billboard_index = 11, .animation_index = 0}, // Flying carpet
+		{.billboard_index = 12, .animation_index = 1}, // Torch
+		{.billboard_index = 13, .animation_index = 2}, // Traveling fireball
 
-		{.billboard_index = 13, .animation_index = 3}, // Eddies
-		{.billboard_index = 14, .animation_index = 3},
+		{.billboard_index = 14, .animation_index = 3}, // Eddies
+		{.billboard_index = 15, .animation_index = 3},
 
-		{.billboard_index = 15, .animation_index = 4}, // Troopers
-		{.billboard_index = 16, .animation_index = 5},
-		{.billboard_index = 17, .animation_index = 6}
+		{.billboard_index = 16, .animation_index = 4}, // Troopers
+		{.billboard_index = 17, .animation_index = 5},
+		{.billboard_index = 18, .animation_index = 6}
 	};
 
 	/* Still and animated billboards can be in any order (it's just easier to impose an order here).
@@ -362,6 +362,8 @@ static void* main_init(const WindowConfig* const window_config) {
 		{0, 2, {2.0f, 2.0f}, {10.5f, 1.0f, 25.0f}},
 		{0, 2, {2.0f, 2.0f}, {25.5f, 3.0f, 31.0f}},
 		{0, 2, {4.0f, 4.0f}, {36.0f, 18.0f, 4.0f}},
+
+		{0, 3, {6.0f, 6.0f}, {10.0f, 5.0f, 32.0f}}, // Anubis
 
 		////////// Animated billboards
 
