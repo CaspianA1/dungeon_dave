@@ -102,7 +102,6 @@ static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_
 	for (billboard_index_t i = 0; i < num_billboards; i++)
 		billboards_gpu[i] = billboard_data[sort_ref_data[i].index];
 
-
 	deinit_vertex_buffer_memory_mapping();
 }
 
