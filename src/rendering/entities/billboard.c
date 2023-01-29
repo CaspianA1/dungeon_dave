@@ -90,6 +90,7 @@ static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_
 		);
 	}
 
+	// TODO: if no billboards were moved, then don't update the GPU buffer
 	sort_billboard_refs_backwards(sort_ref_data, num_billboards);
 
 	////////// Moving the billboards into their right positions in their GPU buffer
