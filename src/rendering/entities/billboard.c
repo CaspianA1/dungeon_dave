@@ -144,7 +144,7 @@ void draw_billboards(BillboardContext* const billboard_context, const Camera* co
 static void define_vertex_spec(void) {
 	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), offsetof(Billboard, material_index), MATERIAL_INDEX_TYPENAME);
 	define_vertex_spec_index(true, false, 1, 1, sizeof(Billboard), offsetof(Billboard, texture_id), TEXTURE_ID_TYPENAME);
-	define_vertex_spec_index(true, true, 2, 2, sizeof(Billboard), offsetof(Billboard, size), GL_FLOAT);
+	define_vertex_spec_index(true, true, 2, 1, sizeof(Billboard), offsetof(Billboard, scale), GL_FLOAT);
 	define_vertex_spec_index(true, true, 3, 3, sizeof(Billboard), offsetof(Billboard, pos), GL_FLOAT);
 }
 

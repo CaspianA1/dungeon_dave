@@ -30,7 +30,7 @@ typedef struct {
 typedef struct {
 	material_index_t material_index;
 	texture_id_t texture_id;
-	vec2 size;
+	GLfloat scale;
 	vec3 pos;
 } Billboard;
 
