@@ -330,7 +330,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Defining the billboard animation instances, and billboards
 
-	// TODO: in the JSON struct, define these as optional extensions to each billboard struct
+	// TODO: in the JSON struct, define these as optional extensions to each billboard struct (the first field will be a a plain texture index, or an animation index)
 	static const BillboardAnimationInstance billboard_animation_instances[] = {
 		{.billboard_index = 11, .animation_index = 0}, // Flying carpet
 		{.billboard_index = 12, .animation_index = 1}, // Torch
