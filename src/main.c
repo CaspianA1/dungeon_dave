@@ -138,9 +138,8 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	//////////
 
+	// TODO: put more level rendering params in here
 	const LevelRenderingConfig level_rendering_config = {
-		// TODO: put more level rendering params in here
-
 		.parallax_mapping = {
 			JSON_TO_FIELD(parallax_json, enabled, bool),
 			JSON_TO_FIELD(parallax_json, min_layers, float),
@@ -165,12 +164,6 @@ static void* main_init(const WindowConfig* const window_config) {
 				JSON_TO_FIELD(cascaded_shadow_json, resolution, u16),
 				JSON_TO_FIELD(cascaded_shadow_json, sub_frustum_scale, float),
 				JSON_TO_FIELD(cascaded_shadow_json, linear_split_weight, float)
-
-				// Terrain
-				/*
-				.num_cascades = 16, .num_depth_buffer_bits = 16,
-				.resolution = 1200, .sub_frustum_scale = 1.0f, .linear_split_weight = 0.4f
-				*/
 			}
 		},
 
@@ -185,7 +178,6 @@ static void* main_init(const WindowConfig* const window_config) {
 			JSON_TO_FIELD(ao_json, strength, float)
 		},
 
-		// Palace
 		.dynamic_light_config = {
 			JSON_TO_FIELD(dyn_light_json, time_for_cycle, float),
 
@@ -211,31 +203,13 @@ static void* main_init(const WindowConfig* const window_config) {
 			JSON_TO_FIELD(skybox_json, map_cube_to_sphere, bool)
 		},
 
-		// Fortress
-		/*
-		.dynamic_light_config = {
-			.time_for_cycle = 1.0f,
-			.pos = {22.0f, 17.0f, 31.0f},
-
-			.looking_at = {
-				.origin = {2.0f, 0.0f, 1.0f},
-				.dest = {2.0f, 0.0f, 1.0f}
-			}
-		},
-
-		.skybox_config = {
-			.texture_path = ASSET_PATH("skyboxes/sky_3.bmp"),
-			.map_cube_to_sphere = false
-		},
-		*/
-
 		.rgb_light_color = {rgb_light_color[0], rgb_light_color[1], rgb_light_color[2]},
 
 		JSON_TO_FIELD(level_json, tone_mapping_max_white, float),
 		JSON_TO_FIELD(level_json, noise_granularity, float)
 	};
 
-	//////////
+	////////// Reading in the sector face texture paths
 
 	cJSON* const non_lighting_json = read_json_subobj(level_json, "non_lighting_data");
 	texture_id_t num_sector_face_texture_paths;
@@ -243,54 +217,9 @@ static void* main_init(const WindowConfig* const window_config) {
 	const GLchar** const sector_face_texture_paths = read_string_vector_from_json(
 		read_json_subobj(non_lighting_json, "sector_face_texture_paths"), &num_sector_face_texture_paths);
 
-	// static const GLchar* const sector_face_texture_paths[] = {
-		// Palace:
-		/*
-		ASSET_PATH("walls/sand.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp"),
-		ASSET_PATH("walls/marble.bmp"), ASSET_PATH("walls/hieroglyph.bmp"),
-		ASSET_PATH("walls/alkadhib.bmp"), ASSET_PATH("walls/saqqara.bmp"),
-		ASSET_PATH("walls/sandstone.bmp"), ASSET_PATH("walls/cobblestone_3.bmp"),
-		ASSET_PATH("walls/rug_3.bmp"), ASSET_PATH("walls/mesa.bmp"),
-		ASSET_PATH("walls/arthouse_bricks.bmp"), ASSET_PATH("walls/eye_of_evil.bmp"),
-		ASSET_PATH("walls/rough_marble.bmp"), ASSET_PATH("walls/mosaic.bmp"),
-		ASSET_PATH("walls/aquamarine_tiles.bmp")
-		*/
-
-		// Pyramid:
-		/*
-		ASSET_PATH("walls/pyramid_bricks_4.bmp"),
-		ASSET_PATH("walls/greece.bmp"), ASSET_PATH("walls/saqqara.bmp")
-		*/
-
-		// Fortress:
-		/*
-		ASSET_PATH("walls/viney_bricks.bmp"), ASSET_PATH("walls/marble.bmp"),
-		ASSET_PATH("walls/vines.bmp"),  ASSET_PATH("walls/stone_2.bmp")
-		*/
-
-		// Tiny:
-		// ASSET_PATH("walls/mesa.bmp"), ASSET_PATH("walls/hieroglyph.bmp")
-
-		// Level 1:
-		/*
-		ASSET_PATH("walls/sand.bmp"), ASSET_PATH("walls/cobblestone_2.bmp"),
-		ASSET_PATH("walls/cobblestone_3.bmp"), ASSET_PATH("walls/stone_2.bmp"),
-		ASSET_PATH("walls/pyramid_bricks_3.bmp"), ASSET_PATH("walls/hieroglyphics.bmp"),
-		ASSET_PATH("walls/desert_snake.bmp"), ASSET_PATH("walls/colorstone.bmp")
-		*/
-
-		// Architecture:
-		/*
-		ASSET_PATH("walls/sand.bmp"),
-		ASSET_PATH("walls/marble.bmp"), ASSET_PATH("walls/gold.bmp"),
-		ASSET_PATH("walls/greece.bmp"), ASSET_PATH("walls/pyramid_bricks_4.bmp")
-		*/
-	// };
-
 	////////// Reading in the still billboard texture paths
 
 	// TODO: perhaps make a series of fns that init a certain context from just JSON (would that be in each context's src file? Or all in another parsing file?)
-
 	cJSON* const billboard_data_json = read_json_subobj(non_lighting_json, "billboard_data");
 	cJSON* const still_billboard_texture_paths_json = read_json_subobj(billboard_data_json, "still_billboard_textures");
 
@@ -300,9 +229,9 @@ static void* main_init(const WindowConfig* const window_config) {
 	////////// Reading in the billboard animation layouts
 
 	cJSON* const billboard_animation_layouts_json = read_json_subobj(billboard_data_json, "animated_billboard_textures");
-	const int int_num_billboard_animation_layouts = validate_json_array(billboard_animation_layouts_json, -1);
-	check_size_of_unsigned_int(int_num_billboard_animation_layouts, UINT16_MAX); // TODO: define a max size for `billboard_index_t`
-	const billboard_index_t num_billboard_animation_layouts = (billboard_index_t) int_num_billboard_animation_layouts;
+
+	const billboard_index_t max_billboard_index = (billboard_index_t) ~0u;
+	const billboard_index_t num_billboard_animation_layouts = validate_json_array(billboard_animation_layouts_json, -1, max_billboard_index);
 
 	// TODO: for the other arrays passed into `init_billboard_context` (not this one), take ownership there
 	AnimationLayout* const billboard_animation_layouts = alloc(num_billboard_animation_layouts, sizeof(AnimationLayout));
@@ -312,7 +241,8 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	JSON_FOR_EACH(i, billboard_animation_layout_json, billboard_animation_layouts_json,
 		const byte num_fields_per_animation_layout = 5;
-		validate_json_array(billboard_animation_layout_json, num_fields_per_animation_layout);
+		validate_json_array(billboard_animation_layout_json, num_fields_per_animation_layout, UINT8_MAX);
+
 		AnimationLayout* const billboard_animation_layout = billboard_animation_layouts + i;
 
 		JSON_FOR_EACH(j, item_in_layout_json, billboard_animation_layout_json,
@@ -419,34 +349,6 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	// Note: the rescale size isn't used in `shared_material_properties`.
 	const WeaponSpriteConfig weapon_sprite_config = {
-		// Simple squares
-		/*
-		.max_degrees = {.yaw = 30.0f, .pitch = 120.0f},
-		.secs_per_movement_cycle = 1.0f, .screen_space_size = 1.0f, .max_movement_magnitude = 0.4f,
-		.animation_layout = {ASSET_PATH("walls/simple_squares.bmp"), 1, 1, 1, 1.0f},
-
-		.shared_material_properties = {
-			.bilinear_percents = {.albedo = 1.0f, .normal = 0.75f},
-			.normal_map_config = {.blur_radius = 1, .blur_std_dev = 1.0f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f}
-		},
-
-		.sound_path = ASSET_PATH("audio/sound_effects/health_increase.wav")
-		*/
-
-		// Desecrator
-		/*
-		.max_degrees = {.yaw = 20.0f, .pitch = 130.0f},
-		.secs_per_movement_cycle = 1.0f, .screen_space_size = 0.7f, .max_movement_magnitude = 0.2f,
-		.animation_layout = {ASSET_PATH("spritesheets/weapons/desecrator.bmp"), 1, 8, 8, 0.07f},
-
-		.shared_material_properties = {
-			.bilinear_percents = {.albedo = 0.5f, .normal = 0.5f},
-			.normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .heightmap_scale = 1.0f, .rescale_factor = 3.0f}
-		},
-
-		.sound_path = ASSET_PATH("audio/sound_effects/rocket_explosion.wav")
-		*/
-
 		// Whip
 		.max_degrees = {.yaw = 15.0f, .pitch = 120.0f},
 		.secs_per_movement_cycle = 0.9f, .screen_space_size = 0.75f, .max_movement_magnitude = 0.25f,
@@ -458,34 +360,6 @@ static void* main_init(const WindowConfig* const window_config) {
 		},
 
 		.sound_path = ASSET_PATH("audio/sound_effects/whip_crack.wav")
-
-		// Snazzy shotgun
-		/*
-		.max_degrees = {.yaw = 30.0f, .pitch = 90.0f},
-		.secs_per_movement_cycle = 0.9f, .screen_space_size = 0.75f, .max_movement_magnitude = 0.2f,
-		.animation_layout = {ASSET_PATH("spritesheets/weapons/snazzy_shotgun.bmp"), 6, 10, 59, 0.035f},
-
-		.shared_material_properties = {
-			.bilinear_percents = {.albedo = 0.0f, .normal = 0.0f},
-			.normal_map_config = {.blur_radius = 4, .blur_std_dev = 1.5f, .heightmap_scale = 2.0f, .rescale_factor = 2.0f}
-		},
-
-		.sound_path = ASSET_PATH("audio/sound_effects/shotgun.wav")
-		*/
-
-		// Reload pistol
-		/*
-		.max_degrees = {.yaw = 25.0f, .pitch = 90.0f},
-		.secs_per_movement_cycle = 1.0f, .screen_space_size = 0.8f, .max_movement_magnitude = 0.2f,
-		.animation_layout =  {ASSET_PATH("spritesheets/weapons/reload_pistol.bmp"), 4, 7, 28, 0.04f},
-
-		.shared_material_properties = {
-			.bilinear_percents = {.albedo = 0.5f, .normal = 1.0f},
-			.normal_map_config = {.blur_radius = 2, .blur_std_dev = 1.0f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f}
-		},
-
-		.sound_path = ASSET_PATH("audio/sound_effects/scrape.wav")
-		*/
 	};
 
 	////////// Reading in all materials
@@ -624,19 +498,7 @@ static void* main_init(const WindowConfig* const window_config) {
 	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
 	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
 
-	//////////
-
-	// const byte
-		// *const heightmap = (const byte*) blank_heightmap, *const texture_id_map = (const byte*) blank_texture_id_map, map_size[2] = {blank_width, blank_height};
-		// *const heightmap = (const byte*) tiny_heightmap, *const texture_id_map = (const byte*) tiny_texture_id_map, map_size[2] = {tiny_width, tiny_height};
-		// *const heightmap = (const byte*) checker_heightmap, *const texture_id_map = (const byte*) checker_texture_id_map, map_size[2] = {checker_width, checker_height};
-		// *const heightmap = (const byte*) palace_heightmap, *const texture_id_map = (const byte*) palace_texture_id_map, map_size[2] = {palace_width, palace_height};
-		// *const heightmap = (const byte*) fortress_heightmap, *const texture_id_map = (const byte*) fortress_texture_id_map, map_size[2] = {fortress_width, fortress_height};
-		// *const heightmap = (const byte*) level_one_heightmap, *const texture_id_map = (const byte*) level_one_texture_id_map, map_size[2] = {level_one_width, level_one_height};
-		// *const heightmap = (const byte*) terrain_heightmap, *const texture_id_map = (const byte*) terrain_texture_id_map, map_size[2] = {terrain_width, terrain_height};
-		// *const heightmap = (const byte*) terrain_2_heightmap, *const texture_id_map = (const byte*) terrain_2_texture_id_map, map_size[2] = {terrain_2_width, terrain_2_height};
-
-	//////////
+	////////// Defining the title screen config
 
 	const struct {
 		const TitleScreenTextureConfig texture;

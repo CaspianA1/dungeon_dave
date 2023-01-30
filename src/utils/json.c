@@ -56,51 +56,52 @@ const char* get_string_from_json(const cJSON* const json) {
 
 ////////// Unsigned int primitive readers
 
-void check_size_of_unsigned_int(const int value, const uint16_t max) {
+static void check_size_of_unsigned_int(const int value, const json_array_size_t max, const char* const number_description) {
 	if (value < 0 || value > max) FAIL(ReadFromJSON,
-		"Expected number %d to be in the size range of [0, %llu]",
-		value, max
+		"Expected number %d, %s, to be in the size range of [0, %hu]",
+		value, number_description, max
 	);
 }
 
-static int get_validated_json_unsigned_int(const cJSON* const json, const uint16_t max) {
+static int get_validated_json_unsigned_int(const cJSON* const json, const json_array_size_t max) {
 	if (!cJSON_IsNumber(json)) FAIL(ReadFromJSON, "Expected JSON object to be a number", json -> string);
 
 	const int value = json -> valueint;
-	check_size_of_unsigned_int(value, max);
+	check_size_of_unsigned_int(value, max, "an unsigned int");
 	return value;
 }
 
-uint8_t get_u8_from_json(const cJSON* const json) {
-	return (uint8_t) get_validated_json_unsigned_int(json, UINT8_MAX);
+#define JSON_UINT_READING_FN(num_bits) uint##num_bits##_t get_u##num_bits##_from_json(const cJSON* const json) {\
+	return (uint##num_bits##_t) get_validated_json_unsigned_int(json, (uint##num_bits##_t) ~0u);\
 }
 
-uint16_t get_u16_from_json(const cJSON* const json) {
-	return (uint16_t) get_validated_json_unsigned_int(json, UINT16_MAX);
-}
+JSON_UINT_READING_FN(8)
+JSON_UINT_READING_FN(16)
+
+#undef JSON_UINT_READING_FN
 
 ////////// Array readers
 
 // If the expected length is -1, the length isn't validated. The actual length is also returned.
-int validate_json_array(const cJSON* const json, const int expected_length) {
+json_array_size_t validate_json_array(const cJSON* const json, const int expected_length, const json_array_size_t max) {
 	const char* const array_name = json -> string;
 	if (!cJSON_IsArray(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be an array", array_name);
 
 	const int length = cJSON_GetArraySize(json);
-
 	if (length == 0) FAIL(ReadFromJSON, "%s", "JSON arrays cannot have size-zero lengths");
+	check_size_of_unsigned_int(length, max, "an array length");
 
-	else if ((expected_length != -1) && (length != expected_length)) FAIL(ReadFromJSON,
+	if ((expected_length != -1) && (length != expected_length)) FAIL(ReadFromJSON,
 		"Expected JSON array '%s' to have a length of %d, but the length was %d",
 		array_name, expected_length, length
 	);
 
-	return length;
+	return (json_array_size_t) length;
 }
 
 #define JSON_ARRAY_READING_FN(return_type_t, typename_t)\
-	void read_##typename_t##s_from_json_array(const cJSON* const json, const int expected_length, return_type_t* const array) {\
-		validate_json_array(json, expected_length);\
+	void read_##typename_t##s_from_json_array(const cJSON* const json, const json_array_size_t expected_length, return_type_t* const array) {\
+		validate_json_array(json, expected_length, MAX_JSON_ARRAY_SIZE);\
 		JSON_FOR_EACH(i, item, json, array[i] = get_##typename_t##_from_json(item););\
 	}
 
@@ -112,11 +113,8 @@ JSON_ARRAY_READING_FN(float, float)
 
 ////////// Vector readers
 
-const char** read_string_vector_from_json(const cJSON* const json, uint16_t* const length) {
-	const int int_length = validate_json_array(json, -1);
-	check_size_of_unsigned_int(int_length, UINT16_MAX);
-
-	*length = (uint16_t) int_length;
+const char** read_string_vector_from_json(const cJSON* const json, json_array_size_t* const length) {
+	*length = validate_json_array(json, -1, MAX_JSON_ARRAY_SIZE);
 	const char** const strings = alloc(*length, sizeof(char*));
 
 	JSON_FOR_EACH(i, string, json, strings[i] = get_string_from_json(string););
@@ -125,28 +123,22 @@ const char** read_string_vector_from_json(const cJSON* const json, uint16_t* con
 }
 
 uint8_t* read_2D_map_from_json(const cJSON* const json, uint8_t size[2]) {
-	const int map_height = validate_json_array(json, -1);
-	check_size_of_unsigned_int(map_height, UINT8_MAX);
+	const uint8_t max_size = UINT8_MAX;
+	const uint8_t map_height = (uint8_t) validate_json_array(json, -1, max_size);
 
-	//////////
-
-	int map_width;
-
-	uint8_t *map, *curr_map_value;
+	uint8_t map_width, *map, *curr_map_value;
 
 	//////////
 
 	JSON_FOR_EACH(i, row, json,
 		if (i == 0) {
-			map_width = validate_json_array(row, -1);
-			check_size_of_unsigned_int(map_width, UINT8_MAX);
-
+			map_width = (uint8_t) validate_json_array(row, -1, max_size);
 			map = alloc((size_t) (map_width * map_height), sizeof(uint8_t));
 			curr_map_value = map;
 		}
 
 		// Checking that the other rows have the same length as the first one
-		else validate_json_array(row, map_width);
+		else validate_json_array(row, map_width, max_size);
 
 		// Initializing row values
 		JSON_FOR_EACH(_, height, row, *(curr_map_value++) = get_u8_from_json(height););

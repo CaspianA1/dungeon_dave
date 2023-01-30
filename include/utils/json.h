@@ -6,6 +6,9 @@
 #include <stdbool.h> // For `bool`
 #include <stdint.h> // For sized ints
 
+typedef uint16_t json_array_size_t;
+#define MAX_JSON_ARRAY_SIZE UINT16_MAX
+
 // Excluded: check_size_of_unsigned_int, get_validated_json_unsigned_int, validate_json_array
 
 ////////// Some general fns
@@ -14,7 +17,7 @@
 #define GET_ARRAY_VALUES_FROM_JSON_KEY(json, c_name, json_name, subtype_t) read_##subtype_t##s_from_json_array(read_json_subobj(json, #json_name), ARRAY_LENGTH(c_name), c_name)
 
 #define JSON_FOR_EACH(index_var, loop_item, json, ...) do {\
-	uint16_t index_var = 0;\
+	json_array_size_t index_var = 0;\
 	const cJSON* loop_item;\
 	cJSON_ArrayForEach(loop_item, json) {\
 		__VA_ARGS__\
@@ -33,21 +36,19 @@ bool get_bool_from_json(const cJSON* const json);
 float get_float_from_json(const cJSON* const json);
 const char* get_string_from_json(const cJSON* const json);
 
-void check_size_of_unsigned_int(const int value, const uint16_t max);
+#define JSON_UINT_READING_DEF(num_bits) uint##num_bits##_t get_u##num_bits##_from_json(const cJSON* const json);
 
-#define JSON_UNSIGNED_INT_READING_DEF(num_bits) uint##num_bits##_t get_u##num_bits##_from_json(const cJSON* const json);
+JSON_UINT_READING_DEF(8)
+JSON_UINT_READING_DEF(16)
 
-JSON_UNSIGNED_INT_READING_DEF(8)
-JSON_UNSIGNED_INT_READING_DEF(16)
-
-#undef JSON_UNSIGNED_INT_READING_DEF
+#undef JSON_UINT_READING_DEF
 
 ////////// Array readers
 
-int validate_json_array(const cJSON* const json, const int expected_length);
+json_array_size_t validate_json_array(const cJSON* const json, const int expected_length, const json_array_size_t max);
 
 #define JSON_ARRAY_READING_DEF(return_type_t, typename_t)\
-	void read_##typename_t##s_from_json_array(const cJSON* const json, const int expected_length, return_type_t* const array);
+	void read_##typename_t##s_from_json_array(const cJSON* const json, const json_array_size_t expected_length, return_type_t* const array);
 
 JSON_ARRAY_READING_DEF(uint8_t, u8)
 JSON_ARRAY_READING_DEF(uint16_t, u16)
@@ -59,8 +60,8 @@ JSON_ARRAY_READING_DEF(float, float)
 
 ////////// Vector readers
 
-// Note: the strings in this array belong to the input JSON.
-const char** read_string_vector_from_json(const cJSON* const json, uint16_t* const size);
+// Note: the returned vectors should be freed via `dealloc`. `size` is an output variable as well.
 
-// Note: the returned map should be freed via `dealloc`. `size` is an output variable as well.
+// Note: the strings in this array belong to the input JSON.
+const char** read_string_vector_from_json(const cJSON* const json, json_array_size_t* const size);
 uint8_t* read_2D_map_from_json(const cJSON* const json, uint8_t size[2]);
