@@ -116,7 +116,7 @@ Other:
 - A 3D character model that casts a shadow (or a flat one, like the weapon - like paper Mario?)
 - Very short, but memorable little audio tracks that play for the cutscenes
 - The player's shadow billboard should have idle, run, jump, and attack animations
-- Documentation for the fields of the level file format
+- Documentation for the fields of the level file format (output a HTML file)
 
 End components:
 - Static sectors
