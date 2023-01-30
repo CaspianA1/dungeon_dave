@@ -41,7 +41,7 @@ static void get_light_view_projection(
 
 	////////// Getting the camera sub frustum center
 
-	// The average FOV (in between the minimum and maximum)
+	// The average FOV (in between the minimum and maximum) (TODO: perhaps use the full FOV, to avoid out-of-bounds areas)
 	const GLfloat avg_fov = constants.camera.init_fov + constants.camera.limits.fov_change * 0.5f;
 
 	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection;
