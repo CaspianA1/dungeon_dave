@@ -63,5 +63,5 @@ JSON_ARRAY_READING_DEF(float, float)
 // Note: the returned vectors should be freed via `dealloc`. `size` is an output variable as well.
 
 // Note: the strings in this array belong to the input JSON.
-const char** read_string_vector_from_json(const cJSON* const json, json_array_size_t* const size);
+const char** read_string_vector_from_json(const cJSON* const json, json_array_size_t* const length);
 uint8_t* read_2D_map_from_json(const cJSON* const json, uint8_t size[2]);

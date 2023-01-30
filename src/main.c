@@ -558,7 +558,8 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Global state initialization
 
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // This is correct for alpha premultiplication
+	// This is correct for alpha premultiplication
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LESS);
 
 	/* Depth clamping is used for 1. shadow pancaking, 2. avoiding clipping with sectors when walking
