@@ -116,7 +116,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	cJSON* const level_json = init_json_from_file(ASSET_PATH("json_data/levels/palace.json"));
 
-	cJSON // TODO: genericize this naming thing here via a macro
+	const cJSON // TODO: genericize this naming thing here via a macro
 		*const parallax_json = read_json_subobj(level_json, "parallax_mapping"),
 		*const shadow_mapping_json = read_json_subobj(level_json, "shadow_mapping"),
 		*const vol_lighting_json =  read_json_subobj(level_json, "volumetric_lighting"),
@@ -124,7 +124,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		*const dyn_light_json = read_json_subobj(level_json, "dynamic_light"),
 		*const skybox_json = read_json_subobj(level_json, "skybox");
 
-	cJSON
+	const cJSON
 		*const dyn_light_looking_at_json = read_json_subobj(dyn_light_json, "looking_at"),
 		*const cascaded_shadow_json = read_json_subobj(shadow_mapping_json, "cascades");
 
@@ -211,7 +211,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Reading in the sector face texture paths
 
-	cJSON* const non_lighting_json = read_json_subobj(level_json, "non_lighting_data");
+	const cJSON* const non_lighting_json = read_json_subobj(level_json, "non_lighting_data");
 	texture_id_t num_sector_face_texture_paths;
 
 	const GLchar** const sector_face_texture_paths = read_string_vector_from_json(
@@ -220,15 +220,15 @@ static void* main_init(const WindowConfig* const window_config) {
 	////////// Reading in the still billboard texture paths
 
 	// TODO: perhaps make a series of fns that init a certain context from just JSON (would that be in each context's src file? Or all in another parsing file?)
-	cJSON* const billboard_data_json = read_json_subobj(non_lighting_json, "billboard_data");
-	cJSON* const still_billboard_texture_paths_json = read_json_subobj(billboard_data_json, "still_billboard_textures");
+	const cJSON* const billboard_data_json = read_json_subobj(non_lighting_json, "billboard_data");
+	const cJSON* const still_billboard_texture_paths_json = read_json_subobj(billboard_data_json, "still_billboard_textures");
 
 	texture_id_t num_still_billboard_texture_paths;
 	const GLchar** const still_billboard_texture_paths = read_string_vector_from_json(still_billboard_texture_paths_json, &num_still_billboard_texture_paths);
 
 	////////// Reading in the billboard animation layouts
 
-	cJSON* const billboard_animation_layouts_json = read_json_subobj(billboard_data_json, "animated_billboard_textures");
+	const cJSON* const billboard_animation_layouts_json = read_json_subobj(billboard_data_json, "animated_billboard_textures");
 
 	const billboard_index_t max_billboard_index = (billboard_index_t) ~0u;
 	const billboard_index_t num_billboard_animation_layouts = validate_json_array(billboard_animation_layouts_json, -1, max_billboard_index);
@@ -675,7 +675,7 @@ static void main_deinit(void* const app_context) {
 
 int main(void) {
 	cJSON* const window_config_json = init_json_from_file(ASSET_PATH("json_data/window.json"));
-	cJSON* const enabled_json = read_json_subobj(window_config_json, "enabled");
+	const cJSON* const enabled_json = read_json_subobj(window_config_json, "enabled");
 
 	//////////
 
