@@ -231,10 +231,9 @@ static void* main_init(const WindowConfig* const window_config) {
 	const cJSON* const billboard_animation_layouts_json = read_json_subobj(billboard_data_json, "animated_billboard_textures");
 
 	const billboard_index_t max_billboard_index = (billboard_index_t) ~0u;
-	const billboard_index_t num_billboard_animation_layouts = validate_json_array(billboard_animation_layouts_json, -1, max_billboard_index);
+	const billboard_index_t num_billboard_animations = validate_json_array(billboard_animation_layouts_json, -1, max_billboard_index);
 
-	// TODO: for the other arrays passed into `init_billboard_context` (not this one), take ownership there
-	AnimationLayout* const billboard_animation_layouts = alloc(num_billboard_animation_layouts, sizeof(AnimationLayout));
+	AnimationLayout* const billboard_animation_layouts = alloc(num_billboard_animations, sizeof(AnimationLayout));
 
 	#define ANIMATION_LAYOUT_FIELD_CASE(index, field, type_t)\
 		case index: billboard_animation_layout -> field = get_##type_t##_from_json(item_in_layout_json); break;
@@ -258,64 +257,12 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	#undef ANIMATION_LAYOUT_FIELD_CASE
 
-	////////// Defining the billboard animation instances, and billboards
-
-	// TODO: in the JSON struct, define these as optional extensions to each billboard struct (the first field will be a a plain texture index, or an animation index)
-	static const BillboardAnimationInstance billboard_animation_instances[] = {
-		{.billboard_index = 11, .animation_index = 0}, // Flying carpet
-		{.billboard_index = 12, .animation_index = 1}, // Torch
-		{.billboard_index = 13, .animation_index = 2}, // Traveling fireball
-
-		{.billboard_index = 14, .animation_index = 3}, // Eddies
-		{.billboard_index = 15, .animation_index = 3},
-
-		{.billboard_index = 16, .animation_index = 4}, // Troopers
-		{.billboard_index = 17, .animation_index = 5},
-		{.billboard_index = 18, .animation_index = 6}
-	};
-
-	/* Still and animated billboards can be in any order (it's just easier to impose an order here).
-	The material indices all start out as 0 (they are assigned in `init_materials_texture`).
-	The animated billboard texture ids are assigned in the loop below the declaration of this array. */
-	static Billboard billboards[] = {
-		////////// Still billboards
-
-		{0, 0, 1.0f, {28.0f, 2.5f, 31.0f}}, // Health kits
-		{0, 0, 1.0f, {5.0f, 0.5f, 22.5f}},
-		{0, 0, 1.0f, {31.5f, 0.5f, 10.5f}},
-
-		{0, 1, 1.0f, {12.5f, 0.5f, 38.5f}}, // Teleporters
-		{0, 1, 1.0f, {8.5f, 0.5f, 25.5f}},
-		{0, 1, 1.0f, {32.5f, 2.5f, 7.5f}},
-
-		{0, 2, 2.0f, {4.5f, 4.0f, 12.5f}}, // Shabtis
-		{0, 2, 2.0f, {10.5f, 1.0f, 25.0f}},
-		{0, 2, 2.0f, {25.5f, 3.0f, 31.0f}},
-		{0, 2, 4.0f, {36.0f, 18.0f, 4.0f}},
-
-		{0, 3, 6.0f, {10.0f, 5.0f, 32.0f}}, // Anubis
-
-		////////// Animated billboards
-
-		{0, 0, 1.0f, {5.0f, 0.5f, 2.0f}}, // Flying carpet
-		{0, 0, 1.0f, {7.5f, 0.5f, 12.5f}}, // Torch
-		{0, 0, 5.0f, {22.5f, 15.0f, 8.5f}}, // Traveling fireball
-
-		{0, 0, 1.0f, {6.5f, 0.5f, 21.5f}},
-
-		{0, 0, 1.0f, {3.5f, 0.5f, 24.5f}}, // Eddies
-		{0, 0, 1.0f, {3.0f, 1.5f, 9.5f}},
-
-		{0, 0, 1.0f, {9.5f, 6.5f, 13.5f}}, // Troopers
-		{0, 0, 1.0f, {21.5f, 0.5f, 24.5f}}
-	};
-
 	////////// Making a series of billboard animations from the billboard animation layouts
 
-	Animation billboard_animations[num_billboard_animation_layouts]; // TODO: don't use a VLA
+	Animation* const billboard_animations = alloc(num_billboard_animations, sizeof(Animation));
 	texture_id_t next_animated_frame_start = num_still_billboard_texture_paths;
 
-	for (billboard_index_t i = 0; i < ARRAY_LENGTH(billboard_animations); i++) {
+	for (billboard_index_t i = 0; i < num_billboard_animations; i++) {
 		const AnimationLayout* const layout = billboard_animation_layouts + i;
 		const texture_id_t total_frames = layout -> total_frames;
 
@@ -327,29 +274,87 @@ static void* main_init(const WindowConfig* const window_config) {
 		next_animated_frame_start += total_frames;
 	}
 
-	////////// Assigning initial texture ids to animated billboards
+	////////// Reading in billboards
 
-	for (billboard_index_t i = 0; i < ARRAY_LENGTH(billboard_animation_instances); i++) {
-		const BillboardAnimationInstance* const animation_instance = billboard_animation_instances + i;
+	const cJSON* const billboards_json = read_json_subobj(billboard_data_json, "billboards");
+	const GLchar* const billboard_categories[] = {"unanimated", "animated"};
 
-		const billboard_index_t
-			billboard_index = animation_instance -> billboard_index,
-			animation_index = animation_instance -> animation_index;
+	// Getting a total billboard count, and allocating a billboard array from that
 
-		if (billboard_index >= ARRAY_LENGTH(billboards)) FAIL(MakeBillboard, "Billboard animation instance at "
-			"index %hu refers to an invalid billboard of index %hu", i, billboard_index);
+	enum {num_billboard_categories = ARRAY_LENGTH(billboard_categories)};
+	billboard_index_t num_billboards = 0, num_billboards_per_category[num_billboard_categories];
 
-		else if (animation_index >= ARRAY_LENGTH(billboard_animations)) FAIL(MakeBillboard, "Billboard animation instance at "
-			"index %hu refers to an invalid billboard animation of index %hu", i, animation_index);
-
-		billboards[billboard_index].texture_id = billboard_animations[animation_index].texture_id_range.start;
+	// TODO: check that the number of billboards doesn't exceed the limit
+	for (byte i = 0; i < num_billboard_categories; i++) {
+		const cJSON* const category_json = read_json_subobj(billboards_json, billboard_categories[i]);
+		const billboard_index_t num_billboards_in_category = validate_json_array(category_json, -1, max_billboard_index);
+		num_billboards += (num_billboards_per_category[i] = num_billboards_in_category);
 	}
 
-	//////////
+	const billboard_index_t num_animated_billboards = num_billboards_per_category[1];
+
+	BillboardAnimationInstance* const billboard_animation_instances = alloc(num_animated_billboards, sizeof(BillboardAnimationInstance));
+	Billboard* const billboards = alloc(num_billboards, sizeof(Billboard));
+
+	// Initializing the billboard array
+
+	billboard_index_t billboard_index = 0, animation_instance_index = 0;
+	for (byte category_index = 0; category_index < num_billboard_categories; category_index++) {
+		const cJSON* const category_json = read_json_subobj(billboards_json, billboard_categories[category_index]);
+
+		JSON_FOR_EACH(_, billboard_json, category_json,
+			// Note: the material index is set in `init_materials_texture`
+			Billboard* const billboard = billboards + billboard_index;
+
+			JSON_FOR_EACH(k, billboard_field, billboard_json,
+				switch (k) {
+					case 0: { // Handling the texture or animation id
+						texture_id_t
+							texture_id_or_animation_index = get_u16_from_json(billboard_field),
+							*const billboard_texture_id = &billboard -> texture_id;
+
+						const GLchar* const error_format_string = "%s billboard at index %hu refers to an out-of-bounds %s of index %hu";
+
+						switch (category_index) {
+							case 0: // Unanimated
+								if (texture_id_or_animation_index >= num_still_billboard_texture_paths) FAIL(
+									MakeBillboard, error_format_string, "Still", billboard_index,
+									"still texture", texture_id_or_animation_index
+								);
+
+								*billboard_texture_id = texture_id_or_animation_index;
+								break;
+
+							case 1: // Animated
+								if (texture_id_or_animation_index >= num_billboard_animations) FAIL(
+									MakeBillboard, error_format_string, "Animated", animation_instance_index,
+									"animation", texture_id_or_animation_index
+								);
+
+								*billboard_texture_id = billboard_animations[texture_id_or_animation_index].texture_id_range.start;
+
+								billboard_animation_instances[animation_instance_index] =
+									(BillboardAnimationInstance) {billboard_index, texture_id_or_animation_index};
+
+								break;
+						}
+						break;
+					}
+					case 1: billboard -> scale = get_float_from_json(billboard_field); break;
+					case 2: read_floats_from_json_array(billboard_field, ARRAY_LENGTH(billboard -> pos), billboard -> pos); break;
+				}
+			);
+
+			billboard_index++;
+			if (category_index == 1) animation_instance_index++;
+
+		);
+	}
+
+	////////// Defining a weapon sprite
 
 	// Note: the rescale size isn't used in `shared_material_properties`.
-	const WeaponSpriteConfig weapon_sprite_config = {
-		// Whip
+	const WeaponSpriteConfig weapon_sprite_config = { // Whip
 		.max_degrees = {.yaw = 15.0f, .pitch = 120.0f},
 		.secs_per_movement_cycle = 0.9f, .screen_space_size = 0.75f, .max_movement_magnitude = 0.25f,
 		.animation_layout = {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22, 0.02f},
@@ -412,15 +417,15 @@ static void* main_init(const WindowConfig* const window_config) {
 		&all_materials,
 		&(List) {(void*) sector_face_texture_paths, 	sizeof(*sector_face_texture_paths), num_sector_face_texture_paths, 0},
 		&(List) {(void*) still_billboard_texture_paths, sizeof(*still_billboard_texture_paths), num_still_billboard_texture_paths, 0},
-		&(List) {(void*) billboard_animation_layouts, 	sizeof(*billboard_animation_layouts), num_billboard_animation_layouts, 0},
-		&(List) {(void*) billboards, 					sizeof(*billboards), ARRAY_LENGTH(billboards), 0},
+		&(List) {(void*) billboard_animation_layouts, 	sizeof(*billboard_animation_layouts), num_billboard_animations, 0},
+		&(List) {(void*) billboards, 					sizeof(*billboards), num_billboards, 0},
 		&weapon_sprite_config.animation_layout, &weapon_sprite_material_index
 	);
 
 	deinit_dict(&all_materials);
 	deinit_json(materials_json);
 
-	//////////
+	////////// Defining shared material properties
 
 	const MaterialPropertiesPerObjectType
 		sector_face_shared_material_properties = {
@@ -539,12 +544,12 @@ static void* main_init(const WindowConfig* const window_config) {
 			level_rendering_config.shadow_mapping.billboard_alpha_threshold,
 			&billboard_shared_material_properties,
 
-			num_billboard_animation_layouts, billboard_animation_layouts,
+			num_billboard_animations, billboard_animation_layouts,
 
 			num_still_billboard_texture_paths, still_billboard_texture_paths,
-			ARRAY_LENGTH(billboards), billboards,
-			num_billboard_animation_layouts, billboard_animations,
-			ARRAY_LENGTH(billboard_animation_instances), billboard_animation_instances
+			num_billboards, billboards,
+			num_billboard_animations, billboard_animations,
+			num_animated_billboards, billboard_animation_instances
 		),
 
 		.dynamic_light = init_dynamic_light(&level_rendering_config.dynamic_light_config),

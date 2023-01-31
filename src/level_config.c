@@ -74,7 +74,8 @@ MaterialsTexture init_materials_texture(const Dict* const all_materials, const L
 	const Billboard* const first_billboard = billboards -> data;
 
 	LIST_FOR_EACH(billboards, Billboard, billboard,
-		const texture_id_t billboard_texture_id = billboard -> texture_id; // TODO: rename `texture_id` to `texture_index`
+		// TODO: rename `texture_id` to `texture_index` (or rename all to something with `id`)
+		const texture_id_t billboard_texture_id = billboard -> texture_id;
 
 		////////// Finding the texture path and the dest material index (for the output list) for the current billboard
 	
@@ -107,11 +108,7 @@ MaterialsTexture init_materials_texture(const Dict* const all_materials, const L
 				frame_index_start = next_frame_index_start;
 			);
 
-			if (texture_path == NULL) FAIL(InvalidTextureID,
-				"Billboard #%lld has an invalid texture ID of %hu",
-				(long long) (billboard - first_billboard + 1),
-				billboard_texture_id
-			);
+			// Note: the texture path is not checked for nullness here, since the billboards were already pre-validated
 		}
 
 		billboard -> material_index = dest_material_index;

@@ -148,6 +148,7 @@ static void define_vertex_spec(void) {
 	define_vertex_spec_index(true, true, 3, 3, sizeof(Billboard), offsetof(Billboard, pos), GL_FLOAT);
 }
 
+// TODO: avoid passing in the num animation layouts (it equals the num billboard animations)
 BillboardContext init_billboard_context(
 	const GLfloat shadow_mapping_alpha_threshold,
 	const MaterialPropertiesPerObjectType* const shared_material_properties,
@@ -155,9 +156,9 @@ BillboardContext init_billboard_context(
 	const texture_id_t num_animation_layouts, const AnimationLayout* const animation_layouts,
 
 	const billboard_index_t num_still_textures, const GLchar* const* const still_texture_paths,
-	const billboard_index_t num_billboards, const Billboard* const billboards,
-	const billboard_index_t num_billboard_animations, const Animation* const billboard_animations,
-	const billboard_index_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances) {
+	const billboard_index_t num_billboards, Billboard* const billboards,
+	const billboard_index_t num_billboard_animations, Animation* const billboard_animations,
+	const billboard_index_t num_billboard_animation_instances, BillboardAnimationInstance* const billboard_animation_instances) {
 
 	const GLsizei texture_size = shared_material_properties -> texture_rescale_size;
 
@@ -188,21 +189,24 @@ BillboardContext init_billboard_context(
 		},
 
 		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),
-		.billboards = init_list(num_billboards, Billboard),
-		.animation_instances = init_list(num_billboard_animation_instances, BillboardAnimationInstance),
-		.animations = init_list(num_billboard_animations, Animation)
+		.billboards = {billboards, sizeof(Billboard), num_billboards, num_billboards},
+
+		.animation_instances = {
+			billboard_animation_instances, sizeof(BillboardAnimationInstance),
+			num_billboard_animation_instances, num_billboard_animation_instances
+		},
+
+		.animations = {billboard_animations, sizeof(Animation), num_billboard_animations, num_billboard_animations}
 	};
 
-	////////// Initializing client-side lists
+	////////// Initializing the sort refs
 
 	billboard_context.distance_sort_refs.length = num_billboards;
 
 	for (billboard_index_t i = 0; i < num_billboards; i++)
 		((BillboardDistanceSortRef*) billboard_context.distance_sort_refs.data)[i].index = i;
 
-	push_array_to_list(&billboard_context.billboards, billboards, num_billboards);
-	push_array_to_list(&billboard_context.animation_instances, billboard_animation_instances, num_billboard_animation_instances);
-	push_array_to_list(&billboard_context.animations, billboard_animations, num_billboard_animations);
+	//////////
 
 	return billboard_context;
 }
