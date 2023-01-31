@@ -39,11 +39,13 @@ static void get_light_view_projection(
 
 	////////// Getting the camera sub frustum center
 
-	// The average FOV (in between the minimum and maximum) (TODO: perhaps use the full FOV, to avoid out-of-bounds areas)
-	const GLfloat avg_fov = constants.camera.init_fov + constants.camera.limits.fov_change * 0.5f;
+	/* Using the max fov because:
+	- If I use the current FOV, the shadows would shimmer when the FOV changes
+	- If I use any fixed FOV smaller than the max, some fragments would be out of bounds */
+	const GLfloat max_fov = constants.camera.init_fov + constants.camera.limits.fov_change;
 
 	mat4 camera_sub_frustum_projection, camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection;
-	glm_perspective(avg_fov, aspect_ratio, near_clip_dist, far_clip_dist, camera_sub_frustum_projection);
+	glm_perspective(max_fov, aspect_ratio, near_clip_dist, far_clip_dist, camera_sub_frustum_projection);
 	glm_mul(camera_sub_frustum_projection, (vec4*) camera_view, camera_sub_frustum_view_projection);
 	glm_mat4_inv(camera_sub_frustum_view_projection, inv_camera_sub_frustum_view_projection);
 
