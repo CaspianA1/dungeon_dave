@@ -23,8 +23,8 @@ cJSON* init_json_from_file(const char* const path) {
 	return json;
 }
 
-cJSON* read_json_subobj(const cJSON* const json, const char* const key) {
-	cJSON* const subobj = cJSON_GetObjectItem(json, key);
+const cJSON* read_json_subobj(const cJSON* const json, const char* const key) {
+	const cJSON* const subobj = cJSON_GetObjectItem(json, key);
 
 	if (subobj == NULL) FAIL(ReadFromJSON,
 		"Could not find JSON key '%s' from object with name '%s'",

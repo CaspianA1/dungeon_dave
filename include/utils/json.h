@@ -28,7 +28,7 @@ typedef uint16_t json_array_size_t;
 cJSON* init_json_from_file(const char* const path);
 #define deinit_json cJSON_Delete
 
-cJSON* read_json_subobj(const cJSON* const json, const char* const key);
+const cJSON* read_json_subobj(const cJSON* const json, const char* const key);
 
 ////////// Primitive readers
 
