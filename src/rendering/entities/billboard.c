@@ -51,14 +51,12 @@ void update_billboard_context(const BillboardContext* const billboard_context, c
 
 ////////// This part concerns the sorting of billboard indices from back to front, and rendering
 
-// Using insertion sort because the data is already partially sorted
-static void sort_billboard_refs_backwards(BillboardDistanceSortRef* const sort_refs,
-	const billboard_index_t num_billboards) {
-
+// Using insertion sort because the data is already partially sorted. Returns if the data needed to be sorted.
+static void sort_billboard_refs_backwards(BillboardDistanceSortRef* const sort_refs, const billboard_index_t num_billboards) {
 	for (billboard_index_t i = 1; i < num_billboards; i++) {
 		const BillboardDistanceSortRef sort_ref = sort_refs[i];
 
-		/* J may become smaller than 0, so using a type
+		/* `j` may become smaller than 0, so using a type
 		that fits `billboard_index_t` that's signed */
 		int32_t j = i - 1;
 
@@ -90,10 +88,9 @@ static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_
 		);
 	}
 
-	// TODO: if no billboards were moved, then don't update the GPU buffer
-	sort_billboard_refs_backwards(sort_ref_data, num_billboards);
-
 	////////// Moving the billboards into their right positions in their GPU buffer
+
+	sort_billboard_refs_backwards(sort_ref_data, num_billboards);
 
 	Billboard* const billboards_gpu = init_vertex_buffer_memory_mapping(
 		billboard_context -> drawable.vertex_buffer, num_billboards * sizeof(Billboard), true

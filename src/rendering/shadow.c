@@ -5,8 +5,6 @@
 #include "utils/texture.h" // For `init_texture_data`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 
-#include "utils/debug_macro_utils.h" // TODO: remove
-
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
 
