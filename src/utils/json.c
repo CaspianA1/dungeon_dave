@@ -53,7 +53,7 @@ const cJSON* read_json_subobj(const cJSON* const json, const char* const key) {
 
 	if (subobj == NULL) FAIL(ReadFromJSON,
 		"Could not find JSON key '%s' from object with name '%s'",
-		key, json -> string
+		key, get_json_name(json)
 	);
 
 	return subobj;
