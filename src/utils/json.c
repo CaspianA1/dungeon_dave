@@ -5,7 +5,6 @@
 
 ////////// Some various internal utils
 
-// TODO: to excluded
 static const char* get_json_name(const cJSON* const json) {
 	return json -> string;
 }
@@ -19,12 +18,11 @@ static void typecheck_json(const cJSON* const json,
 	- Print the actual type, instead of just the object */
 
 	if (!type_checker(json)) {
-		const char first = expected_type[0], *const indefinite_article =
-			(first == 'a' || first == 'e' || first == 'i' || first == 'o' || first == 'u')
-			? "an" : "a";
+		const char c = expected_type[0];
+		const char* const indefinite_article_end = (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') ? "n" : "";
 
-		FAIL(ReadFromJSON, "Expected JSON object '%s' to be %s %s. It looks like this: '%s'",
-			get_json_name(json), indefinite_article, expected_type, cJSON_Print(json));
+		FAIL(ReadFromJSON, "Expected JSON object '%s', '%s', to be a%s %s", get_json_name(json),
+			cJSON_Print(json), indefinite_article_end, expected_type);
 	}
 }
 
@@ -167,5 +165,3 @@ uint8_t* read_2D_map_from_json(const cJSON* const json, uint8_t size[2]) {
 
 	return map;
 }
-
-//////////

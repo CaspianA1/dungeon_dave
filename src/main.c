@@ -678,11 +678,20 @@ static void main_deinit(void* const app_context) {
 	dealloc(scene_context);
 }
 
+static void* wrapping_alloc(const size_t size) {
+	return alloc(size, 1);
+}
+
 int main(void) {
+	// This is just for tracking cJSON allocations
+	cJSON_InitHooks(&(cJSON_Hooks) {wrapping_alloc, dealloc});
+
+	////////// Reading in the window config
+
 	cJSON* const window_config_json = init_json_from_file(ASSET_PATH("json_data/window.json"));
 	const cJSON* const enabled_json = read_json_subobj(window_config_json, "enabled");
 
-	//////////
+	////////// Reading in some arrays
 
 	uint8_t opengl_major_minor_version[2];
 	uint16_t window_size[2];
@@ -690,7 +699,7 @@ int main(void) {
 	GET_ARRAY_VALUES_FROM_JSON_KEY(window_config_json, opengl_major_minor_version, opengl_major_minor_version, u8);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(window_config_json, window_size, window_size, u16);
 
-	//////////
+	////////// Making a window config
 
 	const WindowConfig window_config = {
 		JSON_TO_FIELD(window_config_json, app_name, string),

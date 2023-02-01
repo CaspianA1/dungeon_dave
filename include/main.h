@@ -67,6 +67,6 @@ typedef struct {
 	const byte map_size[2];
 } SceneContext;
 
-// Excluded: main_drawer, main_init, main_deinit
+// Excluded: main_drawer, main_init, main_deinit, wrapping_alloc
 
 #endif
