@@ -19,12 +19,12 @@ static void typecheck_json(const cJSON* const json,
 	- Print the actual type, instead of just the object */
 
 	if (!type_checker(json)) {
-		const char first = expected_type[0], *const a_or_an =
+		const char first = expected_type[0], *const indefinite_article =
 			(first == 'a' || first == 'e' || first == 'i' || first == 'o' || first == 'u')
 			? "an" : "a";
 
 		FAIL(ReadFromJSON, "Expected JSON object '%s' to be %s %s. It looks like this: '%s'",
-			get_json_name(json), a_or_an, expected_type, cJSON_Print(json));
+			get_json_name(json), indefinite_article, expected_type, cJSON_Print(json));
 	}
 }
 
