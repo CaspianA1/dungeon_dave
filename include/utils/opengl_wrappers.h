@@ -51,9 +51,6 @@ static const GLenum framebuffer_target = GL_DRAW_FRAMEBUFFER;
 
 #define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
 
-// TODO: remove
-#define INIT_SHADER_BRANCH(shader, name, key) INIT_UNIFORM_VALUE(name, (shader), 1i, SDL_GetKeyboardState(NULL)[SDL_SCANCODE_##key])
-
 ////////// Some render state setters
 
 #define GENERIC_WITH_RENDER_STATE(setter, unsetter, state, inverse_state, ...) do {\

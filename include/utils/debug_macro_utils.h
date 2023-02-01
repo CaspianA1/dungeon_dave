@@ -8,7 +8,7 @@
 #include "utils/opengl_wrappers.h" // For OpenGL types + `get_GL_error`
 #include "openal/al.h" // For `alGetError`, and various OpenAL #defines
 #include "openal/alc.h" // For `alcGetError`, and various ALC #defines
-#include "utils/sdl_include.h" // For `SDL_Scancode` values, `Uint32`, and `SDL_GetTicks`
+#include "utils/sdl_include.h" // For `SDL_Scancode` values, `Uint32`, `SDL_GetKeyboardState`, and `SDL_GetTicks`
 
 static inline const GLchar* get_AL_error(void) {
 	switch (alGetError()) {
@@ -79,6 +79,9 @@ static inline const GLchar* get_ALC_error(void) {
 		putchar((((num) >> i) & 1) + '0');\
 	putchar('\n');\
 } while (false)
+
+// TODO: remove
+#define INIT_SHADER_BRANCH(shader, name, key) INIT_UNIFORM_VALUE(name, (shader), 1i, SDL_GetKeyboardState(NULL)[SDL_SCANCODE_##key])
 
 #define TWEAK_REALTIME_VALUE(value_name, init_value, min_value, max_value, step, key_decr, key_incr, key_reset)\
 	static GLfloat value_name = (init_value);\
