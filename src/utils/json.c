@@ -6,16 +6,13 @@
 ////////// Some various internal utils
 
 static const char* get_json_name(const cJSON* const json) {
-	return json -> string;
+	const char* const key_name = json -> string;
+	return (key_name == NULL) ? "without key name" : key_name;
 }
 
 static void typecheck_json(const cJSON* const json,
 	cJSON_bool (*const type_checker) (const cJSON* const),
 	const char* const expected_type) {
-
-	/* TODO:
-	- Make a fn for name getting
-	- Print the actual type, instead of just the object */
 
 	if (!type_checker(json)) {
 		const char c = expected_type[0];
@@ -52,7 +49,7 @@ cJSON* init_json_from_file(const char* const path) {
 }
 
 const cJSON* read_json_subobj(const cJSON* const json, const char* const key) {
-	const cJSON* const subobj = cJSON_GetObjectItem(json, key);
+	const cJSON* const subobj = cJSON_GetObjectItemCaseSensitive(json, key);
 
 	if (subobj == NULL) FAIL(ReadFromJSON,
 		"Could not find JSON key '%s' from object with name '%s'",
@@ -108,8 +105,8 @@ json_array_size_t validate_json_array(const cJSON* const json, const int expecte
 	check_number_value_range(json, max);
 
 	if ((expected_length != -1) && (length != expected_length)) FAIL(ReadFromJSON,
-		"Expected JSON array '%s' to have a length of %d, but the length was %d",
-		get_json_name(json), expected_length, length
+		"Expected JSON array '%s', '%s', to have a length of %d, but the length was %d",
+		get_json_name(json), cJSON_Print(json), expected_length, length
 	);
 
 	return (json_array_size_t) length;

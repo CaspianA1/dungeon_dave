@@ -239,7 +239,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		case index: billboard_animation_layout -> field = get_##type_t##_from_json(item_in_layout_json); break;
 
 	JSON_FOR_EACH(i, billboard_animation_layout_json, billboard_animation_layouts_json,
-		const byte num_fields_per_animation_layout = 5;
+		enum {num_fields_per_animation_layout = 5};
 		validate_json_array(billboard_animation_layout_json, num_fields_per_animation_layout, UINT8_MAX);
 
 		AnimationLayout* const billboard_animation_layout = billboard_animation_layouts + i;
@@ -303,6 +303,9 @@ static void* main_init(const WindowConfig* const window_config) {
 		const cJSON* const category_json = read_json_subobj(billboards_json, billboard_categories[category_index]);
 
 		JSON_FOR_EACH(_, billboard_json, category_json,
+			enum {num_fields_per_billboard_json = 3};
+			validate_json_array(billboard_json, num_fields_per_billboard_json, UINT8_MAX);
+
 			// Note: the material index is set in `init_materials_texture`
 			Billboard* const billboard = billboards + billboard_index;
 
