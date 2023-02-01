@@ -9,7 +9,7 @@
 typedef uint16_t json_array_size_t;
 #define MAX_JSON_ARRAY_SIZE UINT16_MAX
 
-// Excluded: check_size_of_unsigned_int, get_validated_json_unsigned_int, validate_json_array
+// Excluded: get_json_name, typecheck_json, check_number_value_range, get_validated_json_unsigned_int, validate_json_array
 
 ////////// Some general fns
 

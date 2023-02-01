@@ -3,6 +3,40 @@
 #include "utils/failure.h" // For `FAIL`
 #include "utils/alloc.h" // For `alloc`
 
+////////// Some various internal utils
+
+// TODO: to excluded
+static const char* get_json_name(const cJSON* const json) {
+	return json -> string;
+}
+
+static void typecheck_json(const cJSON* const json,
+	cJSON_bool (*const type_checker) (const cJSON* const),
+	const char* const expected_type) {
+
+	/* TODO:
+	- Make a fn for name getting
+	- Print the actual type, instead of just the object */
+
+	if (!type_checker(json)) {
+		const char first = expected_type[0], *const a_or_an =
+			(first == 'a' || first == 'e' || first == 'i' || first == 'o' || first == 'u')
+			? "an" : "a";
+
+		FAIL(ReadFromJSON, "Expected JSON object '%s' to be %s %s. It looks like this: '%s'",
+			get_json_name(json), a_or_an, expected_type, cJSON_Print(json));
+	}
+}
+
+static void check_number_value_range(const cJSON* const json, const double max) {
+	const double value = json -> valuedouble, min = 0.0;
+
+	if (value < min || value > max) FAIL(ReadFromJSON,
+		"Expected JSON object '%s' to be in the range of [%g, %g]",
+		get_json_name(json), min, max
+	);
+}
+
 ////////// Some general fns
 
 cJSON* init_json_from_file(const char* const path) {
@@ -14,11 +48,7 @@ cJSON* init_json_from_file(const char* const path) {
 		path, cJSON_GetErrorPtr()
 	);
 
-	if (!cJSON_IsObject(json)) FAIL(ParseJSON,
-		"Expected outermost JSON type from the file "
-		"with the path '%s' to be an object", path
-	);
-
+	typecheck_json(json, cJSON_IsObject, "object");
 	dealloc(contents);
 	return json;
 }
@@ -37,42 +67,31 @@ const cJSON* read_json_subobj(const cJSON* const json, const char* const key) {
 ////////// Primitive readers (TODO: genericize)
 
 bool get_bool_from_json(const cJSON* const json) {
-	if (!cJSON_IsBool(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be a bool", json -> string);
+	typecheck_json(json, cJSON_IsBool, "bool");
 	return (bool) json -> valueint;
 }
 
 float get_float_from_json(const cJSON* const json) {
-	if (!cJSON_IsNumber(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be a number", json -> string);
-
-	const double value = json -> valuedouble, min = (double) -FLT_MAX, max = (double) FLT_MAX;
-	if (value < min || value > max) FAIL(ReadFromJSON, "Expected JSON object '%s' to be in the size range of [%f, %f]", min, max);
-	return (float) value;
+	typecheck_json(json, cJSON_IsNumber, "float");
+	check_number_value_range(json, (double) FLT_MAX);
+	return (float) json -> valuedouble;
 }
 
 const char* get_string_from_json(const cJSON* const json) {
-	if (!cJSON_IsString(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be a string", json -> string);
+	typecheck_json(json, cJSON_IsString, "string");
 	return json -> valuestring;
 }
 
 ////////// Unsigned int primitive readers
 
-static void check_size_of_unsigned_int(const int value, const json_array_size_t max, const char* const number_description) {
-	if (value < 0 || value > max) FAIL(ReadFromJSON,
-		"Expected number %d, %s, to be in the size range of [0, %hu]",
-		value, number_description, max
-	);
-}
-
-static int get_validated_json_unsigned_int(const cJSON* const json, const json_array_size_t max) {
-	if (!cJSON_IsNumber(json)) FAIL(ReadFromJSON, "Expected JSON object to be a number", json -> string);
-
-	const int value = json -> valueint;
-	check_size_of_unsigned_int(value, max, "an unsigned int");
-	return value;
+static int get_validated_json_unsigned_int(const cJSON* const json, const json_array_size_t max, const char* const name) {
+	typecheck_json(json, cJSON_IsNumber, name);
+	check_number_value_range(json, max);
+	return json -> valueint;
 }
 
 #define JSON_UINT_READING_FN(num_bits) uint##num_bits##_t get_u##num_bits##_from_json(const cJSON* const json) {\
-	return (uint##num_bits##_t) get_validated_json_unsigned_int(json, (uint##num_bits##_t) ~0u);\
+	return (uint##num_bits##_t) get_validated_json_unsigned_int(json, (uint##num_bits##_t) ~0u, "u" #num_bits);\
 }
 
 JSON_UINT_READING_FN(8)
@@ -84,16 +103,15 @@ JSON_UINT_READING_FN(16)
 
 // If the expected length is -1, the length isn't validated. The actual length is also returned.
 json_array_size_t validate_json_array(const cJSON* const json, const int expected_length, const json_array_size_t max) {
-	const char* const array_name = json -> string;
-	if (!cJSON_IsArray(json)) FAIL(ReadFromJSON, "Expected JSON object '%s' to be an array", array_name);
+	typecheck_json(json, cJSON_IsArray, "array");
 
 	const int length = cJSON_GetArraySize(json);
 	if (length == 0) FAIL(ReadFromJSON, "%s", "JSON arrays cannot have size-zero lengths");
-	check_size_of_unsigned_int(length, max, "an array length");
+	check_number_value_range(json, max);
 
 	if ((expected_length != -1) && (length != expected_length)) FAIL(ReadFromJSON,
 		"Expected JSON array '%s' to have a length of %d, but the length was %d",
-		array_name, expected_length, length
+		get_json_name(json), expected_length, length
 	);
 
 	return (json_array_size_t) length;
