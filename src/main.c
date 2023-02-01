@@ -306,8 +306,8 @@ static void* main_init(const WindowConfig* const window_config) {
 			// Note: the material index is set in `init_materials_texture`
 			Billboard* const billboard = billboards + billboard_index;
 
-			JSON_FOR_EACH(k, billboard_field, billboard_json,
-				switch (k) {
+			JSON_FOR_EACH(billboard_field_index, billboard_field, billboard_json,
+				switch (billboard_field_index) {
 					case 0: { // Handling the texture or animation id
 						texture_id_t
 							texture_id_or_animation_index = get_u16_from_json(billboard_field),
