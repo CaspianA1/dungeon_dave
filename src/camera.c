@@ -234,7 +234,6 @@ static void update_pos(Camera* const camera,
 
 	const bool continuing_jump_or_fall = foot_height > base_height;
 
-
 	if (continuing_jump_or_fall)
 		pos[1] = foot_height + pace;
 	else {
