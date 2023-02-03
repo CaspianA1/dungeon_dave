@@ -11,6 +11,7 @@ https://learnopengl.com/Guest-Articles/2021/CSM
 For later on:
 - Pushing the weapon against walls puts it in shadow, which doesn't look right (I need to keep it outside the wall)
 - Figure out why for more cascades, there's more edge out-of-bounds artifacts
+- Perhaps for layer blending, overlap the cascades slightly depending on the blend factor? See here: http://gameangst.com/?p=339
 
 Revectorization:
 - https://www.gamedev.net/tutorials/programming/graphics/shadow-map-silhouette-revectorization-smsr-r3437/
