@@ -16,7 +16,7 @@ typedef struct {
 typedef enum {
 	OnlyDraw = 0,
 	UseShaderPipeline = 1,
-	BindVertexSpec = 2
+	BindVertexSpec = 2 // TODO: change this name to `UseVertexSpec`
 } DrawInvocationParam;
 
 //////////
