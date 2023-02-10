@@ -167,7 +167,7 @@ CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* con
 
 	/* TODO: check that the number of cascades does not exceed the max size for `gl_Layer`
 	(see the bottom of https://www.khronos.org/opengl/wiki/Geometry_Shader for more info),
-	and check for a minimum split count too */
+	and check for a minimum split count too (is the variable `MAX_GEOMETRY_SHADER_INVOCATIONS`?) */
 
 	////////// Creating the framebuffer
 
