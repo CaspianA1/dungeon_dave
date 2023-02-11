@@ -178,6 +178,8 @@ float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragmen
 		volumetric_light_sum += light_percent_visiblity;
 	}
 
+	// TODO: for attenuation, perhaps get the dist between the min and max shadow map obs, and then attenuate from that
+
 	float base_volumetric_light_strength = volumetric_light_sum * one_over_num_samples;
 	return base_volumetric_light_strength * volumetric_lighting.opacity;
 }
