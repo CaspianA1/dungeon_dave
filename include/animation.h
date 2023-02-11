@@ -14,6 +14,7 @@ typedef struct { // Note: the texture id range is inclusive.
 	GLfloat secs_for_frame;
 } Animation;
 
+// TODO: stop the rolling rock animation from stuttering
 void update_animation_information(
 	const GLfloat curr_time_secs, const GLfloat cycle_base_time,
 	const Animation animation, texture_id_t* const texture_id);
