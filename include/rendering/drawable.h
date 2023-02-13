@@ -30,7 +30,7 @@ Interface notes:
 	will be allocated for the vertices, but the vertex buffer will not have any elements inside it.
 
 - If the uniform updater is null, it will not be invoked.
-- And if the normal map set supplied to any constructor is 0, `glDeleteTextures` will not delete it.
+- And if the albedo texture or normal map supplied to any constructor are 0, `glDeleteTextures` will not delete it.
 */
 
 Drawable init_drawable_with_vertices(

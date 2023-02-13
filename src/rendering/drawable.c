@@ -32,8 +32,8 @@ Drawable init_drawable_without_vertices(const uniform_updater_t uniform_updater,
 
 void deinit_drawable(const Drawable drawable) {
 	deinit_shader(drawable.shader);
-	deinit_texture(drawable.albedo_texture);
 
+	if (drawable.albedo_texture != 0) deinit_texture(drawable.albedo_texture);
 	if (drawable.normal_map != 0) deinit_texture(drawable.normal_map);
 	if (drawable.vertex_buffer != 0) deinit_gpu_buffer(drawable.vertex_buffer);
 	if (drawable.vertex_spec != 0) deinit_vertex_spec(drawable.vertex_spec);
