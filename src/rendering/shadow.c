@@ -98,6 +98,17 @@ So, before all shader compilation, this function writes the number of cascades t
 void specify_cascade_count_before_any_shader_compilation(
 	const byte opengl_major_minor_version[2], const byte num_cascades) {
 
+	////////// Input validation
+
+	GLint max_cascades;
+	glGetIntegerv(GL_MAX_GEOMETRY_SHADER_INVOCATIONS, &max_cascades);
+
+	if (num_cascades < constants.min_shadow_map_cascades || num_cascades > max_cascades) FAIL(CreateTexture,
+		"The shadow map must have at a cascade count in range of [%hhu, %d]; %hhu is an invalid cascade count",
+		constants.min_shadow_map_cascades, max_cascades, num_cascades);
+
+	////////// Writing to disk
+
 	FILE* const file = open_file_safely(ASSET_PATH("shaders/shadow/num_cascades.glsl"), "w");
 
 	const GLchar* const file_description = "This file is written to before any other shaders include it";
@@ -164,10 +175,6 @@ CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* con
 
 	init_texture_data(shadow_map_texture_type, (GLsizei[]) {resolution, resolution, num_cascades},
 		GL_DEPTH_COMPONENT, internal_format, OPENGL_COLOR_CHANNEL_TYPE, NULL);
-
-	/* TODO: check that the number of cascades does not exceed the max size for `gl_Layer`
-	(see the bottom of https://www.khronos.org/opengl/wiki/Geometry_Shader for more info),
-	and check for a minimum split count too (is the variable `MAX_GEOMETRY_SHADER_INVOCATIONS`?) */
 
 	////////// Creating the framebuffer
 

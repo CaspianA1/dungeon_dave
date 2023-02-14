@@ -50,7 +50,7 @@ enum { // `enum` is used to make these values compile-time constants
 
 static const struct {
 	const GLfloat list_realloc_rate, milliseconds_per_second, one_over_max_byte_value;
-	const byte max_byte_value;
+	const byte max_byte_value, min_shadow_map_cascades;
 
 	const struct { // All angles are in radians
 		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, init_fov;
@@ -80,6 +80,8 @@ static const struct {
 	.milliseconds_per_second = 1000.0f,
 	.one_over_max_byte_value = 1.0f / 255.0f,
 	.max_byte_value = 255,
+
+	.min_shadow_map_cascades = 3,
 
 	.camera = {
 		.near_clip_dist = 0.25f, .eye_height = 0.5f, .aabb_collision_box_size = 0.2f,
