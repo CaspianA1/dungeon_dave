@@ -68,7 +68,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 
 	draw_sectors(sector_context, camera);
 
-	// No backface culling or depth buffer writes for the skybox, billboards, or the weapon sprite
+	// No backface culling or depth buffer writes for the skybox, billboards, or weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
 			draw_skybox(&scene_context -> skybox); // Drawn before any translucent geometry
@@ -112,6 +112,17 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	#undef PRINT_LIBRARY_INFO
 
+	////////// Global state initialization
+
+	// This is correct for alpha premultiplication
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthFunc(GL_LESS);
+
+	/* Depth clamping is used for 1. shadow pancaking, 2. avoiding clipping with sectors when walking
+	against them, and 3. stopping too much upwards weapon pitch from going through the near plane */
+	const GLenum states[] = {GL_DEPTH_TEST, GL_DEPTH_CLAMP, GL_CULL_FACE, GL_TEXTURE_CUBE_MAP_SEAMLESS};
+	for (byte i = 0; i < ARRAY_LENGTH(states); i++) glEnable(states[i]);
+
 	////////// Defining a bunch of level data
 
 	cJSON* const level_json = init_json_from_file(ASSET_PATH("json_data/levels/palace.json"));
@@ -119,10 +130,11 @@ static void* main_init(const WindowConfig* const window_config) {
 	const cJSON // TODO: genericize this naming thing here via a macro
 		*const parallax_json = read_json_subobj(level_json, "parallax_mapping"),
 		*const shadow_mapping_json = read_json_subobj(level_json, "shadow_mapping"),
-		*const vol_lighting_json =  read_json_subobj(level_json, "volumetric_lighting"),
+		*const vol_lighting_json = read_json_subobj(level_json, "volumetric_lighting"),
 		*const ao_json = read_json_subobj(level_json, "ambient_occlusion"),
 		*const dyn_light_json = read_json_subobj(level_json, "dynamic_light"),
-		*const skybox_json = read_json_subobj(level_json, "skybox");
+		*const skybox_json = read_json_subobj(level_json, "skybox"),
+		*const non_lighting_json = read_json_subobj(level_json, "non_lighting_data");
 
 	const cJSON
 		*const dyn_light_looking_at_json = read_json_subobj(dyn_light_json, "looking_at"),
@@ -135,6 +147,48 @@ static void* main_init(const WindowConfig* const window_config) {
 	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_origin, origin, float);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_dest, dest, float);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(level_json, rgb_light_color, rgb_light_color, u8);
+
+	////////// Loading in the heightmap and texture id map, validating them, and extracting data from them
+
+	byte map_size[2], cmp_map_size[2];
+
+	byte
+		*const heightmap = read_2D_map_from_json(read_json_subobj(non_lighting_json, "heightmap"), map_size),
+		*const texture_id_map = read_2D_map_from_json(read_json_subobj(non_lighting_json, "texture_id_map"), cmp_map_size);
+
+	for (byte i = 0; i < ARRAY_LENGTH(map_size); i++) {
+		const byte size_component = map_size[i], cmp_size_component = cmp_map_size[i];
+
+		const GLchar* const axis_name = (i == 0) ? "width" : "height";
+
+		if (size_component != cmp_size_component) FAIL(
+			UseLevelHeightmap, "Cannot use the level heightmap "
+			"because its %s is %hhu, while the texture id map's %s is %hhu",
+			axis_name, size_component, axis_name, cmp_size_component);
+	}
+
+	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
+	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
+
+	//////////
+
+	const cJSON* const skybox_spherical_distortion_config_json = read_json_subobj(skybox_json, "spherical_distortion_config");
+	const SkyboxSphericalDistortionConfig* skybox_spherical_distortion_config_ref = NULL;
+
+	if (!cJSON_IsNull(skybox_spherical_distortion_config_json)) {
+		static SkyboxSphericalDistortionConfig skybox_spherical_distortion_config;
+
+		skybox_spherical_distortion_config = (SkyboxSphericalDistortionConfig) {
+			.level_size = {map_size[0], max_point_height, map_size[1]},
+			JSON_TO_FIELD(skybox_spherical_distortion_config_json, output_texture_scale, float),
+			JSON_TO_FIELD(skybox_spherical_distortion_config_json, percentage_towards_y_bottom, float)
+		};
+
+		GET_ARRAY_VALUES_FROM_JSON_KEY(skybox_spherical_distortion_config_json,
+			skybox_spherical_distortion_config.scale_ratios, scale_ratios, float);
+
+		skybox_spherical_distortion_config_ref = &skybox_spherical_distortion_config;
+	}
 
 	//////////
 
@@ -200,7 +254,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 		.skybox_config = {
 			JSON_TO_FIELD(skybox_json, texture_path, string),
-			JSON_TO_FIELD(skybox_json, map_cube_to_sphere, bool)
+			.spherical_distortion_config = skybox_spherical_distortion_config_ref
 		},
 
 		.rgb_light_color = {rgb_light_color[0], rgb_light_color[1], rgb_light_color[2]},
@@ -211,7 +265,6 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Reading in the sector face texture paths
 
-	const cJSON* const non_lighting_json = read_json_subobj(level_json, "non_lighting_data");
 	texture_id_t num_sector_face_texture_paths;
 
 	const GLchar** const sector_face_texture_paths = read_string_vector_from_json(
@@ -484,28 +537,6 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	const ALchar* const level_soundtrack_path = get_string_from_json(read_json_subobj(non_lighting_json, "soundtrack_path"));
 
-	////////// Loading in the heightmap and texture id map, validating them, and extracting data from them
-
-	byte map_size[2], cmp_map_size[2];
-
-	byte
-		*const heightmap = read_2D_map_from_json(read_json_subobj(non_lighting_json, "heightmap"), map_size),
-		*const texture_id_map = read_2D_map_from_json(read_json_subobj(non_lighting_json, "texture_id_map"), cmp_map_size);
-
-	for (byte i = 0; i < ARRAY_LENGTH(map_size); i++) {
-		const byte size_component = map_size[i], cmp_size_component = cmp_map_size[i];
-
-		const GLchar* const axis_name = (i == 0) ? "width" : "height";
-
-		if (size_component != cmp_size_component) FAIL(
-			UseLevelHeightmap, "Cannot use the level heightmap "
-			"because its %s is %hhu, while the texture id map's %s is %hhu",
-			axis_name, size_component, axis_name, cmp_size_component);
-	}
-
-	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
-	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
-
 	////////// Defining the title screen config
 
 	const struct {
@@ -563,17 +594,6 @@ static void* main_init(const WindowConfig* const window_config) {
 		.title_screen = init_title_screen(&title_screen_config.texture, &title_screen_config.rendering),
 		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
 	};
-
-	////////// Global state initialization
-
-	// This is correct for alpha premultiplication
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthFunc(GL_LESS);
-
-	/* Depth clamping is used for 1. shadow pancaking, 2. avoiding clipping with sectors when walking
-	against them, and 3. stopping too much upwards weapon pitch from going through the near plane */
-	const GLenum states[] = {GL_DEPTH_TEST, GL_DEPTH_CLAMP, GL_CULL_FACE, GL_TEXTURE_CUBE_MAP_SEAMLESS};
-	for (byte i = 0; i < ARRAY_LENGTH(states); i++) glEnable(states[i]);
 
 	////////// Initializing a scene context on the heap
 
@@ -635,7 +655,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		scene_context.billboard_context.shadow_mapping.depth_shader,
 
 		// Plain shaders
-		scene_context.skybox.shader,
+		scene_context.skybox.drawable.shader,
 		scene_context.sector_context.drawable.shader,
 		scene_context.billboard_context.drawable.shader,
 		scene_context.weapon_sprite.drawable.shader
@@ -675,7 +695,7 @@ static void main_deinit(void* const app_context) {
 	deinit_ao_map(&scene_context -> ao_map);
 	deinit_shadow_context(&scene_context -> shadow_context);
 	deinit_title_screen(&scene_context -> title_screen);
-	deinit_skybox(scene_context -> skybox);
+	deinit_skybox(&scene_context -> skybox);
 	deinit_audio_context(&scene_context -> audio_context);
 
 	dealloc(scene_context);

@@ -45,8 +45,12 @@
 	},
 
 	"skybox": {
-		"texture_path": "../assets/skyboxes/desert.bmp",
-		"map_cube_to_sphere": false
+		"texture_path": "../assets/skyboxes/oasis.bmp",
+		"spherical_distortion_config": {
+			"scale_ratios": [1.0, 1.5, 1.0],
+			"output_texture_scale": 8.0,
+			"percentage_towards_y_bottom": 0.3
+		}
 	},
 
 	"rgb_light_color": [245, 213, 161],
