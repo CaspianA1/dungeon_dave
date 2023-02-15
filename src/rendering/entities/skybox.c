@@ -302,7 +302,7 @@ static GLuint make_spherically_distorted_skybox_texture(const GLuint orig_textur
 
 	mat4 translation_scaling_matrix, rotation_matrices[faces_per_cubemap], view_projections[faces_per_cubemap];
 
-	make_matrices_for_skybox_predistortion(config.percentage_towards_y_bottom, config.level_size,
+	make_matrices_for_skybox_predistortion(config.percentage_towards_y_top, config.level_size,
 		config.scale_ratios, translation_scaling_matrix, rotation_matrices, view_projections);
 
 	const GLuint shader = cube_to_sphere_drawable.shader;

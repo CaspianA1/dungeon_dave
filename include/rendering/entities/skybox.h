@@ -7,7 +7,7 @@
 typedef struct {
 	byte level_size[3]; // Width, max y, and height
 	vec3 scale_ratios;
-	GLfloat output_texture_scale, percentage_towards_y_bottom;
+	GLfloat output_texture_scale, percentage_towards_y_top;
 } SkyboxSphericalDistortionConfig;
 
 typedef struct {

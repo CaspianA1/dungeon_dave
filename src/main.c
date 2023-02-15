@@ -181,7 +181,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		skybox_spherical_distortion_config = (SkyboxSphericalDistortionConfig) {
 			.level_size = {map_size[0], max_point_height, map_size[1]},
 			JSON_TO_FIELD(skybox_spherical_distortion_config_json, output_texture_scale, float),
-			JSON_TO_FIELD(skybox_spherical_distortion_config_json, percentage_towards_y_bottom, float)
+			JSON_TO_FIELD(skybox_spherical_distortion_config_json, percentage_towards_y_top, float)
 		};
 
 		GET_ARRAY_VALUES_FROM_JSON_KEY(skybox_spherical_distortion_config_json,
