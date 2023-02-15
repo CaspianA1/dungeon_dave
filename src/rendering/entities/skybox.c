@@ -63,6 +63,7 @@ static GLuint init_skybox_texture(const GLchar* const texture_path, GLint* const
 
 	//////////
 
+	// TODO: enable aniso if mapping a cube to a sphere?
 	const GLuint skybox_texture = preinit_texture(TexSkybox, TexNonRepeating,
 		map_cube_to_sphere ? TexNearest : OPENGL_SCENE_MAG_FILTER,
 		OPENGL_SCENE_MIN_FILTER, false);
@@ -315,7 +316,7 @@ static GLuint make_spherically_distorted_skybox_texture(const GLuint orig_textur
 
 	////////// Drawing
 
-	GLint prev_viewport_bounds[4];
+	GLint prev_viewport_bounds[corners_per_quad];
 	glGetIntegerv(GL_VIEWPORT, prev_viewport_bounds);
 
 	glViewport(0, 0, upscaled_face_size, upscaled_face_size);
