@@ -20,6 +20,7 @@ Details on going from equiangular to equirectangular skyboxes:
 	https://plumetutorials.wordpress.com/2013/10/09/3d-tutorial-making-a-skybox/
 	https://blog.google/products/google-ar-vr/bringing-pixels-front-and-center-vr-video/
 	https://stackoverflow.com/questions/11504584/cubic-to-equirectangular-projection-algorithm
+	https://en.wikipedia.org/wiki/Quadrilateralized_spherical_cube
 	The first comment for this video: https://www.youtube.com/watch?v=-ZutidNYVRE
 	This video (uses Photoshop): https://www.youtube.com/watch?v=XZmr-XYRw3w
 
