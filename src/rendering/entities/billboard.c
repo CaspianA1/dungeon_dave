@@ -3,11 +3,6 @@
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 #include "utils/shader.h" // For `init_shader`
 
-typedef struct {
-	billboard_index_t index;
-	GLfloat dist_to_camera_squared;
-} BillboardDistanceSortRef;
-
 /* TODO:
 - Fix weird depth clamping errors when billboard intersect with the near plane
 - Note: culling cannot be done for billboards for shadow mapping, for the same reason as with sectors
@@ -23,6 +18,11 @@ Drawing billboards to the shadow cascades (an ideal version):
 		(and for that, sort billboards in terms of the light pos (how to do that with no pos?))
 	- Then, when drawing entities that use the world shading fragment shader, multiply the shadow value by the alpha value
 */
+
+typedef struct {
+	billboard_index_t index;
+	GLfloat dist_to_camera_squared;
+} BillboardDistanceSortRef;
 
 //////////
 
@@ -122,7 +122,7 @@ void draw_billboards_to_shadow_context(const BillboardContext* const billboard_c
 
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		draw_drawable(*drawable, corners_per_quad,
-			billboard_context -> billboards.length, NULL, BindVertexSpec
+			billboard_context -> billboards.length, NULL, UseVertexSpec
 		);
 	);
 }
@@ -132,7 +132,7 @@ void draw_billboards(BillboardContext* const billboard_context, const Camera* co
 	sort_billboards_by_dist_to_camera(billboard_context, camera -> pos);
 
 	draw_drawable(billboard_context -> drawable, corners_per_quad, billboard_context -> billboards.length,
-		NULL, UseShaderPipeline | BindVertexSpec
+		NULL, UseShaderPipeline | UseVertexSpec
 	);
 }
 

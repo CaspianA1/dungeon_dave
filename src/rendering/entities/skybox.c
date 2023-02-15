@@ -319,7 +319,7 @@ static GLuint make_spherically_distorted_skybox_texture(const GLuint orig_textur
 	glGetIntegerv(GL_VIEWPORT, prev_viewport_bounds);
 
 	glViewport(0, 0, upscaled_face_size, upscaled_face_size);
-		draw_drawable(cube_to_sphere_drawable, subdivided_face.length, faces_per_cubemap, NULL, BindVertexSpec);
+		draw_drawable(cube_to_sphere_drawable, subdivided_face.length, faces_per_cubemap, NULL, UseVertexSpec);
 		use_framebuffer(framebuffer_target, 0);
 	glViewport(prev_viewport_bounds[0], prev_viewport_bounds[1], prev_viewport_bounds[2], prev_viewport_bounds[3]);
 
@@ -381,6 +381,6 @@ void deinit_skybox(const Skybox* const skybox) {
 
 void draw_skybox(const Skybox* const skybox) {
 	WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS, // Other depth testing mode for the skybox
-		draw_drawable(skybox -> drawable, vertices_per_skybox, faces_per_cubemap, NULL, UseShaderPipeline | BindVertexSpec);
+		draw_drawable(skybox -> drawable, vertices_per_skybox, faces_per_cubemap, NULL, UseShaderPipeline | UseVertexSpec);
 	);
 }

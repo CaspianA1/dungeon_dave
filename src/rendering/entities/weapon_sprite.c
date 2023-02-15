@@ -339,7 +339,7 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 
 	use_vertex_buffer(drawable -> vertex_buffer);
 	reinit_vertex_buffer_data(corners_per_quad, sizeof(vec3), ws -> appearance_context.world_space.corners);
-	draw_drawable(*drawable, corners_per_quad, 0, NULL, BindVertexSpec);
+	draw_drawable(*drawable, corners_per_quad, 0, NULL, UseVertexSpec);
 }
 
 void draw_weapon_sprite(const WeaponSprite* const ws) {
