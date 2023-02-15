@@ -191,7 +191,7 @@ static void make_matrices_for_skybox_predistortion(const GLfloat y_weight, const
 		mat4 view;
 
 		glm_look(
-			(vec3) {0, 0, 0},
+			(vec3) {0.0f, 0.0f, 0.0f},
 			(vec3) {forward_dir[0], forward_dir[1], forward_dir[2]},
 			(vec3) {up_dir[0], up_dir[1], up_dir[2]},
 			view
