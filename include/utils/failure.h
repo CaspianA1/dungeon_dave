@@ -19,6 +19,7 @@ typedef enum {
 	CreateFramebuffer,
 	CreateAudioBuffer,
 	CreateAudioSource,
+	CreateFormatString,
 
 	ReadFromDict,
 	ParseJSON,

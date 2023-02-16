@@ -49,8 +49,9 @@ typedef uint64_t dict_hash_t;
 
 //////////
 
+enum {num_dict_var_types = 2};
+
 typedef union {
-	// TODO: swap the order of these two
 	uint32_t unsigned_int;
 	const char* string;
 } DictVar;
@@ -73,7 +74,7 @@ typedef struct {
 	buffer_size_t num_entry_slots, num_entries;
 } Dict;
 
-// Excluded: get_key_index, keys_are_equal, init_dict_with_load_factor, get_ptr_to_value_in_dict
+// Excluded: make_format_string, get_key_index, keys_are_equal, init_dict_with_load_factor, get_ptr_to_value_in_dict
 
 //////////
 

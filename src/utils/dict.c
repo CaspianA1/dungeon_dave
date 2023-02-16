@@ -2,27 +2,45 @@
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "utils/failure.h"
 
+//////////
+
+static const char dict_var_format_chars[num_dict_var_types] = {'u', 's'};
+
+#define FORMAT_SEARCH_CHAR '_'
+#define FORMAT_SEARCH_CHAR_AS_STRING "_"
+
+// Returns the found location, so that the format string can be built further from there
+static char* make_format_string(char* const format_string, const DictVarType type) {
+	char* const pos = strchr(format_string, FORMAT_SEARCH_CHAR);
+
+	if (pos == NULL) FAIL(CreateFormatString,
+		"Could not make a format string, since "
+		"the search char '%c' was not found", FORMAT_SEARCH_CHAR
+	);
+
+	*pos = dict_var_format_chars[type];
+	return pos;
+}
+
+//////////
+
 // TODO: remove
 void print_dict(const Dict* const dict) {
 	puts("{");
 
 	const buffer_size_t num_entry_slots = dict -> num_entry_slots;
-	const DictVarType key_type = dict -> key_type, value_type = dict -> value_type;
 	const BitArray containment_states = dict -> containment_states;
 	const DictEntry* const entries = dict -> entries;
 
-	static const char* const format_strings[] = {"%di", "%uu", "'%s'"};
+	char format_string[] = "\t%" FORMAT_SEARCH_CHAR_AS_STRING ": %" FORMAT_SEARCH_CHAR_AS_STRING "\n";
+	make_format_string(make_format_string(format_string, dict -> key_type), dict -> value_type);
+
+	//////////
 
 	for (buffer_size_t i = 0; i < num_entry_slots; i++) {
 		if (bitarray_bit_is_set(containment_states, i)) {
 			const DictEntry entry = entries[i];
-
-			putchar('\t');
-			printf(format_strings[key_type], entry.key);
-			putchar(':');
-			putchar(' ');
-			printf(format_strings[value_type], entry.value);
-			putchar('\n');
+			printf(format_string, entry.key, entry.value);
 		}
 	}
 
@@ -35,7 +53,6 @@ static buffer_size_t get_key_index(const Dict* const dict, DictVar key) {
 	dict_hash_t hash;
 
 	switch (dict -> key_type) {
-		// TODO: perhaps transform into an unsigned, and hash from there
 		case DV_UnsignedInt:
 			hash = key.unsigned_int;
 			hash = ((hash >> 16u) ^ hash) * 0x45d9f3bu;
@@ -178,8 +195,8 @@ DictVar read_from_dict(const Dict* const dict, const DictVar key) {
 	const DictVar* const value = get_ptr_to_value_in_dict(dict, key);
 
 	if (value == NULL) {
-		// TODO: find the right format string
-		const char* const format_string = "Could not find the key '%s' in the dict";
+		char format_string[] = "Could not find the key '% " FORMAT_SEARCH_CHAR_AS_STRING "' in the dict";
+		make_format_string(format_string, dict -> key_type);
 		FAIL(ReadFromDict, format_string, key);
 	}
 
