@@ -36,9 +36,6 @@ static buffer_size_t get_key_index(const Dict* const dict, DictVar key) {
 
 	switch (dict -> key_type) {
 		// TODO: perhaps transform into an unsigned, and hash from there
-		case DV_SignedInt:
-			puts("Unsupported hash"); exit(1);
-
 		case DV_UnsignedInt:
 			hash = key.unsigned_int;
 			hash = ((hash >> 16u) ^ hash) * 0x45d9f3bu;
@@ -64,7 +61,6 @@ static buffer_size_t get_key_index(const Dict* const dict, DictVar key) {
 static bool keys_are_equal(const DictVar key_1, const DictVar key_2, const DictVarType type) {
 	switch (type) {
 		case DV_UnsignedInt: return key_1.unsigned_int == key_2.unsigned_int;
-		case DV_SignedInt: return key_1.signed_int == key_2.signed_int;
 		case DV_String: return !strcmp(key_1.string, key_2.string);
 	}
 }

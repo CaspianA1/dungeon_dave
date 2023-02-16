@@ -51,13 +51,11 @@ typedef uint64_t dict_hash_t;
 
 typedef union {
 	// TODO: swap the order of these two
-	int32_t signed_int;
 	uint32_t unsigned_int;
 	const char* string;
 } DictVar;
 
 typedef enum {
-	DV_SignedInt,
 	DV_UnsignedInt,
 	DV_String
 } DictVarType;
