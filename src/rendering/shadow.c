@@ -168,7 +168,7 @@ CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* con
 		#undef INTERNAL_FORMAT_CASE
 
 		default: FAIL(CreateTexture, "Could not create a shadow map texture, because the number "
-			"of depth buffer bits must be 16, 24, or 32, not %d", num_depth_buffer_bits);
+			"of depth buffer bits must be 16, 24, or 32, not %hhu", num_depth_buffer_bits);
 	}
 
 	const uint16_t resolution = config -> resolution;
