@@ -7,7 +7,7 @@
 #include "event.h" // For `Event`
 #include "openal/al.h" // For various OpenAL defs
 
-// TODO: make direction switching harder (maybe), and apply wall alignment slowdown for corners
+// TODO: make direction switching harder (only if other games do it), and apply wall alignment slowdown for corners
 
 //////////
 
