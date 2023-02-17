@@ -124,7 +124,7 @@ void insert_into_dict(Dict* const dict, const DictVar key, const DictVar value) 
 		num_entries = dict -> num_entries,
 		old_num_entry_slots = dict -> num_entry_slots;
 
-	const float load_factor = ((float) num_entries / old_num_entry_slots);
+	const float load_factor = (float) num_entries / old_num_entry_slots;
 
 	if (load_factor > max_load_factor) {
 		Dict new_dict = init_dict_with_load_factor(num_entries,
@@ -140,8 +140,7 @@ void insert_into_dict(Dict* const dict, const DictVar key, const DictVar value) 
 		}
 
 		deinit_dict(dict); // Deallocing the old one
-		memcpy(dict, &new_dict, sizeof(Dict)); // Copying over the new one (TODO: do it with a direct set)
-
+		*dict = new_dict; // Copying over the new one
 		entries = dict -> entries; // Resetting some local vars
 		containment_states = dict -> containment_states;
 	}

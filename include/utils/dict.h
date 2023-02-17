@@ -68,7 +68,8 @@ typedef struct {
 } DictEntry;
 
 typedef struct {
-	const DictVarType key_type, value_type;
+	// Note: I can remove the value type if I remove printing
+	DictVarType key_type, value_type;
 	BitArray containment_states;
 	DictEntry* entries;
 	buffer_size_t num_entry_slots, num_entries;
