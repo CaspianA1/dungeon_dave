@@ -148,48 +148,6 @@ static void* main_init(const WindowConfig* const window_config) {
 	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_dest, dest, float);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(level_json, rgb_light_color, rgb_light_color, u8);
 
-	////////// Loading in the heightmap and texture id map, validating them, and extracting data from them
-
-	byte map_size[2], cmp_map_size[2];
-
-	byte
-		*const heightmap = read_2D_map_from_json(read_json_subobj(non_lighting_json, "heightmap"), map_size),
-		*const texture_id_map = read_2D_map_from_json(read_json_subobj(non_lighting_json, "texture_id_map"), cmp_map_size);
-
-	for (byte i = 0; i < ARRAY_LENGTH(map_size); i++) {
-		const byte size_component = map_size[i], cmp_size_component = cmp_map_size[i];
-
-		const GLchar* const axis_name = (i == 0) ? "width" : "height";
-
-		if (size_component != cmp_size_component) FAIL(
-			UseLevelHeightmap, "Cannot use the level heightmap "
-			"because its %s is %hhu, while the texture id map's %s is %hhu",
-			axis_name, size_component, axis_name, cmp_size_component);
-	}
-
-	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
-	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
-
-	//////////
-
-	const cJSON* const skybox_spherical_distortion_config_json = read_json_subobj(skybox_json, "spherical_distortion_config");
-	const SkyboxSphericalDistortionConfig* skybox_spherical_distortion_config_ref = NULL;
-
-	if (!cJSON_IsNull(skybox_spherical_distortion_config_json)) {
-		static SkyboxSphericalDistortionConfig skybox_spherical_distortion_config;
-
-		skybox_spherical_distortion_config = (SkyboxSphericalDistortionConfig) {
-			.level_size = {map_size[0], max_point_height, map_size[1]},
-			JSON_TO_FIELD(skybox_spherical_distortion_config_json, output_texture_scale, float),
-			JSON_TO_FIELD(skybox_spherical_distortion_config_json, percentage_towards_y_top, float)
-		};
-
-		GET_ARRAY_VALUES_FROM_JSON_KEY(skybox_spherical_distortion_config_json,
-			skybox_spherical_distortion_config.scale_ratios, scale_ratios, float);
-
-		skybox_spherical_distortion_config_ref = &skybox_spherical_distortion_config;
-	}
-
 	//////////
 
 	// TODO: put more level rendering params in here
@@ -254,7 +212,10 @@ static void* main_init(const WindowConfig* const window_config) {
 
 		.skybox_config = {
 			JSON_TO_FIELD(skybox_json, texture_path, string),
-			.spherical_distortion_config = skybox_spherical_distortion_config_ref
+			JSON_TO_FIELD(skybox_json, texture_scale, float),
+			JSON_TO_FIELD(skybox_json, horizon_dist_scale, float),
+			JSON_TO_FIELD(skybox_json, y_shift_offset, float),
+			JSON_TO_FIELD(skybox_json, apply_cylindrical_projection, bool)
 		},
 
 		.rgb_light_color = {rgb_light_color[0], rgb_light_color[1], rgb_light_color[2]},
@@ -561,6 +522,28 @@ static void* main_init(const WindowConfig* const window_config) {
 		}
 	};
 
+	////////// Loading in the heightmap and texture id map, validating them, and extracting data from them
+
+	byte map_size[2], cmp_map_size[2];
+
+	byte
+		*const heightmap = read_2D_map_from_json(read_json_subobj(non_lighting_json, "heightmap"), map_size),
+		*const texture_id_map = read_2D_map_from_json(read_json_subobj(non_lighting_json, "texture_id_map"), cmp_map_size);
+
+	for (byte i = 0; i < ARRAY_LENGTH(map_size); i++) {
+		const byte size_component = map_size[i], cmp_size_component = cmp_map_size[i];
+
+		const GLchar* const axis_name = (i == 0) ? "width" : "height";
+
+		if (size_component != cmp_size_component) FAIL(
+			UseLevelHeightmap, "Cannot use the level heightmap "
+			"because its %s is %hhu, while the texture id map's %s is %hhu",
+			axis_name, size_component, axis_name, cmp_size_component);
+	}
+
+	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
+	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
+
 	//////////
 
 	const SceneContext scene_context = {
@@ -676,6 +659,13 @@ static void* main_init(const WindowConfig* const window_config) {
 	dealloc(sector_face_texture_paths);
 	dealloc(texture_id_map);
 	deinit_json(level_json);
+
+	//////////
+
+	const GLchar* const GL_error = get_GL_error();
+	if (strcmp(GL_error, "NO_ERROR")) FAIL(CreateLevel, "Could not create a level because of the following OpenGL error: '%s'", GL_error);
+
+	//////////
 
 	return scene_context_on_heap;
 }

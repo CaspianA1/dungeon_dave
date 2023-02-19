@@ -46,11 +46,10 @@
 
 	"skybox": {
 		"texture_path": "../assets/skyboxes/oasis.bmp",
-		"spherical_distortion_config": {
-			"scale_ratios": [1.0, 1.5, 1.0],
-			"output_texture_scale": 8.0,
-			"percentage_towards_y_top": 0.3
-		}
+		"texture_scale": 4.0,
+		"horizon_dist_scale": 1.0,
+		"y_shift_offset": 0.0,
+		"apply_cylindrical_projection": true
 	},
 
 	"rgb_light_color": [245, 213, 161],
