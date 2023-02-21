@@ -307,8 +307,9 @@ GLuint init_plain_texture(const GLchar* const path,
 			internal_format, OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
 	);
 
-	init_texture_mipmap(type);
-	deinit_surface(surface);
+	if (min_filter == TexTrilinear || min_filter == TexLinearMipmapped)
+		init_texture_mipmap(type);
 
+	deinit_surface(surface);
 	return texture;
 }
