@@ -31,9 +31,9 @@ void main(void) {
 		vec2 cap_blend_percents = vec2(cylinder_edge.y, -cylinder_edge.y) + cylindrical_cap_blend_widths - abs_y_blend_starts;
 		cap_blend_percents = clamp(cap_blend_percents / cylindrical_cap_blend_widths, 0.0f, 1.0f);
 
-		bool on_cylinder = cap_blend_percents == vec2(0.0f);
+		bool on_cap = (cap_blend_percents != vec2(0.0f));
+		float cap_blend_percent = float(on_cap) * max(cap_blend_percents.x, cap_blend_percents.y);
 
-		float cap_blend_percent = float(!on_cylinder) * max(cap_blend_percents.x, cap_blend_percents.y);
 		color = mix(texture(skybox_sampler, cylinder_edge).rgb, cube_color, cap_blend_percent);
 	}
 	else color = cube_color;
