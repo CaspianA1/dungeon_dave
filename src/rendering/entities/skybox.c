@@ -133,12 +133,10 @@ Skybox init_skybox(const SkyboxConfig* const config) {
 		shader = init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag"), NULL);
 
 	use_shader(shader);
-
 	use_texture_in_shader(skybox_texture, shader, "skybox_sampler", TexSkybox, TU_Skybox);
 
-	INIT_UNIFORM_VALUE(apply_cylindrical_projection, shader, 1ui, config -> apply_cylindrical_projection);
 	INIT_UNIFORM_VALUE(horizon_dist_scale, shader, 1f, config -> horizon_dist_scale);
-	INIT_UNIFORM_VALUE(y_shift_offset, shader, 1f, config -> y_shift_offset);
+	INIT_UNIFORM_VALUE(cylindrical_cap_blend_widths, shader, 2fv, 1,  config -> cylindrical_cap_blend_widths);
 
 	return (Skybox) {
 		init_drawable_with_vertices(define_vertex_spec, NULL, GL_STATIC_DRAW, GL_TRIANGLE_STRIP,

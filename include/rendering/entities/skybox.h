@@ -4,15 +4,16 @@
 #include "rendering/drawable.h" // For `Drawable`
 
 typedef struct {
-    const GLchar* const texture_path;
-    const GLfloat texture_scale, horizon_dist_scale, y_shift_offset;
-    const bool apply_cylindrical_projection;
+	const GLchar* const texture_path;
+	const GLfloat texture_scale, horizon_dist_scale;
+	// No cylindrical projection is applied if both widths are 0
+	const vec2 cylindrical_cap_blend_widths;
 } SkyboxConfig;
 
 //////////
 
 typedef struct {
-    const Drawable drawable;
+	const Drawable drawable;
 } Skybox;
 
 // Excluded: init_skybox_texture, define_vertex_spec

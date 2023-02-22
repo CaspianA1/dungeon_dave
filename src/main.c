@@ -46,7 +46,6 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	////////// Scene updating
 
 	update_camera(camera, event, scene_context -> heightmap, scene_context -> map_size);
-
 	update_billboard_context(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
 	update_dynamic_light(dynamic_light, curr_time_secs);
@@ -140,9 +139,11 @@ static void* main_init(const WindowConfig* const window_config) {
 		*const dyn_light_looking_at_json = read_json_subobj(dyn_light_json, "looking_at"),
 		*const cascaded_shadow_json = read_json_subobj(shadow_mapping_json, "cascades");
 
+	vec2 skybox_cylindrical_cap_blend_widths;
 	vec3 dyn_light_pos, dyn_light_looking_at_origin, dyn_light_looking_at_dest;
 	sdl_pixel_component_t rgb_light_color[3];
 
+	GET_ARRAY_VALUES_FROM_JSON_KEY(skybox_json, skybox_cylindrical_cap_blend_widths, cylindrical_cap_blend_widths, float);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_json, dyn_light_pos, pos, float);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_origin, origin, float);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_dest, dest, float);
@@ -214,8 +215,11 @@ static void* main_init(const WindowConfig* const window_config) {
 			JSON_TO_FIELD(skybox_json, texture_path, string),
 			JSON_TO_FIELD(skybox_json, texture_scale, float),
 			JSON_TO_FIELD(skybox_json, horizon_dist_scale, float),
-			JSON_TO_FIELD(skybox_json, y_shift_offset, float),
-			JSON_TO_FIELD(skybox_json, apply_cylindrical_projection, bool)
+
+			.cylindrical_cap_blend_widths = {
+				skybox_cylindrical_cap_blend_widths[0],
+				skybox_cylindrical_cap_blend_widths[1]
+			}
 		},
 
 		.rgb_light_color = {rgb_light_color[0], rgb_light_color[1], rgb_light_color[2]},

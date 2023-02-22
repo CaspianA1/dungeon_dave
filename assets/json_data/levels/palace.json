@@ -48,8 +48,7 @@
 		"texture_path": "../assets/skyboxes/oasis.bmp",
 		"texture_scale": 4.0,
 		"horizon_dist_scale": 1.0,
-		"y_shift_offset": 0.0,
-		"apply_cylindrical_projection": true
+		"cylindrical_cap_blend_widths": [0.175, 0.0]
 	},
 
 	"rgb_light_color": [245, 213, 161],
@@ -58,7 +57,7 @@
 	"noise_granularity": 0.001,
 
 	"non_lighting_data": {
-		"soundtrack_path": "../assets/audio/themes/new/pyramid.wav",
+		"soundtrack_path": "../assets/audio/themes/new/mountain.wav",
 
 		"sector_face_texture_paths": [
 			"../assets/walls/sand.bmp",
