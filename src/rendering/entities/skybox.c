@@ -150,7 +150,7 @@ void deinit_skybox(const Skybox* const skybox) {
 }
 
 void draw_skybox(const Skybox* const skybox) {
-	WITH_RENDER_STATE(glDepthFunc, GL_LEQUAL, GL_LESS, // Other depth testing mode for the skybox
+	WITH_RENDER_STATE(glDepthFunc, GL_EQUAL, GL_LESS, // Other depth testing mode for the skybox
 		draw_drawable(skybox -> drawable, vertices_per_skybox, 0, NULL, UseShaderPipeline | UseVertexSpec);
 	);
 }
