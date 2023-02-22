@@ -28,7 +28,7 @@ void apply_noise_for_banding_removal(const vec2 seed, inout vec3 color) {
 	color += mix(-noise_granularity, noise_granularity, random_value);
 }
 
-/////////////////////////////////////////////////// PBR
+////////// PBR
 
 const float PI = 3.14159265359f;
 const float ONE_OVER_PI = 1.0f / PI;
