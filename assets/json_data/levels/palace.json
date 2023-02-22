@@ -47,7 +47,7 @@
 	"skybox": {
 		"texture_path": "../assets/skyboxes/oasis.bmp",
 		"texture_scale": 4.0,
-		"horizon_dist_scale": 1.0,
+		"horizon_dist_scale": 0.75,
 		"cylindrical_cap_blend_widths": [0.175, 0.0]
 	},
 
