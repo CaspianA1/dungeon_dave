@@ -46,7 +46,9 @@
 
 	"skybox": {
 		"texture_path": "../assets/skyboxes/mountain.bmp",
-		"map_cube_to_sphere": false
+		"texture_scale": 4.0,
+		"horizon_dist_scale": 0.75,
+		"cylindrical_cap_blend_widths": [0.0, 0.0]
 	},
 
 	"rgb_light_color": [245, 213, 161],
@@ -72,7 +74,7 @@
 
 			"billboards": {
 				"unanimated": [
-					[0, 1.0, [0.5, 0.5, 0.0]]
+					[0, 1.0, [5.0, 0.5, 5.0]]
 				],
 
 				"animated": [
