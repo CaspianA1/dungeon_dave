@@ -135,8 +135,24 @@ Skybox init_skybox(const SkyboxConfig* const config) {
 	use_shader(shader);
 	use_texture_in_shader(skybox_texture, shader, "skybox_sampler", TexSkybox, TU_Skybox);
 
-	INIT_UNIFORM_VALUE(horizon_dist_scale, shader, 1f, config -> horizon_dist_scale);
-	INIT_UNIFORM_VALUE(cylindrical_cap_blend_widths, shader, 2fv, 1,  config -> cylindrical_cap_blend_widths);
+	INIT_UNIFORM_VALUE(cylindrical_cap_blend_widths, shader, 2fv, 1, config -> cylindrical_cap_blend_widths);
+
+	////////// Making a scale-rotation matrix for the skybox
+
+	const GLfloat* const rotation_degrees_per_axis = config -> rotation_degrees_per_axis;
+
+	mat4 scale_rotation = GLM_MAT4_IDENTITY_INIT;
+
+	glm_scale(scale_rotation, (vec3) {1.0f, config -> horizon_dist_scale, 1.0f});
+	glm_rotate_x(scale_rotation, glm_rad(rotation_degrees_per_axis[0]), scale_rotation);
+	glm_rotate_y(scale_rotation, glm_rad(rotation_degrees_per_axis[1]), scale_rotation);
+	glm_rotate_z(scale_rotation, glm_rad(rotation_degrees_per_axis[2]), scale_rotation);
+
+	mat3 scale_rotation_minimized;
+	glm_mat4_pick3(scale_rotation, scale_rotation_minimized);
+	INIT_UNIFORM_VALUE(scale_rotation_matrix, shader, Matrix3fv, 1, GL_FALSE, (GLfloat*) scale_rotation_minimized);
+
+	//////////
 
 	return (Skybox) {
 		init_drawable_with_vertices(define_vertex_spec, NULL, GL_STATIC_DRAW, GL_TRIANGLE_STRIP,

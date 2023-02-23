@@ -139,11 +139,19 @@ static void* main_init(const WindowConfig* const window_config) {
 		*const dyn_light_looking_at_json = read_json_subobj(dyn_light_json, "looking_at"),
 		*const cascaded_shadow_json = read_json_subobj(shadow_mapping_json, "cascades");
 
+	//////////
+
+	vec3 skybox_rotation_degrees_per_axis;
 	vec2 skybox_cylindrical_cap_blend_widths;
+
+	GET_ARRAY_VALUES_FROM_JSON_KEY(skybox_json, skybox_rotation_degrees_per_axis, rotation_degrees_per_axis, float);
+	GET_ARRAY_VALUES_FROM_JSON_KEY(skybox_json, skybox_cylindrical_cap_blend_widths, cylindrical_cap_blend_widths, float);
+
+	//////////
+
 	vec3 dyn_light_pos, dyn_light_looking_at_origin, dyn_light_looking_at_dest;
 	sdl_pixel_component_t rgb_light_color[3];
 
-	GET_ARRAY_VALUES_FROM_JSON_KEY(skybox_json, skybox_cylindrical_cap_blend_widths, cylindrical_cap_blend_widths, float);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_json, dyn_light_pos, pos, float);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_origin, origin, float);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_dest, dest, float);
@@ -215,6 +223,12 @@ static void* main_init(const WindowConfig* const window_config) {
 			JSON_TO_FIELD(skybox_json, texture_path, string),
 			JSON_TO_FIELD(skybox_json, texture_scale, float),
 			JSON_TO_FIELD(skybox_json, horizon_dist_scale, float),
+
+			.rotation_degrees_per_axis = {
+				skybox_rotation_degrees_per_axis[0],
+				skybox_rotation_degrees_per_axis[1],
+				skybox_rotation_degrees_per_axis[2]
+			},
 
 			.cylindrical_cap_blend_widths = {
 				skybox_cylindrical_cap_blend_widths[0],

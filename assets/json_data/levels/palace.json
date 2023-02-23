@@ -48,6 +48,7 @@
 		"texture_path": "../assets/skyboxes/oasis.bmp",
 		"texture_scale": 4.0,
 		"horizon_dist_scale": 0.75,
+		"rotation_degrees_per_axis": [0.0, 240.0, 0.0],
 		"cylindrical_cap_blend_widths": [0.175, 0.0]
 	},
 
