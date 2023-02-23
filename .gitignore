@@ -1,6 +1,6 @@
 .DS_Store
 scrap_code.txt
-.swp
+*.swp
 
 .cache/
 .vscode/
