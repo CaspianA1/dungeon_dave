@@ -10,11 +10,10 @@
 /* TODO:
 - Have a SkyboxRenderer interface that allows swapping out skybox textures
 - Pixel art UV correction for skyboxes, instead of doing rescaling
-- Figure out spherical caps
-- A panorama -> skybox tool, where one can either cut off parts of the panorama,
+- Maybe a panorama -> skybox tool, where one can either cut off parts of the panorama,
 	or insert the panorama as the middle of the skybox, and fill in outlines for the rest
 
-Details on going from equiangular to equirectangular skyboxes:
+Details on going from equiangular to equirectangular skyboxes (not relevant anymore):
 	https://www.reddit.com/r/Unity3D/comments/6vfdpc/how_does_one_create_a_skybox_cubemap_from_scratch/
 	https://vrkiwi.org/dev-blog/35-how-to-make-a-skybox-or-two/
 	https://www.reddit.com/r/gamedev/comments/crxcu8/how_does_one_make_a_seamless_cube_shaped_skybox/
