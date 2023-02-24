@@ -257,8 +257,7 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 	glGetIntegerv(GL_UNPACK_ALIGNMENT, &prev_unpack_alignment);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, sizeof(byte));
 
-	// TODO: specify the format in texture.h
-	init_texture_data(TexVolumetric, (GLsizei[]) {max_x, max_z, max_y}, GL_RED, GL_R8, OPENGL_COLOR_CHANNEL_TYPE, ao_map);
+	init_texture_data(TexVolumetric, (GLsizei[]) {max_x, max_z, max_y}, GL_RED, OPENGL_AO_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, ao_map);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, prev_unpack_alignment);
 	init_texture_mipmap(TexVolumetric);
 

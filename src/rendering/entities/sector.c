@@ -438,16 +438,25 @@ void draw_sectors(const SectorContext* const sector_context, const Camera* const
 
 		use_vertex_spec(drawable -> vertex_spec);
 
+		////////// Depth prepass
+
 		// Running a depth prepass
 		use_shader(sector_context -> depth_prepass_shader);
-		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // No color buffer writes
-		glDrawArrays(GL_TRIANGLES, start_vertex, num_vertices);
+
+		 // No color buffer writes
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+			glDrawArrays(GL_TRIANGLES, start_vertex, num_vertices);
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+		////////// Rendering pass
 
 		// Only passing fragments with the same depth value
 		WITH_RENDER_STATE(glDepthFunc, GL_EQUAL, GL_LESS,
-			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-			use_shader(drawable -> shader);
-			glDrawArrays(GL_TRIANGLES, start_vertex, num_vertices);
+			// No depth buffer writes (TODO: stop the redundant state change for this in 'main.c')
+			WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
+				use_shader(drawable -> shader);
+				glDrawArrays(GL_TRIANGLES, start_vertex, num_vertices);
+			);
 		);
 	}
 }
