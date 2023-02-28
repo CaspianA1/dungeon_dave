@@ -501,20 +501,29 @@ static void* main_init(const WindowConfig* const window_config) {
 		bilinear_percents[1] = shared_material_properties -> bilinear_percents.normal;
 	}
 
-	//////////
+	////////// Specifying the cascade count
 
 	specify_cascade_count_before_any_shader_compilation(
 		window_config -> opengl_major_minor_version,
 		level_rendering_config.shadow_mapping.cascaded_shadow_config.num_cascades);
 
-	//////////
+	////////// Defining the camera config
+
+	const cJSON* const camera_json = read_json_subobj(non_lighting_json, "camera");
+
+	vec3 camera_init_pos, camera_angles_degrees;
+	GET_ARRAY_VALUES_FROM_JSON_KEY(camera_json, camera_init_pos, init_pos, float);
+	GET_ARRAY_VALUES_FROM_JSON_KEY(camera_json, camera_angles_degrees, angles_degrees, float);
 
 	const CameraConfig camera_config = {
-		.init_pos = {1.5f, 0.5f, 1.5f}, // {0.5f, 0.0f, 0.5f},
-		.angles = {.hori = ONE_FOURTH_PI, .vert = 0.0f, .tilt = 0.0f}
-	};
+		.init_pos = {camera_init_pos[0], camera_init_pos[1], camera_init_pos[2]},
 
-	const ALchar* const level_soundtrack_path = get_string_from_json(read_json_subobj(non_lighting_json, "soundtrack_path"));
+		.angles = { // TODO: why can't I set an initial tilt angle?
+			.hori = glm_rad(camera_angles_degrees[0]),
+			.vert = glm_rad(camera_angles_degrees[1]),
+			.tilt = glm_rad(camera_angles_degrees[2])
+		}
+	};
 
 	////////// Defining the title screen config
 
@@ -602,6 +611,8 @@ static void* main_init(const WindowConfig* const window_config) {
 	memcpy(scene_context_on_heap, &scene_context, sizeof(SceneContext));
 
 	////////// Audio setup
+
+	const ALchar* const level_soundtrack_path = get_string_from_json(read_json_subobj(non_lighting_json, "soundtrack_path"));
 
 	const ALchar
 		*const jump_up_sound_path = ASSET_PATH("audio/sound_effects/jump_up.wav"),

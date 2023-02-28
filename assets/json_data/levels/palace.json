@@ -58,6 +58,11 @@
 	"noise_granularity": 0.001,
 
 	"non_lighting_data": {
+		"camera": {
+			"init_pos": [1.5, 0.5, 1.5],
+			"angles_degrees": [45.0, 0.0, 0.0]
+		},
+
 		"soundtrack_path": "../assets/audio/themes/new/mountain.wav",
 
 		"sector_face_texture_paths": [
