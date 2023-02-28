@@ -138,7 +138,7 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 
 	byte num_dimensions;
 
-	#define UPLOAD_CALL(target, num_dims_literal, size, ...)\
+	#define UPLOAD_CALL(target, num_dims_literal, ...)\
 		num_dimensions = num_dims_literal;\
 		glTexImage##num_dims_literal##D(target, level, internal_format, __VA_ARGS__, border, input_format, color_channel_type, pixels);\
 		break;
@@ -150,7 +150,7 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 			FAIL(CreateTexture, "%s", "Texture buffers are not supported for `init_texture_data`");
 
 		case TexPlain1D:
-			UPLOAD_CALL(type, 1, size, size[0]);
+			UPLOAD_CALL(type, 1, size[0]);
 
 		case TexPlain: case TexRect:
 			if (type == TexRect) {
@@ -158,25 +158,25 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 				max_size[2] = max_size[1] = max_size[0]; // All sizes = the max x size
 			}
 
-			UPLOAD_CALL(type, 2, size, size[0], size[1]);
+			UPLOAD_CALL(type, 2, size[0], size[1]);
 
 		case TexSkybox: {
 			glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, max_size); // Getting the max x size
 			max_size[1] = max_size[0]; // Max y size = max x size
 
 			const GLsizei face_size = size[0];
-			UPLOAD_CALL(GL_TEXTURE_CUBE_MAP_POSITIVE_X + (GLenum) size[1], 2, size, face_size, face_size);
+			UPLOAD_CALL(GL_TEXTURE_CUBE_MAP_POSITIVE_X + (GLenum) size[1], 2, face_size, face_size);
 		}
 
 		case TexSet:
 			// The max z-size here is the max number of layers
 			glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, max_size + 2);
-			UPLOAD_CALL(type, 3, size, size[0], size[1], size[2]);
+			UPLOAD_CALL(type, 3, size[0], size[1], size[2]);
 
 		case TexVolumetric:
 			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, max_size); // Getting the max x size
 			max_size[2] = max_size[1] = max_size[0]; // All sizes = the max x size
-			UPLOAD_CALL(type, 3, size, size[0], size[1], size[2]);
+			UPLOAD_CALL(type, 3, size[0], size[1], size[2]);
 	}
 
 	////////// Checking that all of the axes have an appropriate size
