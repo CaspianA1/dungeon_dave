@@ -155,7 +155,7 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 		case TexPlain: case TexRect:
 			if (type == TexRect) {
 				glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE, max_size);
-				max_size[2] = max_size[1] = max_size[0]; // All sizes = the max x size
+				max_size[1] = max_size[0]; // Max y size = max x size
 			}
 
 			UPLOAD_CALL(type, 2, size[0], size[1]);
