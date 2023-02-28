@@ -224,6 +224,7 @@ static void erase_version_strings_from_dependency_list(const List* const depende
 		because it's the only one that should keep #version in it */
 		if (dependency_ref == first_dependency) continue;
 
+		// TODO: expect no version string in each shader, and prepend it manually
 		GLchar* const version_string_pos = strstr(*dependency_ref, base_version_string);
 		if (version_string_pos != NULL) memset(version_string_pos, ' ', full_version_string_length);
 		// TODO: fail here if no version string, printing the included file path
