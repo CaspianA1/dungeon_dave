@@ -18,7 +18,7 @@ extern GLfloat global_anisotropic_filtering_level;
 
 #define OPENGL_MATERIALS_MAP_INTERNAL_PIXEL_FORMAT GL_RGBA8
 #define OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT GL_RGBA
-#define OPENGL_AO_MAP_INTERNAL_PIXEL_FORMAT GL_R8
+#define OPENGL_AO_MAP_INTERNAL_PIXEL_FORMAT GL_R8 // TODO: why not `GL_R8UI`?
 #define OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT GL_SRGB8_ALPHA8
 
 #define OPENGL_COLOR_CHANNEL_TYPE GL_UNSIGNED_BYTE
@@ -59,6 +59,7 @@ typedef enum {
 
 typedef enum {
 	TexBuffer = GL_TEXTURE_BUFFER,
+	TexRect = GL_TEXTURE_RECTANGLE,
 	TexPlain1D = GL_TEXTURE_1D,
 	TexPlain = GL_TEXTURE_2D,
 	TexSkybox = GL_TEXTURE_CUBE_MAP,
@@ -99,8 +100,9 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	const bool use_anisotropic_filtering);
 
 /* Size formats:
+Buffer textures: failure
 Plain 1D textures: {width}
-Plain 2D textures: {width, height}
+Plain 2D textures/rectangle textures: {width, height}
 Skyboxes: {width/height, face index}
 Texture sets/volumetric textures: {width, height, depth} */
 void init_texture_data(const TextureType type, const GLsizei* const size,

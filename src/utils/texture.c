@@ -146,11 +146,19 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 	//////////
 
 	switch (type) {
-		case TexBuffer:
+		case TexBuffer: // TODO: do a size check here
 			FAIL(CreateTexture, "%s", "Texture buffers are not supported for `init_texture_data`");
 
-		case TexPlain1D: UPLOAD_CALL(type, 1, size, size[0]);
-		case TexPlain: UPLOAD_CALL(type, 2, size, size[0], size[1]);
+		case TexPlain1D:
+			UPLOAD_CALL(type, 1, size, size[0]);
+
+		case TexPlain: case TexRect:
+			if (type == TexRect) {
+				glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE, max_size);
+				max_size[2] = max_size[1] = max_size[0]; // All sizes = the max x size
+			}
+
+			UPLOAD_CALL(type, 2, size, size[0], size[1]);
 
 		case TexSkybox: {
 			glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, max_size); // Getting the max x size
@@ -168,7 +176,6 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 		case TexVolumetric:
 			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, max_size); // Getting the max x size
 			max_size[2] = max_size[1] = max_size[0]; // All sizes = the max x size
-
 			UPLOAD_CALL(type, 3, size, size[0], size[1], size[2]);
 	}
 
@@ -185,6 +192,7 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 
 				#define STRING_CASE(t) case t: type_string = #t; break;
 
+				STRING_CASE(TexRect);
 				STRING_CASE(TexPlain1D); STRING_CASE(TexPlain);
 				STRING_CASE(TexSkybox); STRING_CASE(TexSet);
 				STRING_CASE(TexVolumetric);
