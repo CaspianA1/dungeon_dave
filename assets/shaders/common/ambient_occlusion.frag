@@ -8,8 +8,8 @@ uniform sampler3D ambient_occlusion_sampler;
 https://stackoverflow.com/questions/13501081/efficient-bicubic-filtering-code-in-glsl. */
 
 vec4 cubic(const float v) {
-	vec4 n = vec4(1.0f, 2.0f, 3.0f, 4.0f) - v;
-	vec4 s = n * n * n;
+	vec3 n = vec3(1.0f, 2.0f, 3.0f) - v;
+	vec3 s = n * n * n;
 
 	float
 		x = s.x,
