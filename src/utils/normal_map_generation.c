@@ -193,6 +193,7 @@ static void get_texture_metadata(
 	glGetTexParameteriv(type, GL_TEXTURE_MIN_FILTER, mag_min_filter + 1);
 }
 
+// Note: level init is almost instant when this just returns 0; so GPU parallelization could be great here
 GLuint init_normal_map_from_albedo_texture(const GLuint albedo_texture,
 	const TextureType type, const NormalMapConfig* const config) {
 
