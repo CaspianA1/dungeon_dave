@@ -101,6 +101,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 	const GLuint first_shader = shaders_that_share_params[0];
 
 	SharedShadingParams shared_shading_params = {
+		// TODO: change to `GL_*_READ`?
 		.constant = init_uniform_buffer(
 			GL_STATIC_DRAW, "ConstantShadingParams",
 			first_shader, constant_subvar_names, ARRAY_LENGTH(constant_subvar_names)
