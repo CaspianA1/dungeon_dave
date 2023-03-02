@@ -53,7 +53,7 @@ static void report_shader_validation_error(const GLuint shader, const GLchar* co
 	if (log_length > 0) {
 		GLchar* const info_log = alloc((size_t) (log_length + 1), sizeof(GLchar));
 		glGetProgramInfoLog(shader, log_length, NULL, info_log);
-		printf("Problem for shader of path '%s':\n%s\n---\n", shader_path, info_log);
+		fprintf(stderr, "Problem for shader of path '%s':\n%s\n---\n", shader_path, info_log);
 		dealloc(info_log);
 	}
 }
