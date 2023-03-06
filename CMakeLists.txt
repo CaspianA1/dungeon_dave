@@ -10,7 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
-set(CONVERSION_WARNINGS_1 "-Wfloat-conversion -Wdouble-promotion -Wsign-conversion")
+set(CONVERSION_WARNINGS_1 "-Wfloat-conversion -Wimplicit-float-conversion -Wdouble-promotion -Wsign-conversion")
 set(CONVERSION_WARNINGS_2 "-Wimplicit-int-conversion -Wshorten-64-to-32 -Wincompatible-pointer-types")
 set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Wformat ${CONVERSION_WARNINGS_1} ${CONVERSION_WARNINGS_2}")
 
