@@ -258,6 +258,11 @@ static void frustum_cull_sector_faces_into_gpu_buffer(
 	const SectorContext* const sector_context, const Camera* const camera,
 	buffer_size_t* const first_face_index_ref, buffer_size_t* const num_visible_faces_ref) {
 
+	/* TODO: perhaps optimize like this:
+	- Every frame: For all sectors that are visible, add their sub-meshes to the GPU buffer
+	- On the reinit event: Clear all sub-meshes from the GPU buffer
+	- That would result in some occasional overdraw, but it would help if the constant rewriting becomes a botteneck */
+
 	const List* const sectors = &sector_context -> sectors;
 	const Sector* const out_of_bounds_sector = (Sector*) sectors -> data + sectors -> length;
 
