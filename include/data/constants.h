@@ -2,8 +2,8 @@
 #define CONSTANTS_H
 
 #include "utils/typedefs.h" // For OpenGL types + `byte`
-#include "utils/sdl_include.h" // For `SDL_Scancode`
 #include "cglm/cglm.h" // For pi variants + `vec2`
+#include "utils/sdl_include.h" // For `SDL_Scancode`
 
 static const GLfloat
 	PI = GLM_PIf,
