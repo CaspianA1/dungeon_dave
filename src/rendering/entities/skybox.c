@@ -142,6 +142,7 @@ Skybox init_skybox(const SkyboxConfig* const config) {
 
 	mat4 scale_rotation = GLM_MAT4_IDENTITY_INIT;
 
+	// TODO: use `glm_euler_xyz` here instead
 	glm_scale(scale_rotation, (vec3) {1.0f, config -> horizon_dist_scale, 1.0f});
 	glm_rotate_x(scale_rotation, glm_rad(rotation_degrees_per_axis[0]), scale_rotation);
 	glm_rotate_y(scale_rotation, glm_rad(rotation_degrees_per_axis[1]), scale_rotation);
