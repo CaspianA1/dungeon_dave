@@ -47,7 +47,7 @@
 	"skybox": {
 		"texture_path": "../assets/skyboxes/desert_island_mountain.bmp",
 		"texture_scale": 2.0,
-		"horizon_dist_scale": 1.5,
+		"horizon_dist_scale": 1.0,
 		"rotation_degrees_per_axis": [0.0, 0.0, 0.0],
 		"cylindrical_cap_blend_widths": [0.01, 0.01]
 	},
