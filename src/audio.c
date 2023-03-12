@@ -3,6 +3,8 @@
 #include "utils/macro_utils.h" // For `CHECK_BITMASK`
 #include "utils/debug_macro_utils.h" // TODO: remove
 
+// TODO: allow for an option to set the game's master volume
+
 //////////
 
 /* This converts the bytes data referred to
