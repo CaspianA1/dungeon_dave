@@ -26,7 +26,6 @@ layout(shared) uniform ConstantShadingParams {
 	} volumetric_lighting;
 
 	struct {
-		bool tricubic_filtering_enabled;
 		float strength;
 	} ambient_occlusion;
 

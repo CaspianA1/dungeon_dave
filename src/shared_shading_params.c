@@ -23,7 +23,7 @@ static void init_constant_shading_params(UniformBuffer* const shading_params,
 
 	// TODO: to fix the problem of writing too-small numbers, perhaps zero out the uniform buffer first?
 
-	UBO_WRITE(parallax_mapping.enabled); // TODO: write a 32-bit number instead? (Same for `tricubic_filtering_enabled`?)
+	UBO_WRITE(parallax_mapping.enabled); // TODO: write a 32-bit number instead?
 	UBO_WRITE(parallax_mapping.min_layers); UBO_WRITE(parallax_mapping.max_layers);
 	UBO_WRITE(parallax_mapping.height_scale); UBO_WRITE(parallax_mapping.lod_cutoff);
 
@@ -46,7 +46,6 @@ static void init_constant_shading_params(UniformBuffer* const shading_params,
 		}
 	);
 
-	UBO_WRITE(ambient_occlusion.tricubic_filtering_enabled);
 	UBO_WRITE(ambient_occlusion.strength);
 
 	const sdl_pixel_component_t* const rgb_light_color = level_rendering_config -> rgb_light_color;
@@ -84,7 +83,6 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 			"volumetric_lighting.sample_density",
 			"volumetric_lighting.opacity",
 
-			"ambient_occlusion.tricubic_filtering_enabled",
 			"ambient_occlusion.strength",
 
 			"light_color", "tone_mapping_max_white", "noise_granularity"

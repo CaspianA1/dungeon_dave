@@ -30,7 +30,6 @@
 	},
 
 	"ambient_occlusion": {
-		"tricubic_filtering_enabled": true,
 		"strength": 0.9
 	},
 

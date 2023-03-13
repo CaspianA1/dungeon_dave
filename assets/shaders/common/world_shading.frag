@@ -129,7 +129,7 @@ vec4 calculate_light() {
 	vec3 radiance = light_color; // TODO: do some variant of IBL to add the environment map sampler back in
 	vec3 Lo = (diffuse * albedo.rgb * ONE_OVER_PI + specular) * radiance * n_dot_l * shadow_and_volumetric_light.x;
 
-	vec3 ambient = get_ambient_strength() * albedo.rgb;
+	vec3 ambient = get_ambient_strength(fragment_pos_world_space) * albedo.rgb;
 	vec3 color = ((ambient + Lo) + (light_color * shadow_and_volumetric_light.y)) * albedo.a;
 
 	apply_tone_mapping(tone_mapping_max_white, color);

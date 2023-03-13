@@ -194,10 +194,7 @@ static void* main_init(const WindowConfig* const window_config) {
 			JSON_TO_FIELD(vol_lighting_json, opacity, float)
 		},
 
-		.ambient_occlusion = {
-			JSON_TO_FIELD(ao_json, tricubic_filtering_enabled, bool),
-			JSON_TO_FIELD(ao_json, strength, float)
-		},
+		.ambient_occlusion = {JSON_TO_FIELD(ao_json, strength, float)},
 
 		.dynamic_light_config = {
 			JSON_TO_FIELD(dyn_light_json, time_for_cycle, float),

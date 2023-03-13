@@ -1,7 +1,5 @@
 #version 400 core
 
-in vec3 ambient_occlusion_UV;
-
 uniform sampler3D ambient_occlusion_sampler;
 
 /* The tricubic filtering code is based on the bicubic filtering code from here:
@@ -19,20 +17,24 @@ vec4 cubic(const float v) {
 	return vec4(x, y, z, 6.0f - x - y - z) / 6.0f;
 }
 
-// Bicubic filtering reads some values under the heightmap, which makes it a bit darker.
-float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec3 UV) {
-	vec3 texture_size = textureSize(texture_sampler, 0);
-	vec3 texel_size = 1.0f / texture_size;
+// Tricubic filtering reads some values under the heightmap, which makes it a bit darker.
+float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec3 fragment_pos_world_space) {
+	vec3
+		texel_size = 1.0f / textureSize(texture_sampler, 0),
+		UV = fragment_pos_world_space.xzy;
 
-	vec3 upscaled_UV = UV * texture_size - 0.5f;
-	vec3 UV_fraction = fract(upscaled_UV);
-	upscaled_UV -= UV_fraction; // Flooring it
+	vec3 UV_fraction = fract(UV);
+	UV -= UV_fraction; // Flooring it
+
+	/* Note: to get rid of the aliasing, simply set the UV fraction to some
+	constant, and don't floor the UV (but that causes other problems as well). */
 
 	//////////
 
 	const vec2 c_texel_offset = vec2(-0.5f, 1.5f);
-	vec4 c = upscaled_UV.xxyy + vec4(c_texel_offset, c_texel_offset);
-	vec2 c_extra = upscaled_UV.zz + c_texel_offset;
+
+	vec4 c = UV.xxyy + c_texel_offset.xyxy;
+	vec2 c_extra = UV.z + c_texel_offset;
 
 	//////////
 
@@ -42,7 +44,7 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 	vec4 sample_offset = (c + vec4(x_cubic.yw, y_cubic.yw) / s) * texel_size.xxyy;
 
 	vec2 s_extra = z_cubic.xz + z_cubic.yw;
-	vec2 sample_offset_extra = (c_extra + vec2(z_cubic.yw) / s_extra) * texel_size.zz;
+	vec2 sample_offset_extra = (c_extra + vec2(z_cubic.yw) / s_extra) * texel_size.z;
 
 	//////////
 
@@ -59,7 +61,7 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 		s.z / (s.z + s.w),
 		s_extra.x / (s_extra.x + s_extra.y)
 	);
-	
+
 	vec4 lerped_x = mix(
 		vec4(lower_samples.wy, higher_samples.wy),
 		vec4(lower_samples.zx, higher_samples.zx),
@@ -70,11 +72,8 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 	return mix(lerped_y.y, lerped_y.x, lerp_weights.z);
 }
 
-float get_ambient_strength(void) {
-	float raw_ao_amount = ambient_occlusion.tricubic_filtering_enabled
-		? texture_tricubic_single_channel(ambient_occlusion_sampler, ambient_occlusion_UV)
-		: texture(ambient_occlusion_sampler, ambient_occlusion_UV).r;
-
+float get_ambient_strength(const vec3 fragment_pos_world_space) {
+	float raw_ao_amount = texture_tricubic_single_channel(ambient_occlusion_sampler, fragment_pos_world_space);
 	float raw_ao_strength = ambient_occlusion.strength * raw_ao_amount;
 
 	/* The sRGB -> linear mapping is based on function from the bottom of here:
