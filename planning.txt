@@ -80,6 +80,7 @@ Random feature ideas:
 - Find a tighter far plane distance by finding the diameter of the sector convex hull
 - The map editor should be called Dungeon Painter
 - Perhaps build levels on top of cool terrain heightmaps, for a good surrounding environment + a level path through the terrain
+- I can port the game to many more platforms if I reduce the graphics quality - which is the biggest bottleneck
 
 Normal mapping:
 - Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
