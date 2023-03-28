@@ -4,6 +4,7 @@ Levels:
 - A level based on the Zhangjiajie region
 - A map like this one: https://www.planetminecraft.com/project/the-sultans-palace-3351849/ (can look up similar Sultan maps for Minecraft)
 - Maybe a level based in a lost city of gold
+- A level with a Ziggurat in it somewhere (perhaps that'll be the pyramid level?)
 
 Final lighting model:
 - Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
