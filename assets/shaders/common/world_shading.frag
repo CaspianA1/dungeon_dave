@@ -13,7 +13,7 @@ flat in mat3 fragment_tbn;
 
 // These are set through a shared fn for world-shaded objects
 uniform samplerBuffer materials_sampler;
-uniform sampler2DArray albedo_sampler, normal_map_sampler;
+uniform sampler2DArray albedo_sampler, normal_sampler;
 
 // https://64.github.io/tonemapping/ (Reinhard Extended Luminance)
 void apply_tone_mapping(const float max_white, inout vec3 color) {
@@ -77,17 +77,17 @@ vec4 calculate_light() {
 
 	//////////
 
-	vec3 parallax_UV_for_albedo = get_parallax_UV(UV, normal_map_sampler);
-	vec3 parallax_UV_for_normal = parallax_UV_for_albedo;
+	vec3 parallax_UV_for_normal = get_parallax_UV(UV, normal_sampler);
+	vec3 parallax_UV_for_albedo = parallax_UV_for_normal;
 
 	/* Parallax UVs for albedo and normal have different bilinear percents, so this adjusts
 	those individually. Note that the bilinear percent for the parallax heightmap is always 1. */
 	adjust_UV_for_pixel_art_filtering(albedo_bilinear_percent, textureSize(albedo_sampler, 0).xy, parallax_UV_for_albedo.xy);
-	adjust_UV_for_pixel_art_filtering(normal_bilinear_percent, textureSize(normal_map_sampler, 0).xy, parallax_UV_for_normal.xy);
+	adjust_UV_for_pixel_art_filtering(normal_bilinear_percent, textureSize(normal_sampler, 0).xy, parallax_UV_for_normal.xy);
 
 	vec4
 		albedo = texture(albedo_sampler, parallax_UV_for_albedo),
-		normal_and_inv_height = get_tangent_space_normal_3D(normal_map_sampler, parallax_UV_for_normal);
+		normal_and_inv_height = get_tangent_space_normal_3D(normal_sampler, parallax_UV_for_normal);
 
 	/* If an object's heightmap (built from its albedo texture) has steeper height changes,
 	its surface normals will be more slanted, and so the Z components of those normals

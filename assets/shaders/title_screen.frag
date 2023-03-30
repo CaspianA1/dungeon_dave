@@ -15,7 +15,7 @@ uniform float
 	scrolling_bilinear_normal_percent;
 
 uniform vec3 light_pos_tangent_space;
-uniform sampler2D still_albedo_sampler, scrolling_albedo_sampler, scrolling_normal_map_sampler;
+uniform sampler2D still_albedo_sampler, scrolling_albedo_sampler, scrolling_normal_sampler;
 
 //////////
 
@@ -46,12 +46,12 @@ void main(void) {
 		textureSize(scrolling_albedo_sampler, 0), scrolling_UV_for_albedo);
 
 	adjust_UV_for_pixel_art_filtering(scrolling_bilinear_normal_percent,
-		textureSize(scrolling_normal_map_sampler, 0), scrolling_UV_for_normal);
+		textureSize(scrolling_normal_sampler, 0), scrolling_UV_for_normal);
 
 	////////// Getting the normal, dir to light, and halfway dir
 
 	vec3
-		scrolling_fragment_normal = get_tangent_space_normal_2D(scrolling_normal_map_sampler, scrolling_UV_for_normal).rgb,
+		scrolling_fragment_normal = get_tangent_space_normal_2D(scrolling_normal_sampler, scrolling_UV_for_normal).rgb,
 		view_dir = normalize(camera_pos_tangent_space - fragment_pos_tangent_space),
 		dir_to_light = normalize(light_pos_tangent_space - fragment_pos_tangent_space);
 

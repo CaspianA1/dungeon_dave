@@ -82,7 +82,7 @@ TitleScreen init_title_screen(
 
 	use_texture_in_shader(still_albedo_texture, shader, "still_albedo_sampler", texture_type, TU_TitleScreenStillAlbedo);
 	use_texture_in_shader(scrolling_albedo_texture, shader, "scrolling_albedo_sampler", texture_type, TU_TitleScreenScrollingAlbedo);
-	use_texture_in_shader(scrolling_normal_map, shader, "scrolling_normal_map_sampler", texture_type, TU_TitleScreenScrollingNormalMap);
+	use_texture_in_shader(scrolling_normal_map, shader, "scrolling_normal_sampler", texture_type, TU_TitleScreenScrollingNormalMap);
 
 	//////////
 

@@ -181,7 +181,7 @@ void init_shared_textures_for_world_shaded_objects(
 
 		use_texture_in_shader(materials_texture, shader, "materials_sampler", TexBuffer, TU_Materials);
 		use_texture_in_shader(wso.drawable -> albedo_texture, shader, "albedo_sampler", TexSet, wso.texture_units.albedo);
-		use_texture_in_shader(wso.drawable -> normal_map, shader, "normal_map_sampler", TexSet, wso.texture_units.normal_map);
+		use_texture_in_shader(wso.drawable -> normal_map, shader, "normal_sampler", TexSet, wso.texture_units.normal_map);
 		use_texture_in_shader(ao_map_texture, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 
 		use_texture_in_shader(shadow_depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMapPlain);
