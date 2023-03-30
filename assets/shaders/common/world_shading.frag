@@ -4,7 +4,7 @@
 #include "UV_utils.frag"
 #include "normal_utils.frag"
 #include "parallax_mapping.frag"
-#include "ambient_occlusion.frag"
+#include "sample_ambient_occlusion.frag"
 #include "../shadow/shadow.frag"
 
 flat in uint material_index, bilinear_percents_index;
