@@ -17,6 +17,10 @@ layout(shared) uniform ConstantShadingParams {
 
 		float
 			esm_exponent_layer_scale_factor, inter_cascade_blend_threshold,
+
+			/* TODO: for this and `light_view_projection_matrices`, define a max array size instead,
+			and just write less data than that maximum. This will mean that shaders that use those
+			arrays will not need to be recompiled per each level. */
 			cascade_split_distances[NUM_CASCADE_SPLITS];
 	} shadow_mapping;
 
