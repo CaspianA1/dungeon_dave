@@ -1,17 +1,80 @@
 #include "rendering/ambient_occlusion.h"
 #include "cglm/cglm.h" // For various cglm defs
-#include "data/constants.h" // For TWO_PI, and `max_byte_value`
-#include "utils/map_utils.h" // For `pos_out_of_overhead_map_bounds`, and `sample_map_point`
-#include "utils/list.h" // For various `List`-related defs
-#include "utils/macro_utils.h" // For `ARRAY_LENGTH`
+#include "data/constants.h" // For `TWO_PI`, and `DEBUG_AO_MAP_GENERATION`
+#include "utils/uniform_buffer.h" // For various uniform buffer defs
+#include "utils/alloc.h" // For `alloc`, and `dealloc`
+#include "utils/shader.h" // For `init_shader`, and `deinit_shader`
+#include "utils/macro_utils.h" // For `ASSET_PATH`
 #include "utils/texture.h" // For various texture creation utils
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 
-typedef uint16_t trace_count_t;
-// TODO: define these in the `constants` struct, or make them parameters
-static const trace_count_t num_trace_iters = 200;
+#ifdef DEBUG_AO_MAP_GENERATION
+#include "utils/map_utils.h" // For `pos_out_of_overhead_map_bounds`, and `sample_map_point`
+#endif
 
-//////////
+/* TODO:
+Optimization:
+- Spatial hashing for using less space
+- Tracing via maximum mipmaps, or a quadtree/octree/r-tree tracing method
+- Result caching: first sort the rays, and if the previous ray collided, test if the current ray collides with the same point (or around that area); if so, skip this tracing step. Only works for densely distributed rays.
+- (DONE) Allow for a workload split factor, to trade more speed for more space used
+- Allow for a batch fraction size factor, to trade less speed for less space used
+- If reading back directly after the draw call is still too slow, then perhaps do a readback at the end of all level initialization
+- If creating the AO map is too slow, then cache it on disk (a cache directory per level)
+- Maybe add a default value for above the map if high enough above all surrounding points?
+
+Fixes:
+- The aliasing involved in the filtering (perhaps it happens because the world-space position fluctuates so much for larger viewing distances?)
+- Unsampled areas within the hemisphere or sphere (normals are distributed well, but not the rays that are cast, it seems)
+- Give dual normals two sampling passes, and average the results
+- Figure out a better sampling method for over the map (sampling downwards doesn't make sense, since you should be going towards a light source)
+- Perhaps don’t make the bottom of the map black (oddly enough, giving a maximum-ao value when under makes little difference), maybe average neighboring overhead values iteratively?)
+- Perhaps use cosine weighting, instead of just a straight average (or some type of importance sampling, for less noise with fewer samples). See here: https://alexanderameye.github.io/notes/sampling-the-hemisphere/
+
+Possible:
+- Output to some target that has byte-size components
+- Only check the component that changed in the inner loop, if possible
+- (DONE, NO DIFFERENCE) See if disabling face culling during transform feedback changes performance at all
+- See if direction sorting could help at all
+- Would ray attenuation make anything look better?
+- Stratified sampling might look better with less samples
+- Rendering from each point with a given direction could maybe serve as a raytrace, in a way (may be hard to parallelize)
+
+Miscellaneous:
+- (DONE) Keep a CPU implementation of the algorithm (removed by default by a conditional macro), in order to allow verification of the GPU implementation
+- Define the number of trace iters and the max number of ray steps (and the new constants above) as part of the level JSON
+- A Lanzcos filter instead, to fix the tricubic overshoot?
+*/
+
+////////// Some typedefs and constants
+
+/*
+T = the total thread count
+N = the number of trace iters per point
+P = the number of points on the 3D grid
+W = the workload split factor
+
+- Normally, N loop iterations are run per thread, with each thread handling one point.
+- But with this, N/W loop iterations are done per thread, with T*W total threads being spawned.
+- This means that W threads correspond to one point.
+
+Overall, having this split factor should save GPU time, by parallelizing
+the workload more. It does use W times more memory though.
+*/
+
+typedef uint8_t workload_split_factor_t;
+typedef uint8_t ao_value_t;
+typedef uint16_t trace_count_t;
+typedef uint16_t ray_step_count_t;
+
+/* TODO: why does increasing this only make things slower? That doesn't make any sense.
+Also, see that this is nondestructive, in regards to divisions or moduli. */
+static const workload_split_factor_t workload_split_factor = 1u;
+static const trace_count_t num_trace_iters = 512u;
+static const ray_step_count_t max_num_ray_steps = 20u;
+static const GLfloat float_epsilon = GLM_FLT_EPSILON;
+
+////////// Some general utils
 
 static void generate_rand_dir(vec3 v) {
 	static const GLfloat two_pi_over_rand_max = TWO_PI / RAND_MAX;
@@ -29,11 +92,23 @@ static void generate_rand_dir(vec3 v) {
 	// This is to avoid any divisions by zero
 	for (byte i = 0; i < 3; i++) {
 		GLfloat* const component = v + i;
-		if (*component == 0.0f) *component = GLM_FLT_EPSILON;
+		if (*component == 0.0f) *component = float_epsilon;
 	}
+
+	// Normalizing it, just to make 100% sure that it's a unit vector
+	glm_vec3_normalize(v);
 }
 
-//////////
+static ao_value_t get_ao_term_from_collision_count(const trace_count_t num_collisions) {
+	static const ao_value_t max_ao_value = (ao_value_t) ~0u;
+	static const GLfloat collision_term_scaler = (GLfloat) max_ao_value / num_trace_iters;
+
+	return max_ao_value - (ao_value_t) (num_collisions * collision_term_scaler);
+}
+
+////////// The CPU implementation of the GPU AO algorithm
+
+#ifdef DEBUG_AO_MAP_GENERATION
 
 static bool ray_collides_with_heightmap(
 	const vec3 dir, const byte* const heightmap,
@@ -41,28 +116,21 @@ static bool ray_collides_with_heightmap(
 	const byte max_x, const byte max_y, const byte max_z,
 	const bool is_dual_normal, const signed_byte flow[3]) {
 
-	////////// https://www.shadertoy.com/view/3sKXDK
-
-	signed_byte actual_flow[3];
-
 	const signed_byte step_signs[3] = {
 		(signed_byte) glm_signf(dir[0]),
 		(signed_byte) glm_signf(dir[1]),
 		(signed_byte) glm_signf(dir[2])
 	};
 
-	memcpy(actual_flow, is_dual_normal ? step_signs : flow, sizeof(signed_byte[3]));
+	const signed_byte* const actual_flow = is_dual_normal ? step_signs : flow;
 
-	vec3 floating_origin = {origin_x, origin_y, origin_z};
-
-	if (actual_flow[0] == -1) floating_origin[0] -= GLM_FLT_EPSILON;
-	if (actual_flow[2] == -1) floating_origin[2] -= GLM_FLT_EPSILON;
-
-	const int16_t start_pos[3] = {
-		(int16_t) floorf(floating_origin[0]),
-		(int16_t) floorf(floating_origin[1]),
-		(int16_t) floorf(floating_origin[2])
+	const vec3 floating_origin = {
+		(actual_flow[0] == -1) * -float_epsilon + origin_x,
+		origin_y,
+		(actual_flow[2] == -1) * -float_epsilon + origin_z
 	};
+
+	const vec3 start_pos = {floorf(floating_origin[0]), floorf(floating_origin[1]), floorf(floating_origin[2])};
 
 	//////////
 
@@ -70,21 +138,23 @@ static bool ray_collides_with_heightmap(
 	glm_vec3_div(GLM_VEC3_ONE, (GLfloat*) dir, unit_step_size);
 	glm_vec3_abs(unit_step_size, unit_step_size);
 
-	vec3 ray_length_components = {
-		(step_signs[0] == 1) ? (start_pos[0] + 1.0f - floating_origin[0]) : (floating_origin[0] - start_pos[0]),
-		(step_signs[1] == 1) ? (start_pos[1] + 1.0f - floating_origin[1]) : (floating_origin[1] - start_pos[1]),
-		(step_signs[2] == 1) ? (start_pos[2] + 1.0f - floating_origin[2]) : (floating_origin[2] - start_pos[2])
-	};
+	vec3 ray_length_components;
+	glm_vec3_sub((GLfloat*) floating_origin, (GLfloat*) start_pos, ray_length_components);
+
+	for (byte i = 0; i < 3; i++) {
+		const GLfloat component = ray_length_components[i];
+		ray_length_components[i] = (step_signs[i] == 1) ? 1.0f - component : component;
+	}
 
 	glm_vec3_mul(ray_length_components, unit_step_size, ray_length_components);
 
-	int16_t curr_tile[3] = {start_pos[0], start_pos[1], start_pos[2]};
-
 	//////////
 
-	while (true) {
+	int16_t curr_tile[3] = {(int16_t) start_pos[0], (int16_t) start_pos[1], (int16_t) start_pos[2]};
+
+	for (ray_step_count_t i = 0; i < max_num_ray_steps; i++) {
 		// Will yield 1 if x > y, and 0 if x <= y (so this gives the index of the smallest among x and y)
-		const byte x_and_y_min_index = ray_length_components[0] > ray_length_components[1];
+		const byte x_and_y_min_index = (ray_length_components[0] > ray_length_components[1]);
 		const byte index_of_shortest = (ray_length_components[x_and_y_min_index] > ray_length_components[2]) ? 2 : x_and_y_min_index;
 
 		curr_tile[index_of_shortest] += step_signs[index_of_shortest];
@@ -92,16 +162,14 @@ static bool ray_collides_with_heightmap(
 
 		//////////
 
-		// TODO: Why are none of these ever negative?
 		const int16_t cx = curr_tile[0], cy = curr_tile[1], cz = curr_tile[2]; // `c` = current
 
-		// TODO: only check the component that changed
-		if (cy > max_y || pos_out_of_overhead_map_bounds(cx, cz, max_x, max_z))
-			return false;
-
-		else if (cy < (int16_t) sample_map_point(heightmap, (byte) cx, (byte) cz, max_x))
-			return true;
+		if (cy < 0) return true;
+		else if (cy > max_y || pos_out_of_overhead_map_bounds(cx, cz, max_x, max_z)) return false;
+		else if (cy < (int16_t) sample_map_point(heightmap, (byte) cx, (byte) cz, max_x)) return true;
 	}
+
+	return false;
 }
 
 //////////
@@ -118,11 +186,17 @@ static signed_byte clamp_signed_byte_to_directional_range(const signed_byte x) {
 	else return x;
 }
 
+typedef enum {
+	DualNormal, OnMap, AboveMap, BelowMap
+} NormalLocationStatus;
+
 typedef struct {
 	const vec3 normal;
 	const signed_byte flow[3];
-	const enum {OnMap, DualNormal, AboveMap, BelowMap} location_status;
+	const NormalLocationStatus location_status;
 } SurfaceNormalData;
+
+//////////
 
 SurfaceNormalData get_normal_data(const byte* const heightmap,
 	const byte map_width, const byte x, const byte y, const byte z) {
@@ -144,16 +218,13 @@ SurfaceNormalData get_normal_data(const byte* const heightmap,
 		fz = clamp_signed_byte_to_directional_range((diffs.tl - diffs.bl) + (diffs.tr - diffs.br));
 
 	if (fx == 0 && fy == 0 && fz == 0) {
+		NormalLocationStatus location_status;
+
 		// Handling dual normals
-		if (diffs.tl < diffs.bl || diffs.tr < diffs.tl)
-			return (SurfaceNormalData) {GLM_VEC3_ZERO_INIT, {0, 0, 0}, DualNormal};
+		if (diffs.tl < diffs.bl || diffs.tr < diffs.tl) location_status = DualNormal;
+		else location_status = (diffs.tl == 1) ? BelowMap : AboveMap;
 
-		////////// Above or below the map
-
-		return (SurfaceNormalData) {
-			GLM_VEC3_ZERO_INIT, {0, 0, 0},
-			(diffs.tl == 1) ? BelowMap : AboveMap
-		};
+		return (SurfaceNormalData) {GLM_VEC3_ZERO_INIT, {0, 0, 0}, location_status};
 	}
 
 	//////////
@@ -164,63 +235,195 @@ SurfaceNormalData get_normal_data(const byte* const heightmap,
 	return (SurfaceNormalData) {{normal[0], normal[1], normal[2]}, {fx, fy, fz}, OnMap};
 }
 
+#endif
+
 //////////
 
-AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size[2], const byte max_point_height) {
-	/* TODO:
-	- While debugging, use trilinear filtering to spot AO errors more easily
-	- Compute the AO map through transform feedback; pass in 3D map points, and then pass back occlusion values
+static void transform_feedback_hook(const GLuint shader) {
+	glTransformFeedbackVaryings(shader, 1, (const GLchar*[]) {"num_collisions"}, GL_INTERLEAVED_ATTRIBS);
+}
 
-	- Give dual normals two sampling passes
-	- Weight the collision result based on the distance that the ray traveled, or discard rays if they are too long
+static GLuint init_ao_map_texture(
+	const byte* const heightmap, const byte max_x, const byte max_z,
+	const byte max_y, const vec3* const rand_dirs,
+	ao_value_t** const transform_feedback_data_ref) {
 
-	- Implement the DDA version on the GPU (perhaps do separate raytraces per
-		GPU thread for even more speed; but more memory consumed that way as well - perhaps define
-		a trace iter split factor; some traces at some points are split up a bit into a few sub-passes?)
+	////////// Defining some constants
 
-	- A little thought: rendering the scene from the point's perspective, with the direction of the normal,
-		and then getting the fraction of the rendered thing covered by sky, would get the ambient occlusion term quite accurately
+	typedef GLint transform_feedback_output_t;
 
-	- Later on, if it turns out that computing the AO map on the GPU is too slow, perhaps cache the AO map on disk
-		(either computed at the first time that that level starts, or made by another program not tied to the game executable)
+	const TextureType heightmap_texture_type = TexRect;
 
-	- Maybe add a default value for above the map if high enough above all surrounding points?
+	const GLenum
+		heightmap_input_format = GL_RED_INTEGER,
+		transform_feedback_buffer_target = GL_TRANSFORM_FEEDBACK_BUFFER,
 
-	Order of resolution:
-		- Some areas in a hemisphere or sphere go unsampled (normals are distributed well, but not rays that are cast, it seems)
-		- Mip level bleed from black under-map values (oddly enough, giving a `constants.max_byte_value` value when under makes little difference)
-		- Maybe the edge cases for DDA vs naive
-		- Make tricubic less dark (it reads under the heightmap; to fix this, perhaps make the first layer
-			of under-map values equal to the values above (but what about map sides then?))
-		- Note: the tricubic darkness comes from its inherent overshoot; perhaps do a Lanzcos filter instead?
-		- Either fix the overshoot by clamping in the fragment shader, changing the interpolation type, or making in-map values
-			equal to the averages of the surrounding values outside
-		- GPU
-	*/
+		// TODO: ensure that these usages are optimal
+		transform_feedback_buffer_usage = GL_STATIC_DRAW,
+		rand_dirs_ubo_usage = GL_STATIC_DRAW;
 
-	//////////
+	const GLuint transform_feedback_buffer_binding_point = 0;
+	const GLint heightmap_internal_pixel_format = GL_R8UI;
 
-	const byte max_x = map_size[0], max_z = map_size[1], max_y = max_point_height;
-	byte* const ao_map = alloc(max_x * max_y * max_z, sizeof(byte));
+	////////// Setting the unpack alignment for the heightmap and output textures
 
-	//////////
+	GLint prev_unpack_alignment;
+	glGetIntegerv(GL_UNPACK_ALIGNMENT, &prev_unpack_alignment);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, sizeof(ao_value_t));
 
-	srand((unsigned) time(NULL));
+	////////// Some variable initialization
+
+	const buffer_size_t num_points_on_grid = max_x * max_z * max_y;
+	const buffer_size_t num_threads = num_points_on_grid * workload_split_factor;
+	const buffer_size_t output_buffer_size = num_threads * sizeof(transform_feedback_output_t);
+
+	const GLuint transform_feedback_gpu_buffer = init_gpu_buffer();
+	use_gpu_buffer(transform_feedback_buffer_target, transform_feedback_gpu_buffer);
+	init_gpu_buffer_data(transform_feedback_buffer_target, 1, output_buffer_size, NULL, transform_feedback_buffer_usage);
+	glBindBufferBase(transform_feedback_buffer_target, transform_feedback_buffer_binding_point, transform_feedback_gpu_buffer);
+
+	////////// Making a heightmap texture
+
+	const GLuint heightmap_texture = preinit_texture(heightmap_texture_type, TexNonRepeating, TexNearest, TexNearest, false);
+
+	init_texture_data(heightmap_texture_type, (GLsizei[]) {max_x, max_z}, heightmap_input_format,
+		heightmap_internal_pixel_format, OPENGL_COLOR_CHANNEL_TYPE, heightmap);
+
+	////////// Making a shader, and using it
+
+	const GLuint shader = init_shader(ASSET_PATH("shaders/precompute_ambient_occlusion.vert"), NULL, NULL, transform_feedback_hook);
+	use_shader(shader);
+
+	////////// Writing the plain uniforms and the heightmap to the shader
+
+	const trace_count_t num_traces_per_thread = num_trace_iters / workload_split_factor;
+
+	if (num_traces_per_thread * workload_split_factor != num_trace_iters)
+		FAIL(CreateTexture, "Cannot compute an ambient occlusion texture because the %hu "
+			"trace iterations per point cannot be split evenly into %hhu thread groups",
+			num_trace_iters, workload_split_factor);
+
+	INIT_UNIFORM_VALUE(workload_split_factor, shader, 1ui, workload_split_factor);
+	INIT_UNIFORM_VALUE(num_traces_per_thread, shader, 1ui, num_traces_per_thread);
+	INIT_UNIFORM_VALUE(max_num_ray_steps, shader, 1ui, max_num_ray_steps);
+	INIT_UNIFORM_VALUE(max_point_height, shader, 1ui, max_y);
+	INIT_UNIFORM_VALUE(float_epsilon, shader, 1f, float_epsilon);
+
+	use_texture_in_shader(heightmap_texture, shader, "heightmap_sampler", heightmap_texture_type, TU_Temporary);
+
+	////////// Making a uniform buffer, and writing the random dirs to it
+
+	const GLchar* const rand_dirs_uniform_name = "rand_dirs";
+
+	UniformBuffer rand_dirs_ubo = init_uniform_buffer(rand_dirs_ubo_usage,
+		"RandDirs", shader, (const GLchar*[]) {rand_dirs_uniform_name}, 1);
+
+	bind_uniform_buffer_to_shader(&rand_dirs_ubo, shader);
+	enable_uniform_buffer_writing_batch(&rand_dirs_ubo, true);
+
+	write_array_of_primitives_to_uniform_buffer(&rand_dirs_ubo,
+		rand_dirs_uniform_name, (List) {
+			.data = (void*) rand_dirs,
+			.item_size = sizeof(vec3),
+			.length = num_trace_iters
+		}
+	);
+
+	disable_uniform_buffer_writing_batch(&rand_dirs_ubo);
+
+	////////// Drawing
+
+	WITH_BINARY_RENDER_STATE(GL_RASTERIZER_DISCARD,
+		glBeginTransformFeedback(GL_POINTS);
+		draw_primitives(GL_POINTS, (GLsizei) num_threads);
+		glEndTransformFeedback();
+	);
+
+	////////// Reading back from the feedback GPU buffer
+
+	transform_feedback_output_t* const raw_transform_feedback_data = init_gpu_buffer_memory_mapping(
+		transform_feedback_gpu_buffer, transform_feedback_buffer_target, output_buffer_size, false);
+
+	ao_value_t* const transform_feedback_data = alloc(num_points_on_grid, sizeof(ao_value_t));
+
+	for (buffer_size_t i = 0; i < num_points_on_grid; i++) {
+		const buffer_size_t raw_transform_feedback_data_index = i * workload_split_factor;
+		const transform_feedback_output_t first_collision_sum = raw_transform_feedback_data[raw_transform_feedback_data_index];
+
+		/* If the first one is -1, that means that the current span
+		of values for this point's workload is under the map */
+		if (first_collision_sum == -1) transform_feedback_data[i] = 0;
+		else {
+			// This will not overflow, since the total collision sum will be under the max trace count
+			trace_count_t total_collision_sum = (trace_count_t) first_collision_sum;
+
+			for (workload_split_factor_t j = 1; j < workload_split_factor; j++)
+				total_collision_sum += raw_transform_feedback_data[raw_transform_feedback_data_index + j];
+
+			transform_feedback_data[i] = get_ao_term_from_collision_count(total_collision_sum);
+		}
+	}
+
+	deinit_gpu_buffer_memory_mapping(transform_feedback_buffer_target);
+	*transform_feedback_data_ref = transform_feedback_data;
+
+	////////// Making an output texture
+
+	const GLuint output_texture = preinit_texture(TexVolumetric, TexNonRepeating, TexLinear, TexTrilinear, true);
+
+	init_texture_data(TexVolumetric, (GLsizei[]) {max_x, max_z, max_y}, GL_RED,
+		OPENGL_AO_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, transform_feedback_data);
+
+	init_texture_mipmap(TexVolumetric);
+
+	// Resetting the unpack alignment
+	glPixelStorei(GL_UNPACK_ALIGNMENT, prev_unpack_alignment);
+
+	////////// Deinit
+
+	deinit_texture(heightmap_texture);
+	deinit_uniform_buffer(&rand_dirs_ubo);
+	deinit_gpu_buffer(transform_feedback_gpu_buffer);
+	deinit_shader(shader);
+
+	return output_texture;
+}
+
+AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size[2], const byte max_y) {
+	////////// Seeding the random generator, and generating random dirs
+
+	const unsigned seed = (unsigned) time(NULL);
+	srand(seed);
 
 	vec3* const rand_dirs = alloc(num_trace_iters, sizeof(vec3));
 	for (trace_count_t i = 0; i < num_trace_iters; i++) generate_rand_dir(rand_dirs[i]);
 
-	//////////
+	////////// Making an AO map on the GPU
 
-	const GLfloat collision_term_scaler = (GLfloat) constants.max_byte_value / num_trace_iters;
+	ao_value_t* transform_feedback_data;
+	const byte max_x = map_size[0], max_z = map_size[1];
 
-	for (byte* dest = ao_map, y = 0; y < max_y; y++) { // For each posible height
+	const GLuint ao_map_texture = init_ao_map_texture(heightmap, max_x, max_z, max_y, rand_dirs, &transform_feedback_data);
+
+	////////// Verifying that the AO map computed on the GPU is correct
+
+	#ifdef DEBUG_AO_MAP_GENERATION
+
+	printf("The seed provided to `srand` = %uu\nStarting the CPU algorithm\n", seed);
+
+	uint64_t num_correct_with_transform_feedback = 0;
+	const ao_value_t* curr_transform_feedback_datum = transform_feedback_data;
+
+	for (byte y = 0; y < max_y; y++) { // For each posible height
+		printf("%g%%\n", (GLdouble) y / max_y * 100.0);
 		for (byte z = 0; z < max_z; z++) { // For each map row
-			for (byte x = 0; x < max_x; x++, dest++) { // For each map point
+			for (byte x = 0; x < max_x; x++, curr_transform_feedback_datum++) { // For each map point
 				const SurfaceNormalData normal_data = get_normal_data(heightmap, max_x, x, y, z);
 
+				const ao_value_t transform_feedback_result = *curr_transform_feedback_datum;
+
 				if (normal_data.location_status == BelowMap) {
-					*dest = 0;
+					if (transform_feedback_result == 0) num_correct_with_transform_feedback++;
 					continue;
 				}
 
@@ -233,40 +436,38 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 				trace_count_t num_collisions = 0;
 
 				for (trace_count_t i = 0; i < num_trace_iters; i++) {
-					vec3 aligned_rand_dir;
-					glm_vec3_copy(rand_dirs[i], aligned_rand_dir);
-
-					// TODO: for dual normals, do spherical sampling, or average the results of 2 sampling passes
+					vec3 rand_dir;
+					glm_vec3_copy(rand_dirs[i], rand_dir);
 
 					// If above the map, no negation based on normal needed, since sampling in a unit circle
-					if (has_valid_normal && glm_vec3_dot((GLfloat*) normal_data.normal, aligned_rand_dir) < 0.0f)
-						glm_vec3_negate(aligned_rand_dir);
+					if (has_valid_normal && glm_vec3_dot((GLfloat*) normal_data.normal, rand_dir) < 0.0f)
+						glm_vec3_negate(rand_dir);
 
-					num_collisions += ray_collides_with_heightmap(aligned_rand_dir, heightmap, x, y, z,
+					num_collisions += ray_collides_with_heightmap(rand_dir, heightmap, x, y, z,
 						max_x, max_y, max_z, is_dual_normal, normal_data.flow);
 				}
 
-				*dest = constants.max_byte_value - (byte) (num_collisions * collision_term_scaler);
+				const ao_value_t cpu_result = get_ao_term_from_collision_count(num_collisions);
+				if (cpu_result == transform_feedback_result) num_correct_with_transform_feedback++;
+
+				else printf("Incorrect. pos = {%hhu, %hhu, %hhu}. "
+					"Results: %u vs %u; num colls = %u\n",
+					x, y, z, cpu_result, transform_feedback_result, num_collisions);
 			}
 		}
 	}
 
-	const GLuint texture = preinit_texture(TexVolumetric, TexNonRepeating, TexLinear, TexTrilinear, true);
+	printf("Finished the CPU algorithm\n%g%% of the CPU results match the GPU results\n",
+		(GLdouble) num_correct_with_transform_feedback / (max_x * max_y * max_z) * 100.0);
 
-	GLint prev_unpack_alignment;
-	glGetIntegerv(GL_UNPACK_ALIGNMENT, &prev_unpack_alignment);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, sizeof(byte));
+	#endif
 
-	init_texture_data(TexVolumetric, (GLsizei[]) {max_x, max_z, max_y}, GL_RED, OPENGL_AO_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, ao_map);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, prev_unpack_alignment);
-	init_texture_mipmap(TexVolumetric);
+	////////// Deinit
 
-	dealloc(ao_map);
 	dealloc(rand_dirs);
+	dealloc(transform_feedback_data);
 
-	//////////
-
-	return (AmbientOcclusionMap) {texture};
+	return (AmbientOcclusionMap) {ao_map_texture};
 }
 
 void deinit_ao_map(const AmbientOcclusionMap* const ao_map) {

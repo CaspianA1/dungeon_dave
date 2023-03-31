@@ -10,10 +10,11 @@ typedef struct {
 	const GLuint texture;
 } AmbientOcclusionMap;
 
-/* Excluded: generate_rand_dir, ray_collides_with_heightmap,
-sign_between_bytes, clamp_signed_byte_to_directional_range, get_normal_data */
+/* Excluded: generate_rand_dir, get_ao_term_from_collision_count, ray_collides_with_heightmap,
+sign_between_bytes, clamp_signed_byte_to_directional_range, get_normal_data, transform_feedback_hook,
+init_ao_map_texture */
 
-AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size[2], const byte max_point_height);
+AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size[2], const byte max_y);
 void deinit_ao_map(const AmbientOcclusionMap* const ao_map);
 
 #endif

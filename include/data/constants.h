@@ -28,6 +28,7 @@ static const GLfloat
 ////////// TODO: put these in the struct below
 
 // #define TRACK_MEMORY
+// #define DEBUG_AO_MAP_GENERATION
 // #define PRINT_SHADER_VALIDATION_LOG
 
 //////////
