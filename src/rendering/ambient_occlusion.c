@@ -302,8 +302,8 @@ static void transform_feedback_hook(const GLuint shader) {
 }
 
 static GLuint init_ao_map_texture(
-	const byte* const heightmap, const byte max_x, const byte max_z,
-	const byte max_y, const vec3* const rand_dirs,
+	const byte* const heightmap, const byte max_x, const byte max_y,
+	const byte max_z, const vec3* const rand_dirs,
 	ao_value_t** const transform_feedback_data_ref) {
 
 	////////// Defining some constants
@@ -461,7 +461,7 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 	ao_value_t* transform_feedback_data;
 	const byte max_x = map_size[0], max_z = map_size[1];
 
-	const GLuint ao_map_texture = init_ao_map_texture(heightmap, max_x, max_z, max_y, rand_dirs, &transform_feedback_data);
+	const GLuint ao_map_texture = init_ao_map_texture(heightmap, max_x, max_y, max_z, rand_dirs, &transform_feedback_data);
 
 	////////// Verifying that the AO map computed on the GPU is correct
 
