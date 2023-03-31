@@ -4,6 +4,7 @@
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "utils/texture.h" // For `init_texture_data`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
+#include "data/constants.h" // For `default_depth_func`
 
 /*
 https://learnopengl.com/Guest-Articles/2021/CSM
@@ -204,7 +205,7 @@ CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* con
 	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_MAG_FILTER, OPENGL_SCENE_MAG_FILTER);
 	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_MIN_FILTER, OPENGL_SCENE_MAG_FILTER);
 	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_COMPARE_FUNC, (GLint) constants.default_depth_func);
 
 	//////////
 

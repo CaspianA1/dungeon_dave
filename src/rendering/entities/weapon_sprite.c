@@ -344,7 +344,7 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 
 void draw_weapon_sprite(const WeaponSprite* const ws) {
 	// No depth testing b/c depth values from sectors or billboards may intersect
-	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, GL_LESS,
+	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, constants.default_depth_func,
 		draw_drawable(ws -> drawable, corners_per_quad, 0,
 			&(UniformUpdaterParams) {ws}, UseShaderPipeline
 		);

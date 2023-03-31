@@ -50,6 +50,7 @@ enum { // `enum` is used to make these values compile-time constants
 //////////
 
 static const struct {
+	const GLenum default_depth_func;
 	const GLfloat list_realloc_rate, milliseconds_per_second, one_over_max_byte_value;
 	const byte max_byte_value, min_shadow_map_cascades, skybox_sphere_fineness; // Note: the finenes must never equal 0
 
@@ -77,6 +78,8 @@ static const struct {
 	} keys;
 
 } constants = {
+	.default_depth_func = GL_LEQUAL,
+
 	.list_realloc_rate = 2.0f,
 	.milliseconds_per_second = 1000.0f,
 	.one_over_max_byte_value = 1.0f / 255.0f,

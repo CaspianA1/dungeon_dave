@@ -5,6 +5,7 @@
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 #include "utils/macro_utils.h" // For `ARRAY_LENGTH`, and `ASSET_PATH`
 #include "utils/shader.h" // For `init_shader`
+#include "data/constants.h" // For `default_depth_func`
 
 /* TODO:
 - For dynamic sectors, perhaps have a 2D floating-point map that represents the displacement
@@ -456,7 +457,7 @@ void draw_sectors(const SectorContext* const sector_context, const Camera* const
 		////////// Rendering pass
 
 		// Only passing fragments with the same depth value
-		WITH_RENDER_STATE(glDepthFunc, GL_EQUAL, GL_LESS,
+		WITH_RENDER_STATE(glDepthFunc, GL_EQUAL, constants.default_depth_func,
 			// No depth buffer writes (TODO: stop the redundant state change for this in 'main.c')
 			WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
 				use_shader(drawable -> shader);

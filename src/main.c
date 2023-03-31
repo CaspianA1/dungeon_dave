@@ -1,7 +1,7 @@
 #include "main.h"
 #include "utils/opengl_wrappers.h" // For OpenGL defs + wrappers
 #include "utils/macro_utils.h" // For `ASSET_PATH`, and `ARRAY_LENGTH`
-#include "data/constants.h" // For `num_unique_object_types`
+#include "data/constants.h" // For `num_unique_object_types`, `default_depth_func`, and `max_byte_value`
 #include "utils/map_utils.h" // For `get_heightmap_max_point_height,` and `compute_world_far_clip_dist`
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "window.h" // For `make_application`, and `WindowConfig`
@@ -115,7 +115,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	// This is correct for alpha premultiplication
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(constants.default_depth_func);
 
 	/* Depth clamping is used for 1. shadow pancaking, 2. avoiding clipping with sectors when walking
 	against them, and 3. stopping too much upwards weapon pitch from going through the near plane */
