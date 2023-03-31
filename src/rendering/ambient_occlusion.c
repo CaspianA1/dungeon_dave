@@ -12,6 +12,50 @@
 #include "utils/map_utils.h" // For `pos_out_of_overhead_map_bounds`, and `sample_map_point`
 #endif
 
+/* Maximum mipmaps, details:
+
+Paper link: https://www.researchgate.net/publication/47862133
+An implementation: https://github.com/kvark/vange-rs/pull/62
+Commit where the implementation was removed: https://github.com/kvark/vange-rs/commit/f9d5a092e5d86b03b0dc90b88c471eb981cc5661
+
+Preliminary notes:
+	- Mip level n is the coarsest mip level (only one texel)
+	- Mip level 0 is the finest mip level (no max function applied)
+	- The ray will always be inside the bounds of the heightmap
+
+Construction:
+	1. Round map size to a power of 2, and pad bottom and right edges
+	2. Build a maximum mipmap, ignoring the edges
+
+Algorithm:
+	define a ray with an origin, a direction, and a current position
+
+	mip_level = num_mips - 1
+	ray_above_heightmap = true
+
+	while ray_above_heightmap:
+		sampled_height = sample_height(ray.pos, ray.dir, mip_level)
+
+		##########
+
+		if mip_level == 0:
+			if ray.end.y <= sampled_height:
+				update_ray_pos_for_final_intersecting_box()
+				ray_above_heightmap = false
+		else:
+			update_ray_pos_for_mip_level()
+
+		# Not in the paper, but I added this little snippet
+		if ray outside heightmap bounds: ray_above_heightmap = false
+
+		##########
+
+		if ray.end.y > sampled_height || mip_level == 0:
+			TODO: figure out
+		else:
+			mip_level -= 1
+*/
+
 /* TODO:
 Optimization:
 - Spatial hashing for using less space
