@@ -210,7 +210,7 @@ static bool ray_collides_with_heightmap(
 
 	int16_t curr_tile[3] = {(int16_t) start_pos[0], (int16_t) start_pos[1], (int16_t) start_pos[2]};
 
-	for (ray_step_count_t i = 0; i < max_num_ray_steps; i++) {
+	for (ray_step_count_t i = 0; i < compute_params.max_num_ray_steps; i++) {
 		// Will yield 1 if x > y, and 0 if x <= y (so this gives the index of the smallest among x and y)
 		const byte x_and_y_min_index = (ray_length_components[0] > ray_length_components[1]);
 		const byte index_of_shortest = (ray_length_components[x_and_y_min_index] > ray_length_components[2]) ? 2 : x_and_y_min_index;
@@ -493,7 +493,7 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 
 				trace_count_t num_collisions = 0;
 
-				for (trace_count_t i = 0; i < num_trace_iters; i++) {
+				for (trace_count_t i = 0; i < compute_params.num_trace_iters; i++) {
 					vec3 rand_dir;
 					glm_vec3_copy(rand_dirs[i], rand_dir);
 
