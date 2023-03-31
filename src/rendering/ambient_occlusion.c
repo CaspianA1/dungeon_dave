@@ -91,7 +91,7 @@ Miscellaneous:
 - A Lanzcos filter instead, to fix the tricubic overshoot?
 */
 
-////////// Some typedefs and constants
+////////// Some typedefs
 
 /*
 T = the total thread count
@@ -112,11 +112,24 @@ typedef uint8_t ao_value_t;
 typedef uint16_t trace_count_t;
 typedef uint16_t ray_step_count_t;
 
-/* TODO: why does increasing this only make things slower? That doesn't make any sense.
-Also, see that this is nondestructive, in regards to divisions or moduli. */
-static const workload_split_factor_t workload_split_factor = 1u;
-static const trace_count_t num_trace_iters = 512u;
-static const ray_step_count_t max_num_ray_steps = 20u;
+typedef struct {
+	/* TODO: why does increasing the workload split factor only make things slower?
+	That doesn't make any sense. Also, see that this is nondestructive, in regards to
+	divisions or moduli.*/
+	const workload_split_factor_t workload_split_factor;
+	const trace_count_t num_trace_iters;
+	const ray_step_count_t max_num_ray_steps;
+} AmbientOcclusionComputeParams;
+
+////////// Some constants
+
+// TODO: make this a param to `init_ao_map`
+static const AmbientOcclusionComputeParams compute_params = {
+	.workload_split_factor = 1u,
+	.num_trace_iters = 512u,
+	.max_num_ray_steps = 20u
+};
+
 static const GLfloat float_epsilon = GLM_FLT_EPSILON;
 
 ////////// Some general utils
@@ -146,7 +159,7 @@ static void generate_rand_dir(vec3 v) {
 
 static ao_value_t get_ao_term_from_collision_count(const trace_count_t num_collisions) {
 	static const ao_value_t max_ao_value = (ao_value_t) ~0u;
-	static const GLfloat collision_term_scaler = (GLfloat) max_ao_value / num_trace_iters;
+	const GLfloat collision_term_scaler = (GLfloat) max_ao_value / compute_params.num_trace_iters;
 
 	return max_ao_value - (ao_value_t) (num_collisions * collision_term_scaler);
 }
@@ -319,7 +332,7 @@ static GLuint init_ao_map_texture(
 	////////// Some variable initialization
 
 	const buffer_size_t num_points_on_grid = max_x * max_z * max_y;
-	const buffer_size_t num_threads = num_points_on_grid * workload_split_factor;
+	const buffer_size_t num_threads = num_points_on_grid * compute_params.workload_split_factor;
 	const buffer_size_t output_buffer_size = num_threads * sizeof(transform_feedback_output_t);
 
 	const GLuint transform_feedback_gpu_buffer = init_gpu_buffer();
@@ -341,16 +354,16 @@ static GLuint init_ao_map_texture(
 
 	////////// Writing the plain uniforms and the heightmap to the shader
 
-	const trace_count_t num_traces_per_thread = num_trace_iters / workload_split_factor;
+	const trace_count_t num_traces_per_thread = compute_params.num_trace_iters / compute_params.workload_split_factor;
 
-	if (num_traces_per_thread * workload_split_factor != num_trace_iters)
+	if (num_traces_per_thread * compute_params.workload_split_factor != compute_params.num_trace_iters)
 		FAIL(CreateTexture, "Cannot compute an ambient occlusion texture because the %hu "
 			"trace iterations per point cannot be split evenly into %hhu thread groups",
-			num_trace_iters, workload_split_factor);
+			compute_params.num_trace_iters, compute_params.workload_split_factor);
 
-	INIT_UNIFORM_VALUE(workload_split_factor, shader, 1ui, workload_split_factor);
+	INIT_UNIFORM_VALUE(workload_split_factor, shader, 1ui, compute_params.workload_split_factor);
 	INIT_UNIFORM_VALUE(num_traces_per_thread, shader, 1ui, num_traces_per_thread);
-	INIT_UNIFORM_VALUE(max_num_ray_steps, shader, 1ui, max_num_ray_steps);
+	INIT_UNIFORM_VALUE(max_num_ray_steps, shader, 1ui, compute_params.max_num_ray_steps);
 	INIT_UNIFORM_VALUE(max_point_height, shader, 1ui, max_y);
 	INIT_UNIFORM_VALUE(float_epsilon, shader, 1f, float_epsilon);
 
@@ -370,7 +383,7 @@ static GLuint init_ao_map_texture(
 		rand_dirs_uniform_name, (List) {
 			.data = (void*) rand_dirs,
 			.item_size = sizeof(vec3),
-			.length = num_trace_iters
+			.length = compute_params.num_trace_iters
 		}
 	);
 
@@ -392,7 +405,7 @@ static GLuint init_ao_map_texture(
 	ao_value_t* const transform_feedback_data = alloc(num_points_on_grid, sizeof(ao_value_t));
 
 	for (buffer_size_t i = 0; i < num_points_on_grid; i++) {
-		const buffer_size_t raw_transform_feedback_data_index = i * workload_split_factor;
+		const buffer_size_t raw_transform_feedback_data_index = i * compute_params.workload_split_factor;
 		const transform_feedback_output_t first_collision_sum = raw_transform_feedback_data[raw_transform_feedback_data_index];
 
 		/* If the first one is -1, that means that the current span
@@ -402,7 +415,7 @@ static GLuint init_ao_map_texture(
 			// This will not overflow, since the total collision sum will be under the max trace count
 			trace_count_t total_collision_sum = (trace_count_t) first_collision_sum;
 
-			for (workload_split_factor_t j = 1; j < workload_split_factor; j++)
+			for (workload_split_factor_t j = 1; j < compute_params.workload_split_factor; j++)
 				total_collision_sum += raw_transform_feedback_data[raw_transform_feedback_data_index + j];
 
 			transform_feedback_data[i] = get_ao_term_from_collision_count(total_collision_sum);
@@ -440,8 +453,8 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 	const unsigned seed = (unsigned) time(NULL);
 	srand(seed);
 
-	vec3* const rand_dirs = alloc(num_trace_iters, sizeof(vec3));
-	for (trace_count_t i = 0; i < num_trace_iters; i++) generate_rand_dir(rand_dirs[i]);
+	vec3* const rand_dirs = alloc(compute_params.num_trace_iters, sizeof(vec3));
+	for (trace_count_t i = 0; i < compute_params.num_trace_iters; i++) generate_rand_dir(rand_dirs[i]);
 
 	////////// Making an AO map on the GPU
 
