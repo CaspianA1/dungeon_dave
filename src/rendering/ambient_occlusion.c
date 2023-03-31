@@ -22,6 +22,7 @@ Preliminary notes:
 	- Mip level n is the coarsest mip level (only one texel)
 	- Mip level 0 is the finest mip level (no max function applied)
 	- The ray will always be inside the bounds of the heightmap
+	- This algorithm is fast because of space skipping: if the ray is over a mip texel, it's over all heightmap texels in that area
 
 Construction:
 	1. Round map size to a power of 2, and pad bottom and right edges
