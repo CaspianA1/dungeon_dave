@@ -52,7 +52,7 @@ enum { // `enum` is used to make these values compile-time constants
 static const struct {
 	const GLenum default_depth_func;
 	const GLfloat list_realloc_rate, milliseconds_per_second, one_over_max_byte_value;
-	const byte max_byte_value, min_shadow_map_cascades, skybox_sphere_fineness; // Note: the finenes must never equal 0
+	const byte max_byte_value, min_shadow_map_cascades, skybox_sphere_fineness; // Note: the fineness must never equal 0
 
 	const struct { // All angles are in radians
 		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, init_fov;
