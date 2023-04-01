@@ -431,7 +431,7 @@ void draw_sectors_to_shadow_context(const SectorContext* const sector_context) {
 }
 
 void draw_sectors(const SectorContext* const sector_context, const Camera* const camera) {
-	buffer_size_t first_face_index, num_visible_faces;
+	buffer_size_t first_face_index, num_visible_faces; // TODO: use `glMultiDrawArrays` around here instead, to avoid too much CPU -> GPU copying?
 	frustum_cull_sector_faces_into_gpu_buffer(sector_context, camera, &first_face_index, &num_visible_faces);
 
 	// If looking out at the distance with no sectors, why do any state switching at all?
