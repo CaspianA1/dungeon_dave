@@ -12,11 +12,11 @@ typedef struct {
 	const vec2 cylindrical_cap_blend_widths;
 } SkyboxConfig;
 
-//////////
-
 typedef struct {
 	const Drawable drawable;
 } Skybox;
+
+//////////
 
 // Excluded: init_skybox_texture, define_vertex_spec
 
