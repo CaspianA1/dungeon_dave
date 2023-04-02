@@ -131,7 +131,6 @@ static inline void check_framebuffer_completeness(void) {
 		FAIL(CreateFramebuffer, "Could not create a framebuffer for this reason: '%s'", status_string);
 }
 
-// TODO: remove
 static inline const GLchar* get_GL_error(void) {
 	switch (glGetError()) {
 		#define ERROR_CASE(error) case GL_##error: return #error;
