@@ -354,7 +354,7 @@ void draw_weapon_sprite(const WeaponSprite* const ws) {
 ////////// Sound functions
 
 bool weapon_sound_activator(const void* const data) {
-	// TODO: put the `started_this_tick` thing in the `Animation` struct
+	// TODO: put the `activated_weapon_this_tick` thing in the `Animation` struct
 	return ((WeaponSprite*) data) -> animation_context.activated_weapon_this_tick;
 }
 
