@@ -4,6 +4,7 @@
 #include "glad/glad.h" // For OpenGL defs
 #include "cglm/cglm.h" // For `vec3`
 
+// TODO: specify the dynamic light extremities as unnormalized directions instead
 typedef struct {
 	const GLfloat time_for_cycle;
 	const vec3 pos;
