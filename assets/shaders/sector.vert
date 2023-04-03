@@ -27,7 +27,8 @@ void main(void) {
 		face_attribute.normal
 	);
 
-	material_index = face_info_bits >> 3u; // Shifting over to get the material index/texture id
+	// Shifting over to get the material index/texture id
+	material_index = face_info_bits >> 3u;
 	bilinear_percents_index = 0u;
 
 	UV = vec3(
