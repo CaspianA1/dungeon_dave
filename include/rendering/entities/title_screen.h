@@ -1,7 +1,8 @@
 #ifndef TITLE_SCREEN_H
 #define TITLE_SCREEN_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For various typedefs
 #include "utils/texture.h" // For `TextureFilterMode`
 #include "utils/normal_map_generation.h" // For `NormalMapConfig`
 #include <stdbool.h> // For `bool`

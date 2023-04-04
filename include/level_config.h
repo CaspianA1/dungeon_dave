@@ -1,7 +1,8 @@
 #ifndef LEVEL_CONFIG_H
 #define LEVEL_CONFIG_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For various typedefs
 #include "utils/dict.h" // For `Dict`
 #include "utils/list.h" // For `List`
 #include "animation.h" // For `AnimationLayout`

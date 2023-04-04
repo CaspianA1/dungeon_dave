@@ -1,27 +1,50 @@
 #ifndef MAP_UTILS_H
 #define MAP_UTILS_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/typedefs.h" // For various typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "data/constants.h" // For `max_map_size`
 #include "utils/failure.h" // For `FAIL`
 
-static inline byte sample_map_point(const byte* const map, const byte x, const byte z, const byte map_width) {
-	return map[z * map_width + x];
+////////// Indexed access to `map_pos_xz_t`
+
+// This and the function below are not bounds-checked.
+static inline map_pos_component_t get_indexed_map_pos_component(const map_pos_xz_t pos, const byte index) {
+	return index ? pos.z : pos.x;
 }
 
-static inline bool pos_out_of_overhead_map_bounds(const GLfloat x,
-	const GLfloat z, const byte map_width, const byte map_height) {
-
-	return (x < 0.0f) || (z < 0.0f) || (x >= map_width) || (z >= map_height);
+static inline map_pos_component_t* get_indexed_map_pos_component_ref(map_pos_xz_t* const pos, const byte index) {
+	return index ? &pos -> z : &pos -> x;
 }
 
-static inline byte get_heightmap_max_point_height(const byte* const heightmap, const byte map_size[2]) {
-	const byte map_width = map_size[0], map_height = map_size[1];
+////////// Map sampling
 
-	byte min = constants.max_byte_value, max = 0;
+static inline map_pos_component_t sample_map(const Heightmap map, const map_pos_xz_t pos) {
+	return map.data[pos.z * map.size.x + pos.x];
+}
 
-	for (byte y = 0; y < map_height; y++) {
-		for (byte x = 0; x < map_width; x++) {
-			const byte height = sample_map_point(heightmap, x, y, map_width);
+static inline map_texture_id_t sample_texture_id_map(
+	const map_texture_id_t* const texture_id_map_data,
+	const map_pos_component_t size_x, const map_pos_xz_t pos) {
+
+	return texture_id_map_data[pos.z * size_x + pos.x];
+}
+
+////////// XZ bounds checking
+
+static inline bool pos_out_of_overhead_map_bounds(const vec2 pos, const map_pos_xz_t size) {
+	const GLfloat x = pos[0], z = pos[1];
+	return (x < 0.0f) || (z < 0.0f) || (x >= size.x) || (z >= size.z);
+}
+
+////////// General map utilities
+
+static inline map_pos_component_t get_heightmap_max_point_height(const Heightmap heightmap) {
+	map_pos_component_t min = constants.max_map_size, max = 0;
+
+	for (map_pos_component_t z = 0; z < heightmap.size.z; z++) {
+		for (map_pos_component_t x = 0; x < heightmap.size.x; x++) {
+			const map_pos_component_t height = sample_map(heightmap, (map_pos_xz_t) {x, z});
 			if (height < min) min = height;
 			if (height > max) max = height;
 		}
@@ -31,7 +54,7 @@ static inline byte get_heightmap_max_point_height(const byte* const heightmap, c
 	return max;
 }
 
-static inline GLfloat compute_world_far_clip_dist(const byte map_size[2], const byte max_point_height) {
+static inline GLfloat compute_world_far_clip_dist(const map_pos_xz_t map_size, const map_pos_component_t max_point_height) {
 	/* The far clip distance, ideally, would be equal to the diameter of
 	the convex hull of all points in the heightmap. If I had more time,
 	I would implement that, but a simple method that works reasonably well is this:
@@ -54,7 +77,8 @@ static inline GLfloat compute_world_far_clip_dist(const byte map_size[2], const 
 
 	const GLfloat max_jump_height = (constants.speeds.jump * constants.speeds.jump) / (2.0f * constants.accel.g);
 	const GLfloat additional_camera_height = max_jump_height + constants.camera.eye_height;
-	return glm_vec3_norm((vec3) {map_size[0], map_size[1], max_point_height + additional_camera_height});
+
+	return glm_vec3_norm((vec3) {map_size.x, max_point_height + additional_camera_height, map_size.z});
 }
 
 #endif

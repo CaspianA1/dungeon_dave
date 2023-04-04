@@ -3,10 +3,10 @@
 
 #include "openal/al.h" // For various OpenAL defs
 #include "openal/alc.h" // For various ALC defs
-
 #include "camera.h" // For `Camera`
 #include "utils/list.h" // For `List`
 #include "utils/dict.h" // For `Dict`
+#include <stdbool.h> // For `bool`
 
 /* TODO:
 - Pass in a shared audio context config to `init_audio_context`

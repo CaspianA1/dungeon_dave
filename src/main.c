@@ -45,7 +45,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 
 	////////// Scene updating
 
-	update_camera(camera, event, scene_context -> heightmap, scene_context -> map_size);
+	update_camera(camera, event, &scene_context -> heightmap);
 	update_billboard_context(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
 	update_dynamic_light(dynamic_light, curr_time_secs);
@@ -345,7 +345,7 @@ static void* main_init(const WindowConfig* const window_config) {
 							texture_id_or_animation_index = get_u16_from_json(billboard_field),
 							*const billboard_texture_id = &billboard -> texture_id;
 
-						const GLchar* const error_format_string = "%s billboard at index %hu refers to an out-of-bounds %s of index %hu";
+						const GLchar* const error_format_string = "%s billboard at index %u refers to an out-of-bounds %s of index %u";
 
 						switch (category_index) {
 							case 0: // Unanimated
@@ -548,25 +548,30 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Loading in the heightmap and texture id map, validating them, and extracting data from them
 
-	byte map_size[2], cmp_map_size[2];
+	map_pos_xz_t heightmap_size, texture_id_map_size;
 
-	byte
-		*const heightmap = read_2D_map_from_json(read_json_subobj(non_lighting_json, "heightmap"), map_size),
-		*const texture_id_map = read_2D_map_from_json(read_json_subobj(non_lighting_json, "texture_id_map"), cmp_map_size);
+	map_pos_component_t* const heightmap_data = read_2D_map_from_json(
+		read_json_subobj(non_lighting_json, "heightmap"), sizeof(map_pos_component_t), &heightmap_size);
 
-	for (byte i = 0; i < ARRAY_LENGTH(map_size); i++) {
-		const byte size_component = map_size[i], cmp_size_component = cmp_map_size[i];
+	map_texture_id_t* const texture_id_map_data = read_2D_map_from_json(
+		read_json_subobj(non_lighting_json, "texture_id_map"), sizeof(map_texture_id_t), &texture_id_map_size);
+
+	for (byte i = 0; i < 2; i++) {
+		const map_pos_component_t
+			heightmap_size_component = get_indexed_map_pos_component(heightmap_size, i),
+			texture_id_map_size_component = get_indexed_map_pos_component(texture_id_map_size, i);
 
 		const GLchar* const axis_name = (i == 0) ? "width" : "height";
 
-		if (size_component != cmp_size_component) FAIL(
+		if (heightmap_size_component != texture_id_map_size_component) FAIL(
 			UseLevelHeightmap, "Cannot use the level heightmap "
-			"because its %s is %hhu, while the texture id map's %s is %hhu",
-			axis_name, size_component, axis_name, cmp_size_component);
+			"because its %s is %u, while the texture id map's %s is %u",
+			axis_name, heightmap_size_component, axis_name, texture_id_map_size_component);
 	}
 
-	const byte max_point_height = get_heightmap_max_point_height(heightmap, map_size);
-	const GLfloat far_clip_dist = compute_world_far_clip_dist(map_size, max_point_height);
+	const Heightmap heightmap = {heightmap_data, heightmap_size};
+	const map_pos_component_t max_point_height = get_heightmap_max_point_height(heightmap);
+	const GLfloat far_clip_dist = compute_world_far_clip_dist(heightmap.size, max_point_height);
 
 	//////////
 
@@ -575,9 +580,9 @@ static void* main_init(const WindowConfig* const window_config) {
 		.materials_texture = materials_texture,
 		.weapon_sprite = init_weapon_sprite(&weapon_sprite_config, weapon_sprite_material_index),
 
-		.sector_context = init_sector_context(heightmap, texture_id_map,
-			map_size[0], map_size[1], sector_face_texture_paths,
-			num_sector_face_texture_paths, &sector_face_shared_material_properties,
+		.sector_context = init_sector_context(heightmap, texture_id_map_data,
+			sector_face_texture_paths, num_sector_face_texture_paths,
+			&sector_face_shared_material_properties,
 			&level_rendering_config.dynamic_light_config
 		),
 
@@ -596,10 +601,10 @@ static void* main_init(const WindowConfig* const window_config) {
 		.dynamic_light = init_dynamic_light(&level_rendering_config.dynamic_light_config),
 		.shadow_context = init_shadow_context(&level_rendering_config.shadow_mapping.cascaded_shadow_config, far_clip_dist),
 
-		.ao_map = init_ao_map(heightmap, map_size, max_point_height),
+		.ao_map = init_ao_map(heightmap, max_point_height),
 		.skybox = init_skybox(&level_rendering_config.skybox_config),
 		.title_screen = init_title_screen(&title_screen_config.texture, &title_screen_config.rendering),
-		.heightmap = heightmap, .map_size = {map_size[0], map_size[1]}
+		.heightmap = heightmap
 	};
 
 	////////// Initializing a scene context on the heap
@@ -683,7 +688,7 @@ static void* main_init(const WindowConfig* const window_config) {
 	dealloc(billboard_animation_layouts);
 	dealloc(still_billboard_texture_paths);
 	dealloc(sector_face_texture_paths);
-	dealloc(texture_id_map);
+	dealloc(texture_id_map_data);
 	deinit_json(level_json);
 
 	//////////
@@ -699,7 +704,7 @@ static void* main_init(const WindowConfig* const window_config) {
 static void main_deinit(void* const app_context) {
 	SceneContext* const scene_context = (SceneContext*) app_context;
 
-	dealloc(scene_context -> heightmap);
+	dealloc(scene_context -> heightmap.data);
 
 	deinit_shared_shading_params(&scene_context -> shared_shading_params);
 	deinit_materials_texture(&scene_context -> materials_texture);
@@ -717,13 +722,13 @@ static void main_deinit(void* const app_context) {
 	dealloc(scene_context);
 }
 
-static void* wrapping_alloc(const size_t size) {
+static void* cjson_wrapping_alloc(const size_t size) {
 	return alloc(size, 1);
 }
 
 int main(void) {
 	// This is just for tracking cJSON allocations
-	cJSON_InitHooks(&(cJSON_Hooks) {wrapping_alloc, dealloc});
+	cJSON_InitHooks(&(cJSON_Hooks) {cjson_wrapping_alloc, dealloc});
 
 	////////// Reading in the window config
 

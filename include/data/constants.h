@@ -1,7 +1,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include "utils/typedefs.h" // For OpenGL types + `byte`
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For various typedefs
 #include "cglm/cglm.h" // For pi variants + `vec2`
 #include "utils/sdl_include.h" // For `SDL_Scancode`
 
@@ -53,6 +54,7 @@ static const struct {
 	const GLenum default_depth_func;
 	const GLfloat list_realloc_rate, milliseconds_per_second, one_over_max_byte_value;
 	const byte max_byte_value, min_shadow_map_cascades, skybox_sphere_fineness; // Note: the fineness must never equal 0
+	const map_pos_component_t max_map_size;
 
 	const struct { // All angles are in radians
 		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, init_fov;
@@ -84,6 +86,7 @@ static const struct {
 	.milliseconds_per_second = 1000.0f,
 	.one_over_max_byte_value = 1.0f / 255.0f,
 	.max_byte_value = 255,
+	.max_map_size = (map_pos_component_t) ~0u,
 
 	.min_shadow_map_cascades = 3,
 	.skybox_sphere_fineness = 80,

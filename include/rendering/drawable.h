@@ -1,7 +1,8 @@
 #ifndef DRAWABLE_H
 #define DRAWABLE_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For `byte`
 #include "utils/list.h" // For `List`
 
 struct Drawable; // The Drawable's shader will be bound when the uniform updater is called

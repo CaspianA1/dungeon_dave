@@ -1,8 +1,8 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "utils/sdl_include.h" // For various things from the SDL namespace
 #include "glad/glad.h" // For OpenGL defs
+#include "utils/sdl_include.h" // For various things from the SDL namespace
 #include <stdbool.h> // For `bool`
 #include "animation.h" // For `AnimationLayout`
 

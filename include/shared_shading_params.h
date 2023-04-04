@@ -2,7 +2,8 @@
 #define SHARED_SHADING_PARAMS_H
 
 #include "utils/uniform_buffer.h"
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For various typedefs
 #include "level_config.h" // For `LevelRenderingConfig`
 #include "data/constants.h" // For `num_unique_object_types`
 #include "rendering/shadow.h" // For `CascadedShadowContext`

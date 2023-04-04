@@ -1,7 +1,8 @@
 #ifndef NORMAL_MAP_GENERATION_H
 #define NORMAL_MAP_GENERATION_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/typedefs.h" // For various typedefs
+#include "glad/glad.h" // For OpenGL defs
 #include "utils/texture.h" // For `TextureType`
 #include "normal_map_generation.h" // For `NormalMapConfig`
 

@@ -1,7 +1,8 @@
 #ifndef SECTOR_H
 #define SECTOR_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/typedefs.h" // For various typedefs
+#include "glad/glad.h" // For OpenGL defs
 #include "rendering/drawable.h" // For `Drawable`
 #include "utils/list.h" // For `List`
 #include "camera.h" // For `Camera`
@@ -10,21 +11,15 @@
 
 //////////
 
-/* There's five bits to store a texture id in a face mesh's face info byte,
-And the biggest number possible with five bits is 31, so that gives you
-32 different possible texture ids. Also, this is just for wall textures. */
-#define MAX_NUM_SECTOR_SUBTEXTURES ((byte) 32u)
-
-//////////
-
-// These definitions are in the header so that face.c can use them too
-typedef face_component_t face_vertex_t[components_per_face_vertex];
+// These definitions are in the header so that `face.c` can use them too
+typedef map_pos_component_t face_vertex_t[components_per_face_vertex];
 typedef face_vertex_t face_mesh_t[vertices_per_face];
 
 typedef struct {
-	const byte origin[2];
-	byte size[2]; // Top-down (X and Z); same for origin
-	struct {byte min; const byte max;} visible_heights;
+	const map_pos_xz_t origin;
+	map_pos_xz_t size;
+
+	struct {map_pos_component_t min; const map_pos_component_t max;} visible_heights;
 	struct {buffer_size_t start, length;} face_range; // Face domain that defines sector's faces; used for batching
 } Sector;
 
@@ -48,8 +43,8 @@ point_matches_sector_attributes, form_sector_area,
 generate_sectors_and_face_mesh_from_maps, init_trimmed_face_mesh_for_shadow_mapping,
 frustum_cull_sector_faces_into_gpu_buffer, define_vertex_spec */
 
-SectorContext init_sector_context(const byte* const heightmap,
-	const byte* const texture_id_map, const byte map_width, const byte map_height,
+SectorContext init_sector_context(
+	const Heightmap heightmap, const map_texture_id_t* const texture_id_map_data,
 	const GLchar* const* const texture_paths, const texture_id_t num_textures,
 	const MaterialPropertiesPerObjectType* const shared_material_properties,
 	const DynamicLightConfig* const dynamic_light_config);

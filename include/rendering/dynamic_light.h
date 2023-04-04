@@ -2,7 +2,7 @@
 #define DYNAMIC_LIGHT_H
 
 #include "glad/glad.h" // For OpenGL defs
-#include "cglm/cglm.h" // For `vec3`
+#include "cglm/cglm.h" // For various cglm defs
 
 // TODO: specify the dynamic light extremities as unnormalized directions instead
 typedef struct {

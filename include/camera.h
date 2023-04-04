@@ -1,9 +1,10 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "data/constants.h" // For various constant defs
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
-#include "cglm/cglm.h" // For `vec2, `vec3, `mat4`, and `vec4`
+#include "glad/glad.h" // For OpenGL defs
+#include "cglm/cglm.h" // For various cglm defs
+#include "utils/typedefs.h" // For various typedefs
+#include "data/constants.h" // For various constants
 #include "event.h" // For `Event`
 #include "openal/al.h" // For various OpenAL defs
 
@@ -48,13 +49,13 @@ typedef struct {
 } Camera;
 
 /* Excluded:
-Utils: clamp_to_pos_neg_domain, clamp_vec2_to_pos_neg_domain, wrap_around_domain, get_percent_kept_from, smootherstep
+Utils: clamp_to_pos_neg_domain, wrap_around_domain, get_percent_kept_from, smootherstep
 Angle updating: update_camera_angles, update_fov
 Physics + collision: get_pos_collision_info, get_aabb_collision_info, update_pos
 Pace: make_pace_function, update_pace
 Miscellaneous: get_camera_directions, update_camera_pos, update_camera_matrices */
 
-void update_camera(Camera* const camera, const Event* const event, const byte* const heightmap, const byte map_size[2]);
+void update_camera(Camera* const camera, const Event* const event, const Heightmap* const heightmap);
 Camera init_camera(const CameraConfig* const config, const GLfloat far_clip_dist);
 
 ////////// Sound functions

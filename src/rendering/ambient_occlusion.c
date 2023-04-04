@@ -1,6 +1,6 @@
 #include "rendering/ambient_occlusion.h"
 #include "cglm/cglm.h" // For various cglm defs
-#include "data/constants.h" // For `TWO_PI`, and `DEBUG_AO_MAP_GENERATION`
+#include "data/constants.h" // For `TWO_PI` and `DEBUG_AO_MAP_GENERATION`
 #include "utils/uniform_buffer.h" // For various uniform buffer defs
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "utils/shader.h" // For `init_shader`, and `deinit_shader`
@@ -9,7 +9,7 @@
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 
 #ifdef DEBUG_AO_MAP_GENERATION
-#include "utils/map_utils.h" // For `pos_out_of_overhead_map_bounds`, and `sample_map_point`
+#include "utils/map_utils.h" // For `pos_out_of_overhead_map_bounds`, and `sample_map`
 #endif
 
 /* Maximum mipmaps, details:
@@ -168,11 +168,10 @@ static ao_value_t get_ao_term_from_collision_count(const trace_count_t num_colli
 
 #ifdef DEBUG_AO_MAP_GENERATION
 
-static bool ray_collides_with_heightmap(
-	const vec3 dir, const byte* const heightmap,
-	const byte origin_x, const byte origin_y, const byte origin_z,
-	const byte max_x, const byte max_y, const byte max_z,
-	const bool is_dual_normal, const signed_byte flow[3]) {
+static bool ray_collides_with_heightmap(const vec3 dir,
+	const Heightmap heightmap, const map_pos_component_t max_y,
+	const map_pos_component_t origin_x, const map_pos_component_t origin_y,
+	const map_pos_component_t origin_z, const bool is_dual_normal, const signed_byte flow[3]) {
 
 	const signed_byte step_signs[3] = {
 		(signed_byte) glm_signf(dir[0]),
@@ -208,7 +207,11 @@ static bool ray_collides_with_heightmap(
 
 	//////////
 
-	int16_t curr_tile[3] = {(int16_t) start_pos[0], (int16_t) start_pos[1], (int16_t) start_pos[2]};
+	signed_map_pos_component_t curr_tile[3] = {
+		(signed_map_pos_component_t) start_pos[0],
+		(signed_map_pos_component_t) start_pos[1],
+		(signed_map_pos_component_t) start_pos[2]
+	};
 
 	for (ray_step_count_t i = 0; i < compute_params.max_num_ray_steps; i++) {
 		// Will yield 1 if x > y, and 0 if x <= y (so this gives the index of the smallest among x and y)
@@ -220,11 +223,13 @@ static bool ray_collides_with_heightmap(
 
 		//////////
 
-		const int16_t cx = curr_tile[0], cy = curr_tile[1], cz = curr_tile[2]; // `c` = current
+		const signed_map_pos_component_t cx = curr_tile[0], cy = curr_tile[1], cz = curr_tile[2]; // `c` = current
 
 		if (cy < 0) return true;
-		else if (cy > max_y || pos_out_of_overhead_map_bounds(cx, cz, max_x, max_z)) return false;
-		else if (cy < (int16_t) sample_map_point(heightmap, (byte) cx, (byte) cz, max_x)) return true;
+		else if (cy > max_y || pos_out_of_overhead_map_bounds((vec2) {cx, cz}, heightmap.size)) return false;
+
+		else if (cy < (signed_map_pos_component_t) sample_map(heightmap,
+			(map_pos_xz_t) {(map_pos_component_t) cx, (map_pos_component_t) cz})) return true;
 	}
 
 	return false;
@@ -232,7 +237,7 @@ static bool ray_collides_with_heightmap(
 
 //////////
 
-static signed_byte sign_between_bytes(const byte a, const byte b) {
+static signed_byte sign_between_map_values(const map_pos_component_t a, const map_pos_component_t b) {
 	if (a > b) return 1;
 	else if (a < b) return -1;
 	else return 0;
@@ -256,16 +261,16 @@ typedef struct {
 
 //////////
 
-SurfaceNormalData get_normal_data(const byte* const heightmap,
-	const byte map_width, const byte x, const byte y, const byte z) {
+SurfaceNormalData get_normal_data(const Heightmap heightmap,
+	const map_pos_component_t x, const map_pos_component_t y, const map_pos_component_t z) {
 
-	const byte left_x = (x == 0) ? 0 : (x - 1), top_z = (z == 0) ? 0 : (z - 1);
+	const map_pos_component_t left_x = (x == 0) ? 0 : (x - 1), top_z = (z == 0) ? 0 : (z - 1);
 
 	const struct {const signed_byte tl, tr, bl, br;} diffs = {
-		sign_between_bytes(sample_map_point(heightmap, left_x, top_z, map_width), y),
-		sign_between_bytes(sample_map_point(heightmap, x, top_z, map_width), y),
-		sign_between_bytes(sample_map_point(heightmap, left_x, z, map_width), y),
-		sign_between_bytes(sample_map_point(heightmap, x, z, map_width), y)
+		sign_between_map_values(sample_map(heightmap, (map_pos_xz_t) {left_x, top_z}), y),
+		sign_between_map_values(sample_map(heightmap, (map_pos_xz_t) {x, top_z}), y),
+		sign_between_map_values(sample_map(heightmap, (map_pos_xz_t) {left_x, z}), y),
+		sign_between_map_values(sample_map(heightmap, (map_pos_xz_t) {x, z}), y)
 	};
 
 	//////////
@@ -301,10 +306,8 @@ static void transform_feedback_hook(const GLuint shader) {
 	glTransformFeedbackVaryings(shader, 1, (const GLchar*[]) {"num_collisions"}, GL_INTERLEAVED_ATTRIBS);
 }
 
-static GLuint init_ao_map_texture(
-	const byte* const heightmap, const byte max_x, const byte max_y,
-	const byte max_z, const vec3* const rand_dirs,
-	ao_value_t** const transform_feedback_data_ref) {
+static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_component_t max_y,
+	const vec3* const rand_dirs, ao_value_t** const transform_feedback_data_ref) {
 
 	////////// Defining some constants
 
@@ -331,7 +334,7 @@ static GLuint init_ao_map_texture(
 
 	////////// Some variable initialization
 
-	const buffer_size_t num_points_on_grid = max_x * max_z * max_y;
+	const buffer_size_t num_points_on_grid = heightmap.size.x * max_y * heightmap.size.z;
 	const buffer_size_t num_threads = num_points_on_grid * compute_params.workload_split_factor;
 	const buffer_size_t output_buffer_size = num_threads * sizeof(transform_feedback_output_t);
 
@@ -344,8 +347,8 @@ static GLuint init_ao_map_texture(
 
 	const GLuint heightmap_texture = preinit_texture(heightmap_texture_type, TexNonRepeating, TexNearest, TexNearest, false);
 
-	init_texture_data(heightmap_texture_type, (GLsizei[]) {max_x, max_z}, heightmap_input_format,
-		heightmap_internal_pixel_format, OPENGL_COLOR_CHANNEL_TYPE, heightmap);
+	init_texture_data(heightmap_texture_type, (GLsizei[]) {heightmap.size.x, heightmap.size.z},
+		heightmap_input_format, heightmap_internal_pixel_format, MAP_POS_COMPONENT_TYPENAME, heightmap.data);
 
 	////////// Making a shader, and using it
 
@@ -357,8 +360,8 @@ static GLuint init_ao_map_texture(
 	const trace_count_t num_traces_per_thread = compute_params.num_trace_iters / compute_params.workload_split_factor;
 
 	if (num_traces_per_thread * compute_params.workload_split_factor != compute_params.num_trace_iters)
-		FAIL(CreateTexture, "Cannot compute an ambient occlusion texture because the %hu "
-			"trace iterations per point cannot be split evenly into %hhu thread groups",
+		FAIL(CreateTexture, "Cannot compute an ambient occlusion texture because the %u "
+			"trace iterations per point cannot be split evenly into %u thread groups",
 			compute_params.num_trace_iters, compute_params.workload_split_factor);
 
 	INIT_UNIFORM_VALUE(workload_split_factor, shader, 1ui, compute_params.workload_split_factor);
@@ -429,7 +432,7 @@ static GLuint init_ao_map_texture(
 
 	const GLuint output_texture = preinit_texture(TexVolumetric, TexNonRepeating, TexLinear, TexTrilinear, true);
 
-	init_texture_data(TexVolumetric, (GLsizei[]) {max_x, max_z, max_y}, GL_RED,
+	init_texture_data(TexVolumetric, (GLsizei[]) {heightmap.size.x, heightmap.size.z, max_y}, GL_RED,
 		OPENGL_AO_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, transform_feedback_data);
 
 	init_texture_mipmap(TexVolumetric);
@@ -447,8 +450,11 @@ static GLuint init_ao_map_texture(
 	return output_texture;
 }
 
-AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size[2], const byte max_y) {
+AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_component_t max_y) {
 	////////// Seeding the random generator, and generating random dirs
+
+	/* TODO: fix the possible intersection problems for height
+	values over 255. For example, with seed 1680397591u. */
 
 	const unsigned seed = (unsigned) time(NULL);
 	srand(seed);
@@ -459,9 +465,7 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 	////////// Making an AO map on the GPU
 
 	ao_value_t* transform_feedback_data;
-	const byte max_x = map_size[0], max_z = map_size[1];
-
-	const GLuint ao_map_texture = init_ao_map_texture(heightmap, max_x, max_y, max_z, rand_dirs, &transform_feedback_data);
+	const GLuint ao_map_texture = init_ao_map_texture(heightmap, max_y, rand_dirs, &transform_feedback_data);
 
 	////////// Verifying that the AO map computed on the GPU is correct
 
@@ -472,11 +476,11 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 	uint64_t num_correct_with_transform_feedback = 0;
 	const ao_value_t* curr_transform_feedback_datum = transform_feedback_data;
 
-	for (byte y = 0; y < max_y; y++) { // For each posible height
+	for (map_pos_component_t y = 0; y < max_y; y++) { // For each posible height
 		printf("%g%%\n", (GLdouble) y / max_y * 100.0);
-		for (byte z = 0; z < max_z; z++) { // For each map row
-			for (byte x = 0; x < max_x; x++, curr_transform_feedback_datum++) { // For each map point
-				const SurfaceNormalData normal_data = get_normal_data(heightmap, max_x, x, y, z);
+		for (map_pos_component_t z = 0; z < heightmap.size.z; z++) { // For each map row
+			for (map_pos_component_t x = 0; x < heightmap.size.x; x++, curr_transform_feedback_datum++) { // For each map point
+				const SurfaceNormalData normal_data = get_normal_data(heightmap, x, y, z);
 
 				const ao_value_t transform_feedback_result = *curr_transform_feedback_datum;
 
@@ -501,22 +505,21 @@ AmbientOcclusionMap init_ao_map(const byte* const heightmap, const byte map_size
 					if (has_valid_normal && glm_vec3_dot((GLfloat*) normal_data.normal, rand_dir) < 0.0f)
 						glm_vec3_negate(rand_dir);
 
-					num_collisions += ray_collides_with_heightmap(rand_dir, heightmap, x, y, z,
-						max_x, max_y, max_z, is_dual_normal, normal_data.flow);
+					num_collisions += ray_collides_with_heightmap(rand_dir,
+						heightmap, max_y, x, y, z, is_dual_normal, normal_data.flow);
 				}
 
 				const ao_value_t cpu_result = get_ao_term_from_collision_count(num_collisions);
 				if (cpu_result == transform_feedback_result) num_correct_with_transform_feedback++;
 
-				else printf("Incorrect. pos = {%hhu, %hhu, %hhu}. "
-					"Results: %u vs %u; num colls = %u\n",
+				else printf("Incorrect. pos = {%u, %u, %u}. Results: %u vs %u; num colls = %u\n",
 					x, y, z, cpu_result, transform_feedback_result, num_collisions);
 			}
 		}
 	}
 
 	printf("Finished the CPU algorithm\n%g%% of the CPU results match the GPU results\n",
-		(GLdouble) num_correct_with_transform_feedback / (max_x * max_y * max_z) * 100.0);
+		(GLdouble) num_correct_with_transform_feedback / (heightmap.size.x * max_y * heightmap.size.z) * 100.0);
 
 	#endif
 

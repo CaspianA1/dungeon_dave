@@ -1,7 +1,8 @@
 #ifndef WEAPON_SPRITE_H
 #define WEAPON_SPRITE_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For various typedefs
 #include "animation.h" // For `Animation`, and `AnimationLayout`
 #include "cglm/cglm.h" // For `vec3`
 #include "data/constants.h" // For `corners_per_quad`

@@ -2,6 +2,7 @@
 #define SKYBOX_H
 
 #include "rendering/drawable.h" // For `Drawable`
+#include "cglm/cglm.h" // For various cglm defs
 
 typedef struct {
 	const GLchar* const texture_path;

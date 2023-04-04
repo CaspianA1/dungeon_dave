@@ -2,7 +2,7 @@
 #define MAIN_H
 
 #include "audio.h" // For `AudioContext`
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/typedefs.h" // For various typedefs
 #include "camera.h" // For `Camera`
 #include "shared_shading_params.h" // For `SharedShadingParams`
 #include "level_config.h" // For `MaterialsTexture`
@@ -63,10 +63,9 @@ typedef struct {
 	const Skybox skybox;
 	TitleScreen title_screen;
 
-	byte* const heightmap;
-	const byte map_size[2];
+	const Heightmap heightmap;
 } SceneContext;
 
-// Excluded: main_drawer, main_init, main_deinit, wrapping_alloc
+// Excluded: main_drawer, main_init, main_deinit, cjson_wrapping_alloc
 
 #endif

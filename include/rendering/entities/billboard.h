@@ -2,7 +2,8 @@
 #define BILLBOARD_H
 
 #include "rendering/drawable.h" // For `Drawable`
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/typedefs.h" // For various typedefs
+#include "glad/glad.h" // For OpenGL defs
 #include "utils/list.h" // For `List`
 #include "cglm/cglm.h" // For `vec2` and `vec3`
 #include "camera.h" // For `Camera`

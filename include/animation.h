@@ -1,7 +1,8 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For various typedefs
 
 typedef struct { // TODO: add back the const qualifiers, if possible
 	const GLchar* spritesheet_path;

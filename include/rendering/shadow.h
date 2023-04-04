@@ -1,9 +1,10 @@
 #ifndef SHADOW_H
 #define SHADOW_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/typedefs.h" // For various typedefs
 #include "utils/texture.h" // For `TextureType`
-#include "cglm/cglm.h" // For `mat4`
+#include "glad/glad.h" // For OpenGL defs
+#include "cglm/cglm.h" // For various cglm defs
 #include "camera.h" // For `Camera`
 
 /* This shadow mapping implementation employs cascaded shadow mapping with

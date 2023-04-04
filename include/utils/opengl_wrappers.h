@@ -1,7 +1,8 @@
 #ifndef OPENGL_WRAPPERS_H
 #define OPENGL_WRAPPERS_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL types
+#include "utils/typedefs.h" // For various typedefs
 #include "utils/failure.h" // For `FAIL`
 
 static const GLenum framebuffer_target = GL_DRAW_FRAMEBUFFER;

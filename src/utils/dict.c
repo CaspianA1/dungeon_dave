@@ -1,6 +1,6 @@
 #include "utils/dict.h"
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
-#include "utils/failure.h"
+#include "utils/failure.h" // For `FAIL`
 
 //////////
 
