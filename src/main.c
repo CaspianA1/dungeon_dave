@@ -1,6 +1,6 @@
 #include "main.h"
 #include "utils/opengl_wrappers.h" // For OpenGL defs + wrappers
-#include "utils/macro_utils.h" // For `ASSET_PATH`, and `ARRAY_LENGTH`
+#include "utils/macro_utils.h" // For `ARRAY_LENGTH`
 #include "data/constants.h" // For `num_unique_object_types`, `default_depth_func`, and `max_byte_value`
 #include "utils/map_utils.h" // For `get_heightmap_max_point_height,` and `compute_world_far_clip_dist`
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
@@ -124,7 +124,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Defining a bunch of level data
 
-	cJSON* const level_json = init_json_from_file(ASSET_PATH("json_data/levels/palace.json"));
+	cJSON* const level_json = init_json_from_file("json_data/levels/palace.json");
 
 	const cJSON // TODO: genericize this naming thing here via a macro
 		*const parallax_json = read_json_subobj(level_json, "parallax_mapping"),
@@ -389,21 +389,19 @@ static void* main_init(const WindowConfig* const window_config) {
 	const WeaponSpriteConfig weapon_sprite_config = { // Whip
 		.max_degrees = {.yaw = 15.0f, .pitch = 120.0f},
 		.secs_per_movement_cycle = 0.9f, .screen_space_size = 0.75f, .max_movement_magnitude = 0.25f,
-		.animation_layout = {ASSET_PATH("spritesheets/weapons/whip.bmp"), 4, 6, 22, 0.02f},
+		.animation_layout = {"spritesheets/weapons/whip.bmp", 4, 6, 22, 0.02f},
 
 		.shared_material_properties = {
 			.bilinear_percents = {.albedo = 1.0f, .normal = 1.0f},
 			.normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f}
 		},
 
-		.sound_path = ASSET_PATH("audio/sound_effects/whip_crack.wav")
+		.sound_path = "audio/sound_effects/whip_crack.wav"
 	};
 
 	////////// Reading in all materials
 
-	const GLchar* const materials_file_path = ASSET_PATH("json_data/materials.json");
-	cJSON* const materials_json = init_json_from_file(materials_file_path);
-
+	cJSON* const materials_json = init_json_from_file("json_data/materials.json");
 	Dict all_materials = init_dict((buffer_size_t) cJSON_GetArraySize(materials_json), DV_String, DV_UnsignedInt);
 
 	JSON_FOR_EACH(_, json_material, materials_json,
@@ -529,7 +527,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		const TitleScreenRenderingConfig rendering;
 	} title_screen_config = {
 		.texture = {
-			.paths = {.still = ASSET_PATH("logo.bmp"), .scrolling = ASSET_PATH("palace_city.bmp")},
+			.paths = {.still = "logo.bmp", .scrolling = "palace_city.bmp"},
 			.mag_filters = {.still = TexNearest, .scrolling = TexLinear},
 			.scrolling_normal_map_config = {.blur_radius = 5, .blur_std_dev = 0.25f, .heightmap_scale = 0.3f, .rescale_factor = 2.0f}
 		},
@@ -617,8 +615,8 @@ static void* main_init(const WindowConfig* const window_config) {
 	const ALchar* const level_soundtrack_path = get_string_from_json(read_json_subobj(non_lighting_json, "soundtrack_path"));
 
 	const ALchar
-		*const jump_up_sound_path = ASSET_PATH("audio/sound_effects/jump_up.wav"),
-		*const jump_land_sound_path = ASSET_PATH("audio/sound_effects/jump_land.wav");
+		*const jump_up_sound_path = "audio/sound_effects/jump_up.wav",
+		*const jump_land_sound_path = "audio/sound_effects/jump_land.wav";
 
 	// TODO: return clip indices from these, that can be used to find the right audio source
 	add_audio_clip_to_audio_context(&audio_context, weapon_sprite_config.sound_path, true);
@@ -732,7 +730,7 @@ int main(void) {
 
 	////////// Reading in the window config
 
-	cJSON* const window_config_json = init_json_from_file(ASSET_PATH("json_data/window.json"));
+	cJSON* const window_config_json = init_json_from_file("json_data/window.json");
 	const cJSON* const enabled_json = read_json_subobj(window_config_json, "enabled");
 
 	////////// Reading in some arrays

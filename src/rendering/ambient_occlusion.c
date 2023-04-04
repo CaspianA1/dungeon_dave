@@ -4,7 +4,6 @@
 #include "utils/uniform_buffer.h" // For various uniform buffer defs
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "utils/shader.h" // For `init_shader`, and `deinit_shader`
-#include "utils/macro_utils.h" // For `ASSET_PATH`
 #include "utils/texture.h" // For various texture creation utils
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 
@@ -352,7 +351,7 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 
 	////////// Making a shader, and using it
 
-	const GLuint shader = init_shader(ASSET_PATH("shaders/precompute_ambient_occlusion.vert"), NULL, NULL, transform_feedback_hook);
+	const GLuint shader = init_shader("shaders/precompute_ambient_occlusion.vert", NULL, NULL, transform_feedback_hook);
 	use_shader(shader);
 
 	////////// Writing the plain uniforms and the heightmap to the shader

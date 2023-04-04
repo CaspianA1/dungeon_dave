@@ -5,7 +5,7 @@
 #include "data/constants.h" // For various constants
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 #include "utils/shader.h" // For `init_shader`
-#include "utils/macro_utils.h" // For `ASSET_PATH`
+#include "utils/macro_utils.h" // For `ARRAY_LENGTH`
 
 /* TODO:
 - Have a SkyboxRenderer interface that allows swapping out skybox textures
@@ -129,7 +129,7 @@ static void define_vertex_spec(void) {
 Skybox init_skybox(const SkyboxConfig* const config) {
 	const GLuint
 		skybox_texture = init_skybox_texture(config -> texture_path, config -> texture_scale),
-		shader = init_shader(ASSET_PATH("shaders/skybox.vert"), NULL, ASSET_PATH("shaders/skybox.frag"), NULL);
+		shader = init_shader("shaders/skybox.vert", NULL, "shaders/skybox.frag", NULL);
 
 	use_shader(shader);
 	use_texture_in_shader(skybox_texture, shader, "skybox_sampler", TexSkybox, TU_Skybox);

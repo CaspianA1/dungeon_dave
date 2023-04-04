@@ -4,6 +4,7 @@
 #include "utils/macro_utils.h" // For `ON_FIRST_CALL`
 #include "data/constants.h" // For `engine.enabled.anisotropic_filtering`, and `max_byte_value`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
+#include "utils/safe_io.h" // For `get_temp_asset_path`
 
 //////////
 
@@ -40,7 +41,7 @@ SDL_Surface* init_blank_grayscale_surface(const GLsizei width, const GLsizei hei
 }
 
 SDL_Surface* init_surface(const GLchar* const path) {
-	SDL_Surface* const surface = SDL_LoadBMP(path);
+	SDL_Surface* const surface = SDL_LoadBMP(get_temp_asset_path(path));
 	if (surface == NULL) FAIL(OpenFile, "Could not load '%s': %s", path, SDL_GetError());
 
 	if (surface -> format -> format == SDL_PIXEL_FORMAT)

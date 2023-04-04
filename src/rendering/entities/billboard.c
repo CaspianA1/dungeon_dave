@@ -169,7 +169,7 @@ BillboardContext init_billboard_context(
 			define_vertex_spec, NULL, GL_DYNAMIC_DRAW, GL_TRIANGLE_STRIP,
 			(List) {.data = NULL, .item_size = sizeof(Billboard), .length = num_billboards},
 
-			init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),
+			init_shader("shaders/billboard.vert", NULL, "shaders/world_shaded_object.frag", NULL),
 			albedo_texture_set, init_normal_map_from_albedo_texture(albedo_texture_set,
 				TexSet, &shared_material_properties -> normal_map_config
 			)
@@ -177,9 +177,10 @@ BillboardContext init_billboard_context(
 
 		.shadow_mapping = {
 			.depth_shader = init_shader(
-				ASSET_PATH("shaders/shadow/billboard_depth.vert"),
-				ASSET_PATH("shaders/shadow/billboard_depth.geom"),
-				ASSET_PATH("shaders/shadow/billboard_depth.frag"), NULL
+				"shaders/shadow/billboard_depth.vert",
+				"shaders/shadow/billboard_depth.geom",
+				"shaders/shadow/billboard_depth.frag",
+				NULL
 			),
 
 			.alpha_threshold = shadow_mapping_alpha_threshold

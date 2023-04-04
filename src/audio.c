@@ -1,6 +1,6 @@
 #include "audio.h"
 #include "utils/failure.h" // For `FAIL`
-#include "utils/macro_utils.h" // For `CHECK_BITMASK`
+#include "utils/safe_io.h" // For `get_temp_asset_path`
 #include "utils/debug_macro_utils.h" // TODO: remove
 
 // TODO: allow for an option to set the game's master volume
@@ -68,7 +68,7 @@ static ALuint init_audio_buffer(const ALchar* const path, const bool is_position
 	Uint8* wav_buffer;
 	Uint32 wav_length;
 
-	if (SDL_LoadWAV(path, &audio_spec, &wav_buffer, &wav_length) == NULL)
+	if (SDL_LoadWAV(get_temp_asset_path(path), &audio_spec, &wav_buffer, &wav_length) == NULL)
 		FAIL(OpenFile, "Could not load '%s': %s", path, SDL_GetError());
 
 	////////// Setting up some shared vars Converting the WAV data, if needed

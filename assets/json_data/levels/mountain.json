@@ -44,7 +44,7 @@
 	},
 
 	"skybox": {
-		"texture_path": "../assets/skyboxes/desert_island_mountain.bmp",
+		"texture_path": "skyboxes/desert_island_mountain.bmp",
 		"texture_scale": 1.0,
 		"horizon_dist_scale": 1.0,
 		"rotation_degrees_per_axis": [0.0, 0.0, 0.0],
@@ -62,19 +62,19 @@
 			"angles_degrees": [300.0, 0.0, 0.0]
 		},
 
-		"soundtrack_path": "../assets/audio/themes/new/mountain.wav",
+		"soundtrack_path": "audio/themes/new/mountain.wav",
 
 		"sector_face_texture_paths": [
-			"../assets/walls/sand.bmp"
+			"walls/sand.bmp"
 		],
 
 		"billboard_data": {
 			"still_billboard_textures": [
-				"../assets/objects/anubis.bmp"
+				"objects/anubis.bmp"
 			],
 
 			"animated_billboard_textures": [
-				["../assets/spritesheets/flying_carpet.bmp", 5, 10, 46, 0.02]
+				["spritesheets/flying_carpet.bmp", 5, 10, 46, 0.02]
 			],
 
 			"billboards": {

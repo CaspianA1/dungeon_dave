@@ -3,7 +3,7 @@
 #include "utils/bitarray.h" // // For various `BitArray`-related defs
 #include "rendering/entities/face.h" // For `init_mesh_for_sector`, and `init_map_edge_mesh`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
-#include "utils/macro_utils.h" // For `ARRAY_LENGTH`, and `ASSET_PATH`
+#include "utils/macro_utils.h" // For `ARRAY_LENGTH`
 #include "utils/shader.h" // For `init_shader`
 #include "data/constants.h" // For `default_depth_func`
 
@@ -389,7 +389,7 @@ SectorContext init_sector_context(
 		.drawable = init_drawable_with_vertices(
 			define_vertex_spec, NULL, GL_DYNAMIC_DRAW, GL_TRIANGLES,
 			(List) {.data = NULL, .item_size = face_mesh.item_size, .length = face_mesh.length},
-			init_shader(ASSET_PATH("shaders/sector.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),
+			init_shader("shaders/sector.vert", NULL, "shaders/world_shaded_object.frag", NULL),
 			albedo_texture_set, init_normal_map_from_albedo_texture(
 				albedo_texture_set, TexSet, &shared_material_properties -> normal_map_config
 			)
@@ -402,17 +402,17 @@ SectorContext init_sector_context(
 			.vertex_spec = vertex_spec_for_shadow_mapping,
 
 			.depth_shader = init_shader(
-				ASSET_PATH("shaders/shadow/sector_depth.vert"),
-				ASSET_PATH("shaders/shadow/sector_depth.geom"),
-				ASSET_PATH("shaders/shadow/sector_depth.frag"),
+				"shaders/shadow/sector_depth.vert",
+				"shaders/shadow/sector_depth.geom",
+				"shaders/shadow/sector_depth.frag",
 				NULL
 			)
 		},
 
 		.depth_prepass_shader = init_shader(
-			ASSET_PATH("shaders/sector_depth_prepass.vert"),
+			"shaders/sector_depth_prepass.vert",
 			NULL,
-			ASSET_PATH("shaders/shadow/sector_depth.frag"),
+			"shaders/shadow/sector_depth.frag",
 			NULL
 		),
 

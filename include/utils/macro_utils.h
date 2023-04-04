@@ -3,7 +3,6 @@
 
 #include <stdbool.h> // For `bool`, `true`, and `false`
 
-#define ASSET_PATH(suffix) ("../assets/" suffix)
 #define CHECK_BITMASK(bits, mask) (!!((bits) & (mask)))
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof(*(array)))
 

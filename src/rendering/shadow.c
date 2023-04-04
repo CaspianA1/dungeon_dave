@@ -1,6 +1,5 @@
 #include "rendering/shadow.h"
 #include "utils/safe_io.h" // For `open_file_safely`
-#include "utils/macro_utils.h" // For `ASSET_PATH`
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "utils/texture.h" // For `init_texture_data`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
@@ -110,7 +109,7 @@ void specify_cascade_count_before_any_shader_compilation(
 
 	////////// Writing to disk
 
-	FILE* const file = open_file_safely(ASSET_PATH("shaders/shadow/num_cascades.glsl"), "w");
+	FILE* const file = open_file_safely("shaders/shadow/num_cascades.glsl", "w");
 
 	const GLchar* const file_description = "This file is written to before any other shaders include it";
 

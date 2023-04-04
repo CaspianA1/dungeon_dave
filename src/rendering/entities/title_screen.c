@@ -72,7 +72,7 @@ TitleScreen init_title_screen(
 
 	//////////
 
-	const GLuint shader = init_shader(ASSET_PATH("shaders/title_screen.vert"), NULL, ASSET_PATH("shaders/title_screen.frag"), NULL);
+	const GLuint shader = init_shader("shaders/title_screen.vert", NULL, "shaders/title_screen.frag", NULL);
 	use_shader(shader);
 
 	INIT_UNIFORM_VALUE(scrolling_texture_vert_squish_ratio, shader, 1f, rendering_config -> scrolling_vert_squish_ratio);

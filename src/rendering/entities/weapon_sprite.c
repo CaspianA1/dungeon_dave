@@ -1,6 +1,7 @@
 #include "rendering/entities/weapon_sprite.h"
 #include "utils/macro_utils.h" // For `CHECK_BITMASK`
 #include "utils/opengl_wrappers.h" // For `INIT_UNIFORM_VALUE`, `INIT_UNIFORM`, and `UPDATE_UNIFORM`
+#include "utils/safe_io.h" // For `get_temp_asset_path`
 #include "utils/shader.h" // For `init_shader`
 
 /* The weapon sprite code can be a bit hard to understand in the big picture.
@@ -241,7 +242,7 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
 	and here too, but this makes the code much more readable. */
-	SDL_Surface* const peek_surface = init_surface(animation_layout -> spritesheet_path);
+	SDL_Surface* const peek_surface = init_surface(get_temp_asset_path(animation_layout -> spritesheet_path));
 
 	const GLsizei frame_size[2] = {
 		peek_surface -> w / (GLsizei) animation_layout -> frames_across,
@@ -263,7 +264,7 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW,
 			GL_TRIANGLE_STRIP, (List) {NULL, sizeof(vec3), corners_per_quad, corners_per_quad},
 
-			init_shader(ASSET_PATH("shaders/weapon_sprite.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),
+			init_shader("shaders/weapon_sprite.vert", NULL, "shaders/world_shaded_object.frag", NULL),
 			albedo_texture_set, init_normal_map_from_albedo_texture(albedo_texture_set,
 				TexSet, &config -> shared_material_properties.normal_map_config
 			)
