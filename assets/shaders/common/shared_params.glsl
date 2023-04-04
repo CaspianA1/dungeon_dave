@@ -1,11 +1,12 @@
 #version 400 core
 
 #include "../shadow/num_cascades.glsl"
+#include "constants.glsl"
 
 /* These are constant for a given level.
 They are ordered in terms of the stages of rendering. */
 layout(shared) uniform ConstantShadingParams {
-	vec2 all_bilinear_percents[3u]; // TODO: make the `3u` an input macro
+	vec2 all_bilinear_percents[NUM_UNIQUE_OBJECT_TYPES];
 
 	struct {
 		bool enabled;
