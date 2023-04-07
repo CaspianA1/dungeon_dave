@@ -11,9 +11,7 @@ typedef int8_t signed_byte;
 typedef uint8_t byte;
 typedef uint32_t buffer_size_t;
 
-typedef struct {
-	signed_byte x, y, z;
-} sbvec3;
+typedef signed_byte sbvec3[3];
 
 // Note: this texture id type does not apply to sectors' texture IDs.
 typedef uint16_t material_index_t;

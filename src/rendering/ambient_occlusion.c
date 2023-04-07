@@ -178,12 +178,12 @@ static bool ray_collides_with_heightmap(const vec3 dir,
 		(signed_byte) glm_signf(dir[2])
 	};
 
-	const sbvec3 actual_flow = is_dual_normal ? step_signs : flow;
+	const signed_byte* const actual_flow = is_dual_normal ? step_signs : flow;
 
 	const vec3 floating_origin = {
-		(actual_flow.x == -1) * -float_epsilon + origin_x,
+		(actual_flow[0] == -1) * -float_epsilon + origin_x,
 		origin_y,
-		(actual_flow.z == -1) * -float_epsilon + origin_z
+		(actual_flow[2] == -1) * -float_epsilon + origin_z
 	};
 
 	const vec3 start_pos = {floorf(floating_origin[0]), floorf(floating_origin[1]), floorf(floating_origin[2])};
@@ -198,8 +198,8 @@ static bool ray_collides_with_heightmap(const vec3 dir,
 	glm_vec3_sub((GLfloat*) floating_origin, (GLfloat*) start_pos, ray_length_components);
 
 	for (byte i = 0; i < 3; i++) {
-		const GLfloat component = ray_length_components[i];
-		ray_length_components[i] = (step_signs[i] == 1) ? 1.0f - component : component;
+		const GLfloat ray_length_component = ray_length_components[i];
+		ray_length_components[i] = (step_signs[i] == 1) ? (1.0f - ray_length_component) : ray_length_component;
 	}
 
 	glm_vec3_mul(ray_length_components, unit_step_size, ray_length_components);
@@ -216,8 +216,9 @@ static bool ray_collides_with_heightmap(const vec3 dir,
 		// Will yield 1 if x > y, and 0 if x <= y (so this gives the index of the smallest among x and y)
 		const byte x_and_y_min_index = (ray_length_components[0] > ray_length_components[1]);
 		const byte index_of_shortest = (ray_length_components[x_and_y_min_index] > ray_length_components[2]) ? 2 : x_and_y_min_index;
+		const signed_byte step_sign_component = step_signs[index_of_shortest];
 
-		curr_tile[index_of_shortest] += step_signs[index_of_shortest];
+		curr_tile[index_of_shortest] += step_sign_component;
 		ray_length_components[index_of_shortest] += unit_step_size[index_of_shortest];
 
 		//////////
