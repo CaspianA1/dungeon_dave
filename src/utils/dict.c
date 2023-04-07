@@ -25,6 +25,7 @@ static char* make_format_string(char* const format_string, const DictVarType typ
 //////////
 
 // TODO: remove
+/*
 void print_dict(const Dict* const dict) {
 	puts("{");
 
@@ -46,6 +47,7 @@ void print_dict(const Dict* const dict) {
 
 	puts("}");
 }
+*/
 
 ////////// Operations on keys
 

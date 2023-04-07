@@ -90,8 +90,6 @@ typedef struct {
 	}\
 } while (false)
 
-void print_dict(const Dict* const dict); // TODO: remove
-
 // TODO: is the value type actually needed?
 Dict init_dict(const buffer_size_t expected_num_entries,
 	const DictVarType key_type, const DictVarType value_type);
