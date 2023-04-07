@@ -2,15 +2,9 @@
 #include "data/constants.h" // For `TWO_PI`
 
 DynamicLight init_dynamic_light(const DynamicLightConfig* const config) {
-	const GLfloat* const pos = config -> pos;
-
 	vec3 from, to;
-
-	glm_vec3_sub((GLfloat*) pos, (GLfloat*) config -> looking_at.origin, from);
-	glm_vec3_normalize(from);
-
-	glm_vec3_sub((GLfloat*) pos, (GLfloat*) config -> looking_at.dest, to);
-	glm_vec3_normalize(to);
+	glm_vec3_normalize_to((GLfloat*) config -> unnormalized_from, from);
+	glm_vec3_normalize_to((GLfloat*) config -> unnormalized_to, to);
 
 	vec3 axis;
 	glm_vec3_cross((GLfloat*) from, (GLfloat*) to, axis);

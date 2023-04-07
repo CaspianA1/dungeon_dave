@@ -4,11 +4,9 @@
 #include "glad/glad.h" // For OpenGL defs
 #include "cglm/cglm.h" // For various cglm defs
 
-// TODO: specify the dynamic light extremities as unnormalized directions instead
 typedef struct {
 	const GLfloat time_for_cycle;
-	const vec3 pos;
-	const struct {const vec3 origin, dest;} looking_at;
+	const vec3 unnormalized_from, unnormalized_to;
 } DynamicLightConfig;
 
 // This light is dynamic in the sense that it cycles between 2 directions.

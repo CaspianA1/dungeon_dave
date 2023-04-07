@@ -135,9 +135,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		*const skybox_json = read_json_subobj(level_json, "skybox"),
 		*const non_lighting_json = read_json_subobj(level_json, "non_lighting_data");
 
-	const cJSON
-		*const dyn_light_looking_at_json = read_json_subobj(dyn_light_json, "looking_at"),
-		*const cascaded_shadow_json = read_json_subobj(shadow_mapping_json, "cascades");
+	const cJSON* const cascaded_shadow_json = read_json_subobj(shadow_mapping_json, "cascades");
 
 	//////////
 
@@ -149,12 +147,11 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	//////////
 
-	vec3 dyn_light_pos, dyn_light_looking_at_origin, dyn_light_looking_at_dest;
+	vec3 dyn_light_unnormalized_from, dyn_light_unnormalized_to;
 	sdl_pixel_component_t rgb_light_color[3];
 
-	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_json, dyn_light_pos, pos, float);
-	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_origin, origin, float);
-	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_looking_at_json, dyn_light_looking_at_dest, dest, float);
+	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_json, dyn_light_unnormalized_from, unnormalized_from, possibly_negative_float);
+	GET_ARRAY_VALUES_FROM_JSON_KEY(dyn_light_json, dyn_light_unnormalized_to, unnormalized_to, possibly_negative_float);
 	GET_ARRAY_VALUES_FROM_JSON_KEY(level_json, rgb_light_color, rgb_light_color, u8);
 
 	//////////
@@ -199,21 +196,17 @@ static void* main_init(const WindowConfig* const window_config) {
 		.dynamic_light_config = {
 			JSON_TO_FIELD(dyn_light_json, time_for_cycle, float),
 
-			.pos = {dyn_light_pos[0], dyn_light_pos[1], dyn_light_pos[2]},
+			.unnormalized_from = {
+				dyn_light_unnormalized_from[0],
+				dyn_light_unnormalized_from[1],
+				dyn_light_unnormalized_from[2]
+			},
 
-			.looking_at = {
-				.origin = {
-					dyn_light_looking_at_origin[0],
-					dyn_light_looking_at_origin[1],
-					dyn_light_looking_at_origin[2]
-				},
-
-				.dest = {
-					dyn_light_looking_at_dest[0],
-					dyn_light_looking_at_dest[1],
-					dyn_light_looking_at_dest[2]
-				}
-			}
+			.unnormalized_to = {
+				dyn_light_unnormalized_to[0],
+				dyn_light_unnormalized_to[1],
+				dyn_light_unnormalized_to[2]
+			},
 		},
 
 		.skybox_config = {

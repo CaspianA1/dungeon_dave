@@ -183,13 +183,8 @@ static void init_trimmed_face_mesh_for_shadow_mapping(const Heightmap heightmap,
 
 	// TODO: avoid repeating this logic in `init_dynamic_light`
 	vec3 light_dir_from, light_dir_to;
-	const GLfloat* const dynamic_light_pos = dynamic_light_config -> pos;
-
-	glm_vec3_sub((GLfloat*) dynamic_light_pos, (GLfloat*) dynamic_light_config -> looking_at.origin, light_dir_from);
-	glm_vec3_sub((GLfloat*) dynamic_light_pos, (GLfloat*) dynamic_light_config -> looking_at.dest, light_dir_to);
-
-	glm_vec3_normalize(light_dir_from);
-	glm_vec3_normalize(light_dir_to);
+	glm_vec3_normalize_to((GLfloat*) dynamic_light_config -> unnormalized_from, light_dir_from);
+	glm_vec3_normalize_to((GLfloat*) dynamic_light_config -> unnormalized_to, light_dir_to);
 
 	////////// Making a map edge mesh + vertex buffer for it
 

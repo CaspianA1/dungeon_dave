@@ -8,7 +8,8 @@
 typedef uint16_t json_array_size_t;
 #define MAX_JSON_ARRAY_SIZE UINT16_MAX
 
-// Excluded: get_json_name, typecheck_json, check_number_value_range, get_validated_json_unsigned_int, validate_json_array
+/* Excluded: get_json_name, typecheck_json, check_number_value_range_with_options,
+check_number_value_range, get_validated_json_unsigned_int, validate_json_array */
 
 ////////// Some general fns
 
@@ -54,6 +55,7 @@ json_array_size_t validate_json_array(const cJSON* const json, const int expecte
 JSON_ARRAY_READING_DEF(uint8_t, u8)
 JSON_ARRAY_READING_DEF(uint16_t, u16)
 JSON_ARRAY_READING_DEF(float, float)
+JSON_ARRAY_READING_DEF(float, possibly_negative_float)
 
 #undef JSON_ARRAY_READING_DEF
 

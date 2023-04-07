@@ -35,12 +35,8 @@
 
 	"dynamic_light": {
 		"time_for_cycle": 2.5,
-		"pos": [3.0, 50.0, 36.0],
-
-		"looking_at": {
-			"origin": [24.0, 2.5, 20.0],
-			"dest": [28.0, 2.5, 17.5]
-		}
+		"unnormalized_from": [-0.386429, 0.874065, 0.294422],
+		"unnormalized_to": [-0.440328, 0.836623, 0.325843]
 	},
 
 	"skybox": {

@@ -25,13 +25,17 @@ static void typecheck_json(const cJSON* const json,
 	}
 }
 
-static void check_number_value_range(const cJSON* const json, const double max) {
-	const double value = json -> valuedouble, min = 0.0;
+static void check_number_value_range_with_options(const double value, const double min,
+	const double max, const char* const name, const char* const expectation) {
 
 	if (value < min || value > max) FAIL(ReadFromJSON,
-		"Expected JSON object '%s' to be in the range of [%g, %g]",
-		get_json_name(json), min, max
+		"Expected JSON object '%s' to %s of [%g, %g], but it was %g",
+		name, expectation, min, max, value
 	);
+}
+
+static void check_number_value_range(const cJSON* const json, const double min, const double max) {
+	check_number_value_range_with_options(json -> valuedouble, min, max, get_json_name(json), "be in the range");
 }
 
 ////////// Some general fns
@@ -70,7 +74,13 @@ bool get_bool_from_json(const cJSON* const json) {
 
 float get_float_from_json(const cJSON* const json) {
 	typecheck_json(json, cJSON_IsNumber, "float");
-	check_number_value_range(json, (double) FLT_MAX);
+	check_number_value_range(json, 0.0, (double) FLT_MAX);
+	return (float) json -> valuedouble;
+}
+
+float get_possibly_negative_float_from_json(const cJSON* const json) {
+	typecheck_json(json, cJSON_IsNumber, "float");
+	check_number_value_range(json, (double) -FLT_MAX, (double) FLT_MAX);
 	return (float) json -> valuedouble;
 }
 
@@ -83,7 +93,7 @@ const char* get_string_from_json(const cJSON* const json) {
 
 static int get_validated_json_unsigned_int(const cJSON* const json, const uint64_t max, const char* const name) {
 	typecheck_json(json, cJSON_IsNumber, name);
-	check_number_value_range(json, max);
+	check_number_value_range(json, 0.0, max);
 	return json -> valueint;
 }
 
@@ -99,16 +109,23 @@ JSON_UINT_READING_FN(16)
 ////////// Array readers
 
 // If the expected length is -1, the length isn't validated. The actual length is also returned.
-json_array_size_t validate_json_array(const cJSON* const json, const int expected_length, const json_array_size_t max) {
+json_array_size_t validate_json_array(const cJSON* const json, const int expected_length, const json_array_size_t max_array_size) {
 	typecheck_json(json, cJSON_IsArray, "array");
 
+	////////// Doing a range check
+
+	const json_array_size_t min_array_size = 1u;
+
+	const char* const name = get_json_name(json);
 	const int length = cJSON_GetArraySize(json);
-	if (length == 0) FAIL(ReadFromJSON, "%s", "JSON arrays cannot have size-zero lengths");
-	check_number_value_range(json, max);
+
+	check_number_value_range_with_options(length, min_array_size, max_array_size, name, "have an array length");
+
+	//////////
 
 	if ((expected_length != -1) && (length != expected_length)) FAIL(ReadFromJSON,
 		"Expected JSON array '%s', '%s', to have a length of %d, but the length was %d",
-		get_json_name(json), cJSON_Print(json), expected_length, length
+		name, cJSON_Print(json), expected_length, length
 	);
 
 	return (json_array_size_t) length;
@@ -123,6 +140,7 @@ json_array_size_t validate_json_array(const cJSON* const json, const int expecte
 JSON_ARRAY_READING_FN(uint8_t, u8)
 JSON_ARRAY_READING_FN(uint16_t, u16)
 JSON_ARRAY_READING_FN(float, float)
+JSON_ARRAY_READING_FN(float, possibly_negative_float)
 
 #undef JSON_ARRAY_READING_FN
 
