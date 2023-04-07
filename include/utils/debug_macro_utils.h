@@ -80,7 +80,6 @@ static inline const GLchar* get_ALC_error(void) {
 	putchar('\n');\
 } while (false)
 
-// TODO: remove
 #define INIT_SHADER_BRANCH(shader, name, key) INIT_UNIFORM_VALUE(name, (shader), 1ui, SDL_GetKeyboardState(NULL)[SDL_SCANCODE_##key])
 
 #define TWEAK_REALTIME_VALUE(value_name, init_value, min_value, max_value, step, key_decr, key_incr, key_reset)\
