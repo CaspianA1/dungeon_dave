@@ -311,16 +311,17 @@ static void* main_init(const WindowConfig* const window_config) {
 	// Getting a total billboard count, and allocating a billboard array from that
 
 	enum {num_billboard_categories = ARRAY_LENGTH(billboard_categories)};
-	billboard_index_t num_billboards = 0, num_billboards_per_category[num_billboard_categories];
+	billboard_index_t num_billboards = 0, num_animated_billboards;
 
 	// TODO: check that the number of billboards doesn't exceed the limit
 	for (byte i = 0; i < num_billboard_categories; i++) {
 		const cJSON* const category_json = read_json_subobj(billboards_json, billboard_categories[i]);
 		const billboard_index_t num_billboards_in_category = validate_json_array(category_json, -1, max_billboard_index);
-		num_billboards += (num_billboards_per_category[i] = num_billboards_in_category);
-	}
 
-	const billboard_index_t num_animated_billboards = num_billboards_per_category[1];
+		// Category 1 is for animated billboards
+		if (i == 1) num_animated_billboards = num_billboards_in_category;
+		num_billboards += num_billboards_in_category;
+	}
 
 	BillboardAnimationInstance* const billboard_animation_instances = alloc(num_animated_billboards, sizeof(BillboardAnimationInstance));
 	Billboard* const billboards = alloc(num_billboards, sizeof(Billboard));
