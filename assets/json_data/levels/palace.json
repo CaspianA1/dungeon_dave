@@ -58,7 +58,7 @@
 			"angles_degrees": [45.0, 0.0, 0.0]
 		},
 
-		"soundtrack_path": "audio/themes/new/mountain.wav",
+		"soundtrack_path": "audio/themes/new/desert.wav",
 
 		"sector_face_texture_paths": [
 			"walls/sand.bmp",
