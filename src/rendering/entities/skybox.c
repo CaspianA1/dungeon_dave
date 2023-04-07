@@ -1,4 +1,5 @@
 #include "rendering/entities/skybox.h"
+#include "utils/typedefs.h" // For `sbvec3`
 #include "utils/texture.h" // For various texture creation utils
 #include "utils/failure.h" // For `FAIL`
 #include "cglm/cglm.h" // For various cglm defs
@@ -38,8 +39,6 @@ Details on going from equiangular to equirectangular skyboxes (not relevant anym
 */
 
 //////////
-
-typedef signed_byte sbvec3[3]; // `sb` for signed byte (TODO: use this type in the AO code)
 
 /* Note: `ts` = triangle strip. See this link:
  * https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip */

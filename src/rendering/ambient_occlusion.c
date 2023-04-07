@@ -170,20 +170,20 @@ static ao_value_t get_ao_term_from_collision_count(const trace_count_t num_colli
 static bool ray_collides_with_heightmap(const vec3 dir,
 	const Heightmap heightmap, const map_pos_component_t max_y,
 	const map_pos_component_t origin_x, const map_pos_component_t origin_y,
-	const map_pos_component_t origin_z, const bool is_dual_normal, const signed_byte flow[3]) {
+	const map_pos_component_t origin_z, const bool is_dual_normal, const sbvec3 flow) {
 
-	const signed_byte step_signs[3] = {
+	const sbvec3 step_signs = {
 		(signed_byte) glm_signf(dir[0]),
 		(signed_byte) glm_signf(dir[1]),
 		(signed_byte) glm_signf(dir[2])
 	};
 
-	const signed_byte* const actual_flow = is_dual_normal ? step_signs : flow;
+	const sbvec3 actual_flow = is_dual_normal ? step_signs : flow;
 
 	const vec3 floating_origin = {
-		(actual_flow[0] == -1) * -float_epsilon + origin_x,
+		(actual_flow.x == -1) * -float_epsilon + origin_x,
 		origin_y,
-		(actual_flow[2] == -1) * -float_epsilon + origin_z
+		(actual_flow.z == -1) * -float_epsilon + origin_z
 	};
 
 	const vec3 start_pos = {floorf(floating_origin[0]), floorf(floating_origin[1]), floorf(floating_origin[2])};
@@ -254,7 +254,7 @@ typedef enum {
 
 typedef struct {
 	const vec3 normal;
-	const signed_byte flow[3];
+	const sbvec3 flow;
 	const NormalLocationStatus location_status;
 } SurfaceNormalData;
 
