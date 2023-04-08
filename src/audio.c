@@ -3,7 +3,11 @@
 #include "utils/safe_io.h" // For `get_temp_asset_path`
 #include "utils/debug_macro_utils.h" // TODO: remove
 
-// TODO: allow for an option to set the game's master volume
+/* TODO:
+- Allow for an option to set the game's master volume
+- Tying audio to billboards will be trickier later on, but for now, tie sounds to when animated billboards' cycles start
+- Maybe use sound handles, instead of strings, as audio keys (not as much use for `Dict`, then)
+*/
 
 //////////
 
