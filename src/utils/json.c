@@ -26,16 +26,16 @@ static void typecheck_json(const cJSON* const json,
 }
 
 static void check_number_value_range_with_options(const double value, const double min,
-	const double max, const char* const name, const char* const expectation) {
+	const double max, const char* const name, const char* const range_expectation) {
 
 	if (value < min || value > max) FAIL(ReadFromJSON,
-		"Expected JSON object '%s' to %s of [%g, %g], but it was %g",
-		name, expectation, min, max, value
+		"Expected JSON object '%s' to %s in the domain of [%g, %g], but it was %g",
+		name, range_expectation, min, max, value
 	);
 }
 
 static void check_number_value_range(const cJSON* const json, const double min, const double max) {
-	check_number_value_range_with_options(json -> valuedouble, min, max, get_json_name(json), "be in the range");
+	check_number_value_range_with_options(json -> valuedouble, min, max, get_json_name(json), "be");
 }
 
 ////////// Some general fns
