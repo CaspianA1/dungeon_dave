@@ -14,7 +14,7 @@
 		"billboard_alpha_threshold": 0.75,
 		"inter_cascade_blend_threshold": 0.5,
 
-		"cascades": {
+		"shadow_cascades": {
 			"num_cascades": 4,
 			"num_depth_buffer_bits": 16,
 			"resolution": 1024,
@@ -79,14 +79,14 @@
 		],
 
 		"billboard_data": {
-			"still_billboard_textures": [
+			"still_billboard_texture_paths": [
 				"objects/health_kit.bmp",
 				"objects/teleporter.bmp",
 				"objects/shabti.bmp",
 				"objects/anubis.bmp"
 			],
 
-			"animated_billboard_textures": [
+			"animated_billboard_data": [
 				["spritesheets/flying_carpet.bmp", 5, 10, 46, 0.02],
 				["spritesheets/torch_2.bmp", 2, 3, 5, 0.15],
 				["spritesheets/fireball_travel.bmp", 12, 1, 12, 0.08],
@@ -132,7 +132,7 @@
 			}
 		},
 
-		"heightmap": [
+		"heightmap_data": [
 			[3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
 			[3, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 14,14,14,14,14,14,5],
 			[3, 0, 0, 3, 0, 0, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 1, 2, 14,15,15,15,15,14,5],
@@ -175,7 +175,7 @@
 			[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
 		],
 
-		"texture_id_map": [
+		"texture_id_map_data": [
 			[1, 1, 1, 1, 11,11,1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 1, 11,11,1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12,12,12,12,12,12,12,12,1],
 			[1, 0, 0, 1, 11,11,1, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 10,0, 12,12,12,13,13,13,13,12,1],

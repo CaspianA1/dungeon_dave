@@ -134,7 +134,7 @@ json_array_size_t validate_json_array(const cJSON* const json, const int expecte
 #define JSON_ARRAY_READING_FN(return_type_t, typename_t)\
 	void read_##typename_t##s_from_json_array(const cJSON* const json, const json_array_size_t expected_length, return_type_t* const array) {\
 		validate_json_array(json, expected_length, MAX_JSON_ARRAY_SIZE);\
-		JSON_FOR_EACH(i, item, json, array[i] = get_##typename_t##_from_json(item););\
+		RAW_JSON_FOR_EACH(i, item, json, array[i] = get_##typename_t##_from_json(item););\
 	}
 
 JSON_ARRAY_READING_FN(uint8_t, u8)
@@ -150,7 +150,7 @@ const char** read_string_vector_from_json(const cJSON* const json, json_array_si
 	*length = validate_json_array(json, -1, MAX_JSON_ARRAY_SIZE);
 	const char** const strings = alloc(*length, sizeof(char*));
 
-	JSON_FOR_EACH(i, string, json, strings[i] = get_string_from_json(string););
+	RAW_JSON_FOR_EACH(i, string, json, strings[i] = get_string_from_json(string););
 
 	return strings;
 }
@@ -171,7 +171,7 @@ void* read_2D_map_from_json(const cJSON* const json, const buffer_size_t datum_s
 
 	////////// Looping over each row
 
-	JSON_FOR_EACH(i, row, json,
+	RAW_JSON_FOR_EACH(i, row, json,
 		if (i == 0) {
 			map_width = map_size -> x = (map_pos_component_t) validate_json_array(row, -1, constants.max_map_size);
 			map = alloc((size_t) (map_width * map_size -> z), datum_size);
@@ -182,7 +182,7 @@ void* read_2D_map_from_json(const cJSON* const json, const buffer_size_t datum_s
 		else validate_json_array(row, map_width, constants.max_map_size);
 
 		// Initializing row values
-		JSON_FOR_EACH(_, height, row,
+		RAW_JSON_FOR_EACH(_, height, row,
 			const uint64_t result = (uint64_t) get_validated_json_unsigned_int(height, max_size_for_datum, "a number");
 			memcpy(curr_map_ptr, &result, datum_size);
 			curr_map_ptr += datum_size;

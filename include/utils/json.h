@@ -2,7 +2,7 @@
 #define JSON_H
 
 #include "cjson/cJSON.h" // For various JSON defs
-#include "utils/macro_utils.h" // For `ARRAY_LENGTH`
+#include <stdbool.h> // For `bool`, and `false`
 #include "utils/typedefs.h" // For `map_pos_xz_t`, and `map_pos_component_t`
 
 typedef uint16_t json_array_size_t;
@@ -11,21 +11,45 @@ typedef uint16_t json_array_size_t;
 /* Excluded: get_json_name, typecheck_json, check_number_value_range_with_options,
 check_number_value_range, get_validated_json_unsigned_int, validate_json_array */
 
-////////// Some general fns
+////////// Some useful macros
 
-#define JSON_TO_FIELD(json, name, subtype_t) .name = get_##subtype_t##_from_json(read_json_subobj(json, #name))
+#define WITH_JSON_OBJ_SUFFIX(json_obj) json_obj##_json
+#define JSON_OBJ_NAME_DEF(json_obj) *const WITH_JSON_OBJ_SUFFIX(json_obj)
+#define READ_JSON_SUBOBJ_WITH_SUFFIX(json_obj, json_subobj) read_json_subobj(WITH_JSON_OBJ_SUFFIX(json_obj), #json_subobj)
 
-#define GET_ARRAY_VALUES_FROM_JSON_KEY(json, c_name, json_name, subtype_t)\
-	read_##subtype_t##s_from_json_array(read_json_subobj(json, #json_name), ARRAY_LENGTH(c_name), c_name)
+#define JSON_TO_FIELD(json_obj, json_subobj, subtype_t)\
+	.json_subobj = get_##subtype_t##_from_json(\
+	READ_JSON_SUBOBJ_WITH_SUFFIX(json_obj, json_subobj))
 
-#define JSON_FOR_EACH(index_var, loop_item, json, ...) do {\
+#define DEF_ARRAY_FROM_JSON(json_obj, json_subobj, actual_subtype_t, aliased_subtype_t, array_length)\
+	actual_subtype_t json_obj##_##json_subobj[array_length];\
+	\
+	read_##aliased_subtype_t##s_from_json_array(\
+		READ_JSON_SUBOBJ_WITH_SUFFIX(json_obj, json_subobj),\
+		array_length, json_obj##_##json_subobj)
+
+#define DEF_JSON_SUBOBJ(json_obj, json_subobj)\
+	JSON_OBJ_NAME_DEF(json_subobj) =\
+	READ_JSON_SUBOBJ_WITH_SUFFIX(json_obj, json_subobj)
+
+#define EXTRACT_FROM_JSON_SUBOBJ(extracting_fn, json_obj, json_subobj, ...)\
+	json_subobj = extracting_fn##_from_json(READ_JSON_SUBOBJ_WITH_SUFFIX(json_obj, json_subobj) __VA_ARGS__)
+
+// This does not change any suffix names, whereas `JSON_FOR_EACH` does.
+#define RAW_JSON_FOR_EACH(index_var, loop_item, json_obj, ...) do {\
 	json_array_size_t index_var = 0;\
 	const cJSON* loop_item;\
-	cJSON_ArrayForEach(loop_item, json) {\
+	cJSON_ArrayForEach(loop_item, json_obj) {\
 		__VA_ARGS__\
 		index_var++;\
 	}\
 } while (false)
+
+#define JSON_FOR_EACH(index_var, loop_item, json_obj, ...)\
+	RAW_JSON_FOR_EACH(index_var, WITH_JSON_OBJ_SUFFIX(loop_item),\
+	WITH_JSON_OBJ_SUFFIX(json_obj), __VA_ARGS__)
+
+////////// Some general fns
 
 cJSON* init_json_from_file(const char* const path);
 #define deinit_json cJSON_Delete
