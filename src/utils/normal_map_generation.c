@@ -15,9 +15,9 @@ static void generate_heightmap(SDL_Surface* const src, SDL_Surface* const dest, 
 	const GLfloat smallest_possible_heightmap_scale = constants.one_over_max_byte_value;
 
 	if (heightmap_scale < smallest_possible_heightmap_scale) {
-		// Getting the blank color explicitly, because who knows if the blank color doesn't map to 0?
-		const Uint32 blank_color = SDL_MapRGB(dest -> format, 0, 0, 0);
-		SDL_FillRect(dest, NULL, blank_color);
+		// Getting the blank pixel color explicitly, because who knows if a blank pixel doesn't map to 0?
+		const sdl_pixel_t blank_pixel = SDL_MapRGB(dest -> format, 0, 0, 0);
+		SDL_FillRect(dest, NULL, blank_pixel);
 		return;
 	}
 
