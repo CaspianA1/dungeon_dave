@@ -95,7 +95,7 @@ vec4 calculate_light() {
 	roughness, based on the magnitude of the local height change on the normal map. */
 	float roughness = mix(max_roughness, min_roughness, normal_and_inv_height.z);
 
-	////////// https://learnopengl.com/PBR/Lighting and https://www.youtube.com/watch?v=5p0e7YNONr8
+	////////// https://learnopengl.com/PBR/Lighting, and https://www.youtube.com/watch?v=5p0e7YNONr8
 
 	vec3
 		fragment_normal = fragment_tbn * normal_and_inv_height.xyz,
