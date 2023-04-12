@@ -1,6 +1,6 @@
 #include "utils/normal_map_generation.h"
 #include "cglm/cglm.h" // For various cglm defs
-#include "data/constants.h" // For `max_byte_value`
+#include "data/constants.h" // For `one_over_max_byte_value`, and `max_byte_value`
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "utils/failure.h" // For `FAIL`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
@@ -8,6 +8,21 @@
 ////////// This code concerns heightmap creation.
 
 static void generate_heightmap(SDL_Surface* const src, SDL_Surface* const dest, const GLfloat heightmap_scale) {
+	////////// Skipping heightmap generation if the heightmap scale is small enough
+
+	/* Any heightmap scale smaller than this one will result in any
+	pixel component being multiplied by it turning into zero */
+	const GLfloat smallest_possible_heightmap_scale = constants.one_over_max_byte_value;
+
+	if (heightmap_scale < smallest_possible_heightmap_scale) {
+		// Getting the blank color explicitly, because who knows if the blank color doesn't map to 0?
+		const Uint32 blank_color = SDL_MapRGB(dest -> format, 0, 0, 0);
+		SDL_FillRect(dest, NULL, blank_color);
+		return;
+	}
+
+	////////// Generating the heightmap
+
 	const GLint w = dest -> w, h = dest -> h;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
@@ -263,7 +278,6 @@ GLuint init_normal_map_from_albedo_texture(const GLuint albedo_texture,
 
 	////////// Making a heightmap
 
-	// TODO: optimize if the scale is 0
 	generate_heightmap(rgba_surface, grayscale_buffer_1, config -> heightmap_scale);
 
 	////////// Blurring it (if needed), and then making a normal map
