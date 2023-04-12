@@ -111,6 +111,8 @@ float get_csm_shadow_from_layers(const uint prev_layer_index,
 
 		return in_light_percentage;
 	}
+
+	#undef COMPUTE_SHADOW
 }
 
 float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragment_pos_cascade_space) {
