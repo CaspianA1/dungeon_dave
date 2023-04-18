@@ -30,7 +30,13 @@
 	},
 
 	"ambient_occlusion": {
-		"strength": 0.7
+		"strength": 0.3,
+
+		"compute_config": {
+			"workload_split_factor": 1,
+			"num_trace_iters": 200,
+			"max_num_ray_steps": 100
+		}
 	},
 
 	"dynamic_light": {

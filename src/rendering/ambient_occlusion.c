@@ -90,45 +90,6 @@ Miscellaneous:
 - A Lanzcos filter instead, to fix the tricubic overshoot?
 */
 
-////////// Some typedefs
-
-/*
-T = the total thread count
-N = the number of trace iters per point
-P = the number of points on the 3D grid
-W = the workload split factor
-
-- Normally, N loop iterations are run per thread, with each thread handling one point.
-- But with this, N/W loop iterations are done per thread, with T*W total threads being spawned.
-- This means that W threads correspond to one point.
-
-Overall, having this split factor should save GPU time, by parallelizing
-the workload more. It does use W times more memory though.
-*/
-
-typedef uint8_t workload_split_factor_t;
-typedef uint8_t ao_value_t;
-typedef uint16_t trace_count_t;
-typedef uint16_t ray_step_count_t;
-
-typedef struct {
-	/* TODO: why does increasing the workload split factor only make things slower?
-	That doesn't make any sense. Also, see that this is nondestructive, in regards to
-	divisions or moduli.*/
-	const workload_split_factor_t workload_split_factor;
-	const trace_count_t num_trace_iters;
-	const ray_step_count_t max_num_ray_steps;
-} AmbientOcclusionComputeParams;
-
-////////// Some constants
-
-// TODO: make this a param to `init_ao_map`
-static const AmbientOcclusionComputeParams compute_params = {
-	.workload_split_factor = 1u,
-	.num_trace_iters = 512u,
-	.max_num_ray_steps = 20u
-};
-
 static const GLfloat float_epsilon = GLM_FLT_EPSILON;
 
 ////////// Some general utils
@@ -156,9 +117,11 @@ static void generate_rand_dir(vec3 v) {
 	glm_vec3_normalize(v);
 }
 
-static ao_value_t get_ao_term_from_collision_count(const trace_count_t num_collisions) {
+static ao_value_t get_ao_term_from_collision_count(
+	const trace_count_t num_collisions, const trace_count_t num_trace_iters) {
+
 	static const ao_value_t max_ao_value = (ao_value_t) ~0u;
-	const GLfloat collision_term_scaler = (GLfloat) max_ao_value / compute_params.num_trace_iters;
+	const GLfloat collision_term_scaler = (GLfloat) max_ao_value / num_trace_iters;
 
 	return max_ao_value - (ao_value_t) (num_collisions * collision_term_scaler);
 }
@@ -170,7 +133,8 @@ static ao_value_t get_ao_term_from_collision_count(const trace_count_t num_colli
 static bool ray_collides_with_heightmap(const vec3 dir,
 	const Heightmap heightmap, const map_pos_component_t max_y,
 	const map_pos_component_t origin_x, const map_pos_component_t origin_y,
-	const map_pos_component_t origin_z, const bool is_dual_normal, const sbvec3 flow) {
+	const map_pos_component_t origin_z, const ray_step_count_t max_num_ray_steps,
+	const bool is_dual_normal, const sbvec3 flow) {
 
 	const sbvec3 step_signs = {
 		(signed_byte) glm_signf(dir[0]),
@@ -212,7 +176,7 @@ static bool ray_collides_with_heightmap(const vec3 dir,
 		(signed_map_pos_component_t) start_pos[2]
 	};
 
-	for (ray_step_count_t i = 0; i < compute_params.max_num_ray_steps; i++) {
+	for (ray_step_count_t i = 0; i < max_num_ray_steps; i++) {
 		// Will yield 1 if x > y, and 0 if x <= y (so this gives the index of the smallest among x and y)
 		const byte x_and_y_min_index = (ray_length_components[0] > ray_length_components[1]);
 		const byte index_of_shortest = (ray_length_components[x_and_y_min_index] > ray_length_components[2]) ? 2 : x_and_y_min_index;
@@ -307,7 +271,8 @@ static void transform_feedback_hook(const GLuint shader) {
 }
 
 static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_component_t max_y,
-	const vec3* const rand_dirs, ao_value_t** const transform_feedback_data_ref) {
+	const vec3* const rand_dirs, const AmbientOcclusionComputeConfig* const compute_config,
+	ao_value_t** const transform_feedback_data_ref) {
 
 	////////// Defining some constants
 
@@ -334,8 +299,11 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 
 	////////// Some variable initialization
 
+	const trace_count_t num_trace_iters = compute_config -> num_trace_iters;
+	const workload_split_factor_t workload_split_factor = compute_config -> workload_split_factor;
+
 	const buffer_size_t num_points_on_grid = heightmap.size.x * max_y * heightmap.size.z;
-	const buffer_size_t num_threads = num_points_on_grid * compute_params.workload_split_factor;
+	const buffer_size_t num_threads = num_points_on_grid * workload_split_factor;
 	const buffer_size_t output_buffer_size = num_threads * sizeof(transform_feedback_output_t);
 
 	const GLuint transform_feedback_gpu_buffer = init_gpu_buffer();
@@ -357,16 +325,16 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 
 	////////// Writing the plain uniforms and the heightmap to the shader
 
-	const trace_count_t num_traces_per_thread = compute_params.num_trace_iters / compute_params.workload_split_factor;
+	const trace_count_t num_traces_per_thread = num_trace_iters / workload_split_factor;
 
-	if (num_traces_per_thread * compute_params.workload_split_factor != compute_params.num_trace_iters)
+	if (num_traces_per_thread * workload_split_factor != num_trace_iters)
 		FAIL(CreateTexture, "Cannot compute an ambient occlusion texture because the %u "
 			"trace iterations per point cannot be split evenly into %u thread groups",
-			compute_params.num_trace_iters, compute_params.workload_split_factor);
+			num_trace_iters, workload_split_factor);
 
-	INIT_UNIFORM_VALUE(workload_split_factor, shader, 1ui, compute_params.workload_split_factor);
+	INIT_UNIFORM_VALUE(workload_split_factor, shader, 1ui, workload_split_factor);
 	INIT_UNIFORM_VALUE(num_traces_per_thread, shader, 1ui, num_traces_per_thread);
-	INIT_UNIFORM_VALUE(max_num_ray_steps, shader, 1ui, compute_params.max_num_ray_steps);
+	INIT_UNIFORM_VALUE(max_num_ray_steps, shader, 1ui, compute_config -> max_num_ray_steps);
 	INIT_UNIFORM_VALUE(max_point_height, shader, 1ui, max_y);
 	INIT_UNIFORM_VALUE(float_epsilon, shader, 1f, float_epsilon);
 
@@ -386,7 +354,7 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 		rand_dirs_uniform_name, (List) {
 			.data = (void*) rand_dirs,
 			.item_size = sizeof(vec3),
-			.length = compute_params.num_trace_iters
+			.length = num_trace_iters
 		}
 	);
 
@@ -408,7 +376,7 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 	ao_value_t* const transform_feedback_data = alloc(num_points_on_grid, sizeof(ao_value_t));
 
 	for (buffer_size_t i = 0; i < num_points_on_grid; i++) {
-		const buffer_size_t raw_transform_feedback_data_index = i * compute_params.workload_split_factor;
+		const buffer_size_t raw_transform_feedback_data_index = i * workload_split_factor;
 		const transform_feedback_output_t first_collision_sum = raw_transform_feedback_data[raw_transform_feedback_data_index];
 
 		/* If the first one is -1, that means that the current span
@@ -418,10 +386,10 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 			// This will not overflow, since the total collision sum will be under the max trace count
 			trace_count_t total_collision_sum = (trace_count_t) first_collision_sum;
 
-			for (workload_split_factor_t j = 1; j < compute_params.workload_split_factor; j++)
+			for (workload_split_factor_t j = 1; j < workload_split_factor; j++)
 				total_collision_sum += raw_transform_feedback_data[raw_transform_feedback_data_index + j];
 
-			transform_feedback_data[i] = get_ao_term_from_collision_count(total_collision_sum);
+			transform_feedback_data[i] = get_ao_term_from_collision_count(total_collision_sum, num_trace_iters);
 		}
 	}
 
@@ -450,7 +418,9 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 	return output_texture;
 }
 
-AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_component_t max_y) {
+AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_component_t max_y,
+	const AmbientOcclusionComputeConfig* const compute_config) {
+
 	////////// Seeding the random generator, and generating random dirs
 
 	/* TODO: fix the possible intersection problems for height
@@ -459,13 +429,17 @@ AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_compone
 	const unsigned seed = (unsigned) time(NULL);
 	srand(seed);
 
-	vec3* const rand_dirs = alloc(compute_params.num_trace_iters, sizeof(vec3));
-	for (trace_count_t i = 0; i < compute_params.num_trace_iters; i++) generate_rand_dir(rand_dirs[i]);
+	const trace_count_t num_trace_iters = compute_config -> num_trace_iters;
+
+	vec3* const rand_dirs = alloc(num_trace_iters, sizeof(vec3));
+	for (trace_count_t i = 0; i < num_trace_iters; i++) generate_rand_dir(rand_dirs[i]);
 
 	////////// Making an AO map on the GPU
 
 	ao_value_t* transform_feedback_data;
-	const GLuint ao_map_texture = init_ao_map_texture(heightmap, max_y, rand_dirs, &transform_feedback_data);
+
+	const GLuint ao_map_texture = init_ao_map_texture(heightmap, max_y,
+		rand_dirs, compute_config, &transform_feedback_data);
 
 	////////// Verifying that the AO map computed on the GPU is correct
 
@@ -475,6 +449,7 @@ AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_compone
 
 	uint64_t num_correct_with_transform_feedback = 0;
 	const ao_value_t* curr_transform_feedback_datum = transform_feedback_data;
+	const trace_count_t max_num_ray_steps = compute_config -> max_num_ray_steps;
 
 	for (map_pos_component_t y = 0; y < max_y; y++) { // For each posible height
 		printf("%g%%\n", (GLdouble) y / max_y * 100.0);
@@ -497,7 +472,7 @@ AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_compone
 
 				trace_count_t num_collisions = 0;
 
-				for (trace_count_t i = 0; i < compute_params.num_trace_iters; i++) {
+				for (trace_count_t i = 0; i < num_trace_iters; i++) {
 					vec3 rand_dir;
 					glm_vec3_copy(rand_dirs[i], rand_dir);
 
@@ -505,14 +480,15 @@ AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_compone
 					if (has_valid_normal && glm_vec3_dot((GLfloat*) normal_data.normal, rand_dir) < 0.0f)
 						glm_vec3_negate(rand_dir);
 
-					num_collisions += ray_collides_with_heightmap(rand_dir,
-						heightmap, max_y, x, y, z, is_dual_normal, normal_data.flow);
+					num_collisions += ray_collides_with_heightmap(rand_dir, heightmap,
+						max_y, x, y, z, max_num_ray_steps, is_dual_normal, normal_data.flow);
 				}
 
-				const ao_value_t cpu_result = get_ao_term_from_collision_count(num_collisions);
+				const ao_value_t cpu_result = get_ao_term_from_collision_count(num_collisions, num_trace_iters);
 				if (cpu_result == transform_feedback_result) num_correct_with_transform_feedback++;
 
-				else printf("Incorrect. pos = {%u, %u, %u}. Results: %u vs %u; num colls = %u\n",
+				else fprintf(stderr,
+					"Incorrect. pos = {%u, %u, %u}. Results: %u vs %u; num colls = %u\n",
 					x, y, z, cpu_result, transform_feedback_result, num_collisions);
 			}
 		}

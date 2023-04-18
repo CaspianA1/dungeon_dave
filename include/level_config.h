@@ -9,6 +9,7 @@
 #include "utils/normal_map_generation.h" // For `NormalMapConfig`
 #include <stdbool.h> // For `bool`
 #include "rendering/shadow.h" // For `CascadedShadowContextConfig`
+#include "rendering/ambient_occlusion.h" // For `AmbientOcclusionComputeConfig`
 #include "rendering/dynamic_light.h" // For `DynamicLightConfig`
 #include "rendering/entities/skybox.h" // For `SkyboxConfig`
 #include "utils/texture.h" // For `sdl_pixel_component_t`
@@ -62,6 +63,7 @@ typedef struct {
 
 	const struct {
 		const GLfloat strength;
+		const AmbientOcclusionComputeConfig compute_config;
 	} ambient_occlusion;
 
 	const DynamicLightConfig dynamic_light_config;

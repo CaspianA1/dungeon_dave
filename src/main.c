@@ -135,7 +135,9 @@ static void* main_init(const WindowConfig* const window_config) {
 		DEF_JSON_SUBOBJ(level, skybox),
 		DEF_JSON_SUBOBJ(level, non_lighting_data);
 
-	const cJSON DEF_JSON_SUBOBJ(shadow_mapping, shadow_cascades);
+	const cJSON
+		DEF_JSON_SUBOBJ(shadow_mapping, shadow_cascades),
+		DEF_JSON_SUBOBJ(ambient_occlusion, compute_config);
 
 	//////////
 
@@ -182,7 +184,15 @@ static void* main_init(const WindowConfig* const window_config) {
 			JSON_TO_FIELD(volumetric_lighting, opacity, float)
 		},
 
-		.ambient_occlusion = {JSON_TO_FIELD(ambient_occlusion, strength, float)},
+		.ambient_occlusion = {
+			JSON_TO_FIELD(ambient_occlusion, strength, float),
+
+			.compute_config = {
+				JSON_TO_FIELD(compute_config, workload_split_factor, u8),
+				JSON_TO_FIELD(compute_config, num_trace_iters, u16),
+				JSON_TO_FIELD(compute_config, max_num_ray_steps, u16)
+			}
+		},
 
 		.dynamic_light_config = {
 			JSON_TO_FIELD(dynamic_light, time_for_cycle, float),
@@ -421,6 +431,7 @@ static void* main_init(const WindowConfig* const window_config) {
 		for (byte i = 0; i < num_normalized_properties; i++) {
 			const GLfloat normalized_property = normalized_properties[i];
 
+			// TODO: stop chekcing for less-than-zero here
 			if (normalized_property < 0.0f || normalized_property > 1.0f)
 				FAIL(InitializeMaterial, "Material property '%s' for texture path '%s' "\
 					"is %g, and outside of the expected [0, 1] domain",
@@ -602,7 +613,8 @@ static void* main_init(const WindowConfig* const window_config) {
 		.dynamic_light = init_dynamic_light(&level_rendering_config.dynamic_light_config),
 		.shadow_context = init_shadow_context(&level_rendering_config.shadow_mapping.cascaded_shadow_config, far_clip_dist),
 
-		.ao_map = init_ao_map(heightmap, max_point_height),
+		.ao_map = init_ao_map(heightmap, max_point_height, &level_rendering_config.ambient_occlusion.compute_config),
+
 		.skybox = init_skybox(&level_rendering_config.skybox_config),
 		.title_screen = init_title_screen(&title_screen_config.texture, &title_screen_config.rendering),
 		.heightmap = heightmap
