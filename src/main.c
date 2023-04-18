@@ -431,12 +431,13 @@ static void* main_init(const WindowConfig* const window_config) {
 		for (byte i = 0; i < num_normalized_properties; i++) {
 			const GLfloat normalized_property = normalized_properties[i];
 
-			// TODO: stop chekcing for less-than-zero here
-			if (normalized_property < 0.0f || normalized_property > 1.0f)
-				FAIL(InitializeMaterial, "Material property '%s' for texture path '%s' "\
-					"is %g, and outside of the expected [0, 1] domain",
-					property_names[i], albedo_texture_path, (GLdouble) normalized_property
-				);
+			// Not checking for if it's less than 0, since that's already handled by `read_floats_from_json_array`
+			if (normalized_property > 1.0f) FAIL(InitializeMaterial,
+				"Material property '%s' for texture path '%s' "
+				"is %g, and outside of the expected [0, 1] domain",
+				property_names[i], albedo_texture_path,
+				(GLdouble) normalized_property
+			);
 		}
 
 		//////////
