@@ -61,7 +61,6 @@ typedef struct {
 	} volumetric_lighting;
 
 	const struct {
-		const bool tricubic_filtering_enabled;
 		const GLfloat strength;
 	} ambient_occlusion;
 
