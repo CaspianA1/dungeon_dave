@@ -20,7 +20,12 @@ DynamicLight init_dynamic_light(const DynamicLightConfig* const config) {
 
 
 void update_dynamic_light(DynamicLight* const dl, const GLfloat curr_time_secs) {
-	const GLfloat weight = sinf(curr_time_secs / dl -> time_for_cycle * TWO_PI) * 0.5f + 0.5f;
+	float (*const movement_function)(const float) = sinf;
+	const GLfloat function_period = TWO_PI;
+
+	//////////
+
+	const GLfloat weight = movement_function(curr_time_secs / dl -> time_for_cycle * function_period) * 0.5f + 0.5f;
 
 	versor rotation; // SLERP code based on https://www.gamedev.net/forums/topic/523136-slerping-two-vectors/523136/
 	glm_quatv(rotation, dl -> angle_between * weight, (GLfloat*) dl -> axis);
