@@ -127,7 +127,8 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 
 	const size_t included_full_path_string_length = base_path_length + strlen(included_path);
 
-	// One more character for the null terminator (TODO: avoid this alloc in some way?)
+	/* One more character for the null terminator (TODO: avoid this alloc in some way? Perhaps with some fn that returns
+	a temp formatted string? Make some fn to allow any string format, and use that in `get_asset_path` as well then) */
 	GLchar* const full_path_string_for_included = alloc(included_full_path_string_length + 1, sizeof(GLchar));
 
 	memcpy(full_path_string_for_included, includer_path, base_path_length);
