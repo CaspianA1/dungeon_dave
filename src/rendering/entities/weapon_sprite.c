@@ -264,7 +264,7 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW,
 			GL_TRIANGLE_STRIP, (List) {NULL, sizeof(vec3), corners_per_quad, corners_per_quad},
 
-			init_shader("shaders/weapon_sprite.vert", NULL, "shaders/world_shaded_object.frag", NULL),
+			init_shader("shaders/weapon_sprite.vert", NULL, "shaders/common/world_shading.frag", NULL),
 			albedo_texture_set, init_normal_map_from_albedo_texture(albedo_texture_set,
 				TexSet, &config -> shared_material_properties.normal_map_config
 			)

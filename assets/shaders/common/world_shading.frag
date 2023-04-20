@@ -11,6 +11,8 @@ flat in uint material_index, bilinear_percents_index;
 in vec3 UV, fragment_pos_world_space, camera_to_fragment_world_space;
 flat in mat3 fragment_tbn;
 
+out vec4 color;
+
 // These are set through a shared fn for world-shaded objects
 uniform samplerBuffer materials_sampler;
 uniform sampler2DArray albedo_sampler, normal_sampler;
@@ -136,4 +138,8 @@ vec4 calculate_light() {
 	apply_noise_for_banding_removal(UV.xy, color);
 
 	return vec4(color, albedo.a);
+}
+
+void main(void) {
+	color = calculate_light();
 }
