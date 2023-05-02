@@ -396,6 +396,9 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Defining a weapon sprite
 
+	/* TODO: read in weapon sprite data from a non-level JSON file, and then
+	to begin, select a weapon sprite by name in each level file */
+
 	const cJSON DEF_JSON_SUBOBJ(non_lighting_data, weapon_sprite);
 
 	const cJSON
@@ -507,6 +510,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Defining shared material properties
 
+	// TODO: put this in the level JSON files
 	const MaterialPropertiesPerObjectType
 		sector_face_shared_material_properties = {
 			.texture_rescale_size = 128,
@@ -571,7 +575,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Defining the title screen config
 
-	const struct {
+	const struct { // TODO: put this in some JSON file
 		const TitleScreenTextureConfig texture;
 		const TitleScreenRenderingConfig rendering;
 	} title_screen_config = {
@@ -660,7 +664,7 @@ static void* main_init(const WindowConfig* const window_config) {
 	SceneContext* const scene_context_on_heap = alloc(1, sizeof(SceneContext));
 	memcpy(scene_context_on_heap, &scene_context, sizeof(SceneContext));
 
-	////////// Audio setup
+	////////// Audio setup (TODO: put this data in some JSON file)
 
 	const ALchar* const EXTRACT_FROM_JSON_SUBOBJ(get_string, non_lighting_data, soundtrack_path,);
 
