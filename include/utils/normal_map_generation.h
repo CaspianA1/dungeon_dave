@@ -7,13 +7,13 @@
 #include "normal_map_generation.h" // For `NormalMapConfig`
 
 /* Excluded:
-generate_heightmap, int_min, int_max, limit_int_to_domain, sobel_sample,
+generate_heightmap, int_min, int_max, int_clamp, sobel_sample,
 generate_normal_map, compute_1D_gaussian_kernel,
 do_separable_gaussian_blur_pass, get_texture_metadata */
 
 typedef struct {
     const bool use_anisotropic_filtering;
-    const signed_byte blur_radius; // This can be zero. If so, no blurring happens.
+    const byte blur_radius; // This can be zero. If so, no blurring happens.
     const GLfloat blur_std_dev, heightmap_scale, rescale_factor;
 } NormalMapConfig;
 

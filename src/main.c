@@ -124,7 +124,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Defining a bunch of level data
 
-	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file("json_data/levels/palace.json");
+	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file("json_data/levels/mountain.json");
 
 	const cJSON
 		DEF_JSON_SUBOBJ(level, parallax_mapping),
@@ -396,18 +396,52 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Defining a weapon sprite
 
+	const cJSON DEF_JSON_SUBOBJ(non_lighting_data, weapon_sprite);
+
+	const cJSON
+			DEF_JSON_SUBOBJ(weapon_sprite, max_degrees),
+			DEF_JSON_SUBOBJ(weapon_sprite, shared_material_properties),
+			DEF_JSON_SUBOBJ(weapon_sprite, animation_layout);
+
+	const cJSON
+			DEF_JSON_SUBOBJ(shared_material_properties, bilinear_percents),
+			DEF_JSON_SUBOBJ(shared_material_properties, normal_map_config);
+
 	// Note: the rescale size isn't used in `shared_material_properties`.
 	const WeaponSpriteConfig weapon_sprite_config = { // Whip
-		.max_degrees = {.yaw = 15.0f, .pitch = 120.0f},
-		.secs_per_movement_cycle = 0.9f, .screen_space_size = 0.75f, .max_movement_magnitude = 0.25f,
-		.animation_layout = {"spritesheets/weapons/whip.bmp", 4, 6, 22, 0.02f},
-
-		.shared_material_properties = {
-			.bilinear_percents = {.albedo = 1.0f, .normal = 1.0f},
-			.normal_map_config = {.blur_radius = 0, .blur_std_dev = 0.0f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f}
+		.max_degrees = {
+			JSON_TO_FIELD(max_degrees, yaw, float),
+			JSON_TO_FIELD(max_degrees, pitch, float)
 		},
 
-		.sound_path = "audio/sound_effects/whip_crack.wav"
+		JSON_TO_FIELD(weapon_sprite, secs_per_movement_cycle, float),
+		JSON_TO_FIELD(weapon_sprite, screen_space_size, float),
+		JSON_TO_FIELD(weapon_sprite, max_movement_magnitude, float),
+
+		.animation_layout = {
+			JSON_TO_FIELD(animation_layout, spritesheet_path, string),
+			JSON_TO_FIELD(animation_layout, frames_across, u16),
+			JSON_TO_FIELD(animation_layout, frames_down, u16),
+			JSON_TO_FIELD(animation_layout, total_frames, u16),
+			JSON_TO_FIELD(animation_layout, secs_for_frame, float),
+		},
+
+		.shared_material_properties = {
+			.bilinear_percents = {
+				JSON_TO_FIELD(bilinear_percents, albedo, float),
+				JSON_TO_FIELD(bilinear_percents, normal, float)
+			},
+			.normal_map_config = {
+				.use_anisotropic_filtering = false,
+
+				JSON_TO_FIELD(normal_map_config, blur_radius, u8),
+				JSON_TO_FIELD(normal_map_config, blur_std_dev, float),
+				JSON_TO_FIELD(normal_map_config, heightmap_scale, float),
+				JSON_TO_FIELD(normal_map_config, rescale_factor, float)
+			}
+		},
+
+		JSON_TO_FIELD(weapon_sprite, sound_path, string)
 	};
 
 	////////// Reading in all materials

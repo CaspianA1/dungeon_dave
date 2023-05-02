@@ -64,6 +64,32 @@
 			"angles_degrees": [45.0, 0.0, 0.0]
 		},
 
+		"weapon_sprite": {
+			"max_degrees": {"yaw": 15.0, "pitch": 120.0},
+			"secs_per_movement_cycle": 0.9,
+			"screen_space_size": 0.75,
+			"max_movement_magnitude": 0.25,
+
+			"animation_layout": {
+				"spritesheet_path": "spritesheets/weapons/whip.bmp",
+				"frames_across": 4,
+				"frames_down": 6,
+				"total_frames": 22,
+				"secs_for_frame": 0.02
+			},
+
+			"shared_material_properties": {
+				"bilinear_percents": {"albedo": 1.0, "normal": 1.0},
+
+				"normal_map_config": {
+					"blur_radius": 0, "blur_std_dev": 0.0,
+					"heightmap_scale": 1.0, "rescale_factor": 2.0
+				}
+			},
+
+			"sound_path": "audio/sound_effects/whip_crack.wav"
+		},
+
 		"soundtrack_path": "audio/themes/new/city.wav",
 
 		"sector_face_texture_paths": [
