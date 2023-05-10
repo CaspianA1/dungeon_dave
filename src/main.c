@@ -124,6 +124,30 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Defining a bunch of level data
 
+	/*
+	How level data flow will happen:
+
+	1. A function from each object interface will load an init object given a base key in the level struct.
+		Only basic validation happens here; i.e. validation based around the value ranges required for fitting
+		each number's value range into each struct member's typw.
+
+	2. That init object will then passed to the initializer.
+	3. Specific validation then happens in that initializer.
+
+	Alternative idea: only pass the key to the 'init_*_context', and then do the parsing all in one function.
+	But that will make passing a raw struct difficult to each context initializer.
+
+	_____ Overall requirements for each context:
+
+	1. Init base init object from JSON
+	2. Init context from base init object
+	3. Deinit context
+
+	(Optional)
+	4. Update
+	4. Draw
+	*/
+
 	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file("json_data/levels/mountain.json");
 
 	const cJSON
