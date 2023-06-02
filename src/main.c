@@ -145,10 +145,10 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	(Optional)
 	4. Update
-	4. Draw
+	5. Draw
 	*/
 
-	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file("json_data/levels/mountain.json");
+	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file("json_data/levels/palace.json");
 
 	const cJSON
 		DEF_JSON_SUBOBJ(level, parallax_mapping),
