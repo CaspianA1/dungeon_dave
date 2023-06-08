@@ -210,16 +210,22 @@ void stop_nonpositional_audio_source(const AudioContext* const context, const AL
 ////////// Init, deinit, and updating
 
 AudioContext init_audio_context(void) {
-	// TODO: find out if any of these can return null, and if so, fail
+	#define CHECK_AL_INIT_ERROR(cond, description) if (cond) FAIL(LoadOpenAL,\
+		"Could not load OpenAL because it was impossible to %s", description)
+
 	ALCdevice* const device = alcOpenDevice(NULL);
+	CHECK_AL_INIT_ERROR(device == NULL, "open a device");
+
 	ALCcontext* const context = alcCreateContext(device, NULL);
+	CHECK_AL_INIT_ERROR(context == NULL, "create an OpenAL context");
 
-	if (!alcMakeContextCurrent(context))
-		FAIL(LoadOpenAL, "Could not load OpenAL (at `alcMakeContextCurrent`). Reason: %s", get_ALC_error());
+	CHECK_AL_INIT_ERROR(!alcMakeContextCurrent(context), "make the OpenAL context the current one");
 
-	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+	#undef CHECK_AL_INIT_ERROR
 
 	//////////
+
+	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 
 	return (AudioContext) {
 		device, context, // TODO: allow for input size guesses

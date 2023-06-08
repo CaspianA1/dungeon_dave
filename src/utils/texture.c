@@ -25,7 +25,7 @@ SDL_Surface* init_blank_grayscale_surface(const GLsizei width, const GLsizei hei
 	SDL_Surface* const blank_surface = SDL_CreateRGBSurface(0, width, height, CHAR_BIT, 0, 0, 0, 0);
 	if (blank_surface == NULL) FAIL(CreateSurface, "Could not create a blank grayscale surface: %s", SDL_GetError());
 
-	static const uint16_t num_palette_colors = SDL_MAX_UINT8 + 1u;
+	enum {num_palette_colors = SDL_MAX_UINT8 + 1u};
 	static SDL_Color palette_colors[num_palette_colors];
 
 	ON_FIRST_CALL(
