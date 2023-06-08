@@ -7,11 +7,10 @@ try_command() {
 	eval $1 || (echo "This command failed: \"$1\""; exit 1)
 }
 
-# Params: the needed command, additional message
-fail_if_cmd_is_nonexistent() {
+# Params: the needed command, action to take
+run_if_cmd_is_nonexistent() {
 	if ! command -v $1 &> /dev/null; then
-		echo "The command $1 doesn't exist, which is needed for installation. $2"
-		exit 1
+		try_command "eval $2"
 	fi
 }
 
@@ -67,15 +66,33 @@ install_openal_soft() {
 
 ##########
 
+# Params: package manager
+# package manager's installation command,
+# dependencies as a string (separated by spaces)
+install_dependencies() {
+	package_manager="$1"
+	installation_command="$2"
+	dependencies_as_string="$3"
+
+	run_if_cmd_is_nonexistent\
+		"$package_manager"\
+		"echo \"You need $package_manager to install dependencies on your platform.\"; exit 1"
+
+	for dependency in $dependencies_as_string; do
+		echo "> Checking if dependency $dependency should be installed"
+		run_if_cmd_is_nonexistent "$dependency" "$installation_command $dependency"
+	done
+}
+
 install_dependencies_for_macos() {
-	fail_if_cmd_is_nonexistent "brew" ""
-	try_command "brew install make cmake git pkg-config sdl2"
+	install_dependencies "brew" "brew install" "make cmake git pkg-config sdl2"
 }
 
 install_dependencies_for_linux() {
-	fail_if_cmd_is_nonexistent "dnf" "Only Fedora is supported for Linux distros at the moment."
-	try_command "sudo dnf install clang make cmake git pkg-config SDL2-devel"
+	install_dependencies "dnf" "sudo dnf install" "clang make cmake git pkg-config SDL2-devel"
 }
+
+##########
 
 main() {
 	##### First, installing some stuff via the system's package manager
@@ -94,11 +111,8 @@ main() {
 
 	files_without_glad=`ls | grep -xv "glad"`
 
-	if [[ $files_without_glad != "" ]] then
-		echo "REMOVING FILES"
+	if [[ $files_without_glad != "" ]]; then
 		rm -r $files_without_glad
-	else
-		echo "KEEPING FILES"
 	fi
 
 	##### Then, installing everything
