@@ -17,19 +17,34 @@ set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Wformat -Wfloat-conversion -Wdouble
 set(CMAKE_C_FLAGS_DEBUG "-g -fsanitize=address,undefined,float-divide-by-zero,unsigned-integer-overflow,implicit-conversion")
 set(CMAKE_C_FLAGS_RELEASE "-Ofast")
 
+set(TARGET_NAME dungeon_dave)
+
 ########## Declaring SDL2 as a package, and other standard CMake boilerplate.
 
 find_package(SDL2 REQUIRED)
 file(GLOB_RECURSE SRC_FILES src/*.c lib/glad/glad.c)
 
-add_executable(dungeon_dave ${SRC_FILES})
-target_include_directories(dungeon_dave PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/lib ${SDL2_INCLUDE_DIRS})
+add_executable(${TARGET_NAME} ${SRC_FILES})
+
+target_include_directories(
+	${TARGET_NAME} PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/lib ${SDL2_INCLUDE_DIRS}
+)
+
+##########
+
+if (APPLE)
+	set(LIBRARY_FILE_SUFFIX dylib)
+else()
+	set(LIBRARY_FILE_SUFFIX so)
+endif()
 
 # TODO: make the .dylib/.so thing portable to more systems
-target_link_libraries(dungeon_dave
+target_link_libraries(${TARGET_NAME}
 	m # This is the C math library
-	${CMAKE_CURRENT_SOURCE_DIR}/lib/cjson/libcjson.so
-	${CMAKE_CURRENT_SOURCE_DIR}/lib/openal/libopenal.so
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/cjson/libcjson.${LIBRARY_FILE_SUFFIX}
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/openal/libopenal.${LIBRARY_FILE_SUFFIX}
 	${SDL2_LIBRARIES})
 
 ##########

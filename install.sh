@@ -30,17 +30,25 @@ do_cmake_build() {
 	try_command "make -j $2"
 	cd ..
 
-	# TODO: abstract out the `.so` suffix
-	mkdir temp
-	mv $3 build/$4.so* temp
+	##### If on MacOS, using .dylib files instead
+
+	library_file_end="so"
+
+	if [[ `uname` == "Darwin" ]]; then
+		library_file_end="dylib"
+	fi
 
 	##### Then, moving everything needed into its own directory, and removing everything else
 
-	project_dir_name=`basename $PWD`
-	mv temp ../$5
-	cd ..
+	mkdir temp
+	mv $3 build/$4*.$library_file_end temp
 
+	project_dir_name=`basename $PWD`
+
+	mv temp ..
+	cd ..
 	sudo rm -r $project_dir_name
+	mv temp $5
 }
 
 ##########
@@ -112,7 +120,7 @@ main() {
 	files_without_glad=`ls | grep -xv "glad"`
 
 	if [[ $files_without_glad != "" ]]; then
-		rm -r $files_without_glad
+		sudo rm -r $files_without_glad
 	fi
 
 	##### Then, installing everything
