@@ -12,6 +12,7 @@ typedef enum {
 
 	InvalidTextureID,
 	InitializeMaterial,
+	UseDict,
 
 	OpenFile,
 	CreateSurface,
@@ -21,7 +22,6 @@ typedef enum {
 	CreateAudioSource,
 	CreateFormatString,
 
-	ReadFromDict,
 	ParseJSON,
 	ReadFromJSON,
 

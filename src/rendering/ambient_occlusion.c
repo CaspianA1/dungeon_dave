@@ -6,6 +6,7 @@
 #include "utils/shader.h" // For `init_shader`, and `deinit_shader`
 #include "utils/texture.h" // For various texture creation utils
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
+#include <time.h> // For `time`
 
 #ifdef DEBUG_AO_MAP_GENERATION
 #include "utils/map_utils.h" // For `pos_out_of_overhead_map_bounds`, and `sample_map`
@@ -95,7 +96,7 @@ static const GLfloat float_epsilon = GLM_FLT_EPSILON;
 ////////// Some general utils
 
 static void generate_rand_dir(vec3 v) {
-	static const GLfloat two_pi_over_rand_max = TWO_PI / RAND_MAX;
+	static const GLfloat two_pi_over_rand_max = TWO_PI / (GLfloat) RAND_MAX;
 
 	const GLfloat // Within a unit sphere
 		hori_angle = rand() * two_pi_over_rand_max,

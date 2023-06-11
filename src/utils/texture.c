@@ -178,6 +178,8 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, max_size); // Getting the max x size
 			max_size[2] = max_size[1] = max_size[0]; // All sizes = the max x size
 			UPLOAD_CALL(type, 3, size[0], size[1], size[2]);
+
+		default: FAIL(CreateTexture, "Invalid texture type, with numerical value of %d", type);
 	}
 
 	////////// Checking that all of the axes have an appropriate size

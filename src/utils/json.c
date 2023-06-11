@@ -161,7 +161,7 @@ void* read_2D_map_from_json(const cJSON* const json, const buffer_size_t datum_s
 	map_size -> z = (uint8_t) validate_json_array(json, -1, constants.max_map_size);
 
 	map_pos_component_t map_width;
-	void* map;
+	void* map = NULL; // This does not need to be set, but Clang complains otherwise
 	uint8_t* curr_map_ptr;
 
 	////////// Computing the max size for the datum

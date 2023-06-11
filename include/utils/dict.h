@@ -75,7 +75,7 @@ typedef struct {
 	buffer_size_t num_entry_slots, num_entries;
 } Dict;
 
-// Excluded: make_format_string, get_key_index, keys_are_equal, init_dict_with_load_factor, get_ptr_to_value_in_dict
+// Excluded: make_format_string, fail_for_invalid_key_type, get_key_index, keys_are_equal, init_dict_with_load_factor, get_ptr_to_value_in_dict
 
 //////////
 

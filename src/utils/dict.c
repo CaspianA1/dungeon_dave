@@ -22,6 +22,10 @@ static char* make_format_string(char* const format_string, const DictVarType typ
 	return pos;
 }
 
+static inline void fail_for_invalid_key_type(const DictVarType key_type) {
+	FAIL(UseDict, "Invalid dict key type, with numerical value of %d", key_type);
+}
+
 //////////
 
 // TODO: remove
@@ -53,8 +57,9 @@ void print_dict(const Dict* const dict) {
 
 static buffer_size_t get_key_index(const Dict* const dict, DictVar key) {
 	dict_hash_t hash;
+	const DictVarType key_type = dict -> key_type;
 
-	switch (dict -> key_type) {
+	switch (key_type) {
 		case DV_UnsignedInt:
 			hash = key.unsigned_int;
 			hash = ((hash >> 16u) ^ hash) * 0x45d9f3bu;
@@ -72,6 +77,8 @@ static buffer_size_t get_key_index(const Dict* const dict, DictVar key) {
 			
 			break;
 		}
+
+		default: fail_for_invalid_key_type(key_type);
 	}
 
 	return hash % dict -> num_entry_slots;
@@ -81,6 +88,10 @@ static bool keys_are_equal(const DictVar key_1, const DictVar key_2, const DictV
 	switch (type) {
 		case DV_UnsignedInt: return key_1.unsigned_int == key_2.unsigned_int;
 		case DV_String: return !strcmp(key_1.string, key_2.string);
+
+		default:
+			fail_for_invalid_key_type(type);
+			return false; // This is dead code, but Clang complains if it isn't there
 	}
 }
 
@@ -198,7 +209,7 @@ DictVar read_from_dict(const Dict* const dict, const DictVar key) {
 	if (value == NULL) {
 		char format_string[] = "Could not find the key '% " FORMAT_SEARCH_CHAR_AS_STRING "' in the dict";
 		make_format_string(format_string, dict -> key_type);
-		FAIL(ReadFromDict, format_string, key);
+		FAIL(UseDict, format_string, key);
 	}
 
 	return *value;
