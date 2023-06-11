@@ -29,7 +29,8 @@ add_executable(${TARGET_NAME} ${SRC_FILES})
 target_include_directories(
 	${TARGET_NAME} PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/include
-	${CMAKE_CURRENT_SOURCE_DIR}/lib ${SDL2_INCLUDE_DIRS}
+	${CMAKE_CURRENT_SOURCE_DIR}/lib
+	${SDL2_INCLUDE_DIRS}
 )
 
 ##########
@@ -40,11 +41,11 @@ else()
 	set(LIBRARY_FILE_SUFFIX so)
 endif()
 
-# TODO: make the .dylib/.so thing portable to more systems
 target_link_libraries(${TARGET_NAME}
 	m # This is the C math library
 	${CMAKE_CURRENT_SOURCE_DIR}/lib/cjson/libcjson.${LIBRARY_FILE_SUFFIX}
 	${CMAKE_CURRENT_SOURCE_DIR}/lib/openal/libopenal.${LIBRARY_FILE_SUFFIX}
-	${SDL2_LIBRARIES})
+	${SDL2_LIBRARIES}
+)
 
 ##########

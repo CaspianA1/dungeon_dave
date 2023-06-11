@@ -41,7 +41,7 @@ do_cmake_build() {
 	##### Then, moving everything needed into its own directory, and removing everything else
 
 	mkdir temp
-	mv $3 build/$4*.$library_file_end temp
+	mv $3 build/$4*.$library_file_end* temp
 
 	project_dir_name=`basename $PWD`
 
