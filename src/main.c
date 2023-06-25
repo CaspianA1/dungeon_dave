@@ -148,7 +148,7 @@ static void* main_init(const WindowConfig* const window_config) {
 	5. Draw
 	*/
 
-	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file("json_data/levels/palace.json");
+	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file("json_data/levels/mountain.json");
 
 	const cJSON
 		DEF_JSON_SUBOBJ(level, parallax_mapping),
@@ -503,10 +503,20 @@ static void* main_init(const WindowConfig* const window_config) {
 
 		//////////
 
+		const GLfloat min_roughness = normalized_properties[1], max_roughness = normalized_properties[2];
+
+		if (min_roughness > max_roughness)
+			FAIL(InitializeMaterial, "Material for texture path '%s' cannot have its "
+				"min roughness (%g) exceed its max roughness (%g)", albedo_texture_path,
+				(GLdouble) min_roughness, (GLdouble) max_roughness
+			);
+
+		//////////
+
 		const packed_material_properties_t properties = (packed_material_properties_t) (
 			((byte) (normalized_properties[0] * constants.max_byte_value)) |
-			(((byte) (normalized_properties[1] * constants.max_byte_value)) << 8u) |
-			(((byte) (normalized_properties[2] * constants.max_byte_value)) << 16u)
+			(((byte) (min_roughness * constants.max_byte_value)) << 8u) |
+			(((byte) (max_roughness * constants.max_byte_value)) << 16u)
 		);
 
 		typed_insert_into_dict(&all_materials, albedo_texture_path, properties, string, unsigned_int);
@@ -612,12 +622,11 @@ static void* main_init(const WindowConfig* const window_config) {
 		.rendering = {
 			.texture_transition_immediacy_factor = 2,
 			.scrolling_vert_squish_ratio = 0.5f,
-			.specular_exponent = 16.0f,
 			.scrolling_bilinear_albedo_percent = 0.1f,
 			.scrolling_bilinear_normal_percent = 0.75f,
 			.light_dist_from_screen_plane = 0.3f,
 			.secs_per_scroll_cycle = 7.0f,
-			.light_spin_cycle = {.secs_per = 2.5f, .logo_transitions_per = 0.5f}
+			.light_spin_cycle = {.secs_per = 5.0f, .logo_transitions_per = 0.5f}
 		}
 	};
 
