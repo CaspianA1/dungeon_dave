@@ -2,9 +2,14 @@
 
 ##########
 
-# Param: command as a string, command to run upon failure as a string
+# Params: command as a string, command to run upon failure as a string
 try_command() {
-	eval $1 || (echo "This command failed: \"$1\""; exit 1)
+  eval $1
+
+  if [[ $? != 0 ]]; then
+    echo "This command failed: '$1'"
+    exit 1
+  fi
 }
 
 # Params: the needed command, action to take
