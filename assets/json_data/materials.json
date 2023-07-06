@@ -24,6 +24,7 @@
 	"walls/viney_bricks.bmp": [0.0, 0.0, 0.0],
 	"walls/vines.bmp": [0.8, 0.6, 0.9],
 	"walls/gold.bmp": [0.0, 0.0, 0.0],
+	"walls/water.bmp": [0.8, 0.7, 0.9],
 
 	"objects/health_kit.bmp": [1.0, 0.5, 0.6],
 	"objects/teleporter.bmp": [0.6, 0.4, 0.6],
