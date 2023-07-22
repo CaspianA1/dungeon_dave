@@ -148,7 +148,7 @@ static void* main_init(const WindowConfig* const window_config) {
 	5. Draw
 	*/
 
-	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file("json_data/levels/mountain.json");
+	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file("json_data/levels/palace.json");
 
 	const cJSON
 		DEF_JSON_SUBOBJ(level, parallax_mapping),
@@ -459,6 +459,7 @@ static void* main_init(const WindowConfig* const window_config) {
 				JSON_TO_FIELD(bilinear_percents, normal, float)
 			},
 			.normal_map_config = {
+				// No anisotropic filtering here since it's not viewed at steep angles
 				.use_anisotropic_filtering = false,
 
 				JSON_TO_FIELD(normal_map_config, blur_radius, u8),
@@ -609,7 +610,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	////////// Defining the title screen config
 
-	const struct { // TODO: put this in some JSON file
+	const struct { // TODO: put this in a JSON file meant to define the title screen
 		const TitleScreenTextureConfig texture;
 		const TitleScreenRenderingConfig rendering;
 	} title_screen_config = {
@@ -624,9 +625,23 @@ static void* main_init(const WindowConfig* const window_config) {
 			.scrolling_vert_squish_ratio = 0.5f,
 			.scrolling_bilinear_albedo_percent = 0.1f,
 			.scrolling_bilinear_normal_percent = 0.75f,
+			.tone_mapping_max_white = 1.0f, .noise_granularity = 0.002f,
 			.light_dist_from_screen_plane = 0.3f,
 			.secs_per_scroll_cycle = 7.0f,
-			.light_spin_cycle = {.secs_per = 5.0f, .logo_transitions_per = 0.5f}
+			.light_spin_cycle = {.secs_per = 5.0f, .logo_transitions_per = 0.5f},
+
+			.still_and_scrolling_layer_configs = {
+				{
+					.ambient_strength = 0.9f,
+					.light_color = GLM_VEC3_ONE_INIT,
+					.material_properties = {0.9f, 0.3f, 0.9f}
+				},
+				{
+					.ambient_strength = 0.0f,
+					.light_color = GLM_VEC3_ONE_INIT,
+					.material_properties = {0.1f, 0.4f, 0.5f}
+				}
+			}
 		}
 	};
 

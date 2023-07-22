@@ -1,6 +1,6 @@
 {
 	"parallax_mapping": {
-		"enabled": true,
+		"enabled": false,
 		"min_layers": 4.0,
 		"max_layers": 32.0,
 		"height_scale": 0.04,
