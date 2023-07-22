@@ -1,8 +1,6 @@
 #include "animation.h"
 #include <math.h> // For `ceilf`
 
-#include "utils/debug_macro_utils.h"
-
 void update_animation_information(
 	const GLfloat curr_time_secs, const GLfloat cycle_base_time,
 	const Animation animation, texture_id_t* const texture_id) {

@@ -19,8 +19,9 @@ ESM scaling:
 Note: shadows are the major bottleneck with the terrain 2 level
 */
 
-vec2 get_csm_shadows_from_layers(const uint prev_layer_index, const uint curr_layer_index, const vec3 fragment_pos_world_space) {
-	// TODO: do an unvectorized version for the first layer, where there's no blending
+float get_csm_shadow_from_layers(const uint prev_layer_index,
+	const uint curr_layer_index, const vec3 fragment_pos_world_space,
+	vec3 curr_fragment_pos_cascade_space) {
 
 	/////////// Defining some shared vars
 
@@ -29,63 +30,96 @@ vec2 get_csm_shadows_from_layers(const uint prev_layer_index, const uint curr_la
 	uint samples_per_row = (shadow_mapping.sample_radius << 1u) + 1u;
 	float one_over_samples_per_kernel = 1.0f / (samples_per_row * samples_per_row);
 
-	/////////// Getting the average occluder depth for the prev layer
+	vec3 curr_sample_UV = vec3(curr_fragment_pos_cascade_space.xy - sample_extent, curr_layer_index);
 
-	vec2 occluder_depth_sums = vec2(0.0f);
+	/////////// A shadow-computing macro
 
-	vec3 prev_fragment_pos_light_space = (light_view_projection_matrices[prev_layer_index]
-		* vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
+	#define COMPUTE_SHADOW(type_t, UPDATE_Y, UPDATE_X, TEXTURE_SAMPLES,\
+		SAMPLE_UV_RESET, FRAGMENT_POSITIONS_CASCADE_SPACE, ESM_EXPONENT_SCALING)\
+		\
+		type_t occluder_depth_sum = type_t(0.0f);\
+		for (uint y = 0; y < samples_per_row; y++, UPDATE_Y) {\
+			for (uint x = 0; x < samples_per_row; x++, UPDATE_X)\
+				occluder_depth_sum += type_t TEXTURE_SAMPLES;\
+			SAMPLE_UV_RESET\
+		}\
+		type_t occluder_receiver_diff = occluder_depth_sum * one_over_samples_per_kernel - type_t FRAGMENT_POSITIONS_CASCADE_SPACE;\
+		type_t layer_scaled_esm_exponent = shadow_mapping.esm_exponent * ESM_EXPONENT_SCALING;\
+		type_t in_light_percentage = clamp(exp(layer_scaled_esm_exponent * occluder_receiver_diff), 0.0f, 1.0f);
 
-	vec3 curr_fragment_pos_light_space = (light_view_projection_matrices[curr_layer_index]
-		* vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
+	/////////// If the current layer index is non-zero, we should blend the curr and last layer's shadows
 
-	vec3
-		prev_sample_UV = vec3(prev_fragment_pos_light_space.xy - sample_extent, prev_layer_index),
-		curr_sample_UV = vec3(curr_fragment_pos_light_space.xy - sample_extent, curr_layer_index);
+	if (curr_layer_index != 0u) {
+		vec3 prev_fragment_pos_cascade_space = (light_view_projection_matrices[prev_layer_index]
+			* vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
 
-	for (uint y = 0; y < samples_per_row; y++, prev_sample_UV.y += texel_size.y, curr_sample_UV.y += texel_size.y) {
-		for (uint x = 0; x < samples_per_row; x++, prev_sample_UV.x += texel_size.x, curr_sample_UV.x += texel_size.x) {
-			occluder_depth_sums += vec2(
-				texture(shadow_cascade_sampler, prev_sample_UV).r,
-				texture(shadow_cascade_sampler, curr_sample_UV).r
-			);
-		}
-		prev_sample_UV.x = prev_fragment_pos_light_space.x - sample_extent.x;
-		curr_sample_UV.x = curr_fragment_pos_light_space.x - sample_extent.x;
+		vec3 prev_sample_UV = vec3(prev_fragment_pos_cascade_space.xy - sample_extent, prev_layer_index);
+
+		COMPUTE_SHADOW(vec2,
+			(prev_sample_UV.y += texel_size.y, curr_sample_UV.y += texel_size.y),
+			(prev_sample_UV.x += texel_size.x, curr_sample_UV.x += texel_size.x),
+
+			(texture(shadow_cascade_sampler, prev_sample_UV).r, texture(shadow_cascade_sampler, curr_sample_UV).r),
+
+			prev_sample_UV.x = prev_fragment_pos_cascade_space.x - sample_extent.x;
+			curr_sample_UV.x = curr_fragment_pos_cascade_space.x - sample_extent.x;,
+
+			(prev_fragment_pos_cascade_space.z, curr_fragment_pos_cascade_space.z),
+			pow(vec2(prev_layer_index, curr_layer_index) + 1.0f, vec2(shadow_mapping.esm_exponent_layer_scale_factor))
+		)
+
+		////////// Getting the percent between cascades
+
+		uint depth_range_shift = uint(curr_layer_index == NUM_CASCADE_SPLITS);
+
+		float
+			dist_ahead_of_last_split = world_depth_value - shadow_mapping.cascade_split_distances[prev_layer_index],
+			depth_range = shadow_mapping.cascade_split_distances[curr_layer_index - depth_range_shift] -
+				shadow_mapping.cascade_split_distances[prev_layer_index - depth_range_shift];
+
+		////////// Modifying the percent beteween to account for the blend threshold
+
+		float // If it's the last layer index, `percent_between` may be more than 1
+			percent_between = min(dist_ahead_of_last_split / depth_range, 1.0f),
+			blend_threshold = shadow_mapping.inter_cascade_blend_threshold;
+
+		float blended_in_light_percentage = mix(in_light_percentage.x,
+			in_light_percentage.y, percent_between / blend_threshold);
+
+		bool prereqs_for_using_blended = (percent_between <= blend_threshold)
+			&& (prev_fragment_pos_cascade_space == clamp(prev_fragment_pos_cascade_space, 0.0f, 1.0f));
+
+		// Only using the blended in-light percentage when the percent between is less than the blend threshold
+		return mix(in_light_percentage.y, blended_in_light_percentage, float(prereqs_for_using_blended));
+	}
+	else {
+		/* If we're only in the first layer, only compute shadows for that one.
+		This is done because the first layer covers a lot of screen real estate,
+		so this can lead to a reasonable performance gain. */
+
+		COMPUTE_SHADOW(float,
+			(curr_sample_UV.y += texel_size.y),
+			(curr_sample_UV.x += texel_size.x),
+
+			(texture(shadow_cascade_sampler, curr_sample_UV).r),
+
+			curr_sample_UV.x = curr_fragment_pos_cascade_space.x - sample_extent.x;,
+
+			(curr_fragment_pos_cascade_space.z),
+			1.0f
+		)
+
+		return in_light_percentage;
 	}
 
-	/////////// Calculating the shadow strengths
-
-	vec2 occluder_receiver_diffs = occluder_depth_sums * one_over_samples_per_kernel
-		- vec2(prev_fragment_pos_light_space.z, curr_fragment_pos_light_space.z);
-
-	vec2 layer_scaled_esm_exponents = shadow_mapping.esm_exponent * pow(
-		vec2(prev_layer_index + 1u, curr_layer_index + 1u),
-		vec2(shadow_mapping.esm_exponent_layer_scale_factor)
-	);
-
-	vec2 in_light_percentages = exp(layer_scaled_esm_exponents * occluder_receiver_diffs);
-
-	/////////// Doing a sub-frustum bounds check
-
-	/* If the previous UV is out of range, and the current one is in range,
-	there should be no blending between shadow layer values */
-	bool no_layer_blending =
-		prev_fragment_pos_light_space != clamp(prev_fragment_pos_light_space, 0.0f, 1.0f) &&
-		curr_fragment_pos_light_space == clamp(curr_fragment_pos_light_space, 0.0f, 1.0f);
-
-	in_light_percentages.x = no_layer_blending ? in_light_percentages.y : in_light_percentages.x;
-
-	///////////
-
-	return clamp(in_light_percentages, 0.0f, 1.0f);
+	#undef COMPUTE_SHADOW
 }
 
-float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragment_pos_world_space, const vec3 view_dir) {
+float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragment_pos_cascade_space) {
 	/* TODO:
 	- Find a way to make this lighting scheme work with my current lighting equation
 		- The question: given a light source, and a light color, how do we use an illumination
-			equation to fit the god ray term in.
+			equation to fit the god ray term in. Perhaps just consider it to be a blended medium?
 		- Idea for that: multiply the ambient term by the god ray term? Hm, doesn't quite work.
 		- A good reference point for nice looking volumetric lighting chould be Quake 2 RTX.
 		- See this video on volumetric lighting: https://www.youtube.com/watch?v=G0sYTrX3VHI
@@ -107,70 +141,68 @@ float get_volumetric_light_from_layer(const uint layer_index, const vec3 fragmen
 	- An interesting presentation about volumetric rendering: https://www.ea.com/frostbite/news/physically-based-unified-volumetric-rendering-in-frostbite
 
 	- Higher sample densities (e.g. 4.0) leads to god rays being shown that should be occluded
+	- For god rays that are shown over the skybox, perhaps go from screen-space to light-space
 	*/
 
-	if (!volumetric_lighting.enabled) return 0.0f;
+	if (volumetric_lighting.opacity == 0.0f) return 0.0f;
 
-	mat4 light_view_projection_matrix = light_view_projection_matrices[layer_index];
+	vec3 camera_pos_cascade_space = (light_view_projection_matrices[layer_index]
+		* vec4(camera_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
 
-	vec3 // TODO: don't recalculate `fragment_pos_cascade_space`
-		camera_pos_cascade_space = (light_view_projection_matrix * vec4(camera_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f,
-		fragment_pos_cascade_space = (light_view_projection_matrix * vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
+	float one_over_num_samples = 1.0f / volumetric_lighting.num_samples;
+	float sample_density_over_sample_count = volumetric_lighting.sample_density * one_over_num_samples;
 
-	float sample_density_over_sample_count = volumetric_lighting.sample_density / volumetric_lighting.num_samples;
-
-	vec3
+	vec3 // TODO: apply biasing by adding a small offset based on a light-space surface normal
 		delta_UV = (camera_pos_cascade_space - fragment_pos_cascade_space) * sample_density_over_sample_count,
-		curr_pos_cascade_space = camera_pos_cascade_space;
+		curr_pos_cascade_space = fragment_pos_cascade_space;
 
-	float curr_decay = volumetric_lighting.decay_weight, volumetric_light_strength = 0.0f;
+	float volumetric_light_sum = 0.0f;
 
 	//////////
 
-	for (uint i = 0; i < volumetric_lighting.num_samples; i++) {
-		curr_pos_cascade_space -= delta_UV;
+	/* TODO:
+	- Add some minor attenuation
+	- Figure out a way to make the god rays weaker when closer to the viewer
+	- Stop the ground from being so bright
+	- Most of this can be fixed through attenuating based on the dist between the screen-space fragment and light pos
+	- See here: https://bartwronski.files.wordpress.com/2014/08/bwronski_volumetric_fog_siggraph2014.pdf
+	Note: the results may turn out weird if the opacity is outside of the [0, 1] domain
+	*/
 
-		float depth_test = texture(shadow_cascade_sampler_depth_comparison,
+	// TODO: figure out a way to make the god rays become weaker when closer to the viewer
+	for (uint i = 0; i < volumetric_lighting.num_samples; i++) {
+		curr_pos_cascade_space += delta_UV;
+
+		float light_percent_visiblity = texture(shadow_cascade_sampler_depth_comparison,
 			vec4(curr_pos_cascade_space.xy, layer_index, curr_pos_cascade_space.z)
 		);
 
-		volumetric_light_strength += depth_test * curr_decay;
-		curr_decay *= volumetric_lighting.decay;
+		volumetric_light_sum += light_percent_visiblity;
 	}
 
-	return volumetric_lighting.opacity * min(volumetric_light_strength, 1.0f);
+	// TODO: for attenuation, perhaps get the dist between the min and max shadow map obs, and then attenuate from that
+
+	float base_volumetric_light_strength = volumetric_light_sum * one_over_num_samples;
+	return base_volumetric_light_strength * volumetric_lighting.opacity;
 }
 
 // The first component of the return value equals the shadow strength, and the second one equals the volumetric light value.
-vec2 get_csm_shadow_and_volumetric_light(const vec3 fragment_pos_world_space, const vec3 view_dir) {
+vec2 get_csm_shadow_and_volumetric_light(const vec3 fragment_pos_world_space) {
 	uint layer_index = 0u; // TODO: calculate this in the vertex shader in some way - and just move more calculations to there
 
 	while (layer_index < NUM_CASCADE_SPLITS
 		&& shadow_mapping.cascade_split_distances[layer_index] <= world_depth_value)
 		layer_index++;
 
+	uint prev_layer_index = max(int(layer_index) - 1, 0);
+
+	vec3 fragment_pos_cascade_space = (light_view_projection_matrices[layer_index]
+		* vec4(fragment_pos_world_space, 1.0f)).xyz * 0.5f + 0.5f;
+
 	//////////
 
-	uint // If the layer index equals 0, this makes the previous layer 0 too
-		depth_range_shift = uint(layer_index == NUM_CASCADE_SPLITS),
-		prev_layer_index = max(int(layer_index) - 1, 0);
-
-	float
-		dist_ahead_of_last_split = world_depth_value - shadow_mapping.cascade_split_distances[prev_layer_index],
-		depth_range = shadow_mapping.cascade_split_distances[layer_index - depth_range_shift] -
-					shadow_mapping.cascade_split_distances[prev_layer_index - depth_range_shift];
-
-	/* If the layer index equals 0, this will be less than 0; and if it's the last layer index,
-	it may be over 1. This clamps the blend factor between 0 and 1 for when that happens. */
-	float percent_between = clamp(dist_ahead_of_last_split / depth_range, 0.0f, 1.0f);
-
-	vec2 prev_and_curr = get_csm_shadows_from_layers(prev_layer_index, layer_index, fragment_pos_world_space);
-
-	float
-		shadow = mix(prev_and_curr.x, prev_and_curr.y, percent_between),
-		volumetric_light = get_volumetric_light_from_layer(prev_layer_index, fragment_pos_world_space, view_dir);
-
-	/* Sampling from the previous layer for volumetric lighting seems
-	to give better results than the current layer, oddly enough */
-	return vec2(shadow, volumetric_light);
+	return vec2( // TODO: perhaps pick a layer index based on the percent between?
+		get_csm_shadow_from_layers(prev_layer_index, layer_index, fragment_pos_world_space, fragment_pos_cascade_space),
+		get_volumetric_light_from_layer(layer_index, fragment_pos_cascade_space)
+	);
 }

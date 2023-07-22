@@ -1,5 +1,5 @@
 #include "rendering/entities/face.h"
-#include "utils/map_utils.h" // For `sample_map_point`
+#include "utils/map_utils.h" // For `sample_map`, `get_indexed_map_pos_component`, and `get_indexed_map_pos_component_ref`
 
 /* For the face type, NS = north-south, and EW = east-west.
 If a face is NS, its two ends lie on a vertical top-down axis;
@@ -11,47 +11,50 @@ For hori faces, origin and size are both top-down. */
 
 typedef struct {
 	const enum {Flat, Vert_NS, Vert_EW} type;
-	byte origin[2], size[2];
+	map_pos_component_t origin[2], size[2];
 } Face;
 
 //////////
 
 /*
 static void print_face(const Face face, const GLchar* const prefix_msg) {
-	const GLchar* const type_string =
-		(GLchar*[]) {"Flat", "Vert_NS", "Vert_EW"}[face.type];
+	const GLchar* const type_string = (GLchar*[]) {"Flat", "Vert_NS", "Vert_EW"}[face.type];
 
-	printf("%s{.type = %s, .origin = {%d, %d}, .size = {%d, %d}}\n",
+	printf("%s{.type = %s, .origin = {%u, %u}, .size = {%u, %u}}\n",
 		prefix_msg, type_string, face.origin[0],
 		face.origin[1], face.size[0], face.size[1]);
 }
 */
 
-// Returns if there is another face to get
-static bool get_next_face(
-	const byte varying_axis, const byte adjacent_side_val,
-	const byte map_width, const byte* const heightmap,
-	const Sector* const sector, Face* const face) {
-	
-	byte
+// Returns if there is another face to get. Initializes the face origin on the varying axis, and the face's size too.
+static bool get_next_face(const byte varying_axis, const map_pos_component_t adjacent_side_val,
+	const Heightmap heightmap, const Sector* const sector, Face* const face) {
+
+	map_pos_component_t
 		*const face_size = face -> size,
 		*const face_origin_on_varying_axis = face -> origin + varying_axis;
 
-	const byte
+	const map_pos_component_t
 		max_visible_height = sector -> visible_heights.max,
-		end_edge_val = sector -> origin[varying_axis] + sector -> size[varying_axis];
+		end_edge_val = get_indexed_map_pos_component(sector -> origin, varying_axis)
+					+ get_indexed_map_pos_component(sector -> size, varying_axis);
 
-	byte face_height_diff = 0, start_val = *face_origin_on_varying_axis + face_size[0], map_point_params[2];
-	map_point_params[!varying_axis] = adjacent_side_val;
+	map_pos_component_t face_height_diff = 0, start_val = *face_origin_on_varying_axis + face_size[0];
+
+	//////////
+
+	map_pos_xz_t map_point_params;
+	*get_indexed_map_pos_component_ref(&map_point_params, !varying_axis) = adjacent_side_val;
+	map_pos_component_t* const varying_map_point_value = get_indexed_map_pos_component_ref(&map_point_params, varying_axis);
+
+	//////////
 
 	while (start_val < end_edge_val) {
-		map_point_params[varying_axis] = start_val;
-
-		const int16_t height_diff = max_visible_height - sample_map_point(
-			heightmap, map_point_params[0], map_point_params[1], map_width);
+		*varying_map_point_value = start_val;
+		const signed_map_pos_component_t height_diff = max_visible_height - sample_map(heightmap, map_point_params);
 
 		if (height_diff > 0) {
-			face_height_diff = (byte) height_diff;
+			face_height_diff = (map_pos_component_t) height_diff;
 			break;
 		}
 		start_val++;
@@ -59,12 +62,10 @@ static bool get_next_face(
 
 	if (start_val == end_edge_val) return false;
 
-	byte end_val = start_val;
+	map_pos_component_t end_val = start_val;
 	while (end_val < end_edge_val) {
-		map_point_params[varying_axis] = end_val;
-
-		const int16_t height_diff = max_visible_height - sample_map_point(
-			heightmap, map_point_params[0], map_point_params[1], map_width);
+		*varying_map_point_value = end_val;
+		const signed_map_pos_component_t height_diff = max_visible_height - sample_map(heightmap, map_point_params);
 
 		if (height_diff != face_height_diff) break;
 		end_val++;
@@ -78,8 +79,8 @@ static bool get_next_face(
 }
 
 static void add_to_face_mesh(List* const face_mesh,
-	const Face face, const byte sector_max_visible_height,
-	const byte side, const byte texture_id) {
+	const Face face, const map_pos_component_t sector_max_visible_height,
+	const byte side, const map_texture_id_t texture_id) {
 
 	/* Face info bits, layout:
 	Bits 0-2, three bits -> face id.
@@ -94,15 +95,16 @@ static void add_to_face_mesh(List* const face_mesh,
 	byte face_id = (byte) (side << 2u) | (byte) face.type;
 	if (face_id == 5u || face_id == 6u) face_id -= 2u;
 
-	const byte
-		face_info = (byte) (texture_id << 3u) | face_id,
+	const byte face_info = (byte) (texture_id << 3u) | face_id;
+
+	const map_pos_component_t
 		near_x = face.origin[0], near_z = face.origin[1],
 		top_y = sector_max_visible_height;
 
 	switch (face.type) {
 		case Flat: {
-			const byte size_x = face.size[0], size_z = face.size[1];
-			const byte far_x = near_x + size_x, far_z = near_z + size_z;
+			const map_pos_component_t size_x = face.size[0], size_z = face.size[1];
+			const map_pos_component_t far_x = near_x + size_x, far_z = near_z + size_z;
 
 			push_ptr_to_list(face_mesh,
 				(face_mesh_t) {
@@ -117,8 +119,8 @@ static void add_to_face_mesh(List* const face_mesh,
 			break;
 		}
 		case Vert_NS: {
-			const byte size_z = face.size[0], size_y = face.size[1];
-			const byte far_z = near_z + size_z, bottom_y = top_y - size_y;
+			const map_pos_component_t size_z = face.size[0], size_y = face.size[1];
+			const map_pos_component_t far_z = near_z + size_z, bottom_y = top_y - size_y;
 
 			push_ptr_to_list(face_mesh,
 				side ? (face_mesh_t) {
@@ -140,8 +142,8 @@ static void add_to_face_mesh(List* const face_mesh,
 			break;
 		}
 		case Vert_EW: {
-			const byte size_x = face.size[0], size_y = face.size[1];
-			const byte far_x = near_x + size_x, bottom_y = top_y - size_y;
+			const map_pos_component_t size_x = face.size[0], size_y = face.size[1];
+			const map_pos_component_t far_x = near_x + size_x, bottom_y = top_y - size_y;
 
 			push_ptr_to_list(face_mesh,
 				side ? (face_mesh_t) {
@@ -165,19 +167,16 @@ static void add_to_face_mesh(List* const face_mesh,
 	}
 }
 
-void init_mesh_for_sector(
-	const Sector* const sector, List* const face_mesh,
-	byte* const biggest_face_height, const byte* const heightmap,
-	const byte map_width, const byte map_height, const byte texture_id) {
+// This initializes `face_mesh` and `biggest_face_height`
+void init_mesh_for_sector(const Sector* const sector,
+	List* const face_mesh, map_pos_component_t* const biggest_face_height,
+	const Heightmap heightmap, const map_texture_id_t texture_id) {
 
-	const byte
-		dimensions[2] = {map_width, map_height},
-		max_visible_height = sector -> visible_heights.max,
-		*const origin_xz = sector -> origin,
-		*const size_xz = sector -> size;
+	const map_pos_component_t max_visible_height = sector -> visible_heights.max;
+	const map_pos_xz_t origin_xz = sector -> origin, size_xz = sector -> size;
 
 	add_to_face_mesh(face_mesh, // Adding the flat face
-		(Face) {Flat, {origin_xz[0], origin_xz[1]}, {size_xz[0], size_xz[1]}},
+		(Face) {Flat, {origin_xz.x, origin_xz.z}, {size_xz.x, size_xz.z}},
 		max_visible_height, 0, texture_id);
 
 	//////////
@@ -185,39 +184,42 @@ void init_mesh_for_sector(
 	*biggest_face_height = 0;
 
 	for (byte unvarying_axis = 0; unvarying_axis < 2; unvarying_axis++) {
-		for (byte side = 0; side < 2; side++) {
+		const map_pos_component_t
+			unvarying_axis_map_size = get_indexed_map_pos_component(heightmap.size, unvarying_axis),
+			unvarying_axis_sector_size = get_indexed_map_pos_component(size_xz, unvarying_axis);
 
+		for (byte side = 0; side < 2; side++) {
 			Face next_face = {
 				.type = Vert_NS + unvarying_axis,
-				.origin = {origin_xz[0], origin_xz[1]}
+				.origin = {origin_xz.x, origin_xz.z}
 			};
 
-			byte adjacent_side_val;
+			map_pos_component_t adjacent_side_val;
 
 			if (side) { // `side` is a top or left of the top-down sector
-				const byte unvarying_axis_origin = next_face.origin[unvarying_axis];
+				const map_pos_component_t unvarying_axis_origin = next_face.origin[unvarying_axis];
 				if (unvarying_axis_origin == 0) continue;
 				else adjacent_side_val = unvarying_axis_origin - 1;
 			}
 			else {
-				byte* const unvarying_axis_origin = next_face.origin + unvarying_axis;
-				if ((*unvarying_axis_origin += size_xz[unvarying_axis]) == dimensions[unvarying_axis]) continue;
+				map_pos_component_t* const unvarying_axis_origin = next_face.origin + unvarying_axis;
+				if ((*unvarying_axis_origin += unvarying_axis_sector_size) == unvarying_axis_map_size) continue;
 				else adjacent_side_val = *unvarying_axis_origin;
 			}
 
-			while (get_next_face(!unvarying_axis, adjacent_side_val, map_width, heightmap, sector, &next_face)) {
+			while (get_next_face(!unvarying_axis, adjacent_side_val, heightmap, sector, &next_face)) {
 				add_to_face_mesh(face_mesh, next_face, max_visible_height, side, texture_id);
 
-				const byte face_height = next_face.size[1];
+				const map_pos_component_t face_height = next_face.size[1];
 				if (face_height > *biggest_face_height) *biggest_face_height = face_height;
 			}
 		}
 	}
 }
 
-List init_map_edge_mesh(const byte* const heightmap, const byte map_width, const byte map_height) {
+List init_map_edge_mesh(const Heightmap heightmap) {
 	// TODO: make this a constant somewhere
-	buffer_size_t submesh_amount_guess = (map_width + map_height) / 6;
+	buffer_size_t submesh_amount_guess = (heightmap.size.x + heightmap.size.z) / 6;
 	if (submesh_amount_guess == 0) submesh_amount_guess = 1;
 
 	List edge_mesh = init_list(submesh_amount_guess, face_mesh_t);
@@ -228,28 +230,25 @@ List init_map_edge_mesh(const byte* const heightmap, const byte map_width, const
 		Face face = {.type = Vert_NS + unvarying_axis, .size = {0, 0}};
 
 		for (byte side = 0; side < 2; side++) { // `side` == top or left
-			const byte map_size[2] = {map_width, map_height}, varying_axis = !unvarying_axis;
+			const byte varying_axis = !unvarying_axis;
 
 			face.origin[varying_axis] = 0;
-			face.origin[unvarying_axis] = side ? 0 : (map_size[unvarying_axis] - 1);
+			face.origin[unvarying_axis] = side ? 0 : (get_indexed_map_pos_component(heightmap.size, unvarying_axis) - 1);
 
 			//////////
 
 			bool building_edge_faces = true;
 
 			while (building_edge_faces) {
-				const byte face_height = sample_map_point(heightmap, face.origin[0], face.origin[1], map_width);
+				const map_pos_component_t face_height = sample_map(heightmap, (map_pos_xz_t) {face.origin[0], face.origin[1]});
 
-				byte map_pos[2] = {face.origin[0], face.origin[1]};
-				byte* const varying_bottom_of_edge = map_pos + varying_axis;
+				map_pos_xz_t curr_map_pos = {face.origin[0], face.origin[1]};
+				map_pos_component_t* const varying_bottom_of_edge = get_indexed_map_pos_component_ref(&curr_map_pos, varying_axis);
+				const map_pos_component_t varying_map_boundary = get_indexed_map_pos_component(heightmap.size, varying_axis);
 
-				const byte varying_map_boundary = map_size[varying_axis];
-
-				while (building_edge_faces && sample_map_point(heightmap,
-					map_pos[0], map_pos[1], map_width) == face_height) {
-
+				while (building_edge_faces && sample_map(heightmap, curr_map_pos) == face_height) {
 					(*varying_bottom_of_edge)++;
-					building_edge_faces = *varying_bottom_of_edge < varying_map_boundary;
+					building_edge_faces = (*varying_bottom_of_edge < varying_map_boundary);
 				}
 
 				face.size[0] = *varying_bottom_of_edge - face.origin[varying_axis];
@@ -258,7 +257,7 @@ List init_map_edge_mesh(const byte* const heightmap, const byte map_width, const
 				//////////
 
 				if (face_height != 0) { // No face mesh generated for height-zero faces
-					byte* const unvarying_origin = face.origin + unvarying_axis;
+					map_pos_component_t* const unvarying_origin = face.origin + unvarying_axis;
 
 					if (!side) (*unvarying_origin)++; // Putting the face on the other block side
 					add_to_face_mesh(&edge_mesh, face, face_height, side, 0);

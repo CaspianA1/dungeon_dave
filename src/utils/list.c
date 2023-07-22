@@ -1,10 +1,9 @@
 #include "utils/list.h"
+#include "data/constants.h" // For `list_realloc_rate`
 #include <string.h> // For `memcpy`
 #include <math.h> // For `ceilf`
 
-#define LIST_REALLOC_AMOUNT_FOR(curr_alloc) ((buffer_size_t) (ceilf((curr_alloc) * list_realloc_rate)))
-
-static const GLfloat list_realloc_rate = 2.0f;
+#define LIST_REALLOC_AMOUNT_FOR(curr_alloc) ((buffer_size_t) (ceilf((curr_alloc) * constants.list_realloc_rate)))
 
 //////////
 

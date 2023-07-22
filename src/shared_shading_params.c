@@ -21,30 +21,38 @@ static void init_constant_shading_params(UniformBuffer* const shading_params,
 		}
 	);
 
-	UBO_WRITE(parallax_mapping.enabled); // TODO: write a 32-bit number instead? (Same for `tricubic_filtering_enabled`?)
+	// TODO: to fix the problem of writing too-small numbers, perhaps zero out the uniform buffer first?
+
+	UBO_WRITE(parallax_mapping.enabled); // TODO: write a 32-bit number instead?
 	UBO_WRITE(parallax_mapping.min_layers); UBO_WRITE(parallax_mapping.max_layers);
 	UBO_WRITE(parallax_mapping.height_scale); UBO_WRITE(parallax_mapping.lod_cutoff);
 
 	UBO_WRITE(shadow_mapping.sample_radius);
 	UBO_WRITE(shadow_mapping.esm_exponent);
 	UBO_WRITE(shadow_mapping.esm_exponent_layer_scale_factor);
+	UBO_WRITE(shadow_mapping.inter_cascade_blend_threshold);
 
-	UBO_WRITE(volumetric_lighting.enabled); UBO_WRITE(volumetric_lighting.num_samples);
-	UBO_WRITE(volumetric_lighting.decay); UBO_WRITE(volumetric_lighting.decay_weight);
-	UBO_WRITE(volumetric_lighting.sample_density); UBO_WRITE(volumetric_lighting.opacity);
+	UBO_WRITE(volumetric_lighting.num_samples);
+	UBO_WRITE(volumetric_lighting.sample_density);
+	UBO_WRITE(volumetric_lighting.opacity);
 
 	write_array_of_primitives_to_uniform_buffer(shading_params,
 		"shadow_mapping.cascade_split_distances", (List) {
 			.data = shadow_context -> split_dists,
 			.item_size = sizeof(GLfloat),
+			/* TODO: make some macro somewhere to get the number of split dists,
+			given the number of cascades (this logic is just hardcoded in at the moment) */
 			.length = (buffer_size_t) shadow_context -> num_cascades - 1
 		}
 	);
 
-	UBO_WRITE(ambient_occlusion.tricubic_filtering_enabled);
 	UBO_WRITE(ambient_occlusion.strength);
 
-	UBO_WRITE(light_color);
+	const sdl_pixel_component_t* const rgb_light_color = level_rendering_config -> rgb_light_color;
+	vec3 light_color = {rgb_light_color[0], rgb_light_color[1], rgb_light_color[2]};
+	glm_vec3_scale(light_color, constants.one_over_max_byte_value, light_color);
+	write_primitive_to_uniform_buffer(shading_params, "light_color", light_color, sizeof(vec3));
+
 	UBO_WRITE(tone_mapping_max_white);
 	UBO_WRITE(noise_granularity);
 
@@ -68,13 +76,13 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 
 			"shadow_mapping.sample_radius", "shadow_mapping.esm_exponent",
 			"shadow_mapping.esm_exponent_layer_scale_factor",
+			"shadow_mapping.inter_cascade_blend_threshold",
 			"shadow_mapping.cascade_split_distances",
 
-			"volumetric_lighting.enabled", "volumetric_lighting.num_samples",
-			"volumetric_lighting.decay", "volumetric_lighting.decay_weight",
-			"volumetric_lighting.sample_density", "volumetric_lighting.opacity",
+			"volumetric_lighting.num_samples",
+			"volumetric_lighting.sample_density",
+			"volumetric_lighting.opacity",
 
-			"ambient_occlusion.tricubic_filtering_enabled",
 			"ambient_occlusion.strength",
 
 			"light_color", "tone_mapping_max_white", "noise_granularity"
@@ -91,6 +99,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 	const GLuint first_shader = shaders_that_share_params[0];
 
 	SharedShadingParams shared_shading_params = {
+		// TODO: change to `GL_*_READ`?
 		.constant = init_uniform_buffer(
 			GL_STATIC_DRAW, "ConstantShadingParams",
 			first_shader, constant_subvar_names, ARRAY_LENGTH(constant_subvar_names)
@@ -170,9 +179,9 @@ void init_shared_textures_for_world_shaded_objects(
 
 		use_shader(shader);
 
-		use_texture_in_shader(materials_texture, shader, "materials_sampler", TexPlain1D, TU_Materials);
+		use_texture_in_shader(materials_texture, shader, "materials_sampler", TexBuffer, TU_Materials);
 		use_texture_in_shader(wso.drawable -> albedo_texture, shader, "albedo_sampler", TexSet, wso.texture_units.albedo);
-		use_texture_in_shader(wso.drawable -> normal_map, shader, "normal_map_sampler", TexSet, wso.texture_units.normal_map);
+		use_texture_in_shader(wso.drawable -> normal_map, shader, "normal_sampler", TexSet, wso.texture_units.normal_map);
 		use_texture_in_shader(ao_map_texture, shader, "ambient_occlusion_sampler", TexVolumetric, TU_AmbientOcclusionMap);
 
 		use_texture_in_shader(shadow_depth_layers, shader, "shadow_cascade_sampler", shadow_map_texture_type, TU_CascadedShadowMapPlain);

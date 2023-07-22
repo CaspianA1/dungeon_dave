@@ -1,29 +1,36 @@
 #ifndef LEVEL_CONFIG_H
 #define LEVEL_CONFIG_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For various typedefs
+#include "utils/dict.h" // For `Dict`
 #include "utils/list.h" // For `List`
 #include "animation.h" // For `AnimationLayout`
 #include "utils/normal_map_generation.h" // For `NormalMapConfig`
 #include <stdbool.h> // For `bool`
 #include "rendering/shadow.h" // For `CascadedShadowContextConfig`
+#include "rendering/ambient_occlusion.h" // For `AmbientOcclusionComputeConfig`
 #include "rendering/dynamic_light.h" // For `DynamicLightConfig`
+#include "rendering/entities/skybox.h" // For `SkyboxConfig`
+#include "utils/texture.h" // For `sdl_pixel_component_t`
 
 //////////
 
+// Metallicity, min roughness, and max roughness
+typedef uint32_t packed_material_properties_t;
+
 typedef struct {
-	const GLchar* const albedo_texture_path; // TODO: put the heightmap scale in here
-	const struct {const GLfloat metallicity, min_roughness, max_roughness;} lighting;
-} MaterialPropertiesPerObjectInstance;
+	const GLuint material_properties_buffer, buffer_texture;
+} MaterialsTexture;
 
 // Excluded: copy_matching_material_to_dest_materials
 
-void validate_all_materials(const List* const all_materials);
-
-GLuint init_materials_texture(const List* const all_materials, const List* const sector_face_texture_paths,
+MaterialsTexture init_materials_texture(const Dict* const all_materials, const List* const sector_face_texture_paths,
 	const List* const still_billboard_texture_paths, const List* const billboard_animation_layouts,
 	List* const billboards, const AnimationLayout* const weapon_sprite_animation_layout,
 	material_index_t* const weapon_sprite_material_index);
+
+void deinit_materials_texture(const MaterialsTexture* const materials_texture);
 
 //////////
 
@@ -42,26 +49,27 @@ typedef struct {
 	} parallax_mapping;
 
 	const struct {
-		const GLuint sample_radius, esm_exponent;
-		const GLfloat esm_exponent_layer_scale_factor, billboard_alpha_threshold;
-		const CascadedShadowContextConfig shadow_context_config;
+		const byte sample_radius, esm_exponent;
+
+		const GLfloat esm_exponent_layer_scale_factor, billboard_alpha_threshold, inter_cascade_blend_threshold;
+		const CascadedShadowContextConfig cascaded_shadow_config;
 	} shadow_mapping;
 
+	// Note: if the opacity is 0, volumetric lighting is not computed
 	const struct {
-		const bool enabled;
-		const GLuint num_samples;
-		const GLfloat decay, decay_weight, sample_density, opacity;
+		const byte num_samples;
+		const GLfloat sample_density, opacity;
 	} volumetric_lighting;
 
 	const struct {
-		const bool tricubic_filtering_enabled;
 		const GLfloat strength;
+		const AmbientOcclusionComputeConfig compute_config;
 	} ambient_occlusion;
 
 	const DynamicLightConfig dynamic_light_config;
-	const GLchar* const skybox_path;
+	const SkyboxConfig skybox_config;
 
-	const vec3 light_color;
+	const sdl_pixel_component_t rgb_light_color[3];
 	const GLfloat ambient_strength, tone_mapping_max_white, noise_granularity;
 } LevelRenderingConfig;
 

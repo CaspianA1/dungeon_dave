@@ -1,9 +1,10 @@
 #ifndef SHADOW_H
 #define SHADOW_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "utils/typedefs.h" // For various typedefs
 #include "utils/texture.h" // For `TextureType`
-#include "utils/cglm_include.h" // For `mat4`
+#include "glad/glad.h" // For OpenGL defs
+#include "cglm/cglm.h" // For various cglm defs
 #include "camera.h" // For `Camera`
 
 /* This shadow mapping implementation employs cascaded shadow mapping with
@@ -18,13 +19,13 @@ but this method uses the scene's shadow map, instead of a screen-space depth map
 Because volumetric lighting requires a series of depth comparisons for good results,
 instead of setting sampling parameters for the depth layers, the sampling parameters
 are split into two different sampler objects; one that fetches raw depth values, and one
-that fetches four averaged bilinear depth comparisons.  */
+that fetches four averaged bilinear depth comparisons. */
 
 static const TextureType shadow_map_texture_type = TexSet;
 
 typedef struct {
 	const byte num_cascades, num_depth_buffer_bits;
-	const GLsizei resolution;
+	const uint16_t resolution;
 	const GLfloat sub_frustum_scale, linear_split_weight;
 } CascadedShadowContextConfig;
 
@@ -33,7 +34,7 @@ typedef struct {
 		framebuffer, depth_layers,
 		plain_depth_sampler, depth_comparison_sampler;
 
-	const GLsizei resolution;
+	const uint16_t resolution;
 	const byte num_cascades;
 	const GLfloat sub_frustum_scale;
 

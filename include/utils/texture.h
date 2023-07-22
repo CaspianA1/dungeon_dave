@@ -1,8 +1,8 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include "glad/glad.h" // For OpenGL defs
 #include "utils/sdl_include.h" // For various things from the SDL namespace
-#include "lib/glad/glad.h" // For OpenGL defs
 #include <stdbool.h> // For `bool`
 #include "animation.h" // For `AnimationLayout`
 
@@ -16,21 +16,15 @@ extern GLfloat global_anisotropic_filtering_level;
 #define SDL_PIXEL_FORMAT SDL_PIXELFORMAT_BGRA32
 #define OPENGL_INPUT_PIXEL_FORMAT GL_BGRA
 
-#define OPENGL_MATERIALS_MAP_INTERNAL_PIXEL_FORMAT GL_RGBA
+#define OPENGL_MATERIALS_MAP_INTERNAL_PIXEL_FORMAT GL_RGBA8
 #define OPENGL_NORMAL_MAP_INTERNAL_PIXEL_FORMAT GL_RGBA
+#define OPENGL_AO_MAP_INTERNAL_PIXEL_FORMAT GL_R8
 #define OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT GL_SRGB8_ALPHA8
 
 #define OPENGL_COLOR_CHANNEL_TYPE GL_UNSIGNED_BYTE
 
-//////////
-
 #define OPENGL_SCENE_MAG_FILTER TexLinear
 #define OPENGL_SCENE_MIN_FILTER TexTrilinear
-
-/* There's five bits to store a texture id in a face mesh's face info byte,
-And the biggest number possible with five bits is 31, so that gives you
-32 different possible texture ids. Also, this is just for wall textures. */
-#define MAX_NUM_SECTOR_SUBTEXTURES ((byte) 32u)
 
 // Each enum value is a texture unit id.
 typedef enum {
@@ -64,6 +58,8 @@ typedef enum {
 //////////
 
 typedef enum {
+	TexBuffer = GL_TEXTURE_BUFFER,
+	TexRect = GL_TEXTURE_RECTANGLE,
 	TexPlain1D = GL_TEXTURE_1D,
 	TexPlain = GL_TEXTURE_2D,
 	TexSkybox = GL_TEXTURE_CUBE_MAP,
@@ -104,8 +100,9 @@ GLuint preinit_texture(const TextureType type, const TextureWrapMode wrap_mode,
 	const bool use_anisotropic_filtering);
 
 /* Size formats:
+Buffer textures: failure
 Plain 1D textures: {width}
-Plain 2D textures: {width, height}
+Plain 2D textures/rectangle textures: {width, height}
 Skyboxes: {width/height, face index}
 Texture sets/volumetric textures: {width, height, depth} */
 void init_texture_data(const TextureType type, const GLsizei* const size,

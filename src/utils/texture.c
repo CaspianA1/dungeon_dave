@@ -4,6 +4,7 @@
 #include "utils/macro_utils.h" // For `ON_FIRST_CALL`
 #include "data/constants.h" // For `engine.enabled.anisotropic_filtering`, and `max_byte_value`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
+#include "utils/safe_io.h" // For `get_temp_asset_path`
 
 //////////
 
@@ -24,7 +25,7 @@ SDL_Surface* init_blank_grayscale_surface(const GLsizei width, const GLsizei hei
 	SDL_Surface* const blank_surface = SDL_CreateRGBSurface(0, width, height, CHAR_BIT, 0, 0, 0, 0);
 	if (blank_surface == NULL) FAIL(CreateSurface, "Could not create a blank grayscale surface: %s", SDL_GetError());
 
-	static const uint16_t num_palette_colors = SDL_MAX_UINT8 + 1u;
+	enum {num_palette_colors = SDL_MAX_UINT8 + 1u};
 	static SDL_Color palette_colors[num_palette_colors];
 
 	ON_FIRST_CALL(
@@ -40,8 +41,8 @@ SDL_Surface* init_blank_grayscale_surface(const GLsizei width, const GLsizei hei
 }
 
 SDL_Surface* init_surface(const GLchar* const path) {
-	SDL_Surface* const surface = SDL_LoadBMP(path);
-	if (surface == NULL) FAIL(OpenFile, "Could not create a surface from disk: %s", SDL_GetError());
+	SDL_Surface* const surface = SDL_LoadBMP(get_temp_asset_path(path));
+	if (surface == NULL) FAIL(OpenFile, "Could not load '%s': %s", path, SDL_GetError());
 
 	if (surface -> format -> format == SDL_PIXEL_FORMAT)
 		return surface; // Format is already correct
@@ -61,7 +62,6 @@ static void premultiply_surface_alpha(SDL_Surface* const surface) {
 	const GLint w = surface -> w, h = surface -> h;
 	const SDL_PixelFormat* const format = surface -> format;
 
-	const GLfloat one_over_max_byte_value = 1.0f / constants.max_byte_value;
 	sdl_pixel_component_t r, g, b, a;
 
 	WITH_SURFACE_PIXEL_ACCESS(surface,
@@ -72,7 +72,7 @@ static void premultiply_surface_alpha(SDL_Surface* const surface) {
 				sdl_pixel_t* const pixel = row + x;
 				SDL_GetRGBA(*pixel, format, &r, &g, &b, &a);
 
-				const GLfloat normalized_alpha = a * one_over_max_byte_value;
+				const GLfloat normalized_alpha = a * constants.one_over_max_byte_value;
 
 				r = (sdl_pixel_component_t) (r * normalized_alpha);
 				g = (sdl_pixel_component_t) (g * normalized_alpha);
@@ -127,20 +127,85 @@ void init_texture_data(const TextureType type, const GLsizei* const size,
 
 	const GLint level = 0, border = 0;
 
-	#define UPLOAD_CALL(target, dims, ...) glTexImage##dims##D(\
-		target, level, internal_format, __VA_ARGS__, border, input_format, color_channel_type, pixels\
-	); break
+	////////// Setting up a max size
+
+	GLint max_plain_size; // Getting the default max size
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_plain_size);
+
+	// Some sizes on some axes may be overwritten below. Not all dimensions are used either.
+	GLsizei max_size[3] = {max_plain_size, max_plain_size, max_plain_size};
+
+	////////// Defining a variable for the dimension count + a macro to upload texture data
+
+	byte num_dimensions;
+
+	#define UPLOAD_CALL(target, num_dims_literal, ...)\
+		num_dimensions = num_dims_literal;\
+		glTexImage##num_dims_literal##D(target, level, internal_format, __VA_ARGS__, border, input_format, color_channel_type, pixels);\
+		break;
+
+	//////////
 
 	switch (type) {
-		case TexPlain1D: UPLOAD_CALL(type, 1, size[0]);
-		case TexPlain: UPLOAD_CALL(type, 2, size[0], size[1]);
+		case TexBuffer: // TODO: do a size check here
+			FAIL(CreateTexture, "%s", "Texture buffers are not supported for `init_texture_data`");
+
+		case TexPlain1D:
+			UPLOAD_CALL(type, 1, size[0]);
+
+		case TexPlain: case TexRect:
+			if (type == TexRect) {
+				glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE, max_size);
+				max_size[1] = max_size[0]; // Max y size = max x size
+			}
+
+			UPLOAD_CALL(type, 2, size[0], size[1]);
 
 		case TexSkybox: {
+			glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, max_size); // Getting the max x size
+			max_size[1] = max_size[0]; // Max y size = max x size
+
 			const GLsizei face_size = size[0];
 			UPLOAD_CALL(GL_TEXTURE_CUBE_MAP_POSITIVE_X + (GLenum) size[1], 2, face_size, face_size);
 		}
 
-		case TexSet: case TexVolumetric: UPLOAD_CALL(type, 3, size[0], size[1], size[2]);
+		case TexSet:
+			// The max z-size here is the max number of layers
+			glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, max_size + 2);
+			UPLOAD_CALL(type, 3, size[0], size[1], size[2]);
+
+		case TexVolumetric:
+			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, max_size); // Getting the max x size
+			max_size[2] = max_size[1] = max_size[0]; // All sizes = the max x size
+			UPLOAD_CALL(type, 3, size[0], size[1], size[2]);
+
+		default: FAIL(CreateTexture, "Invalid texture type, with numerical value of %d", type);
+	}
+
+	////////// Checking that all of the axes have an appropriate size
+
+	for (byte i = 0; i < num_dimensions; i++) {
+		const GLsizei sub_size = size[i], sub_max_size = max_size[i];
+
+		if (sub_size > sub_max_size) {
+			const GLchar* type_string = NULL;
+
+			switch (type) {
+				case TexBuffer: break; // This case should never be reached
+
+				#define STRING_CASE(t) case t: type_string = #t; break;
+
+				STRING_CASE(TexRect);
+				STRING_CASE(TexPlain1D); STRING_CASE(TexPlain);
+				STRING_CASE(TexSkybox); STRING_CASE(TexSet);
+				STRING_CASE(TexVolumetric);
+
+				#undef STRING_CASE
+			}
+
+			FAIL(CreateTexture, "Texture with enum type of '%s' has a size of %d on the %c-axis "
+				"that exceeds the maximum size of %d", type_string, sub_size, 'x' + i, sub_max_size);
+		}
 	}
 
 	#undef UPLOAD_CALL
@@ -253,8 +318,9 @@ GLuint init_plain_texture(const GLchar* const path,
 			internal_format, OPENGL_COLOR_CHANNEL_TYPE, surface -> pixels);
 	);
 
-	init_texture_mipmap(type);
-	deinit_surface(surface);
+	if (min_filter == TexTrilinear || min_filter == TexLinearMipmapped)
+		init_texture_mipmap(type);
 
+	deinit_surface(surface);
 	return texture;
 }

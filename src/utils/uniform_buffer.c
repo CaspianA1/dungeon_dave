@@ -19,6 +19,8 @@ static GLuint safely_get_uniform_block_index(const GLuint shader, const GLchar* 
 	return block_index;
 }
 
+/* TODO: genericize `usage` (so that options for
+reading and drawing are provided in a clearer way) */
 UniformBuffer init_uniform_buffer(const GLenum usage,
 	const GLchar* const block_name, const GLuint shader_using_uniform_block,
 	const GLchar* const* const subvar_names, const buffer_size_t num_subvars) {
@@ -39,7 +41,7 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 		);
 	}
 
-	////////// Then, getting the byte offsets, the array stride, and the matrix stride, and freeing the subvar indices
+	////////// Then, getting the byte offsets, the array stride, and the matrix stride, and then freeing the subvar indices
 
 	const buffer_size_t twice_num_subvars = num_subvars << 1;
 
@@ -66,15 +68,15 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 		safely_get_uniform_block_index(shader_using_uniform_block, block_name),
 		GL_UNIFORM_BLOCK_DATA_SIZE, &block_size_in_bytes);
 
-	const GLuint buffer = init_gpu_buffer();
-	use_gpu_buffer(uniform_buffer_target, buffer);
+	const GLuint uniform_buffer = init_gpu_buffer();
+	use_gpu_buffer(uniform_buffer_target, uniform_buffer);
 	init_gpu_buffer_data(uniform_buffer_target, 1, block_size_in_bytes, NULL, usage);
-	glBindBufferBase(uniform_buffer_target, binding_point, buffer);
+	glBindBufferBase(uniform_buffer_target, binding_point, uniform_buffer);
 
 	////////// And finally, returning the uniform buffer
 
 	return (UniformBuffer) {
-		.id = buffer, .binding_point = binding_point,
+		.id = uniform_buffer, .binding_point = binding_point,
 		.gpu_memory_mapping = NULL,
 
 		.block = {
@@ -151,13 +153,14 @@ static void check_matrix_size(const buffer_size_t column_size,
 	);
 }
 
+// Note: for this, the array data written into is allowed to be smaller than the max length.
 static void check_array_length(const buffer_size_t expected_length, const GLint array_length,
 	const GLchar* const block_name, const GLchar* const subvar_name, const GLchar* const function_name) {
 
-	if (expected_length != (buffer_size_t) array_length) {
+	if (expected_length > (buffer_size_t) array_length) {
 		FAIL(InitializeShaderUniform,
 			"When initializing the array `%s` in `%s` for uniform block `%s`, "
-				"the input array length was %u items long, when it should have been %u",
+				"the input array length was %u items long, when it should have less than or equal to %u",
 				subvar_name, function_name, block_name, (buffer_size_t) array_length, expected_length
 		);
 	}
@@ -238,7 +241,7 @@ void write_array_of_primitives_to_uniform_buffer(const UniformBuffer* const buff
 	get_subvar_metadata(buffer, subvar_name, &dest, &array_length, &array_stride, NULL);
 	check_array_length(primitives.length, array_length, buffer -> block.name, subvar_name, function_name);
 
-	LIST_FOR_EACH(0, &primitives, primitive,
+	UNTYPED_LIST_FOR_EACH(&primitives, primitive,
 		memcpy(dest, primitive, primitives.item_size);
 		dest += array_stride;
 	);

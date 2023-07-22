@@ -2,14 +2,27 @@
 #define SKYBOX_H
 
 #include "rendering/drawable.h" // For `Drawable`
+#include "cglm/cglm.h" // For various cglm defs
 
-typedef Drawable Skybox;
+typedef struct {
+	const GLchar* const texture_path;
+	const GLfloat texture_scale, horizon_dist_scale;
+	const vec3 rotation_degrees_per_axis;
 
-// Excluded: init_skybox_texture
+	// No cylindrical projection is applied if both widths are 0
+	const vec2 cylindrical_cap_blend_widths;
+} SkyboxConfig;
 
-#define deinit_skybox deinit_drawable
+typedef struct {
+	const Drawable drawable;
+} Skybox;
 
-Skybox init_skybox(const GLchar* const texture_path);
+//////////
+
+// Excluded: init_skybox_texture, define_vertex_spec
+
+Skybox init_skybox(const SkyboxConfig* const config);
+void deinit_skybox(const Skybox* const skybox);
 void draw_skybox(const Skybox* const skybox);
 
 #endif

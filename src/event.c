@@ -12,9 +12,9 @@ Event get_next_event(const Uint32 curr_time_ms, const GLfloat secs_elapsed_betwe
 	int mouse_movement[2]; // Not GLint b/c `SDL_GetRelativeMouseState` is expecting ints
 
 	const bool
+		clicking_left = CHECK_BITMASK(SDL_GetRelativeMouseState(mouse_movement, mouse_movement + 1), SDL_BUTTON_LMASK),
 		attempting_acceleration = keys[constants.keys.accelerate[0]] || keys[constants.keys.accelerate[1]],
-		moving_forward = keys[constants.keys.forward], moving_backward = keys[constants.keys.backward],
-		clicking_left = CHECK_BITMASK(SDL_GetRelativeMouseState(mouse_movement, mouse_movement + 1), SDL_BUTTON_LMASK);
+		moving_forward = keys[constants.keys.forward], moving_backward = keys[constants.keys.backward];
 
 	// Only accelerating if attempting it, and moving forward or backward exclusively (not both or none)
 	const bool accelerating = attempting_acceleration && (moving_forward ^ moving_backward);

@@ -16,7 +16,7 @@ const struct FaceAttribute {
 );
 
 void main(void) {
-	////////// Setting `material_index`, UV and camera_fragment_delta_tangent_space
+	////////// Setting `material_index`, `bilinear_percents_index`, `UV`, and the common outputs
 
 	uint face_id = face_info_bits & 7u; // Extracting the first 3 bits
 	FaceAttribute face_attribute = face_attributes[face_id];
@@ -27,7 +27,8 @@ void main(void) {
 		face_attribute.normal
 	);
 
-	material_index = face_info_bits >> 3u; // Shifting over to get the material index/texture id
+	// Shifting over to get the material index/texture id
+	material_index = face_info_bits >> 3u;
 	bilinear_percents_index = 0u;
 
 	UV = vec3(

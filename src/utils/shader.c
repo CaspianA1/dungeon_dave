@@ -3,7 +3,7 @@
 #include "utils/list.h" // For various `List`-related defs
 #include "utils/failure.h" // For `FAIL`
 #include "data/constants.h" // For `PRINT_SHADER_VALIDATION_LOG`
-#include "utils/safe_io.h" // For `open_file_safely`
+#include "utils/safe_io.h" // For `read_file_contents`
 #include <string.h> // For `strrchr`, `strlen`, `memcpy`, `strcpy`, `strstr`, and `memset`
 
 enum {num_sub_shaders = 3}; // Vertex, geometry, and fragment
@@ -53,7 +53,7 @@ static void report_shader_validation_error(const GLuint shader, const GLchar* co
 	if (log_length > 0) {
 		GLchar* const info_log = alloc((size_t) (log_length + 1), sizeof(GLchar));
 		glGetProgramInfoLog(shader, log_length, NULL, info_log);
-		printf("Problem for shader of path '%s':\n%s\n---\n", shader_path, info_log);
+		fprintf(stderr, "Problem for shader of path '%s':\n%s\n---\n", shader_path, info_log);
 		dealloc(info_log);
 	}
 }
@@ -106,25 +106,6 @@ static GLuint init_shader_from_source(
 	return shader;
 }
 
-static GLchar* read_file_contents(const GLchar* const path) {
-	FILE* const file = open_file_safely(path, "r");
-
-	/* (TODO) Possible bug: if `ftell` fails, `num_bytes` will
-	underflow, and too much data will be allocated. */
-
-	fseek(file, 0l, SEEK_END); // Set file position to end
-	const size_t num_bytes = (size_t) ftell(file);
-	fseek(file, 0l, SEEK_SET); // Rewind file position
-
-	GLchar* const data = alloc(num_bytes + 1l, sizeof(GLchar));
-	fread(data, num_bytes, 1, file); // Read file bytes
-	data[num_bytes] = '\0';
-
-	fclose(file);
-
-	return data;
-}
-
 static GLchar* get_source_for_included_file(List* const dependency_list,
 	const GLchar* const includer_path, const GLchar* const included_path) {
 
@@ -146,8 +127,9 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 
 	const size_t included_full_path_string_length = base_path_length + strlen(included_path);
 
-	// One more character for the null terminator
-	GLchar* const full_path_string_for_included = alloc(included_full_path_string_length + 1, sizeof(char));
+	/* One more character for the null terminator (TODO: avoid this alloc in some way? Perhaps with some fn that returns
+	a temp formatted string? Make some fn to allow any string format, and use that in `get_asset_path` as well then) */
+	GLchar* const full_path_string_for_included = alloc(included_full_path_string_length + 1, sizeof(GLchar));
 
 	memcpy(full_path_string_for_included, includer_path, base_path_length);
 	strcpy(full_path_string_for_included + base_path_length, included_path);
@@ -156,6 +138,7 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 
 	GLchar* const included_contents = read_file_contents(full_path_string_for_included);
 	while (read_and_parse_includes_for_glsl(dependency_list, included_contents, full_path_string_for_included));
+
 	dealloc(full_path_string_for_included);
 
 	return included_contents;
@@ -185,10 +168,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	3. Correct line numbers for errors when including files
 	*/
 
-	#define NO_PATH_STRING_ERROR() FAIL(ParseIncludeDirectiveInShader,\
-		"Path string expected after #include for '%s'", sub_shader_path)
-
-	const GLchar *const include_directive = "#include";
+	const GLchar* const include_directive = "#include";
 
 	//////////
 
@@ -199,7 +179,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 
 	GLchar* after_include_string = include_string + strlen(include_directive);
 	for (GLchar c = *after_include_string; c == ' ' || c == '\t'; c = *(++after_include_string));
-	if (*after_include_string != '\"') NO_PATH_STRING_ERROR(); // Other character or EOF
+	if (*after_include_string != '\"') goto error; // Other character or EOF
 
 	////////// Finding a righthand quote, failing if a newline is reached
 
@@ -209,9 +189,7 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 	for (GLchar c = *curr_path_substring; !found_right_quote; c = *(++curr_path_substring)) {
 		switch (c) {
 			case '\0': case '\r': case '\n':
-				NO_PATH_STRING_ERROR();
-				break;
-
+				goto error;
 			case '\"':
 				// Putting a null terminator here so that the path can be read as its own string
 				*curr_path_substring = '\0';
@@ -219,27 +197,38 @@ static bool read_and_parse_includes_for_glsl(List* const dependency_list,
 		}
 	}
 
-	#undef NO_PATH_STRING_ERROR
+	////////// Fetching the included code
 
-	////////// Fetching the included code, and replacing the #include region with whitespace
-
-	GLchar* const included_code = get_source_for_included_file(dependency_list, sub_shader_path, after_include_string + 1);
+	const GLchar* const included_path = after_include_string + 1;
+	GLchar* const included_code = get_source_for_included_file(dependency_list, sub_shader_path, included_path);
 	push_ptr_to_list(dependency_list, &included_code); // The included code is freed by `init_shader`
 
+	//////////
+
+	// Replacing the #include region with whitespace (thus removing the null terminator)
 	memset(include_string, ' ', (size_t) (curr_path_substring - include_string));
 
 	return true;
+
+	error: FAIL(ParseIncludeDirectiveInShader, "Path string "
+			"expected after #include for '%s'", sub_shader_path);
 }
 
 static void erase_version_strings_from_dependency_list(const List* const dependency_list) {
 	const GLchar *const base_version_string = "#version", *const full_version_string = "#version ___ core";
 	const GLsizei full_version_string_length = strlen(full_version_string);
 
-	// Not erasing the version string from the first one because it's the only one that should keep #version in it
-	LIST_FOR_EACH(1, dependency_list, untyped_dependency,
-		const GLchar* const dependency = *((GLchar**) untyped_dependency);
-		GLchar* const version_string_pos = strstr(dependency, base_version_string);
+	const void* const first_dependency = dependency_list -> data;
+
+	LIST_FOR_EACH(dependency_list, GLchar*, dependency_ref,
+		/* Not erasing the version string from the first one
+		because it's the only one that should keep #version in it */
+		if (dependency_ref == first_dependency) continue;
+
+		// TODO: expect no version string in each shader, and prepend it manually
+		GLchar* const version_string_pos = strstr(*dependency_ref, base_version_string);
 		if (version_string_pos != NULL) memset(version_string_pos, ' ', full_version_string_length);
+		// TODO: fail here if no version string, printing the included file path
 	);
 }
 
@@ -250,7 +239,6 @@ GLuint init_shader(
 	void (*const hook_before_linking) (const GLuint shader)) {
 
 	const GLchar* const paths[num_sub_shaders] = {vertex_shader_path, geo_shader_path, fragment_shader_path};
-
 	List dependency_lists[num_sub_shaders];
 
 	for (byte i = 0; i < num_sub_shaders; i++) {
@@ -277,7 +265,7 @@ GLuint init_shader(
 		if (paths[i] == NULL) continue;
 
 		const List* const dependency_list = dependency_lists + i;
-		LIST_FOR_EACH(0, dependency_list, dependency_code, dealloc(*(GLchar**) dependency_code););
+		LIST_FOR_EACH(dependency_list, GLchar*, dependency_ref, dealloc(*dependency_ref););
 		deinit_list(*dependency_list);
 	}
 

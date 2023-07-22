@@ -5,7 +5,7 @@ in vec3 camera_to_fragment_tangent_space;
 /* This code was developed from https://learnopengl.com/Advanced-Lighting/Parallax-Mapping.
 The LOD system that transitions between the plain and parallax UV was based on section 5.4.3 from
 https://advances.realtimerendering.com/s2006/Chapter5-Parallax_Occlusion_Mapping_for_detailed_surface_rendering.pdf. */
-vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
+vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_sampler) {
 	/* TODO:
 	- Aliasing
 	- Very slow at times
@@ -28,7 +28,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 
 	////////// LOD calculations
 
-	float lod = textureQueryLod(normal_map_sampler, UV.xy).x;
+	float lod = textureQueryLod(normal_sampler, UV.xy).x;
 
 	/* For all LOD values above `lod_cutoff`, the plain UV is used, skipping a lot
 	of work. Anything below the cutoff gets a progressively smaller height scale. */
@@ -50,7 +50,7 @@ vec3 get_parallax_UV(const vec3 UV, const sampler2DArray normal_map_sampler) {
 	4, 8, 12, ... decrease fragment shader divergence and increase performance? Not sure. */
 	float num_layers = mix(parallax_mapping.max_layers, parallax_mapping.min_layers, max(view_dir.z, 0.0f));
 
-	#define PARALLAX_SAMPLE(UV) texture(normal_map_sampler, UV).a
+	#define PARALLAX_SAMPLE(UV) texture(normal_sampler, UV).a
 
 	float
 		layer_depth = 1.0f / num_layers, curr_layer_depth = 0.0f,

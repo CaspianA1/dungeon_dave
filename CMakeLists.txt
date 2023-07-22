@@ -1,4 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.13)
+
+# TODO: make the build process work with non-Clang compilers
+# TODO: make debug mode work on Fedora
 
 project(DungeonDave)
 
@@ -10,21 +13,39 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
-set(CONVERSION_WARNINGS_1 "-Wfloat-conversion -Wdouble-promotion -Wsign-conversion")
-set(CONVERSION_WARNINGS_2 "-Wimplicit-int-conversion -Wshorten-64-to-32 -Wincompatible-pointer-types")
-set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Wformat ${CONVERSION_WARNINGS_1} ${CONVERSION_WARNINGS_2}")
-
+set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Wformat -Wfloat-conversion -Wdouble-promotion -Wsign-conversion -Wincompatible-pointer-types")
 set(CMAKE_C_FLAGS_DEBUG "-g -fsanitize=address,undefined,float-divide-by-zero,unsigned-integer-overflow,implicit-conversion")
 set(CMAKE_C_FLAGS_RELEASE "-Ofast")
+
+set(TARGET_NAME dungeon_dave)
 
 ########## Declaring SDL2 as a package, and other standard CMake boilerplate.
 
 find_package(SDL2 REQUIRED)
+file(GLOB_RECURSE SRC_FILES src/*.c lib/glad/glad.c)
 
-file(GLOB_RECURSE SRC_FILES src/*.c)
+add_executable(${TARGET_NAME} ${SRC_FILES})
 
-add_executable(dungeon_dave ${SRC_FILES})
-target_include_directories(dungeon_dave PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${SDL2_INCLUDE_DIRS})
-target_link_libraries(dungeon_dave ${SDL2_LIBRARIES})
+target_include_directories(
+	${TARGET_NAME} PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/lib
+	${SDL2_INCLUDE_DIRS}
+)
+
+##########
+
+if (APPLE)
+	set(LIBRARY_FILE_SUFFIX dylib)
+else()
+	set(LIBRARY_FILE_SUFFIX so)
+endif()
+
+target_link_libraries(${TARGET_NAME}
+	m # This is the C math library
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/cjson/libcjson.${LIBRARY_FILE_SUFFIX}
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/openal/libopenal.${LIBRARY_FILE_SUFFIX}
+	${SDL2_LIBRARIES}
+)
 
 ##########

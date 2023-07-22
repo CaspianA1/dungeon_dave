@@ -1,6 +1,6 @@
 #include "utils/normal_map_generation.h"
-#include "utils/cglm_include.h" // For various cglm defs
-#include "data/constants.h" // For `max_byte_value`
+#include "cglm/cglm.h" // For various cglm defs
+#include "data/constants.h" // For `one_over_max_byte_value`, and `max_byte_value`
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "utils/failure.h" // For `FAIL`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
@@ -8,6 +8,21 @@
 ////////// This code concerns heightmap creation.
 
 static void generate_heightmap(SDL_Surface* const src, SDL_Surface* const dest, const GLfloat heightmap_scale) {
+	////////// Skipping heightmap generation if the heightmap scale is small enough
+
+	/* Any heightmap scale smaller than this one will result in any
+	pixel component being multiplied by it turning into zero */
+	const GLfloat smallest_possible_heightmap_scale = constants.one_over_max_byte_value;
+
+	if (heightmap_scale < smallest_possible_heightmap_scale) {
+		// Getting the blank pixel color explicitly, because who knows if a blank pixel doesn't map to 0?
+		const sdl_pixel_t blank_pixel = SDL_MapRGB(dest -> format, 0, 0, 0);
+		SDL_FillRect(dest, NULL, blank_pixel);
+		return;
+	}
+
+	////////// Generating the heightmap
+
 	const GLint w = dest -> w, h = dest -> h;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
@@ -41,7 +56,7 @@ static GLint int_max(const GLint val, const GLint upper) {
 	return (val > upper) ? val : upper;
 }
 
-static GLint limit_int_to_domain(const GLint val, const GLint lower, const GLint upper) {
+static GLint int_clamp(const GLint val, const GLint lower, const GLint upper) {
 	return int_min(int_max(val, lower), upper);
 }
 
@@ -58,9 +73,7 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 	const GLint w = dest -> w, h = dest -> h;
 	const SDL_PixelFormat* const format = dest -> format;
 
-	const GLfloat
-		one_over_max_rgb_value = 1.0f / constants.max_byte_value,
-		half_max_rgb_value = 0.5f * constants.max_byte_value;
+	const GLfloat half_max_byte_value = 0.5f * constants.max_byte_value;
 
 	WITH_SURFACE_PIXEL_ACCESS(src,
 		WITH_SURFACE_PIXEL_ACCESS(dest,
@@ -91,14 +104,14 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 					};
 
 					const GLfloat // These are in a range of 0 to 1
-						gx = normal[0] * one_over_max_rgb_value,
-						gy = normal[1] * one_over_max_rgb_value;
+						gx = normal[0] * constants.one_over_max_byte_value,
+						gy = normal[1] * constants.one_over_max_byte_value;
 
 					normal[2] = sqrtf(fabsf(1.0f - (gx * gx + gy * gy))) * constants.max_byte_value;
 
 					glm_vec3_normalize(normal);
-					glm_vec3_scale(normal, half_max_rgb_value, normal);
-					glm_vec3_adds(normal, half_max_rgb_value, normal);
+					glm_vec3_scale(normal, half_max_byte_value, normal);
+					glm_vec3_adds(normal, half_max_byte_value, normal);
 
 					dest_pixel[x] = SDL_MapRGBA(format,
 						(sdl_pixel_component_t) normal[0],
@@ -116,21 +129,21 @@ static void generate_normal_map(SDL_Surface* const src, SDL_Surface* const dest,
 
 ////////// This code concerns Gaussian blur (the normal map input is blurred to cut out high frequencies from the Sobel operator).
 
-static GLfloat* compute_1D_gaussian_kernel(const signed_byte radius, const GLfloat std_dev) {
-	const signed_byte kernel_length = radius * 2 + 1;
+static GLfloat* compute_1D_gaussian_kernel(const byte radius, const GLfloat std_dev) {
+	const uint16_t kernel_length = radius * 2 + 1;
 
 	GLfloat* const kernel = alloc((size_t) kernel_length, sizeof(GLfloat)), sum = 0.0f;
 	const GLfloat one_over_two_times_std_dev_squared = 1.0f / (2.0f * std_dev * std_dev);
 
-	for (signed_byte x = 0; x < kernel_length; x++) {
-		const signed_byte dx = x - radius;
+	for (uint16_t x = 0; x < kernel_length; x++) {
+		const int16_t dx = (int16_t) (x - radius);
 		const GLfloat weight = expf(-(dx * dx) * one_over_two_times_std_dev_squared);
 		kernel[x] = weight;
 		sum += weight;
 	}
 
 	const GLfloat one_over_sum = 1.0f / sum;
-	for (signed_byte i = 0; i < kernel_length; i++) kernel[i] *= one_over_sum;
+	for (uint16_t i = 0; i < kernel_length; i++) kernel[i] *= one_over_sum;
 
 	return kernel;
 }
@@ -139,7 +152,7 @@ static GLfloat* compute_1D_gaussian_kernel(const signed_byte radius, const GLflo
 static void do_separable_gaussian_blur_pass(
 	SDL_Surface* const src, SDL_Surface* const dest,
 	const GLfloat* const kernel, const GLint subtexture_h,
-	const signed_byte kernel_radius, const bool blur_is_vertical) {
+	const byte kernel_radius, const bool blur_is_vertical) {
 
 	const GLint w = dest -> w, h = dest -> h;
 
@@ -155,14 +168,14 @@ static void do_separable_gaussian_blur_pass(
 				for (GLint x = 0; x < w; x++) {
 					GLuint blurred_pixel = 0.0f;
 
-					for (signed_byte i = -kernel_radius; i <= kernel_radius; i++) {
+					for (int16_t i = -kernel_radius; i <= kernel_radius; i++) {
 						GLint fx = x, fy = y; // `f` = filter
 						if (blur_is_vertical) fy += i; else fx += i;
 
 						const sdl_pixel_component_t src_pixel = *(sdl_pixel_component_t*)
 							read_surface_pixel(src,
-								limit_int_to_domain(fx, 0, w - 1),
-								limit_int_to_domain(fy, subtexture_top, subtexture_bottom)
+								int_clamp(fx, 0, w - 1),
+								int_clamp(fy, subtexture_top, subtexture_bottom)
 							);
 
 						blurred_pixel += (sdl_pixel_component_t) (src_pixel * kernel[i + kernel_radius]);
@@ -195,6 +208,7 @@ static void get_texture_metadata(
 	glGetTexParameteriv(type, GL_TEXTURE_MIN_FILTER, mag_min_filter + 1);
 }
 
+// Note: level init is almost instant when this just returns 0; so GPU parallelization could be great here
 GLuint init_normal_map_from_albedo_texture(const GLuint albedo_texture,
 	const TextureType type, const NormalMapConfig* const config) {
 
@@ -264,12 +278,11 @@ GLuint init_normal_map_from_albedo_texture(const GLuint albedo_texture,
 
 	////////// Making a heightmap
 
-	// TODO: optimize if the scale is 0
 	generate_heightmap(rgba_surface, grayscale_buffer_1, config -> heightmap_scale);
 
 	////////// Blurring it (if needed), and then making a normal map
 
-	const signed_byte blur_radius = config -> blur_radius;
+	const byte blur_radius = config -> blur_radius;
 	const GLfloat blur_std_dev = config -> blur_std_dev;
 
 	if (blur_radius != 0 && blur_std_dev != 0.0f) {

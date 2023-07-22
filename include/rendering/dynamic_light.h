@@ -1,13 +1,12 @@
 #ifndef DYNAMIC_LIGHT_H
 #define DYNAMIC_LIGHT_H
 
-#include "lib/glad/glad.h" // For OpenGL defs
-#include "utils/cglm_include.h" // For `vec3`
+#include "glad/glad.h" // For OpenGL defs
+#include "cglm/cglm.h" // For various cglm defs
 
 typedef struct {
 	const GLfloat time_for_cycle;
-	const vec3 pos;
-	const struct {const vec3 origin, dest;} looking_at;
+	const vec3 unnormalized_from, unnormalized_to;
 } DynamicLightConfig;
 
 // This light is dynamic in the sense that it cycles between 2 directions.
@@ -19,6 +18,7 @@ typedef struct {
 
 //////////
 
+// TODO: verify that the dynamic light never points upwards
 DynamicLight init_dynamic_light(const DynamicLightConfig* const config);
 void update_dynamic_light(DynamicLight* const dl, const GLfloat curr_time_secs);
 

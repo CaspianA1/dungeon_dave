@@ -1,7 +1,11 @@
 #ifndef ALLOC_H
 #define ALLOC_H
 
-// TODO: perhaps also track OpenGL allocations
+/*
+TODO:
+- Track SDL allocations via `SDL_SetMemoryFunctions`
+- Perhaps also track OpenGL allocations
+*/
 
 #include <stdlib.h> // For `size_t`, and allocation functions
 #include "data/constants.h" // For `TRACK_MEMORY`

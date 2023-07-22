@@ -1,9 +1,10 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include "utils/typedefs.h" // For OpenGL types + `byte`
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For various typedefs
+#include "cglm/cglm.h" // For pi variants + `vec2`
 #include "utils/sdl_include.h" // For `SDL_Scancode`
-#include "utils/cglm_include.h" // For pi variants + `vec2`
 
 static const GLfloat
 	PI = GLM_PIf,
@@ -25,18 +26,10 @@ static const GLfloat
 #define BIT_CLICK_LEFT 64
 #define BIT_USE_WEAPON BIT_CLICK_LEFT
 
-//////////
-
-#define KEY_FLY SDL_SCANCODE_1
-#define KEY_TOGGLE_WIREFRAME_MODE SDL_SCANCODE_2
-#define KEY_PRINT_POSITION SDL_SCANCODE_3
-#define KEY_PRINT_DIRECTION SDL_SCANCODE_4
-#define KEY_PRINT_OPENGL_ERROR SDL_SCANCODE_5
-#define KEY_PRINT_SDL_ERROR SDL_SCANCODE_6
-
 ////////// TODO: put these in the struct below
 
 // #define TRACK_MEMORY
+// #define DEBUG_AO_MAP_GENERATION
 // #define PRINT_SHADER_VALIDATION_LOG
 
 //////////
@@ -51,7 +44,6 @@ enum { // `enum` is used to make these values compile-time constants
 	corners_per_frustum = 8,
 	planes_per_frustum = 6,
 	faces_per_cubemap = 6,
-	vertices_per_skybox = 14,
 
 	num_unique_object_types = 3 // Sector face, billboard, and weapon sprite
 };
@@ -59,8 +51,10 @@ enum { // `enum` is used to make these values compile-time constants
 //////////
 
 static const struct {
-	const GLfloat milliseconds_per_second;
-	const byte max_byte_value;
+	const GLenum default_depth_func;
+	const GLfloat list_realloc_rate, milliseconds_per_second, one_over_max_byte_value;
+	const byte max_byte_value, min_shadow_map_cascades, skybox_sphere_fineness; // Note: the fineness must never equal 0
+	const map_pos_component_t max_map_size;
 
 	const struct { // All angles are in radians
 		const GLfloat near_clip_dist, eye_height, aabb_collision_box_size, tilt_correction_rate, init_fov;
@@ -86,8 +80,16 @@ static const struct {
 	} keys;
 
 } constants = {
+	.default_depth_func = GL_LEQUAL,
+
+	.list_realloc_rate = 2.0f,
 	.milliseconds_per_second = 1000.0f,
+	.one_over_max_byte_value = 1.0f / 255.0f,
 	.max_byte_value = 255,
+	.max_map_size = (map_pos_component_t) ~0u,
+
+	.min_shadow_map_cascades = 3,
+	.skybox_sphere_fineness = 80,
 
 	.camera = {
 		.near_clip_dist = 0.25f, .eye_height = 0.5f, .aabb_collision_box_size = 0.2f,

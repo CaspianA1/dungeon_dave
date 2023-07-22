@@ -1,6 +1,6 @@
 #include "data/maps.h"
 
-const byte level_one_heightmap[level_one_height][level_one_width] = {
+const map_pos_component_t level_one_heightmap[level_one_height][level_one_width] = {
 	{5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
 	{5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
 	{5, 0, 0, 0, 5, 0, 0, 0, 0, 2, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 3},

@@ -1,7 +1,8 @@
 #ifndef DRAWABLE_H
 #define DRAWABLE_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For `byte`
 #include "utils/list.h" // For `List`
 
 struct Drawable; // The Drawable's shader will be bound when the uniform updater is called
@@ -16,7 +17,7 @@ typedef struct {
 typedef enum {
 	OnlyDraw = 0,
 	UseShaderPipeline = 1,
-	BindVertexSpec = 2
+	UseVertexSpec = 2
 } DrawInvocationParam;
 
 //////////
@@ -30,7 +31,7 @@ Interface notes:
 	will be allocated for the vertices, but the vertex buffer will not have any elements inside it.
 
 - If the uniform updater is null, it will not be invoked.
-- And if the normal map set supplied to any constructor is 0, `glDeleteTextures` will not delete it.
+- And if the albedo texture or normal map supplied to any constructor are 0, `glDeleteTextures` will not delete it.
 */
 
 Drawable init_drawable_with_vertices(

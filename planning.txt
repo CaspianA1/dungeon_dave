@@ -4,6 +4,7 @@ Levels:
 - A level based on the Zhangjiajie region
 - A map like this one: https://www.planetminecraft.com/project/the-sultans-palace-3351849/ (can look up similar Sultan maps for Minecraft)
 - Maybe a level based in a lost city of gold
+- A level with a Ziggurat in it somewhere (perhaps that'll be the pyramid level?)
 
 Final lighting model:
 - Note: too many fancy lighting effects may make the game look less retro, so set some hard limit to that.
@@ -23,18 +24,19 @@ Shadow mapping:
 - Filtering in exp(gl_FragCoord.z) may remove some shadow acne
 - Make the billboards + a 2D character sprite cast shadows
 
-Ideal CSM: - Sector mesh optimization: 1. In high-speed memory. 2. Front faces pre-culled (result is half the size?).
+Ideal CSM:
+	- Sector mesh optimization:
+		1. In high-speed memory. 2. Front faces pre-culled (result is half the size?).
 		3. Face info bits removed. 4. Additional faces added for external map edges.
-	- A technique like ESM or EVSM.
+	- ESM.
 
 Architectural/code design ideas:
-- More efficiently set statemap bit ranges, maybe
 - Catch more warnings with -Weverything
 - File paths may not work on Windows
 - Pass in texture parameters through a bitmask
 - Tell if a level was just initialized through the Event struct
 - Can store one more byte in a sector with it staying 16 bytes - maybe do something more with that? Perhaps store its texture id there?
-- Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if enough precision?)
+- Perhaps use the texture id map as a texture, and use the other 5 bits in the face info bitset for something else (lighting params, if there's enough precision?)
 - Define the constants in constants.h in constants.c, and make the constants.h struct extern
 - Three classes of settings: hardcoded in the `constants` struct, configurable via a level file, and configurable by the player
 - Some library memory leaks; this should be fixed in some way, if possible (figure out why `SDL_GetNumAllocations` is above zero after `deinit_screen`; even happens with a simple test app)
@@ -50,6 +52,13 @@ Architectural/code design ideas:
 - Figure out how to make spherically distorted skyboxes in Blender from cube-like ones made in an image editor
 - A shader cache
 - Specular antialiasing
+- Allow for usage of a debug output context, if desired
+- For constants in the `constants` struct, perhaps test their validity through some static assertions?
+	Or is that too much - checks for limits, which are used for checks for runtime constants?
+	- Perhaps build a level file system like this: a program that compiles a level json file into a binary file, that can then be cast as a pointer to a struct directly
+- After the title screen init, there's some slowdown (much more with debug mode on)
+- Perhaps some level file versions for different rendering quality settings
+- Change uint8_t and byte to u8, and the same for uint16_t to u16 (same for all uint*_t types!)
 
 Miscellaneous problems:
 - The checker heightmap has faster pacing sometimes
@@ -58,6 +67,7 @@ Miscellaneous problems:
 - Using the raytraced AO map results in little white flickering dots
 - It's slow up close for many objects like sectors and billboards (even without parallax mapping)
 - See if a Z-prepass could lead to an increase in speed by rendering just one face at full resolution, up close
+- Make the speed of mouse movement slower on Linux (it most likely has to do with high-DPI scaling, or something like that)
 
 Object rendering:
 - Up-and-down moving platforms that can also work as doors (continually up-and-down moving, down if player close, or down if action fulfilled)
@@ -72,6 +82,7 @@ Random feature ideas:
 - Find a tighter far plane distance by finding the diameter of the sector convex hull
 - The map editor should be called Dungeon Painter
 - Perhaps build levels on top of cool terrain heightmaps, for a good surrounding environment + a level path through the terrain
+- I can port the game to many more platforms if I reduce the graphics quality - which is the biggest bottleneck
 
 Normal mapping:
 - Improper shadow coverage at edges of objects leads to some in-shadow areas having normal map details shown
@@ -108,6 +119,7 @@ Other:
 - A 3D character model that casts a shadow (or a flat one, like the weapon - like paper Mario?)
 - Very short, but memorable little audio tracks that play for the cutscenes
 - The player's shadow billboard should have idle, run, jump, and attack animations
+- Documentation for the fields of the level file format (output a HTML file)
 
 End components:
 - Static sectors

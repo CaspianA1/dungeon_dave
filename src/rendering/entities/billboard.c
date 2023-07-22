@@ -3,11 +3,6 @@
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 #include "utils/shader.h" // For `init_shader`
 
-typedef struct {
-	billboard_index_t index;
-	GLfloat dist_to_camera;
-} BillboardDistanceSortRef;
-
 /* TODO:
 - Fix weird depth clamping errors when billboard intersect with the near plane
 - Note: culling cannot be done for billboards for shadow mapping, for the same reason as with sectors
@@ -23,6 +18,11 @@ Drawing billboards to the shadow cascades (an ideal version):
 		(and for that, sort billboards in terms of the light pos (how to do that with no pos?))
 	- Then, when drawing entities that use the world shading fragment shader, multiply the shadow value by the alpha value
 */
+
+typedef struct {
+	billboard_index_t index;
+	GLfloat dist_to_camera_squared;
+} BillboardDistanceSortRef;
 
 //////////
 
@@ -51,14 +51,22 @@ void update_billboard_context(const BillboardContext* const billboard_context, c
 
 ////////// This part concerns the sorting of billboard indices from back to front, and rendering
 
-static int compare_billboard_sort_refs(const void* const a, const void* const b) {
-	const GLfloat
-		dist_a = ((BillboardDistanceSortRef*) a) -> dist_to_camera,
-		dist_b = ((BillboardDistanceSortRef*) b) -> dist_to_camera;
+// Using insertion sort because the data is already partially sorted. Returns if the data needed to be sorted.
+static void sort_billboard_refs_backwards(BillboardDistanceSortRef* const sort_refs, const billboard_index_t num_billboards) {
+	for (billboard_index_t i = 1; i < num_billboards; i++) {
+		const BillboardDistanceSortRef sort_ref = sort_refs[i];
 
-	if (dist_a < dist_b) return 1;
-	else if (dist_a > dist_b) return -1;
-	else return 0;
+		/* `j` may become smaller than 0, so using a type
+		that fits `billboard_index_t` that's signed */
+		int32_t j = i - 1;
+
+		while (j >= 0 && sort_refs[j].dist_to_camera_squared < sort_ref.dist_to_camera_squared) {
+			sort_refs[j + 1] = sort_refs[j];
+			j--;
+		}
+
+		sort_refs[j + 1] = sort_ref;
+	}
 }
 
 static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_context, const vec3 camera_pos) {
@@ -69,16 +77,20 @@ static void sort_billboards_by_dist_to_camera(BillboardContext* const billboard_
 
 	const billboard_index_t num_billboards = (billboard_index_t) billboards -> length;
 
-	for (billboard_index_t i = 0; i < num_billboards; i++)
-		sort_ref_data[i] = (BillboardDistanceSortRef) {
-			i, glm_vec3_distance((GLfloat*) camera_pos, (GLfloat*) billboard_data[i].pos)
-		};
+	////////// Reinitializing the sort ref distances to the camera, and sorting the billboards
 
-	/* Sorting from back to front by index (the actual billboards are not sorted, since that would require much more copying).
-	TODO: use the fact that the billboards will already be partially sorted for better sorting performance (i.e. using insertion sort). */
-	qsort(sort_ref_data, num_billboards, sizeof(BillboardDistanceSortRef), compare_billboard_sort_refs);
+	for (billboard_index_t i = 0; i < num_billboards; i++) {
+		BillboardDistanceSortRef* const sort_ref = sort_ref_data + i;
+
+		sort_ref -> dist_to_camera_squared = glm_vec3_distance2(
+			(GLfloat*) camera_pos,
+			(GLfloat*) billboard_data[sort_ref -> index].pos
+		);
+	}
 
 	////////// Moving the billboards into their right positions in their GPU buffer
+
+	sort_billboard_refs_backwards(sort_ref_data, num_billboards);
 
 	Billboard* const billboards_gpu = init_vertex_buffer_memory_mapping(
 		billboard_context -> drawable.vertex_buffer, num_billboards * sizeof(Billboard), true
@@ -110,7 +122,7 @@ void draw_billboards_to_shadow_context(const BillboardContext* const billboard_c
 
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		draw_drawable(*drawable, corners_per_quad,
-			billboard_context -> billboards.length, NULL, BindVertexSpec
+			billboard_context -> billboards.length, NULL, UseVertexSpec
 		);
 	);
 }
@@ -120,7 +132,7 @@ void draw_billboards(BillboardContext* const billboard_context, const Camera* co
 	sort_billboards_by_dist_to_camera(billboard_context, camera -> pos);
 
 	draw_drawable(billboard_context -> drawable, corners_per_quad, billboard_context -> billboards.length,
-		NULL, UseShaderPipeline | BindVertexSpec
+		NULL, UseShaderPipeline | UseVertexSpec
 	);
 }
 
@@ -129,10 +141,11 @@ void draw_billboards(BillboardContext* const billboard_context, const Camera* co
 static void define_vertex_spec(void) {
 	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), offsetof(Billboard, material_index), MATERIAL_INDEX_TYPENAME);
 	define_vertex_spec_index(true, false, 1, 1, sizeof(Billboard), offsetof(Billboard, texture_id), TEXTURE_ID_TYPENAME);
-	define_vertex_spec_index(true, true, 2, 2, sizeof(Billboard), offsetof(Billboard, size), GL_FLOAT);
+	define_vertex_spec_index(true, true, 2, 1, sizeof(Billboard), offsetof(Billboard, scale), GL_FLOAT);
 	define_vertex_spec_index(true, true, 3, 3, sizeof(Billboard), offsetof(Billboard, pos), GL_FLOAT);
 }
 
+// TODO: avoid passing in the num animation layouts (it equals the num billboard animations)
 BillboardContext init_billboard_context(
 	const GLfloat shadow_mapping_alpha_threshold,
 	const MaterialPropertiesPerObjectType* const shared_material_properties,
@@ -140,9 +153,9 @@ BillboardContext init_billboard_context(
 	const texture_id_t num_animation_layouts, const AnimationLayout* const animation_layouts,
 
 	const billboard_index_t num_still_textures, const GLchar* const* const still_texture_paths,
-	const billboard_index_t num_billboards, const Billboard* const billboards,
-	const billboard_index_t num_billboard_animations, const Animation* const billboard_animations,
-	const billboard_index_t num_billboard_animation_instances, const BillboardAnimationInstance* const billboard_animation_instances) {
+	const billboard_index_t num_billboards, Billboard* const billboards,
+	const billboard_index_t num_billboard_animations, Animation* const billboard_animations,
+	const billboard_index_t num_billboard_animation_instances, BillboardAnimationInstance* const billboard_animation_instances) {
 
 	const GLsizei texture_size = shared_material_properties -> texture_rescale_size;
 
@@ -156,7 +169,7 @@ BillboardContext init_billboard_context(
 			define_vertex_spec, NULL, GL_DYNAMIC_DRAW, GL_TRIANGLE_STRIP,
 			(List) {.data = NULL, .item_size = sizeof(Billboard), .length = num_billboards},
 
-			init_shader(ASSET_PATH("shaders/billboard.vert"), NULL, ASSET_PATH("shaders/world_shaded_object.frag"), NULL),
+			init_shader("shaders/billboard.vert", NULL, "shaders/common/world_shading.frag", NULL),
 			albedo_texture_set, init_normal_map_from_albedo_texture(albedo_texture_set,
 				TexSet, &shared_material_properties -> normal_map_config
 			)
@@ -164,25 +177,34 @@ BillboardContext init_billboard_context(
 
 		.shadow_mapping = {
 			.depth_shader = init_shader(
-				ASSET_PATH("shaders/shadow/billboard_depth.vert"),
-				ASSET_PATH("shaders/shadow/billboard_depth.geom"),
-				ASSET_PATH("shaders/shadow/billboard_depth.frag"), NULL
+				"shaders/shadow/billboard_depth.vert",
+				"shaders/shadow/billboard_depth.geom",
+				"shaders/shadow/billboard_depth.frag",
+				NULL
 			),
 
 			.alpha_threshold = shadow_mapping_alpha_threshold
 		},
 
 		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),
-		.billboards = init_list(num_billboards, Billboard),
-		.animation_instances = init_list(num_billboard_animation_instances, BillboardAnimationInstance),
-		.animations = init_list(num_billboard_animations, Animation)
+		.billboards = {billboards, sizeof(Billboard), num_billboards, num_billboards},
+
+		.animation_instances = {
+			billboard_animation_instances, sizeof(BillboardAnimationInstance),
+			num_billboard_animation_instances, num_billboard_animation_instances
+		},
+
+		.animations = {billboard_animations, sizeof(Animation), num_billboard_animations, num_billboard_animations}
 	};
 
-	////////// Initializing client-side lists
+	////////// Initializing the sort refs
 
-	push_array_to_list(&billboard_context.billboards, billboards, num_billboards);
-	push_array_to_list(&billboard_context.animation_instances, billboard_animation_instances, num_billboard_animation_instances);
-	push_array_to_list(&billboard_context.animations, billboard_animations, num_billboard_animations);
+	billboard_context.distance_sort_refs.length = num_billboards;
+
+	for (billboard_index_t i = 0; i < num_billboards; i++)
+		((BillboardDistanceSortRef*) billboard_context.distance_sort_refs.data)[i].index = i;
+
+	//////////
 
 	return billboard_context;
 }

@@ -1,7 +1,7 @@
 #ifndef MAPS_H
 #define MAPS_H
 
-#include "utils/typedefs.h" // For `byte`
+#include "utils/typedefs.h" // For `map_pos_component_t`
 
 enum { // These are enums so that they can define compile-time constant arrays
 	level_one_width = 25, level_one_height = 15,
@@ -21,7 +21,7 @@ enum { // These are enums so that they can define compile-time constant arrays
 
 #define MAP_DEF(prefix) prefix##_heightmap[prefix##_height][prefix##_width], prefix##_texture_id_map[prefix##_height][prefix##_width]
 
-extern const byte
+extern const map_pos_component_t
 	MAP_DEF(level_one), MAP_DEF(architecture), MAP_DEF(fortress),
 	MAP_DEF(palace), MAP_DEF(tpt), MAP_DEF(pyramid), MAP_DEF(maze),
 	MAP_DEF(test), MAP_DEF(terrain), MAP_DEF(terrain_2),

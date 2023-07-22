@@ -2,15 +2,9 @@
 #include "data/constants.h" // For `TWO_PI`
 
 DynamicLight init_dynamic_light(const DynamicLightConfig* const config) {
-	const GLfloat* const pos = config -> pos;
-
 	vec3 from, to;
-
-	glm_vec3_sub((GLfloat*) pos, (GLfloat*) config -> looking_at.origin, from);
-	glm_vec3_normalize(from);
-
-	glm_vec3_sub((GLfloat*) pos, (GLfloat*) config -> looking_at.dest, to);
-	glm_vec3_normalize(to);
+	glm_vec3_normalize_to((GLfloat*) config -> unnormalized_from, from);
+	glm_vec3_normalize_to((GLfloat*) config -> unnormalized_to, to);
 
 	vec3 axis;
 	glm_vec3_cross((GLfloat*) from, (GLfloat*) to, axis);
@@ -26,7 +20,12 @@ DynamicLight init_dynamic_light(const DynamicLightConfig* const config) {
 
 
 void update_dynamic_light(DynamicLight* const dl, const GLfloat curr_time_secs) {
-	const GLfloat weight = sinf(curr_time_secs / dl -> time_for_cycle * TWO_PI) * 0.5f + 0.5f;
+	float (*const movement_function)(const float) = sinf;
+	const GLfloat function_period = TWO_PI;
+
+	//////////
+
+	const GLfloat weight = movement_function(curr_time_secs / dl -> time_for_cycle * function_period) * 0.5f + 0.5f;
 
 	versor rotation; // SLERP code based on https://www.gamedev.net/forums/topic/523136-slerping-two-vectors/523136/
 	glm_quatv(rotation, dl -> angle_between * weight, (GLfloat*) dl -> axis);

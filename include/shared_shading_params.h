@@ -2,12 +2,13 @@
 #define SHARED_SHADING_PARAMS_H
 
 #include "utils/uniform_buffer.h"
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For various typedefs
 #include "level_config.h" // For `LevelRenderingConfig`
 #include "data/constants.h" // For `num_unique_object_types`
 #include "rendering/shadow.h" // For `CascadedShadowContext`
 #include "camera.h" // For `Camera`
-#include "utils/cglm_include.h" // For `vec2`, and `vec3`
+#include "cglm/cglm.h" // For `vec2`, and `vec3`
 #include "rendering/drawable.h" // For `Drawable`
 #include "utils/texture.h" // For `TextureUnit`
 #include "rendering/ambient_occlusion.h" // For `AmbientOcclusionMap`

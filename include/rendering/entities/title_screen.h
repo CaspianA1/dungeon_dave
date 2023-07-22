@@ -1,7 +1,8 @@
 #ifndef TITLE_SCREEN_H
 #define TITLE_SCREEN_H
 
-#include "utils/typedefs.h" // For OpenGL types + other typedefs
+#include "glad/glad.h" // For OpenGL defs
+#include "utils/typedefs.h" // For various typedefs
 #include "utils/texture.h" // For `TextureFilterMode`
 #include "utils/normal_map_generation.h" // For `NormalMapConfig`
 #include <stdbool.h> // For `bool`
@@ -15,14 +16,21 @@ typedef struct {
 } TitleScreenTextureConfig;
 
 typedef struct {
+	const GLfloat ambient_strength;
+	const vec3 light_color, material_properties;
+} TitleScreenLayerConfig;
+
+typedef struct {
 	const byte texture_transition_immediacy_factor;
 
 	const GLfloat
-		scrolling_vert_squish_ratio, specular_exponent,
+		scrolling_vert_squish_ratio,
 		scrolling_bilinear_albedo_percent, scrolling_bilinear_normal_percent,
+		tone_mapping_max_white, noise_granularity,
 		light_dist_from_screen_plane, secs_per_scroll_cycle;
 
 	const struct {const GLfloat secs_per, logo_transitions_per;} light_spin_cycle;
+	const TitleScreenLayerConfig still_and_scrolling_layer_configs[2];
 } TitleScreenRenderingConfig;
 
 //////////
