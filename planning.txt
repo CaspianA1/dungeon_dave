@@ -59,6 +59,7 @@ Architectural/code design ideas:
 - After the title screen init, there's some slowdown (much more with debug mode on)
 - Perhaps some level file versions for different rendering quality settings
 - Change uint8_t and byte to u8, and the same for uint16_t to u16 (same for all uint*_t types!)
+- For range limiting in the json struct, perhaps keep a secondary layout struct that checks the corresponding range for the value, if applicable
 
 Miscellaneous problems:
 - The checker heightmap has faster pacing sometimes
