@@ -30,7 +30,6 @@ If you wish to run the project as well, you can specify the second argument to b
 - Toggle wireframe mode: 2
 - Print position: 3
 - Print direction: 4
-
 - Print SDL error: 5
 - Print OpenGL error: 6
 - Print OpenAL error: 7
