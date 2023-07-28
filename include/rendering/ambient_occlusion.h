@@ -2,7 +2,7 @@
 #define AMBIENT_OCCLUSION_H
 
 /* This ambient occlusion implementation works by testing whether random rays from each point
-in the heightmap (from the lowest to the highest point) intersect with any scene geometry */
+in the heightmap (from the lowest to the highest point) intersect with any level geometry. */
 
 #include "glad/glad.h" // For OpenGL defs
 #include "utils/typedefs.h" // For various typedefs

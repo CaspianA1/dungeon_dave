@@ -160,7 +160,7 @@ BillboardContext init_billboard_context(
 	const GLsizei texture_size = shared_material_properties -> texture_rescale_size;
 
 	const GLuint albedo_texture_set = init_texture_set(
-		true, TexNonRepeating, OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER,
+		true, TexNonRepeating, OPENGL_LEVEL_MAG_FILTER, OPENGL_LEVEL_MIN_FILTER,
 		num_still_textures, num_animation_layouts, texture_size, texture_size, still_texture_paths, animation_layouts
 	);
 

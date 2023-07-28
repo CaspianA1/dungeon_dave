@@ -66,7 +66,7 @@ static GLuint init_skybox_texture(const GLchar* const texture_path, const GLfloa
 	//////////
 
 	const GLuint skybox_texture = preinit_texture(TexSkybox, TexNonRepeating,
-		OPENGL_SCENE_MAG_FILTER, OPENGL_SCENE_MIN_FILTER, false);
+		OPENGL_LEVEL_MAG_FILTER, OPENGL_LEVEL_MIN_FILTER, false);
 
 	const GLint face_size = skybox_w >> 2, twice_face_size = skybox_w >> 1;
 	const GLint rescaled_face_size = (GLint) (face_size * texture_scale);

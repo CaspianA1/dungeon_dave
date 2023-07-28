@@ -14,7 +14,7 @@ void init_mesh_for_sector(
 
 /* Normally, the map edges are left out of the big sector sector, since they're not visible to the player,
 but in the case of shadow-casting sectors, the map edges should cast shadows. So for that, this generates
-another mesh for just the map edges that will provide correct map-edge shadows for the scene. */
+another mesh for just the map edges that will provide correct map-edge shadows for the level. */
 List init_map_edge_mesh(const Heightmap heightmap);
 
 #endif

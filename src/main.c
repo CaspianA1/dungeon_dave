@@ -27,30 +27,30 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 
 	//////////
 
-	SceneContext* const scene_context = (SceneContext*) app_context;
-	if (tick_title_screen(&scene_context -> title_screen, event)) return true;
+	LevelContext* const level_context = (LevelContext*) app_context;
+	if (tick_title_screen(&level_context -> title_screen, event)) return true;
 
 	////////// Some variable initialization
 
-	const SectorContext* const sector_context = &scene_context -> sector_context;
-	const CascadedShadowContext* const shadow_context = &scene_context -> shadow_context;
+	const SectorContext* const sector_context = &level_context -> sector_context;
+	const CascadedShadowContext* const shadow_context = &level_context -> shadow_context;
 
-	Camera* const camera = &scene_context -> camera;
-	BillboardContext* const billboard_context = &scene_context -> billboard_context;
-	WeaponSprite* const weapon_sprite = &scene_context -> weapon_sprite;
-	const AudioContext* const audio_context = &scene_context -> audio_context;
+	Camera* const camera = &level_context -> camera;
+	BillboardContext* const billboard_context = &level_context -> billboard_context;
+	WeaponSprite* const weapon_sprite = &level_context -> weapon_sprite;
+	const AudioContext* const audio_context = &level_context -> audio_context;
 
-	DynamicLight* const dynamic_light = &scene_context -> dynamic_light;
+	DynamicLight* const dynamic_light = &level_context -> dynamic_light;
 	const GLfloat* const dir_to_light = dynamic_light -> curr_dir, curr_time_secs = event -> curr_time_secs;
 
 	////////// Scene updating
 
-	update_camera(camera, event, &scene_context -> heightmap);
+	update_camera(camera, event, &level_context -> heightmap);
 	update_billboard_context(billboard_context, curr_time_secs);
 	update_weapon_sprite(weapon_sprite, camera, event);
 	update_dynamic_light(dynamic_light, curr_time_secs);
 	update_shadow_context(shadow_context, camera, dir_to_light, event -> aspect_ratio);
-	update_shared_shading_params(&scene_context -> shared_shading_params, camera, shadow_context, dir_to_light);
+	update_shared_shading_params(&level_context -> shared_shading_params, camera, shadow_context, dir_to_light);
 	update_audio_context(audio_context, camera);
 
 	////////// Rendering to the shadow context
@@ -70,7 +70,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 	// No backface culling or depth buffer writes for the skybox, billboards, or weapon sprite
 	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
 		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
-			draw_skybox(&scene_context -> skybox); // Drawn before any translucent geometry
+			draw_skybox(&level_context -> skybox); // Drawn before any translucent geometry
 
 			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
 				draw_billboards(billboard_context, camera);
@@ -674,7 +674,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	//////////
 
-	const SceneContext scene_context = {
+	const LevelContext level_context = {
 		.camera = init_camera(&camera_config, far_clip_dist),
 		.materials_texture = materials_texture,
 		.weapon_sprite = init_weapon_sprite(&weapon_sprite_config, weapon_sprite_material_index),
@@ -707,10 +707,10 @@ static void* main_init(const WindowConfig* const window_config) {
 		.heightmap = heightmap
 	};
 
-	////////// Initializing a scene context on the heap
+	////////// Initializing a level context on the heap
 
-	SceneContext* const scene_context_on_heap = alloc(1, sizeof(SceneContext));
-	memcpy(scene_context_on_heap, &scene_context, sizeof(SceneContext));
+	LevelContext* const level_context_on_heap = alloc(1, sizeof(LevelContext));
+	memcpy(level_context_on_heap, &level_context, sizeof(LevelContext));
 
 	////////// Audio setup (TODO: put this data in some JSON file)
 
@@ -726,16 +726,15 @@ static void* main_init(const WindowConfig* const window_config) {
 	add_audio_clip_to_audio_context(&audio_context, jump_land_sound_path, true);
 	add_audio_clip_to_audio_context(&audio_context, soundtrack_path, false);
 
+	const Camera* const camera = &level_context_on_heap -> camera;
+
 	// TODO: add a running sound
 	const PositionalAudioSourceMetadata positional_audio_source_metadata[] = {
-		{weapon_sprite_config.sound_path, &scene_context_on_heap -> weapon_sprite,
+		{weapon_sprite_config.sound_path, &level_context_on_heap -> weapon_sprite,
 		weapon_sound_activator, weapon_sound_updater},
 
-		{jump_up_sound_path, &scene_context_on_heap -> camera,
-		jump_up_sound_activator, jump_up_sound_updater},
-
-		{jump_land_sound_path, &scene_context_on_heap -> camera,
-		jump_land_sound_activator, jump_land_sound_updater}
+		{jump_up_sound_path, camera, jump_up_sound_activator, jump_up_sound_updater},
+		{jump_land_sound_path, camera, jump_land_sound_activator, jump_land_sound_updater}
 	};
 
 	for (byte i = 0; i < ARRAY_LENGTH(positional_audio_source_metadata); i++)
@@ -745,43 +744,44 @@ static void* main_init(const WindowConfig* const window_config) {
 	add_nonpositional_audio_source_to_audio_context(&audio_context, soundtrack_path, true);
 	play_nonpositional_audio_source(&audio_context, soundtrack_path);
 
-	memcpy(&scene_context_on_heap -> audio_context, &audio_context, sizeof(AudioContext));
+	memcpy(&level_context_on_heap -> audio_context, &audio_context, sizeof(AudioContext));
 
 	////////// Initializing shared textures
 
 	const WorldShadedObject world_shaded_objects[] = {
-		{&scene_context.sector_context.drawable, {TU_SectorFaceAlbedo, TU_SectorFaceNormalMap}},
-		{&scene_context.billboard_context.drawable, {TU_BillboardAlbedo, TU_BillboardNormalMap}},
-		{&scene_context.weapon_sprite.drawable, {TU_WeaponSpriteAlbedo, TU_WeaponSpriteNormalMap}}
+		{&level_context.sector_context.drawable, {TU_SectorFaceAlbedo, TU_SectorFaceNormalMap}},
+		{&level_context.billboard_context.drawable, {TU_BillboardAlbedo, TU_BillboardNormalMap}},
+		{&level_context.weapon_sprite.drawable, {TU_WeaponSpriteAlbedo, TU_WeaponSpriteNormalMap}}
 	};
 
 	init_shared_textures_for_world_shaded_objects(world_shaded_objects,
-		ARRAY_LENGTH(world_shaded_objects), &scene_context.shadow_context,
-		&scene_context.ao_map, materials_texture.buffer_texture
+		ARRAY_LENGTH(world_shaded_objects), &level_context.shadow_context,
+		&level_context.ao_map, materials_texture.buffer_texture
 	);
 
 	////////// Initializing shared shading params
 
 	const GLuint shaders_that_use_shared_params[] = {
 		// Depth shaders
-		scene_context.sector_context.depth_prepass_shader,
-		scene_context.sector_context.shadow_mapping.depth_shader,
-		scene_context.billboard_context.shadow_mapping.depth_shader,
+		level_context.sector_context.depth_prepass_shader,
+		level_context.sector_context.shadow_mapping.depth_shader,
+		level_context.billboard_context.shadow_mapping.depth_shader,
 
 		// Plain shaders
-		scene_context.skybox.drawable.shader,
-		scene_context.sector_context.drawable.shader,
-		scene_context.billboard_context.drawable.shader,
-		scene_context.weapon_sprite.drawable.shader
+		level_context.skybox.drawable.shader,
+		level_context.sector_context.drawable.shader,
+		level_context.billboard_context.drawable.shader,
+		level_context.weapon_sprite.drawable.shader
 	};
 
+	// TODO: init this before, as a part of the level context struct on the stack
 	const SharedShadingParams shared_shading_params = init_shared_shading_params(
 		shaders_that_use_shared_params, ARRAY_LENGTH(shaders_that_use_shared_params),
-		&level_rendering_config, all_bilinear_percents, &scene_context.shadow_context
+		&level_rendering_config, all_bilinear_percents, &level_context.shadow_context
 	);
 
 	// I am bypassing the type system's const safety checks with this, but it's for the best
-	memcpy(&scene_context_on_heap -> shared_shading_params, &shared_shading_params, sizeof(SharedShadingParams));
+	memcpy(&level_context_on_heap -> shared_shading_params, &shared_shading_params, sizeof(SharedShadingParams));
 
 	////////// Some random deinit
 
@@ -798,28 +798,28 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	//////////
 
-	return scene_context_on_heap;
+	return level_context_on_heap;
 }
 
 static void main_deinit(void* const app_context) {
-	SceneContext* const scene_context = (SceneContext*) app_context;
+	LevelContext* const level_context = (LevelContext*) app_context;
 
-	dealloc(scene_context -> heightmap.data);
+	dealloc(level_context -> heightmap.data);
 
-	deinit_shared_shading_params(&scene_context -> shared_shading_params);
-	deinit_materials_texture(&scene_context -> materials_texture);
+	deinit_shared_shading_params(&level_context -> shared_shading_params);
+	deinit_materials_texture(&level_context -> materials_texture);
 
-	deinit_weapon_sprite(&scene_context -> weapon_sprite);
-	deinit_sector_context(&scene_context -> sector_context);
-	deinit_billboard_context(&scene_context -> billboard_context);
+	deinit_weapon_sprite(&level_context -> weapon_sprite);
+	deinit_sector_context(&level_context -> sector_context);
+	deinit_billboard_context(&level_context -> billboard_context);
 
-	deinit_ao_map(&scene_context -> ao_map);
-	deinit_shadow_context(&scene_context -> shadow_context);
-	deinit_title_screen(&scene_context -> title_screen);
-	deinit_skybox(&scene_context -> skybox);
-	deinit_audio_context(&scene_context -> audio_context);
+	deinit_ao_map(&level_context -> ao_map);
+	deinit_shadow_context(&level_context -> shadow_context);
+	deinit_title_screen(&level_context -> title_screen);
+	deinit_skybox(&level_context -> skybox);
+	deinit_audio_context(&level_context -> audio_context);
 
-	dealloc(scene_context);
+	dealloc(level_context);
 }
 
 static void* cjson_wrapping_alloc(const size_t size) {

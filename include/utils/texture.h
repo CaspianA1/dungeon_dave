@@ -23,8 +23,8 @@ extern GLfloat global_anisotropic_filtering_level;
 
 #define OPENGL_COLOR_CHANNEL_TYPE GL_UNSIGNED_BYTE
 
-#define OPENGL_SCENE_MAG_FILTER TexLinear
-#define OPENGL_SCENE_MIN_FILTER TexTrilinear
+#define OPENGL_LEVEL_MAG_FILTER TexLinear
+#define OPENGL_LEVEL_MIN_FILTER TexTrilinear
 
 // Each enum value is a texture unit id.
 typedef enum {

@@ -64,7 +64,7 @@ typedef struct {
 	TitleScreen title_screen;
 
 	const Heightmap heightmap;
-} SceneContext;
+} LevelContext;
 
 // Excluded: main_drawer, main_init, main_deinit, cjson_wrapping_alloc
 

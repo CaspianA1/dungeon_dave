@@ -92,7 +92,7 @@ static void get_light_view_projection(
 
 /* For shaders, the number of cascades equals the value of the macro `NUM_CASCADES`
 in `num_cascades.geom`. This is a macro, and not a uniform, since the shadow
-geometry shader must clone the scene geometry a fixed number of times
+geometry shader must clone the level geometry a fixed number of times
 (specified at compile time) for different layered rendering passes per each sub-frustum.
 So, before all shader compilation, this function writes the number of cascades to `num_cascades.geom.` */
 void specify_cascade_count_before_any_shader_compilation(
@@ -195,14 +195,14 @@ CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* con
 	const GLuint plain_depth_sampler = depth_samplers[0];
 	glSamplerParameteri(plain_depth_sampler, GL_TEXTURE_WRAP_S, TexNonRepeating);
 	glSamplerParameteri(plain_depth_sampler, GL_TEXTURE_WRAP_T, TexNonRepeating);
-	glSamplerParameteri(plain_depth_sampler, GL_TEXTURE_MAG_FILTER, OPENGL_SCENE_MAG_FILTER);
-	glSamplerParameteri(plain_depth_sampler, GL_TEXTURE_MIN_FILTER, OPENGL_SCENE_MAG_FILTER);
+	glSamplerParameteri(plain_depth_sampler, GL_TEXTURE_MAG_FILTER, OPENGL_LEVEL_MAG_FILTER);
+	glSamplerParameteri(plain_depth_sampler, GL_TEXTURE_MIN_FILTER, OPENGL_LEVEL_MAG_FILTER);
 
 	const GLuint depth_comparison_sampler = depth_samplers[1];
 	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_WRAP_S, TexNonRepeating);
 	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_WRAP_T, TexNonRepeating);
-	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_MAG_FILTER, OPENGL_SCENE_MAG_FILTER);
-	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_MIN_FILTER, OPENGL_SCENE_MAG_FILTER);
+	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_MAG_FILTER, OPENGL_LEVEL_MAG_FILTER);
+	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_MIN_FILTER, OPENGL_LEVEL_MAG_FILTER);
 	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 	glSamplerParameteri(depth_comparison_sampler, GL_TEXTURE_COMPARE_FUNC, (GLint) constants.default_depth_func);
 
