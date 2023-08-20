@@ -102,7 +102,7 @@ install_dependencies_for_macos() {
 }
 
 install_dependencies_for_linux() {
-	install_dependencies "dnf" "sudo dnf install" "clang make cmake git pkg-config SDL2-devel"
+	install_dependencies "dnf" "sudo dnf install" "clang make cmake git pkg-config SDL2-devel libasan libubsan"
 }
 
 ##########
