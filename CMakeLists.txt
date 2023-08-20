@@ -14,7 +14,7 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Wformat -Wfloat-conversion -Wdouble-promotion -Wsign-conversion -Wincompatible-pointer-types")
-set(CMAKE_C_FLAGS_DEBUG "-g -fsanitize=address,undefined,float-divide-by-zero,unsigned-integer-overflow,implicit-conversion")
+set(CMAKE_C_FLAGS_DEBUG "-g -fsanitize=address,undefined,float-divide-by-zero,signed-integer-overflow")
 set(CMAKE_C_FLAGS_RELEASE "-Ofast")
 
 set(TARGET_NAME dungeon_dave)
