@@ -20,7 +20,7 @@ DynamicLight init_dynamic_light(const DynamicLightConfig* const config) {
 
 
 void update_dynamic_light(DynamicLight* const dl, const GLfloat curr_time_secs) {
-	float (*const movement_function)(const float) = sinf;
+	float (*const movement_function) (const float) = sinf;
 	const GLfloat function_period = TWO_PI;
 
 	//////////
