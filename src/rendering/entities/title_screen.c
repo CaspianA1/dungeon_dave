@@ -67,7 +67,7 @@ TitleScreen init_title_screen(
 	////////// Getting the scrolling texture size
 
 	const GLchar* const scrolling_texture_path = texture_config -> paths.scrolling;
-	SDL_Surface* const peek_surface = init_surface(get_temp_asset_path(scrolling_texture_path));
+	SDL_Surface* const peek_surface = init_surface(scrolling_texture_path);
 	const GLsizei scrolling_texture_size[2] = {peek_surface -> w, peek_surface -> h};
 	deinit_surface(peek_surface);
 

@@ -242,7 +242,7 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 
 	/* It's a bit wasteful to load the surface in `init_texture_set`
 	and here too, but this makes the code much more readable. */
-	SDL_Surface* const peek_surface = init_surface(get_temp_asset_path(animation_layout -> spritesheet_path));
+	SDL_Surface* const peek_surface = init_surface(animation_layout -> spritesheet_path);
 
 	const GLsizei frame_size[2] = {
 		peek_surface -> w / (GLsizei) animation_layout -> frames_across,

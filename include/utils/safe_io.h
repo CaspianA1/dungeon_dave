@@ -15,7 +15,7 @@ that must be fully used before the function is called again. Therefore, it is en
 to call this function as late as possible, in terms of when the asset path is needed. */
 static inline const char* get_temp_asset_path(const char* const unmodified_path) {
 	// TODO: try to make these constants in `constants.h`
-	static const char* const path_prefix = "../assets/";
+	static const char* const path_prefix = "../../assets/";
 	enum {max_concatenation_buffer_size = 100u};
 
 	static char temp_concatenated_string[max_concatenation_buffer_size];

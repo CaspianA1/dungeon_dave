@@ -13,10 +13,9 @@ cd build/$build_type
 
 cmake -DCMAKE_BUILD_TYPE=$cmake_build_type ../.. || exit 2
 make -j || exit 3
-cd ..
 
 if [ "$2" == "run" ]; then
-	./$build_type/dungeon_dave
+	./dungeon_dave
 elif [ "$2" != "" ]; then
 	echo "The second parameter may only be 'run', or nothing at all. Exiting."
 	exit 4
