@@ -22,11 +22,13 @@ typedef struct {
 
 // Excluded: init_screen, deinit_screen, resize_window_if_needed, application_should_exit, loop_application
 
+typedef bool (*const drawer_t) (void* const, const Event* const, const WindowConfig* const);
+
 void make_application(
 	const WindowConfig* const config,
-	bool (*const drawer) (void* const, const Event* const),
 	void* (*const init) (const WindowConfig* const),
-	void (*const deinit) (void* const));
+	void (*const deinit) (void* const),
+	const drawer_t drawer);
 
 // Note: the drawer returns if the mouse should be visible.
 

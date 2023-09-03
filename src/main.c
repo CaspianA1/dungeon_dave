@@ -8,91 +8,7 @@
 #include "utils/json.h" // For various JSON defs
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
-static bool main_drawer(void* const app_context, const Event* const event) {
-	////////// Setting the wireframe mode
-
-	const Uint8* const keys = event -> keys;
-
-	static bool in_wireframe_mode = false, already_pressing_wireframe_mode_key = false;
-
-	if (keys[KEY_TOGGLE_WIREFRAME_MODE]) {
-		if (!already_pressing_wireframe_mode_key) {
-			already_pressing_wireframe_mode_key = true;
-			glPolygonMode(GL_FRONT_AND_BACK, (in_wireframe_mode = !in_wireframe_mode) ? GL_LINE : GL_FILL);
-		}
-	}
-	else already_pressing_wireframe_mode_key = false;
-
-	glClear(GL_DEPTH_BUFFER_BIT | (in_wireframe_mode * GL_COLOR_BUFFER_BIT));
-
-	//////////
-
-	LevelContext* const level_context = (LevelContext*) app_context;
-	if (tick_title_screen(&level_context -> title_screen, event)) return true;
-
-	////////// Some variable initialization
-
-	const SectorContext* const sector_context = &level_context -> sector_context;
-	const CascadedShadowContext* const shadow_context = &level_context -> shadow_context;
-
-	Camera* const camera = &level_context -> camera;
-	BillboardContext* const billboard_context = &level_context -> billboard_context;
-	WeaponSprite* const weapon_sprite = &level_context -> weapon_sprite;
-	const AudioContext* const audio_context = &level_context -> audio_context;
-
-	DynamicLight* const dynamic_light = &level_context -> dynamic_light;
-	const GLfloat* const dir_to_light = dynamic_light -> curr_dir, curr_time_secs = event -> curr_time_secs;
-
-	////////// Scene updating
-
-	update_camera(camera, event, &level_context -> heightmap);
-	update_billboard_context(billboard_context, curr_time_secs);
-	update_weapon_sprite(weapon_sprite, camera, event);
-	update_dynamic_light(dynamic_light, curr_time_secs);
-	update_shadow_context(shadow_context, camera, dir_to_light, event -> aspect_ratio);
-	update_shared_shading_params(&level_context -> shared_shading_params, camera, shadow_context, dir_to_light);
-	update_audio_context(audio_context, camera);
-
-	////////// Rendering to the shadow context
-
-	// TODO: still enable face culling for sectors?
-	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
-		enable_rendering_to_shadow_context(shadow_context);
-			draw_sectors_to_shadow_context(sector_context);
-			draw_billboards_to_shadow_context(billboard_context);
-		disable_rendering_to_shadow_context(event -> screen_size);
-	);
-
-	////////// The main drawing code
-
-	draw_sectors(sector_context, camera);
-
-	// No backface culling or depth buffer writes for the skybox, billboards, or weapon sprite
-	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
-		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
-			draw_skybox(&level_context -> skybox); // Drawn before any translucent geometry
-
-			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
-				draw_billboards(billboard_context, camera);
-				draw_weapon_sprite(weapon_sprite);
-			);
-		);
-	);
-
-	////////// Some debugging
-
-	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
-	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(camera -> dir);
-
-	if (keys[KEY_PRINT_SDL_ERROR]) SDL_ERR_CHECK;
-	if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
-	if (keys[KEY_PRINT_AL_ERROR]) AL_ERR_CHECK;
-	if (keys[KEY_PRINT_ALC_ERROR]) ALC_ERR_CHECK;
-
-	return false;
-}
-
-static void* main_init(const WindowConfig* const window_config) {
+static void* main_init_with_path(const WindowConfig* const window_config, const GLchar* const level_path) {
 	////////// Printing library info
 
 	AudioContext audio_context = init_audio_context();
@@ -129,7 +45,7 @@ static void* main_init(const WindowConfig* const window_config) {
 
 	1. A function from each object interface will load an init object given a base key in the level struct.
 		Only basic validation happens here; i.e. validation based around the value ranges required for fitting
-		each number's value range into each struct member's typw.
+		each number's value range into each struct member's type.
 
 	2. That init object will then passed to the initializer.
 	3. Specific validation then happens in that initializer.
@@ -148,7 +64,7 @@ static void* main_init(const WindowConfig* const window_config) {
 	5. Draw
 	*/
 
-	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file("json_data/levels/palace.json");
+	cJSON JSON_OBJ_NAME_DEF(level) = init_json_from_file(level_path);
 
 	const cJSON
 		DEF_JSON_SUBOBJ(level, parallax_mapping),
@@ -801,6 +717,10 @@ static void* main_init(const WindowConfig* const window_config) {
 	return level_context_on_heap;
 }
 
+static void* main_init(const WindowConfig* const window_config) {
+	return main_init_with_path(window_config, "json_data/levels/palace.json");
+}
+
 static void main_deinit(void* const app_context) {
 	LevelContext* const level_context = (LevelContext*) app_context;
 
@@ -820,6 +740,92 @@ static void main_deinit(void* const app_context) {
 	deinit_audio_context(&level_context -> audio_context);
 
 	dealloc(level_context);
+}
+
+static bool main_drawer(void* const app_context, const Event* const event, const WindowConfig* const window_config) {
+	////////// Setting the wireframe mode
+
+	const Uint8* const keys = event -> keys;
+
+	static bool in_wireframe_mode = false, already_pressing_wireframe_mode_key = false;
+
+	if (keys[KEY_TOGGLE_WIREFRAME_MODE]) {
+		if (!already_pressing_wireframe_mode_key) {
+			already_pressing_wireframe_mode_key = true;
+			glPolygonMode(GL_FRONT_AND_BACK, (in_wireframe_mode = !in_wireframe_mode) ? GL_LINE : GL_FILL);
+		}
+	}
+	else already_pressing_wireframe_mode_key = false;
+
+	glClear(GL_DEPTH_BUFFER_BIT | (in_wireframe_mode * GL_COLOR_BUFFER_BIT));
+
+	//////////
+
+	LevelContext* const level_context = (LevelContext*) app_context;
+
+	if (tick_title_screen(&level_context -> title_screen, event))
+		return true;
+
+	////////// Some variable initialization
+
+	const SectorContext* const sector_context = &level_context -> sector_context;
+	const CascadedShadowContext* const shadow_context = &level_context -> shadow_context;
+
+	Camera* const camera = &level_context -> camera;
+	BillboardContext* const billboard_context = &level_context -> billboard_context;
+	WeaponSprite* const weapon_sprite = &level_context -> weapon_sprite;
+	const AudioContext* const audio_context = &level_context -> audio_context;
+
+	DynamicLight* const dynamic_light = &level_context -> dynamic_light;
+	const GLfloat* const dir_to_light = dynamic_light -> curr_dir, curr_time_secs = event -> curr_time_secs;
+
+	////////// Scene updating
+
+	update_camera(camera, event, &level_context -> heightmap);
+	update_billboard_context(billboard_context, curr_time_secs);
+	update_weapon_sprite(weapon_sprite, camera, event);
+	update_dynamic_light(dynamic_light, curr_time_secs);
+	update_shadow_context(shadow_context, camera, dir_to_light, event -> aspect_ratio);
+	update_shared_shading_params(&level_context -> shared_shading_params, camera, shadow_context, dir_to_light);
+	update_audio_context(audio_context, camera);
+
+	////////// Rendering to the shadow context
+
+	// TODO: still enable face culling for sectors?
+	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+		enable_rendering_to_shadow_context(shadow_context);
+			draw_sectors_to_shadow_context(sector_context);
+			draw_billboards_to_shadow_context(billboard_context);
+		disable_rendering_to_shadow_context(event -> screen_size);
+	);
+
+	////////// The main drawing code
+
+	draw_sectors(sector_context, camera);
+
+	// No backface culling or depth buffer writes for the skybox, billboards, or weapon sprite
+	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
+		WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
+			draw_skybox(&level_context -> skybox); // Drawn before any translucent geometry
+
+			WITH_BINARY_RENDER_STATE(GL_BLEND, // Blending for these two
+				draw_billboards(billboard_context, camera);
+				draw_weapon_sprite(weapon_sprite);
+			);
+		);
+	);
+
+	////////// Some debugging
+
+	if (keys[KEY_PRINT_POSITION]) DEBUG_VEC3(camera -> pos);
+	if (keys[KEY_PRINT_DIRECTION]) DEBUG_VEC3(camera -> dir);
+
+	if (keys[KEY_PRINT_SDL_ERROR]) SDL_ERR_CHECK;
+	if (keys[KEY_PRINT_OPENGL_ERROR]) GL_ERR_CHECK;
+	if (keys[KEY_PRINT_AL_ERROR]) AL_ERR_CHECK;
+	if (keys[KEY_PRINT_ALC_ERROR]) ALC_ERR_CHECK;
+
+	return false;
 }
 
 static void* cjson_wrapping_alloc(const size_t size) {
@@ -865,7 +871,7 @@ int main(void) {
 		.window_size = {window_config_window_size[0], window_config_window_size[1]}
 	};
 
-	make_application(&window_config, main_drawer, main_init, main_deinit);
+	make_application(&window_config, main_init, main_deinit, main_drawer);
 
 	// This is deinited after `make_application` because of the lifetime of `app_name`
 	deinit_json(WITH_JSON_OBJ_SUFFIX(window_config));

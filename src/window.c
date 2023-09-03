@@ -36,6 +36,8 @@ static Screen init_screen(const WindowConfig* const config) {
 	const uint16_t* const window_size = config -> window_size;
 	const uint16_t window_w = window_size[0], window_h = window_size[1];
 
+	// TODO: force high-DPI if it's available
+
 	Screen screen = {
 		.window = SDL_CreateWindow(config -> app_name,
 			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -81,6 +83,7 @@ static void deinit_screen(const Screen* const screen) {
 
 static void resize_window_if_needed(SDL_Window* const window, const WindowConfig* const config, const Uint8* const keys) {
 	static bool window_resized_last_tick = false, window_is_fullscreen = false;
+
 	static GLint desktop_width, desktop_height;
 
 	ON_FIRST_CALL( // TODO: make this a runtime constant
@@ -129,7 +132,7 @@ static bool application_should_exit(const Uint8* const keys) {
 	is by pressing the window exit button (not through pressing ctrl-w or ctrl-q!).
 	That isn't possible for this application, since the mouse is locked in the window.
 	Since exiting doesn't work normally, a ctrl key followed by an exit activation key
-	serves as a manual workaround to this problem. */
+	serves as a manual workaround to this problem. TODO: document this in the README. */
 
 	const bool // On Ubuntu, `SDL_QUIT` is not caught by `SDL_PollEvent`, so this circumvents that
 		ctrl_key = keys[constants.keys.ctrl[0]] || keys[constants.keys.ctrl[1]],
@@ -140,8 +143,9 @@ static bool application_should_exit(const Uint8* const keys) {
 
 //////////
 
-static void loop_application(const Screen* const screen, const WindowConfig* const config,
-	void* const app_context, bool (*const drawer) (void* const, const Event* const)) {
+static void loop_application(
+	const Screen* const screen, const WindowConfig* const config,
+	void* const app_context, const drawer_t drawer) {
 
 	SDL_Window* const window = screen -> window;
 	const Uint8* const keys = SDL_GetKeyboardState(NULL);
@@ -151,15 +155,16 @@ static void loop_application(const Screen* const screen, const WindowConfig* con
 	SDL_DisplayMode display_mode;
 	SDL_GetCurrentDisplayMode(0, &display_mode);
 
+	const bool vsync_is_enabled = config -> enabled.vsync;
+
 	// If the display mode refresh rate is 0, it is considered not available
-	const byte refresh_rate = (display_mode.refresh_rate == 0 || !config -> enabled.vsync)
+	const byte refresh_rate = (display_mode.refresh_rate == 0 || !vsync_is_enabled)
 		? config -> default_fps : (byte) display_mode.refresh_rate;
 
 	////////// Timing-related variables
 
 	const GLfloat max_delay = constants.milliseconds_per_second / (GLfloat) refresh_rate;
 	const GLfloat one_over_time_frequency = 1.0f / SDL_GetPerformanceFrequency();
-	const bool vsync_is_enabled = config -> enabled.vsync;
 
 	GLfloat secs_elapsed_between_frames = 0.0f;
 	Uint64 time_counter_for_last_frame = SDL_GetPerformanceCounter();
@@ -176,10 +181,11 @@ static void loop_application(const Screen* const screen, const WindowConfig* con
 		////////// Getting the next event, drawing the screen, and swapping the framebuffer
 
 		const Event event = get_next_event(time_before_tick_ms, secs_elapsed_between_frames, keys);
-		const bool mouse_should_be_visible = drawer(app_context, &event);
+		const bool mouse_should_be_visible = drawer(app_context, &event, config);
 
 		if (mouse_should_be_visible != mouse_is_currently_visible) {
 			mouse_is_currently_visible = mouse_should_be_visible;
+			// TODO: fix the 'unsupported' error arising from this on the second-made level on Fedora (does this happen on MacOS?)
 			SDL_SetRelativeMouseMode(mouse_should_be_visible ? SDL_FALSE : SDL_TRUE);
 		}
 
@@ -202,9 +208,9 @@ static void loop_application(const Screen* const screen, const WindowConfig* con
 
 void make_application(
 	const WindowConfig* const config,
-	bool (*const drawer) (void* const, const Event* const),
 	void* (*const init) (const WindowConfig* const),
-	void (*const deinit) (void* const)) {
+	void (*const deinit) (void* const),
+	const drawer_t drawer) {
 
 	const Screen screen = init_screen(config);
 	void* const app_context = init(config);
