@@ -209,6 +209,11 @@ void write_primitive_to_uniform_buffer(const UniformBuffer* const buffer,
 
 	byte* dest;
 	get_subvar_metadata(buffer, subvar_name, &dest, NULL, NULL, NULL);
+
+	/* Zeroing out the dest the 32 bits with 0, otherwise the
+	primitive will be partially unitialized GPU-side. */
+	if (size < sizeof(uint32_t)) *(uint32_t*) dest = 0u;
+
 	memcpy(dest, primitive, size);
 }
 
