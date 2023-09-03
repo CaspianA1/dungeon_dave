@@ -335,6 +335,7 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	}
 }
 
+// TODO: make this work, and use it
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	const Drawable* const drawable = &ws -> drawable;
 
