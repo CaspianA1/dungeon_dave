@@ -2,6 +2,7 @@
 
 ////////// Constants
 
+// TODO: make this an input in some type of file like `num_cascades.glsl`
 const uint max_num_trace_iters = 2048u;
 
 ////////// Outputs
