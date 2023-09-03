@@ -456,7 +456,7 @@ void draw_sectors(const SectorContext* const sector_context, const Camera* const
 		// Running a depth prepass
 		use_shader(sector_context -> depth_prepass_shader);
 
-		 // No color buffer writes
+		// No color buffer writes
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 			glDrawArrays(GL_TRIANGLES, start_vertex, num_vertices);
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
