@@ -57,6 +57,7 @@ vec4 calculate_lighting(
 
 	//////////
 
+	// TODO: reuse this in `billboard_depth.frag`
 	const float almost_zero = 0.0001f;
 	const vec3 dielectric_F0 = vec3(0.04f);
 
