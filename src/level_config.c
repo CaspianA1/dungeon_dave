@@ -43,7 +43,7 @@ MaterialsTexture init_materials_texture(const Dict* const all_materials, const L
 	material_index_t* const weapon_sprite_material_index) {
 
 	////////// Variable initialization
-	
+
 	const byte num_sector_face_textures = (byte) sector_face_texture_paths -> length;
 	const texture_id_t num_still_billboard_texture_paths = (texture_id_t) still_billboard_texture_paths -> length;
 
