@@ -7,6 +7,11 @@
 - Allow for an option to set the game's master volume
 - Tying audio to billboards will be trickier later on, but for now, tie sounds to when animated billboards' cycles start
 - Maybe use sound handles, instead of strings, as audio keys (not as much use for `Dict`, then)
+
+- Fix this OpenAL error that happens at startup when there's no title screen:
+[ALSOFT] (WW) Error generated on context 0x7fa46001e200, code 0xa003, "Listener velocity out of range"
+[ALSOFT] (WW) Error generated on context 0x7fa46001e200, code 0xa003, "Value out of range"
+[ALSOFT] (WW) Error generated on context 0x7fa46001e200, code 0xa003, "Value out of range
 */
 
 //////////
