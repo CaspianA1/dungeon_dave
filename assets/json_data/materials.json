@@ -35,6 +35,7 @@
 	"spritesheets/torch_2.bmp": [1.0, 0.75, 1.0],
 	"spritesheets/fireball_travel.bmp": [0.4, 0.4, 0.7],
 	"spritesheets/rolling_rock.bmp": [0.1, 0.2, 0.35],
+	"spritesheets/numbers.bmp": [0.8, 0.1, 0.2],
 
 	"spritesheets/enemies/eddie_attack.bmp": [0.5, 0.7, 1.0],
 	"spritesheets/enemies/trooper_idle.bmp": [0.3, 0.7, 1.0],
