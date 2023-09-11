@@ -78,7 +78,7 @@ MaterialsTexture init_materials_texture(const Dict* const all_materials, const L
 		const texture_id_t billboard_texture_id = billboard -> texture_id;
 
 		////////// Finding the texture path and the dest material index (for the output list) for the current billboard
-	
+
 		const GLchar* texture_path = NULL;
 		material_index_t dest_material_index = num_sector_face_textures;
 
@@ -131,7 +131,7 @@ MaterialsTexture init_materials_texture(const Dict* const all_materials, const L
 
 	copy_matching_material_to_dest_materials(weapon_sprite_animation_layout -> spritesheet_path,
 		all_materials, material_properties_mapping, *weapon_sprite_material_index);
-	
+
 	////////// Making the materials texture buffer
 
 	deinit_gpu_buffer_memory_mapping(TexBuffer);
@@ -142,7 +142,6 @@ MaterialsTexture init_materials_texture(const Dict* const all_materials, const L
 	glTexBuffer(TexBuffer, OPENGL_MATERIALS_MAP_INTERNAL_PIXEL_FORMAT, material_properties_buffer);
 
 	//////////
-
 
 	return (MaterialsTexture) {material_properties_buffer, materials_texture};
 }
