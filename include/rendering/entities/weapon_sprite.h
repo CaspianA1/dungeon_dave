@@ -13,10 +13,9 @@
 #include "openal/al.h" // For various OpenAL defs
 
 typedef struct {
-	GLfloat cycle_base_time;
-	const material_index_t material_index;
-	texture_id_t curr_frame;
-	bool activated_weapon_this_tick;
+	GLfloat cycle_start_time;
+	texture_id_t texture_id;
+	bool activated_in_this_tick, is_currently_being_animated;
 	const Animation animation;
 } WeaponSpriteAnimationContext;
 
@@ -65,7 +64,7 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 #define deinit_weapon_sprite(ws) deinit_drawable((ws) -> drawable)
 
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event);
-void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws);
+void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws); // TODO: make this work, and use it
 void draw_weapon_sprite(const WeaponSprite* const ws);
 
 ////////// Sound functions
