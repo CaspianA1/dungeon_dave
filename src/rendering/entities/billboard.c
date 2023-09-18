@@ -189,11 +189,18 @@ void draw_billboards(BillboardContext* const billboard_context, const Camera* co
 ////////// Initialization and deinitialization
 
 static void define_vertex_spec(void) {
-	// TODO: make this easier to read via a macro
-	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), offsetof(Billboard, curr_material_index), MATERIAL_INDEX_TYPENAME);
-	define_vertex_spec_index(true, false, 1, 1, sizeof(Billboard), offsetof(Billboard, curr_texture_id), TEXTURE_ID_TYPENAME);
-	define_vertex_spec_index(true, true, 2, 1, sizeof(Billboard), offsetof(Billboard, scale), GL_FLOAT);
-	define_vertex_spec_index(true, true, 3, 3, sizeof(Billboard), offsetof(Billboard, pos), GL_FLOAT);
+	#define DEFINE_VERTEX_SPEC_INDEX(treat_vertices_as_floats, index,\
+		num_components, billboard_field_name, gl_component_typename)\
+		\
+		define_vertex_spec_index(true, (treat_vertices_as_floats), (index), (num_components),\
+			sizeof(Billboard), offsetof(Billboard, billboard_field_name), gl_component_typename)
+
+	DEFINE_VERTEX_SPEC_INDEX(false, 0, 1, curr_material_index, MATERIAL_INDEX_TYPENAME);
+	DEFINE_VERTEX_SPEC_INDEX(false, 1, 1, curr_texture_id, TEXTURE_ID_TYPENAME);
+	DEFINE_VERTEX_SPEC_INDEX(true, 2, 1, scale, GL_FLOAT);
+	DEFINE_VERTEX_SPEC_INDEX(true, 3, 3, pos, GL_FLOAT);
+
+	#undef DEFINE_VERTEX_SPEC_INDEX
 }
 
 // TODO: avoid passing in the num animation layouts (it equals the num billboard animations)
