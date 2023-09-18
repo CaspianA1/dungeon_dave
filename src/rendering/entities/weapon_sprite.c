@@ -40,26 +40,26 @@ TODO: do a depth prepass for the weapon sprite (and perhaps the rest of the geom
 //////////
 
 static void update_weapon_sprite_animation(WeaponSpriteAnimationContext* const animation_context, const Event* const event) {
-	texture_id_t curr_frame = animation_context -> curr_frame;
+	GLfloat* const cycle_start_time = &animation_context -> cycle_start_time;
+	texture_id_t* const texture_id = &animation_context -> texture_id;
 	const GLfloat curr_time_secs = event -> curr_time_secs;
 
-	animation_context -> activated_weapon_this_tick = false;
+	bool* const is_currently_being_animated = &animation_context -> is_currently_being_animated;
+	animation_context -> activated_in_this_tick = false;
 
-	if (curr_frame == 0) {
-		if (CHECK_BITMASK(event -> movement_bits, BIT_USE_WEAPON)) {
-			animation_context -> cycle_base_time = curr_time_secs;
-			animation_context -> activated_weapon_this_tick = true;
-			curr_frame++;
-		}
+	if (!*is_currently_being_animated && CHECK_BITMASK(event -> movement_bits, BIT_USE_WEAPON)) {
+		animation_context -> activated_in_this_tick = true;
+		*is_currently_being_animated = true;
+		*cycle_start_time = curr_time_secs;
 	}
 
-	else update_animation_information(
-		curr_time_secs,
-		animation_context -> cycle_base_time,
-		animation_context -> animation, &curr_frame
-	);
-
-	animation_context -> curr_frame = curr_frame;
+	if (*is_currently_being_animated)
+		*is_currently_being_animated =
+			!update_animation_information(curr_time_secs,
+				animation_context -> animation,
+				&animation_context -> cycle_start_time,
+				texture_id
+			);
 }
 
 ////////// This part concerns the mapping from weapon sway -> screen corners -> world corners -> rotated world corners
@@ -210,7 +210,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 		const GLuint shader = drawable -> shader;
 
 		INIT_UNIFORM_VALUE(weapon_sprite_material_index, shader, 1ui,
-			typed_params.weapon_sprite -> animation_context.material_index);
+			typed_params.weapon_sprite -> animation_context.animation.material_index);
 
 		INIT_UNIFORM(frame_index, shader);
 		INIT_UNIFORM(world_corners, shader);
@@ -224,7 +224,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	mat3 tbn;
 	get_quad_tbn_matrix(world_corners, tbn);
 
-	UPDATE_UNIFORM(frame_index, 1ui, typed_params.weapon_sprite -> animation_context.curr_frame);
+	UPDATE_UNIFORM(frame_index, 1ui, typed_params.weapon_sprite -> animation_context.texture_id);
 	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
 	UPDATE_UNIFORM(tbn, Matrix3fv, 1, GL_FALSE, (GLfloat*) tbn);
 }
@@ -271,8 +271,11 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 		),
 
 		.animation_context = {
-			.cycle_base_time = 0.0f, .material_index = material_index, .curr_frame = 0,
+			.cycle_start_time = 0.0f, .texture_id = 0,
+			.activated_in_this_tick = false, .is_currently_being_animated = false,
+
 			.animation = {
+				.material_index = material_index,
 				.texture_id_range = {.start = 0, .end = animation_layout -> total_frames},
 				.secs_for_frame = animation_layout -> secs_for_frame
 			}
@@ -335,7 +338,6 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	}
 }
 
-// TODO: make this work, and use it
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	const Drawable* const drawable = &ws -> drawable;
 
@@ -356,8 +358,9 @@ void draw_weapon_sprite(const WeaponSprite* const ws) {
 ////////// Sound functions
 
 bool weapon_sound_activator(const void* const data) {
-	// TODO: put the `activated_weapon_this_tick` thing in the `Animation` struct
-	return ((WeaponSprite*) data) -> animation_context.activated_weapon_this_tick;
+	/* TODO: maybe put the `activated_in_this_tick` variable in the `Animation`
+	struct (if that's needed for other non-weapon-sprite objects) */
+	return ((WeaponSprite*) data) -> animation_context.activated_in_this_tick;
 }
 
 void weapon_sound_updater(const void* const data, const ALuint al_source) {

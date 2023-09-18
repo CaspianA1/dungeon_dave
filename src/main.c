@@ -8,6 +8,7 @@
 #include "utils/json.h" // For various JSON defs
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
+// TODO: instead of passing in a window config to this or the drawer, infer the OpenGL major-minor version with `glGetIntegerv`
 static void* main_init_with_path(const WindowConfig* const window_config, const GLchar* const level_path) {
 	////////// Printing library info
 
@@ -45,7 +46,9 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 
 	1. A function from each object interface will load an init object given a base key in the level struct.
 		Only basic validation happens here; i.e. validation based around the value ranges required for fitting
-		each number's value range into each struct member's type.
+		each number's value range into each struct member's type. Basically, this step will just create a valid struct
+		given some JSON, and do a series of null and range checks. TODO: see if this is possible to automate somehow
+		(or at least just a little).
 
 	2. That init object will then passed to the initializer.
 	3. Specific validation then happens in that initializer.
@@ -240,6 +243,7 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 		const texture_id_t total_frames = layout -> total_frames;
 
 		billboard_animations[i] = (Animation) {
+			// The material index is set in `init_materials_texture`
 			.texture_id_range = {next_animated_frame_start, next_animated_frame_start + total_frames - 1},
 			.secs_for_frame = layout -> secs_for_frame
 		};
@@ -294,7 +298,7 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 					case 0: { // Handling the texture or animation id
 						texture_id_t
 							texture_id_or_animation_index = get_u16_from_json(named_billboard_field),
-							*const billboard_texture_id = &billboard -> texture_id;
+							*const billboard_texture_id = &billboard -> curr_texture_id;
 
 						const GLchar* const error_format_string = "%s billboard at index %u refers to an out-of-bounds %s of index %u";
 
@@ -316,8 +320,10 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 
 								*billboard_texture_id = billboard_animations[texture_id_or_animation_index].texture_id_range.start;
 
-								billboard_animation_instances[animation_instance_index] =
-									(BillboardAnimationInstance) {billboard_index, texture_id_or_animation_index};
+								// TODO: what should I put for `cycle_start_time`?
+								billboard_animation_instances[animation_instance_index] = (BillboardAnimationInstance) {
+									billboard_index, texture_id_or_animation_index, 0.0f, false
+								};
 
 								break;
 						}
@@ -447,12 +453,14 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 
 	material_index_t weapon_sprite_material_index;
 
+	// TODO: make this easier to read via a macro
 	const MaterialsTexture materials_texture = init_materials_texture(
 		&all_materials,
-		&(List) {(void*) sector_face_texture_paths, 	sizeof(*sector_face_texture_paths), num_sector_face_texture_paths, 0},
+		&(List) {(void*) sector_face_texture_paths,     sizeof(*sector_face_texture_paths), num_sector_face_texture_paths, 0},
 		&(List) {(void*) still_billboard_texture_paths, sizeof(*still_billboard_texture_paths), num_still_billboard_texture_paths, 0},
-		&(List) {(void*) billboard_animation_layouts, 	sizeof(*billboard_animation_layouts), num_billboard_animations, 0},
-		&(List) {(void*) billboards, 					sizeof(*billboards), num_billboards, 0},
+		&(List) {(void*) billboard_animation_layouts,   sizeof(*billboard_animation_layouts), num_billboard_animations, 0},
+		&(List) {(void*) billboard_animations,          sizeof(*billboard_animations), num_billboard_animations, 0},
+		&(List) {(void*) billboards,                    sizeof(*billboards), num_billboards, 0},
 		&weapon_sprite_config.animation_layout, &weapon_sprite_material_index
 	);
 

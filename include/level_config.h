@@ -27,7 +27,7 @@ typedef struct {
 
 MaterialsTexture init_materials_texture(const Dict* const all_materials, const List* const sector_face_texture_paths,
 	const List* const still_billboard_texture_paths, const List* const billboard_animation_layouts,
-	List* const billboards, const AnimationLayout* const weapon_sprite_animation_layout,
+	List* const bllboard_animations, List* const billboards, const AnimationLayout* const weapon_sprite_animation_layout,
 	material_index_t* const weapon_sprite_material_index);
 
 void deinit_materials_texture(const MaterialsTexture* const materials_texture);

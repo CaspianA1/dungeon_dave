@@ -51,9 +51,10 @@ typedef struct {
 	List distance_sort_refs, billboards, animations, animation_instances;
 } BillboardContext;
 
+// Note that all of these fields are subject to change.
 typedef struct {
-	material_index_t material_index;
-	texture_id_t texture_id;
+	material_index_t curr_material_index;
+	texture_id_t curr_texture_id;
 	GLfloat scale;
 	vec3 pos;
 } Billboard;
@@ -62,11 +63,20 @@ typedef struct {
 	/* The billboard index is associated with a BillboardAnimationInstance
 	and not an Animation because there's one animation instance per animated billboard. */
 	billboard_index_t billboard_index, animation_index;
+	GLfloat cycle_start_time;
+	bool just_finished_cycle;
 } BillboardAnimationInstance;
 
 ////////// Excluded: compare_billboard_sort_refs, sort_billboard_refs_backwards, sort_billboards_by_dist_to_camera, define_vertex_spec
 
 void update_billboard_context(const BillboardContext* const billboard_context, const GLfloat curr_time_secs);
+
+/* This returns if the billboard animation was updated (which can
+only happen if the current animation just finished its cycle).
+TODO: use this for switching player + enemy animations. */
+bool update_billboard_animation(const BillboardContext* const billboard_context,
+	const GLfloat curr_time_secs, const billboard_index_t billboard_index_to_update,
+	const billboard_index_t new_animation_index);
 
 void draw_billboards_to_shadow_context(const BillboardContext* const billboard_context);
 void draw_billboards(BillboardContext* const billboard_context, const Camera* const camera);

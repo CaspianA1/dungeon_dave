@@ -29,24 +29,74 @@ typedef struct {
 // This just updates the billboard animation instances at the moment
 void update_billboard_context(const BillboardContext* const billboard_context, const GLfloat curr_time_secs) {
 	const List* const animation_instances = &billboard_context -> animation_instances;
-
-	BillboardAnimationInstance* const animation_instance_data = animation_instances -> data;
 	const Animation* const animation_data = billboard_context -> animations.data;
 	Billboard* const billboard_data = billboard_context -> billboards.data;
 
-	/* Billboard animations are constantly looping, so their
-	cycle base time is for when this function is first called */
-	static GLfloat cycle_base_time;
-	ON_FIRST_CALL(cycle_base_time = curr_time_secs;);
-
-	for (billboard_index_t i = 0; i < animation_instances -> length; i++) {
-		BillboardAnimationInstance* const animation_instance = animation_instance_data + i;
-
-		update_animation_information(
-			curr_time_secs, cycle_base_time,
+	LIST_FOR_EACH(animation_instances, BillboardAnimationInstance, animation_instance,
+		animation_instance -> just_finished_cycle = update_animation_information(
+			curr_time_secs,
 			animation_data[animation_instance -> animation_index],
-			&billboard_data[animation_instance -> billboard_index].texture_id);
+			&animation_instance -> cycle_start_time,
+			&billboard_data[animation_instance -> billboard_index].curr_texture_id);
+	);
+}
+
+/* TODO:
+- Later on, if needed, make this a function instead that just passes in an animation instance
+- Perhaps make it possible to queue billboard animations (so keep a list of animations to fulfill in the instance) */
+bool update_billboard_animation(const BillboardContext* const billboard_context,
+	const GLfloat curr_time_secs, const billboard_index_t billboard_index_to_update,
+	const billboard_index_t new_animation_index) {
+
+	////////// Checking for errors
+
+	const List
+		*const billboards = &billboard_context -> billboards,
+		*const animations = &billboard_context -> animations,
+		*const animation_instances = &billboard_context -> animation_instances;
+
+	const GLchar* error_type = NULL;
+	billboard_index_t out_of_bounds_index;
+
+	if (billboard_index_to_update >= billboards -> length) {
+		error_type = "Billboard";
+		out_of_bounds_index = billboard_index_to_update;
 	}
+	else if (new_animation_index >= animations -> length) {
+		error_type = "Animation";
+		out_of_bounds_index = new_animation_index;
+	}
+
+	if (error_type != NULL) FAIL(UpdateBillboard,
+		"%s index of %u provided to `update_billboard_animation` is out of bounds",
+		error_type, out_of_bounds_index);
+
+	//////////
+
+	// For each animation instance
+	LIST_FOR_EACH(animation_instances, BillboardAnimationInstance, animation_instance,
+		const billboard_index_t billboard_index = animation_instance -> billboard_index;
+
+		// If the animation instance's billboard index matches the given one
+		if (billboard_index == billboard_index_to_update) {
+			const billboard_index_t orig_animation_index = animation_instance -> animation_index;
+
+			// Only doing the updating step if the animation just completed, and the animation index is not the same
+			if (animation_instance -> just_finished_cycle && orig_animation_index != new_animation_index) {
+				Billboard* const billboard_to_update = ptr_to_list_index(billboards, billboard_index);
+				const Animation* const new_animation = ptr_to_list_index(animations, new_animation_index);
+
+				billboard_to_update -> curr_material_index = new_animation -> material_index;
+				billboard_to_update -> curr_texture_id = new_animation -> texture_id_range.start;
+				animation_instance -> animation_index = new_animation_index;
+				animation_instance -> cycle_start_time = curr_time_secs;
+				animation_instance -> just_finished_cycle = false;
+				return true;
+			}
+		}
+	);
+
+	return false;
 }
 
 ////////// This part concerns the sorting of billboard indices from back to front, and rendering
@@ -139,8 +189,9 @@ void draw_billboards(BillboardContext* const billboard_context, const Camera* co
 ////////// Initialization and deinitialization
 
 static void define_vertex_spec(void) {
-	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), offsetof(Billboard, material_index), MATERIAL_INDEX_TYPENAME);
-	define_vertex_spec_index(true, false, 1, 1, sizeof(Billboard), offsetof(Billboard, texture_id), TEXTURE_ID_TYPENAME);
+	// TODO: make this easier to read via a macro
+	define_vertex_spec_index(true, false, 0, 1, sizeof(Billboard), offsetof(Billboard, curr_material_index), MATERIAL_INDEX_TYPENAME);
+	define_vertex_spec_index(true, false, 1, 1, sizeof(Billboard), offsetof(Billboard, curr_texture_id), TEXTURE_ID_TYPENAME);
 	define_vertex_spec_index(true, true, 2, 1, sizeof(Billboard), offsetof(Billboard, scale), GL_FLOAT);
 	define_vertex_spec_index(true, true, 3, 3, sizeof(Billboard), offsetof(Billboard, pos), GL_FLOAT);
 }

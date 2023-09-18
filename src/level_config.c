@@ -21,7 +21,7 @@ static void copy_matching_material_to_dest_materials(const GLchar* const texture
 `still_billboard_texture_paths` -> GLchar*
 `billboard_animation_layouts` -> AnimationLayout
 
-Note: this mutates the billboard list by setting each billboard's material index.
+Note: this mutates the billboard and billboard animation lists, by setting each ones' material indices.
 
 This function returns a 1D texture of material lighting properties (each property is a `packed_material_lighting_properties_t`).
 This texture is indexed by a material index when shading world-shaded objects.
@@ -39,7 +39,7 @@ Let S = the number of sector face textures,
 - For a weapon sprite, the material index equals S + B + V + its animation layout id among the other weapon sprites. */
 MaterialsTexture init_materials_texture(const Dict* const all_materials, const List* const sector_face_texture_paths,
 	const List* const still_billboard_texture_paths, const List* const billboard_animation_layouts,
-	List* const billboards, const AnimationLayout* const weapon_sprite_animation_layout,
+	List* const billboard_animations, List* const billboards, const AnimationLayout* const weapon_sprite_animation_layout,
 	material_index_t* const weapon_sprite_material_index) {
 
 	////////// Variable initialization
@@ -75,7 +75,7 @@ MaterialsTexture init_materials_texture(const Dict* const all_materials, const L
 
 	LIST_FOR_EACH(billboards, Billboard, billboard,
 		// TODO: rename `texture_id` to `texture_index` (or rename all to something with `id`)
-		const texture_id_t billboard_texture_id = billboard -> texture_id;
+		const texture_id_t billboard_texture_id = billboard -> curr_texture_id;
 
 		////////// Finding the texture path and the dest material index (for the output list) for the current billboard
 
@@ -98,11 +98,12 @@ MaterialsTexture init_materials_texture(const Dict* const all_materials, const L
 				const texture_id_t next_frame_index_start = frame_index_start + animation_layout -> total_frames;
 
 				if (billboard_texture_id >= frame_index_start && billboard_texture_id < next_frame_index_start) {
-					const billboard_index_t layout_index = (billboard_index_t) (animation_layout -
+					const billboard_index_t animation_index = (billboard_index_t) (animation_layout -
 						(AnimationLayout*) (billboard_animation_layouts -> data));
 
 					texture_path = animation_layout -> spritesheet_path;
-					dest_material_index += num_still_billboard_texture_paths + layout_index;
+					dest_material_index += num_still_billboard_texture_paths + animation_index;
+					((Animation*) ptr_to_list_index(billboard_animations, animation_index)) -> material_index = dest_material_index;
 					break;
 				}
 				frame_index_start = next_frame_index_start;
@@ -111,7 +112,7 @@ MaterialsTexture init_materials_texture(const Dict* const all_materials, const L
 			// Note: the texture path is not checked for nullness here, since the billboards were already pre-validated
 		}
 
-		billboard -> material_index = dest_material_index;
+		billboard -> curr_material_index = dest_material_index;
 
 		const bool skipping_material_lookup_and_copy =
 			last_dest_material_index == dest_material_index &&

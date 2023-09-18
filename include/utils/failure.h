@@ -26,6 +26,7 @@ typedef enum {
 	ReadFromJSON,
 
 	MakeBillboard,
+	UpdateBillboard,
 
 	CreateShader,
 	ParseIncludeDirectiveInShader,
