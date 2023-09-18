@@ -453,16 +453,21 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 
 	material_index_t weapon_sprite_material_index;
 
-	// TODO: make this easier to read via a macro
+	#define BUILD_TEMP_PTR_TO_LIST(contents_name) &(List) {(void*) (contents_name), sizeof(*contents_name), num_##contents_name, 0}
+
+	const billboard_index_t num_billboard_animation_layouts = num_billboard_animations;
+
 	const MaterialsTexture materials_texture = init_materials_texture(
 		&all_materials,
-		&(List) {(void*) sector_face_texture_paths,     sizeof(*sector_face_texture_paths), num_sector_face_texture_paths, 0},
-		&(List) {(void*) still_billboard_texture_paths, sizeof(*still_billboard_texture_paths), num_still_billboard_texture_paths, 0},
-		&(List) {(void*) billboard_animation_layouts,   sizeof(*billboard_animation_layouts), num_billboard_animations, 0},
-		&(List) {(void*) billboard_animations,          sizeof(*billboard_animations), num_billboard_animations, 0},
-		&(List) {(void*) billboards,                    sizeof(*billboards), num_billboards, 0},
+		BUILD_TEMP_PTR_TO_LIST(sector_face_texture_paths),
+		BUILD_TEMP_PTR_TO_LIST(still_billboard_texture_paths),
+		BUILD_TEMP_PTR_TO_LIST(billboard_animation_layouts),
+		BUILD_TEMP_PTR_TO_LIST(billboard_animations),
+		BUILD_TEMP_PTR_TO_LIST(billboards),
 		&weapon_sprite_config.animation_layout, &weapon_sprite_material_index
 	);
+
+	#undef BUILD_TEMP_PTR_TO_LIST
 
 	deinit_dict(&all_materials);
 	deinit_json(WITH_JSON_OBJ_SUFFIX(materials));
