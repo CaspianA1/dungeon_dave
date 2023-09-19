@@ -36,7 +36,7 @@ static Screen init_screen(const WindowConfig* const config) {
 	const uint16_t* const window_size = config -> window_size;
 	const uint16_t window_w = window_size[0], window_h = window_size[1];
 
-	// TODO: force high-DPI if it's available
+	// TODO: force high-DPI if it's available (or make it a possible `WindowConfig` option)
 
 	Screen screen = {
 		.window = SDL_CreateWindow(config -> app_name,
@@ -181,7 +181,7 @@ static void loop_application(
 		////////// Getting the next event, drawing the screen, and swapping the framebuffer
 
 		const Event event = get_next_event(time_before_tick_ms, secs_elapsed_between_frames, keys);
-		const bool mouse_should_be_visible = drawer(app_context, &event, config);
+		const bool mouse_should_be_visible = drawer(app_context, &event);
 
 		if (mouse_should_be_visible != mouse_is_currently_visible) {
 			mouse_is_currently_visible = mouse_should_be_visible;
@@ -208,12 +208,12 @@ static void loop_application(
 
 void make_application(
 	const WindowConfig* const config,
-	void* (*const init) (const WindowConfig* const),
+	void* (*const init) (void),
 	void (*const deinit) (void* const),
 	const drawer_t drawer) {
 
 	const Screen screen = init_screen(config);
-	void* const app_context = init(config);
+	void* const app_context = init();
 
 	loop_application(&screen, config, app_context, drawer);
 	deinit(app_context);

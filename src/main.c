@@ -8,8 +8,7 @@
 #include "utils/json.h" // For various JSON defs
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
-// TODO: instead of passing in a window config to this or the drawer, infer the OpenGL major-minor version with `glGetIntegerv`
-static void* main_init_with_path(const WindowConfig* const window_config, const GLchar* const level_path) {
+static void* main_init_with_path(const GLchar* const level_path) {
 	////////// Printing library info
 
 	AudioContext audio_context = init_audio_context();
@@ -516,9 +515,7 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 
 	////////// Specifying the cascade count
 
-	specify_cascade_count_before_any_shader_compilation(
-		window_config -> opengl_major_minor_version,
-		level_rendering_config.shadow_mapping.cascaded_shadow_config.num_cascades);
+	specify_cascade_count_before_any_shader_compilation(level_rendering_config.shadow_mapping.cascaded_shadow_config.num_cascades);
 
 	////////// Defining the camera config
 
@@ -734,8 +731,8 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 	return level_context_on_heap;
 }
 
-static void* main_init(const WindowConfig* const window_config) {
-	return main_init_with_path(window_config, "json_data/levels/palace.json");
+static void* main_init(void) {
+	return main_init_with_path("json_data/levels/palace.json");
 }
 
 static void main_deinit(void* const app_context) {
@@ -759,7 +756,7 @@ static void main_deinit(void* const app_context) {
 	dealloc(level_context);
 }
 
-static bool main_drawer(void* const app_context, const Event* const event, const WindowConfig* const window_config) {
+static bool main_drawer(void* const app_context, const Event* const event) {
 	////////// Setting the wireframe mode
 
 	const Uint8* const keys = event -> keys;

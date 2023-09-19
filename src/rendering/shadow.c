@@ -95,9 +95,7 @@ in `num_cascades.geom`. This is a macro, and not a uniform, since the shadow
 geometry shader must clone the level geometry a fixed number of times
 (specified at compile time) for different layered rendering passes per each sub-frustum.
 So, before all shader compilation, this function writes the number of cascades to `num_cascades.geom.` */
-void specify_cascade_count_before_any_shader_compilation(
-	const byte opengl_major_minor_version[2], const byte num_cascades) {
-
+void specify_cascade_count_before_any_shader_compilation(const byte num_cascades) {
 	////////// Input validation
 
 	GLint max_cascades;
@@ -109,12 +107,16 @@ void specify_cascade_count_before_any_shader_compilation(
 
 	////////// Writing to disk
 
+	GLint opengl_major_minor_version[2];
+	glGetIntegerv(GL_MAJOR_VERSION, opengl_major_minor_version);
+	glGetIntegerv(GL_MINOR_VERSION, opengl_major_minor_version + 1);
+
 	FILE* const file = open_file_safely("shaders/shadow/num_cascades.glsl", "w");
 
 	const GLchar* const file_description = "This file is written to before any other shaders include it";
 
 	fprintf(file,
-		"#version %hhu%hhu0 core\n\n// %s\n"
+		"#version %d%d0 core\n\n// %s\n"
 		"#define NUM_CASCADES %hhuu\n"
 		"#define NUM_CASCADE_SPLITS %hhuu\n",
 

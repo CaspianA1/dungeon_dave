@@ -44,8 +44,7 @@ typedef struct {
 
 // Excluded: get_light_view_projection
 
-void specify_cascade_count_before_any_shader_compilation(
-	const byte opengl_major_minor_version[2], const byte num_cascades);
+void specify_cascade_count_before_any_shader_compilation(const byte num_cascades);
 
 CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* const config, const GLfloat far_clip_dist);
 void deinit_shadow_context(const CascadedShadowContext* const shadow_context);

@@ -22,11 +22,11 @@ typedef struct {
 
 // Excluded: init_screen, deinit_screen, resize_window_if_needed, application_should_exit, loop_application
 
-typedef bool (*const drawer_t) (void* const, const Event* const, const WindowConfig* const);
+typedef bool (*const drawer_t) (void* const, const Event* const);
 
 void make_application(
 	const WindowConfig* const config,
-	void* (*const init) (const WindowConfig* const),
+	void* (*const init) (void),
 	void (*const deinit) (void* const),
 	const drawer_t drawer);
 
