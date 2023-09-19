@@ -50,7 +50,6 @@ typedef struct {
 
 // TODO: make other functions like this per each key game object
 TitleScreen init_title_screen_from_json(const GLchar* const json_path);
-
 TitleScreen init_title_screen(const TitleScreenConfig* const config);
 void deinit_title_screen(const TitleScreen* const title_screen);
 
