@@ -10,44 +10,44 @@
 #include "event.h" // For `Event`
 
 typedef struct {
-	const struct {const GLchar *const still, *const scrolling;} paths;
-	const struct {const TextureFilterMode still, scrolling;} mag_filters;
-	const NormalMapConfig scrolling_normal_map_config;
-} TitleScreenTextureConfig;
-
-typedef struct {
+	const GLchar* const texture_path;
+	const TextureFilterMode mag_filter; // TODO: make this a boolean flag for using bilinear filtering or not
 	const GLfloat ambient_strength;
 	const vec3 light_color, material_properties;
-} TitleScreenLayerConfig;
+} TitleScreenPerLayerConfig;
 
 typedef struct {
-	const byte texture_transition_immediacy_factor;
+	const TitleScreenPerLayerConfig per_layer[2];
 
-	const GLfloat
-		scrolling_vert_squish_ratio,
-		scrolling_bilinear_albedo_percent, scrolling_bilinear_normal_percent,
-		tone_mapping_max_white, noise_granularity,
-		light_dist_from_screen_plane, secs_per_scroll_cycle;
+	const struct {
+		const GLfloat vert_squish_ratio;
+		const struct {const GLfloat albedo, normal;} bilinear_percents;
+		const NormalMapConfig normal_map_config;
+	} scrolling;
 
-	const struct {const GLfloat secs_per, logo_transitions_per;} light_spin_cycle;
-	const TitleScreenLayerConfig still_and_scrolling_layer_configs[2];
-} TitleScreenRenderingConfig;
+	const struct {
+		const byte texture_transition_immediacy_factor;
 
-//////////
+		const GLfloat
+			tone_mapping_max_white, noise_granularity,
+			light_dist_from_screen_plane, secs_per_scroll_cycle;
+
+		const struct {
+			const GLfloat secs_per, logo_transitions_per;
+		} light_spin_cycle;
+	} shared;
+} TitleScreenConfig;
 
 typedef struct {
 	bool active;
 	const Drawable drawable;
 	const GLuint still_albedo_texture;
-	const TitleScreenRenderingConfig rendering_config;
+	const TitleScreenConfig config;
 } TitleScreen;
 
 // Excluded: update_uniforms
 
-TitleScreen init_title_screen(
-	const TitleScreenTextureConfig* const texture_config,
-	const TitleScreenRenderingConfig* const rendering_config);
-
+TitleScreen init_title_screen(const TitleScreenConfig* const config);
 void deinit_title_screen(const TitleScreen* const title_screen);
 
 // This returns if the title screen is active

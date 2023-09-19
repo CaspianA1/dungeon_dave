@@ -8,7 +8,7 @@
 ////////// Uniform updating
 
 typedef struct {
-	const TitleScreenRenderingConfig* const config;
+	const TitleScreenConfig* const config;
 	const GLfloat curr_time_secs;
 } UniformUpdaterParams;
 
@@ -33,21 +33,25 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 	const GLfloat relative_time_secs = typed_params.curr_time_secs - base_time_secs;
 
 	const GLfloat // Modding the hori scroll with 1 to avoid floating-point imprecision errors for large time values
-		palace_city_hori_scroll = fmodf(relative_time_secs / typed_params.config -> secs_per_scroll_cycle, 1.0f),
-		spin_seed = relative_time_secs * TWO_PI / typed_params.config -> light_spin_cycle.secs_per;
+		palace_city_hori_scroll = fmodf(relative_time_secs / typed_params.config -> shared.secs_per_scroll_cycle, 1.0f),
+		spin_seed = relative_time_secs * TWO_PI / typed_params.config -> shared.light_spin_cycle.secs_per;
 
 	/* TODO: if used, make this focus on different quadrants each time
 	(and make sure that `secs_per` is still followed) */
 	// spin_seed += tanf(sinf(spin_seed));
 
-	GLfloat texture_transition_weight = cosf(spin_seed * typed_params.config -> light_spin_cycle.logo_transitions_per) * 0.5f + 0.5f;
-	for (byte i = 0; i < typed_params.config -> texture_transition_immediacy_factor; i++) texture_transition_weight = glm_smooth(texture_transition_weight);
+	GLfloat texture_transition_weight = cosf(
+		spin_seed * typed_params.config -> shared.light_spin_cycle.logo_transitions_per
+	) * 0.5f + 0.5f;
+
+	for (byte i = 0; i < typed_params.config -> shared.texture_transition_immediacy_factor; i++)
+		texture_transition_weight = glm_smooth(texture_transition_weight);
 
 	//////////
 
 	UPDATE_UNIFORM(scrolling_light_pos_tangent_space, 3fv, 1, (vec3) {
 		sinf(spin_seed), cosf(spin_seed),
-		typed_params.config -> light_dist_from_screen_plane
+		typed_params.config -> shared.light_dist_from_screen_plane
 	});
 
 	UPDATE_UNIFORM(texture_transition_weight, 1f, texture_transition_weight);
@@ -56,17 +60,15 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 ////////// Initialization, deinitialization, and rendering
 
-TitleScreen init_title_screen(
-	const TitleScreenTextureConfig* const texture_config,
-	const TitleScreenRenderingConfig* const rendering_config) {
-
-	const TextureType
-		still_texture_type = TexPlain,
-		scrolling_texture_type = TexSet;
+TitleScreen init_title_screen(const TitleScreenConfig* const config) {
+	const TextureType still_texture_type = TexPlain, scrolling_texture_type = TexSet;
 
 	////////// Getting the scrolling texture size
 
-	const GLchar* const scrolling_texture_path = texture_config -> paths.scrolling;
+	const TitleScreenPerLayerConfig* const per_layer = config -> per_layer;
+	const TitleScreenPerLayerConfig *const still_layer_config = per_layer, *const scrolling_layer_config = per_layer + 1;
+
+	const GLchar* const scrolling_texture_path = scrolling_layer_config -> texture_path;
 	SDL_Surface* const peek_surface = init_surface(scrolling_texture_path);
 	const GLsizei scrolling_texture_size[2] = {peek_surface -> w, peek_surface -> h};
 	deinit_surface(peek_surface);
@@ -76,7 +78,7 @@ TitleScreen init_title_screen(
 	/* This is only a texture set so that it can work with the shader function
 	`get_albedo_and_normal` (TODO: genericize that one, if possible) */
 	const GLuint scrolling_albedo_texture = init_texture_set(false, TexRepeating,
-		texture_config -> mag_filters.scrolling, TexLinearMipmapped, 1, 0, scrolling_texture_size[0],
+		scrolling_layer_config -> mag_filter, TexLinearMipmapped, 1, 0, scrolling_texture_size[0],
 		scrolling_texture_size[1], (const GLchar*[]) {scrolling_texture_path}, NULL
 	);
 
@@ -85,37 +87,35 @@ TitleScreen init_title_screen(
 
 	const GLuint
 		scrolling_normal_map = init_normal_map_from_albedo_texture(scrolling_albedo_texture,
-			scrolling_texture_type, &texture_config -> scrolling_normal_map_config),
+			scrolling_texture_type, &config -> scrolling.normal_map_config),
 
-		still_albedo_texture = init_plain_texture(texture_config -> paths.still, TexNonRepeating,
-			texture_config -> mag_filters.still, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
+		still_albedo_texture = init_plain_texture(still_layer_config -> texture_path, TexNonRepeating,
+			still_layer_config -> mag_filter, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
 	//////////
 
 	const GLuint shader = init_shader("shaders/title_screen.vert", NULL, "shaders/title_screen.frag", NULL);
 	use_shader(shader);
 
-	INIT_UNIFORM_VALUE(scrolling_texture_vert_squish_ratio, shader, 1f, rendering_config -> scrolling_vert_squish_ratio);
+	INIT_UNIFORM_VALUE(scrolling_texture_vert_squish_ratio, shader, 1f, config -> scrolling.vert_squish_ratio);
 
 	INIT_UNIFORM_VALUE(scrolling_bilinear_percents, shader, 2f,
-		rendering_config -> scrolling_bilinear_albedo_percent,
-		rendering_config -> scrolling_bilinear_normal_percent
+		config -> scrolling.bilinear_percents.albedo,
+		config -> scrolling.bilinear_percents.normal
 	);
 
-	INIT_UNIFORM_VALUE(tone_mapping_max_white, shader, 1f, rendering_config -> tone_mapping_max_white);
-	INIT_UNIFORM_VALUE(noise_granularity, shader, 1f, rendering_config -> noise_granularity);
+	INIT_UNIFORM_VALUE(tone_mapping_max_white, shader, 1f, config -> shared.tone_mapping_max_white);
+	INIT_UNIFORM_VALUE(noise_granularity, shader, 1f, config -> shared.noise_granularity);
 
 	//////////
 
-	enum {num_layers = ARRAY_LENGTH(rendering_config -> still_and_scrolling_layer_configs)};
-
-	const TitleScreenLayerConfig* const still_and_scrolling_layer_configs = rendering_config -> still_and_scrolling_layer_configs;
+	enum {num_layers = ARRAY_LENGTH(config -> per_layer)};
 
 	vec3 still_and_scrolling_light_colors[num_layers];
 	vec4 still_and_scrolling_material_properties_and_ambient_strength[num_layers];
 
 	for (byte i = 0; i < num_layers; i++) {
-		const TitleScreenLayerConfig* const layer_config = still_and_scrolling_layer_configs + i;
+		const TitleScreenPerLayerConfig* const layer_config = per_layer + i;
 
 		glm_vec3_copy((GLfloat*) layer_config -> light_color, still_and_scrolling_light_colors[i]);
 
@@ -124,13 +124,15 @@ TitleScreen init_title_screen(
 		material_properties_dest[3] = layer_config -> ambient_strength;
 	}
 
+	//////////
+
 	INIT_UNIFORM_VALUE(still_and_scrolling_light_colors, shader, 3fv, num_layers,
 		(const GLfloat*) still_and_scrolling_light_colors);
 
 	INIT_UNIFORM_VALUE(still_and_scrolling_material_properties_and_ambient_strength, shader, 4fv, num_layers,
 		(const GLfloat*) still_and_scrolling_material_properties_and_ambient_strength);
 
-	////////////////////////////////////
+	//////////
 
 	use_texture_in_shader(still_albedo_texture, shader, "still_albedo_sampler", still_texture_type, TU_TitleScreenStillAlbedo);
 	use_texture_in_shader(scrolling_albedo_texture, shader, "scrolling_albedo_sampler", scrolling_texture_type, TU_TitleScreenScrollingAlbedo);
@@ -148,7 +150,7 @@ TitleScreen init_title_screen(
 		),
 
 		.still_albedo_texture = still_albedo_texture,
-		.rendering_config = *rendering_config
+		.config = *config
 	};
 }
 
@@ -164,7 +166,7 @@ bool tick_title_screen(TitleScreen* const title_screen, const Event* const event
 	const bool active = title_screen -> active;
 
 	if (active) {
-		const UniformUpdaterParams uniform_updater_params = {&title_screen -> rendering_config, event -> curr_time_secs};
+		const UniformUpdaterParams uniform_updater_params = {&title_screen -> config, event -> curr_time_secs};
 		draw_drawable(title_screen -> drawable, corners_per_quad, 0, &uniform_updater_params, UseShaderPipeline);
 	}
 

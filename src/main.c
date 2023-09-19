@@ -539,38 +539,42 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 
 	////////// Defining the title screen config
 
-	const struct { // TODO: put this in a JSON file meant to define the title screen
-		const TitleScreenTextureConfig texture;
-		const TitleScreenRenderingConfig rendering;
-	} title_screen_config = {
-		.texture = {
-			.paths = {.still = "logo.bmp", .scrolling = "palace_city.bmp"},
-			.mag_filters = {.still = TexNearest, .scrolling = TexLinear},
-			.scrolling_normal_map_config = {.blur_radius = 5, .blur_std_dev = 0.25f, .heightmap_scale = 0.3f, .rescale_factor = 2.0f}
+	// TODO: put this in a JSON file meant to define the title screen
+	const TitleScreenConfig title_screen_config = {
+		.per_layer = {
+			{
+				.texture_path = "logo.bmp",
+				.mag_filter = TexNearest,
+				.ambient_strength = 0.9f,
+				.light_color = GLM_VEC3_ONE_INIT,
+				.material_properties = {0.9f, 0.3f, 0.9f}
+			},
+			{
+				.texture_path = "palace_city.bmp",
+				.mag_filter = TexLinear,
+				.ambient_strength = 0.0f,
+				.light_color = GLM_VEC3_ONE_INIT,
+				.material_properties = {0.1f, 0.4f, 0.5f}
+			}
 		},
 
-		.rendering = {
+		.scrolling = {
+			.vert_squish_ratio = 0.5f,
+			.bilinear_percents = {.albedo = 0.1f, .normal = 0.75f},
+
+			.normal_map_config =  {
+				.blur_radius = 5, .blur_std_dev = 0.25f,
+				.heightmap_scale = 0.3f, .rescale_factor = 2.0f
+			},
+		},
+
+		.shared = {
 			.texture_transition_immediacy_factor = 2,
-			.scrolling_vert_squish_ratio = 0.5f,
-			.scrolling_bilinear_albedo_percent = 0.1f,
-			.scrolling_bilinear_normal_percent = 0.75f,
-			.tone_mapping_max_white = 1.0f, .noise_granularity = 0.002f,
+			.tone_mapping_max_white = 1.0f,
+			.noise_granularity = 0.002f,
 			.light_dist_from_screen_plane = 0.3f,
 			.secs_per_scroll_cycle = 7.0f,
-			.light_spin_cycle = {.secs_per = 5.0f, .logo_transitions_per = 0.5f},
-
-			.still_and_scrolling_layer_configs = {
-				{
-					.ambient_strength = 0.9f,
-					.light_color = GLM_VEC3_ONE_INIT,
-					.material_properties = {0.9f, 0.3f, 0.9f}
-				},
-				{
-					.ambient_strength = 0.0f,
-					.light_color = GLM_VEC3_ONE_INIT,
-					.material_properties = {0.1f, 0.4f, 0.5f}
-				}
-			}
+			.light_spin_cycle = {.secs_per = 5.0f, .logo_transitions_per = 0.5f}
 		}
 	};
 
@@ -632,7 +636,7 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 		.ao_map = init_ao_map(heightmap, max_point_height, &level_rendering_config.ambient_occlusion.compute_config),
 
 		.skybox = init_skybox(&level_rendering_config.skybox_config),
-		.title_screen = init_title_screen(&title_screen_config.texture, &title_screen_config.rendering),
+		.title_screen = init_title_screen(&title_screen_config),
 		.heightmap = heightmap
 	};
 
