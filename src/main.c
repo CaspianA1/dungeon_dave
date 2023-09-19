@@ -284,6 +284,8 @@ static void* main_init_with_path(const GLchar* const level_path) {
 			WITH_JSON_OBJ_SUFFIX(billboards), billboard_categories[category_index]);
 
 		JSON_FOR_EACH(_, billboard_data, category,
+			(void) _;
+
 			enum {num_fields_per_billboard_json = 3};
 			validate_json_array(WITH_JSON_OBJ_SUFFIX(billboard_data), num_fields_per_billboard_json, UINT8_MAX);
 
@@ -399,6 +401,8 @@ static void* main_init_with_path(const GLchar* const level_path) {
 		WITH_JSON_OBJ_SUFFIX(materials)), DV_String, DV_UnsignedInt);
 
 	JSON_FOR_EACH(_, material_data, materials,
+		(void) _;
+
 		vec3 normalized_properties;
 		const byte num_normalized_properties = ARRAY_LENGTH(normalized_properties);
 

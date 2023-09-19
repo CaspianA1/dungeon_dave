@@ -183,6 +183,8 @@ void* read_2D_map_from_json(const cJSON* const json, const buffer_size_t datum_s
 
 		// Initializing row values
 		RAW_JSON_FOR_EACH(_, height, row,
+			(void) _;
+
 			const uint64_t result = (uint64_t) get_validated_json_unsigned_int(height, max_size_for_datum, "a number");
 			memcpy(curr_map_ptr, &result, datum_size);
 			curr_map_ptr += datum_size;
