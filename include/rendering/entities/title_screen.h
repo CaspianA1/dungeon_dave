@@ -11,7 +11,7 @@
 
 typedef struct {
 	const GLchar* const texture_path;
-	const TextureFilterMode mag_filter; // TODO: make this a boolean flag for using bilinear filtering or not
+	const bool use_bilinear_filtering;
 	const GLfloat ambient_strength;
 	const vec3 light_color, material_properties;
 } TitleScreenPerLayerConfig;

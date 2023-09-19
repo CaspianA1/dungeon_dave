@@ -544,14 +544,14 @@ static void* main_init_with_path(const WindowConfig* const window_config, const 
 		.per_layer = {
 			{
 				.texture_path = "logo.bmp",
-				.mag_filter = TexNearest,
+				.use_bilinear_filtering = false,
 				.ambient_strength = 0.9f,
 				.light_color = GLM_VEC3_ONE_INIT,
 				.material_properties = {0.9f, 0.3f, 0.9f}
 			},
 			{
 				.texture_path = "palace_city.bmp",
-				.mag_filter = TexLinear,
+				.use_bilinear_filtering = true,
 				.ambient_strength = 0.0f,
 				.light_color = GLM_VEC3_ONE_INIT,
 				.material_properties = {0.1f, 0.4f, 0.5f}

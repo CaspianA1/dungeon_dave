@@ -62,6 +62,7 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 	const TextureType still_texture_type = TexPlain, scrolling_texture_type = TexSet;
+	const TextureFilterMode min_filter = TexLinearMipmapped;
 
 	////////// Getting the scrolling texture size
 
@@ -78,8 +79,9 @@ TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 	/* This is only a texture set so that it can work with the shader function
 	`get_albedo_and_normal` (TODO: genericize that one, if possible) */
 	const GLuint scrolling_albedo_texture = init_texture_set(false, TexRepeating,
-		scrolling_layer_config -> mag_filter, TexLinearMipmapped, 1, 0, scrolling_texture_size[0],
-		scrolling_texture_size[1], (const GLchar*[]) {scrolling_texture_path}, NULL
+		scrolling_layer_config -> use_bilinear_filtering ? TexLinear : TexNearest,
+		min_filter, 1, 0, scrolling_texture_size[0], scrolling_texture_size[1],
+		(const GLchar*[]) {scrolling_texture_path}, NULL
 	);
 
 	// Overwriting the vertical wrap through a dumb hack
@@ -90,7 +92,8 @@ TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 			scrolling_texture_type, &config -> scrolling.normal_map_config),
 
 		still_albedo_texture = init_plain_texture(still_layer_config -> texture_path, TexNonRepeating,
-			still_layer_config -> mag_filter, TexLinearMipmapped, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
+			still_layer_config -> use_bilinear_filtering ? TexLinear : TexNearest,
+			min_filter, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
 	//////////
 
