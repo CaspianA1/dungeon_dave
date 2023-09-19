@@ -252,7 +252,7 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 	deinit_surface(peek_surface);
 
 	const GLuint albedo_texture_set = init_texture_set(
-		true, TexNonRepeating,
+		true, false, TexNonRepeating,
 		OPENGL_LEVEL_MAG_FILTER, OPENGL_LEVEL_MIN_FILTER, 0, 1,
 		frame_size[0], frame_size[1], NULL, animation_layout
 	);

@@ -276,17 +276,18 @@ static void init_animated_subtextures_in_texture_set(const bool premultiply_alph
 }
 
 GLuint init_texture_set(const bool premultiply_alpha,
-	const TextureWrapMode wrap_mode, const TextureFilterMode mag_filter,
-	const TextureFilterMode min_filter, const texture_id_t num_still_subtextures,
-	const texture_id_t num_animation_layouts, const GLsizei rescale_w, const GLsizei rescale_h,
-	const GLchar* const* const still_subtexture_paths, const AnimationLayout* const animation_layouts) {
+	const bool use_anisotropic_filtering, const TextureWrapMode wrap_mode,
+	const TextureFilterMode mag_filter, const TextureFilterMode min_filter,
+	const texture_id_t num_still_subtextures, const texture_id_t num_animation_layouts,
+	const GLsizei rescale_w, const GLsizei rescale_h, const GLchar* const* const still_subtexture_paths,
+	const AnimationLayout* const animation_layouts) {
 
 	texture_id_t num_animated_frames = 0; // A frame is a subtexture
 	for (texture_id_t i = 0; i < num_animation_layouts; i++) num_animated_frames += animation_layouts[i].total_frames;
 
 	////////// Defining the texture set, and a rescaled surface
 
-	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter, true);
+	const GLuint texture = preinit_texture(TexSet, wrap_mode, mag_filter, min_filter, use_anisotropic_filtering);
 
 	init_texture_data(TexSet, (GLsizei[]) {rescale_w, rescale_h, num_still_subtextures + num_animated_frames},
 		OPENGL_INPUT_PIXEL_FORMAT, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, NULL);

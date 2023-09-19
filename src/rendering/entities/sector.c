@@ -374,7 +374,7 @@ SectorContext init_sector_context(
 	const GLsizei texture_size = shared_material_properties -> texture_rescale_size;
 
 	const GLuint albedo_texture_set = init_texture_set(
-		false, TexRepeating, OPENGL_LEVEL_MAG_FILTER, OPENGL_LEVEL_MIN_FILTER,
+		false, true, TexRepeating, OPENGL_LEVEL_MAG_FILTER, OPENGL_LEVEL_MIN_FILTER,
 		num_textures, 0, texture_size, texture_size, texture_paths, NULL
 	);
 

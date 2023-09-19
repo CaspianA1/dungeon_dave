@@ -1,0 +1,37 @@
+{
+	"per_layer": [
+		{
+			"texture_path": "logo.bmp",
+			"use_bilinear_filtering": false,
+			"ambient_strength": 0.9,
+			"light_color": [1.0, 1.0, 1.0],
+			"material_properties": [0.9, 0.3, 0.9]
+		},
+		{
+			"texture_path": "palace_city.bmp",
+			"use_bilinear_filtering": true,
+			"ambient_strength": 0.0,
+			"light_color": [1.0, 1.0, 1.0],
+			"material_properties": [0.1, 0.4, 0.5]
+		}
+	],
+
+	"scrolling": {
+		"vert_squish_ratio": 0.5,
+		"bilinear_percents": {"albedo": 0.1, "normal": 0.75},
+
+		"normal_map": {
+			"blur_radius": 5, "blur_std_dev": 0.25,
+			"heightmap_scale": 0.3, "rescale_factor": 2.0
+		}
+	},
+
+	"shared": {
+		"texture_transition_immediacy_factor": 2,
+		"tone_mapping_max_white": 1.0,
+		"noise_granularity": 0.002,
+		"light_dist_from_screen_plane": 0.3,
+		"secs_per_scroll_cycle": 7.0,
+		"light_spin_cycle": {"secs_per": 5.0, "logo_transitions_per": 0.5}
+	}
+}

@@ -81,7 +81,7 @@
 			"shared_material_properties": {
 				"bilinear_percents": {"albedo": 1.0, "normal": 1.0},
 
-				"normal_map_config": {
+				"normal_map": {
 					"blur_radius": 0, "blur_std_dev": 0.0,
 					"heightmap_scale": 1.0, "rescale_factor": 2.0
 				}

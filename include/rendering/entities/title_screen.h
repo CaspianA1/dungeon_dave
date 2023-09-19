@@ -1,6 +1,7 @@
 #ifndef TITLE_SCREEN_H
 #define TITLE_SCREEN_H
 
+#include "data/constants.h" // For `num_title_screen_layers`
 #include "glad/glad.h" // For OpenGL defs
 #include "utils/typedefs.h" // For various typedefs
 #include "utils/texture.h" // For `TextureFilterMode`
@@ -17,7 +18,7 @@ typedef struct {
 } TitleScreenPerLayerConfig;
 
 typedef struct {
-	const TitleScreenPerLayerConfig per_layer[2];
+	const TitleScreenPerLayerConfig per_layer[num_title_screen_layers];
 
 	const struct {
 		const GLfloat vert_squish_ratio;
@@ -46,6 +47,9 @@ typedef struct {
 } TitleScreen;
 
 // Excluded: update_uniforms
+
+// TODO: make other functions like this per each key game object
+TitleScreen init_title_screen_from_json(const GLchar* const json_path);
 
 TitleScreen init_title_screen(const TitleScreenConfig* const config);
 void deinit_title_screen(const TitleScreen* const title_screen);

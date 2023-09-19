@@ -1,8 +1,7 @@
 #include "rendering/entities/title_screen.h"
 #include "utils/macro_utils.h" // For `ON_FIRST_CALL`
 #include "utils/opengl_wrappers.h" // For `INIT_UNIFORM`, and `UPDATE_UNIFORM`
-#include "data/constants.h" // For `TWO_PI`
-#include "utils/safe_io.h" // For `get_temp_asset_path`
+#include "utils/json.h" // For various JSON defs
 #include "utils/shader.h" // For `init_shader`
 
 ////////// Uniform updating
@@ -60,6 +59,79 @@ static void update_uniforms(const Drawable* const drawable, const void* const pa
 
 ////////// Initialization, deinitialization, and rendering
 
+TitleScreen init_title_screen_from_json(const GLchar* const json_path) {
+	cJSON JSON_OBJ_NAME_DEF(title_screen) = init_json_from_file(json_path);
+
+	const cJSON
+		DEF_JSON_SUBOBJ(title_screen, per_layer),
+		DEF_JSON_SUBOBJ(title_screen, scrolling),
+		DEF_JSON_SUBOBJ(title_screen, shared);
+
+	const cJSON
+		DEF_JSON_SUBOBJ(scrolling, bilinear_percents),
+		DEF_JSON_SUBOBJ(scrolling, normal_map),
+		DEF_JSON_SUBOBJ(shared, light_spin_cycle);
+
+	const TitleScreenConfig title_screen_config = {
+		// The `per_layer` field is set below
+
+		.scrolling = {
+			JSON_TO_FIELD(scrolling, vert_squish_ratio, float),
+
+			.bilinear_percents = {
+				JSON_TO_FIELD(bilinear_percents, albedo, float),
+				JSON_TO_FIELD(bilinear_percents, normal, float),
+			},
+
+			.normal_map_config =  {
+				JSON_TO_FIELD(normal_map, blur_radius, u8),
+				JSON_TO_FIELD(normal_map, blur_std_dev, float),
+				JSON_TO_FIELD(normal_map, heightmap_scale, float),
+				JSON_TO_FIELD(normal_map, rescale_factor, float)
+			},
+		},
+
+		.shared = {
+			JSON_TO_FIELD(shared, texture_transition_immediacy_factor, u8),
+			JSON_TO_FIELD(shared, tone_mapping_max_white, float),
+			JSON_TO_FIELD(shared, noise_granularity, float),
+			JSON_TO_FIELD(shared, light_dist_from_screen_plane, float),
+			JSON_TO_FIELD(shared, secs_per_scroll_cycle, float),
+
+			.light_spin_cycle = {
+				JSON_TO_FIELD(light_spin_cycle, secs_per, float),
+				JSON_TO_FIELD(light_spin_cycle, logo_transitions_per, float)
+			}
+		}
+	};
+
+	//////////
+
+	validate_json_array(WITH_JSON_OBJ_SUFFIX(per_layer), num_title_screen_layers, num_title_screen_layers);
+
+	JSON_FOR_EACH(i, layer_config, per_layer,
+		DEF_ARRAY_FROM_JSON(layer_config, light_color, float, float, 3);
+		DEF_ARRAY_FROM_JSON(layer_config, material_properties, float, float, 3);
+
+		const TitleScreenPerLayerConfig this_layer_config = {
+			JSON_TO_FIELD(layer_config, texture_path, string),
+			JSON_TO_FIELD(layer_config, use_bilinear_filtering, bool),
+			JSON_TO_FIELD(layer_config, ambient_strength, float),
+
+			.light_color = {layer_config_light_color[0], layer_config_light_color[1], layer_config_light_color[2]},
+			.material_properties = {layer_config_material_properties[0], layer_config_material_properties[1], layer_config_material_properties[2]}
+		};
+
+		memcpy((void*) (title_screen_config.per_layer + i), &this_layer_config, sizeof(TitleScreenPerLayerConfig));
+	);
+
+	//////////
+
+	const TitleScreen title_screen = init_title_screen(&title_screen_config);
+	deinit_json(WITH_JSON_OBJ_SUFFIX(title_screen));
+	return title_screen;
+}
+
 TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 	const TextureType still_texture_type = TexPlain, scrolling_texture_type = TexSet;
 	const TextureFilterMode min_filter = TexLinearMipmapped;
@@ -78,7 +150,7 @@ TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 
 	/* This is only a texture set so that it can work with the shader function
 	`get_albedo_and_normal` (TODO: genericize that one, if possible) */
-	const GLuint scrolling_albedo_texture = init_texture_set(false, TexRepeating,
+	const GLuint scrolling_albedo_texture = init_texture_set(false, false, TexRepeating,
 		scrolling_layer_config -> use_bilinear_filtering ? TexLinear : TexNearest,
 		min_filter, 1, 0, scrolling_texture_size[0], scrolling_texture_size[1],
 		(const GLchar*[]) {scrolling_texture_path}, NULL
@@ -112,12 +184,10 @@ TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 
 	//////////
 
-	enum {num_layers = ARRAY_LENGTH(config -> per_layer)};
+	vec3 still_and_scrolling_light_colors[num_title_screen_layers];
+	vec4 still_and_scrolling_material_properties_and_ambient_strength[num_title_screen_layers];
 
-	vec3 still_and_scrolling_light_colors[num_layers];
-	vec4 still_and_scrolling_material_properties_and_ambient_strength[num_layers];
-
-	for (byte i = 0; i < num_layers; i++) {
+	for (byte i = 0; i < num_title_screen_layers; i++) {
 		const TitleScreenPerLayerConfig* const layer_config = per_layer + i;
 
 		glm_vec3_copy((GLfloat*) layer_config -> light_color, still_and_scrolling_light_colors[i]);
@@ -129,11 +199,10 @@ TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 
 	//////////
 
-	INIT_UNIFORM_VALUE(still_and_scrolling_light_colors, shader, 3fv, num_layers,
-		(const GLfloat*) still_and_scrolling_light_colors);
+	INIT_UNIFORM_VALUE(still_and_scrolling_light_colors, shader, 3fv, num_title_screen_layers, (const GLfloat*) still_and_scrolling_light_colors);
 
-	INIT_UNIFORM_VALUE(still_and_scrolling_material_properties_and_ambient_strength, shader, 4fv, num_layers,
-		(const GLfloat*) still_and_scrolling_material_properties_and_ambient_strength);
+	INIT_UNIFORM_VALUE(still_and_scrolling_material_properties_and_ambient_strength, shader, 4fv,
+		num_title_screen_layers, (const GLfloat*) still_and_scrolling_material_properties_and_ambient_strength);
 
 	//////////
 

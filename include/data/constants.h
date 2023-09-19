@@ -45,6 +45,7 @@ enum { // `enum` is used to make these values compile-time constants
 	planes_per_frustum = 6,
 	faces_per_cubemap = 6,
 
+	num_title_screen_layers = 2,
 	num_unique_object_types = 3 // Sector face, billboard, and weapon sprite
 };
 

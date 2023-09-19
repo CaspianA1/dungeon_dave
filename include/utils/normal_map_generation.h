@@ -12,7 +12,6 @@ generate_normal_map, compute_1D_gaussian_kernel,
 do_separable_gaussian_blur_pass, get_texture_metadata */
 
 typedef struct {
-    const bool use_anisotropic_filtering;
     const byte blur_radius; // This can be zero. If so, no blurring happens.
     const GLfloat blur_std_dev, heightmap_scale, rescale_factor;
 } NormalMapConfig;

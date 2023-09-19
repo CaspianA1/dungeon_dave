@@ -353,7 +353,7 @@ static void* main_init_with_path(const GLchar* const level_path) {
 
 	const cJSON
 			DEF_JSON_SUBOBJ(shared_material_properties, bilinear_percents),
-			DEF_JSON_SUBOBJ(shared_material_properties, normal_map_config);
+			DEF_JSON_SUBOBJ(shared_material_properties, normal_map);
 
 	// Note: the rescale size isn't used in `shared_material_properties`.
 	const WeaponSpriteConfig weapon_sprite_config = { // Whip
@@ -379,14 +379,12 @@ static void* main_init_with_path(const GLchar* const level_path) {
 				JSON_TO_FIELD(bilinear_percents, albedo, float),
 				JSON_TO_FIELD(bilinear_percents, normal, float)
 			},
-			.normal_map_config = {
-				// No anisotropic filtering here since it's not viewed at steep angles
-				.use_anisotropic_filtering = false,
 
-				JSON_TO_FIELD(normal_map_config, blur_radius, u8),
-				JSON_TO_FIELD(normal_map_config, blur_std_dev, float),
-				JSON_TO_FIELD(normal_map_config, heightmap_scale, float),
-				JSON_TO_FIELD(normal_map_config, rescale_factor, float)
+			.normal_map_config = {
+				JSON_TO_FIELD(normal_map, blur_radius, u8),
+				JSON_TO_FIELD(normal_map, blur_std_dev, float),
+				JSON_TO_FIELD(normal_map, heightmap_scale, float),
+				JSON_TO_FIELD(normal_map, rescale_factor, float)
 			}
 		},
 
@@ -480,8 +478,8 @@ static void* main_init_with_path(const GLchar* const level_path) {
 			.bilinear_percents = {.albedo = 0.8f, .normal = 0.9f},
 
 			.normal_map_config = {
-				.use_anisotropic_filtering = true, .blur_radius = 3,
-				.blur_std_dev = 0.8f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f
+				.blur_radius = 3, .blur_std_dev = 0.8f,
+				.heightmap_scale = 1.0f, .rescale_factor = 2.0f
 			}
 		},
 
@@ -490,8 +488,8 @@ static void* main_init_with_path(const GLchar* const level_path) {
 			.bilinear_percents = {.albedo = 0.8f, .normal = 0.6f},
 
 			.normal_map_config = {
-				.use_anisotropic_filtering = true, .blur_radius = 1,
-				.blur_std_dev = 0.1f, .heightmap_scale = 1.0f, .rescale_factor = 2.0f
+				.blur_radius = 1, .blur_std_dev = 0.1f,
+				.heightmap_scale = 1.0f, .rescale_factor = 2.0f
 			} // This, with 2x scaling, uses about 100mb more memory
 		};
 
@@ -531,47 +529,6 @@ static void* main_init_with_path(const GLchar* const level_path) {
 			.hori = glm_rad(camera_angles_degrees[0]),
 			.vert = glm_rad(camera_angles_degrees[1]),
 			.tilt = glm_rad(camera_angles_degrees[2])
-		}
-	};
-
-	////////// Defining the title screen config
-
-	// TODO: put this in a JSON file meant to define the title screen
-	const TitleScreenConfig title_screen_config = {
-		.per_layer = {
-			{
-				.texture_path = "logo.bmp",
-				.use_bilinear_filtering = false,
-				.ambient_strength = 0.9f,
-				.light_color = GLM_VEC3_ONE_INIT,
-				.material_properties = {0.9f, 0.3f, 0.9f}
-			},
-			{
-				.texture_path = "palace_city.bmp",
-				.use_bilinear_filtering = true,
-				.ambient_strength = 0.0f,
-				.light_color = GLM_VEC3_ONE_INIT,
-				.material_properties = {0.1f, 0.4f, 0.5f}
-			}
-		},
-
-		.scrolling = {
-			.vert_squish_ratio = 0.5f,
-			.bilinear_percents = {.albedo = 0.1f, .normal = 0.75f},
-
-			.normal_map_config =  {
-				.blur_radius = 5, .blur_std_dev = 0.25f,
-				.heightmap_scale = 0.3f, .rescale_factor = 2.0f
-			},
-		},
-
-		.shared = {
-			.texture_transition_immediacy_factor = 2,
-			.tone_mapping_max_white = 1.0f,
-			.noise_granularity = 0.002f,
-			.light_dist_from_screen_plane = 0.3f,
-			.secs_per_scroll_cycle = 7.0f,
-			.light_spin_cycle = {.secs_per = 5.0f, .logo_transitions_per = 0.5f}
 		}
 	};
 
@@ -633,7 +590,7 @@ static void* main_init_with_path(const GLchar* const level_path) {
 		.ao_map = init_ao_map(heightmap, max_point_height, &level_rendering_config.ambient_occlusion.compute_config),
 
 		.skybox = init_skybox(&level_rendering_config.skybox_config),
-		.title_screen = init_title_screen(&title_screen_config),
+		.title_screen = init_title_screen_from_json("json_data/title_screen.json"),
 		.heightmap = heightmap
 	};
 

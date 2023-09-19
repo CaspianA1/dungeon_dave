@@ -188,11 +188,10 @@ static void do_separable_gaussian_blur_pass(
 	);
 }
 
-static void get_texture_metadata(
-	const TextureType type,
+static void get_texture_metadata(const TextureType type,
 	GLint* const subtexture_w, GLint* const subtexture_h,
 	GLint* const num_subtextures, GLint* const wrap_mode,
-	GLint mag_min_filter[2]) {
+	GLint mag_min_filter[2], bool* const uses_anisotropic_filtering) {
 
 	const GLint level = 0;
 
@@ -206,6 +205,15 @@ static void get_texture_metadata(
 	glGetTexParameteriv(type, GL_TEXTURE_WRAP_S, wrap_mode);
 	glGetTexParameteriv(type, GL_TEXTURE_MAG_FILTER, mag_min_filter);
 	glGetTexParameteriv(type, GL_TEXTURE_MIN_FILTER, mag_min_filter + 1);
+
+	if (GLAD_GL_EXT_texture_filter_anisotropic) {
+		GLfloat anisotropic_filtering_level;
+		glGetTexParameterfv(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, &anisotropic_filtering_level);
+		*uses_anisotropic_filtering = (anisotropic_filtering_level != 1.0f);
+		/* TODO: what would happen if texture type A uses aniso, then type B does not, and then another of type A does not?
+		Would that mean that anisotropic filtering for the second type A would be used when not necessary? */
+	}
+	else *uses_anisotropic_filtering = false;
 }
 
 // Note: level init is almost instant when this just returns 0; so GPU parallelization could be great here
@@ -229,13 +237,13 @@ GLuint init_normal_map_from_albedo_texture(const GLuint albedo_texture,
 	if (type != TexPlain && type != TexSet)
 		FAIL(CreateTexture, "%s", "Normal map creation failed: unsupported texture type");
 
-
 	////////// Querying OpenGL for information about the texture set
 
 	GLint subtexture_w, subtexture_h, num_subtextures, wrap_mode, mag_min_filter[2];
+	bool uses_anisotropic_filtering;
 
 	use_texture(type, albedo_texture);
-	get_texture_metadata(type, &subtexture_w, &subtexture_h, &num_subtextures, &wrap_mode, mag_min_filter);
+	get_texture_metadata(type, &subtexture_w, &subtexture_h, &num_subtextures, &wrap_mode, mag_min_filter, &uses_anisotropic_filtering);
 
 	////////// Uploading the texture to the CPU
 
@@ -303,8 +311,9 @@ GLuint init_normal_map_from_albedo_texture(const GLuint albedo_texture,
 	////////// Putting the normal map in GPU memory
 
 	const TextureFilterMode min_filter = (TextureFilterMode) mag_min_filter[1];
+
 	const GLuint normal_map_set = preinit_texture(type, (TextureWrapMode) wrap_mode,
-		(TextureFilterMode) mag_min_filter[0], min_filter, config -> use_anisotropic_filtering);
+		(TextureFilterMode) mag_min_filter[0], min_filter, uses_anisotropic_filtering);
 
 	WITH_SURFACE_PIXEL_ACCESS(rgba_surface, // Copying `rgba_surface` to a new texture on the GPU
 		init_texture_data(type, (GLsizei[]) {subtexture_w, subtexture_h, num_subtextures}, OPENGL_INPUT_PIXEL_FORMAT,
