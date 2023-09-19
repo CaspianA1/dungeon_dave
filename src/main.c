@@ -403,6 +403,8 @@ static void* main_init_with_path(const GLchar* const level_path) {
 	JSON_FOR_EACH(_, material_data, materials,
 		(void) _;
 
+		// TODO: figure out how to use `DEF_ARRAY_FROM_JSON` here
+
 		vec3 normalized_properties;
 		const byte num_normalized_properties = ARRAY_LENGTH(normalized_properties);
 
