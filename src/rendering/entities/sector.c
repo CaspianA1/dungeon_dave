@@ -383,8 +383,11 @@ SectorContext init_sector_context(
 	return (SectorContext) {
 		.drawable = init_drawable_with_vertices(
 			define_vertex_spec, NULL, GL_DYNAMIC_DRAW, GL_TRIANGLES,
+
 			(List) {.data = NULL, .item_size = face_mesh.item_size, .length = face_mesh.length},
+
 			init_shader("shaders/sector.vert", NULL, "shaders/common/world_shading.frag", NULL),
+
 			albedo_texture_set, init_normal_map_from_albedo_texture(
 				albedo_texture_set, TexSet, &shared_material_properties -> normal_map_config
 			)
