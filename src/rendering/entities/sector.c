@@ -448,6 +448,7 @@ void draw_sectors(const SectorContext* const sector_context, const Camera* const
 	if (num_visible_faces != 0) {
 		// TODO: call `draw_drawable` here instead
 		const Drawable* const drawable = &sector_context -> drawable;
+		const GLenum triangle_mode = drawable -> triangle_mode;
 
 		const GLint start_vertex = (GLint) (first_face_index * vertices_per_face);
 		const GLsizei num_vertices = (GLsizei) (num_visible_faces * vertices_per_face);
@@ -461,7 +462,7 @@ void draw_sectors(const SectorContext* const sector_context, const Camera* const
 
 		// No color buffer writes
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-			glDrawArrays(GL_TRIANGLES, start_vertex, num_vertices);
+			glDrawArrays(triangle_mode, start_vertex, num_vertices);
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 		////////// Rendering pass
@@ -471,7 +472,7 @@ void draw_sectors(const SectorContext* const sector_context, const Camera* const
 			// No depth buffer writes (TODO: stop the redundant state change for this in 'main.c')
 			WITH_RENDER_STATE(glDepthMask, GL_FALSE, GL_TRUE,
 				use_shader(drawable -> shader);
-				glDrawArrays(GL_TRIANGLES, start_vertex, num_vertices);
+				glDrawArrays(triangle_mode, start_vertex, num_vertices);
 			);
 		);
 	}
