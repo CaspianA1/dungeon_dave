@@ -657,6 +657,7 @@ static void* main_init_with_path(const GLchar* const level_path) {
 	const GLuint shaders_that_use_shared_params[] = {
 		// Depth shaders
 		level_context.sector_context.depth_prepass_shader,
+		level_context.weapon_sprite.depth_prepass_shader,
 		level_context.sector_context.shadow_mapping.depth_shader,
 		level_context.billboard_context.shadow_mapping.depth_shader,
 
@@ -778,6 +779,7 @@ static bool main_drawer(void* const app_context, const Event* const event) {
 
 	////////// The main drawing code
 
+	draw_weapon_sprite_for_depth_prepass(weapon_sprite);
 	draw_sectors(sector_context, camera);
 
 	// No backface culling or depth buffer writes for the skybox, billboards, or weapon sprite

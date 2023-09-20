@@ -47,6 +47,8 @@ typedef struct {
 
 typedef struct {
 	const Drawable drawable;
+	const GLuint depth_prepass_shader;
+
 	WeaponSpriteAnimationContext animation_context;
 	WeaponSpriteAppearanceContext appearance_context;
 	vec3 curr_sound_emitting_pos, velocity; // These are used for OpenAL
@@ -61,10 +63,11 @@ define_vertex_spec, get_sound_emitting_pos */
 ////////// Drawing functions
 
 WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const material_index_t material_index);
-#define deinit_weapon_sprite(ws) deinit_drawable((ws) -> drawable)
+void deinit_weapon_sprite(const WeaponSprite* const ws);
 
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event);
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws); // TODO: make this work, and use it
+void draw_weapon_sprite_for_depth_prepass(const WeaponSprite* const ws);
 void draw_weapon_sprite(const WeaponSprite* const ws);
 
 ////////// Sound functions

@@ -21,9 +21,11 @@
 
 2. It is then drawn to the shadow context via `draw_weapon_sprite_to_shadow_context`.
 	In that, the world-space corners on the CPU are copied over to a vertex buffer on the GPU.
-	It is then drawn. TODO: let alpha values in the weapon sprite's texture determine its visiblity.
+	It is then drawn.
 
-3. Finally, it is drawn to the default framebuffer in `draw_weapon_sprite`. No vertex buffer
+3. The opaque parts of it are then drawn to the depth buffer via `draw_weapon_sprite_for_depth_prepass`.
+
+4. Finally, it is drawn to the default framebuffer in `draw_weapon_sprite`. No vertex buffer
 or spec are used for this; the four corners are simply passed in as a uniform. I figured that
 there wouldn't be much point of binding a vertex spec if the vertex count is known
 ahead of time, and is very small; so this should make the code a bit simpler and marginally faster. */
@@ -265,9 +267,15 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 			GL_TRIANGLE_STRIP, (List) {NULL, sizeof(vec3), corners_per_quad, corners_per_quad},
 
 			init_shader("shaders/weapon_sprite.vert", NULL, "shaders/common/world_shading.frag", NULL),
+
 			albedo_texture_set, init_normal_map_from_albedo_texture(albedo_texture_set,
 				TexSet, &config -> shared_material_properties.normal_map_config
 			)
+		),
+
+		.depth_prepass_shader = init_shader(
+			"shaders/weapon_sprite_depth_prepass.vert", NULL,
+			"shaders/weapon_sprite_depth_prepass.frag", NULL
 		),
 
 		.animation_context = {
@@ -295,6 +303,11 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 			}
 		}
 	};
+}
+
+void deinit_weapon_sprite(const WeaponSprite* const ws) {
+	deinit_shader(ws -> depth_prepass_shader);
+	deinit_drawable(ws -> drawable);
 }
 
 //////////
@@ -346,13 +359,38 @@ void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
 	draw_drawable(*drawable, corners_per_quad, 0, NULL, UseVertexSpec);
 }
 
-void draw_weapon_sprite(const WeaponSprite* const ws) {
-	// No depth testing b/c depth values from sectors or billboards may intersect
-	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, constants.default_depth_func,
-		draw_drawable(ws -> drawable, corners_per_quad, 0,
-			&(UniformUpdaterParams) {ws}, UseShaderPipeline
-		);
+void draw_weapon_sprite_for_depth_prepass(const WeaponSprite* const ws) {
+	// TODO: share logic between this depth prepass and the one for sectors (redundant state changes otherwise).
+
+	const Drawable* const drawable = &ws -> drawable;
+	const GLuint shader = ws -> depth_prepass_shader;
+	use_shader(shader);
+
+	static GLint frame_index_id, world_corners_id;
+
+	ON_FIRST_CALL(
+		INIT_UNIFORM(frame_index, shader);
+		INIT_UNIFORM(world_corners, shader);
+		use_texture_in_shader(drawable -> albedo_texture, shader, "albedo_sampler", TexSet, TU_WeaponSpriteAlbedo);
 	);
+
+	// Allowing all fragments to pass (except for discarded ones), since it's drawn in front of everything else
+	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, constants.default_depth_func,
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+			UPDATE_UNIFORM(frame_index, 1ui, ws -> animation_context.texture_id);
+			UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) ws -> appearance_context.world_space.corners);
+			draw_primitives(drawable -> triangle_mode, corners_per_quad);
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	);
+}
+
+// TODO: can I stop shading early for the transparent part of the weapon sprite, without `discard`?
+void draw_weapon_sprite(const WeaponSprite* const ws) {
+	/* Not using `GL_EQUAL` after the weapon-sprite depth prepass, because
+	only depth buffer values that correspond with an alpha value of 1
+	are written to the depth buffer. Otherwise, proper alpha blending would not happen. */
+
+	draw_drawable(ws -> drawable, corners_per_quad, 0, &(UniformUpdaterParams) {ws}, UseShaderPipeline);
 }
 
 ////////// Sound functions
