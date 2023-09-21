@@ -171,10 +171,8 @@ void draw_billboards_to_shadow_context(const BillboardContext* const billboard_c
 			"albedo_sampler", TexSet, TU_BillboardAlbedo);
 	);
 
-	WITHOUT_BINARY_RENDER_STATE(GL_CULL_FACE,
-		draw_drawable(*drawable, corners_per_quad,
-			billboard_context -> billboards.length, NULL, UseVertexSpec
-		);
+	draw_drawable(*drawable, corners_per_quad,
+		billboard_context -> billboards.length, NULL, UseVertexSpec
 	);
 }
 
