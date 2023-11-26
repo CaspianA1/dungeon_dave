@@ -1,7 +1,7 @@
 # Dungeon Dave!
 
 - A first-person FPS in the style of games like Doom and Quake.
-- Expected to be complete by late 2023.
+- Expected to be complete by late 2024.
 - The Dungeon Dave engine is built fully from scratch, ensuring optimal performance for all platforms.
 - See the `audio` branch for the most active development.
 
