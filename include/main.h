@@ -1,7 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "audio.h" // For `AudioContext`
+#include "utils/json.h" // For various JSON defs
 #include "utils/typedefs.h" // For various typedefs
 #include "camera.h" // For `Camera`
 #include "shared_shading_params.h" // For `SharedShadingParams`
@@ -14,6 +14,7 @@
 #include "rendering/ambient_occlusion.h" // For `AmbientOcclusionMap`
 #include "rendering/entities/skybox.h" // For `Skybox`
 #include "rendering/entities/title_screen.h" // For `TitleScreen`
+#include "audio.h" // For `AudioContext`
 
 /* Drawing architecture change, plan:
 1. Allow BatchDrawContext to call glDrawArraysInstanced, if needed
@@ -45,7 +46,9 @@
 
 // TODO: add more const qualifiers where I can
 typedef struct {
-	AudioContext audio_context;
+	/* This is kept in this struct since various objects
+	still need the strings from this JSON */
+	cJSON* const level_json;
 
 	Camera camera;
 
@@ -66,6 +69,14 @@ typedef struct {
 	const Heightmap heightmap;
 } LevelContext;
 
-// Excluded: level_init, level_init_with_path, level_deinit, level_drawer, cjson_wrapping_alloc
+typedef struct {
+	AudioContext audio_context;
+	LevelContext curr_level_context;
+} GameContext;
+
+/* Excluded:
+level_init, level_deinit, level_drawer,
+game_init, game_deinit, game_drawer,
+cjson_wrapping_alloc */
 
 #endif

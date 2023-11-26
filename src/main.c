@@ -5,13 +5,14 @@
 #include "utils/map_utils.h" // For `get_heightmap_max_point_height,` and `compute_world_far_clip_dist`
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "window.h" // For `make_application`, and `WindowConfig`
-#include "utils/json.h" // For various JSON defs
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
-static void* level_init_with_path(const GLchar* const level_path) {
-	////////// Printing library info
+static LevelContext level_init(
+	const GLchar* const level_path,
+	AudioContext* const audio_context,
+	LevelContext* const level_context_heap_dest) {
 
-	AudioContext audio_context = init_audio_context();
+	////////// Printing library info
 
 	#define PRINT_LIBRARY_INFO(suffix_lowercase, suffix_uppercase, start, end)\
 		printf("\n%s Open%s:\nVendor: %s\nRenderer: %s\nVersion: %s\n%s",\
@@ -567,7 +568,9 @@ static void* level_init_with_path(const GLchar* const level_path) {
 
 	//////////
 
-	const LevelContext level_context = {
+	LevelContext level_context = {
+		.level_json = WITH_JSON_OBJ_SUFFIX(level),
+
 		.camera = init_camera(&camera_config, far_clip_dist),
 		.materials_texture = materials_texture,
 		.weapon_sprite = init_weapon_sprite(&weapon_sprite_config, weapon_sprite_material_index),
@@ -600,12 +603,7 @@ static void* level_init_with_path(const GLchar* const level_path) {
 		.heightmap = heightmap
 	};
 
-	////////// Initializing a level context on the heap
-
-	LevelContext* const level_context_on_heap = alloc(1, sizeof(LevelContext));
-	memcpy(level_context_on_heap, &level_context, sizeof(LevelContext));
-
-	////////// Audio setup (TODO: put this data in some JSON file)
+	////////// Audio setup (TODO: put this data in some JSON file; perhaps `default_sounds.json`?)
 
 	const ALchar* const EXTRACT_FROM_JSON_SUBOBJ(get_string, non_lighting_data, soundtrack_path,);
 
@@ -614,30 +612,29 @@ static void* level_init_with_path(const GLchar* const level_path) {
 		*const jump_land_sound_path = "audio/sound_effects/jump_land.wav";
 
 	// TODO: return clip indices from these, that can be used to find the right audio source
-	add_audio_clip_to_audio_context(&audio_context, weapon_sprite_config.sound_path, true);
-	add_audio_clip_to_audio_context(&audio_context, jump_up_sound_path, true);
-	add_audio_clip_to_audio_context(&audio_context, jump_land_sound_path, true);
-	add_audio_clip_to_audio_context(&audio_context, soundtrack_path, false);
+	add_audio_clip_to_audio_context(audio_context, weapon_sprite_config.sound_path, true);
+	add_audio_clip_to_audio_context(audio_context, jump_up_sound_path, true);
+	add_audio_clip_to_audio_context(audio_context, jump_land_sound_path, true);
+	add_audio_clip_to_audio_context(audio_context, soundtrack_path, false);
 
-	const Camera* const camera = &level_context_on_heap -> camera;
+	Camera* const camera_heap_dest = &level_context_heap_dest -> camera;
+	WeaponSprite* const weapon_sprite_heap_dest = &level_context_heap_dest -> weapon_sprite;
 
-	// TODO: add a running sound
+	// TODO: add a running sound (probably for only above a certain speed)
 	const PositionalAudioSourceMetadata positional_audio_source_metadata[] = {
-		{weapon_sprite_config.sound_path, &level_context_on_heap -> weapon_sprite,
+		{weapon_sprite_config.sound_path, weapon_sprite_heap_dest,
 		weapon_sound_activator, weapon_sound_updater},
 
-		{jump_up_sound_path, camera, jump_up_sound_activator, jump_up_sound_updater},
-		{jump_land_sound_path, camera, jump_land_sound_activator, jump_land_sound_updater}
+		{jump_up_sound_path, camera_heap_dest, jump_up_sound_activator, jump_up_sound_updater},
+		{jump_land_sound_path, camera_heap_dest, jump_land_sound_activator, jump_land_sound_updater}
 	};
 
 	for (byte i = 0; i < ARRAY_LENGTH(positional_audio_source_metadata); i++)
-		add_positional_audio_source_to_audio_context(&audio_context, positional_audio_source_metadata + i, false);
+		add_positional_audio_source_to_audio_context(audio_context, positional_audio_source_metadata + i, false);
 
 	// TODO: perhaps return source indices from this, that can be used to select a source to play
-	add_nonpositional_audio_source_to_audio_context(&audio_context, soundtrack_path, true);
-	play_nonpositional_audio_source(&audio_context, soundtrack_path);
-
-	memcpy(&level_context_on_heap -> audio_context, &audio_context, sizeof(AudioContext));
+	add_nonpositional_audio_source_to_audio_context(audio_context, soundtrack_path, true);
+	play_nonpositional_audio_source(audio_context, soundtrack_path);
 
 	////////// Initializing shared textures
 
@@ -675,7 +672,7 @@ static void* level_init_with_path(const GLchar* const level_path) {
 	);
 
 	// I am bypassing the type system's const safety checks with this, but it's for the best
-	memcpy(&level_context_on_heap -> shared_shading_params, &shared_shading_params, sizeof(SharedShadingParams));
+	memcpy(&level_context.shared_shading_params, &shared_shading_params, sizeof(SharedShadingParams));
 
 	////////// Some random deinit
 
@@ -683,7 +680,6 @@ static void* level_init_with_path(const GLchar* const level_path) {
 	dealloc(still_billboard_texture_paths);
 	dealloc(sector_face_texture_paths);
 	dealloc(texture_id_map_data);
-	deinit_json(WITH_JSON_OBJ_SUFFIX(level));
 
 	//////////
 
@@ -692,16 +688,10 @@ static void* level_init_with_path(const GLchar* const level_path) {
 
 	//////////
 
-	return level_context_on_heap;
+	return level_context;
 }
 
-static void* level_init(void) {
-	return level_init_with_path("json_data/levels/palace.json");
-}
-
-static void level_deinit(void* const app_context) {
-	LevelContext* const level_context = (LevelContext*) app_context;
-
+static void level_deinit(const LevelContext* const level_context) {
 	dealloc(level_context -> heightmap.data);
 
 	deinit_shared_shading_params(&level_context -> shared_shading_params);
@@ -715,12 +705,13 @@ static void level_deinit(void* const app_context) {
 	deinit_shadow_context(&level_context -> shadow_context);
 	deinit_title_screen(&level_context -> title_screen);
 	deinit_skybox(&level_context -> skybox);
-	deinit_audio_context(&level_context -> audio_context);
 
-	dealloc(level_context);
+	deinit_json(level_context -> level_json);
 }
 
-static bool level_drawer(void* const app_context, const Event* const event) {
+static bool level_drawer(LevelContext* const level_context,
+	const AudioContext* const audio_context, const Event* const event) {
+
 	////////// Setting the wireframe mode
 
 	const Uint8* const keys = event -> keys;
@@ -739,8 +730,6 @@ static bool level_drawer(void* const app_context, const Event* const event) {
 
 	//////////
 
-	LevelContext* const level_context = (LevelContext*) app_context;
-
 	if (tick_title_screen(&level_context -> title_screen, event))
 		return true;
 
@@ -752,7 +741,6 @@ static bool level_drawer(void* const app_context, const Event* const event) {
 	Camera* const camera = &level_context -> camera;
 	BillboardContext* const billboard_context = &level_context -> billboard_context;
 	WeaponSprite* const weapon_sprite = &level_context -> weapon_sprite;
-	const AudioContext* const audio_context = &level_context -> audio_context;
 
 	DynamicLight* const dynamic_light = &level_context -> dynamic_light;
 	const GLfloat* const dir_to_light = dynamic_light -> curr_dir, curr_time_secs = event -> curr_time_secs;
@@ -765,7 +753,7 @@ static bool level_drawer(void* const app_context, const Event* const event) {
 	update_dynamic_light(dynamic_light, curr_time_secs);
 	update_shadow_context(shadow_context, camera, dir_to_light, event -> aspect_ratio);
 	update_shared_shading_params(&level_context -> shared_shading_params, camera, shadow_context, dir_to_light);
-	update_audio_context(audio_context, camera);
+	update_audio_context(audio_context, camera); // TODO: should this be called here, or in `game_drawer`?
 
 	////////// Rendering to the shadow context
 
@@ -806,6 +794,49 @@ static bool level_drawer(void* const app_context, const Event* const event) {
 
 	return false;
 }
+
+//////////
+
+static void* game_init(void) {
+	GameContext* const game_context_on_heap = alloc(1, sizeof(GameContext));
+
+	/* TODO: clear the audio context between levels,
+	or split the audio context up into 2 parts:
+	the OpenAL part, and the state dictionaries */
+	AudioContext audio_context = init_audio_context();
+
+	LevelContext curr_level_context = level_init(
+		"json_data/levels/palace.json",
+		&audio_context,
+		&game_context_on_heap -> curr_level_context
+	);
+
+	GameContext game_context = {
+		.audio_context = audio_context,
+		.curr_level_context = curr_level_context
+	};
+
+	memcpy(game_context_on_heap, &game_context, sizeof(GameContext));
+	return game_context_on_heap;
+}
+
+static void game_deinit(void* const app_context) {
+	GameContext* const game_context = app_context;
+	level_deinit(&game_context -> curr_level_context);
+
+	/* At this point, the data stored in `PositionalAudioSourceMetadata` within
+	the audio context may have been deallocated, so that should not be accessed
+	at this point. The same goes for all dict keys in the audio context. */
+	deinit_audio_context(&game_context -> audio_context);
+	dealloc(game_context);
+}
+
+static bool game_drawer(void* const app_context, const Event* const event) {
+	GameContext* const game_context = app_context;
+	return level_drawer(&game_context -> curr_level_context, &game_context -> audio_context, event);
+}
+
+//////////
 
 static void* cjson_wrapping_alloc(const size_t size) {
 	return alloc(size, 1);
@@ -850,7 +881,7 @@ int main(void) {
 		.window_size = {window_config_window_size[0], window_config_window_size[1]}
 	};
 
-	make_application(&window_config, level_init, level_deinit, level_drawer);
+	make_application(&window_config, game_init, game_deinit, game_drawer);
 
 	// This is deinited after `make_application` because of the lifetime of `app_name`
 	deinit_json(WITH_JSON_OBJ_SUFFIX(window_config));
