@@ -74,7 +74,7 @@ static buffer_size_t get_key_index(const Dict* const dict, DictVar key) {
 
 			while ((c = (uint8_t) *(key.string++)))
 				hash = ((hash << 5) + hash) + c;
-			
+
 			break;
 		}
 
@@ -174,7 +174,7 @@ void insert_into_dict(Dict* const dict, const DictVar key, const DictVar value) 
 
 		/* If the index equals the original index by here, there will be an infinite loop.
 		This never happens because: Since the max load factor will always be under 1, there will
-		always be some number of available entry slots in the hash table. Thus, an entry slot will 
+		always be some number of available entry slots in the hash table. Thus, an entry slot will
 		always be found. Once the load factor equals the max load factor, the hash table will be resized,
 		which will give even more available slots. */
 	}
