@@ -7,6 +7,14 @@
 #include "window.h" // For `make_application`, and `WindowConfig`
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
+/* TODO: cache computed level data like this:
+- Keep a cache file for each level JSON file
+- If the cache does not exist, build it for the first time
+- Otherwise, compute the checksum of the current level file
+- If it does not line up with the checksum in the cache, then rebuild the cache
+- If reading from the cache, then do not recompile shaders, or recompute the AO map; just read from the file
+- Otherwise, compute the values, use them directly, and write them to the cache (but do not read from the file in that case, since that incurs a parsing step) */
+
 static LevelContext level_init(
 	const GLchar* const level_path,
 	AudioContext* const audio_context,
