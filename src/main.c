@@ -8,7 +8,7 @@
 #include "utils/json.h" // For various JSON defs
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
 
-static void* main_init_with_path(const GLchar* const level_path) {
+static void* level_init_with_path(const GLchar* const level_path) {
 	////////// Printing library info
 
 	AudioContext audio_context = init_audio_context();
@@ -695,11 +695,11 @@ static void* main_init_with_path(const GLchar* const level_path) {
 	return level_context_on_heap;
 }
 
-static void* main_init(void) {
-	return main_init_with_path("json_data/levels/palace.json");
+static void* level_init(void) {
+	return level_init_with_path("json_data/levels/palace.json");
 }
 
-static void main_deinit(void* const app_context) {
+static void level_deinit(void* const app_context) {
 	LevelContext* const level_context = (LevelContext*) app_context;
 
 	dealloc(level_context -> heightmap.data);
@@ -720,7 +720,7 @@ static void main_deinit(void* const app_context) {
 	dealloc(level_context);
 }
 
-static bool main_drawer(void* const app_context, const Event* const event) {
+static bool level_drawer(void* const app_context, const Event* const event) {
 	////////// Setting the wireframe mode
 
 	const Uint8* const keys = event -> keys;
@@ -850,7 +850,7 @@ int main(void) {
 		.window_size = {window_config_window_size[0], window_config_window_size[1]}
 	};
 
-	make_application(&window_config, main_init, main_deinit, main_drawer);
+	make_application(&window_config, level_init, level_deinit, level_drawer);
 
 	// This is deinited after `make_application` because of the lifetime of `app_name`
 	deinit_json(WITH_JSON_OBJ_SUFFIX(window_config));

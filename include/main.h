@@ -66,6 +66,6 @@ typedef struct {
 	const Heightmap heightmap;
 } LevelContext;
 
-// Excluded: main_init, main_init_with_path, main_deinit, main_drawer, cjson_wrapping_alloc
+// Excluded: level_init, level_init_with_path, level_deinit, level_drawer, cjson_wrapping_alloc
 
 #endif
