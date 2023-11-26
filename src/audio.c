@@ -33,7 +33,7 @@ static void convert_audio_data(
 	const SDL_AudioFormat orig_format = orig_spec -> format;
 
 	if (orig_format == new_format && orig_num_channels == new_num_channels) return;
-	
+
 	////////// Making a stream
 
 	const int sample_rate = orig_spec -> freq;
@@ -277,7 +277,7 @@ void update_audio_context(const AudioContext* const context, const Camera* const
 
 	alListenerfv(AL_POSITION, camera -> pos);
 	alListenerfv(AL_VELOCITY, camera -> velocity_world_space);
-	alListenerfv(AL_ORIENTATION, (ALfloat[6]) {dir[0], dir[1], dir[2], up[0], up[1], up[2]});	
+	alListenerfv(AL_ORIENTATION, (ALfloat[6]) {dir[0], dir[1], dir[2], up[0], up[1], up[2]});
 
 	const List* const positional_sources = &context -> positional_sources;
 
