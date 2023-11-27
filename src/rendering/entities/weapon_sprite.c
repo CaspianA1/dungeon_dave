@@ -1,7 +1,6 @@
 #include "rendering/entities/weapon_sprite.h"
 #include "utils/macro_utils.h" // For `CHECK_BITMASK`
 #include "utils/opengl_wrappers.h" // For `INIT_UNIFORM_VALUE`, `INIT_UNIFORM`, and `UPDATE_UNIFORM`
-#include "utils/safe_io.h" // For `get_temp_asset_path`
 #include "utils/shader.h" // For `init_shader`
 
 /* The weapon sprite code can be a bit hard to understand in the big picture.
