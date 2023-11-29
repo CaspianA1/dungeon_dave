@@ -1,5 +1,5 @@
 #include "event.h"
-#include "data/constants.h" // For `keys`, and `milliseconds_per_second`
+#include "data/constants.h" // For `keys` (not the input parameter), and `milliseconds_per_second`
 #include "utils/macro_utils.h" // For `CHECK_BITMASK`
 
 // TODO: avoid all repeated base time logic by making the curr time in secs relative to startup time
