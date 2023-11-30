@@ -46,8 +46,8 @@
 
 // TODO: add more const qualifiers where I can
 typedef struct {
-	/* This is kept in this struct since various objects
-	still need the strings from this JSON */
+	/* This is kept in this struct since various
+	objects still need the strings from this JSON */
 	cJSON* const level_json;
 
 	Camera camera;
