@@ -4,7 +4,7 @@
 #include "utils/failure.h" // For `FAIL`
 #include "data/constants.h" // For `PRINT_SHADER_VALIDATION_LOG`
 #include "utils/safe_io.h" // For `read_file_contents`
-#include <string.h> // For `strrchr`, `strlen`, `memcpy`, `strcpy`, `strstr`, and `memset`
+#include <string.h> // For various string utils
 
 enum {num_sub_shaders = 3}; // Vertex, geometry, and fragment
 
@@ -109,33 +109,30 @@ static GLuint init_shader_from_source(
 static GLchar* get_source_for_included_file(List* const dependency_list,
 	const GLchar* const includer_path, const GLchar* const included_path) {
 
-	/* When a shader includes a file, the file it includes
-	should be relative to its filesystem directory. So,
-	this function finds a new path for the included file,
-	which is the concatenation of the base includer path
-	with the included file path. */
+	/* When a shader includes a file, the file it includes should be relative
+	to its filesystem directory. So, this function finds a new path for the included
+	file, which is the concatenation of the base includer path with the included file path. */
 
 	////////// Calculating the base path length for the included shader
 
 	const GLchar* const last_slash_pos_in_includer_path = strrchr(includer_path, '/');
 
-	const size_t base_path_length = (last_slash_pos_in_includer_path == NULL)
+	const int base_path_length = (last_slash_pos_in_includer_path == NULL)
 		? 0 // If there's no slash in the path, there's no base path
-		: (size_t) (last_slash_pos_in_includer_path - includer_path + 1);
+		: (last_slash_pos_in_includer_path - includer_path + 1);
 
 	////////// Allocating a new string that concatenates the includer base path with the included path
 
-	// TODO: use a `concat_strings` function here instead
+	#define CALL_FORMAT_FUNCTION_FOR_PATH(dest, dest_length)\
+		snprintf(dest, dest_length, "%.*s%s", base_path_length, includer_path, included_path)
 
-	const size_t included_path_length = strlen(included_path);
-	const size_t included_full_path_string_length = base_path_length + included_path_length;
+	const size_t full_path_string_length = (size_t) CALL_FORMAT_FUNCTION_FOR_PATH(NULL, 0) + 1;
 
-	/* One more character for the null terminator (TODO: avoid this alloc in some way? Perhaps with some fn that returns
-	a temp formatted string? Make some fn to allow any string format, and use that in `get_asset_path` as well then) */
-	GLchar* const full_path_string_for_included = alloc(included_full_path_string_length + 1, sizeof(GLchar));
+	// TODO: can I avoid this allocation in some way, perhaps with some sort of temporary buffer?
+	GLchar* const full_path_string_for_included = alloc(full_path_string_length, sizeof(GLchar));
+	CALL_FORMAT_FUNCTION_FOR_PATH(full_path_string_for_included, full_path_string_length);
 
-	memcpy(full_path_string_for_included, includer_path, base_path_length);
-	memcpy(full_path_string_for_included + base_path_length, included_path, included_path_length);
+	#undef CALL_FORMAT_FUNCTION_FOR_PATH
 
 	////////// Reading the included file, blanking out #versions, recursively reading its #includes, and returning the contents
 
