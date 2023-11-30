@@ -125,14 +125,17 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 
 	////////// Allocating a new string that concatenates the includer base path with the included path
 
-	const size_t included_full_path_string_length = base_path_length + strlen(included_path);
+	// TODO: use a `concat_strings` function here instead
+
+	const size_t included_path_length = strlen(included_path);
+	const size_t included_full_path_string_length = base_path_length + included_path_length;
 
 	/* One more character for the null terminator (TODO: avoid this alloc in some way? Perhaps with some fn that returns
 	a temp formatted string? Make some fn to allow any string format, and use that in `get_asset_path` as well then) */
 	GLchar* const full_path_string_for_included = alloc(included_full_path_string_length + 1, sizeof(GLchar));
 
 	memcpy(full_path_string_for_included, includer_path, base_path_length);
-	strcpy(full_path_string_for_included + base_path_length, included_path);
+	memcpy(full_path_string_for_included + base_path_length, included_path, included_path_length);
 
 	////////// Reading the included file, blanking out #versions, recursively reading its #includes, and returning the contents
 
