@@ -17,21 +17,21 @@ for whatever reason, then one would have to manually change all of the path pref
 that must be fully used before the function is called again. Therefore, it is encouraged
 to call this function as late as possible, in terms of when the asset path is needed. */
 static inline const char* get_temp_asset_path(const char* const unmodified_path) {
-	// TODO: put in `constants.h`?
-	enum {max_concatenation_buffer_size = 100u};
+	enum {max_concatenation_buffer_size = 100u}; // TODO: put in `constants.h`?
 
 	static char temp_concatenated_string[max_concatenation_buffer_size];
 
-	// Adding 1 at the end for the null terminator
-	const size_t num_output_bytes = strlen(ASSET_PATH_PREFIX) + strlen(unmodified_path) + 1u;
+	const size_t
+		asset_path_prefix_length = strlen(ASSET_PATH_PREFIX),
+		unmodified_path_length = strlen(unmodified_path);
 
-	if (num_output_bytes > max_concatenation_buffer_size)
+	// Adding 1 at the end for the null terminator
+	if (asset_path_prefix_length + unmodified_path_length + 1 > max_concatenation_buffer_size)
 		FAIL(OpenFile, "Cannot open the file with path '%s', since its path when prefixed"
 			" with '%s' exceeds the max path length", unmodified_path, ASSET_PATH_PREFIX);
 
-	// TODO: use memcpy here instead
-	strcpy(temp_concatenated_string, ASSET_PATH_PREFIX);
-	strcat(temp_concatenated_string, unmodified_path);
+	memcpy(temp_concatenated_string, ASSET_PATH_PREFIX, asset_path_prefix_length);
+	memcpy(temp_concatenated_string + asset_path_prefix_length, unmodified_path, unmodified_path_length + 1);
 
 	return temp_concatenated_string;
 }
