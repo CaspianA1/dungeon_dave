@@ -53,11 +53,6 @@ SDL_Surface* init_surface(const GLchar* const path) {
 	}
 }
 
-void* read_surface_pixel(const SDL_Surface* const surface, const GLint x, const GLint y) {
-	sdl_pixel_component_t* const row = (sdl_pixel_component_t*) surface -> pixels + y * surface -> pitch;
-	return row + x * surface -> format -> BytesPerPixel;
-}
-
 static void premultiply_surface_alpha(SDL_Surface* const surface) {
 	const GLint w = surface -> w, h = surface -> h;
 	const SDL_PixelFormat* const format = surface -> format;
