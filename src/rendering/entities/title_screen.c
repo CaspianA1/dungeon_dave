@@ -4,6 +4,10 @@
 #include "utils/json.h" // For various JSON defs
 #include "utils/shader.h" // For `init_shader`
 
+/* TODO: rescale the title screen's drawn aspect ratio for wider screens.
+For the base logo, keep it from being stretched or squished, but extend/shrink
+the other image for wider/narrower screen configurations. */
+
 ////////// Uniform updating
 
 typedef struct {
