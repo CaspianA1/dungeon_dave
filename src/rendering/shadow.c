@@ -180,7 +180,7 @@ CascadedShadowContext init_shadow_context(const CascadedShadowContextConfig* con
 
 	////////// Creating the framebuffer
 
-	GLuint framebuffer = init_framebuffer();
+	const GLuint framebuffer = init_framebuffer();
 	use_framebuffer(framebuffer_target, framebuffer);
 
 	glFramebufferTexture(framebuffer_target, GL_DEPTH_ATTACHMENT, depth_layers, 0);
