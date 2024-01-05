@@ -9,3 +9,5 @@ build/
 lib/cglm
 lib/openal
 lib/cjson
+
+assets/cache

@@ -35,7 +35,8 @@ typedef enum {
 	InitializeGPUMemoryMapping,
 
 	UseLevelHeightmap,
-	CreateLevel
+	CreateLevel,
+	WorkWithLevelCache
 } FailureType;
 
 void print_failure_message(const char* const failure_type_string,

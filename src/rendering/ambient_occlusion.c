@@ -271,9 +271,23 @@ static void transform_feedback_hook(const GLuint shader) {
 	glTransformFeedbackVaryings(shader, 1, (const GLchar*[]) {"num_collisions"}, GL_INTERLEAVED_ATTRIBS);
 }
 
-static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_component_t max_y,
-	const vec3* const rand_dirs, const AmbientOcclusionComputeConfig* const compute_config,
-	ao_value_t** const transform_feedback_data_ref) {
+static void set_unpack_alignment(const GLint unpack_alignment) {
+	glPixelStorei(GL_UNPACK_ALIGNMENT, unpack_alignment);
+}
+
+static GLint save_and_set_unpack_alignment(const GLint new_unpack_alignment) {
+	GLint prev_unpack_alignment;
+	glGetIntegerv(GL_UNPACK_ALIGNMENT, &prev_unpack_alignment);
+	set_unpack_alignment(new_unpack_alignment);
+	return prev_unpack_alignment;
+}
+
+//////////
+
+static AmbientOcclusionMap init_ao_map_texture(const Heightmap heightmap,
+	const map_pos_component_t max_y, const vec3* const rand_dirs,
+	const AmbientOcclusionComputeConfig* const compute_config,
+	ao_value_t** const cpu_data) {
 
 	////////// Defining some constants
 
@@ -292,12 +306,6 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 	const GLuint transform_feedback_buffer_binding_point = 0;
 	const GLint heightmap_internal_pixel_format = GL_R8UI;
 
-	////////// Setting the unpack alignment for the heightmap and output textures
-
-	GLint prev_unpack_alignment;
-	glGetIntegerv(GL_UNPACK_ALIGNMENT, &prev_unpack_alignment);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, sizeof(ao_value_t));
-
 	////////// Some variable initialization
 
 	const trace_count_t num_trace_iters = compute_config -> num_trace_iters;
@@ -314,10 +322,13 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 
 	////////// Making a heightmap texture
 
+	const GLint prev_unpack_alignment = save_and_set_unpack_alignment(sizeof(ao_value_t));
 	const GLuint heightmap_texture = preinit_texture(heightmap_texture_type, TexNonRepeating, TexNearest, TexNearest, false);
 
 	init_texture_data(heightmap_texture_type, (GLsizei[]) {heightmap.size.x, heightmap.size.z},
 		heightmap_input_format, heightmap_internal_pixel_format, MAP_POS_COMPONENT_TYPENAME, heightmap.data);
+
+	set_unpack_alignment(prev_unpack_alignment);
 
 	////////// Making a shader, and using it
 
@@ -375,6 +386,7 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 		transform_feedback_gpu_buffer, transform_feedback_buffer_target, output_buffer_size, false);
 
 	ao_value_t* const transform_feedback_data = alloc(num_points_on_grid, sizeof(ao_value_t));
+	*cpu_data = transform_feedback_data;
 
 	for (buffer_size_t i = 0; i < num_points_on_grid; i++) {
 		const buffer_size_t raw_transform_feedback_data_index = i * workload_split_factor;
@@ -395,19 +407,6 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 	}
 
 	deinit_gpu_buffer_memory_mapping(transform_feedback_buffer_target);
-	*transform_feedback_data_ref = transform_feedback_data;
-
-	////////// Making an output texture
-
-	const GLuint output_texture = preinit_texture(TexVolumetric, TexNonRepeating, TexLinear, TexTrilinear, true);
-
-	init_texture_data(TexVolumetric, (GLsizei[]) {heightmap.size.x, heightmap.size.z, max_y}, GL_RED,
-		OPENGL_AO_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_COLOR_CHANNEL_TYPE, transform_feedback_data);
-
-	init_texture_mipmap(TexVolumetric);
-
-	// Resetting the unpack alignment
-	glPixelStorei(GL_UNPACK_ALIGNMENT, prev_unpack_alignment);
 
 	////////// Deinit
 
@@ -416,11 +415,13 @@ static GLuint init_ao_map_texture(const Heightmap heightmap, const map_pos_compo
 	deinit_gpu_buffer(transform_feedback_gpu_buffer);
 	deinit_shader(shader);
 
-	return output_texture;
+	return init_ao_map_from_cpu_copy(heightmap, max_y, transform_feedback_data);
 }
 
-AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_component_t max_y,
-	const AmbientOcclusionComputeConfig* const compute_config) {
+AmbientOcclusionMap init_ao_map_with_copy_on_cpu(
+	const Heightmap heightmap, const map_pos_component_t max_y,
+	const AmbientOcclusionComputeConfig* const compute_config,
+	ao_value_t** const cpu_copy) {
 
 	////////// Seeding the random generator, and generating random dirs
 
@@ -437,10 +438,8 @@ AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_compone
 
 	////////// Making an AO map on the GPU
 
-	ao_value_t* transform_feedback_data;
-
-	const GLuint ao_map_texture = init_ao_map_texture(heightmap, max_y,
-		rand_dirs, compute_config, &transform_feedback_data);
+	const AmbientOcclusionMap ao_map = init_ao_map_texture(heightmap, max_y,
+		rand_dirs, compute_config, cpu_copy);
 
 	////////// Verifying that the AO map computed on the GPU is correct
 
@@ -449,7 +448,7 @@ AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_compone
 	printf("The seed provided to `srand` = %uu\nStarting the CPU algorithm\n", seed);
 
 	uint64_t num_correct_with_transform_feedback = 0;
-	const ao_value_t* curr_transform_feedback_datum = transform_feedback_data;
+	const ao_value_t* curr_transform_feedback_datum = *cpu_copy;
 	const trace_count_t max_num_ray_steps = compute_config -> max_num_ray_steps;
 
 	for (map_pos_component_t y = 0; y < max_y; y++) { // For each posible height
@@ -503,9 +502,25 @@ AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_compone
 	////////// Deinit
 
 	dealloc(rand_dirs);
-	dealloc(transform_feedback_data);
 
-	return (AmbientOcclusionMap) {ao_map_texture};
+	return ao_map;
+}
+
+AmbientOcclusionMap init_ao_map_from_cpu_copy(
+	const Heightmap heightmap,
+	const map_pos_component_t max_y,
+	const ao_value_t* const cpu_data) {
+
+	const GLint prev_unpack_alignment = save_and_set_unpack_alignment(sizeof(ao_value_t));
+	const GLuint texture = preinit_texture(TexVolumetric, TexNonRepeating, TexLinear, TexTrilinear, true);
+
+	init_texture_data(TexVolumetric, (GLsizei[]) {heightmap.size.x, heightmap.size.z, max_y}, GL_RED,
+		OPENGL_AO_MAP_INTERNAL_PIXEL_FORMAT, OPENGL_AO_MAP_COLOR_CHANNEL_TYPE, cpu_data);
+
+	init_texture_mipmap(TexVolumetric);
+	set_unpack_alignment(prev_unpack_alignment);
+
+	return (AmbientOcclusionMap) {.texture = texture};
 }
 
 void deinit_ao_map(const AmbientOcclusionMap* const ao_map) {

@@ -1,12 +1,29 @@
 #ifndef SAFE_IO_H
 #define SAFE_IO_H
 
-#include <stdio.h> // For `fopen`
+#include <stdarg.h> // For variadic utils
+#include <stdio.h> // For various IO-related functions
 #include "utils/failure.h" // For `FAIL`
 #include "utils/alloc.h" // For `alloc`
 
 // TODO: put in `constants.h`?
 static const char* const ASSET_PATH_PREFIX = "../../assets/";
+
+// The returned string should be freed with `dealloc`. TODO: put this in a better place
+static inline char* make_formatted_string(const char* const format, ...) {
+	va_list args;
+	va_start(args, format);
+	const size_t size = (size_t) vsnprintf(NULL, 0, format, args) + 1;
+	va_end(args);
+
+	char* const formatted_string = alloc(size, sizeof(char));
+
+	va_start(args, format);
+	vsnprintf(formatted_string, size, format, args);
+	va_end(args);
+
+	return formatted_string;
+}
 
 /* Why this is used:
 - All assets in the `assets` directory share the common prefix defined in this function.

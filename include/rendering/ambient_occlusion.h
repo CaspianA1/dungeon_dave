@@ -24,7 +24,13 @@ the workload more. It does use W times more memory though.
 */
 
 typedef uint8_t workload_split_factor_t;
+
+/* Note: this should be in sync
+with `OPENGL_AO_MAP_INTERNAL_PIXEL_FORMAT`
+and `OPENGL_AO_MAP_COLOR_CHANNEL_TYPE`,
+in `texture.h`. */
 typedef uint8_t ao_value_t;
+
 typedef uint16_t trace_count_t;
 typedef uint16_t ray_step_count_t;
 
@@ -40,15 +46,22 @@ typedef struct {
 //////////
 
 typedef struct {
-	const GLuint texture;
+	GLuint texture;
 } AmbientOcclusionMap;
 
 /* Excluded: generate_rand_dir, get_ao_term_from_collision_count, ray_collides_with_heightmap,
 sign_between_map_values, clamp_signed_byte_to_directional_range, get_normal_data, transform_feedback_hook,
-init_ao_map_texture */
+set_unpack_alignment, save_and_set_unpack_alignment, init_ao_map_texture */
 
-AmbientOcclusionMap init_ao_map(const Heightmap heightmap, const map_pos_component_t max_y,
-	const AmbientOcclusionComputeConfig* const compute_config);
+AmbientOcclusionMap init_ao_map_with_copy_on_cpu(
+	const Heightmap heightmap, const map_pos_component_t max_y,
+	const AmbientOcclusionComputeConfig* const compute_config,
+	ao_value_t** const cpu_copy); // `cpu_copy` should be freed with `dealloc` by the caller
+
+AmbientOcclusionMap init_ao_map_from_cpu_copy(
+	const Heightmap heightmap,
+	const map_pos_component_t max_y,
+	const ao_value_t* const cpu_data);
 
 void deinit_ao_map(const AmbientOcclusionMap* const ao_map);
 

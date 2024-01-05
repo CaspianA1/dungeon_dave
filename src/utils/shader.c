@@ -121,18 +121,9 @@ static GLchar* get_source_for_included_file(List* const dependency_list,
 		? 0 // If there's no slash in the path, there's no base path
 		: (last_slash_pos_in_includer_path - includer_path + 1);
 
-	////////// Allocating a new string that concatenates the includer base path with the included path
+	////////// Making a new string that concatenates the includer base path with the included path
 
-	#define CALL_FORMAT_FUNCTION_FOR_PATH(dest, dest_length)\
-		snprintf(dest, dest_length, "%.*s%s", base_path_length, includer_path, included_path)
-
-	const size_t full_path_string_length = (size_t) CALL_FORMAT_FUNCTION_FOR_PATH(NULL, 0) + 1;
-
-	// TODO: can I avoid this allocation in some way, perhaps with some sort of temporary buffer?
-	GLchar* const full_path_string_for_included = alloc(full_path_string_length, sizeof(GLchar));
-	CALL_FORMAT_FUNCTION_FOR_PATH(full_path_string_for_included, full_path_string_length);
-
-	#undef CALL_FORMAT_FUNCTION_FOR_PATH
+	GLchar* const full_path_string_for_included = make_formatted_string("%.*s%s", base_path_length, includer_path, included_path);
 
 	////////// Reading the included file, blanking out #versions, recursively reading its #includes, and returning the contents
 

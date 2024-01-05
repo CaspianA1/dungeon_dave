@@ -1,4 +1,5 @@
 #include "main.h"
+#include "level_cache.h" // For `get_level_cache`
 #include "utils/opengl_wrappers.h" // For OpenGL defs + wrappers
 #include "utils/macro_utils.h" // For `ARRAY_LENGTH`
 #include "data/constants.h" // For `num_unique_object_types`, `default_depth_func`, and `max_byte_value`
@@ -6,14 +7,6 @@
 #include "utils/alloc.h" // For `alloc`, and `dealloc`
 #include "window.h" // For `make_application`, and `WindowConfig`
 #include "utils/debug_macro_utils.h" // For the debug keys, and `DEBUG_VEC3`
-
-/* TODO: cache computed level data like this:
-- Keep a cache file for each level JSON file
-- If the cache does not exist, build it for the first time
-- Otherwise, compute the checksum of the current level file
-- If it does not line up with the checksum in the cache, then rebuild the cache
-- If reading from the cache, then do not recompile shaders, or recompute the AO map; just read from the file
-- Otherwise, compute the values, use them directly, and write them to the cache (but do not read from the file in that case, since that incurs a parsing step) */
 
 static LevelContext level_init(
 	const GLchar* const level_path,
@@ -188,6 +181,49 @@ static LevelContext level_init(
 		JSON_TO_FIELD(level, noise_granularity, float)
 	};
 
+	////////// Specifying the cascade count early on
+
+	specify_cascade_count_before_any_shader_compilation(level_rendering_config.shadow_mapping.cascaded_shadow_config.num_cascades);
+
+	////////// Loading in the heightmap and texture id map, validating them, and extracting data from them
+
+	map_pos_xz_t heightmap_size, texture_id_map_size;
+
+	map_pos_component_t* const EXTRACT_FROM_JSON_SUBOBJ(read_2D_map, non_lighting_data,
+		heightmap_data,, sizeof(map_pos_component_t), &heightmap_size);
+
+	map_pos_component_t* const EXTRACT_FROM_JSON_SUBOBJ(read_2D_map, non_lighting_data,
+		texture_id_map_data,, sizeof(map_pos_component_t), &texture_id_map_size);
+
+	for (byte i = 0; i < 2; i++) {
+		const map_pos_component_t
+			heightmap_size_component = get_indexed_map_pos_component(heightmap_size, i),
+			texture_id_map_size_component = get_indexed_map_pos_component(texture_id_map_size, i);
+
+		const GLchar* const axis_name = (i == 0) ? "width" : "height";
+
+		if (heightmap_size_component != texture_id_map_size_component) FAIL(
+			UseLevelHeightmap, "Cannot use the level heightmap "
+			"because its %s is %u, while the texture id map's %s is %u",
+			axis_name, heightmap_size_component, axis_name, texture_id_map_size_component);
+	}
+
+	const Heightmap heightmap = {heightmap_data, heightmap_size};
+	const map_pos_component_t max_point_height = get_heightmap_max_point_height(heightmap);
+	const GLfloat far_clip_dist = compute_world_far_clip_dist(heightmap.size, max_point_height);
+
+	////////// Loading in the level cache
+
+	const LevelCacheConfig level_cache_config = {
+		.ambient_occlusion = {
+			.heightmap = heightmap,
+			.max_y = max_point_height,
+			.compute_config = &level_rendering_config.ambient_occlusion.compute_config
+		}
+	};
+
+	const LevelCache level_cache = get_level_cache(level_path, &level_cache_config);
+
 	////////// Reading in the sector face texture paths
 
 	texture_id_t num_sector_face_texture_paths;
@@ -346,7 +382,6 @@ static LevelContext level_init(
 
 			billboard_index++;
 			if (category_index == 1) animation_instance_index++;
-
 		);
 	}
 
@@ -526,10 +561,6 @@ static LevelContext level_init(
 		bilinear_percents[1] = shared_material_properties -> bilinear_percents.normal;
 	}
 
-	////////// Specifying the cascade count
-
-	specify_cascade_count_before_any_shader_compilation(level_rendering_config.shadow_mapping.cascaded_shadow_config.num_cascades);
-
 	////////// Defining the camera config
 
 	const cJSON DEF_JSON_SUBOBJ(non_lighting_data, camera);
@@ -546,33 +577,6 @@ static LevelContext level_init(
 			.tilt = glm_rad(camera_angles_degrees[2])
 		}
 	};
-
-	////////// Loading in the heightmap and texture id map, validating them, and extracting data from them
-
-	map_pos_xz_t heightmap_size, texture_id_map_size;
-
-	map_pos_component_t* const EXTRACT_FROM_JSON_SUBOBJ(read_2D_map, non_lighting_data,
-		heightmap_data,, sizeof(map_pos_component_t), &heightmap_size);
-
-	map_pos_component_t* const EXTRACT_FROM_JSON_SUBOBJ(read_2D_map, non_lighting_data,
-		texture_id_map_data,, sizeof(map_pos_component_t), &texture_id_map_size);
-
-	for (byte i = 0; i < 2; i++) {
-		const map_pos_component_t
-			heightmap_size_component = get_indexed_map_pos_component(heightmap_size, i),
-			texture_id_map_size_component = get_indexed_map_pos_component(texture_id_map_size, i);
-
-		const GLchar* const axis_name = (i == 0) ? "width" : "height";
-
-		if (heightmap_size_component != texture_id_map_size_component) FAIL(
-			UseLevelHeightmap, "Cannot use the level heightmap "
-			"because its %s is %u, while the texture id map's %s is %u",
-			axis_name, heightmap_size_component, axis_name, texture_id_map_size_component);
-	}
-
-	const Heightmap heightmap = {heightmap_data, heightmap_size};
-	const map_pos_component_t max_point_height = get_heightmap_max_point_height(heightmap);
-	const GLfloat far_clip_dist = compute_world_far_clip_dist(heightmap.size, max_point_height);
 
 	//////////
 
@@ -604,7 +608,7 @@ static LevelContext level_init(
 		.dynamic_light = init_dynamic_light(&level_rendering_config.dynamic_light_config),
 		.shadow_context = init_shadow_context(&level_rendering_config.shadow_mapping.cascaded_shadow_config, far_clip_dist),
 
-		.ao_map = init_ao_map(heightmap, max_point_height, &level_rendering_config.ambient_occlusion.compute_config),
+		.ao_map = level_cache.ao_map,
 
 		.skybox = init_skybox(&level_rendering_config.skybox_config),
 		.title_screen = init_title_screen_from_json("json_data/title_screen.json"),
@@ -810,16 +814,28 @@ static void* game_init(void) {
 
 	/* TODO: clear the audio context between levels,
 	or split the audio context up into 2 parts:
-	the OpenAL part, and the state dictionaries */
+	the OpenAL part, and the state dictionaries. */
+
 	AudioContext audio_context = init_audio_context();
 
-	LevelContext curr_level_context = level_init(
-		"json_data/levels/palace.json",
-		&audio_context,
+	const GLchar* const level_path = "json_data/levels/mountain.json";
+
+	////////// Loading the level context
+
+	// Making a redundant vertex spec here, since OpenGL requires that one must always be active
+	const GLuint redundant_vertex_spec = init_vertex_spec();
+	use_vertex_spec(redundant_vertex_spec);
+
+	const LevelContext curr_level_context = level_init(
+		level_path, &audio_context,
 		&game_context_on_heap -> curr_level_context
 	);
 
-	GameContext game_context = {
+	deinit_vertex_spec(redundant_vertex_spec);
+
+	//////////
+
+	const GameContext game_context = {
 		.audio_context = audio_context,
 		.curr_level_context = curr_level_context
 	};
