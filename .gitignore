@@ -10,4 +10,4 @@ lib/cglm
 lib/openal
 lib/cjson
 
-assets/cache
+assets/cache/*.cache
