@@ -4,8 +4,6 @@
 #include <sys/stat.h> // TODO: support Windows for this too
 #include <time.h>
 
-#define VALIDATE_LEVEL_CACHE // TODO: put this in the right place, and actually use it
-
 /* TODO:
 - Do I need to worry about endian-ness here? I should test this on a big-endian machine.
 - Can I compress the cache, to make it take up less space?
