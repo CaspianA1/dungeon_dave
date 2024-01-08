@@ -185,6 +185,11 @@ static LevelContext level_init(
 
 	specify_cascade_count_before_any_shader_compilation(level_rendering_config.shadow_mapping.cascaded_shadow_config.num_cascades);
 
+	////////// Making a redundant vertex spec, since one must always be active during rendering
+
+	const GLuint redundant_vertex_spec = init_vertex_spec();
+	use_vertex_spec(redundant_vertex_spec);
+
 	////////// Loading in the heightmap and texture id map, validating them, and extracting data from them
 
 	map_pos_xz_t heightmap_size, texture_id_map_size;
@@ -688,6 +693,7 @@ static LevelContext level_init(
 
 	////////// Some random deinit
 
+	deinit_vertex_spec(redundant_vertex_spec);
 	dealloc(billboard_animation_layouts);
 	dealloc(still_billboard_texture_paths);
 	dealloc(sector_face_texture_paths);
@@ -818,22 +824,14 @@ static void* game_init(void) {
 
 	AudioContext audio_context = init_audio_context();
 
-	const GLchar* const level_path = "json_data/levels/mountain.json";
+	const GLchar* const level_path = "json_data/levels/palace.json";
 
 	////////// Loading the level context
-
-	// Making a redundant vertex spec here, since OpenGL requires that one must always be active
-	const GLuint redundant_vertex_spec = init_vertex_spec();
-	use_vertex_spec(redundant_vertex_spec);
 
 	const LevelContext curr_level_context = level_init(
 		level_path, &audio_context,
 		&game_context_on_heap -> curr_level_context
 	);
-
-	deinit_vertex_spec(redundant_vertex_spec);
-
-	//////////
 
 	const GameContext game_context = {
 		.audio_context = audio_context,
