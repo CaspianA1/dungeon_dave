@@ -1,6 +1,6 @@
 #include "rendering/entities/weapon_sprite.h"
 #include "utils/macro_utils.h" // For `CHECK_BITMASK`
-#include "utils/opengl_wrappers.h" // For `INIT_UNIFORM_VALUE`, `INIT_UNIFORM`, and `UPDATE_UNIFORM`
+#include "utils/opengl_wrappers.h" // For `INIT_UNIFORM_ID`, `INIT_UNIFORM_VALUE`, and `UPDATE_UNIFORM`
 #include "utils/shader.h" // For `init_shader`
 
 /* The weapon sprite code can be a bit hard to understand in the big picture.
@@ -202,32 +202,16 @@ static void get_quad_tbn_matrix(const vec3* const quad_corners, mat3 tbn) {
 
 typedef struct {const WeaponSprite* const weapon_sprite;} UniformUpdaterParams;
 
-static void update_uniforms(const Drawable* const drawable, const void* const param) {
-	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
-
-	static GLint frame_index_id, world_corners_id, tbn_id;
-
-	ON_FIRST_CALL(
-		const GLuint shader = drawable -> shader;
-
-		INIT_UNIFORM_VALUE(weapon_sprite_material_index, shader, 1ui,
-			typed_params.weapon_sprite -> animation_context.animation.material_index);
-
-		INIT_UNIFORM(frame_index, shader);
-		INIT_UNIFORM(world_corners, shader);
-		INIT_UNIFORM(tbn, shader);
-	);
-
-	////////// Updating uniforms
-
-	const vec3* const world_corners = typed_params.weapon_sprite -> appearance_context.world_space.corners;
+static void update_uniforms(const void* const param) {
+	const WeaponSprite* const ws = (*(UniformUpdaterParams*) param).weapon_sprite;
+	const vec3* const world_corners = ws -> appearance_context.world_space.corners;
 
 	mat3 tbn;
 	get_quad_tbn_matrix(world_corners, tbn);
 
-	UPDATE_UNIFORM(frame_index, 1ui, typed_params.weapon_sprite -> animation_context.texture_id);
-	UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
-	UPDATE_UNIFORM(tbn, Matrix3fv, 1, GL_FALSE, (GLfloat*) tbn);
+	UPDATE_UNIFORM(ws, world_space, frame_index, 1ui, ws -> animation_context.texture_id);
+	UPDATE_UNIFORM(ws, world_space, world_corners, 3fv, corners_per_quad, (GLfloat*) world_corners);
+	UPDATE_UNIFORM(ws, world_space, tbn, Matrix3fv, 1, GL_FALSE, (GLfloat*) tbn);
 }
 
 ////////// Initialization, deinitialization, updating, and rendering
@@ -258,6 +242,26 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 		frame_size[0], frame_size[1], NULL, animation_layout
 	);
 
+	////////// Making a world shader, and setting the material index uniform
+
+	const GLuint world_shader = init_shader(
+		"shaders/weapon_sprite.vert", NULL,
+		"shaders/common/world_shading.frag", NULL
+	);
+
+	use_shader(world_shader);
+	INIT_UNIFORM_VALUE(weapon_sprite_material_index, world_shader, 1ui, material_index);
+
+	////////// Making a depth prepass shader, and setting the albedo sampler uniform
+
+	const GLuint depth_prepass_shader = init_shader(
+		"shaders/weapon_sprite_depth_prepass.vert", NULL,
+		"shaders/weapon_sprite_depth_prepass.frag", NULL
+	);
+
+	use_shader(depth_prepass_shader);
+	use_texture_in_shader(albedo_texture_set, depth_prepass_shader, "albedo_sampler", TexSet, TU_WeaponSpriteAlbedo);
+
 	//////////
 
 	return (WeaponSprite) {
@@ -265,21 +269,31 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 			define_vertex_spec, (uniform_updater_t) update_uniforms, GL_DYNAMIC_DRAW,
 			GL_TRIANGLE_STRIP, (List) {NULL, sizeof(vec3), corners_per_quad, corners_per_quad},
 
-			init_shader("shaders/weapon_sprite.vert", NULL, "shaders/common/world_shading.frag", NULL),
+			world_shader, albedo_texture_set,
 
-			albedo_texture_set, init_normal_map_from_albedo_texture(albedo_texture_set,
-				TexSet, &config -> shared_material_properties.normal_map_config
+			init_normal_map_from_albedo_texture(albedo_texture_set, TexSet,
+				&config -> shared_material_properties.normal_map_config
 			)
 		),
 
-		.depth_prepass_shader = init_shader(
-			"shaders/weapon_sprite_depth_prepass.vert", NULL,
-			"shaders/weapon_sprite_depth_prepass.frag", NULL
-		),
+		.depth_prepass_shader = depth_prepass_shader,
+
+		.world_space_uniform_ids = {
+			INIT_UNIFORM_ID(frame_index, world_shader),
+			INIT_UNIFORM_ID(world_corners, world_shader),
+			INIT_UNIFORM_ID(tbn, world_shader)
+		},
+
+		.depth_prepass_uniform_ids = {
+			INIT_UNIFORM_ID(frame_index, depth_prepass_shader),
+			INIT_UNIFORM_ID(world_corners, depth_prepass_shader)
+		},
 
 		.animation_context = {
-			.cycle_start_time = 0.0f, .texture_id = 0,
-			.activated_in_this_tick = false, .is_currently_being_animated = false,
+			.cycle_start_time = 0.0f,
+			.texture_id = 0,
+			.activated_in_this_tick = false,
+			.is_currently_being_animated = false,
 
 			.animation = {
 				.material_index = material_index,
@@ -298,9 +312,13 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 
 			.world_space = {
 				.max_yaw = glm_rad(config -> max_degrees.yaw),
-				.max_pitch = glm_rad(config -> max_degrees.pitch)
+				.max_pitch = glm_rad(config -> max_degrees.pitch),
+				// The world corners are uninitialized here
 			}
-		}
+		},
+
+		// And the OpenAL variables are unitialized as well
+		.openal_variables_are_uninitialized = true
 	};
 }
 
@@ -312,15 +330,32 @@ void deinit_weapon_sprite(const WeaponSprite* const ws) {
 //////////
 
 // The sound emitting pos is in the middle of the top edge of the weapon
-static void get_sound_emitting_pos(const vec3* const world_corners, vec3 sound_emitting_pos) {
+static void get_sound_emitting_pos(const vec3 world_corners[corners_per_quad], vec3 sound_emitting_pos) {
 	glm_vec3_add((GLfloat*) world_corners[2], (GLfloat*) world_corners[3], sound_emitting_pos);
 	glm_vec3_scale(sound_emitting_pos, 0.5f, sound_emitting_pos);
 }
 
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event) {
+	const vec3* const world_corners = ws -> appearance_context.world_space.corners;
+
+	if (ws -> openal_variables_are_uninitialized) {
+		// This initializes the world corners the first time around
+		vec2 screen_corners[corners_per_quad];
+		get_screen_corners(ws, event, camera -> speed_xz_percent, screen_corners);
+		get_world_corners(screen_corners, camera, &ws -> appearance_context);
+
+		// And this initializes the OpenAL variables
+		get_sound_emitting_pos(world_corners, ws -> curr_sound_emitting_pos);
+		glm_vec3_zero(ws -> velocity);
+
+		update_weapon_sprite_animation(&ws -> animation_context, event);
+
+		ws -> openal_variables_are_uninitialized = false;
+		return;
+	}
+
 	////////// Getting the previous sound emitting pos
 
-	const vec3* const world_corners = ws -> appearance_context.world_space.corners;
 	vec3 last_sound_emitting_pos;
 	get_sound_emitting_pos(world_corners, last_sound_emitting_pos);
 
@@ -337,17 +372,8 @@ void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, co
 	GLfloat* const curr_sound_emitting_pos = ws -> curr_sound_emitting_pos, *const velocity = ws -> velocity;
 	get_sound_emitting_pos(world_corners, curr_sound_emitting_pos);
 
-	// TODO: use an `ON_FIRST_CALL` block here instead, and after that, don't use such a block altogether
-	static bool first_call = true;
-
-	if (first_call) {
-		glm_vec3_zero(velocity);
-		first_call = false;
-	}
-	else {
-		glm_vec3_sub(curr_sound_emitting_pos, last_sound_emitting_pos, velocity);
-		glm_vec3_scale(velocity, 1.0f / event -> delta_time, velocity);
-	}
+	glm_vec3_sub(curr_sound_emitting_pos, last_sound_emitting_pos, velocity);
+	glm_vec3_scale(velocity, 1.0f / event -> delta_time, velocity);
 }
 
 void draw_weapon_sprite_to_shadow_context(const WeaponSprite* const ws) {
@@ -365,19 +391,11 @@ void draw_weapon_sprite_for_depth_prepass(const WeaponSprite* const ws) {
 	const GLuint shader = ws -> depth_prepass_shader;
 	use_shader(shader);
 
-	static GLint frame_index_id, world_corners_id;
-
-	ON_FIRST_CALL(
-		INIT_UNIFORM(frame_index, shader);
-		INIT_UNIFORM(world_corners, shader);
-		use_texture_in_shader(drawable -> albedo_texture, shader, "albedo_sampler", TexSet, TU_WeaponSpriteAlbedo);
-	);
-
 	// Allowing all fragments to pass (except for discarded ones), since it's drawn in front of everything else
 	WITH_RENDER_STATE(glDepthFunc, GL_ALWAYS, constants.default_depth_func,
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-			UPDATE_UNIFORM(frame_index, 1ui, ws -> animation_context.texture_id);
-			UPDATE_UNIFORM(world_corners, 3fv, corners_per_quad, (GLfloat*) ws -> appearance_context.world_space.corners);
+			UPDATE_UNIFORM(ws, depth_prepass, frame_index, 1ui, ws -> animation_context.texture_id);
+			UPDATE_UNIFORM(ws, depth_prepass, world_corners, 3fv, corners_per_quad, (GLfloat*) ws -> appearance_context.world_space.corners);
 			draw_primitives(drawable -> triangle_mode, corners_per_quad);
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	);

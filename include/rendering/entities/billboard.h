@@ -42,12 +42,7 @@ In the actual code, this happens:
 
 typedef struct {
 	const Drawable drawable;
-
-	const struct {
-		const GLuint depth_shader;
-		const GLfloat alpha_threshold;
-	} shadow_mapping;
-
+	const struct {const GLuint depth_shader;} shadow_mapping;
 	List distance_sort_refs, billboards, animations, animation_instances;
 } BillboardContext;
 

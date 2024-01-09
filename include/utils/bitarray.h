@@ -26,7 +26,7 @@ static const byte
 		(sizeof(bitarray_chunk_t) >= sizeof(uint32_t)) +
 		(sizeof(bitarray_chunk_t) >= sizeof(uint64_t)) + 2u;
 
-static const byte bits_per_chunk_minus_one =  sizeof(bitarray_chunk_t) * CHAR_BIT - 1u;
+static const byte bits_per_chunk_minus_one = sizeof(bitarray_chunk_t) * CHAR_BIT - 1u;
 
 //////////
 
@@ -46,6 +46,10 @@ static inline bitarray_chunk_t get_mask_for_bit_index_in_chunk(const buffer_size
 	return (bitarray_chunk_t) ((bitarray_chunk_t) 1u << (bit_index & bits_per_chunk_minus_one));
 }
 
+static inline buffer_size_t get_num_chunks_for_bitarray(const buffer_size_t num_bits) {
+	return ((num_bits - 1u) >> log2_bits_per_chunk) + 1u;
+}
+
 ////////// Public utils
 
 static inline bool bitarray_bit_is_set(const BitArray bitarray, const buffer_size_t bit_index) {
@@ -61,17 +65,22 @@ static inline void set_bit_in_bitarray(const BitArray bitarray, const buffer_siz
 // This is inclusive on both ends.
 void set_bit_range_in_bitarray(const BitArray bitarray, const buffer_size_t start, const buffer_size_t end);
 
-////////// Init and deinit
+////////// Init, deinit, and clear
 
 static inline BitArray init_bitarray(const buffer_size_t num_bits) {
 	/* Uses the equation for integer ceiling division, but right-
 	shifting by the log2 of the divisor, instead of dividing */
-	const buffer_size_t num_chunks = ((num_bits - 1u) >> log2_bits_per_chunk) + 1u;
+	const buffer_size_t num_chunks = get_num_chunks_for_bitarray(num_bits);
 	return (BitArray) {clearing_alloc(num_chunks, sizeof(bitarray_chunk_t))};
 }
 
 static inline void deinit_bitarray(const BitArray bitarray) {
 	dealloc(bitarray.chunks);
+}
+
+static inline void clear_bitarray(const BitArray bitarray, const buffer_size_t num_bits) {
+	const buffer_size_t num_chunks = get_num_chunks_for_bitarray(num_bits);
+	memset(bitarray.chunks, 0, num_chunks * sizeof(bitarray_chunk_t));
 }
 
 #endif

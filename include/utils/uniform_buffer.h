@@ -25,6 +25,9 @@ typedef struct {
 /* Excluded: safely_get_uniform_block_index, check_if_is_array,
 check_primitive_size, check_matrix_size, check_array_length, get_subvar_metadata */
 
+// This should be called once all uniform buffers have been discarded, and a new set needs to be made
+void reset_uniform_buffer_binding_point_counter(void);
+
 /* This expects that lifetime of `subvar_names` is longer than the lifetime of the
 uniform buffer (so the subvar names should be on the heap, or in static memory). */
 UniformBuffer init_uniform_buffer(const GLenum usage,

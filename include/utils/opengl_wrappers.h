@@ -45,12 +45,12 @@ static const GLenum framebuffer_target = GL_DRAW_FRAMEBUFFER;
 
 ////////// Some uniform setters
 
-#define INIT_UNIFORM(name, shader) name##_id = safely_get_uniform((shader), #name)
+#define INIT_UNIFORM_ID(name, shader) .name = safely_get_uniform((shader), #name)
 
 #define INIT_UNIFORM_VALUE(name, shader, type_prefix, ...)\
 	glUniform##type_prefix(safely_get_uniform((shader), #name), __VA_ARGS__)
 
-#define UPDATE_UNIFORM(name, type_prefix, ...) glUniform##type_prefix(name##_id, __VA_ARGS__)
+#define UPDATE_UNIFORM(base, prefix, name, type_prefix, ...) glUniform##type_prefix(base -> prefix##_uniform_ids.name, __VA_ARGS__)
 
 ////////// Some render state setters
 

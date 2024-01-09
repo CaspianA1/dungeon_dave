@@ -1,6 +1,6 @@
 #include "rendering/entities/title_screen.h"
-#include "utils/macro_utils.h" // For `ON_FIRST_CALL`
-#include "utils/opengl_wrappers.h" // For `INIT_UNIFORM`, and `UPDATE_UNIFORM`
+#include "utils/macro_utils.h" // For `CHECK_BITMASK`
+#include "utils/opengl_wrappers.h" // For `INIT_UNIFORM_ID`, `INIT_UNIFORM_VALUE`, and `UPDATE_UNIFORM`
 #include "utils/json.h" // For various JSON defs
 #include "utils/shader.h" // For `init_shader`
 
@@ -11,54 +11,41 @@ the other image for wider/narrower screen configurations. */
 ////////// Uniform updating
 
 typedef struct {
-	const TitleScreenConfig* const config;
+	const TitleScreen* const title_screen;
 	const GLfloat curr_time_secs;
 } UniformUpdaterParams;
 
-static void update_uniforms(const Drawable* const drawable, const void* const param) {
+static void update_uniforms(const void* const param) {
 	const UniformUpdaterParams typed_params = *(UniformUpdaterParams*) param;
+	const TitleScreen* const title_screen = typed_params.title_screen;
+	const TitleScreenConfig* const config = &title_screen -> config;
 
-	static GLint scrolling_light_pos_tangent_space_id, texture_transition_weight_id, scroll_factor_id;
-	static GLfloat base_time_secs;
-
-	ON_FIRST_CALL(
-		const GLuint shader = drawable -> shader;
-
-		INIT_UNIFORM(scrolling_light_pos_tangent_space, shader);
-		INIT_UNIFORM(texture_transition_weight, shader);
-		INIT_UNIFORM(scroll_factor, shader);
-
-		base_time_secs = typed_params.curr_time_secs;
-	);
-
-	//////////
-
-	const GLfloat relative_time_secs = typed_params.curr_time_secs - base_time_secs;
+	const GLfloat time_seed = typed_params.curr_time_secs;
 
 	const GLfloat // Modding the hori scroll with 1 to avoid floating-point imprecision errors for large time values
-		palace_city_hori_scroll = fmodf(relative_time_secs / typed_params.config -> shared.secs_per_scroll_cycle, 1.0f),
-		spin_seed = relative_time_secs * TWO_PI / typed_params.config -> shared.light_spin_cycle.secs_per;
+		palace_city_hori_scroll = fmodf(time_seed / config -> shared.secs_per_scroll_cycle, 1.0f),
+		spin_seed = time_seed * TWO_PI / config -> shared.light_spin_cycle.secs_per;
 
 	/* TODO: if used, make this focus on different quadrants each time
 	(and make sure that `secs_per` is still followed) */
 	// spin_seed += tanf(sinf(spin_seed));
 
 	GLfloat texture_transition_weight = cosf(
-		spin_seed * typed_params.config -> shared.light_spin_cycle.logo_transitions_per
+		spin_seed * config -> shared.light_spin_cycle.logo_transitions_per
 	) * 0.5f + 0.5f;
 
-	for (byte i = 0; i < typed_params.config -> shared.texture_transition_immediacy_factor; i++)
+	for (byte i = 0; i < config -> shared.texture_transition_immediacy_factor; i++)
 		texture_transition_weight = glm_smooth(texture_transition_weight);
 
 	//////////
 
-	UPDATE_UNIFORM(scrolling_light_pos_tangent_space, 3fv, 1, (vec3) {
+	UPDATE_UNIFORM(title_screen, shader, scrolling_light_pos_tangent_space, 3fv, 1, (vec3) {
 		sinf(spin_seed), cosf(spin_seed),
-		typed_params.config -> shared.light_dist_from_screen_plane
+		config -> shared.light_dist_from_screen_plane
 	});
 
-	UPDATE_UNIFORM(texture_transition_weight, 1f, texture_transition_weight);
-	UPDATE_UNIFORM(scroll_factor, 1f, palace_city_hori_scroll);
+	UPDATE_UNIFORM(title_screen, shader, texture_transition_weight, 1f, texture_transition_weight);
+	UPDATE_UNIFORM(title_screen, shader, scroll_factor, 1f, palace_city_hori_scroll);
 }
 
 ////////// Initialization, deinitialization, and rendering
@@ -171,7 +158,7 @@ TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 			still_layer_config -> use_bilinear_filtering ? TexLinear : TexNearest,
 			min_filter, OPENGL_DEFAULT_INTERNAL_PIXEL_FORMAT);
 
-	//////////
+	////////// Making a shader, and setting some uniforms
 
 	const GLuint shader = init_shader("shaders/title_screen.vert", NULL, "shaders/title_screen.frag", NULL);
 	use_shader(shader);
@@ -186,7 +173,7 @@ TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 	INIT_UNIFORM_VALUE(tone_mapping_max_white, shader, 1f, config -> shared.tone_mapping_max_white);
 	INIT_UNIFORM_VALUE(noise_granularity, shader, 1f, config -> shared.noise_granularity);
 
-	//////////
+	////////// Setting some more uniforms
 
 	vec3 still_and_scrolling_light_colors[num_title_screen_layers];
 	vec4 still_and_scrolling_material_properties_and_ambient_strength[num_title_screen_layers];
@@ -201,14 +188,14 @@ TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 		material_properties_dest[3] = layer_config -> ambient_strength;
 	}
 
-	//////////
+	////////// And setting some more
 
 	INIT_UNIFORM_VALUE(still_and_scrolling_light_colors, shader, 3fv, num_title_screen_layers, (const GLfloat*) still_and_scrolling_light_colors);
 
 	INIT_UNIFORM_VALUE(still_and_scrolling_material_properties_and_ambient_strength, shader, 4fv,
 		num_title_screen_layers, (const GLfloat*) still_and_scrolling_material_properties_and_ambient_strength);
 
-	//////////
+	////////// Setting a bunch of albedo samplers
 
 	use_texture_in_shader(still_albedo_texture, shader, "still_albedo_sampler", still_texture_type, TU_TitleScreenStillAlbedo);
 	use_texture_in_shader(scrolling_albedo_texture, shader, "scrolling_albedo_sampler", scrolling_texture_type, TU_TitleScreenScrollingAlbedo);
@@ -224,6 +211,12 @@ TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 			GL_TRIANGLE_STRIP, shader, scrolling_albedo_texture,
 			scrolling_normal_map
 		),
+
+		.shader_uniform_ids = {
+			INIT_UNIFORM_ID(scrolling_light_pos_tangent_space, shader),
+			INIT_UNIFORM_ID(texture_transition_weight, shader),
+			INIT_UNIFORM_ID(scroll_factor, shader)
+		},
 
 		.still_albedo_texture = still_albedo_texture,
 		.config = *config
@@ -242,7 +235,7 @@ bool tick_title_screen(TitleScreen* const title_screen, const Event* const event
 	const bool active = title_screen -> active;
 
 	if (active) {
-		const UniformUpdaterParams uniform_updater_params = {&title_screen -> config, event -> curr_time_secs};
+		const UniformUpdaterParams uniform_updater_params = {title_screen, event -> curr_time_secs};
 		draw_drawable(title_screen -> drawable, corners_per_quad, 0, &uniform_updater_params, UseShaderPipeline);
 	}
 

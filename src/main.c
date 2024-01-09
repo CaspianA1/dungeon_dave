@@ -31,6 +31,8 @@ static LevelContext level_init(
 
 	////////// Global state initialization
 
+	reset_uniform_buffer_binding_point_counter();
+
 	// This is correct for alpha premultiplication
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(constants.default_depth_func);
@@ -855,7 +857,26 @@ static void game_deinit(void* const app_context) {
 
 static bool game_drawer(void* const app_context, const Event* const event) {
 	GameContext* const game_context = app_context;
-	return level_drawer(&game_context -> curr_level_context, &game_context -> audio_context, event);
+	LevelContext* const curr_level_context = &game_context -> curr_level_context;
+
+	// TODO: don't hardcode this key
+	if (event -> keys[SDL_SCANCODE_C]) {
+		level_deinit(curr_level_context);
+
+		// TODO: store the next level path in the curr level JSON instead
+		const GLchar* const next_level_path = "json_data/levels/mountain.json";
+		AudioContext* const audio_context = &game_context -> audio_context;
+
+		reset_audio_context(audio_context);
+
+		const LevelContext next_level_context = level_init(
+			next_level_path, audio_context, curr_level_context
+		);
+
+		memcpy(curr_level_context, &next_level_context, sizeof(LevelContext));
+	}
+
+	return level_drawer(curr_level_context, &game_context -> audio_context, event);
 }
 
 //////////

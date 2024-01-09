@@ -55,7 +55,8 @@ add_audio_source_to_audio_context,
 apply_action_to_nonpositional_audio_source */
 
 AudioContext init_audio_context(void);
-void deinit_audio_context(const AudioContext* const context);
+void deinit_audio_context(AudioContext* const context);
+void reset_audio_context(AudioContext* const context);
 
 //////////
 

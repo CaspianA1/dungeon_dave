@@ -7,6 +7,8 @@ static const GLenum uniform_buffer_target = GL_UNIFORM_BUFFER;
 static const GLchar* const max_primitive_size_name = "dvec4";
 static const size_t max_primitive_size = sizeof(GLdouble[4]); // The size of a dvec4
 
+static GLuint next_uniform_buffer_binding_point = 0;
+
 ////////// This part concerns initialization, deinitialization, binding a uniform buffer to a shader, and the mapping of a buffer
 
 static GLuint safely_get_uniform_block_index(const GLuint shader, const GLchar* const block_name) {
@@ -14,9 +16,13 @@ static GLuint safely_get_uniform_block_index(const GLuint shader, const GLchar* 
 
 	if (block_index == GL_INVALID_INDEX) FAIL(InitializeShaderUniform,
 		"Uniform block '%s' does not exist in shader", block_name
-	);	
+	);
 
 	return block_index;
+}
+
+void reset_uniform_buffer_binding_point_counter(void) {
+	next_uniform_buffer_binding_point = 0;
 }
 
 /* TODO: genericize `usage` (so that options for
@@ -25,9 +31,7 @@ UniformBuffer init_uniform_buffer(const GLenum usage,
 	const GLchar* const block_name, const GLuint shader_using_uniform_block,
 	const GLchar* const* const subvar_names, const buffer_size_t num_subvars) {
 
-	// TODO: reset this when starting a new level
-	static GLuint next_binding_point = 0;
-	const GLuint binding_point = next_binding_point++;
+	const GLuint binding_point = next_uniform_buffer_binding_point++;
 
 	////////// First, getting the subvar indices
 

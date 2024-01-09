@@ -95,6 +95,7 @@ Dict init_dict(const buffer_size_t expected_num_entries,
 	const DictVarType key_type, const DictVarType value_type);
 
 void deinit_dict(const Dict* const dict);
+void clear_dict(Dict* const dict);
 
 //////////
 

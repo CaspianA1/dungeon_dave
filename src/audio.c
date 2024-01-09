@@ -241,36 +241,47 @@ AudioContext init_audio_context(void) {
 	};
 }
 
-void deinit_audio_context(const AudioContext* const context) {
-	const List* const positional_sources = &context -> positional_sources;
+void deinit_audio_context(AudioContext* const context) {
+	reset_audio_context(context);
 
-	const Dict
+	deinit_dict(&context -> clips);
+	deinit_dict(&context -> nonpositional_sources);
+	deinit_list(context -> positional_sources);
+
+	alcMakeContextCurrent(NULL);
+	alcDestroyContext(context -> context);
+	alcCloseDevice(context -> device);
+}
+
+void reset_audio_context(AudioContext* const context) {
+	List* const positional_sources = &context -> positional_sources;
+
+	Dict
 		*const nonpositional_sources = &context -> nonpositional_sources,
 		*const clips = &context -> clips;
 
+	// First, stopping and deleting all of the positional sources
 	LIST_FOR_EACH(positional_sources, PositionalAudioSource, source,
 		const ALuint al_source = source -> al_source;
 		alSourceStop(al_source);
 		alDeleteSources(1, &al_source);
 	);
 
+	// Then, doing the same for all the nonpositional sources
 	DICT_FOR_EACH(nonpositional_sources, source,
 		const ALuint al_source = source -> value.unsigned_int;
 		alSourceStop(al_source);
 		alDeleteSources(1, &al_source);
 	);
 
+	// And finally, deleting all of the buffers
 	DICT_FOR_EACH(clips, clip,
 		alDeleteBuffers(1, &clip -> value.unsigned_int);
 	);
 
-	deinit_dict(&context -> clips);
-	deinit_dict(nonpositional_sources);
-	deinit_list(*positional_sources);
-
-	alcMakeContextCurrent(NULL);
-	alcDestroyContext(context -> context);
-	alcCloseDevice(context -> device);
+	clear_dict(clips);
+	clear_dict(nonpositional_sources);
+	clear_list(positional_sources);
 }
 
 void update_audio_context(const AudioContext* const context, const Camera* const camera) {

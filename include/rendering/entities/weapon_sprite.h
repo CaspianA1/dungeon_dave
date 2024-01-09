@@ -49,9 +49,15 @@ typedef struct {
 	const Drawable drawable;
 	const GLuint depth_prepass_shader;
 
+	const struct {const GLint frame_index, world_corners, tbn;} world_space_uniform_ids;
+	const struct {const GLint frame_index, world_corners;} depth_prepass_uniform_ids;
+
 	WeaponSpriteAnimationContext animation_context;
 	WeaponSpriteAppearanceContext appearance_context;
-	vec3 curr_sound_emitting_pos, velocity; // These are used for OpenAL
+
+	// These are used for OpenAL
+	vec3 curr_sound_emitting_pos, velocity;
+	bool openal_variables_are_uninitialized;
 } WeaponSprite;
 
 //////////

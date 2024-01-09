@@ -47,7 +47,7 @@ void draw_drawable(const Drawable drawable,
 		use_shader(drawable.shader);
 
 		if (drawable.uniform_updater != NULL)
-			drawable.uniform_updater((struct Drawable*) &drawable, uniform_updater_param);
+			drawable.uniform_updater(uniform_updater_param);
 	}
 
 	if (invocation_params & UseVertexSpec) use_vertex_spec(drawable.vertex_spec);

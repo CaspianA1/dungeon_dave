@@ -42,6 +42,14 @@ typedef struct {
 typedef struct {
 	bool active;
 	const Drawable drawable;
+
+	const struct {
+		const GLint
+			scrolling_light_pos_tangent_space,
+			texture_transition_weight,
+			scroll_factor;
+	} shader_uniform_ids;
+
 	const GLuint still_albedo_texture;
 	const TitleScreenConfig config;
 } TitleScreen;

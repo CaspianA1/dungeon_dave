@@ -95,7 +95,7 @@ static bool keys_are_equal(const DictVar key_1, const DictVar key_2, const DictV
 	}
 }
 
-////////// Some utils, and init and deinit
+////////// Some utils, init, deinit, and clear
 
 static Dict init_dict_with_load_factor(const buffer_size_t expected_num_entries,
 	const float load_factor, const DictVarType key_type, const DictVarType value_type) {
@@ -122,6 +122,13 @@ Dict init_dict(const buffer_size_t expected_num_entries,
 void deinit_dict(const Dict* const dict) {
 	deinit_bitarray(dict -> containment_states);
 	dealloc(dict -> entries);
+}
+
+/* Calling this will make the dict go under
+the min load factor, but it should be fine */
+void clear_dict(Dict* const dict) {
+	clear_bitarray(dict -> containment_states, dict -> num_entry_slots);
+	dict -> num_entries = 0;
 }
 
 ////////// Insertion, getting, and existence checking

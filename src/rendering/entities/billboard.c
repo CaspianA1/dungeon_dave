@@ -1,5 +1,4 @@
 #include "rendering/entities/billboard.h"
-#include "utils/macro_utils.h" // For `ON_FIRST_CALL`
 #include "utils/opengl_wrappers.h" // For various OpenGL wrappers
 #include "utils/shader.h" // For `init_shader`
 
@@ -91,6 +90,7 @@ bool update_billboard_animation(const BillboardContext* const billboard_context,
 				animation_instance -> animation_index = new_animation_index;
 				animation_instance -> cycle_start_time = curr_time_secs;
 				animation_instance -> just_finished_cycle = false;
+
 				return true;
 			}
 		}
@@ -162,15 +162,6 @@ void draw_billboards_to_shadow_context(const BillboardContext* const billboard_c
 
 	use_shader(depth_shader);
 
-	ON_FIRST_CALL(
-		INIT_UNIFORM_VALUE(alpha_threshold, depth_shader, 1f,
-			billboard_context -> shadow_mapping.alpha_threshold);
-
-		// For alpha-tested shadows
-		use_texture_in_shader(drawable -> albedo_texture, depth_shader,
-			"albedo_sampler", TexSet, TU_BillboardAlbedo);
-	);
-
 	draw_drawable(*drawable, corners_per_quad,
 		billboard_context -> billboards.length, NULL, UseVertexSpec
 	);
@@ -221,13 +212,41 @@ BillboardContext init_billboard_context(
 		num_still_textures, num_animation_layouts, texture_size, texture_size, still_texture_paths, animation_layouts
 	);
 
-	BillboardContext billboard_context = {
+	////////// Building the sort refs
+
+	List distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef);
+	distance_sort_refs.length = num_billboards;
+
+	for (billboard_index_t i = 0; i < num_billboards; i++)
+		((BillboardDistanceSortRef*) distance_sort_refs.data)[i].index = i;
+
+	////////// Making a depth shader, and setting some uniforms
+
+	const GLuint depth_shader = init_shader(
+		"shaders/shadow/billboard_depth.vert",
+		"shaders/shadow/billboard_depth.geom",
+		"shaders/shadow/billboard_depth.frag",
+		NULL
+	);
+
+	use_shader(depth_shader);
+
+	// For alpha-tested shadows
+	INIT_UNIFORM_VALUE(alpha_threshold, depth_shader, 1f, shadow_mapping_alpha_threshold);
+	use_texture_in_shader(albedo_texture_set, depth_shader, "albedo_sampler", TexSet, TU_BillboardAlbedo);
+
+	////////// Returning the billboard context
+
+	return (BillboardContext) {
 		.drawable = init_drawable_with_vertices(
 			define_vertex_spec, NULL, GL_DYNAMIC_DRAW, GL_TRIANGLE_STRIP,
 
 			(List) {.data = NULL, .item_size = sizeof(Billboard), .length = num_billboards},
 
-			init_shader("shaders/billboard.vert", NULL, "shaders/common/world_shading.frag", NULL),
+			init_shader(
+				"shaders/billboard.vert", NULL,
+				"shaders/common/world_shading.frag", NULL
+			),
 
 			albedo_texture_set, init_normal_map_from_albedo_texture(albedo_texture_set,
 				TexSet, &shared_material_properties -> normal_map_config
@@ -235,17 +254,10 @@ BillboardContext init_billboard_context(
 		),
 
 		.shadow_mapping = {
-			.depth_shader = init_shader(
-				"shaders/shadow/billboard_depth.vert",
-				"shaders/shadow/billboard_depth.geom",
-				"shaders/shadow/billboard_depth.frag",
-				NULL
-			),
-
-			.alpha_threshold = shadow_mapping_alpha_threshold
+			.depth_shader = depth_shader,
 		},
 
-		.distance_sort_refs = init_list(num_billboards, BillboardDistanceSortRef),
+		.distance_sort_refs = distance_sort_refs,
 		.billboards = {billboards, sizeof(Billboard), num_billboards, num_billboards},
 
 		.animation_instances = {
@@ -255,17 +267,6 @@ BillboardContext init_billboard_context(
 
 		.animations = {billboard_animations, sizeof(Animation), num_billboard_animations, num_billboard_animations}
 	};
-
-	////////// Initializing the sort refs
-
-	billboard_context.distance_sort_refs.length = num_billboards;
-
-	for (billboard_index_t i = 0; i < num_billboards; i++)
-		((BillboardDistanceSortRef*) billboard_context.distance_sort_refs.data)[i].index = i;
-
-	//////////
-
-	return billboard_context;
 }
 
 void deinit_billboard_context(const BillboardContext* const billboard_context) {
