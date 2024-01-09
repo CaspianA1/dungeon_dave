@@ -63,7 +63,7 @@ SharedShadingParams init_shared_shading_params(const GLuint* const shaders_that_
 	const GLuint num_shaders, const LevelRenderingConfig* const level_rendering_config,
 	const vec2 all_bilinear_percents[num_unique_object_types],
 	const CascadedShadowContext* const shadow_context) {
-	
+
 	static const GLchar
 		*const constant_subvar_names[] = {
 			"all_bilinear_percents",
