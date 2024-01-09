@@ -1,7 +1,6 @@
 #include "audio.h"
 #include "utils/failure.h" // For `FAIL`
 #include "utils/safe_io.h" // For `get_temp_asset_path`
-#include "utils/debug_macro_utils.h" // TODO: remove
 
 /* TODO:
 - Allow for an option to set the game's master volume
