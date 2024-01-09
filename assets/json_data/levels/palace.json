@@ -90,7 +90,7 @@
 			"sound_path": "audio/sound_effects/whip_crack.wav"
 		},
 
-		"soundtrack_path": "audio/themes/new/city.wav",
+		"soundtrack_path": "audio/themes/new/museum.wav",
 
 		"sector_face_texture_paths": [
 			"walls/sand.bmp",
