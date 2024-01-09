@@ -11,8 +11,8 @@ generate_normal_map, compute_1D_gaussian_kernel,
 do_separable_gaussian_blur_pass, get_texture_metadata */
 
 typedef struct {
-    const byte blur_radius; // This can be zero. If so, no blurring happens.
-    const GLfloat blur_std_dev, heightmap_scale, rescale_factor;
+	const byte blur_radius; // This can be zero. If so, no blurring happens.
+	const GLfloat blur_std_dev, heightmap_scale, rescale_factor;
 } NormalMapConfig;
 
 // This bakes an inverted heightmap into the alpha channel of the normal map too, for use with parallax mapping
