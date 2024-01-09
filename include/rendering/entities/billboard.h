@@ -8,6 +8,7 @@
 #include "cglm/cglm.h" // For `vec2` and `vec3`
 #include "camera.h" // For `Camera`
 #include "level_config.h" // For `MaterialPropertiesPerObjectType`
+#include "utils/normal_map_generation.h" // For `NormalMapCreator`
 #include "animation.h" // For `Animation`
 
 /* TODO:
@@ -80,6 +81,7 @@ void draw_billboards(BillboardContext* const billboard_context, const Camera* co
 BillboardContext init_billboard_context(
 	const GLfloat shadow_mapping_alpha_threshold,
 	const MaterialPropertiesPerObjectType* const shared_material_properties,
+	const NormalMapCreator* const normal_map_creator,
 
 	const texture_id_t num_animation_layouts, const AnimationLayout* const animation_layouts,
 

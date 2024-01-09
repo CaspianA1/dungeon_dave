@@ -10,7 +10,7 @@
 
 static LevelContext level_init(
 	const GLchar* const level_path,
-	AudioContext* const audio_context,
+	PersistentGameContext* const persistent_game_context,
 	LevelContext* const level_context_heap_dest) {
 
 	////////// Printing library info
@@ -587,22 +587,34 @@ static LevelContext level_init(
 
 	//////////
 
+	const NormalMapCreator* const normal_map_creator = &persistent_game_context -> normal_map_creator;
+
+	//////////
+
 	LevelContext level_context = {
 		.level_json = WITH_JSON_OBJ_SUFFIX(level),
 
 		.camera = init_camera(&camera_config, far_clip_dist),
 		.materials_texture = materials_texture,
-		.weapon_sprite = init_weapon_sprite(&weapon_sprite_config, weapon_sprite_material_index),
 
-		.sector_context = init_sector_context(heightmap, texture_id_map_data,
+		.weapon_sprite = init_weapon_sprite(
+			&weapon_sprite_config,
+			normal_map_creator,
+			weapon_sprite_material_index
+		),
+
+		.sector_context = init_sector_context(
+			heightmap, texture_id_map_data,
 			sector_face_texture_paths, num_sector_face_texture_paths,
 			&sector_face_shared_material_properties,
+			normal_map_creator,
 			&level_rendering_config.dynamic_light_config
 		),
 
 		.billboard_context = init_billboard_context(
 			level_rendering_config.shadow_mapping.billboard_alpha_threshold,
 			&billboard_shared_material_properties,
+			normal_map_creator,
 
 			num_billboard_animations, billboard_animation_layouts,
 
@@ -618,11 +630,13 @@ static LevelContext level_init(
 		.ao_map = level_cache.ao_map,
 
 		.skybox = init_skybox(&level_rendering_config.skybox_config),
-		.title_screen = init_title_screen_from_json("json_data/title_screen.json"),
+		.title_screen = init_title_screen_from_json("json_data/title_screen.json", normal_map_creator),
 		.heightmap = heightmap
 	};
 
 	////////// Audio setup (TODO: put this data in some JSON file; perhaps `default_sounds.json`?)
+
+	AudioContext* const audio_context = &persistent_game_context -> audio_context;
 
 	const ALchar* const EXTRACT_FROM_JSON_SUBOBJ(get_string, non_lighting_data, soundtrack_path,);
 
@@ -730,7 +744,8 @@ static void level_deinit(const LevelContext* const level_context) {
 }
 
 static bool level_drawer(LevelContext* const level_context,
-	const AudioContext* const audio_context, const Event* const event) {
+	const PersistentGameContext* const persistent_game_context,
+	const Event* const event) {
 
 	////////// Setting the wireframe mode
 
@@ -773,7 +788,7 @@ static bool level_drawer(LevelContext* const level_context,
 	update_dynamic_light(dynamic_light, curr_time_secs);
 	update_shadow_context(shadow_context, camera, dir_to_light, event -> aspect_ratio);
 	update_shared_shading_params(&level_context -> shared_shading_params, camera, shadow_context, dir_to_light);
-	update_audio_context(audio_context, camera); // TODO: should this be called here, or in `game_drawer`?
+	update_audio_context(&persistent_game_context -> audio_context, camera); // TODO: should this be called here, or in `game_drawer`?
 
 	////////// Rendering to the shadow context
 
@@ -824,19 +839,23 @@ static void* game_init(void) {
 	or split the audio context up into 2 parts:
 	the OpenAL part, and the state dictionaries. */
 
-	AudioContext audio_context = init_audio_context();
-
 	const GLchar* const level_path = "json_data/levels/palace.json";
 
 	////////// Loading the level context
 
+	PersistentGameContext persistent_game_context = {
+		.audio_context = init_audio_context(),
+		.normal_map_creator = init_normal_map_creator()
+	};
+
 	const LevelContext curr_level_context = level_init(
-		level_path, &audio_context,
+		level_path,
+		&persistent_game_context,
 		&game_context_on_heap -> curr_level_context
 	);
 
 	const GameContext game_context = {
-		.audio_context = audio_context,
+		.persistent_game_context = persistent_game_context,
 		.curr_level_context = curr_level_context
 	};
 
@@ -851,7 +870,11 @@ static void game_deinit(void* const app_context) {
 	/* At this point, the data stored in `PositionalAudioSourceMetadata` within
 	the audio context may have been deallocated, so that should not be accessed
 	at this point. The same goes for all dict keys in the audio context. */
-	deinit_audio_context(&game_context -> audio_context);
+
+	PersistentGameContext* const persistent_game_context = &game_context -> persistent_game_context;
+
+	deinit_normal_map_creator(&persistent_game_context -> normal_map_creator);
+	deinit_audio_context(&persistent_game_context -> audio_context);
 	dealloc(game_context);
 }
 
@@ -865,18 +888,23 @@ static bool game_drawer(void* const app_context, const Event* const event) {
 
 		// TODO: store the next level path in the curr level JSON instead
 		const GLchar* const next_level_path = "json_data/levels/mountain.json";
-		AudioContext* const audio_context = &game_context -> audio_context;
 
-		reset_audio_context(audio_context);
+		PersistentGameContext* const persistent_game_context = &game_context -> persistent_game_context;
+
+		reset_audio_context(&persistent_game_context -> audio_context);
 
 		const LevelContext next_level_context = level_init(
-			next_level_path, audio_context, curr_level_context
+			next_level_path, persistent_game_context, curr_level_context
 		);
 
 		memcpy(curr_level_context, &next_level_context, sizeof(LevelContext));
 	}
 
-	return level_drawer(curr_level_context, &game_context -> audio_context, event);
+	return level_drawer(
+		curr_level_context,
+		&game_context -> persistent_game_context,
+		event
+	);
 }
 
 //////////

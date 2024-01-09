@@ -197,6 +197,7 @@ static void define_vertex_spec(void) {
 BillboardContext init_billboard_context(
 	const GLfloat shadow_mapping_alpha_threshold,
 	const MaterialPropertiesPerObjectType* const shared_material_properties,
+	const NormalMapCreator* const normal_map_creator,
 
 	const texture_id_t num_animation_layouts, const AnimationLayout* const animation_layouts,
 
@@ -248,14 +249,16 @@ BillboardContext init_billboard_context(
 				"shaders/common/world_shading.frag", NULL
 			),
 
-			albedo_texture_set, init_normal_map_from_albedo_texture(albedo_texture_set,
-				TexSet, &shared_material_properties -> normal_map_config
+			albedo_texture_set,
+
+			init_normal_map_from_albedo_texture(
+				normal_map_creator,
+				&shared_material_properties -> normal_map_config,
+				albedo_texture_set, TexSet
 			)
 		),
 
-		.shadow_mapping = {
-			.depth_shader = depth_shader,
-		},
+		.shadow_mapping = {.depth_shader = depth_shader},
 
 		.distance_sort_refs = distance_sort_refs,
 		.billboards = {billboards, sizeof(Billboard), num_billboards, num_billboards},

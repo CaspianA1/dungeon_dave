@@ -5,7 +5,7 @@
 #include "glad/glad.h" // For OpenGL defs
 #include "utils/typedefs.h" // For various typedefs
 #include "utils/texture.h" // For `TextureFilterMode`
-#include "utils/normal_map_generation.h" // For `NormalMapConfig`
+#include "utils/normal_map_generation.h" // For `NormalMapConfig`, and `NormalMapCreator`
 #include <stdbool.h> // For `bool`
 #include "rendering/drawable.h" // For `Drawable`
 #include "event.h" // For `Event`
@@ -57,8 +57,12 @@ typedef struct {
 // Excluded: update_uniforms
 
 // TODO: make other functions like this per each key game object
-TitleScreen init_title_screen_from_json(const GLchar* const json_path);
-TitleScreen init_title_screen(const TitleScreenConfig* const config);
+TitleScreen init_title_screen_from_json(const GLchar* const json_path,
+	const NormalMapCreator* const normal_map_creator);
+
+TitleScreen init_title_screen(const TitleScreenConfig* const config,
+	const NormalMapCreator* const normal_map_creator);
+
 void deinit_title_screen(const TitleScreen* const title_screen);
 
 // This returns if the title screen is active

@@ -217,8 +217,12 @@ static void get_texture_metadata(const TextureType type,
 }
 
 // Note: level init is almost instant when this just returns 0; so GPU parallelization could be great here
-GLuint init_normal_map_from_albedo_texture(const GLuint albedo_texture,
-	const TextureType type, const NormalMapConfig* const config) {
+GLuint init_normal_map_from_albedo_texture(
+	const NormalMapCreator* const creator,
+	const NormalMapConfig* const config,
+	const GLuint albedo_texture, const TextureType type) {
+
+	(void) creator; // TODO: remove
 
 	/* How this function works:
 
@@ -329,4 +333,14 @@ GLuint init_normal_map_from_albedo_texture(const GLuint albedo_texture,
 	deinit_surface(rgba_surface);
 
 	return normal_map_set;
+}
+
+////////// These are some normal map creator fns
+
+NormalMapCreator init_normal_map_creator(void) {
+	return (NormalMapCreator) {0};
+}
+
+void deinit_normal_map_creator(const NormalMapCreator* const creator) {
+	(void) creator; // TODO: remove
 }

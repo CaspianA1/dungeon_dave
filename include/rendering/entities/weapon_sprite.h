@@ -8,6 +8,7 @@
 #include "data/constants.h" // For `corners_per_quad`
 #include "level_config.h" // For `MaterialPropertiesPerObjectType`
 #include "rendering/drawable.h" // For `Drawable`
+#include "utils/normal_map_generation.h" // For `NormalMapCreator`
 #include "camera.h" // For `Camera`
 #include "event.h" // For `Event`
 #include "openal/al.h" // For various OpenAL defs
@@ -68,7 +69,11 @@ define_vertex_spec, get_sound_emitting_pos */
 
 ////////// Drawing functions
 
-WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const material_index_t material_index);
+WeaponSprite init_weapon_sprite(
+	const WeaponSpriteConfig* const config,
+	const NormalMapCreator* const normal_map_creator,
+	const material_index_t material_index);
+
 void deinit_weapon_sprite(const WeaponSprite* const ws);
 
 void update_weapon_sprite(WeaponSprite* const ws, const Camera* const camera, const Event* const event);

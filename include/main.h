@@ -15,6 +15,7 @@
 #include "rendering/entities/skybox.h" // For `Skybox`
 #include "rendering/entities/title_screen.h" // For `TitleScreen`
 #include "audio.h" // For `AudioContext`
+#include "utils/normal_map_generation.h" // For `NormalMapCreator`
 
 /* Drawing architecture change, plan:
 1. Allow BatchDrawContext to call glDrawArraysInstanced, if needed
@@ -69,8 +70,14 @@ typedef struct {
 	const Heightmap heightmap;
 } LevelContext;
 
+// This state persists across levels
 typedef struct {
 	AudioContext audio_context;
+	const NormalMapCreator normal_map_creator;
+} PersistentGameContext;
+
+typedef struct {
+	PersistentGameContext persistent_game_context;
 	LevelContext curr_level_context;
 } GameContext;
 

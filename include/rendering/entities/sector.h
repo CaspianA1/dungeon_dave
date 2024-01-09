@@ -7,6 +7,7 @@
 #include "utils/list.h" // For `List`
 #include "camera.h" // For `Camera`
 #include "level_config.h" // For `MaterialPropertiesPerObjectType`
+#include "utils/normal_map_generation.h" // For `NormalMapCreator`
 #include "rendering/dynamic_light.h" // For `DynamicLightConfig`
 
 //////////
@@ -47,6 +48,7 @@ SectorContext init_sector_context(
 	const Heightmap heightmap, const map_texture_id_t* const texture_id_map_data,
 	const GLchar* const* const texture_paths, const texture_id_t num_textures,
 	const MaterialPropertiesPerObjectType* const shared_material_properties,
+	const NormalMapCreator* const normal_map_creator,
 	const DynamicLightConfig* const dynamic_light_config);
 
 void deinit_sector_context(const SectorContext* const sector_context);

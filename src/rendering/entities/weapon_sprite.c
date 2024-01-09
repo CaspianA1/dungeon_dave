@@ -220,7 +220,11 @@ static void define_vertex_spec(void) {
 	define_vertex_spec_index(false, true, 0, 3, 0, 0, GL_FLOAT);
 }
 
-WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const material_index_t material_index) {
+WeaponSprite init_weapon_sprite(
+	const WeaponSpriteConfig* const config,
+	const NormalMapCreator* const normal_map_creator,
+	const material_index_t material_index) {
+
 	////////// Getting the frame size and an albedo texture set
 
 	const AnimationLayout* const animation_layout = &config -> animation_layout;
@@ -271,8 +275,10 @@ WeaponSprite init_weapon_sprite(const WeaponSpriteConfig* const config, const ma
 
 			world_shader, albedo_texture_set,
 
-			init_normal_map_from_albedo_texture(albedo_texture_set, TexSet,
-				&config -> shared_material_properties.normal_map_config
+			init_normal_map_from_albedo_texture(
+				normal_map_creator,
+				&config -> shared_material_properties.normal_map_config,
+				albedo_texture_set, TexSet
 			)
 		),
 

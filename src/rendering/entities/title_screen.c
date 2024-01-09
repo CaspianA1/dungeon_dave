@@ -50,7 +50,9 @@ static void update_uniforms(const void* const param) {
 
 ////////// Initialization, deinitialization, and rendering
 
-TitleScreen init_title_screen_from_json(const GLchar* const json_path) {
+TitleScreen init_title_screen_from_json(const GLchar* const json_path,
+	const NormalMapCreator* const normal_map_creator) {
+
 	cJSON JSON_OBJ_NAME_DEF(title_screen) = init_json_from_file(json_path);
 
 	const cJSON
@@ -118,12 +120,14 @@ TitleScreen init_title_screen_from_json(const GLchar* const json_path) {
 
 	//////////
 
-	const TitleScreen title_screen = init_title_screen(&title_screen_config);
+	const TitleScreen title_screen = init_title_screen(&title_screen_config, normal_map_creator);
 	deinit_json(WITH_JSON_OBJ_SUFFIX(title_screen));
 	return title_screen;
 }
 
-TitleScreen init_title_screen(const TitleScreenConfig* const config) {
+TitleScreen init_title_screen(const TitleScreenConfig* const config,
+	const NormalMapCreator* const normal_map_creator) {
+
 	const TextureType still_texture_type = TexPlain, scrolling_texture_type = TexSet;
 	const TextureFilterMode min_filter = TexLinearMipmapped;
 
@@ -151,8 +155,9 @@ TitleScreen init_title_screen(const TitleScreenConfig* const config) {
 	glTexParameteri(scrolling_texture_type, GL_TEXTURE_WRAP_T, TexNonRepeating);
 
 	const GLuint
-		scrolling_normal_map = init_normal_map_from_albedo_texture(scrolling_albedo_texture,
-			scrolling_texture_type, &config -> scrolling.normal_map_config),
+		scrolling_normal_map = init_normal_map_from_albedo_texture(
+			normal_map_creator, &config -> scrolling.normal_map_config,
+			scrolling_albedo_texture, scrolling_texture_type),
 
 		still_albedo_texture = init_plain_texture(still_layer_config -> texture_path, TexNonRepeating,
 			still_layer_config -> use_bilinear_filtering ? TexLinear : TexNearest,

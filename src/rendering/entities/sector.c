@@ -348,6 +348,7 @@ SectorContext init_sector_context(
 	const Heightmap heightmap, const map_texture_id_t* const texture_id_map_data,
 	const GLchar* const* const texture_paths, const texture_id_t num_textures,
 	const MaterialPropertiesPerObjectType* const shared_material_properties,
+	const NormalMapCreator* const normal_map_creator,
 	const DynamicLightConfig* const dynamic_light_config) {
 
 	////////// Checking that there's not too many sector face textures
@@ -389,7 +390,9 @@ SectorContext init_sector_context(
 			init_shader("shaders/sector.vert", NULL, "shaders/common/world_shading.frag", NULL),
 
 			albedo_texture_set, init_normal_map_from_albedo_texture(
-				albedo_texture_set, TexSet, &shared_material_properties -> normal_map_config
+				normal_map_creator,
+				&shared_material_properties -> normal_map_config,
+				albedo_texture_set, TexSet
 			)
 		),
 
