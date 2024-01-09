@@ -3,7 +3,7 @@
 
 #include "glad/glad.h" // For OpenGL defs
 #include "utils/typedefs.h" // For various typedefs
-#include "list.h" // For `List`
+#include "utils/list.h" // For `List`
 #include <stdbool.h> // For `bool`
 
 typedef struct {

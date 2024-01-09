@@ -4,7 +4,6 @@
 #include "utils/typedefs.h" // For various typedefs
 #include "glad/glad.h" // For OpenGL defs
 #include "utils/texture.h" // For `TextureType`
-#include "normal_map_generation.h" // For `NormalMapConfig`
 
 /* Excluded:
 generate_heightmap, int_min, int_max, int_clamp, sobel_sample,
