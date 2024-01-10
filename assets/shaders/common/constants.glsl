@@ -1,5 +1,4 @@
 #version 400 core
 
 #define VERTICES_PER_TRIANGLE 3u
-#define FACES_PER_CUBEMAP 6u
 #define NUM_UNIQUE_OBJECT_TYPES 3u
