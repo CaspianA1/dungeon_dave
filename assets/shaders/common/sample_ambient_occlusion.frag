@@ -71,7 +71,7 @@ float get_ambient_strength(const vec3 fragment_pos_world_space) {
 
 	float
 		linear_for_below = ao_strength / 12.92f,
-		linear_for_above = pow((ao_strength + 0.055f) / 1.055f, 2.5f);
+		linear_for_above = pow((ao_strength + 0.055f) / 1.055f, 2.4f);
 
 	return mix(linear_for_above, linear_for_below, float(ao_strength <= 0.04045f));
 }
