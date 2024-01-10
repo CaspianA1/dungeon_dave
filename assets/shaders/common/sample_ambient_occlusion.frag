@@ -1,5 +1,7 @@
 #version 400 core
 
+#include "srgb.frag"
+
 uniform sampler3D ambient_occlusion_sampler;
 
 /* The tricubic filtering code is based on the bicubic filtering code from here:
@@ -64,14 +66,8 @@ float texture_tricubic_single_channel(const sampler3D texture_sampler, const vec
 float get_ambient_strength(const vec3 fragment_pos_world_space) {
 	float ao_strength = ambient_occlusion.strength * texture_tricubic_single_channel(ambient_occlusion_sampler, fragment_pos_world_space);
 
-	/* The sRGB -> linear mapping is based on function from the bottom of here:
-	https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml.
-	It's done manually because there are no sRGB formats for 8-bit textures.
-	TODO: move this calculation to the CPU. */
+	/* This conversion is done manually because there are no sRGB formats
+	for 8-bit textures. TODO: move this calculation to the CPU. */
 
-	float
-		linear_for_below = ao_strength / 12.92f,
-		linear_for_above = pow((ao_strength + 0.055f) / 1.055f, 2.4f);
-
-	return mix(linear_for_above, linear_for_below, float(ao_strength <= 0.04045f));
+	return convert_srgb_to_linear(ao_strength);
 }
