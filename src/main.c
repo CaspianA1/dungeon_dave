@@ -185,6 +185,8 @@ static LevelContext level_init(
 
 	////////// Specifying the cascade count early on
 
+	/* TODO: later on, don't do this; just make the geo shader instancing have 1 invocation, and make
+	the normal instancing render to the different layers.  That will allow for shader recompilation. */
 	specify_cascade_count_before_any_shader_compilation(level_rendering_config.shadow_mapping.cascaded_shadow_config.num_cascades);
 
 	////////// Making a redundant vertex spec, since one must always be active during rendering
