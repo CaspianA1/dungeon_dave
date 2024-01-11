@@ -15,7 +15,7 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Wformat -Wfloat-conversion -Wdouble-promotion -Wsign-conversion -Wincompatible-pointer-types")
 set(CMAKE_C_FLAGS_DEBUG "-g -fsanitize=address,undefined,float-divide-by-zero,signed-integer-overflow")
-set(CMAKE_C_FLAGS_RELEASE "-Ofast") # Note: including `fno-fast-math` here can help with avoiding some floating-point errors.
+set(CMAKE_C_FLAGS_RELEASE "-Ofast") # Note: including `-fno-fast-math` here can help with avoiding some floating-point errors.
 
 set(TARGET_NAME dungeon_dave)
 
