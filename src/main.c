@@ -189,11 +189,6 @@ static LevelContext level_init(
 	the normal instancing render to the different layers. That will allow for shader recompilation. */
 	specify_cascade_count_before_any_shader_compilation(level_rendering_config.shadow_mapping.cascaded_shadow_config.num_cascades);
 
-	////////// Making a redundant vertex spec, since one must always be active during rendering
-
-	const GLuint redundant_vertex_spec = init_vertex_spec();
-	use_vertex_spec(redundant_vertex_spec);
-
 	////////// Loading in the heightmap and texture id map, validating them, and extracting data from them
 
 	map_pos_xz_t heightmap_size, texture_id_map_size;
@@ -230,6 +225,10 @@ static LevelContext level_init(
 			.compute_config = &level_rendering_config.ambient_occlusion.compute_config
 		}
 	};
+
+	// Making a redundant vertex spec before the first OpenGL code, since one must always be active
+	const GLuint redundant_vertex_spec = init_vertex_spec();
+	use_vertex_spec(redundant_vertex_spec);
 
 	const LevelCache level_cache = get_level_cache(level_path, &level_cache_config);
 
@@ -687,9 +686,11 @@ static LevelContext level_init(
 	////////// Initializing shared shading params
 
 	const GLuint shaders_that_use_shared_params[] = {
-		// Depth shaders
+		// Depth prepass shaders
 		level_context.sector_context.depth_prepass_shader,
 		level_context.weapon_sprite.depth_prepass_shader,
+
+		// Depth shaders (for shadow mapping)
 		level_context.sector_context.shadow_mapping.depth_shader,
 		level_context.billboard_context.shadow_mapping.depth_shader,
 
