@@ -455,6 +455,8 @@ static LevelContext level_init(
 	JSON_FOR_EACH(_, material_data, materials,
 		(void) _;
 
+		// TODO: also include a sound path per each material (different walking sounds)
+
 		// TODO: figure out how to use `DEF_ARRAY_FROM_JSON` here
 
 		vec3 normalized_properties;
