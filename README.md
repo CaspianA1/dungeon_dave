@@ -3,12 +3,10 @@
 - A first-person FPS in the style of games like Doom and Quake.
 - Expected to be complete by late 2024.
 - The Dungeon Dave engine is built fully from scratch, ensuring optimal performance for all platforms.
-- See the `audio` branch for the most active development.
 
 ### Dependencies
 
-- To install any dependencies, navigate to `install_scripts` and run the build script for your platform.
-- Note: the only install script available at the moment is for MacOS.
+- To install any dependencies, run `install.sh`. Note that only MacOS and Fedora Linux are officially supported.
 
 ### Building
 
