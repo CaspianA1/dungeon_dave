@@ -53,6 +53,7 @@ SDL_Surface* init_surface(const GLchar* const path) {
 	}
 }
 
+// TODO: use `SDL_PremultiplyAlpha` instead
 static void premultiply_surface_alpha(SDL_Surface* const surface) {
 	const GLint w = surface -> w, h = surface -> h;
 	const SDL_PixelFormat* const format = surface -> format;
