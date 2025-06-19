@@ -9,18 +9,18 @@
 
 ### Rendering Techniques
 
-- ***Normal Mapping***
-- ***Parallax Occlusion Mapping*** (heightmaps are generated at runtime based on objects' albedo textures - currently disabled though)
+- **Normal Mapping**
+- **Parallax Occlusion Mapping** (heightmaps are generated at runtime based on objects' albedo textures - currently disabled though)
 
-- ***Exponential Shadow Mapping*** (for soft shadows)
-- ***Cascaded Shadow Mapping*** (with blended depth layers - this makes transitions between depth layers a smooth fade)
-- ***God Rays*** (based on [this](https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-13-volumetric-light-scattering-post-process) technique from Nvidia, but works in light-space rather than in screen-space, which allows for the light volumes to remain when the camera is turned away from the sun)
-- ***Precomputed Raytraced Ambient Occlusion*** (a shader traces rays from each point in the scene to compute a set of occlusion values, and caches this on disk - and at runtime, the main shader does tricubic interpolation from a 3D texture containing this occlusion data to get accurate ambient occlusion!)
+- **Exponential Shadow Mapping** (for soft shadows)
+- **Cascaded Shadow Mapping** (with blended depth layers - this makes transitions between depth layers a smooth fade)
+- **God Rays** (based on [this](https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-13-volumetric-light-scattering-post-process) technique from Nvidia, but works in light-space rather than in screen-space, which allows for the light volumes to remain when the camera is turned away from the sun)
+- **Precomputed Raytraced Ambient Occlusion** (a shader traces rays from each point in the scene to compute a set of occlusion values, and caches this on disk - and at runtime, the main shader does tricubic interpolation from a 3D texture containing this occlusion data to get accurate ambient occlusion!)
 
 ### More To Know
 - The renderer is also fully physically based, and employs a metallic/roughness material system.
 - Shadows and god rays work perfectly for translucent objects!
-- Billboard sprites are fully animated too.
+- Billboard sprites are fully animated.
 - Levels use a set of original soundtracks developed by Adam Winograd. In-game sound effects use OpenAL for a surround-sound effect.
 - I drew most of the pixel art with Aseprite, including the skyboxes (which employ cylindrical projection).
 
