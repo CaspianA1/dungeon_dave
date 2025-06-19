@@ -15,7 +15,7 @@
 - **Exponential Shadow Mapping** (for soft shadows)
 - **Cascaded Shadow Mapping** (with blended depth layers - this makes transitions between depth layers a smooth fade)
 - **God Rays** (based on [this](https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-13-volumetric-light-scattering-post-process) technique from Nvidia, but works in light-space rather than in screen-space, which allows for the light volumes to remain when the camera is turned away from the sun)
-- **Precomputed Raytraced Ambient Occlusion** (a shader traces rays from each point in the scene to compute a set of occlusion values, and caches this on disk - and at runtime, the main shader does tricubic interpolation from a 3D texture containing this occlusion data to get accurate ambient occlusion!)
+- **Precomputed Raytraced Ambient Occlusion** (a shader traces rays from each point in the scene to compute a set of occlusion values - and caches this on disk - and at runtime, the main shader tricubically interpolates from a 3D texture to fetch these occlusion values)
 
 ### More To Know
 - The renderer is also fully physically based, and employs a metallic/roughness material system.
