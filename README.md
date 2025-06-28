@@ -18,7 +18,8 @@
 - **Precomputed Raytraced Ambient Occlusion** (a shader traces rays from each point in the scene to compute a set of occlusion values - and caches this on disk - and at runtime, the main shader tricubically interpolates from a 3D texture to fetch these occlusion values)
 
 ### More To Know
-- The renderer is also fully physically based, and employs a metallic/roughness material system.
+- The renderer is fully physically based, and employs a metallic/roughness material system.
+- The renderer is a typical forward renderer, and utilizes a depth prepass.
 - Shadows and god rays work perfectly for translucent objects!
 - Billboard sprites are fully animated.
 - The voxelized world uses greedy meshing to minimize the size of the overall world mesh.
