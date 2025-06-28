@@ -21,6 +21,7 @@
 - The renderer is also fully physically based, and employs a metallic/roughness material system.
 - Shadows and god rays work perfectly for translucent objects!
 - Billboard sprites are fully animated.
+- The voxelized world uses greedy meshing to minimize the size of the overall world mesh.
 - Levels use a set of original soundtracks developed by Adam Winograd. In-game sound effects use OpenAL for a surround-sound effect.
 - I drew most of the pixel art with Aseprite, including the skyboxes (which employ cylindrical projection).
 
