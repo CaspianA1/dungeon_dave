@@ -2,7 +2,7 @@
 
 ---
 
-- A first-person FPS in the style of games like Doom and Quake.
+- A first-person shooter in the style of games like Doom and Quake.
 - The Dungeon Dave engine is built fully from scratch, ensuring optimal performance for all platforms.
 
 ---
