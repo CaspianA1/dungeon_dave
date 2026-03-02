@@ -9,20 +9,24 @@
 
 ### Rendering Techniques
 
-- **Normal Mapping**
-- **Parallax Occlusion Mapping** (heightmaps are generated at runtime based on objects' albedo textures - currently disabled though)
+- **Normal Mapping** (normal maps are generated at runtime from each object's albedo texture, via a heightmap + Gaussian blur + Sobel operator pipeline)
+- **Parallax Occlusion Mapping** (uses the same runtime-generated heightmaps - currently disabled though)
 
 - **Exponential Shadow Mapping** (for soft shadows)
-- **Cascaded Shadow Mapping** (with blended depth layers - this makes transitions between depth layers a smooth fade)
+- **Cascaded Shadow Mapping** (with blended depth layers - this makes transitions between depth layers a smooth fade; all cascades are rendered in a single draw call via geometry shader invocation instancing, with the cascade count baked as a GLSL `#define` before compilation)
 - **God Rays** (based on [this](https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-13-volumetric-light-scattering-post-process) technique from Nvidia, but works in light-space rather than in screen-space, which allows for the light volumes to remain when the camera is turned away from the sun)
-- **Precomputed Raytraced Ambient Occlusion** (a shader traces rays from each point in the scene to compute a set of occlusion values - and caches this on disk - and at runtime, the main shader tricubically interpolates from a 3D texture to fetch these occlusion values)
+- **Precomputed Raytraced Ambient Occlusion** (a vertex shader traces rays via Transform Feedback as an improvised GPU compute pass, caches results on disk, and at runtime the main shader tricubically interpolates from a 3D texture to fetch the values)
+- **Tone Mapping** (Reinhard Extended Luminance, applied in the fragment shader on floating-point PBR-computed values before output)
 
 ### More To Know
 - The renderer is fully physically based, and employs a metallic/roughness material system.
 - The renderer is a typical forward renderer, and utilizes a depth prepass.
-- Shadows and god rays work perfectly for translucent objects!
+- Shadows and god rays work correctly for translucent objects - billboards cast correctly shaped shadows via alpha-tested depth writes.
 - Billboard sprites are fully animated.
 - The voxelized world uses greedy meshing to minimize the size of the overall world mesh.
+- Per-sector AABB frustum culling is performed each frame.
+- The sun has configurable dynamic movement, oscillating between two defined directions, with live updates to shadows and god rays.
+- Textures use a pixel art UV filtering technique (by Inigo Quilez) with configurable bilinear percents per object type, to sharpen pixel art without hard aliased edges.
 - Levels use a set of original soundtracks developed by Adam Winograd. In-game sound effects use OpenAL for a surround-sound effect.
 - I drew most of the pixel art with Aseprite, including the skyboxes (which employ cylindrical projection).
 
